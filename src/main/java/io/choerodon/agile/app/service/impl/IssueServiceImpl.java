@@ -2582,7 +2582,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        queryUserProjects(organizationId, projectId, projectIds, projects, userId);
+        String type = workBenchIssueSearchVO.getType();
+        queryUserProjects(organizationId, projectId, projectIds, projects, userId, type);
 
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
@@ -2649,13 +2650,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         });
     }
 
-    private void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId) {
+    private void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type) {
         if (ObjectUtils.isEmpty(projectId)) {
             List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(organizationId,userId).getBody();
             if (!CollectionUtils.isEmpty(projectVOS)) {
                 projectVOS
                         .stream()
-                        .filter(v -> !Objects.equals(v.getCategory(),"PROGRAM") && Boolean.TRUE.equals(v.getEnabled()))
+                        .filter(v -> ((!Objects.isNull(type) && Objects.equals(type, "myStarBeacon"))
+                                ? (Boolean.TRUE.equals(v.getEnabled()))
+                                : (!Objects.equals(v.getCategory(),"PROGRAM") && Boolean.TRUE.equals(v.getEnabled()))))
                         .forEach(obj -> {
                             projectIds.add(obj.getId());
                             projects.add(obj);
@@ -2688,5 +2691,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } else {
             return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         }
+    }
+
+    @Override
+    public Boolean existBacklog(Long organizationId) {
+        if (ObjectUtils.isEmpty(organizationId)) {
+            throw new CommonException("error.organizationId.iss.null");
+        }
+        if (backlogExpandService != null) {
+            return true;
+        }
+        return false;
     }
 }

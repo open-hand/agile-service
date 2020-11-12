@@ -372,4 +372,6 @@ public interface IssueService {
     void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId);
     
     void handleUpdateVersionIssueRel(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType);
+
+    Boolean existBacklog(Long organizationId);
 }
