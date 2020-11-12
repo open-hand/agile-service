@@ -20,6 +20,7 @@ const FieldStar = ({
   }, [issueId, onUpdate, reloadIssue, starBeacon]);
   return (
     <Star
+      disabled={disabled}
       onClick={handleStarClick}
       style={{ margin: '6px 5px 0' }}
       activeTooltip="取消"

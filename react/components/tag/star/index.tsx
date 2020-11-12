@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icon, Tooltip } from 'choerodon-ui/pro';
 import classNames from 'classnames';
+import { omit } from 'lodash';
 import styles from './index.less';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
@@ -25,7 +26,15 @@ const Star: React.FC<Props> = ({
     [styles.star_active]: active,
     propsClassName,
   });
-  const star = <Icon className={className} type="star_border" {...otherProps} />;
+
+  const star = (
+    <Icon
+      className={className}
+      type="star_border"
+      {...omit(otherProps, 'onClick')}
+      onClick={disabled ? undefined : otherProps.onClick}
+    />
+  );
   if (disabled) {
     return star;
   }
