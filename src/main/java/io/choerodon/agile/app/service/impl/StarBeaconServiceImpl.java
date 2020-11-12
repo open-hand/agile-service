@@ -52,7 +52,7 @@ public class StarBeaconServiceImpl implements StarBeaconService {
         if (starBeaconVO.getType().equals(STAR_BEACON_TYPE_ISSUE)) {
             IssueDTO issueDTO = new IssueDTO();
             issueDTO.setIssueId(starBeaconDTO.getInstanceId());
-            issueDTO.setProjectId(starBeaconDTO.getProjectId());
+            issueDTO.setProjectId(starBeaconVO.getIssueProjectId());
             if(Objects.isNull(issueMapper.selectOne(issueDTO))) {
                 throw new CommonException(ERROR_INSTANCE_IS_NULL);
             }
