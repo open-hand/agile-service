@@ -74,7 +74,11 @@ class VersionApi extends Api<VersionApi> {
    * @param statusArr
    */
   loadNamesByStatus(statusArr: Array<string> = []) {
-    return axios.post(`${this.prefix}/product_version/names`, statusArr);
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/product_version/names`,
+      data: statusArr,
+    });
   }
 
   /**
