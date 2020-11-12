@@ -53,6 +53,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 敏捷开发Issue
@@ -1075,7 +1076,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public List<IssueEpicVO> listEpicSelectData(Long projectId) {
-        return issueAssembler.toTargetList(issueMapper.queryIssueEpicSelectList(projectId), IssueEpicVO.class);
+        return issueAssembler.toTargetList(Stream.of(issueMapper.queryIssueEpicSelectList(projectId),
+                Optional.ofNullable(agilePluginService).map(service -> service
+                        .selectEpicBySubProjectFeature(projectId)).orElse(Collections.emptyList()))
+                .flatMap(Collection::stream).collect(Collectors.toList()), IssueEpicVO.class);
     }
 
 
@@ -1297,7 +1301,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         }
     }
-    
+
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"labelId"}, instanceId = "issueId", idPosition = "arg")
     public void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId) {

@@ -305,4 +305,6 @@ public interface AgilePluginService {
      * @param versionId
      */
     void deleteProgramVersionRel(Long projectId, Long versionId);
+
+    List<IssueDTO> selectEpicBySubProjectFeature(Long subProjectId);
 }
