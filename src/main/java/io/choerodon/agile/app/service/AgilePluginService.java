@@ -298,4 +298,11 @@ public interface AgilePluginService {
     PredefinedDTO getFeaturePredefined(Long organizationId, Long projectId);
 
     Map<String, Long> getFeatureMap(Long organizationId, Long projectId);
+
+    /**
+     * 删除子项目版本时，删除和项目群版本的关联关系
+     * @param projectId
+     * @param versionId
+     */
+    void deleteProgramVersionRel(Long projectId, Long versionId);
 }
