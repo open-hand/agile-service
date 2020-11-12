@@ -1095,22 +1095,41 @@
                 <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
                     #{projectId}
                 </foreach>
-                AND aisr.sprint_id in (
-                    select sprint_id
-                    from agile_sprint asp
-                    where asp.project_id in
-                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                        #{projectId}
-                    </foreach>
-                    AND asp.status_code = 'started'
-                )
-                AND ai.issue_id = aisr.issue_id
+                <if test="searchType == null">
+                    AND aisr.sprint_id in (
+                        select sprint_id
+                        from agile_sprint asp
+                        where asp.project_id in
+                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                            #{projectId}
+                        </foreach>
+                        AND asp.status_code = 'started'
+                    )
+                    AND ai.issue_id = aisr.issue_id
+                    AND ais.is_completed != 1
+                </if>
                 <choose>
                     <when test="searchType == null">
                         AND ai.type_code in ('story','bug','task')
                         AND (ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0)
                         AND (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
                         AND ai.assignee_id = #{userId}
+                    </when>
+                    <when test="searchType == 'myStarBeacon'">
+                        AND ai.type_code in ('story','bug','task','feature')
+                        AND (ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0)
+                        AND (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
+                        AND ai.issue_id in
+                        (
+                            select fsb.instance_id
+                            from fd_star_beacon fsb
+                            where fsb.type = 'issue'
+                            and fsb.project_id in
+                            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                                #{projectId}
+                            </foreach>
+                            and fsb.user_id = #{userId}
+                        )
                     </when>
                     <otherwise>
                         AND ai.type_code = 'bug'
@@ -1120,14 +1139,14 @@
                         <if test="searchType == 'reportedBug'">
                             AND ai.reporter_id = #{userId}
                         </if>
+                        AND ais.is_completed != 1
                     </otherwise>
                 </choose>
 
                 AND ais.project_id = ai.project_id
                 AND ais.status_id = ai.status_id
-                AND ais.is_completed != 1
             )
-        <if test="searchType == null">
+        <if test="searchType == null or searchType == 'myStarBeacon'">
         UNION ALL
             (
                 select
@@ -1151,21 +1170,35 @@
                     <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
                         #{projectId}
                     </foreach>
-                    AND aisr.sprint_id in (
-                        select sprint_id
-                        from agile_sprint asp
-                        where asp.project_id in
-                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                            #{projectId}
-                        </foreach>
-                        AND asp.status_code = 'started'
-                    )
+                    <if test="searchType == null">
+                        AND aisr.sprint_id in (
+                            select sprint_id
+                            from agile_sprint asp
+                            where asp.project_id in
+                            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                                #{projectId}
+                            </foreach>
+                            AND asp.status_code = 'started'
+                        )
+                        AND ai.assignee_id = #{userId}
+                        AND ais.status_id = ai.status_id
+                        AND ais.is_completed != 1
+                    </if>
+                    <if test="searchType != null and searchType == 'myStarBeacon'">
+                        AND ai.issue_id IN (
+                            select fsb.instance_id
+                            from fd_star_beacon fsb
+                            where fsb.type = 'issue'
+                            and fsb.project_id in
+                            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                                #{projectId}
+                            </foreach>
+                            and fsb.user_id = #{userId}
+                        )
+                    </if>
                     AND ai.issue_id = aisr.issue_id
                     AND ai.type_code in ('sub_task','bug')
-                    AND ai.assignee_id = #{userId}
                     AND ais.project_id = ai.project_id
-                    AND ais.status_id = ai.status_id
-                    AND ais.is_completed != 1
                 )
             )
         </if>
@@ -1211,7 +1244,7 @@
                 OR
                 (
                     <choose>
-                        <when test="searchType == null">
+                        <when test="searchType == null or searchType == 'myStarBeacon'">
                             ai.type_code IN ('sub_task','bug')
                             AND (
                                 ai.parent_issue_id in
@@ -1224,8 +1257,24 @@
                                     #{parentIssue}
                                 </foreach>
                             )
-                            AND ai.assignee_id = #{userId}
-                            AND ais.is_completed != 1
+                            <choose>
+                                <when test="searchType == null">
+                                    AND ai.assignee_id = #{userId}
+                                    AND ais.is_completed != 1
+                                </when>
+                                <when test="searchType != null and searchType == 'myStarBeacon'">
+                                    AND ai.issue_id in (
+                                    select fsb.instance_id
+                                    from fd_star_beacon fsb
+                                    where fsb.type = 'issue'
+                                    and fsb.project_id in
+                                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                                        #{projectId}
+                                    </foreach>
+                                    and fsb.user_id = #{userId}
+                                    )
+                                </when>
+                            </choose>
                         </when>
                         <otherwise>
                             ai.type_code = 'bug'
