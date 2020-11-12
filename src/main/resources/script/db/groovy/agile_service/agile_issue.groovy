@@ -189,4 +189,12 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
             column(name: 'estimated_end_time', type: 'DATETIME', remarks: '预计结束时间')
         }
     }
+
+    changeSet(id: '2020-11-12-agile-issue-add-column', author: 'fuqianghuang01@gmail.com') {
+        addColumn(tableName: 'agile_issue') {
+            column(name: 'main_responsible_id', type: 'BIGINT UNSIGNED', remarks: '主要责任人')
+            column(name: 'test_responsible_id', type: 'BIGINT UNSIGNED', remarks: '测试责任人')
+            column(name: 'environment', type: 'VARCHAR(255)', remarks: '环境')
+        }
+    }
 }
