@@ -1,22 +1,13 @@
 import React from 'react';
 import STATUS_TYPE from '@/constants/STATUS_TYPE';
 import { IStatus } from '@/common/types';
+import BaseTag from '../base-tag';
 import styles from './index.less';
 
 interface Props {
   mode?: 'inline' | 'tag'
   code: IStatus['valueCode']
 }
-const renderTagMode = ({ color, name }: { color: string, name: string }) => (
-  <div
-    className={styles.status_type_tag_mode}
-    style={{
-      background: color,
-    }}
-  >
-    {name || ''}
-  </div>
-);
 const renderInlineMode = ({ color, name }: { color: string, name: string }) => (
   <div className={styles.status_type_inline_mode}>
     <div
@@ -35,10 +26,7 @@ const StatusTypeTag: React.FC<Props> = ({ mode = 'inline', code }) => {
       color,
       name,
     });
-    case 'tag': return renderTagMode({
-      color,
-      name,
-    });
+    case 'tag': return <BaseTag color={color} text={name} />;
     default: return null;
   }
 };
