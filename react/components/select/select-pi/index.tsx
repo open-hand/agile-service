@@ -33,7 +33,7 @@ interface Props extends Partial<SelectProps> {
 const SelectPI: React.FC<Props> = forwardRef(({
   dataRef, statusList, disabledCurrentPI = false, afterLoad, request, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const afterLoadRef = useRef<Function>();
+  const afterLoadRef = useRef<Props['afterLoad']>();
   afterLoadRef.current = afterLoad;
   const config = useMemo((): SelectConfig<PI> => ({
     name: 'all_pi',
@@ -45,10 +45,8 @@ const SelectPI: React.FC<Props> = forwardRef(({
         {renderPi(pi)}
       </FragmentForSearch>
     ),
+    afterLoad: afterLoadRef.current,
     middleWare: (sprints) => {
-      if (afterLoadRef.current) {
-        afterLoadRef.current(sprints);
-      }
       if (dataRef) {
         Object.assign(dataRef, {
           current: sprints,
