@@ -43,7 +43,7 @@ class CommonApi extends Api<CommonApi> {
    * @param onlySelectEnableSubProject  是否只查询启动的子项目
    */
   getSubProjects(onlySelectEnableSubProject: boolean = false) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `/iam/choerodon/v1/organizations/${getOrganizationId()}/project_relations/${getProjectId()}/${getProjectId()}`,
       params: {
@@ -83,5 +83,6 @@ class CommonApi extends Api<CommonApi> {
 }
 
 const commonApi = new CommonApi();
+const commonApiConfig = new CommonApi(true);
 
-export { commonApi };
+export { commonApi, commonApiConfig };
