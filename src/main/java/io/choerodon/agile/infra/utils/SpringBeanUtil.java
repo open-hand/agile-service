@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
@@ -23,11 +24,16 @@ public class SpringBeanUtil implements ApplicationContextAware {
     }
 
     public static <T> T getExpandBean(Class<T> clazz) {
+        T t = null;
         try {
-            return applicationContext.getBean(clazz);
+            t = applicationContext.getBean(clazz);
+        }
+        catch (NoSuchBeanDefinitionException e){
+            t = null;
         }
         catch (Exception e){
-            return null;
+            e.printStackTrace();
         }
+        return t;
     }
 }

@@ -27,6 +27,11 @@ public class StatusLinkageVO {
 
     private StatusVO statusVO;
 
+    private Long programId;
+
+    private ProjectVO projectVO;
+
+
     public Long getId() {
         return id;
     }
@@ -89,5 +94,21 @@ public class StatusLinkageVO {
 
     public void setStatusVO(StatusVO statusVO) {
         this.statusVO = statusVO;
+    }
+
+    public Long getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(Long programId) {
+        this.programId = programId;
+    }
+
+    public ProjectVO getProjectVO() {
+        return projectVO;
+    }
+
+    public void setProjectVO(ProjectVO projectVO) {
+        this.projectVO = projectVO;
     }
 }

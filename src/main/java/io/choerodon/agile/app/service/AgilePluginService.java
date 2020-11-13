@@ -307,4 +307,14 @@ public interface AgilePluginService {
     void deleteProgramVersionRel(Long projectId, Long versionId);
 
     List<IssueDTO> selectEpicBySubProjectFeature(Long subProjectId);
+
+    void listStatusLinkageByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds, String applyType, List<StatusSettingVO> list);
+
+    /**
+     * 故事改变状态联动改变特性的状态
+     * @param projectId
+     * @param issueDTO
+     * @param applyType
+     */
+    void storyLinkageFeature(Long projectId, IssueDTO issueDTO, String applyType);
 }
