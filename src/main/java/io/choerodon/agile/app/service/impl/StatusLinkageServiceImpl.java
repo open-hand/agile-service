@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.StatusLinkageVO;
 import io.choerodon.agile.api.vo.StatusVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusLinkageService;
@@ -13,6 +14,7 @@ import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StatusLinkageMapper;
 import io.choerodon.agile.infra.mapper.StatusMachineTransformMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang.BooleanUtils;
 import org.modelmapper.ModelMapper;
@@ -136,6 +138,10 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException("error.issue.null");
         }
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (agilePluginService != null) {
+            agilePluginService.storyLinkageFeature(projectId,issueDTO,applyType);
+        }
         // 判断issue是不是子任务或者子bug
         Boolean checkBugOrSubTask = checkIsSubBugOrSubTask(issueDTO);
         if (Boolean.FALSE.equals(checkBugOrSubTask)) {
@@ -182,7 +188,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         return statusLinkageMapper.selectWithStatusByProjectId(projectId);
     }
 
-    private void changeParentStatus(Long projectId, String applyType, IssueDTO parentIssue, Long changeStatus, IssueDTO triggerIssue) {
+    protected void changeParentStatus(Long projectId, String applyType, IssueDTO parentIssue, Long changeStatus, IssueDTO triggerIssue) {
         if (parentIssue.getStatusId().equals(changeStatus)) {
             return;
         }
