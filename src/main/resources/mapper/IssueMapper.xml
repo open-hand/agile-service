@@ -1732,7 +1732,8 @@
     <select id="queryIssueEpicSelectList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
             issue_id,
-            epic_name
+            epic_name,
+            creation_date
         FROM
             agile_issue
         WHERE

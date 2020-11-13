@@ -30,6 +30,7 @@ import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.utils.PageableHelper;
+import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
@@ -1079,7 +1080,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return issueAssembler.toTargetList(Stream.of(issueMapper.queryIssueEpicSelectList(projectId),
                 Optional.ofNullable(agilePluginService).map(service -> service
                         .selectEpicBySubProjectFeature(projectId)).orElse(Collections.emptyList()))
-                .flatMap(Collection::stream).collect(Collectors.toList()), IssueEpicVO.class);
+                .flatMap(Collection::stream).sorted(Comparator.comparing(AuditDomain::getCreationDate).reversed())
+                .collect(Collectors.toList()), IssueEpicVO.class);
     }
 
 
