@@ -52,7 +52,7 @@ class IssueList extends Component {
 
   render() {
     const {
-      issue, i, showAssignee, showDelete, showPriority, onOpen, style, showStar,
+      issue, i, showAssignee, showDelete, showPriority, onOpen, style,
     } = this.props;
     const { typeCode, starBeacon } = issue;
     const menu = AppState.currentMenuType;
@@ -93,6 +93,7 @@ class IssueList extends Component {
             </p>
           </div>
         </Tooltip>
+        <Star active={starBeacon} style={{ margin: '0 8px' }} />
         {
           showPriority && (
           <div style={{ marginRight: '8px', overflow: 'hidden' }}>
@@ -124,7 +125,6 @@ class IssueList extends Component {
             </div>
           ) : null
         }
-        {showStar && <Star active={starBeacon} style={{ margin: '0 10px' }} />}
         <div style={{
           marginRight: '8px', display: 'flex', justifyContent: 'flex-end',
         }}
