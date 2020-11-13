@@ -24,7 +24,9 @@ interface IUseChoseFieldProps {
  * @param initChosenField 初始化已选字段时的操作 返回false | undefined | void 则跳过此字段
  */
 interface IChosenFieldFieldEvents {
+    initFieldStart?: (fields: IChosenFieldField[], currentChosenField: Map<string, IChosenFieldField>) => void,
     initField?: (data: IChosenFieldField, currentChosenField: Map<string, IChosenFieldField>) => IChosenFieldField | false | undefined | void,
+    initFieldFinish?: (customFields: IChosenFieldField[], systemFields: IChosenFieldField[], currentChosenField: Map<string, IChosenFieldField>) => void,
     initChosenField?: (data: IChosenFieldField, currentChosenField: Map<string, IChosenFieldField>) => IChosenFieldField | false | undefined | void,
     choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
     cancelChosenField?: (data: IChosenFieldField) => void,

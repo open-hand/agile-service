@@ -56,7 +56,7 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     if (config?.extraFormItems && Array.isArray(config.extraFormItems)) {
       config?.extraFormItems.forEach((item) => !extraFormItems.has(item.code) && extraFormItems.set(item.code, item));
     }
-  }, [config?.extraFormItems]);
+  }, [config?.extraFormItems, extraFormItems]);
   // const chosenFields = useObservable<IChosenFieldField[]>([]);
   const systemDataSetFieldConfig = useMemo(() => {
     const localSystemDataSetFieldConfig: Map<string, FieldProps> = new Map();
@@ -132,7 +132,7 @@ const IssueFilterForm: React.FC = () => {
       if (field.fieldType === 'member') {
         values = Array.isArray(values) ? values.map((item) => String(item)) : String(values);
       }
-      dataSet.current?.set(field.code, values);
+      !dataSet.current?.get(field.code) && dataSet.current?.set(field.code, values);
     }
   }, [dataSet, dateFormatArr]);
   useEffect(() => {
@@ -143,7 +143,7 @@ const IssueFilterForm: React.FC = () => {
     props.extraFormItems?.forEach((field) => {
       initField(field);
     });
-  }, [initField]);
+  }, [initField, props.chosenFields, props.extraFormItems]);
   const render = (item: IChosenFieldField) => (props.extraRenderFields && props.extraRenderFields(item, {
     style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
   }, { dataSet })) || renderField(item, {
