@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import { issueLinkApi, featureApi } from '@/api';
+import Star from '@/components/tag/star';
 import UserHead from '../../UserHead';
 import PriorityTag from '../../PriorityTag';
 import StatusTag from '../../StatusTag';
@@ -33,7 +34,7 @@ class LinkList extends Component {
       canDelete = true, onOpen,
     } = this.props;
 
-    const { typeCode } = issue;
+    const { typeCode, starBeacon } = issue;
     let deleteTipTitle;
 
     if (typeCode !== 'feature') {
@@ -79,6 +80,7 @@ class LinkList extends Component {
             </p>
           </div>
         </Tooltip>
+        {/* <Star active={starBeacon} style={{ marginRight: 8 }} disabled /> */}
         {
           typeCode !== 'feature' && (
             <div style={{ marginRight: '8px', overflow: 'hidden' }}>
@@ -140,7 +142,7 @@ class LinkList extends Component {
           )
         } */}
         <div style={{
-          width: '48px', marginRight: '8px', display: 'flex', justifyContent: 'flex-end',
+          marginRight: '8px', display: 'flex', justifyContent: 'flex-end',
         }}
         >
           <Tooltip mouseEnterDelay={0.5} title={`任务状态： ${typeCode !== 'feature' ? (issue.statusVO && issue.statusVO.name) : (issue.statusMapVO && issue.statusMapVO.name)}`}>
