@@ -1088,14 +1088,17 @@
                     ai.project_id,
                     ai.last_update_date
                 from
-                    agile_issue_sprint_rel aisr,
+                    <if test="searchType != 'myStarBeacon'">
+                        agile_issue_sprint_rel aisr,
+                    </if>
                     agile_issue ai,
                     agile_issue_status ais
-                where aisr.project_id in
-                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                    #{projectId}
-                </foreach>
-                <if test="searchType == null">
+                where 1=1
+                <if test="searchType != 'myStarBeacon'">
+                    AND aisr.project_id IN
+                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                        #{projectId}
+                    </foreach>
                     AND aisr.sprint_id in (
                         select sprint_id
                         from agile_sprint asp
