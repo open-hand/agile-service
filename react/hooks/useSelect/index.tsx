@@ -95,10 +95,12 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   const loadData = useCallback(async ({ filter = textRef.current, page = 1 }: LoadConfig = {} as LoadConfig) => {
     const res = await request({ filter, page });
     batchedUpdates(() => {
+      console.log(firstRef.current);
       if (paging) {
         const { list, hasNextPage } = res as { list: T[], hasNextPage: boolean };
         if (afterLoad && firstRef.current) {
           afterLoad(list);
+          firstRef.current = false;
         }
         setData((d) => (page > 1 ? d.concat(list) : list));
         setPage(page);
@@ -106,6 +108,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
       } else {
         if (afterLoad && firstRef.current) {
           afterLoad(res as T[]);
+          firstRef.current = false;
         }
         setData(res as T[]);
       }
