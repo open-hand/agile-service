@@ -1247,7 +1247,7 @@
                 OR
                 (
                     <choose>
-                        <when test="searchType == null or searchType == 'myStarBeacon'">
+                        <when test="searchType == null">
                             ai.type_code IN ('sub_task','bug')
                             AND (
                                 ai.parent_issue_id in
@@ -1260,24 +1260,8 @@
                                     #{parentIssue}
                                 </foreach>
                             )
-                            <choose>
-                                <when test="searchType == null">
-                                    AND ai.assignee_id = #{userId}
-                                    AND ais.is_completed != 1
-                                </when>
-                                <when test="searchType != null and searchType == 'myStarBeacon'">
-                                    AND ai.issue_id in (
-                                    select fsb.instance_id
-                                    from fd_star_beacon fsb
-                                    where fsb.type = 'issue'
-                                    and fsb.project_id in
-                                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                                        #{projectId}
-                                    </foreach>
-                                    and fsb.user_id = #{userId}
-                                    )
-                                </when>
-                            </choose>
+                            AND ai.assignee_id = #{userId}
+                            AND ais.is_completed != 1
                         </when>
                         <otherwise>
                             ai.type_code = 'bug'
@@ -3196,6 +3180,49 @@
             )
         </if>
         order by t1.issue_id desc
+    </select>
+
+    <select id="listMyStarIssuesByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        SELECT
+            ai.issue_id, ai.summary,
+            ai.project_id, ai.type_code,
+            ai.issue_type_id,
+            CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+            ai.reporter_id,
+            ai.last_update_date,
+            ai.priority_id,
+            ai.assignee_id,
+            ai.issue_type_id,
+            ai.status_id,
+            ai.parent_issue_id,
+            ai.type_code,
+            ai.relate_issue_id,
+            ai.last_update_date
+        FROM
+            agile_issue ai,
+            agile_project_info api,
+            agile_issue_status ais
+        WHERE
+            ai.project_id = api.project_id
+            AND ais.project_id = ai.project_id
+            AND ai.status_id = ais.status_id
+            AND ai.project_id IN
+            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                #{projectId}
+            </foreach>
+            AND ai.issue_id IN (
+                SELECT fsb.instance_id
+                FROM fd_star_beacon fsb
+                WHERE fsb.type = 'issue'
+                AND fsb.project_id IN
+                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                    #{projectId}
+                </foreach>
+                AND fsb.user_id = #{userId}
+            )
+        ORDER BY
+        ai.project_id ASC,
+        ai.last_update_date DESC
     </select>
 
 </mapper>
