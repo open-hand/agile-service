@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
+import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -32,7 +33,7 @@ public class SpringBeanUtil implements ApplicationContextAware {
             t = null;
         }
         catch (Exception e){
-            e.printStackTrace();
+            throw new CommonException(e.getMessage());
         }
         return t;
     }
