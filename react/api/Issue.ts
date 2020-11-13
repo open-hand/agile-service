@@ -85,6 +85,8 @@ interface IExportSearch {
     sprint?: any,
     summary?: string,
     version?: any,
+    starBeacon?: boolean
+    userId?: string
   },
   searchArgs?: {
     createStartDate: string,

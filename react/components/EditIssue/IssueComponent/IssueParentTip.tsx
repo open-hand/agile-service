@@ -21,7 +21,7 @@ const IssueParentTip: React.FC<Props> = ({ parentSummary, parentDescription, par
               <div className={styles.issueParentTip_content_item_content}>
                 <span>
                   {parentSummary}
-                  <Star active={parentStarBeacon} style={{ marginTop: -3 }} disabled />
+                  {parentStarBeacon && <Star active={parentStarBeacon} style={{ marginTop: -3 }} disabled />}
                 </span>
               </div>
             </div>
