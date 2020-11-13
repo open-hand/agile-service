@@ -1,7 +1,10 @@
 import { IExportSearch } from '@/api';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
+import { stores } from '@choerodon/boot';
 
+const { AppState } = stores;
 function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes'> {
+  const userId = String(AppState.userInfo.id);
   const {
     issueTypeId,
     assigneeId,
@@ -20,6 +23,7 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     sprint,
     summary,
     version,
+    starBeacon,
   } = data;
   return {
     advancedSearchArgs: {
@@ -38,6 +42,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       sprint,
       summary,
       version,
+      starBeacon,
+      userId: starBeacon ? userId : undefined,
     },
     searchArgs: {
       createStartDate: createDate[0],

@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import {
-  TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField, DataSet,
+  TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField, DataSet, CheckBox,
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
 import { find } from 'lodash';
@@ -105,6 +105,9 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       }
       case 'quickFilterIds': {
         return <QuickFilterField name={code} multiple {...otherComponentProps} />;
+      }
+      case 'starBeacon': {
+        return <CheckBox label="我关注的" name={code} />;
       }
       default:
         break;
