@@ -2588,20 +2588,24 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        String type = workBenchIssueSearchVO.getType();
-        queryUserProjects(organizationId, projectId, projectIds, projects, userId, type);
+        String searchType = workBenchIssueSearchVO.getType();
+        queryUserProjects(organizationId, projectId, projectIds, projects, userId, searchType);
 
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        String searchType = workBenchIssueSearchVO.getType();
         Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId, searchType));
         List<IssueDTO> parentIssuesDTOS = parentPage.getContent();
         if (CollectionUtils.isEmpty(parentIssuesDTOS)) {
             return new Page<>();
         }
         List<Long> parentIssues = parentIssuesDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
+        List<IssueDTO> allIssue;
+        if (Objects.equals(searchType, "myStarBeacon")) {
+            allIssue = issueMapper.listMyStarIssuesByProjectIdsAndUserId(projectIds, userId);
+        } else {
+            allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
+        }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);

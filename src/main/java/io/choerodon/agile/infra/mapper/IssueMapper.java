@@ -539,4 +539,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueVO> listAvailableParents(@Param("projectId") Long projectId,
                                        @Param("issueType") String issueType,
                                        @Param("param") String param);
+
+    List<IssueDTO> listMyStarIssuesByProjectIdsAndUserId(List<Long> projectIds, Long userId);
 }
