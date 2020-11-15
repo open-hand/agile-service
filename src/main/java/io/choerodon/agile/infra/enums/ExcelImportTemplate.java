@@ -40,15 +40,17 @@ public class ExcelImportTemplate {
 
         public static final List<Header> HEADERS;
 
-        public static final List<String> HEADER_CODES = new ArrayList<>();
 
         public static final String PARENT = "parent";
-        private static final String RELATE_ISSUE = "relate_issue";
-        private static final Map<String, String> CODE_VALUE_MAP = new HashMap();
-        private static final Map<String, Integer> VALUE_WIDTH_MAP = new HashMap<>();
+        public static final String RELATE_ISSUE = "relate_issue";
+        private static final int INIT_CAPACITY = 50;
+        public static final List<String> HEADER_CODES = new ArrayList<>(INIT_CAPACITY);
+        private static final Map<String, String> CODE_VALUE_MAP = new HashMap(INIT_CAPACITY);
+        private static final Map<String, String> VALUE_CODE_MAP = new HashMap(INIT_CAPACITY);
+        private static final Map<String, Integer> VALUE_WIDTH_MAP = new HashMap<>(INIT_CAPACITY);
 
         static {
-            HEADERS = new ArrayList<>(50);
+            HEADERS = new ArrayList<>(INIT_CAPACITY);
             HEADERS.add(new Header(FieldCode.ISSUE_TYPE, "问题类型*", true, null));
             HEADERS.add(new Header(PARENT, "父级故事/任务/缺陷", false, 12000));
             HEADERS.add(new Header(FieldCode.EPIC, "所属史诗", false, 8000));
@@ -74,6 +76,7 @@ public class ExcelImportTemplate {
                 String value = h.getValue();
                 HEADER_CODES.add(code);
                 CODE_VALUE_MAP.put(code, value);
+                VALUE_CODE_MAP.put(value, code);
                 VALUE_WIDTH_MAP.put(value, h.getDefaultWidth());
             });
         }
@@ -106,6 +109,10 @@ public class ExcelImportTemplate {
 
         public static Integer getWidthByValue(String value) {
             return VALUE_WIDTH_MAP.get(value);
+        }
+
+        public static String getCodeByValue(String value) {
+            return VALUE_CODE_MAP.get(value);
         }
 
         public static List<String> validateAndAddFields(List<String> systemFields) {

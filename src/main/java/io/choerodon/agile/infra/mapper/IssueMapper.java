@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.mapper;
 import io.choerodon.agile.api.vo.IssueIdSprintIdVO;
 import io.choerodon.agile.api.vo.IssueOverviewVO;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -546,4 +547,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @return
      */
     List<IssueVO> listUndoneAvailableParents(@Param("projectId") Long projectId);
+
+    IssueVO selectByIssueNum(@Param("projectId") Long projectId,
+                                   @Param("issueNum") String issueNum);
 }
