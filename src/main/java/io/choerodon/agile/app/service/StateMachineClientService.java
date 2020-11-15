@@ -31,4 +31,6 @@ public interface StateMachineClientService {
     ExecuteResult executeTransformForDemo(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType, InputDTO inputDTO);
 
     void cleanInstanceCache(Long projectId, Long issueId, String applyType);
+
+    void initRank(IssueCreateVO issueCreateVO, Long issueId, String type);
 }

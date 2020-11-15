@@ -17,15 +17,13 @@ import { linkUrl } from '@/utils/to';
 import LINK_URL, { getParams } from '@/constants/LINK_URL';
 import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import ImportIssue from '@/components/ImportIssue';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
 import FilterManage from './components/FilterManage';
 import SaveFilterModal from './components/SaveFilterModal';
-// import { openExportIssueModal } from './components/ExportIssue';
-
 import IssueDetail from './components/issue-detail';
-import ImportIssue from './components/ImportIssue';
 import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
@@ -44,7 +42,6 @@ const Issue = observer(() => {
     if (localPageCacheStore.getItem('issues.table')) {
       const { columProps } = localPageCacheStore.getItem('issues.table');
       if (Array.isArray(columProps) && columProps.length > 0) {
-        console.log('visibleColumns...', columProps);
         return columProps.map((item) => item.name);
       }
       return [];
@@ -203,7 +200,11 @@ const Issue = observer(() => {
           className="leftBtn"
           icon="unarchive"
           funcType="flat"
-          onClick={() => openExportIssueModal(issueSearchStore.getAllFields, issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()] : [], dataSet, tableRef)}
+          onClick={() => openExportIssueModal(
+            issueSearchStore.getAllFields,
+            issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
+            dataSet, tableRef,
+          )}
         >
           导出问题
         </Button>

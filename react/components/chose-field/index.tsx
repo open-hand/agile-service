@@ -44,8 +44,11 @@ interface IChoseFieldComponentProps {
   dropDownBtnProps?: Partial<ButtonProps>,
 }
 const defaultInitFieldAction = {
+  initFieldStart: (data: any) => data,
   initField: (data: any) => data,
+  initFieldFinish: (data: any) => data,
   initChosenField: (data: any) => data,
+
 };
 export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps, IChoseFieldComponentProps] {
   const [fields, setFields] = useState<IChosenFieldField[]>([]);
@@ -62,44 +65,59 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
   }, [config?.fields]);
   // 操作函数只初始化一次  防止方法多次创建 多次更改
   const events = useMemo(() => {
-    let { initField, initChosenField }: IChosenFieldFieldEvents = defaultInitFieldAction;
+    let {
+      initField, initChosenField, initFieldFinish, initFieldStart,
+    }: IChosenFieldFieldEvents = defaultInitFieldAction;
     if (config?.events?.initChosenField) {
       initChosenField = config?.events?.initChosenField;
     }
     if (config?.events?.initField) {
       initField = config?.events?.initField;
     }
-    return { initField, initChosenField };
+    if (config?.events?.initFieldStart) {
+      initFieldStart = config?.events?.initFieldStart;
+    }
+    if (config?.events?.initFieldFinish) {
+      initFieldFinish = config?.events?.initFieldFinish;
+    }
+    return {
+      initField, initChosenField, initFieldFinish, initFieldStart,
+    };
   }, []);
   const store = useMemo(() => {
     const systemFields: Array<IChosenFieldField> = [];
     const customFields: Array<IChosenFieldField> = [];
     const currentChosenFields: Map<string, IChosenFieldField> = new Map();
-    fields.forEach((field) => {
-      let newField = field;
-      if (['time', 'datetime', 'date'].indexOf(field.fieldType ?? '') !== -1) {
-        newField = { ...field, otherComponentProps: { range: true } };
-      }
-      const result = events.initField(newField, currentChosenFields);
-      const { immutableCheck } = result || {};
-      if (field.id) {
-        result && customFields.push(result);
-        immutableCheck && currentChosenFields.set(field.code, result as IChosenFieldField);
-      } else if (!field.noDisplay) {
-        result && systemFields.push(result);
-        immutableCheck && currentChosenFields.set(field.code, result as IChosenFieldField);
-      }
-    });
-    config?.defaultValue?.forEach((field) => {
-      let newField = field;
-      if (['time', 'datetime', 'date'].indexOf(field.fieldType ?? '') !== -1) {
-        newField = { ...field, otherComponentProps: { range: true } };
-      }
-      const result = events.initChosenField(newField, currentChosenFields);
-      result && currentChosenFields.set(field.code, result);
-    });
+    if (fields.length > 0) {
+      events.initFieldStart(fields, currentChosenFields);
+      fields.forEach((field) => {
+        let newField = field;
+        if (['time', 'datetime', 'date'].indexOf(field.fieldType ?? '') !== -1) {
+          newField = { ...field, otherComponentProps: { range: true } };
+        }
+        const result = events.initField(newField, currentChosenFields);
+        const { immutableCheck } = result || {};
+        if (field.id) {
+          result && customFields.push(result);
+          immutableCheck && currentChosenFields.set(field.code, result as IChosenFieldField);
+        } else if (!field.noDisplay) {
+          result && systemFields.push(result);
+          immutableCheck && currentChosenFields.set(field.code, result as IChosenFieldField);
+        }
+      });
+      config?.defaultValue?.forEach((field) => {
+        let newField = field;
+        if (['time', 'datetime', 'date'].indexOf(field.fieldType ?? '') !== -1) {
+          newField = { ...field, otherComponentProps: { range: true } };
+        }
+        const result = events.initChosenField(newField, currentChosenFields);
+        result && currentChosenFields.set(field.code, result);
+      });
+      events.initFieldFinish(customFields, systemFields, currentChosenFields);
+    }
+
     return new ChoseFieldStore({ systemFields, customFields, chosenFields: [...currentChosenFields.values()] });
-  }, [events, config?.defaultValue, fields]);
+  }, [config?.defaultValue, events, fields]);
   const dataProps = {
     store,
     fields,

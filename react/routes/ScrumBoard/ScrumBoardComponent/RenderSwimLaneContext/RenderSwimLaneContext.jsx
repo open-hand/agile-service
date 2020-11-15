@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import { Collapse } from 'choerodon-ui';
 import { isEqual } from 'lodash';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import './RenderSwimLaneContext.less';
 import SwimLaneHeader from './SwimLaneHeader';
 
@@ -20,15 +21,17 @@ const getPanelKey = (mode, issue) => {
 const getDefaultExpanded = (mode, issueArr, key) => {
   let retArr = issueArr;
   if (mode === 'parent_child') {
-    retArr = retArr.filter(issue => !issue.isComplish || key === 'other');
+    retArr = retArr.filter((issue) => !issue.isComplish || key === 'other');
   }
-  return retArr.map(issue => getPanelKey(mode, issue));
+  return retArr.map((issue) => getPanelKey(mode, issue));
 };
 @observer
 class SwimLaneContext extends React.Component {
-  constructor(props) {    
+  constructor(props) {
     super(props);
+    const defaultCacheActiveKeys = localPageCacheStore.getItem(`scrumBoard.panel-${props.mode}`);
     this.state = {
+      defaultActiveKey: defaultCacheActiveKeys,
       activeKey: [],
       issues: [],
     };
@@ -43,13 +46,12 @@ class SwimLaneContext extends React.Component {
       return {
         mode,
         issues,
-        activeKey,
+        activeKey: state.defaultActiveKey || activeKey,
+        defaultActiveKey: undefined,
       };
-    } else {
-      return null;
     }
+    return null;
   }
-
 
   getPanelItem = (key, parentIssue = null) => {
     const {
@@ -83,6 +85,7 @@ class SwimLaneContext extends React.Component {
     this.setState({
       activeKey: arr,
     });
+    localPageCacheStore.setItem(`scrumBoard.panel-${this.props.mode}`, arr);
   };
 
   keyConverter = (key, mode) => {

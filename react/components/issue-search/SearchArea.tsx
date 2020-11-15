@@ -1,9 +1,10 @@
-import React, { useState, useContext, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import {
   Select, Icon,
 } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import { find, remove } from 'lodash';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui/pro';
 import { SelectMode } from 'choerodon-ui/lib/select/enum';
@@ -25,9 +26,14 @@ const SearchArea: React.FC = () => {
     store, onClear, urlFilter, onClickSaveFilter,
   } = useContext(IssueSearchContext);
   const { data: quickFilters } = useQuickFilters();
-  const { isHasFilter } = store;
+  const { isHasFilter, chosenFields } = store;
   const myFilters = store.getMyFilters;
-  const [selectedQuickFilters, setSelectedQuickFilters] = useState<LabeledValue[]>([]);
+  const selectedQuickFilterIds = chosenFields.get('quickFilterIds') ? toJS(chosenFields.get('quickFilterIds')?.value) : undefined;
+  const getSelectedQuickFilters = () => (selectedQuickFilterIds || []).map((id: string) => {
+    const target = find(quickFilters, { filterId: id });
+    return target ? { key: `quick|${target.filterId}`, label: target.name } : {};
+  });
+  const selectedQuickFilters: LabeledValue[] = getSelectedQuickFilters();
   const userId = String(AppState.userInfo.id);
   const reset = () => {
     onClear();
@@ -39,7 +45,6 @@ const SearchArea: React.FC = () => {
     const [type, id] = k.split('|');
     if (type === 'quick') {
       const newSelectedQuickFilters = [...selectedQuickFilters, v];
-      setSelectedQuickFilters([...selectedQuickFilters, v]);
       const quickFilterIds = newSelectedQuickFilters.map((filter) => filter.key.split('|')[1]);
       store.handleFilterChange('quickFilterIds', quickFilterIds);
     } else if (type === 'my') {
@@ -65,13 +70,15 @@ const SearchArea: React.FC = () => {
     } else if (type === 'commonly') {
       if (id === 'onlyMe') {
         store.handleFilterChange('assigneeId', [userId]);
+      } else if (id === 'starBeacon') {
+        store.handleFilterChange('starBeacon', true);
+        store.handleFilterChange('userId', userId);
       }
     }
   };
   const handleDeselect = (v: LabeledValue) => {
     // clear
     if (!v) {
-      setSelectedQuickFilters([]);
       reset();
       return;
     }
@@ -79,10 +86,16 @@ const SearchArea: React.FC = () => {
     const [type, id] = key.split('|');
     if (type === 'quick') {
       remove(selectedQuickFilters, { key });
-      setSelectedQuickFilters([...selectedQuickFilters]);
     } else if (type === 'my') {
       store.clearAllFilter();
       store.query();
+    } else if (type === 'commonly') {
+      if (id === 'onlyMe') {
+        store.handleFilterChange('assigneeId', []);
+      } else if (id === 'starBeacon') {
+        store.handleFilterChange('starBeacon', undefined);
+        store.handleFilterChange('userId', undefined);
+      }
     }
     const quickFilterIds = selectedQuickFilters.map((filter) => filter.key.split('|')[1]);
     store.handleFilterChange('quickFilterIds', quickFilterIds);
@@ -101,6 +114,7 @@ const SearchArea: React.FC = () => {
 
     const currentFilterDTO = store.getCustomFieldFilters();
     const onlyMe = currentFilterDTO.otherArgs.assigneeId && currentFilterDTO.otherArgs.assigneeId.length === 1 && currentFilterDTO.otherArgs.assigneeId[0] === userId;
+    const { starBeacon } = currentFilterDTO.otherArgs;
     const result = [...selectedQuickFilters];
     if (targetMyFilter) {
       result.push(
@@ -110,6 +124,11 @@ const SearchArea: React.FC = () => {
     if (onlyMe) {
       result.push(
         { key: 'commonly|onlyMe', label: '仅我的问题' },
+      );
+    }
+    if (starBeacon) {
+      result.push(
+        { key: 'commonly|starBeacon', label: '我关注的' },
       );
     }
     return result;
@@ -128,12 +147,12 @@ const SearchArea: React.FC = () => {
   const renderSearch = () => (
     <>
       {hasSummaryField && (
-      <div style={{ marginTop: 4 }}>
-        <SummaryField
-          onChange={handleInputChange}
-          value={store.getFilterValueByCode('contents') ? store.getFilterValueByCode('contents')[0] : undefined}
-        />
-      </div>
+        <div style={{ marginTop: 4 }}>
+          <SummaryField
+            onChange={handleInputChange}
+            value={store.getFilterValueByCode('contents') ? store.getFilterValueByCode('contents')[0] : undefined}
+          />
+        </div>
       )}
       <div className={`${prefixCls}-search-left`}>
         <CustomFields>
@@ -148,19 +167,18 @@ const SearchArea: React.FC = () => {
                 placeholder="快速筛选"
                 maxTagCount={0}
                 labelInValue
-                maxTagPlaceholder={(ommittedValues : LabeledValue[]) => `${ommittedValues.map((item) => item.label).join(', ')}`}
+                maxTagPlaceholder={(ommittedValues: LabeledValue[]) => `${ommittedValues.map((item) => item.label).join(', ')}`}
                 style={{ ...getSelectStyle({ name: '快速筛选' }, myFilterSelectValue), height: 34 }}
                 onSelect={handleSelect}
                 onDeselect={handleDeselect}
                 onClear={() => {
-                  setSelectedQuickFilters([]);
                   reset();
                 }}
                 value={myFilterSelectValue}
               >
                 <OptGroup key="commonly" label="常用选项">
                   <Option value="commonly|onlyMe">仅我的问题</Option>
-                  {/* <Option value={-2}>仅故事</Option> */}
+                  <Option value="commonly|starBeacon">我关注的</Option>
                 </OptGroup>
                 <OptGroup key="quick" label="快速筛选">
                   {quickFilters.map((filter) => (
@@ -169,10 +187,10 @@ const SearchArea: React.FC = () => {
                 </OptGroup>
                 <OptGroup key="my" label="我的筛选">
                   {
-                  myFilters.map((filter) => (
-                    <Option value={`my|${filter.filterId}`}>{filter.name}</Option>
-                  ))
-                }
+                    myFilters.map((filter) => (
+                      <Option value={`my|${filter.filterId}`}>{filter.name}</Option>
+                    ))
+                  }
                 </OptGroup>
               </Select>
             </div>

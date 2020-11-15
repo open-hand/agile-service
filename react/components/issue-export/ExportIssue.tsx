@@ -72,6 +72,7 @@ const ExportIssue: React.FC = () => {
     defaultValue: store.getCurrentChosenFieldsArr,
     events: {
       initField: (data) => store.initField(data),
+      initFieldFinish: (cField, sField, current) => store.initFieldFinish(cField, sField, current),
       initChosenField: (data) => store.initChosenField(data),
       choseField: (data) => handleChange(data),
     },

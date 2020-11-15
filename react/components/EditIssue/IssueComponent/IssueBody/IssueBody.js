@@ -48,7 +48,7 @@ function IssueBody(props) {
             showTitle={false}
             field={{ fieldCode: 'summary', fieldName: '概要' }}
           />
-          {/* <FieldStar {...props} /> */}
+          <FieldStar {...props} />
           <div style={{ flexShrink: 0, marginLeft: 'auto', color: 'rgba(0, 0, 0, 0.65)' }}>
             {!disabled && (
               <IssueDropDown {...props} />

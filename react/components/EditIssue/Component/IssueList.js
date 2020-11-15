@@ -3,6 +3,7 @@ import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import { stores, Permission } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
 import { issueApi } from '@/api';
+import Star from '@/components/tag/star';
 import PriorityTag from '../../PriorityTag';
 import StatusTag from '../../StatusTag';
 import TypeTag from '../../TypeTag';
@@ -16,14 +17,14 @@ class IssueList extends Component {
   };
 
   handleDeleteIssue(issueId) {
-    const { onRefresh, issue: { objectVersionNumber, typeCode, createBy } } = this.props;
+    const { onRefresh, issue: { objectVersionNumber, typeCode, createdBy } } = this.props;
     const data = {
       issueId,
       relateIssueId: 0,
       objectVersionNumber,
     };
     if (typeCode === 'sub_task') {
-      issueApi.delete(issueId, createBy)
+      issueApi.delete(issueId, createdBy)
         .then(() => {
           if (onRefresh) {
             onRefresh();
@@ -53,7 +54,7 @@ class IssueList extends Component {
     const {
       issue, i, showAssignee, showDelete, showPriority, onOpen, style,
     } = this.props;
-    const { typeCode } = issue;
+    const { typeCode, starBeacon } = issue;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
     const issueTypeName = this.getIssueTypeName(issue.typeCode);
@@ -92,6 +93,7 @@ class IssueList extends Component {
             </p>
           </div>
         </Tooltip>
+        <Star active={starBeacon} style={{ margin: '0 8px' }} />
         {
           showPriority && (
           <div style={{ marginRight: '8px', overflow: 'hidden' }}>
@@ -148,6 +150,7 @@ class IssueList extends Component {
               <Popconfirm
                 title={`确认要删除该${issueTypeName}吗?`}
                 placement="left"
+                // eslint-disable-next-line react/jsx-no-bind
                 onConfirm={this.confirm.bind(this, issue.issueId)}
                 onCancel={this.cancel}
                 okText="删除"

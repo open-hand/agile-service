@@ -4,21 +4,23 @@ import { versionApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IVersion } from '@/common/types';
+import { getProjectId } from '@/utils/common';
 
 interface Props extends Partial<SelectProps> {
+  projectId?: string
   dataRef?: React.MutableRefObject<Array<any>>
   statusArr?: Array<string>
   valueField?: string
   afterLoad?: (versions: IVersion[]) => void
 }
 const SelectVersion: React.FC<Props> = forwardRef(({
-  valueField, dataRef = { current: null }, afterLoad, statusArr = [], ...otherProps
+  projectId, valueField, dataRef = { current: null }, afterLoad, statusArr = [], ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'version',
     textField: 'name',
     valueField: valueField || 'name',
-    request: () => versionApi.loadNamesByStatus(statusArr),
+    request: () => versionApi.project(projectId || getProjectId()).loadNamesByStatus(statusArr),
     middleWare: (versions: IVersion[]) => {
       if (dataRef) {
         Object.assign(dataRef, {
@@ -31,7 +33,7 @@ const SelectVersion: React.FC<Props> = forwardRef(({
       return versions;
     },
     paging: false,
-  }), []);
+  }), [projectId]);
   const props = useSelect(config);
   return (
     <Select

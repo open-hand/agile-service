@@ -30,6 +30,7 @@ import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.utils.PageableHelper;
+import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
@@ -53,6 +54,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 敏捷开发Issue
@@ -172,6 +174,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private BoardAssembler boardAssembler;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired
+    private StarBeaconMapper starBeaconMapper;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -210,6 +214,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String BACKETNAME = "agile-service";
     private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
     private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
+    private static final String STAR_BEACON_TYPE_ISSUE = "issue";
+    private static final String BUG_TYPE = "bug";
+    private static final String TASK_TYPE = "task";
 
     @Autowired
     private ModelMapper modelMapper;
@@ -383,7 +390,67 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService != null) {
             agilePluginService.programIssueDetailDTOToVO(issueVO,issue);
         }
+        //设置星标
+        setStarBeacon(issueVO);
         return issueVO;
+    }
+
+    private void setStarBeacon(IssueVO issue) {
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        StarBeaconDTO starBeaconDTO = new StarBeaconDTO();
+        starBeaconDTO.setUserId(userId);
+        starBeaconDTO.setType(STAR_BEACON_TYPE_ISSUE);
+        starBeaconDTO.setInstanceId(issue.getIssueId());
+        starBeaconDTO.setProjectId(issue.getProjectId());
+        issue.setStarBeacon(false);
+        if(!Objects.isNull(starBeaconMapper.selectOne(starBeaconDTO))) {
+            issue.setStarBeacon(true);
+        }
+        String typeCode = issue.getTypeCode();
+        if (Objects.equals(typeCode, STORY_TYPE) || Objects.equals(typeCode, TASK_TYPE)) {
+            //子任务设置星标
+            setListStarBeacon(issue.getSubIssueVOList(), starBeaconDTO);
+            //子缺陷设置星标
+            setListStarBeacon(issue.getSubBugVOList(), starBeaconDTO);
+        }
+        if (Objects.equals(typeCode, SUB_TASK)) {
+            //设置父级星标
+            issue.setParentStarBeacon(false);
+            if (!Objects.isNull(issue.getParentIssueId())) {
+                starBeaconDTO.setInstanceId(issue.getParentIssueId());
+                if(!Objects.isNull(starBeaconMapper.selectOne(starBeaconDTO))) {
+                    issue.setParentStarBeacon(true);
+                }
+            }
+            //同父级子任务设置星标
+            setListStarBeacon(issue.getSameParentIssueVOList(), starBeaconDTO);
+        }
+        if (Objects.equals(typeCode, BUG_TYPE)) {
+            //设置关联星标
+            issue.setRelateStarBeacon(false);
+            if (!Objects.isNull(issue.getRelateIssueId())) {
+                starBeaconDTO.setInstanceId(issue.getRelateIssueId());
+                if(!Objects.isNull(starBeaconMapper.selectOne(starBeaconDTO))) {
+                    issue.setRelateStarBeacon(true);
+                }
+            }
+            //同父级子缺陷设置星标
+            setListStarBeacon(issue.getSameParentBugVOList(), starBeaconDTO);
+        }
+    }
+
+    private void setListStarBeacon(List<IssueSubListVO> issues, StarBeaconDTO starBeaconDTO) {
+        if (!Objects.isNull(issues) && !issues.isEmpty()) {
+            List<Long> issueIds = issues.stream().map(IssueSubListVO::getIssueId).collect(Collectors.toList());
+            List<Long> starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, starBeaconDTO.getProjectId(), starBeaconDTO.getUserId());
+            if (!Objects.isNull(starIssueIds) && !starIssueIds.isEmpty()) {
+                issues.forEach(issue -> {
+                    if (starIssueIds.contains(issue.getIssueId())) {
+                        issue.setStarBeacon(true);
+                    }
+                });
+            }
+        }
     }
 
     protected IssueVO queryIssueByUpdate(Long projectId, Long issueId, List<String> fieldList) {
@@ -1010,7 +1077,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public List<IssueEpicVO> listEpicSelectData(Long projectId) {
-        return issueAssembler.toTargetList(issueMapper.queryIssueEpicSelectList(projectId), IssueEpicVO.class);
+        return issueAssembler.toTargetList(Stream.of(issueMapper.queryIssueEpicSelectList(projectId),
+                Optional.ofNullable(agilePluginService).map(service -> service
+                        .selectEpicBySubProjectFeature(projectId)).orElse(Collections.emptyList()))
+                .flatMap(Collection::stream).sorted(Comparator.comparing(AuditDomain::getCreationDate).reversed())
+                .collect(Collectors.toList()), IssueEpicVO.class);
     }
 
 
@@ -1232,7 +1303,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         }
     }
-    
+
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"labelId"}, instanceId = "issueId", idPosition = "arg")
     public void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId) {
@@ -2517,19 +2588,24 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        queryUserProjects(organizationId, projectId, projectIds, projects, userId);
+        String searchType = workBenchIssueSearchVO.getType();
+        queryUserProjects(organizationId, projectId, projectIds, projects, userId, searchType);
 
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        String searchType = workBenchIssueSearchVO.getType();
         Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId, searchType));
         List<IssueDTO> parentIssuesDTOS = parentPage.getContent();
         if (CollectionUtils.isEmpty(parentIssuesDTOS)) {
             return new Page<>();
         }
         List<Long> parentIssues = parentIssuesDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
+        List<IssueDTO> allIssue;
+        if (Objects.equals(searchType, "myStarBeacon")) {
+            allIssue = issueMapper.listMyStarIssuesByProjectIdsAndUserId(projectIds, userId);
+        } else {
+            allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
+        }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
@@ -2584,13 +2660,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         });
     }
 
-    private void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId) {
+    private void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type) {
         if (ObjectUtils.isEmpty(projectId)) {
             List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(organizationId,userId).getBody();
             if (!CollectionUtils.isEmpty(projectVOS)) {
                 projectVOS
                         .stream()
-                        .filter(v -> !Objects.equals(v.getCategory(),"PROGRAM") && Boolean.TRUE.equals(v.getEnabled()))
+                        .filter(v -> ((!Objects.isNull(type) && Objects.equals(type, "myStarBeacon"))
+                                ? (Boolean.TRUE.equals(v.getEnabled()))
+                                : (!Objects.equals(v.getCategory(),"PROGRAM") && Boolean.TRUE.equals(v.getEnabled()))))
                         .forEach(obj -> {
                             projectIds.add(obj.getId());
                             projects.add(obj);

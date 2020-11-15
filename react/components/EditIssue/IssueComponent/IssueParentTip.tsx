@@ -1,14 +1,16 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import Star from '@/components/tag/star';
 import styles from './IssueParentTip.less';
 
 interface Props {
   parentSummary: string
   parentDescription: string
+  parentStarBeacon: boolean
 }
 
-const IssueParentTip: React.FC<Props> = ({ parentSummary, parentDescription }) => (
+const IssueParentTip: React.FC<Props> = ({ parentSummary, parentDescription, parentStarBeacon }) => (
   <>
     {
       parentSummary && (
@@ -19,6 +21,7 @@ const IssueParentTip: React.FC<Props> = ({ parentSummary, parentDescription }) =
               <div className={styles.issueParentTip_content_item_content}>
                 <span>
                   {parentSummary}
+                  {parentStarBeacon && <Star active={parentStarBeacon} style={{ marginTop: -3, marginLeft: 3 }} disabled />}
                 </span>
               </div>
             </div>

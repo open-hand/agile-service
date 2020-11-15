@@ -49,6 +49,7 @@ export interface SelectConfig<T = {}> {
   renderer?: (item: T) => JSX.Element
   request: ({ filter, page }: LoadConfig) => Promise<T[] | { list: T[], hasNextPage: boolean }>
   middleWare?: MiddleWare<T>,
+  afterLoad?: (data: T[]) => void
   paging?: boolean
   props?: object
 }
@@ -65,6 +66,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   const dataSetRef = useRef<DataSet>();
   const cacheRef = useRef<Map<any, T>>(new Map());
   const defaultRender = useCallback((item: T) => getValueByPath(item, config.textField), [config.textField]);
+  const firstRef = useRef(true);
   const {
     textField = 'meaning',
     valueField = 'value',
@@ -72,6 +74,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     // renderer,
     request,
     middleWare = noop,
+    afterLoad,
     paging = true,
     props,
   } = config;
@@ -80,8 +83,8 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     if (item) {
       const result = optionRenderer(item);
       return maxTagTextLength
-      && typeof result === 'string'
-      && (result as string).length > maxTagTextLength
+        && typeof result === 'string'
+        && (result as string).length > maxTagTextLength
         ? `${(result as string).slice(0, maxTagTextLength)}...`
         : result;
     }
@@ -94,13 +97,23 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     batchedUpdates(() => {
       if (paging) {
         const { list, hasNextPage } = res as { list: T[], hasNextPage: boolean };
+        if (afterLoad && firstRef.current) {
+          afterLoad(list);
+          firstRef.current = false;
+        }
         setData((d) => (page > 1 ? d.concat(list) : list));
         setPage(page);
         setCanLoadMore(hasNextPage);
       } else {
+        if (afterLoad && firstRef.current) {
+          afterLoad(res as T[]);
+          firstRef.current = false;
+        }
         setData(res as T[]);
       }
     });
+  // TODO: 更好的实现
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paging, request]);
   const searchData = useMemo(() => debounce((filter: string) => {
     loadData({ filter });

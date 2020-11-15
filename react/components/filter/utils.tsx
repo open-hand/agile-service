@@ -167,6 +167,7 @@ export function departFilter(filter: IFilter, fields: IFilterField[]) {
     text: [],
   };
   const systemFilter: { [key: string]: any } = {};
+  const otherFilter: { [key: string]: any } = {};
   Object.keys(filter).forEach((code) => {
     const field = find(fields, { code });
 
@@ -247,9 +248,13 @@ export function departFilter(filter: IFilter, fields: IFilterField[]) {
         }
         default: break;
       }
+    } else {
+      const value = filter[code];
+      otherFilter[code] = value;
     }
   });
   return {
+    otherFilter,
     systemFilter,
     customField,
   };

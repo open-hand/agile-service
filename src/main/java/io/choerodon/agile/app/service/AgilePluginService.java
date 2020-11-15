@@ -300,4 +300,23 @@ public interface AgilePluginService {
     List<SubFeatureVO> listFeature(Long organizationId, Long projectId);
 
     Map<String, Long> getFeatureMap(Long organizationId, Long projectId);
+
+    /**
+     * 删除子项目版本时，删除和项目群版本的关联关系
+     * @param projectId
+     * @param versionId
+     */
+    void deleteProgramVersionRel(Long projectId, Long versionId);
+
+    List<IssueDTO> selectEpicBySubProjectFeature(Long subProjectId);
+
+    void listStatusLinkageByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds, String applyType, List<StatusSettingVO> list);
+
+    /**
+     * 故事改变状态联动改变特性的状态
+     * @param projectId
+     * @param issueDTO
+     * @param applyType
+     */
+    void storyLinkageFeature(Long projectId, IssueDTO issueDTO, String applyType);
 }

@@ -1,5 +1,5 @@
 import { axios, stores, Choerodon } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
 import Api from './Api';
 
 const { AppState } = stores;
@@ -85,6 +85,8 @@ interface IExportSearch {
     sprint?: any,
     summary?: string,
     version?: any,
+    starBeacon?: boolean
+    userId?: string
   },
   searchArgs?: {
     createStartDate: string,
@@ -265,7 +267,7 @@ class IssueApi extends Api<IssueApi> {
     return axios({
       headers: { 'Content-Type': 'multipart/form-data' },
       method: 'post',
-      url: `${this.prefix}/excel/import`,
+      url: getApplyType() === 'program' ? `${this.prefix}/issues/import` : `${this.prefix}/excel/import`,
       params: {
         organizationId,
         userId,
@@ -311,6 +313,13 @@ class IssueApi extends Api<IssueApi> {
  */
   downloadTemplateForImport() {
     const organizationId = getOrganizationId();
+    if (getApplyType() === 'program') {
+      return axios({
+        method: 'get',
+        url: `${this.prefix}/issues/template`,
+        responseType: 'arraybuffer',
+      });
+    }
     return axios({
       method: 'get',
       url: `${this.prefix}/excel/download`,
@@ -434,6 +443,28 @@ class IssueApi extends Api<IssueApi> {
         param,
         page,
         size,
+      },
+    });
+  }
+
+  star(issueId: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/star_beacon/instance/${issueId}/star`,
+      data: {
+        type: 'issue',
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  unstar(issueId: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/star_beacon/instance/${issueId}/unstar`,
+      data: {
+        type: 'issue',
+        organizationId: getOrganizationId(),
       },
     });
   }

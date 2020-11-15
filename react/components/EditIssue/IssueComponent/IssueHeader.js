@@ -16,6 +16,7 @@ const IssueHeader = (props) => {
   const issue = store.getIssue;
   const {
     parentIssueId, relateIssueId, typeCode, parentIssueSummary, parentRelateSummary, parentIssueDescription, parentRelateDescription,
+    parentStarBeacon, relateStarBeacon,
   } = issue;
   return (
     <div className={`${prefixCls}-IssueHeader`}>
@@ -27,7 +28,13 @@ const IssueHeader = (props) => {
                 overlayClassName={`${prefixCls}-IssueHeader-top-popover`}
                 placement="leftTop"
                 title="父任务详情"
-                content={<IssueParentTip parentSummary={parentIssueSummary || parentRelateSummary} parentDescription={parentIssueDescription || parentRelateDescription} />}
+                content={(
+                  <IssueParentTip
+                    parentSummary={parentIssueSummary || parentRelateSummary}
+                    parentDescription={parentIssueDescription || parentRelateDescription}
+                    parentStarBeacon={parentStarBeacon || relateStarBeacon}
+                  />
+                )}
                 trigger="hover"
                 getPopupContainer={((triggerNode) => triggerNode.parentNode)}
               >

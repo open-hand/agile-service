@@ -244,6 +244,38 @@ public class IssueVO {
         this.sprintId = sprintId;
     }
 
+    private Boolean starBeacon;
+
+    private Boolean parentStarBeacon;
+
+    private Boolean relateStarBeacon;
+
+    private List<ProgramVersionFeatureRelVO> programVersionFeatureRelVOS;
+
+    public Boolean getParentStarBeacon() {
+        return parentStarBeacon;
+    }
+
+    public void setParentStarBeacon(Boolean parentStarBeacon) {
+        this.parentStarBeacon = parentStarBeacon;
+    }
+
+    public Boolean getRelateStarBeacon() {
+        return relateStarBeacon;
+    }
+
+    public void setRelateStarBeacon(Boolean relateStarBeacon) {
+        this.relateStarBeacon = relateStarBeacon;
+    }
+
+    public Boolean getStarBeacon() {
+        return starBeacon;
+    }
+
+    public void setStarBeacon(Boolean starBeacon) {
+        this.starBeacon = starBeacon;
+    }
+
     public String getParentRelateDescription() {
         return parentRelateDescription;
     }
@@ -815,5 +847,13 @@ public class IssueVO {
 
     public void setWsjf(WsjfVO wsjf) {
         this.wsjf = wsjf;
+    }
+
+    public List<ProgramVersionFeatureRelVO> getProgramVersionFeatureRelVOS() {
+        return programVersionFeatureRelVOS;
+    }
+
+    public void setProgramVersionFeatureRelVOS(List<ProgramVersionFeatureRelVO> programVersionFeatureRelVOS) {
+        this.programVersionFeatureRelVOS = programVersionFeatureRelVOS;
     }
 }

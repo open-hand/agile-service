@@ -327,3 +327,5 @@ export interface ISearchVO {
   quickFilterIds?: string[],
   contents?: string[],
 }
+
+export type IVersionStatusCode = 'version_planning' | 'released' | 'archived'
