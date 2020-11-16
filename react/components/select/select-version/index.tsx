@@ -12,15 +12,21 @@ interface Props extends Partial<SelectProps> {
   statusArr?: Array<string>
   valueField?: string
   afterLoad?: (versions: IVersion[]) => void
+  request?: Function
 }
 const SelectVersion: React.FC<Props> = forwardRef(({
-  projectId, valueField, dataRef = { current: null }, afterLoad, statusArr = [], ...otherProps
+  request, projectId, valueField, dataRef = { current: null }, afterLoad, statusArr = [], ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'version',
     textField: 'name',
     valueField: valueField || 'name',
-    request: () => versionApi.project(projectId || getProjectId()).loadNamesByStatus(statusArr),
+    request: () => {
+      if (request) {
+        return request();
+      }
+      return versionApi.project(projectId || getProjectId()).loadNamesByStatus(statusArr);
+    },
     middleWare: (versions: IVersion[]) => {
       if (dataRef) {
         Object.assign(dataRef, {
