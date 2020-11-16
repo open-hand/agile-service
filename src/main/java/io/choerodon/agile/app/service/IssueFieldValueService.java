@@ -21,7 +21,6 @@ public interface IssueFieldValueService {
                            BatchUpdateFieldsValueVo batchUpdateFieldsValueVo,
                            String applyType,
                            ServletRequestAttributes requestAttributes,
-                           String encryptType,
-                           boolean sendMsg);
+                           String encryptType);
 
 }

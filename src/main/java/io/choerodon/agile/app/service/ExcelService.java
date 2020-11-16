@@ -22,7 +22,7 @@ public interface ExcelService {
 
     void download(Long projectId, Long organizationId, HttpServletResponse response, ExcelTemplateVO excelTemplateVO);
 
-    void batchImport(Long projectId, Long organizationId, Long userId, Workbook workbook, ServletRequestAttributes requestAttributes);
+    void batchImport(Long projectId, Long organizationId, Long userId, Workbook workbook);
 
     void cancelImport(Long projectId, Long id, Long objectVersionNumber);
 

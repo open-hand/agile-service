@@ -8,7 +8,6 @@ import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
 import io.choerodon.agile.app.service.FieldValueService;
 import io.choerodon.agile.app.service.IssueFieldValueService;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
-//import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -47,8 +46,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
                                   BatchUpdateFieldsValueVo batchUpdateFieldsValueVo,
                                   String applyType,
                                   ServletRequestAttributes requestAttributes,
-                                  String encryptType,
-                                  boolean sendMsg) {
+                                  String encryptType) {
         EncryptContext.setEncryptType(encryptType);
         RequestContextHolder.setRequestAttributes(requestAttributes);
         Long userId = DetailsHelper.getUserDetails().getUserId();
@@ -59,9 +57,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             batchUpdateFieldStatusVO.setKey(messageCode);
             batchUpdateFieldStatusVO.setUserId(userId);
             batchUpdateFieldStatusVO.setProcess(0.0);
-            if (sendMsg) {
-                messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
-            }
+            messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             if (Boolean.FALSE.equals(EnumUtil.contain(ObjectSchemeCode.class, schemeCode))) {
                 throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
             }
@@ -77,12 +73,12 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             batchUpdateFieldStatusVO.setIncrementalValue(incrementalValue);
             //修改issue预定义字段值
             if (!CollectionUtils.isEmpty(batchUpdateFieldsValueVo.getPredefinedFields())) {
-                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO,applyType, sendMsg);
+                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO,applyType);
             }
 
             // 批量修改issue自定义字段值
             if (!CollectionUtils.isEmpty(customFields)) {
-                fieldValueService.handlerCustomFields(projectId, customFields, schemeCode, issueIds,batchUpdateFieldStatusVO, sendMsg);
+                fieldValueService.handlerCustomFields(projectId, customFields, schemeCode, issueIds,batchUpdateFieldStatusVO, true);
             }
              //发送websocket
             batchUpdateFieldStatusVO.setStatus("success");
@@ -93,9 +89,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             throw new CommonException("update field failed, exception: {}", e);
         }
         finally {
-            if (sendMsg) {
-                messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
-            }
+            messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
         }
     }
 }

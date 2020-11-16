@@ -179,7 +179,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private IssueFieldValueService issueFieldValueService;
+    private FieldValueService fieldValueService;
 
     private static final String[] FIELDS_NAMES;
 
@@ -1276,8 +1276,7 @@ public class ExcelServiceImpl implements ExcelService {
     public void batchImport(Long projectId,
                             Long organizationId,
                             Long userId,
-                            Workbook workbook,
-                            ServletRequestAttributes requestAttributes) {
+                            Workbook workbook) {
         FileOperationHistoryDTO history = initFileOperationHistory(projectId, userId, DOING, UPLOAD_FILE);
         validateWorkbook(workbook, history);
         List<String> headerNames = resolveCodeFromHeader(workbook, history);
@@ -1332,7 +1331,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Long sprintId = parent.getSprintId();
                     Long epicId = parent.getEpicId();
                     IssueVO result = stateMachineClientService.createIssue(parent, APPLY_TYPE_AGILE);
-                    insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId, requestAttributes);
+                    insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
 
                     result.setComponentIssueRelVOList(components);
                     result.setSprintId(sprintId);
@@ -1360,7 +1359,7 @@ public class ExcelServiceImpl implements ExcelService {
                     sons.forEach(s -> {
                         IssueVO returnValue = stateMachineClientService.createIssue(s, APPLY_TYPE_AGILE);
                         sonResult.add(returnValue);
-                        insertCustomFields(returnValue.getIssueId(), s.getCustomFields(), projectId, requestAttributes);
+                        insertCustomFields(returnValue.getIssueId(), s.getCustomFields(), projectId);
                     });
 
                     importedIssueIds.add(result.getIssueId());
@@ -1385,7 +1384,7 @@ public class ExcelServiceImpl implements ExcelService {
                     continue;
                 }
                 IssueVO result = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
-                insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId, requestAttributes);
+                insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId);
 
                 importedIssueIds.add(result.getIssueId());
                 progress.successCountIncrease();
@@ -1408,13 +1407,12 @@ public class ExcelServiceImpl implements ExcelService {
 
     private void insertCustomFields(Long issueId,
                                     List<PageFieldViewUpdateVO> customFields,
-                                    Long projectId,
-                                    ServletRequestAttributes requestAttributes) {
+                                    Long projectId) {
         BatchUpdateFieldsValueVo batchUpdateFieldsValueVo = new BatchUpdateFieldsValueVo();
         batchUpdateFieldsValueVo.setCustomFields(customFields);
         batchUpdateFieldsValueVo.setIssueIds(Arrays.asList(issueId));
         batchUpdateFieldsValueVo.setPredefinedFields(new JSONObject());
-        issueFieldValueService.asyncUpdateFields(projectId,"agile_issue",batchUpdateFieldsValueVo,"agile", requestAttributes, EncryptType.DO_NOTHING.name(), false);
+        fieldValueService.handlerCustomFields(projectId, customFields, "agile_issue", batchUpdateFieldsValueVo.getIssueIds(), null, false);
     }
 
     private void generateErrorDataExcelAndUpload(Map<Integer, List<Integer>> errorRowColMap,

@@ -105,5 +105,5 @@ public interface FieldValueService {
      * @param issueIds
      * @param predefinedFields
      */
-    void handlerPredefinedFields(Long projectId, List<Long> issueIds, JSONObject predefinedFields,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,String applyType, boolean sendMsg);
+    void handlerPredefinedFields(Long projectId, List<Long> issueIds, JSONObject predefinedFields,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,String applyType);
 }

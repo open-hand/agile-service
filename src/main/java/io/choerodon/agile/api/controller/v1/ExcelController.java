@@ -65,7 +65,7 @@ public class ExcelController {
                                       @ApiParam(value = "导入文件", required = true)
                                       @RequestParam("file") MultipartFile file) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        excelService.batchImport(projectId, organizationId, userId, ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file), (ServletRequestAttributes)RequestContextHolder.currentRequestAttributes());
+        excelService.batchImport(projectId, organizationId, userId, ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file));
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
