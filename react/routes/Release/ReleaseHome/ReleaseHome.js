@@ -18,6 +18,7 @@ import EditRelease from '../ReleaseComponent/EditRelease';
 import PublicRelease from '../ReleaseComponent/PublicRelease';
 import TableDropMenu from '../../../common/TableDropMenu';
 import DeleteReleaseWithIssues from '../ReleaseComponent/DeleteReleaseWithIssues';
+import { openLinkVersionModal } from '../ReleaseComponent/link-program-vesion';
 
 const { AppState } = stores;
 const COLOR_MAP = {
@@ -137,6 +138,9 @@ class ReleaseHome extends Component {
         });
       }
     }
+    if (key === '6') {
+      openLinkVersionModal(record.versionId, this.props.program.id, record.programVersionInfoVOS ? record.programVersionInfoVOS[0] : undefined, () => this.refresh(pagination));
+    }
   }
 
   handleChangeTable(pagination, filters, sorter, barFilters) {
@@ -152,7 +156,7 @@ class ReleaseHome extends Component {
     ReleaseStore.setFilters({
       advancedSearchArgs: {
         statusCodes: filters
-        && filters.key && filters.key.length > 0 ? filters.key : [],
+          && filters.key && filters.key.length > 0 ? filters.key : [],
       },
       searchArgs,
       contents: barFilters,
@@ -191,11 +195,21 @@ class ReleaseHome extends Component {
               </Menu.Item>
             </Permission>
           )}
+
         <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus']} key="3">
           <Menu.Item key="3">
             <Tooltip placement="top" title={record.statusCode === 'archived' ? '撤销归档' : '归档'}>
               <span>
                 {record.statusCode === 'archived' ? '撤销归档' : '归档'}
+              </span>
+            </Tooltip>
+          </Menu.Item>
+        </Permission>
+        <Permission service={['choerodon.code.project.cooperation.work-list.ps.version.link.program.version']} key="6">
+          <Menu.Item key="6">
+            <Tooltip placement="top" title="关联项目群版本">
+              <span>
+                关联项目群版本
               </span>
             </Tooltip>
           </Menu.Item>
@@ -231,6 +245,17 @@ class ReleaseHome extends Component {
     );
   };
 
+  renderProgramVersion({ text }) {
+    if (text && Array.isArray(text)) {
+      const versionTags = [
+        <Tooltip title={text[0].name}><div className="c7n-release-progress-version">{text[0].name}</div></Tooltip>,
+      ];
+      text.length > 1 && versionTags.push(<Tooltip title={text.slice(1).map((item) => item.name).join(',')}><div className="c7n-release-progress-version">...</div></Tooltip>);
+      return versionTags;
+    }
+    return '';
+  }
+
   render() {
     const {
       loading,
@@ -242,6 +267,7 @@ class ReleaseHome extends Component {
       publicVersion,
       release,
     } = this.state;
+    const { isInProgram } = this.props;
     const deleteReleaseVisible = ReleaseStore.getDeleteReleaseVisible;
     const versionData = ReleaseStore.getVersionList.length > 0 ? ReleaseStore.getVersionList : [];
     const versionColumn = [{
@@ -318,6 +344,13 @@ class ReleaseHome extends Component {
       ),
       filters: [],
     }];
+    isInProgram && versionColumn.splice(1, 0, {
+      title: '关联项目群',
+      dataIndex: 'programVersionInfoVOS',
+      key: 'programVersionInfoVOS',
+      width: 180,
+      render: (text, record) => this.renderProgramVersion({ text }),
+    });
     return (
       <Page
         service={[

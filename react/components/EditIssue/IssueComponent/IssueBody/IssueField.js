@@ -11,6 +11,7 @@ import EditIssueContext from '../../stores';
 import FieldPro from './Field/FieldPro';
 import FieldStartTime from './Field/FieldStartTime';
 import FieldEndTime from './Field/FieldEndTime';
+import FieldProgramVersion from './Field/FieldProgramVersion';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -87,6 +88,8 @@ const IssueField = observer((props) => {
         return typeCode !== 'issue_epic' && (
           <FieldEndTime {...props} field={field} />
         );
+      case 'programVersion':
+        return <FieldProgramVersion {...props} field={field} />;
       default:
         return renderNormalField(field);
     }
@@ -102,6 +105,7 @@ const IssueField = observer((props) => {
   } else if (typeCode === 'feature') {
     // fields.splice(4, 0, { fieldCode: 'teams', fieldName: '负责团队和冲刺' });
     // fields.splice(4, 0, { fieldCode: 'teamSprint', fieldName: '团队Sprint' });
+    fields.splice(4, 0, { fieldCode: 'programVersion', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {
     fields = fields.slice(0, 4);
