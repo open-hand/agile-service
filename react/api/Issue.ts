@@ -311,21 +311,23 @@ class IssueApi extends Api<IssueApi> {
  * @export
  * @returns
  */
-  downloadTemplateForImport() {
+  downloadTemplateForImport(data: { systemFields: string[], customFields: string[]}) {
     const organizationId = getOrganizationId();
     if (getApplyType() === 'program') {
       return axios({
-        method: 'get',
+        method: 'post',
         url: `${this.prefix}/issues/template`,
         responseType: 'arraybuffer',
+        data,
       });
     }
     return axios({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/excel/download`,
       params: {
         organizationId,
       },
+      data,
       responseType: 'arraybuffer',
     });
   }
