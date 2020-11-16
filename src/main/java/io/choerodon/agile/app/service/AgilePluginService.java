@@ -323,7 +323,7 @@ public interface AgilePluginService {
     /**
      * 设置特性类型和团队信息
      * @param issues
-     * @param projects
+     * @param organizationId
      */
-    void setFeatureTypeAndFeatureTeams(List<IssueListFieldKVVO> issues,  List<ProjectVO> projects);
+    void setFeatureTypeAndFeatureTeams(List<IssueListFieldKVVO> issues,  Long organizationId);
 }

@@ -2637,7 +2637,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         });
         if (agilePluginService != null) {
-            agilePluginService.setFeatureTypeAndFeatureTeams(list, projects);
+            agilePluginService.setFeatureTypeAndFeatureTeams(list, organizationId);
         }
         if (!userIds.isEmpty()) {
             setAssignee(list, userIds);
