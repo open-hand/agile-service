@@ -326,4 +326,12 @@ public interface AgilePluginService {
      * @param organizationId
      */
     void setFeatureTypeAndFeatureTeams(List<IssueListFieldKVVO> issues,  Long organizationId);
+
+    /**
+     * 项目群子项目版本列表要返回关联的项目群版本信息
+     * @param productVersionPageVOS
+     * @param projectId
+     * @param content
+     */
+    void settingProgramVersions(List<ProductVersionPageVO> productVersionPageVOS, Long projectId, List<Long> content);
 }

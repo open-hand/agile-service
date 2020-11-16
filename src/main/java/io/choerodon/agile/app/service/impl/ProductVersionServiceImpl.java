@@ -195,8 +195,14 @@ public class ProductVersionServiceImpl implements ProductVersionService {
                 queryVersionIdsByProjectId(projectId, searchVO.getSearchArgs(),
                         searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
         if ((versionIds.getContent() != null) && !versionIds.getContent().isEmpty()) {
-            return PageUtil.buildPageInfoWithPageInfoList(versionIds, productVersionPageAssembler.toTargetList(productVersionMapper.
-                    queryVersionByIds(projectId, versionIds.getContent()), ProductVersionPageVO.class));
+            List<Long> content = versionIds.getContent();
+            List<ProductVersionPageVO> productVersionPageVOS = productVersionPageAssembler.toTargetList(productVersionMapper.
+                    queryVersionByIds(projectId, content), ProductVersionPageVO.class);
+            AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+            if(agilePluginService != null){
+                agilePluginService.settingProgramVersions(productVersionPageVOS,projectId,content);
+            }
+            return PageUtil.buildPageInfoWithPageInfoList(versionIds, productVersionPageVOS);
         } else {
             return new Page<>();
         }

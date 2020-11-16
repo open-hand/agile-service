@@ -1,10 +1,12 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.choerodon.agile.api.vo.business.ProgramVersionInfoVO;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/14.
@@ -45,6 +47,9 @@ public class ProductVersionPageVO {
 
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
+
+    @ApiModelProperty(value = "子项目版本关联的项目群版本")
+    private List<ProgramVersionInfoVO> programVersionInfoVOS;
 
     public Long getVersionId() {
         return versionId;
@@ -132,5 +137,13 @@ public class ProductVersionPageVO {
 
     public void setSequence(Integer sequence) {
         this.sequence = sequence;
+    }
+
+    public List<ProgramVersionInfoVO> getProgramVersionInfoVOS() {
+        return programVersionInfoVOS;
+    }
+
+    public void setProgramVersionInfoVOS(List<ProgramVersionInfoVO> programVersionInfoVOS) {
+        this.programVersionInfoVOS = programVersionInfoVOS;
     }
 }
