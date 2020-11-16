@@ -11,7 +11,7 @@ import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { useIssueTypes } from '@/hooks';
 import { IIssueType } from '@/common/types';
 import SelectStatus from '@/components/select/select-status';
-import { statusTransformApi, commonApi } from '@/api';
+import { statusTransformApi, commonApi, issueTypeApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import Loading from '@/components/Loading';
 import SelectTeam from '@/components/select/select-team';
@@ -60,11 +60,6 @@ const FeatureLinkage = ({
 
   const modalDataSet = useMemo(() => new DataSet({
     autoCreate: true,
-    // events: {
-    //   update: () => {
-
-    //   },
-    // }
   }), []);
 
   modalDataSetRef.current = modalDataSet;
@@ -90,12 +85,12 @@ const FeatureLinkage = ({
 
   useEffect(() => {
     const { current } = modalDataSet;
-    if (selectedType) { // 有selectedTypeCode的时候再请求，防止请求两边，浪费一次没有意义的请求
-      setLoading(true);
-      statusTransformApi.getLinkage(selectedType, record.get('id')).then((res: IFeatureLinkageSetting) => {
-        setLoading(false);
-        const { linkages } = res;
-        batchedUpdates(() => {
+    setLoading(true);
+    statusTransformApi.getFeatureLinkage(selectedType, record.get('id')).then((res: IFeatureLinkageSetting) => {
+      setLoading(false);
+      const { linkages } = res;
+      batchedUpdates(() => {
+        if (linkages?.length) {
           const initFields = Field.init(new Array(linkages.length).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             addFieldLinkage(item.key, i);
@@ -105,15 +100,18 @@ const FeatureLinkage = ({
               projectId, statusId,
             } = item;
             const { key } = initFields[i];
-            current?.set(`${key}-code`, projectId);
-            current?.set(`${key}-operation`, statusId);
+              current?.set(`${key}-project`, projectId);
+              current?.set(`${key}-status`, statusId);
           });
-          setLoading(false);
-        });
-      }).catch(() => {
+        } else {
+          const newKey = Field.add();
+          addFieldLinkage(newKey, 0);
+        }
         setLoading(false);
       });
-    }
+    }).catch(() => {
+      setLoading(false);
+    });
   }, [Field, addFieldLinkage, modalDataSet, record, selectedType]);
 
   useEffect(() => {
@@ -129,11 +127,12 @@ const FeatureLinkage = ({
           updateData.push({
             projectId: current?.get(`${key}-project`),
             statusId: current?.get(`${key}-status`),
+            issueTypeId: selectedType,
           });
         });
         console.log('updateData：');
         console.log(updateData);
-        await statusTransformApi.updateLinkage(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+        await statusTransformApi.updateFeatureLinkage(record.get('id'), updateData);
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
@@ -204,15 +203,25 @@ const FeatureLinkage = ({
                 </Row>
                 <Row key={`${key}-status`} gutter={20}>
                   <Col span={22}>
-                    <SelectStatus
-                      disabled={!modalDataSet?.current?.get(`${key}-project`)}
-                      name={`${key}-status`}
-                      placeholder="指定状态"
-                      issueTypeCode="story"
-                      projectId={modalDataSet?.current?.get(`${key}-project`)}
-                      applyType="agile"
-                      clearButton={false}
-                    />
+                    {
+                      !modalDataSet?.current?.get(`${key}-project`) ? (
+                        <Select name={`${key}-status`} placeholder="指定状态" disabled />
+                      ) : (
+                        <SelectStatus
+                          name={`${key}-status`}
+                          placeholder="指定状态"
+                          clearButton={false}
+                          request={async () => {
+                            const projectIssueTypes = await issueTypeApi.loadAllWithStateMachineId('agile', modalDataSet?.current?.get(`${key}-project`));
+                            const issueTypeId = (projectIssueTypes || []).find((item) => item.typeCode === 'story')?.id;
+                            if (issueTypeId) {
+                              return statusTransformApi.getFeatureLinkageStatus({ issueTypeId, projectId: modalDataSet?.current?.get(`${key}-project`) });
+                            }
+                            return Promise.resolve([]);
+                          }}
+                        />
+                      )
+                    }
                   </Col>
                 </Row>
               </div>
