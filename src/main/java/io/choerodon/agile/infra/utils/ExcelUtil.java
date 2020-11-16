@@ -2,7 +2,7 @@ package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
 import io.choerodon.agile.infra.dto.PredefinedDTO;
-import io.choerodon.agile.infra.enums.ExcelImportTemplateColumn;
+import io.choerodon.agile.infra.enums.ExcelImportTemplate;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -168,11 +168,11 @@ public class ExcelUtil {
     }
 
     private static void initExample(Workbook wb, Sheet sheet, boolean withFeature) {
-        sheet.setColumnWidth(ExcelImportTemplateColumn.Issue.SUMMARY_COL, 8000);
-        sheet.setColumnWidth(ExcelImportTemplateColumn.Issue.SUB_TASK_COL, 6000);
-        sheet.setColumnWidth(ExcelImportTemplateColumn.Issue.DESCRIPTION_COL, 8500);
-        sheet.setColumnWidth(ExcelImportTemplateColumn.Issue.PRIORITY_COL, 6000);
-        sheet.setColumnWidth(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL, 9000);
+        sheet.setColumnWidth(ExcelImportTemplate.Issue.SUMMARY_COL, 8000);
+        sheet.setColumnWidth(ExcelImportTemplate.Issue.SUB_TASK_COL, 6000);
+        sheet.setColumnWidth(ExcelImportTemplate.Issue.DESCRIPTION_COL, 8500);
+        sheet.setColumnWidth(ExcelImportTemplate.Issue.PRIORITY_COL, 6000);
+        sheet.setColumnWidth(ExcelImportTemplate.Issue.EPIC_NAME_COL, 9000);
 
         Row row = sheet.createRow(18);
         row.createCell(0).setCellValue("示例：");
@@ -280,10 +280,10 @@ public class ExcelUtil {
         Sheet resultSheet = workbook.createSheet(sheetName);
         CellStyle style = CatalogExcelUtil.getHeadStyle(workbook);
         Map<Integer,Integer> widthMap = new HashMap<>();
-        widthMap.put(ExcelImportTemplateColumn.Issue.EPIC_COL, 8000);
-        widthMap.put(ExcelImportTemplateColumn.Issue.SUB_TASK_COL, 8000);
-        widthMap.put(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL, 8000);
-        generateHeaders(resultSheet, style, Arrays.asList(fieldsName), widthMap);
+        widthMap.put(ExcelImportTemplate.Issue.EPIC_COL, 8000);
+        widthMap.put(ExcelImportTemplate.Issue.SUB_TASK_COL, 8000);
+        widthMap.put(ExcelImportTemplate.Issue.EPIC_NAME_COL, 8000);
+        generateHeaders(resultSheet, style, Arrays.asList(fieldsName));
 
         List<PredefinedDTO> predefinedList = new ArrayList<>();
         predefinedList.add(
@@ -291,70 +291,70 @@ public class ExcelUtil {
                         priorityList,
                         1,
                         500,
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getIndex()
+                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getName(),
+                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getIndex()
                 ));
         predefinedList.add(
                 new PredefinedDTO(
                         issueTypeList,
                         1,
                         500,
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getIndex()
+                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getName(),
+                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getIndex()
                 ));
         predefinedList.add(
                 new PredefinedDTO(
                         versionList,
                         1,
                         500,
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getIndex()
+                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getName(),
+                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getIndex()
                 ));
         predefinedList.add(
                 new PredefinedDTO(
                         componentList,
                         1,
                         500,
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getIndex()
+                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getName(),
+                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getIndex()
                 ));
         predefinedList.add(
                 new PredefinedDTO(
                         sprintList,
                         1,
                         500,
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getIndex()
+                        ExcelImportTemplate.Issue.SPRINT_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.SPRINT_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.SPRINT_SHEET.getName(),
+                        ExcelImportTemplate.Issue.SPRINT_SHEET.getIndex()
                 ));
         predefinedList.add(
                 new PredefinedDTO(
                         users,
                         1,
                         500,
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getIndex()
+                        ExcelImportTemplate.Issue.MANAGER_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.MANAGER_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.MANAGER_SHEET.getName(),
+                        ExcelImportTemplate.Issue.MANAGER_SHEET.getIndex()
                 ));
         predefinedList.add(
                 new PredefinedDTO(
                         users,
                         1,
                         500,
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getIndex()
+                        ExcelImportTemplate.Issue.REPORTER_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.REPORTER_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.REPORTER_SHEET.getName(),
+                        ExcelImportTemplate.Issue.REPORTER_SHEET.getIndex()
                 ));
         predefinedList.add(theSecondColumnPredefined);
 
@@ -400,20 +400,17 @@ public class ExcelUtil {
         return workbook;
     }
 
-    public static void generateHeaders(Sheet sheet, CellStyle style, List<String> headers,
-                                       Map<Integer, Integer> widthMap) {
+    public static void generateHeaders(Sheet sheet, CellStyle style, List<String> headers) {
         Row row = sheet.createRow(0);
-        int columnNum = headers.size();
         int defaultWidth = 4000;
-        for (int i = 0; i < columnNum; i++) {
-            if (!ObjectUtils.isEmpty(widthMap)
-                    && !ObjectUtils.isEmpty(widthMap.get(i))) {
-                sheet.setColumnWidth(i, widthMap.get(i));
-            } else {
-                sheet.setColumnWidth(i, defaultWidth);
-            }
-        }
         for (int i = 0; i < headers.size(); i++) {
+            String value = headers.get(i);
+            Integer width = ExcelImportTemplate.Header.getWidthByValue(value);
+            if (width == null) {
+                sheet.setColumnWidth(i, defaultWidth);
+            } else {
+                sheet.setColumnWidth(i, width);
+            }
             CatalogExcelUtil.initCell(row.createCell(i), style, headers.get(i));
         }
     }
@@ -642,7 +639,7 @@ public class ExcelUtil {
 
     }
 
-    protected static String substring(String str) {
+    public static String substring(String str) {
         if (StringUtils.hasText(str) && str.length() > CELL_MAX_LENGTH) {
             return str.substring(0, CELL_MAX_LENGTH);
         } else {

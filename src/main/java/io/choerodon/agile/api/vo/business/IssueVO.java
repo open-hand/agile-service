@@ -234,6 +234,16 @@ public class IssueVO {
 
     private Date estimatedEndTime;
 
+    private Long sprintId;
+
+    public Long getSprintId() {
+        return sprintId;
+    }
+
+    public void setSprintId(Long sprintId) {
+        this.sprintId = sprintId;
+    }
+
     private Boolean starBeacon;
 
     private Boolean parentStarBeacon;

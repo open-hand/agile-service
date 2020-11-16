@@ -218,7 +218,11 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     }
 
     @Override
-    public void handlerPredefinedFields(Long projectId, List<Long> issueIds, JSONObject predefinedFields,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,String appleType) {
+    public void handlerPredefinedFields(Long projectId,
+                                        List<Long> issueIds,
+                                        JSONObject predefinedFields,
+                                        BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
+                                        String appleType) {
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds);
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
@@ -291,7 +295,12 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     }
 
     @Override
-    public void handlerCustomFields(Long projectId, List<PageFieldViewUpdateVO> customFields, String schemeCode, List<Long> issueIds,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
+    public void handlerCustomFields(Long projectId,
+                                    List<PageFieldViewUpdateVO> customFields,
+                                    String schemeCode,
+                                    List<Long> issueIds,
+                                    BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
+                                    boolean sendMsg) {
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds);
         if (CollectionUtils.isEmpty(customFields)) {
             throw new CommonException("error.customFields.null");
@@ -304,8 +313,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             if (!CollectionUtils.isEmpty(needAddIssueIds)) {
                 batchHandlerCustomFields(projectId, v, schemeCode, needAddIssueIds);
             }
-            batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-            messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            if (sendMsg) {
+                batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
+                messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            }
         });
     }
 

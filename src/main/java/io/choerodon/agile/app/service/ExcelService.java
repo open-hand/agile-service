@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.api.vo.ExcelTemplateVO;
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
@@ -19,7 +20,7 @@ import java.util.Map;
  */
 public interface ExcelService {
 
-    void download(Long projectId, Long organizationId, HttpServletRequest request, HttpServletResponse response);
+    void download(Long projectId, Long organizationId, HttpServletResponse response, ExcelTemplateVO excelTemplateVO);
 
     void batchImport(Long projectId, Long organizationId, Long userId, Workbook workbook);
 

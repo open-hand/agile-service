@@ -97,7 +97,7 @@ public interface FieldValueService {
      * @param schemeCode
      * @param issueIds
      */
-    void handlerCustomFields(Long projectId, List<PageFieldViewUpdateVO> customFields, String schemeCode, List<Long> issueIds,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO);
+    void handlerCustomFields(Long projectId, List<PageFieldViewUpdateVO> customFields, String schemeCode, List<Long> issueIds,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO, boolean sendMsg);
 
     /**
      * 批量处理预定义字段值

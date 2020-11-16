@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.vo.ExcelTemplateVO;
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.app.service.ExcelService;
@@ -28,6 +29,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -43,14 +45,14 @@ public class ExcelController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("下载导入模版")
-    @GetMapping(value = "/download")
+    @PostMapping(value = "/download")
     public void download(@ApiParam(value = "项目id", required = true)
                          @PathVariable(name = "project_id") Long projectId,
-                             @ApiParam(value = "组织id", required = true)
+                         @ApiParam(value = "组织id", required = true)
                          @RequestParam Long organizationId,
-                             HttpServletRequest request,
-                             HttpServletResponse response) {
-        excelService.download(projectId, organizationId, request, response);
+                         HttpServletResponse response,
+                         @RequestBody ExcelTemplateVO excelTemplateVO) {
+        excelService.download(projectId, organizationId, response, excelTemplateVO);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

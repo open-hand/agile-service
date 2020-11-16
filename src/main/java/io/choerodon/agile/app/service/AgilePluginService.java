@@ -297,6 +297,8 @@ public interface AgilePluginService {
      */
     PredefinedDTO getFeaturePredefined(Long organizationId, Long projectId);
 
+    List<SubFeatureVO> listFeature(Long organizationId, Long projectId);
+
     Map<String, Long> getFeatureMap(Long organizationId, Long projectId);
 
     /**

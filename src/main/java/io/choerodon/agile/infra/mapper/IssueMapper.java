@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.mapper;
 import io.choerodon.agile.api.vo.IssueIdSprintIdVO;
 import io.choerodon.agile.api.vo.IssueOverviewVO;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -541,4 +542,14 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                        @Param("param") String param);
 
     List<IssueDTO> listMyStarIssuesByProjectIdsAndUserId(List<Long> projectIds, Long userId);
+
+    /**
+     * 查询项目下未完成的issue，包含story, task和bug(不包含子缺陷)
+     * @param projectId
+     * @return
+     */
+    List<IssueVO> listUndoneAvailableParents(@Param("projectId") Long projectId);
+
+    IssueVO selectByIssueNum(@Param("projectId") Long projectId,
+                                   @Param("issueNum") String issueNum);
 }
