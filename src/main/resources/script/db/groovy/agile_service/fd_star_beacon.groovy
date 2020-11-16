@@ -29,4 +29,20 @@ databaseChangeLog(logicalFilePath: 'fd_star_beacon.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(id: '2020-11-16-fd-star-beacon-add-index', author: 'huaxin.deng@hand-china.com') {
+        createIndex(indexName: "idx_type", tableName: "fd_star_beacon") {
+            column(name: "type")
+        }
+        createIndex(indexName: "idx_instance_id", tableName: "fd_star_beacon") {
+            column(name: "instance_id")
+        }
+        createIndex(indexName: "idx_project_id", tableName: "fd_star_beacon") {
+            column(name: "project_id")
+        }
+        createIndex(indexName: "idx_user_id", tableName: "fd_star_beacon") {
+            column(name: "user_id")
+        }
+    }
+
 }
