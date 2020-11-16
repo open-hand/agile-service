@@ -64,7 +64,12 @@ class ImportIssue extends Component {
   };
 
   exportExcel = () => {
-    issueApi.downloadTemplateForImport().then((excel) => {
+    const importFieldsData = { systemFields: [], customFields: [] };
+    const allFields = this.importFieldsRef.current?.allFields || [];
+    const fields = this.importFieldsRef.current?.fields || [];
+    importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system));
+    importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system));
+    issueApi.downloadTemplateForImport(importFieldsData).then((excel) => {
       const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const fileName = '问题导入模板.xlsx';
       FileSaver.saveAs(blob, fileName);
@@ -82,9 +87,6 @@ class ImportIssue extends Component {
   };
 
   upload = (file) => {
-    console.log('导入的字段：');
-    console.log(this.importFieldsRef.current.fields);
-
     if (!file) {
       Choerodon.prompt('请选择文件');
       return;
