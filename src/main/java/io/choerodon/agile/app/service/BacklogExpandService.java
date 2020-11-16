@@ -82,8 +82,9 @@ public interface BacklogExpandService {
      * @param programId
      * @param organizationId
      * @param programVersionId
+     * @param targetProgramVersion
      */
-    void deleteVersionBacklogRelByProgramVersionId(Long programId,Long organizationId,Long programVersionId);
+    void deleteVersionBacklogRelByProgramVersionId(Long programId,Long organizationId,Long programVersionId, Long targetProgramVersion);
 
     /**
      * 发布项目群版本时,将关联的需求置为已发布
