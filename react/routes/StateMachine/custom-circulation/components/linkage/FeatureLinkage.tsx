@@ -6,29 +6,23 @@ import {
 } from 'choerodon-ui/pro';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import { observer } from 'mobx-react-lite';
-import { find, includes } from 'lodash';
+import { includes } from 'lodash';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-import { useIssueTypes } from '@/hooks';
-import { IIssueType } from '@/common/types';
 import SelectStatus from '@/components/select/select-status';
-import { statusTransformApi, commonApi, issueTypeApi } from '@/api';
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import {
+  statusTransformApi, commonApi, issueTypeApi, IFeatureLinkage,
+} from '@/api';
 import Loading from '@/components/Loading';
-import SelectTeam from '@/components/select/select-team';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import styles from './index.less';
 
-interface IFeatureLinkageSettingItem {
-  projectId: string
-  statusId: string
-}
-
 interface IFeatureLinkageSetting {
   id: string
   issueTypeId: string
-  linkages: IFeatureLinkageSettingItem[]
+  projectId: string
+  statusId: string
 }
 
 interface IFieldK {
@@ -46,7 +40,6 @@ const FeatureLinkage = ({
 // @ts-ignore
   modal, record, selectedType, customCirculationDataSet,
 }) => {
-  const [issueTypes] = useIssueTypes();
   const [loading, setLoading] = useState(false);
   const [fields, Field] = useFields();
   const [subProjects, setSubProjects] = useState<ISubProject[]>([]);
@@ -86,16 +79,14 @@ const FeatureLinkage = ({
   useEffect(() => {
     const { current } = modalDataSet;
     setLoading(true);
-    statusTransformApi.getFeatureLinkage(selectedType, record.get('id')).then((res: IFeatureLinkageSetting) => {
-      setLoading(false);
-      const { linkages } = res;
+    statusTransformApi.getFeatureLinkage(record.get('id'), 'feature').then((linkages: IFeatureLinkageSetting[]) => {
       batchedUpdates(() => {
         if (linkages?.length) {
           const initFields = Field.init(new Array(linkages.length).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             addFieldLinkage(item.key, i);
           });
-          linkages.forEach((item: IFeatureLinkageSettingItem, i: number) => {
+          linkages.forEach((item, i: number) => {
             const {
               projectId, statusId,
             } = item;
@@ -116,12 +107,9 @@ const FeatureLinkage = ({
 
   useEffect(() => {
     const handleOk = async () => {
-      console.log('validate, data');
-      console.log(await modalDataSet.validate(), modalDataSet.current);
       if (await modalDataSet.validate()) {
         const current = modalDataSet?.current;
-        // @ts-ignore
-        const updateData: any[] = [];
+        const updateData: IFeatureLinkage[] = [];
         fields.forEach((f: IFieldK) => {
           const { key } = f;
           updateData.push({
@@ -130,8 +118,6 @@ const FeatureLinkage = ({
             issueTypeId: selectedType,
           });
         });
-        console.log('updateData：');
-        console.log(updateData);
         await statusTransformApi.updateFeatureLinkage(record.get('id'), updateData);
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
