@@ -38,6 +38,16 @@ public class ExcelColumnVO {
 
     private Map<String, IssueTypeVO> issueTypeMap;
 
+    private PageFieldViewUpdateVO customFieldDetail;
+
+    public PageFieldViewUpdateVO getCustomFieldDetail() {
+        return customFieldDetail;
+    }
+
+    public void setCustomFieldDetail(PageFieldViewUpdateVO customFieldDetail) {
+        this.customFieldDetail = customFieldDetail;
+    }
+
     public Map<String, IssueTypeVO> getIssueTypeMap() {
         return issueTypeMap;
     }

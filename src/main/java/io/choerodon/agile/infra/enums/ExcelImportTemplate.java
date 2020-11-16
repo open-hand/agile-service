@@ -14,6 +14,61 @@ import java.util.stream.Collectors;
  */
 public class ExcelImportTemplate {
 
+    public static class Progress {
+
+        private Long failCount;
+
+        private Long successCount;
+
+        private Integer processNum;
+
+        public Progress () {
+            this.failCount = 0L;
+            this.successCount=0L;
+            this.processNum = 0;
+        }
+
+        public void addSuccessCount(Long count) {
+            this.successCount += count;
+        }
+
+        public void failCountIncrease(){
+            this.failCount++;
+        }
+
+        public void successCountIncrease() {
+            this.successCount++;
+        }
+
+        public void processNumIncrease() {
+            this.processNum++;
+        }
+
+        public Long getFailCount() {
+            return failCount;
+        }
+
+        public void setFailCount(Long failCount) {
+            this.failCount = failCount;
+        }
+
+        public Long getSuccessCount() {
+            return successCount;
+        }
+
+        public void setSuccessCount(Long successCount) {
+            this.successCount = successCount;
+        }
+
+        public Integer getProcessNum() {
+            return processNum;
+        }
+
+        public void setProcessNum(Integer processNum) {
+            this.processNum = processNum;
+        }
+    }
+
     public static class Cursor {
 
         //隐藏页sheet从2开始，0为导航页，1为数据页

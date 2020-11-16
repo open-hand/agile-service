@@ -639,7 +639,7 @@ public class ExcelUtil {
 
     }
 
-    protected static String substring(String str) {
+    public static String substring(String str) {
         if (StringUtils.hasText(str) && str.length() > CELL_MAX_LENGTH) {
             return str.substring(0, CELL_MAX_LENGTH);
         } else {

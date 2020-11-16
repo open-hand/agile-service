@@ -118,6 +118,16 @@ public class IssueCreateVO {
 
     private Date estimatedEndTime;
 
+    private List<PageFieldViewUpdateVO> customFields;
+
+    public List<PageFieldViewUpdateVO> getCustomFields() {
+        return customFields;
+    }
+
+    public void setCustomFields(List<PageFieldViewUpdateVO> customFields) {
+        this.customFields = customFields;
+    }
+
     public Date getEstimatedStartTime() {
         return estimatedStartTime;
     }

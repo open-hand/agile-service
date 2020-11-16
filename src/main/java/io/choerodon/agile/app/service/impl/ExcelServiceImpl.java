@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.business.ExportIssuesVO;
@@ -26,9 +27,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
 import org.hzero.boot.message.MessageClient;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.starter.keyencrypt.core.EncryptType;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +45,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -175,6 +178,8 @@ public class ExcelServiceImpl implements ExcelService {
     private AgilePluginService agilePluginService;
     @Autowired
     private PlatformTransactionManager transactionManager;
+    @Autowired
+    private IssueFieldValueService issueFieldValueService;
 
     private static final String[] FIELDS_NAMES;
 
@@ -962,10 +967,10 @@ public class ExcelServiceImpl implements ExcelService {
 
     }
 
-    protected void updateFinalRecode(FileOperationHistoryDTO fileOperationHistoryDTO, Long successcount, Long failCount, String status) {
+    protected void updateFinalRecode(FileOperationHistoryDTO fileOperationHistoryDTO, Long successCount, Long failCount, String status) {
         FileOperationHistoryDTO update = new FileOperationHistoryDTO();
         update.setId(fileOperationHistoryDTO.getId());
-        update.setSuccessCount(successcount);
+        update.setSuccessCount(successCount);
         update.setFailCount(failCount);
         update.setStatus(status);
         update.setFileUrl(fileOperationHistoryDTO.getFileUrl());
@@ -1268,7 +1273,11 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Async
     @Override
-    public void batchImport(Long projectId, Long organizationId, Long userId, Workbook workbook) {
+    public void batchImport(Long projectId,
+                            Long organizationId,
+                            Long userId,
+                            Workbook workbook,
+                            ServletRequestAttributes requestAttributes) {
         FileOperationHistoryDTO history = initFileOperationHistory(projectId, userId, DOING, UPLOAD_FILE);
         validateWorkbook(workbook, history);
         List<String> headerNames = resolveCodeFromHeader(workbook, history);
@@ -1283,18 +1292,10 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Integer, Integer> sonParentMap = new HashMap<>();
         Set<Integer> withoutParentRows = new HashSet<>();
         processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, dataSheet, dataRowCount, columnNum);
-
-        Long failCount = 0L;
-        Long successCount = 0L;
-        Integer processNum = 0;
+        ExcelImportTemplate.Progress progress = new ExcelImportTemplate.Progress();
         //key为错误的行数，value为错误的列
         Map<Integer, List<Integer>> errorRowColMap = new HashMap<>();
-
         List<Long> importedIssueIds = new ArrayList<>();
-
-
-
-
         for (int rowNum = 1; rowNum <= dataRowCount; rowNum++) {
             if (checkCanceled(projectId, history.getId(), importedIssueIds)) {
                 return;
@@ -1321,28 +1322,27 @@ public class ExcelServiceImpl implements ExcelService {
                 TransactionStatus status = transactionManager.getTransaction(definition);
                 try {
                     IssueCreateVO parent = new IssueCreateVO();
-                    validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, withFeature, parent, null);
+                    validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, parent, null);
                     if (!ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
-                        setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet);
-                        int errorCount = sonSet.size() + 1;
-                        failCount = failCount + errorCount;
-                        history.setFailCount(failCount);
-                        processNum = processNum + errorCount;
-                        sendProcess(history, userId, processNum * 1.0 / dataRowCount);
+                        processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet);
                         rowNum = Collections.max(sonSet);
                         continue;
                     }
                     List<ComponentIssueRelVO> components =  parent.getComponentIssueRelVOList();
                     Long sprintId = parent.getSprintId();
+                    Long epicId = parent.getEpicId();
                     IssueVO result = stateMachineClientService.createIssue(parent, APPLY_TYPE_AGILE);
+                    insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId, requestAttributes);
+
                     result.setComponentIssueRelVOList(components);
                     result.setSprintId(sprintId);
+                    result.setEpicId(epicId);
 
                     boolean sonsOk = true;
                     List<IssueCreateVO> sons = new ArrayList<>();
                     for (Integer sonRow : sonSet) {
                         IssueCreateVO son = new IssueCreateVO();
-                        validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, withFeature, son, result);
+                        validateData(projectId, dataSheet.getRow(sonRow), headerMap, withoutParentRows, errorRowColMap, son, result);
                         if (!ObjectUtils.isEmpty(errorRowColMap.get(sonRow))) {
                             sonsOk = false;
                             break;
@@ -1351,68 +1351,148 @@ public class ExcelServiceImpl implements ExcelService {
                         }
                     }
                     if (!sonsOk) {
-                        setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet);
-                        int errorCount = sonSet.size() + 1;
-                        failCount = failCount + errorCount;
-                        history.setFailCount(failCount);
-                        processNum = processNum + errorCount;
-                        sendProcess(history, userId, processNum * 1.0 / dataRowCount);
+                        processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet);
                         rowNum = Collections.max(sonSet);
                         transactionManager.rollback(status);
                         continue;
                     }
                     List<IssueVO> sonResult = new ArrayList<>();
-                    sons.forEach(s -> sonResult.add(stateMachineClientService.createIssue(s, APPLY_TYPE_AGILE)));
+                    sons.forEach(s -> {
+                        IssueVO returnValue = stateMachineClientService.createIssue(s, APPLY_TYPE_AGILE);
+                        sonResult.add(returnValue);
+                        insertCustomFields(returnValue.getIssueId(), s.getCustomFields(), projectId, requestAttributes);
+                    });
 
                     importedIssueIds.add(result.getIssueId());
                     importedIssueIds.addAll(sonResult.stream().map(IssueVO::getIssueId).collect(Collectors.toList()));
-                    successCount = sonSet.size() + 1L;
+                    progress.addSuccessCount(sonSet.size() + 1L);
                     rowNum = Collections.max(sonSet);
                     transactionManager.commit(status);
                 } catch (Exception e) {
+                    processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet);
+                    rowNum = Collections.max(sonSet);
                     transactionManager.rollback(status);
+                    continue;
                 }
             } else {
                 IssueCreateVO issueCreateVO = new IssueCreateVO();
-                validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, withFeature, issueCreateVO, null);
+                validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, issueCreateVO, null);
                 if (!ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
-                    failCount++;
-                    history.setFailCount(failCount);
-                    processNum++;
-                    sendProcess(history, userId, processNum * 1.0 / dataRowCount);
+                    progress.failCountIncrease();
+                    progress.processNumIncrease();
+                    history.setFailCount(progress.getFailCount());
+                    sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount);
                     continue;
                 }
                 IssueVO result = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
+                insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId, requestAttributes);
 
                 importedIssueIds.add(result.getIssueId());
-                successCount++;
+                progress.successCountIncrease();
             }
-            processNum++;
-            history.setFailCount(failCount);
-            history.setSuccessCount(successCount);
-            sendProcess(history, userId, processNum * 1.0 / dataRowCount);
+            progress.processNumIncrease();
+            history.setFailCount(progress.getFailCount());
+            history.setSuccessCount(progress.getSuccessCount());
+            sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount);
         }
+        //错误数据生成excel
+        String status;
+        if (ObjectUtils.isEmpty(errorRowColMap)) {
+            status = SUCCESS;
+        } else {
+            generateErrorDataExcelAndUpload(errorRowColMap, dataSheet, headerMap, headerNames, history, organizationId);
+            status = FAILED;
+        }
+        updateFinalRecode(history, progress.getSuccessCount(), progress.getFailCount(), status);
+    }
 
+    private void insertCustomFields(Long issueId,
+                                    List<PageFieldViewUpdateVO> customFields,
+                                    Long projectId,
+                                    ServletRequestAttributes requestAttributes) {
+        BatchUpdateFieldsValueVo batchUpdateFieldsValueVo = new BatchUpdateFieldsValueVo();
+        batchUpdateFieldsValueVo.setCustomFields(customFields);
+        batchUpdateFieldsValueVo.setIssueIds(Arrays.asList(issueId));
+        batchUpdateFieldsValueVo.setPredefinedFields(new JSONObject());
+        issueFieldValueService.asyncUpdateFields(projectId,"agile_issue",batchUpdateFieldsValueVo,"agile", requestAttributes, EncryptType.DO_NOTHING.name(), false);
+    }
 
-//        if (!errorRows.isEmpty()) {
-//            LOGGER.info("导入数据有误");
-//            PredefinedDTO theSecondColumnPredefined;
-//            if(withFeature && agilePluginService != null){
-//                theSecondColumnPredefined = agilePluginService.getFeaturePredefined(organizationId, projectId);
-//            }else {
-//                theSecondColumnPredefined  = getEpicPredefined(projectId);
-//            }
-//            Workbook result = ExcelUtil.generateExcelAwesome(workbook, errorRows,
-//                    errorMapList, copyFieldsName , priorityList, issueTypeList, versionList,
-//                    IMPORT_TEMPLATE_NAME, componentList, sprintList, managers,
-//                    theSecondColumnPredefined, false);
-//            String errorWorkBookUrl = uploadErrorExcel(result, organizationId);
-//            history.setFileUrl(errorWorkBookUrl);
-//            status = FAILED;
-//        } else {
-//            status = SUCCESS;
-//        }
-//        updateFinalRecode(history, successCount, failCount, status);
+    private void generateErrorDataExcelAndUpload(Map<Integer, List<Integer>> errorRowColMap,
+                                                 Sheet dataSheet,
+                                                 Map<Integer, ExcelColumnVO> headerMap,
+                                                 List<String> headerNames,
+                                                 FileOperationHistoryDTO history,
+                                                 Long organizationId) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        ExcelUtil.createGuideSheet(workbook, ExcelUtil.initGuideSheet(), true);
+        Sheet sheet = workbook.createSheet(IMPORT_TEMPLATE_NAME);
+        CellStyle style = CatalogExcelUtil.getHeadStyle(workbook);
+        ExcelUtil.generateHeaders(sheet, style, headerNames);
+        List<PredefinedDTO> predefinedList = processPredefinedByHeaderMap(headerMap);
+        fillInPredefinedValues(workbook, sheet, predefinedList);
+        int colNum = headerNames.size();
+        writeErrorData(errorRowColMap, dataSheet, colNum, sheet);
+        String errorWorkBookUrl = uploadErrorExcel(workbook, organizationId);
+        history.setFileUrl(errorWorkBookUrl);
+    }
+
+    private void writeErrorData(Map<Integer, List<Integer>> errorRowColMap,
+                                Sheet dataSheet,
+                                int colNum,
+                                Sheet sheet) {
+        XSSFWorkbook workbook = (XSSFWorkbook)sheet.getWorkbook();
+        XSSFCellStyle ztStyle = workbook.createCellStyle();
+        Font ztFont = workbook.createFont();
+        ztFont.setColor(Font.COLOR_RED);
+        ztStyle.setFont(ztFont);
+        int startRow = 1;
+        for (Map.Entry<Integer, List<Integer>> entry: errorRowColMap.entrySet()) {
+            int rowNum = entry.getKey();
+            List<Integer> errorCol = entry.getValue();
+            Row originRow = dataSheet.getRow(rowNum);
+            Row row = sheet.createRow(startRow);
+            for (int i = 0; i < colNum; i++) {
+                Cell originCell = originRow.getCell(i);
+                if (!isCellEmpty(originCell)) {
+                    Cell cell = row.createCell(i);
+                    cell.setCellValue(ExcelUtil.substring(originCell.toString()));
+                    if (errorCol.contains(i)) {
+                        cell.setCellStyle(ztStyle);
+                    }
+                }
+            }
+        }
+    }
+
+    private List<PredefinedDTO> processPredefinedByHeaderMap(Map<Integer, ExcelColumnVO> headerMap) {
+        List<PredefinedDTO> result = new ArrayList<>();
+        ExcelImportTemplate.Cursor cursor = new ExcelImportTemplate.Cursor();
+        headerMap.forEach((k, v) -> {
+            int col = k;
+            ExcelColumnVO excelColumn = v;
+            List<String> values = excelColumn.getPredefinedValues();
+            if (!ObjectUtils.isEmpty(values)) {
+                PredefinedDTO dto =
+                        new PredefinedDTO(values,
+                                PREDEFINED_VALUE_START_ROW,
+                                PREDEFINED_VALUE_END_ROW,
+                                col,
+                                col,
+                                excelColumn.getFieldCode(),
+                                cursor.getAndIncreaseSheetNum());
+                result.add(dto);
+            }
+        });
+        return result;
+    }
+
+    private void processErrorData(Long userId, FileOperationHistoryDTO history, Sheet dataSheet, Integer dataRowCount, ExcelImportTemplate.Progress progress, Map<Integer, List<Integer>> errorRowColMap, int rowNum, Set<Integer> sonSet) {
+        setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet);
+        int errorCount = sonSet.size() + 1;
+        Long failCount = progress.getFailCount() + errorCount;
+        history.setFailCount(failCount);
+        int processNum = progress.getProcessNum() + errorCount;
+        sendProcess(history, userId, processNum * 1.0 / dataRowCount);
     }
 
     private void setErrorMsgToParentSonRow(int rowNum,
@@ -1433,7 +1513,7 @@ public class ExcelServiceImpl implements ExcelService {
                 cell = row.getCell(1);
             }
             String value = cell.toString();
-            cell.setCellValue(buildWithErrorMsg(value, "父子结构中有错误数据"));
+            cell.setCellValue(buildWithErrorMsg(value, "父子结构中有错误数据或父子结构插入错误"));
         }
     }
 
@@ -1442,9 +1522,9 @@ public class ExcelServiceImpl implements ExcelService {
                               Map<Integer, ExcelColumnVO> headerMap,
                               Set<Integer> withoutParentRows,
                               Map<Integer, List<Integer>> errorRowColMap,
-                              boolean withFeature,
                               IssueCreateVO issueCreateVO,
                               IssueVO parentIssue) {
+        issueCreateVO.setProjectId(projectId);
         int rowNum = row.getRowNum();
         int issueTypeColIndex = 0;
         int parentIndex = 1;
@@ -1491,10 +1571,69 @@ public class ExcelServiceImpl implements ExcelService {
             ExcelColumnVO excelColumn = entry.getValue();
             boolean isCustomField = excelColumn.isCustomField();
             if (isCustomField) {
-
+                validateCustomFieldData(row, col, excelColumn, errorRowColMap, issueCreateVO);
             } else {
                 validateSystemFieldData(row, col, excelColumn, errorRowColMap, issueCreateVO, parentIssue, projectId, headerMap);
             }
+        }
+    }
+
+    private void validateCustomFieldData(Row row,
+                                         Integer col,
+                                         ExcelColumnVO excelColumn,
+                                         Map<Integer, List<Integer>> errorRowColMap,
+                                         IssueCreateVO issueCreateVO) {
+        Cell cell = row.getCell(col);
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString();
+            boolean multiValue = excelColumn.isMultiValue();
+            Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
+            List<String> valueList = new ArrayList<>();
+            Object customFieldValue = null;
+            if (multiValue) {
+                String regex = "，";
+                valueList.addAll(Arrays.asList(value.split(regex)));
+            }
+            List<String> values = excelColumn.getPredefinedValues();
+            if (!ObjectUtils.isEmpty(values)) {
+                if (multiValue) {
+                    boolean ok = true;
+                    List<String> ids = new ArrayList<>();
+                    for (String str : valueList) {
+                        if (!values.contains(str)) {
+                            ok = false;
+                            break;
+                        } else {
+                            ids.add(String.valueOf(valueIdMap.get(str)));
+                        }
+                    }
+                    if (!ok) {
+                        cell.setCellValue(buildWithErrorMsg(value, "自定义字段值错误"));
+                        addErrorColumn(row.getRowNum(), col, errorRowColMap);
+                    }
+                    customFieldValue = ids;
+                } else {
+                    if (!values.contains(value)) {
+                        cell.setCellValue(buildWithErrorMsg(value, "自定义字段值错误"));
+                        addErrorColumn(row.getRowNum(), col, errorRowColMap);
+                    } else {
+                        customFieldValue = String.valueOf(valueIdMap.get(value));
+                    }
+                }
+            } else {
+                customFieldValue = value;
+            }
+            PageFieldViewUpdateVO PageFieldViewUpdateVO = excelColumn.getCustomFieldDetail();
+            List<PageFieldViewUpdateVO> customFields = issueCreateVO.getCustomFields();
+            if (customFields == null) {
+                customFields = new ArrayList<>();
+                issueCreateVO.setCustomFields(customFields);
+            }
+            PageFieldViewUpdateVO pageFieldViewUpdate = new PageFieldViewUpdateVO();
+            pageFieldViewUpdate.setFieldId(PageFieldViewUpdateVO.getFieldId());
+            pageFieldViewUpdate.setFieldType(PageFieldViewUpdateVO.getFieldType());
+            pageFieldViewUpdate.setValue(customFieldValue);
+            customFields.add(pageFieldViewUpdate);
         }
     }
 
@@ -1648,14 +1787,15 @@ public class ExcelServiceImpl implements ExcelService {
             cell = row.getCell(col);
         }
         String value = cell.toString();
-        Long parentId = parentIssue.getIssueId();
         if (SUB_TASK_CN.equals(issueType)) {
+            Long parentId = parentIssue.getIssueId();
             issueCreateVO.setParentIssueId(parentId);
         } else if (SUB_BUG_CN.equals(issueType)) {
             if (parentIssue.getTypeCode().equals("bug")) {
                 cell.setCellValue(buildWithErrorMsg(value, "子缺陷的父级不能为缺陷类型"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
+                Long parentId = parentIssue.getIssueId();
                 issueCreateVO.setRelateIssueId(parentId);
             }
         }
@@ -1795,9 +1935,8 @@ public class ExcelServiceImpl implements ExcelService {
         Integer rowNum = row.getRowNum();
         String value = cell.toString();
         Map<String, IssueTypeVO> issueTypeMap = excelColumn.getIssueTypeMap();
-        List<String> issueTypeNames =
-                issueTypeMap.values().stream().map(IssueTypeVO::getName).collect(Collectors.toList());
-        if (!issueTypeNames.contains(value)){
+        List<String> values = excelColumn.getPredefinedValues();
+        if (!values.contains(value)){
             cell.setCellValue(buildWithErrorMsg(value, "问题类型错误"));
             addErrorColumn(rowNum, col, errorRowColMap);
         } else {
@@ -1973,7 +2112,7 @@ public class ExcelServiceImpl implements ExcelService {
                                               Integer columnNum) {
         Map<Integer, String> rowIssueTypeMap = new LinkedHashMap<>();
         List<IssueTypeLinkDTO> issueTypeLinks = new ArrayList<>();
-        for (int i = 1; i < dataRowCount; i++) {
+        for (int i = 1; i <= dataRowCount; i++) {
             int size = issueTypeLinks.size();
             IssueTypeLinkDTO lastIssueTypeLink = null;
             if (size > 0) {
@@ -1994,7 +2133,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
             rowIssueTypeMap.put(i, issueType);
         }
-        parentSonMap.putAll(getParentSonMap(issueTypeLinks));
+         parentSonMap.putAll(getParentSonMap(issueTypeLinks));
         sonParentMap.putAll(getSonParentMap(parentSonMap));
 
         for (Map.Entry<Integer, String> entry : rowIssueTypeMap.entrySet()) {
@@ -2085,6 +2224,11 @@ public class ExcelServiceImpl implements ExcelService {
                 throw new CommonException("error.illegal.custom.field.header."+headerName);
             } else {
                 String fieldCode = detail.getCode();
+                PageFieldViewUpdateVO fieldDetail = new PageFieldViewUpdateVO();
+                fieldDetail.setFieldId(detail.getId());
+                fieldDetail.setFieldType(detail.getFieldType());
+                excelColumn.setCustomFieldDetail(fieldDetail);
+
                 excelColumn.setFieldCode(fieldCode);
                 String fieldType = detail.getFieldType();
                 excelColumn.setMultiValue(multiValueFieldType.contains(fieldType));

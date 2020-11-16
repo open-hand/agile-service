@@ -3265,7 +3265,7 @@
         left join agile_component_issue_rel t3
         on (t3.project_id = #{projectId} and t3.issue_id = t1.issue_id)
         where t1.project_id = #{projectId}
-        and CONCAT_WS( '-', api.project_code, ai.issue_num ) = #{issueNum}
+        and CONCAT_WS( '-', t2.project_code, t1.issue_num ) = #{issueNum}
     </select>
 
 </mapper>
