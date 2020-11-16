@@ -16,7 +16,6 @@ const TypeTag: React.FC<Props> = ({
   let {
     colour, name = '', icon,
   } = data || {};
-  // const { typeCode } = data || {};
   if (featureType === 'business') {
     colour = '#3D5AFE';
     name = '特性';
@@ -24,6 +23,7 @@ const TypeTag: React.FC<Props> = ({
   } else if (featureType === 'enabler') {
     colour = '#FFCA28';
     name = '使能';
+    icon = 'characteristic';
   }
   if (icon === 'agile-backlog') {
     icon = 'highlight';

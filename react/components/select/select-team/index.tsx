@@ -22,13 +22,12 @@ const SelectTeam: React.FC<Props> = forwardRef(({
     valueField: 'projectId',
     request: () => commonApi.getSubProjects(true),
     paging: false,
+    // @ts-ignore
+    afterLoad: afterLoadRef.current,
     middleWare: (projects) => {
       // @ts-ignore
       // eslint-disable-next-line
         projectDataRef.current = projects;
-      if (afterLoadRef.current) {
-        afterLoadRef.current(projects);
-      }
       return projects || [];
     },
   }), []);
