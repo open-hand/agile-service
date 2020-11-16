@@ -326,12 +326,14 @@ const NotifySetting = ({
             <Icon type="arrow_drop_down" />
           </div>
         </Dropdown>
-        <div style={{ borderTop: '1px solid #e8e8e8', width: 'calc(100% + .4rem)', marginLeft: '-0.2rem' }} />
         {
           AppState.currentMenuType.category !== 'PROGRAM' && (
-          <CheckBox
-            name="webhook"
-          />
+            <>
+              <div style={{ borderTop: '1px solid #e8e8e8', width: 'calc(100% + .4rem)', marginLeft: '-0.2rem' }} />
+              <CheckBox
+                name="webhook"
+              />
+            </>
           )
         }
       </Form>

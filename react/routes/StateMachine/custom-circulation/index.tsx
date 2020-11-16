@@ -99,6 +99,10 @@ interface IStatusLinkageVOS {
   statusId: string
   statusVO: IStatus
   projectName: string
+  projectVO?: {
+    id: string
+    name: string
+  },
 }
 
 const transformedMember = {
@@ -420,9 +424,9 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       const prefixStr = '当项目';
       const linkageStr = (
         statusLinkageVOS.map((linkageSetting) => {
-          const { statusVO, projectName } = linkageSetting;
+          const { statusVO, projectVO } = linkageSetting;
           const toStatusName = statusVO?.name;
-          return `【${projectName}】的故事状态全为【${toStatusName}】`;
+          return `【${projectVO?.name}】的故事状态全为【${toStatusName}】`;
         })).join('，');
       const suffixStr = `，则关联的特性自动流转到【${record.get('name')}】状态。`;
       return `${prefixStr}${linkageStr}${suffixStr}`;
@@ -455,7 +459,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           )
         }
         {
-          (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug') && statusLinkageVOS && statusLinkageVOS.length > 0 && (
+          (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug' || selectedTypeCode === 'feature') && statusLinkageVOS && statusLinkageVOS.length > 0 && (
             <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>
               <Tooltip title={renderStatusLinkageSetting(statusLinkageVOS, record)}>
                 {renderStatusLinkageSetting(statusLinkageVOS, record)}

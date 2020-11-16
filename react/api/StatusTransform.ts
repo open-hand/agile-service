@@ -71,6 +71,12 @@ export interface ILinkage {
   parentIssueTypeCode: 'story' | 'task' | 'bug',
   parentIssueStatusSetting: string,
 }
+
+export interface IFeatureLinkage {
+  issueTypeId: string
+  statusId: string
+  projectId: string
+}
 class StatusTransformApi extends Api<StatusTransformApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -275,6 +281,56 @@ class StatusTransformApi extends Api<StatusTransformApi> {
         statusId,
         objectVersionNumber,
         applyType: getApplyType(),
+      },
+      data,
+    });
+  }
+
+  /**
+   * 获取特性状态联动设置
+   * @param issueTypeId
+   * @param statusId
+   */
+
+  getFeatureLinkage(issueTypeId: string, statusId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/status_linkages/list`,
+      params: {
+        issueTypeId,
+        statusId,
+      },
+    });
+  }
+
+  /**
+   * 创建更新特性的状态联动
+   * @param typeCode
+   * @param statusId
+   * @param data
+   */
+  updateFeatureLinkage(statusId: string, data: IFeatureLinkage[]) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/status_linkages/pro/setting_story_status`,
+      params: {
+        statusId,
+        typeCode: 'feature',
+      },
+      data,
+    });
+  }
+
+  /**
+   * 获取设置特性状态联动时可设置的状态
+   * @param data
+   */
+  getFeatureLinkageStatus(data: {issueTypeId: string, projectId: string}) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/status_linkages/pro/list_status`,
+      params: {
+        typeCode: 'feature',
       },
       data,
     });
