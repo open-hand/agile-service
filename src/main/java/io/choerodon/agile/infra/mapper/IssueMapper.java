@@ -551,5 +551,5 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueVO> listUndoneAvailableParents(@Param("projectId") Long projectId);
 
     IssueVO selectByIssueNum(@Param("projectId") Long projectId,
-                                   @Param("issueNum") String issueNum);
+                             @Param("issueNum") String issueNum);
 }

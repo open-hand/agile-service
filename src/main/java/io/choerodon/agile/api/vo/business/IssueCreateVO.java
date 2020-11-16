@@ -120,6 +120,16 @@ public class IssueCreateVO {
 
     private List<PageFieldViewUpdateVO> customFields;
 
+    private RelatedIssueVO relatedIssueVO;
+
+    public RelatedIssueVO getRelatedIssueVO() {
+        return relatedIssueVO;
+    }
+
+    public void setRelatedIssueVO(RelatedIssueVO relatedIssueVO) {
+        this.relatedIssueVO = relatedIssueVO;
+    }
+
     public List<PageFieldViewUpdateVO> getCustomFields() {
         return customFields;
     }
