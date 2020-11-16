@@ -292,13 +292,12 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * @param statusId
    */
 
-  getFeatureLinkage(issueTypeId: string, statusId: string) {
+  getFeatureLinkage(statusId: string, typeCode?: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status_linkages/list`,
+      url: `${this.prefix}/status_linkages/pro/${statusId}`,
       params: {
-        issueTypeId,
-        statusId,
+        typeCode: typeCode || 'feature',
       },
     });
   }
