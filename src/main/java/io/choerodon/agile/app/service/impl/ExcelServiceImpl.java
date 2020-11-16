@@ -173,6 +173,10 @@ public class ExcelServiceImpl implements ExcelService {
     private FieldValueService fieldValueService;
     @Autowired
     private IssueLabelMapper issueLabelMapper;
+    @Autowired
+    private IssueLinkService issueLinkService;
+    @Autowired
+    private IssueLinkTypeMapper issueLinkTypeMapper;
 
     private static final String[] FIELDS_NAMES;
 
@@ -802,7 +806,8 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Integer, List<Integer>> errorRowColMap = new HashMap<>();
         List<Long> importedIssueIds = new ArrayList<>();
         Set<Integer> dateColumns = getDateColumns(headerMap);
-
+        Map<Integer, Long> rowIssueIdMap = new HashMap<>();
+        List<RelatedIssueVO> relatedIssueList = new ArrayList<>();
         for (int rowNum = 1; rowNum <= dataRowCount; rowNum++) {
             if (checkCanceled(projectId, history.getId(), importedIssueIds)) {
                 return;
@@ -847,15 +852,17 @@ public class ExcelServiceImpl implements ExcelService {
                     List<ComponentIssueRelVO> components =  parent.getComponentIssueRelVOList();
                     Long sprintId = parent.getSprintId();
                     Long epicId = parent.getEpicId();
+                    Optional.ofNullable(parent.getRelatedIssueVO()).ifPresent(x -> relatedIssueList.add(x));
                     IssueVO result = stateMachineClientService.createIssue(parent, APPLY_TYPE_AGILE);
                     insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
+                    rowIssueIdMap.put(rowNum, result.getIssueId());
 
                     result.setComponentIssueRelVOList(components);
                     result.setSprintId(sprintId);
                     result.setEpicId(epicId);
 
                     boolean sonsOk = true;
-                    List<IssueCreateVO> sons = new ArrayList<>();
+                    Map<Integer, IssueCreateVO> sonMap = new HashMap<>();
                     for (Integer sonRow : sonSet) {
                         IssueCreateVO son = new IssueCreateVO();
                         validateData(projectId, dataSheet.getRow(sonRow), headerMap, withoutParentRows, errorRowColMap, son, result);
@@ -863,7 +870,7 @@ public class ExcelServiceImpl implements ExcelService {
                             sonsOk = false;
                             break;
                         } else {
-                            sons.add(son);
+                            sonMap.put(sonRow, son);
                         }
                     }
                     if (!sonsOk) {
@@ -872,15 +879,15 @@ public class ExcelServiceImpl implements ExcelService {
                         transactionManager.rollback(status);
                         continue;
                     }
-                    List<IssueVO> sonResult = new ArrayList<>();
-                    sons.forEach(s -> {
-                        IssueVO returnValue = stateMachineClientService.createIssue(s, APPLY_TYPE_AGILE);
-                        sonResult.add(returnValue);
-                        insertCustomFields(returnValue.getIssueId(), s.getCustomFields(), projectId);
+                    sonMap.forEach((k, v) -> {
+                        Optional.ofNullable(v.getRelatedIssueVO()).ifPresent(x -> relatedIssueList.add(x));
+                        IssueVO returnValue = stateMachineClientService.createIssue(v, APPLY_TYPE_AGILE);
+                        insertCustomFields(returnValue.getIssueId(), v.getCustomFields(), projectId);
+                        rowIssueIdMap.put(k, returnValue.getIssueId());
                     });
 
                     importedIssueIds.add(result.getIssueId());
-                    importedIssueIds.addAll(sonResult.stream().map(IssueVO::getIssueId).collect(Collectors.toList()));
+                    importedIssueIds.addAll(rowIssueIdMap.values());
                     progress.addSuccessCount(sonSet.size() + 1L);
                     rowNum = Collections.max(sonSet);
                     transactionManager.commit(status);
@@ -900,8 +907,10 @@ public class ExcelServiceImpl implements ExcelService {
                     sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount);
                     continue;
                 }
+                Optional.ofNullable(issueCreateVO.getRelatedIssueVO()).ifPresent(x -> relatedIssueList.add(x));
                 IssueVO result = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
                 insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId);
+                rowIssueIdMap.put(rowNum, result.getIssueId());
 
                 importedIssueIds.add(result.getIssueId());
                 progress.successCountIncrease();
@@ -911,6 +920,8 @@ public class ExcelServiceImpl implements ExcelService {
             history.setSuccessCount(progress.getSuccessCount());
             sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount);
         }
+        updateRelatedIssue(relatedIssueList, rowIssueIdMap, errorRowColMap, headerMap, dataSheet, projectId);
+
         //错误数据生成excel
         String status;
         if (ObjectUtils.isEmpty(errorRowColMap)) {
@@ -920,6 +931,72 @@ public class ExcelServiceImpl implements ExcelService {
             status = FAILED;
         }
         updateFinalRecode(history, progress.getSuccessCount(), progress.getFailCount(), status);
+    }
+
+    private void updateRelatedIssue(List<RelatedIssueVO> relatedIssueList,
+                                    Map<Integer, Long> rowIssueIdMap,
+                                    Map<Integer, List<Integer>> errorRowColMap,
+                                    Map<Integer, ExcelColumnVO> headerMap,
+                                    Sheet dataSheet,
+                                    Long projectId) {
+        relatedIssueList =
+                relatedIssueList
+                        .stream()
+                        .filter(x -> !ObjectUtils.isEmpty(x.getRelatedIds()) || !ObjectUtils.isEmpty(x.getRelatedRows())).collect(Collectors.toList());
+        Set<Long> deleteIssueIds = new HashSet<>();
+        Map<Long, Set<Long>> relatedMap = new HashMap<>();
+        int relateIssueIndex = 0;
+        for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
+            if (entry.getValue().getFieldCode().equals(ExcelImportTemplate.Header.RELATE_ISSUE)) {
+                relateIssueIndex = entry.getKey();
+            }
+        }
+        for (RelatedIssueVO x : relatedIssueList) {
+            Integer rowNum = x.getRow();
+            Cell cell = dataSheet.getRow(rowNum).getCell(relateIssueIndex);
+            String value = cell.toString();
+            Long issueId = rowIssueIdMap.get(rowNum);
+            if (issueId != null && ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
+                Set<Integer> relatedRows = x.getRelatedRows();
+                Set<Long> relatedIssueIds = x.getRelatedIds();
+                boolean ok = true;
+                for (Integer relatedRow : relatedRows) {
+                    Long relatedIssueId = rowIssueIdMap.get(relatedRow);
+                    if (relatedIssueId == null) {
+                        deleteIssueIds.add(issueId);
+                        cell.setCellValue(buildWithErrorMsg(value, "第" + relatedRow + "行插入失败"));
+                        addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
+                        ok = false;
+                        break;
+                    } else {
+                        relatedIssueIds.add(relatedIssueId);
+                    }
+                }
+                if (ok) {
+                    relatedMap.put(issueId, relatedIssueIds);
+                }
+            }
+        }
+        if (!deleteIssueIds.isEmpty()) {
+            issueService.batchDeleteIssuesAgile(projectId, new ArrayList<>(deleteIssueIds));
+        }
+        Long linkTypeId =
+                issueLinkTypeMapper.queryIssueLinkTypeByProjectId(projectId, null, "关联", null)
+                        .get(0)
+                        .getLinkTypeId();
+        relatedMap.forEach((k, v) -> {
+            Long issueId = k;
+            Set<Long> linkedIssueIds = v;
+            List<IssueLinkCreateVO> issueLinkList = new ArrayList<>();
+            linkedIssueIds.forEach(l -> {
+                IssueLinkCreateVO create = new IssueLinkCreateVO();
+                create.setIssueId(issueId);
+                create.setLinkTypeId(linkTypeId);
+                create.setLinkedIssueId(l);
+                issueLinkList.add(create);
+            });
+            issueLinkService.createIssueLinkList(issueLinkList, issueId, projectId);
+        });
     }
 
     private Set<Integer> getDateColumns(Map<Integer, ExcelColumnVO> headerMap) {
@@ -936,11 +1013,13 @@ public class ExcelServiceImpl implements ExcelService {
     private void insertCustomFields(Long issueId,
                                     List<PageFieldViewUpdateVO> customFields,
                                     Long projectId) {
-        BatchUpdateFieldsValueVo batchUpdateFieldsValueVo = new BatchUpdateFieldsValueVo();
-        batchUpdateFieldsValueVo.setCustomFields(customFields);
-        batchUpdateFieldsValueVo.setIssueIds(Arrays.asList(issueId));
-        batchUpdateFieldsValueVo.setPredefinedFields(new JSONObject());
-        fieldValueService.handlerCustomFields(projectId, customFields, "agile_issue", batchUpdateFieldsValueVo.getIssueIds(), null, false);
+        if (!ObjectUtils.isEmpty(customFields)) {
+            BatchUpdateFieldsValueVo batchUpdateFieldsValueVo = new BatchUpdateFieldsValueVo();
+            batchUpdateFieldsValueVo.setCustomFields(customFields);
+            batchUpdateFieldsValueVo.setIssueIds(Arrays.asList(issueId));
+            batchUpdateFieldsValueVo.setPredefinedFields(new JSONObject());
+            fieldValueService.handlerCustomFields(projectId, customFields, "agile_issue", batchUpdateFieldsValueVo.getIssueIds(), null, false);
+        }
     }
 
     private void generateErrorDataExcelAndUpload(Map<Integer, List<Integer>> errorRowColMap,
@@ -1229,9 +1308,57 @@ public class ExcelServiceImpl implements ExcelService {
                 validateAndSetEstimatedTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ESTIMATED_END_TIME);
                 break;
             case ExcelImportTemplate.Header.RELATE_ISSUE:
+                validateRelateIssue(row, col, issueCreateVO, errorRowColMap, projectId);
                 break;
             default:
                 break;
+        }
+    }
+
+    private void validateRelateIssue(Row row,
+                                     Integer col,
+                                     IssueCreateVO issueCreateVO,
+                                     Map<Integer, List<Integer>> errorRowColMap,
+                                     Long projectId) {
+        String projectCode = projectInfoMapper.selectProjectCodeByProjectId(projectId);
+        Cell cell = row.getCell(col);
+        int rowNum = row.getRowNum();
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString();
+            String regex = "(([0-9]+，)|(！[0-9]+，))*(([0-9]+)|(！[0-9]+))";
+            if (Pattern.matches(regex, value)) {
+                RelatedIssueVO relatedIssueVO = new RelatedIssueVO();
+                issueCreateVO.setRelatedIssueVO(relatedIssueVO);
+                relatedIssueVO.setRow(rowNum);
+                Set<Long> relatedIssueIds = new HashSet<>();
+                Set<Integer> relatedRows = new HashSet<>();
+                String[] array = value.split("，");
+                boolean ok = true;
+                for (String str : array) {
+                    if (str.startsWith("！")) {
+                        relatedRows.add(Integer.valueOf(str.substring(1)) - 1);
+                    } else {
+                        int num = Integer.valueOf(str);
+                        String issueNum = projectCode + "-" + num;
+                        IssueVO issueVO = issueMapper.selectByIssueNum(projectId, issueNum);
+                        if (issueVO == null) {
+                            ok = false;
+                            cell.setCellValue(buildWithErrorMsg(value, num + "不存在"));
+                            addErrorColumn(rowNum, col, errorRowColMap);
+                            break;
+                        } else {
+                            relatedIssueIds.add(issueVO.getIssueId());
+                        }
+                    }
+                }
+                if (ok) {
+                    relatedIssueVO.setRelatedIds(relatedIssueIds);
+                    relatedIssueVO.setRelatedRows(relatedRows);
+                }
+            } else {
+                cell.setCellValue(buildWithErrorMsg(value, "关联问题格式不正确"));
+                addErrorColumn(rowNum, col, errorRowColMap);
+            }
         }
     }
 

@@ -1703,6 +1703,7 @@
         LEFT JOIN agile_issue_comment aic on aic.issue_id=ai.issue_id
         LEFT JOIN agile_issue_attachment aia on aia.issue_id=ai.issue_id
         LEFT JOIN agile_data_log adl on adl.issue_id=ai.issue_id and adl.project_id=ai.project_id
+        left join fd_field_value t1 on (t1.project_id = ai.project_id and t1.instance_id = ai.issue_id and t1.scheme_code = 'agile_issue')
         WHERE ai.project_id = #{projectId} AND ai.issue_id IN
         <foreach collection="issueIds" item="issueId" open="("
                  separator="," close=")">
