@@ -140,6 +140,16 @@ public class IssueListFieldKVVO {
 
     private String projectName;
 
+    private List<ProjectVO> featureTeams;
+
+    public List<ProjectVO> getFeatureTeams() {
+        return featureTeams;
+    }
+
+    public void setFeatureTeams(List<ProjectVO> featureTeams) {
+        this.featureTeams = featureTeams;
+    }
+
     public String getProjectName() {
         return projectName;
     }

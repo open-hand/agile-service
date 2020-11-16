@@ -317,4 +317,11 @@ public interface AgilePluginService {
      * @param applyType
      */
     void storyLinkageFeature(Long projectId, IssueDTO issueDTO, String applyType);
+
+    /**
+     * 设置特性类型和团队信息
+     * @param issues
+     * @param projects
+     */
+    void setFeatureTypeAndFeatureTeams(List<IssueListFieldKVVO> issues,  List<ProjectVO> projects);
 }
