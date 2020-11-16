@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 import Api from './Api';
 
 interface VersionCreateVO {
@@ -65,6 +65,39 @@ class VersionApi extends Api<VersionApi> {
       params: {
         page,
         size,
+      },
+    });
+  }
+
+  /**
+   * 查询可关联的项目群版本
+   * @param programId
+   */
+  loadProgramVersion(programId: string) {
+    return this.request({
+      method: 'get',
+      url: `/agile/v1/projects/${programId}/program_version/list_program_version`,
+      params: {
+        organizationId: getOrganizationId(),
+        teamProjectIds: getProjectId(),
+        selectAll: false,
+      },
+    });
+  }
+
+  /**
+   * 关联项目群某个版本
+   * @param programVersionId
+   * @param productVersionId
+   */
+  linkProgramVersion(programVersionId:string, productVersionId:string) {
+    return this.request({
+      method: 'get',
+      url: `/agile/v1/projects/${getProjectId()}/program_version/link_program_version`,
+      params: {
+        programVersionId,
+        productVersionId,
+        organizationId: getOrganizationId(),
       },
     });
   }
@@ -194,4 +227,5 @@ class VersionApi extends Api<VersionApi> {
 }
 
 const versionApi = new VersionApi();
-export { versionApi };
+const versionApiConfig = new VersionApi(true);
+export { versionApi, versionApiConfig };
