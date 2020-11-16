@@ -110,19 +110,19 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(PARENT, "父级故事/任务/缺陷", false, 12000));
             HEADERS.add(new Header(FieldCode.EPIC, "所属史诗", false, 8000));
             HEADERS.add(new Header(FieldCode.FEATURE, "所属特性", false, 8000));
-            HEADERS.add(new Header(FieldCode.COMPONENT, "模块", false, null));
-            HEADERS.add(new Header(FieldCode.SPRINT, "冲刺", false, null));
+            HEADERS.add(new Header(FieldCode.COMPONENT, "模块", true, null));
+            HEADERS.add(new Header(FieldCode.SPRINT, "冲刺", true, null));
             HEADERS.add(new Header(FieldCode.SUMMARY, "概述*", true, null));
             HEADERS.add(new Header(FieldCode.DESCRIPTION, "描述", true, null));
-            HEADERS.add(new Header(FieldCode.ASSIGNEE, "经办人", false, null));
-            HEADERS.add(new Header(FieldCode.REPORTER, "报告人", false, null));
+            HEADERS.add(new Header(FieldCode.ASSIGNEE, "经办人", true, null));
+            HEADERS.add(new Header(FieldCode.REPORTER, "报告人", true, null));
             HEADERS.add(new Header(FieldCode.PRIORITY, "优先级*", true, null));
-            HEADERS.add(new Header(FieldCode.REMAINING_TIME, "预估时间(小时)", false, null));
+            HEADERS.add(new Header(FieldCode.REMAINING_TIME, "预估时间(小时)", true, null));
             HEADERS.add(new Header(FieldCode.FIX_VERSION, "版本", false, null));
-            HEADERS.add(new Header(FieldCode.STORY_POINTS, "故事点", false, null));
+            HEADERS.add(new Header(FieldCode.STORY_POINTS, "故事点", true, null));
             HEADERS.add(new Header(FieldCode.EPIC_NAME, "史诗名称(仅问题类型为史诗时生效)", false, 8000));
+            HEADERS.add(new Header(FieldCode.LABEL, "标签", false, null));
             HEADERS.add(new Header(FieldCode.ESTIMATED_START_TIME, "预估开始时间", false, null));
-            HEADERS.add(new Header(FieldCode.ESTIMATED_END_TIME, "预估结束时间", false, null));
             HEADERS.add(new Header(FieldCode.ESTIMATED_END_TIME, "预估结束时间", false, null));
             HEADERS.add(new Header(RELATE_ISSUE, "关联问题", false, null));
 
@@ -170,17 +170,7 @@ public class ExcelImportTemplate {
             return VALUE_CODE_MAP.get(value);
         }
 
-        public static List<String> validateAndAddFields(List<String> systemFields) {
-            List<String> requiredCode =
-                    getByRequired(true)
-                            .stream()
-                            .map(Header::getCode)
-                            .collect(Collectors.toList());
-            requiredCode.forEach(r -> {
-                if (!systemFields.contains(r)) {
-                    throw new CommonException("error.required.system.field." + r);
-                }
-            });
+        public static List<String> addFields(List<String> systemFields) {
             List<String> fields = new ArrayList<>();
             for (int i = 0; i < systemFields.size(); i++) {
                 String code = systemFields.get(i);
