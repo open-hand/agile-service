@@ -962,6 +962,13 @@ public class ExcelServiceImpl implements ExcelService {
                 Set<Long> relatedIssueIds = x.getRelatedIds();
                 boolean ok = true;
                 for (Integer relatedRow : relatedRows) {
+                    if (Objects.equals(rowNum, relatedRow)) {
+                        deleteIssueIds.add(issueId);
+                        cell.setCellValue(buildWithErrorMsg(value, "自己不能和自己关联，rowNum: " + (rowNum + 1)));
+                        addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
+                        ok = false;
+                        break;
+                    }
                     Long relatedIssueId = rowIssueIdMap.get(relatedRow);
                     if (relatedIssueId == null) {
                         deleteIssueIds.add(issueId);
