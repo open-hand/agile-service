@@ -4,6 +4,7 @@ import React, {
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { omit, debounce } from 'lodash';
 import { Button, DataSet } from 'choerodon-ui/pro';
+import { usePersistFn } from 'ahooks';
 import { SearchMatcher } from 'choerodon-ui/pro/lib/select/Select';
 import { Renderer } from 'choerodon-ui/pro/lib/field/FormField';
 
@@ -72,12 +73,14 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     valueField = 'value',
     optionRenderer = defaultRender,
     // renderer,
-    request,
+    request: requestFn,
     middleWare = noop,
-    afterLoad,
+    afterLoad: afterLoadFn,
     paging = true,
     props,
   } = config;
+  const request = usePersistFn(requestFn);
+  const afterLoad = usePersistFn(afterLoadFn || noop);
   const renderer = useCallback(({ value, maxTagTextLength }) => {
     const item = cacheRef.current?.get(value);
     if (item) {
@@ -113,8 +116,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
       }
     });
   // TODO: 更好的实现
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paging, request]);
+  }, [afterLoad, paging, request]);
   const searchData = useMemo(() => debounce((filter: string) => {
     loadData({ filter });
   }, 500), [loadData]);
