@@ -110,7 +110,7 @@ class VersionApi extends Api<VersionApi> {
   deleteLinkProgramVersion(programVersionId: string, productVersionId: string) {
     return this.request({
       method: 'delete',
-      url: `${this.prefix}/program_version/delete_product_version_rel`,
+      url: `${this.prefix}/program_version/delete_program_version_rel`,
       params: {
         programVersionId,
         productVersionId,
