@@ -73,14 +73,14 @@ class VersionApi extends Api<VersionApi> {
    * 查询可关联的项目群版本
    * @param programId
    */
-  loadProgramVersion(programId: string) {
+  loadProgramVersion(selectAll: boolean = false, teamProjectIds?: string[], programId?: string) {
     return this.request({
       method: 'get',
-      url: `/agile/v1/projects/${programId}/program_version/list_program_version`,
+      url: `/agile/v1/projects/${programId || getProjectId()}/program_version/list_program_version`,
       params: {
         organizationId: getOrganizationId(),
-        teamProjectIds: getProjectId(),
-        selectAll: false,
+        teamProjectIds: teamProjectIds ? String(teamProjectIds) : undefined,
+        selectAll,
       },
     });
   }
@@ -90,10 +90,27 @@ class VersionApi extends Api<VersionApi> {
    * @param programVersionId
    * @param productVersionId
    */
-  linkProgramVersion(programVersionId:string, productVersionId:string) {
+  linkProgramVersion(programVersionId: string, productVersionId: string) {
     return this.request({
       method: 'get',
       url: `/agile/v1/projects/${getProjectId()}/program_version/link_program_version`,
+      params: {
+        programVersionId,
+        productVersionId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
+   * 删除项目所关联的项目群版本
+   * @param programVersionId
+   * @param programId
+   */
+  deleteLinkProgramVersion(programVersionId: string, productVersionId: string) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/program_version/delete_product_version_rel`,
       params: {
         programVersionId,
         productVersionId,
