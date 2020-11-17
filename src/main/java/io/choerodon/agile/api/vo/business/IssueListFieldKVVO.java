@@ -138,9 +138,22 @@ public class IssueListFieldKVVO {
 
     private Date estimatedEndTime;
 
+    @ApiModelProperty("项目名")
     private String projectName;
 
+    @ApiModelProperty("特性关联团队")
     private List<ProjectVO> featureTeams;
+
+    @ApiModelProperty("星标")
+    private Boolean starBeacon;
+
+    public Boolean getStarBeacon() {
+        return starBeacon;
+    }
+
+    public void setStarBeacon(Boolean starBeacon) {
+        this.starBeacon = starBeacon;
+    }
 
     public List<ProjectVO> getFeatureTeams() {
         return featureTeams;

@@ -541,7 +541,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                        @Param("issueType") String issueType,
                                        @Param("param") String param);
 
-    List<IssueDTO> listMyStarIssuesByProjectIdsAndUserId(List<Long> projectIds, Long userId);
+    List<IssueDTO> listMyStarIssuesByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds, @Param("parentIssues") List<Long> parentIssues, @Param("userId") Long userId);
 
     /**
      * 查询项目下未完成的issue，包含story, task和bug(不包含子缺陷)

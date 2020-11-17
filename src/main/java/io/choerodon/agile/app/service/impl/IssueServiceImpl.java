@@ -442,7 +442,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private void setListStarBeacon(List<IssueSubListVO> issues, StarBeaconDTO starBeaconDTO) {
         if (!Objects.isNull(issues) && !issues.isEmpty()) {
             List<Long> issueIds = issues.stream().map(IssueSubListVO::getIssueId).collect(Collectors.toList());
-            List<Long> starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, starBeaconDTO.getProjectId(), starBeaconDTO.getUserId());
+            List<Long> starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, Arrays.asList(starBeaconDTO.getProjectId()), starBeaconDTO.getUserId());
             if (!Objects.isNull(starIssueIds) && !starIssueIds.isEmpty()) {
                 issues.forEach(issue -> {
                     if (starIssueIds.contains(issue.getIssueId())) {
@@ -2602,7 +2602,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<Long> parentIssues = parentIssuesDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         List<IssueDTO> allIssue;
         if (Objects.equals(searchType, "myStarBeacon")) {
-            allIssue = issueMapper.listMyStarIssuesByProjectIdsAndUserId(projectIds, userId);
+            allIssue = issueMapper.listMyStarIssuesByProjectIdsAndUserId(projectIds, parentIssues, userId);
         } else {
             allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
         }
@@ -2639,11 +2639,28 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService != null) {
             agilePluginService.setFeatureTypeAndFeatureTeams(list, organizationId);
         }
+        if (Objects.equals(searchType, "myStarBeacon")) {
+            setListStarBeacon(list, userId, projectIds);
+        }
         if (!userIds.isEmpty()) {
             setAssignee(list, userIds);
         }
         PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
         return new Page<>(list, pageInfo, parentPage.getTotalElements());
+    }
+
+    private void setListStarBeacon(List<IssueListFieldKVVO> issues, Long userId, List<Long> projectIds) {
+        if (!CollectionUtils.isEmpty(issues)) {
+            List<Long> issueIds = issues.stream().map(IssueListFieldKVVO::getIssueId).collect(Collectors.toList());
+            List<Long> starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, projectIds, userId);
+            if (!CollectionUtils.isEmpty(starIssueIds)) {
+                issues.forEach(issue -> {
+                    if (starIssueIds.contains(issue.getIssueId())) {
+                        issue.setStarBeacon(true);
+                    }
+                });
+            }
+        }
     }
 
     private void setAssignee(List<IssueListFieldKVVO> list, Set<Long> userIds) {
