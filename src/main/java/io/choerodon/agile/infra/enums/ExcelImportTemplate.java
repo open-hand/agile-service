@@ -93,8 +93,57 @@ public class ExcelImportTemplate {
 
     public static class Header {
 
-        public static final List<Header> HEADERS;
+        private String code;
 
+        private String value;
+
+        private Boolean required;
+
+        private Integer defaultWidth;
+
+        public Header(String code, String value, Boolean required, Integer defaultWidth) {
+            this.code = code;
+            this.value = value;
+            this.required = required;
+            this.defaultWidth = defaultWidth;
+        }
+
+        public Integer getDefaultWidth() {
+            return defaultWidth;
+        }
+
+        public void setDefaultWidth(Integer defaultWidth) {
+            this.defaultWidth = defaultWidth;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public Boolean getRequired() {
+            return required;
+        }
+
+        public void setRequired(Boolean required) {
+            this.required = required;
+        }
+    }
+
+    public static class IssueHeader {
+
+        public static final List<Header> HEADERS;
 
         public static final String PARENT = "parent";
         public static final String RELATE_ISSUE = "relate_issue";
@@ -136,20 +185,6 @@ public class ExcelImportTemplate {
             });
         }
 
-        private String code;
-
-        private String value;
-
-        private Boolean required;
-
-        private Integer defaultWidth;
-
-        public Header(String code, String value, Boolean required, Integer defaultWidth) {
-            this.code = code;
-            this.value = value;
-            this.required = required;
-            this.defaultWidth = defaultWidth;
-        }
 
         public static List<Header> getByRequired(boolean required) {
             return HEADERS
@@ -186,41 +221,6 @@ public class ExcelImportTemplate {
             return fields;
         }
 
-        public Integer getDefaultWidth() {
-            return defaultWidth;
-        }
-
-        public void setDefaultWidth(Integer defaultWidth) {
-            this.defaultWidth = defaultWidth;
-        }
-
-        public String getCode() {
-            return code;
-        }
-
-        public void setCode(String code) {
-            this.code = code;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        public Boolean getRequired() {
-            return required;
-        }
-
-        public void setRequired(Boolean required) {
-            this.required = required;
-        }
-    }
-
-    public static class Issue {
-
         public static final int ISSUE_TYPE_COL = 0;
         public static final int EPIC_COL = 1;
         public static final int COMPONENT_COL = 2;
@@ -236,52 +236,6 @@ public class ExcelImportTemplate {
         public static final int STORY_POINT_COL = 12;
         public static final int EPIC_NAME_COL = 13;
 
-        public static final HiddenSheet PRIORITY_SHEET = new HiddenSheet(PRIORITY_COL, "hidden_priority", 2);
-        public static final HiddenSheet ISSUE_TYPE_SHEET = new HiddenSheet(ISSUE_TYPE_COL, "hidden_issue_type", 3);
-        public static final HiddenSheet FIX_VERSION_SHEET = new HiddenSheet(FIX_VERSION_COL, "hidden_fix_version", 4);
-        public static final HiddenSheet COMPONENT_SHEET = new HiddenSheet(COMPONENT_COL, "hidden_component", 5);
-        public static final HiddenSheet SPRINT_SHEET = new HiddenSheet(SPRINT_COL, "hidden_sprint", 6);
-        public static final HiddenSheet MANAGER_SHEET = new HiddenSheet(MANAGER_COL, "hidden_manager", 7);
-        public static final HiddenSheet REPORTER_SHEET = new HiddenSheet(REPORTER_COL, "hidden_reporter", 8);
-        public static final HiddenSheet EPIC_SHEET = new HiddenSheet(EPIC_COL, "hidden_epic", 9);
-    }
-
-    public static class HiddenSheet {
-        private int col;
-
-        private String name;
-
-        private int index;
-
-        public HiddenSheet (int col, String name, int index) {
-            this.col = col;
-            this.name = name;
-            this.index = index;
-        }
-
-        public int getCol() {
-            return col;
-        }
-
-        public void setCol(int col) {
-            this.col = col;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getIndex() {
-            return index;
-        }
-
-        public void setIndex(int index) {
-            this.index = index;
-        }
     }
 
 }

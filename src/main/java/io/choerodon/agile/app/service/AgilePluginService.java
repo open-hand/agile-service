@@ -9,7 +9,6 @@ import io.choerodon.agile.infra.dto.business.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -288,14 +287,6 @@ public interface AgilePluginService {
      * @return
      */
     String[] changeFeatureHeaders(String[] copyFieldsName);
-
-    /**
-     * 获取特性的预定义字段
-     * @param organizationId
-     * @param projectId
-     * @return
-     */
-    PredefinedDTO getFeaturePredefined(Long organizationId, Long projectId);
 
     List<SubFeatureVO> listFeature(Long organizationId, Long projectId);
 

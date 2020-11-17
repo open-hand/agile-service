@@ -231,12 +231,12 @@ public class ExcelServiceImpl implements ExcelService {
         boolean withFeature = (withFeature(projectId, organizationId) && agilePluginService != null);
 
         validateSystemField(systemFields, withFeature);
-        systemFields = ExcelImportTemplate.Header.addFields(systemFields);
+        systemFields = ExcelImportTemplate.IssueHeader.addFields(systemFields);
         ExcelImportTemplate.Cursor cursor = new ExcelImportTemplate.Cursor();
         List<PredefinedDTO> predefinedList =
                 processSystemFieldPredefinedList(organizationId, projectId, systemFields, withFeature, cursor);
         Map<String, String> customFieldCodeNameMap = new HashMap<>();
-        predefinedList.addAll(processCustomFieldPredefinedList(projectId, customFields, cursor, systemFields.size(), customFieldCodeNameMap));
+        predefinedList.addAll(processCustomFieldPredefinedList(projectId, customFields, cursor, systemFields.size(), customFieldCodeNameMap, "agileIssueType"));
         List<String> headers = generateExcelHeaderTitle(systemFields, customFields, customFieldCodeNameMap);
         Workbook wb = new XSSFWorkbook();
         // create guide sheet
@@ -256,7 +256,7 @@ public class ExcelServiceImpl implements ExcelService {
     private void validateSystemField(List<String> systemFields, boolean withFeature) {
         List<String> requiredCode =
                 ExcelImportTemplate
-                        .Header
+                        .IssueHeader
                         .getByRequired(true)
                         .stream()
                         .map(ExcelImportTemplate.Header::getCode)
@@ -272,7 +272,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private void checkAndThrowException(List<String> systemFields, String fieldCode) {
         if (!systemFields.contains(fieldCode)) {
-            throw new CommonException("error.required.system.code.not.existed" + fieldCode);
+            throw new CommonException("error.required.system.code.not.existed." + fieldCode);
         }
     }
 
@@ -281,7 +281,7 @@ public class ExcelServiceImpl implements ExcelService {
                                                   Map<String, String> customFieldCodeNameMap) {
         List<String> result = new ArrayList<>();
         systemFields.forEach(s -> {
-            String title = ExcelImportTemplate.Header.getValueByCode(s);
+            String title = ExcelImportTemplate.IssueHeader.getValueByCode(s);
             if (!StringUtils.hasText(title)) {
                 throw new CommonException("error.excel.header.code." + s);
             }
@@ -299,17 +299,18 @@ public class ExcelServiceImpl implements ExcelService {
         return result;
     }
 
-    private List<PredefinedDTO> processCustomFieldPredefinedList(Long projectId,
+    protected List<PredefinedDTO> processCustomFieldPredefinedList(Long projectId,
                                                                  List<String> customFields,
                                                                  ExcelImportTemplate.Cursor cursor,
                                                                  int systemFieldLength,
-                                                                 Map<String, String> customFieldCodeNameMap) {
+                                                                 Map<String, String> customFieldCodeNameMap,
+                                                                 String issueTypeList) {
         List<PredefinedDTO> result = new ArrayList<>();
         if (ObjectUtils.isEmpty(customFields)) {
             return result;
         }
         List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetails =
-                objectSchemeFieldService.queryCustomFieldList(projectId, "agileIssueType");
+                objectSchemeFieldService.queryCustomFieldList(projectId, issueTypeList);
         Map<String, List<String>> customFieldValueMap = new HashMap<>();
         List<String> customFieldCodes = new ArrayList<>();
         List<String> fieldTypes = Arrays.asList("multiple", "single", "checkbox", "radio");
@@ -579,7 +580,7 @@ public class ExcelServiceImpl implements ExcelService {
                                                        List<String> systemFields) {
         //查询当前项目所有未完成的story,bug,task
         List<IssueVO> issues = issueMapper.listUndoneAvailableParents(projectId);
-        int col = getColByFieldCode(systemFields, ExcelImportTemplate.Header.PARENT);
+        int col = getColByFieldCode(systemFields, ExcelImportTemplate.IssueHeader.PARENT);
         List<String> values = new ArrayList<>();
         issues.forEach(i -> {
             String summary = i.getSummary();
@@ -591,7 +592,7 @@ public class ExcelServiceImpl implements ExcelService {
                 PREDEFINED_VALUE_END_ROW,
                 col,
                 col,
-                ExcelImportTemplate.Header.PARENT,
+                ExcelImportTemplate.IssueHeader.PARENT,
                 cursor.getAndIncreaseSheetNum());
     }
 
@@ -656,7 +657,7 @@ public class ExcelServiceImpl implements ExcelService {
     private void isCustomFieldsIllegal(List<String> customFields, List<String> customFieldCodes) {
         customFields.forEach(c -> {
             if (!customFieldCodes.contains(c)) {
-                throw new CommonException("error.illegal.custom.field.code");
+                throw new CommonException("error.illegal.custom.field.code."+ c);
             }
         });
     }
@@ -947,7 +948,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Long, Set<Long>> relatedMap = new HashMap<>();
         int relateIssueIndex = 0;
         for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
-            if (entry.getValue().getFieldCode().equals(ExcelImportTemplate.Header.RELATE_ISSUE)) {
+            if (entry.getValue().getFieldCode().equals(ExcelImportTemplate.IssueHeader.RELATE_ISSUE)) {
                 relateIssueIndex = entry.getKey();
             }
         }
@@ -999,7 +1000,7 @@ public class ExcelServiceImpl implements ExcelService {
         });
     }
 
-    private Set<Integer> getDateColumns(Map<Integer, ExcelColumnVO> headerMap) {
+    protected Set<Integer> getDateColumns(Map<Integer, ExcelColumnVO> headerMap) {
         Set<Integer> set = new HashSet<>();
         headerMap.forEach((k, v) -> {
             if (v.getFieldCode().equals(FieldCode.ESTIMATED_START_TIME)
@@ -1010,7 +1011,7 @@ public class ExcelServiceImpl implements ExcelService {
         return set;
     }
 
-    private void insertCustomFields(Long issueId,
+    protected void insertCustomFields(Long issueId,
                                     List<PageFieldViewUpdateVO> customFields,
                                     Long projectId) {
         if (!ObjectUtils.isEmpty(customFields)) {
@@ -1041,7 +1042,7 @@ public class ExcelServiceImpl implements ExcelService {
         history.setFileUrl(errorWorkBookUrl);
     }
 
-    private void writeErrorData(Map<Integer, List<Integer>> errorRowColMap,
+    protected void writeErrorData(Map<Integer, List<Integer>> errorRowColMap,
                                 Sheet dataSheet,
                                 int colNum,
                                 Sheet sheet) {
@@ -1069,7 +1070,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private List<PredefinedDTO> processPredefinedByHeaderMap(Map<Integer, ExcelColumnVO> headerMap) {
+    protected List<PredefinedDTO> processPredefinedByHeaderMap(Map<Integer, ExcelColumnVO> headerMap) {
         List<PredefinedDTO> result = new ArrayList<>();
         ExcelImportTemplate.Cursor cursor = new ExcelImportTemplate.Cursor();
         headerMap.forEach((k, v) -> {
@@ -1183,7 +1184,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void validateCustomFieldData(Row row,
+    protected void validateCustomFieldData(Row row,
                                          Integer col,
                                          ExcelColumnVO excelColumn,
                                          Map<Integer, List<Integer>> errorRowColMap,
@@ -1284,9 +1285,9 @@ public class ExcelServiceImpl implements ExcelService {
                 validateAndSetEpic(row, col, excelColumn, errorRowColMap, issueCreateVO, issueType, parentIssue);
                 break;
             case FieldCode.SUMMARY:
-                validateAndSetSummary(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                validateAndSetSummary(row, col, errorRowColMap, issueCreateVO);
                 break;
-            case ExcelImportTemplate.Header.PARENT:
+            case ExcelImportTemplate.IssueHeader.PARENT:
                 setParent(row, col, issueCreateVO, errorRowColMap, parentIssue, issueType);
                 break;
             case FieldCode.DESCRIPTION:
@@ -1307,7 +1308,7 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.ESTIMATED_END_TIME:
                 validateAndSetEstimatedTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ESTIMATED_END_TIME);
                 break;
-            case ExcelImportTemplate.Header.RELATE_ISSUE:
+            case ExcelImportTemplate.IssueHeader.RELATE_ISSUE:
                 validateRelateIssue(row, col, issueCreateVO, errorRowColMap, projectId);
                 break;
             default:
@@ -1362,7 +1363,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void validateAndSetEstimatedTime(Row row,
+    protected void validateAndSetEstimatedTime(Row row,
                                              Integer col,
                                              IssueCreateVO issueCreateVO,
                                              Map<Integer, List<Integer>> errorRowColMap,
@@ -1475,7 +1476,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void setDescription(Row row,
+    protected void setDescription(Row row,
                                 Integer col,
                                 IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
@@ -1513,9 +1514,8 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
 
-    private void validateAndSetSummary(Row row,
+    protected void validateAndSetSummary(Row row,
                                        Integer col,
-                                       ExcelColumnVO excelColumn,
                                        Map<Integer, List<Integer>> errorRowColMap,
                                        IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
@@ -1595,7 +1595,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void validateAndSetEpicName(Row row,
+    protected void validateAndSetEpicName(Row row,
                                         Integer col,
                                         Map<Integer, List<Integer>> errorRowColMap,
                                         IssueCreateVO issueCreateVO,
@@ -1612,7 +1612,7 @@ public class ExcelServiceImpl implements ExcelService {
             } else {
                 value = cell.toString().trim();
                 if (value.length() > 20) {
-                    cell.setCellValue(buildWithErrorMsg(value, "史诗名称过长"));
+                    cell.setCellValue(buildWithErrorMsg(value, "史诗名称过长，不能超过20位"));
                     addErrorColumn(rowNum, col, errorRowColMap);
                 } else if (!checkEpicNameExist(projectId, value)) {
                     cell.setCellValue(buildWithErrorMsg(value, "史诗名称重复"));
@@ -1637,7 +1637,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void validateAndSetIssueType(Row row,
+    protected void validateAndSetIssueType(Row row,
                                          Integer col,
                                          ExcelColumnVO excelColumn,
                                          Map<Integer, List<Integer>> errorRowColMap,
@@ -1764,7 +1764,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void validateAndSetReporter(Row row,
+    protected void validateAndSetReporter(Row row,
                                         Integer col,
                                         ExcelColumnVO excelColumn,
                                         Map<Integer, List<Integer>> errorRowColMap,
@@ -1802,7 +1802,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void addErrorColumn(int rowNum, Integer col, Map<Integer, List<Integer>> errorRowColMap) {
+    protected void addErrorColumn(int rowNum, Integer col, Map<Integer, List<Integer>> errorRowColMap) {
         List<Integer> columns = errorRowColMap.get(rowNum);
         if (columns == null) {
             columns = new ArrayList<>();
@@ -1811,7 +1811,7 @@ public class ExcelServiceImpl implements ExcelService {
         columns.add(col);
     }
 
-    private String buildWithErrorMsg(String value, String msg) {
+    protected String buildWithErrorMsg(String value, String msg) {
         return new StringBuilder(value).append("(").append(msg).append(")").toString();
     }
 
@@ -1879,7 +1879,7 @@ public class ExcelServiceImpl implements ExcelService {
         boolean containsCustomFields = false;
         for (int i = 0; i < headerNames.size(); i++) {
             String headerName = headerNames.get(i);
-            String code = ExcelImportTemplate.Header.getCodeByValue(headerName);
+            String code = ExcelImportTemplate.IssueHeader.getCodeByValue(headerName);
             boolean isSystemField = StringUtils.hasText(code);
             ExcelColumnVO excelColumnVO = new ExcelColumnVO();
             headerMap.put(i, excelColumnVO);
@@ -1893,13 +1893,14 @@ public class ExcelServiceImpl implements ExcelService {
             }
         }
         if (containsCustomFields) {
-            validateCustomField(headerMap, projectId, history);
+            validateCustomField(headerMap, projectId, history, "agileIssueType");
         }
     }
 
-    private void validateCustomField(Map<Integer, ExcelColumnVO> headerMap,
-                                     Long projectId,
-                                     FileOperationHistoryDTO history) {
+    protected void validateCustomField(Map<Integer, ExcelColumnVO> headerMap,
+                                       Long projectId,
+                                       FileOperationHistoryDTO history,
+                                       String issueTypeList) {
         List<ExcelColumnVO> customFields = new ArrayList<>();
         for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
             ExcelColumnVO value = entry.getValue();
@@ -1908,7 +1909,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
         }
         List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetails =
-                objectSchemeFieldService.queryCustomFieldList(projectId, "agileIssueType");
+                objectSchemeFieldService.queryCustomFieldList(projectId, issueTypeList);
         List<UserDTO> users =
                 baseFeignClient.listUsersByProjectId(projectId, 1, 0, null).getBody();
         List<String> userNames = new ArrayList<>();
@@ -1919,9 +1920,7 @@ public class ExcelServiceImpl implements ExcelService {
         });
 
         Map<String, ObjectSchemeFieldDetailVO> fieldMap = new HashMap<>();
-        objectSchemeFieldDetails.forEach(o -> {
-            fieldMap.put(o.getName(), o);
-        });
+        objectSchemeFieldDetails.forEach(o -> fieldMap.put(o.getName(), o));
         String status = "error_custom_field_header";
         List<String> multiValueFieldType = Arrays.asList("checkbox", "multiple");
         List<String> fieldTypes = Arrays.asList("multiple", "single", "checkbox", "radio");
@@ -1932,7 +1931,7 @@ public class ExcelServiceImpl implements ExcelService {
                 status += headerName;
                 history.setStatus(status);
                 fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
-                throw new CommonException("error.illegal.custom.field.header."+headerName);
+                throw new CommonException("error.illegal.custom.field.header." + headerName);
             } else {
                 String fieldCode = detail.getCode();
                 PageFieldViewUpdateVO fieldDetail = new PageFieldViewUpdateVO();
@@ -1963,10 +1962,10 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private void setSystemFieldPredefinedValueByCode(String code,
-                                                             Long projectId,
-                                                             Long organizationId,
-                                                             ExcelColumnVO excelColumnVO,
-                                                             boolean withFeature) {
+                                                     Long projectId,
+                                                     Long organizationId,
+                                                     ExcelColumnVO excelColumnVO,
+                                                     boolean withFeature) {
         switch (code) {
             case FieldCode.PRIORITY:
                 processPriority(organizationId, excelColumnVO);
@@ -1974,7 +1973,7 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.ISSUE_TYPE:
                 processIssueType(withFeature, projectId, excelColumnVO);
                 break;
-            case ExcelImportTemplate.Header.PARENT:
+            case ExcelImportTemplate.IssueHeader.PARENT:
                 processParentIssue(projectId, excelColumnVO);
                 break;
             case FieldCode.FIX_VERSION:
@@ -2217,7 +2216,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private List<String> resolveCodeFromHeader(Workbook workbook,
+    protected List<String> resolveCodeFromHeader(Workbook workbook,
                                                FileOperationHistoryDTO history) {
         Sheet dataSheet = workbook.getSheetAt(1);
         Row headerRow = dataSheet.getRow(0);
