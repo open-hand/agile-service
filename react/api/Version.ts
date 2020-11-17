@@ -73,10 +73,10 @@ class VersionApi extends Api<VersionApi> {
    * 查询可关联的项目群版本
    * @param programId
    */
-  loadProgramVersion(selectAll: boolean = false, teamProjectIds?: string[], programId?: string) {
+  loadProgramVersion(selectAll: boolean = false, teamProjectIds?: string[]) {
     return this.request({
       method: 'get',
-      url: `/agile/v1/projects/${programId || getProjectId()}/program_version/list_program_version`,
+      url: `/agile/v1/projects/${getProjectId()}/program_version/list_program_version`,
       params: {
         organizationId: getOrganizationId(),
         teamProjectIds: teamProjectIds ? String(teamProjectIds) : undefined,

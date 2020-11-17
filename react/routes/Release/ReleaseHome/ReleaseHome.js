@@ -179,6 +179,7 @@ class ReleaseHome extends Component {
   };
 
   renderMenu = (text, record) => {
+    const { isInProgram } = this.props;
     const { type, id, organizationId } = AppState.currentMenuType;
     const menu = (
       <Menu onClick={(e) => this.handleClickMenu(record, e.key)}>
@@ -205,15 +206,18 @@ class ReleaseHome extends Component {
             </Tooltip>
           </Menu.Item>
         </Permission>
-        <Permission service={['choerodon.code.project.cooperation.work-list.ps.version.link.program.version']} key="6">
-          <Menu.Item key="6">
-            <Tooltip placement="top" title="关联项目群版本">
-              <span>
-                关联项目群版本
-              </span>
-            </Tooltip>
-          </Menu.Item>
-        </Permission>
+        {isInProgram
+       && (
+       <Permission service={['choerodon.code.project.cooperation.work-list.ps.version.link.program.version']} key="6">
+         <Menu.Item key="6">
+           <Tooltip placement="top" title="关联项目群版本">
+             <span>
+               关联项目群版本
+             </span>
+           </Tooltip>
+         </Menu.Item>
+       </Permission>
+       )}
         {record.statusCode === 'archived'
           ? null
           : (
