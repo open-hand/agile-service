@@ -8,6 +8,7 @@ import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { versionApiConfig } from '@/api';
 import { IsInProgram } from '@/hooks/useIsInProgram';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { getProjectId } from '@/utils/common';
 
 interface Props {
   modal?: IModalProps,
@@ -29,7 +30,7 @@ const LinkProgramVersion: React.FC<Props> = (props) => {
         autoQuery: true,
         fields: [{ name: 'id', type: 'string' as FieldType }, { name: 'name', type: 'string' as FieldType }],
         transport: {
-          read: versionApiConfig.loadProgramVersion(false, undefined, props.programId),
+          read: versionApiConfig.loadProgramVersion(false, [getProjectId()]),
         },
       }),
     }],
