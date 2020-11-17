@@ -22,7 +22,7 @@ class FeatureApi {
    * 批量创建特性关联
    * @param data
    */
-  createLink(data:IFeatureLink) {
+  createLink(data: IFeatureLink) {
     return axios.post(`${this.prefix}/board_depend/batch_create_depend`, data);
   }
 
@@ -30,7 +30,7 @@ class FeatureApi {
    * 刪除特性关联
    * @param featureDependId
    */
-  deleteLink(featureDependId:number) {
+  deleteLink(featureDependId: number) {
     return axios.delete(`${this.prefix}/board_depend/${featureDependId}`);
   }
 
@@ -199,6 +199,21 @@ class FeatureApi {
    */
   addIssues(featureId: number, issueIds: Array<number>) {
     return axios.post(`${this.prefix}/issues/to_feature/${featureId}`, issueIds);
+  }
+
+  /**
+   * 更新特性版本
+   */
+  updateVersions(featureId: string, programVersionIds?: string[]) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/program_version/feature_link_program_version`,
+      params: {
+        featureId,
+        organizationId: getOrganizationId(),
+        programVersionIds: programVersionIds ? String(programVersionIds) : '',
+      },
+    });
   }
 }
 

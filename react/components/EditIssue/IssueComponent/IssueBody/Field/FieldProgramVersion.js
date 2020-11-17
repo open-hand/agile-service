@@ -4,7 +4,8 @@ import moment from 'moment';
 import { DateTimePicker, Select, Tooltip } from 'choerodon-ui/pro';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { toJS } from 'mobx';
-import { issueApi } from '@/api';
+import { featureApi, issueApi } from '@/api';
+import SelectProgramVersion from '@/components/select/select-program-version';
 
 class FieldProgramVersion extends Component {
   renderItem(name, symbol = ',') {
@@ -27,34 +28,26 @@ class FieldProgramVersion extends Component {
     );
   }
 
-  updateIssueField = (value) => {
+  updateIssueField =async (value) => {
     const {
       store, onUpdate, reloadIssue, field,
     } = this.props;
     const issue = store.getIssue;
     const { issueId, objectVersionNumber } = issue;
-    const obj = {
-      issueId,
-      objectVersionNumber,
-      programVersionFeatureRelVOS: value,
-    };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
+    await featureApi.updateVersions(issueId, value);
+    if (onUpdate) {
+      onUpdate();
+    }
+    await reloadIssue(issueId);
   };
 
   render() {
     const { store, disabled } = this.props;
     const issue = store.getIssue;
-    const { programVersionFeatureRelVOS } = issue;
+    const { programVersionFeatureRelVOS, activePiTeams } = issue;
     const field = store.getFieldByCode('estimatedEndTime');
     const required = field?.required;
+    const teamProjectIds = activePiTeams && activePiTeams.length > 0 ? activePiTeams.map((item) => item.id) : undefined;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -64,10 +57,16 @@ class FieldProgramVersion extends Component {
         </div>
         <div className="c7n-value-wrapper" style={{ width: 'auto' }}>
           <TextEditToggle
-            initValue={programVersionFeatureRelVOS && programVersionFeatureRelVOS.length > 0 ? programVersionFeatureRelVOS.map((item) => item.id) : undefined}
+            initValue={programVersionFeatureRelVOS && programVersionFeatureRelVOS.length > 0 ? programVersionFeatureRelVOS.map((item) => String(item.programVersionId)) : undefined}
             onSubmit={this.updateIssueField}
             alwaysRender={false}
-            editor={() => <Select required={required} />}
+            editor={() => (
+              <SelectProgramVersion
+                multiple
+                required={required}
+                teamProjectIds={teamProjectIds}
+              />
+            )}
             submitTrigger={['blur']}
             disabled={disabled}
           >
