@@ -1,7 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
-import io.choerodon.agile.infra.dto.PredefinedDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -168,11 +167,11 @@ public class ExcelUtil {
     }
 
     private static void initExample(Workbook wb, Sheet sheet, boolean withFeature) {
-        sheet.setColumnWidth(ExcelImportTemplate.Issue.SUMMARY_COL, 8000);
-        sheet.setColumnWidth(ExcelImportTemplate.Issue.SUB_TASK_COL, 6000);
-        sheet.setColumnWidth(ExcelImportTemplate.Issue.DESCRIPTION_COL, 8500);
-        sheet.setColumnWidth(ExcelImportTemplate.Issue.PRIORITY_COL, 6000);
-        sheet.setColumnWidth(ExcelImportTemplate.Issue.EPIC_NAME_COL, 9000);
+        sheet.setColumnWidth(ExcelImportTemplate.IssueHeader.SUMMARY_COL, 8000);
+        sheet.setColumnWidth(ExcelImportTemplate.IssueHeader.SUB_TASK_COL, 6000);
+        sheet.setColumnWidth(ExcelImportTemplate.IssueHeader.DESCRIPTION_COL, 8500);
+        sheet.setColumnWidth(ExcelImportTemplate.IssueHeader.PRIORITY_COL, 6000);
+        sheet.setColumnWidth(ExcelImportTemplate.IssueHeader.EPIC_NAME_COL, 9000);
 
         Row row = sheet.createRow(18);
         row.createCell(0).setCellValue("示例：");
@@ -261,151 +260,13 @@ public class ExcelUtil {
         }
     }
 
-    public static Workbook generateExcelAwesome(Workbook generateExcel,
-                                                List<Integer> errorRows,
-                                                Map<Integer, List<Integer>> errorMapList,
-                                                String[] fieldsName,
-                                                List<String> priorityList,
-                                                List<String> issueTypeList,
-                                                List<String> versionList,
-                                                String sheetName,
-                                                List<String> componentList,
-                                                List<String> sprintList,
-                                                List<String> users,
-                                                PredefinedDTO theSecondColumnPredefined,
-                                                boolean withFeature) {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        // create guide sheet
-        createGuideSheet(workbook, initGuideSheet(), withFeature);
-        Sheet resultSheet = workbook.createSheet(sheetName);
-        CellStyle style = CatalogExcelUtil.getHeadStyle(workbook);
-        Map<Integer,Integer> widthMap = new HashMap<>();
-        widthMap.put(ExcelImportTemplate.Issue.EPIC_COL, 8000);
-        widthMap.put(ExcelImportTemplate.Issue.SUB_TASK_COL, 8000);
-        widthMap.put(ExcelImportTemplate.Issue.EPIC_NAME_COL, 8000);
-        generateHeaders(resultSheet, style, Arrays.asList(fieldsName));
-
-        List<PredefinedDTO> predefinedList = new ArrayList<>();
-        predefinedList.add(
-                new PredefinedDTO(
-                        priorityList,
-                        1,
-                        500,
-                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getName(),
-                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        issueTypeList,
-                        1,
-                        500,
-                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getName(),
-                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        versionList,
-                        1,
-                        500,
-                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getName(),
-                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        componentList,
-                        1,
-                        500,
-                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getName(),
-                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        sprintList,
-                        1,
-                        500,
-                        ExcelImportTemplate.Issue.SPRINT_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.SPRINT_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.SPRINT_SHEET.getName(),
-                        ExcelImportTemplate.Issue.SPRINT_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        users,
-                        1,
-                        500,
-                        ExcelImportTemplate.Issue.MANAGER_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.MANAGER_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.MANAGER_SHEET.getName(),
-                        ExcelImportTemplate.Issue.MANAGER_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        users,
-                        1,
-                        500,
-                        ExcelImportTemplate.Issue.REPORTER_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.REPORTER_SHEET.getCol(),
-                        ExcelImportTemplate.Issue.REPORTER_SHEET.getName(),
-                        ExcelImportTemplate.Issue.REPORTER_SHEET.getIndex()
-                ));
-        predefinedList.add(theSecondColumnPredefined);
-
-        for (PredefinedDTO predefined : predefinedList) {
-            workbook =
-                    dropDownList2007(
-                            workbook,
-                            resultSheet,
-                            predefined.values(),
-                            predefined.startRow(),
-                            predefined.endRow(),
-                            predefined.startCol(),
-                            predefined.endCol(),
-                            predefined.hidden(),
-                            predefined.hiddenSheetIndex());
-        }
-
-        Sheet sheet = generateExcel.getSheetAt(1);
-        int size = sheet.getPhysicalNumberOfRows();
-        XSSFCellStyle ztStyle = workbook.createCellStyle();
-        Font ztFont = workbook.createFont();
-        ztFont.setColor(Font.COLOR_RED);
-        ztStyle.setFont(ztFont);
-        int index = 1;
-        for (int i = 1; i <= size; i++) {
-            if (errorRows.contains(i)) {
-                Row row = sheet.getRow(i);
-                Row newRow = resultSheet.createRow(index++);
-                for (int j = 0; j < fieldsName.length; j++) {
-                    Cell cell = newRow.createCell(j);
-                    if (row.getCell(j) != null) {
-                        cell.setCellValue(substring(row.getCell(j).toString()));
-                    }
-                    if (errorMapList.get(i) != null) {
-                        List<Integer> errList = errorMapList.get(i);
-                        if (errList.contains(j)) {
-                            cell.setCellStyle(ztStyle);
-                        }
-                    }
-                }
-            }
-        }
-        return workbook;
-    }
 
     public static void generateHeaders(Sheet sheet, CellStyle style, List<String> headers) {
         Row row = sheet.createRow(0);
         int defaultWidth = 4000;
         for (int i = 0; i < headers.size(); i++) {
             String value = headers.get(i);
-            Integer width = ExcelImportTemplate.Header.getWidthByValue(value);
+            Integer width = ExcelImportTemplate.IssueHeader.getWidthByValue(value);
             if (width == null) {
                 sheet.setColumnWidth(i, defaultWidth);
             } else {
@@ -413,41 +274,6 @@ public class ExcelUtil {
             }
             CatalogExcelUtil.initCell(row.createCell(i), style, headers.get(i));
         }
-    }
-
-
-    public static <T> SXSSFWorkbook generateExcel(List<T> list, Class<T> clazz, String[] fieldsName, String[] fields, String sheetName) {
-        //1、创建工作簿
-        SXSSFWorkbook workbook = new SXSSFWorkbook();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if (list != null && !list.isEmpty()) {
-            //1.3、列标题样式
-            CellStyle style2 = createCellStyle(workbook, (short) 13, CellStyle.ALIGN_LEFT, true);
-            //1.4、强制换行
-            CellStyle cellStyle = workbook.createCellStyle();
-            cellStyle.setWrapText(true);
-            //2、创建工作表
-            SXSSFSheet sheet = workbook.createSheet(sheetName);
-            //设置默认列宽
-            sheet.setDefaultColumnWidth(13);
-            SXSSFRow row2 = sheet.createRow(0);
-            row2.setHeight((short) 260);
-            for (int j = 0; j < list.size(); j++) {
-                SXSSFRow row = sheet.createRow(j + 1);
-                row.setHeight((short) 260);
-                Object data = list.get(j);
-                for (int i = 0; i < fieldsName.length; i++) {
-                    //3.3设置列标题
-                    SXSSFCell cell2 = row2.createCell(i);
-                    //加载单元格样式
-                    cell2.setCellStyle(style2);
-                    cell2.setCellValue(fieldsName[i]);
-                    //4、操作单元格；将数据写入excel
-                    handleWriteCell(row, i, data, cellStyle, fields, clazz, null, formatter);
-                }
-            }
-        }
-        return workbook;
     }
 
     public static Workbook initIssueExportWorkbook(String sheetName, String[] fieldsName) {
