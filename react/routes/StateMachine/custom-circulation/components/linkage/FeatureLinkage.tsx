@@ -74,6 +74,7 @@ const FeatureLinkage = ({
     addField(`${key}-status`, {
       required: true,
     });
+    addField(`${key}-storyId`, {});
   }, [addField]);
 
   useEffect(() => {
@@ -115,7 +116,7 @@ const FeatureLinkage = ({
           updateData.push({
             projectId: current?.get(`${key}-project`),
             statusId: current?.get(`${key}-status`),
-            issueTypeId: selectedType,
+            issueTypeId: current?.get(`${key}-storyId`),
           });
         });
         await statusTransformApi.updateFeatureLinkage(record.get('id'), updateData);
@@ -201,6 +202,7 @@ const FeatureLinkage = ({
                             const projectIssueTypes = await issueTypeApi.loadAllWithStateMachineId('agile', modalDataSet?.current?.get(`${key}-project`));
                             const issueTypeId = (projectIssueTypes || []).find((item) => item.typeCode === 'story')?.id;
                             if (issueTypeId) {
+                              modalDataSet.current?.set(`${key}-storyId`, issueTypeId);
                               return statusTransformApi.getFeatureLinkageStatus({ issueTypeId, projectId: modalDataSet?.current?.get(`${key}-project`) });
                             }
                             return Promise.resolve([]);
