@@ -3220,7 +3220,19 @@
                 )
                 OR
                 (
-                    ai.issue_id IN (
+                    ai.type_code IN ('sub_task','bug')
+                    AND (
+                        ai.parent_issue_id IN
+                        <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                            #{parentIssue}
+                        </foreach>
+                        OR
+                        ai.relate_issue_id IN
+                        <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                            #{parentIssue}
+                        </foreach>
+                    )
+                    AND ai.issue_id IN (
                     SELECT fsb.instance_id
                     FROM fd_star_beacon fsb
                     WHERE fsb.type = 'issue'
