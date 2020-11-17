@@ -3211,15 +3211,27 @@
             <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
                 #{projectId}
             </foreach>
-            AND ai.issue_id IN (
-                SELECT fsb.instance_id
-                FROM fd_star_beacon fsb
-                WHERE fsb.type = 'issue'
-                AND fsb.project_id IN
-                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                    #{projectId}
-                </foreach>
-                AND fsb.user_id = #{userId}
+            AND
+            (
+                (
+                    ai.issue_id IN
+                    <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                        #{parentIssue}
+                    </foreach>
+                )
+                OR
+                (
+                    ai.issue_id IN (
+                    SELECT fsb.instance_id
+                    FROM fd_star_beacon fsb
+                    WHERE fsb.type = 'issue'
+                    AND fsb.project_id IN
+                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                        #{projectId}
+                    </foreach>
+                    AND fsb.user_id = #{userId}
+                    )
+                )
             )
         ORDER BY
         ai.project_id ASC,

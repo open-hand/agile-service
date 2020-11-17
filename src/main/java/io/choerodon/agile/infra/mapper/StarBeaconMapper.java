@@ -15,10 +15,10 @@ public interface StarBeaconMapper extends BaseMapper<StarBeaconDTO> {
     /**
      * 根据issueIds查询星标
      * @param issueIds
-     * @param projectId
+     * @param projectIds
      * @param userId
      * @return
      */
-    List<Long> selectStarIssuesByIds(@Param("issueIds") List<Long> issueIds, @Param("projectId") Long projectId, @Param("userId") Long userId);
+    List<Long> selectStarIssuesByIds(@Param("issueIds") List<Long> issueIds, @Param("projectIds") List<Long> projectIds, @Param("userId") Long userId);
 }
 
