@@ -52,6 +52,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -239,8 +240,8 @@ public class ExcelServiceImpl implements ExcelService {
         predefinedList.addAll(processCustomFieldPredefinedList(projectId, customFields, cursor, systemFields.size(), customFieldCodeNameMap, "agileIssueType"));
         List<String> headers = generateExcelHeaderTitle(systemFields, customFields, customFieldCodeNameMap);
         Workbook wb = new XSSFWorkbook();
-        // create guide sheet
-        ExcelUtil.createGuideSheet(wb, ExcelUtil.initGuideSheet(), false);
+        // copy guide sheet
+        copyGuideSheetFromTemplate(wb, "/templates/IssueImportGuideTemplate.xlsx");
         Sheet sheet = wb.createSheet(IMPORT_TEMPLATE_NAME);
         CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
         ExcelUtil.generateHeaders(sheet, style, headers);
@@ -251,6 +252,18 @@ public class ExcelServiceImpl implements ExcelService {
         } catch (Exception e) {
             LOGGER.info("exception: {}", e);
         }
+    }
+
+    protected void copyGuideSheetFromTemplate(Workbook wb, String path) {
+        Sheet guideSheet = wb.createSheet("要求");
+        InputStream inputStream = this.getClass().getResourceAsStream(path);
+        XSSFWorkbook srcWorkbook = null;
+        try {
+            srcWorkbook = new XSSFWorkbook(inputStream);
+        } catch (IOException e) {
+            throw new CommonException("error.open.issue.guide.template");
+        }
+        ExcelUtil.copySheet(srcWorkbook.getSheetAt(0), guideSheet, ExcelUtil.copyCellStyle(srcWorkbook, wb));
     }
 
     private void validateSystemField(List<String> systemFields, boolean withFeature) {
@@ -1037,7 +1050,7 @@ public class ExcelServiceImpl implements ExcelService {
                                                  FileOperationHistoryDTO history,
                                                  Long organizationId) {
         XSSFWorkbook workbook = new XSSFWorkbook();
-        ExcelUtil.createGuideSheet(workbook, ExcelUtil.initGuideSheet(), true);
+        copyGuideSheetFromTemplate(workbook, "/templates/IssueImportGuideTemplate.xlsx");
         Sheet sheet = workbook.createSheet(IMPORT_TEMPLATE_NAME);
         CellStyle style = CatalogExcelUtil.getHeadStyle(workbook);
         ExcelUtil.generateHeaders(sheet, style, headerNames);
