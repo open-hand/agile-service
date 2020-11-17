@@ -10,23 +10,23 @@ import { getApplyType } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import styles from './ImportFields.less';
 
-const programImportRequiresFields = ['summary', 'description', 'issueTypeId', 'reporterId', 'epicId', 'epicName', 'piNameVOList'];
+const programImportRequiresFields = ['summary', 'description', 'issueType', 'reporter', 'epic', 'epicName', 'pi'];
 const projectImportRequiresFields = ['issueType', 'parentIssue', 'epic', 'component', 'sprint', 'summary', 'description', 'epicName', 'assignee', 'reporter', 'priority', 'remainingTime', 'storyPoints', 'linkIssue'];
 const subProjectImportRequiredFields = ['issueType', 'parentIssue', 'feature', 'component', 'sprint', 'summary', 'description', 'assignee', 'reporter', 'priority', 'remainingTime', 'storyPoints', 'linkIssue'];
 
 const programSystemFields = [
   { code: 'summary', title: '概要' },
   { code: 'description', title: '描述' },
-  { code: 'issueTypeId', title: '类型' },
-  { code: 'reporterId', title: '报告人' },
-  { code: 'epicId', title: '所属史诗' },
+  { code: 'issueType', title: '类型' },
+  { code: 'reporter', title: '报告人' },
+  { code: 'epic', title: '所属史诗' },
   { code: 'epicName', title: '史诗名称' },
-  { code: 'piNameVOList', title: 'PI' },
+  { code: 'pi', title: 'PI' },
   { code: 'estimatedStartTime', title: '预计开始时间' },
   { code: 'estimatedEndTime', title: '预计结束时间' },
   { code: 'benfitHypothesis', title: '特性价值' },
   { code: 'acceptanceCritera', title: '验收标准' },
-  { code: 'teamProjects', title: '负责的子项目' },
+  { code: 'subProject', title: '负责的子项目' },
 ];
 
 const projectSystemFields = [
