@@ -834,6 +834,9 @@ public class ExcelServiceImpl implements ExcelService {
                 }
             }
             Cell issueTypeCell = row.getCell(issueTypeCol);
+            if (issueTypeCell == null) {
+                issueTypeCell = row.createCell(issueTypeCol);
+            }
             String issueType;
             if (isCellEmpty(issueTypeCell)) {
                 errorRowColMap.put(rowNum, Arrays.asList(issueTypeCol));
@@ -1164,8 +1167,7 @@ public class ExcelServiceImpl implements ExcelService {
             Row row = dataSheet.getRow(rowNum);
             Cell cell = row.getCell(parentColIndex);
             if (isCellEmpty(cell)) {
-                row.createCell(parentColIndex);
-                cell = row.getCell(parentColIndex);
+                cell = row.createCell(parentColIndex);
             }
             String value = cell.toString();
             cell.setCellValue(buildWithErrorMsg(value, "父子结构中有错误数据或父子结构插入错误"));
@@ -1184,6 +1186,9 @@ public class ExcelServiceImpl implements ExcelService {
         issueCreateVO.setProjectId(projectId);
         int rowNum = row.getRowNum();
         Cell issueTypeCell = row.getCell(issueTypeCol);
+        if (issueTypeCell == null) {
+            issueTypeCell = row.createCell(issueTypeCol);
+        }
         String value = "";
         if (isCellEmpty(issueTypeCell)) {
             issueTypeCell.setCellValue(buildWithErrorMsg(value, "问题类型为空"));
@@ -1200,6 +1205,9 @@ public class ExcelServiceImpl implements ExcelService {
                 && (SUB_TASK_CN.equals(value)
                 || SUB_BUG_CN.equals(value))) {
             Cell parentCell = row.getCell(parentCol);
+            if (parentCell == null) {
+                parentCell = row.createCell(parentCol);
+            }
             String parentCellValue = "";
             if (isCellEmpty(parentCell)) {
                 issueTypeCell.setCellValue(buildWithErrorMsg(parentCellValue, "子任务/子缺陷必须要有父节点"));
