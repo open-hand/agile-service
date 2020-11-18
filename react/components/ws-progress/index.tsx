@@ -2,14 +2,14 @@ import React, {
   useState, useReducer, useEffect, useCallback, useMemo,
 } from 'react';
 import { WSHandler, Choerodon } from '@choerodon/boot';
-import _ from 'lodash';
 import fileSever, { FileSaverOptions } from 'file-saver';
 import moment from 'moment';
 import { Progress } from 'choerodon-ui/pro';
 import { ProgressStatus, ProgressType } from 'choerodon-ui/lib/progress/enum';
-import './index.less';
 import { humanizeDuration } from '@/utils/common';
 import { observer } from 'mobx-react-lite';
+import './index.less';
+
 /**
  * @param fieldKey websocket传输信息下载url的key  默认fileUrl
  * @param fileName 下载文件名  默认为url 最后一个‘/’后的名
@@ -34,6 +34,7 @@ interface Props {
   renderEndProgress?: (messageData: any) => React.ReactElement | React.ReactElement[] | null | string,
   visible?: boolean, /**  可控类型 控制进度条是否显示 */
   messageKey: string,
+  predefineProgressTextConfig?: 'export' | 'import' | 'none' /** 预定义配置 ws进行时的下方提示文字的配置 默认export */
   autoDownload?: boolean | DownloadProps, /** 完成后是否自动下载 */
   downloadProps?: DownloadProps, /** 下载文件配置，当存在自动下载配置时，以自动下载配置为最高优先级 */
   onFinish?: (messageData: any) => void, /** websocket任务完成后回调 */
@@ -66,7 +67,20 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
       return { ...tempProps, ...props.autoDownload };
     }
     return tempProps;
-  }, [props.downloadProps]);
+  }, [props.autoDownload, props.downloadProps]);
+  const doingTextTemplate = useMemo(() => {
+    if (props.predefineProgressTextConfig !== 'none') {
+      switch (props.predefineProgressTextConfig) {
+        case 'import':
+          return '导入';
+        case 'export':
+          return '导出';
+        default:
+          return '导出';
+      }
+    }
+    return '';
+  }, [props.predefineProgressTextConfig]);
   const [stateProgress, dispatch] = useReducer((state: StateProps, action: ActionProps) => {
     switch (action.type) {
       case 'init':
@@ -148,14 +162,14 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
           downloadInfo.url
             ? (
               <>
-                <span>{downloadInfo.timeLine ?? `导出完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate, downloadInfo.timeFormat)}）`}</span>
+                <span>{downloadInfo.timeLine ?? `${doingTextTemplate}完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate, downloadInfo.timeFormat)}）`}</span>
                 <span role="none" className="c7n-agile-ws-finish-url" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</span>
               </>
             ) : ''
         )}
       </div>
     ) : <></>;
-  }, [props.downloadInfo, stateProgress.data]);
+  }, [doingTextTemplate, downLoadProps?.fileName, downLoadProps?.fileSaverOptions, props, stateProgress.data]);
   useEffect(() => {
     if (typeof (props.visible) !== 'undefined') {
       dispatch({ type: 'visible', visible: props.visible });
@@ -177,8 +191,12 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
             strokeWidth={16}
             showInfo={false}
           />
-          <span className="c7n-agile-ws-progress-area-text">正在导出中</span>
-          <span className="c7n-agile-ws-progress-area-prompt">（本次导入耗时较长，您可先返回进行其他操作）</span>
+          <span className="c7n-agile-ws-progress-area-text">{`正在${doingTextTemplate}中`}</span>
+          <span className="c7n-agile-ws-progress-area-prompt">
+            （本次
+            {doingTextTemplate}
+            耗时较长，您可先返回进行其他操作）
+          </span>
         </div>
       ) : renderFinish()}
     </WSHandler>
