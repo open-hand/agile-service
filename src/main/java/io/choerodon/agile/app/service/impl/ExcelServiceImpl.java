@@ -807,6 +807,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Integer, ExcelColumnVO> headerMap = new LinkedHashMap<>();
         boolean withFeature = (withFeature(projectId, organizationId) && agilePluginService != null);
         processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history);
+        validateRequiredSystemField(headerMap, withFeature, history);
 
         Sheet dataSheet = workbook.getSheetAt(1);
         int columnNum = headerMap.size();
@@ -814,7 +815,9 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Integer, Set<Integer>> parentSonMap = new HashMap<>();
         Map<Integer, Integer> sonParentMap = new HashMap<>();
         Set<Integer> withoutParentRows = new HashSet<>();
-        processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, dataSheet, dataRowCount, columnNum);
+        int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
+        int parentCol = getColIndexByFieldCode(headerMap, ExcelImportTemplate.IssueHeader.PARENT);
+        processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, dataSheet, dataRowCount, columnNum, issueTypeCol, parentCol);
         ExcelImportTemplate.Progress progress = new ExcelImportTemplate.Progress();
         //key为错误的行数，value为错误的列
         Map<Integer, List<Integer>> errorRowColMap = new HashMap<>();
@@ -836,10 +839,10 @@ public class ExcelServiceImpl implements ExcelService {
                     row.getCell(col).setCellType(CellType.STRING);
                 }
             }
-            Cell issueTypeCell = row.getCell(0);
+            Cell issueTypeCell = row.getCell(issueTypeCol);
             String issueType;
             if (isCellEmpty(issueTypeCell)) {
-                errorRowColMap.put(rowNum, Arrays.asList(0));
+                errorRowColMap.put(rowNum, Arrays.asList(issueTypeCol));
                 issueTypeCell.setCellValue(buildWithErrorMsg("", "问题类型为空"));
                 continue;
             } else {
@@ -857,9 +860,9 @@ public class ExcelServiceImpl implements ExcelService {
                 TransactionStatus status = transactionManager.getTransaction(definition);
                 try {
                     IssueCreateVO parent = new IssueCreateVO();
-                    validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, parent, null);
+                    validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, parent, null, issueTypeCol, parentCol);
                     if (!ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
-                        processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet);
+                        processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol);
                         rowNum = Collections.max(sonSet);
                         continue;
                     }
@@ -879,7 +882,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Integer, IssueCreateVO> sonMap = new HashMap<>();
                     for (Integer sonRow : sonSet) {
                         IssueCreateVO son = new IssueCreateVO();
-                        validateData(projectId, dataSheet.getRow(sonRow), headerMap, withoutParentRows, errorRowColMap, son, result);
+                        validateData(projectId, dataSheet.getRow(sonRow), headerMap, withoutParentRows, errorRowColMap, son, result, issueTypeCol, parentCol);
                         if (!ObjectUtils.isEmpty(errorRowColMap.get(sonRow))) {
                             sonsOk = false;
                             break;
@@ -888,7 +891,7 @@ public class ExcelServiceImpl implements ExcelService {
                         }
                     }
                     if (!sonsOk) {
-                        processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet);
+                        processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol);
                         rowNum = Collections.max(sonSet);
                         transactionManager.rollback(status);
                         continue;
@@ -906,14 +909,14 @@ public class ExcelServiceImpl implements ExcelService {
                     rowNum = Collections.max(sonSet);
                     transactionManager.commit(status);
                 } catch (Exception e) {
-                    processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet);
+                    processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol);
                     rowNum = Collections.max(sonSet);
                     transactionManager.rollback(status);
                     continue;
                 }
             } else {
                 IssueCreateVO issueCreateVO = new IssueCreateVO();
-                validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, issueCreateVO, null);
+                validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, issueCreateVO, null, issueTypeCol, parentCol);
                 if (!ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
                     progress.failCountIncrease();
                     progress.processNumIncrease();
@@ -945,6 +948,26 @@ public class ExcelServiceImpl implements ExcelService {
             status = FAILED;
         }
         updateFinalRecode(history, progress.getSuccessCount(), progress.getFailCount(), status);
+    }
+
+    private void validateRequiredSystemField(Map<Integer, ExcelColumnVO> headerMap,
+                                             boolean withFeature,
+                                             FileOperationHistoryDTO history) {
+        List<String> headerCodes = new ArrayList<>();
+        headerMap.forEach((k, v) -> {
+            if (!v.isCustomField()) {
+                headerCodes.add(v.getFieldCode());
+            }
+        });
+        try {
+            validateSystemField(headerCodes, withFeature);
+        } catch (CommonException e) {
+            history.setStatus("template_error_missing_required_column");
+            fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
+            FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
+            sendProcess(errorImport, history.getUserId(), 0.0);
+            throw e;
+        }
     }
 
     private void updateRelatedIssue(List<RelatedIssueVO> relatedIssueList,
@@ -1112,8 +1135,16 @@ public class ExcelServiceImpl implements ExcelService {
         return result;
     }
 
-    private void processErrorData(Long userId, FileOperationHistoryDTO history, Sheet dataSheet, Integer dataRowCount, ExcelImportTemplate.Progress progress, Map<Integer, List<Integer>> errorRowColMap, int rowNum, Set<Integer> sonSet) {
-        setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet);
+    private void processErrorData(Long userId,
+                                  FileOperationHistoryDTO history,
+                                  Sheet dataSheet,
+                                  Integer dataRowCount,
+                                  ExcelImportTemplate.Progress progress,
+                                  Map<Integer, List<Integer>> errorRowColMap,
+                                  int rowNum,
+                                  Set<Integer> sonSet,
+                                  int parentColIndex) {
+        setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet, parentColIndex);
         int errorCount = sonSet.size() + 1;
         Long failCount = progress.getFailCount() + errorCount;
         history.setFailCount(failCount);
@@ -1124,19 +1155,23 @@ public class ExcelServiceImpl implements ExcelService {
     private void setErrorMsgToParentSonRow(int rowNum,
                                            Sheet dataSheet,
                                            Map<Integer, List<Integer>> errorRowColMap,
-                                           Set<Integer> sonSet) {
-        addErrorMsgIfNotExisted(rowNum, dataSheet, errorRowColMap);
-        sonSet.forEach(s -> addErrorMsgIfNotExisted(s, dataSheet, errorRowColMap));
+                                           Set<Integer> sonSet,
+                                           int parentColIndex) {
+        addErrorMsgIfNotExisted(rowNum, dataSheet, errorRowColMap, parentColIndex);
+        sonSet.forEach(s -> addErrorMsgIfNotExisted(s, dataSheet, errorRowColMap, parentColIndex));
     }
 
-    private void addErrorMsgIfNotExisted(int rowNum, Sheet dataSheet, Map<Integer, List<Integer>> errorRowColMap) {
+    private void addErrorMsgIfNotExisted(int rowNum,
+                                         Sheet dataSheet,
+                                         Map<Integer, List<Integer>> errorRowColMap,
+                                         int parentColIndex) {
         if (ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
-            errorRowColMap.put(rowNum, Arrays.asList(1));
+            errorRowColMap.put(rowNum, Arrays.asList(parentColIndex));
             Row row = dataSheet.getRow(rowNum);
-            Cell cell = row.getCell(1);
+            Cell cell = row.getCell(parentColIndex);
             if (isCellEmpty(cell)) {
-                row.createCell(1);
-                cell = row.getCell(1);
+                row.createCell(parentColIndex);
+                cell = row.getCell(parentColIndex);
             }
             String value = cell.toString();
             cell.setCellValue(buildWithErrorMsg(value, "父子结构中有错误数据或父子结构插入错误"));
@@ -1149,46 +1184,46 @@ public class ExcelServiceImpl implements ExcelService {
                               Set<Integer> withoutParentRows,
                               Map<Integer, List<Integer>> errorRowColMap,
                               IssueCreateVO issueCreateVO,
-                              IssueVO parentIssue) {
+                              IssueVO parentIssue,
+                              int issueTypeCol,
+                              int parentCol) {
         issueCreateVO.setProjectId(projectId);
         int rowNum = row.getRowNum();
-        int issueTypeColIndex = 0;
-        int parentIndex = 1;
-        Cell issueTypeCell = row.getCell(issueTypeColIndex);
+        Cell issueTypeCell = row.getCell(issueTypeCol);
         String value = "";
         if (isCellEmpty(issueTypeCell)) {
             issueTypeCell.setCellValue(buildWithErrorMsg(value, "问题类型为空"));
-            addErrorColumn(rowNum, issueTypeColIndex, errorRowColMap);
+            addErrorColumn(rowNum, issueTypeCol, errorRowColMap);
             return;
         }
         value = issueTypeCell.toString();
         if (withoutParentRows.contains(rowNum)) {
             issueTypeCell.setCellValue(buildWithErrorMsg(value, "子任务/子缺陷必须要有父节点"));
-            addErrorColumn(rowNum, issueTypeColIndex, errorRowColMap);
+            addErrorColumn(rowNum, issueTypeCol, errorRowColMap);
             return;
         }
         if (parentIssue == null
                 && (SUB_TASK_CN.equals(value)
                 || SUB_BUG_CN.equals(value))) {
-            Cell parentCell = row.getCell(parentIndex);
+            Cell parentCell = row.getCell(parentCol);
             String parentCellValue = "";
             if (isCellEmpty(parentCell)) {
                 issueTypeCell.setCellValue(buildWithErrorMsg(parentCellValue, "子任务/子缺陷必须要有父节点"));
-                addErrorColumn(rowNum, parentIndex, errorRowColMap);
+                addErrorColumn(rowNum, parentCol, errorRowColMap);
                 return;
             }
             parentCellValue = parentCell.toString();
-            List<String> values = headerMap.get(parentIndex).getPredefinedValues();
+            List<String> values = headerMap.get(parentCol).getPredefinedValues();
             if (!values.contains(parentCellValue)) {
                 issueTypeCell.setCellValue(buildWithErrorMsg(parentCellValue, "输入值错误"));
-                addErrorColumn(rowNum, parentIndex, errorRowColMap);
+                addErrorColumn(rowNum, parentCol, errorRowColMap);
                 return;
             }
             String issueNum = parentCellValue.split(":")[0];
             parentIssue = issueMapper.selectByIssueNum(projectId, issueNum);
             if (parentIssue == null) {
                 issueTypeCell.setCellValue(buildWithErrorMsg(parentCellValue, "父节点不存在"));
-                addErrorColumn(rowNum, parentIndex, errorRowColMap);
+                addErrorColumn(rowNum, parentCol, errorRowColMap);
                 return;
             }
         }
@@ -1263,6 +1298,15 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
+    protected Integer getColIndexByFieldCode(Map<Integer, ExcelColumnVO> headerMap, String fieldCode) {
+        for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
+            if (entry.getValue().getFieldCode().equals(fieldCode)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
     private void validateSystemFieldData(Row row,
                                          Integer col,
                                          ExcelColumnVO excelColumn,
@@ -1272,7 +1316,8 @@ public class ExcelServiceImpl implements ExcelService {
                                          Long projectId,
                                          Map<Integer, ExcelColumnVO> headerMap) {
         String fieldCode = excelColumn.getFieldCode();
-        String issueType = row.getCell(0).toString();
+        int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
+        String issueType = row.getCell(issueTypeCol).toString();
         switch (fieldCode) {
             case FieldCode.ASSIGNEE:
                 validateAndSetAssignee(row, col, excelColumn, errorRowColMap, issueCreateVO);
@@ -1840,7 +1885,9 @@ public class ExcelServiceImpl implements ExcelService {
                                               Set<Integer> withoutParentRows,
                                               Sheet dataSheet,
                                               Integer dataRowCount,
-                                              Integer columnNum) {
+                                              Integer columnNum,
+                                              int issueTypeCol,
+                                              int parentCol) {
         Map<Integer, String> rowIssueTypeMap = new LinkedHashMap<>();
         List<IssueTypeLinkDTO> issueTypeLinks = new ArrayList<>();
         for (int i = 1; i <= dataRowCount; i++) {
@@ -1853,7 +1900,7 @@ public class ExcelServiceImpl implements ExcelService {
             if (isSkip(row, columnNum)) {
                 continue;
             }
-            String issueType = getCellString(row.getCell(0));
+            String issueType = getCellString(row.getCell(issueTypeCol));
             if (issueType == null) {
                 continue;
             }
@@ -1864,7 +1911,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
             rowIssueTypeMap.put(i, issueType);
         }
-         parentSonMap.putAll(getParentSonMap(issueTypeLinks));
+        parentSonMap.putAll(getParentSonMap(issueTypeLinks));
         sonParentMap.putAll(getSonParentMap(parentSonMap));
 
         for (Map.Entry<Integer, String> entry : rowIssueTypeMap.entrySet()) {
@@ -1874,7 +1921,7 @@ public class ExcelServiceImpl implements ExcelService {
                     || SUB_BUG_CN.equals(issueType)) {
                 Integer parentRow = sonParentMap.get(rowNum);
                 if (parentRow == null) {
-                    Cell parentCell = dataSheet.getRow(rowNum).getCell(1);
+                    Cell parentCell = dataSheet.getRow(rowNum).getCell(parentCol);
                     if (isCellEmpty(parentCell)) {
                         withoutParentRows.add(rowNum);
                     }
