@@ -28,7 +28,7 @@ const UserHead = memo(({
   const iconSize = size || 18;
   const {
     id, loginName, realName, avatar, imageUrl, email, ldap, name,
-  } = user;
+  } = user || {};
   const img = avatar || imageUrl;
   const renderTooltip = () => {
     if (title) {
