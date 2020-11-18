@@ -31,7 +31,7 @@ public interface ExcelService {
     void asyncExportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
                            HttpServletResponse response, Long organizationId, Sort sort, ServletRequestAttributes requestAttributes);
 
-    FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status, String action);
+    FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status, String action, String websocketKey);
 
     void processExportField(List<String> exportFieldCodes,
                             String[] fieldsName,
@@ -42,5 +42,5 @@ public interface ExcelService {
 
     void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId);
 
-    void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process);
+    void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process, String websocketKey);
 }
