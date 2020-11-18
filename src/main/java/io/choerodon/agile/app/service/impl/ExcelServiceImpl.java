@@ -113,6 +113,8 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected static final String SUB_TASK_CN = "子任务";
 
+    private static final String COLON_CN = "：";
+
     private static final int PREDEFINED_VALUE_START_ROW = 1;
     private static final int PREDEFINED_VALUE_END_ROW = 500;
 
@@ -598,7 +600,7 @@ public class ExcelServiceImpl implements ExcelService {
         issues.forEach(i -> {
             String summary = i.getSummary();
             String issueNum = i.getIssueNum();
-            values.add(issueNum + ":"+ summary);
+            values.add(issueNum + COLON_CN + summary);
         });
         return new PredefinedDTO(values,
                 PREDEFINED_VALUE_START_ROW,
@@ -1217,11 +1219,11 @@ public class ExcelServiceImpl implements ExcelService {
             parentCellValue = parentCell.toString();
             List<String> values = headerMap.get(parentCol).getPredefinedValues();
             if (!values.contains(parentCellValue)) {
-                issueTypeCell.setCellValue(buildWithErrorMsg(parentCellValue, "输入值错误"));
+                parentCell.setCellValue(buildWithErrorMsg(parentCellValue, "输入值错误"));
                 addErrorColumn(rowNum, parentCol, errorRowColMap);
                 return;
             }
-            String issueNum = parentCellValue.split(":")[0];
+            String issueNum = parentCellValue.split(COLON_CN)[0];
             parentIssue = issueMapper.selectByIssueNum(projectId, issueNum);
             if (parentIssue == null) {
                 issueTypeCell.setCellValue(buildWithErrorMsg(parentCellValue, "父节点不存在"));
@@ -2156,7 +2158,7 @@ public class ExcelServiceImpl implements ExcelService {
         issues.forEach(i -> {
             String summary = i.getSummary();
             String issueNum = i.getIssueNum();
-            String value = issueNum + ":"+ summary;
+            String value = issueNum + COLON_CN+ summary;
             values.add(value);
             map.put(value, i.getIssueId());
         });
