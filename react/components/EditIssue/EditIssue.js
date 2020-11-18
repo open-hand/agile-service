@@ -208,7 +208,7 @@ function EditIssue() {
       position: 'fixed',
       right: 0,
       // eslint-disable-next-line no-nested-ternary
-      top: isFullScreen ? 0 : HeaderStore.announcementClosed ? 50 : 100,
+      top: isFullScreen ? 0 : HeaderStore.announcementClosed ? 48 : 100,
       bottom: 0,
       // height: 'calc(100vh - 50px)',
       zIndex: 101,
