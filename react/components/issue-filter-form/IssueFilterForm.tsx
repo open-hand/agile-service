@@ -19,6 +19,7 @@ import { IIssueFilterFormProps } from '.';
 interface IConfig {
   fields?: IChosenFieldField[],
   value?: IChosenFieldField[], /** 可控值value */
+  defaultValue?: IChosenFieldField[]
   systemDataSetField?: FieldProps[],
   defaultVisibleFooterAddBtn?: boolean, // 是否使用默认添加筛选按钮
   actions?: {
@@ -114,6 +115,7 @@ const IssueFilterForm: React.FC = () => {
   const props = useIssueFilterFormStore();
   const prefixCls = 'c7n-agile-issue-filter-form';
   const dateFormatArr = useMemo(() => ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'], []);
+  const currentFormCode = useMemo(() => new Map<'chosenFields' | 'extraFormItems', Set<string>>([['chosenFields', new Set()], ['extraFormItems', new Set()]]), []);
   const dataSet = useMemo(() => {
     if (props.dataSet) {
       return props.dataSet;
@@ -136,14 +138,18 @@ const IssueFilterForm: React.FC = () => {
     }
   }, [dataSet, dateFormatArr]);
   useEffect(() => {
+    props.extraFormItems?.forEach((field) => {
+      !currentFormCode.get('extraFormItems')?.has(field.code)
+      && currentFormCode.get('extraFormItems')?.add(field.code) && initField(field);
+    });
+  }, [currentFormCode, initField, props.extraFormItems]);
+  useEffect(() => {
     // 初始化值
     props.chosenFields?.forEach((field) => {
-      initField(field);
+      !currentFormCode.get('chosenFields')?.has(field.code)
+      && currentFormCode.get('chosenFields')?.add(field.code) && initField(field);
     });
-    props.extraFormItems?.forEach((field) => {
-      initField(field);
-    });
-  }, [initField, props.chosenFields, props.extraFormItems]);
+  }, [currentFormCode, initField]);
   const render = (item: IChosenFieldField) => (props.extraRenderFields && props.extraRenderFields(item, {
     style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
   }, { dataSet })) || renderField(item, {
