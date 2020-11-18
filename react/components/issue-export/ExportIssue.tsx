@@ -88,6 +88,7 @@ const ExportIssue: React.FC = () => {
   const [filterData, filterComponentProps] = useIssueFilterForm({
     fields,
     value: choseFieldStore.getAllChosenField,
+    defaultValue: store.getCurrentChosenFieldsArr,
     extraFormItems: store.getExtraFields,
     systemDataSetField: store.dataSetSystemFields,
     extraRenderFields: store.renderField,
