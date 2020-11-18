@@ -3274,7 +3274,7 @@
         <result column="type_code" property="typeCode"/>
         <result column="sprint_id" property="sprintId"/>
         <collection property="componentIssueRelVOList"  ofType="io.choerodon.agile.api.vo.ComponentIssueRelVO">
-            <id column="component_id"/>
+            <id column="component_id" property="componentId"/>
         </collection>
     </resultMap>
 
@@ -3282,13 +3282,15 @@
         select
         t1.issue_id,
         t1.type_code,
-        t1.sprint_id,
+        t4.sprint_id,
         t3.component_id
         from agile_issue t1
         left join agile_project_info t2
         on t1.project_id = t2.project_id
         left join agile_component_issue_rel t3
         on (t3.project_id = #{projectId} and t3.issue_id = t1.issue_id)
+        left join agile_issue_sprint_rel t4 on t1.issue_id = t4.issue_id
+        left join agile_sprint t5 on (t4.sprint_id = t5.sprint_id and t5.status_code != 'closed')
         where t1.project_id = #{projectId}
         and CONCAT_WS( '-', t2.project_code, t1.issue_num ) = #{issueNum}
     </select>
