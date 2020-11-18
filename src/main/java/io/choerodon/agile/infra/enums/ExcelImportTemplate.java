@@ -220,22 +220,6 @@ public class ExcelImportTemplate {
             fields.add(RELATE_ISSUE);
             return fields;
         }
-
-        public static final int ISSUE_TYPE_COL = 0;
-        public static final int EPIC_COL = 1;
-        public static final int COMPONENT_COL = 2;
-        public static final int SPRINT_COL = 3;
-        public static final int SUMMARY_COL = 4;
-        public static final int SUB_TASK_COL = 5;
-        public static final int DESCRIPTION_COL = 6;
-        public static final int MANAGER_COL = 7;
-        public static final int REPORTER_COL = 8;
-        public static final int PRIORITY_COL = 9;
-        public static final int REMAIN_TIME_COL = 10;
-        public static final int FIX_VERSION_COL = 11;
-        public static final int STORY_POINT_COL = 12;
-        public static final int EPIC_NAME_COL = 13;
-
     }
 
 }
