@@ -325,4 +325,13 @@ public interface AgilePluginService {
      * @param content
      */
     void settingProgramVersions(List<ProductVersionPageVO> productVersionPageVOS, Long projectId, List<Long> content);
+
+    /**
+     * 版本关联特性
+     * @param programId
+     * @param organizationId
+     * @param featureIds
+     * @param programVersionIds
+     */
+    void linkFeatureByBacklog(Long programId,Long organizationId, List<Long> featureIds, List<Long> programVersionIds);
 }
