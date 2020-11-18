@@ -10,7 +10,7 @@ import { getApplyType } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import styles from './ImportFields.less';
 
-const programImportRequiresFields = ['summary', 'description', 'issueType', 'reporter', 'epic', 'epicName', 'pi'];
+const programImportRequiresFields = ['issueType', 'summary', 'description', 'reporter', 'epic', 'epicName', 'pi'];
 const projectImportRequiresFields = ['issueType', 'parentIssue', 'epic', 'component', 'sprint', 'summary', 'description', 'epicName', 'assignee', 'reporter', 'priority', 'remainingTime', 'storyPoints', 'linkIssue'];
 const subProjectImportRequiredFields = ['issueType', 'parentIssue', 'feature', 'component', 'sprint', 'summary', 'description', 'assignee', 'reporter', 'priority', 'remainingTime', 'storyPoints', 'linkIssue'];
 
@@ -52,12 +52,12 @@ const projectSystemFields = [
 
 const subProjectSystemFields = [
   { code: 'issueType', title: '类型' },
+  { code: 'summary', title: '概要' },
+  { code: 'description', title: '描述' },
   { code: 'parentIssue', title: '父级故事/任务/缺陷' },
   { code: 'feature', title: '故事所属特性' },
   { code: 'component', title: '模块' },
   { code: 'sprint', title: '冲刺' },
-  { code: 'summary', title: '概要' },
-  { code: 'description', title: '描述' },
   { code: 'assignee', title: '经办人' },
   { code: 'reporter', title: '报告人' },
   { code: 'priority', title: '优先级' },

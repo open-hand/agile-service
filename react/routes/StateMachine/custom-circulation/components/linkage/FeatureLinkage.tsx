@@ -203,7 +203,7 @@ const FeatureLinkage = ({
                             const issueTypeId = (projectIssueTypes || []).find((item) => item.typeCode === 'story')?.id;
                             if (issueTypeId) {
                               modalDataSet.current?.set(`${key}-storyId`, issueTypeId);
-                              return statusTransformApi.getFeatureLinkageStatus({ issueTypeId, projectId: modalDataSet?.current?.get(`${key}-project`) });
+                              return statusTransformApi.getFeatureLinkageStatus({ issueTypeId, projectId: modalDataSet?.current?.get(`${key}-project`), parentIssueStatusSetting: record.get('id') });
                             }
                             return Promise.resolve([]);
                           }}
