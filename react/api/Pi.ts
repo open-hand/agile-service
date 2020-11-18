@@ -18,7 +18,7 @@ class PiApi extends Api<PiApi> {
       data: statusList,
       transformResponse: (res) => {
         const data = JSON.parse(res);
-        return data.map((pi: { code: string, name: string}) => ({ ...pi, piName: `${pi.code}-${pi.name}` }));
+        return data.map((pi: { code: string, name: string }) => ({ ...pi, piName: `${pi.code}-${pi.name}` }));
       },
     });
   }
@@ -48,17 +48,21 @@ class PiApi extends Api<PiApi> {
 
   /**
    * 子项目下,根据活跃的ART和PI状态查询PI
-   * @param data  状态列表，[todo、doing、done]
+   * @param statusList  状态列表，[todo、doing、done]
    * @param programId
    */
-  getPiByPiStatus(data:Array<string>, programId:number) {
+  getPiByPiStatus(statusList: Array<string>, programId: number) {
     return axios({
       method: 'post',
       url: `${this.prefix}/project_invoke_program/pi/query_pi_by_status`,
       params: {
         programId,
       },
-      data,
+      transformResponse: (res: any) => {
+        const data: any = JSON.parse(res);
+        return data.map((pi: { code: string, name: string }) => ({ ...pi, piName: `${pi.code}-${pi.name}` }));
+      },
+      data: statusList,
     });
   }
 
@@ -66,7 +70,7 @@ class PiApi extends Api<PiApi> {
    * 查询feature 关联过的特性记录(PI历程)
    * @param issueId
    */
-  getFeatureLog(issueId:number) {
+  getFeatureLog(issueId: number) {
     return axios.get(`${this.prefix}/pi/${issueId}/list_feature_pi_log`);
   }
 
@@ -79,8 +83,8 @@ class PiApi extends Api<PiApi> {
    * @param outsetIssueId
    * @param rankIndex
    */
-  addFeatures(issueIds:Array<number>, sourceId:number = 0, destinationId:number = 0,
-    before:boolean = false, outsetIssueId:number = 0, rankIndex:number = 0) {
+  addFeatures(issueIds: Array<number>, sourceId: number = 0, destinationId: number = 0,
+    before: boolean = false, outsetIssueId: number = 0, rankIndex: number = 0) {
     return axios.post(`${this.prefix}/pi/to_pi/${destinationId}`, {
       before,
       issueIds,
