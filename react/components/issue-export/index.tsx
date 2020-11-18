@@ -28,8 +28,9 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
   tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, otherModalProps?: ModalProps) {
   const checkOptions = [...tableDataSet.fields.values()].map((option) => ({ value: option.props.name!, label: option.props.label as string, order: option.order }));
   const { className, ...otherProps } = otherModalProps || {};
+  const key = Modal.key();
   Modal.open({
-    key: Modal.key(),
+    key,
     title: '导出问题',
     style: {
       width: 380,
@@ -43,8 +44,9 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
       tableRef={tableRef}
       store={store}
     />,
-    okText: '关闭',
-    okCancel: false,
+    okText: store.exportButtonConfig?.buttonChildren ?? '导出',
+    okProps: { ...store.exportButtonConfig?.buttonProps },
+    cancelText: '关闭',
     ...otherProps,
   });
 }

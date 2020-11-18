@@ -3,12 +3,14 @@ import React, {
 } from 'react';
 import { injectIntl, InjectedIntl } from 'react-intl';
 import { observer } from 'mobx-react-lite';
+import { IModalProps } from '@/common/types';
 import IssueExportStore from './store';
 import { IExportIssueProps } from '..';
 
 interface Context extends IExportIssueProps {
   intl: InjectedIntl,
   prefixCls: string,
+  modal?: IModalProps,
 }
 type Props = Pick<Context, 'intl' | 'tableRef' | 'fields' | 'chosenFields' | 'checkOptions'> & { children: React.Component | React.ReactElement, store?: IssueExportStore };
 const ExportIssueContext = createContext({} as Context);
