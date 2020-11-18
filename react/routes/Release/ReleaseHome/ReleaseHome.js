@@ -207,17 +207,17 @@ class ReleaseHome extends Component {
           </Menu.Item>
         </Permission>
         {isInProgram
-       && (
-       <Permission service={['choerodon.code.project.cooperation.work-list.ps.version.link.program.version']} key="6">
-         <Menu.Item key="6">
-           <Tooltip placement="top" title="关联项目群版本">
-             <span>
-               关联项目群版本
-             </span>
-           </Tooltip>
-         </Menu.Item>
-       </Permission>
-       )}
+          && (
+            <Permission service={['choerodon.code.project.cooperation.work-list.ps.version.link.program.version']} key="6">
+              <Menu.Item key="6">
+                <Tooltip placement="top" title="关联项目群版本">
+                  <span>
+                    关联项目群版本
+                  </span>
+                </Tooltip>
+              </Menu.Item>
+            </Permission>
+          )}
         {record.statusCode === 'archived'
           ? null
           : (
@@ -233,6 +233,7 @@ class ReleaseHome extends Component {
           )}
       </Menu>
     );
+
     return (
       <TableDropMenu
         menu={menu}
@@ -240,6 +241,14 @@ class ReleaseHome extends Component {
         onClickEdit={this.handleClickMenu.bind(this, record, '5')}
         type={type}
         projectId={id}
+        menuPermissionProps={{
+          service:
+            [
+              'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
+              'choerodon.code.project.cooperation.work-list.ps.version.link.program.version',
+              'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
+            ],
+        }}
         organizationId={organizationId}
         service={[
           'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
@@ -363,6 +372,7 @@ class ReleaseHome extends Component {
           'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
           'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
           'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion',
+          'choerodon.code.project.cooperation.work-list.ps.version.link.program.version',
         ]}
       >
         <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
