@@ -1166,13 +1166,18 @@
                     select
                         IF(ai.type_code = 'bug',ai.relate_issue_id,ai.parent_issue_id) as issue_id
                     from
-                        agile_issue_sprint_rel aisr,
+                        <if test="searchType != myStarBeacon">
+                            agile_issue_sprint_rel aisr,
+                        </if>
                         agile_issue ai,
                         agile_issue_status ais
-                    where aisr.project_id in
-                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                        #{projectId}
-                    </foreach>
+                    where 1=1
+                    <if test="searchType != myStarBeacon">
+                        AND aisr.project_id in
+                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                            #{projectId}
+                        </foreach>
+                    </if>
                     <if test="searchType == null">
                         AND aisr.sprint_id in (
                             select sprint_id
@@ -1199,7 +1204,9 @@
                             and fsb.user_id = #{userId}
                         )
                     </if>
-                    AND ai.issue_id = aisr.issue_id
+                    <if test="searchType != myStarBeacon">
+                        AND ai.issue_id = aisr.issue_id
+                    </if>
                     AND ai.type_code in ('sub_task','bug')
                     AND ais.project_id = ai.project_id
                 )
