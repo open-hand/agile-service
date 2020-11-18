@@ -1587,6 +1587,9 @@ public class ExcelServiceImpl implements ExcelService {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
         String value = "";
+        if (cell == null) {
+            cell = row.createCell(col);
+        }
         if (isCellEmpty(cell)) {
             row.createCell(col).setCellValue(buildWithErrorMsg(value,  "概要不能为空"));
             addErrorColumn(rowNum, col, errorRowColMap);
@@ -1672,6 +1675,9 @@ public class ExcelServiceImpl implements ExcelService {
             int rowNum = row.getRowNum();
             Cell cell = row.getCell(col);
             String value = "";
+            if (cell == null) {
+                cell = row.createCell(col);
+            }
             if (isCellEmpty(cell)) {
                 row.createCell(col).setCellValue(buildWithErrorMsg(value, "史诗名称不能为空"));
                 addErrorColumn(rowNum, col, errorRowColMap);
