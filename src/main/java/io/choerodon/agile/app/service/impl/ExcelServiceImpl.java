@@ -54,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -802,7 +803,9 @@ public class ExcelServiceImpl implements ExcelService {
         List<String> headerNames = resolveCodeFromHeader(workbook, history, WEBSOCKET_IMPORT_CODE);
         Map<Integer, ExcelColumnVO> headerMap = new LinkedHashMap<>();
         boolean withFeature = (withFeature(projectId, organizationId) && agilePluginService != null);
-        processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history);
+        //获取日期类型的列
+        Set<Integer> dateTypeColumns = new HashSet<>();
+        processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history, dateTypeColumns);
         validateRequiredSystemField(headerMap, withFeature, history);
 
         Sheet dataSheet = workbook.getSheetAt(1);
@@ -818,7 +821,6 @@ public class ExcelServiceImpl implements ExcelService {
         //key为错误的行数，value为错误的列
         Map<Integer, List<Integer>> errorRowColMap = new HashMap<>();
         List<Long> importedIssueIds = new ArrayList<>();
-        Set<Integer> dateColumns = getDateColumns(headerMap);
         Map<Integer, Long> rowIssueIdMap = new HashMap<>();
         List<RelatedIssueVO> relatedIssueList = new ArrayList<>();
         for (int rowNum = 1; rowNum <= dataRowCount; rowNum++) {
@@ -831,7 +833,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
             for (int col = 0; col < columnNum; col++) {
                 Cell cell = row.getCell(col);
-                if (cell != null && !dateColumns.contains(col)) {
+                if (cell != null && !dateTypeColumns.contains(col)) {
                     row.getCell(col).setCellType(CellType.STRING);
                 }
             }
@@ -1042,17 +1044,6 @@ public class ExcelServiceImpl implements ExcelService {
         });
     }
 
-    protected Set<Integer> getDateColumns(Map<Integer, ExcelColumnVO> headerMap) {
-        Set<Integer> set = new HashSet<>();
-        headerMap.forEach((k, v) -> {
-            if (v.getFieldCode().equals(FieldCode.ESTIMATED_START_TIME)
-                    || v.getFieldCode().equals(FieldCode.ESTIMATED_END_TIME) ) {
-                set.add(k);
-            }
-        });
-        return set;
-    }
-
     protected void insertCustomFields(Long issueId,
                                     List<PageFieldViewUpdateVO> customFields,
                                     Long projectId) {
@@ -1249,6 +1240,9 @@ public class ExcelServiceImpl implements ExcelService {
                                          Map<Integer, List<Integer>> errorRowColMap,
                                          IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
+        SimpleDateFormat formats = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat formatTimeOnly = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat formatYearOnly = new SimpleDateFormat("yyyy");
         if (!isCellEmpty(cell)) {
             String value = cell.toString();
             boolean multiValue = excelColumn.isMultiValue();
@@ -1286,7 +1280,11 @@ public class ExcelServiceImpl implements ExcelService {
                     }
                 }
             } else {
-                customFieldValue = value;
+                if (excelColumn.isDateType()) {
+                    customFieldValue = parseDateToString(cell, row.getRowNum(), col, errorRowColMap, formats, formatTimeOnly, formatYearOnly);
+                } else {
+                    customFieldValue = value;
+                }
             }
             PageFieldViewUpdateVO PageFieldViewUpdateVO = excelColumn.getCustomFieldDetail();
             List<PageFieldViewUpdateVO> customFields = issueCreateVO.getCustomFields();
@@ -1300,6 +1298,48 @@ public class ExcelServiceImpl implements ExcelService {
             pageFieldViewUpdate.setValue(customFieldValue);
             customFields.add(pageFieldViewUpdate);
         }
+    }
+
+    /**
+     * @see <a href="https://stackoverflow.com/questions/15710888/reading-time-values-from-spreadsheet-using-poi-api"></a>
+     * @param cell
+     * @param rowNum
+     * @param col
+     * @param errorRowColMap
+     * @param format
+     * @param formatTimeOnly
+     * @param formatYearOnly
+     * @return
+     */
+    private String parseDateToString(Cell cell,
+                                     int rowNum,
+                                     Integer col,
+                                     Map<Integer, List<Integer>> errorRowColMap,
+                                     SimpleDateFormat format,
+                                     SimpleDateFormat formatTimeOnly,
+                                     SimpleDateFormat formatYearOnly) {
+        if (!cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
+            String value = cell.toString();
+            cell.setCellValue(buildWithErrorMsg(value, "请输入正确的日期格式"));
+            addErrorColumn(rowNum, col, errorRowColMap);
+        } else {
+            if (!DateUtil.isCellDateFormatted(cell)) {
+                cell.setCellValue(buildWithErrorMsg(cell.toString(), "请输入正确的日期格式"));
+                addErrorColumn(rowNum, col, errorRowColMap);
+            } else {
+                Date date = cell.getDateCellValue();
+                String dateStamp = formatYearOnly.format(date);
+                if (dateStamp.equals("1899")) {
+                    //仅时间类型返回
+                    String time = formatTimeOnly.format(date);
+                    Date now = new Date();
+                    return format.format(now).split(" ")[0] + " " + time;
+                } else {
+                    return format.format(date);
+                }
+            }
+        }
+        return null;
     }
 
     protected Integer getColIndexByFieldCode(Map<Integer, ExcelColumnVO> headerMap, String fieldCode) {
@@ -1946,7 +1986,8 @@ public class ExcelServiceImpl implements ExcelService {
                                   List<String> headerNames,
                                   Map<Integer, ExcelColumnVO> headerMap,
                                   boolean withFeature,
-                                  FileOperationHistoryDTO history) {
+                                  FileOperationHistoryDTO history,
+                                  Set<Integer> dateTypeColumns) {
         boolean containsCustomFields = false;
         for (int i = 0; i < headerNames.size(); i++) {
             String headerName = headerNames.get(i);
@@ -1956,6 +1997,7 @@ public class ExcelServiceImpl implements ExcelService {
             headerMap.put(i, excelColumnVO);
             excelColumnVO.setCustomField(!isSystemField);
             if (isSystemField) {
+                addSystemFieldIfDateType(dateTypeColumns, code, i, excelColumnVO);
                 excelColumnVO.setFieldCode(code);
                 setSystemFieldPredefinedValueByCode(code, projectId, organizationId, excelColumnVO, withFeature);
             } else {
@@ -1964,14 +2006,26 @@ public class ExcelServiceImpl implements ExcelService {
             }
         }
         if (containsCustomFields) {
-            validateCustomField(headerMap, projectId, history, "agileIssueType");
+            validateCustomField(headerMap, projectId, history, "agileIssueType", dateTypeColumns);
+        }
+    }
+
+    protected void addSystemFieldIfDateType(Set<Integer> dateTypeColumns,
+                                          String code,
+                                          int col,
+                                          ExcelColumnVO excelColumnVO) {
+        if (FieldCode.ESTIMATED_START_TIME.equals(code)
+                || FieldCode.ESTIMATED_END_TIME.equals(code)) {
+            dateTypeColumns.add(col);
+            excelColumnVO.setDateType(true);
         }
     }
 
     protected void validateCustomField(Map<Integer, ExcelColumnVO> headerMap,
                                        Long projectId,
                                        FileOperationHistoryDTO history,
-                                       String issueTypeList) {
+                                       String issueTypeList,
+                                       Set<Integer> dateTypeColumns) {
         List<ExcelColumnVO> customFields = new ArrayList<>();
         for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
             ExcelColumnVO value = entry.getValue();
@@ -1995,6 +2049,7 @@ public class ExcelServiceImpl implements ExcelService {
         String status = "error_custom_field_header";
         List<String> multiValueFieldType = Arrays.asList("checkbox", "multiple");
         List<String> fieldTypes = Arrays.asList("multiple", "single", "checkbox", "radio");
+        List<String> dateTypes = Arrays.asList("date", "datetime", "time");
         for (ExcelColumnVO excelColumn : customFields) {
             String headerName = excelColumn.getFieldCode();
             ObjectSchemeFieldDetailVO detail = fieldMap.get(headerName);
@@ -2027,6 +2082,11 @@ public class ExcelServiceImpl implements ExcelService {
                 if ("member".equals(fieldType)) {
                     excelColumn.setValueIdMap(userMap);
                     excelColumn.setPredefinedValues(userNames);
+                }
+                boolean isDateType = dateTypes.contains(fieldType);
+                excelColumn.setDateType(isDateType);
+                if (isDateType) {
+                    dateTypeColumns.add(getColIndexByFieldCode(headerMap, fieldCode));
                 }
             }
         }

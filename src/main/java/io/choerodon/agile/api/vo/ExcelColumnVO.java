@@ -16,6 +16,11 @@ public class ExcelColumnVO {
     private boolean customField;
 
     /**
+     * 是否为日期类型
+     */
+    private boolean dateType;
+
+    /**
      * 自定义字段是否允许保存多个值
      */
     private boolean multiValue;
@@ -39,6 +44,14 @@ public class ExcelColumnVO {
     private Map<String, IssueTypeVO> issueTypeMap;
 
     private PageFieldViewUpdateVO customFieldDetail;
+
+    public boolean isDateType() {
+        return dateType;
+    }
+
+    public void setDateType(boolean dateType) {
+        this.dateType = dateType;
+    }
 
     public PageFieldViewUpdateVO getCustomFieldDetail() {
         return customFieldDetail;
