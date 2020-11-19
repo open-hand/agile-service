@@ -179,15 +179,15 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if ("issue_epic".equals(issueCreateVO.getTypeCode())) {
             initRank(issueCreateVO, issueId, "epic");
         }
-        issueService.afterCreateIssue(issueId, issueConvertDTO, issueCreateVO, projectInfo);
-        if (agilePluginService != null) {
-            agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO,projectId,issueId,issueCreateVO);
-        }
         CreateIssuePayload createIssuePayload = new CreateIssuePayload(issueCreateVO, issueConvertDTO, projectInfo);
         InputDTO inputDTO = new InputDTO(issueId, JSON.toJSONString(createIssuePayload));
         //通过状态机客户端创建实例, 反射验证/条件/后置动作
         StateMachineTransformDTO initTransform = modelMapper.map(instanceService.queryInitTransform(organizationId, stateMachineId), StateMachineTransformDTO.class);
         stateMachineClient.createInstance(initTransform, inputDTO);
+        issueService.afterCreateIssue(issueId, issueConvertDTO, issueCreateVO, projectInfo);
+        if (agilePluginService != null) {
+            agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO,projectId,issueId,issueCreateVO);
+        }
         return issueService.queryIssueCreate(issueCreateVO.getProjectId(), issueId);
     }
 
