@@ -105,17 +105,17 @@ const Linkage = ({
       <Form dataSet={linkageDataSet}>
         <div>
           <p className={styles.label}>父级为故事类型</p>
-          <SelectStatus name="story" issueTypeId={getIssueTypeId('story')} />
+          <SelectStatus name="story" key={getIssueTypeId('story')} issueTypeId={getIssueTypeId('story')} />
         </div>
         <div>
           <p className={styles.label}>父级为任务类型</p>
-          <SelectStatus name="task" issueTypeId={getIssueTypeId('task')} />
+          <SelectStatus name="task" key={getIssueTypeId('task')} issueTypeId={getIssueTypeId('task')} />
         </div>
         {
           selectedTypeCode === 'sub_task' && (
             <div>
               <p className={styles.label}>父级为缺陷类型</p>
-              <SelectStatus name="bug" issueTypeId={getIssueTypeId('bug')} />
+              <SelectStatus name="bug" key={getIssueTypeId('bug')} issueTypeId={getIssueTypeId('bug')} />
             </div>
           )
         }
