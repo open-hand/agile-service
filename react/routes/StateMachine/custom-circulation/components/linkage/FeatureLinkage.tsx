@@ -53,6 +53,15 @@ const FeatureLinkage = ({
 
   const modalDataSet = useMemo(() => new DataSet({
     autoCreate: true,
+    events: {
+      // @ts-ignore
+      update: ({ dataSet, name }) => {
+        const [key, selectName] = name.split('-');
+        if (selectName === 'project') {
+          dataSet.current?.set(`${key}-status`, undefined);
+        }
+      },
+    },
   }), []);
 
   modalDataSetRef.current = modalDataSet;
@@ -198,6 +207,7 @@ const FeatureLinkage = ({
                           name={`${key}-status`}
                           placeholder="指定状态"
                           clearButton={false}
+                          key={`${modalDataSet?.current?.get(`${key}-project`)}`}
                           request={async () => {
                             const projectIssueTypes = await issueTypeApi.loadAllWithStateMachineId('agile', modalDataSet?.current?.get(`${key}-project`));
                             const issueTypeId = (projectIssueTypes || []).find((item) => item.typeCode === 'story')?.id;
