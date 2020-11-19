@@ -1,5 +1,4 @@
 import React from 'react';
-import { IStatus } from '@/common/types';
 import styles from './index.less';
 
 interface BaseTagProps {
