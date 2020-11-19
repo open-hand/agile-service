@@ -222,7 +222,7 @@ function EditIssue() {
           minWidth: 440,
         }}
         defaultSize={{
-          width: localStorage.getItem('agile.EditIssue.width') || 605,
+          width: localStorage.getItem('agile.EditIssue.width') || 640,
           height: '100%',
         }}
         onResizeEnd={handleResizeEnd}
