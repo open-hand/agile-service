@@ -5,6 +5,7 @@ import io.choerodon.agile.infra.enums.ExcelImportTemplate;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -422,7 +423,8 @@ public class ExcelUtil {
             cell.setCellValue(substring(datas.get(i)));
         }
         XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper((XSSFSheet) realSheet);
-        XSSFDataValidationConstraint dvConstraint = (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(hiddenSheetName + "!$A$1:$A" + datas.size());
+        int dateSize = datas.size();
+        String columnLetter = CellReference.convertNumToColString(startCol);
         CellRangeAddressList addressList = null;
         XSSFDataValidation validation = null;
         // 单元格样式
@@ -431,6 +433,7 @@ public class ExcelUtil {
         style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
         // 循环指定单元格下拉数据
         for (int i = startRow; i <= endRow; i++) {
+            XSSFDataValidationConstraint dvConstraint = buildDataValidationConstraint(columnLetter, hiddenSheetName, i, dateSize, dvHelper);
             row = (XSSFRow) realSheet.createRow(i);
             cell = row.createCell(startCol);
             cell.setCellStyle(style);
@@ -440,6 +443,46 @@ public class ExcelUtil {
         }
 
         return workbook;
+    }
+
+    /**
+     * 公式讲解参考
+     * @see <a href="https://zhuanlan.zhihu.com/p/38156200">参考</a>
+     * @param columnLetter
+     * @param hiddenSheetName
+     * @param rowNum
+     * @param dateSize
+     * @param dvHelper
+     * @return
+     */
+    private static XSSFDataValidationConstraint buildDataValidationConstraint(String columnLetter,
+                                                                              String hiddenSheetName,
+                                                                              int rowNum,
+                                                                              int dateSize,
+                                                                              XSSFDataValidationHelper dvHelper) {
+        int realRow = rowNum + 1;
+        StringBuilder formulaBuilder = new StringBuilder();
+        formulaBuilder
+                .append("OFFSET(")
+                .append(hiddenSheetName)
+                .append("!$A1, ")
+                .append("MATCH($")
+                .append(columnLetter)
+                .append(realRow)
+                .append("&\"*\", ")
+                .append(hiddenSheetName)
+                .append("!$A1:$A")
+                .append(dateSize)
+                .append(", 0) - 1, 0, COUNTIF(")
+                .append(hiddenSheetName)
+                .append("!$A1:$A")
+                .append(dateSize)
+                .append(", $")
+                .append(columnLetter)
+                .append(realRow)
+                .append("&\"*\"), 1)");
+        String listFormula = formulaBuilder.toString();
+        return (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(listFormula);
     }
 
     /**
