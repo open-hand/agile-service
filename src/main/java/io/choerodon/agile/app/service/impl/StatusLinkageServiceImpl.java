@@ -17,6 +17,7 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,7 +134,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
     }
 
     @Override
-    public void updateParentStatus(Long projectId, Long issueId, String applyType) {
+    public boolean updateParentStatus(Long projectId, Long issueId, String applyType) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException("error.issue.null");
@@ -145,18 +146,18 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         // 判断issue是不是子任务或者子bug
         Boolean checkBugOrSubTask = checkIsSubBugOrSubTask(issueDTO);
         if (Boolean.FALSE.equals(checkBugOrSubTask)) {
-            return;
+            return true;
         }
         List<StatusLinkageDTO> statusLinkageDTOS = queryByStatusIdAndIssueTypeId(projectId, issueDTO.getIssueTypeId(), issueDTO.getStatusId());
         if (CollectionUtils.isEmpty(statusLinkageDTOS)) {
-            return;
+            return true;
         }
         Map<String, StatusLinkageDTO> statusLinkageDTOMap = statusLinkageDTOS.stream().collect(Collectors.toMap(StatusLinkageDTO::getParentIssueTypeCode, Function.identity()));
         Long parentIssueId = getParentIssueId(issueDTO);
         IssueDTO parentIssue = issueMapper.selectByPrimaryKey(parentIssueId);
         StatusLinkageDTO statusLinkageDTO = statusLinkageDTOMap.get(parentIssue.getTypeCode());
         if (ObjectUtils.isEmpty(statusLinkageDTO)) {
-            return;
+            return true;
         }
         // 统计子任务的状态
         Boolean isChange = false;
@@ -179,8 +180,9 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         }
         // 判断是否改变父任务的状态
         if (Boolean.TRUE.equals(isChange)) {
-            changeParentStatus(projectId, applyType, parentIssue, changeStatus, issueDTO);
+            return changeParentStatus(projectId, applyType, parentIssue, changeStatus, issueDTO);
         }
+        return true;
     }
 
     @Override
@@ -188,9 +190,9 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         return statusLinkageMapper.selectWithStatusByProjectId(projectId);
     }
 
-    protected void changeParentStatus(Long projectId, String applyType, IssueDTO parentIssue, Long changeStatus, IssueDTO triggerIssue) {
+    protected boolean changeParentStatus(Long projectId, String applyType, IssueDTO parentIssue, Long changeStatus, IssueDTO triggerIssue) {
         if (parentIssue.getStatusId().equals(changeStatus)) {
-            return;
+            return true;
         }
         // 获取当前状态对应的transformId
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, parentIssue.getIssueTypeId());
@@ -203,12 +205,12 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
                     .selectTransformByStatusId(organizationId, stateMachineId, parentIssue.getStatusId(), changeStatus, true);
         }
         if (CollectionUtils.isEmpty(statusMachineTransformDTOS)) {
-            // todo 返回提示信息给前端
-            return;
+            return !StringUtils.equals("agile", applyType);
         }
         StatusMachineTransformDTO statusTransform = statusMachineTransformDTOS.get(0);
         issueService.updateIssueStatus(projectId, parentIssue.getIssueId(), statusTransform.getId(),
                 parentIssue.getObjectVersionNumber(), applyType, triggerIssue, true);
+        return true;
     }
 
     private void handlerMultiSetting(Map<String, Object> variables, List<StatusLinkageDTO> select, IssueDTO issueDTO, Map<String, List<IssueDTO>> issueMap, Map<Long, List<StatusLinkageDTO>> linkageDTOMap, List<IssueDTO> issueDTOS) {

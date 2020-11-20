@@ -50,6 +50,16 @@ public class IssueMoveVO {
     @ApiModelProperty(value = "是否排序")
     private Long projectId;
 
+    private String errorMsg;
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
+
     public Long getProjectId() {
         return projectId;
     }
