@@ -39,6 +39,7 @@ import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.hzero.core.base.AopProxy;
+import org.hzero.core.message.MessageAccessor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -684,13 +685,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
          * 修改属性报错，导致数据回滚但是状态机实例已经完成状态变更，导致issue无论变更什么状态都无效
          * 抛异常并清空当前实例的状态机的状态信息
          */
+        boolean transformFlag;
         try {
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId);
-            statusLinkageService.updateParentStatus(projectId,issueId,applyType);
+            transformFlag = statusLinkageService.updateParentStatus(projectId,issueId,applyType);
         }
         catch (Exception e) {
             stateMachineClientService.cleanInstanceCache(projectId,issueId,applyType);
             throw new CommonException("error.update.status.transform.setting",e);
+        }
+        if (!transformFlag) {
+            IssueVO error = new IssueVO();
+            error.setErrorMsg(MessageAccessor.getMessage("error.update.status.transform.setting").getDesc());
+            return error;
         }
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
