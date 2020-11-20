@@ -130,14 +130,14 @@ class ScrumBoardHome extends Component {
   onQuickSearchChange = (
     onlyMeChecked = false,
     onlyStoryChecked = false,
-    starBacon = false,
+    starBeacon = false,
     moreChecked,
     personalFilters,
   ) => {
     ScrumBoardStore.addQuickSearchFilter(
       onlyMeChecked,
       onlyStoryChecked,
-      starBacon,
+      starBeacon,
       moreChecked,
       personalFilters,
     );
@@ -145,7 +145,7 @@ class ScrumBoardHome extends Component {
       ...(localPageCacheStore.getItem('scrumboard') || {}),
       onlyMeChecked,
       onlyStoryChecked,
-      starBacon,
+      starBeacon,
       moreChecked,
       personalFilters,
     });
