@@ -13,7 +13,7 @@ class ScrumBoardStore {
   @observable quickSearchObj = {
     onlyMe: false,
     onlyStory: false,
-    starBacon: false,
+    starBeacon: false,
     quickSearchArray: [],
     assigneeFilterIds: [],
     sprintId: undefined,
@@ -349,13 +349,13 @@ class ScrumBoardStore {
   @action addQuickSearchFilter(
     onlyMeChecked = false,
     onlyStoryChecked = false,
-    starBacon = false,
+    starBeacon = false,
     moreChecked = [],
     personalFilter,
   ) {
     this.quickSearchObj.onlyMe = onlyMeChecked;
     this.quickSearchObj.onlyStory = onlyStoryChecked;
-    this.quickSearchObj.starBacon = starBacon;
+    this.quickSearchObj.starBeacon = starBeacon;
     this.quickSearchObj.quickSearchArray = moreChecked;
     this.personalFilter = personalFilter;
   }
@@ -364,7 +364,7 @@ class ScrumBoardStore {
     this.quickSearchObj.assigneeFilterIds = [];
     this.quickSearchObj.onlyMe = false;
     this.quickSearchObj.onlyStory = false;
-    this.quickSearchObj.starBacon = false;
+    this.quickSearchObj.starBeacon = false;
     this.quickSearchObj.quickSearchArray = [];
     this.quickSearchObj.sprintId = undefined;
     this.personalFilter = [];
@@ -373,11 +373,11 @@ class ScrumBoardStore {
 
   @computed get hasSetFilter() {
     const {
-      onlyMe, onlyStory, starBacon, quickSearchArray = [], assigneeFilterIds = [], sprintId,
+      onlyMe, onlyStory, starBeacon, quickSearchArray = [], assigneeFilterIds = [], sprintId,
     } = this.quickSearchObj;
     if (onlyMe === false
       && onlyStory === false
-      && starBacon === false
+      && starBeacon === false
       && quickSearchArray.length === 0
       && assigneeFilterIds.length === 0
       && !sprintId
@@ -604,13 +604,13 @@ class ScrumBoardStore {
 
   axiosGetBoardData(boardId) {
     const {
-      onlyMe, onlyStory, starBacon, quickSearchArray, assigneeFilterIds, sprintId,
+      onlyMe, onlyStory, starBeacon, quickSearchArray, assigneeFilterIds, sprintId,
     } = this.quickSearchObj;
     return boardApi.load(boardId,
       {
         onlyMe,
         onlyStory,
-        starBacon,
+        starBeacon,
         quickFilterIds: quickSearchArray,
         assigneeFilterIds,
         sprintId,
