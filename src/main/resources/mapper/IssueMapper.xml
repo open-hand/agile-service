@@ -69,6 +69,7 @@
         <id property="reporterId" column="reporter_id"/>
         <id property="description" column="description"/>
         <id property="assigneeId" column="assignee_id"/>
+        <id property="featureId" column="feature_id"/>
         <id property="projectId" column="project_id"/>
         <id property="epicId" column="epic_id"/>
         <id property="sprintId" column="sprint_id"/>
@@ -1166,14 +1167,17 @@
                     select
                         IF(ai.type_code = 'bug',ai.relate_issue_id,ai.parent_issue_id) as issue_id
                     from
-                        agile_issue_sprint_rel aisr,
+                        <if test="searchType != 'myStarBeacon'">
+                            agile_issue_sprint_rel aisr,
+                        </if>
                         agile_issue ai,
                         agile_issue_status ais
-                    where aisr.project_id in
-                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                        #{projectId}
-                    </foreach>
-                    <if test="searchType == null">
+                    where 1=1
+                    <if test="searchType != 'myStarBeacon'">
+                        AND aisr.project_id in
+                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                            #{projectId}
+                        </foreach>
                         AND aisr.sprint_id in (
                             select sprint_id
                             from agile_sprint asp
@@ -1199,7 +1203,9 @@
                             and fsb.user_id = #{userId}
                         )
                     </if>
-                    AND ai.issue_id = aisr.issue_id
+                    <if test="searchType != 'myStarBeacon'">
+                        AND ai.issue_id = aisr.issue_id
+                    </if>
                     AND ai.type_code in ('sub_task','bug')
                     AND ais.project_id = ai.project_id
                 )
@@ -1626,14 +1632,21 @@
     <select id="queryIssueByIssueIds" resultMap="issueSearch">
         SELECT
         ai.issue_id, CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
-        ai.type_code, ai.summary,
+        ai.type_code,
+        ai.summary,
         ai.issue_type_id,
         ai.priority_id,
-        ai.reporter_id, ai.description,
-        ai.assignee_id, ai.project_id,
-        ai.epic_id, asp1.sprint_id,
-        ai.story_points, ai.status_id,
-        ai.object_version_number, ai.priority_code,
+        ai.reporter_id,
+        ai.description,
+        ai.assignee_id,
+        ai.project_id,
+        ai.epic_id,
+        ai.feature_id,
+        asp1.sprint_id,
+        ai.story_points,
+        ai.status_id,
+        ai.object_version_number,
+        ai.priority_code,
         ai1.epic_name AS issue_epic_name,
         alv2.name AS color,
         apv1.version_id AS version_id,

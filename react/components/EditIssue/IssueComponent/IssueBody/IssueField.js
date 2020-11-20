@@ -57,10 +57,7 @@ const IssueField = observer((props) => {
       case 'lastUpdateDate':
         return (<FieldDateTime {...props} field={field} />);
       case 'component':
-        if (typeCode !== 'sub_task') {
-          return (<FieldComponent {...props} />);
-        }
-        return '';
+        return (<FieldComponent {...props} />);
       case 'timeTrace':
         return (<FieldTimeTrace {...props} />);
       case 'pi':
@@ -99,7 +96,7 @@ const IssueField = observer((props) => {
   let fields = applyType === 'program' ? toJS(store.customFields).filter((item) => hideFields.indexOf(item.fieldCode) === -1) : toJS(store.customFields);
   // 系统字段单独控制是否显示
   if (typeCode === 'sub_task') {
-    fields = fields.filter((field) => ['component', 'epic'].indexOf(field.fieldCode) === -1);
+    fields = fields.filter((field) => ['epic'].indexOf(field.fieldCode) === -1);
   } else if (typeCode === 'issue_epic') {
     fields = fields.filter((field) => field.fieldCode !== 'epic');
   } else if (typeCode === 'feature') {
