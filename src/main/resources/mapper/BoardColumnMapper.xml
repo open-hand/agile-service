@@ -110,6 +110,15 @@
                 #{priorityId}
             </foreach>
         </if>
+        <if test="starBeacon != null and starBeacon == true">
+            AND ai1.issue_id IN (
+                SELECT fsb.instance_id
+                FROM fd_star_beacon fsb
+                WHERE fsb.type = "issue"
+                AND fsb.project_id = #{projectId}
+                AND fsb.user_id = #{userId}
+            )
+        </if>
         ) ai ON ai.status_id = ais.status_id
         LEFT JOIN agile_project_info api ON api.project_id = ai.project_id
         LEFT JOIN lookup_value alv1 ON abc.color_code = alv1.value_code

@@ -9,10 +9,8 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
@@ -97,6 +95,8 @@ public class BoardServiceImpl implements BoardService {
     private StatusLinkageService statusLinkageService;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired
+    private StarBeaconMapper starBeaconMapper;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -384,7 +384,8 @@ public class BoardServiceImpl implements BoardService {
         List<Long> assigneeIds = new ArrayList<>();
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();
-        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, boardQuery.getSprintId(), boardQuery.getAssigneeId(), boardQuery.getOnlyStory(), filterSql, boardQuery.getAssigneeFilterIds(), searchList, boardQuery.getPriorityIds());
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, boardQuery.getSprintId(), boardQuery.getAssigneeId(), boardQuery.getOnlyStory(), filterSql, boardQuery.getAssigneeFilterIds(), searchList, boardQuery.getPriorityIds(), boardQuery.getStarBeacon(), userId);
         Boolean condition = boardQuery.getAssigneeId() != null && boardQuery.getOnlyStory();
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -401,6 +402,7 @@ public class BoardServiceImpl implements BoardService {
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
         columns.forEach(columnAndIssueDTO ->
             columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
+                List<Long> starIssueIds = getStarIssueIds(subStatusDTO, projectId, userId);
                 subStatusDTO.getIssues().forEach(issueForBoardDO -> {
                     UserMessageDTO userMessageDTO = usersMap.get(issueForBoardDO.getAssigneeId());
                     if(userMessageDTO != null){
@@ -416,6 +418,9 @@ public class BoardServiceImpl implements BoardService {
                         issueForBoardDO.setImageUrl(imageUrl);
                         issueForBoardDO.setEmail(email);
                         issueForBoardDO.setLdap(ldap);
+                        if (starIssueIds.contains(issueForBoardDO.getIssueId())) {
+                            issueForBoardDO.setStarBeacon(true);
+                        }
                     }
                 });
                 subStatusDTO.getIssues().sort(comparator);
@@ -425,6 +430,16 @@ public class BoardServiceImpl implements BoardService {
         //处理用户默认看板设置，保存最近一次的浏览
         handleUserSetting(boardId, projectId);
         return jsonObject;
+    }
+
+    private List<Long> getStarIssueIds(SubStatusDTO subStatusDTO, Long projectId, Long userId) {
+        List<Long> issueIds;
+        List<Long> starIssueIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(subStatusDTO.getIssues())) {
+            issueIds = subStatusDTO.getIssues().stream().map(IssueForBoardDO::getIssueId).collect(Collectors.toList());
+            starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, Collections.singletonList(projectId), userId);
+        }
+        return starIssueIds;
     }
 
     @Override
