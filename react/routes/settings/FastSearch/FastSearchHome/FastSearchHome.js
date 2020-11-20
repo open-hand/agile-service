@@ -126,14 +126,15 @@ class Search extends Component {
     const { pageInfo } = this.state;
     quickFilterApi.drag(postData)
       .then(() => {
-        quickFilterApi.loadList({ contents: [], filterName: '' }, pageInfo.page, pageInfo.size).then((res) => {
+        console.log('pageInfo', pageInfo);
+        quickFilterApi.loadList({ contents: [], filterName: '' }, pageInfo.page, pageInfo.pageSize).then((res) => {
           this.setState({
             filters: res.content,
           });
         });
       })
       .catch(() => {
-        quickFilterApi.loadList({ contents: [], filterName: '' }, pageInfo.page, pageInfo.size).then((ress) => {
+        quickFilterApi.loadList({ contents: [], filterName: '' }, pageInfo.page, pageInfo.pageSize).then((ress) => {
           this.setState({
             filters: ress.content,
           });
@@ -142,7 +143,6 @@ class Search extends Component {
   };
 
   handleTableChange = (pagination, filters, sorter, barFilters) => {
-    console.log('pagination', pagination);
     this.setState({
       filterName: filters.name && filters.name[0],
       barFilters,

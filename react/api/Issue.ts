@@ -151,6 +151,12 @@ class IssueApi extends Api<IssueApi> {
         transformId,
         objectVersionNumber,
       },
+    }).then((res: any) => {
+      if (typeof (res) === 'object') {
+        const { errorMsg } = res;
+        Choerodon.prompt(errorMsg, 'error');
+      }
+      return res;
     });
   }
 
@@ -311,7 +317,7 @@ class IssueApi extends Api<IssueApi> {
  * @export
  * @returns
  */
-  downloadTemplateForImport(data: { systemFields: string[], customFields: string[]}) {
+  downloadTemplateForImport(data: { systemFields: string[], customFields: string[] }) {
     const organizationId = getOrganizationId();
     if (getApplyType() === 'program') {
       return axios({
