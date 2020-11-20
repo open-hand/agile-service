@@ -696,7 +696,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (!transformFlag) {
             IssueVO error = new IssueVO();
-            error.setErrorMsg(MessageAccessor.getMessage("error.update.status.transform.setting").getDesc());
+            error.setErrorMsg(MessageAccessor.getMessage("error.update.status.transform.parent_status_update_failed").getDesc());
             return error;
         }
         if (backlogExpandService != null) {

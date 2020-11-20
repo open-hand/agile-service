@@ -526,7 +526,7 @@ public class BoardServiceImpl implements BoardService {
         }
         if (!transformFlag) {
             IssueMoveVO error = new IssueMoveVO();
-            error.setErrorMsg(MessageAccessor.getMessage("error.update.status.transform.setting").getDesc());
+            error.setErrorMsg(MessageAccessor.getMessage("error.update.status.transform.parent_status_update_failed").getDesc());
             return error;
         }
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
