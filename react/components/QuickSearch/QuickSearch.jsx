@@ -107,7 +107,7 @@ class QuickSearch extends Component {
   handleQuickSearchChange = (value, option) => {
     const { onQuickSearchChange } = this.props;
     const flattenValue = value.map((item) => item.key);
-    const otherSearchId = flattenValue.filter((item) => !(item === -1 || item === -2) && String(item).split('%').length === 1);
+    const otherSearchId = flattenValue.filter((item) => !(item === -1 || item === -2 || item === -3) && String(item).split('%').length === 1);
     const personalFilters = flattenValue.filter((item) => String(item).split('%')[0] === 'personal').map((item) => item.split('%')[1]);
     this.setState({
       selectQuickSearch: value,
@@ -117,6 +117,7 @@ class QuickSearch extends Component {
     onQuickSearchChange(
       flattenValue.includes(-1),
       flattenValue.includes(-2),
+      flattenValue.includes(-3),
       otherSearchId,
       personalFilters,
     );
@@ -224,6 +225,7 @@ class QuickSearch extends Component {
                 <OptGroup key="quickSearch" label="常用选项">
                   <Option key={-1} value={-1}>仅我的问题</Option>
                   <Option key={-2} value={-2}>仅故事</Option>
+                  <Option key={-3} value={-3}>我关注的</Option>
                 </OptGroup>
                 <OptGroup key="personal" label="我的筛选">
                   {
