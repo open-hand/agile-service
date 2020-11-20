@@ -400,7 +400,6 @@ public class BoardServiceImpl implements BoardService {
         jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, boardQuery.getSprintId()));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
-        List<Long> starIssueIds = getStarIssueIds(columns, projectId, userId);
         columns.forEach(columnAndIssueDTO ->
             columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
                 subStatusDTO.getIssues().forEach(issueForBoardDO -> {
@@ -418,9 +417,6 @@ public class BoardServiceImpl implements BoardService {
                         issueForBoardDO.setImageUrl(imageUrl);
                         issueForBoardDO.setEmail(email);
                         issueForBoardDO.setLdap(ldap);
-                        if (starIssueIds.contains(issueForBoardDO.getIssueId())) {
-                            issueForBoardDO.setStarBeacon(true);
-                        }
                     }
                 });
                 subStatusDTO.getIssues().sort(comparator);
@@ -430,21 +426,6 @@ public class BoardServiceImpl implements BoardService {
         //处理用户默认看板设置，保存最近一次的浏览
         handleUserSetting(boardId, projectId);
         return jsonObject;
-    }
-
-    private List<Long> getStarIssueIds(List<ColumnAndIssueDTO> columns, Long projectId, Long userId) {
-        List<Long> issueIds = new ArrayList<>();
-        columns.forEach(columnAndIssueDTO -> {
-            columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
-                issueIds.addAll(subStatusDTO.getIssues().stream()
-                        .map(IssueForBoardDO::getIssueId).collect(Collectors.toList()));
-                });
-        });
-        List<Long> starIssueIds = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(issueIds)) {
-            starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, Collections.singletonList(projectId), userId);
-        }
-        return starIssueIds;
     }
 
     @Override
