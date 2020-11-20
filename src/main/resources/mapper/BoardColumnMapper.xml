@@ -123,7 +123,7 @@
         ) ai ON ai.status_id = ais.status_id
         LEFT JOIN agile_project_info api ON api.project_id = ai.project_id
         LEFT JOIN lookup_value alv1 ON abc.color_code = alv1.value_code
-        LEFT JOIN fd_star_beacon fsb ON (ai.issue_id = fsb.instance_id AND fsb.project_id = #{projectId} AND fsb.type = 'issue')
+        LEFT JOIN fd_star_beacon fsb ON fsb.project_id = #{projectId} AND fsb.type = 'issue' AND ai.issue_id = fsb.instance_id
         WHERE
         abc.project_id = #{projectId} AND abc.board_id = #{boardId}
         ORDER BY abc.sequence
