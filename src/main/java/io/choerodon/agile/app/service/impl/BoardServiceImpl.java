@@ -400,9 +400,9 @@ public class BoardServiceImpl implements BoardService {
         jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, boardQuery.getSprintId()));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
+        List<Long> starIssueIds = getStarIssueIds(columns, projectId, userId);
         columns.forEach(columnAndIssueDTO ->
             columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
-                List<Long> starIssueIds = getStarIssueIds(subStatusDTO, projectId, userId);
                 subStatusDTO.getIssues().forEach(issueForBoardDO -> {
                     UserMessageDTO userMessageDTO = usersMap.get(issueForBoardDO.getAssigneeId());
                     if(userMessageDTO != null){
@@ -432,11 +432,16 @@ public class BoardServiceImpl implements BoardService {
         return jsonObject;
     }
 
-    private List<Long> getStarIssueIds(SubStatusDTO subStatusDTO, Long projectId, Long userId) {
-        List<Long> issueIds;
+    private List<Long> getStarIssueIds(List<ColumnAndIssueDTO> columns, Long projectId, Long userId) {
+        List<Long> issueIds = new ArrayList<>();
+        columns.forEach(columnAndIssueDTO -> {
+            columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
+                issueIds.addAll(subStatusDTO.getIssues().stream()
+                        .map(IssueForBoardDO::getIssueId).collect(Collectors.toList()));
+                });
+        });
         List<Long> starIssueIds = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(subStatusDTO.getIssues())) {
-            issueIds = subStatusDTO.getIssues().stream().map(IssueForBoardDO::getIssueId).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(issueIds)) {
             starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, Collections.singletonList(projectId), userId);
         }
         return starIssueIds;
