@@ -1,5 +1,5 @@
 import { omit } from 'lodash';
-import { axios, stores } from '@choerodon/boot';
+import { axios, stores, Choerodon } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import Api from './Api';
 
@@ -172,6 +172,12 @@ class BoardApi extends Api<BoardApi> {
         transformId,
       },
       data,
+    }).then((res: any) => {
+      if (typeof (res) === 'object') {
+        const { errorMsg } = res;
+        Choerodon.prompt(errorMsg, 'error');
+      }
+      return res;
     });
   }
 
