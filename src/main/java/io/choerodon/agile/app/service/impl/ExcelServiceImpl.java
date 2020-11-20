@@ -656,6 +656,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected void fillInPredefinedValues(Workbook wb, Sheet sheet, List<PredefinedDTO> predefinedList) {
         for (PredefinedDTO predefined : predefinedList) {
+            Collections.sort(predefined.values());
             wb = ExcelUtil
                     .dropDownList2007(
                             wb,
