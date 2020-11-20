@@ -30,6 +30,16 @@ public class BoardQueryVO {
     @ApiModelProperty("冲刺id")
     @Encrypt
     private  Long sprintId;
+    @ApiModelProperty("星标")
+    private Boolean starBeacon;
+
+    public Boolean getStarBeacon() {
+        return starBeacon;
+    }
+
+    public void setStarBeacon(Boolean starBeacon) {
+        this.starBeacon = starBeacon;
+    }
 
     public List<Long> getPersonalFilterIds() {
         return personalFilterIds;

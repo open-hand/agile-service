@@ -9,10 +9,8 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
@@ -98,6 +96,8 @@ public class BoardServiceImpl implements BoardService {
     private StatusLinkageService statusLinkageService;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired
+    private StarBeaconMapper starBeaconMapper;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -385,7 +385,8 @@ public class BoardServiceImpl implements BoardService {
         List<Long> assigneeIds = new ArrayList<>();
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();
-        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, boardQuery.getSprintId(), boardQuery.getAssigneeId(), boardQuery.getOnlyStory(), filterSql, boardQuery.getAssigneeFilterIds(), searchList, boardQuery.getPriorityIds());
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, boardQuery.getSprintId(), boardQuery.getAssigneeId(), boardQuery.getOnlyStory(), filterSql, boardQuery.getAssigneeFilterIds(), searchList, boardQuery.getPriorityIds(), boardQuery.getStarBeacon(), userId);
         Boolean condition = boardQuery.getAssigneeId() != null && boardQuery.getOnlyStory();
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
