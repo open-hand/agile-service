@@ -1101,6 +1101,7 @@ public class ExcelServiceImpl implements ExcelService {
                     }
                 }
             }
+            startRow++;
         }
     }
 
@@ -1251,8 +1252,7 @@ public class ExcelServiceImpl implements ExcelService {
             List<String> valueList = new ArrayList<>();
             Object customFieldValue = null;
             if (multiValue) {
-                String regex = "，";
-                valueList.addAll(Arrays.asList(value.split(regex)));
+                valueList.addAll(splitByRegex(value));
             }
             List<String> values = excelColumn.getPredefinedValues();
             if (!ObjectUtils.isEmpty(values)) {
@@ -1299,6 +1299,17 @@ public class ExcelServiceImpl implements ExcelService {
             pageFieldViewUpdate.setValue(customFieldValue);
             customFields.add(pageFieldViewUpdate);
         }
+    }
+
+    protected List<String> splitByRegex(String value) {
+        String regex1 = ",";
+        String regex2 = "，";
+        List<String> result = new ArrayList<>();
+        String[] array = value.split(regex1);
+        for (String str : array) {
+            result.addAll(Arrays.asList(str.split(regex2)));
+        }
+        return result;
     }
 
     /**
@@ -1436,16 +1447,16 @@ public class ExcelServiceImpl implements ExcelService {
         int rowNum = row.getRowNum();
         if (!isCellEmpty(cell)) {
             String value = cell.toString();
-            String regex = "(([0-9]+，)|(！[0-9]+，))*(([0-9]+)|(！[0-9]+))";
+            String regex = "(([0-9]+(，|,))|(！[0-9]+(，|,)))*(([0-9]+)|(！[0-9]+))";
             if (Pattern.matches(regex, value)) {
                 RelatedIssueVO relatedIssueVO = new RelatedIssueVO();
                 issueCreateVO.setRelatedIssueVO(relatedIssueVO);
                 relatedIssueVO.setRow(rowNum);
                 Set<Long> relatedIssueIds = new HashSet<>();
                 Set<Integer> relatedRows = new HashSet<>();
-                String[] array = value.split("，");
+                List<String> values = splitByRegex(value);
                 boolean ok = true;
-                for (String str : array) {
+                for (String str : values) {
                     if (str.startsWith("！")) {
                         relatedRows.add(Integer.valueOf(str.substring(1)) - 1);
                     } else {
