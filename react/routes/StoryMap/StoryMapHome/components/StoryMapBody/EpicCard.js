@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Tooltip } from 'choerodon-ui';
 import { observer } from 'mobx-react';
+import StatusTag from '@/components/StatusTag';
 import EpicDrag from './EpicDrag';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import Card from './Card';
 import './EpicCard.less';
+import { CardWidth, CardPaddingLeft } from '../../Constants';
 
 @observer
 class EpicCard extends Component {
@@ -33,13 +35,23 @@ class EpicCard extends Component {
     this.container = ref;
   }
 
-
   render() {
     const {
       epic, subIssueNum, onMouseDown,
     } = this.props;
     const {
-      issueId, epicName, issueNum, programId,
+      issueId, epicName, issueNum, programId, totalCount, completedCount, statusVO = {
+        canDelete: null,
+        code: null,
+        completed: null,
+        defaultStatus: null,
+        description: null,
+        id: '88255195225804800',
+        name: '已评审',
+        objectVersionNumber: 1,
+        organizationId: 7,
+        type: 'done',
+      },
     } = epic;
     const { selectedIssueMap } = StoryMapStore;
     return (
@@ -50,12 +62,34 @@ class EpicCard extends Component {
         saveRef={this.saveRef}
         onMouseDown={onMouseDown}
       >
-        <div className="summary">
-          <Tooltip title={`${epicName || '无史诗'}`} getPopupContainer={() => document.getElementsByClassName('minimap-container-scroll')[0]}>
-            {`${epicName || '无史诗'}`}
-          </Tooltip>
+        {
+          epicName && (
+          <div className="progress" style={{ marginLeft: -CardPaddingLeft }}>
+            <div className="completed" style={{ width: totalCount ? 3 / 5 * CardWidth : 0 }} />
+          </div>
+          )
+        }
+        <div className="top">
+          <div className="summary">
+            <Tooltip title={`${epicName || '无史诗'}`} getPopupContainer={() => document.getElementsByClassName('minimap-container-scroll')[0]}>
+              {`${epicName || '无史诗'}`}
+            </Tooltip>
+          </div>
+          <div style={{ marginLeft: 5 }}>{`(${subIssueNum})`}</div>
         </div>
-        <div style={{ marginLeft: 5 }}>{`(${subIssueNum})`}</div>
+        {
+          epicName && (
+            <div className="status">
+              <Tooltip mouseEnterDelay={0.5} title={`状态： ${statusVO && statusVO.name}`}>
+                <div>
+                  <StatusTag
+                    data={statusVO}
+                  />
+                </div>
+              </Tooltip>
+            </div>
+          )
+        }
       </Card>
     );
   }

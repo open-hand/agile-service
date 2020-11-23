@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
+import StatusTag from '@/components/StatusTag';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 import Card from '../Card';
 import './FeatureCard.less';
@@ -18,16 +19,40 @@ class FeatureCard extends Component {
   render() {
     const { feature } = this.props;
     const {
-      featureType, summary, issueId, issueNum, programId,
+      featureType, summary, issueId, issueNum, programId, statusVO = {
+        canDelete: null,
+        code: null,
+        completed: null,
+        defaultStatus: null,
+        description: null,
+        id: '88255195225804800',
+        name: '已评审',
+        objectVersionNumber: 1,
+        organizationId: 7,
+        type: 'done',
+      },
     } = feature;
     const { selectedIssueMap } = StoryMapStore;
     return (
-      <Card className={`c7nagile-StoryMap-FeatureCard minimapCard ${featureType || 'none'} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`} onClick={this.handleClick}>
+      <Card className={`c7nagile-StoryMap-FeatureCard minimapCard ${featureType || 'none'} ${statusVO.completed ? 'completedCard' : undefined} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`} onClick={this.handleClick}>
         <div className="summary">
-          <Tooltip title={`${summary || '无特性'}`} getPopupContainer={trigger => trigger.parentNode}>
+          <Tooltip title={`${summary || '无特性'}`} getPopupContainer={(trigger) => trigger.parentNode}>
             {summary || '无特性'}
           </Tooltip>
         </div>
+        {
+          summary && (
+          <div className="status">
+            <Tooltip mouseEnterDelay={0.5} title={`状态： ${statusVO && statusVO.name}`}>
+              <div>
+                <StatusTag
+                  data={statusVO}
+                />
+              </div>
+            </Tooltip>
+          </div>
+          )
+        }
       </Card>
     );
   }
