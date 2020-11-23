@@ -334,4 +334,11 @@ public interface AgilePluginService {
      * @param programVersionIds
      */
     void linkFeatureByBacklog(Long programId,Long organizationId, List<Long> featureIds, List<Long> programVersionIds);
+
+    /**
+     * 获取字段Code
+     * @param fieldCodeS
+     * @param typeCode
+     */
+    void getIssueTypeFieldCodes(List<String> fieldCodeS, String typeCode);
 }

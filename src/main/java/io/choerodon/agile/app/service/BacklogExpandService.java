@@ -93,4 +93,11 @@ public interface BacklogExpandService {
      * @param programVersionId
      */
     void releaseProgramVersion(Long programId,Long organizationId,Long programVersionId);
+
+    /**
+     * 获取需求的字段code集合
+     * @param fieldCodeS
+     * @param typeCode
+     */
+    void getBacklogFieldCodes(List<String> fieldCodeS, String typeCode);
 }

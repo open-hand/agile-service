@@ -137,4 +137,12 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
                                     @Param("edited") Boolean edited);
 
     List<ObjectSchemeFieldExtendDTO> selectExtendFields(@Param("organizationId") Long organizationId,@Param("fieldId") Long fieldId,@Param("projectId") Long projectId);
+
+    /**
+     * 查询根据code查询字段
+     *
+     * @param fieldCodes
+     * @return
+     */
+    List<PageConfigFieldVO> listConfigsByFieldCodes(@Param("fieldCodes") List<String> fieldCodes);
 }

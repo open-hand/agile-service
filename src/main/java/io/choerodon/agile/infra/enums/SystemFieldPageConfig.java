@@ -33,6 +33,10 @@ public class SystemFieldPageConfig {
         ESTIMATED_START_TIME(FieldCode.ESTIMATED_START_TIME, true, true),
         ESTIMATED_END_TIME(FieldCode.ESTIMATED_END_TIME, true, true),
         SUB_PROJECT(FieldCode.SUB_PROJECT, true, true),
+        PROGRAM_VERSION(FieldCode.PROGRAM_VERSION, true, true),
+        MAIN_RESPONSIBLE(FieldCode.MAIN_RESPONSIBLE, true, true),
+        TEST_RESPONSIBLE(FieldCode.TEST_RESPONSIBLE, true, true),
+        environment(FieldCode.ENVIRONMENT, true, true),
         ;
 
 
