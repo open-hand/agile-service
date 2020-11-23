@@ -8,6 +8,7 @@ import { observer } from 'mobx-react-lite';
 import { Choerodon } from '@choerodon/boot';
 import { IModalProps } from '@/common/types';
 import { issueApi } from '@/api';
+import styles from './index.less';
 
 interface Props {
   modal?: IModalProps,
@@ -59,6 +60,7 @@ const openBatchDeleteModal = ({ dataSet, close }: { dataSet: DataSet, close: Fun
     style: {
       width: 520,
     },
+    className: styles.batchDeleteModal,
     children: <ObserverBatchDeleteModal dataSet={dataSet} close={close} />,
   });
 };

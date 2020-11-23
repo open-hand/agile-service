@@ -155,14 +155,14 @@ function Header({
 }) {
   return (
     <>
-      <div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         <span style={{
           fontSize: '30px', fontWeight: 500, marginRight: 12, color: '#FFFFFF',
         }}
         >
           {`${dataSet.selected.length}`}
         </span>
-        <span style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.8)' }}>项已选中</span>
+        <span style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.8)', marginTop: 5 }}>项已选中</span>
       </div>
       <div style={{ marginLeft: 'auto', height: 56 }}>
         <div style={{
