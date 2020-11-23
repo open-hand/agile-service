@@ -5,6 +5,7 @@ import {
   Form, Button, Select, DataSet, Row, Col, Progress,
 } from 'choerodon-ui/pro';
 import { WSHandler, Choerodon } from '@choerodon/boot';
+import { observer } from 'mobx-react-lite';
 import { find, pick } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
@@ -147,7 +148,7 @@ function formatFields(fieldData, data, dataSet) {
 }
 
 function BatchModal({
-  dataSet: tableDataSet, fields: customFields, onCancel, onEdit,
+  dataSet: tableDataSet, fields: customFields, onCancel, onEdit, issueSearchStore,
 }) {
   const { isInProgram } = useIsInProgram();
   const fieldData = [...systemFields.values(), ...customFields].filter(((f) => (isInProgram ? f.code !== 'epicId' : f.code !== 'featureId')));
@@ -397,17 +398,24 @@ function BatchModal({
       </div>
     </>
   );
+
   return (
-    <div style={{ padding: 15 }}>
-      <WSProvider server={Choerodon.WEBSOCKET_SERVER}>
-        <WSHandler
-          messageKey={`agile-batch-update-field-${getProjectId()}`}
-          onMessage={handleMessage}
-        >
-          {render()}
-        </WSHandler>
-      </WSProvider>
-    </div>
+    <>
+      {
+        issueSearchStore.batchAction === 'edit' && (
+        <div style={{ padding: 15 }}>
+          <WSProvider server={Choerodon.WEBSOCKET_SERVER}>
+            <WSHandler
+              messageKey={`agile-batch-update-field-${getProjectId()}`}
+              onMessage={handleMessage}
+            >
+              {render()}
+            </WSHandler>
+          </WSProvider>
+        </div>
+        )
+      }
+    </>
   );
 }
-export default BatchModal;
+export default observer(BatchModal);

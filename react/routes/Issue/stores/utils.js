@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui';
 import Modal from '../components/Modal';
 import BatchModal from '../components/BatchModal';
+import openBatchDeleteModal from '../components/BatchDeleteConfirm';
 
 function transformSystemFilter(data) {
   const {
@@ -149,23 +150,57 @@ export function transformFilter(chosenFields) {
 }
 
 let modal;
-function Header({ dataSet, close }) {
+function Header({
+  dataSet, close, onClickEdit, onClickDelete,
+}) {
   return (
     <>
-      <div style={{ fontSize: '18px', fontWeight: 500, marginRight: 12 }}>
-        {`批量编辑 (已选中${dataSet.selected.length}项)`}
+      <div>
+        <span style={{
+          fontSize: '30px', fontWeight: 500, marginRight: 12, color: '#FFFFFF',
+        }}
+        >
+          {`${dataSet.selected.length}`}
+        </span>
+        <span style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.8)' }}>项已选中</span>
       </div>
-      {/* <Button
-        icon="close"
-        shape="circle"
-        style={{ color: 'white', marginRight: -5, marginLeft: 'auto' }}
-        onClick={close}
-      /> */}
+      <div style={{ marginLeft: 'auto', height: 56 }}>
+        <div style={{
+          display: 'inline-block', height: 56, lineHeight: '56px', borderRight: '1px solid #95A5FF',
+        }}
+        >
+          <Button
+            icon="mode_edit"
+            style={{ color: 'white', marginRight: 6 }}
+            onClick={onClickEdit}
+          >
+            编辑
+          </Button>
+          <Button
+            icon="delete_forever"
+            style={{ color: 'white', marginRight: 18 }}
+            onClick={onClickDelete}
+          >
+            删除
+          </Button>
+        </div>
+        <Button
+          icon="close"
+          shape="circle"
+          style={{ color: 'white', marginRight: -10, marginLeft: 10 }}
+          onClick={close}
+        />
+      </div>
     </>
   );
 }
 const ObserverHeader = observer(Header);
 export function handleSelect({ dataSet }, issueSearchStore) {
+  const close = () => {
+    dataSet.unSelectAll();
+    issueSearchStore.setBatchAction(undefined);
+  };
+
   modal = Modal.open({
     key: 'modal',
     header: <ObserverHeader
@@ -173,7 +208,15 @@ export function handleSelect({ dataSet }, issueSearchStore) {
       modal={modal}
       close={() => {
         modal.close();
-        dataSet.unSelectAll();
+        close();
+      }}
+      onClickEdit={() => {
+        issueSearchStore.setBatchAction('edit');
+      }}
+      onClickDelete={() => {
+        modal.close();
+        issueSearchStore.setBatchAction('delete');
+        openBatchDeleteModal({ dataSet, close });
       }}
     />,
     content: <BatchModal
@@ -182,13 +225,14 @@ export function handleSelect({ dataSet }, issueSearchStore) {
       fields={issueSearchStore.fields}
       onCancel={() => {
         modal.close();
-        dataSet.unSelectAll();
+        close();
       }}
       onEdit={() => {
         modal.close();
-        dataSet.unSelectAll();
+        close();
         dataSet.query();
       }}
+      issueSearchStore={issueSearchStore}
     />,
   });
 }
