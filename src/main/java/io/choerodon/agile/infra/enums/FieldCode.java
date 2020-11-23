@@ -36,5 +36,9 @@ public class FieldCode {
     public static final String SUB_PROJECT = "subProject";
     public static final String ESTIMATED_START_TIME = "estimatedStartTime";
     public static final String ESTIMATED_END_TIME = "estimatedEndTime";
+    public static final String PROGRAM_VERSION = "programVersion";
+    public static final String MAIN_RESPONSIBLE = "mainResponsible";
+    public static final String TEST_RESPONSIBLE = "testResponsible";
+    public static final String ENVIRONMENT = "environment";
 
 }

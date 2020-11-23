@@ -418,4 +418,56 @@
         where t1.scheme_code = #{objectSchemeField.schemeCode}
         and t1.is_system = #{objectSchemeField.system}
     </select>
+
+    <select id="selectFieldsByFieldCodes" resultMap="objectSchemeFieldWithExtends">
+        select
+            t1.id,
+            t1.code,
+            t1.name,
+            t1.field_type,
+            t1.is_system,
+            t1.extra_config,
+            flv.name as field_type_name,
+            t1.is_required as required,
+            ffo.id as ffo_id,
+            ffo.field_id as ffo_field_id,
+            ffo.code as ffo_code,
+            ffo.value as ffo_value,
+            ffo.is_enabled as ffo_enabled
+        from fd_object_scheme_field t1
+        left join lookup_value flv on flv.value_code = t1.field_type and flv.type_code = 'field_type'
+        left join fd_field_option ffo on t1.id = ffo.field_id
+        where t1.code in
+        <foreach collection="fieldCodes" item="fieldCode" open="(" close=")" separator=",">
+           #{fieldCode}
+        </foreach>
+        order by t1.id desc
+    </select>
+
+    <select id="selectNotSyncField" resultMap="objectSchemeFieldWithExtends">
+        select
+            t4.id,
+            t4.code,
+            t4.default_value,
+            t4.description,
+            t4.field_type,
+            flv.name as field_type_name,
+            t4.name,
+            t4.object_version_number,
+            t4.organization_id,
+            t4.project_id,
+            t4.is_system,
+            t4.extra_config,
+            'system' as created_level
+        from fd_object_scheme_field t4
+        left join lookup_value flv on flv.value_code = t4.field_type and flv.type_code = 'field_type'
+        where
+        t4.organization_id = 0
+        AND t4.project_id = 0
+        AND t4.is_system = 1
+        AND t4.id NOT IN
+        <foreach collection="systemFieldIds" item="systemFieldId" open="(" close=")" separator=",">
+           #{systemFieldId}
+        </foreach>
+    </select>
 </mapper>
