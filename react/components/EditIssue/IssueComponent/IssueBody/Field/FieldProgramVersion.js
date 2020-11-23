@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import moment from 'moment';
-import { DateTimePicker, Select, Tooltip } from 'choerodon-ui/pro';
+import { Tooltip } from 'choerodon-ui/pro';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import { toJS } from 'mobx';
-import { featureApi, issueApi } from '@/api';
+import { featureApi } from '@/api';
 import SelectProgramVersion from '@/components/select/select-program-version';
 
 class FieldProgramVersion extends Component {
@@ -28,7 +26,7 @@ class FieldProgramVersion extends Component {
     );
   }
 
-  updateIssueField =async (value) => {
+  updateIssueField = async (value) => {
     const {
       store, onUpdate, reloadIssue, field,
     } = this.props;
@@ -45,9 +43,8 @@ class FieldProgramVersion extends Component {
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { programVersionFeatureRelVOS, activePiTeams } = issue;
-    const field = store.getFieldByCode('estimatedEndTime');
+    const field = store.getFieldByCode('programVersion');
     const required = field?.required;
-    const teamProjectIds = activePiTeams && activePiTeams.length > 0 ? activePiTeams.map((item) => item.id) : undefined;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -64,7 +61,6 @@ class FieldProgramVersion extends Component {
               <SelectProgramVersion
                 multiple
                 required={required}
-                teamProjectIds={teamProjectIds}
               />
             )}
             submitTrigger={['blur']}
