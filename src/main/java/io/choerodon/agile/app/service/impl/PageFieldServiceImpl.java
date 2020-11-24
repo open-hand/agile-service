@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.FieldValueUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -164,10 +167,55 @@ public class PageFieldServiceImpl implements PageFieldService {
             pageFields =
                     objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueType, created, edited);
         }
+        addNotSyncField(organizationId, projectId, pageFields, issueType, created, edited);
         if (agilePluginService != null) {
             pageFields = agilePluginService.handlerProgramPageField(projectId,issueType,pageFields);
         }
         return pageFields;
+    }
+
+    private void addNotSyncField(Long organizationId, Long projectId, List<PageFieldDTO> pageFields, String issueType,Boolean created, Boolean edited) {
+        List<Long> existFields = pageFields.stream().filter(v -> Boolean.TRUE.equals(v.getSystem())).map(PageFieldDTO::getFieldId).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(existFields)) {
+            return;
+        }
+        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectNotSyncFieldByFieldConfig(organizationId, issueType);
+        if (CollectionUtils.isEmpty(objectSchemeFieldDTOS)) {
+            return;
+        }
+        String endRank = pageFields.get(pageFields.size() - 1).getRank();
+        for (ObjectSchemeFieldDTO objectSchemeFieldDTO : objectSchemeFieldDTOS) {
+            String fieldContext = objectSchemeFieldService.getFieldContext(objectSchemeFieldDTO.getCode());
+            List<String> context = Arrays.asList(fieldContext.split(","));
+            if (context.contains(issueType)) {
+                boolean checkFieldPageConfig = checkFieldPageConfig(issueType,objectSchemeFieldDTO.getCode(),created,edited);
+                if (Boolean.FALSE.equals(checkFieldPageConfig)) {
+                    continue;
+                }
+                PageFieldDTO pageFieldDTO = modelMapper.map(objectSchemeFieldDTO, PageFieldDTO.class);
+                pageFieldDTO.setFieldId(objectSchemeFieldDTO.getId());
+                pageFieldDTO.setFieldName(objectSchemeFieldDTO.getName());
+                pageFieldDTO.setFieldCode(objectSchemeFieldDTO.getCode());
+                pageFieldDTO.setDisplay(true);
+                String preRank = RankUtil.genPre(endRank);
+                pageFieldDTO.setRank(preRank);
+                endRank = preRank;
+                pageFields.add(pageFieldDTO);
+            }
+        }
+    }
+
+    private boolean checkFieldPageConfig(String issueType, String code, Boolean created, Boolean edited) {
+        Boolean checkConfig = false;
+        SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(code);
+        if (!ObjectUtils.isEmpty(commonField)) {
+            return Objects.equals(commonField.created(), created) || Objects.equals(commonField.edited(), edited);
+        }
+        BacklogExpandService backlogExpandService = SpringBeanUtil.getExpandBean(BacklogExpandService.class);
+        if (backlogExpandService != null) {
+            return backlogExpandService.checkFieldPageConfig(issueType, code, created, edited);
+        }
+        return checkConfig;
     }
 
     @Override
