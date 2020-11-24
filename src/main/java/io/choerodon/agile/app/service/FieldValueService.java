@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.FieldValueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
@@ -106,4 +107,6 @@ public interface FieldValueService {
      * @param predefinedFields
      */
     void handlerPredefinedFields(Long projectId, List<Long> issueIds, JSONObject predefinedFields,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,String applyType);
+
+    void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId);
 }
