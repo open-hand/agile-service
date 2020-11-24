@@ -387,7 +387,6 @@ class ScrumBoardHome extends Component {
   };
 
   render() {
-    console.log('render....');
     const { HeaderStore } = this.props;
     const {
       updateParentStatus, expandAll,

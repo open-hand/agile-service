@@ -39,7 +39,6 @@ class SwimLaneContext extends React.Component {
   }
 
   componentDidMount() {
-    console.log('componentDidMount', 'expandOrUp', this.props);
     // isEqual(getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]),)
     scrumBoardStore.bindFunction('expandOrUp', this.handleExpandOrUPPanel);
   }

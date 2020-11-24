@@ -126,7 +126,6 @@ class Search extends Component {
     const { pageInfo } = this.state;
     quickFilterApi.drag(postData)
       .then(() => {
-        console.log('pageInfo', pageInfo);
         quickFilterApi.loadList({ contents: [], filterName: '' }, pageInfo.page, pageInfo.pageSize).then((res) => {
           this.setState({
             filters: res.content,

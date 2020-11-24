@@ -27,11 +27,13 @@ export interface IStatusCreate {
   name: string
   type: IStatus['valueCode']
   defaultStatus: boolean
+  transferAll: boolean
 }
 export interface IStatusCreateLink {
   issueTypeId: string
   statusId: string
   defaultStatus: boolean
+  transferAll?: boolean
 }
 
 export interface ICondition {
@@ -324,7 +326,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * 获取设置特性状态联动时可设置的状态
    * @param data
    */
-  getFeatureLinkageStatus(data: {issueTypeId: string, projectId: string, parentIssueStatusSetting: string}) {
+  getFeatureLinkageStatus(data: { issueTypeId: string, projectId: string, parentIssueStatusSetting: string }) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/status_linkages/pro/list_status`,
