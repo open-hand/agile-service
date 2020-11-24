@@ -23,6 +23,7 @@ import DailyLog from '../../../DailyLog';
 import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
 import { InjectedComponent } from '../../injectComponent';
+import TestLink from './test-case-link-list';
 import './IssueBody.less';
 
 const { TabPane } = Tabs;
@@ -91,9 +92,8 @@ function IssueBody(props) {
 
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
             ? <SubBug {...props} /> : ''}
-          {/* {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
-            ? <TestLink {...props} /> : ''测试用例关联链接 后端无返回数据
-          } */}
+          {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1 || true
+            ? <TestLink {...props} /> : '' }
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
           {['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}

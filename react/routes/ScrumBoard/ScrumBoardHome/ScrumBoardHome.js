@@ -32,6 +32,7 @@ import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 import { service } from '../setting/Setting';
 import SelectPriority from './SelectPriority';
 import CreateIssue from '../ScrumBoardComponent/create-issue';
+import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
 
 const { Option } = Select;
 const { AppState } = stores;
@@ -386,9 +387,10 @@ class ScrumBoardHome extends Component {
   };
 
   render() {
+    console.log('render....');
     const { HeaderStore } = this.props;
     const {
-      updateParentStatus,
+      updateParentStatus, expandAll,
     } = this.state;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
@@ -450,6 +452,7 @@ class ScrumBoardHome extends Component {
           >
             配置看板
           </Button>
+          <ExpandAllButton />
           <ScrumBoardFullScreen />
           {
             currentSprintIsDoing && (

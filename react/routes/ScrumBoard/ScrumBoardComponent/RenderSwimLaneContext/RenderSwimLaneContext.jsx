@@ -5,6 +5,7 @@ import { Collapse } from 'choerodon-ui';
 import { isEqual } from 'lodash';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import './RenderSwimLaneContext.less';
+import scrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import SwimLaneHeader from './SwimLaneHeader';
 
 const { Panel } = Collapse;
@@ -35,6 +36,20 @@ class SwimLaneContext extends React.Component {
       activeKey: [],
       issues: [],
     };
+  }
+
+  componentDidMount() {
+    console.log('componentDidMount', 'expandOrUp', this.props);
+    // isEqual(getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]),)
+    scrumBoardStore.bindFunction('expandOrUp', this.handleExpandOrUPPanel);
+  }
+
+  componentWillUnmount() {
+    scrumBoardStore.removeBindFunction('expandOrUp');
+  }
+
+  handleExpandOrUPPanel = (expandAll = true) => {
+    this.panelOnChange(expandAll ? getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]) : []);
   }
 
   static getDerivedStateFromProps(props, state) {

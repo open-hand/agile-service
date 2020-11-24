@@ -145,7 +145,27 @@ class ScrumBoardStore {
     draggingSwimlane: 0,
   };
 
-  @observable statusLinkages = []
+  @observable statusLinkages = [];
+
+  @observable currentBindFunctionMaps = new Map();
+
+  executeBindFunction(keys = [], ...args) {
+    keys.forEach((key) => {
+      this.currentBindFunctionMaps.has(key) && this.currentBindFunctionMaps.get(key)(...args);
+    });
+  }
+
+  @action('绑定一个函数') bindFunction(key, fn) {
+    if (typeof (fn) === 'function' && key) {
+      this.currentBindFunctionMaps.set(key, fn);
+    }
+  }
+
+  @action('移除一个绑定函数') removeBindFunction(key) {
+    if (typeof (key) === 'string') {
+      this.currentBindFunctionMaps.delete(key);
+    }
+  }
 
   needRefresh(issue, destinationStatus) {
     if ((issue.issueTypeVO.typeCode === 'bug' && issue.relateIssueId) || issue.issueTypeVO.typeCode === 'sub_task') {
@@ -469,6 +489,7 @@ class ScrumBoardStore {
     this.currentSprintExist = false;
     this.calanderCouldUse = false;
     this.clickIssueMap.clear();
+    this.currentBindFunctionMaps.clear();
   }
 
   @computed get getDayRemain() {
