@@ -9,9 +9,11 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
+import io.choerodon.agile.infra.mapper.FieldValueMapper;
+import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -19,7 +21,6 @@ import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.core.base.AopProxy;
 import org.modelmapper.ModelMapper;
@@ -72,8 +73,6 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
-    @Autowired
-    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
 
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
@@ -319,91 +318,6 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
             }
         });
-    }
-
-    @Override
-    public void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId) {
-        // 查询原来的值
-        Long issueId = issueDetailDTO.getIssueId();
-        List<FieldValueDTO> fieldValueDTOS = fieldValueMapper.queryListByInstanceIds(Arrays.asList(projectId), Arrays.asList(issueId), "agile_issue", null);
-        if (!CollectionUtils.isEmpty(fieldValueDTOS)) {
-            Map<Long, List<FieldValueDTO>> listMap = fieldValueDTOS.stream().collect(Collectors.groupingBy(FieldValueDTO::getFieldId));
-            Long organizationId = ConvertUtil.getOrganizationId(projectId);
-            List<PageFieldViewCreateVO> createDTOs = new ArrayList<>();
-            handlerFieldValue(listMap, createDTOs);
-            createFieldValues(organizationId, projectId, newIssueId, "agile_issue", createDTOs);
-        }
-    }
-
-    private void handlerFieldValue(Map<Long, List<FieldValueDTO>> listMap, List<PageFieldViewCreateVO> createDTOs) {
-        Set<Long> keySet = listMap.keySet();
-        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectByIds(StringUtils.join(keySet, ","));
-        Map<Long, ObjectSchemeFieldDTO> schemeFieldDTOMap = objectSchemeFieldDTOS.stream().collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
-        for (Map.Entry<Long, List<FieldValueDTO>> entry : listMap.entrySet()) {
-            Long key = entry.getKey();
-            ObjectSchemeFieldDTO objectSchemeFieldDTO = schemeFieldDTOMap.get(key);
-            if (ObjectUtils.isEmpty(objectSchemeFieldDTO)) {
-                continue;
-            }
-            PageFieldViewCreateVO pageFieldViewCreateVO = new PageFieldViewCreateVO();
-            pageFieldViewCreateVO.setFieldId(key);
-            pageFieldViewCreateVO.setFieldCode(objectSchemeFieldDTO.getCode());
-            pageFieldViewCreateVO.setFieldType(objectSchemeFieldDTO.getFieldType());
-            pageFieldViewCreateVO.setValue(setFiledValue(objectSchemeFieldDTO, listMap));
-            createDTOs.add(pageFieldViewCreateVO);
-        }
-    }
-
-    private Object setFiledValue(ObjectSchemeFieldDTO objectSchemeFieldDTO, Map<Long, List<FieldValueDTO>> listMap) {
-        Object value = null;
-        switch (objectSchemeFieldDTO.getFieldType()) {
-            case FieldType.CHECKBOX:
-            case FieldType.MULTIPLE:
-                List<FieldValueDTO> fieldValueDTOS = listMap.get(objectSchemeFieldDTO.getId());
-                List<String> values = new ArrayList<>();
-                if (!CollectionUtils.isEmpty(fieldValueDTOS)) {
-                    values.addAll(fieldValueDTOS.stream().map(v -> String.valueOf(v.getOptionId())).collect(Collectors.toList()));
-                }
-                value = values;
-                break;
-            case FieldType.MEMBER:
-            case FieldType.SINGLE:
-            case FieldType.RADIO:
-                List<FieldValueDTO> singleFields = listMap.get(objectSchemeFieldDTO.getId());
-                if (!CollectionUtils.isEmpty(singleFields)) {
-                    value = singleFields.get(0).getOptionId();
-                }
-                break;
-            case FieldType.DATE:
-            case FieldType.DATETIME:
-            case FieldType.TIME:
-                List<FieldValueDTO> dateFields = listMap.get(objectSchemeFieldDTO.getId());
-                if (!CollectionUtils.isEmpty(dateFields)) {
-                    value = dateFields.get(0).getDateValue();
-                }
-                break;
-            case FieldType.INPUT:
-                List<FieldValueDTO> inputFields = listMap.get(objectSchemeFieldDTO.getId());
-                if (!CollectionUtils.isEmpty(inputFields)) {
-                    value = inputFields.get(0).getStringValue();
-                }
-                break;
-            case FieldType.TEXT:
-                List<FieldValueDTO> textFields = listMap.get(objectSchemeFieldDTO.getId());
-                if (!CollectionUtils.isEmpty(textFields)) {
-                    value = textFields.get(0).getTextValue();
-                }
-                break;
-            case FieldType.NUMBER:
-                List<FieldValueDTO> numberFields = listMap.get(objectSchemeFieldDTO.getId());
-                if (!CollectionUtils.isEmpty(numberFields)) {
-                    value = numberFields.get(0).getNumberValue();
-                }
-                break;
-            default:
-                break;
-        }
-        return value;
     }
 
     protected void batchHandlerCustomFields(Long projectId, PageFieldViewUpdateVO pageFieldViewUpdateVO, String schemeCode, List<Long> needAddIssueIds) {
