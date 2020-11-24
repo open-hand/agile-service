@@ -106,6 +106,8 @@ class StoryCard extends Component {
       },
     } = story;
     const { selectedIssueMap } = StoryMapStore;
+    console.log('story：');
+    console.log(story);
     return (
       <Card
         className={`c7nagile-StoryMap-StoryCard ${index === 0 && rowIndex === 0 ? 'minimapCard' : ''} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`}

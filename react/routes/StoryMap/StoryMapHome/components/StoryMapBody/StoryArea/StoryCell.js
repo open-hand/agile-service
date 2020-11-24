@@ -59,27 +59,28 @@ class StoryCell extends Component {
               <div style={{ display: 'flex', flex: 1 }}>
                 {
                   adding ? null : (
-                    <Fragment>
-                      {featureList.filter(feature => !feature.adding).map((feature, index) => {
+                    <>
+                      {featureList.filter((feature) => !feature.adding).map((feature, index) => {
                         const targetFeature = targetEpic.feature[feature.issueId] || {};
                         if (targetFeature) {
                           const storys = this.getStorys(targetFeature);
                           return (
-                            (!StoryMapStore.hiddenColumnNoStory || storys.length > 0) ?
-                              <StoryColumn
-                                feature={feature}
-                                featureIndex={index}
-                                isLast={isLastColumn && index === featureList.length - 1}
-                                storys={storys}
-                                width={targetFeature.width}
-                                {...this.props}
-                              /> : ''
+                            (!StoryMapStore.hiddenColumnNoStory || storys.length > 0)
+                              ? (
+                                <StoryColumn
+                                  feature={feature}
+                                  featureIndex={index}
+                                  isLast={isLastColumn && index === featureList.length - 1}
+                                  storys={storys}
+                                  width={targetFeature.width}
+                                  {...this.props}
+                                />
+                              ) : ''
                           );
-                        } else {
-                          return null;
                         }
+                        return null;
                       })}
-                    </Fragment>
+                    </>
                   )
                 }
               </div>

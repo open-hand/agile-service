@@ -25,7 +25,7 @@ class StoryRow extends Component {
     const firstNotCollapseIndex = this.getFirstNotCollapseIndex();
     const { storyCollapse, rowIndex } = this.props;
     return (
-      <Fragment>
+      <>
         {/* 标题行 */}
         {['version'].includes(swimLine) && (
           <tr>
@@ -35,7 +35,7 @@ class StoryRow extends Component {
                 isLastColumn={index === epicWithFeature.length - 1}
                 lastCollapse={index > 0 ? storyData[epicList[index - 1].issueId] && storyData[epicList[index - 1].issueId].collapse : false}
                 showTitle={firstNotCollapseIndex === index}
-                otherData={storyData[epic.issueId]}                
+                otherData={storyData[epic.issueId]}
                 {...this.props}
               />
             ))}
@@ -44,20 +44,23 @@ class StoryRow extends Component {
         <tr style={{ ...storyCollapse ? { height: 0 } : {} }}>
           {epicList.map((epic, index) => {
             const otherData = storyData[epic.issueId];
-            return (!StoryMapStore.hiddenColumnNoStory || otherData.storys.length > 0) ? (
-              <StoryCell 
+            // 无特性的故事不会显示在板子上,当隐藏无故事的列时，隐藏特性列
+            const storysWithFeature = (otherData.storys || []).filter((item) => item.featureId && item.featureId !== '0');
+            return (!StoryMapStore.hiddenColumnNoStory || storysWithFeature.length > 0) ? (
+              <StoryCell
                 rowIndex={rowIndex}
                 epicIndex={index}
                 lastCollapse={index > 0 ? storyData[epicList[index - 1].issueId] && storyData[epicList[index - 1].issueId].collapse : false}
                 isLastColumn={index === epicWithFeature.length - 1}
                 showTitle={firstNotCollapseIndex === index}
                 epic={epic}
-                otherData={storyData[epic.issueId]}            
+                otherData={storyData[epic.issueId]}
                 {...this.props}
               />
-            ) : ''})}
-        </tr>        
-      </Fragment>
+            ) : '';
+          })}
+        </tr>
+      </>
     );
   }
 }
