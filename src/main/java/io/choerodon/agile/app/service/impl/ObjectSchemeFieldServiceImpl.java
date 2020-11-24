@@ -192,7 +192,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             List<String> issueTypeNames = new ArrayList<>();
             boolean containsAllIssueTypes = containsAllIssueTypes(organizationId, projectId, issueTypes);
             String requiredScope =
-                    processIssueTyeAndRequiredScope(f.getCode(),issueTypes, issueTypeNames, true, extendList, containsAllIssueTypes);
+                    processIssueTyeAndRequiredScope(f,issueTypes, issueTypeNames, true, extendList, containsAllIssueTypes);
             vo.setContext(String.join(",", issueTypes));
             vo.setContexts(issueTypes);
             if (!CollectionUtils.isEmpty(issueTypes) && CollectionUtils.isEmpty(issueTypeNames)) {
@@ -380,7 +380,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return result;
     }
 
-    private String processIssueTyeAndRequiredScope(String fieldCode,
+    private String processIssueTyeAndRequiredScope(ObjectSchemeFieldDTO fieldDTO,
                                                    List<String> issueTypes,
                                                    List<String> issueTypeNames,
                                                    boolean resetIssueType,
@@ -389,8 +389,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         boolean allIsRequired = true;
         boolean allIsNotRequired = false;
         if (CollectionUtils.isEmpty(extendList)) {
-            String fieldContext = getFieldContext(fieldCode);
+            String fieldContext = getFieldContext(fieldDTO.getCode());
             issueTypes.addAll(Arrays.asList(fieldContext.split(",")));
+            allIsRequired = allIsRequired && fieldDTO.getRequired();
+            allIsNotRequired = allIsNotRequired || fieldDTO.getRequired();
         }
         for (ObjectSchemeFieldExtendDTO e : extendList) {
             issueTypes.add(e.getIssueType());
@@ -579,7 +581,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<String> issueTypeNames = new ArrayList<>();
         boolean containsAllIssueTypes = containsAllIssueTypes(organizationId, projectId, issueTypes);
         String requiredScope =
-                processIssueTyeAndRequiredScope(field.getCode(),issueTypes, issueTypeNames, false, extendList, containsAllIssueTypes);
+                processIssueTyeAndRequiredScope(field,issueTypes, issueTypeNames, false, extendList, containsAllIssueTypes);
         ObjectSchemeFieldDetailVO fieldDetailDTO = modelMapper.map(field, ObjectSchemeFieldDetailVO.class);
         fieldDetailDTO.setContext(issueTypes.toArray(new String[issueTypes.size()]));
         fieldDetailDTO.setRequiredScope(requiredScope);
@@ -1093,7 +1095,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             String endRank = pageConfigFieldVO.getRank();
             List<PageConfigFieldVO> configFieldVOS = objectSchemeFieldExtendMapper.listConfigsByFieldCodes(fieldCodeS);
             for (PageConfigFieldVO configFieldVO : configFieldVOS) {
-                SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(pageConfigFieldVO.getFieldCode());
+                SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(configFieldVO.getFieldCode());
                 if (!ObjectUtils.isEmpty(commonField)) {
                     configFieldVO.setCreated(commonField.created());
                     configFieldVO.setEdited(commonField.edited());
