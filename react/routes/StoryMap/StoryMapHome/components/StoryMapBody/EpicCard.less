@@ -2,10 +2,31 @@
   cursor: grab;
   background: #D9C2FB;
   border-radius: 0.02rem;
-  padding: 0.12rem;
   overflow: hidden;
   text-overflow: ellipsis;
-
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  .progress {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    background-color: rgba(48, 63, 159, 0.3);
+    height: 4px;
+    .completed {
+      position: absolute;
+      background: #303F9F;
+      height: 4px;
+    }
+  }
+  .top {
+    display: flex;
+  }
+  .status {
+    margin-left: auto;
+    width: 48px;
+  }
   &.none {
     background: rgba(0, 0, 0, 0.04);
   }

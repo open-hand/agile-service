@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Tooltip } from 'choerodon-ui';
+import StatusTag from '@/components/StatusTag';
 import { DragSource } from 'react-dnd';
 import { find } from 'lodash';
 import { observer } from 'mobx-react';
 import { storyMapApi } from '@/api';
 
+import { TypeTag } from '@/components';
 import AutoScroll from '../../../../../../common/AutoScroll';
 import Card from '../Card';
 import './StoryCard.less';
@@ -53,8 +55,8 @@ class StoryCard extends Component {
     if (swimLine === 'none' || storyMapVersionDTOList.length === 0) {
       const storyMapDragVO = {
         // 问题id列表，移动到版本，配合versionId使用
-        // versionIssueIds: [],     
-        epicId: 0, // 要关联的史诗id          
+        // versionIssueIds: [],
+        epicId: 0, // 要关联的史诗id
         epicIssueIds: [issueId],
         featureId: 0, // 要关联的特性id
         // 问题id列表，移动到特性，配合featureId使用
@@ -89,7 +91,20 @@ class StoryCard extends Component {
     const {
       story, connectDragSource, index, rowIndex,
     } = this.props;
-    const { issueId, issueNum, summary } = story;
+    const {
+      issueId, issueNum, summary, completedCount = 1, totalCount = 4, statusVO = {
+        canDelete: null,
+        code: null,
+        completed: null,
+        defaultStatus: null,
+        description: null,
+        id: '88255195225804800',
+        name: '已评审',
+        objectVersionNumber: 1,
+        organizationId: 7,
+        type: 'done',
+      },
+    } = story;
     const { selectedIssueMap } = StoryMapStore;
     return (
       <Card
@@ -100,9 +115,28 @@ class StoryCard extends Component {
       >
         <Icon type="close" className="c7nagile-StoryMap-StoryCard-delete" onClick={this.handlRemoveStory} />
         <div className="summary">
-          <Tooltip title={summary} getPopupContainer={trigger => trigger.parentNode} placement={index === 0 && rowIndex === 0 ? 'bottom' : 'top'}>
+          <Tooltip title={summary} getPopupContainer={(trigger) => trigger.parentNode} placement={index === 0 && rowIndex === 0 ? 'bottom' : 'top'}>
             {summary}
           </Tooltip>
+        </div>
+        <div className="bottom">
+          {
+            totalCount && (
+              <div className="subTaskProgress">
+                <TypeTag data={{ icon: 'agile_subtask', colour: '#4D90FE' }} iconSize={24} />
+                <span className="completedCount">{`${completedCount}/${totalCount}`}</span>
+              </div>
+            )
+          }
+          <div className="status">
+            <Tooltip mouseEnterDelay={0.5} title={`状态： ${statusVO && statusVO.name}`}>
+              <div>
+                <StatusTag
+                  data={statusVO}
+                />
+              </div>
+            </Tooltip>
+          </div>
         </div>
       </Card>
     );
