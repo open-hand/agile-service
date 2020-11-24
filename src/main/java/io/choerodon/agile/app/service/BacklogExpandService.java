@@ -100,4 +100,6 @@ public interface BacklogExpandService {
      * @param typeCode
      */
     void getBacklogFieldCodes(List<String> fieldCodeS, String typeCode);
+
+    Boolean checkFieldPageConfig(String issueType, String code, Boolean created, Boolean edited);
 }

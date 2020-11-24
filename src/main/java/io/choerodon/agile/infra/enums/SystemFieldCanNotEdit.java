@@ -67,7 +67,6 @@ public class SystemFieldCanNotEdit {
         featureMap.put(FieldCode.STATUS, new PageConfigFieldEditedVO(true, true, true));
         featureMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(false, false, true));
         featureMap.put(FieldCode.SUB_PROJECT, new PageConfigFieldEditedVO(false, true, true));
-        featureMap.put(FieldCode.PROGRAM_VERSION, new PageConfigFieldEditedVO(false, true, true));
 
         storyMap = new HashMap<>();
         storyMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));
@@ -78,7 +77,6 @@ public class SystemFieldCanNotEdit {
         storyMap.put(FieldCode.LAST_UPDATE_DATE, new PageConfigFieldEditedVO(true, true, true));
         storyMap.put(FieldCode.STATUS, new PageConfigFieldEditedVO(true, true, true));
         storyMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(false, false, true));
-        storyMap.put(FieldCode.MAIN_RESPONSIBLE, new PageConfigFieldEditedVO(false, false, true));
 //        storyMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
 //        storyMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
 //        storyMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));
@@ -98,7 +96,6 @@ public class SystemFieldCanNotEdit {
         taskMap.put(FieldCode.LAST_UPDATE_DATE, new PageConfigFieldEditedVO(true, true, true));
         taskMap.put(FieldCode.STATUS, new PageConfigFieldEditedVO(true, true, true));
         taskMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(false, false, true));
-        taskMap.put(FieldCode.MAIN_RESPONSIBLE, new PageConfigFieldEditedVO(false, false, true));
 //        taskMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
 //        taskMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
 //        taskMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));
@@ -117,9 +114,6 @@ public class SystemFieldCanNotEdit {
         bugMap.put(FieldCode.LAST_UPDATE_DATE, new PageConfigFieldEditedVO(true, true, true));
         bugMap.put(FieldCode.STATUS, new PageConfigFieldEditedVO(true, true, true));
         bugMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(false, false, true));
-        bugMap.put(FieldCode.MAIN_RESPONSIBLE, new PageConfigFieldEditedVO(false, false, true));
-        bugMap.put(FieldCode.TEST_RESPONSIBLE, new PageConfigFieldEditedVO(false, false, true));
-        bugMap.put(FieldCode.ENVIRONMENT, new PageConfigFieldEditedVO(false, false, true));
 //        bugMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
 //        bugMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
 //        bugMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));

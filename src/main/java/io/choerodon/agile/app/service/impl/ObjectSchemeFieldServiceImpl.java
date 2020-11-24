@@ -266,12 +266,15 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             return;
         }
         List<ObjectSchemeFieldDTO> notSyncFields = objectSchemeFieldMapper.selectNotSyncField(systemFieldIds);
+        if (CollectionUtils.isEmpty(issueTypes)) {
+            objectSchemeFieldDTOS.addAll(notSyncFields);
+            return;
+        }
         List<ObjectSchemeFieldDTO> notSyncFilterFields = notSyncFields.stream().filter(v -> {
             List<String> contexts = new ArrayList<>(Arrays.asList(getFieldContext(v.getCode()).split(",")));
             if (CollectionUtils.isEmpty(contexts)) {
                 return false;
             }
-
             contexts.retainAll(issueTypes);
             return !CollectionUtils.isEmpty(contexts);
         }).collect(Collectors.toList());
@@ -1100,9 +1103,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     configFieldVO.setCreated(commonField.created());
                     configFieldVO.setEdited(commonField.edited());
                 }
-                String nextRank = RankUtil.genNext(endRank);
-                configFieldVO.setRank(nextRank);
-                endRank = nextRank;
+                String preRank = RankUtil.genPre(endRank);
+                configFieldVO.setRank(preRank);
+                endRank = preRank;
                 configFieldVO.setIssueType(issueType);
             }
             pageConfigFieldVOS.addAll(configFieldVOS);
@@ -1199,36 +1202,26 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     || ObjectUtils.isEmpty(f.getEdited())) {
                 throw new CommonException("error.page.config.field.selectBox.empty");
             }
-            if (ObjectUtils.isEmpty(f.getObjectVersionNumber())) {
-                throw new CommonException("error.page.config.field.objectVersionNumber.null");
+            //查询字段配置是否存在，存在则更新不存在则创建
+            ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
+            dto.setIssueType(issueType);
+            dto.setOrganizationId(organizationId);
+            dto.setFieldId(fieldId);
+            dto.setProjectId(projectId);
+            List<ObjectSchemeFieldExtendDTO> result = objectSchemeFieldExtendMapper.select(dto);
+            Long issueTypeId = issueTypeMap.get(issueType);
+            if (Boolean.FALSE.equals(onProjectLevel)) {
+                result = result.stream().filter(v -> ObjectUtils.isEmpty(v.getProjectId())).collect(Collectors.toList());
             }
-            if (onProjectLevel) {
-                //查询字段配置是否存在，存在则更新不存在则创建
-                ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
-                dto.setIssueType(issueType);
-                dto.setOrganizationId(organizationId);
-                dto.setFieldId(fieldId);
-                dto.setProjectId(projectId);
-                List<ObjectSchemeFieldExtendDTO> result = objectSchemeFieldExtendMapper.select(dto);
-                Long issueTypeId = issueTypeMap.get(issueType);
-                if (result.isEmpty() && !ObjectUtils.isEmpty(issueTypeId)) {
-                    dto.setIssueTypeId(issueTypeId);
-                    dto.setRequired(f.getRequired());
-                    dto.setCreated(f.getCreated());
-                    dto.setEdited(f.getEdited());
-                    dto.setRank(f.getRank());
-                    objectSchemeFieldExtendMapper.insertSelective(dto);
-                } else {
-                    updateObjectSchemeFieldExtend(f, result);
-                }
+            if (result.isEmpty() && !ObjectUtils.isEmpty(issueTypeId)) {
+                dto.setIssueTypeId(issueTypeId);
+                dto.setRequired(f.getRequired());
+                dto.setCreated(f.getCreated());
+                dto.setEdited(f.getEdited());
+                dto.setRank(f.getRank());
+                objectSchemeFieldExtendMapper.insertSelective(dto);
             } else {
-                List<ObjectSchemeFieldExtendDTO> result =
-                        objectSchemeFieldExtendMapper.selectExtendField(Arrays.asList(issueType), organizationId, fieldId, null);
-                if (result.isEmpty()) {
-                    throw new CommonException("error.page.config.field.not.existed");
-                } else {
-                    updateObjectSchemeFieldExtend(f, result);
-                }
+                updateObjectSchemeFieldExtend(f, result);
             }
         });
     }
