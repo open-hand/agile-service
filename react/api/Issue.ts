@@ -56,6 +56,7 @@ interface CopyCondition {
   subTask: boolean,
   summary: string,
   epicName?: string,
+  customField?: boolean,
 }
 
 interface ICustomFieldData {
@@ -188,7 +189,7 @@ class IssueApi extends Api<IssueApi> {
     return axios({
       method: 'post',
       url: `${this.prefix}/issues/${issueId}/clone_issue`,
-      data: copyCondition,
+      data: { customField: true, ...copyCondition },
       params: {
         organizationId,
         applyType,
