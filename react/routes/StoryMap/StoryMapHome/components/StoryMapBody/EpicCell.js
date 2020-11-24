@@ -153,6 +153,7 @@ class EpicCell extends Component {
     const {
       collapse, storys, feature, epicId,
     } = otherData || {};
+
     const {
       // featureCommonDTOList,
       issueId,

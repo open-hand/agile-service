@@ -26,12 +26,10 @@ import CreateVersion from './components/CreateVersion';
 import CreateEpicModal from './components/CreateEpicModal';
 import IssueDetail from './components/IssueDetail';
 import StoryFilterDropDown from './components/StoryFilterDropDown';
-import StoryFilter from './components/StoryFilter';
 import StoryMapStore from '../../../stores/project/StoryMap/StoryMapStore';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
 
-const { Option } = Select;
 const HEX = {
   'c7nagile-StoryMap-EpicCard': '#D9C2FB',
   'c7nagile-StoryMap-StoryCard': '#AEE9E0',
@@ -40,16 +38,19 @@ const HEX = {
 };
 
 const StoryMapHome = observer(() => {
-  const handleRefresh = () => {
-    StoryMapStore.getStoryMap();
+  const handleRefresh = (firstLoad = false) => {
+    StoryMapStore.getStoryMap(firstLoad);
   };
   const ref = useRef(null);
   StoryMapStore.setMiniMapRef(ref);
 
   useEffect(() => {
-    handleRefresh();
+    handleRefresh(true);
     const defaultHiddenNoStoryValue = localPageCacheStore.getItem('stroyMap.hidden.no.stroy');
     defaultHiddenNoStoryValue && StoryMapStore.setHiddenColumnNoStory(defaultHiddenNoStoryValue);
+
+    const defaultFoldCompletedEpic = localPageCacheStore.getItem('stroyMap.fold.completedEpic');
+    defaultFoldCompletedEpic && StoryMapStore.setFoldCompletedEpic(defaultFoldCompletedEpic);
 
     return () => { StoryMapStore.clear(); };
   }, []);
@@ -116,9 +117,15 @@ const StoryMapHome = observer(() => {
     }
   };
 
-  const handleCheckBoxChange = (value, oldValue) => {
+  const handleNoStoryCheckBoxChange = (value) => {
     localPageCacheStore.setItem('stroyMap.hidden.no.stroy', value);
     StoryMapStore.setHiddenColumnNoStory(value);
+  };
+
+  const handleCompletedEpicCheckBoxChange = (value) => {
+    localPageCacheStore.setItem('stroyMap.fold.completedEpic', value);
+    StoryMapStore.setFoldCompletedEpic(value);
+    StoryMapStore.foldCompletedEpicColumn(value);
   };
 
   const {
@@ -161,7 +168,8 @@ const StoryMapHome = observer(() => {
         <HeaderLine />
         <SwitchSwimLine />
         <StoryFilterDropDown />
-        <CheckBox name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleCheckBoxChange}>隐藏无故事的列</CheckBox>
+        <CheckBox name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>
+        <CheckBox name="foldCompletedEpic" checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起史诗已完成列</CheckBox>
       </Header>
       <Breadcrumb />
       <Content style={{

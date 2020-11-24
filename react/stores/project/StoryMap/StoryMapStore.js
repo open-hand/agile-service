@@ -1,4 +1,3 @@
-
 import {
   observable, action, computed, set, toJS,
 } from 'mobx';
@@ -8,8 +7,9 @@ import {
 } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import {
-  storyMapApi, versionApi, issueTypeApi, priorityApi, 
+  storyMapApi, versionApi, issueTypeApi, priorityApi,
 } from '@/api';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
 class StoryMapStore {
   @observable swimLine = localStorage.getItem('agile.StoryMap.SwimLine') || 'none';
@@ -67,6 +67,12 @@ class StoryMapStore {
     this.hiddenColumnNoStory = data;
   }
 
+  @observable foldCompletedEpic = false;
+
+  @action setFoldCompletedEpic = (data) => {
+    this.foldCompletedEpic = data;
+  }
+
   miniMap = {};
 
   @action clear() {
@@ -83,6 +89,7 @@ class StoryMapStore {
     this.versionList = [];
     this.selectedIssueMap.clear();
     this.hiddenColumnNoStory = false;
+    this.foldCompletedEpic = false;
   }
 
   @action resetSearchVO() {
@@ -96,7 +103,7 @@ class StoryMapStore {
     };
   }
 
-  getStoryMap = () => {
+  getStoryMap = (firstLoad) => {
     this.setLoading(true);
     Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
       let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
@@ -104,15 +111,15 @@ class StoryMapStore {
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');
       const newStoryMapData = {
         ...storyMapData,
-        epicWithFeature: featureWithoutEpic.length > 0 ? epicWithFeature.map(epic => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] })).concat({
+        epicWithFeature: featureWithoutEpic.length > 0 ? epicWithFeature.map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] })).concat({
           issueId: 0,
           featureCommonDTOList: featureWithoutEpic,
-        }) : epicWithFeature.map(epic => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] })),
+        }) : epicWithFeature.map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] })),
       };
       this.issueTypes = issueTypes;
       this.prioritys = prioritys;
       this.initVersionList(versionList);
-      this.initStoryData(newStoryMapData);
+      this.initStoryData(newStoryMapData, firstLoad);
       this.setLoading(false);
     }).catch((error) => {
       Choerodon.prompt(error);
@@ -187,7 +194,6 @@ class StoryMapStore {
     this.loading = loading;
   }
 
-
   @action switchSwimLine(swimLine) {
     this.swimLine = swimLine;
     localStorage.setItem('agile.StoryMap.SwimLine', swimLine);
@@ -202,9 +208,8 @@ class StoryMapStore {
       const oldVersion = find(this.versionList, { versionId: version.versionId });
       if (oldVersion) {
         return { ...version, storyNum: 0, collapse: oldVersion.collapse };
-      } else {
-        return { ...version, storyNum: 0, collapse: false };
       }
+      return { ...version, storyNum: 0, collapse: false };
     });
   }
 
@@ -235,7 +240,7 @@ class StoryMapStore {
     });
   }
 
-  @action initStoryData(storyMapData) {
+  @action initStoryData(storyMapData, firstLoad) {
     const {
       epicWithFeature, storyList, storyMapWidth,
     } = storyMapData;
@@ -273,6 +278,27 @@ class StoryMapStore {
     });
     this.storyData = storyData;
     this.storyMapData = storyMapData;
+    if (firstLoad) {
+      const defaultFoldCompletedEpic = localPageCacheStore.getItem('stroyMap.fold.completedEpic');
+      defaultFoldCompletedEpic && this.foldCompletedEpicColumn(defaultFoldCompletedEpic);
+    }
+  }
+
+  @action foldCompletedEpicColumn(fold) {
+    const {
+      epicWithFeature = [],
+    } = this.storyMapData;
+    epicWithFeature.forEach((epic) => {
+      const { issueId: epicId, statusVO = {} } = epic;
+      const { completed } = statusVO;
+      if (epicId) {
+        this.storyData[epicId] = {
+          ...this.storyData[epicId],
+          collapse: fold,
+          // collapse: completed && fold,
+        };
+      }
+    });
   }
 
   @action addStoryToStoryData(story, storyData = this.storyData) {
@@ -285,7 +311,7 @@ class StoryMapStore {
       if (targetFeature) {
         targetFeature.storys.push(story);
         // 故事按照version泳道分类
-        // if (this.swimLine === 'version') {          
+        // if (this.swimLine === 'version') {
         if (storyMapVersionDTOList.length === 0) {
           this.addStoryNumToVersion('none');
           if (!targetFeature.version.none) {
@@ -298,7 +324,7 @@ class StoryMapStore {
           // if (!targetFeature.version[versionId]) {
           //   set(targetFeature.version, {
           //     [versionId]: [],
-          //   }); 
+          //   });
           // }
           this.addStoryNumToVersion(versionId);
           targetFeature.version[versionId].push(story);
@@ -431,9 +457,9 @@ class StoryMapStore {
       // if (this.storyData[epicId]) {
       //   const targetEpic = this.storyData[epicId];
       //   const { feature } = targetEpic;
-      //   const targetFeature = feature[featureId || 'none'];      
+      //   const targetFeature = feature[featureId || 'none'];
       //   remove(targetFeature.version[targetVersionId], { issueId: story.issueId });
-      //   remove(storyMapVersionDTOList, { versionId: targetVersionId });  
+      //   remove(storyMapVersionDTOList, { versionId: targetVersionId });
       //   // 版本全删掉后，移到未规划
       //   if (story.storyMapVersionDTOList.length === 0) {
       //     targetFeature.version.none.push(story);
@@ -477,7 +503,6 @@ class StoryMapStore {
   }) {
     this.storyData[epicId].feature[featureId].width = width;
   }
-
 
   changeWidth({
     width,
@@ -558,7 +583,7 @@ class StoryMapStore {
     }
     const sortVO = {
       projectId: getProjectId(),
-      objectVersionNumber: source.epicRankObjectVersionNumber, // 乐观锁     
+      objectVersionNumber: source.epicRankObjectVersionNumber, // 乐观锁
       issueId: source.issueId,
       type: 'epic',
       before: true, // 是否拖动到第一个
@@ -596,9 +621,9 @@ class StoryMapStore {
   @computed get getIsEmpty() {
     const { epicWithFeature, featureWithoutEpic } = this.storyMapData;
     if (epicWithFeature && featureWithoutEpic) {
-      return featureWithoutEpic.length === 0 && epicWithFeature.filter(epic => epic.issueId).length === 0;
-    } else if (epicWithFeature) {
-      return epicWithFeature.filter(epic => epic.issueId).length === 0;
+      return featureWithoutEpic.length === 0 && epicWithFeature.filter((epic) => epic.issueId).length === 0;
+    } if (epicWithFeature) {
+      return epicWithFeature.filter((epic) => epic.issueId).length === 0;
     }
     return false;
   }
@@ -615,6 +640,5 @@ class StoryMapStore {
     return find(this.prioritys, { default: true }) || this.prioritys[0];
   }
 }
-
 
 export default new StoryMapStore();
