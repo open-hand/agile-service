@@ -1879,8 +1879,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                     subIssueDTOList.forEach(issueDO -> copySubIssue(issueDO, newIssueId, projectId));
                 }
             }
-            // 复制自定义字段的值
-            fieldValueService.copyCustomFieldValue(projectId,issueDetailDTO,newIssueId);
+            if (copyConditionVO.getCustomField()) {
+                // 复制自定义字段的值
+                fieldValueService.copyCustomFieldValue(projectId, issueDetailDTO, newIssueId);
+            }
             return queryIssue(projectId, newIssueId, organizationId);
         } else {
             throw new CommonException("error.issue.copyIssueByIssueId");

@@ -21,6 +21,9 @@ public class CopyConditionVO {
     @ApiModelProperty(value = "是否复制冲刺")
     private Boolean sprintValues;
 
+    @ApiModelProperty(value = "是否复制自定义字段")
+    private Boolean customField;
+
     private String epicName;
 
     public String getEpicName() {
@@ -66,5 +69,13 @@ public class CopyConditionVO {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    public Boolean getCustomField() {
+        return customField;
+    }
+
+    public void setCustomField(Boolean customField) {
+        this.customField = customField;
     }
 }
