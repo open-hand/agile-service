@@ -5,7 +5,7 @@ import { createRef } from 'react';
 import {
   observable, computed, action, toJS,
 } from 'mobx';
-import { flattenDeep, debounce, find } from 'lodash';
+import { debounce, find } from 'lodash';
 import dayjs, { Dayjs } from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
@@ -17,7 +17,9 @@ import { Gantt } from './types';
 import {
   ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE, MIN_VIEW_RATE,
 } from './constants';
-import { getDragSideShrink, getDragSideExpand, getMoveStep } from './utils';
+import {
+  flattenDeep, getDragSideShrink, getDragSideExpand, getMoveStep,
+} from './utils';
 
 dayjs.extend(weekday);
 dayjs.extend(weekOfYear);
@@ -109,7 +111,7 @@ class GanttStore {
 
   mainElementRef = createRef<HTMLDivElement>();
 
-  chartHammer: HammerManager;
+  chartElementRef = createRef<HTMLDivElement>();
 
   isPointerPress: boolean = false;
 
@@ -129,13 +131,14 @@ class GanttStore {
   }
 
   @action
-  setColumns(columns: Gantt.Column[]) {
-    this.columns = columns;
+  setRowCollapse(item: Gantt.Item, collapsed: boolean) {
+    item.collapsed = collapsed;
+    // this.barList = this.getBarList();
   }
 
   @action
-  setChartHammer(chartHammer: HammerManager) {
-    this.chartHammer = chartHammer;
+  setColumns(columns: Gantt.Column[]) {
+    this.columns = columns;
   }
 
   @action syncSize(size: {
@@ -559,7 +562,7 @@ class GanttStore {
     // };
 
     // 进行展开扁平
-    return observable(flattenDeep(data).map((item, index) => {
+    return observable(flattenDeep(data).map((item: any, index) => {
       let startAmp = dayjs(item.startDate || 0).valueOf();
       let endAmp = dayjs(item.endDate || 0).valueOf();
 
@@ -601,8 +604,11 @@ class GanttStore {
   @action
   handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     if (this._wheelTimer) clearTimeout(this._wheelTimer);
-    this.scrolling = true;
-    this.translateX += event.deltaX;
+    // 水平滚动
+    if (Math.abs(event.deltaX) > 0) {
+      this.scrolling = true;
+      this.translateX += event.deltaX;
+    }
     this._wheelTimer = setTimeout(() => {
       this.scrolling = false;
     }, 100);
@@ -620,15 +626,15 @@ class GanttStore {
 
   @action
   showSelectionBar(event: MouseEvent) {
-    const topMargin = 4;
-    const rowH = 28;
     const scrollTop = this.mainElementRef.current?.scrollTop || 0;
     const { top } = this.mainElementRef.current?.getBoundingClientRect() || { top: 0 };
+    // 内容区高度
+    const contentHeight = this.getBarList.length * ROW_HEIGHT;
     const offsetY = event.clientY - top + scrollTop;
-    if (offsetY < topMargin) {
+    if (offsetY - contentHeight > topTap) {
       this.showSelectionIndicator = false;
     } else {
-      const top = Math.floor((offsetY - 4) / rowH) * rowH + 4;
+      const top = Math.floor((offsetY - topTap) / ROW_HEIGHT) * ROW_HEIGHT + 4;
       this.showSelectionIndicator = true;
       this.selectionIndicatorTop = top;
     }
@@ -666,6 +672,9 @@ class GanttStore {
    */
   @action
   shadowGesturePress(event: HammerInput, type: Gantt.MoveType, barInfo: Gantt.Bar) {
+    if (!this.chartElementRef.current) {
+      return;
+    }
     const { width } = barInfo;
     this.isPointerPress = true;
     const isLeft = type === 'left';
@@ -674,6 +683,7 @@ class GanttStore {
     // 移动右边，以左侧为基准
     const basePointerX = isLeft ? startX + width : startX - width;
 
+    const chartHammer = new Hammer(this.chartElementRef.current);
     // let baseX: number;
     // const old = { ...barInfo };
     const panStart = (event: HammerInput) => {
@@ -695,15 +705,13 @@ class GanttStore {
     const panEnd = () => {
       this.isPointerPress = false;
       this.handleDragEnd();
-      this.chartHammer.off('panstart', panStart);
-      this.chartHammer.off('panmove', panMove);
-      this.chartHammer.off('panend', panEnd);
+      chartHammer.destroy();
       this.updateTaskDate(barInfo);
     };
 
-    this.chartHammer.on('panstart', panStart);
-    this.chartHammer.on('panmove', panMove);
-    this.chartHammer.on('panend', panEnd);
+    chartHammer.on('panstart', panStart);
+    chartHammer.on('panmove', panMove);
+    chartHammer.on('panend', panEnd);
   }
 
   shadowGesturePressUp() {
@@ -715,6 +723,10 @@ class GanttStore {
    * @param barInfo
    */
   shadowGestureBarPress(barInfo: Gantt.Bar) {
+    if (!this.chartElementRef.current) {
+      return;
+    }
+    const chartHammer = new Hammer(this.chartElementRef.current);
     const step = CELL_UNIT;
     let { translateX } = barInfo;
 
@@ -748,16 +760,13 @@ class GanttStore {
 
     const panEnd = () => {
       this.handleDragEnd();
-      this.chartHammer.off('panstart', panStart);
-      this.chartHammer.off('panmove', panMove);
-      this.chartHammer.off('panend', panEnd);
-
+      chartHammer.destroy();
       this.updateTaskDate(barInfo);
     };
 
-    this.chartHammer.on('panstart', panStart);
-    this.chartHammer.on('panmove', panMove);
-    this.chartHammer.on('panend', panEnd);
+    chartHammer.on('panstart', panStart);
+    chartHammer.on('panmove', panMove);
+    chartHammer.on('panend', panEnd);
   }
 
   @action

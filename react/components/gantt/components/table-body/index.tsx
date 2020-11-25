@@ -1,8 +1,10 @@
+/* eslint-disable no-underscore-dangle */
 import React, { useContext, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import Context from '../../context';
 import styles from './index.less';
 import { ROW_HEIGHT } from '../../constants';
+import RowToggler from './RowToggler';
 
 const TableBody: React.FC = () => {
   const { store } = useContext(Context);
@@ -37,6 +39,25 @@ const TableBody: React.FC = () => {
                 minWidth: column.minWidth,
               }}
             >
+              {index === 0 && (
+                Array(bar._depth).fill(0).map((_, i) => (
+                  <div
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={i}
+                    className={styles['row-indentation']}
+                    // style={{ width: bar._depth * 38, backgroundSize: bar._depth * 38 }}
+                  />
+                ))
+              )}
+              {index === 0 && bar._childrenCount > 0 && (
+                <RowToggler
+                  level={bar._depth}
+                  collapsed={bar._collapsed}
+                  onClick={() => {
+                    store.setRowCollapse(bar.task, !bar._collapsed);
+                  }}
+                />
+              )}
               {/* @ts-ignore */}
               <span className={styles.ellipsis}>{bar.task[column.name]}</span>
             </div>

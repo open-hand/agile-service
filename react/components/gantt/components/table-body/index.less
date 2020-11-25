@@ -10,20 +10,55 @@
   display: flex;
   align-items: center;
 }
+
 .cell {
   position: relative;
   display: flex;
   align-items: center;
   border-right: 1px solid #f0f0f0;
-  height: 100%;  
-  overflow: hidden;
+  height: 100%;
   color: #8c8c8c;
   user-select: none;
   padding: 0 12px;
 }
+
 .ellipsis {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.row-indentation {
+  width: 38px;
+  height: 100%;
+  position: relative;
+  margin-top: -26px;
+  margin-left: 12px;
+  pointer-events: none;
+  &:before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    left: 0;
+    width: 1px;
+    bottom: 0;
+    background-color: #e5e5e5;
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background-color: #e5e5e5;
+  }
+
+
+}
+
+.row-indentation + .row-indentation:after {
+  left: -15px;
 }
