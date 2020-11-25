@@ -372,4 +372,11 @@ public interface IssueService {
     void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId);
     
     void handleUpdateVersionIssueRel(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType);
+
+    /**
+     * 根据filter id获得sql
+     * @param quickFilterIds
+     * @return
+     */
+    String getQuickFilter(List<Long> quickFilterIds);
 }
