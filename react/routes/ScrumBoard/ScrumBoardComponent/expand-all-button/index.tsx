@@ -10,7 +10,12 @@ import expandStyles from './index.less';
 function ExpandAllButton() {
   const [expandAll, setExpandAll] = useState<boolean>();
   function handleClick() {
+    if (scrumBoardStore.currentBindFunctionMaps.has('expandOrUp-epic')) {
+      scrumBoardStore.executeBindFunction(['expandOrUp-epic'], false);
+      return;
+    }
     scrumBoardStore.executeBindFunction(['expandOrUp', 'expandOrUp-epic'], false);
+
     // scrumBoardStore.currentBindFunctionMaps.get('expandOrUp')(!expandAll);
   }
   return scrumBoardStore.currentBindFunctionMaps.get('expandOrUp') || scrumBoardStore.currentBindFunctionMaps.get('expandOrUp-epic') ? (
