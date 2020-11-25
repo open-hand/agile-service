@@ -268,7 +268,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
           show: true,
           interval: 0,
           lineStyle: {
-            color: ['#eee'],
+            color: '#eee',
             width: 2,
             type: 'solid',
           },

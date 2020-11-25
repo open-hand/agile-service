@@ -123,7 +123,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
         show: true,
         interval: 0,
         lineStyle: {
-          color: ['#eee'],
+          color: '#eee',
           width: 1,
           type: 'solid',
         },
