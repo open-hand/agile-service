@@ -51,6 +51,7 @@ const TableBody: React.FC = () => {
               )}
               {index === 0 && bar._childrenCount > 0 && (
                 <RowToggler
+                  level={bar._depth}
                   collapsed={bar._collapsed}
                   onClick={() => {
                     store.setRowCollapse(bar.task, !bar._collapsed);

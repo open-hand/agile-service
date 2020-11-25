@@ -9,15 +9,22 @@ import Gantt from '@/components/gantt';
 const dataList = [
   {
     executor: null,
-    content: 'SCRUM敏捷实践集',
+    content: '冲刺一',
     startDate: '2020-11-01 08:02:02',
     endDate: '2020-11-02',
     collapsed: false,
-    children: [],
+    children: [{
+      executor: null,
+      content: '我的子任务',
+      startDate: '2020-11-01 08:02:02',
+      endDate: '2020-11-02',
+      collapsed: false,
+      children: [],
+    }],
   },
   {
     executor: null,
-    content: '风险的哈哈哈',
+    content: '冲刺二',
     startDate: '2021-12-01',
     endDate: '2021-12-31',
     collapsed: false,
