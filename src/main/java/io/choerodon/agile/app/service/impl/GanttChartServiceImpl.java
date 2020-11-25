@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.GanttChartVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.UserWithGanttChartVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.GanttChartService;
 import io.choerodon.agile.app.service.IssueService;
@@ -39,7 +40,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     private UserService userService;
 
     @Override
-    public List<GanttChartVO> list(Long projectId, SearchVO searchVO) {
+    public List<GanttChartVO> listByTask(Long projectId, SearchVO searchVO) {
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (condition) {
             String filterSql;
@@ -66,6 +67,39 @@ public class GanttChartServiceImpl implements GanttChartService {
         } else {
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<UserWithGanttChartVO> listByUser(Long projectId, SearchVO searchVO) {
+        List<GanttChartVO> ganttChartList = listByTask(projectId, searchVO);
+        List<GanttChartVO> unassigned = new ArrayList<>();
+        Map<String, List<GanttChartVO>> map = new HashMap<>();
+        ganttChartList.forEach(g -> {
+            UserMessageDTO user = g.getAssignee();
+            if (ObjectUtils.isEmpty(user)) {
+                unassigned.add(g);
+            } else {
+                String name = user.getName();
+                List<GanttChartVO> ganttCharts = map.get(name);
+                if (ganttCharts == null) {
+                    ganttCharts = new ArrayList<>();
+                    map.put(name, ganttCharts);
+                }
+                ganttCharts.add(g);
+            }
+        });
+        List<UserWithGanttChartVO> result = new ArrayList<>();
+        map.forEach((k, v) -> {
+            UserWithGanttChartVO userWithGanttChartVO = new UserWithGanttChartVO();
+            userWithGanttChartVO.setName(k);
+            userWithGanttChartVO.setGanttChartList(v);
+            result.add(userWithGanttChartVO);
+        });
+        UserWithGanttChartVO unassignedVO = new UserWithGanttChartVO();
+        unassignedVO.setName("未分配");
+        unassignedVO.setGanttChartList(unassigned);
+        result.add(unassignedVO);
+        return result;
     }
 
     private List<GanttChartVO> buildFromIssueDto(List<IssueDTO> issueList, Long projectId) {
