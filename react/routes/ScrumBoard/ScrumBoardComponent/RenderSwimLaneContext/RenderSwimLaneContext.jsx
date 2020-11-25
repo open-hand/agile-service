@@ -39,8 +39,10 @@ class SwimLaneContext extends React.Component {
   }
 
   componentDidMount() {
+    if (this.props.mode !== 'swimlane_none') {
+      scrumBoardStore.bindFunction('expandOrUp', this.handleExpandOrUPPanel);
+    }
     // isEqual(getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]),)
-    scrumBoardStore.bindFunction('expandOrUp', this.handleExpandOrUPPanel);
   }
 
   componentWillUnmount() {
