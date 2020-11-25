@@ -2,7 +2,9 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 import { createRef } from 'react';
-import { observable, computed, action } from 'mobx';
+import {
+  observable, computed, action, toJS,
+} from 'mobx';
 import { flattenDeep, debounce, find } from 'lodash';
 import dayjs, { Dayjs } from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
@@ -13,7 +15,7 @@ import isLeapYear from 'dayjs/plugin/isLeapYear';
 import weekday from 'dayjs/plugin/weekday';
 import { Gantt } from './types';
 import {
-  ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE,
+  ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE, MIN_VIEW_RATE,
 } from './constants';
 import { getDragSideShrink, getDragSideExpand, getMoveStep } from './utils';
 
@@ -23,54 +25,6 @@ dayjs.extend(quarterOfYear);
 dayjs.extend(advancedFormat);
 dayjs.extend(isBetween);
 dayjs.extend(isLeapYear);
-const dataList: Gantt.Item[] = [
-  {
-    executor: null,
-    content: 'SCRUM敏捷实践集',
-    startDate: '2020-11-01 08:02:02',
-    endDate: '2020-11-02',
-    collapsed: false,
-    children: [],
-  },
-  {
-    executor: null,
-    content: '风险的哈哈哈',
-    startDate: '2021-12-01',
-    endDate: '2021-12-31',
-    collapsed: false,
-    children: [
-      {
-        executor: null,
-        content: '我的子任务',
-        startDate: '2020-11-01 08:02:02',
-        endDate: '2020-11-02',
-        collapsed: false,
-        children: [],
-      },
-      {
-        executor: null,
-        content: '我的子任务2',
-        startDate: '2020-11-01 08:02:02',
-        endDate: '2020-11-02',
-        collapsed: false,
-        children: [{
-          executor: null,
-          content: '我的子任务3',
-          startDate: null,
-          endDate: null,
-          collapsed: false,
-        },
-        {
-          executor: null,
-          content: '我的子任务4',
-          startDate: '2020-08-18',
-          endDate: '2020-08-19',
-          collapsed: false,
-        }],
-      },
-    ],
-  },
-];
 
 // 视图日视图、周视图、月视图、季视图、年视图
 export const viewTypeList: Gantt.SightConfig[] = [
@@ -121,7 +75,13 @@ class GanttStore {
 
   _wheelTimer: NodeJS.Timeout | null
 
+  @observable data: Gantt.Item[] = [];
+
+  @observable columns: Gantt.Column[] = [];
+
   @observable scrolling = false;
+
+  @observable collapse = false;
 
   @observable tableWidth: number;
 
@@ -153,11 +113,62 @@ class GanttStore {
 
   isPointerPress: boolean = false;
 
+  @action
+  setData(data: Gantt.Item[]) {
+    this.data = data;
+  }
+
+  @action
+  toggleCollapse() {
+    if (this.tableWidth > 0) {
+      this.tableWidth = 0;
+      this.viewWidth = this.width - this.tableWidth;
+    } else {
+      this.initSize();
+    }
+  }
+
+  @action
+  setColumns(columns: Gantt.Column[]) {
+    this.columns = columns;
+  }
+
+  @action
   setChartHammer(chartHammer: HammerManager) {
     this.chartHammer = chartHammer;
   }
 
-  @action switchSight(type:Gantt.Sight) {
+  @action syncSize(size: {
+    width?: number;
+    height?: number;
+  }) {
+    if (!size.height || !size.width) {
+      return;
+    }
+    const { width, height } = size;
+    this.width = width;
+    this.height = height;
+    // this.viewHeight = height - HEADER_HEIGHT;
+    this.initSize();
+  }
+
+  @action initSize() {
+    this.tableWidth = this.columns.reduce((width, item) => width + item.width, 0);
+    this.viewWidth = this.height - this.tableWidth;
+    // 表盘宽度不能小于总宽度38%
+    if (this.viewWidth < MIN_VIEW_RATE * this.width) {
+      this.viewWidth = MIN_VIEW_RATE * this.width;
+      this.tableWidth = this.width - this.viewWidth;
+    }
+
+    // 图表宽度不能小于 200
+    if (this.viewWidth < 200) {
+      this.viewWidth = 200;
+      this.tableWidth = this.width - this.viewWidth;
+    }
+  }
+
+  @action switchSight(type: Gantt.Sight) {
     const target = find(viewTypeList, { type });
     if (target) {
       this.sightConfig = target;
@@ -180,15 +191,32 @@ class GanttStore {
     return this.height - HEADER_HEIGHT;
   }
 
+  @computed get getColumnsWidth(): number[] {
+    const totalColumnWidth = this.columns.reduce((width, item) => width + item.width, 0);
+    if (totalColumnWidth < this.tableWidth) {
+      let availableWidth = this.tableWidth;
+      const result: number[] = [];
+      this.columns.forEach((column, index) => {
+        if (index === this.columns.length - 1) {
+          result.push(availableWidth);
+        } else {
+          const width = (this.tableWidth * (column.width / totalColumnWidth));
+          result.push(width);
+          availableWidth -= width;
+        }
+      });
+      return result;
+    }
+    return this.columns.map((column) => column.width);
+  }
+
   // 内容区滚动区域域高度
   @computed get bodyScrollHeight() {
-    // let height = this.barList.length * ROW_HEIGHT + topTap;
-    let height = 0 * ROW_HEIGHT + topTap;
+    let height = this.getBarList.length * ROW_HEIGHT + topTap;
     if (height < this.bodyClientHeight) {
       height = this.bodyClientHeight;
     }
-
-    return height + 2 * ROW_HEIGHT;
+    return height;
   }
 
   @computed get pxUnitAmp() {
@@ -429,8 +457,8 @@ class GanttStore {
     return list;
   }
 
-  @computed get barList(): Gantt.Bar[] {
-    const { pxUnitAmp } = this;
+  @computed get getBarList(): Gantt.Bar[] {
+    const { pxUnitAmp, data } = this;
     const minStamp = 11 * pxUnitAmp;
     const height = 8;
     const baseTop = 14;
@@ -531,7 +559,7 @@ class GanttStore {
     // };
 
     // 进行展开扁平
-    return observable(flattenDeep(dataList).map((item, index) => {
+    return observable(flattenDeep(data).map((item, index) => {
       let startAmp = dayjs(item.startDate || 0).valueOf();
       let endAmp = dayjs(item.endDate || 0).valueOf();
 
@@ -585,6 +613,10 @@ class GanttStore {
       this.showSelectionBar(event);
     }
   }, 5)
+
+  handleMouseLeave() {
+    this.showSelectionIndicator = false;
+  }
 
   @action
   showSelectionBar(event: MouseEvent) {
