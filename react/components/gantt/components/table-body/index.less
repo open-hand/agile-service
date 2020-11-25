@@ -3,4 +3,27 @@
   top: 0;
   left: 0;
   overflow: hidden;
+  padding-top: 4px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid #f0f0f0;
+  height: 100%;  
+  overflow: hidden;
+  color: #8c8c8c;
+  user-select: none;
+  padding: 0 12px;
+}
+.ellipsis {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

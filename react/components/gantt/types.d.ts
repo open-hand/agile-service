@@ -51,4 +51,13 @@ export namespace Gantt {
     _depth?: number
     _index?: number
   }
+  interface Column {
+    width: number,
+    minWidth?: number,
+    name: string,
+    label: string,
+    visible: boolean,
+    keepVisible: boolean,
+    sortable: boolean,
+  }
 }

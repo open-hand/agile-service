@@ -12,12 +12,16 @@ const Chart: React.FC = () => {
   const { store } = useContext(Context);
   const chartRef = useRef<HTMLDivElement>(null);
   const {
-    tableWidth, viewWidth, bodyScrollHeight, translateX, barList,
+    tableWidth, viewWidth, bodyScrollHeight, translateX,
   } = store;
+  const barList = store.getBarList;
   const minorList = store.getMinorList();
   const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     event.persist();
     store.handleMouseMove(event);
+  }, [store]);
+  const handleMouseLeave = useCallback(() => {
+    store.handleMouseLeave();
   }, [store]);
   useEffect(() => {
     if (chartRef.current) {
@@ -31,6 +35,7 @@ const Chart: React.FC = () => {
       className={styles.chart}
       onWheel={store.handleWheel}
       onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       style={{
         left: tableWidth,
         width: viewWidth,

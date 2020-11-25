@@ -5,15 +5,32 @@ import styles from './index.less';
 
 const TableHeader: React.FC = () => {
   const { store } = useContext(Context);
-
+  const { columns, tableWidth } = store;
+  const width = tableWidth;
+  const columnsWidth = store.getColumnsWidth;
   return (
     <div
-      className={styles.chart}
-      style={{
-        width: store.tableWidth,
-      }}
+      className={styles.scrollable}
+      style={{ width, height: 56 }}
     >
-      TableHeader
+      <div className={styles.head} style={{ width, height: 56 }}>
+        <div className={styles.row} style={{ height: 56 }}>
+          {columns.map((column, index) => (
+            <div
+              key={column.name}
+              className={styles.cell}
+              style={{
+                width: columnsWidth[index],
+                minWidth: column.minWidth,
+              }}
+            >
+              <div className={styles['head-cell']}>
+                <span className={styles.ellipsis}>{column.label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
