@@ -1,6 +1,5 @@
 package io.choerodon.agile.infra.enums.header;
 
-import io.choerodon.core.exception.CommonException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +31,7 @@ public enum TableHeaderCode {
         }
     }
 
-    public static boolean notExisted(String code, boolean throwException) {
-        boolean contains = CODES.contains(code);
-        if (!contains && throwException) {
-            throw new CommonException("error.illegal.table.header.code." + code);
-        }
-        return contains;
+    public static boolean notExisted(String code) {
+        return CODES.contains(code);
     }
 }
