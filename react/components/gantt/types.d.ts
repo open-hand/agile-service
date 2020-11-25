@@ -39,6 +39,11 @@ export namespace Gantt {
     invalidDateRange: boolean
     dateTextFormat: (startX: number) => string
     task: Item
+    _collapsed: boolean
+    _depth: number
+    _index?: number
+    _childrenCount: number
+    _parent?: Bar
   }
   interface Item {
     executor: null,

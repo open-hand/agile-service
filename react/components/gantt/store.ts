@@ -5,7 +5,7 @@ import { createRef } from 'react';
 import {
   observable, computed, action, toJS,
 } from 'mobx';
-import { flattenDeep, debounce, find } from 'lodash';
+import { debounce, find } from 'lodash';
 import dayjs, { Dayjs } from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
@@ -17,7 +17,9 @@ import { Gantt } from './types';
 import {
   ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE, MIN_VIEW_RATE,
 } from './constants';
-import { getDragSideShrink, getDragSideExpand, getMoveStep } from './utils';
+import {
+  flattenDeep, getDragSideShrink, getDragSideExpand, getMoveStep,
+} from './utils';
 
 dayjs.extend(weekday);
 dayjs.extend(weekOfYear);
@@ -126,6 +128,12 @@ class GanttStore {
     } else {
       this.initSize();
     }
+  }
+
+  @action
+  setRowCollapse(item: Gantt.Item, collapsed: boolean) {
+    item.collapsed = collapsed;
+    // this.barList = this.getBarList();
   }
 
   @action
@@ -559,7 +567,7 @@ class GanttStore {
     // };
 
     // 进行展开扁平
-    return observable(flattenDeep(data).map((item, index) => {
+    return observable(flattenDeep(data).map((item: any, index) => {
       let startAmp = dayjs(item.startDate || 0).valueOf();
       let endAmp = dayjs(item.endDate || 0).valueOf();
 
@@ -620,15 +628,15 @@ class GanttStore {
 
   @action
   showSelectionBar(event: MouseEvent) {
-    const topMargin = 4;
-    const rowH = 28;
     const scrollTop = this.mainElementRef.current?.scrollTop || 0;
     const { top } = this.mainElementRef.current?.getBoundingClientRect() || { top: 0 };
+    // 内容区高度
+    const contentHeight = this.getBarList.length * ROW_HEIGHT;
     const offsetY = event.clientY - top + scrollTop;
-    if (offsetY < topMargin) {
+    if (offsetY - contentHeight > topTap) {
       this.showSelectionIndicator = false;
     } else {
-      const top = Math.floor((offsetY - 4) / rowH) * rowH + 4;
+      const top = Math.floor((offsetY - topTap) / ROW_HEIGHT) * ROW_HEIGHT + 4;
       this.showSelectionIndicator = true;
       this.selectionIndicatorTop = top;
     }

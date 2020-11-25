@@ -1,7 +1,28 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-underscore-dangle */
 import dayjs from 'dayjs';
 import { Gantt } from './types';
 import { MOVE_SPACE } from './constants';
 
+/**
+ * 将树形数据向下递归为一维数组
+ * @param {*} arr 数据源
+ * @param {*} children  子集key
+ */
+export function flattenDeep<T extends any[]>(arr: T, children = 'children', depth = 0, parent = null): T {
+  let index = 0;
+  return arr.reduce((flat, item) => {
+    item._depth = depth;
+    item._parent = parent;
+    item._index = index;
+    index += 1;
+
+    return flat.concat(
+      item,
+      item[children] && !item.collapsed ? flattenDeep(item[children], children, depth + 1, item) : [],
+    );
+  }, []);
+}
 export function getDragSideShrink(moveEvent: HammerInput, sideType: Gantt.MoveType) {
   let direction = 0;
   if (moveEvent.direction === 2) {
