@@ -36,7 +36,7 @@ const CaseListItem = ({
             }}
             role="none"
             onClick={() => {
-              testLinkStore.toLink(link.caseId, link.caseNum);
+              testLinkStore.toLink(link.caseId, link.caseNum, link.folderId);
             }}
           >
             {`${link.caseNum} ${link.summary}`}

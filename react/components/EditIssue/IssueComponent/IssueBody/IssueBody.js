@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useContext } from 'react';
+import React, { Fragment, useContext } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import FieldStar from './Field/FieldStar';
@@ -23,10 +23,12 @@ import DailyLog from '../../../DailyLog';
 import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
 import { InjectedComponent } from '../../injectComponent';
-import TestLink from './test-case-link-list';
+// import TestLink from '@choerodon/testmanager/lib/components/test-case-link-list';
 import './IssueBody.less';
 
 const { TabPane } = Tabs;
+// eslint-disable-next-line no-undef
+const TestLink = C7NTryImport('@choerodon/testmanager/lib/components/test-case-link-list', Fragment);
 
 function IssueBody(props) {
   const {
@@ -92,7 +94,7 @@ function IssueBody(props) {
 
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
             ? <SubBug {...props} /> : ''}
-          {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1 || true
+          {issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <TestLink {...props} /> : '' }
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
