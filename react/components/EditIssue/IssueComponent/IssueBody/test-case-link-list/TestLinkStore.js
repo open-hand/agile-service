@@ -33,12 +33,13 @@ function TestLinkStore(issueId) {
         this.loadData();
       }).catch(() => Choerodon.prompt('关联错误，请重试', 'error'));
     },
-    toLink(linkId, name) {
+    toLink(linkId, name, folderId) {
       to('/testManager/IssueManage', {
         type: 'project',
         params: {
           paramIssueId: linkId,
           paramName: name,
+          folderId,
         },
       });
     },
