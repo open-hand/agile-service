@@ -29,6 +29,7 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
   const {
     width, translateX, translateY, invalidDateRange, stepGesture, label, dateTextFormat,
   } = data;
+  // TODO 优化hover判断性能
   const { selectionIndicatorTop } = store;
   const showDragBar = useMemo(() => {
     const baseTop = translateY - (translateY % ROW_HEIGHT);
@@ -53,7 +54,6 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
   const handleRightPressUp = useCallback(() => {
     store.shadowGesturePressUp();
   }, [store]);
-
   const themeColor = useMemo(() => {
     if (translateX + width >= dayjs().valueOf() / store.pxUnitAmp) {
       return ['#95DDFF', '#64C7FE'];
@@ -95,22 +95,21 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
                 </svg>
               </div>
             )}
+            <Hammer onPress={handleLeftPress} onPressUp={handleLeftPressUp}>
+              <div
+                className={classNames(styles['resize-handle'], styles.left)}
+                style={{ left: -14 }}
+              />
+            </Hammer>
+            <Hammer onPress={handleRightPress} onPressUp={handleRightPressUp}>
+              <div
+                className={classNames(styles['resize-handle'], styles.right)}
+                style={{ left: width + 2 }}
+              />
+            </Hammer>
+            <div className={classNames(styles['resize-bg'], styles.compact)} style={{ width: width + 30, left: -14 }} />
           </>
         )}
-        <Hammer onPress={handleLeftPress} onPressUp={handleLeftPressUp}>
-          <div
-            className={classNames(styles['resize-handle'], styles.left)}
-            style={{ left: -14, display: showDragBar ? 'block' : 'none' }}
-          />
-        </Hammer>
-        <Hammer onPress={handleRightPress} onPressUp={handleRightPressUp}>
-          <div
-            className={classNames(styles['resize-handle'], styles.right)}
-            style={{ left: width + 2, display: showDragBar ? 'block' : 'none' }}
-          />
-        </Hammer>
-
-        {showDragBar && <div className={classNames(styles['resize-bg'], styles.compact)} style={{ width: width + 30, left: -14 }} />}
         <div
           role="none"
           onMouseDown={handleBarPress}

@@ -3,18 +3,16 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import Hammer from 'hammerjs';
-import TaskBar from '../task-bar';
 import DragPresent from '../drag-present';
+import BarList from '../bar-list';
 import Context from '../../context';
 import styles from './index.less';
 
 const Chart: React.FC = () => {
   const { store } = useContext(Context);
-  const chartRef = useRef<HTMLDivElement>(null);
   const {
-    tableWidth, viewWidth, bodyScrollHeight, translateX,
+    tableWidth, viewWidth, bodyScrollHeight, translateX, chartElementRef,
   } = store;
-  const barList = store.getBarList;
   const minorList = store.getMinorList();
   const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     event.persist();
@@ -23,15 +21,10 @@ const Chart: React.FC = () => {
   const handleMouseLeave = useCallback(() => {
     store.handleMouseLeave();
   }, [store]);
-  useEffect(() => {
-    if (chartRef.current) {
-      const chartHammer = new Hammer(chartRef.current);
-      store.setChartHammer(chartHammer);
-    }
-  }, [store]);
+
   return (
     <div
-      ref={chartRef}
+      ref={chartElementRef}
       className={styles.chart}
       onWheel={store.handleWheel}
       onMouseMove={handleMouseMove}
@@ -71,12 +64,7 @@ const Chart: React.FC = () => {
         <DragPresent />
       </svg>
       <div className={styles['render-chunk']} style={{ height: bodyScrollHeight, transform: `translateX(-${translateX}px` }}>
-        {barList.map((bar) => (
-          <TaskBar
-            key={bar.label}
-            data={bar}
-          />
-        ))}
+        <BarList />
       </div>
     </div>
   );
