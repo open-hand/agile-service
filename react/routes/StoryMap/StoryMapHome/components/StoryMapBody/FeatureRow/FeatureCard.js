@@ -19,22 +19,11 @@ class FeatureCard extends Component {
   render() {
     const { feature } = this.props;
     const {
-      featureType, summary, issueId, issueNum, programId, statusVO = {
-        canDelete: null,
-        code: null,
-        completed: null,
-        defaultStatus: null,
-        description: null,
-        id: '88255195225804800',
-        name: '已评审',
-        objectVersionNumber: 1,
-        organizationId: 7,
-        type: 'done',
-      },
+      featureType, summary, issueId, statusVO,
     } = feature;
     const { selectedIssueMap } = StoryMapStore;
     return (
-      <Card className={`c7nagile-StoryMap-FeatureCard minimapCard ${featureType || 'none'} ${statusVO.completed ? 'completedCard' : undefined} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`} onClick={this.handleClick}>
+      <Card className={`c7nagile-StoryMap-FeatureCard minimapCard ${featureType || 'none'} ${statusVO && statusVO.completed ? 'completedCard' : undefined} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`} onClick={this.handleClick}>
         <div className="summary">
           <Tooltip title={`${summary || '无特性'}`} getPopupContainer={(trigger) => trigger.parentNode}>
             {summary || '无特性'}
@@ -46,7 +35,7 @@ class FeatureCard extends Component {
             <Tooltip mouseEnterDelay={0.5} title={`状态： ${statusVO && statusVO.name}`}>
               <div>
                 <StatusTag
-                  data={statusVO}
+                  data={statusVO || {}}
                 />
               </div>
             </Tooltip>

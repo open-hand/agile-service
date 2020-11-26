@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import React, {
-  Fragment, useEffect, useRef, useMemo,
+  Fragment, useEffect, useRef, useCallback,
 } from 'react';
 import {
   Page, Header, Content, Breadcrumb,
@@ -15,6 +15,7 @@ import { observer } from 'mobx-react-lite';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import HeaderLine from '@/components/HeaderLine';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import Minimap from './components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from './emptyStory.svg';
@@ -25,7 +26,7 @@ import SwitchSwimLine from './components/SwitchSwimLine';
 import CreateEpicModal from './components/CreateEpicModal';
 import IssueDetail from './components/IssueDetail';
 import ListenSize from './components/ListenSize';
-import StoryMapStore from '../../../stores/project/StoryMap/StoryMapStore';
+import StoryMapSearch from './components/Search';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
 
@@ -172,6 +173,12 @@ const StoryMapHome = observer(() => {
       >
         <Loading loading={loading} />
         <ListenSize />
+        {
+          !isEmpty && (
+            <StoryMapSearch />
+          )
+        }
+
         {!isEmpty ? (
           <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
             <StoryMapBody />

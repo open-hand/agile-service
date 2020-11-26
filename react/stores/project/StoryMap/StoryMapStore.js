@@ -106,7 +106,7 @@ class StoryMapStore {
     };
   }
 
-  getStoryMap = (firstLoad) => {
+  getStoryMap = (firstLoad = false) => {
     this.setLoading(true);
     Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprints()]).then(([storyMapData, issueTypes, versionList, prioritys, sprintList]) => {
       let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
@@ -302,8 +302,7 @@ class StoryMapStore {
       if (epicId) {
         this.storyData[epicId] = {
           ...this.storyData[epicId],
-          collapse: fold,
-          // collapse: completed && fold,
+          collapse: completed && fold,
         };
       }
     });
