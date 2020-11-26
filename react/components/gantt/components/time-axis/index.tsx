@@ -1,15 +1,22 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import classNames from 'classnames';
 import Context from '../../context';
 import styles from './index.less';
 
 const TimeAxis: React.FC = () => {
+  const ref = useRef<HTMLDivElement>(null);
   const { store } = useContext(Context);
   const majorList = store.getMajorList();
   const minorList = store.getMinorList();
+  useEffect(() => {
+    if (ref.current) {
+      store.initDragScrollHammer(ref.current);
+    }
+  }, [store]);
   return (
     <div
+      ref={ref}
       className={styles['time-axis']}
       style={{
         left: store.tableWidth,

@@ -145,6 +145,30 @@ class GanttStore {
   }
 
   @action
+  initDragScrollHammer(element: HTMLElement) {
+    const hammer = new Hammer(element);
+    let { translateX } = this;
+
+    const panStart = () => {
+      this.scrolling = true;
+      translateX = this.translateX;
+    };
+
+    const panMove = (event: HammerInput) => {
+      this.translateX = translateX - event.deltaX;
+    };
+
+    const panEnd = (event: HammerInput) => {
+      this.scrolling = false;
+      this.translateX = translateX - event.deltaX;
+    };
+
+    hammer.on('panstart', panStart);
+    hammer.on('panmove', panMove);
+    hammer.on('panend', panEnd);
+  }
+
+  @action
   setChartHammer(chartHammer: HammerManager) {
     this.chartHammer = chartHammer;
   }
