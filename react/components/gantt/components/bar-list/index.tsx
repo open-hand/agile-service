@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import TaskBar from '../task-bar';
+import InvalidTaskBar from '../invalid-task-bar';
 import Context from '../../context';
 
 const BarList: React.FC = () => {
@@ -9,10 +10,17 @@ const BarList: React.FC = () => {
   return (
     <>
       {barList.map((bar) => (
-        <TaskBar
-          key={bar.label}
-          data={bar}
-        />
+        bar.invalidDateRange ? (
+          <InvalidTaskBar
+            key={bar.label}
+            data={bar}
+          />
+        ) : (
+          <TaskBar
+            key={bar.label}
+            data={bar}
+          />
+        )
       ))}
     </>
   );

@@ -435,6 +435,92 @@ class GanttStore {
     return this.minorAmp2Px([...dateMap.values()]);
   }
 
+  startXRectBar = (startX: number) => {
+    let date = dayjs(startX * this.pxUnitAmp);
+    const dayRect = () => {
+      const stAmp = date.startOf('day');
+      const endAmp = date.endOf('day');
+      // @ts-ignore
+      const left = stAmp / this.pxUnitAmp;
+      // @ts-ignore
+      const width = (endAmp - stAmp) / this.pxUnitAmp;
+
+      return {
+        left,
+        width,
+      };
+    };
+    const weekRect = () => {
+      // week 注意周日为每周第一天 ????????
+      if (date.weekday() === 0) {
+        date = date.add(-1, 'week');
+      }
+      const left = date.weekday(1).startOf('day').valueOf() / this.pxUnitAmp;
+      const width = (7 * 24 * 60 * 60 * 1000 - 1000) / this.pxUnitAmp;
+
+      return {
+        left,
+        width,
+      };
+    };
+    const monthRect = () => {
+      const stAmp = date.startOf('month').valueOf();
+      const endAmp = date.endOf('month').valueOf();
+      const left = stAmp / this.pxUnitAmp;
+      const width = (endAmp - stAmp) / this.pxUnitAmp;
+
+      return {
+        left,
+        width,
+      };
+    };
+
+    const map = {
+      day: dayRect,
+      week: weekRect,
+      month: weekRect,
+      quarter: monthRect,
+      halfYear: monthRect,
+    };
+
+    return map[this.sightConfig.type]();
+  }
+
+  @action
+  handleInvalidBarLeave() {
+    this.handleDragEnd();
+  }
+
+  @action
+  handleInvalidBarHover(barInfo: Gantt.Bar, left: number, width: number) {
+    barInfo.translateX = left;
+    barInfo.width = width;
+    // 只能向右拖动
+    this.handleDragStart(barInfo, 'right');
+  }
+
+  @action
+  handleInvalidBarMove(barInfo: Gantt.Bar, left: number, width: number) {
+    const moveDistance = left - barInfo.translateX;
+    // 只能向右拖动
+    if (moveDistance + width > 0) {
+      barInfo.width = moveDistance + width;
+    }
+  }
+
+  @action
+  handleInvalidBarDown(barInfo: Gantt.Bar) {
+    // 只能向右拖动
+    barInfo.stepGesture = 'moving';
+  }
+
+  @action
+  handleInvalidBarUp(barInfo: Gantt.Bar) {
+    barInfo.invalidDateRange = false;
+    this.handleDragEnd();
+    // TODO 修改日期逻辑
+  }
+
   minorAmp2Px(ampList: Gantt.MinorAmp[]): Gantt.Minor[] {
     const { pxUnitAmp } = this;
     const list = ampList.map((item) => {
