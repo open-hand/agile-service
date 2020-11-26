@@ -875,8 +875,8 @@ class GanttStore {
   updateTaskDate(barInfo: Gantt.Bar) {
     const { translateX, width, task } = barInfo;
     // TODO:更新之后的后续处理
-    task.startDate = String(dayjs(translateX * this.pxUnitAmp));
-    task.endDate = String(dayjs((translateX + width) * this.pxUnitAmp));
+    task.startDate = dayjs(translateX * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
+    task.endDate = dayjs((translateX + width) * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
   }
 
   @action
