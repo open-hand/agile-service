@@ -1,100 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import Gantt from '@/components/gantt';
+import { ganttApi } from '@/api';
+import UserHead from '@/components/UserHead';
 
-const dataList = [
-  {
-    executor: null,
-    content: 'SCRUM敏捷实践集',
-    startDate: '2020-10-05 08:02:02',
-    endDate: '2020-10-08 18:02:02',
-    collapsed: false,
-    children: [],
-  },
-  {
-    executor: null,
-    content: '风险的哈哈哈',
-    startDate: null,
-    endDate: null,
-    collapsed: false,
-    children: [
-      {
-        executor: null,
-        content: '我的子任务',
-        startDate: '2020-11-01 08:02:02',
-        endDate: '2020-11-02',
-        collapsed: false,
-        children: [],
-      },
-      {
-        executor: null,
-        content: '我的子任务2',
-        startDate: '2020-11-01 08:02:02',
-        endDate: '2020-11-02',
-        collapsed: false,
-        children: [{
-          executor: null,
-          content: '我的子任务3',
-          startDate: null,
-          endDate: null,
-          collapsed: false,
-        },
-        {
-          executor: null,
-          content: '我的子任务4',
-          startDate: '2020-08-18',
-          endDate: '2020-08-19',
-          collapsed: false,
-        }],
-      },
-    ],
-  },
-];
-const dataColumns = [
-  {
-    width: 214,
-    minWidth: 210,
-    name: 'content',
-    label: '名称',
-    visible: true,
-    keepVisible: true,
-    sortable: true,
-  },
-  {
-    width: 100,
-    minWidth: 52,
-    name: 'executor',
-    label: '经办人',
-    visible: true,
-    keepVisible: false,
-    sortable: true,
-  },
-  {
-    width: 120,
-    minWidth: 70,
-    name: 'startDate',
-    label: '预计开始',
-    visible: true,
-    keepVisible: false,
-    sortable: true,
-  },
-  {
-    width: 100,
-    minWidth: 70,
-    name: 'endDate',
-    label: '预计结束',
-    visible: true,
-    keepVisible: false,
-    sortable: false,
-  },
-];
 const GanttPage: React.FC = () => {
-  const [data, setData] = useState(dataList);
-  const [columns, setColumns] = useState(dataColumns);
+  const [data, setData] = useState([]);
+  const [columns, setColumns] = useState([{
+    width: 214,
+    name: 'summary',
+    label: '名称',
+  },
+  {
+    width: 100,
+    name: 'assignee',
+    label: '经办人',
+    // @ts-ignore
+    render: (record) => <UserHead user={record.assignee} />,
+  },
+  {
+    width: 100,
+    name: 'estimatedStartTime',
+    label: '预计开始时间',
+  },
+  {
+    width: 100,
+    name: 'estimatedEndTime',
+    label: '预计结束时间',
+  }]);
+  useEffect(() => {
+    (async () => {
+      const [headers, res] = await Promise.all([
+        ganttApi.loadHeaders(),
+        ganttApi.load(),
+      ]);
+      // setColumns(headers.map((h: any) => ({
+      //   width: 100,
+      //   name: h.fieldCode,
+      //   label: h.name,
+      // })));
+      setData(res.map((r: any) => ({
+        ...r,
+        startDate: r.estimatedStartTime || '',
+        endDate: r.estimatedEndTime || '',
+      })));
+    })();
+  }, []);
   return (
     <Page>
       <Header>
@@ -111,7 +66,7 @@ const GanttPage: React.FC = () => {
         flexDirection: 'column',
       }}
       >
-        <Gantt data={data} columns={columns} />
+        {columns.length > 0 && <Gantt data={data} columns={columns} />}
       </Content>
     </Page>
   );

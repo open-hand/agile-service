@@ -5,7 +5,7 @@ import { createRef } from 'react';
 import {
   observable, computed, action, toJS,
 } from 'mobx';
-import { debounce, find } from 'lodash';
+import { debounce, find, throttle } from 'lodash';
 import dayjs, { Dayjs } from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
@@ -83,6 +83,8 @@ class GanttStore {
 
   @observable scrolling = false;
 
+  @observable scrollTop = 0;
+
   @observable collapse = false;
 
   @observable tableWidth: number;
@@ -128,7 +130,7 @@ class GanttStore {
       this.tableWidth = 0;
       this.viewWidth = this.width - this.tableWidth;
     } else {
-      this.initSize();
+      this.initWidth();
     }
   }
 
@@ -156,13 +158,16 @@ class GanttStore {
       return;
     }
     const { width, height } = size;
-    this.width = width;
-    this.height = height;
-    // this.viewHeight = height - HEADER_HEIGHT;
-    this.initSize();
+    if (this.height !== height) {
+      this.height = height;
+    }
+    if (this.width !== width) {
+      this.width = width;
+      this.initWidth();
+    }
   }
 
-  @action initSize() {
+  @action initWidth() {
     this.tableWidth = this.columns.reduce((width, item) => width + item.width, 0);
     this.viewWidth = this.height - this.tableWidth;
     // 表盘宽度不能小于总宽度38%
@@ -556,6 +561,7 @@ class GanttStore {
 
   @computed get getBarList(): Gantt.Bar[] {
     const { pxUnitAmp, data } = this;
+    console.log('re', data.length);
     const minStamp = 11 * pxUnitAmp;
     const height = 8;
     const baseTop = 14;
@@ -621,40 +627,6 @@ class GanttStore {
       return map[this.sightConfig.type]();
     };
 
-    // // 设置阴影位置
-    // const setShadowShow = (left: number, width: number, isShow: boolean) => {
-    //   this.dragPresentVisible = isShow;
-    //   this.shadowGestBarLeft = left;
-    //   this.shadowGestBarRight = left + width;
-    //   this.dragPresentX = left;
-    //   this.dragPresentWidth = width;
-    // };
-
-    // // 设置任务
-    // const setInvalidTaskBar = (barInfo: Gantt.Bar, left: number, width: number) => {
-    //   barInfo.translateX = left;
-    //   barInfo.width = width;
-    //   barInfo.invalidDateRange = false;
-
-    //   this.dragPresentVisible = true;
-    //   this.shadowGestBarLeft = left + width;
-    //   this.shadowGestBarRight = 0;
-
-    //   this.dragPresentX = left;
-    //   this.dragPresentWidth = width;
-
-    //   barInfo.stepGesture = 'moving';
-    // };
-    /**
-     * 根据选中行高度 显示对应条状工具条
-     */
-    // const getHovered = (top: number, selectionIndicatorTop: number) => {
-    //   const baseTop = top - (top % ROW_HEIGHT);
-    //   const isShow = (selectionIndicatorTop >= baseTop && selectionIndicatorTop <= baseTop + ROW_HEIGHT);
-
-    //   return isShow;
-    // };
-
     // 进行展开扁平
     return observable(flattenDeep(data).map((item: any, index) => {
       let startAmp = dayjs(item.startDate || 0).valueOf();
@@ -706,6 +678,27 @@ class GanttStore {
     this._wheelTimer = setTimeout(() => {
       this.scrolling = false;
     }, 100);
+  }
+
+  handleScroll = (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const { scrollTop } = event.currentTarget;
+    this.scrollY(scrollTop);
+  }
+
+  scrollY = throttle((scrollTop: number) => {
+    this.scrollTop = scrollTop;
+  }, 100)
+
+  // 虚拟滚动
+  @computed get getVisibleRows() {
+    const visibleHeight = this.bodyClientHeight;
+    const visibleRowCount = Math.ceil(visibleHeight / ROW_HEIGHT) + 10;
+
+    const start = Math.max(Math.ceil(this.scrollTop / ROW_HEIGHT) - 5, 0);
+    return {
+      start,
+      count: visibleRowCount,
+    };
   }
 
   handleMouseMove = debounce((event) => {

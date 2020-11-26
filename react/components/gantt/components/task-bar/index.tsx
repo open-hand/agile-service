@@ -19,7 +19,7 @@ const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
   const { store } = useContext(Context);
   const {
-    width, translateX, translateY, invalidDateRange, stepGesture, label, dateTextFormat,
+    width, translateX, translateY, invalidDateRange, stepGesture, label, dateTextFormat, task,
   } = data;
   // TODO 优化hover判断性能
   const { selectionIndicatorTop } = store;
@@ -110,8 +110,8 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
             viewBox={`0 0 ${width + 1} ${height + 1}`}
           >
             <path
-              fill={themeColor[0]}
-              stroke={themeColor[1]}
+              fill={task.backgroundColor || themeColor[0]}
+              stroke={task.borderColor || themeColor[1]}
               d={`
               M${width - 2},0.5
               l-${width - 5},0

@@ -7,21 +7,25 @@ import Context from '../../context';
 const BarList: React.FC = () => {
   const { store } = useContext(Context);
   const barList = store.getBarList;
+  const { count, start } = store.getVisibleRows;
   return (
     <>
-      {barList.map((bar) => (
-        bar.invalidDateRange ? (
+      {barList.slice(start, start + count).map((bar, index) => {
+        const rowIndex = index + start;
+        return bar.invalidDateRange ? (
           <InvalidTaskBar
-            key={`${bar.label}-invalid`}
+            // eslint-disable-next-line react/no-array-index-key
+            key={`${bar.label}-${rowIndex}-invalid`}
             data={bar}
           />
         ) : (
           <TaskBar
-            key={bar.label}
+            // eslint-disable-next-line react/no-array-index-key
+            key={`${bar.label}-${rowIndex}`}
             data={bar}
           />
-        )
-      ))}
+        );
+      })}
     </>
   );
 };

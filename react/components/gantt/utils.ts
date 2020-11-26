@@ -9,7 +9,7 @@ import { MOVE_SPACE } from './constants';
  * @param {*} arr 数据源
  * @param {*} children  子集key
  */
-export function flattenDeep<T extends any[]>(arr: T, children = 'children', depth = 0, parent = null): T {
+export function flattenDeep(arr: any[] = [], children = 'children', depth = 0, parent = null): any[] {
   let index = 0;
   return arr.reduce((flat, item) => {
     item._depth = depth;
@@ -19,7 +19,7 @@ export function flattenDeep<T extends any[]>(arr: T, children = 'children', dept
 
     return flat.concat(
       item,
-      item[children] && !item.collapsed ? flattenDeep(item[children], children, depth + 1, item) : [],
+      item[children] ? flattenDeep(item[children], children, depth + 1, item) : [],
     );
   }, []);
 }
