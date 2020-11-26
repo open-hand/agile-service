@@ -12,7 +12,7 @@ const BarList: React.FC = () => {
       {barList.map((bar) => (
         bar.invalidDateRange ? (
           <InvalidTaskBar
-            key={bar.label}
+            key={`${bar.label}-invalid`}
             data={bar}
           />
         ) : (
