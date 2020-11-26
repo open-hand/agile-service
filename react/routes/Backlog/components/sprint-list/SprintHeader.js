@@ -1,22 +1,20 @@
 import React from 'react';
 import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
-import { Permission, stores } from '@choerodon/boot';
+import { Permission } from '@choerodon/boot';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import SprintStatus from '@/components/tag/sprint-status-tag/SprintStatus';
+import SprintStoryPointInfo from '@/components/SprintStoryPointInfo';
 import SprintName from './SprintHeaderComponent/SprintName';
-import SprintStatus from './SprintHeaderComponent/SprintStatus';
 import SprintButton from './SprintHeaderComponent/SprintButton';
 import SprintVisibleIssue from './SprintHeaderComponent/SprintVisibleIssue';
 import AssigneeInfo from './SprintHeaderComponent/AssigneeInfo';
-import StoryPoint from './SprintHeaderComponent/StoryPoint';
 import SprintDateRange from './SprintHeaderComponent/SprintDateRange';
 import SprintGoal from './SprintHeaderComponent/SprintGoal';
 import WorkLoadBtn from './SprintHeaderComponent/WorkLoadBtn';
 import SprintIcon from './SprintHeaderComponent/SprintIcon';
 import './SprintHeader.less';
-
-const { AppState } = stores;
 
 const prefix = 'c7n-backlog-SprintHeader';
 function BacklogHeader({ data }) {
@@ -45,7 +43,6 @@ function SprintHeader({ data }) {
     type, expand, sprintId, piId, sprintType,
   } = data;
   const isSprint = type === 'sprint';
-  const { type: projectType, id: projectId, organizationId: orgId } = AppState.currentMenuType;
   const { isInProgram } = useIsInProgram();
   return (
     isSprint ? (
@@ -84,7 +81,8 @@ function SprintHeader({ data }) {
           <AssigneeInfo
             data={data}
           />
-          <StoryPoint
+          <SprintStoryPointInfo
+            show={data.statusCode === 'started'}
             data={data}
           />
         </div>

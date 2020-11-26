@@ -17,9 +17,9 @@ const WorkLoadBtn = ({ data }) => {
   const { assigneeIssues } = data;
 
   return (
-    <React.Fragment>
+    <>
       <span
-        role="none" 
+        role="none"
         onClick={handleClickBtn}
         className="c7n-agile-workloadBtn"
         style={{
@@ -34,7 +34,7 @@ const WorkLoadBtn = ({ data }) => {
         onCancel={onCloseModal}
         data={data}
       />
-    </React.Fragment>
+    </>
   );
 };
 

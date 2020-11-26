@@ -1,9 +1,10 @@
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
+import SprintStoryPointInfo from '@/components/SprintStoryPointInfo';
+import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import StoryCell from './StoryCell';
 import TitleCell from './TitleCell';
-import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 
 @observer
 class StoryRow extends Component {
@@ -19,26 +20,52 @@ class StoryRow extends Component {
   }
 
   render() {
-    const { storyMapData, storyData, swimLine } = StoryMapStore;
+    const {
+      storyMapData, storyData, swimLine, tableOverflow,
+    } = StoryMapStore;
     const { epicWithFeature } = storyMapData || {};
     const epicList = StoryMapStore.getEpicList;
     const firstNotCollapseIndex = this.getFirstNotCollapseIndex();
-    const { storyCollapse, rowIndex } = this.props;
+    const { storyCollapse, rowIndex, sprint } = this.props;
+    const {
+      statusCode, planning, todoStoryPoint, doingStoryPoint, doneStoryPoint,
+    } = sprint || {};
     return (
       <>
         {/* 标题行 */}
-        {['version'].includes(swimLine) && (
-          <tr>
-            {epicList.map((epic, index) => (
-              <TitleCell
-                epicIndex={index}
-                isLastColumn={index === epicWithFeature.length - 1}
-                lastCollapse={index > 0 ? storyData[epicList[index - 1].issueId] && storyData[epicList[index - 1].issueId].collapse : false}
-                showTitle={firstNotCollapseIndex === index}
-                otherData={storyData[epic.issueId]}
-                {...this.props}
-              />
-            ))}
+        {['version', 'sprint'].includes(swimLine) && (
+          <tr style={{ borderRight: '1px solid rgba(211, 211, 211)' }}>
+              {epicList.map((epic, index, arr) => (
+                <TitleCell
+                  epicIndex={index}
+                  isLastColumn={index === epicWithFeature.length - 1}
+                  lastCollapse={index > 0 ? storyData[epicList[index - 1].issueId] && storyData[epicList[index - 1].issueId].collapse : false}
+                  showTitle={firstNotCollapseIndex === index}
+                  otherData={storyData[epic.issueId]}
+                  {...this.props}
+                />
+              ))}
+            <div style={{
+              position: 'sticky',
+              right: 10,
+              zIndex: 5,
+              width: 0,
+            }}
+            >
+              {
+                statusCode && (
+                  <div style={{
+                    marginTop: 10,
+                    position: 'relative',
+                    right: tableOverflow ? 116 : 130,
+                    width: 0,
+                  }}
+                  >
+                    <SprintStoryPointInfo show data={{ todoStoryPoint, doingStoryPoint, doneStoryPoint }} />
+                  </div>
+                )
+            }
+            </div>
           </tr>
         )}
         <tr style={{ ...storyCollapse ? { height: 0 } : {} }}>

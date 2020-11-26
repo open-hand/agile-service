@@ -48,11 +48,11 @@ class StoryCard extends Component {
 
   handlRemoveStory = (e) => {
     e.stopPropagation();
-    const { story, version } = this.props;
-    const { issueId, storyMapVersionDTOList } = story;
+    const { story, version, sprint } = this.props;
+    const { issueId, storyMapVersionDTOList, storyMapSprintDTOList } = story;
     const { swimLine } = StoryMapStore;
     // 未规划或无泳道
-    if (swimLine === 'none' || storyMapVersionDTOList.length === 0) {
+    if (swimLine === 'none' || storyMapVersionDTOList.length === 0 || storyMapSprintDTOList.length === 0) {
       const storyMapDragVO = {
         // 问题id列表，移动到版本，配合versionId使用
         // versionIssueIds: [],
@@ -77,6 +77,19 @@ class StoryCard extends Component {
       }
       storyMapApi.move(storyMapDragVO).then(() => {
         StoryMapStore.removeStoryFromStoryMap(story, version.versionId);
+        StoryMapStore.loadIssueList();
+      });
+    } else if (swimLine === 'sprint') {
+      const storyMapDragVO = {
+        sprintId: 0,
+        sprintIssueRelVOList: [],
+      };
+      if (storyMapSprintDTOList.length > 0) {
+        const removeSprint = find(storyMapSprintDTOList, { sprintId: sprint.sprintId });
+        storyMapDragVO.sprintIssueRelVOList = [{ ...removeSprint, issueId }];
+      }
+      storyMapApi.move(storyMapDragVO).then(() => {
+        StoryMapStore.removeStoryFromStoryMap(story, sprint.sprintId);
         StoryMapStore.loadIssueList();
       });
     }
@@ -106,8 +119,6 @@ class StoryCard extends Component {
       },
     } = story;
     const { selectedIssueMap } = StoryMapStore;
-    console.log('story：');
-    console.log(story);
     return (
       <Card
         className={`c7nagile-StoryMap-StoryCard ${index === 0 && rowIndex === 0 ? 'minimapCard' : ''} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`}
@@ -160,7 +171,7 @@ export default DragSource(
         });
       }
 
-      return { story: props.story, version: props.version };
+      return { story: props.story, version: props.version, sprint: props.sprint };
     },
     endDrag(props, monitor) {
       const item = monitor.getItem();
@@ -168,13 +179,16 @@ export default DragSource(
       if (!dropResult) {
         return;
       }
-      const { story, version: sourceVersion } = item;
+      const { story, version: sourceVersion, sprint: sourceSprint } = item;
       const {
-        issueId, epicId, storyMapVersionDTOList,
+        issueId, epicId, storyMapVersionDTOList, storyMapSprintDTOList,
       } = story;
       const featureId = story.featureId || 'none';
-      const { epic: { issueId: targetEpicId }, feature: { issueId: targetFeatureId }, version } = dropResult;
+      const {
+        epic: { issueId: targetEpicId }, feature: { issueId: targetFeatureId }, version, sprint,
+      } = dropResult;
       const { versionId: targetVersionId } = version || {};
+      const { sprintId: targetSprintId } = sprint || {};
       const storyMapDragVO = {
         versionIssueIds: [],
         versionId: 0, // 要关联的版本id
@@ -185,11 +199,18 @@ export default DragSource(
         featureId: 0, // 要关联的特性id
         // 问题id列表，移动到特性，配合featureId使用
         featureIssueIds: [],
+        sprintIssueIds: [],
+        sprintId: 0, // 要关联的版本id
+        sprintIssueRelVOList: [],
       };
       // 史诗，特性，版本都不变时
       if (epicId === targetEpicId && featureId === targetFeatureId) {
         if (StoryMapStore.swimLine === 'version') {
           if (find(storyMapVersionDTOList, { versionId: targetVersionId }) || (storyMapVersionDTOList.length === 0 && targetVersionId === 'none')) {
+            return;
+          }
+        } else if (StoryMapStore.swimLine === 'sprint') {
+          if (find(storyMapSprintDTOList, { sprintId: targetSprintId }) || (storyMapSprintDTOList.length === 0 && targetSprintId === 'none')) {
             return;
           }
         } else if (StoryMapStore.swimLine === 'none') {
@@ -232,6 +253,30 @@ export default DragSource(
             storyMapDragVO.versionId = 0;
           } else {
             storyMapDragVO.versionId = targetVersionId;
+          }
+        }
+      }
+
+      // 对冲刺进行处理
+      if (StoryMapStore.swimLine === 'sprint') {
+        // 在不同的冲刺移动
+        if (sourceSprint.sprintId !== targetSprintId) {
+          // 如果原先有冲刺，就移除离开的冲刺
+          if (storyMapSprintDTOList.length > 0) {
+            const removeSprint = find(storyMapSprintDTOList, { sprintId: sourceSprint.sprintId });
+            if (removeSprint) {
+              storyMapDragVO.sprintIssueRelVOList = [{ ...removeSprint, issueId }];
+            }
+          }
+        }
+
+        if (!find(storyMapSprintDTOList, { sprintId: targetSprintId })) {
+          storyMapDragVO.sprintIssueIds = [issueId];
+          // 拖到未规划
+          if (targetSprintId === 'none') {
+            storyMapDragVO.sprintId = 0;
+          } else {
+            storyMapDragVO.sprintId = targetSprintId;
           }
         }
       }

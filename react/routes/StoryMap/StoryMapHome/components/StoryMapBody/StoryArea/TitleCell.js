@@ -1,28 +1,25 @@
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
-import { Icon, Button, Tooltip } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui';
 import Cell from '../Cell';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 import './TitleCell.less';
+import { toJS } from 'mobx';
+import SprintStatus from '@/components/tag/sprint-status-tag/SprintStatus';
+import SprintAssigneeInfo from './SprintAssigneeInfo';
 
 @observer
 class TitleCell extends Component {
-  handleCreateVersionClick = () => {
-    StoryMapStore.setCreateModalVisible(true);
-  }
-
   renderTitle = (storyCollapse) => {
-    const { swimLine, isFullScreen } = StoryMapStore;
-    const { version } = this.props;
-    const { storyNum } = version;
+    const { swimLine } = StoryMapStore;
+    const { version, sprint } = this.props;
     switch (swimLine) {
       case 'none': {
         return null;
       }
       case 'version': {
         return (
-          <Fragment>
+          <>
             <Icon
               style={{ marginRight: 15 }}
               type={storyCollapse ? 'expand_less' : 'expand_more'}
@@ -31,14 +28,53 @@ class TitleCell extends Component {
               }}
             />
             {version.name}
+            {` (${version.storyNum || 0})`}
+          </>
+        );
+      }
+      case 'sprint': {
+        // console.log(toJS(sprint));
+        const {
+          sprintId, sprintName, storyNum, statusCode, planning, assigneeIssues = [{
+            assigneeId: '=FrI7G0gdVFIwkkv1KqWcEapF-SWg1-_JQGrtR1P3sj4==',
+            assigneeLoginName: '16433',
+            assigneeName: '李楷文（16433）',
+            assigneeRealName: '李楷文',
+            imageUrl: 'https://minio.choerodon.com.cn/iam-service/file_37110ff0ff674617abd5ef0e5fb2d165_ualb20p2uus.jpg',
+            issueCount: 18,
+            remainingIssueCount: 17,
+            remainingStoryPoints: 29,
+            remainingTime: 72,
+            sprintId: '=DEFpolnfiElId2AFMRi9QfJHNNGnnVeHE7GNp7rtUx0==',
+            totalRemainingTime: 72,
+            totalStoryPoints: 29,
+          }],
+        } = sprint;
+        return (
+          <>
+            <Icon
+              style={{ marginRight: 15 }}
+              type={storyCollapse ? 'expand_less' : 'expand_more'}
+              onClick={(e) => {
+                StoryMapStore.collapseStory(sprintId);
+              }}
+            />
+            {sprintName}
             {` (${storyNum || 0})`}
-          </Fragment>
+            {
+              statusCode && (
+                <SprintStatus data={{ statusCode, planning }} />
+              )
+            }
+            {
+              assigneeIssues && <SprintAssigneeInfo assignees={assigneeIssues} />
+            }
+          </>
         );
       }
       default: return null;
     }
   }
-
 
   render() {
     const {

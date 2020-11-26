@@ -35,7 +35,7 @@ class CreateStory extends Component {
     if (value && value.trim()) {
       const { swimLine } = StoryMapStore;
       const {
-        onCreate, epic, feature, version,
+        onCreate, epic, feature, version, sprint,
       } = this.props;
       const storyType = StoryMapStore.getIssueTypeByCode('story');
       const defaultPriority = StoryMapStore.getDefaultPriority;
@@ -52,6 +52,11 @@ class CreateStory extends Component {
           versionIssueRelVOList: [{
             ...version,
             relationType: 'fix',
+          }],
+        } : {},
+        ...swimLine === 'sprint' && version.sprintId !== 'none' ? {
+          sprintIssueRelVOList: [{
+            ...sprint,
           }],
         } : {},
       };

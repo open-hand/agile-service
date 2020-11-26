@@ -1,15 +1,11 @@
 import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Tooltip, Icon,
-} from 'choerodon-ui';
 import { findIndex } from 'lodash';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
 import UserHead from '@/components/UserHead';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import AssigneeModal from './AssigneeModal';
 import './AssigneeInfo.less';
 
 @observer class AssigneeInfo extends Component {
