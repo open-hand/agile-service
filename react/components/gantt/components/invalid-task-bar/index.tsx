@@ -22,15 +22,24 @@ const InvalidTaskBar: React.FC<TaskBarProps> = ({ data }) => {
   const [visible, setVisible] = useState(false);
   const { translateX: viewTranslateX } = store;
   const top = translateY;
-  const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleMouseEnter = useCallback(() => {
+    if (store.gestureKeyPress) {
+      return;
+    }
     startX = triggerRef.current?.getBoundingClientRect()?.left || 0;
     setVisible(true);
-  }, []);
-  const handleMouseLeave = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  }, [store.gestureKeyPress]);
+  const handleMouseLeave = useCallback(() => {
+    if (store.gestureKeyPress) {
+      return;
+    }
     setVisible(false);
     store.handleInvalidBarLeave();
   }, [store]);
   const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (store.gestureKeyPress) {
+      return;
+    }
     // TODO 优化点击后移动的逻辑
     const pointerX = viewTranslateX + (event.clientX - startX);
     // eslint-disable-next-line no-shadow
@@ -42,10 +51,10 @@ const InvalidTaskBar: React.FC<TaskBarProps> = ({ data }) => {
       store.handleInvalidBarHover(data, left, Math.ceil(width));
     }
   }, [data, store, viewTranslateX]);
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleMouseDown = useCallback(() => {
     store.handleInvalidBarDown(data);
   }, [data, store]);
-  const handleMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleMouseUp = useCallback(() => {
     store.handleInvalidBarUp(data);
   }, [data, store]);
   return (

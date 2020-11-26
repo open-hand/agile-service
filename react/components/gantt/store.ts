@@ -524,6 +524,7 @@ class GanttStore {
   @action
   handleInvalidBarUp(barInfo: Gantt.Bar) {
     barInfo.invalidDateRange = false;
+    this.updateTaskDate(barInfo);
     this.handleDragEnd();
     // TODO 修改日期逻辑
   }
@@ -742,9 +743,9 @@ class GanttStore {
   @action
   handleDragStart(barInfo: Gantt.Bar, type: Gantt.MoveType) {
     this.dragging = barInfo;
-    this.gestureKeyPress = true;
     this.draggingType = type;
     barInfo.stepGesture = 'start';
+    this.isPointerPress = true;
   }
 
   @action
@@ -753,8 +754,8 @@ class GanttStore {
       this.dragging.stepGesture = 'end';
       this.dragging = null;
     }
-    this.gestureKeyPress = false;
     this.draggingType = null;
+    this.isPointerPress = false;
   }
 
   /**
@@ -766,7 +767,6 @@ class GanttStore {
   @action
   shadowGesturePress(event: React.MouseEvent, type: Gantt.MoveType, barInfo: Gantt.Bar) {
     const { width } = barInfo;
-    this.isPointerPress = true;
     const isLeft = type === 'left';
     // @ts-ignore
     const { left, right } = event.target.getBoundingClientRect();
@@ -777,6 +777,7 @@ class GanttStore {
     // let baseX: number;
     // const old = { ...barInfo };
     const panStart = (event: HammerInput) => {
+      this.gestureKeyPress = true;
       // baseX = event.center.x;
       this.handleDragStart(barInfo, type);
     };
@@ -793,7 +794,7 @@ class GanttStore {
       this.updateDraggingBarPosition(event, barInfo, type, basePointerX);
     };
     const panEnd = () => {
-      this.isPointerPress = false;
+      this.gestureKeyPress = false;
       this.handleDragEnd();
       this.chartHammer.off('panstart', panStart);
       this.chartHammer.off('panmove', panMove);
@@ -820,7 +821,7 @@ class GanttStore {
 
     let startX = 0;
     let pointerX = 0;
-
+    this.gestureKeyPress = true;
     const layoutShadow = action((translateX: number) => {
       barInfo.translateX = translateX;
     });
@@ -839,6 +840,7 @@ class GanttStore {
     });
     const panStart = (event: HammerInput) => {
       startX = event.center.x;
+      this.gestureKeyPress = true;
       this.handleDragStart(barInfo, 'move');
     };
 
@@ -847,6 +849,7 @@ class GanttStore {
     };
 
     const panEnd = () => {
+      this.gestureKeyPress = false;
       this.handleDragEnd();
       this.chartHammer.off('panstart', panStart);
       this.chartHammer.off('panmove', panMove);
@@ -870,13 +873,10 @@ class GanttStore {
      */
   @action
   updateTaskDate(barInfo: Gantt.Bar) {
-    const { translateX } = barInfo;
-    const { width } = barInfo;
-    const { task } = barInfo;
-
+    const { translateX, width, task } = barInfo;
+    // TODO:更新之后的后续处理
     task.startDate = String(dayjs(translateX * this.pxUnitAmp));
     task.endDate = String(dayjs((translateX + width) * this.pxUnitAmp));
-    // TODO:更新之后的后续处理
   }
 
   @action
