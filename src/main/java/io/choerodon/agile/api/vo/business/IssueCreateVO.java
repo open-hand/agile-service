@@ -122,6 +122,36 @@ public class IssueCreateVO {
 
     private RelatedIssueVO relatedIssueVO;
 
+    private Long mainResponsibleId;
+
+    private Long testResponsibleId;
+
+    private String environment;
+
+    public Long getMainResponsibleId() {
+        return mainResponsibleId;
+    }
+
+    public void setMainResponsibleId(Long mainResponsibleId) {
+        this.mainResponsibleId = mainResponsibleId;
+    }
+
+    public Long getTestResponsibleId() {
+        return testResponsibleId;
+    }
+
+    public void setTestResponsibleId(Long testResponsibleId) {
+        this.testResponsibleId = testResponsibleId;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
+    }
+
     public RelatedIssueVO getRelatedIssueVO() {
         return relatedIssueVO;
     }

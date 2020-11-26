@@ -390,15 +390,22 @@ public class ExcelServiceImpl implements ExcelService {
                 .ifPresent(x -> result.add(x));
         List<String> userNameList = new ArrayList<>(getManagers(projectId).keySet());
         Optional
-                .ofNullable(processAssigneePredefined(cursor, systemFields, userNameList))
+                .ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.ASSIGNEE))
                 .ifPresent(x -> result.add(x));
         Optional
-                .ofNullable(processReporterPredefined(cursor, systemFields, userNameList))
+                .ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.REPORTER))
                 .ifPresent(x -> result.add(x));
         Optional
                 .ofNullable(processEpicOrFeaturePredefined(organizationId, projectId, withFeature, cursor, systemFields))
                 .ifPresent(x -> result.add(x));
         Optional.ofNullable(processLabelPredefined(projectId, cursor, systemFields))
+                .ifPresent(x -> result.add(x));
+
+        Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.MAIN_RESPONSIBLE))
+                .ifPresent(x -> result.add(x));
+        Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.TEST_RESPONSIBLE))
+                .ifPresent(x -> result.add(x));
+        Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, Arrays.asList("非生产环境", "生产环境"), FieldCode.ENVIRONMENT))
                 .ifPresent(x -> result.add(x));
         return result;
     }
@@ -462,38 +469,22 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private PredefinedDTO processReporterPredefined(ExcelImportTemplate.Cursor cursor,
-                                                    List<String> fieldCodes,
-                                                    List<String> userNameList) {
-        int col = fieldCodes.indexOf(FieldCode.REPORTER);
+    private PredefinedDTO buildPredefinedByFieldCodeAndValues(ExcelImportTemplate.Cursor cursor,
+                                                              List<String> fieldCodes,
+                                                              List<String> values,
+                                                              String fieldCode) {
+        int col = fieldCodes.indexOf(fieldCode);
         if (col == -1) {
             return null;
         }
-        return new PredefinedDTO(userNameList,
+        return new PredefinedDTO(values,
                 PREDEFINED_VALUE_START_ROW,
                 PREDEFINED_VALUE_END_ROW,
                 col,
                 col,
-                FieldCode.REPORTER,
+                fieldCode,
                 cursor.getAndIncreaseSheetNum());
     }
-
-    private PredefinedDTO processAssigneePredefined(ExcelImportTemplate.Cursor cursor,
-                                                    List<String> fieldCodes,
-                                                    List<String> userNameList) {
-        int col = fieldCodes.indexOf(FieldCode.ASSIGNEE);
-        if (col == -1) {
-            return null;
-        }
-        return new PredefinedDTO(userNameList,
-                PREDEFINED_VALUE_START_ROW,
-                PREDEFINED_VALUE_END_ROW,
-                col,
-                col,
-                FieldCode.ASSIGNEE,
-                cursor.getAndIncreaseSheetNum());
-    }
-
 
     private PredefinedDTO processSprintPredefined(Long projectId,
                                                   ExcelImportTemplate.Cursor cursor,
@@ -1432,8 +1423,76 @@ public class ExcelServiceImpl implements ExcelService {
             case ExcelImportTemplate.IssueHeader.RELATE_ISSUE:
                 validateRelateIssue(row, col, issueCreateVO, errorRowColMap, projectId);
                 break;
+            case FieldCode.MAIN_RESPONSIBLE:
+                validateAndSetMainResponsible(row, col, issueCreateVO, errorRowColMap, excelColumn);
+                break;
+            case FieldCode.TEST_RESPONSIBLE:
+                validateAndSetTestResponsible(row, col, issueCreateVO, errorRowColMap, excelColumn);
+                break;
+            case FieldCode.ENVIRONMENT:
+                validateAndSetEnvironment(row, col, issueCreateVO, errorRowColMap, excelColumn);
+                break;
             default:
                 break;
+        }
+    }
+
+    private void validateAndSetEnvironment(Row row,
+                                           Integer col,
+                                           IssueCreateVO issueCreateVO,
+                                           Map<Integer, List<Integer>> errorRowColMap,
+                                           ExcelColumnVO excelColumnVO) {
+        Cell cell = row.getCell(col);
+        int rowNum = row.getRowNum();
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString();
+            List<String> values = excelColumnVO.getPredefinedValues();
+            if (!values.contains(value)) {
+                cell.setCellValue(buildWithErrorMsg(value, "请输入正确的环境"));
+                addErrorColumn(rowNum, col, errorRowColMap);
+            } else {
+                issueCreateVO.setEnvironment(value);
+            }
+        }
+    }
+
+    private void validateAndSetTestResponsible(Row row,
+                                               Integer col,
+                                               IssueCreateVO issueCreateVO,
+                                               Map<Integer, List<Integer>> errorRowColMap,
+                                               ExcelColumnVO excelColumnVO) {
+        Cell cell = row.getCell(col);
+        int rowNum = row.getRowNum();
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString();
+            List<String> values = excelColumnVO.getPredefinedValues();
+            Map<String, Long> map = excelColumnVO.getValueIdMap();
+            if (!values.contains(value)) {
+                cell.setCellValue(buildWithErrorMsg(value, "请输入正确的测试负责人"));
+                addErrorColumn(rowNum, col, errorRowColMap);
+            } else {
+                issueCreateVO.setTestResponsibleId(map.get(value));
+            }
+        }
+    }
+
+    private void validateAndSetMainResponsible(Row row,
+                                               Integer col,
+                                               IssueCreateVO issueCreateVO,
+                                               Map<Integer, List<Integer>> errorRowColMap,
+                                               ExcelColumnVO excelColumnVO) {
+        Cell cell = row.getCell(col);
+        int rowNum = row.getRowNum();
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString();
+            List<String> values = excelColumnVO.getPredefinedValues();
+            Map<String, Long> map = excelColumnVO.getValueIdMap();
+            if (!values.contains(value)) {
+                cell.setCellValue(buildWithErrorMsg(value, "请输入正确的主要负责人"));
+                addErrorColumn(rowNum, col, errorRowColMap);
+            } else {
+                issueCreateVO.setMainResponsibleId(map.get(value));
+            }
         }
     }
 
@@ -2130,6 +2189,8 @@ public class ExcelServiceImpl implements ExcelService {
                 break;
             case FieldCode.ASSIGNEE:
             case FieldCode.REPORTER:
+            case FieldCode.MAIN_RESPONSIBLE:
+            case FieldCode.TEST_RESPONSIBLE:
                 processUser(projectId, excelColumnVO);
                 break;
             case FieldCode.EPIC:
@@ -2139,9 +2200,17 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.LABEL:
                 processLabel(projectId, excelColumnVO);
                 break;
+            case FieldCode.ENVIRONMENT:
+                processEnvironment(excelColumnVO);
+                break;
             default:
                 break;
         }
+    }
+
+    private void processEnvironment(ExcelColumnVO excelColumnVO) {
+        List<String> values = Arrays.asList("非生产环境", "生产环境");
+        excelColumnVO.setPredefinedValues(values);
     }
 
     private void processLabel(Long projectId, ExcelColumnVO excelColumnVO) {
