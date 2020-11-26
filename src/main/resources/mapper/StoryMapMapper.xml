@@ -19,6 +19,13 @@
         <!--<id column="ai_program_id" property="programId"/>-->
         <id column="ar_rank" property="epicRank"/>
         <id column="ar_object_version_number" property="epicRankObjectVersionNumber"/>
+        <association property="statusVO" javaType="io.choerodon.agile.api.vo.StatusVO">
+            <id property="id" column="status_id"/>
+            <result property="name" column="status_name"/>
+            <result property="code" column="status_code"/>
+            <result property="completed" column="status_completed"/>
+            <result property="type" column="status_type"/>
+        </association>
     </resultMap>
 
     <select id="selectEpicList" resultMap="epicWithInfoListMap">
@@ -30,10 +37,16 @@
             ai.epic_name as ai_epic_name,
 --             ai.program_id as ai_program_id,
             ar.rank as ar_rank,
-            ar.object_version_number as ar_object_version_number
+            ar.object_version_number as ar_object_version_number,
+            ais.name as status_name,
+            ai.status_id as status_id,
+            ais.is_completed as status_completed,
+            fs.type as status_type
         from agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         left join agile_rank ar on ar.project_id = #{projectId} and ai.issue_id = ar.issue_id and ar.type = 'epic'
+        LEFT JOIN agile_issue_status ais on ais.project_id = ai.project_id and ais.status_id = ai.status_id
+        LEFT JOIN fd_status fs on fs.id = ais.status_id
         where
               ai.project_id = #{projectId}
           AND ai.issue_id in
@@ -53,6 +66,20 @@
         <id column="ai_issue_type_id" property="issueTypeId"/>
         <id column="ai_status_id" property="statusId"/>
         <id column="ai_completed" property="completed"/>
+
+        <association property="statusVO" javaType="io.choerodon.agile.api.vo.StatusVO">
+            <id property="id" column="status_id"/>
+            <result property="name" column="status_name"/>
+            <result property="code" column="status_code"/>
+            <result property="completed" column="status_completed"/>
+            <result property="type" column="status_type"/>
+        </association>
+
+        <collection property="storyMapSprintList" notNullColumn="sprint_id" autoMapping="true" ofType="io.choerodon.agile.api.vo.SprintNameVO">
+            <id property="sprintId" column="sprint_id"/>
+            <id property="sprintName" column="sprint_name"/>
+        </collection>
+
         <collection property="storyMapVersionDTOList" autoMapping="true" ofType="io.choerodon.agile.infra.dto.StoryMapVersionDTO">
             <id property="versionId" column="version_version_id"/>
             <id property="name" column="version_name"/>
@@ -67,7 +94,13 @@
         ai.epic_id as ai_epic_id,
 --         ai.feature_id as ai_feature_id,
         version_info.version_id as version_version_id,
-        version_info.name as version_name
+        version_info.name as version_name,
+        asp.sprint_id as sprint_id,
+        asp.sprint_name as sprint_name,
+        ais.name as status_name,
+        ai.status_id as status_id,
+        ais.is_completed as status_completed,
+        fs.type as status_type
         from agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         left join (
@@ -75,6 +108,10 @@
             from agile_version_issue_rel avir, agile_product_version apv
             where avir.version_id = apv.version_id and avir.project_id = #{projectId}
         ) version_info on ai.issue_id = version_info.issue_id
+        LEFT JOIN agile_issue_sprint_rel aisl on aisl.project_id = ai.project_id and aisl.issue_id = ai.issue_id
+        LEFT JOIN agile_sprint asp on asp.project_id = aisl.project_id and asp.sprint_id = aisl.sprint_id
+        LEFT JOIN agile_issue_status ais on ais.project_id = ai.project_id and ais.status_id = ai.status_id
+        LEFT JOIN fd_status fs on fs.id = ais.status_id
         where ai.project_id = #{projectId} and ai.type_code = 'story'
         and (
            <if test="epicIds != null and epicIds.size > 0">
@@ -195,6 +232,90 @@
             </foreach>
         </if>
         order by ai.issue_id desc
+    </select>
+
+    <select id="countEpicProgress" resultType="io.choerodon.agile.api.vo.IssueProgressVO">
+        select
+          ai.epic_id as id,
+          COUNT(case when ais.is_completed != 1 then ai.issue_id end) as unCompletedCount,
+          COUNT(case when ais.is_completed = 1 then ai.issue_id end) as completedCount,
+          COUNT(*) as totalCount
+          from (
+              (
+                select ai1.issue_id,ai1.epic_id,ai1.status_id from agile_issue ai1
+                where
+                ai1.project_id = #{projectId}
+                and ai1.type_code = 'story'
+                and ai1.epic_id in
+                <foreach collection="epicIds" item="epicId" open="(" close=")" separator=",">
+                   #{epicId}
+                </foreach>
+              )
+              union all (
+                select subt.issue_id,story.epic_id as epic_id,subt.status_id from agile_issue subt
+                LEFT JOIN agile_issue story on story.issue_id = subt.parent_issue_id
+                where subt.project_id = #{projectId}
+                and subt.type_code = 'sub_task'
+                and subt.parent_issue_id in (
+                    select ai1.issue_id from agile_issue ai1
+                    where
+                    ai1.project_id = #{projectId}
+                    and ai1.type_code = 'story'
+                    and ai1.epic_id in
+                    <foreach collection="epicIds" item="epicId" open="(" close=")" separator=",">
+                        #{epicId}
+                    </foreach>
+                 )
+               ) union all (
+                select bug.issue_id,story.epic_id as epic_id,bug.status_id from agile_issue bug
+                LEFT JOIN agile_issue story on story.issue_id = bug.relate_issue_id
+                where bug.project_id = #{projectId}
+                and bug.type_code = 'bug'
+                and bug.relate_issue_id in(
+                    select ai1.issue_id from agile_issue ai1
+                    where
+                    ai1.project_id = #{projectId}
+                    and ai1.type_code = 'story'
+                    and ai1.epic_id in
+                    <foreach collection="epicIds" item="epicId" open="(" close=")" separator=",">
+                        #{epicId}
+                    </foreach>
+                )
+               )
+           ) ai
+        LEFT JOIN agile_issue_status ais on ais.project_id = #{projectId} and ais.status_id = ai.status_id
+        group by ai.epic_id
+    </select>
+
+    <select id="countStoryProgress" resultType="io.choerodon.agile.api.vo.IssueProgressVO">
+        select
+          ai.story_id as id,
+          COUNT(case when ais.is_completed != 1 then ai.issue_id end) as unCompletedCount,
+          COUNT(case when ais.is_completed = 1 then ai.issue_id end) as completedCount,
+          COUNT(*) as totalCount
+         from (
+           (
+            select ai1.issue_id,ai1.parent_issue_id as story_id,ai1.status_id from agile_issue ai1
+            where ai1.project_id = #{projectId}
+            and ai1.type_code = 'sub_task'
+            and ai1.parent_issue_id in
+            <foreach collection="storyIds" item="storyId" open="(" close=")" separator=",">
+                #{storyId}
+            </foreach>
+           )
+           union all
+           (
+            select ai2.issue_id,ai2.relate_issue_id as story_id,ai2.status_id from agile_issue ai2
+            where ai2.project_id = #{projectId}
+            and ai2.type_code = 'bug'
+            and ai2.relate_issue_id in
+            <foreach collection="storyIds" item="storyId" open="(" close=")" separator=",">
+                #{storyId}
+            </foreach>
+           )
+        ) ai
+        LEFT JOIN agile_issue_status ais on ais.project_id = #{projectId} and ais.status_id = ai.status_id
+        group by ai.story_id
     </select>
 
 </mapper>
