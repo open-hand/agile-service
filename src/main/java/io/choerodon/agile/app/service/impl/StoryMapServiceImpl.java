@@ -221,7 +221,7 @@ public class StoryMapServiceImpl implements StoryMapService {
     @Override
     public List<SprintSearchVO> storyMapSprintInfo(Long projectId) {
         // 查询项目的所有冲刺
-        List<SprintDTO> sprintDTOS = sprintMapper.getSprintByProjectId(projectId);
+        List<SprintDTO> sprintDTOS = sprintMapper.selectByCondition(Condition.builder(SprintDTO.class).andWhere(Sqls.custom().andEqualTo("projectId",projectId)).build());
         if (CollectionUtils.isEmpty(sprintDTOS)) {
             return new ArrayList<>();
         }
@@ -249,6 +249,9 @@ public class StoryMapServiceImpl implements StoryMapService {
                 sprint.setDoneStoryPoint(issueProgressVO.getDoneStoryPoint());
             }
             list.add(sprint);
+        }
+        if (agilePluginService != null) {
+            agilePluginService.handlerSprintPlanInfo(projectId,list);
         }
         return list;
     }

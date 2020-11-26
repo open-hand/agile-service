@@ -1011,7 +1011,7 @@
 
     <select id="queryStoryPointProgress" resultType="io.choerodon.agile.api.vo.SprintSearchVO">
        select
-          ai1.sprint_id as id,
+          ai1.sprint_id as sprint_id,
           SUM(case when ais.category_code = 'todo' then ai1.story_points  else 0 end) as todoStoryPoint,
           SUM(case when ais.category_code = 'doing' then ai1.story_points else 0 end) as doingStoryPoint,
           SUM(case when ais.category_code = 'done' then ai1.story_points else 0 end) as doneStoryPoint

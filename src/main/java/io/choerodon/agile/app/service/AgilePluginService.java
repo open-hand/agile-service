@@ -341,4 +341,11 @@ public interface AgilePluginService {
      * @param typeCode
      */
     void getIssueTypeFieldCodes(List<String> fieldCodeS, String typeCode);
+
+    /**
+     * 处理冲刺是否是规划中
+     * @param projectId
+     * @param list
+     */
+    void handlerSprintPlanInfo(Long projectId, List<SprintSearchVO> list);
 }

@@ -75,7 +75,7 @@
             <result property="type" column="status_type"/>
         </association>
 
-        <collection property="storyMapSprintList" notNullColumn="sprint_id" autoMapping="true" ofType="io.choerodon.agile.api.vo.SprintNameVO">
+        <collection property="storyMapSprintList" autoMapping="true" ofType="io.choerodon.agile.api.vo.SprintNameVO">
             <id property="sprintId" column="sprint_id"/>
             <id property="sprintName" column="sprint_name"/>
         </collection>
@@ -87,6 +87,7 @@
     </resultMap>
 
     <select id="selectStoryList" resultMap="storyListMap">
+        select * from (
         select
         ai.issue_id as ai_issue_id,
         IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) as ai_issue_num,
@@ -103,9 +104,9 @@
         from agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         left join (
-            select avir.issue_id, apv.version_id, apv.name
-            from agile_version_issue_rel avir, agile_product_version apv
-            where avir.version_id = apv.version_id and avir.project_id = #{projectId}
+        select avir.issue_id, apv.version_id, apv.name
+        from agile_version_issue_rel avir, agile_product_version apv
+        where avir.version_id = apv.version_id and avir.project_id = #{projectId}
         ) version_info on ai.issue_id = version_info.issue_id
         LEFT JOIN agile_issue_sprint_rel aisl on aisl.project_id = ai.project_id and aisl.issue_id = ai.issue_id
         LEFT JOIN agile_sprint asp on asp.project_id = aisl.project_id and asp.sprint_id = aisl.sprint_id
@@ -113,23 +114,23 @@
         LEFT JOIN fd_status fs on fs.id = ais.status_id
         where ai.project_id = #{projectId} and ai.type_code = 'story'
         and (
-           <if test="epicIds != null and epicIds.size > 0">
-               ai.epic_id in
-               <foreach collection="epicIds" item="epicId" open="(" separator=","
-                        close=")">
-                   #{epicId}
-               </foreach>
-           </if>
+        <if test="epicIds != null and epicIds.size > 0">
+            ai.epic_id in
+            <foreach collection="epicIds" item="epicId" open="(" separator=","
+                     close=")">
+                #{epicId}
+            </foreach>
+        </if>
         )
         <if test='searchVO.advancedSearchArgs.versionList != null and searchVO.advancedSearchArgs.versionList.size > 0'>
             and ai.issue_id in (
-                 select avir2.issue_id
-                 from agile_version_issue_rel avir2
-                 where avir2.version_id in
-                 <foreach collection="searchVO.advancedSearchArgs.versionList" item="versionId" open="(" separator=","
-                         close=")">
-                     #{versionId}
-                 </foreach>
+            select avir2.issue_id
+            from agile_version_issue_rel avir2
+            where avir2.version_id in
+            <foreach collection="searchVO.advancedSearchArgs.versionList" item="versionId" open="(" separator=","
+                     close=")">
+                #{versionId}
+            </foreach>
             )
         </if>
         <if test='searchVO.advancedSearchArgs.statusList != null and searchVO.advancedSearchArgs.statusList.size > 0'>
@@ -183,10 +184,39 @@
         </if>
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
-        order by ai.issue_id
+        ) search
+         where 1=1
+        <if test='searchVO.searchArgs != null'>
+            <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                AND search.ai_issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+            </if>
+        </if>
+        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <foreach collection="searchVO.contents" item="content" index="index">
+                AND (search.ai_issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.ai_summary LIKE
+                CONCAT(CONCAT('%',
+                #{content}), '%'))
+            </foreach>
+        </if>
+        order by search.ai_issue_id
     </select>
 
-    <select id="selectDemandStoryList" resultMap="storyListMap">
+    <resultMap id="storyDemandListMap" type="io.choerodon.agile.infra.dto.business.StoryMapStoryDTO">
+        <id column="ai_issue_id" property="issueId"/>
+        <id column="ai_issue_num" property="issueNum"/>
+        <id column="ai_summary" property="summary"/>
+        <id column="ai_epic_id" property="epicId"/>
+        <!--<id column="ai_feature_id" property="featureId"/>-->
+        <id column="ai_issue_type_id" property="issueTypeId"/>
+        <id column="ai_status_id" property="statusId"/>
+        <id column="ai_completed" property="completed"/>
+        <collection property="storyMapVersionDTOList" autoMapping="true" ofType="io.choerodon.agile.infra.dto.StoryMapVersionDTO">
+            <id property="versionId" column="version_version_id"/>
+            <id property="name" column="version_name"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectDemandStoryList" resultMap="storyDemandListMap">
         select
         ai.issue_id as ai_issue_id,
         IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) as ai_issue_num,
