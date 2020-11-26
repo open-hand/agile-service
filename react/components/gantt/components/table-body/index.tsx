@@ -3,7 +3,7 @@ import React, { useContext, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import Context from '../../context';
 import styles from './index.less';
-import { ROW_HEIGHT } from '../../constants';
+import { ROW_HEIGHT, TOP_PADDING } from '../../constants';
 import RowToggler from './RowToggler';
 
 const TableRows = () => {
@@ -15,7 +15,7 @@ const TableRows = () => {
   return (
     <>
       {barList.slice(start, start + count).map((bar, rowIndex) => (
-        <div className={styles.row} style={{ height: ROW_HEIGHT, top: (rowIndex + start) * ROW_HEIGHT }}>
+        <div className={styles.row} style={{ height: ROW_HEIGHT, top: (rowIndex + start) * ROW_HEIGHT + TOP_PADDING }}>
           {columns.map((column, index) => (
             <div
               key={column.name}

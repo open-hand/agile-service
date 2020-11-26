@@ -15,7 +15,7 @@ import isLeapYear from 'dayjs/plugin/isLeapYear';
 import weekday from 'dayjs/plugin/weekday';
 import { Gantt } from './types';
 import {
-  ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE, MIN_VIEW_RATE,
+  ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE, MIN_VIEW_RATE, TOP_PADDING,
 } from './constants';
 import {
   flattenDeep, getDragSideShrink, getDragSideExpand, getMoveStep,
@@ -56,7 +56,6 @@ export const viewTypeList: Gantt.SightConfig[] = [
     value: 115200,
   },
 ];
-const topTap = 4;
 const startDate = '2020-10-01';
 class GanttStore {
   constructor() {
@@ -227,7 +226,7 @@ class GanttStore {
 
   // 内容区滚动区域域高度
   @computed get bodyScrollHeight() {
-    let height = this.getBarList.length * ROW_HEIGHT + topTap;
+    let height = this.getBarList.length * ROW_HEIGHT + TOP_PADDING;
     if (height < this.bodyClientHeight) {
       height = this.bodyClientHeight;
     }
@@ -717,10 +716,10 @@ class GanttStore {
     // 内容区高度
     const contentHeight = this.getBarList.length * ROW_HEIGHT;
     const offsetY = event.clientY - top + scrollTop;
-    if (offsetY - contentHeight > topTap) {
+    if (offsetY - contentHeight > TOP_PADDING) {
       this.showSelectionIndicator = false;
     } else {
-      const top = Math.floor((offsetY - topTap) / ROW_HEIGHT) * ROW_HEIGHT + 4;
+      const top = Math.floor((offsetY - TOP_PADDING) / ROW_HEIGHT) * ROW_HEIGHT + TOP_PADDING;
       this.showSelectionIndicator = true;
       this.selectionIndicatorTop = top;
     }
