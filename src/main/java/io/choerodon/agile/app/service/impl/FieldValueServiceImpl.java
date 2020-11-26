@@ -345,6 +345,9 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             if (ObjectUtils.isEmpty(objectSchemeFieldDTO)) {
                 continue;
             }
+            if (Boolean.TRUE.equals(objectSchemeFieldDTO.getSystem())) {
+                continue;
+            }
             PageFieldViewCreateVO pageFieldViewCreateVO = new PageFieldViewCreateVO();
             pageFieldViewCreateVO.setFieldId(key);
             pageFieldViewCreateVO.setFieldCode(objectSchemeFieldDTO.getCode());

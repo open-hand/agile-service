@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
 
+import io.choerodon.agile.api.vo.IssueProgressVO;
+import io.choerodon.agile.api.vo.StatusVO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 public class EpicWithInfoDTO {
@@ -19,6 +21,10 @@ public class EpicWithInfoDTO {
     private String epicRank;
 
     private Long epicRankObjectVersionNumber;
+
+    private StatusVO statusVO;
+
+    private IssueProgressVO issueProgressVO;
 
     public Long getIssueId() {
         return issueId;
@@ -74,5 +80,21 @@ public class EpicWithInfoDTO {
 
     public void setEpicRankObjectVersionNumber(Long epicRankObjectVersionNumber) {
         this.epicRankObjectVersionNumber = epicRankObjectVersionNumber;
+    }
+
+    public StatusVO getStatusVO() {
+        return statusVO;
+    }
+
+    public void setStatusVO(StatusVO statusVO) {
+        this.statusVO = statusVO;
+    }
+
+    public IssueProgressVO getIssueProgressVO() {
+        return issueProgressVO;
+    }
+
+    public void setIssueProgressVO(IssueProgressVO issueProgressVO) {
+        this.issueProgressVO = issueProgressVO;
     }
 }
