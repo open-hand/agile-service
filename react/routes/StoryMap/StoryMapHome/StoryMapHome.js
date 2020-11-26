@@ -14,8 +14,12 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import HeaderLine from '@/components/HeaderLine';
+import FilterManage from '@/components/FilterManage';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
+import { useIssueSearchStore } from '@/components/issue-search';
+import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import { transformFilter } from '@/routes/Issue/stores/utils';
 import Minimap from './components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from './emptyStory.svg';
@@ -38,6 +42,14 @@ const HEX = {
 };
 
 const StoryMapHome = observer(() => {
+  const issueSearchStore = useIssueSearchStore({
+    // @ts-ignore
+    getSystemFields: () => getSystemFields(['issueTypeId']),
+    transformFilter,
+    // @ts-ignore
+    defaultChosenFields: Array.isArray(localPageCacheStore.getItem('storyMapFilter')) ? new Map(localPageCacheStore.getItem('storyMapFilter').map((item) => [item.code, item])) : undefined,
+  });
+
   const handleRefresh = (firstLoad = false) => {
     StoryMapStore.getStoryMap(firstLoad);
   };
@@ -45,13 +57,16 @@ const StoryMapHome = observer(() => {
   StoryMapStore.setMiniMapRef(ref);
 
   useEffect(() => {
-    handleRefresh(true);
     const defaultHiddenNoStoryValue = localPageCacheStore.getItem('stroyMap.hidden.no.stroy');
     defaultHiddenNoStoryValue && StoryMapStore.setHiddenColumnNoStory(defaultHiddenNoStoryValue);
 
     const defaultFoldCompletedEpic = localPageCacheStore.getItem('stroyMap.fold.completedEpic');
     defaultFoldCompletedEpic && StoryMapStore.setFoldCompletedEpic(defaultFoldCompletedEpic);
 
+    const cacheSearchVO = localPageCacheStore.getItem('storyMapSearchVO');
+    cacheSearchVO && StoryMapStore.setSearchVO(cacheSearchVO);
+
+    handleRefresh(true);
     return () => { StoryMapStore.clear(); };
   }, []);
   const handleOpenIssueList = () => {
@@ -124,6 +139,13 @@ const StoryMapHome = observer(() => {
     StoryMapStore.foldCompletedEpicColumn(value);
   };
 
+  const handleClickFilterManage = useCallback(() => {
+    // const editFilterInfo = IssueStore.getEditFilterInfo;
+    // const filterListVisible = IssueStore.getFilterListVisible;
+    // IssueStore.setFilterListVisible(!filterListVisible);
+    StoryMapStore.setFilterListVisible(!StoryMapStore.filterListVisible);
+  }, []);
+
   const {
     loading, selectedIssueMap,
   } = StoryMapStore;
@@ -165,6 +187,7 @@ const StoryMapHome = observer(() => {
         <SwitchSwimLine />
         <CheckBox style={{ margin: '0 20px' }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>
         <CheckBox name="foldCompletedEpic" checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起史诗已完成列</CheckBox>
+        <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button>
       </Header>
       <Breadcrumb />
       <Content style={{
@@ -175,7 +198,7 @@ const StoryMapHome = observer(() => {
         <ListenSize />
         {
           !isEmpty && (
-            <StoryMapSearch />
+            <StoryMapSearch issueSearchStore={issueSearchStore} />
           )
         }
 
@@ -198,6 +221,11 @@ const StoryMapHome = observer(() => {
               />
           )
         )}
+        <FilterManage
+          visible={StoryMapStore.filterListVisible}
+          setVisible={StoryMapStore.setFilterListVisible}
+          issueSearchStore={issueSearchStore}
+        />
         <SideIssueList handleClickOutside={handleCloseIssueList} eventTypes={['click']} />
         <CreateEpicModal onOk={handleCreateEpic} />
         <IssueDetail refresh={handleIssueRefresh} isFullScreen={isFullScreen} onChangeWidth={setIssueWidth} />

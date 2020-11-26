@@ -3,7 +3,7 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import {
-  debounce, isEmpty, isEqual, pick,
+  debounce, isEmpty, isEqual, pick, includes,
 } from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { fieldApi, personalFilterApi } from '@/api';
@@ -51,7 +51,7 @@ export function flattenObject(object) {
   delete result.text;
   return result;
 }
-export function getSystemFields() {
+export function getSystemFields(excludeCodes = []) {
   const systemFields = [{
     code: 'issueIds',
     name: 'issueId',
@@ -143,7 +143,7 @@ export function getSystemFields() {
     defaultShow: false,
     fieldType: 'datetime',
   }];
-  return IsInProgramStore.isInProgram ? systemFields : systemFields.filter((f) => f.code !== 'feature');
+  return IsInProgramStore.isInProgram ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }
 
 class IssueStore {
@@ -166,7 +166,7 @@ class IssueStore {
     return this.filterListVisible;
   }
 
-  @action setFilterListVisible(data) {
+  @action setFilterListVisible = (data) => {
     this.filterListVisible = data;
   }
 
@@ -178,17 +178,6 @@ class IssueStore {
 
   @action setUpdateFilterName(data) {
     this.updateFilterName = data;
-  }
-
-  // 控制保存模态框是否显示
-  @observable saveFilterVisible = false;
-
-  @computed get getSaveFilterVisible() {
-    return this.saveFilterVisible;
-  }
-
-  @action setSaveFilterVisible(data) {
-    this.saveFilterVisible = data;
   }
 
   // 控制导出模态框是否显示
