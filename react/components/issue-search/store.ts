@@ -24,7 +24,7 @@ export type IBatchAction = undefined | 'edit' | 'delete'
 export interface IssueSearchStoreProps {
   getSystemFields: () => ILocalField[]
   transformFilter: (chosenFields: IChosenFields) => any
-  defaultChosenFields: IChosenFields,
+  defaultChosenFields?: IChosenFields,
 }
 class IssueSearchStore {
   query: () => void = () => { }

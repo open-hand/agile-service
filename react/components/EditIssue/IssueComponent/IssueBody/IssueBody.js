@@ -23,7 +23,6 @@ import DailyLog from '../../../DailyLog';
 import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
 import { InjectedComponent } from '../../injectComponent';
-// import TestLink from '@choerodon/testmanager/lib/components/test-case-link-list';
 import './IssueBody.less';
 
 const { TabPane } = Tabs;
@@ -83,7 +82,10 @@ function IssueBody(props) {
           <IssueAttachment {...props} />
           {
             issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
-              <IssueWSJF {...props} />
+              <>
+                <IssueWSJF {...props} />
+                <InjectedComponent.PIAim {...props} />
+              </>
             )
           }
           {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
