@@ -1,22 +1,20 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Button } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { stores } from '@choerodon/boot';
-import IssueStore from '@/stores/project/issue/IssueStore';
 import IssueSearchStore from '@/components/issue-search/store';
-import Store from '../../stores';
 import FilterItem from './FilterItem';
 import './FilterManage.less';
 
 const { HeaderStore } = stores;
 interface Props {
-
+  visible: boolean,
+  setVisible: Function,
+  issueSearchStore: IssueSearchStore,
 }
-const FilterManage: React.FC<Props> = () => {
-  const { issueSearchStore } = useContext(Store);
-  const { myFilters } = issueSearchStore as IssueSearchStore;
-  const { filterListVisible } = IssueStore;
-  if (!filterListVisible) {
+const FilterManage: React.FC<Props> = ({ visible, setVisible, issueSearchStore }) => {
+  const { myFilters } = issueSearchStore;
+  if (!visible) {
     return null;
   }
   return (
@@ -30,7 +28,7 @@ const FilterManage: React.FC<Props> = () => {
           shape="circle"
           icon="close"
           onClick={() => {
-            IssueStore.setFilterListVisible(false);
+            setVisible(false);
           }}
         />
       </div>
@@ -48,7 +46,7 @@ const FilterManage: React.FC<Props> = () => {
                   onDelete={async () => {
                     await issueSearchStore.loadMyFilterList();
                     if (issueSearchStore.myFilters.length === 0) {
-                      IssueStore.setFilterListVisible(false);
+                      setVisible(false);
                     }
                   }}
                 />

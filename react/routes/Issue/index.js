@@ -13,16 +13,16 @@ import CreateIssue from '@/components/CreateIssue';
 import { projectApi } from '@/api/Project';
 import { issueApi } from '@/api';
 import IssueSearch from '@/components/issue-search';
+import openSaveFilterModal from '@/components/SaveFilterModal';
 import { linkUrl } from '@/utils/to';
 import LINK_URL, { getParams } from '@/constants/LINK_URL';
 import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import ImportIssue from '@/components/ImportIssue';
+import FilterManage from '@/components/FilterManage';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
-import FilterManage from './components/FilterManage';
-import SaveFilterModal from './components/SaveFilterModal';
 import IssueDetail from './components/issue-detail';
 import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
@@ -148,7 +148,6 @@ const Issue = observer(() => {
   const handleClickFilterManage = () => {
     const editFilterInfo = IssueStore.getEditFilterInfo;
     const filterListVisible = IssueStore.getFilterListVisible;
-    IssueStore.setSaveFilterVisible(false);
     IssueStore.setFilterListVisible(!filterListVisible);
     IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, {
       isEditing:
@@ -166,12 +165,10 @@ const Issue = observer(() => {
     }
     IssueStore.query();
   }, []);
-  const handleClickSaveFilter = useCallback(() => {
-    IssueStore.setSaveFilterVisible(true);
-    IssueStore.setFilterListVisible(false);
-    // IssueStore.setEditFilterInfo(map(editFilterInfo,
-    //   (item) => Object.assign(item, { isEditing: false })));
-  }, []);
+
+  const handleClickSaveFilter = () => {
+    openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
+  };
 
   return (
     <Page
@@ -243,8 +240,11 @@ const Issue = observer(() => {
           }}
           selectedIssue={IssueStore.selectedIssue?.issueId}
         />
-        <SaveFilterModal issueSearchStore={issueSearchStore} />
-        <FilterManage />
+        <FilterManage
+          visible={IssueStore.filterListVisible}
+          setVisible={IssueStore.setFilterListVisible}
+          issueSearchStore={issueSearchStore}
+        />
         {/* <ExportIssue issueSearchStore={issueSearchStore} dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} /> */}
         {IssueStore.getCreateQuestion && (
           <CreateIssue

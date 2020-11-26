@@ -1,30 +1,24 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
-import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import { toJS } from 'mobx';
+import IssueSearch, { IssueSearchStore } from '@/components/issue-search';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
-import { transformFilter } from '@/routes/Issue/stores/utils';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import openSaveFilterModal from '@/components/SaveFilterModal';
 import styles from './Search.less';
 
-const StoryMapSearch = () => {
-  const issueSearchStore = useIssueSearchStore({
-    // @ts-ignore
-    getSystemFields,
-    transformFilter,
-    // @ts-ignore
-    defaultChosenFields: Array.isArray(localPageCacheStore.getItem('storyMapFilter')) ? new Map(localPageCacheStore.getItem('storyMapFilter').map((item) => [item.code, item])) : undefined,
-  });
+interface Props {
+  issueSearchStore: IssueSearchStore,
+}
 
+const StoryMapSearch: React.FC<Props> = ({ issueSearchStore }) => {
   const handleClear = () => {
     StoryMapStore.getStoryMap();
   };
 
-  const handleClickSaveFilter = useCallback(() => {
-    console.log('保存筛选');
-    // StoryMapStore.setSaveFilterVisible(true);
-    // StoryMapStore.setFilterListVisible(false);
-  }, []);
+  const handleClickSaveFilter = () => {
+    openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
+  };
 
   return (
     <div className={styles.storyMapSearch}>
@@ -33,6 +27,8 @@ const StoryMapSearch = () => {
         onClear={handleClear}
         onChange={() => {
           localPageCacheStore.setItem('storyMapFilter', issueSearchStore.currentFilter);
+          localPageCacheStore.setItem('storyMapSearchVO', issueSearchStore.getCustomFieldFilters());
+          StoryMapStore.setSearchVO(issueSearchStore.getCustomFieldFilters());
           StoryMapStore.getStoryMap();
         }}
         onClickSaveFilter={handleClickSaveFilter}

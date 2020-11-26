@@ -43,6 +43,10 @@ class StoryMapStore {
     },
   }
 
+  @action setSearchVO = (data) => {
+    this.searchVO = data;
+  }
+
   @observable issueList = [];
 
   @observable issueTypes = [];
@@ -135,12 +139,6 @@ class StoryMapStore {
     storyMapApi.getDemands(this.sideSearchVO).then((res) => {
       this.setIssueList(res.demandStoryList);
     });
-  }
-
-  @action
-  handleFilterChange = (field, values) => {
-    this.searchVO.advancedSearchArgs[field] = values;
-    this.getStoryMap();
   }
 
   @action
@@ -701,6 +699,17 @@ class StoryMapStore {
 
   @action setTableOverflow({ tableWidth = 0, containerWidth = 0 }) {
     this.tableOverflow = tableWidth > containerWidth;
+  }
+
+  // 筛选列表是否显示
+  @observable filterListVisible = false;
+
+  @computed get getFilterListVisible() {
+    return this.filterListVisible;
+  }
+
+  @action setFilterListVisible = (data) => {
+    this.filterListVisible = data;
   }
 }
 
