@@ -111,6 +111,8 @@ class GanttStore {
 
   mainElementRef = createRef<HTMLDivElement>();
 
+  chartHammer: HammerManager;
+
   chartElementRef = createRef<HTMLDivElement>();
 
   isPointerPress: boolean = false;
@@ -139,6 +141,11 @@ class GanttStore {
   @action
   setColumns(columns: Gantt.Column[]) {
     this.columns = columns;
+  }
+
+  @action
+  setChartHammer(chartHammer: HammerManager) {
+    this.chartHammer = chartHammer;
   }
 
   @action syncSize(size: {
@@ -757,19 +764,16 @@ class GanttStore {
    * @param barInfo
    */
   @action
-  shadowGesturePress(event: HammerInput, type: Gantt.MoveType, barInfo: Gantt.Bar) {
-    if (!this.chartElementRef.current) {
-      return;
-    }
+  shadowGesturePress(event: React.MouseEvent, type: Gantt.MoveType, barInfo: Gantt.Bar) {
     const { width } = barInfo;
     this.isPointerPress = true;
     const isLeft = type === 'left';
+    // @ts-ignore
     const { left, right } = event.target.getBoundingClientRect();
     const startX = isLeft ? right : left;
     // 移动右边，以左侧为基准
     const basePointerX = isLeft ? startX + width : startX - width;
 
-    const chartHammer = new Hammer(this.chartElementRef.current);
     // let baseX: number;
     // const old = { ...barInfo };
     const panStart = (event: HammerInput) => {
@@ -791,13 +795,15 @@ class GanttStore {
     const panEnd = () => {
       this.isPointerPress = false;
       this.handleDragEnd();
-      chartHammer.destroy();
+      this.chartHammer.off('panstart', panStart);
+      this.chartHammer.off('panmove', panMove);
+      this.chartHammer.off('panend', panEnd);
       this.updateTaskDate(barInfo);
     };
 
-    chartHammer.on('panstart', panStart);
-    chartHammer.on('panmove', panMove);
-    chartHammer.on('panend', panEnd);
+    this.chartHammer.on('panstart', panStart);
+    this.chartHammer.on('panmove', panMove);
+    this.chartHammer.on('panend', panEnd);
   }
 
   shadowGesturePressUp() {
@@ -809,10 +815,6 @@ class GanttStore {
    * @param barInfo
    */
   shadowGestureBarPress(barInfo: Gantt.Bar) {
-    if (!this.chartElementRef.current) {
-      return;
-    }
-    const chartHammer = new Hammer(this.chartElementRef.current);
     const step = CELL_UNIT;
     let { translateX } = barInfo;
 
@@ -846,13 +848,16 @@ class GanttStore {
 
     const panEnd = () => {
       this.handleDragEnd();
-      chartHammer.destroy();
+      this.chartHammer.off('panstart', panStart);
+      this.chartHammer.off('panmove', panMove);
+      this.chartHammer.off('panend', panEnd);
+
       this.updateTaskDate(barInfo);
     };
 
-    chartHammer.on('panstart', panStart);
-    chartHammer.on('panmove', panMove);
-    chartHammer.on('panend', panEnd);
+    this.chartHammer.on('panstart', panStart);
+    this.chartHammer.on('panmove', panMove);
+    this.chartHammer.on('panend', panEnd);
   }
 
   @action

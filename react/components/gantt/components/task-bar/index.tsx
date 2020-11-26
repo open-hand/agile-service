@@ -3,7 +3,6 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import classNames from 'classnames';
-import Hammer from 'react-hammerjs';
 import dayjs from 'dayjs';
 import Context from '../../context';
 import styles from './index.less';
@@ -14,13 +13,6 @@ interface TaskBarProps {
   data: Gantt.Bar
 }
 const height = 8;
-const options = {
-  recognizers: {
-    tap: {
-      time: 10,
-    },
-  },
-};
 const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
   e.stopPropagation();
 };
@@ -42,18 +34,12 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
   const handleBarPressUp = useCallback(() => {
     store.shadowGestureBarPressUp();
   }, [store]);
-  const handleLeftPress = useCallback((event: HammerInput) => {
+  const handleLeftDown = useCallback((event: React.MouseEvent) => {
     store.shadowGesturePress(event, 'left', data);
   }, [data, store]);
-  const handleLeftPressUp = useCallback(() => {
-    store.shadowGesturePressUp();
-  }, [store]);
-  const handleRightPress = useCallback((event: HammerInput) => {
+  const handleRightDown = useCallback((event: React.MouseEvent) => {
     store.shadowGesturePress(event, 'right', data);
   }, [data, store]);
-  const handleRightPressUp = useCallback(() => {
-    store.shadowGesturePressUp();
-  }, [store]);
   const themeColor = useMemo(() => {
     if (translateX + width >= dayjs().valueOf() / store.pxUnitAmp) {
       return ['#95DDFF', '#64C7FE'];
@@ -95,18 +81,18 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
                 </svg>
               </div>
             )}
-            <Hammer onPress={handleLeftPress} onPressUp={handleLeftPressUp}>
-              <div
-                className={classNames(styles['resize-handle'], styles.left)}
-                style={{ left: -14 }}
-              />
-            </Hammer>
-            <Hammer onPress={handleRightPress} onPressUp={handleRightPressUp}>
-              <div
-                className={classNames(styles['resize-handle'], styles.right)}
-                style={{ left: width + 2 }}
-              />
-            </Hammer>
+            <div
+              role="none"
+              onMouseDown={handleLeftDown}
+              className={classNames(styles['resize-handle'], styles.left)}
+              style={{ left: -14 }}
+            />
+            <div
+              role="none"
+              onMouseDown={handleRightDown}
+              className={classNames(styles['resize-handle'], styles.right)}
+              style={{ left: width + 2 }}
+            />
             <div className={classNames(styles['resize-bg'], styles.compact)} style={{ width: width + 30, left: -14 }} />
           </>
         )}
