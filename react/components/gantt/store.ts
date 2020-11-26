@@ -561,7 +561,6 @@ class GanttStore {
 
   @computed get getBarList(): Gantt.Bar[] {
     const { pxUnitAmp, data } = this;
-    console.log('re', data.length);
     const minStamp = 11 * pxUnitAmp;
     const height = 8;
     const baseTop = 14;

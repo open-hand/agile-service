@@ -32,7 +32,7 @@ const Chart: React.FC = () => {
     <div
       ref={chartRef}
       className={styles.chart}
-      // onWheel={store.handleWheel}
+      onWheel={store.handleWheel}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
