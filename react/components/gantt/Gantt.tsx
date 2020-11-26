@@ -12,6 +12,7 @@ import ScrollIndicator from './components/scroll-indicator';
 import SelectionIndicator from './components/selection-indicator';
 import TimeAxisScaleSelect from './components/time-axis-scale-select';
 import TimeIndicator from './components/time-indicator';
+import ScrollBar from './components/scroll-bar';
 import Chart from './components/chart';
 import styles from './Gantt.less';
 import { Gantt } from './types';
@@ -57,6 +58,7 @@ const GanttComponent: React.FC<GanttProps> = ({ data, columns }) => {
         <Divider />
         <TimeIndicator />
         <TimeAxisScaleSelect />
+        <ScrollBar />
       </Body>
     </Context.Provider>
   );

@@ -145,6 +145,30 @@ class GanttStore {
   }
 
   @action
+  initDragScrollHammer(element: HTMLElement) {
+    const hammer = new Hammer(element);
+    let { translateX } = this;
+
+    const panStart = () => {
+      this.scrolling = true;
+      translateX = this.translateX;
+    };
+
+    const panMove = (event: HammerInput) => {
+      this.translateX = translateX - event.deltaX;
+    };
+
+    const panEnd = (event: HammerInput) => {
+      this.scrolling = false;
+      this.translateX = translateX - event.deltaX;
+    };
+
+    hammer.on('panstart', panStart);
+    hammer.on('panmove', panMove);
+    hammer.on('panend', panEnd);
+  }
+
+  @action
   setChartHammer(chartHammer: HammerManager) {
     this.chartHammer = chartHammer;
   }
@@ -690,6 +714,7 @@ class GanttStore {
   // 虚拟滚动
   @computed get getVisibleRows() {
     const visibleHeight = this.bodyClientHeight;
+    // 多渲染几个，减少空白
     const visibleRowCount = Math.ceil(visibleHeight / ROW_HEIGHT) + 10;
 
     const start = Math.max(Math.ceil(this.scrollTop / ROW_HEIGHT) - 5, 0);

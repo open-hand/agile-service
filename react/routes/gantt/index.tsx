@@ -4,34 +4,56 @@ import { observer } from 'mobx-react-lite';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import Gantt from '@/components/gantt';
+import GanttComponent from '@/components/gantt';
 import { ganttApi } from '@/api';
 import UserHead from '@/components/UserHead';
+import { Gantt } from '@/components/gantt/types';
 
+function test(data: any) {
+  const map = new Map<string, any>();
+  const result: any[] = [];
+  data.forEach((item: any) => {
+    if (!item.parentId) {
+      result.push(item);
+    } else {
+      const parent = map.get(String(item.parentId));
+      if (parent) {
+        if (!parent.children) {
+          parent.children = [];
+        }
+        parent.children.push(item);
+      }
+    }
+    map.set(item.issueId, item);
+  });
+  console.log(result);
+  return result;
+}
+const tableColumns = [{
+  width: 214,
+  name: 'summary',
+  label: '名称',
+},
+{
+  width: 100,
+  name: 'assignee',
+  label: '经办人',
+  // @ts-ignore
+  render: (record) => <UserHead user={record.assignee} />,
+},
+{
+  width: 100,
+  name: 'estimatedStartTime',
+  label: '预计开始时间',
+},
+{
+  width: 100,
+  name: 'estimatedEndTime',
+  label: '预计结束时间',
+}];
 const GanttPage: React.FC = () => {
-  const [data, setData] = useState([]);
-  const [columns, setColumns] = useState([{
-    width: 214,
-    name: 'summary',
-    label: '名称',
-  },
-  {
-    width: 100,
-    name: 'assignee',
-    label: '经办人',
-    // @ts-ignore
-    render: (record) => <UserHead user={record.assignee} />,
-  },
-  {
-    width: 100,
-    name: 'estimatedStartTime',
-    label: '预计开始时间',
-  },
-  {
-    width: 100,
-    name: 'estimatedEndTime',
-    label: '预计结束时间',
-  }]);
+  const [data, setData] = useState<any[]>([]);
+  const [columns, setColumns] = useState<Gantt.Column[]>([]);
   useEffect(() => {
     (async () => {
       const [headers, res] = await Promise.all([
@@ -43,11 +65,12 @@ const GanttPage: React.FC = () => {
       //   name: h.fieldCode,
       //   label: h.name,
       // })));
-      setData(res.map((r: any) => ({
+      setColumns(tableColumns);
+      setData(test(res.map((r: any) => ({
         ...r,
         startDate: r.estimatedStartTime || '',
         endDate: r.estimatedEndTime || '',
-      })));
+      }))));
     })();
   }, []);
   return (
@@ -66,7 +89,7 @@ const GanttPage: React.FC = () => {
         flexDirection: 'column',
       }}
       >
-        {columns.length > 0 && <Gantt data={data} columns={columns} />}
+        {columns.length > 0 && <GanttComponent data={data} columns={columns} />}
       </Content>
     </Page>
   );

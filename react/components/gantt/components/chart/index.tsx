@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import Hammer from 'hammerjs';
 import DragPresent from '../drag-present';
 import BarList from '../bar-list';
+import Today from '../today';
 import Context from '../../context';
 import styles from './index.less';
 
@@ -26,6 +27,7 @@ const Chart: React.FC = () => {
     if (chartRef.current) {
       const chartHammer = new Hammer(chartRef.current);
       store.setChartHammer(chartHammer);
+      store.initDragScrollHammer(chartRef.current);
     }
   }, [store]);
   return (
@@ -71,6 +73,7 @@ const Chart: React.FC = () => {
       </svg>
       <div className={styles['render-chunk']} style={{ height: bodyScrollHeight, transform: `translateX(-${translateX}px` }}>
         <BarList />
+        <Today />
       </div>
     </div>
   );
