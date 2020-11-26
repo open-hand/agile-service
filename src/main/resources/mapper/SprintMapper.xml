@@ -934,4 +934,125 @@
         order by sprint_id
     </select>
 
+    <select id="queryAssigneeIssueBySprintIds" resultType="io.choerodon.agile.infra.dto.AssigneeIssueDTO">
+        SELECT
+        cc.sprint_id,
+        cc.assignee_id,
+        cc.total_story_points,
+        cc.total_remaining_time,
+        cc.issue_count,
+        bb.remaining_story_points,
+        bb.remaining_time,
+        bb.remaining_issue_count
+        FROM
+        (
+            SELECT
+                a.sprint_id,
+                a.assignee_id,
+                SUM( a.story_points ) AS total_story_points,
+                SUM( a.remaining_time ) AS total_remaining_time,
+                COUNT( 1 ) AS issue_count
+            FROM
+            (
+                SELECT
+                    aisr.sprint_id,
+                    CASE WHEN
+                    ai.assignee_id IS NULL THEN 0 ELSE ai.assignee_id
+                    END AS assignee_id,
+                    ai.story_points,
+                    ai.remaining_time
+                FROM
+                agile_issue ai,
+                agile_issue_sprint_rel aisr
+                WHERE
+                aisr.issue_id = ai.issue_id
+                AND aisr.project_id = #{projectId}
+                AND aisr.sprint_id in
+                <foreach collection="sprintIds" item="sprintId" open="(" close=")" separator=",">
+                    #{sprintId}
+                </foreach>
+            ) a
+                GROUP BY
+                a.sprint_id,a.assignee_id
+            ) cc
+        LEFT JOIN (
+        SELECT
+            a2.sprint_id,
+            a2.assignee_id,
+            SUM( a2.story_points ) AS remaining_story_points,
+            SUM( a2.remaining_time ) AS remaining_time,
+            COUNT( 1 ) AS remaining_issue_count
+        FROM
+        (
+            SELECT
+                aisr.sprint_id,
+                CASE WHEN
+                ai2.assignee_id IS NULL THEN 0 ELSE ai2.assignee_id
+                END AS assignee_id,
+                ai2.story_points,
+                ai2.remaining_time
+            FROM
+            agile_issue ai2,
+            agile_issue_sprint_rel aisr
+            WHERE
+            aisr.issue_id = ai2.issue_id
+            AND aisr.project_id = #{projectId}
+            AND aisr.sprint_id in
+            <foreach collection="sprintIds" item="sprintId" open="(" close=")" separator=",">
+                #{sprintId}
+            </foreach>
+            AND ai2.status_id IN ( SELECT ais.status_id FROM agile_issue_status ais WHERE ais.project_id = #{projectId} AND ais.is_completed != 1 )
+        ) a2
+        GROUP BY
+        a2.sprint_id,a2.assignee_id
+        ) bb ON cc.sprint_id = bb.sprint_id and cc.assignee_id = bb.assignee_id
+        order by cc.sprint_id,cc.assignee_id
+    </select>
+
+    <select id="queryStoryPointProgress" resultType="io.choerodon.agile.api.vo.SprintSearchVO">
+       select
+          ai1.sprint_id as id,
+          SUM(case when ais.category_code = 'todo' then ai1.story_points  else 0 end) as todoStoryPoint,
+          SUM(case when ais.category_code = 'doing' then ai1.story_points else 0 end) as doingStoryPoint,
+          SUM(case when ais.category_code = 'done' then ai1.story_points else 0 end) as doneStoryPoint
+       from (
+          select ai.issue_id,ai.status_id,aisr.sprint_id,ai.story_points from agile_issue ai
+          JOIN agile_issue_sprint_rel aisr on aisr.project_id = ai.project_id and aisr.issue_id = ai.issue_id
+          where ai.project_id = #{projectId}
+          and ai.type_code = 'story'
+          and ai.story_points is not null
+          and aisr.sprint_id in
+          <foreach collection="sprintIds" item="sprintId" open="(" close=")" separator="," >
+              #{sprintId}
+          </foreach>
+       ) ai1
+       LEFT JOIN agile_issue_status ais on ais.project_id = #{projectId} and ais.status_id = ai1.status_id
+       group by ai1.sprint_id
+    </select>
+
+    <select id="queryOutIssueId" resultType="java.lang.Long">
+        select ai.issue_id from agile_issue ai
+        where ai.project_id = #{projectId}
+        <if test="sprintId != 0">
+            AND EXISTS (
+                select
+                    1
+                from agile_issue_sprint_rel aisr
+                where aisr.project_id = #{projectId}
+                and aisr.sprint_id = #{sprintId}
+                and aisr.issue_id = ai.issue_id
+                )
+        </if>
+        <if test="sprintId == 0">
+            AND NOT EXISTS (
+                select
+                1
+                from agile_issue_sprint_rel aisr
+                where aisr.project_id = #{projectId}
+                and aisr.issue_id = ai.issue_id
+            )
+        </if>
+        order by ai.rank desc limit 1
+    </select>
+
 </mapper>

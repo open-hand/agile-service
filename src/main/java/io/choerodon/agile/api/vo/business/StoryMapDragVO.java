@@ -25,6 +25,15 @@ public class StoryMapDragVO {
     @Encrypt(ignoreValue = {"0"})
     private Long versionId;
 
+    @ApiModelProperty(value = "要关联的冲刺Id")
+    @Encrypt(ignoreValue = {"0"})
+    private Long sprintId;
+
+    @ApiModelProperty(value = "问题id列表，移动到冲刺，配合sprintId使用")
+    @Encrypt(ignoreValue = {"0"})
+    private List<Long> sprintIssueIds;
+
+
     @ApiModelProperty(value = "问题id列表，移动到史诗，配合epicId使用")
     @Encrypt
     private List<Long> epicIssueIds;
@@ -90,6 +99,22 @@ public class StoryMapDragVO {
 
     public void setVersionIssueRelVOList(List<VersionIssueRelVO> versionIssueRelVOList) {
         this.versionIssueRelVOList = versionIssueRelVOList;
+    }
+
+    public Long getSprintId() {
+        return sprintId;
+    }
+
+    public void setSprintId(Long sprintId) {
+        this.sprintId = sprintId;
+    }
+
+    public List<Long> getSprintIssueIds() {
+        return sprintIssueIds;
+    }
+
+    public void setSprintIssueIds(List<Long> sprintIssueIds) {
+        this.sprintIssueIds = sprintIssueIds;
     }
 
     public List<VersionIssueRelVO> getVersionIssueRelVOList() {

@@ -92,7 +92,6 @@
         IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) as ai_issue_num,
         ai.summary as ai_summary,
         ai.epic_id as ai_epic_id,
---         ai.feature_id as ai_feature_id,
         version_info.version_id as version_version_id,
         version_info.name as version_name,
         asp.sprint_id as sprint_id,
@@ -182,6 +181,8 @@
                 </if>
             </if>
         </if>
+        <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVO"/>
+        <include refid="io.choerodon.agile.infra.mapper.IssueMapper.filterSqlAndAssigneeIds"/>
         order by ai.issue_id
     </select>
 
