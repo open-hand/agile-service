@@ -6,44 +6,54 @@ import {
 } from '@choerodon/boot';
 import Gantt from '@/components/gantt';
 
-const dataList = Array(10).fill(0).map((_, i) => ({
-  executor: null,
-  content: `冲刺二${i}`,
-  startDate: '2020-10-01',
-  endDate: '2020-12-31',
-  collapsed: false,
-  // children: [
-  //   {
-  //     executor: null,
-  //     content: '我的子任务',
-  //     startDate: '2020-11-01 08:02:02',
-  //     endDate: '2020-11-02',
-  //     collapsed: false,
-  //     children: [],
-  //   },
-  //   {
-  //     executor: null,
-  //     content: '我的子任务2',
-  //     startDate: '2020-11-01 08:02:02',
-  //     endDate: '2020-11-02',
-  //     collapsed: false,
-  //     children: [{
-  //       executor: null,
-  //       content: '我的子任务3',
-  //       startDate: null,
-  //       endDate: null,
-  //       collapsed: false,
-  //     },
-  //     {
-  //       executor: null,
-  //       content: '我的子任务4',
-  //       startDate: '2020-08-18',
-  //       endDate: '2020-08-19',
-  //       collapsed: false,
-  //     }],
-  //   },
-  // ],
-}));
+const dataList = [
+  {
+    executor: null,
+    content: 'SCRUM敏捷实践集',
+    startDate: '2020-11-01 08:02:02',
+    endDate: '2020-11-02',
+    collapsed: false,
+    children: [],
+  },
+  {
+    executor: null,
+    content: '风险的哈哈哈',
+    startDate: null,
+    endDate: null,
+    collapsed: false,
+    children: [
+      {
+        executor: null,
+        content: '我的子任务',
+        startDate: '2020-11-01 08:02:02',
+        endDate: '2020-11-02',
+        collapsed: false,
+        children: [],
+      },
+      {
+        executor: null,
+        content: '我的子任务2',
+        startDate: '2020-11-01 08:02:02',
+        endDate: '2020-11-02',
+        collapsed: false,
+        children: [{
+          executor: null,
+          content: '我的子任务3',
+          startDate: null,
+          endDate: null,
+          collapsed: false,
+        },
+        {
+          executor: null,
+          content: '我的子任务4',
+          startDate: '2020-08-18',
+          endDate: '2020-08-19',
+          collapsed: false,
+        }],
+      },
+    ],
+  },
+];
 const dataColumns = [
   {
     width: 214,
