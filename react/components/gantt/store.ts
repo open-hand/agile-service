@@ -690,6 +690,7 @@ class GanttStore {
   // 虚拟滚动
   @computed get getVisibleRows() {
     const visibleHeight = this.bodyClientHeight;
+    // 多渲染几个，减少空白
     const visibleRowCount = Math.ceil(visibleHeight / ROW_HEIGHT) + 10;
 
     const start = Math.max(Math.ceil(this.scrollTop / ROW_HEIGHT) - 5, 0);
