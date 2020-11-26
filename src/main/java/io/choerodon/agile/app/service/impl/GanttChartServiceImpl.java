@@ -1,14 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.GanttChartVO;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.UserWithGanttChartVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.BoardAssembler;
-import io.choerodon.agile.app.service.GanttChartService;
-import io.choerodon.agile.app.service.IssueService;
-import io.choerodon.agile.app.service.IssueTypeService;
-import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -38,6 +32,8 @@ public class GanttChartServiceImpl implements GanttChartService {
     private IssueTypeService issueTypeService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private StatusService statusService;
 
     @Override
     public List<GanttChartVO> listByTask(Long projectId, SearchVO searchVO) {
@@ -105,6 +101,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     private List<GanttChartVO> buildFromIssueDto(List<IssueDTO> issueList, Long projectId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
         Set<Long> userIds = new HashSet<>();
         for (IssueDTO dto : issueList) {
             if (!ObjectUtils.isEmpty(dto.getReporterId()) && !Objects.equals(0L, dto.getReporterId())) {
@@ -121,6 +118,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             result.add(ganttChart);
             BeanUtils.copyProperties(i, ganttChart);
             ganttChart.setIssueTypeVO(issueTypeDTOMap.get(i.getIssueTypeId()));
+            ganttChart.setStatusVO(statusMap.get(i.getStatusId()));
             Long assigneeId = i.getAssigneeId();
             if (!ObjectUtils.isEmpty(assigneeId)) {
                 UserMessageDTO assignee = usersMap.get(assigneeId);

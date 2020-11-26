@@ -35,7 +35,18 @@ public class GanttChartVO {
 
     private IssueTypeVO issueTypeVO;
 
+    @Encrypt
     private Long parentId;
+
+    private StatusVO statusVO;
+
+    public StatusVO getStatusVO() {
+        return statusVO;
+    }
+
+    public void setStatusVO(StatusVO statusVO) {
+        this.statusVO = statusVO;
+    }
 
     public Long getParentId() {
         return parentId;
