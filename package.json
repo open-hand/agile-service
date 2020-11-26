@@ -8,6 +8,7 @@
     "lib"
   ],
   "dependencies": {
+    "@babel/helper-regex": "^7.10.5",
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
     "ahooks": "^2.7.1",
@@ -45,10 +46,10 @@
     "wolfy87-eventemitter": "^5.2.8"
   },
   "devDependencies": {
-    "@choerodon/testmanager": "^0.24.0",
     "@choerodon/boot": "0.23.0-test",
     "@choerodon/compiler": "^0.0.1",
     "@choerodon/master": "^0.24.0",
+    "@choerodon/testmanager": "^0.24.0",
     "@types/classnames": "^2.2.10",
     "@types/echarts": "^4.6.5",
     "@types/file-saver": "^2.0.1",

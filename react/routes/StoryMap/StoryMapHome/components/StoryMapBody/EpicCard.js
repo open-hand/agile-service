@@ -40,19 +40,9 @@ class EpicCard extends Component {
       epic, subIssueNum, onMouseDown,
     } = this.props;
     const {
-      issueId, epicName, issueNum, programId, totalCount, completedCount, statusVO = {
-        canDelete: null,
-        code: null,
-        completed: null,
-        defaultStatus: null,
-        description: null,
-        id: '88255195225804800',
-        name: '已评审',
-        objectVersionNumber: 1,
-        organizationId: 7,
-        type: 'done',
-      },
+      issueId, epicName, statusVO, issueProgressVO,
     } = epic;
+    const { completedCount, totalCount } = issueProgressVO || {};
     const { selectedIssueMap } = StoryMapStore;
     return (
       <Card
@@ -65,7 +55,7 @@ class EpicCard extends Component {
         {
           epicName && (
           <div className="progress" style={{ marginLeft: -CardPaddingLeft }}>
-            <div className="completed" style={{ width: totalCount ? 3 / 5 * CardWidth : 0 }} />
+            <div className="completed" style={{ width: totalCount ? completedCount / totalCount * CardWidth : 0 }} />
           </div>
           )
         }
@@ -83,7 +73,7 @@ class EpicCard extends Component {
               <Tooltip mouseEnterDelay={0.5} title={`状态： ${statusVO && statusVO.name}`}>
                 <div>
                   <StatusTag
-                    data={statusVO}
+                    data={statusVO || {}}
                   />
                 </div>
               </Tooltip>

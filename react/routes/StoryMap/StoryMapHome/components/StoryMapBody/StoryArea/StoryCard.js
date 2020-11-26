@@ -102,22 +102,12 @@ class StoryCard extends Component {
 
   render() {
     const {
-      story, connectDragSource, index, rowIndex,
+      story, index, rowIndex,
     } = this.props;
     const {
-      issueId, issueNum, summary, completedCount = 1, totalCount = 4, statusVO = {
-        canDelete: null,
-        code: null,
-        completed: null,
-        defaultStatus: null,
-        description: null,
-        id: '88255195225804800',
-        name: '已评审',
-        objectVersionNumber: 1,
-        organizationId: 7,
-        type: 'done',
-      },
+      issueId, summary, statusVO = {}, issueProgressVO,
     } = story;
+    const { completedCount, totalCount } = issueProgressVO || {};
     const { selectedIssueMap } = StoryMapStore;
     return (
       <Card
@@ -145,7 +135,7 @@ class StoryCard extends Component {
             <Tooltip mouseEnterDelay={0.5} title={`状态： ${statusVO && statusVO.name}`}>
               <div>
                 <StatusTag
-                  data={statusVO}
+                  data={statusVO || {}}
                 />
               </div>
             </Tooltip>
