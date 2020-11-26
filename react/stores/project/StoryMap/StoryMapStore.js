@@ -7,7 +7,7 @@ import {
 } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import {
-  storyMapApi, versionApi, issueTypeApi, priorityApi,
+  storyMapApi, versionApi, issueTypeApi, priorityApi, sprintApi,
 } from '@/api';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
@@ -51,6 +51,8 @@ class StoryMapStore {
 
   @observable versionList = [];
 
+  @observable sprintList = [];
+
   @observable resizing = false;
 
   @observable storyMapData = {};
@@ -87,6 +89,7 @@ class StoryMapStore {
       },
     };
     this.versionList = [];
+    this.sprintList = [];
     this.selectedIssueMap.clear();
     this.hiddenColumnNoStory = false;
     this.foldCompletedEpic = false;
@@ -105,7 +108,7 @@ class StoryMapStore {
 
   getStoryMap = (firstLoad) => {
     this.setLoading(true);
-    Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
+    Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprints()]).then(([storyMapData, issueTypes, versionList, prioritys, sprintList]) => {
       let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
       const { featureWithoutEpic = [] } = storyMapData;
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');
@@ -119,6 +122,7 @@ class StoryMapStore {
       this.issueTypes = issueTypes;
       this.prioritys = prioritys;
       this.initVersionList(versionList);
+      this.initSprintList(sprintList);
       this.initStoryData(newStoryMapData, firstLoad);
       this.setLoading(false);
     }).catch((error) => {
@@ -213,6 +217,19 @@ class StoryMapStore {
     });
   }
 
+  @action initSprintList(sprintList) {
+    this.sprintList = sprintList.concat([{
+      sprintId: 'none',
+      sprintName: '未计划部分',
+    }]).map((sprint) => {
+      const oldSprint = find(this.sprintList, { sprintId: sprint.sprintId });
+      if (oldSprint) {
+        return { ...sprint, storyNum: 0, collapse: oldSprint.collapse };
+      }
+      return { ...sprint, storyNum: 0, collapse: false };
+    });
+  }
+
   getInitVersions() {
     const versionObj = {};
     this.versionList.forEach((version) => {
@@ -221,23 +238,12 @@ class StoryMapStore {
     return versionObj;
   }
 
-  @action afterCreateVersion(version) {
-    this.setCreateModalVisible(false);
-    // const index = this.versionList.length - 1;
-    this.versionList.unshift({
-      ...version,
-      storyNum: 0,
-      collapse: false,
+  getInitSprints() {
+    const sprintObj = {};
+    this.sprintList.forEach((sprint) => {
+      sprintObj[sprint.sprintId] = [];
     });
-    Object.keys(this.storyData).forEach((epicId) => {
-      const epic = this.storyData[epicId];
-      Object.keys(epic.feature).forEach((featureId) => {
-        const feature = epic.feature[featureId];
-        set(feature.version, {
-          [version.versionId]: [],
-        });
-      });
-    });
+    return sprintObj;
   }
 
   @action initStoryData(storyMapData, firstLoad) {
@@ -256,6 +262,7 @@ class StoryMapStore {
           none: {
             storys: [],
             version: this.getInitVersions(),
+            sprint: this.getInitSprints(),
             width: epicWithWidth ? epicWithWidth.width : 1,
           },
         } : {},
@@ -268,6 +275,7 @@ class StoryMapStore {
           targetFeature[feature.issueId] = {
             storys: [],
             version: this.getInitVersions(),
+            sprint: this.getInitSprints(),
             width: featureWithWidth ? featureWithWidth.width : 1,
           };
         }
@@ -302,7 +310,9 @@ class StoryMapStore {
   }
 
   @action addStoryToStoryData(story, storyData = this.storyData) {
-    const { epicId, featureId, storyMapVersionDTOList } = story;
+    const {
+      epicId, featureId, storyMapVersionDTOList, storyMapSprintDTOList = [],
+    } = story;
     if (epicId !== undefined && storyData[epicId] && storyData.epicId === story.epicData) {
       const targetEpic = storyData[epicId];
       const { feature, storys } = targetEpic;
@@ -329,6 +339,19 @@ class StoryMapStore {
           this.addStoryNumToVersion(versionId);
           targetFeature.version[versionId].push(story);
         });
+        // 冲刺
+        if (storyMapSprintDTOList.length === 0) {
+          this.addStoryNumToSprint('none');
+          if (!targetFeature.sprint.none) {
+            targetFeature.sprint.none = [];
+          }
+          targetFeature.sprint.none.push(story);
+        }
+        storyMapSprintDTOList.forEach((sprint) => {
+          const { sprintId } = sprint;
+          this.addStoryNumToSprint(sprintId);
+          targetFeature.sprint[sprintId].push(story);
+        });
       }
 
       // }
@@ -342,6 +365,13 @@ class StoryMapStore {
     }
   }
 
+  @action addStoryNumToSprint(sprintId) {
+    const sprint = find(this.sprintList, { sprintId });
+    if (sprint) {
+      sprint.storyNum += 1;
+    }
+  }
+
   @action collapse(epicId) {
     this.storyData[epicId].collapse = !this.storyData[epicId].collapse;
   }
@@ -351,6 +381,11 @@ class StoryMapStore {
       case 'version': {
         const targetVersion = find(this.versionList, { versionId: id });
         targetVersion.collapse = !targetVersion.collapse;
+        break;
+      }
+      case 'sprint': {
+        const targetSprint = find(this.sprintList, { sprintId: id });
+        targetSprint.collapse = !targetSprint.collapse;
         break;
       }
       default: break;
@@ -391,6 +426,7 @@ class StoryMapStore {
           none: {
             storys: [],
             version: this.getInitVersions(),
+            sprint: this.getInitSprints(),
             width: 1,
           },
         },
@@ -410,6 +446,7 @@ class StoryMapStore {
           none: {
             storys: [],
             version: this.getInitVersions(),
+            sprint: this.getInitSprints(),
             width: 1,
           },
         },
@@ -437,6 +474,7 @@ class StoryMapStore {
       [newFeature.issueId]: {
         storys: [],
         version: this.getInitVersions(),
+        sprint: this.getInitSprints(),
         width: 1,
       },
     });
@@ -449,9 +487,11 @@ class StoryMapStore {
     this.updateMiniMap();
   }
 
-  @action removeStoryFromStoryMap(story, targetVersionId) {
-    const { epicId, featureId, storyMapVersionDTOList } = story;
-    if (targetVersionId) {
+  @action removeStoryFromStoryMap(story, targetVersionOrSprintId) {
+    const {
+      epicId, featureId, storyMapVersionDTOList, storyMapSprintDTOList,
+    } = story;
+    if (targetVersionOrSprintId || targetVersionOrSprintId) {
       this.getStoryMap();
       this.setClickIssue();
       // if (this.storyData[epicId]) {
@@ -488,6 +528,24 @@ class StoryMapStore {
           remove(targetFeature.version[versionId], { issueId: story.issueId });
           const v = find(this.versionList, { versionId });
           if (version) {
+            v.storyNum -= 1;
+          }
+        });
+        // 从各个冲刺移除
+        if (storyMapSprintDTOList.length === 0) {
+          if (targetFeature.sprint.none) {
+            remove(targetFeature.sprint.none, { issueId: story.issueId });
+            const sprint = find(this.sprintList, { sprintId: 'none' });
+            if (sprint) {
+              sprint.storyNum -= 1;
+            }
+          }
+        }
+        storyMapSprintDTOList.forEach((sprint) => {
+          const { sprintId } = sprint;
+          remove(targetFeature.sprint[sprintId], { issueId: story.issueId });
+          const v = find(this.sprintList, { sprintId });
+          if (sprint) {
             v.storyNum -= 1;
           }
         });
@@ -638,6 +696,12 @@ class StoryMapStore {
 
   @computed get getDefaultPriority() {
     return find(this.prioritys, { default: true }) || this.prioritys[0];
+  }
+
+  @observable tableOverflow = false;
+
+  @action setTableOverflow({ tableWidth = 0, containerWidth = 0 }) {
+    this.tableOverflow = tableWidth > containerWidth;
   }
 }
 

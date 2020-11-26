@@ -11,13 +11,9 @@ import './StoryCell.less';
 
 @observer
 class StoryCell extends Component {
-  handleCreateVersionClick = () => {
-    StoryMapStore.setCreateModalVisible(true);
-  }
-
   getStorys = (targetFeature) => {
     const { swimLine } = StoryMapStore;
-    const { version } = this.props;
+    const { version, sprint } = this.props;
     try {
       switch (swimLine) {
         case 'none': {
@@ -25,6 +21,9 @@ class StoryCell extends Component {
         }
         case 'version': {
           return targetFeature.version[version.versionId];
+        }
+        case 'sprint': {
+          return targetFeature.sprint[sprint.sprintId];
         }
         default: return [];
       }

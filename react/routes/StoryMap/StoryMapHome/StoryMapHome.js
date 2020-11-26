@@ -15,17 +15,16 @@ import { observer } from 'mobx-react-lite';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import HeaderLine from '@/components/HeaderLine';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import Minimap from '../../../components/MiniMap';
+import Minimap from './components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from './emptyStory.svg';
 import Loading from '../../../components/Loading';
 import StoryMapBody from './components/StoryMapBody';
 import SideIssueList from './components/SideIssueList';
 import SwitchSwimLine from './components/SwitchSwimLine';
-import CreateVersion from './components/CreateVersion';
 import CreateEpicModal from './components/CreateEpicModal';
 import IssueDetail from './components/IssueDetail';
-import StoryFilterDropDown from './components/StoryFilterDropDown';
+import ListenSize from './components/ListenSize';
 import StoryMapStore from '../../../stores/project/StoryMap/StoryMapStore';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
@@ -65,10 +64,6 @@ const StoryMapHome = observer(() => {
 
   const handleCreateEpicClick = () => {
     StoryMapStore.setCreateEpicModalVisible(true);
-  };
-  const handleCreateVersion = (version) => {
-    StoryMapStore.afterCreateVersion(version);
-    document.getElementsByClassName('minimap-container-scroll')[0].scrollTop = 0;
   };
 
   const handleCreateEpic = (newEpic) => {
@@ -167,8 +162,7 @@ const StoryMapHome = observer(() => {
         </Button>
         <HeaderLine />
         <SwitchSwimLine />
-        <StoryFilterDropDown />
-        <CheckBox name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>
+        <CheckBox style={{ margin: '0 20px' }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>
         <CheckBox name="foldCompletedEpic" checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起史诗已完成列</CheckBox>
       </Header>
       <Breadcrumb />
@@ -177,12 +171,11 @@ const StoryMapHome = observer(() => {
       }}
       >
         <Loading loading={loading} />
+        <ListenSize />
         {!isEmpty ? (
-          <>
-            <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
-              <StoryMapBody />
-            </Minimap>
-          </>
+          <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
+            <StoryMapBody />
+          </Minimap>
         ) : (
           loading ? null : (
               // eslint-disable-next-line react/jsx-indent
@@ -199,7 +192,6 @@ const StoryMapHome = observer(() => {
           )
         )}
         <SideIssueList handleClickOutside={handleCloseIssueList} eventTypes={['click']} />
-        <CreateVersion onOk={handleCreateVersion} />
         <CreateEpicModal onOk={handleCreateEpic} />
         <IssueDetail refresh={handleIssueRefresh} isFullScreen={isFullScreen} onChangeWidth={setIssueWidth} />
       </Content>

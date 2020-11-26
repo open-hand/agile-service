@@ -12,21 +12,21 @@ class SwitchSwimLine extends Component {
   }
 
   render() {
-    const { loading, storyMapData, swimLine } = StoryMapStore;
+    const { swimLine } = StoryMapStore;
     const swimlanMenu = (
       <Menu onClick={this.handleSwitchSwinLine} selectable defaultSelectedKeys={[swimLine]}>
         <Menu.Item key="none">无泳道</Menu.Item>
         <Menu.Item key="version">版本泳道</Menu.Item>
-        {/* <Menu.Item key="sprint">冲刺泳道</Menu.Item> */}
+        <Menu.Item key="sprint">冲刺泳道</Menu.Item>
       </Menu>
     );
-    return (     
+    return (
       <Dropdown
         overlay={swimlanMenu}
         trigger={['click']}
         overlayClassName="modeMenu"
         placement="bottomCenter"
-        getPopupContainer={triggerNode => triggerNode}
+        getPopupContainer={(triggerNode) => triggerNode}
       >
         <Button style={{ color: 'black' }}>
           {swimLine === 'none' && '无泳道'}
@@ -34,7 +34,7 @@ class SwitchSwimLine extends Component {
           {swimLine === 'sprint' && '冲刺泳道'}
           <Icon type="arrow_drop_down" />
         </Button>
-      </Dropdown> 
+      </Dropdown>
     );
   }
 }

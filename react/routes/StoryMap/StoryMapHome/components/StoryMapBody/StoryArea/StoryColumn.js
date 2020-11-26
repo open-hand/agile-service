@@ -14,14 +14,18 @@ class StoryColumn extends Component {
     StoryMapStore.afterCreateStory(newStory);
   }
 
-
   render() {
-    // console.log('render');
     const {
-      storys, width, epic, feature, version, connectDropTarget, isOver, rowIndex,
+      storys, width, epic, feature, version, sprint, connectDropTarget, isOver, rowIndex,
     } = this.props;
-    // 只有未规划和规划中的可以创建
-    const canCreate = version ? (!version.statusCode || version.statusCode === 'version_planning') : true;
+    // 只有未规划、版本规划中、冲刺未完成的可以创建
+    let canCreate = true;
+    if (version) {
+      canCreate = !version.statusCode || version.statusCode === 'version_planning';
+    }
+    if (sprint) {
+      canCreate = !sprint.statusCode || sprint.statusCode !== 'closed';
+    }
     return (
       <Column
         width={width}
@@ -29,8 +33,8 @@ class StoryColumn extends Component {
         style={{ background: isOver ? 'rgb(240,240,240)' : 'white', position: 'relative' }}
       >
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-          {storys && storys.map((story, index) => <StoryCard index={index} rowIndex={rowIndex} story={story} version={version} />)}
-          {!StoryMapStore.isFullScreen && canCreate && <CreateStory onCreate={this.handleCreateStory} epic={epic} feature={feature} version={version} />}
+          {storys && storys.map((story, index) => <StoryCard index={index} rowIndex={rowIndex} story={story} sprint={sprint} version={version} />)}
+          {!StoryMapStore.isFullScreen && canCreate && <CreateStory onCreate={this.handleCreateStory} epic={epic} feature={feature} sprint={sprint} version={version} />}
         </div>
       </Column>
     );
@@ -44,7 +48,9 @@ StoryColumn.propTypes = {
 export default DropTarget(
   'story',
   {
-    drop: props => ({ epic: props.epic, feature: props.feature, version: props.version }),
+    drop: (props) => ({
+      epic: props.epic, feature: props.feature, version: props.version, sprint: props.sprint,
+    }),
   },
   (connect, monitor) => ({
     connectDropTarget: connect.dropTarget(),

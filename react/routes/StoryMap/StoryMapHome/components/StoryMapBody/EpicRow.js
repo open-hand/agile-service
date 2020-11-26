@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import EpicCell from './EpicCell';
 
@@ -13,7 +11,7 @@ class EpicRow extends Component {
     return (
       <tr style={{ height: 60 }}>
         {epicList.map((epic, index) => (
-          <EpicCell 
+          <EpicCell
             lastCollapse={index > 0 ? storyData[epicList[index - 1].issueId] && storyData[epicList[index - 1].issueId].collapse : false}
             isLastEpic={index === epicList.length - 1}
             index={index}
