@@ -1,4 +1,6 @@
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, {
+  useMemo, useRef, useEffect, useContext,
+} from 'react';
 import { useSize } from 'ahooks';
 import Context from './context';
 import GanttStore from './store';
@@ -14,17 +16,25 @@ import Chart from './components/chart';
 import styles from './Gantt.less';
 import { Gantt } from './types';
 
+const Body:React.FC = ({ children }) => {
+  const { store } = useContext(Context);
+  const ref = useRef<HTMLDivElement>(null);
+  const size = useSize(ref);
+  useEffect(() => {
+    store.syncSize(size);
+  }, [size, store]);
+  return (
+    <div className={styles.body} ref={ref}>
+      {children}
+    </div>
+  );
+};
 interface GanttProps {
   data: Gantt.Item[]
   columns: Gantt.Column[]
 }
 const GanttComponent: React.FC<GanttProps> = ({ data, columns }) => {
   const store = useMemo(() => new GanttStore(), []);
-  const ref = useRef<HTMLDivElement>(null);
-  const size = useSize(ref);
-  useEffect(() => {
-    store.syncSize(size);
-  }, [size, store]);
   useEffect(() => {
     store.setData(data);
   }, [data, store]);
@@ -33,13 +43,13 @@ const GanttComponent: React.FC<GanttProps> = ({ data, columns }) => {
   }, [columns, store]);
   return (
     <Context.Provider value={{ store }}>
-      <div className={styles.body} ref={ref}>
+      <Body>
         {/* <ScrollIndicator /> */}
         <header>
           <TableHeader />
           <TimeAxis />
         </header>
-        <main ref={store.mainElementRef}>
+        <main ref={store.mainElementRef} onScroll={store.handleScroll}>
           <SelectionIndicator />
           <TableBody />
           <Chart />
@@ -47,7 +57,7 @@ const GanttComponent: React.FC<GanttProps> = ({ data, columns }) => {
         <Divider />
         <TimeIndicator />
         <TimeAxisScaleSelect />
-      </div>
+      </Body>
     </Context.Provider>
   );
 };

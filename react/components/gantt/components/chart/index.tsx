@@ -21,10 +21,16 @@ const Chart: React.FC = () => {
   const handleMouseLeave = useCallback(() => {
     store.handleMouseLeave();
   }, [store]);
-
+  const chartRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (chartRef.current) {
+      const chartHammer = new Hammer(chartRef.current);
+      store.setChartHammer(chartHammer);
+    }
+  }, [store]);
   return (
     <div
-      ref={chartElementRef}
+      ref={chartRef}
       className={styles.chart}
       onWheel={store.handleWheel}
       onMouseMove={handleMouseMove}

@@ -46,23 +46,20 @@ export namespace Gantt {
     _parent?: Bar
   }
   interface Item {
-    executor: null,
-    content: string,
     startDate: string | null,
     endDate: string | null,
     collapsed: boolean,
     children?: Item[],
+    borderColor?: string
+    backgroundColor?: string
     _parent?: Bar
     _depth?: number
     _index?: number
   }
   interface Column {
     width: number,
-    minWidth?: number,
     name: string,
     label: string,
-    visible: boolean,
-    keepVisible: boolean,
-    sortable: boolean,
+    render?: (item: Item) => React.ReactNode
   }
 }

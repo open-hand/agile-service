@@ -5,7 +5,7 @@ import { createRef } from 'react';
 import {
   observable, computed, action, toJS,
 } from 'mobx';
-import { debounce, find } from 'lodash';
+import { debounce, find, throttle } from 'lodash';
 import dayjs, { Dayjs } from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
@@ -15,7 +15,7 @@ import isLeapYear from 'dayjs/plugin/isLeapYear';
 import weekday from 'dayjs/plugin/weekday';
 import { Gantt } from './types';
 import {
-  ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE, MIN_VIEW_RATE,
+  ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE, MIN_VIEW_RATE, TOP_PADDING,
 } from './constants';
 import {
   flattenDeep, getDragSideShrink, getDragSideExpand, getMoveStep,
@@ -56,7 +56,6 @@ export const viewTypeList: Gantt.SightConfig[] = [
     value: 115200,
   },
 ];
-const topTap = 4;
 const startDate = '2020-10-01';
 class GanttStore {
   constructor() {
@@ -82,6 +81,8 @@ class GanttStore {
   @observable columns: Gantt.Column[] = [];
 
   @observable scrolling = false;
+
+  @observable scrollTop = 0;
 
   @observable collapse = false;
 
@@ -111,6 +112,8 @@ class GanttStore {
 
   mainElementRef = createRef<HTMLDivElement>();
 
+  chartHammer: HammerManager;
+
   chartElementRef = createRef<HTMLDivElement>();
 
   isPointerPress: boolean = false;
@@ -126,7 +129,7 @@ class GanttStore {
       this.tableWidth = 0;
       this.viewWidth = this.width - this.tableWidth;
     } else {
-      this.initSize();
+      this.initWidth();
     }
   }
 
@@ -141,6 +144,11 @@ class GanttStore {
     this.columns = columns;
   }
 
+  @action
+  setChartHammer(chartHammer: HammerManager) {
+    this.chartHammer = chartHammer;
+  }
+
   @action syncSize(size: {
     width?: number;
     height?: number;
@@ -149,13 +157,16 @@ class GanttStore {
       return;
     }
     const { width, height } = size;
-    this.width = width;
-    this.height = height;
-    // this.viewHeight = height - HEADER_HEIGHT;
-    this.initSize();
+    if (this.height !== height) {
+      this.height = height;
+    }
+    if (this.width !== width) {
+      this.width = width;
+      this.initWidth();
+    }
   }
 
-  @action initSize() {
+  @action initWidth() {
     this.tableWidth = this.columns.reduce((width, item) => width + item.width, 0);
     this.viewWidth = this.height - this.tableWidth;
     // 表盘宽度不能小于总宽度38%
@@ -215,7 +226,7 @@ class GanttStore {
 
   // 内容区滚动区域域高度
   @computed get bodyScrollHeight() {
-    let height = this.getBarList.length * ROW_HEIGHT + topTap;
+    let height = this.getBarList.length * ROW_HEIGHT + TOP_PADDING;
     if (height < this.bodyClientHeight) {
       height = this.bodyClientHeight;
     }
@@ -517,6 +528,7 @@ class GanttStore {
   @action
   handleInvalidBarUp(barInfo: Gantt.Bar) {
     barInfo.invalidDateRange = false;
+    this.updateTaskDate(barInfo);
     this.handleDragEnd();
     // TODO 修改日期逻辑
   }
@@ -613,40 +625,6 @@ class GanttStore {
       return map[this.sightConfig.type]();
     };
 
-    // // 设置阴影位置
-    // const setShadowShow = (left: number, width: number, isShow: boolean) => {
-    //   this.dragPresentVisible = isShow;
-    //   this.shadowGestBarLeft = left;
-    //   this.shadowGestBarRight = left + width;
-    //   this.dragPresentX = left;
-    //   this.dragPresentWidth = width;
-    // };
-
-    // // 设置任务
-    // const setInvalidTaskBar = (barInfo: Gantt.Bar, left: number, width: number) => {
-    //   barInfo.translateX = left;
-    //   barInfo.width = width;
-    //   barInfo.invalidDateRange = false;
-
-    //   this.dragPresentVisible = true;
-    //   this.shadowGestBarLeft = left + width;
-    //   this.shadowGestBarRight = 0;
-
-    //   this.dragPresentX = left;
-    //   this.dragPresentWidth = width;
-
-    //   barInfo.stepGesture = 'moving';
-    // };
-    /**
-     * 根据选中行高度 显示对应条状工具条
-     */
-    // const getHovered = (top: number, selectionIndicatorTop: number) => {
-    //   const baseTop = top - (top % ROW_HEIGHT);
-    //   const isShow = (selectionIndicatorTop >= baseTop && selectionIndicatorTop <= baseTop + ROW_HEIGHT);
-
-    //   return isShow;
-    // };
-
     // 进行展开扁平
     return observable(flattenDeep(data).map((item: any, index) => {
       let startAmp = dayjs(item.startDate || 0).valueOf();
@@ -700,6 +678,27 @@ class GanttStore {
     }, 100);
   }
 
+  handleScroll = (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const { scrollTop } = event.currentTarget;
+    this.scrollY(scrollTop);
+  }
+
+  scrollY = throttle((scrollTop: number) => {
+    this.scrollTop = scrollTop;
+  }, 100)
+
+  // 虚拟滚动
+  @computed get getVisibleRows() {
+    const visibleHeight = this.bodyClientHeight;
+    const visibleRowCount = Math.ceil(visibleHeight / ROW_HEIGHT) + 10;
+
+    const start = Math.max(Math.ceil(this.scrollTop / ROW_HEIGHT) - 5, 0);
+    return {
+      start,
+      count: visibleRowCount,
+    };
+  }
+
   handleMouseMove = debounce((event) => {
     if (!this.isPointerPress) {
       this.showSelectionBar(event);
@@ -717,10 +716,10 @@ class GanttStore {
     // 内容区高度
     const contentHeight = this.getBarList.length * ROW_HEIGHT;
     const offsetY = event.clientY - top + scrollTop;
-    if (offsetY - contentHeight > topTap) {
+    if (offsetY - contentHeight > TOP_PADDING) {
       this.showSelectionIndicator = false;
     } else {
-      const top = Math.floor((offsetY - topTap) / ROW_HEIGHT) * ROW_HEIGHT + 4;
+      const top = Math.floor((offsetY - TOP_PADDING) / ROW_HEIGHT) * ROW_HEIGHT + TOP_PADDING;
       this.showSelectionIndicator = true;
       this.selectionIndicatorTop = top;
     }
@@ -735,9 +734,9 @@ class GanttStore {
   @action
   handleDragStart(barInfo: Gantt.Bar, type: Gantt.MoveType) {
     this.dragging = barInfo;
-    this.gestureKeyPress = true;
     this.draggingType = type;
     barInfo.stepGesture = 'start';
+    this.isPointerPress = true;
   }
 
   @action
@@ -746,8 +745,8 @@ class GanttStore {
       this.dragging.stepGesture = 'end';
       this.dragging = null;
     }
-    this.gestureKeyPress = false;
     this.draggingType = null;
+    this.isPointerPress = false;
   }
 
   /**
@@ -757,22 +756,19 @@ class GanttStore {
    * @param barInfo
    */
   @action
-  shadowGesturePress(event: HammerInput, type: Gantt.MoveType, barInfo: Gantt.Bar) {
-    if (!this.chartElementRef.current) {
-      return;
-    }
+  shadowGesturePress(event: React.MouseEvent, type: Gantt.MoveType, barInfo: Gantt.Bar) {
     const { width } = barInfo;
-    this.isPointerPress = true;
     const isLeft = type === 'left';
+    // @ts-ignore
     const { left, right } = event.target.getBoundingClientRect();
     const startX = isLeft ? right : left;
     // 移动右边，以左侧为基准
     const basePointerX = isLeft ? startX + width : startX - width;
 
-    const chartHammer = new Hammer(this.chartElementRef.current);
     // let baseX: number;
     // const old = { ...barInfo };
     const panStart = (event: HammerInput) => {
+      this.gestureKeyPress = true;
       // baseX = event.center.x;
       this.handleDragStart(barInfo, type);
     };
@@ -789,15 +785,17 @@ class GanttStore {
       this.updateDraggingBarPosition(event, barInfo, type, basePointerX);
     };
     const panEnd = () => {
-      this.isPointerPress = false;
+      this.gestureKeyPress = false;
       this.handleDragEnd();
-      chartHammer.destroy();
+      this.chartHammer.off('panstart', panStart);
+      this.chartHammer.off('panmove', panMove);
+      this.chartHammer.off('panend', panEnd);
       this.updateTaskDate(barInfo);
     };
 
-    chartHammer.on('panstart', panStart);
-    chartHammer.on('panmove', panMove);
-    chartHammer.on('panend', panEnd);
+    this.chartHammer.on('panstart', panStart);
+    this.chartHammer.on('panmove', panMove);
+    this.chartHammer.on('panend', panEnd);
   }
 
   shadowGesturePressUp() {
@@ -809,16 +807,12 @@ class GanttStore {
    * @param barInfo
    */
   shadowGestureBarPress(barInfo: Gantt.Bar) {
-    if (!this.chartElementRef.current) {
-      return;
-    }
-    const chartHammer = new Hammer(this.chartElementRef.current);
     const step = CELL_UNIT;
     let { translateX } = barInfo;
 
     let startX = 0;
     let pointerX = 0;
-
+    this.gestureKeyPress = true;
     const layoutShadow = action((translateX: number) => {
       barInfo.translateX = translateX;
     });
@@ -837,6 +831,7 @@ class GanttStore {
     });
     const panStart = (event: HammerInput) => {
       startX = event.center.x;
+      this.gestureKeyPress = true;
       this.handleDragStart(barInfo, 'move');
     };
 
@@ -845,14 +840,18 @@ class GanttStore {
     };
 
     const panEnd = () => {
+      this.gestureKeyPress = false;
       this.handleDragEnd();
-      chartHammer.destroy();
+      this.chartHammer.off('panstart', panStart);
+      this.chartHammer.off('panmove', panMove);
+      this.chartHammer.off('panend', panEnd);
+
       this.updateTaskDate(barInfo);
     };
 
-    chartHammer.on('panstart', panStart);
-    chartHammer.on('panmove', panMove);
-    chartHammer.on('panend', panEnd);
+    this.chartHammer.on('panstart', panStart);
+    this.chartHammer.on('panmove', panMove);
+    this.chartHammer.on('panend', panEnd);
   }
 
   @action
@@ -865,13 +864,10 @@ class GanttStore {
      */
   @action
   updateTaskDate(barInfo: Gantt.Bar) {
-    const { translateX } = barInfo;
-    const { width } = barInfo;
-    const { task } = barInfo;
-
-    task.startDate = String(dayjs(translateX * this.pxUnitAmp));
-    task.endDate = String(dayjs((translateX + width) * this.pxUnitAmp));
+    const { translateX, width, task } = barInfo;
     // TODO:更新之后的后续处理
+    task.startDate = dayjs(translateX * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
+    task.endDate = dayjs((translateX + width) * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
   }
 
   @action
