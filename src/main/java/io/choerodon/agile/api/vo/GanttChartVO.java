@@ -4,6 +4,7 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author superlee
@@ -39,6 +40,16 @@ public class GanttChartVO {
     private Long parentId;
 
     private StatusVO statusVO;
+
+    private List<GanttChartVO> children;
+
+    public List<GanttChartVO> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<GanttChartVO> children) {
+        this.children = children;
+    }
 
     public StatusVO getStatusVO() {
         return statusVO;

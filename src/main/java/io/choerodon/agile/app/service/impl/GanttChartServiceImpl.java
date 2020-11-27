@@ -66,7 +66,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     }
 
     @Override
-    public List<UserWithGanttChartVO> listByUser(Long projectId, SearchVO searchVO) {
+    public List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO) {
         List<GanttChartVO> ganttChartList = listByTask(projectId, searchVO);
         List<GanttChartVO> unassigned = new ArrayList<>();
         Map<String, List<GanttChartVO>> map = new HashMap<>();
@@ -84,17 +84,43 @@ public class GanttChartServiceImpl implements GanttChartService {
                 ganttCharts.add(g);
             }
         });
-        List<UserWithGanttChartVO> result = new ArrayList<>();
+        List<GanttChartTreeVO> result = new ArrayList<>();
         map.forEach((k, v) -> {
-            UserWithGanttChartVO userWithGanttChartVO = new UserWithGanttChartVO();
-            userWithGanttChartVO.setName(k);
-            userWithGanttChartVO.setGanttChartList(v);
-            result.add(userWithGanttChartVO);
+            GanttChartTreeVO ganttChartTreeVO = new GanttChartTreeVO();
+            ganttChartTreeVO.setSummary(k);
+            ganttChartTreeVO.setGroup(true);
+            ganttChartTreeVO.setChildren(toTree(v));
+            result.add(ganttChartTreeVO);
         });
-        UserWithGanttChartVO unassignedVO = new UserWithGanttChartVO();
-        unassignedVO.setName("未分配");
-        unassignedVO.setGanttChartList(unassigned);
+        GanttChartTreeVO unassignedVO = new GanttChartTreeVO();
+        unassignedVO.setSummary("未分配");
+        unassignedVO.setGroup(true);
+        unassignedVO.setChildren(toTree(unassigned));
         result.add(unassignedVO);
+        return result;
+    }
+
+    private List<GanttChartVO> toTree(List<GanttChartVO> ganttChartList) {
+        List<GanttChartVO> result = new ArrayList<>();
+        Map<Long, GanttChartVO> map = new HashMap<>();
+        List<GanttChartVO> rootNodes = new ArrayList<>();
+        ganttChartList.forEach(g -> map.put(g.getIssueId(), g));
+        ganttChartList.forEach(g -> {
+            Long parentId = g.getParentId();
+            if (parentId == null
+                    || map.get(parentId) == null) {
+                rootNodes.add(g);
+            } else {
+                GanttChartVO parent = map.get(parentId);
+                List<GanttChartVO> children = parent.getChildren();
+                if (children == null) {
+                    children = new ArrayList<>();
+                    parent.setChildren(children);
+                }
+                children.add(g);
+            }
+        });
+        result.addAll(rootNodes);
         return result;
     }
 
