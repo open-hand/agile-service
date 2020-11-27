@@ -39,7 +39,7 @@ export namespace Gantt {
     invalidDateRange: boolean
     dateTextFormat: (startX: number) => string
     task: Item
-    _isGroup?: boolean
+    _group?: boolean
     _collapsed: boolean
     _depth: number
     _index?: number
@@ -50,7 +50,7 @@ export namespace Gantt {
     startDate: string | null,
     endDate: string | null,
     collapsed: boolean,
-    isGroup?: boolean
+    group?: boolean
     children?: Item[],
     borderColor?: string
     backgroundColor?: string

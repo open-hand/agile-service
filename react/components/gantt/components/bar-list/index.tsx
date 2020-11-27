@@ -14,7 +14,7 @@ const BarList: React.FC = () => {
     <>
       {barList.slice(start, start + count).map((bar, index) => {
         const rowIndex = index + start;
-        if (bar._isGroup) {
+        if (bar._group) {
           return (
             <GroupBar
           // eslint-disable-next-line react/no-array-index-key

@@ -688,7 +688,7 @@ class GanttStore {
         // setShadowShow,
         // setInvalidTaskBar,
         // getHovered,
-        _isGroup: item.isGroup,
+        _group: item.group,
         _collapsed: item.collapsed, // 是否折叠
         _depth: item._depth, // 表示子节点深度
         _index: item._index, // 任务下标位置
