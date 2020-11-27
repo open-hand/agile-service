@@ -8,33 +8,23 @@ import GanttComponent from '@/components/gantt';
 import { ganttApi, issueApi } from '@/api';
 import UserHead from '@/components/UserHead';
 import { Gantt } from '@/components/gantt/types';
+import TypeTag from '@/components/TypeTag';
+import Loading from '@/components/Loading';
 import Search from './components/search';
 
-function test(data: any) {
-  const map = new Map<string, any>();
-  const result: any[] = [];
-  data.forEach((item: any) => {
-    map.set(item.issueId, item);
-  });
-  data.forEach((item: any) => {
-    if (!item.parentId) {
-      result.push(item);
-    } else {
-      const parent = map.get(String(item.parentId));
-      if (parent) {
-        if (!parent.children) {
-          parent.children = [];
-        }
-        parent.children.push(item);
-      }
-    }
-  });
-  return result;
-}
 const tableColumns = [{
   width: 214,
   name: 'summary',
   label: '名称',
+  // @ts-ignore
+  render: (record) => (
+    !record.group ? (
+      <span>
+        <TypeTag data={record.issueTypeVO} />
+        {record.summary}
+      </span>
+    ) : record.summary
+  ),
 },
 {
   width: 100,
@@ -56,8 +46,10 @@ const tableColumns = [{
 const GanttPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     (async () => {
+      setLoading(true);
       const [headers, res] = await Promise.all([
         ganttApi.loadHeaders(),
         ganttApi.loadByUser(),
@@ -69,6 +61,7 @@ const GanttPage: React.FC = () => {
       // })));
       setColumns(tableColumns);
       setData(res);
+      setLoading(false);
     })();
   }, []);
   const handleUpdate = useCallback(async (issue: Gantt.Item, startDate: string, endDate: string) => {
@@ -103,7 +96,7 @@ const GanttPage: React.FC = () => {
       }}
       >
         <Search />
-        {columns.length > 0 && (
+        {loading ? <Loading loading /> : columns.length > 0 && (
           <GanttComponent
             data={data}
             columns={columns}
