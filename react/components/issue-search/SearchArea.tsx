@@ -1,6 +1,6 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, useCallback } from 'react';
 import {
-  Select, Icon,
+  Select, Icon, Tooltip,
 } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import { find, remove } from 'lodash';
@@ -16,6 +16,7 @@ import SummaryField from './custom-fields/field/SummaryField';
 import CustomFields from './custom-fields';
 import { getSelectStyle } from './custom-fields/utils';
 import useQuickFilters from './useQuickFilters';
+import ListenSearchSize from './ListenSearchSize';
 
 const { AppState } = stores;
 const { Option, OptGroup } = Select;
@@ -26,7 +27,9 @@ const SearchArea: React.FC = () => {
     store, onClear, urlFilter, onClickSaveFilter,
   } = useContext(IssueSearchContext);
   const { data: quickFilters } = useQuickFilters();
-  const { isHasFilter, chosenFields } = store;
+  const {
+    isHasFilter, chosenFields, overflowLine, folded,
+  } = store;
   const myFilters = store.getMyFilters;
   const selectedQuickFilterIds = chosenFields.get('quickFilterIds') ? toJS(chosenFields.get('quickFilterIds')?.value) : undefined;
   const getSelectedQuickFilters = () => (selectedQuickFilterIds || []).map((id: string) => {
@@ -66,6 +69,9 @@ const SearchArea: React.FC = () => {
         } else {
           store.handleFilterChange(key, value);
         }
+      }
+      if (folded) {
+        store.setFolded(false);
       }
     } else if (type === 'commonly') {
       if (id === 'onlyMe') {
@@ -141,6 +147,10 @@ const SearchArea: React.FC = () => {
     }
     store.handleFilterChange('issueIds', []);
   };
+  const handleClickExpandFilter = useCallback(() => {
+    store.setFolded(!folded);
+  }, [folded, store]);
+
   const myFilterSelectValue = getMyFilterSelectValue();
   const hasSummaryField = useMemo(() => store.getAllFields.some((f) => f.code === 'contents'), [store.getAllFields]);
   const hasQuickFilterField = useMemo(() => store.getAllFields.some((f) => f.code === 'quickFilterIds'), [store.getAllFields]);
@@ -198,24 +208,37 @@ const SearchArea: React.FC = () => {
         </CustomFields>
       </div>
       <div className={`${prefixCls}-search-right`}>
-        {isHasFilter && (
+        {isHasFilter && !folded && (
           <Button
             onClick={reset}
             funcType={'flat' as FuncType}
-            color={'blue' as ButtonColor}
+            className={`${prefixCls}-search-right-btn`}
           >
             重置
           </Button>
         )}
-        {onClickSaveFilter && !findSameFilter() && isHasFilter && (
+        {onClickSaveFilter && !findSameFilter() && isHasFilter && !folded && (
           <Button
             onClick={onClickSaveFilter}
-            funcType={'raised' as FuncType}
-            color={'blue' as ButtonColor}
+            funcType={'flat' as FuncType}
+            className={`${prefixCls}-search-right-btn ${prefixCls}-search-right-saveBtn`}
           >
             保存筛选
           </Button>
         )}
+        {
+          (overflowLine || folded) && (
+            <Tooltip title={folded ? '展开筛选' : '折叠筛选'}>
+              <Button
+                onClick={handleClickExpandFilter}
+                funcType={'flat' as FuncType}
+                className={`${prefixCls}-search-right-btn`}
+              >
+                <Icon type={folded ? 'expand_more' : 'expand_less'} />
+              </Button>
+            </Tooltip>
+          )
+        }
       </div>
     </>
   );
@@ -233,7 +256,13 @@ const SearchArea: React.FC = () => {
     </>
   );
   return (
-    <div className={`${prefixCls}-search`}>
+    <div
+      className={`${prefixCls}-search`}
+      style={{
+        height: folded ? 46 : 'unset',
+      }}
+    >
+      <ListenSearchSize />
       {urlFilter ? renderUrlFilter() : renderSearch()}
     </div>
   );
