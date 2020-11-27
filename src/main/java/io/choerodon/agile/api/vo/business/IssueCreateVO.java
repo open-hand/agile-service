@@ -128,6 +128,16 @@ public class IssueCreateVO {
 
     private String environment;
 
+    private List<Long> programVersionIds;
+
+    public List<Long> getProgramVersionIds() {
+        return programVersionIds;
+    }
+
+    public void setProgramVersionIds(List<Long> programVersionIds) {
+        this.programVersionIds = programVersionIds;
+    }
+
     public Long getMainResponsibleId() {
         return mainResponsibleId;
     }

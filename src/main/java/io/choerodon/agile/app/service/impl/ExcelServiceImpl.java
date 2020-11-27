@@ -1427,10 +1427,10 @@ public class ExcelServiceImpl implements ExcelService {
                 validateAndSetMainResponsible(row, col, issueCreateVO, errorRowColMap, excelColumn);
                 break;
             case FieldCode.TEST_RESPONSIBLE:
-                validateAndSetTestResponsible(row, col, issueCreateVO, errorRowColMap, excelColumn);
+                validateAndSetTestResponsible(row, col, issueCreateVO, errorRowColMap, excelColumn, issueType);
                 break;
             case FieldCode.ENVIRONMENT:
-                validateAndSetEnvironment(row, col, issueCreateVO, errorRowColMap, excelColumn);
+                validateAndSetEnvironment(row, col, issueCreateVO, errorRowColMap, excelColumn, issueType);
                 break;
             default:
                 break;
@@ -1441,10 +1441,11 @@ public class ExcelServiceImpl implements ExcelService {
                                            Integer col,
                                            IssueCreateVO issueCreateVO,
                                            Map<Integer, List<Integer>> errorRowColMap,
-                                           ExcelColumnVO excelColumnVO) {
+                                           ExcelColumnVO excelColumnVO,
+                                           String issueType) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
-        if (!isCellEmpty(cell)) {
+        if (!isCellEmpty(cell) && BUG_CN.equals(issueType)) {
             String value = cell.toString();
             List<String> values = excelColumnVO.getPredefinedValues();
             if (!values.contains(value)) {
@@ -1460,10 +1461,11 @@ public class ExcelServiceImpl implements ExcelService {
                                                Integer col,
                                                IssueCreateVO issueCreateVO,
                                                Map<Integer, List<Integer>> errorRowColMap,
-                                               ExcelColumnVO excelColumnVO) {
+                                               ExcelColumnVO excelColumnVO,
+                                               String issueType) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
-        if (!isCellEmpty(cell)) {
+        if (!isCellEmpty(cell) && BUG_CN.equals(issueType)) {
             String value = cell.toString();
             List<String> values = excelColumnVO.getPredefinedValues();
             Map<String, Long> map = excelColumnVO.getValueIdMap();
