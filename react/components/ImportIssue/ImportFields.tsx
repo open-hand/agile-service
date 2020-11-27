@@ -48,6 +48,9 @@ const projectSystemFields = [
   { code: 'label', title: '标签' },
   { code: 'estimatedStartTime', title: '预计开始时间' },
   { code: 'estimatedEndTime', title: '预计结束时间' },
+  { code: 'mainResponsible', title: '主要负责人' },
+  { code: 'testResponsible', title: '测试负责人' },
+  { code: 'environment', title: '环境' },
 ];
 
 const subProjectSystemFields = [
@@ -68,6 +71,9 @@ const subProjectSystemFields = [
   { code: 'label', title: '标签' },
   { code: 'estimatedStartTime', title: '预计开始时间' },
   { code: 'estimatedEndTime', title: '预计结束时间' },
+  { code: 'mainResponsible', title: '主要负责人' },
+  { code: 'testResponsible', title: '测试负责人' },
+  { code: 'environment', title: '环境' },
 ];
 
 interface Props {
