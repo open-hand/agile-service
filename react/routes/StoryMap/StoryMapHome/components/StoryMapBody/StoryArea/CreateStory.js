@@ -54,10 +54,8 @@ class CreateStory extends Component {
             relationType: 'fix',
           }],
         } : {},
-        ...swimLine === 'sprint' && version.sprintId !== 'none' ? {
-          sprintIssueRelVOList: [{
-            ...sprint,
-          }],
+        ...swimLine === 'sprint' && sprint.sprintId !== 'none' ? {
+          sprintId: sprint.sprintId,
         } : {},
       };
       if (!await checkCanQuickCreate(storyType.typeCode)) {
@@ -80,7 +78,7 @@ class CreateStory extends Component {
           value: '',
         });
         const { versionIssueRelVOList } = res;
-        onCreate({ ...res, storyMapVersionDTOList: versionIssueRelVOList });
+        onCreate({ ...res, storyMapVersionDTOList: versionIssueRelVOList, storyMapSprintList: [{ sprintId: sprint.sprintId !== 'none' ? sprint.sprintId : 0 }] });
         fieldApi.quickCreateDefault(res.issueId, dto);
       }).finally(() => {
         this.canAdd = true;

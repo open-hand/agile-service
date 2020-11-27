@@ -28,7 +28,7 @@ class StoryRow extends Component {
     const firstNotCollapseIndex = this.getFirstNotCollapseIndex();
     const { storyCollapse, rowIndex, sprint } = this.props;
     const {
-      statusCode, planning, todoStoryPoint, doingStoryPoint, doneStoryPoint,
+      statusCode, todoStoryPoint, doingStoryPoint, doneStoryPoint,
     } = sprint || {};
     return (
       <>
