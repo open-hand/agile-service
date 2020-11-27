@@ -199,5 +199,17 @@ class IssueSearchStore {
   @action setBatchAction = (data: IBatchAction) => {
     this.batchAction = data;
   }
+
+  @observable overflowLine: boolean = false;
+
+  @action setOverflowLine = (data: boolean) => {
+    this.overflowLine = data;
+  }
+
+  @observable folded: boolean = false;
+
+  @action setFolded = (data: boolean) => {
+    this.folded = data;
+  }
 }
 export default IssueSearchStore;
