@@ -49,10 +49,10 @@ class StoryCard extends Component {
   handlRemoveStory = (e) => {
     e.stopPropagation();
     const { story, version, sprint } = this.props;
-    const { issueId, storyMapVersionDTOList, storyMapSprintDTOList } = story;
+    const { issueId, storyMapVersionDTOList, storyMapSprintList } = story;
     const { swimLine } = StoryMapStore;
     // 未规划或无泳道
-    if (swimLine === 'none' || storyMapVersionDTOList.length === 0 || storyMapSprintDTOList.length === 0) {
+    if (swimLine === 'none' || storyMapVersionDTOList.length === 0 || storyMapSprintList.length === 0) {
       const storyMapDragVO = {
         // 问题id列表，移动到版本，配合versionId使用
         // versionIssueIds: [],
@@ -82,12 +82,8 @@ class StoryCard extends Component {
     } else if (swimLine === 'sprint') {
       const storyMapDragVO = {
         sprintId: 0,
-        sprintIssueRelVOList: [],
+        sprintIssueIds: [issueId],
       };
-      if (storyMapSprintDTOList.length > 0) {
-        const removeSprint = find(storyMapSprintDTOList, { sprintId: sprint.sprintId });
-        storyMapDragVO.sprintIssueRelVOList = [{ ...removeSprint, issueId }];
-      }
       storyMapApi.move(storyMapDragVO).then(() => {
         StoryMapStore.removeStoryFromStoryMap(story, sprint.sprintId);
         StoryMapStore.loadIssueList();
@@ -105,9 +101,8 @@ class StoryCard extends Component {
       story, index, rowIndex,
     } = this.props;
     const {
-      issueId, summary, statusVO = {}, issueProgressVO,
+      issueId, summary, statusVO = {},
     } = story;
-    const { completedCount, totalCount } = issueProgressVO || {};
     const { selectedIssueMap } = StoryMapStore;
     return (
       <Card
@@ -123,14 +118,14 @@ class StoryCard extends Component {
           </Tooltip>
         </div>
         <div className="bottom">
-          {
+          {/* {
             totalCount && (
               <div className="subTaskProgress">
                 <TypeTag data={{ icon: 'agile_subtask', colour: '#4D90FE' }} iconSize={24} />
                 <span className="completedCount">{`${completedCount}/${totalCount}`}</span>
               </div>
             )
-          }
+          } */}
           <div className="status">
             <Tooltip mouseEnterDelay={0.5} title={`状态： ${statusVO && statusVO.name}`}>
               <div>
@@ -171,7 +166,7 @@ export default DragSource(
       }
       const { story, version: sourceVersion, sprint: sourceSprint } = item;
       const {
-        issueId, epicId, storyMapVersionDTOList, storyMapSprintDTOList,
+        issueId, epicId, storyMapVersionDTOList, storyMapSprintList,
       } = story;
       const featureId = story.featureId || 'none';
       const {
@@ -191,16 +186,15 @@ export default DragSource(
         featureIssueIds: [],
         sprintIssueIds: [],
         sprintId: 0, // 要关联的版本id
-        sprintIssueRelVOList: [],
       };
-      // 史诗，特性，版本都不变时
+      // 史诗，特性，版本\冲刺都不变时
       if (epicId === targetEpicId && featureId === targetFeatureId) {
         if (StoryMapStore.swimLine === 'version') {
           if (find(storyMapVersionDTOList, { versionId: targetVersionId }) || (storyMapVersionDTOList.length === 0 && targetVersionId === 'none')) {
             return;
           }
         } else if (StoryMapStore.swimLine === 'sprint') {
-          if (find(storyMapSprintDTOList, { sprintId: targetSprintId }) || (storyMapSprintDTOList.length === 0 && targetSprintId === 'none')) {
+          if (find(storyMapSprintList, { sprintId: targetSprintId }) || (storyMapSprintList.length === 0 && targetSprintId === 'none')) {
             return;
           }
         } else if (StoryMapStore.swimLine === 'none') {
@@ -249,18 +243,20 @@ export default DragSource(
 
       // 对冲刺进行处理
       if (StoryMapStore.swimLine === 'sprint') {
+        console.log('sourceSprintId, targetSprintId：');
+        console.log(sourceSprint.sprintId, targetSprintId);
         // 在不同的冲刺移动
-        if (sourceSprint.sprintId !== targetSprintId) {
-          // 如果原先有冲刺，就移除离开的冲刺
-          if (storyMapSprintDTOList.length > 0) {
-            const removeSprint = find(storyMapSprintDTOList, { sprintId: sourceSprint.sprintId });
-            if (removeSprint) {
-              storyMapDragVO.sprintIssueRelVOList = [{ ...removeSprint, issueId }];
-            }
-          }
-        }
+        // if (sourceSprint.sprintId !== targetSprintId) {
+        //   // 如果原先有冲刺，就移除离开的冲刺
+        //   if (storyMapSprintList.length > 0) {
+        //     const removeSprint = find(storyMapSprintList, { sprintId: sourceSprint.sprintId });
+        //     if (removeSprint) {
+        //       storyMapDragVO.sprintIssueRelVOList = [{ ...removeSprint, issueId }];
+        //     }
+        //   }
+        // }
 
-        if (!find(storyMapSprintDTOList, { sprintId: targetSprintId })) {
+        if (!find(storyMapSprintList, { sprintId: targetSprintId })) {
           storyMapDragVO.sprintIssueIds = [issueId];
           // 拖到未规划
           if (targetSprintId === 'none') {

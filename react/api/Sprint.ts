@@ -324,6 +324,16 @@ class SprintApi extends Api<SprintApi> {
   addIssues(sprintId: number, moveCardsInfo: MoveIssueCardsInfo) {
     return axios.post(`${this.prefix}/issues/to_sprint/${sprintId}`, moveCardsInfo);
   }
+
+  loadSprintsWidthInfo() {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/story_map/sprint_info`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
 }
 
 const sprintApi = new SprintApi();

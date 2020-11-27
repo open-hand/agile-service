@@ -40,9 +40,8 @@ class EpicCard extends Component {
       epic, subIssueNum, onMouseDown,
     } = this.props;
     const {
-      issueId, epicName, statusVO, issueProgressVO,
+      issueId, epicName, statusVO,
     } = epic;
-    const { completedCount, totalCount } = issueProgressVO || {};
     const { selectedIssueMap } = StoryMapStore;
     return (
       <Card
@@ -52,13 +51,13 @@ class EpicCard extends Component {
         saveRef={this.saveRef}
         onMouseDown={onMouseDown}
       >
-        {
+        {/* {
           epicName && (
           <div className="progress" style={{ marginLeft: -CardPaddingLeft }}>
             <div className="completed" style={{ width: totalCount ? completedCount / totalCount * CardWidth : 0 }} />
           </div>
           )
-        }
+        } */}
         <div className="top">
           <div className="summary">
             <Tooltip title={`${epicName || '无史诗'}`} getPopupContainer={() => document.getElementsByClassName('minimap-container-scroll')[0]}>

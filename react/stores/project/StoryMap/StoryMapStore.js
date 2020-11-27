@@ -112,7 +112,7 @@ class StoryMapStore {
 
   getStoryMap = (firstLoad = false) => {
     this.setLoading(true);
-    Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprints()]).then(([storyMapData, issueTypes, versionList, prioritys, sprintList]) => {
+    Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprintsWidthInfo()]).then(([storyMapData, issueTypes, versionList, prioritys, sprintList]) => {
       let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
       const { featureWithoutEpic = [] } = storyMapData;
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');
@@ -308,7 +308,7 @@ class StoryMapStore {
 
   @action addStoryToStoryData(story, storyData = this.storyData) {
     const {
-      epicId, featureId, storyMapVersionDTOList, storyMapSprintDTOList = [],
+      epicId, featureId, storyMapVersionDTOList, storyMapSprintList,
     } = story;
     if (epicId !== undefined && storyData[epicId] && storyData.epicId === story.epicData) {
       const targetEpic = storyData[epicId];
@@ -336,19 +336,33 @@ class StoryMapStore {
           this.addStoryNumToVersion(versionId);
           targetFeature.version[versionId].push(story);
         });
+
         // 冲刺
-        if (storyMapSprintDTOList.length === 0) {
+        if (!storyMapSprintList && storyMapSprintList.length === 0) {
           this.addStoryNumToSprint('none');
           if (!targetFeature.sprint.none) {
             targetFeature.sprint.none = [];
           }
           targetFeature.sprint.none.push(story);
         }
-        storyMapSprintDTOList.forEach((sprint) => {
+        (storyMapSprintList || []).forEach((sprint) => {
           const { sprintId } = sprint;
           this.addStoryNumToSprint(sprintId);
-          targetFeature.sprint[sprintId].push(story);
+          if (sprintId) {
+            targetFeature.sprint[sprintId].push(story);
+          }
         });
+        // // 冲刺
+        // if (sprintId === 0) {
+        //   this.addStoryNumToSprint('none');
+        //   if (!targetFeature.sprint.none) {
+        //     targetFeature.sprint.none = [];
+        //   }
+        //   targetFeature.sprint.none.push(story);
+        // } else {
+        //   targetFeature.sprint[sprintId].push(story);
+        // }
+        // this.addStoryNumToSprint(sprintId);
       }
 
       // }
@@ -486,7 +500,7 @@ class StoryMapStore {
 
   @action removeStoryFromStoryMap(story, targetVersionOrSprintId) {
     const {
-      epicId, featureId, storyMapVersionDTOList, storyMapSprintDTOList,
+      epicId, featureId, storyMapVersionDTOList, storyMapSprintList,
     } = story;
     if (targetVersionOrSprintId || targetVersionOrSprintId) {
       this.getStoryMap();
@@ -529,7 +543,7 @@ class StoryMapStore {
           }
         });
         // 从各个冲刺移除
-        if (storyMapSprintDTOList.length === 0) {
+        if (storyMapSprintList.length === 0) {
           if (targetFeature.sprint.none) {
             remove(targetFeature.sprint.none, { issueId: story.issueId });
             const sprint = find(this.sprintList, { sprintId: 'none' });
@@ -538,7 +552,7 @@ class StoryMapStore {
             }
           }
         }
-        storyMapSprintDTOList.forEach((sprint) => {
+        storyMapSprintList.forEach((sprint) => {
           const { sprintId } = sprint;
           remove(targetFeature.sprint[sprintId], { issueId: story.issueId });
           const v = find(this.sprintList, { sprintId });

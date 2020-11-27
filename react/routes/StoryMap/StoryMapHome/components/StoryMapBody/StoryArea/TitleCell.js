@@ -35,20 +35,7 @@ class TitleCell extends Component {
       case 'sprint': {
         // console.log(toJS(sprint));
         const {
-          sprintId, sprintName, storyNum, statusCode, planning, assigneeIssues = [{
-            assigneeId: '=FrI7G0gdVFIwkkv1KqWcEapF-SWg1-_JQGrtR1P3sj4==',
-            assigneeLoginName: '16433',
-            assigneeName: '李楷文（16433）',
-            assigneeRealName: '李楷文',
-            imageUrl: 'https://minio.choerodon.com.cn/iam-service/file_37110ff0ff674617abd5ef0e5fb2d165_ualb20p2uus.jpg',
-            issueCount: 18,
-            remainingIssueCount: 17,
-            remainingStoryPoints: 29,
-            remainingTime: 72,
-            sprintId: '=DEFpolnfiElId2AFMRi9QfJHNNGnnVeHE7GNp7rtUx0==',
-            totalRemainingTime: 72,
-            totalStoryPoints: 29,
-          }],
+          sprintId, sprintName, storyNum, statusCode, planning, assigneeIssues,
         } = sprint;
         return (
           <>
@@ -67,7 +54,7 @@ class TitleCell extends Component {
               )
             }
             {
-              assigneeIssues && <SprintAssigneeInfo assignees={assigneeIssues} />
+              assigneeIssues && assigneeIssues.length && <SprintAssigneeInfo assignees={assigneeIssues} />
             }
           </>
         );
