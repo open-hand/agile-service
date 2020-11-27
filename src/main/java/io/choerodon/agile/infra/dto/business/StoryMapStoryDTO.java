@@ -36,8 +36,6 @@ public class StoryMapStoryDTO {
 
     private List<SprintNameVO> storyMapSprintList;
 
-    private IssueProgressVO issueProgressVO;
-
     public Long getIssueId() {
         return issueId;
     }
@@ -124,13 +122,5 @@ public class StoryMapStoryDTO {
 
     public void setStatusVO(StatusVO statusVO) {
         this.statusVO = statusVO;
-    }
-
-    public IssueProgressVO getIssueProgressVO() {
-        return issueProgressVO;
-    }
-
-    public void setIssueProgressVO(IssueProgressVO issueProgressVO) {
-        this.issueProgressVO = issueProgressVO;
     }
 }

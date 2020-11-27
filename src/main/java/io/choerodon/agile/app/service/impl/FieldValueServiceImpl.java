@@ -30,9 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static org.hzero.core.redis.RedisHelper.DATE_FORMAT;
 
 /**
  * @author shinan.chen
@@ -382,7 +386,11 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             case FieldType.TIME:
                 List<FieldValueDTO> dateFields = listMap.get(objectSchemeFieldDTO.getId());
                 if (!CollectionUtils.isEmpty(dateFields)) {
-                    value = dateFields.get(0).getDateValue();
+                    Date dateValue = dateFields.get(0).getDateValue();
+                    DateFormat dfff = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    if (dateValue != null) {
+                        value = dfff.format(dateValue);
+                    }
                 }
                 break;
             case FieldType.INPUT:

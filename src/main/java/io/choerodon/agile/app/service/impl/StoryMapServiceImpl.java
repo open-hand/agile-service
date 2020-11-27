@@ -108,23 +108,7 @@ public class StoryMapServiceImpl implements StoryMapService {
                 List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, epicIds, searchVO.getAdvancedSearchArgs());
                 storyMap.setEpics(epicWithInfoDTOList);
             }
-            List<EpicWithInfoDTO> epicWithInfoDTOList = storyMap.getEpics();
             List<StoryMapStoryDTO> storyMapStoryDTOS = storyMapMapper.selectStoryList(projectId, epicIds, searchVO,filterSql,searchVO.getAssigneeFilterIds());
-            // 查询故事的问题数
-            if (!CollectionUtils.isEmpty(storyMapStoryDTOS)) {
-                List<Long> resultStoryIds = storyMapStoryDTOS.stream().map(StoryMapStoryDTO::getIssueId).collect(Collectors.toList());
-                List<IssueProgressVO> storyCounts = storyMapMapper.countStoryProgress(projectId, resultStoryIds);
-                Map<Long, IssueProgressVO> progressVOMap = storyCounts.stream().collect(Collectors.toMap(IssueProgressVO::getId, Function.identity()));
-                for (StoryMapStoryDTO storyMapStoryDTO : storyMapStoryDTOS) {
-                    storyMapStoryDTO.setIssueProgressVO(progressVOMap.get(storyMapStoryDTO.getIssueId()));
-                }
-            }
-            // 查询史诗下的问题数
-            List<IssueProgressVO> epicCounts = storyMapMapper.countEpicProgress(projectId,epicIds);
-            Map<Long, IssueProgressVO> epicProgressVOMap = epicCounts.stream().collect(Collectors.toMap(IssueProgressVO::getId, Function.identity()));
-            for (EpicWithInfoDTO epicWithInfoDTO : epicWithInfoDTOList) {
-                epicWithInfoDTO.setIssueProgressVO(epicProgressVOMap.get(epicWithInfoDTO.getIssueId()));
-            }
             storyMap.setStoryList(!epicIds.isEmpty() ? storyMapStoryDTOS : new ArrayList<>());
         }
         storyMap.setStoryMapWidth(setStoryMapWidth(projectId));
@@ -212,7 +196,7 @@ public class StoryMapServiceImpl implements StoryMapService {
             moveIssueVO.setBefore(false);
             moveIssueVO.setRankIndex(false);
             Long outIssueId = sprintMapper.queryOutIssueId(projectId, sprintId);
-            moveIssueVO.setOutsetIssueId(outIssueId);
+            moveIssueVO.setOutsetIssueId(ObjectUtils.isEmpty(outIssueId) ? 0L : outIssueId);
             moveIssueVO.setRankIndex(false);
             issueService.batchIssueToSprint(projectId, sprintId, moveIssueVO);
         }
