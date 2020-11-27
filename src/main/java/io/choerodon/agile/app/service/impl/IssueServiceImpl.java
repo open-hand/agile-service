@@ -38,7 +38,6 @@ import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.hzero.boot.message.MessageClient;
 import org.hzero.core.base.AopProxy;
 import org.hzero.core.message.MessageAccessor;
 import org.modelmapper.ModelMapper;
@@ -46,7 +45,6 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -68,6 +66,7 @@ import java.util.stream.Stream;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
+
     @Autowired
     private IssueAccessDataService issueAccessDataService;
     @Autowired
@@ -178,7 +177,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private BacklogExpandService backlogExpandService;
     @Autowired
     private StarBeaconMapper starBeaconMapper;
-
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";

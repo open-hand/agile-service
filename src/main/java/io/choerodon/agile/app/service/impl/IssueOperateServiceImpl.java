@@ -37,53 +37,40 @@ public class IssueOperateServiceImpl implements IssueOperateService {
     private MessageClient messageClient;
     @Autowired
     private UserService userService;
-    @Autowired
-    private IssueMapper issueMapper;
 
     @Async
     @Override
     public void batchDeleteIssue(Long projectId, List<Long> issueIds) {
-        if(!CollectionUtils.isEmpty(issueIds)){
+        if (!CollectionUtils.isEmpty(issueIds)) {
             Long userId = DetailsHelper.getUserDetails().getUserId();
-            List<Long> issues = handlerIssue(projectId,issueIds,userId);
-            if (CollectionUtils.isEmpty(issues)) {
+            boolean projectOwner = userService.isProjectOwner(projectId, userId);
+            if (Boolean.FALSE.equals(projectOwner)) {
                 return;
             }
-            String messageCode = WEBSOCKET_BATCH_DELETE_ISSUE +"-"+projectId;
+            String messageCode = WEBSOCKET_BATCH_DELETE_ISSUE + "-" + projectId;
             BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
             Double progress = 0.0;
-            double incrementalValue = 1.0 / (issues.size() == 0 ? 1 : issues.size());
-            try{
+            double incrementalValue = 1.0 / (issueIds.size() == 0 ? 1 : issueIds.size());
+            try {
                 batchUpdateFieldStatusVO.setStatus("doing");
                 batchUpdateFieldStatusVO.setKey(messageCode);
                 batchUpdateFieldStatusVO.setUserId(userId);
                 batchUpdateFieldStatusVO.setProcess(progress);
                 messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
-                for (Long issueId : issues) {
-                    issueService.deleteIssue(projectId,issueId);
+                for (Long issueId : issueIds) {
+                    issueService.deleteIssue(projectId, issueId);
                     progress += incrementalValue;
                     batchUpdateFieldStatusVO.setProcess(progress);
                     messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 }
                 batchUpdateFieldStatusVO.setProcess(1.0);
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 batchUpdateFieldStatusVO.setStatus("failed");
                 batchUpdateFieldStatusVO.setError(e.getMessage());
                 throw new CommonException("delete issue failed, exception: {}", e.getMessage());
-            }
-            finally {
+            } finally {
                 messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             }
         }
-    }
-
-    private List<Long> handlerIssue(Long projectId, List<Long> issueIds, Long userId) {
-        boolean projectOwner = userService.isProjectOwner(projectId, userId);
-        if(Boolean.FALSE.equals(projectOwner)){
-            List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds);
-            return issueDTOS.stream().filter(issueDTO -> Objects.equals(userId, issueDTO.getCreatedBy())).map(IssueDTO::getIssueId).collect(Collectors.toList());
-        }
-        return issueIds;
     }
 }

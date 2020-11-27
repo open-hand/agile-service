@@ -36,8 +36,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.hzero.core.redis.RedisHelper.DATE_FORMAT;
-
 /**
  * @author shinan.chen
  * @since 2019/4/8
