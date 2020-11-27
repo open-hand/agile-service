@@ -141,11 +141,13 @@ export function getMaxRange(bar: Gantt.Bar) {
     const current = temp.shift();
     if (current) {
       const { translateX = 0, width = 0 } = current;
-      if (minTranslateX === 0 && translateX > 0) {
-        minTranslateX = translateX;
+      if (minTranslateX === 0) {
+        minTranslateX = translateX || 0;
       }
-      minTranslateX = Math.min(translateX, minTranslateX);
-      maxTranslateX = Math.max(translateX + width, maxTranslateX);
+      if (translateX) {
+        minTranslateX = Math.min(translateX, minTranslateX);
+        maxTranslateX = Math.max(translateX + width, maxTranslateX);
+      }
       if (current.task.children && current.task.children.length > 0) {
         current.task.children.forEach((t) => {
           if (t._bar) {
