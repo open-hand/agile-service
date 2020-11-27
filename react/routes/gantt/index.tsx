@@ -8,6 +8,7 @@ import GanttComponent from '@/components/gantt';
 import { ganttApi } from '@/api';
 import UserHead from '@/components/UserHead';
 import { Gantt } from '@/components/gantt/types';
+import Search from './components/search';
 
 function test(data: any) {
   const map = new Map<string, any>();
@@ -89,7 +90,9 @@ const GanttPage: React.FC = () => {
         flexDirection: 'column',
       }}
       >
+        <Search />
         {columns.length > 0 && <GanttComponent data={data} columns={columns} />}
+
       </Content>
     </Page>
   );
