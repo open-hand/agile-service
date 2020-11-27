@@ -14,6 +14,9 @@ function test(data: any) {
   const map = new Map<string, any>();
   const result: any[] = [];
   data.forEach((item: any) => {
+    map.set(item.issueId, item);
+  });
+  data.forEach((item: any) => {
     if (!item.parentId) {
       result.push(item);
     } else {
@@ -25,7 +28,6 @@ function test(data: any) {
         parent.children.push(item);
       }
     }
-    map.set(item.issueId, item);
   });
   console.log(result);
   return result;
@@ -71,6 +73,7 @@ const GanttPage: React.FC = () => {
         ...r,
         startDate: r.estimatedStartTime || '',
         endDate: r.estimatedEndTime || '',
+        collapsed: false,
       }))));
     })();
   }, []);

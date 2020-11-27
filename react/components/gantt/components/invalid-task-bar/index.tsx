@@ -37,6 +37,7 @@ const InvalidTaskBar: React.FC<TaskBarProps> = ({ data }) => {
     store.handleInvalidBarLeave();
   }, [store]);
   const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    event.stopPropagation();
     if (store.gestureKeyPress) {
       return;
     }
@@ -51,7 +52,8 @@ const InvalidTaskBar: React.FC<TaskBarProps> = ({ data }) => {
       store.handleInvalidBarHover(data, left, Math.ceil(width));
     }
   }, [data, store, viewTranslateX]);
-  const handleMouseDown = useCallback(() => {
+  const handleMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    event.stopPropagation();
     store.handleInvalidBarDown(data);
   }, [data, store]);
   const handleMouseUp = useCallback(() => {
