@@ -18,13 +18,13 @@ class StoryColumn extends Component {
     const {
       storys, width, epic, feature, version, sprint, connectDropTarget, isOver, rowIndex,
     } = this.props;
-    // 只有未规划、版本规划中、冲刺未完成的可以创建
-    let canCreate = true;
+    // 只有未规划、版本规划中、冲刺未完成的可以创建、删除、拖拽
+    let canBeOperated = true;
     if (version) {
-      canCreate = !version.statusCode || version.statusCode === 'version_planning';
+      canBeOperated = !version.statusCode || version.statusCode === 'version_planning';
     }
     if (sprint) {
-      canCreate = !sprint.statusCode || sprint.statusCode !== 'closed';
+      canBeOperated = !sprint.statusCode || sprint.statusCode !== 'closed';
     }
     return (
       <Column
@@ -33,8 +33,8 @@ class StoryColumn extends Component {
         style={{ background: isOver ? 'rgb(240,240,240)' : 'white', position: 'relative' }}
       >
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-          {storys && storys.map((story, index) => <StoryCard index={index} rowIndex={rowIndex} story={story} sprint={sprint} version={version} />)}
-          {!StoryMapStore.isFullScreen && canCreate && <CreateStory onCreate={this.handleCreateStory} epic={epic} feature={feature} sprint={sprint} version={version} />}
+          {storys && storys.map((story, index) => <StoryCard index={index} rowIndex={rowIndex} story={story} sprint={sprint} version={version} canBeOperated={canBeOperated} />)}
+          {!StoryMapStore.isFullScreen && canBeOperated && <CreateStory onCreate={this.handleCreateStory} epic={epic} feature={feature} sprint={sprint} version={version} />}
         </div>
       </Column>
     );
@@ -51,10 +51,26 @@ export default DropTarget(
     drop: (props) => ({
       epic: props.epic, feature: props.feature, version: props.version, sprint: props.sprint,
     }),
+    canDrop: (props, monitor) => { // props: target, monitor: source
+      // console.log('props, monitor：');
+      const item = monitor.getItem();
+      // console.log(props.sprint, item.sprint);
+      const targetSprint = props.sprint;
+      const sourceSprint = item.sprint;
+      if (targetSprint) { // 冲刺泳道
+        const { sprintId: targetSprintId, statusCode: targetSprintStatusCode } = targetSprint;
+        const { sprintId: sourceSprintId, statusCode: sourceSprintStatusCode } = sourceSprint;
+        if (((targetSprintId === 'none' || targetSprintStatusCode !== 'closed') && sourceSprintStatusCode !== 'closed') || sourceSprintId === targetSprintId) { // 移入冲刺时不能是从已完成冲刺移出的，或者在自己冲刺内更改史诗或特性
+          return true;
+        }
+        return false;
+      }
+      return true;
+    },
   },
   (connect, monitor) => ({
     connectDropTarget: connect.dropTarget(),
     isOver: monitor.isOver(),
-    // canDrop: monitor.canDrop(), //去掉可以优化性能
+    canDrop: monitor.canDrop(),
   }),
 )(StoryColumn);

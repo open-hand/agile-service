@@ -98,7 +98,7 @@ class StoryCard extends Component {
 
   render() {
     const {
-      story, index, rowIndex,
+      story, index, rowIndex, canBeOperated,
     } = this.props;
     const {
       issueId, summary, statusVO = {},
@@ -111,7 +111,11 @@ class StoryCard extends Component {
         onClick={this.handleClick}
         onMouseDown={this.handleMouseDown}
       >
-        <Icon type="close" className="c7nagile-StoryMap-StoryCard-delete" onClick={this.handlRemoveStory} />
+        {
+          canBeOperated && (
+            <Icon type="close" className="c7nagile-StoryMap-StoryCard-delete" onClick={this.handlRemoveStory} />
+          )
+        }
         <div className="summary">
           <Tooltip title={summary} getPopupContainer={(trigger) => trigger.parentNode} placement={index === 0 && rowIndex === 0 ? 'bottom' : 'top'}>
             {summary}
