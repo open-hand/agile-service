@@ -1,6 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import React, { useContext, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
+import classNames from 'classnames';
 import Context from '../../context';
 import styles from './index.less';
 import { ROW_HEIGHT, TOP_PADDING } from '../../constants';
@@ -29,8 +30,10 @@ const TableRows = () => {
                   <div
                     // eslint-disable-next-line react/no-array-index-key
                     key={i}
-                    className={styles['row-indentation']}
-                    // style={{ width: bar._depth * 38, backgroundSize: bar._depth * 38 }}
+                    className={classNames(styles['row-indentation'], {
+                      [styles['row-indentation-both']]: i === bar._depth - 1,
+                    })}
+                  // style={{ width: bar._depth * 38, backgroundSize: bar._depth * 38 }}
                   />
                 ))
               )}

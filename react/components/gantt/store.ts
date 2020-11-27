@@ -648,9 +648,9 @@ class GanttStore {
 
       return map[this.sightConfig.type]();
     };
-
-    // 进行展开扁平
-    return observable(flattenDeep(data).map((item: any, index) => {
+    const flattenData = flattenDeep(data);
+    const tempMap = new Map<Gantt.Item, Gantt.Bar>();
+    const barList = flattenData.map((item: any, index) => {
       let startAmp = dayjs(item.startDate || 0).valueOf();
       let endAmp = dayjs(item.endDate || 0).valueOf();
 
@@ -665,7 +665,7 @@ class GanttStore {
       const translateY = baseTop + index * topStep;
       const { _parent } = item;
 
-      return {
+      const bar = {
         task: item,
         translateX,
         translateY,
@@ -679,6 +679,7 @@ class GanttStore {
         // setShadowShow,
         // setInvalidTaskBar,
         // getHovered,
+        _isGroup: item.isGroup,
         _collapsed: item.collapsed, // 是否折叠
         _depth: item._depth, // 表示子节点深度
         _index: item._index, // 任务下标位置
@@ -686,7 +687,11 @@ class GanttStore {
         _childrenCount: !item.children ? 0 : item.children.length, // 子任务
         _dateFormat,
       };
-    }));
+      item._bar = bar;
+      return bar;
+    });
+    // 进行展开扁平
+    return observable(barList);
   }
 
   @action

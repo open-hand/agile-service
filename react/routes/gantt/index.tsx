@@ -69,12 +69,12 @@ const GanttPage: React.FC = () => {
       //   label: h.name,
       // })));
       setColumns(tableColumns);
-      setData(test(res.map((r: any) => ({
-        ...r,
-        startDate: r.estimatedStartTime || '',
-        endDate: r.estimatedEndTime || '',
-        collapsed: false,
-      }))));
+      // setData(test(res.map((r: any) => ({
+      //   ...r,
+      //   startDate: r.estimatedStartTime || '',
+      //   endDate: r.estimatedEndTime || '',
+      //   collapsed: false,
+      // }))));
     })();
   }, []);
   return (
