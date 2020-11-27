@@ -15,7 +15,7 @@ const GanttIssueSearch: React.FC<Props> = () => {
 
   };
   const handleChange = () => {
-
+    console.log('issueSearchStore', issueSearchStore.chosenFields);
   };
   const handleSaveFilter = () => {};
   return (

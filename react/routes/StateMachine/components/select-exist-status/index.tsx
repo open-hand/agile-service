@@ -53,7 +53,7 @@ const SelectExistStatus: React.FC<Props> = ({
         name: 'transferAll',
         type: 'boolean' as FieldType,
         defaultValue: true,
-        label: '是否能流转到所有状态?',
+        label: '是否转换到所有状态?',
         required: true,
       },
     ],
