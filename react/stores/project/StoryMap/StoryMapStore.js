@@ -35,12 +35,13 @@ class StoryMapStore {
   };
 
   @observable searchVO = {
-    advancedSearchArgs: {
-      components: [],
-      sprints: [],
-      prioritys: [],
-      isCompleted: undefined,
+    advancedSearchArgs: {},
+    otherArgs: {
+      customField: {
+        option: [], date: [], date_hms: [], number: [], string: [], text: [],
+      },
     },
+    searchArgs: {},
   }
 
   @action setSearchVO = (data) => {
@@ -85,12 +86,13 @@ class StoryMapStore {
     this.storyMapData = {};
     this.storyData = {};
     this.searchVO = {
-      advancedSearchArgs: {
-        components: [],
-        sprints: [],
-        prioritys: [],
-        isCompleted: undefined,
+      advancedSearchArgs: {},
+      otherArgs: {
+        customField: {
+          option: [], date: [], date_hms: [], number: [], string: [], text: [],
+        },
       },
+      searchArgs: {},
     };
     this.versionList = [];
     this.sprintList = [];
@@ -101,12 +103,13 @@ class StoryMapStore {
 
   @action resetSearchVO() {
     this.searchVO = {
-      advancedSearchArgs: {
-        components: [],
-        sprints: [],
-        prioritys: [],
-        isCompleted: undefined,
+      advancedSearchArgs: {},
+      otherArgs: {
+        customField: {
+          option: [], date: [], date_hms: [], number: [], string: [], text: [],
+        },
       },
+      searchArgs: {},
     };
   }
 
@@ -268,7 +271,7 @@ class StoryMapStore {
       const targetFeature = storyData[epicId].feature;
       // eslint-disable-next-line no-unused-expressions
       epic.featureCommonDTOList && epic.featureCommonDTOList.forEach((feature) => {
-        if (!targetFeature[feature.issueId]) {
+        if (feature.issueId && !targetFeature[feature.issueId]) {
           const featureWithWidth = find(storyMapWidth, { issueId: feature.issueId, type: 'feature' });
           targetFeature[feature.issueId] = {
             storys: [],
@@ -338,7 +341,7 @@ class StoryMapStore {
         });
 
         // 冲刺
-        if (!storyMapSprintList && storyMapSprintList.length === 0) {
+        if (!storyMapSprintList || storyMapSprintList.length === 0) {
           this.addStoryNumToSprint('none');
           if (!targetFeature.sprint.none) {
             targetFeature.sprint.none = [];
@@ -352,17 +355,6 @@ class StoryMapStore {
             targetFeature.sprint[sprintId].push(story);
           }
         });
-        // // 冲刺
-        // if (sprintId === 0) {
-        //   this.addStoryNumToSprint('none');
-        //   if (!targetFeature.sprint.none) {
-        //     targetFeature.sprint.none = [];
-        //   }
-        //   targetFeature.sprint.none.push(story);
-        // } else {
-        //   targetFeature.sprint[sprintId].push(story);
-        // }
-        // this.addStoryNumToSprint(sprintId);
       }
 
       // }

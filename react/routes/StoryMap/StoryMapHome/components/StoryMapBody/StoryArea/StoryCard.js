@@ -122,14 +122,6 @@ class StoryCard extends Component {
           </Tooltip>
         </div>
         <div className="bottom">
-          {/* {
-            totalCount && (
-              <div className="subTaskProgress">
-                <TypeTag data={{ icon: 'agile_subtask', colour: '#4D90FE' }} iconSize={24} />
-                <span className="completedCount">{`${completedCount}/${totalCount}`}</span>
-              </div>
-            )
-          } */}
           <div className="status">
             <Tooltip mouseEnterDelay={0.5} title={`状态： ${statusVO && statusVO.name}`}>
               <div>
@@ -178,20 +170,20 @@ export default DragSource(
       } = dropResult;
       const { versionId: targetVersionId } = version || {};
       const { sprintId: targetSprintId } = sprint || {};
-      const storyMapDragVO = {
-        versionIssueIds: [],
-        versionId: 0, // 要关联的版本id
-        epicId: 0, // 要关联的史诗id
-        versionIssueRelVOList: [],
-        // 问题id列表，移动到史诗，配合epicId使用
-        epicIssueIds: [],
-        featureId: 0, // 要关联的特性id
-        // 问题id列表，移动到特性，配合featureId使用
-        featureIssueIds: [],
-        sprintIssueIds: [],
-        sprintId: 0, // 要关联的版本id
-      };
-      // 史诗，特性，版本\冲刺都不变时
+      const storyMapDragVO = {}; // {
+      //   versionIssueIds: [],
+      //   versionId: 0, // 要关联的版本id
+      //   epicId: 0, // 要关联的史诗id
+      //   versionIssueRelVOList: [],
+      //   // 问题id列表，移动到史诗，配合epicId使用
+      //   epicIssueIds: [],
+      //   featureId: 0, // 要关联的特性id
+      //   // 问题id列表，移动到特性，配合featureId使用
+      //   featureIssueIds: [],
+      //   sprintIssueIds: [],
+      //   sprintId: 0, // 要关联的版本id
+      // }
+      // 史诗，特性，版本，冲刺都不变时
       if (epicId === targetEpicId && featureId === targetFeatureId) {
         if (StoryMapStore.swimLine === 'version') {
           if (find(storyMapVersionDTOList, { versionId: targetVersionId }) || (storyMapVersionDTOList.length === 0 && targetVersionId === 'none')) {
@@ -215,11 +207,11 @@ export default DragSource(
           storyMapDragVO.epicId = targetEpicId;
           storyMapDragVO.epicIssueIds = [issueId];
           storyMapDragVO.featureId = 0;
+          storyMapDragVO.featureIssueIds = [];
         } else {
           storyMapDragVO.featureId = targetFeatureId;
+          storyMapDragVO.featureIssueIds = [issueId];
         }
-        storyMapDragVO.featureId = targetFeatureId === 'none' ? 0 : targetFeatureId;
-        storyMapDragVO.featureIssueIds = [issueId];
       }
       // 对版本进行处理
       if (StoryMapStore.swimLine === 'version') {
@@ -236,42 +228,18 @@ export default DragSource(
 
         if (!find(storyMapVersionDTOList, { versionId: targetVersionId })) {
           storyMapDragVO.versionIssueIds = [issueId];
-          // 拖到未规划
-          if (targetVersionId === 'none') {
-            storyMapDragVO.versionId = 0;
-          } else {
-            storyMapDragVO.versionId = targetVersionId;
-          }
+          storyMapDragVO.versionId = targetVersionId === 'none' ? 0 : targetVersionId;
         }
       }
 
       // 对冲刺进行处理
       if (StoryMapStore.swimLine === 'sprint') {
-        console.log('sourceSprintId, targetSprintId：');
-        console.log(sourceSprint.sprintId, targetSprintId);
-        // 在不同的冲刺移动
-        // if (sourceSprint.sprintId !== targetSprintId) {
-        //   // 如果原先有冲刺，就移除离开的冲刺
-        //   if (storyMapSprintList.length > 0) {
-        //     const removeSprint = find(storyMapSprintList, { sprintId: sourceSprint.sprintId });
-        //     if (removeSprint) {
-        //       storyMapDragVO.sprintIssueRelVOList = [{ ...removeSprint, issueId }];
-        //     }
-        //   }
-        // }
-
         if (!find(storyMapSprintList, { sprintId: targetSprintId })) {
           storyMapDragVO.sprintIssueIds = [issueId];
-          // 拖到未规划
-          if (targetSprintId === 'none') {
-            storyMapDragVO.sprintId = 0;
-          } else {
-            storyMapDragVO.sprintId = targetSprintId;
-          }
+          storyMapDragVO.sprintId = targetSprintId === 'none' ? 0 : targetSprintId;
         }
       }
 
-      // console.log(storyMapDragVO);
       storyMapApi.move(storyMapDragVO).then(() => {
         StoryMapStore.setClickIssue(null);
         // StoryMapStore.removeStoryFromStoryMap(story);

@@ -150,10 +150,10 @@ class EpicCell extends Component {
       epic, otherData, lastCollapse, index, connectDropTarget, isOver,
     } = this.props;
     const { resizing } = this.state;
+    const { storyData } = StoryMapStore;
     const {
       collapse, storys, feature, epicId,
     } = otherData || {};
-
     const {
       // featureCommonDTOList,
       issueId,
@@ -165,11 +165,7 @@ class EpicCell extends Component {
     let subIssueNum = 0;
     let noEpicStoryLength = 0;
     if (storys && feature) {
-      noEpicStoryLength = storys.filter((
-        story,
-      ) => !!story.featureId && Object.keys(feature).map(
-        (featureId) => featureId,
-      ).includes(story.featureId)).length;
+      noEpicStoryLength = storys.filter((story) => !!story.featureId && Object.keys(feature).includes(story.featureId)).length;
       if (!StoryMapStore.hiddenColumnNoStory) {
         subIssueNum = Math.max((
           epicId ? storys.length : noEpicStoryLength
@@ -188,7 +184,6 @@ class EpicCell extends Component {
         subIssueNum = Math.max((epicId ? storys.length : noEpicStoryLength) + hasStoryFeatureLength, 0);
       }
     }
-
     return (
       <>
         {
