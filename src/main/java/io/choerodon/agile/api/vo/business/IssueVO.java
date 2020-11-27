@@ -236,6 +236,8 @@ public class IssueVO {
 
     private Long sprintId;
 
+    private List<PiTargetInfoVO> piTargetInfoVOS;
+
     public Long getSprintId() {
         return sprintId;
     }
@@ -865,5 +867,13 @@ public class IssueVO {
 
     public void setProgramVersionFeatureRelVOS(List<ProgramVersionFeatureRelVO> programVersionFeatureRelVOS) {
         this.programVersionFeatureRelVOS = programVersionFeatureRelVOS;
+    }
+
+    public List<PiTargetInfoVO> getPiTargetInfoVOS() {
+        return piTargetInfoVOS;
+    }
+
+    public void setPiTargetInfoVOS(List<PiTargetInfoVO> piTargetInfoVOS) {
+        this.piTargetInfoVOS = piTargetInfoVOS;
     }
 }
