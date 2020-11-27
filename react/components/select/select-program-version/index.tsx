@@ -1,9 +1,11 @@
 import React, {
   useMemo, forwardRef, useState, useReducer, useEffect, useCallback,
 } from 'react';
+import { Select as OldSelect } from 'choerodon-ui';
 import { Select, Tooltip } from 'choerodon-ui/pro';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { versionApi } from '@/api';
+import { SelectProps as OldSelectProps } from 'choerodon-ui/lib/select';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import FlatSelect from '@/components/flat-select';
 import { IProgramVersion } from '@/common/types';
@@ -16,6 +18,9 @@ interface Props extends Partial<SelectProps> {
   flat?: boolean
   filterSelected?: boolean
 }
+interface OldProps extends Partial<OldSelectProps> {
+  teamProjectIds?: string[],
+}
 interface StateProps {
   data: Array<IProgramVersion>
   option: Map<string, Array<IProgramVersion>>
@@ -24,9 +29,12 @@ interface StateProps {
 interface ActionProps extends Partial<StateProps> {
   type: 'init' | 'change' | 'destroy'
 }
-const SelectProgramVersion: React.FC<Props> = forwardRef(({
-  teamProjectIds, dataRef, afterLoad, flat, ...otherProps
-}, ref: React.Ref<Select>) => {
+interface VersionDataConfigProps {
+  dataRef?: React.MutableRefObject<any>
+  teamProjectIds?: string[]
+  afterLoad?: (versions: any[]) => void
+}
+function useGetVersionData({ dataRef, afterLoad, teamProjectIds }: VersionDataConfigProps): [StateProps, any] {
   const [versionData, dispatch] = useReducer<(state: StateProps, action: ActionProps) => StateProps>((state, action) => {
     const { type } = action;
     switch (type) {
@@ -74,8 +82,13 @@ const SelectProgramVersion: React.FC<Props> = forwardRef(({
     });
   }, [teamProjectIds]);
   useEffect(() => { loadData(); }, [loadData]);
+  return [versionData, { loadData, dispatch }];
+}
+const SelectProgramVersion: React.FC<Props> = forwardRef(({
+  teamProjectIds, dataRef, afterLoad, flat, ...otherProps
+}, ref: React.Ref<Select>) => {
   const Component = flat ? FlatSelect : Select;
-
+  const [versionData, method] = useGetVersionData({ teamProjectIds, dataRef, afterLoad });
   const OptionComponent = versionData.headOptions.map((item) => {
     const options = (versionData.option.get(item.id) || []);
 
@@ -109,3 +122,33 @@ const SelectProgramVersion: React.FC<Props> = forwardRef(({
   );
 });
 export default SelectProgramVersion;
+const OldSelectProgramVersion: React.FC<OldProps> = ({ teamProjectIds, ...restProps }) => {
+  const [versionData, method] = useGetVersionData({ teamProjectIds });
+  console.log('OldSelect....111');
+  const OptionComponent = versionData.headOptions.map((item) => {
+    const options = (versionData.option.get(item.id) || []);
+
+    return (
+      <OldSelect.OptGroup label={(
+        <Tooltip title={item.name}>
+          <span className={versionStyles.OptGroup}>{item.name}</span>
+        </Tooltip>) as unknown as string}
+      >
+        { options.map((option) => (
+          <OldSelect.Option value={option.id}>
+            {option.name}
+          </OldSelect.Option>
+        ))}
+      </OldSelect.OptGroup>
+    );
+  });
+  return (
+    <OldSelect
+      maxTagCount={3}
+      {...restProps}
+    >
+      {OptionComponent}
+    </OldSelect>
+  );
+};
+export { OldSelectProgramVersion };

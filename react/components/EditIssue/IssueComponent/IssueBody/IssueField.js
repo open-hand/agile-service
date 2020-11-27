@@ -102,7 +102,7 @@ const IssueField = observer((props) => {
   } else if (typeCode === 'feature') {
     // fields.splice(4, 0, { fieldCode: 'teams', fieldName: '负责团队和冲刺' });
     // fields.splice(4, 0, { fieldCode: 'teamSprint', fieldName: '团队Sprint' });
-    fields.splice(4, 0, { fieldCode: 'programVersion', fieldName: '团队Sprint' });
+    // fields.splice(4, 0, { fieldCode: 'programVersion', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {
     fields = fields.slice(0, 4);
