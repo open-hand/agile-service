@@ -3,7 +3,7 @@
 /* eslint-disable no-underscore-dangle */
 import { createRef } from 'react';
 import {
-  observable, computed, action, toJS,
+  observable, computed, action,
 } from 'mobx';
 import { debounce, find, throttle } from 'lodash';
 import dayjs, { Dayjs } from 'dayjs';
@@ -18,7 +18,7 @@ import {
   ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE, MIN_VIEW_RATE, TOP_PADDING,
 } from './constants';
 import {
-  flattenDeep, getDragSideShrink, getDragSideExpand, getMoveStep,
+  flattenDeep, getDragSideShrink, getDragSideExpand, getMoveStep, transverseData,
 } from './utils';
 
 dayjs.extend(weekday);
@@ -56,13 +56,13 @@ export const viewTypeList: Gantt.SightConfig[] = [
     value: 115200,
   },
 ];
-const startDate = '2020-10-01';
+
 class GanttStore {
   constructor() {
     this.width = 1320;
     this.height = 418;
     const sightConfig = viewTypeList[0];
-    const translateX = dayjs(startDate).valueOf() / (sightConfig.value * 1000);
+    const translateX = dayjs(this.getStartDate()).valueOf() / (sightConfig.value * 1000);
     const bodyWidth = this.width;
     const viewWidth = 704;
     const tableWidth = 500;
@@ -118,9 +118,13 @@ class GanttStore {
 
   isPointerPress: boolean = false;
 
+  getStartDate() {
+    return dayjs().subtract(10, 'day').toString();
+  }
+
   @action
   setData(data: Gantt.Item[]) {
-    this.data = data;
+    this.data = transverseData(data);
   }
 
   @action
@@ -210,7 +214,7 @@ class GanttStore {
     const target = find(viewTypeList, { type });
     if (target) {
       this.sightConfig = target;
-      this.translateX = dayjs(startDate).valueOf() / (target.value * 1000);
+      this.translateX = dayjs(this.getStartDate()).valueOf() / (target.value * 1000);
     }
   }
 
@@ -649,7 +653,6 @@ class GanttStore {
       return map[this.sightConfig.type]();
     };
     const flattenData = flattenDeep(data);
-    const tempMap = new Map<Gantt.Item, Gantt.Bar>();
     const barList = flattenData.map((item: any, index) => {
       let startAmp = dayjs(item.startDate || 0).valueOf();
       let endAmp = dayjs(item.endDate || 0).valueOf();
@@ -664,7 +667,6 @@ class GanttStore {
       const translateX = startAmp / pxUnitAmp;
       const translateY = baseTop + index * topStep;
       const { _parent } = item;
-
       const bar = {
         task: item,
         translateX,
@@ -908,7 +910,6 @@ class GanttStore {
     const isExpand = getDragSideExpand(moveEv, type);
     // 每次step可能不一样， 动态计算 如：每月可能30或31天
     const step = getMoveStep(isLeft, isShrink, this.sightConfig.type, this.pxUnitAmp, barInfo);
-
     if (isShrink) {
       this.moveShrinkStep(step, type, barInfo, basePointerX, pointerX);
     }
@@ -925,6 +926,8 @@ class GanttStore {
   moveShrinkStep = (step: number, type: Gantt.MoveType, barInfo: Gantt.Bar, basePointerX: number, pointerX: number) => {
     const isLeft = type === 'left';
     let { width, translateX } = barInfo;
+    const pointerDis = pointerX - basePointerX;
+    if (pointerDis > width) return;
 
     if (isLeft) {
       translateX += step;
@@ -932,9 +935,6 @@ class GanttStore {
     } else {
       width -= step;
     }
-
-    const pointerDis = Math.abs(pointerX - basePointerX);
-    if (pointerDis > width) return;
     if (width < step) return;
 
     barInfo.translateX = translateX;

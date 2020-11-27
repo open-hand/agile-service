@@ -29,7 +29,6 @@ function test(data: any) {
       }
     }
   });
-  console.log(result);
   return result;
 }
 const tableColumns = [{
@@ -61,7 +60,7 @@ const GanttPage: React.FC = () => {
     (async () => {
       const [headers, res] = await Promise.all([
         ganttApi.loadHeaders(),
-        ganttApi.load(),
+        ganttApi.loadByUser(),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -69,12 +68,7 @@ const GanttPage: React.FC = () => {
       //   label: h.name,
       // })));
       setColumns(tableColumns);
-      // setData(test(res.map((r: any) => ({
-      //   ...r,
-      //   startDate: r.estimatedStartTime || '',
-      //   endDate: r.estimatedEndTime || '',
-      //   collapsed: false,
-      // }))));
+      setData(res);
     })();
   }, []);
   return (

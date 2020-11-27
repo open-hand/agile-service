@@ -15,29 +15,39 @@ const TableRows = () => {
   const { count, start } = store.getVisibleRows;
   return (
     <>
-      {barList.slice(start, start + count).map((bar, rowIndex) => (
-        <div className={styles.row} style={{ height: ROW_HEIGHT, top: (rowIndex + start) * ROW_HEIGHT + TOP_PADDING }}>
-          {columns.map((column, index) => (
-            <div
-              key={column.name}
-              className={styles.cell}
-              style={{
-                width: columnsWidth[index],
-              }}
-            >
-              {index === 0 && (
-                Array(bar._depth).fill(0).map((_, i) => (
-                  <div
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={i}
-                    className={classNames(styles['row-indentation'], {
-                      [styles['row-indentation-both']]: i === bar._depth - 1,
-                    })}
-                  // style={{ width: bar._depth * 38, backgroundSize: bar._depth * 38 }}
-                  />
-                ))
-              )}
-              {index === 0 && bar._childrenCount > 0 && (
+      {barList.slice(start, start + count).map((bar, rowIndex) => {
+        // 父元素如果是其最后一个祖先的子，要隐藏上一层的线
+        const parent = bar._parent;
+        const parentItem = parent?._parent;
+        let isLastChild = false;
+        if (parentItem?.children) {
+          if (parentItem.children[parentItem.children.length - 1] === bar._parent) {
+            isLastChild = true;
+          }
+        }
+        return (
+          <div className={styles.row} style={{ height: ROW_HEIGHT, top: (rowIndex + start) * ROW_HEIGHT + TOP_PADDING }}>
+            {columns.map((column, index) => (
+              <div
+                key={column.name}
+                className={styles.cell}
+                style={{
+                  width: columnsWidth[index],
+                }}
+              >
+                {index === 0 && (
+                  Array(bar._depth).fill(0).map((_, i) => (
+                    <div
+                  // eslint-disable-next-line react/no-array-index-key
+                      key={i}
+                      className={classNames(styles['row-indentation'], {
+                        [styles['row-indentation-hidden']]: isLastChild && i === bar._depth - 2,
+                        [styles['row-indentation-both']]: i === bar._depth - 1,
+                      })}
+                    />
+                  ))
+                )}
+                {index === 0 && bar._childrenCount > 0 && (
                 <RowToggler
                   level={bar._depth}
                   collapsed={bar._collapsed}
@@ -45,13 +55,14 @@ const TableRows = () => {
                     store.setRowCollapse(bar.task, !bar._collapsed);
                   }}
                 />
-              )}
-              {/* @ts-ignore */}
-              <span className={styles.ellipsis}>{column.render ? column.render(bar.task) : bar.task[column.name]}</span>
-            </div>
-          ))}
-        </div>
-      ))}
+                )}
+                {/* @ts-ignore */}
+                <span className={styles.ellipsis}>{column.render ? column.render(bar.task) : bar.task[column.name]}</span>
+              </div>
+            ))}
+          </div>
+        );
+      })}
     </>
   );
 };

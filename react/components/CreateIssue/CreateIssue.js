@@ -1074,6 +1074,7 @@ class CreateIssue extends Component {
         cancelText="取消"
         confirmLoading={createLoading}
         width={MODAL_WIDTH.middle}
+        maskClosable={false}
       >
         <Content>
           <Spin spinning={loading}>

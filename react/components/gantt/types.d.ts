@@ -44,7 +44,7 @@ export namespace Gantt {
     _depth: number
     _index?: number
     _childrenCount: number
-    _parent?: Bar
+    _parent?: Item
   }
   interface Item {
     startDate: string | null,
