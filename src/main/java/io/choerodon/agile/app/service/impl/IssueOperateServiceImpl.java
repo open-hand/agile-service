@@ -4,6 +4,10 @@ import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.BatchUpdateFieldStatusVO;
 import io.choerodon.agile.app.service.IssueOperateService;
 import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.IssueInfoDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.hzero.boot.message.MessageClient;
@@ -12,8 +16,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author zhaotianxin
@@ -28,23 +35,31 @@ public class IssueOperateServiceImpl implements IssueOperateService {
     private IssueService issueService;
     @Autowired
     private MessageClient messageClient;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private IssueMapper issueMapper;
 
     @Async
     @Override
     public void batchDeleteIssue(Long projectId, List<Long> issueIds) {
         if(!CollectionUtils.isEmpty(issueIds)){
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            List<Long> issues = handlerIssue(projectId,issueIds,userId);
+            if (CollectionUtils.isEmpty(issues)) {
+                return;
+            }
             String messageCode = WEBSOCKET_BATCH_DELETE_ISSUE +"-"+projectId;
             BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
             Double progress = 0.0;
-            Long userId = DetailsHelper.getUserDetails().getUserId();
-            double incrementalValue = 1.0 / (issueIds.size() == 0 ? 1 : issueIds.size());
+            double incrementalValue = 1.0 / (issues.size() == 0 ? 1 : issues.size());
             try{
                 batchUpdateFieldStatusVO.setStatus("doing");
                 batchUpdateFieldStatusVO.setKey(messageCode);
                 batchUpdateFieldStatusVO.setUserId(userId);
                 batchUpdateFieldStatusVO.setProcess(progress);
                 messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
-                for (Long issueId : issueIds) {
+                for (Long issueId : issues) {
                     issueService.deleteIssue(projectId,issueId);
                     progress += incrementalValue;
                     batchUpdateFieldStatusVO.setProcess(progress);
@@ -61,5 +76,14 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                 messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             }
         }
+    }
+
+    private List<Long> handlerIssue(Long projectId, List<Long> issueIds, Long userId) {
+        boolean projectOwner = userService.isProjectOwner(projectId, userId);
+        if(Boolean.FALSE.equals(projectOwner)){
+            List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds);
+            return issueDTOS.stream().filter(issueDTO -> Objects.equals(userId, issueDTO.getCreatedBy())).map(IssueDTO::getIssueId).collect(Collectors.toList());
+        }
+        return issueIds;
     }
 }
