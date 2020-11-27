@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 
 
 import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.app.service.IssueOperateService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
@@ -52,6 +53,8 @@ public class IssueController {
     private IssueValidator issueValidator;
     @Autowired
     private StateMachineClientService stateMachineClientService;
+    @Autowired
+    private IssueOperateService issueOperateService;
 
     public IssueController(IssueService issueService) {
         this.issueService = issueService;
@@ -705,4 +708,14 @@ public class IssueController {
         return ResponseEntity.ok(issueService.pagingQueryAvailableParents(pageRequest, projectId, issueType, param));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("批量删除issue")
+    @PostMapping(value = "/batch_delete")
+    public ResponseEntity batchDeleteIssue(@ApiParam(value = "项目id", required = true)
+                                           @PathVariable(name = "project_id") Long projectId,
+                                           @ApiParam(value = "issueIds", required = true)
+                                           @RequestBody @Encrypt List<Long> issueIds) {
+        issueOperateService.batchDeleteIssue(projectId, issueIds);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 }
