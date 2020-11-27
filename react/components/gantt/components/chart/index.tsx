@@ -27,7 +27,7 @@ const Chart: React.FC = () => {
     if (chartRef.current) {
       const chartHammer = new Hammer(chartRef.current);
       store.setChartHammer(chartHammer);
-      store.initDragScrollHammer(chartRef.current);
+      // store.initDragScrollHammer(chartRef.current);
     }
   }, [store]);
   return (

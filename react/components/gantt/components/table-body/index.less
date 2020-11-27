@@ -37,6 +37,7 @@
   margin-top: -26px;
   margin-left: 12px;
   pointer-events: none;
+
   &:before {
     content: '';
     position: absolute;
@@ -47,6 +48,9 @@
     background-color: #e5e5e5;
   }
 
+}
+
+.row-indentation-both {
   &:after {
     content: '';
     position: absolute;
@@ -56,10 +60,8 @@
     height: 1px;
     background-color: #e5e5e5;
   }
-
-
 }
 
-.row-indentation + .row-indentation:after {
-  left: -15px;
+.row-indentation-hidden {
+  visibility: hidden;
 }

@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 import dayjs from 'dayjs';
+import { cloneDeep } from 'lodash';
 import { Gantt } from './types';
 import { MOVE_SPACE } from './constants';
 
@@ -15,11 +16,12 @@ export function flattenDeep(arr: any[] = [], children = 'children', depth = 0, p
     item._depth = depth;
     item._parent = parent;
     item._index = index;
+    item._index = index;
     index += 1;
 
     return flat.concat(
       item,
-      item[children] ? flattenDeep(item[children], children, depth + 1, item) : [],
+      item[children] && !item.collapsed ? flattenDeep(item[children], children, depth + 1, item) : [],
     );
   }, []);
 }
@@ -67,7 +69,7 @@ export function getMoveStep(isLeft: boolean, isShrink: boolean, sight: Gantt.Sig
     }
 
     let step = 24 * 60 * 60 * 1000 / pxUnitAmp;
-    const diff = Math.abs((endDate.valueOf() - startDate.valueOf()) / pxUnitAmp);
+    const diff = (endDate.valueOf() - startDate.valueOf()) / pxUnitAmp;
     if (diff > MOVE_SPACE) {
       step = diff;
     }
@@ -130,4 +132,56 @@ export function getMoveStep(isLeft: boolean, isShrink: boolean, sight: Gantt.Sig
 
   const step = map[sight]();
   return step;
+}
+
+export function getMaxRange(bar: Gantt.Bar) {
+  let minTranslateX = 0;
+  let maxTranslateX = 0;
+  const temp: Gantt.Bar[] = [bar];
+
+  while (temp.length > 0) {
+    const current = temp.shift();
+    if (current) {
+      const { translateX = 0, width = 0 } = current;
+      if (minTranslateX === 0) {
+        minTranslateX = translateX || 0;
+      }
+      if (translateX) {
+        minTranslateX = Math.min(translateX, minTranslateX);
+        maxTranslateX = Math.max(translateX + width, maxTranslateX);
+      }
+      if (current.task.children && current.task.children.length > 0) {
+        current.task.children.forEach((t) => {
+          if (t._bar) {
+            temp.push(t._bar);
+          }
+        });
+      }
+    }
+  }
+
+  return {
+    translateX: minTranslateX,
+    width: maxTranslateX - minTranslateX,
+  };
+}
+export function transverseData(data: Gantt.Item[] = [], startDateKey: string, endDateKey: string) {
+  const result:Gantt.Item[] = cloneDeep(data);
+  const temp: Gantt.Item[] = result.slice();
+  while (temp.length > 0) {
+    const current = temp.shift();
+    if (current) {
+      current.startDate = current[startDateKey] || '';
+      current.endDate = current[endDateKey] || '';
+      current.collapsed = current.collapsed || false;
+      if (current.children && current.children.length > 0) {
+        current.children.forEach((t) => {
+          if (t) {
+            temp.push(t);
+          }
+        });
+      }
+    }
+  }
+  return result;
 }

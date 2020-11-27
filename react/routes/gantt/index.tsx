@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import GanttComponent from '@/components/gantt';
-import { ganttApi } from '@/api';
+import { ganttApi, issueApi } from '@/api';
 import UserHead from '@/components/UserHead';
 import { Gantt } from '@/components/gantt/types';
 import Search from './components/search';
@@ -13,6 +13,9 @@ import Search from './components/search';
 function test(data: any) {
   const map = new Map<string, any>();
   const result: any[] = [];
+  data.forEach((item: any) => {
+    map.set(item.issueId, item);
+  });
   data.forEach((item: any) => {
     if (!item.parentId) {
       result.push(item);
@@ -25,9 +28,7 @@ function test(data: any) {
         parent.children.push(item);
       }
     }
-    map.set(item.issueId, item);
   });
-  console.log(result);
   return result;
 }
 const tableColumns = [{
@@ -59,7 +60,7 @@ const GanttPage: React.FC = () => {
     (async () => {
       const [headers, res] = await Promise.all([
         ganttApi.loadHeaders(),
-        ganttApi.load(),
+        ganttApi.loadByUser(),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -67,12 +68,23 @@ const GanttPage: React.FC = () => {
       //   label: h.name,
       // })));
       setColumns(tableColumns);
-      setData(test(res.map((r: any) => ({
-        ...r,
-        startDate: r.estimatedStartTime || '',
-        endDate: r.estimatedEndTime || '',
-      }))));
+      setData(res);
     })();
+  }, []);
+  const handleUpdate = useCallback(async (issue: Gantt.Item, startDate: string, endDate: string) => {
+    try {
+      await issueApi.update({
+        issueId: issue.issueId as number,
+        objectVersionNumber: issue.objectVersionNumber as number,
+        estimatedStartTime: startDate,
+        estimatedEndTime: endDate,
+      });
+      // eslint-disable-next-line no-param-reassign
+      issue.objectVersionNumber += 1;
+      return true;
+    } catch (error) {
+      return false;
+    }
   }, []);
   return (
     <Page>
@@ -91,8 +103,15 @@ const GanttPage: React.FC = () => {
       }}
       >
         <Search />
-        {columns.length > 0 && <GanttComponent data={data} columns={columns} />}
-
+        {columns.length > 0 && (
+          <GanttComponent
+            data={data}
+            columns={columns}
+            onUpdate={handleUpdate}
+            startDateKey="estimatedStartTime"
+            endDateKey="estimatedEndTime"
+          />
+        )}
       </Content>
     </Page>
   );

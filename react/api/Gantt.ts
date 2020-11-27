@@ -6,10 +6,18 @@ class GanttApi {
     return `/agile/v1/projects/${getProjectId()}`;
   }
 
-  load() {
+  loadByTask() {
     return axios({
       method: 'post',
       url: `${this.prefix}/gantt/list/by_task`,
+      data: {},
+    });
+  }
+
+  loadByUser() {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/gantt/list/by_user`,
       data: {},
     });
   }

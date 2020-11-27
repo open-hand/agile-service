@@ -3,7 +3,7 @@
 /* eslint-disable no-underscore-dangle */
 import { createRef } from 'react';
 import {
-  observable, computed, action, toJS,
+  observable, computed, action, runInAction,
 } from 'mobx';
 import { debounce, find, throttle } from 'lodash';
 import dayjs, { Dayjs } from 'dayjs';
@@ -18,7 +18,7 @@ import {
   ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE, MIN_VIEW_RATE, TOP_PADDING,
 } from './constants';
 import {
-  flattenDeep, getDragSideShrink, getDragSideExpand, getMoveStep,
+  flattenDeep, getDragSideShrink, getDragSideExpand, getMoveStep, transverseData,
 } from './utils';
 
 dayjs.extend(weekday);
@@ -56,13 +56,13 @@ export const viewTypeList: Gantt.SightConfig[] = [
     value: 115200,
   },
 ];
-const startDate = '2020-10-01';
+
 class GanttStore {
   constructor() {
     this.width = 1320;
     this.height = 418;
     const sightConfig = viewTypeList[0];
-    const translateX = dayjs(startDate).valueOf() / (sightConfig.value * 1000);
+    const translateX = dayjs(this.getStartDate()).valueOf() / (sightConfig.value * 1000);
     const bodyWidth = this.width;
     const viewWidth = 704;
     const tableWidth = 500;
@@ -118,9 +118,15 @@ class GanttStore {
 
   isPointerPress: boolean = false;
 
+  onUpdate: (item: Gantt.Item, startDate: string, endDate: string) => Promise<boolean> = () => Promise.resolve(true);
+
+  getStartDate() {
+    return dayjs().subtract(10, 'day').toString();
+  }
+
   @action
-  setData(data: Gantt.Item[]) {
-    this.data = data;
+  setData(data: Gantt.Item[], startDateKey: string, endDateKey: string) {
+    this.data = transverseData(data, startDateKey, endDateKey);
   }
 
   @action
@@ -137,6 +143,11 @@ class GanttStore {
   setRowCollapse(item: Gantt.Item, collapsed: boolean) {
     item.collapsed = collapsed;
     // this.barList = this.getBarList();
+  }
+
+  @action
+  setOnUpdate(onUpdate: (item: Gantt.Item, startDate: string, endDate: string) => Promise<boolean>) {
+    this.onUpdate = onUpdate;
   }
 
   @action
@@ -210,7 +221,7 @@ class GanttStore {
     const target = find(viewTypeList, { type });
     if (target) {
       this.sightConfig = target;
-      this.translateX = dayjs(startDate).valueOf() / (target.value * 1000);
+      this.translateX = dayjs(this.getStartDate()).valueOf() / (target.value * 1000);
     }
   }
 
@@ -648,9 +659,8 @@ class GanttStore {
 
       return map[this.sightConfig.type]();
     };
-
-    // 进行展开扁平
-    return observable(flattenDeep(data).map((item: any, index) => {
+    const flattenData = flattenDeep(data);
+    const barList = flattenData.map((item: any, index) => {
       let startAmp = dayjs(item.startDate || 0).valueOf();
       let endAmp = dayjs(item.endDate || 0).valueOf();
 
@@ -664,8 +674,7 @@ class GanttStore {
       const translateX = startAmp / pxUnitAmp;
       const translateY = baseTop + index * topStep;
       const { _parent } = item;
-
-      return {
+      const bar = {
         task: item,
         translateX,
         translateY,
@@ -679,6 +688,7 @@ class GanttStore {
         // setShadowShow,
         // setInvalidTaskBar,
         // getHovered,
+        _group: item.group,
         _collapsed: item.collapsed, // 是否折叠
         _depth: item._depth, // 表示子节点深度
         _index: item._index, // 任务下标位置
@@ -686,7 +696,11 @@ class GanttStore {
         _childrenCount: !item.children ? 0 : item.children.length, // 子任务
         _dateFormat,
       };
-    }));
+      item._bar = bar;
+      return bar;
+    });
+    // 进行展开扁平
+    return observable(barList);
   }
 
   @action
@@ -888,11 +902,24 @@ class GanttStore {
      * 更新时间
      */
   @action
-  updateTaskDate(barInfo: Gantt.Bar) {
+  async updateTaskDate(barInfo: Gantt.Bar) {
     const { translateX, width, task } = barInfo;
+    const oldStartDate = barInfo.task.startDate;
+    const oldEndDate = barInfo.task.endDate;
     // TODO:更新之后的后续处理
-    task.startDate = dayjs(translateX * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
-    task.endDate = dayjs((translateX + width) * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
+    const startDate = dayjs(translateX * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
+    const endDate = dayjs((translateX + width) * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
+    runInAction(() => {
+      task.startDate = startDate;
+      task.endDate = endDate;
+    });
+    const success = await this.onUpdate(task, startDate, endDate);
+    if (!success) {
+      runInAction(() => {
+        task.startDate = oldStartDate;
+        task.endDate = oldEndDate;
+      });
+    }
   }
 
   @action
@@ -903,7 +930,6 @@ class GanttStore {
     const isExpand = getDragSideExpand(moveEv, type);
     // 每次step可能不一样， 动态计算 如：每月可能30或31天
     const step = getMoveStep(isLeft, isShrink, this.sightConfig.type, this.pxUnitAmp, barInfo);
-
     if (isShrink) {
       this.moveShrinkStep(step, type, barInfo, basePointerX, pointerX);
     }
@@ -920,6 +946,8 @@ class GanttStore {
   moveShrinkStep = (step: number, type: Gantt.MoveType, barInfo: Gantt.Bar, basePointerX: number, pointerX: number) => {
     const isLeft = type === 'left';
     let { width, translateX } = barInfo;
+    const pointerDis = pointerX - basePointerX;
+    if (pointerDis > width) return;
 
     if (isLeft) {
       translateX += step;
@@ -927,10 +955,7 @@ class GanttStore {
     } else {
       width -= step;
     }
-
-    const pointerDis = Math.abs(pointerX - basePointerX);
-    if (pointerDis > width) return;
-    if (width <= step) return;
+    if (width < step) return;
 
     barInfo.translateX = translateX;
     barInfo.width = width;

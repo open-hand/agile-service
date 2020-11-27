@@ -5,6 +5,8 @@
   align-items: center;
   color: #d9d9d9;
   cursor: pointer;
+  position: relative;
+  z-index: 5;
 }
 
 .row-toggler:hover {
@@ -14,16 +16,17 @@
 .row-toggler > i {
   width: 20px;
   height: 20px;
+  background: white;
 
   &[data-level='0'] {
     border: 1px solid #e5e5e5;
-    border-radius: 2px;   
+    border-radius: 2px;
   }
 }
 
 .row-toggler > i > svg {
   transition: transform 218ms;
-  fill: currentColor;
+  fill: currentColor;  
 }
 
 .row-toggler.collapsed > i > svg {
