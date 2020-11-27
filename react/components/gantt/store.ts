@@ -935,7 +935,7 @@ class GanttStore {
 
     const pointerDis = Math.abs(pointerX - basePointerX);
     if (pointerDis > width) return;
-    if (width <= step) return;
+    if (width < step) return;
 
     barInfo.translateX = translateX;
     barInfo.width = width;
