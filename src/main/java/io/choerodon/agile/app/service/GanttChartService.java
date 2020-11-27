@@ -2,7 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.GanttChartVO;
 import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.UserWithGanttChartVO;
+import io.choerodon.agile.api.vo.GanttChartTreeVO;
 
 import java.util.List;
 
@@ -28,5 +28,5 @@ public interface GanttChartService {
      * @param searchVO
      * @return
      */
-    List<UserWithGanttChartVO> listByUser(Long projectId, SearchVO searchVO);
+    List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO);
 }
