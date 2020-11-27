@@ -3,7 +3,7 @@
 /* eslint-disable no-underscore-dangle */
 import { createRef } from 'react';
 import {
-  observable, computed, action,
+  observable, computed, action, runInAction,
 } from 'mobx';
 import { debounce, find, throttle } from 'lodash';
 import dayjs, { Dayjs } from 'dayjs';
@@ -118,13 +118,15 @@ class GanttStore {
 
   isPointerPress: boolean = false;
 
+  onUpdate: (item: Gantt.Item, startDate: string, endDate: string) => Promise<boolean> = () => Promise.resolve(true);
+
   getStartDate() {
     return dayjs().subtract(10, 'day').toString();
   }
 
   @action
-  setData(data: Gantt.Item[]) {
-    this.data = transverseData(data);
+  setData(data: Gantt.Item[], startDateKey: string, endDateKey: string) {
+    this.data = transverseData(data, startDateKey, endDateKey);
   }
 
   @action
@@ -141,6 +143,11 @@ class GanttStore {
   setRowCollapse(item: Gantt.Item, collapsed: boolean) {
     item.collapsed = collapsed;
     // this.barList = this.getBarList();
+  }
+
+  @action
+  setOnUpdate(onUpdate: (item: Gantt.Item, startDate: string, endDate: string) => Promise<boolean>) {
+    this.onUpdate = onUpdate;
   }
 
   @action
@@ -895,11 +902,24 @@ class GanttStore {
      * 更新时间
      */
   @action
-  updateTaskDate(barInfo: Gantt.Bar) {
+  async updateTaskDate(barInfo: Gantt.Bar) {
     const { translateX, width, task } = barInfo;
+    const oldStartDate = barInfo.task.startDate;
+    const oldEndDate = barInfo.task.endDate;
     // TODO:更新之后的后续处理
-    task.startDate = dayjs(translateX * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
-    task.endDate = dayjs((translateX + width) * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
+    const startDate = dayjs(translateX * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
+    const endDate = dayjs((translateX + width) * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
+    runInAction(() => {
+      task.startDate = startDate;
+      task.endDate = endDate;
+    });
+    const success = await this.onUpdate(task, startDate, endDate);
+    if (!success) {
+      runInAction(() => {
+        task.startDate = oldStartDate;
+        task.endDate = oldEndDate;
+      });
+    }
   }
 
   @action

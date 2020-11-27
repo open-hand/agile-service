@@ -17,7 +17,7 @@ import Chart from './components/chart';
 import styles from './Gantt.less';
 import { Gantt } from './types';
 
-const Body:React.FC = ({ children }) => {
+const Body: React.FC = ({ children }) => {
   const { store } = useContext(Context);
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
@@ -33,15 +33,23 @@ const Body:React.FC = ({ children }) => {
 interface GanttProps {
   data: Gantt.Item[]
   columns: Gantt.Column[]
+  onUpdate: (item: Gantt.Item, startDate: string, endDate: string) => Promise<boolean>
+  startDateKey?: string
+  endDateKey?: string
 }
-const GanttComponent: React.FC<GanttProps> = ({ data, columns }) => {
+const GanttComponent: React.FC<GanttProps> = ({
+  data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate',
+}) => {
   const store = useMemo(() => new GanttStore(), []);
   useEffect(() => {
-    store.setData(data);
-  }, [data, store]);
+    store.setData(data, startDateKey, endDateKey);
+  }, [data, endDateKey, startDateKey, store]);
   useEffect(() => {
     store.setColumns(columns);
   }, [columns, store]);
+  useEffect(() => {
+    store.setOnUpdate(onUpdate);
+  }, [columns, onUpdate, store]);
   return (
     <Context.Provider value={{ store }}>
       <Body>

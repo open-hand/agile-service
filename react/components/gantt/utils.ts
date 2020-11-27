@@ -165,14 +165,14 @@ export function getMaxRange(bar: Gantt.Bar) {
     width: maxTranslateX - minTranslateX,
   };
 }
-export function transverseData(data: Gantt.Item[] = []) {
+export function transverseData(data: Gantt.Item[] = [], startDateKey: string, endDateKey: string) {
   const result:Gantt.Item[] = cloneDeep(data);
   const temp: Gantt.Item[] = result.slice();
   while (temp.length > 0) {
     const current = temp.shift();
     if (current) {
-      current.startDate = current.startDate || '';
-      current.endDate = current.endDate || '';
+      current.startDate = current[startDateKey] || '';
+      current.endDate = current[endDateKey] || '';
       current.collapsed = current.collapsed || false;
       if (current.children && current.children.length > 0) {
         current.children.forEach((t) => {
