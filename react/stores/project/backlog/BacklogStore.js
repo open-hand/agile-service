@@ -535,7 +535,6 @@ class BacklogStore {
     return {
       get(sprintId) {
         const filterAssignId = that.filterSprintAssign.get(sprintId);
-        console.log('filterAssignId====', filterAssignId);
         if (filterAssignId) {
           return that.issueMap.get(sprintId) ? that.issueMap.get(sprintId).filter((issue) => issue.assigneeId === filterAssignId) : [];
         }

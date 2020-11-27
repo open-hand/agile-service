@@ -52,9 +52,7 @@ export default DropTarget(
       epic: props.epic, feature: props.feature, version: props.version, sprint: props.sprint,
     }),
     canDrop: (props, monitor) => { // props: target, monitor: source
-      // console.log('props, monitor：');
       const item = monitor.getItem();
-      // console.log(props.sprint, item.sprint);
       const targetSprint = props.sprint;
       const sourceSprint = item.sprint;
       if (targetSprint) { // 冲刺泳道

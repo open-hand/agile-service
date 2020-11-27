@@ -33,7 +33,6 @@ class TitleCell extends Component {
         );
       }
       case 'sprint': {
-        // console.log(toJS(sprint));
         const {
           sprintId, sprintName, storyNum, statusCode, planning, assigneeIssues,
         } = sprint;
@@ -54,7 +53,7 @@ class TitleCell extends Component {
               )
             }
             {
-              assigneeIssues && assigneeIssues.length && <SprintAssigneeInfo assignees={assigneeIssues} />
+              assigneeIssues && assigneeIssues.length > 0 && <SprintAssigneeInfo assignees={assigneeIssues} />
             }
           </>
         );
