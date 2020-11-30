@@ -2,11 +2,13 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.SprintStoryPointVO;
 import io.choerodon.agile.api.vo.SprintTaskVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.TeamPerformanceService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.mapper.TeamPerformanceMapper;
 import io.choerodon.agile.infra.utils.DataUtil;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +31,9 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
 
     @Override
     public List<SprintStoryPointVO> querySprintStoryPoint(Long projectId) {
-        List<SprintStoryPointVO> sprintStoryPoints = teamPerformanceMapper.querySprintStoryPoints(projectId);
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        List<SprintStoryPointVO> sprintStoryPoints = teamPerformanceMapper.querySprintStoryPoints(projectId,
+                Objects.isNull(agilePluginService) ? false : true);
         BigDecimal sumStoryPoints = new BigDecimal(0);
         BigDecimal sumStoryPointsComplete = new BigDecimal(0);
         List<Long> mainResponsibleIds = new ArrayList<>();
@@ -53,7 +57,9 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
 
     @Override
     public List<SprintTaskVO> querySprintTaskTime(Long projectId) {
-        List<SprintTaskVO> sprintTasks = teamPerformanceMapper.querySprintTaskTime(projectId);
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        List<SprintTaskVO> sprintTasks = teamPerformanceMapper.querySprintTaskTime(projectId,
+                Objects.isNull(agilePluginService) ? false : true);
         BigDecimal sumRemainingTime = new BigDecimal(0);
         BigDecimal remainingTimeComplete = new BigDecimal(0);
         List<Long> mainResponsibleIds = new ArrayList<>();
