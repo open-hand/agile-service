@@ -207,7 +207,7 @@ class IssueSearchStore {
     this.overflowLine = data;
   }
 
-  @observable folded: boolean = false;
+  @observable folded: boolean | undefined;
 
   @action setFolded = (data: boolean) => {
     this.folded = data;

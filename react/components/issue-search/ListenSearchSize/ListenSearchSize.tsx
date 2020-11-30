@@ -14,7 +14,7 @@ const ListenSize: React.FC = () => {
   const searchSize = useSize(searchEle as BasicTarget);
 
   useEffect(() => {
-    store.setOverflowLine((searchSize.height || 0) > 46);
+    store.setOverflowLine((searchSize.height || 0) > 50);
   }, [searchSize.height, store]);
 
   return (

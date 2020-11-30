@@ -1,13 +1,17 @@
 import React, {
-  useEffect, useCallback,
+  useEffect, useCallback, useState,
 } from 'react';
 import {
-  DataSet, Modal,
+  DataSet, Modal, Button, Progress,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { Choerodon } from '@choerodon/boot';
+import { Choerodon, WSHandler, WSProvider } from '@choerodon/boot';
 import { IModalProps } from '@/common/types';
 import { issueApi } from '@/api';
+import { getProjectId } from '@/utils/common';
+
+import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { ProgressStatus } from 'choerodon-ui/lib/progress/enum';
 import styles from './index.less';
 
 interface Props {
@@ -18,29 +22,47 @@ interface Props {
 
 const BatchDeleteModal: React.FC<Props> = (props) => {
   const { modal, dataSet: tableDataSet, close } = props;
+  const [loading, setLoading] = useState<boolean | string>(false);
+  const [progress, setProgress] = useState(0);
 
   const handleDelete = useCallback(async () => {
     const issueIds = tableDataSet.selected.map((record) => record.get('issueId'));
-    return issueApi.batchDelete(issueIds).then(() => {
-      Choerodon.prompt('删除成功');
-      close();
-      tableDataSet.query();
-      return true;
-    }).catch(() => {
-      Choerodon.prompt('删除失败');
-      return false;
-    });
-  }, [close, tableDataSet]);
+    await issueApi.batchDelete(issueIds);
+  }, [tableDataSet]);
 
   const handleCancel = useCallback(() => {
     close();
-    return Promise.resolve(true);
-  }, [close]);
+    modal?.close();
+  }, [close, modal]);
 
-  useEffect(() => {
-    modal?.handleOk(handleDelete);
-    modal?.handleCancel(handleCancel);
-  }, [close, handleCancel, handleDelete, modal]);
+  const handleMessage = (message: string) => {
+    const data = JSON.parse(message);
+    if (data) {
+      const { status, process } = data;
+      switch (status) {
+        case 'success': {
+          setLoading('success');
+          setTimeout(() => {
+            Choerodon.prompt('删除成功');
+            close();
+            modal?.close();
+            tableDataSet.query();
+          }, 2000);
+          break;
+        }
+        case 'doing': {
+          setProgress(Number(process));
+          break;
+        }
+        case 'failed': {
+          Choerodon.prompt(data.error, 'error');
+          setLoading(false);
+          break;
+        }
+        default: break;
+      }
+    }
+  };
 
   return (
     <div>
@@ -48,6 +70,41 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
       <span style={{ color: '#F44336' }}>
         请谨慎操作！
       </span>
+      <WSHandler
+        messageKey={`agile-batch-delete-issue-${getProjectId()}`}
+        onMessage={handleMessage}
+      >
+        { loading && (
+          <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
+            {loading === 'success' ? '修改成功' : ['正在删除，请稍等片刻', <span className={styles.dot}>…</span>]}
+            <Progress status={'success' as ProgressStatus} value={Math.round(progress * 100)} />
+          </div>
+        )}
+      </WSHandler>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+        <Button
+          onClick={handleCancel}
+          disabled={!!loading}
+          style={{
+            fontWeight: 500,
+          }}
+        >
+          取消
+        </Button>
+        <Button
+          disabled={!!loading}
+          color={'blue' as ButtonColor}
+          loading={Boolean(loading)}
+          style={{
+            fontWeight: 500,
+          }}
+          onClick={() => {
+            handleDelete();
+          }}
+        >
+          确定
+        </Button>
+      </div>
     </div>
   );
 };
@@ -62,6 +119,7 @@ const openBatchDeleteModal = ({ dataSet, close }: { dataSet: DataSet, close: Fun
     },
     className: styles.batchDeleteModal,
     children: <ObserverBatchDeleteModal dataSet={dataSet} close={close} />,
+    footer: () => null,
   });
 };
 export default openBatchDeleteModal;

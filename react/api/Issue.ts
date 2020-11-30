@@ -480,12 +480,9 @@ class IssueApi extends Api<IssueApi> {
 
   batchDelete(issueIds: string[]) {
     return this.request({
-      method: 'delete',
-      url: `${this.prefix}/star_beacon/instance/unstar`,
-      data: {
-        organizationId: getOrganizationId(),
-        issueIds,
-      },
+      method: 'post',
+      url: `${this.prefix}/issues/batch_delete`,
+      data: issueIds,
     });
   }
 }

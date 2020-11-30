@@ -6,15 +6,16 @@ import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import { DropTarget } from 'react-dnd';
 import { IsInProgram } from '@/hooks/useIsInProgram';
+import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import Column from './Column';
 import EpicCard from './EpicCard';
 import Cell from './Cell';
 import AddCard from './AddCard';
 import CreateEpic from './CreateEpic';
+import ListenEpicCellInViewport from './ListenEpicCellInViewport';
 import { ColumnWidth, CellPadding } from '../../Constants';
 import AutoScroll from '../../../../../common/AutoScroll';
 import EpicDragCollapse from './EpicDragCollapse';
-import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
 @observer
 class EpicCell extends Component {
@@ -150,7 +151,7 @@ class EpicCell extends Component {
       epic, otherData, lastCollapse, index, connectDropTarget, isOver,
     } = this.props;
     const { resizing } = this.state;
-    const { storyData } = StoryMapStore;
+    const { epicInViewportMap } = StoryMapStore;
     const {
       collapse, storys, feature, epicId,
     } = otherData || {};
@@ -184,11 +185,14 @@ class EpicCell extends Component {
         subIssueNum = Math.max((epicId ? storys.length : noEpicStoryLength) + hasStoryFeatureLength, 0);
       }
     }
+    const epicInViewport = epicInViewportMap.get(epicId);
     return (
       <>
         {
           !StoryMapStore.hiddenColumnNoStory || (epicId ? storys.length > 0 : noEpicStoryLength > 0) ? (
             <Cell
+              key={epicId.toString()}
+              className={`epicCell-${epicId}`}
               saveRef={connectDropTarget}
               epicIndex={index}
               lastCollapse={lastCollapse}
@@ -255,18 +259,22 @@ class EpicCell extends Component {
                       ({ isInProgram }) => (
                         <>
                           <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Column style={{ minHeight: 'unset' }}>
-                              {adding
-                                ? <CreateEpic index={index} onCreate={this.handleCreateEpic} />
-                                : (
-                                  <EpicCard
-                                    epic={epic}
-                                    subIssueNum={subIssueNum}
-                                    index={index}
-                                    onMouseDown={this.handleDragMouseDown}
-                                  />
-                                )}
-                            </Column>
+                            {
+                              !!epicInViewport && (
+                                <Column style={{ minHeight: 'unset' }}>
+                                  {adding
+                                    ? <CreateEpic index={index} onCreate={this.handleCreateEpic} />
+                                    : (
+                                      <EpicCard
+                                        epic={epic}
+                                        subIssueNum={subIssueNum}
+                                        index={index}
+                                        onMouseDown={this.handleDragMouseDown}
+                                      />
+                                    )}
+                                </Column>
+                              )
+                            }
                             {issueId && !StoryMapStore.isFullScreen ? (
                               !adding && !isInProgram && (
                               <AddCard
@@ -312,13 +320,14 @@ class EpicCell extends Component {
                   </IsInProgram>
                 )}
               {collapse && (
-              <EpicDragCollapse
-                epic={epic}
-                index={index}
-                subIssueNum={subIssueNum}
-                onMouseDown={this.handleDragMouseDown}
-              />
+                <EpicDragCollapse
+                  epic={epic}
+                  index={index}
+                  subIssueNum={subIssueNum}
+                  onMouseDown={this.handleDragMouseDown}
+                />
               )}
+              <ListenEpicCellInViewport epicId={epicId} />
             </Cell>
           ) : ''
         }

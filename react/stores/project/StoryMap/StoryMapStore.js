@@ -717,6 +717,20 @@ class StoryMapStore {
   @action setFilterListVisible = (data) => {
     this.filterListVisible = data;
   }
+
+  @observable epicEleMap = observable.map();
+
+  @observable epicInViewportMap = observable.map();
+
+  @action setEpicInViewportMap = (key, value) => {
+    this.epicInViewportMap.set(key, value);
+  }
+
+  @observable rowInViewportMap = observable.map();
+
+  @action setRowInViewportMap = (key, value) => {
+    this.rowInViewportMap.set(key, value);
+  }
 }
 
 export default new StoryMapStore();
