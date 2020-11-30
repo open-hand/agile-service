@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
+import { useLockFn } from 'ahooks';
 
 export default function useDragResize(handleResize: ({ width }: { width: number }) => void, {
   initSize,
@@ -8,8 +9,8 @@ export default function useDragResize(handleResize: ({ width }: { width: number 
   initSize: {
     width: number
   },
-  minWidth: number
-  maxWidth: number
+  minWidth?: number
+  maxWidth?: number
 }): [
     (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void,
     boolean
@@ -19,14 +20,18 @@ export default function useDragResize(handleResize: ({ width }: { width: number 
     left: 0,
   });
   const initSizeRef = useRef(initSize);
-  const handleMouseMove = useCallback((event: MouseEvent) => {
+  const handleMouseMove = useLockFn(async (event: MouseEvent) => {
     const distance = event.clientX - positionRef.current.left;
-    const width = initSizeRef.current.width + distance;
-    const minWidth = Math.max(width, minWidthConfig);
-    const maxWidth = Math.min(minWidth, maxWidthConfig);
-    handleResize({ width: maxWidth });
+    let width = initSizeRef.current.width + distance;
+    if (minWidthConfig !== undefined) {
+      width = Math.max(width, minWidthConfig);
+    }
+    if (maxWidthConfig !== undefined) {
+      width = Math.min(width, maxWidthConfig);
+    }
+    handleResize({ width });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handleResize]);
+  });
   const handleMouseUp = useCallback(() => {
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('mouseup', handleMouseUp);

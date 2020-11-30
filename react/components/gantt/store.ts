@@ -68,7 +68,6 @@ class GanttStore {
     const bodyWidth = this.width;
     const viewWidth = 704;
     const tableWidth = 500;
-    // const collapsed = this.data.every(bar => bar.collapsed);
     this.viewWidth = viewWidth;
     this.tableWidth = tableWidth;
     this.translateX = translateX;
@@ -249,9 +248,40 @@ class GanttStore {
     this.translateX = translateX;
   }
 
+  getTranslateXByDate(date: string) {
+    return Math.floor(dayjs(date).hour(0).minute(0).second(0)
+      .valueOf() / this.pxUnitAmp);
+  }
+
   @computed get todayTranslateX() {
     return Math.floor(dayjs(new Date().valueOf()).hour(0).minute(0).second(0)
       .valueOf() / this.pxUnitAmp);
+  }
+
+  @computed get mid() {
+    const startAmp = this.pxUnitAmp * this.getTranslateXByDate(this.getStartDate());
+    const endAmp = startAmp + this.getDurationAmp();
+    return parseInt(String((startAmp + endAmp) / 2), 10);
+  }
+
+  @computed get scrollBarWidth() {
+    const MIN_WIDTH = 30;
+    return Math.max((this.viewWidth) / (this.scrollWidth) * 160, MIN_WIDTH);
+  }
+
+  @computed get scrollLeft() {
+    const rate = this.viewWidth / this.scrollWidth;
+    const curDate = dayjs(this.translateAmp).toString();
+    // 默认滚动条在中间
+    const half = (this.viewWidth - this.scrollBarWidth) / 2;
+    const viewScrollLeft = half + rate * (this.getTranslateXByDate(curDate) - this.getTranslateXByDate(this.getStartDate()));
+    return Math.min(Math.max(viewScrollLeft, 0), this.viewWidth - this.scrollBarWidth);
+  }
+
+  @computed get scrollWidth() {
+    // 最小宽度
+    const init = this.getTranslateXByDate(String(this.mid + this.pxUnitAmp)) - this.getTranslateXByDate(String(this.mid - this.pxUnitAmp));
+    return Math.max(Math.abs(this.viewWidth + this.translateX - this.getTranslateXByDate(this.getStartDate())), init);
   }
 
   // 内容区滚动高度
