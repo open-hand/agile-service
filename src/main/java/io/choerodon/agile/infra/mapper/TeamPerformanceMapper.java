@@ -20,8 +20,8 @@ public interface TeamPerformanceMapper extends BaseMapper<SprintDTO> {
     /**
      * 查询当前项目正在进行冲刺任务工时统计数据
      * @param projectId
-     * @param b
+     * @param isPlugin
      * @return
      */
-    List<SprintTaskVO> querySprintTaskTime(@Param("projectId") Long projectId, @Param("isPlugin") boolean b);
+    List<SprintTaskVO> querySprintTaskTime(@Param("projectId") Long projectId, @Param("isPlugin") boolean isPlugin);
 }
