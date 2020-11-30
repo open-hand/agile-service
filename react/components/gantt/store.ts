@@ -209,9 +209,20 @@ class GanttStore {
     }
   }
 
+  @action handleResizeTableWidth(width: number) {
+    this.tableWidth = width;
+    this.viewWidth = this.width - this.tableWidth;
+    // const tableMinWidth = 200;
+    // const chartMinWidth = 200;
+    // if (this.tableWidth + increase >= tableMinWidth && this.viewWidth - increase >= chartMinWidth) {
+    //   this.tableWidth += increase;
+    //   this.viewWidth -= increase;
+    // }
+  }
+
   @action initWidth() {
     this.tableWidth = this.columns.reduce((width, item) => width + item.width, 0);
-    this.viewWidth = this.height - this.tableWidth;
+    this.viewWidth = this.width - this.tableWidth;
     // 表盘宽度不能小于总宽度38%
     if (this.viewWidth < MIN_VIEW_RATE * this.width) {
       this.viewWidth = MIN_VIEW_RATE * this.width;
