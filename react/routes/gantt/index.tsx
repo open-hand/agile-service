@@ -17,6 +17,11 @@ import FlatSelect from '@/components/flat-select';
 import useFullScreen from '@/common/useFullScreen';
 import STATUS from '@/constants/STATUS';
 import { Issue } from '@/common/types';
+import { ILocalField } from '@/components/issue-search/store';
+import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import { useIssueSearchStore } from '@/components/issue-search';
+import FilterManage from '@/components/FilterManage';
+import { transformFilter } from './components/search/util';
 import Search from './components/search';
 import './index.less';
 
@@ -59,18 +64,23 @@ const tableColumns = [{
 const GanttPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [type, setType] = useState<string>('task');
-  const [sprintId, setSprintId] = useState<string|null>(null);
+  const [sprintId, setSprintId] = useState<string | null>(null);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const [workCalendar, setWorkCalendar] = useState<any>();
+  const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
+  const issueSearchStore = useIssueSearchStore({
+    getSystemFields: () => getSystemFields().filter((item) => item.code !== 'sprint') as ILocalField[],
+    transformFilter,
+  });
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
-  useEffect(() => {
+  const loadData = useCallback(() => {
     (async () => {
       setLoading(true);
       const year = dayjs().year();
       const [workCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
-        type === 'task' ? ganttApi.loadByTask() : ganttApi.loadByUser(),
+        type === 'task' ? ganttApi.loadByTask(issueSearchStore.getCustomFieldFilters()) : ganttApi.loadByUser(issueSearchStore.getCustomFieldFilters()),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -82,7 +92,10 @@ const GanttPage: React.FC = () => {
       setData(res);
       setLoading(false);
     })();
-  }, [type]);
+  }, [issueSearchStore, type]);
+  useEffect(() => {
+    loadData();
+  }, [issueSearchStore, loadData]);
   const handleUpdate = useCallback(async (issue: Gantt.Item, startDate: string, endDate: string) => {
     try {
       await issueApi.update({
@@ -111,13 +124,13 @@ const GanttPage: React.FC = () => {
       }
     }
   }, [sprintId]);
-  const isRestDay = useCallback((date:string) => {
+  const isRestDay = useCallback((date: string) => {
     if (!workCalendar) {
       return false;
     }
     const day = dayjs(date).weekday();
     const { saturdayWork, sundayWork, timeZoneWorkCalendarDTOS } = workCalendar;
-    const unWorkDays = timeZoneWorkCalendarDTOS.map((w:any) => w.workDay);
+    const unWorkDays = timeZoneWorkCalendarDTOS.map((w: any) => w.workDay);
     if (!saturdayWork && day === 6) {
       return true;
     }
@@ -129,7 +142,7 @@ const GanttPage: React.FC = () => {
     }
     return false;
   }, [workCalendar]);
-  const getBarColor = useCallback((issue:Issue) => {
+  const getBarColor = useCallback((issue: Issue) => {
     const statusType = issue.statusVO.type;
     const color = STATUS[statusType];
     if (color) {
@@ -143,6 +156,9 @@ const GanttPage: React.FC = () => {
       backgroundColor: '',
     };
   }, []);
+  const handleClickFilterManage = () => {
+    setFilterManageVisible(true);
+  };
   return (
     <Page>
       <Header>
@@ -174,6 +190,7 @@ const GanttPage: React.FC = () => {
         >
           {isFullScreen ? '退出全屏' : '全屏'}
         </Button>
+        <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button>
       </Header>
       <Breadcrumb />
       <Content style={{
@@ -182,7 +199,7 @@ const GanttPage: React.FC = () => {
         flexDirection: 'column',
       }}
       >
-        <Search />
+        <Search issueSearchStore={issueSearchStore} loadData={loadData} />
         <Loading loading={loading} />
         {columns.length > 0 && workCalendar && (
           <GanttComponent
@@ -196,6 +213,11 @@ const GanttPage: React.FC = () => {
             getBarColor={getBarColor}
           />
         )}
+        <FilterManage
+          visible={filterManageVisible!}
+          setVisible={setFilterManageVisible}
+          issueSearchStore={issueSearchStore}
+        />
       </Content>
     </Page>
   );
