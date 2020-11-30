@@ -37,9 +37,10 @@ interface GanttProps {
   startDateKey?: string
   endDateKey?: string
   isRestDay?: (date: string) => boolean
+  getBarColor?: (item: Gantt.Item) => { backgroundColor: string, borderColor: string }
 }
 const GanttComponent: React.FC<GanttProps> = ({
-  data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate', isRestDay,
+  data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate', isRestDay, getBarColor,
 }) => {
   const store = useMemo(() => new GanttStore(), []);
   useEffect(() => {
@@ -58,7 +59,7 @@ const GanttComponent: React.FC<GanttProps> = ({
   }, [isRestDay, store]);
 
   return (
-    <Context.Provider value={{ store }}>
+    <Context.Provider value={{ store, getBarColor }}>
       <Body>
         {/* <ScrollIndicator /> */}
         <header>

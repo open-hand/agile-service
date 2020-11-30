@@ -119,6 +119,10 @@ class GanttStore {
 
   isPointerPress: boolean = false;
 
+  startDateKey: string = 'startDate';
+
+  endDateKey: string = 'endDate';
+
   onUpdate: (item: Gantt.Item, startDate: string, endDate: string) => Promise<boolean> = () => Promise.resolve(true);
 
   isRestDay = isRestDay
@@ -133,6 +137,8 @@ class GanttStore {
 
   @action
   setData(data: Gantt.Item[], startDateKey: string, endDateKey: string) {
+    this.startDateKey = startDateKey;
+    this.endDateKey = endDateKey;
     this.data = transverseData(data, startDateKey, endDateKey);
   }
 
@@ -961,12 +967,16 @@ class GanttStore {
     runInAction(() => {
       task.startDate = startDate;
       task.endDate = endDate;
+      task[this.startDateKey] = startDate;
+      task[this.endDateKey] = endDate;
     });
     const success = await this.onUpdate(task, startDate, endDate);
     if (!success) {
       runInAction(() => {
         task.startDate = oldStartDate;
         task.endDate = oldEndDate;
+        task[this.startDateKey] = oldStartDate;
+        task[this.endDateKey] = oldEndDate;
       });
     }
   }

@@ -45,7 +45,6 @@ const ScrollBar: React.FC = () => {
       style={{ left: tableWidth, width: viewWidth }}
       onMouseDown={handleMouseDown}
     >
-      {store.scrollWidth}
       {resizing && (
         <div style={{
           position: 'fixed',

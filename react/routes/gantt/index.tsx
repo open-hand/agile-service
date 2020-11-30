@@ -15,6 +15,8 @@ import Loading from '@/components/Loading';
 import SelectSprint from '@/components/select/select-sprint';
 import FlatSelect from '@/components/flat-select';
 import useFullScreen from '@/common/useFullScreen';
+import STATUS from '@/constants/STATUS';
+import { Issue } from '@/common/types';
 import Search from './components/search';
 import './index.less';
 
@@ -123,6 +125,20 @@ const GanttPage: React.FC = () => {
     }
     return false;
   }, [workCalendar]);
+  const getBarColor = useCallback((issue:Issue) => {
+    const statusType = issue.statusVO.type;
+    const color = STATUS[statusType];
+    if (color) {
+      return {
+        borderColor: color,
+        backgroundColor: color,
+      };
+    }
+    return {
+      borderColor: '',
+      backgroundColor: '',
+    };
+  }, []);
   return (
     <Page>
       <Header>
@@ -171,6 +187,8 @@ const GanttPage: React.FC = () => {
             startDateKey="estimatedStartTime"
             endDateKey="estimatedEndTime"
             isRestDay={isRestDay}
+            // @ts-ignore
+            getBarColor={getBarColor}
           />
         )}
       </Content>
