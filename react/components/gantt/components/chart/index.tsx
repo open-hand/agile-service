@@ -25,6 +25,8 @@ const Chart: React.FC = () => {
   const chartRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (chartRef.current) {
+      // @ts-ignore
+      chartElementRef.current = chartRef.current;
       const chartHammer = new Hammer(chartRef.current);
       store.setChartHammer(chartHammer);
       // store.initDragScrollHammer(chartRef.current);

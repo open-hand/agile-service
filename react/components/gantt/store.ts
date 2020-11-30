@@ -21,6 +21,7 @@ import {
   flattenDeep, getDragSideShrink, getDragSideExpand, getMoveStep, transverseData,
 } from './utils';
 
+const AUTOSCROLL_RATE = 7;
 dayjs.extend(weekday);
 dayjs.extend(weekOfYear);
 dayjs.extend(quarterOfYear);
@@ -77,6 +78,8 @@ class GanttStore {
 
   _wheelTimer: NodeJS.Timeout | null
 
+  scrollTimer: number | null
+
   @observable data: Gantt.Item[] = [];
 
   @observable columns: Gantt.Column[] = [];
@@ -122,6 +125,10 @@ class GanttStore {
   startDateKey: string = 'startDate';
 
   endDateKey: string = 'endDate';
+
+  autoScrollPos: number = 0;
+
+  clientX: number = 0;
 
   onUpdate: (item: Gantt.Item, startDate: string, endDate: string) => Promise<boolean> = () => Promise.resolve(true);
 
@@ -831,6 +838,7 @@ class GanttStore {
     this.draggingType = type;
     barInfo.stepGesture = 'start';
     this.isPointerPress = true;
+    this.startAutoScroll();
   }
 
   @action
@@ -841,6 +849,7 @@ class GanttStore {
     }
     this.draggingType = null;
     this.isPointerPress = false;
+    this.stopAutoScroll();
   }
 
   /**
@@ -876,6 +885,7 @@ class GanttStore {
       //   barInfo.width = old.width - moveDistance;
       //   barInfo.translateX = old.translateX + moveDistance;
       // }
+
       this.updateDraggingBarPosition(event, barInfo, type, basePointerX);
     };
     const panEnd = () => {
@@ -912,7 +922,7 @@ class GanttStore {
     });
 
     const setBarShadowPosition = action((event: HammerInput) => {
-      pointerX = event.center.x;
+      pointerX = event.center.x + this.autoScrollPos;
       const pointerDis = pointerX - startX;
       const direction = pointerDis > 0 ? 1 : -1;
       const moveX = step * direction;
@@ -981,10 +991,44 @@ class GanttStore {
     }
   }
 
+  handleDraggingMouseMove=(event: MouseEvent) => {
+    this.clientX = event.clientX;
+  }
+
+  // 拖动时，当鼠标到边缘时，自动滚动
+  startAutoScroll = () => {
+    this.autoScrollPos = 0;
+    document.addEventListener('mousemove', this.handleDraggingMouseMove);
+    // 到最左或最右，停止滚动
+    const space = 100;
+    const scrollFunc = () => {
+      if (this.chartElementRef.current) {
+        if (this.clientX + space > this.chartElementRef.current?.getBoundingClientRect().right) {
+          this.autoScrollPos += AUTOSCROLL_RATE;
+          this.translateX += AUTOSCROLL_RATE;
+        } else if (this.clientX - space < this.chartElementRef.current?.getBoundingClientRect().left) {
+          this.autoScrollPos -= AUTOSCROLL_RATE;
+          this.translateX -= AUTOSCROLL_RATE;
+        }
+      }
+
+      this.scrollTimer = requestAnimationFrame(scrollFunc);
+    };
+    this.scrollTimer = requestAnimationFrame(scrollFunc);
+  }
+
+  // 停止自动滚动
+  stopAutoScroll = () => {
+    document.removeEventListener('mousemove', this.handleDraggingMouseMove);
+    if (this.scrollTimer) {
+      cancelAnimationFrame(this.scrollTimer);
+    }
+  }
+
   @action
   updateDraggingBarPosition(moveEv: HammerInput, barInfo: Gantt.Bar, type: Gantt.MoveType, basePointerX: number) {
     const isLeft = type === 'left';
-    const pointerX = moveEv.center.x;
+    const pointerX = isLeft ? moveEv.center.x - this.autoScrollPos : moveEv.center.x + this.autoScrollPos;
     const isShrink = getDragSideShrink(moveEv, type);
     const isExpand = getDragSideExpand(moveEv, type);
     // 每次step可能不一样， 动态计算 如：每月可能30或31天
@@ -1005,8 +1049,6 @@ class GanttStore {
   moveShrinkStep = (step: number, type: Gantt.MoveType, barInfo: Gantt.Bar, basePointerX: number, pointerX: number) => {
     const isLeft = type === 'left';
     let { width, translateX } = barInfo;
-    const pointerDis = pointerX - basePointerX;
-    if (pointerDis > width) return;
 
     if (isLeft) {
       translateX += step;
@@ -1014,6 +1056,9 @@ class GanttStore {
     } else {
       width -= step;
     }
+
+    const pointerDis = Math.abs(pointerX - basePointerX);
+    if (pointerDis > width) return;
     if (width < step) return;
 
     barInfo.translateX = translateX;
