@@ -838,7 +838,6 @@ class GanttStore {
     this.draggingType = type;
     barInfo.stepGesture = 'start';
     this.isPointerPress = true;
-    this.startAutoScroll();
   }
 
   @action
@@ -874,6 +873,7 @@ class GanttStore {
       this.gestureKeyPress = true;
       // baseX = event.center.x;
       this.handleDragStart(barInfo, type);
+      this.startAutoScroll();
     };
     const panMove = (event: HammerInput) => {
       // 移动
@@ -937,6 +937,7 @@ class GanttStore {
       startX = event.center.x;
       this.gestureKeyPress = true;
       this.handleDragStart(barInfo, 'move');
+      this.startAutoScroll();
     };
 
     const panMove = (event: HammerInput) => {
@@ -1028,7 +1029,7 @@ class GanttStore {
   @action
   updateDraggingBarPosition(moveEv: HammerInput, barInfo: Gantt.Bar, type: Gantt.MoveType, basePointerX: number) {
     const isLeft = type === 'left';
-    const pointerX = isLeft ? moveEv.center.x - this.autoScrollPos : moveEv.center.x + this.autoScrollPos;
+    const pointerX = moveEv.center.x + this.autoScrollPos;
     const isShrink = getDragSideShrink(moveEv, type);
     const isExpand = getDragSideExpand(moveEv, type);
     // 每次step可能不一样， 动态计算 如：每月可能30或31天
