@@ -851,6 +851,7 @@ class GanttStore {
     this.stopAutoScroll();
   }
 
+  // TODO 采用新方案
   /**
    * 调整宽度
    * @param event
@@ -906,6 +907,7 @@ class GanttStore {
 
   }
 
+  // TODO 采用新方案
   /**
    * 横向调整位置
    * @param barInfo
@@ -972,7 +974,6 @@ class GanttStore {
     const { translateX, width, task } = barInfo;
     const oldStartDate = barInfo.task.startDate;
     const oldEndDate = barInfo.task.endDate;
-    // TODO:更新之后的后续处理
     const startDate = dayjs(translateX * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
     const endDate = dayjs((translateX + width) * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
     runInAction(() => {

@@ -2,15 +2,18 @@ class AutoScroller {
   constructor({
     scroller,
     rate = 5,
-    space = 100,
+    space = 50,
+    onAutoScroll,
   }: {
     scroller?: HTMLElement
     rate?: number
     space?: number
+    onAutoScroll: (delta: number) => void
   }) {
     this.scroller = scroller || null;
     this.rate = rate;
     this.space = space;
+    this.onAutoScroll = onAutoScroll;
   }
 
   rate: number;
@@ -21,9 +24,11 @@ class AutoScroller {
 
   autoScrollPos: number = 0;
 
-  clientX: number = 0;
+  clientX: number | null = null;
 
   scrollTimer: number | null = null
+
+  onAutoScroll: (delta: number) => void
 
   handleDraggingMouseMove = (event: MouseEvent) => {
     this.clientX = event.clientX;
@@ -32,8 +37,10 @@ class AutoScroller {
   handleScroll = (position: 'left' | 'right') => {
     if (position === 'left') {
       this.autoScrollPos -= this.rate;
+      this.onAutoScroll(-this.rate);
     } else if (position === 'right') {
       this.autoScrollPos += this.rate;
+      this.onAutoScroll(this.rate);
     }
   }
 
@@ -42,7 +49,7 @@ class AutoScroller {
     document.addEventListener('mousemove', this.handleDraggingMouseMove);
     // 到最左或最右，停止滚动
     const scrollFunc = () => {
-      if (this.scroller) {
+      if (this.scroller && this.clientX !== null) {
         if (this.clientX + this.space > this.scroller?.getBoundingClientRect().right) {
           this.handleScroll('right');
         } else if (this.clientX - this.space < this.scroller?.getBoundingClientRect().left) {

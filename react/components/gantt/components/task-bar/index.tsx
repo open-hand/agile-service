@@ -8,7 +8,7 @@ import Context from '../../context';
 import styles from './index.less';
 import { Gantt } from '../../types';
 import { ROW_HEIGHT } from '../../constants';
-import DragResize from '../drag-resizer';
+import DragResize from '../drag-resize';
 
 interface TaskBarProps {
   data: Gantt.Bar
@@ -48,15 +48,19 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
     return ['#FD998F', '#F96B5D'];
   }, [store.pxUnitAmp, translateX, width]);
   // eslint-disable-next-line no-shadow
-  const handleLeftResize = useCallback(({ width, x }) => {
+  const handleResize = useCallback(({ width, x }) => {
     // eslint-disable-next-line no-param-reassign
     data.width = width;
     // eslint-disable-next-line no-param-reassign
     data.translateX = x;
-  }, []);
+  }, [data]);
   const handleLeftResizeEnd = useCallback(() => {
+    store.updateTaskDate(data);
+  }, [data, store]);
+  const handleAutoScroll = useCallback((delta: number) => {
+    store.translateX += delta;
+  }, [store]);
 
-  }, []);
   return (
     <div
       role="none"
@@ -93,11 +97,9 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
               </div>
             )} */}
             <DragResize
-              role="none"
-              // onMouseDown={handleLeftDown}
               className={classNames(styles['resize-handle'], styles.left)}
               style={{ left: -14 }}
-              onResize={handleLeftResize}
+              onResize={handleResize}
               onResizeEnd={handleLeftResizeEnd}
               defaultSize={{
                 x: translateX,
@@ -107,21 +109,39 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
               grid={30}
               type="left"
               scroller={store.chartElementRef.current || undefined}
+              onAutoScroll={handleAutoScroll}
             />
-            <div
-              role="none"
-              onMouseDown={handleRightDown}
+            <DragResize
               className={classNames(styles['resize-handle'], styles.right)}
               style={{ left: width + 2 }}
+              onResize={handleResize}
+              onResizeEnd={handleLeftResizeEnd}
+              defaultSize={{
+                x: translateX,
+                width,
+              }}
+              minWidth={30}
+              grid={30}
+              type="right"
+              scroller={store.chartElementRef.current || undefined}
+              onAutoScroll={handleAutoScroll}
             />
             <div className={classNames(styles['resize-bg'], styles.compact)} style={{ width: width + 30, left: -14 }} />
           </>
         )}
-        <div
-          role="none"
-          onMouseDown={handleBarPress}
-          onMouseUp={handleBarPressUp}
+        <DragResize
           className={styles.bar}
+          onResize={handleResize}
+          onResizeEnd={handleLeftResizeEnd}
+          defaultSize={{
+            x: translateX,
+            width,
+          }}
+          minWidth={30}
+          grid={30}
+          type="move"
+          scroller={store.chartElementRef.current || undefined}
+          onAutoScroll={handleAutoScroll}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -157,7 +177,7 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
               className={styles.default}
             />
           </svg>
-        </div>
+        </DragResize>
       </div>
       {stepGesture !== 'moving' && <div className={styles.label} style={{ left: width + 45 }}>{label}</div>}
       {stepGesture === 'moving' && (
