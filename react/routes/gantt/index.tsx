@@ -183,7 +183,8 @@ const GanttPage: React.FC = () => {
       }}
       >
         <Search />
-        {loading ? <Loading loading /> : columns.length > 0 && workCalendar && (
+        <Loading loading={loading} />
+        {columns.length > 0 && workCalendar && (
           <GanttComponent
             data={data}
             columns={columns}
