@@ -338,6 +338,7 @@
         <result property="resolution" column="resolution"/>
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
+        <result property="objectVersionNumber" column="object_version_number"/>
         <collection property="versionIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
             <id property="versionId" column="version_id"/>
@@ -417,7 +418,8 @@
         ai.parent_issue_id,
         ai.relate_issue_id,
         ai.estimated_start_time,
-        ai.estimated_end_time
+        ai.estimated_end_time,
+        ai.object_version_number
         FROM agile_issue ai
         <if test="isExcelExported">
           left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
