@@ -8,6 +8,7 @@ import Context from '../../context';
 import styles from './index.less';
 import { Gantt } from '../../types';
 import { ROW_HEIGHT } from '../../constants';
+import DragResize from '../drag-resizer';
 
 interface TaskBarProps {
   data: Gantt.Bar
@@ -46,6 +47,16 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
     }
     return ['#FD998F', '#F96B5D'];
   }, [store.pxUnitAmp, translateX, width]);
+  // eslint-disable-next-line no-shadow
+  const handleLeftResize = useCallback(({ width, x }) => {
+    // eslint-disable-next-line no-param-reassign
+    data.width = width;
+    // eslint-disable-next-line no-param-reassign
+    data.translateX = x;
+  }, []);
+  const handleLeftResizeEnd = useCallback(() => {
+
+  }, []);
   return (
     <div
       role="none"
@@ -81,11 +92,21 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
                 </svg>
               </div>
             )} */}
-            <div
+            <DragResize
               role="none"
-              onMouseDown={handleLeftDown}
+              // onMouseDown={handleLeftDown}
               className={classNames(styles['resize-handle'], styles.left)}
               style={{ left: -14 }}
+              onResize={handleLeftResize}
+              onResizeEnd={handleLeftResizeEnd}
+              defaultSize={{
+                x: translateX,
+                width,
+              }}
+              minWidth={30}
+              grid={30}
+              type="left"
+              scroller={store.chartElementRef.current || undefined}
             />
             <div
               role="none"
