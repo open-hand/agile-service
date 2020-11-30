@@ -28,6 +28,7 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
   const handleDelete = useCallback(async () => {
     const issueIds = tableDataSet.selected.map((record) => record.get('issueId'));
     await issueApi.batchDelete(issueIds);
+    setLoading(true);
   }, [tableDataSet]);
 
   const handleCancel = useCallback(() => {

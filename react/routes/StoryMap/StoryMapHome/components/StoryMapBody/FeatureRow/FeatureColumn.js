@@ -118,7 +118,7 @@ class FeatureColumn extends Component {
     return (
       <Column width={width} style={{ position: 'relative' }}>
         {
-          !!epicInViewportMap.get(epicId) && (
+          !!epicInViewportMap.get(epicId) && feature.issueId && (
             <>
               <FeatureCard feature={feature} />
               {resizing && (
