@@ -1,29 +1,27 @@
 import React from 'react';
-import { getSystemFields } from '@/stores/project/issue/IssueStore';
-import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
-import { ILocalField } from '@/components/issue-search/store';
-import { transformFilter } from './util';
+import IssueSearch from '@/components/issue-search';
+import IssueSearchStore from '@/components/issue-search/store';
+import openSaveFilterModal from '@/components/SaveFilterModal';
 
 interface Props {
+  issueSearchStore: IssueSearchStore
+  loadData: () => void
 }
-const GanttIssueSearch: React.FC<Props> = () => {
-  const issueSearchStore = useIssueSearchStore({
-    getSystemFields: () => getSystemFields().filter((item) => item.code !== 'sprint') as ILocalField[],
-    transformFilter,
-  });
-  const handleClear = () => {
+const GanttIssueSearch: React.FC<Props> = ({ issueSearchStore, loadData }) => {
+  // const issueSearchStore = useIssueSearchStore({
+  //   getSystemFields: () => getSystemFields().filter((item) => item.code !== 'sprint') as ILocalField[],
+  //   transformFilter,
+  // });
 
+  const handleSaveFilter = () => {
+    openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
-  const handleChange = () => {
-    console.log('issueSearchStore', issueSearchStore.chosenFields);
-  };
-  const handleSaveFilter = () => {};
   return (
     <div>
       <IssueSearch
         store={issueSearchStore}
-        onClear={handleClear}
-        onChange={handleChange}
+        onClear={loadData}
+        onChange={loadData}
         onClickSaveFilter={handleSaveFilter}
       />
     </div>
