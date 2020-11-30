@@ -56,7 +56,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
                 List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false);
                 List<GanttChartVO> result = buildFromIssueDto(issueDTOList, projectId);
-                return result;
+                return toTree(result);
             } else {
                 return new ArrayList<>();
             }
