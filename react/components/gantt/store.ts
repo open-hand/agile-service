@@ -838,7 +838,6 @@ class GanttStore {
     this.draggingType = type;
     barInfo.stepGesture = 'start';
     this.isPointerPress = true;
-    this.startAutoScroll();
   }
 
   @action
@@ -852,6 +851,7 @@ class GanttStore {
     this.stopAutoScroll();
   }
 
+  // TODO 采用新方案
   /**
    * 调整宽度
    * @param event
@@ -874,6 +874,7 @@ class GanttStore {
       this.gestureKeyPress = true;
       // baseX = event.center.x;
       this.handleDragStart(barInfo, type);
+      this.startAutoScroll();
     };
     const panMove = (event: HammerInput) => {
       // 移动
@@ -906,6 +907,7 @@ class GanttStore {
 
   }
 
+  // TODO 采用新方案
   /**
    * 横向调整位置
    * @param barInfo
@@ -937,6 +939,7 @@ class GanttStore {
       startX = event.center.x;
       this.gestureKeyPress = true;
       this.handleDragStart(barInfo, 'move');
+      this.startAutoScroll();
     };
 
     const panMove = (event: HammerInput) => {
@@ -971,7 +974,6 @@ class GanttStore {
     const { translateX, width, task } = barInfo;
     const oldStartDate = barInfo.task.startDate;
     const oldEndDate = barInfo.task.endDate;
-    // TODO:更新之后的后续处理
     const startDate = dayjs(translateX * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
     const endDate = dayjs((translateX + width) * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
     runInAction(() => {
@@ -1028,7 +1030,7 @@ class GanttStore {
   @action
   updateDraggingBarPosition(moveEv: HammerInput, barInfo: Gantt.Bar, type: Gantt.MoveType, basePointerX: number) {
     const isLeft = type === 'left';
-    const pointerX = isLeft ? moveEv.center.x - this.autoScrollPos : moveEv.center.x + this.autoScrollPos;
+    const pointerX = moveEv.center.x + this.autoScrollPos;
     const isShrink = getDragSideShrink(moveEv, type);
     const isExpand = getDragSideExpand(moveEv, type);
     // 每次step可能不一样， 动态计算 如：每月可能30或31天

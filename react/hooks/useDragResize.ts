@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { useLockFn } from 'ahooks';
+import { usePersistFn } from 'ahooks';
 
 export default function useDragResize(handleResize: ({ width }: { width: number }) => void, {
   initSize,
@@ -20,7 +20,7 @@ export default function useDragResize(handleResize: ({ width }: { width: number 
     left: 0,
   });
   const initSizeRef = useRef(initSize);
-  const handleMouseMove = useLockFn(async (event: MouseEvent) => {
+  const handleMouseMove = usePersistFn(async (event: MouseEvent) => {
     const distance = event.clientX - positionRef.current.left;
     let width = initSizeRef.current.width + distance;
     if (minWidthConfig !== undefined) {
