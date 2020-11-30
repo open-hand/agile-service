@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { find } from 'lodash';
+import dayjs from 'dayjs';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import GanttComponent from '@/components/gantt';
-import { ganttApi, issueApi } from '@/api';
+import { ganttApi, issueApi, workCalendarApi } from '@/api';
 import UserHead from '@/components/UserHead';
 import { Gantt } from '@/components/gantt/types';
 import TypeTag from '@/components/TypeTag';
@@ -51,14 +53,17 @@ const tableColumns = [{
 const GanttPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [type, setType] = useState<string>('task');
+  const [sprintId, setSprintId] = useState<string|null>(null);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
+  const [workCalendar, setWorkCalendar] = useState<any>();
   const [loading, setLoading] = useState(false);
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const [headers, res] = await Promise.all([
-        ganttApi.loadHeaders(),
+      const year = dayjs().year();
+      const [workCalendarRes, res] = await Promise.all([
+        workCalendarApi.getWorkSetting(year),
         type === 'task' ? ganttApi.loadByTask() : ganttApi.loadByUser(),
       ]);
       // setColumns(headers.map((h: any) => ({
@@ -66,6 +71,7 @@ const GanttPage: React.FC = () => {
       //   name: h.fieldCode,
       //   label: h.name,
       // })));
+      setWorkCalendar(workCalendarRes);
       setColumns(tableColumns);
       setData(res);
       setLoading(false);
@@ -89,10 +95,45 @@ const GanttPage: React.FC = () => {
   const handleSprintChange = useCallback(() => {
 
   }, []);
+  const afterSprintLoad = useCallback((sprints) => {
+    if (!sprintId) {
+      const currentSprint = find(sprints, { statusCode: 'started' });
+      if (currentSprint) {
+        setSprintId(currentSprint.sprintId);
+      } else {
+        setSprintId(sprints[0]?.sprintId);
+      }
+    }
+  }, [sprintId]);
+  const isRestDay = useCallback((date:string) => {
+    if (!workCalendar) {
+      return false;
+    }
+    const day = dayjs(date).weekday();
+    const { saturdayWork, sundayWork, timeZoneWorkCalendarDTOS } = workCalendar;
+    const unWorkDays = timeZoneWorkCalendarDTOS.map((w:any) => w.workDay);
+    if (!saturdayWork && day === 6) {
+      return true;
+    }
+    if (!sundayWork && day === 0) {
+      return true;
+    }
+    if (unWorkDays.includes(dayjs(date).format('YYYY-MM-DD'))) {
+      return true;
+    }
+    return false;
+  }, [workCalendar]);
   return (
     <Page>
       <Header>
-        <SelectSprint currentSprintOption flat placeholder="冲刺" onChange={handleSprintChange} clearButton={false} />
+        <SelectSprint
+          flat
+          placeholder="冲刺"
+          value={sprintId}
+          onChange={handleSprintChange}
+          clearButton={false}
+          afterLoad={afterSprintLoad}
+        />
         <FlatSelect value={type} onChange={setType} clearButton={false}>
           <Option value="task">
             按任务查看
@@ -122,13 +163,14 @@ const GanttPage: React.FC = () => {
       }}
       >
         <Search />
-        {loading ? <Loading loading /> : columns.length > 0 && (
+        {loading ? <Loading loading /> : columns.length > 0 && workCalendar && (
           <GanttComponent
             data={data}
             columns={columns}
             onUpdate={handleUpdate}
             startDateKey="estimatedStartTime"
             endDateKey="estimatedEndTime"
+            isRestDay={isRestDay}
           />
         )}
       </Content>

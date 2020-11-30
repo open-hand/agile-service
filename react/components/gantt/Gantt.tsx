@@ -36,9 +36,10 @@ interface GanttProps {
   onUpdate: (item: Gantt.Item, startDate: string, endDate: string) => Promise<boolean>
   startDateKey?: string
   endDateKey?: string
+  isRestDay?: (date: string) => boolean
 }
 const GanttComponent: React.FC<GanttProps> = ({
-  data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate',
+  data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate', isRestDay,
 }) => {
   const store = useMemo(() => new GanttStore(), []);
   useEffect(() => {
@@ -49,7 +50,13 @@ const GanttComponent: React.FC<GanttProps> = ({
   }, [columns, store]);
   useEffect(() => {
     store.setOnUpdate(onUpdate);
-  }, [columns, onUpdate, store]);
+  }, [onUpdate, store]);
+  useEffect(() => {
+    if (isRestDay) {
+      store.setIsRestDay(isRestDay);
+    }
+  }, [isRestDay, store]);
+
   return (
     <Context.Provider value={{ store }}>
       <Body>

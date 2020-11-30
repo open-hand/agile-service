@@ -56,7 +56,9 @@ export const viewTypeList: Gantt.SightConfig[] = [
     value: 115200,
   },
 ];
-
+function isRestDay(date: string) {
+  return [0, 6].includes(dayjs(date).weekday());
+}
 class GanttStore {
   constructor() {
     this.width = 1320;
@@ -120,8 +122,14 @@ class GanttStore {
 
   onUpdate: (item: Gantt.Item, startDate: string, endDate: string) => Promise<boolean> = () => Promise.resolve(true);
 
+  isRestDay = isRestDay
+
   getStartDate() {
     return dayjs().subtract(10, 'day').toString();
+  }
+
+  setIsRestDay(func: (date: string) => boolean) {
+    this.isRestDay = func || isRestDay;
   }
 
   @action
@@ -580,7 +588,7 @@ class GanttStore {
 
       let isWeek = false;
       if (this.sightConfig.type === 'day') {
-        isWeek = [0, 6].includes(startDate.weekday());
+        isWeek = this.isRestDay(startDate.toString());
       }
       return {
         label,
