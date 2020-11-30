@@ -5,6 +5,7 @@ import { sprintApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ISprint } from '@/common/types';
+import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   hasUnassign?: boolean,
@@ -15,6 +16,7 @@ interface Props extends Partial<SelectProps> {
   projectId?: string
   currentSprintOption?: boolean
   dataRef?: React.MutableRefObject<any>
+  flat?: boolean
 }
 
 const SelectSprint: React.FC<Props> = forwardRef(({
@@ -26,6 +28,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
   projectId,
   currentSprintOption,
   dataRef,
+  flat,
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
@@ -57,8 +60,9 @@ const SelectSprint: React.FC<Props> = forwardRef(({
     paging: !!isProgram,
   }), [isProgram, projectId, selectSprints, JSON.stringify(statusList), currentSprintOption]);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
   return (
-    <Select
+    <Component
       ref={ref}
       {...props}
       {...otherProps}

@@ -61,7 +61,7 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
       <div>
         {showDragBar && (
           <>
-            {stepGesture !== 'moving' && (
+            {/* {stepGesture !== 'moving' && (
               <div className={styles['dependency-handle']} style={{ left: -34, width: 12 }}>
                 <svg width="12px" height="12px" viewBox="0 0 12 12" version="1.1">
                   <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
@@ -80,7 +80,7 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
                   </g>
                 </svg>
               </div>
-            )}
+            )} */}
             <div
               role="none"
               onMouseDown={handleLeftDown}
