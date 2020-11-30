@@ -6,7 +6,6 @@ import {
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
-import { merge } from 'lodash';
 import { toJS } from 'mobx';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
@@ -73,11 +72,13 @@ class ScrumBoardHome extends Component {
     const scrumboardInitValue = localPageCacheStore.getItem('scrumboard');
     if (scrumboardInitValue) {
       const {
-        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters = [], assigneeFilter, sprintFilter, priorityIds,
+        onlyMeChecked, onlyStoryChecked, moreChecked, starBeacon, personalFilters = [], assigneeFilter, sprintFilter, priorityIds,
       } = scrumboardInitValue;
+
       ScrumBoardStore.addQuickSearchFilter(
         onlyMeChecked,
         onlyStoryChecked,
+        starBeacon,
         moreChecked,
         personalFilters,
       );
@@ -142,8 +143,7 @@ class ScrumBoardHome extends Component {
       moreChecked,
       personalFilters,
     );
-    localPageCacheStore.setItem('scrumboard', {
-      ...(localPageCacheStore.getItem('scrumboard') || {}),
+    localPageCacheStore.mergeSetItem('scrumboard', {
       onlyMeChecked,
       onlyStoryChecked,
       starBeacon,
@@ -160,8 +160,7 @@ class ScrumBoardHome extends Component {
 
   onSprintChange = (value) => {
     ScrumBoardStore.addSprintFilter(value);
-    localPageCacheStore.setItem('scrumboard', {
-      ...(localPageCacheStore.getItem('scrumboard') || {}),
+    localPageCacheStore.mergeSetItem('scrumboard', {
       sprintFilter: value,
     });
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
@@ -375,8 +374,7 @@ class ScrumBoardHome extends Component {
 
   handlePriorityChange = (value) => {
     ScrumBoardStore.setPriority(value);
-    localPageCacheStore.setItem('scrumboard', {
-      ...(localPageCacheStore.getItem('scrumboard') || {}),
+    localPageCacheStore.mergeSetItem('scrumboard', {
       priorityIds: value,
     });
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
