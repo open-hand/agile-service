@@ -5,6 +5,7 @@ import SprintStoryPointInfo from '@/components/SprintStoryPointInfo';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import StoryCell from './StoryCell';
 import TitleCell from './TitleCell';
+import ListenRowInViewport from '../ListenRowlInViewport';
 
 @observer
 class StoryRow extends Component {
@@ -20,54 +21,56 @@ class StoryRow extends Component {
   }
 
   render() {
-    console.log('storyRow');
     const {
-      storyMapData, storyData, swimLine, tableOverflow,
+      storyMapData, storyData, swimLine, tableOverflow, rowInViewportMap,
     } = StoryMapStore;
     const { epicWithFeature } = storyMapData || {};
     const epicList = StoryMapStore.getEpicList;
     const firstNotCollapseIndex = this.getFirstNotCollapseIndex();
-    const { storyCollapse, rowIndex, sprint } = this.props;
     const {
-      statusCode, todoStoryPoint, doingStoryPoint, doneStoryPoint,
+      storyCollapse, rowIndex, sprint, version,
+    } = this.props;
+    const { versionId } = version || {};
+    const {
+      sprintId, statusCode, todoStoryPoint, doingStoryPoint, doneStoryPoint,
     } = sprint || {};
     return (
       <>
         {/* 标题行 */}
         {['version', 'sprint'].includes(swimLine) && (
-          <tr style={{ borderRight: '1px solid rgba(211, 211, 211)' }}>
-              {epicList.map((epic, index, arr) => (
-                <TitleCell
-                  epicIndex={index}
-                  isLastColumn={index === epicWithFeature.length - 1}
-                  lastCollapse={index > 0 ? storyData[epicList[index - 1].issueId] && storyData[epicList[index - 1].issueId].collapse : false}
-                  showTitle={firstNotCollapseIndex === index}
-                  otherData={storyData[epic.issueId]}
-                  {...this.props}
-                />
-              ))}
-            <div style={{
-              position: 'sticky',
-              right: 10,
-              zIndex: 5,
-              width: 0,
-            }}
-            >
-              {
-                statusCode && (
-                  <div style={{
-                    marginTop: 10,
-                    position: 'relative',
-                    right: tableOverflow ? 116 : 130,
-                    width: 0,
-                  }}
-                  >
-                    <SprintStoryPointInfo show data={{ todoStoryPoint, doingStoryPoint, doneStoryPoint }} />
-                  </div>
-                )
-            }
-            </div>
-          </tr>
+        <tr className={versionId || sprintId ? `row-${versionId || sprintId}` : ''} style={{ borderRight: '1px solid rgba(211, 211, 211)' }}>
+          {epicList.map((epic, index, arr) => (
+            <TitleCell
+              epicIndex={index}
+              isLastColumn={index === epicWithFeature.length - 1}
+              lastCollapse={index > 0 ? storyData[epicList[index - 1].issueId] && storyData[epicList[index - 1].issueId].collapse : false}
+              showTitle={firstNotCollapseIndex === index}
+              otherData={storyData[epic.issueId]}
+              {...this.props}
+            />
+          ))}
+          <div style={{
+            position: 'sticky',
+            right: 10,
+            zIndex: 5,
+            width: 0,
+          }}
+          >
+            {
+                        statusCode && (
+                          <div style={{
+                            marginTop: 10,
+                            position: 'relative',
+                            right: tableOverflow ? 116 : 130,
+                            width: 0,
+                          }}
+                          >
+                            <SprintStoryPointInfo show data={{ todoStoryPoint, doingStoryPoint, doneStoryPoint }} />
+                          </div>
+                        )
+                    }
+          </div>
+        </tr>
         )}
         <tr style={{ ...storyCollapse ? { height: 0 } : {} }}>
           {epicList.map((epic, index) => {
@@ -88,6 +91,7 @@ class StoryRow extends Component {
             ) : '';
           })}
         </tr>
+        <ListenRowInViewport id={versionId || sprintId} />
       </>
     );
   }

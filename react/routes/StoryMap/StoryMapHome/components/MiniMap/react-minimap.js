@@ -275,25 +275,6 @@ export class Minimap extends React.Component {
     return (
       <div className={`minimap-container ${this.props.className}`}>
         <div
-          className="minimap"
-          style={{
-            width: `${width}px`,
-            height: `${height}px`,
-          }}
-          ref={(minimap) => {
-            this.minimap = minimap;
-          }}
-          // onMouseDown={this.down}
-        // onTouchStart={this.down}
-        // onTouchMove={this.move}
-        // onMouseMove={this.move}
-        // onTouchEnd={this.up}
-        >
-          {/* {this.state.viewport} */}
-          {this.state.children}
-        </div>
-
-        <div
           className="minimap-container-scroll"
           // onScroll={this.synchronize}
           ref={(container) => {

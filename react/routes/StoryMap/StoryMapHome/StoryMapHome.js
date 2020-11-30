@@ -192,12 +192,11 @@ const StoryMapHome = observer(() => {
       </Header>
       <Breadcrumb />
       <Content style={{
-        padding: 0, borderTop: '1px solid #D8D8D8',
+        padding: 0, borderTop: '1px solid #D8D8D8', overflow: 'hidden',
       }}
       >
         <Loading loading={loading} />
         <ListenSize />
-        <div>{JSON.stringify(epicInViewportMap)}</div>
         {
           !isEmpty && (
             <StoryMapSearch issueSearchStore={issueSearchStore} />

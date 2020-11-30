@@ -725,6 +725,12 @@ class StoryMapStore {
   @action setEpicInViewportMap = (key, value) => {
     this.epicInViewportMap.set(key, value);
   }
+
+  @observable rowInViewportMap = observable.map();
+
+  @action setRowInViewportMap = (key, value) => {
+    this.rowInViewportMap.set(key, value);
+  }
 }
 
 export default new StoryMapStore();

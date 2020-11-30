@@ -9,7 +9,6 @@ import './StoryMapBody.less';
 @observer
 class StoryMapBody extends Component {
   render() {
-    console.log('bodyrender');
     return (
       <div className="c7nagile-StoryMapBody">
         <table className="c7nagile-StoryMapBody-table">

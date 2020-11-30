@@ -227,7 +227,7 @@ const SearchArea: React.FC = () => {
           </Button>
         )}
         {
-          (overflowLine || folded) && (
+          (overflowLine || folded === true) && (
             <Tooltip title={folded ? '展开筛选' : '折叠筛选'}>
               <Button
                 onClick={handleClickExpandFilter}
@@ -259,7 +259,8 @@ const SearchArea: React.FC = () => {
     <div
       className={`${prefixCls}-search`}
       style={{
-        height: folded ? 46 : 'unset',
+        height: folded ? 48 : 'unset',
+        overflowY: 'hidden',
       }}
     >
       <ListenSearchSize />
