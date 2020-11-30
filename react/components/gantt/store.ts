@@ -56,7 +56,9 @@ export const viewTypeList: Gantt.SightConfig[] = [
     value: 115200,
   },
 ];
-
+function isRestDay(date: string) {
+  return [0, 6].includes(dayjs(date).weekday());
+}
 class GanttStore {
   constructor() {
     this.width = 1320;
@@ -66,7 +68,6 @@ class GanttStore {
     const bodyWidth = this.width;
     const viewWidth = 704;
     const tableWidth = 500;
-    // const collapsed = this.data.every(bar => bar.collapsed);
     this.viewWidth = viewWidth;
     this.tableWidth = tableWidth;
     this.translateX = translateX;
@@ -118,14 +119,26 @@ class GanttStore {
 
   isPointerPress: boolean = false;
 
+  startDateKey: string = 'startDate';
+
+  endDateKey: string = 'endDate';
+
   onUpdate: (item: Gantt.Item, startDate: string, endDate: string) => Promise<boolean> = () => Promise.resolve(true);
+
+  isRestDay = isRestDay
 
   getStartDate() {
     return dayjs().subtract(10, 'day').toString();
   }
 
+  setIsRestDay(func: (date: string) => boolean) {
+    this.isRestDay = func || isRestDay;
+  }
+
   @action
   setData(data: Gantt.Item[], startDateKey: string, endDateKey: string) {
+    this.startDateKey = startDateKey;
+    this.endDateKey = endDateKey;
     this.data = transverseData(data, startDateKey, endDateKey);
   }
 
@@ -201,9 +214,20 @@ class GanttStore {
     }
   }
 
+  @action handleResizeTableWidth(width: number) {
+    this.tableWidth = width;
+    this.viewWidth = this.width - this.tableWidth;
+    // const tableMinWidth = 200;
+    // const chartMinWidth = 200;
+    // if (this.tableWidth + increase >= tableMinWidth && this.viewWidth - increase >= chartMinWidth) {
+    //   this.tableWidth += increase;
+    //   this.viewWidth -= increase;
+    // }
+  }
+
   @action initWidth() {
     this.tableWidth = this.columns.reduce((width, item) => width + item.width, 0);
-    this.viewWidth = this.height - this.tableWidth;
+    this.viewWidth = this.width - this.tableWidth;
     // 表盘宽度不能小于总宽度38%
     if (this.viewWidth < MIN_VIEW_RATE * this.width) {
       this.viewWidth = MIN_VIEW_RATE * this.width;
@@ -230,9 +254,40 @@ class GanttStore {
     this.translateX = translateX;
   }
 
+  getTranslateXByDate(date: string) {
+    return Math.floor(dayjs(date).hour(0).minute(0).second(0)
+      .valueOf() / this.pxUnitAmp);
+  }
+
   @computed get todayTranslateX() {
     return Math.floor(dayjs(new Date().valueOf()).hour(0).minute(0).second(0)
       .valueOf() / this.pxUnitAmp);
+  }
+
+  @computed get mid() {
+    const startAmp = this.pxUnitAmp * this.getTranslateXByDate(this.getStartDate());
+    const endAmp = startAmp + this.getDurationAmp();
+    return parseInt(String((startAmp + endAmp) / 2), 10);
+  }
+
+  @computed get scrollBarWidth() {
+    const MIN_WIDTH = 30;
+    return Math.max((this.viewWidth) / (this.scrollWidth) * 160, MIN_WIDTH);
+  }
+
+  @computed get scrollLeft() {
+    const rate = this.viewWidth / this.scrollWidth;
+    const curDate = dayjs(this.translateAmp).toString();
+    // 默认滚动条在中间
+    const half = (this.viewWidth - this.scrollBarWidth) / 2;
+    const viewScrollLeft = half + rate * (this.getTranslateXByDate(curDate) - this.getTranslateXByDate(this.getStartDate()));
+    return Math.min(Math.max(viewScrollLeft, 0), this.viewWidth - this.scrollBarWidth);
+  }
+
+  @computed get scrollWidth() {
+    // 最小宽度
+    const init = this.getTranslateXByDate(String(this.mid + this.pxUnitAmp)) - this.getTranslateXByDate(String(this.mid - this.pxUnitAmp));
+    return Math.max(Math.abs(this.viewWidth + this.translateX - this.getTranslateXByDate(this.getStartDate())), init);
   }
 
   // 内容区滚动高度
@@ -580,7 +635,7 @@ class GanttStore {
 
       let isWeek = false;
       if (this.sightConfig.type === 'day') {
-        isWeek = [0, 6].includes(startDate.weekday());
+        isWeek = this.isRestDay(startDate.toString());
       }
       return {
         label,
@@ -912,12 +967,16 @@ class GanttStore {
     runInAction(() => {
       task.startDate = startDate;
       task.endDate = endDate;
+      task[this.startDateKey] = startDate;
+      task[this.endDateKey] = endDate;
     });
     const success = await this.onUpdate(task, startDate, endDate);
     if (!success) {
       runInAction(() => {
         task.startDate = oldStartDate;
         task.endDate = oldEndDate;
+        task[this.startDateKey] = oldStartDate;
+        task[this.endDateKey] = oldEndDate;
       });
     }
   }
