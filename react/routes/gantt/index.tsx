@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button } from 'choerodon-ui/pro';
+import { Button, Tooltip } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
 import dayjs from 'dayjs';
@@ -46,11 +46,15 @@ const tableColumns = [{
   width: 100,
   name: 'estimatedStartTime',
   label: '预计开始时间',
+  // @ts-ignore
+  render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
 {
   width: 100,
   name: 'estimatedEndTime',
   label: '预计结束时间',
+  // @ts-ignore
+  render: (record) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 }];
 const GanttPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
