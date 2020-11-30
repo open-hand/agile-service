@@ -10,8 +10,13 @@ import UserHead from '@/components/UserHead';
 import { Gantt } from '@/components/gantt/types';
 import TypeTag from '@/components/TypeTag';
 import Loading from '@/components/Loading';
+import SelectSprint from '@/components/select/select-sprint';
+import FlatSelect from '@/components/flat-select';
+import useFullScreen from '@/common/useFullScreen';
 import Search from './components/search';
+import './index.less';
 
+const { Option } = FlatSelect;
 const tableColumns = [{
   width: 214,
   name: 'summary',
@@ -45,14 +50,16 @@ const tableColumns = [{
 }];
 const GanttPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
+  const [type, setType] = useState<string>('task');
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
   useEffect(() => {
     (async () => {
       setLoading(true);
       const [headers, res] = await Promise.all([
         ganttApi.loadHeaders(),
-        ganttApi.loadByUser(),
+        type === 'task' ? ganttApi.loadByTask() : ganttApi.loadByUser(),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -63,7 +70,7 @@ const GanttPage: React.FC = () => {
       setData(res);
       setLoading(false);
     })();
-  }, []);
+  }, [type]);
   const handleUpdate = useCallback(async (issue: Gantt.Item, startDate: string, endDate: string) => {
     try {
       await issueApi.update({
@@ -79,13 +86,32 @@ const GanttPage: React.FC = () => {
       return false;
     }
   }, []);
+  const handleSprintChange = useCallback(() => {
+
+  }, []);
   return (
     <Page>
       <Header>
+        <SelectSprint currentSprintOption flat placeholder="冲刺" onChange={handleSprintChange} clearButton={false} />
+        <FlatSelect value={type} onChange={setType} clearButton={false}>
+          <Option value="task">
+            按任务查看
+          </Option>
+          <Option value="assignee">
+            按经办人查看
+          </Option>
+        </FlatSelect>
         <Button
           icon="playlist_add"
         >
           创建问题
+        </Button>
+        <Button
+          // @ts-ignore
+          onClick={() => { toggleFullScreen(); }}
+          icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}
+        >
+          {isFullScreen ? '退出全屏' : '全屏'}
         </Button>
       </Header>
       <Breadcrumb />
