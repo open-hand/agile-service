@@ -1876,7 +1876,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (copyConditionVO.getSubTask()) {
                 List<IssueDTO> subIssueDTOList = issueDetailDTO.getSubIssueDTOList();
                 if (subIssueDTOList != null && !subIssueDTOList.isEmpty()) {
-                    subIssueDTOList.forEach(issueDO -> copySubIssue(issueDO, newIssueId, projectId));
+                    subIssueDTOList.forEach(issueDO -> copySubIssue(issueDO, newIssueId, projectId,copyConditionVO));
                 }
             }
             if (copyConditionVO.getCustomField()) {
@@ -1923,7 +1923,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         updateIssue(projectId, issueUpdateVO, fieldList);
     }
 
-    protected void copySubIssue(IssueDTO issueDTO, Long newIssueId, Long projectId) {
+    protected void copySubIssue(IssueDTO issueDTO, Long newIssueId, Long projectId, CopyConditionVO copyConditionVO) {
         IssueDetailDTO subIssueDetailDTO = issueMapper.queryIssueDetail(issueDTO.getProjectId(), issueDTO.getIssueId());
         IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToSubIssueCreateDto(subIssueDetailDTO, newIssueId);
         IssueSubVO newSubIssue = stateMachineClientService.createSubIssue(issueSubCreateVO);
@@ -1934,6 +1934,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             subIssueUpdateVO.setIssueId(newSubIssue.getIssueId());
             subIssueUpdateVO.setObjectVersionNumber(newSubIssue.getObjectVersionNumber());
             updateIssue(projectId, subIssueUpdateVO, Lists.newArrayList(REMAIN_TIME_FIELD));
+        }
+        if (Boolean.TRUE.equals(copyConditionVO.getCustomField())) {
+            fieldValueService.copyCustomFieldValue(projectId, subIssueDetailDTO, newSubIssue.getIssueId());
         }
     }
 
