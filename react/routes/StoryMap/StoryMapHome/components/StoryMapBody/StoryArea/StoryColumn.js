@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import { DropTarget } from 'react-dnd';
 import Column from '../Column';
@@ -18,6 +17,8 @@ class StoryColumn extends Component {
     const {
       storys, width, epic, feature, version, sprint, connectDropTarget, isOver, rowIndex,
     } = this.props;
+    const { issueId: epicId } = epic;
+    const { epicInViewportMap } = StoryMapStore;
     // 只有未规划、版本规划中、冲刺未完成的可以创建、删除、拖拽
     let canBeOperated = true;
     if (version) {
@@ -32,10 +33,14 @@ class StoryColumn extends Component {
         saveRef={connectDropTarget}
         style={{ background: isOver ? 'rgb(240,240,240)' : 'white', position: 'relative' }}
       >
-        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-          {storys && storys.map((story, index) => <StoryCard index={index} rowIndex={rowIndex} story={story} sprint={sprint} version={version} canBeOperated={canBeOperated} />)}
-          {!StoryMapStore.isFullScreen && canBeOperated && <CreateStory onCreate={this.handleCreateStory} epic={epic} feature={feature} sprint={sprint} version={version} />}
-        </div>
+        {
+          !!epicInViewportMap.get(epicId) && (
+            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+              {storys && storys.map((story, index) => <StoryCard index={index} rowIndex={rowIndex} story={story} sprint={sprint} version={version} canBeOperated={canBeOperated} />)}
+              {!StoryMapStore.isFullScreen && canBeOperated && <CreateStory onCreate={this.handleCreateStory} epic={epic} feature={feature} sprint={sprint} version={version} />}
+            </div>
+          )
+        }
       </Column>
     );
   }

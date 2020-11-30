@@ -20,6 +20,7 @@ class StoryRow extends Component {
   }
 
   render() {
+    console.log('storyRow');
     const {
       storyMapData, storyData, swimLine, tableOverflow,
     } = StoryMapStore;

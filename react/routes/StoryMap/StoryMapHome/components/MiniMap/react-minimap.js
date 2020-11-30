@@ -48,38 +48,38 @@ export class Minimap extends React.Component {
     this.initState = false;
   }
 
-  componentDidMount() {
-    const { onMountCenterOnX, onMountCenterOnY } = this.props;
-    setTimeout(() => this.synchronize({
-      centerOnX: onMountCenterOnX,
-      centerOnY: onMountCenterOnY,
-    }));
-    window.addEventListener('resize', this.resize);
-    document.addEventListener('mouseup', this.up);
-    this.init();
-  }
+  // componentDidMount() {
+  //   const { onMountCenterOnX, onMountCenterOnY } = this.props;
+  //   setTimeout(() => this.synchronize({
+  //     centerOnX: onMountCenterOnX,
+  //     centerOnY: onMountCenterOnY,
+  //   }));
+  //   window.addEventListener('resize', this.resize);
+  //   document.addEventListener('mouseup', this.up);
+  //   this.init();
+  // }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.resize);
-    document.removeEventListener('mouseup', this.up);
-  }
+  // componentWillUnmount() {
+  //   window.removeEventListener('resize', this.resize);
+  //   document.removeEventListener('mouseup', this.up);
+  // }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.keepAspectRatio !== this.props.keepAspectRatio) {
-      setTimeout(this.synchronize);
-    } else if (nextProps.children !== this.props.children) {
-      setTimeout(this.synchronize);
-    }
-  }
+  // componentWillReceiveProps(nextProps) {
+  //   if (nextProps.keepAspectRatio !== this.props.keepAspectRatio) {
+  //     setTimeout(this.synchronize);
+  //   } else if (nextProps.children !== this.props.children) {
+  //     setTimeout(this.synchronize);
+  //   }
+  // }
 
-  componentDidUpdate() {
-    if (this.initState) {
-      this.initState = false;
-    } else {
-      this.initState = true;
-      this.init();
-    }
-  }
+  // componentDidUpdate() {
+  //   if (this.initState) {
+  //     this.initState = false;
+  //   } else {
+  //     this.initState = true;
+  //     this.init();
+  //   }
+  // }
 
   init() {
     const { childComponent, keepAspectRatio, showHeight } = this.props;
@@ -283,19 +283,19 @@ export class Minimap extends React.Component {
           ref={(minimap) => {
             this.minimap = minimap;
           }}
-          onMouseDown={this.down}
+          // onMouseDown={this.down}
         // onTouchStart={this.down}
         // onTouchMove={this.move}
         // onMouseMove={this.move}
         // onTouchEnd={this.up}
         >
-          {this.state.viewport}
+          {/* {this.state.viewport} */}
           {this.state.children}
         </div>
 
         <div
           className="minimap-container-scroll"
-          onScroll={this.synchronize}
+          // onScroll={this.synchronize}
           ref={(container) => {
             this.source = container;
           }}

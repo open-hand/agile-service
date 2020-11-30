@@ -37,6 +37,7 @@ class StoryArea extends Component {
   }
 
   render() {
+    console.log('storyArea');
     return this.renderStory();
   }
 }

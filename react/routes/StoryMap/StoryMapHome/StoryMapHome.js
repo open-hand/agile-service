@@ -33,6 +33,7 @@ import ListenSize from './components/ListenSize';
 import StoryMapSearch from './components/Search';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
+import ListenEpicCellInViewport from './components/StoryMapBody/ListenEpicCellInViewport';
 
 const HEX = {
   'c7nagile-StoryMap-EpicCard': '#D9C2FB',
@@ -147,7 +148,7 @@ const StoryMapHome = observer(() => {
   }, []);
 
   const {
-    loading, selectedIssueMap,
+    loading, selectedIssueMap, epicInViewportMap,
   } = StoryMapStore;
   const isEmpty = StoryMapStore.getIsEmpty;
   /**
@@ -196,6 +197,7 @@ const StoryMapHome = observer(() => {
       >
         <Loading loading={loading} />
         <ListenSize />
+        <div>{JSON.stringify(epicInViewportMap)}</div>
         {
           !isEmpty && (
             <StoryMapSearch issueSearchStore={issueSearchStore} />
