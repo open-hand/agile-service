@@ -15,7 +15,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @EnableScheduling
 public class AgileServiceApplication {
-    
     public static void main(String[] args) {
         SpringApplication.run(AgileServiceApplication.class);
     }
