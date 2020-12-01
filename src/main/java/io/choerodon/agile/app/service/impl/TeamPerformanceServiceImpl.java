@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.SprintBugVO;
 import io.choerodon.agile.api.vo.SprintStoryPointVO;
 import io.choerodon.agile.api.vo.SprintTaskVO;
 import io.choerodon.agile.app.service.AgilePluginService;
@@ -9,14 +10,16 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.mapper.TeamPerformanceMapper;
 import io.choerodon.agile.infra.utils.DataUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TeamPerformanceServiceImpl implements TeamPerformanceService {
@@ -79,6 +82,52 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
             handleMainRate(sumRemainingTime, remainingTimeComplete, sprintTask);
         }
         return sprintTasks;
+    }
+
+    @Override
+    public Page<SprintBugVO> querySprintBugRank(Long projectId, String environment, PageRequest pageRequest) {
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        Page<SprintBugVO> sprintBugPage = PageHelper.doPageAndSort(pageRequest,
+                () -> teamPerformanceMapper.querySprintBugCount(projectId,
+                        environment,
+                        Objects.isNull(agilePluginService) ? false : true));
+        sprintBugPage.setContent(handleUser(sprintBugPage.getContent()));
+        return sprintBugPage;
+    }
+
+    @Override
+    public List<SprintBugVO> querySprintBugCount(Long projectId, String environment) {
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        List<SprintBugVO> sprintBugs = teamPerformanceMapper.querySprintBugCount(projectId,
+                environment,
+                Objects.isNull(agilePluginService) ? false : true);
+        return handleUser(sprintBugs);
+    }
+
+    private List<SprintBugVO> handleUser(List<SprintBugVO> sprintBugs) {
+        if (CollectionUtils.isEmpty(sprintBugs)) {
+            return sprintBugs;
+        }
+        List<Long> mainResponsibleId =
+                sprintBugs.stream().filter(sprintBugVO -> Objects.nonNull(sprintBugVO.getMainResponsibleId()))
+                        .map(SprintBugVO::getMainResponsibleId).collect(Collectors.toList());
+        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(mainResponsibleId, true);
+        sprintBugs.forEach(sprintBug -> handleUser(sprintBug, usersMap.get(sprintBug.getMainResponsibleId())));
+        return sprintBugs;
+    }
+
+    private void handleUser(SprintBugVO sprintBug, UserMessageDTO userMessage) {
+        if (Objects.isNull(userMessage)) {
+            return;
+        }
+        sprintBug.setRealName(userMessage.getRealName());
+        sprintBug.setLoginName(userMessage.getLoginName());
+        sprintBug.setImageUrl(userMessage.getImageUrl());
+        sprintBug.setName(new StringBuilder()
+                .append(userMessage.getRealName())
+                .append(LEFT_PARENTHESIS)
+                .append(userMessage.getLoginName())
+                .append(RIGHT_PARENTHESIS).toString());
     }
 
     private void handleMainRate(BigDecimal sumStoryPoints, BigDecimal sumStoryPointsComplete, SprintTaskVO sprintTask) {
