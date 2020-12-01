@@ -835,9 +835,8 @@ class GanttStore {
   @action
   handleInvalidBarDragEnd(barInfo: Gantt.Bar) {
     barInfo.invalidDateRange = false;
-    this.updateTaskDate(barInfo);
     this.handleDragEnd();
-    // TODO 修改日期逻辑
+    this.updateTaskDate(barInfo);
   }
 
   @action

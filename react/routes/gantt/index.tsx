@@ -76,11 +76,16 @@ const GanttPage: React.FC = () => {
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
   const loadData = useCallback(() => {
     (async () => {
-      setLoading(true);
       const year = dayjs().year();
+      const filter = issueSearchStore.getCustomFieldFilters();
+      if (sprintId === null) {
+        return;
+      }
+      filter.otherArgs.sprint = [sprintId];
+      setLoading(true);
       const [workCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
-        type === 'task' ? ganttApi.loadByTask(issueSearchStore.getCustomFieldFilters()) : ganttApi.loadByUser(issueSearchStore.getCustomFieldFilters()),
+        type === 'task' ? ganttApi.loadByTask(filter) : ganttApi.loadByUser(filter),
       ]);
       // setColumns(headers.map((h: any) => ({
       //   width: 100,
@@ -92,7 +97,7 @@ const GanttPage: React.FC = () => {
       setData(res);
       setLoading(false);
     })();
-  }, [issueSearchStore, type]);
+  }, [issueSearchStore, sprintId, type]);
   useEffect(() => {
     loadData();
   }, [issueSearchStore, loadData]);
@@ -111,8 +116,8 @@ const GanttPage: React.FC = () => {
       return false;
     }
   }, []);
-  const handleSprintChange = useCallback(() => {
-
+  const handleSprintChange = useCallback((value: string) => {
+    setSprintId(value);
   }, []);
   const afterSprintLoad = useCallback((sprints) => {
     if (!sprintId) {
@@ -120,7 +125,7 @@ const GanttPage: React.FC = () => {
       if (currentSprint) {
         setSprintId(currentSprint.sprintId);
       } else {
-        setSprintId(sprints[0]?.sprintId);
+        setSprintId(sprints[0]?.sprintId || '0');
       }
     }
   }, [sprintId]);
@@ -169,6 +174,7 @@ const GanttPage: React.FC = () => {
           onChange={handleSprintChange}
           clearButton={false}
           afterLoad={afterSprintLoad}
+          hasUnassign
         />
         <FlatSelect value={type} onChange={setType} clearButton={false}>
           <Option value="task">
