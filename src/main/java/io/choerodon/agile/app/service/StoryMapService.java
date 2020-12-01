@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.SprintSearchVO;
 import io.choerodon.agile.api.vo.business.StoryMapDragVO;
 import io.choerodon.agile.api.vo.StoryMapVO;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface StoryMapService {
     void storyMapMove(Long projectId, StoryMapDragVO storyMapDragVO);
 
     List<SprintSearchVO> storyMapSprintInfo(Long projectId);
+
+    StoryMapVO pageStoryMap(Long projectId, Long organizationId, SearchVO searchVO,Integer page, Integer size);
 }

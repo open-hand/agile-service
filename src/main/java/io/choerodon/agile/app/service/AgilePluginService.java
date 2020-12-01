@@ -348,4 +348,15 @@ public interface AgilePluginService {
      * @param list
      */
     void handlerSprintPlanInfo(Long projectId, List<SprintSearchVO> list);
+
+    /**
+     * 故事地图分页查询
+     * @param projectId
+     * @param epicIds
+     * @param searchVO
+     * @param page
+     * @param size
+     * @return
+     */
+    StoryMapVO handlerBusinessPageStoryMap(Long projectId, List<Long> epicIds, SearchVO searchVO, Integer page, Integer size);
 }
