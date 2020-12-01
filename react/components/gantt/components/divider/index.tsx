@@ -29,7 +29,7 @@ const Divider: React.FC = () => {
       role="none"
       className={styles.divider}
       style={{ left }}
-      onMouseDown={handleMouseDown}
+      onMouseDown={tableWidth === 0 ? undefined : handleMouseDown}
     >
       {resizing && (
         <div style={{
@@ -44,7 +44,7 @@ const Divider: React.FC = () => {
         />
       )}
       <hr />
-      <div className={styles['icon-wrapper']} role="none" onClick={handleClick}>
+      <div className={styles['icon-wrapper']} role="none" onMouseDown={(e) => e.stopPropagation()} onClick={handleClick}>
         <i
           className={classNames(styles.arrow, { [styles.reverse]: left <= 0 })}
         />
