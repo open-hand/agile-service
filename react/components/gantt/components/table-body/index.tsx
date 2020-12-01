@@ -8,7 +8,9 @@ import { ROW_HEIGHT, TOP_PADDING } from '../../constants';
 import RowToggler from './RowToggler';
 
 const TableRows = () => {
-  const { store, onRow } = useContext(Context);
+  const {
+    store, onRow, tableIndent, expandIcon,
+  } = useContext(Context);
   const { columns } = store;
   const columnsWidth = store.getColumnsWidth;
   const barList = store.getBarList;
@@ -40,28 +42,53 @@ const TableRows = () => {
                 className={styles.cell}
                 style={{
                   width: columnsWidth[index],
+                  paddingLeft: index === 0 ? tableIndent * (bar._depth + 1) : 12,
                 }}
               >
                 {index === 0 && (
                   Array(bar._depth).fill(0).map((_, i) => (
                     <div
-                  // eslint-disable-next-line react/no-array-index-key
+                      // eslint-disable-next-line react/no-array-index-key
                       key={i}
                       className={classNames(styles['row-indentation'], {
                         [styles['row-indentation-hidden']]: isLastChild && i === bar._depth - 2,
                         [styles['row-indentation-both']]: i === bar._depth - 1,
                       })}
+                      style={{
+                        left: tableIndent * (i) + 15,
+                        width: tableIndent * 1.5,
+                      }}
                     />
                   ))
                 )}
                 {index === 0 && bar._childrenCount > 0 && (
-                <RowToggler
-                  level={bar._depth}
-                  collapsed={bar._collapsed}
-                  onClick={() => {
-                    store.setRowCollapse(bar.task, !bar._collapsed);
-                  }}
-                />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: tableIndent * (bar._depth) + 15,
+                      background: 'white',
+                      zIndex: 9,
+                      transform: 'translateX(-52%)',
+                    }}
+                  >
+                    {expandIcon ? expandIcon({
+                      level: bar._depth,
+                      collapsed: bar._collapsed,
+                      onClick: (event) => {
+                        event.stopPropagation();
+                        store.setRowCollapse(bar.task, !bar._collapsed);
+                      },
+                    }) : (
+                      <RowToggler
+                        level={bar._depth}
+                        collapsed={bar._collapsed}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          store.setRowCollapse(bar.task, !bar._collapsed);
+                        }}
+                      />
+                    )}
+                  </div>
                 )}
                 {/* @ts-ignore */}
                 <span className={styles.ellipsis}>{column.render ? column.render(bar.task) : bar.task[column.name]}</span>
