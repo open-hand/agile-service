@@ -7,6 +7,9 @@ interface GanttContext {
   getBarColor?: (item: Gantt.Item) => { backgroundColor: string, borderColor: string }
   showBackToday: boolean
   showUnitSwitch: boolean
+  onRow?: {
+    onClick: (item: Gantt.Item) => void
+  }
 }
 const context = createContext({} as GanttContext);
 export default context;

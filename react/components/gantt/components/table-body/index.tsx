@@ -8,7 +8,7 @@ import { ROW_HEIGHT, TOP_PADDING } from '../../constants';
 import RowToggler from './RowToggler';
 
 const TableRows = () => {
-  const { store } = useContext(Context);
+  const { store, onRow } = useContext(Context);
   const { columns } = store;
   const columnsWidth = store.getColumnsWidth;
   const barList = store.getBarList;
@@ -26,7 +26,14 @@ const TableRows = () => {
           }
         }
         return (
-          <div className={styles.row} style={{ height: ROW_HEIGHT, top: (rowIndex + start) * ROW_HEIGHT + TOP_PADDING }}>
+          <div
+            role="none"
+            className={styles.row}
+            style={{ height: ROW_HEIGHT, top: (rowIndex + start) * ROW_HEIGHT + TOP_PADDING }}
+            onClick={() => {
+              onRow?.onClick(bar.task);
+            }}
+          >
             {columns.map((column, index) => (
               <div
                 key={column.name}
