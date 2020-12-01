@@ -66,4 +66,8 @@ export namespace Gantt {
     label: string,
     render?: (item: Item) => React.ReactNode
   }
+  interface Dependence {
+    from: string
+    to: string
+  }
 }
