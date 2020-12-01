@@ -7,6 +7,7 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,9 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     @Override
     public List<GanttChartVO> listByTask(Long projectId, SearchVO searchVO) {
+        if (isSprintEmpty(searchVO)) {
+            throw new CommonException("error.otherArgs.sprint.empty");
+        }
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (condition) {
             String filterSql;
@@ -64,6 +68,14 @@ public class GanttChartServiceImpl implements GanttChartService {
         } else {
             return new ArrayList<>();
         }
+    }
+
+    private boolean isSprintEmpty(SearchVO searchVO) {
+        Map<String, Object> otherArgs = searchVO.getOtherArgs();
+        if (!ObjectUtils.isEmpty(otherArgs)) {
+            return ObjectUtils.isEmpty(otherArgs.get("sprint"));
+        }
+        return true;
     }
 
     @Override
