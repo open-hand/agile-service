@@ -22,8 +22,8 @@ const DragPresent: React.FC = () => {
   const rightLine = draggingType === 'right' || draggingType === 'move';
   return (
     <g
-      fill="rgba(204, 236, 255, 0.3)"
-      stroke="#87D2FF"
+      fill="#DAE0FF"
+      stroke="#7B90FF"
     >
       {leftLine && <path d={`M${left},0 L${left},${bodyScrollHeight}`} />}
       <rect x={left} y="0" width={width} height={bodyScrollHeight} strokeWidth="0" />

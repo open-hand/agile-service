@@ -9,7 +9,7 @@ import classNames from 'classnames';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import GanttComponent from '@/components/gantt';
+import GanttComponent, { GanttProps } from '@/components/gantt';
 import { ganttApi, issueApi, workCalendarApi } from '@/api';
 import UserHead from '@/components/UserHead';
 import { Gantt } from '@/components/gantt/types';
@@ -18,14 +18,13 @@ import Loading from '@/components/Loading';
 import SelectSprint from '@/components/select/select-sprint';
 import FlatSelect from '@/components/flat-select';
 import useFullScreen from '@/common/useFullScreen';
-import STATUS from '@/constants/STATUS';
-import { Issue } from '@/common/types';
 import { ILocalField } from '@/components/issue-search/store';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import { transformFilter } from './components/search/util';
 import Search from './components/search';
+import GanttBar from './components/gantt-bar';
 import IssueDetail from './components/issue-detail';
 import Context from './context';
 import GanttStore from './store';
@@ -155,20 +154,6 @@ const GanttPage: React.FC = () => {
     }
     return false;
   }, [workCalendar]);
-  const getBarColor = useCallback((issue: Issue) => {
-    const statusType = issue.statusVO.type;
-    const color = STATUS[statusType];
-    if (color) {
-      return {
-        borderColor: color,
-        backgroundColor: color,
-      };
-    }
-    return {
-      borderColor: '',
-      backgroundColor: '',
-    };
-  }, []);
   const handleClickFilterManage = () => {
     setFilterManageVisible(true);
   };
@@ -189,6 +174,13 @@ const GanttPage: React.FC = () => {
     >
       <Icon type="navigate_next" />
     </div>
+  ), []);
+  const renderBar: GanttProps['renderBar'] = useCallback((bar, { width, height }) => (
+    <GanttBar
+      bar={bar}
+      width={width}
+      height={height}
+    />
   ), []);
   return (
     <Page>
@@ -239,6 +231,7 @@ const GanttPage: React.FC = () => {
           <Loading loading={loading} />
           {columns.length > 0 && workCalendar && (
             <GanttComponent
+              // @ts-ignore
               ref={store.ganttRef}
               data={data}
               columns={columns}
@@ -246,14 +239,13 @@ const GanttPage: React.FC = () => {
               startDateKey="estimatedStartTime"
               endDateKey="estimatedEndTime"
               isRestDay={isRestDay}
-              // @ts-ignore
-              getBarColor={getBarColor}
               showBackToday={false}
               showUnitSwitch={false}
               unit={unit}
               onRow={onRow}
               tableIndent={28}
               expandIcon={getExpandIcon}
+              renderBar={renderBar}
             />
           )}
           <IssueDetail />

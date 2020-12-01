@@ -18,7 +18,7 @@ const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
   e.stopPropagation();
 };
 const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
-  const { store, getBarColor } = useContext(Context);
+  const { store, getBarColor, renderBar } = useContext(Context);
   const {
     width, translateX, translateY, invalidDateRange, stepGesture, label, dateTextFormat, task, loading,
   } = data;
@@ -135,17 +135,21 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
           onAutoScroll={handleAutoScroll}
           onBeforeResize={handleBeforeResize('move')}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            version="1.1"
-            width={width + 1}
-            height={height + 1}
-            viewBox={`0 0 ${width + 1} ${height + 1}`}
-          >
-            <path
-              fill={task.backgroundColor || (getBarColor && getBarColor(task).backgroundColor) || themeColor[0]}
-              stroke={task.borderColor || (getBarColor && getBarColor(task).borderColor) || themeColor[1]}
-              d={`
+          {renderBar ? renderBar(data, {
+            width: width + 1,
+            height: height + 1,
+          }) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              version="1.1"
+              width={width + 1}
+              height={height + 1}
+              viewBox={`0 0 ${width + 1} ${height + 1}`}
+            >
+              <path
+                fill={task.backgroundColor || (getBarColor && getBarColor(task).backgroundColor) || themeColor[0]}
+                stroke={task.borderColor || (getBarColor && getBarColor(task).borderColor) || themeColor[1]}
+                d={`
               M${width - 2},0.5
               l-${width - 5},0
               c-0.41421,0 -0.78921,0.16789 -1.06066,0.43934
@@ -166,9 +170,11 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
               c-0.03256,-0.38255 -0.20896,-0.724 -0.47457,-0.97045
               c-0.26763,-0.24834 -0.62607,-0.40013 -1.01995,-0.40013z
             `}
-              className={styles.default}
-            />
-          </svg>
+                className={styles.default}
+              />
+            </svg>
+          )}
+
         </DragResize>
       </div>
       {stepGesture !== 'moving' && <div className={styles.label} style={{ left: width + 45 }}>{label}</div>}

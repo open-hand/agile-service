@@ -26,7 +26,7 @@ const GanttOperation: React.FC = () => {
           ganttRef.current && ganttRef.current.backToday();
         }}
         style={{
-          borderRadius: '13px',
+          borderRadius: '16px',
           boxShadow: '0px 0px 7px 0px rgba(0, 0, 0, 0.1)',
         }}
       >
@@ -48,7 +48,7 @@ const GanttOperation: React.FC = () => {
         <Button
           funcType={'raised' as FuncType}
           style={{
-            borderRadius: '13px',
+            borderRadius: '16px',
             boxShadow: '0px 0px 7px 0px rgba(0, 0, 0, 0.1)',
           }}
         >
