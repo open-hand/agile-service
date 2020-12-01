@@ -14,6 +14,7 @@ import TimeAxisScaleSelect from './components/time-axis-scale-select';
 import TimeIndicator from './components/time-indicator';
 import ScrollBar from './components/scroll-bar';
 import Chart from './components/chart';
+import ScrollTop from './components/scroll-top';
 import styles from './Gantt.less';
 import { Gantt } from './types';
 
@@ -75,6 +76,7 @@ const GanttComponent: React.FC<GanttProps> = ({
         <TimeIndicator />
         <TimeAxisScaleSelect />
         <ScrollBar />
+        <ScrollTop />
       </Body>
     </Context.Provider>
   );
