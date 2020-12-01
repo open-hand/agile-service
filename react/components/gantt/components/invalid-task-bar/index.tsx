@@ -53,8 +53,8 @@ const InvalidTaskBar: React.FC<TaskBarProps> = ({ data }) => {
   const handleResize = useCallback(({ width: newWidth, x }) => {
     store.updateBarSize(data, { width: newWidth, x });
   }, [data, store]);
-  const handleLeftResizeEnd = useCallback(() => {
-    store.handleInvalidBarDragEnd(data);
+  const handleLeftResizeEnd = useCallback((oldSize: { width: number, x: number }) => {
+    store.handleInvalidBarDragEnd(data, oldSize);
   }, [data, store]);
   const handleAutoScroll = useCallback((delta: number) => {
     store.translateX += delta;

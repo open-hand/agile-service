@@ -20,7 +20,7 @@ const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
   const { store, getBarColor } = useContext(Context);
   const {
-    width, translateX, translateY, invalidDateRange, stepGesture, label, dateTextFormat, task,
+    width, translateX, translateY, invalidDateRange, stepGesture, label, dateTextFormat, task, loading,
   } = data;
   // TODO 优化hover判断性能
   const { selectionIndicatorTop } = store;
@@ -41,14 +41,14 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
   const handleResize = useCallback(({ width: newWidth, x }) => {
     store.updateBarSize(data, { width: newWidth, x });
   }, [data, store]);
-  const handleLeftResizeEnd = useCallback(() => {
+  const handleLeftResizeEnd = useCallback((oldSize: { width: number, x: number }) => {
     store.handleDragEnd();
-    store.updateTaskDate(data);
+    store.updateTaskDate(data, oldSize);
   }, [data, store]);
   const handleAutoScroll = useCallback((delta: number) => {
     store.translateX += delta;
   }, [store]);
-
+  const allowDrag = showDragBar && !loading;
   return (
     <div
       role="none"
@@ -61,8 +61,9 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
       }}
       onClick={handleClick}
     >
+      {loading && <div className={styles.loading} />}
       <div>
-        {showDragBar && (
+        {allowDrag && (
           <>
             {/* {stepGesture !== 'moving' && (
               <div className={styles['dependency-handle']} style={{ left: -34, width: 12 }}>

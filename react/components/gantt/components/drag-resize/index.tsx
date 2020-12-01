@@ -11,7 +11,8 @@ interface Size {
 }
 interface DragResizeProps extends React.HTMLProps<HTMLDivElement> {
   onResize: ({ width, x }: { width: number, x: number }) => void
-  onResizeEnd: () => void
+  /* 拖拽前的size */
+  onResizeEnd: ({ width, x }: { width: number, x: number }) => void
   onBeforeResize?: () => void
   minWidth: number
   type: 'left' | 'right' | 'move'
@@ -94,7 +95,7 @@ const DragResize: React.FC<DragResizeProps> = ({
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('mouseup', handleMouseUp);
     setResizing(false);
-    onResizeEnd();
+    onResizeEnd({ x: positionRef.current.x, width: positionRef.current.width });
   });
   const handleMouseDown = usePersistFn((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();

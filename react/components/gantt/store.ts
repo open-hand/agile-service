@@ -719,6 +719,7 @@ class GanttStore {
         // setShadowShow,
         // setInvalidTaskBar,
         // getHovered,
+        loading: false,
         _group: item.group,
         _collapsed: item.collapsed, // 是否折叠
         _depth: item._depth, // 表示子节点深度
@@ -839,10 +840,10 @@ class GanttStore {
   }
 
   @action
-  handleInvalidBarDragEnd(barInfo: Gantt.Bar) {
+  handleInvalidBarDragEnd(barInfo: Gantt.Bar, oldSize: { width: number, x: number }) {
     barInfo.invalidDateRange = false;
     this.handleDragEnd();
-    this.updateTaskDate(barInfo);
+    this.updateTaskDate(barInfo, oldSize);
   }
 
   @action
@@ -855,26 +856,29 @@ class GanttStore {
      * 更新时间
      */
   @action
-  async updateTaskDate(barInfo: Gantt.Bar) {
+  async updateTaskDate(barInfo: Gantt.Bar, oldSize: { width: number, x: number }) {
     const { translateX, width, task } = barInfo;
-    const oldStartDate = barInfo.task.startDate;
-    const oldEndDate = barInfo.task.endDate;
     const startDate = dayjs(translateX * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
     const endDate = dayjs((translateX + width) * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
+    const oldStartDate = barInfo.task.startDate;
+    const oldEndDate = barInfo.task.endDate;
+    if (startDate === oldStartDate && endDate === oldEndDate) {
+      return;
+    }
     runInAction(() => {
-      task.startDate = startDate;
-      task.endDate = endDate;
-      task[this.startDateKey] = startDate;
-      task[this.endDateKey] = endDate;
+      barInfo.loading = true;
     });
     const success = await this.onUpdate(task, startDate, endDate);
-    if (!success) {
+    if (success) {
       runInAction(() => {
-        task.startDate = oldStartDate;
-        task.endDate = oldEndDate;
-        task[this.startDateKey] = oldStartDate;
-        task[this.endDateKey] = oldEndDate;
+        task.startDate = startDate;
+        task.endDate = endDate;
+        task[this.startDateKey] = startDate;
+        task[this.endDateKey] = endDate;
       });
+    } else {
+      barInfo.width = oldSize.width;
+      barInfo.translateX = oldSize.x;
     }
   }
 }
