@@ -31,7 +31,7 @@ const Chart: React.FC = () => {
       store.setChartHammer(chartHammer);
       // store.initDragScrollHammer(chartRef.current);
     }
-  }, [store]);
+  }, [chartElementRef, store]);
   return (
     <div
       ref={chartRef}

@@ -17,14 +17,12 @@ const GanttIssueSearch: React.FC<Props> = ({ issueSearchStore, loadData }) => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
   return (
-    <div>
-      <IssueSearch
-        store={issueSearchStore}
-        onClear={loadData}
-        onChange={loadData}
-        onClickSaveFilter={handleSaveFilter}
-      />
-    </div>
+    <IssueSearch
+      store={issueSearchStore}
+      onClear={loadData}
+      onChange={loadData}
+      onClickSaveFilter={handleSaveFilter}
+    />
   );
 };
 export default GanttIssueSearch;
