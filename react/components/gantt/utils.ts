@@ -25,26 +25,7 @@ export function flattenDeep(arr: any[] = [], children = 'children', depth = 0, p
     );
   }, []);
 }
-export function getDragSideShrink(moveEvent: HammerInput, sideType: Gantt.MoveType) {
-  let direction = 0;
-  if (moveEvent.direction === 2) {
-    direction = -1;
-  } else if (moveEvent.direction === 4) {
-    direction = 1;
-  }
 
-  return (sideType === 'right' && direction < 0) || (sideType === 'left' && direction > 0);
-}
-export function getDragSideExpand(moveEvent: HammerInput, sideType: Gantt.MoveType) {
-  let direction = 0;
-  if (moveEvent.direction === 2) {
-    direction = -1;
-  } else if (moveEvent.direction === 4) {
-    direction = 1;
-  }
-
-  return (sideType === 'right' && direction > 0) || (sideType === 'left' && direction < 0);
-}
 export function getMoveStep(isLeft: boolean, isShrink: boolean, sight: Gantt.Sight, pxUnitAmp: number, barInfo: Gantt.Bar) {
   const { translateX, width } = barInfo;
   const startX = isLeft ? translateX : translateX + width;

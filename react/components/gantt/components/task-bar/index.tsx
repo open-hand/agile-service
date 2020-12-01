@@ -29,32 +29,20 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
     const isShow = (selectionIndicatorTop >= baseTop && selectionIndicatorTop <= baseTop + ROW_HEIGHT);
     return isShow;
   }, [selectionIndicatorTop, translateY]);
-  const handleBarPress = useCallback(() => {
-    store.shadowGestureBarPress(data);
-  }, [data, store]);
-  const handleBarPressUp = useCallback(() => {
-    store.shadowGestureBarPressUp();
-  }, [store]);
-  const handleLeftDown = useCallback((event: React.MouseEvent) => {
-    store.shadowGesturePress(event, 'left', data);
-  }, [data, store]);
-  const handleRightDown = useCallback((event: React.MouseEvent) => {
-    store.shadowGesturePress(event, 'right', data);
-  }, [data, store]);
   const themeColor = useMemo(() => {
     if (translateX + width >= dayjs().valueOf() / store.pxUnitAmp) {
       return ['#95DDFF', '#64C7FE'];
     }
     return ['#FD998F', '#F96B5D'];
   }, [store.pxUnitAmp, translateX, width]);
-  // eslint-disable-next-line no-shadow
-  const handleResize = useCallback(({ width, x }) => {
-    // eslint-disable-next-line no-param-reassign
-    data.width = width;
-    // eslint-disable-next-line no-param-reassign
-    data.translateX = x;
-  }, [data]);
+  const handleBeforeResize = (type:Gantt.MoveType) => () => {
+    store.handleDragStart(data, type);
+  };
+  const handleResize = useCallback(({ width: newWidth, x }) => {
+    store.updateBarSize(data, { width: newWidth, x });
+  }, [data, store]);
   const handleLeftResizeEnd = useCallback(() => {
+    store.handleDragEnd();
     store.updateTaskDate(data);
   }, [data, store]);
   const handleAutoScroll = useCallback((delta: number) => {
@@ -110,6 +98,7 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
               type="left"
               scroller={store.chartElementRef.current || undefined}
               onAutoScroll={handleAutoScroll}
+              onBeforeResize={handleBeforeResize('left')}
             />
             <DragResize
               className={classNames(styles['resize-handle'], styles.right)}
@@ -125,6 +114,7 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
               type="right"
               scroller={store.chartElementRef.current || undefined}
               onAutoScroll={handleAutoScroll}
+              onBeforeResize={handleBeforeResize('right')}
             />
             <div className={classNames(styles['resize-bg'], styles.compact)} style={{ width: width + 30, left: -14 }} />
           </>
@@ -142,6 +132,7 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
           type="move"
           scroller={store.chartElementRef.current || undefined}
           onAutoScroll={handleAutoScroll}
+          onBeforeResize={handleBeforeResize('move')}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

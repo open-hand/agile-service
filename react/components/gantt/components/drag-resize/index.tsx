@@ -12,6 +12,7 @@ interface Size {
 interface DragResizeProps extends React.HTMLProps<HTMLDivElement> {
   onResize: ({ width, x }: { width: number, x: number }) => void
   onResizeEnd: () => void
+  onBeforeResize?: () => void
   minWidth: number
   type: 'left' | 'right' | 'move'
   grid?: number
@@ -24,7 +25,9 @@ interface DragResizeProps extends React.HTMLProps<HTMLDivElement> {
 }
 const snap = (n: number, size: number): number => Math.round(n / size) * size;
 const DragResize: React.FC<DragResizeProps> = ({
-  type, onResize, onResizeEnd, minWidth, grid, defaultSize: { x: defaultX, width: defaultWidth }, scroller, onAutoScroll, children, ...otherProps
+  type, onBeforeResize, onResize, onResizeEnd, minWidth, grid,
+  defaultSize: { x: defaultX, width: defaultWidth }, scroller,
+  onAutoScroll, children, ...otherProps
 }) => {
   const [resizing, setResizing] = useState(false);
   const handleAutoScroll = usePersistFn((delta: number) => {
@@ -42,6 +45,7 @@ const DragResize: React.FC<DragResizeProps> = ({
   });
   const updateSize = usePersistFn(() => {
     const distance = moveRef.current.clientX - positionRef.current.clientX + autoScroll.autoScrollPos;
+    console.log(distance);
     switch (type) {
       case 'left': {
         let width = positionRef.current.width - distance;
@@ -104,6 +108,7 @@ const DragResize: React.FC<DragResizeProps> = ({
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
     setResizing(true);
+    onBeforeResize && onBeforeResize();
   });
 
   return (
