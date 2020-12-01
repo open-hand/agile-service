@@ -128,11 +128,13 @@ const GanttPage: React.FC = () => {
   }, []);
   const afterSprintLoad = useCallback((sprints) => {
     if (!sprintId) {
-      const currentSprint = find(sprints, { statusCode: 'started' });
-      if (currentSprint) {
-        setSprintId(currentSprint.sprintId);
-      } else {
-        setSprintId(sprints[0]?.sprintId || '0');
+      if (sprints.length > 0) {
+        const currentSprint = find(sprints, { statusCode: 'started' });
+        if (currentSprint) {
+          setSprintId(currentSprint.sprintId);
+        } else {
+          setSprintId(sprints[0]?.sprintId || '0');
+        }
       }
     }
   }, [sprintId]);
