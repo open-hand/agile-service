@@ -5,9 +5,6 @@ import io.choerodon.agile.api.vo.BatchUpdateFieldStatusVO;
 import io.choerodon.agile.app.service.IssueOperateService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.IssueInfoDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.hzero.boot.message.MessageClient;
@@ -16,11 +13,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author zhaotianxin
@@ -50,19 +44,23 @@ public class IssueOperateServiceImpl implements IssueOperateService {
             String messageCode = WEBSOCKET_BATCH_DELETE_ISSUE + "-" + projectId;
             BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
             Double progress = 0.0;
-            double incrementalValue = 1.0 / (issueIds.size() == 0 ? 1 : issueIds.size());
+            double incremental = Math.ceil(issueIds.size() <= 20 ? 1 : (issueIds.size()*1.0) / 20) ;
             try {
                 batchUpdateFieldStatusVO.setStatus("doing");
                 batchUpdateFieldStatusVO.setKey(messageCode);
                 batchUpdateFieldStatusVO.setUserId(userId);
                 batchUpdateFieldStatusVO.setProcess(progress);
                 messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                int i = 0;
                 for (Long issueId : issueIds) {
+                    i++;
                     issueService.deleteIssue(projectId, issueId);
-                    progress += incrementalValue;
-                    batchUpdateFieldStatusVO.setProcess(progress);
+                    if (i % incremental == 0) {
+                        batchUpdateFieldStatusVO.setProcess((i * 1.0) / issueIds.size());
+                    }
                     messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 }
+                batchUpdateFieldStatusVO.setStatus("success");
                 batchUpdateFieldStatusVO.setProcess(1.0);
             } catch (Exception e) {
                 batchUpdateFieldStatusVO.setStatus("failed");

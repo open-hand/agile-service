@@ -224,6 +224,7 @@ public class StoryMapServiceImpl implements StoryMapService {
         List<SprintSearchVO> issueProgressVOS = sprintMapper.queryStoryPointProgress(projectId, sprintIds);
         Map<Long, SprintSearchVO> issueProgressVOMap = issueProgressVOS.stream().collect(Collectors.toMap(SprintSearchVO::getSprintId, Function.identity()));
         List<SprintSearchVO> list = new ArrayList<>();
+        Collections.sort(sprintDTOS, ((o1, o2) -> o2.getSprintId().compareTo(o1.getSprintId())));
         for (SprintDTO sprintDTO : sprintDTOS) {
             SprintSearchVO sprint = modelMapper.map(sprintDTO, SprintSearchVO.class);
             sprint.setAssigneeIssues(issueSearchAssembler.dtoListToAssigneeIssueVO(assigneeCountMap.get(sprint.getSprintId()), usersMap));
