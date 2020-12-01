@@ -39,6 +39,7 @@ export namespace Gantt {
     invalidDateRange: boolean
     dateTextFormat: (startX: number) => string
     task: Item
+    loading: boolean
     _group?: boolean
     _collapsed: boolean
     _depth: number

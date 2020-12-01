@@ -4,6 +4,16 @@
   left: 0;
   display: flex;
 
+  .loading {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    cursor: not-allowed;
+    z-index: 9;
+  }
+
   & .bar {
     position: relative;
     height: 8px;
@@ -196,6 +206,7 @@
 .resize-handle.disabled {
   cursor: not-allowed
 }
+
 .date-text {
   color: #262626
 }
