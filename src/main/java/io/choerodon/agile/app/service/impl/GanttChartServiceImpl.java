@@ -50,7 +50,8 @@ public class GanttChartServiceImpl implements GanttChartService {
 //            Map<String, String> order = new HashMap<>(1);
 //            order.put("issueId", "issue_issue_id");
 //            String orderStr = PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, order));
-            List<IssueDTO> issues = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), null);
+            String orderStr = "issue_id desc";
+            List<IssueDTO> issues = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr);
             List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
