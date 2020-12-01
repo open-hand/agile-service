@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useContext, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import EditIssue from '@/components/EditIssue';
@@ -9,9 +10,9 @@ const IssueDetail = () => {
   const refresh = useCallback(() => [
 
   ], []);
-  const handleResetIssue = useCallback((newIssueId) => [
-    store.setIssueId(newIssueId),
-  ], [store]);
+  const handleResetIssue = useCallback((newIssueId) => {
+    store.setIssueId(newIssueId);
+  }, [store]);
   return (
     <EditIssue
       visible={issueId}

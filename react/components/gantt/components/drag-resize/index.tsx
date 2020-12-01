@@ -45,7 +45,6 @@ const DragResize: React.FC<DragResizeProps> = ({
   });
   const updateSize = usePersistFn(() => {
     const distance = moveRef.current.clientX - positionRef.current.clientX + autoScroll.autoScrollPos;
-    console.log(distance);
     switch (type) {
       case 'left': {
         let width = positionRef.current.width - distance;
