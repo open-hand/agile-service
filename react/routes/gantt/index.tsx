@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {
+  useState, useEffect, useCallback, useMemo,
+} from 'react';
 import { Button, Tooltip } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
@@ -23,6 +25,9 @@ import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import { transformFilter } from './components/search/util';
 import Search from './components/search';
+import Context from './context';
+import GanttStore from './store';
+import GanttOperation from './components/gantt-operation';
 import './index.less';
 
 const { Option } = FlatSelect;
@@ -73,6 +78,7 @@ const GanttPage: React.FC = () => {
     getSystemFields: () => getSystemFields().filter((item) => item.code !== 'sprint') as ILocalField[],
     transformFilter,
   });
+  const store = useMemo(() => new GanttStore(), []);
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
   const loadData = useCallback(() => {
     (async () => {
@@ -164,6 +170,7 @@ const GanttPage: React.FC = () => {
   const handleClickFilterManage = () => {
     setFilterManageVisible(true);
   };
+  const { unit } = store;
   return (
     <Page>
       <Header>
@@ -205,10 +212,15 @@ const GanttPage: React.FC = () => {
         flexDirection: 'column',
       }}
       >
-        <Search issueSearchStore={issueSearchStore} loadData={loadData} />
-        <Loading loading={loading} />
-        {columns.length > 0 && workCalendar && (
+        <Context.Provider value={{ store }}>
+          <div style={{ display: 'flex' }}>
+            <Search issueSearchStore={issueSearchStore} loadData={loadData} />
+            <GanttOperation />
+          </div>
+          <Loading loading={loading} />
+          {columns.length > 0 && workCalendar && (
           <GanttComponent
+            ref={store.ganttRef}
             data={data}
             columns={columns}
             onUpdate={handleUpdate}
@@ -217,13 +229,17 @@ const GanttPage: React.FC = () => {
             isRestDay={isRestDay}
             // @ts-ignore
             getBarColor={getBarColor}
+            showBackToday={false}
+            showUnitSwitch={false}
+            unit={unit}
           />
-        )}
-        <FilterManage
-          visible={filterManageVisible!}
-          setVisible={setFilterManageVisible}
-          issueSearchStore={issueSearchStore}
-        />
+          )}
+          <FilterManage
+            visible={filterManageVisible!}
+            setVisible={setFilterManageVisible}
+            issueSearchStore={issueSearchStore}
+          />
+        </Context.Provider>
       </Content>
     </Page>
   );

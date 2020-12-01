@@ -1,5 +1,5 @@
 import React, {
-  useMemo, useRef, useEffect, useContext,
+  useMemo, useRef, useEffect, useContext, forwardRef, useImperativeHandle, MutableRefObject,
 } from 'react';
 import { useSize } from 'ahooks';
 import Context from './context';
@@ -39,10 +39,17 @@ interface GanttProps {
   endDateKey?: string
   isRestDay?: (date: string) => boolean
   getBarColor?: (item: Gantt.Item) => { backgroundColor: string, borderColor: string }
+  showBackToday?: boolean
+  showUnitSwitch?: boolean
+  unit?: Gantt.Sight
 }
-const GanttComponent: React.FC<GanttProps> = ({
+export interface GanttRef {
+  backToday: () => void
+}
+const GanttComponent: React.FC<GanttProps> = forwardRef(({
   data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate', isRestDay, getBarColor,
-}) => {
+  showBackToday = true, showUnitSwitch = true, unit,
+}, ref) => {
   const store = useMemo(() => new GanttStore(), []);
   useEffect(() => {
     store.setData(data, startDateKey, endDateKey);
@@ -58,9 +65,19 @@ const GanttComponent: React.FC<GanttProps> = ({
       store.setIsRestDay(isRestDay);
     }
   }, [isRestDay, store]);
-
+  useEffect(() => {
+    if (unit) {
+      store.switchSight(unit);
+    }
+  }, [unit, store]);
+  useImperativeHandle(ref, (): GanttRef => ({
+    backToday: () => store.scrollToToday(),
+  }));
   return (
-    <Context.Provider value={{ store, getBarColor }}>
+    <Context.Provider value={{
+      store, getBarColor, showBackToday, showUnitSwitch,
+    }}
+    >
       <Body>
         {/* <ScrollIndicator /> */}
         <header>
@@ -73,12 +90,12 @@ const GanttComponent: React.FC<GanttProps> = ({
           <Chart />
         </main>
         <Divider />
-        <TimeIndicator />
-        <TimeAxisScaleSelect />
+        {showBackToday && <TimeIndicator />}
+        {showUnitSwitch && <TimeAxisScaleSelect />}
         <ScrollBar />
         <ScrollTop />
       </Body>
     </Context.Provider>
   );
-};
+});
 export default GanttComponent;
