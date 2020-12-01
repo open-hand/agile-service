@@ -78,4 +78,21 @@ public class StoryMapController {
                                              @PathVariable(name = "project_id") Long projectId) {
         return new ResponseEntity<>(storyMapService.storyMapSprintInfo(projectId),HttpStatus.CREATED);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询故事地图整体(分页)")
+    @PostMapping("/page_main")
+    public ResponseEntity<StoryMapVO> pageStoryMap(@ApiParam(value = "项目id", required = true)
+                                                    @PathVariable(name = "project_id") Long projectId,
+                                                    @ApiParam(value = "组织id", required = true)
+                                                    @RequestParam Long organizationId,
+                                                    @RequestParam Integer page,
+                                                    @RequestParam Integer size,
+                                                    @ApiParam(value = "search DTO", required = true)
+                                                    @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return Optional.ofNullable(storyMapService.pageStoryMap(projectId, organizationId, searchVO, page, size))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.storyMap.get"));
+    }
 }

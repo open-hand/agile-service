@@ -15,6 +15,9 @@ public class StoryMapVO {
     private List<StoryMapStoryDTO> storyList;
     private List<StoryMapWidthVO> storyMapWidth;
     private List<StoryMapStoryVO> demandStoryList;
+    private Integer totalPage;
+    private Integer page;
+    private Integer size;
 
     public List<StoryMapStoryVO> getDemandStoryList() {
         return demandStoryList;
@@ -46,5 +49,29 @@ public class StoryMapVO {
 
     public void setStoryMapWidth(List<StoryMapWidthVO> storyMapWidth) {
         this.storyMapWidth = storyMapWidth;
+    }
+
+    public Integer getTotalPage() {
+        return totalPage;
+    }
+
+    public void setTotalPage(Integer totalPage) {
+        this.totalPage = totalPage;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 }

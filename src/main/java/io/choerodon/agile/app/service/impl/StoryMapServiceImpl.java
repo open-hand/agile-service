@@ -15,6 +15,7 @@ import io.choerodon.agile.infra.mapper.SprintMapper;
 import io.choerodon.agile.infra.mapper.StoryMapMapper;
 import io.choerodon.agile.infra.mapper.StoryMapWidthMapper;
 import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
@@ -238,5 +239,48 @@ public class StoryMapServiceImpl implements StoryMapService {
             agilePluginService.handlerSprintPlanInfo(projectId,list);
         }
         return list;
+    }
+
+    @Override
+    public StoryMapVO pageStoryMap(Long projectId, Long organizationId, SearchVO searchVO, Integer page, Integer size) {
+        Boolean condition = issueService.handleSearchUser(searchVO, projectId);
+        String filterSql = null;
+        if(condition){
+            //处理自定义搜索
+            if (searchVO.getQuickFilterIds() != null && !searchVO.getQuickFilterIds().isEmpty()) {
+                filterSql = issueService.getQuickFilter(searchVO.getQuickFilterIds());
+            }
+            //处理未匹配的筛选
+            boardAssembler.handleOtherArgs(searchVO);
+        }
+        StoryMapVO storyMap = new StoryMapVO();
+        List<Long> epicIds = new ArrayList<>();
+        // get project completed status
+        getStatusIdByIsCompleted(projectId, searchVO);
+        if (agilePluginService != null) {
+            // get project epic
+            List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId, searchVO.getAdvancedSearchArgs());
+            if (projectEpicIds != null && !projectEpicIds.isEmpty()) {
+                epicIds.addAll(projectEpicIds);
+            }
+            storyMap = agilePluginService.handlerBusinessPageStoryMap(projectId, epicIds, searchVO, page, size);
+        }
+        else {
+            Page<Long> pageEpicIds = PageHelper.doPage(page, size, () -> storyMapMapper.selectEpicIdsByProject(projectId, searchVO.getAdvancedSearchArgs()));
+            List<Long> content = pageEpicIds.getContent();
+            if (CollectionUtils.isEmpty(content)) {
+                storyMap.setEpics(new ArrayList<>());
+            } else {
+                List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, content, searchVO.getAdvancedSearchArgs());
+                storyMap.setEpics(epicWithInfoDTOList);
+            }
+            List<StoryMapStoryDTO> storyMapStoryDTOS = storyMapMapper.selectStoryList(projectId, content, searchVO,filterSql,searchVO.getAssigneeFilterIds());
+            storyMap.setStoryList(!content.isEmpty() ? storyMapStoryDTOS : new ArrayList<>());
+            storyMap.setTotalPage(pageEpicIds.getTotalPages());
+        }
+        storyMap.setPage(page);
+        storyMap.setSize(size);
+        storyMap.setStoryMapWidth(setStoryMapWidth(projectId));
+        return storyMap;
     }
 }
