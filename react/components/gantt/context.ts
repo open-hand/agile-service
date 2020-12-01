@@ -10,6 +10,12 @@ interface GanttContext {
   onRow?: {
     onClick: (item: Gantt.Item) => void
   }
+  tableIndent: number
+  expandIcon?: ({ level, collapsed, onClick }: {
+    level: number,
+    collapsed: boolean
+    onClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+  }) => React.ReactNode
 }
 const context = createContext({} as GanttContext);
 export default context;

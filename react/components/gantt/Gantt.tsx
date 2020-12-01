@@ -17,6 +17,7 @@ import Chart from './components/chart';
 import ScrollTop from './components/scroll-top';
 import styles from './Gantt.less';
 import { Gantt } from './types';
+import { TABLE_INDENT } from './constants';
 
 const Body: React.FC = ({ children }) => {
   const { store } = useContext(Context);
@@ -45,13 +46,19 @@ interface GanttProps {
   onRow?: {
     onClick: (item: Gantt.Item) => void
   }
+  tableIndent?: number
+  expandIcon?: ({ level, collapsed, onClick }: {
+    level: number,
+    collapsed: boolean
+    onClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+  }) => React.ReactNode
 }
 export interface GanttRef {
   backToday: () => void
 }
 const GanttComponent: React.FC<GanttProps> = forwardRef(({
   data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate', isRestDay, getBarColor,
-  showBackToday = true, showUnitSwitch = true, unit, onRow,
+  showBackToday = true, showUnitSwitch = true, unit, onRow, tableIndent = TABLE_INDENT, expandIcon,
 }, ref) => {
   const store = useMemo(() => new GanttStore(), []);
   useEffect(() => {
@@ -78,7 +85,7 @@ const GanttComponent: React.FC<GanttProps> = forwardRef(({
   }));
   return (
     <Context.Provider value={{
-      store, getBarColor, showBackToday, showUnitSwitch, onRow,
+      store, getBarColor, showBackToday, showUnitSwitch, onRow, tableIndent, expandIcon,
     }}
     >
       <Body>

@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import styles from './RowToggler.less';
 
 interface RowTogglerProps {
-  onClick: () => void
+  onClick: React.DOMAttributes<HTMLDivElement>['onClick']
   collapsed: boolean
   level: number
 }

@@ -1,10 +1,11 @@
 import React, {
   useState, useEffect, useCallback, useMemo,
 } from 'react';
-import { Button, Tooltip } from 'choerodon-ui/pro';
+import { Button, Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
 import dayjs from 'dayjs';
+import classNames from 'classnames';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
@@ -40,7 +41,7 @@ const tableColumns = [{
   render: (record) => (
     !record.group ? (
       <span>
-        <TypeTag data={record.issueTypeVO} />
+        <TypeTag data={record.issueTypeVO} style={{ marginRight: 5, marginTop: -3 }} />
         {record.summary}
       </span>
     ) : record.summary
@@ -178,6 +179,17 @@ const GanttPage: React.FC = () => {
       store.setIssueId(issue.issueId);
     },
   }), [store]);
+  const getExpandIcon = useCallback(({ level, collapsed, onClick }) => (
+    <div
+      role="none"
+      onClick={onClick}
+      className={classNames('gantt-expand-icon', {
+        'gantt-expand-icon-expanded': !collapsed,
+      })}
+    >
+      <Icon type="navigate_next" />
+    </div>
+  ), []);
   return (
     <Page>
       <Header>
@@ -240,6 +252,8 @@ const GanttPage: React.FC = () => {
               showUnitSwitch={false}
               unit={unit}
               onRow={onRow}
+              tableIndent={28}
+              expandIcon={getExpandIcon}
             />
           )}
           <IssueDetail />
