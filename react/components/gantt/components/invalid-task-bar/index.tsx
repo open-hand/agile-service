@@ -93,8 +93,8 @@ const InvalidTaskBar: React.FC<TaskBarProps> = ({ data }) => {
             left: translateX,
             width: Math.ceil(width),
             transform: `translateY(${top}px)`,
-            backgroundColor: 'rgb(149, 221, 255)',
-            borderColor: 'rgb(100, 199, 254)',
+            backgroundColor: '#7B90FF',
+            borderColor: '#7B90FF',
           }}
         >
           <div
