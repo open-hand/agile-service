@@ -6,6 +6,7 @@ import Context from '../../context';
 import styles from './index.less';
 import { Gantt } from '../../types';
 import { ROW_HEIGHT } from '../../constants';
+import DragResize from '../drag-resize';
 
 interface TaskBarProps {
   data: Gantt.Bar
@@ -23,50 +24,58 @@ const InvalidTaskBar: React.FC<TaskBarProps> = ({ data }) => {
   const { translateX: viewTranslateX } = store;
   const top = translateY;
   const handleMouseEnter = useCallback(() => {
-    if (store.gestureKeyPress) {
+    if (data.stepGesture === 'moving') {
       return;
     }
     startX = triggerRef.current?.getBoundingClientRect()?.left || 0;
     setVisible(true);
-  }, [store.gestureKeyPress]);
+  }, [data.stepGesture]);
   const handleMouseLeave = useCallback(() => {
-    if (store.gestureKeyPress) {
+    if (data.stepGesture === 'moving') {
       return;
     }
     setVisible(false);
     store.handleInvalidBarLeave();
-  }, [store]);
+  }, [data.stepGesture, store]);
   const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    event.stopPropagation();
-    if (store.gestureKeyPress) {
+    if (data.stepGesture === 'moving') {
       return;
     }
-    // TODO 优化点击后移动的逻辑
     const pointerX = viewTranslateX + (event.clientX - startX);
     // eslint-disable-next-line no-shadow
     const { left, width } = store.startXRectBar(pointerX);
-    // 移动的时候就不改translateX了
-    if (data.stepGesture === 'moving') {
-      store.handleInvalidBarMove(data, left, Math.ceil(width));
-    } else {
-      store.handleInvalidBarHover(data, left, Math.ceil(width));
-    }
+    store.handleInvalidBarHover(data, left, Math.ceil(width));
   }, [data, store, viewTranslateX]);
-  const handleMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    event.stopPropagation();
-    store.handleInvalidBarDown(data);
+
+  const handleBeforeResize = () => () => {
+    store.handleInvalidBarDragStart(data);
+  };
+  const handleResize = useCallback(({ width: newWidth, x }) => {
+    store.updateBarSize(data, { width: newWidth, x });
   }, [data, store]);
-  const handleMouseUp = useCallback(() => {
-    store.handleInvalidBarUp(data);
+  const handleLeftResizeEnd = useCallback(() => {
+    store.handleInvalidBarDragEnd(data);
   }, [data, store]);
+  const handleAutoScroll = useCallback((delta: number) => {
+    store.translateX += delta;
+  }, [store]);
   return (
-    <div
-      role="none"
+    <DragResize
+      onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
+      onResize={handleResize}
+      onResizeEnd={handleLeftResizeEnd}
+      defaultSize={{
+        x: translateX,
+        width,
+      }}
+      minWidth={30}
+      grid={30}
+      type="right"
+      scroller={store.chartElementRef.current || undefined}
+      onAutoScroll={handleAutoScroll}
+      onBeforeResize={handleBeforeResize}
     >
       <div
         ref={triggerRef}
@@ -106,7 +115,7 @@ const InvalidTaskBar: React.FC<TaskBarProps> = ({ data }) => {
           </div>
         </div>
       )}
-    </div>
+    </DragResize>
   );
 };
 export default observer(InvalidTaskBar);

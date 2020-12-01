@@ -15,13 +15,12 @@ import isLeapYear from 'dayjs/plugin/isLeapYear';
 import weekday from 'dayjs/plugin/weekday';
 import { Gantt } from './types';
 import {
-  ROW_HEIGHT, HEADER_HEIGHT, CELL_UNIT, MOVE_SPACE, MIN_VIEW_RATE, TOP_PADDING,
+  ROW_HEIGHT, HEADER_HEIGHT, MIN_VIEW_RATE, TOP_PADDING,
 } from './constants';
 import {
-  flattenDeep, getDragSideShrink, getDragSideExpand, getMoveStep, transverseData,
+  flattenDeep, transverseData,
 } from './utils';
 
-const AUTOSCROLL_RATE = 7;
 dayjs.extend(weekday);
 dayjs.extend(weekOfYear);
 dayjs.extend(quarterOfYear);
@@ -594,42 +593,6 @@ class GanttStore {
     return map[this.sightConfig.type]();
   }
 
-  @action
-  handleInvalidBarLeave() {
-    this.handleDragEnd();
-  }
-
-  @action
-  handleInvalidBarHover(barInfo: Gantt.Bar, left: number, width: number) {
-    barInfo.translateX = left;
-    barInfo.width = width;
-    // 只能向右拖动
-    this.handleDragStart(barInfo, 'right');
-  }
-
-  @action
-  handleInvalidBarMove(barInfo: Gantt.Bar, left: number, width: number) {
-    const moveDistance = left - barInfo.translateX;
-    // 只能向右拖动
-    if (moveDistance + width > 0) {
-      barInfo.width = moveDistance + width;
-    }
-  }
-
-  @action
-  handleInvalidBarDown(barInfo: Gantt.Bar) {
-    // 只能向右拖动
-    barInfo.stepGesture = 'moving';
-  }
-
-  @action
-  handleInvalidBarUp(barInfo: Gantt.Bar) {
-    barInfo.invalidDateRange = false;
-    this.updateTaskDate(barInfo);
-    this.handleDragEnd();
-    // TODO 修改日期逻辑
-  }
-
   minorAmp2Px(ampList: Gantt.MinorAmp[]): Gantt.Minor[] {
     const { pxUnitAmp } = this;
     const list = ampList.map((item) => {
@@ -848,122 +811,39 @@ class GanttStore {
     }
     this.draggingType = null;
     this.isPointerPress = false;
-    this.stopAutoScroll();
-  }
-
-  // TODO 采用新方案
-  /**
-   * 调整宽度
-   * @param event
-   * @param type
-   * @param barInfo
-   */
-  @action
-  shadowGesturePress(event: React.MouseEvent, type: Gantt.MoveType, barInfo: Gantt.Bar) {
-    const { width } = barInfo;
-    const isLeft = type === 'left';
-    // @ts-ignore
-    const { left, right } = event.target.getBoundingClientRect();
-    const startX = isLeft ? right : left;
-    // 移动右边，以左侧为基准
-    const basePointerX = isLeft ? startX + width : startX - width;
-
-    // let baseX: number;
-    // const old = { ...barInfo };
-    const panStart = (event: HammerInput) => {
-      this.gestureKeyPress = true;
-      // baseX = event.center.x;
-      this.handleDragStart(barInfo, type);
-      this.startAutoScroll();
-    };
-    const panMove = (event: HammerInput) => {
-      // 移动
-      // eslint-disable-next-line no-bitwise
-      // const moveDistance = (((event.center.x - baseX + 15) / 30) | 0) * 30;
-      // 向左移动，值为负，向右移动，值为正
-      // if (type === 'left') {
-      //   // 移动左操作栏时
-      //   barInfo.width = old.width - moveDistance;
-      //   barInfo.translateX = old.translateX + moveDistance;
-      // }
-
-      this.updateDraggingBarPosition(event, barInfo, type, basePointerX);
-    };
-    const panEnd = () => {
-      this.gestureKeyPress = false;
-      this.handleDragEnd();
-      this.chartHammer.off('panstart', panStart);
-      this.chartHammer.off('panmove', panMove);
-      this.chartHammer.off('panend', panEnd);
-      this.updateTaskDate(barInfo);
-    };
-
-    this.chartHammer.on('panstart', panStart);
-    this.chartHammer.on('panmove', panMove);
-    this.chartHammer.on('panend', panEnd);
-  }
-
-  shadowGesturePressUp() {
-
-  }
-
-  // TODO 采用新方案
-  /**
-   * 横向调整位置
-   * @param barInfo
-   */
-  shadowGestureBarPress(barInfo: Gantt.Bar) {
-    const step = CELL_UNIT;
-    let { translateX } = barInfo;
-
-    let startX = 0;
-    let pointerX = 0;
-    this.gestureKeyPress = true;
-    const layoutShadow = action((translateX: number) => {
-      barInfo.translateX = translateX;
-    });
-
-    const setBarShadowPosition = action((event: HammerInput) => {
-      pointerX = event.center.x + this.autoScrollPos;
-      const pointerDis = pointerX - startX;
-      const direction = pointerDis > 0 ? 1 : -1;
-      const moveX = step * direction;
-      if (Math.abs(pointerDis) >= step) {
-        translateX += moveX;
-        layoutShadow(translateX);
-        startX += moveX;
-        barInfo.stepGesture = 'moving';
-      }
-    });
-    const panStart = (event: HammerInput) => {
-      startX = event.center.x;
-      this.gestureKeyPress = true;
-      this.handleDragStart(barInfo, 'move');
-      this.startAutoScroll();
-    };
-
-    const panMove = (event: HammerInput) => {
-      setBarShadowPosition(event);
-    };
-
-    const panEnd = () => {
-      this.gestureKeyPress = false;
-      this.handleDragEnd();
-      this.chartHammer.off('panstart', panStart);
-      this.chartHammer.off('panmove', panMove);
-      this.chartHammer.off('panend', panEnd);
-
-      this.updateTaskDate(barInfo);
-    };
-
-    this.chartHammer.on('panstart', panStart);
-    this.chartHammer.on('panmove', panMove);
-    this.chartHammer.on('panend', panEnd);
   }
 
   @action
-  shadowGestureBarPressUp() {
+  handleInvalidBarLeave() {
+    this.handleDragEnd();
+  }
 
+  @action
+  handleInvalidBarHover(barInfo: Gantt.Bar, left: number, width: number) {
+    barInfo.translateX = left;
+    barInfo.width = width;
+    // 只能向右拖动
+    this.handleDragStart(barInfo, 'right');
+  }
+
+  @action
+  handleInvalidBarDragStart(barInfo: Gantt.Bar) {
+    // 只能向右拖动
+    barInfo.stepGesture = 'moving';
+  }
+
+  @action
+  handleInvalidBarDragEnd(barInfo: Gantt.Bar) {
+    barInfo.invalidDateRange = false;
+    this.updateTaskDate(barInfo);
+    this.handleDragEnd();
+    // TODO 修改日期逻辑
+  }
+
+  @action
+  updateBarSize(barInfo: Gantt.Bar, { width, x }: { width: number, x: number }) {
+    barInfo.width = width;
+    barInfo.translateX = x;
   }
 
   /**
@@ -991,102 +871,6 @@ class GanttStore {
         task[this.endDateKey] = oldEndDate;
       });
     }
-  }
-
-  handleDraggingMouseMove=(event: MouseEvent) => {
-    this.clientX = event.clientX;
-  }
-
-  // 拖动时，当鼠标到边缘时，自动滚动
-  startAutoScroll = () => {
-    this.autoScrollPos = 0;
-    document.addEventListener('mousemove', this.handleDraggingMouseMove);
-    // 到最左或最右，停止滚动
-    const space = 100;
-    const scrollFunc = () => {
-      if (this.chartElementRef.current) {
-        if (this.clientX + space > this.chartElementRef.current?.getBoundingClientRect().right) {
-          this.autoScrollPos += AUTOSCROLL_RATE;
-          this.translateX += AUTOSCROLL_RATE;
-        } else if (this.clientX - space < this.chartElementRef.current?.getBoundingClientRect().left) {
-          this.autoScrollPos -= AUTOSCROLL_RATE;
-          this.translateX -= AUTOSCROLL_RATE;
-        }
-      }
-
-      this.scrollTimer = requestAnimationFrame(scrollFunc);
-    };
-    this.scrollTimer = requestAnimationFrame(scrollFunc);
-  }
-
-  // 停止自动滚动
-  stopAutoScroll = () => {
-    document.removeEventListener('mousemove', this.handleDraggingMouseMove);
-    if (this.scrollTimer) {
-      cancelAnimationFrame(this.scrollTimer);
-    }
-  }
-
-  @action
-  updateDraggingBarPosition(moveEv: HammerInput, barInfo: Gantt.Bar, type: Gantt.MoveType, basePointerX: number) {
-    const isLeft = type === 'left';
-    const pointerX = moveEv.center.x + this.autoScrollPos;
-    const isShrink = getDragSideShrink(moveEv, type);
-    const isExpand = getDragSideExpand(moveEv, type);
-    // 每次step可能不一样， 动态计算 如：每月可能30或31天
-    const step = getMoveStep(isLeft, isShrink, this.sightConfig.type, this.pxUnitAmp, barInfo);
-    if (isShrink) {
-      this.moveShrinkStep(step, type, barInfo, basePointerX, pointerX);
-    }
-
-    if (isExpand) {
-      this.moveExpandStep(step, type, barInfo, basePointerX, pointerX);
-    }
-  }
-
-  /**
-     * 跟随鼠标移动搜索阴影
-     */
-  @action
-  moveShrinkStep = (step: number, type: Gantt.MoveType, barInfo: Gantt.Bar, basePointerX: number, pointerX: number) => {
-    const isLeft = type === 'left';
-    let { width, translateX } = barInfo;
-
-    if (isLeft) {
-      translateX += step;
-      width -= step;
-    } else {
-      width -= step;
-    }
-
-    const pointerDis = Math.abs(pointerX - basePointerX);
-    if (pointerDis > width) return;
-    if (width < step) return;
-
-    barInfo.translateX = translateX;
-    barInfo.width = width;
-  }
-
-  /**
-   * 跟随鼠标拖动扩大阴影
-   */
-  @action
-  moveExpandStep = (step: number, type: Gantt.MoveType, barInfo: Gantt.Bar, basePointerX: number, pointerX: number) => {
-    const isLeft = type === 'left';
-    let { width, translateX } = barInfo;
-
-    const pointerDis = Math.abs(pointerX - basePointerX);
-    if (pointerDis < MOVE_SPACE || pointerDis < width) return;
-
-    // 测试代码
-    if (isLeft) {
-      translateX -= step;
-      width += step;
-    } else {
-      width += step;
-    }
-    barInfo.translateX = translateX;
-    barInfo.width = width;
   }
 }
 
