@@ -42,13 +42,16 @@ interface GanttProps {
   showBackToday?: boolean
   showUnitSwitch?: boolean
   unit?: Gantt.Sight
+  onRow?: {
+    onClick: (item: Gantt.Item) => void
+  }
 }
 export interface GanttRef {
   backToday: () => void
 }
 const GanttComponent: React.FC<GanttProps> = forwardRef(({
   data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate', isRestDay, getBarColor,
-  showBackToday = true, showUnitSwitch = true, unit,
+  showBackToday = true, showUnitSwitch = true, unit, onRow,
 }, ref) => {
   const store = useMemo(() => new GanttStore(), []);
   useEffect(() => {
@@ -75,7 +78,7 @@ const GanttComponent: React.FC<GanttProps> = forwardRef(({
   }));
   return (
     <Context.Provider value={{
-      store, getBarColor, showBackToday, showUnitSwitch,
+      store, getBarColor, showBackToday, showUnitSwitch, onRow,
     }}
     >
       <Body>

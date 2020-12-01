@@ -35,9 +35,16 @@ class GanttStore {
 
   @observable unit: Gantt.Sight = 'day'
 
+  @observable issueId: string | null = null
+
   @action
   switchUnit(unit: Gantt.Sight) {
     this.unit = unit;
+  }
+
+  @action
+  setIssueId(issueId: string | null) {
+    this.issueId = issueId;
   }
 }
 

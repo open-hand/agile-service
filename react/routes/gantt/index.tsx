@@ -25,6 +25,7 @@ import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import { transformFilter } from './components/search/util';
 import Search from './components/search';
+import IssueDetail from './components/issue-detail';
 import Context from './context';
 import GanttStore from './store';
 import GanttOperation from './components/gantt-operation';
@@ -171,6 +172,12 @@ const GanttPage: React.FC = () => {
     setFilterManageVisible(true);
   };
   const { unit } = store;
+  const onRow = useMemo(() => ({
+    // @ts-ignore
+    onClick: (issue) => {
+      store.setIssueId(issue.issueId);
+    },
+  }), [store]);
   return (
     <Page>
       <Header>
@@ -219,21 +226,23 @@ const GanttPage: React.FC = () => {
           </div>
           <Loading loading={loading} />
           {columns.length > 0 && workCalendar && (
-          <GanttComponent
-            ref={store.ganttRef}
-            data={data}
-            columns={columns}
-            onUpdate={handleUpdate}
-            startDateKey="estimatedStartTime"
-            endDateKey="estimatedEndTime"
-            isRestDay={isRestDay}
-            // @ts-ignore
-            getBarColor={getBarColor}
-            showBackToday={false}
-            showUnitSwitch={false}
-            unit={unit}
-          />
+            <GanttComponent
+              ref={store.ganttRef}
+              data={data}
+              columns={columns}
+              onUpdate={handleUpdate}
+              startDateKey="estimatedStartTime"
+              endDateKey="estimatedEndTime"
+              isRestDay={isRestDay}
+              // @ts-ignore
+              getBarColor={getBarColor}
+              showBackToday={false}
+              showUnitSwitch={false}
+              unit={unit}
+              onRow={onRow}
+            />
           )}
+          <IssueDetail />
           <FilterManage
             visible={filterManageVisible!}
             setVisible={setFilterManageVisible}
