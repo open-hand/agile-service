@@ -120,7 +120,7 @@ class FeatureColumn extends Component {
         {
           !!epicInViewportMap.get(epicId) && feature.issueId && (
             <>
-              <FeatureCard feature={feature} />
+              <FeatureCard feature={{ ...feature, epicId }} />
               {resizing && (
               <div style={{
                 position: 'fixed',
