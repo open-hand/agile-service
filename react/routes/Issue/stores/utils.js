@@ -2,9 +2,9 @@ import React from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui';
+import openBatchDeleteModal from '@/components/BatchDeleteConfirm';
 import Modal from '../components/Modal';
 import BatchModal from '../components/BatchModal';
-import openBatchDeleteModal from '../components/BatchDeleteConfirm';
 
 function transformSystemFilter(data) {
   const {

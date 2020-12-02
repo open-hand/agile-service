@@ -1,11 +1,11 @@
 import React, {
-  useEffect, useCallback, useState,
+  useCallback, useState,
 } from 'react';
 import {
   DataSet, Modal, Button, Progress,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { Choerodon, WSHandler, WSProvider } from '@choerodon/boot';
+import { Choerodon, WSHandler } from '@choerodon/boot';
 import { IModalProps } from '@/common/types';
 import { issueApi } from '@/api';
 import { getProjectId } from '@/utils/common';
@@ -93,8 +93,8 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
           取消
         </Button>
         <Button
+          className={styles.batchDeleteBtn}
           disabled={!!loading}
-          color={'blue' as ButtonColor}
           loading={Boolean(loading)}
           style={{
             fontWeight: 500,
