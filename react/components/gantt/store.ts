@@ -692,6 +692,7 @@ class GanttStore {
     };
     const flattenData = flattenDeep(data);
     const barList = flattenData.map((item: any, index) => {
+      const valid = item.startDate && item.endDate;
       let startAmp = dayjs(item.startDate || 0).startOf('day').valueOf();
       let endAmp = dayjs(item.endDate || 0).add(1, 'day').startOf('day').valueOf();
 
@@ -702,8 +703,8 @@ class GanttStore {
           .valueOf();
       }
 
-      const width = (endAmp - startAmp) / pxUnitAmp;
-      const translateX = startAmp / pxUnitAmp;
+      const width = valid ? (endAmp - startAmp) / pxUnitAmp : 0;
+      const translateX = valid ? startAmp / pxUnitAmp : 0;
       const translateY = baseTop + index * topStep;
       const { _parent } = item;
       const bar = {
