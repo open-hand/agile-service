@@ -864,7 +864,9 @@ class GanttStore {
   async updateTaskDate(barInfo: Gantt.Bar, oldSize: { width: number, x: number }) {
     const { translateX, width, task } = barInfo;
     const startDate = dayjs(translateX * this.pxUnitAmp).hour(9).format('YYYY-MM-DD HH:mm:ss');
-    const endDate = dayjs((translateX + width) * this.pxUnitAmp).subtract(1).hour(18).format('YYYY-MM-DD HH:mm:ss');
+    const endDate = dayjs((translateX + width) * this.pxUnitAmp).subtract(1).hour(18).minute(0)
+      .second(0)
+      .format('YYYY-MM-DD HH:mm:ss');
     const oldStartDate = barInfo.task.startDate;
     const oldEndDate = barInfo.task.endDate;
     if (startDate === oldStartDate && endDate === oldEndDate) {
