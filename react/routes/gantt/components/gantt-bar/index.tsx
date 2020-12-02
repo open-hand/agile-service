@@ -10,7 +10,7 @@ interface GanttBarProps {
   width: number
   height: number
 }
-function format(h:number) {
+function format(h: number) {
   if (h >= 24) {
     const days = Math.floor(h / 24);
     const hours = h % 24;
@@ -26,10 +26,15 @@ const GanttBar: React.FC<GanttBarProps> = ({ bar, width, height }) => {
   // @ts-ignore
   const completeCount = issue.children?.filter((item) => item.statusVO.type === 'done').length || 0;
   // @ts-ignore
-  const [color1, color2] = STATUS_COLOR[statusType];
+  let [color1, color2] = STATUS_COLOR[statusType];
   const percent = totalCount ? completeCount / totalCount : 0;
   let diff = 0;
   if (issue.estimatedStartTime && issue.estimatedEndTime) {
+    // 延期
+    if (dayjs(issue.estimatedEndTime).isBefore(dayjs()) && issue.statusVO.type !== 'done') {
+      color1 = '#FF5C6A';
+      color2 = '#FFBAC0';
+    }
     diff = dayjs(issue.estimatedEndTime).diff(issue.estimatedStartTime, 'hour');
   }
   return (
