@@ -6,6 +6,7 @@ import { Gantt } from '@/components/gantt/types';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
 
 interface GanttBarProps {
+  type: string
   bar: Gantt.Bar
   width: number
   height: number
@@ -19,19 +20,22 @@ function format(h: number) {
   }
   return `${h}小时`;
 }
-const GanttBar: React.FC<GanttBarProps> = ({ bar, width, height }) => {
+const GanttBar: React.FC<GanttBarProps> = ({
+  type, bar, width, height,
+}) => {
   const { task: issue } = bar;
   const statusType = issue.statusVO.type;
+  const hasChildren = issue.children && issue.children.length > 0;
   const totalCount = issue.children?.length || 0;
   // @ts-ignore
-  const completeCount = issue.children?.filter((item) => item.statusVO.type === 'done').length || 0;
+  const completeCount = issue.children?.filter((item) => item.completed).length || 0;
   // @ts-ignore
   let [color1, color2] = STATUS_COLOR[statusType];
   const percent = totalCount ? completeCount / totalCount : 0;
   let diff = 0;
   if (issue.estimatedStartTime && issue.estimatedEndTime) {
     // 延期
-    if (dayjs(issue.estimatedEndTime).isBefore(dayjs()) && issue.statusVO.type !== 'done') {
+    if (dayjs(issue.estimatedEndTime).isBefore(dayjs()) && issue.completed) {
       color1 = '#FF5C6A';
       color2 = '#FFBAC0';
     }
@@ -49,10 +53,12 @@ const GanttBar: React.FC<GanttBarProps> = ({ bar, width, height }) => {
           持续时间：
           {format(diff)}
         </div>
+        {type !== 'assignee' && hasChildren && (
         <div>
           当前进度：
           {`${Math.round(percent * 100 * 100) / 100}%`}
         </div>
+        )}
         <div>
           预计开始：
           {issue.estimatedStartTime}
