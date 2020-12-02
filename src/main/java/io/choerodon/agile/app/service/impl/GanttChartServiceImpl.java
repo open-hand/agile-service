@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
@@ -35,11 +37,20 @@ public class GanttChartServiceImpl implements GanttChartService {
     private UserService userService;
     @Autowired
     private StatusService statusService;
+    @Autowired
+    private ProjectConfigService projectConfigService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     public List<GanttChartVO> listByTask(Long projectId, SearchVO searchVO) {
         if (isSprintEmpty(searchVO)) {
             throw new CommonException("error.otherArgs.sprint.empty");
+        }
+        //设置不查询史诗
+        boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
+        if (illegalIssueTypeId) {
+            return new ArrayList<>();
         }
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (condition) {
@@ -68,6 +79,40 @@ public class GanttChartServiceImpl implements GanttChartService {
         } else {
             return new ArrayList<>();
         }
+    }
+
+    private boolean buildIssueType(SearchVO searchVO, Long projectId) {
+        List<String> issueTypes = Arrays.asList("story", "bug", "task", "sub_task");
+        String key = "issueTypeId";
+        List<Long> allowedIssueTypeIds =
+                projectConfigService
+                        .queryIssueTypesWithStateMachineIdByProjectId(projectId, "agile")
+                        .stream()
+                        .filter(x -> issueTypes.contains(x.getTypeCode()))
+                        .map(IssueTypeWithStateMachineIdVO::getId)
+                        .collect(Collectors.toList());
+
+        Map<String, Object> advancedSearchArgs = searchVO.getAdvancedSearchArgs();
+        if (advancedSearchArgs == null) {
+            advancedSearchArgs = new HashMap<>();
+            searchVO.setAdvancedSearchArgs(advancedSearchArgs);
+        }
+        Object issueTypeId = advancedSearchArgs.get(key);
+        List<String> list = new ArrayList<>();
+        if (ObjectUtils.isEmpty(issueTypeId)) {
+            allowedIssueTypeIds.forEach(a -> list.add(a + ""));
+        } else {
+            List<String> array = objectMapper.convertValue(issueTypeId, new TypeReference<List<String>>() {
+            });
+            allowedIssueTypeIds.forEach(a -> {
+                String idStr = a + "";
+                if (array.contains(idStr)) {
+                    list.add(idStr);
+                }
+            });
+        }
+        advancedSearchArgs.put(key, list);
+        return list.isEmpty();
     }
 
     private boolean isSprintEmpty(SearchVO searchVO) {
