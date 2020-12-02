@@ -186,6 +186,14 @@ const GanttPage: React.FC = () => {
       height={height}
     />
   ), []);
+  const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((item, t) => (
+    <div
+      role="none"
+      className="gantt-expand-icon"
+    >
+      {t === 'left' ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />}
+    </div>
+  ), []);
   return (
     <Page>
       <Header>
@@ -257,6 +265,7 @@ const GanttPage: React.FC = () => {
               tableIndent={28}
               expandIcon={getExpandIcon}
               renderBar={renderBar}
+              renderBarThumb={renderBarThumb}
               tableCollapseAble={false}
             />
           )}

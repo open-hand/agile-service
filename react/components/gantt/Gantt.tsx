@@ -48,6 +48,7 @@ export interface GanttProps {
   tableIndent?: number
   expandIcon?: GanttContext['expandIcon']
   renderBar?: GanttContext['renderBar']
+  renderBarThumb?: GanttContext['renderBarThumb']
   onBarClick?: GanttContext['onBarClick']
   tableCollapseAble?: GanttContext['tableCollapseAble']
 }
@@ -57,7 +58,7 @@ export interface GanttRef {
 const GanttComponent: React.FC<GanttProps> = forwardRef(({
   data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate', isRestDay, getBarColor,
   showBackToday = true, showUnitSwitch = true, unit, onRow, tableIndent = TABLE_INDENT, expandIcon,
-  renderBar, onBarClick, tableCollapseAble = true,
+  renderBar, onBarClick, tableCollapseAble = true, renderBarThumb,
 }, ref) => {
   const store = useMemo(() => new GanttStore(), []);
   useEffect(() => {
@@ -94,6 +95,7 @@ const GanttComponent: React.FC<GanttProps> = forwardRef(({
       renderBar,
       onBarClick,
       tableCollapseAble,
+      renderBarThumb,
     }}
     >
       <Body>

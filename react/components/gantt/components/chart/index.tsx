@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import Hammer from 'hammerjs';
 import DragPresent from '../drag-present';
 import BarList from '../bar-list';
+import BarThumbList from '../bar-thumb-list';
 import Today from '../today';
 import Dependencies from '../dependencies';
 import Context from '../../context';
@@ -80,6 +81,7 @@ const Chart: React.FC = () => {
         <Dependencies />
       </svg>
       <div className={styles['render-chunk']} style={{ height: bodyScrollHeight, transform: `translateX(-${translateX}px` }}>
+        <BarThumbList />
         <BarList />
         <Today />
       </div>

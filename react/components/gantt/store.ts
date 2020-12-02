@@ -624,6 +624,32 @@ class GanttStore {
     return list;
   }
 
+  getTaskBarThumbVisible(barInfo: Gantt.Bar) {
+    const { width, translateX: barTranslateX, invalidDateRange } = barInfo;
+    if (invalidDateRange) {
+      return false;
+    }
+    const rightSide = this.translateX + this.viewWidth;
+    const right = barTranslateX;
+
+    return barTranslateX + width < this.translateX || right - rightSide > 0;
+  }
+
+  scrollToBar(barInfo: Gantt.Bar, type: 'left' | 'right') {
+    const { translateX: barTranslateX, width } = barInfo;
+    const translateX1 = this.translateX + (this.viewWidth / 2);
+    const translateX2 = barTranslateX + width;
+
+    const diffX = Math.abs(translateX2 - translateX1);
+    let translateX = this.translateX + diffX;
+
+    if (type === 'left') {
+      translateX = this.translateX - diffX;
+    }
+
+    this.translateX = translateX;
+  }
+
   @computed get getBarList(): Gantt.Bar[] {
     const { pxUnitAmp, data } = this;
     const minStamp = 11 * pxUnitAmp;
