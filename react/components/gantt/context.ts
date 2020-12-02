@@ -18,6 +18,7 @@ export interface GanttContext {
   }) => React.ReactNode
   renderBar?: (barInfo: Gantt.Bar, { width, height }: { width: number, height: number }) => React.ReactNode
   onBarClick?: (item: Gantt.Item) => void
+  tableCollapseAble: boolean
 }
 const context = createContext({} as GanttContext);
 export default context;

@@ -6,7 +6,7 @@ import Context from '../../context';
 import styles from './index.less';
 
 const Divider: React.FC = () => {
-  const { store } = useContext(Context);
+  const { store, tableCollapseAble } = useContext(Context);
   const { tableWidth } = store;
   const handleClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();
@@ -27,8 +27,10 @@ const Divider: React.FC = () => {
   return (
     <div
       role="none"
-      className={styles.divider}
-      style={{ left }}
+      className={classNames(styles.divider, {
+        [styles.divider_only]: !tableCollapseAble,
+      })}
+      style={{ left: left - 1 }}
       onMouseDown={tableWidth === 0 ? undefined : handleMouseDown}
     >
       {resizing && (
@@ -44,11 +46,13 @@ const Divider: React.FC = () => {
         />
       )}
       <hr />
-      <div className={styles['icon-wrapper']} role="none" onMouseDown={(e) => e.stopPropagation()} onClick={handleClick}>
-        <i
-          className={classNames(styles.arrow, { [styles.reverse]: left <= 0 })}
-        />
-      </div>
+      {tableCollapseAble && (
+        <div className={styles['icon-wrapper']} role="none" onMouseDown={(e) => e.stopPropagation()} onClick={handleClick}>
+          <i
+            className={classNames(styles.arrow, { [styles.reverse]: left <= 0 })}
+          />
+        </div>
+      )}
     </div>
   );
 };

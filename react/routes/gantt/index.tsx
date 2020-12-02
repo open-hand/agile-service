@@ -257,6 +257,7 @@ const GanttPage: React.FC = () => {
               tableIndent={28}
               expandIcon={getExpandIcon}
               renderBar={renderBar}
+              tableCollapseAble={false}
             />
           )}
           <IssueDetail />

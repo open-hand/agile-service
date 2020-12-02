@@ -49,6 +49,7 @@ export interface GanttProps {
   expandIcon?: GanttContext['expandIcon']
   renderBar?: GanttContext['renderBar']
   onBarClick?: GanttContext['onBarClick']
+  tableCollapseAble?: GanttContext['tableCollapseAble']
 }
 export interface GanttRef {
   backToday: () => void
@@ -56,7 +57,7 @@ export interface GanttRef {
 const GanttComponent: React.FC<GanttProps> = forwardRef(({
   data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate', isRestDay, getBarColor,
   showBackToday = true, showUnitSwitch = true, unit, onRow, tableIndent = TABLE_INDENT, expandIcon,
-  renderBar, onBarClick,
+  renderBar, onBarClick, tableCollapseAble = true,
 }, ref) => {
   const store = useMemo(() => new GanttStore(), []);
   useEffect(() => {
@@ -92,6 +93,7 @@ const GanttComponent: React.FC<GanttProps> = forwardRef(({
       expandIcon,
       renderBar,
       onBarClick,
+      tableCollapseAble,
     }}
     >
       <Body>
