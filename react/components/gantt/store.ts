@@ -692,13 +692,14 @@ class GanttStore {
     };
     const flattenData = flattenDeep(data);
     const barList = flattenData.map((item: any, index) => {
-      let startAmp = dayjs(item.startDate || 0).valueOf();
-      let endAmp = dayjs(item.endDate || 0).valueOf();
+      let startAmp = dayjs(item.startDate || 0).startOf('day').valueOf();
+      let endAmp = dayjs(item.endDate || 0).add(1, 'day').startOf('day').valueOf();
 
       // 开始结束日期相同默认一天
       if (Math.abs(endAmp - startAmp) < minStamp) {
-        startAmp = dayjs(item.startDate || 0).valueOf();
-        endAmp = dayjs(item.endDate || 0).add(minStamp, 'millisecond').valueOf();
+        startAmp = dayjs(item.startDate || 0).startOf('day').valueOf();
+        endAmp = dayjs(item.endDate || 0).add(1, 'day').startOf('day').add(minStamp, 'millisecond')
+          .valueOf();
       }
 
       const width = (endAmp - startAmp) / pxUnitAmp;
@@ -858,8 +859,8 @@ class GanttStore {
   @action
   async updateTaskDate(barInfo: Gantt.Bar, oldSize: { width: number, x: number }) {
     const { translateX, width, task } = barInfo;
-    const startDate = dayjs(translateX * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
-    const endDate = dayjs((translateX + width) * this.pxUnitAmp).format('YYYY-MM-DD HH:mm:ss');
+    const startDate = dayjs(translateX * this.pxUnitAmp).hour(9).format('YYYY-MM-DD HH:mm:ss');
+    const endDate = dayjs((translateX + width) * this.pxUnitAmp).subtract(1).hour(18).format('YYYY-MM-DD HH:mm:ss');
     const oldStartDate = barInfo.task.startDate;
     const oldEndDate = barInfo.task.endDate;
     if (startDate === oldStartDate && endDate === oldEndDate) {
