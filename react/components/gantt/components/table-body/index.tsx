@@ -53,6 +53,8 @@ const TableRows = () => {
                 className={styles.cell}
                 style={{
                   width: columnsWidth[index],
+                  minWidth: column.minWidth,
+                  maxWidth: column.maxWidth,
                   paddingLeft: index === 0 ? tableIndent * (bar._depth + 1) : 12,
                 }}
               >
