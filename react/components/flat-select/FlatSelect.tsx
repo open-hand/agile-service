@@ -134,7 +134,7 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     const hasValue = this.getValue() !== undefined && this.getValue() !== null;
     const placeholder = this.hasFloatLabel ? undefined : this.getPlaceholders()[0];
     const { clearButton } = this.props;
-    const width = (hasValue ? measureTextWidth(finalText) + (clearButton ? 52 : 35) : measureTextWidth(placeholder || '') + 32);
+    const width = (hasValue ? measureTextWidth(finalText) + (clearButton ? 52 : 35) : measureTextWidth(placeholder || '') + 36);
     if (isValidElement(text)) {
       otherProps.style = { ...otherProps.style, width, textIndent: -1000 };
     } else {
