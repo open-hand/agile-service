@@ -22,10 +22,12 @@ import { ILocalField } from '@/components/issue-search/store';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
+import HeaderLine from '@/components/HeaderLine';
 import { transformFilter } from './components/search/util';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
 import IssueDetail from './components/issue-detail';
+import CreateIssue from './components/create-issue';
 import Context from './context';
 import GanttStore from './store';
 import GanttOperation from './components/gantt-operation';
@@ -72,7 +74,6 @@ const tableColumns = [{
 const GanttPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [type, setType] = useState<string>('task');
-  const [sprintId, setSprintId] = useState<string | null>(null);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const [workCalendar, setWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
@@ -82,6 +83,7 @@ const GanttPage: React.FC = () => {
     transformFilter,
   });
   const store = useMemo(() => new GanttStore(), []);
+  const { sprintId } = store;
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7n-gantt-fullScreen');
   const loadData = useCallback(() => {
     (async () => {
@@ -126,18 +128,18 @@ const GanttPage: React.FC = () => {
     }
   }, []);
   const handleSprintChange = useCallback((value: string) => {
-    setSprintId(value);
-  }, []);
+    store.setSprintId(value);
+  }, [store]);
   const afterSprintLoad = useCallback((sprints) => {
     if (!sprintId) {
       const currentSprint = find(sprints, { statusCode: 'started' });
       if (currentSprint) {
-        setSprintId(currentSprint.sprintId);
+        store.setSprintId(currentSprint.sprintId);
       } else {
-        setSprintId(sprints[0]?.sprintId || '0');
+        store.setSprintId(sprints[0]?.sprintId || '0');
       }
     }
-  }, [sprintId]);
+  }, [sprintId, store]);
   const isRestDay = useCallback((date: string) => {
     if (!workCalendar) {
       return false;
@@ -195,6 +197,7 @@ const GanttPage: React.FC = () => {
           clearButton={false}
           afterLoad={afterSprintLoad}
           hasUnassign
+          style={{ marginRight: 40 }}
         />
         <FlatSelect value={type} onChange={setType} clearButton={false}>
           <Option value="task">
@@ -204,8 +207,12 @@ const GanttPage: React.FC = () => {
             按经办人查看
           </Option>
         </FlatSelect>
+        <HeaderLine />
         <Button
           icon="playlist_add"
+          onClick={() => {
+            store.setCreateIssueVisible(true);
+          }}
         >
           创建问题
         </Button>
@@ -253,6 +260,7 @@ const GanttPage: React.FC = () => {
             />
           )}
           <IssueDetail />
+          <CreateIssue refresh={loadData} />
           <FilterManage
             visible={filterManageVisible!}
             setVisible={setFilterManageVisible}
