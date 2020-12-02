@@ -38,12 +38,14 @@ const tableColumns = [{
   label: '名称',
   // @ts-ignore
   render: (record) => (
-    !record.group ? (
-      <span style={{ cursor: 'pointer', color: 'black' }}>
-        <TypeTag data={record.issueTypeVO} style={{ marginRight: 5, marginTop: -3 }} />
-        {record.summary}
-      </span>
-    ) : record.summary
+    <Tooltip title={record.summary}>
+      {!record.group ? (
+        <span style={{ cursor: 'pointer', color: 'black' }}>
+          <TypeTag data={record.issueTypeVO} style={{ marginRight: 5 }} />
+          <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
+        </span>
+      ) : record.summary}
+    </Tooltip>
   ),
 },
 {
