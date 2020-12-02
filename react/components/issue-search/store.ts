@@ -109,7 +109,6 @@ class IssueSearchStore {
 
   handleFilterChange = (code: string, value: any) => {
     this.setFieldFilter(code, value);
-    console.log('this.query', this.query);
     this.query();
   }
 
