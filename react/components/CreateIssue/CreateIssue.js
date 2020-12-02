@@ -8,7 +8,7 @@ import {
   Select, Form, Input, Button, Modal, Spin,
 } from 'choerodon-ui';
 import moment from 'moment';
-import reactComponentDebounce from 'react-component-debounce';
+import reactComponentDebounce from '@choerodon/react-component-debounce';
 import {
   featureApi, epicApi, fieldApi, issueTypeApi,
   issueApi,
