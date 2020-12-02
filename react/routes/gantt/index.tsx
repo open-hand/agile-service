@@ -244,6 +244,7 @@ const GanttPage: React.FC = () => {
               showUnitSwitch={false}
               unit={unit}
               onRow={onRow}
+              onBarClick={onRow.onClick}
               tableIndent={28}
               expandIcon={getExpandIcon}
               renderBar={renderBar}

@@ -17,6 +17,7 @@ export interface GanttContext {
     onClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
   }) => React.ReactNode
   renderBar?: (barInfo: Gantt.Bar, { width, height }: { width: number, height: number }) => React.ReactNode
+  onBarClick?: (item: Gantt.Item) => void
 }
 const context = createContext({} as GanttContext);
 export default context;
