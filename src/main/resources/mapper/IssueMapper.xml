@@ -3311,4 +3311,33 @@
         and CONCAT_WS( '-', t2.project_code, t1.issue_num ) = #{issueNum}
     </select>
 
+    <select id="selectSubListByIssueIds" resultType="java.lang.Long">
+        select ai.issue_id from agile_issue ai
+        where ai.project_id = #{projectId}
+        and ai.type_code in ('sub_task','bug')
+        and ai.issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+            #{issueId}
+        </foreach>
+        and (
+           ai.parent_issue_id in (
+             select ai1.issue_id from agile_issue ai1
+             where ai1.project_id = #{projectId}
+             and ai1.issue_id in
+            <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+            </foreach>
+            )
+            or
+            ai.relate_issue_id in (
+            select ai1.issue_id from agile_issue ai1
+            where ai1.project_id = #{projectId}
+            and ai1.issue_id in
+            <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+            </foreach>
+           )
+         )
+    </select>
+
 </mapper>

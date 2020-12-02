@@ -12,10 +12,7 @@ import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -552,4 +549,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     IssueVO selectByIssueNum(@Param("projectId") Long projectId,
                              @Param("issueNum") String issueNum);
+
+    List<Long> selectSubListByIssueIds(@Param("projectId") Long projectId, @Param("issueIds")  List<Long> issueIds);
 }
