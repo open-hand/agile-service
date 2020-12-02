@@ -284,7 +284,7 @@ class GanttStore {
 
   @computed get scrollBarWidth() {
     const MIN_WIDTH = 30;
-    return Math.max((this.viewWidth) / (this.scrollWidth) * 160, MIN_WIDTH);
+    return Math.max((this.viewWidth / this.scrollWidth) * 160, MIN_WIDTH);
   }
 
   @computed get scrollLeft() {
