@@ -778,6 +778,15 @@
                 where alir.label_id = ail.label_id
                 AND ail.label_name LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.label}) ,'%') )
             </if>
+            <if test='searchVO.searchArgs.estimatedStartTimeScopeStart != null and searchVO.searchArgs.estimatedStartTimeScopeStart != "" and searchVO.searchArgs.estimatedStartTimeScopeEnd != null and searchVO.searchArgs.estimatedStartTimeScopeEnd != ""'>
+                and ai.estimated_start_time &gt;= #{searchVO.searchArgs.estimatedStartTimeScopeStart} and ai.estimated_start_time &lt;=
+                #{searchVO.searchArgs.estimatedStartTimeScopeEnd}
+            </if>
+
+            <if test='searchVO.searchArgs.estimatedEndTimeScopeStart != null and searchVO.searchArgs.estimatedEndTimeScopeStart != "" and searchVO.searchArgs.estimatedEndTimeScopeEnd != null and searchVO.searchArgs.estimatedEndTimeScopeEnd != ""'>
+                and ai.estimated_end_time &gt;= #{searchVO.searchArgs.estimatedEndTimeScopeStart} and ai.estimated_end_time &lt;=
+                #{searchVO.searchArgs.estimatedEndTimeScopeEnd}
+            </if>
         </if>
     </sql>
 
