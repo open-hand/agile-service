@@ -238,7 +238,7 @@ class GanttStore {
   }
 
   @action initWidth() {
-    this.tableWidth = this.columns.reduce((width, item) => width + item.width, 0);
+    // this.tableWidth = this.columns.reduce((width, item) => width + item.width, 0);
     this.viewWidth = this.width - this.tableWidth;
     // 表盘宽度不能小于总宽度38%
     if (this.viewWidth < MIN_VIEW_RATE * this.width) {
@@ -308,22 +308,18 @@ class GanttStore {
   }
 
   @computed get getColumnsWidth(): number[] {
-    const totalColumnWidth = this.columns.reduce((width, item) => width + item.width, 0);
-    if (totalColumnWidth < this.tableWidth) {
-      let availableWidth = this.tableWidth;
-      const result: number[] = [];
-      this.columns.forEach((column, index) => {
-        if (index === this.columns.length - 1) {
-          result.push(availableWidth);
-        } else {
-          const width = (this.tableWidth * (column.width / totalColumnWidth));
-          result.push(width);
-          availableWidth -= width;
-        }
-      });
-      return result;
-    }
-    return this.columns.map((column) => column.width);
+    const totalColumnWidth = this.columns.reduce((width, item) => width + (item.width || 0), 0);
+    const totalFlex = this.columns.reduce((total, item) => total + (item.width ? 0 : item.flex || 1), 0);
+    const restWidth = this.tableWidth - totalColumnWidth;
+    return this.columns.map((column) => {
+      if (column.width) {
+        return column.width;
+      }
+      if (column.flex) {
+        return restWidth * (column.flex / totalFlex);
+      }
+      return restWidth * (1 / totalFlex);
+    });
   }
 
   // 内容区滚动区域域高度

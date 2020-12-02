@@ -1,22 +1,20 @@
-// @ts-nocheck
 import React, { useContext, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import EditIssue from '@/components/EditIssue';
 import Context from '../../context';
 
-const IssueDetail = () => {
+interface Props {
+  refresh: () => void
+}
+const IssueDetail:React.FC<Props> = ({ refresh }) => {
   const { store } = useContext(Context);
   const { issueId } = store;
-  const refresh = useCallback(() => [
-
-  ], []);
   const handleResetIssue = useCallback((newIssueId) => {
     store.setIssueId(newIssueId);
   }, [store]);
   return (
     <EditIssue
       visible={issueId}
-      disabled
       issueId={issueId}
       onCancel={() => {
         handleResetIssue(null);
@@ -28,9 +26,9 @@ const IssueDetail = () => {
       onUpdate={() => {
         refresh();
       }}
-      resetIssue={(parentIssueId) => {
-        handleResetIssue(parentIssueId);
-      }}
+      // resetIssue={(parentIssueId) => {
+      //   handleResetIssue(parentIssueId);
+      // }}
     />
   );
 };

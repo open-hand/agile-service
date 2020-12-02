@@ -21,6 +21,8 @@ const TableHeader: React.FC = () => {
               className={styles.cell}
               style={{
                 width: columnsWidth[index],
+                minWidth: column.minWidth,
+                maxWidth: column.maxWidth,
               }}
             >
               <div className={styles['head-cell']}>

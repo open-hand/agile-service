@@ -62,7 +62,10 @@ export namespace Gantt {
     [key: string]: any
   }
   interface Column {
-    width: number,
+    width?: number,
+    minWidth?: number
+    maxWidth?: number
+    flex?: number
     name: string,
     label: string,
     render?: (item: Item) => React.ReactNode

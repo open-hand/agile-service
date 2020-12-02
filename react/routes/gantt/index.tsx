@@ -35,7 +35,8 @@ import './index.less';
 
 const { Option } = FlatSelect;
 const tableColumns = [{
-  width: 214,
+  flex: 2,
+  minWidth: 200,
   name: 'summary',
   label: '名称',
   // @ts-ignore
@@ -52,20 +53,23 @@ const tableColumns = [{
 },
 {
   width: 100,
+  minWidth: 100,
   name: 'assignee',
   label: '经办人',
   // @ts-ignore
   render: (record) => <UserHead user={record.assignee} />,
 },
 {
-  width: 100,
+  flex: 1,
+  minWidth: 100,
   name: 'estimatedStartTime',
   label: '预计开始',
   // @ts-ignore
   render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
 {
-  width: 100,
+  flex: 1,
+  minWidth: 100,
   name: 'estimatedEndTime',
   label: '预计结束',
   // @ts-ignore
@@ -269,7 +273,7 @@ const GanttPage: React.FC = () => {
               tableCollapseAble={false}
             />
           )}
-          <IssueDetail />
+          <IssueDetail refresh={loadData} />
           <CreateIssue refresh={loadData} />
           <FilterManage
             visible={filterManageVisible!}
