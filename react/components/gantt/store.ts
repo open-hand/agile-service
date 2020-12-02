@@ -276,12 +276,6 @@ class GanttStore {
       .valueOf() / this.pxUnitAmp);
   }
 
-  @computed get mid() {
-    const startAmp = this.pxUnitAmp * this.getTranslateXByDate(this.getStartDate());
-    const endAmp = startAmp + this.getDurationAmp();
-    return parseInt(String((startAmp + endAmp) / 2), 10);
-  }
-
   @computed get scrollBarWidth() {
     const MIN_WIDTH = 30;
     return Math.max((this.viewWidth / this.scrollWidth) * 160, MIN_WIDTH);
@@ -297,9 +291,10 @@ class GanttStore {
   }
 
   @computed get scrollWidth() {
+    // TODO 待研究
     // 最小宽度
-    const init = this.getTranslateXByDate(String(this.mid + this.pxUnitAmp)) - this.getTranslateXByDate(String(this.mid - this.pxUnitAmp));
-    return Math.max(Math.abs(this.viewWidth + this.translateX - this.getTranslateXByDate(this.getStartDate())), Math.abs(init));
+    const init = this.viewWidth + 200;
+    return Math.max(Math.abs(this.viewWidth + this.translateX - this.getTranslateXByDate(this.getStartDate())), init);
   }
 
   // 内容区滚动高度
