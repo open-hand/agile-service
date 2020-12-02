@@ -339,6 +339,7 @@
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
         <result property="objectVersionNumber" column="object_version_number"/>
+        <result property="completed" column="completed"/>
         <collection property="versionIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
             <id property="versionId" column="version_id"/>
@@ -419,11 +420,10 @@
         ai.relate_issue_id,
         ai.estimated_start_time,
         ai.estimated_end_time,
-        ai.object_version_number
+        ai.object_version_number,
+        ais.is_completed as completed
         FROM agile_issue ai
-        <if test="isExcelExported">
-          left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
-        </if>
+        left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
         left join agile_issue ai3 on ai.epic_id = ai3.issue_id
         LEFT JOIN lookup_value alv2 ON ai3.color_code = alv2.value_code
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
