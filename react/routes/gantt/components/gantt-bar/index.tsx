@@ -10,6 +10,15 @@ interface GanttBarProps {
   width: number
   height: number
 }
+function format(h:number) {
+  if (h >= 24) {
+    const days = Math.floor(h / 24);
+    const hours = h % 24;
+
+    return `${days}天${hours > 0 ? `${hours}小时` : ''}`;
+  }
+  return `${h}小时`;
+}
 const GanttBar: React.FC<GanttBarProps> = ({ bar, width, height }) => {
   const { task: issue } = bar;
   const statusType = issue.statusVO.type;
@@ -19,17 +28,21 @@ const GanttBar: React.FC<GanttBarProps> = ({ bar, width, height }) => {
   // @ts-ignore
   const [color1, color2] = STATUS_COLOR[statusType];
   const percent = totalCount ? completeCount / totalCount : 0;
-  let days = 0;
+  let diff = 0;
   if (issue.estimatedStartTime && issue.estimatedEndTime) {
-    days = dayjs(issue.estimatedEndTime).diff(issue.estimatedStartTime, 'day');
+    diff = dayjs(issue.estimatedEndTime).diff(issue.estimatedStartTime, 'hour');
   }
   return (
     <Tooltip title={(
       <div>
         {issue.summary}
         <div>
+          状态：
+          {issue.statusVO.name}
+        </div>
+        <div>
           持续时间：
-          {days}
+          {format(diff)}
         </div>
         <div>
           当前进度：

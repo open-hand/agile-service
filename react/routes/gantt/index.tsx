@@ -56,14 +56,14 @@ const tableColumns = [{
 {
   width: 100,
   name: 'estimatedStartTime',
-  label: '预计开始时间',
+  label: '预计开始',
   // @ts-ignore
   render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
 {
   width: 100,
   name: 'estimatedEndTime',
-  label: '预计结束时间',
+  label: '预计结束',
   // @ts-ignore
   render: (record) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 }];
@@ -128,13 +128,11 @@ const GanttPage: React.FC = () => {
   }, []);
   const afterSprintLoad = useCallback((sprints) => {
     if (!sprintId) {
-      if (sprints.length > 0) {
-        const currentSprint = find(sprints, { statusCode: 'started' });
-        if (currentSprint) {
-          setSprintId(currentSprint.sprintId);
-        } else {
-          setSprintId(sprints[0]?.sprintId || '0');
-        }
+      const currentSprint = find(sprints, { statusCode: 'started' });
+      if (currentSprint) {
+        setSprintId(currentSprint.sprintId);
+      } else {
+        setSprintId(sprints[0]?.sprintId || '0');
       }
     }
   }, [sprintId]);
