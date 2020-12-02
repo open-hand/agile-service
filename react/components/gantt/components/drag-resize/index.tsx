@@ -23,12 +23,14 @@ interface DragResizeProps extends React.HTMLProps<HTMLDivElement> {
     x: number
   }
   onAutoScroll: (delta: number) => void
+  /* 点击就算开始 */
+  clickStart?:boolean
 }
 const snap = (n: number, size: number): number => Math.round(n / size) * size;
 const DragResize: React.FC<DragResizeProps> = ({
   type, onBeforeResize, onResize, onResizeEnd, minWidth, grid,
   defaultSize: { x: defaultX, width: defaultWidth }, scroller,
-  onAutoScroll, children, ...otherProps
+  onAutoScroll, clickStart = false, children, ...otherProps
 }) => {
   const [resizing, setResizing] = useState(false);
   const handleAutoScroll = usePersistFn((delta: number) => {
@@ -88,7 +90,9 @@ const DragResize: React.FC<DragResizeProps> = ({
   const handleMouseMove = usePersistFn((event: MouseEvent) => {
     if (!resizing) {
       setResizing(true);
-      onBeforeResize && onBeforeResize();
+      if (!clickStart) {
+        onBeforeResize && onBeforeResize();
+      }
     }
     moveRef.current.clientX = event.clientX;
     updateSize();
@@ -107,6 +111,10 @@ const DragResize: React.FC<DragResizeProps> = ({
     event.stopPropagation();
     if (scroller) {
       autoScroll.start();
+    }
+    if (clickStart) {
+      onBeforeResize && onBeforeResize();
+      setResizing(true);
     }
     positionRef.current.clientX = event.clientX;
     positionRef.current.x = defaultX;
