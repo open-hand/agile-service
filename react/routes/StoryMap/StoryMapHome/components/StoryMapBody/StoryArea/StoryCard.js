@@ -154,9 +154,10 @@ export default DragSource(
 
       return { story: props.story, version: props.version, sprint: props.sprint };
     },
-    endDrag(props, monitor) {
+    endDrag(props, monitor) { // props: target, monitor: source
       const item = monitor.getItem();
       const dropResult = monitor.getDropResult();
+
       if (!dropResult) {
         return;
       }
@@ -240,10 +241,15 @@ export default DragSource(
         }
       }
 
+      const targetEpicIndex = StoryMapStore.getEpicList.findIndex((epic) => epic.issueId === targetEpicId);
+      const toEpicIndex = StoryMapStore.getEpicList.findIndex((epic) => epic.issueId === epicId);
+
+      const fromPage = Math.ceil((targetEpicIndex + 1) / StoryMapStore.pageSize);
+      const toPage = Math.ceil((toEpicIndex + 1) / StoryMapStore.pageSize);
       storyMapApi.move(storyMapDragVO).then(() => {
         StoryMapStore.setClickIssue(null);
         // StoryMapStore.removeStoryFromStoryMap(story);
-        StoryMapStore.getStoryMap();
+        StoryMapStore.getAfterMoveStoryMap({ fromPage, toPage });
       });
     },
   },

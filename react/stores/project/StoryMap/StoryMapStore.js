@@ -62,7 +62,15 @@ class StoryMapStore {
 
   @observable storyMapData = {};
 
+  @action setStoryMapData = (data) => {
+    this.storyMapData = data;
+  }
+
   @observable storyData = {};
+
+  @action setStoryData = (data) => {
+    this.storyData = {};
+  };
 
   @observable loading = false;
 
@@ -82,6 +90,14 @@ class StoryMapStore {
 
   miniMap = {};
 
+  @action clearData = () => {
+    this.storyMapData = {};
+    this.storyData = {};
+    this.page = 1;
+    this.totalPage = 0;
+    this.pageDataMap = observable.map();
+  }
+
   @action clear() {
     this.storyMapData = {};
     this.storyData = {};
@@ -99,6 +115,11 @@ class StoryMapStore {
     this.selectedIssueMap.clear();
     this.hiddenColumnNoStory = false;
     this.foldCompletedEpic = false;
+    this.epicInViewportMap = observable.map();
+    this.rowInViewportMap = observable.map();
+    this.page = 1;
+    this.pageSize = 10;
+    this.totalPage = 0;
   }
 
   @action resetSearchVO() {
@@ -113,29 +134,128 @@ class StoryMapStore {
     };
   }
 
-  getStoryMap = (firstLoad = false) => {
+  @action
+  getDatas = (firstLoad) => {
+    if (firstLoad) {
+      this.setLoading(true);
+      Promise.all([issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprintsWidthInfo()]).then(([issueTypes, versionList, prioritys, sprintList]) => {
+        this.issueTypes = issueTypes;
+        this.prioritys = prioritys;
+        this.initVersionList(versionList);
+        this.initSprintList(sprintList);
+        this.setLoading(false);
+      }).catch(() => {
+        this.setLoading(false);
+      });
+    }
+  };
+
+  getStoryMap = (firstLoad = false, page = this.page) => {
     this.setLoading(true);
-    Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprintsWidthInfo()]).then(([storyMapData, issueTypes, versionList, prioritys, sprintList]) => {
-      let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
+    this.getDatas(firstLoad);
+    storyMapApi.getStoryMap(this.searchVO, { page, size: this.pageSize }).then((storyMapData) => {
+      this.pageDataMap.set(this.page, storyMapData);
       const { featureWithoutEpic = [] } = storyMapData;
-      epicWithFeature = sortBy(epicWithFeature, 'epicRank');
-      const newStoryMapData = {
-        ...storyMapData,
-        epicWithFeature: featureWithoutEpic.length > 0 ? epicWithFeature.map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] })).concat({
+
+      let newStoryList = [];
+      let newEpicWithFeature = [];
+
+      for (let i = 1; i <= this.page; i++) {
+        const pageStoryList = this.pageDataMap.get(i).storyList || [];
+        const pageEpicWidthFeature = (this.pageDataMap.get(i).epicWithFeature || []).map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] }));
+
+        newStoryList = [...newStoryList, ...pageStoryList];
+        newEpicWithFeature = [...newEpicWithFeature, ...pageEpicWidthFeature];
+      }
+
+      if (featureWithoutEpic.length > 0 && newEpicWithFeature.find((item) => !item.issueId)) {
+        newEpicWithFeature = [...newEpicWithFeature, {
           issueId: 0,
           featureCommonDTOList: featureWithoutEpic,
-        }) : epicWithFeature.map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] })),
+        }];
+      }
+
+      const newStoryMapData = {
+        ...storyMapData,
+        featureWithoutEpic,
+        storyList: newStoryList,
+        epicWithFeature: sortBy(newEpicWithFeature, 'epicRank'),
       };
-      this.issueTypes = issueTypes;
-      this.prioritys = prioritys;
-      this.initVersionList(versionList);
-      this.initSprintList(sprintList);
+
       this.initStoryData(newStoryMapData, firstLoad);
       this.setLoading(false);
+      this.setTotalPage(storyMapData.totalPage);
     }).catch((error) => {
-      Choerodon.prompt(error);
+      console.log(error);
       this.setLoading(false);
     });
+  }
+
+  getAfterMoveStoryMap = ({ fromPage, toPage }) => {
+    this.setLoading(true);
+    if (fromPage !== toPage) {
+      Promise.all([storyMapApi.getStoryMap(this.searchVO, { page: fromPage, size: this.pageSize }), storyMapApi.getStoryMap(this.searchVO, { page: toPage, size: this.pageSize })]).then(([fromData, toData]) => {
+        this.pageDataMap.set(fromPage, fromData);
+        this.pageDataMap.set(toPage, toData);
+        const { featureWithoutEpic = [] } = this.storyMapData;
+
+        let newStoryList = [];
+        let newEpicWithFeature = [];
+
+        for (let i = 1; i <= this.page; i++) {
+          const pageStoryList = this.pageDataMap.get(i).storyList || [];
+          const pageEpicWidthFeature = (this.pageDataMap.get(i).epicWithFeature || []).map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] }));
+
+          newStoryList = [...newStoryList, ...pageStoryList];
+          newEpicWithFeature = [...newEpicWithFeature, ...pageEpicWidthFeature];
+        }
+
+        const newStoryMapData = {
+          ...this.storyMapData,
+          storyList: newStoryList,
+          epicWithFeature: sortBy(featureWithoutEpic.length > 0 && !newEpicWithFeature.find((item) => !item.issueId) ? newEpicWithFeature.concat({
+            issueId: 0,
+            featureCommonDTOList: featureWithoutEpic,
+          }) : newEpicWithFeature, 'epicRank'),
+        };
+        this.initStoryData(newStoryMapData);
+        this.setLoading(false);
+      }).catch((error) => {
+        console.log(error);
+        this.setLoading(false);
+      });
+    } else {
+      storyMapApi.getStoryMap(this.searchVO, { page: fromPage, size: this.pageSize }).then((replaceData) => {
+        this.pageDataMap.set(fromPage, replaceData);
+
+        const { featureWithoutEpic = [] } = this.storyMapData;
+
+        let newStoryList = [];
+        let newEpicWithFeature = [];
+
+        for (let i = 1; i <= this.page; i++) {
+          const pageStoryList = this.pageDataMap.get(i).storyList || [];
+          const pageEpicWidthFeature = (this.pageDataMap.get(i).epicWithFeature || []).map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] }));
+
+          newStoryList = [...newStoryList, ...pageStoryList];
+          newEpicWithFeature = [...newEpicWithFeature, ...pageEpicWidthFeature];
+        }
+
+        const newStoryMapData = {
+          ...this.storyMapData,
+          storyList: newStoryList,
+          epicWithFeature: sortBy(featureWithoutEpic.length > 0 && !newEpicWithFeature.find((item) => !item.issueId) ? newEpicWithFeature.concat({
+            issueId: 0,
+            featureCommonDTOList: featureWithoutEpic,
+          }) : newEpicWithFeature, 'epicRank'),
+        };
+        this.initStoryData(newStoryMapData);
+        this.setLoading(false);
+      }).catch((error) => {
+        console.log(error);
+        this.setLoading(false);
+      });
+    }
   }
 
   loadIssueList = () => {
@@ -144,8 +264,7 @@ class StoryMapStore {
     });
   }
 
-  @action
-  handleSideFilterChange = (field, values) => {
+  @action handleSideFilterChange = (field, values) => {
     this.sideSearchVO.advancedSearchArgs[field] = values;
     this.loadIssueList();
   }
@@ -202,7 +321,6 @@ class StoryMapStore {
   @action switchSwimLine(swimLine) {
     this.swimLine = swimLine;
     localStorage.setItem('agile.StoryMap.SwimLine', swimLine);
-    this.updateMiniMap();
   }
 
   @action initVersionList(versionList) {
@@ -337,6 +455,9 @@ class StoryMapStore {
           //   });
           // }
           this.addStoryNumToVersion(versionId);
+          if (!targetFeature.version[versionId]) {
+            targetFeature.version[versionId] = [];
+          }
           targetFeature.version[versionId].push(story);
         });
 
@@ -351,9 +472,10 @@ class StoryMapStore {
         (storyMapSprintList || []).forEach((sprint) => {
           const { sprintId } = sprint;
           this.addStoryNumToSprint(sprintId);
-          if (sprintId) {
-            targetFeature.sprint[sprintId].push(story);
+          if (!targetFeature.sprint[sprintId]) {
+            targetFeature.sprint[sprintId] = [];
           }
+          targetFeature.sprint[sprintId].push(story);
         });
       }
 
@@ -435,7 +557,6 @@ class StoryMapStore {
         },
       },
     });
-    this.updateMiniMap();
   }
 
   @action afterCreateEpicInModal(newEpic) {
@@ -455,7 +576,6 @@ class StoryMapStore {
         },
       },
     });
-    this.updateMiniMap();
   }
 
   @action addFeature(epic) {
@@ -481,13 +601,11 @@ class StoryMapStore {
         width: 1,
       },
     });
-    this.updateMiniMap();
   }
 
   @action afterCreateStory(newStory) {
     this.addStoryToStoryData(newStory);
     this.storyMapData.storyList.push(newStory);
-    this.updateMiniMap();
   }
 
   @action removeStoryFromStoryMap(story, targetVersionOrSprintId) {
@@ -495,7 +613,10 @@ class StoryMapStore {
       epicId, featureId, storyMapVersionDTOList, storyMapSprintList,
     } = story;
     if (targetVersionOrSprintId || targetVersionOrSprintId) {
-      this.getStoryMap();
+      const epicIndex = this.getEpicList.findIndex((epic) => epic.issueId === epicId);
+      const epicPage = Math.ceil((epicIndex + 1) / this.pageSize);
+
+      this.getStoryMap(false, epicPage);
       this.setClickIssue();
       // if (this.storyData[epicId]) {
       //   const targetEpic = this.storyData[epicId];
@@ -554,7 +675,6 @@ class StoryMapStore {
         });
       }
     }
-    this.updateMiniMap();
   }
 
   @action setFeatureWidth({
@@ -653,7 +773,6 @@ class StoryMapStore {
     };
 
     storyMapApi.sort(sortVO).then(() => {
-      // this.getStoryMap();
       const [removed] = this.storyMapData.epicWithFeature.splice(sourceIndex, 1);
       this.storyMapData.epicWithFeature.splice(resultIndex, 0, removed);
     });
@@ -665,13 +784,6 @@ class StoryMapStore {
 
   setMiniMapRef(ref) {
     this.miniMap = ref;
-  }
-
-  updateMiniMap() {
-    setTimeout(() => {
-      // eslint-disable-next-line no-unused-expressions
-      this.miniMap.current && this.miniMap.current.synchronize();
-    });
   }
 
   @computed get getEpicList() {
@@ -718,8 +830,6 @@ class StoryMapStore {
     this.filterListVisible = data;
   }
 
-  @observable epicEleMap = observable.map();
-
   @observable epicInViewportMap = observable.map();
 
   @action setEpicInViewportMap = (key, value) => {
@@ -731,6 +841,38 @@ class StoryMapStore {
   @action setRowInViewportMap = (key, value) => {
     this.rowInViewportMap.set(key, value);
   }
+
+  @observable pageSize = 10;
+
+  @action setPageSize = (pageSize) => {
+    this.pageSize = pageSize;
+  }
+
+  @observable page = 1;
+
+  @action setPage = (page) => {
+    this.page = page;
+  }
+
+  @observable totalPage = 0;
+
+  @action setTotalPage = (totalPage) => {
+    this.totalPage = totalPage;
+  }
+
+  @observable tableWidth = 0;
+
+  @action setTableWidth = (data) => {
+    this.tableWidth = data;
+  }
+
+  @observable scrollWidth = 0;
+
+  @action setScrollWidth = (data) => {
+    this.scrollWidth = data;
+  }
+
+  @observable pageDataMap = observable.map();
 }
 
 export default new StoryMapStore();

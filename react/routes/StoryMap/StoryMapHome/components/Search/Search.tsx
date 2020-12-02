@@ -13,6 +13,7 @@ interface Props {
 
 const StoryMapSearch: React.FC<Props> = ({ issueSearchStore }) => {
   const handleClear = () => {
+    StoryMapStore.clearData();
     StoryMapStore.getStoryMap();
   };
 
@@ -29,6 +30,7 @@ const StoryMapSearch: React.FC<Props> = ({ issueSearchStore }) => {
           localPageCacheStore.setItem('storyMapFilter', issueSearchStore.currentFilter);
           localPageCacheStore.setItem('storyMapSearchVO', issueSearchStore.getCustomFieldFilters());
           StoryMapStore.setSearchVO(issueSearchStore.getCustomFieldFilters());
+          StoryMapStore.clearData();
           StoryMapStore.getStoryMap();
         }}
         onClickSaveFilter={handleClickSaveFilter}

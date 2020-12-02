@@ -14,7 +14,7 @@ class EpicCard extends Component {
   handleClick = () => {
     const { epic } = this.props;
     if (epic.issueId) {
-      StoryMapStore.setClickIssue(epic);
+      StoryMapStore.setClickIssue({ ...epic, epicId: epic.issueId });
     }
   }
 

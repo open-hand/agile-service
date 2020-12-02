@@ -7,7 +7,7 @@ import {
 } from '@choerodon/boot';
 import { Button, Icon } from 'choerodon-ui';
 import {
-  Select, DataSet, CheckBox, Modal,
+  CheckBox,
 } from 'choerodon-ui/pro';
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -29,11 +29,10 @@ import SideIssueList from './components/SideIssueList';
 import SwitchSwimLine from './components/SwitchSwimLine';
 import CreateEpicModal from './components/CreateEpicModal';
 import IssueDetail from './components/IssueDetail';
-import ListenSize from './components/ListenSize';
 import StoryMapSearch from './components/Search';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
-import ListenEpicCellInViewport from './components/StoryMapBody/ListenEpicCellInViewport';
+import { ColumnWidth } from './Constants';
 
 const HEX = {
   'c7nagile-StoryMap-EpicCard': '#D9C2FB',
@@ -51,8 +50,8 @@ const StoryMapHome = observer(() => {
     defaultChosenFields: Array.isArray(localPageCacheStore.getItem('storyMapFilter')) ? new Map(localPageCacheStore.getItem('storyMapFilter').map((item) => [item.code, item])) : undefined,
   });
 
-  const handleRefresh = (firstLoad = false) => {
-    StoryMapStore.getStoryMap(firstLoad);
+  const handleRefresh = (firstLoad = false, page = StoryMapStore.page) => {
+    StoryMapStore.getStoryMap(firstLoad, page);
   };
   const ref = useRef(null);
   StoryMapStore.setMiniMapRef(ref);
@@ -66,6 +65,9 @@ const StoryMapHome = observer(() => {
 
     const cacheSearchVO = localPageCacheStore.getItem('storyMapSearchVO');
     cacheSearchVO && StoryMapStore.setSearchVO(cacheSearchVO);
+
+    const screenWidth = window.screen.width;
+    StoryMapStore.setPageSize(Math.ceil(screenWidth / ColumnWidth));
 
     handleRefresh(true);
     return () => { StoryMapStore.clear(); };
@@ -116,9 +118,6 @@ const StoryMapHome = observer(() => {
     );
   };
 
-  const handleIssueRefresh = () => {
-    handleRefresh();
-  };
   /**
    * 问题宽度localStorage.getItem('agile.EditIssue.width')
    * @param {*} width
@@ -148,7 +147,7 @@ const StoryMapHome = observer(() => {
   }, []);
 
   const {
-    loading, selectedIssueMap, epicInViewportMap,
+    loading, selectedIssueMap, storyMapData, storyData,
   } = StoryMapStore;
   const isEmpty = StoryMapStore.getIsEmpty;
   /**
@@ -164,6 +163,7 @@ const StoryMapHome = observer(() => {
 
   const { isInProgram } = useIsInProgram(); // 判断是否为项目群下的子项目 是则不显示史诗
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7nagile-StoryMap-fullScreen');
+
   return (
     <Page
       className="c7nagile-StoryMap"
@@ -196,7 +196,6 @@ const StoryMapHome = observer(() => {
       }}
       >
         <Loading loading={loading} />
-        <ListenSize />
         {
           !isEmpty && (
             <StoryMapSearch issueSearchStore={issueSearchStore} />
@@ -229,7 +228,7 @@ const StoryMapHome = observer(() => {
         />
         <SideIssueList handleClickOutside={handleCloseIssueList} eventTypes={['click']} />
         <CreateEpicModal onOk={handleCreateEpic} />
-        <IssueDetail refresh={handleIssueRefresh} isFullScreen={isFullScreen} onChangeWidth={setIssueWidth} />
+        <IssueDetail refresh={handleRefresh} isFullScreen={isFullScreen} onChangeWidth={setIssueWidth} />
       </Content>
     </Page>
   );

@@ -46,7 +46,6 @@ class FeatureCell extends Component {
     const { storyData, swimLine } = StoryMapStore;
     const targetEpic = storyData[epicId] || {};
     const { collapse } = otherData || {};
-    console.log(toJS(otherData));
     // 无特性的故事不会显示在板子上,当隐藏无故事的列时，隐藏特性列
     const storysWithFeature = (otherData.storys || []).filter((item) => item.featureId && item.featureId !== '0');
     return (
@@ -68,7 +67,6 @@ class FeatureCell extends Component {
               <>
                 {featureCommonDTOList.filter((feature) => !feature.adding).map((feature) => {
                   const targetFeature = targetEpic.feature[feature.issueId] || {};
-                  console.log(feature, toJS(targetFeature));
                   if (targetFeature) {
                     const storys = this.getStorys(targetFeature);
                     return (

@@ -78,7 +78,7 @@ class CreateStory extends Component {
           value: '',
         });
         const { versionIssueRelVOList } = res;
-        onCreate({ ...res, storyMapVersionDTOList: versionIssueRelVOList, storyMapSprintList: [{ sprintId: sprint.sprintId !== 'none' ? sprint.sprintId : 0 }] });
+        onCreate({ ...res, storyMapVersionDTOList: versionIssueRelVOList, storyMapSprintList: [{ sprintId: sprint && sprint.sprintId !== 'none' ? sprint.sprintId : 0 }] });
         fieldApi.quickCreateDefault(res.issueId, dto);
       }).finally(() => {
         this.canAdd = true;
