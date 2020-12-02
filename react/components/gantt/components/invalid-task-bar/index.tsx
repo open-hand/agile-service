@@ -47,7 +47,7 @@ const InvalidTaskBar: React.FC<TaskBarProps> = ({ data }) => {
     store.handleInvalidBarHover(data, left, Math.ceil(width));
   }, [data, store, viewTranslateX]);
 
-  const handleBeforeResize = () => () => {
+  const handleBeforeResize = () => {
     store.handleInvalidBarDragStart(data);
   };
   const handleResize = useCallback(({ width: newWidth, x }) => {
@@ -76,6 +76,7 @@ const InvalidTaskBar: React.FC<TaskBarProps> = ({ data }) => {
       scroller={store.chartElementRef.current || undefined}
       onAutoScroll={handleAutoScroll}
       onBeforeResize={handleBeforeResize}
+      clickStart
     >
       <div
         ref={triggerRef}

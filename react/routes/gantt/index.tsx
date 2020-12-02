@@ -185,11 +185,12 @@ const GanttPage: React.FC = () => {
   ), []);
   const renderBar: GanttProps['renderBar'] = useCallback((bar, { width, height }) => (
     <GanttBar
+      type={type}
       bar={bar}
       width={width}
       height={height}
     />
-  ), []);
+  ), [type]);
   const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((item, t) => (
     <div
       role="none"
