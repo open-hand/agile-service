@@ -34,6 +34,9 @@ const SaveFilterModal: React.FC<Props> = (props) => {
     }],
   }), []);
   const handleSubmit = useCallback(async () => {
+    if (!await dataSet.current?.validate()) {
+      return false;
+    }
     const value = dataSet.toData()[0] as any;
     const data = {
       name: value.filterName,

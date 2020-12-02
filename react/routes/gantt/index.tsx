@@ -220,6 +220,7 @@ const GanttPage: React.FC = () => {
       <Content style={{
         borderTop: '1px solid rgb(216, 216, 216)',
         display: 'flex',
+        paddingTop: 7,
         flexDirection: 'column',
       }}
       >

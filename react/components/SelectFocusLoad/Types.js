@@ -485,7 +485,7 @@ export default {
     props: {
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filter: false,
-      filterOption: false,
+      filterOption,
       loadWhenMount: true,
     },
     request: ({ filter, page }, statusList = ['version_planning']) => versionApi.loadNamesByStatus(statusList),
@@ -570,7 +570,7 @@ export default {
     ),
     props: {
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filterOption,
+      // filterOption,
       loadWhenMount: true,
     },
   }, // 特性列表

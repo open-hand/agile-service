@@ -36,7 +36,7 @@ class ComponentApi {
       `/agile/v1/projects/${projectId || getProjectId()}/component/query_all?size=${999}&page=${1}`, {
         advancedSearchArgs: {},
         searchArgs: {},
-        content: filter,
+        contents: filter && filter !== '' ? [filter] : undefined,
       },
     );
   }
@@ -50,7 +50,7 @@ class ComponentApi {
 
   /**
    * 创建模块
-   * @param obj 
+   * @param obj
    */
   create(obj: IComponent) {
     const projectId:number = AppState.currentMenuType.id;
@@ -66,8 +66,8 @@ class ComponentApi {
 
   /**
    * 更新模块
-   * @param componentId 
-   * @param obj 
+   * @param componentId
+   * @param obj
    */
   update(componentId: number, obj: object) {
     const projectId = AppState.currentMenuType.id;
@@ -83,7 +83,7 @@ class ComponentApi {
 
   /**
    * 根据模块id加载模块
-   * @param componentId 
+   * @param componentId
    */
   load(componentId: number) {
     return axios.get(`${this.prefix}/component/${componentId}`);
@@ -91,8 +91,8 @@ class ComponentApi {
 
   /**
    * 删除模块
-   * @param componentId 
-   * @param relateComponentId 
+   * @param componentId
+   * @param relateComponentId
    */
   delete(componentId: number, relateComponentId: number) {
     if (relateComponentId === 0) {
@@ -109,7 +109,7 @@ class ComponentApi {
 
   /**
    * 检查模块名称是否重复
-   * @param componentName 
+   * @param componentName
    */
   checkName(componentName:string) {
     return axios({
