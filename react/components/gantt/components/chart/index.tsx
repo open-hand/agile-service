@@ -31,13 +31,17 @@ const Chart: React.FC = () => {
       const chartHammer = new Hammer(chartRef.current);
       store.setChartHammer(chartHammer);
       // store.initDragScrollHammer(chartRef.current);
+      chartRef.current.addEventListener('wheel', store.handleWheel);
+      return () => {
+        chartRef.current?.removeEventListener('wheel', store.handleWheel);
+      };
     }
+    return () => {};
   }, [chartElementRef, store]);
   return (
     <div
       ref={chartRef}
       className={styles.chart}
-      onWheel={store.handleWheel}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{

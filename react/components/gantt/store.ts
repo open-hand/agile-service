@@ -737,7 +737,11 @@ class GanttStore {
   }
 
   @action
-  handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+  handleWheel = (event: WheelEvent) => {
+    if (event.deltaX !== 0) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     if (this._wheelTimer) clearTimeout(this._wheelTimer);
     // 水平滚动
     if (Math.abs(event.deltaX) > 0) {
