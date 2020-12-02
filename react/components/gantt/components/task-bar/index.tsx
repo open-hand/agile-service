@@ -14,11 +14,11 @@ interface TaskBarProps {
   data: Gantt.Bar
 }
 const height = 8;
-const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-  e.stopPropagation();
-};
+
 const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
-  const { store, getBarColor, renderBar } = useContext(Context);
+  const {
+    store, getBarColor, renderBar, onBarClick,
+  } = useContext(Context);
   const {
     width, translateX, translateY, invalidDateRange, stepGesture, label, dateTextFormat, task, loading,
   } = data;
@@ -49,6 +49,10 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
     store.translateX += delta;
   }, [store]);
   const allowDrag = showDragBar && !loading;
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.stopPropagation();
+    onBarClick && onBarClick(data.task);
+  }, [data.task, onBarClick]);
   return (
     <div
       role="none"

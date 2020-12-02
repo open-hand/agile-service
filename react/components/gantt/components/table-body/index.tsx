@@ -15,6 +15,17 @@ const TableRows = () => {
   const columnsWidth = store.getColumnsWidth;
   const barList = store.getBarList;
   const { count, start } = store.getVisibleRows;
+  if (barList.length === 0) {
+    return (
+      <div style={{
+        textAlign: 'center',
+        color: ' rgba(0,0,0,0.65)',
+      }}
+      >
+        暂无数据
+      </div>
+    );
+  }
   return (
     <>
       {barList.slice(start, start + count).map((bar, rowIndex) => {

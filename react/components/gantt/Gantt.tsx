@@ -48,13 +48,17 @@ export interface GanttProps {
   tableIndent?: number
   expandIcon?: GanttContext['expandIcon']
   renderBar?: GanttContext['renderBar']
+  renderBarThumb?: GanttContext['renderBarThumb']
+  onBarClick?: GanttContext['onBarClick']
+  tableCollapseAble?: GanttContext['tableCollapseAble']
 }
 export interface GanttRef {
   backToday: () => void
 }
 const GanttComponent: React.FC<GanttProps> = forwardRef(({
   data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate', isRestDay, getBarColor,
-  showBackToday = true, showUnitSwitch = true, unit, onRow, tableIndent = TABLE_INDENT, expandIcon, renderBar,
+  showBackToday = true, showUnitSwitch = true, unit, onRow, tableIndent = TABLE_INDENT, expandIcon,
+  renderBar, onBarClick, tableCollapseAble = true, renderBarThumb,
 }, ref) => {
   const store = useMemo(() => new GanttStore(), []);
   useEffect(() => {
@@ -81,7 +85,17 @@ const GanttComponent: React.FC<GanttProps> = forwardRef(({
   }));
   return (
     <Context.Provider value={{
-      store, getBarColor, showBackToday, showUnitSwitch, onRow, tableIndent, expandIcon, renderBar,
+      store,
+      getBarColor,
+      showBackToday,
+      showUnitSwitch,
+      onRow,
+      tableIndent,
+      expandIcon,
+      renderBar,
+      onBarClick,
+      tableCollapseAble,
+      renderBarThumb,
     }}
     >
       <Body>

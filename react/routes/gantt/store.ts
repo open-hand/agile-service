@@ -37,6 +37,10 @@ class GanttStore {
 
   @observable issueId: string | null = null
 
+  @observable sprintId: string | null = null
+
+  @observable createIssueVisible: boolean = false
+
   @action
   switchUnit(unit: Gantt.Sight) {
     this.unit = unit;
@@ -45,6 +49,16 @@ class GanttStore {
   @action
   setIssueId(issueId: string | null) {
     this.issueId = issueId;
+  }
+
+  @action
+  setSprintId(sprintId: string | null) {
+    this.sprintId = sprintId;
+  }
+
+  @action
+  setCreateIssueVisible(createIssueVisible: boolean) {
+    this.createIssueVisible = createIssueVisible;
   }
 }
 

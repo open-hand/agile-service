@@ -86,6 +86,10 @@ const DragResize: React.FC<DragResizeProps> = ({
     }
   });
   const handleMouseMove = usePersistFn((event: MouseEvent) => {
+    if (!resizing) {
+      setResizing(true);
+      onBeforeResize && onBeforeResize();
+    }
     moveRef.current.clientX = event.clientX;
     updateSize();
   });
@@ -94,8 +98,10 @@ const DragResize: React.FC<DragResizeProps> = ({
     autoScroll.stop();
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('mouseup', handleMouseUp);
-    setResizing(false);
-    onResizeEnd({ x: positionRef.current.x, width: positionRef.current.width });
+    if (resizing) {
+      setResizing(false);
+      onResizeEnd({ x: positionRef.current.x, width: positionRef.current.width });
+    }
   });
   const handleMouseDown = usePersistFn((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();
@@ -107,8 +113,6 @@ const DragResize: React.FC<DragResizeProps> = ({
     positionRef.current.width = defaultWidth;
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-    setResizing(true);
-    onBeforeResize && onBeforeResize();
   });
 
   return (
