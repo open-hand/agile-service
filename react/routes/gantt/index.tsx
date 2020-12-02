@@ -273,7 +273,7 @@ const GanttPage: React.FC = () => {
               tableCollapseAble={false}
             />
           )}
-          <IssueDetail />
+          <IssueDetail refresh={loadData} />
           <CreateIssue refresh={loadData} />
           <FilterManage
             visible={filterManageVisible!}
