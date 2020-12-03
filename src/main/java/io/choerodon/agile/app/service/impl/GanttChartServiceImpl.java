@@ -44,9 +44,9 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     @Override
     public List<GanttChartVO> listByTask(Long projectId, SearchVO searchVO) {
-        if (isSprintEmpty(searchVO)) {
-            throw new CommonException("error.otherArgs.sprint.empty");
-        }
+//        if (isSprintEmpty(searchVO)) {
+//            throw new CommonException("error.otherArgs.sprint.empty");
+//        }
         //设置不查询史诗
         boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
         if (illegalIssueTypeId) {
