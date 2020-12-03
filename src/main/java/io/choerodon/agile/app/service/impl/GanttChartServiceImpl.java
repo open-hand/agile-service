@@ -151,11 +151,13 @@ public class GanttChartServiceImpl implements GanttChartService {
             ganttChartTreeVO.setChildren(toTree(v));
             result.add(ganttChartTreeVO);
         });
-        GanttChartTreeVO unassignedVO = new GanttChartTreeVO();
-        unassignedVO.setSummary("未分配");
-        unassignedVO.setGroup(true);
-        unassignedVO.setChildren(toTree(unassigned));
-        result.add(unassignedVO);
+        if (!unassigned.isEmpty()) {
+            GanttChartTreeVO unassignedVO = new GanttChartTreeVO();
+            unassignedVO.setSummary("未分配");
+            unassignedVO.setGroup(true);
+            unassignedVO.setChildren(toTree(unassigned));
+            result.add(unassignedVO);
+        }
         return result;
     }
 
