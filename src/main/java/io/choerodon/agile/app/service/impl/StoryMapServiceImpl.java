@@ -204,14 +204,20 @@ public class StoryMapServiceImpl implements StoryMapService {
     }
 
     @Override
-    public List<SprintSearchVO> storyMapSprintInfo(Long projectId) {
+    public List<SprintSearchVO> storyMapSprintInfo(Long projectId, List<Long> sprintIds) {
         // 查询项目的所有冲刺
-        List<SprintDTO> sprintDTOS = sprintMapper.selectByCondition(Condition.builder(SprintDTO.class).andWhere(Sqls.custom().andEqualTo("projectId",projectId)).build());
+        List<SprintDTO> sprintDTOS = sprintMapper.selectByCondition(Condition.builder(SprintDTO.class).andWhere(Sqls.custom().andEqualTo("projectId", projectId)).build());
         if (CollectionUtils.isEmpty(sprintDTOS)) {
             return new ArrayList<>();
         }
-        // 查询冲刺经办人的汇总信息
-        List<Long> sprintIds = sprintDTOS.stream().map(SprintDTO::getSprintId).collect(Collectors.toList());
+        Collections.sort(sprintDTOS, ((o1, o2) -> o2.getSprintId().compareTo(o1.getSprintId())));
+        if (CollectionUtils.isEmpty(sprintIds)) {
+            // 查询冲刺经办人的汇总信息
+            sprintIds = sprintDTOS.stream().map(SprintDTO::getSprintId).limit(5L).collect(Collectors.toList());
+        } else {
+            List<Long> finalSprintIds = sprintIds;
+            sprintDTOS = sprintDTOS.stream().filter(sprintDTO -> finalSprintIds.contains(sprintDTO.getSprintId())).collect(Collectors.toList());
+        }
         List<AssigneeIssueDTO> assigneeIssueDTOS = sprintMapper.queryAssigneeIssueBySprintIds(projectId, sprintIds);
         Map<Long, List<AssigneeIssueDTO>> assigneeCountMap = new HashMap<>();
         Map<Long, UserMessageDTO> usersMap = new HashMap<>();
@@ -224,7 +230,6 @@ public class StoryMapServiceImpl implements StoryMapService {
         List<SprintSearchVO> issueProgressVOS = sprintMapper.queryStoryPointProgress(projectId, sprintIds);
         Map<Long, SprintSearchVO> issueProgressVOMap = issueProgressVOS.stream().collect(Collectors.toMap(SprintSearchVO::getSprintId, Function.identity()));
         List<SprintSearchVO> list = new ArrayList<>();
-        Collections.sort(sprintDTOS, ((o1, o2) -> o2.getSprintId().compareTo(o1.getSprintId())));
         for (SprintDTO sprintDTO : sprintDTOS) {
             SprintSearchVO sprint = modelMapper.map(sprintDTO, SprintSearchVO.class);
             sprint.setAssigneeIssues(issueSearchAssembler.dtoListToAssigneeIssueVO(assigneeCountMap.get(sprint.getSprintId()), usersMap));

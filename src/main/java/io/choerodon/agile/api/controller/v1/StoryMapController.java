@@ -73,10 +73,11 @@ public class StoryMapController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("故事地图冲刺泳道查询冲刺的问题计数信息")
-    @GetMapping(value = "/sprint_info")
+    @PostMapping(value = "/sprint_info")
     public ResponseEntity<List<SprintSearchVO>> storyMapSprintInfo(@ApiParam(value = "项目id", required = true)
-                                             @PathVariable(name = "project_id") Long projectId) {
-        return new ResponseEntity<>(storyMapService.storyMapSprintInfo(projectId),HttpStatus.CREATED);
+                                             @PathVariable(name = "project_id") Long projectId,
+                                             @RequestBody @Encrypt List<Long> sprintIds) {
+        return new ResponseEntity<>(storyMapService.storyMapSprintInfo(projectId,sprintIds),HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
