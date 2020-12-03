@@ -69,21 +69,29 @@ export default DragSource(
       if (dropResult) {
         const {
           epic: { issueId: targetEpicId },
-          feature: { issueId: targetFeatureId }, version,
+          feature: { issueId: targetFeatureId }, version, sprint,
         } = dropResult;
         const { versionId: targetVersionId } = version || {};
-        const { issue: { issueId, storyMapVersionVOList } } = source;
-        const storyMapDragVO = {
-          versionIssueIds: [],
-          versionId: 0, // 要关联的版本id
-          epicId: targetEpicId, // 要关联的史诗id
-          versionIssueRelVOList: [],
-          // 问题id列表，移动到史诗，配合epicId使用
-          epicIssueIds: [issueId],
-          featureId: 0, // 要关联的特性id
-          // 问题id列表，移动到特性，配合featureId使用
-          featureIssueIds: [],
-        };
+        const { sprintId: targetSprintId } = sprint || {};
+        const {
+          issue: {
+            epicId, issueId, storyMapVersionVOList, storyMapSprintList,
+          },
+        } = source;
+        const storyMapDragVO = {};
+        // versionIssueIds: [],
+        //   versionId: 0, // 要关联的版本id
+        //   epicId: targetEpicId, // 要关联的史诗id
+        //   versionIssueRelVOList: [],
+        //   // 问题id列表，移动到史诗，配合epicId使用
+        //   epicIssueIds: [issueId],
+        //   featureId: 0, // 要关联的特性id
+        //   // 问题id列表，移动到特性，配合featureId使用
+        //   featureIssueIds: [],
+        if (epicId !== targetEpicId) {
+          storyMapDragVO.epicId = targetEpicId;
+          storyMapDragVO.epicIssueIds = [issueId];
+        }
         if (targetFeatureId && targetFeatureId !== 'none') {
           storyMapDragVO.featureId = targetFeatureId;
           storyMapDragVO.featureIssueIds = [issueId];
@@ -96,6 +104,12 @@ export default DragSource(
           storyMapDragVO.versionIssueRelVOList = storyMapVersionVOList
             .map((v) => ({ ...v, issueId }));
         }
+
+        if (targetSprintId && !find(storyMapSprintList, { versionId: targetSprintId }) && targetSprintId !== 'none') {
+          storyMapDragVO.sprintId = targetSprintId;
+          storyMapDragVO.sprintIssueIds = [issueId];
+        }
+
         storyMapApi.move(storyMapDragVO).then(() => {
           // StoryMapStore.removeStoryFromStoryMap(story);
           const targetEpicIndex = StoryMapStore.getEpicList.findIndex((epic) => epic.issueId === targetEpicId);

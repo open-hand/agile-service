@@ -22,10 +22,10 @@ interface Props {
   assignees: IAssigneeInfo[]
 }
 
-const SprintAssigneeInfo: React.FC<Props> = ({ assignees }) => {
+const SprintAssigneeInfo: React.FC<Props> = ({ assignees, ...otherProps }) => {
   const data = assignees.filter((item) => item.assigneeId);
   return (
-    <div className={styles.assigneeInfo}>
+    <div className={styles.assigneeInfo} {...otherProps}>
       {
         data.map(({
           assigneeId,

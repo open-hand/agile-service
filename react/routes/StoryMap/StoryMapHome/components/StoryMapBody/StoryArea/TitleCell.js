@@ -1,11 +1,12 @@
 import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
-import { Icon } from 'choerodon-ui';
+import { Icon, Tooltip } from 'choerodon-ui';
 import Cell from '../Cell';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 import './TitleCell.less';
 import { toJS } from 'mobx';
 import SprintStatus from '@/components/tag/sprint-status-tag/SprintStatus';
+import SprintStoryPointInfo from '@/components/SprintStoryPointInfo';
 import SprintAssigneeInfo from './SprintAssigneeInfo';
 
 @observer
@@ -34,7 +35,7 @@ class TitleCell extends Component {
       }
       case 'sprint': {
         const {
-          sprintId, sprintName, storyNum, statusCode, planning, assigneeIssues,
+          sprintId, sprintName, storyNum, statusCode, planning, assigneeIssues, todoStoryPoint, doingStoryPoint, doneStoryPoint,
         } = sprint;
         return (
           <>
@@ -45,15 +46,27 @@ class TitleCell extends Component {
                 StoryMapStore.collapseStory(sprintId);
               }}
             />
-            {sprintName}
-            {` (${storyNum || 0})`}
+            {
+              statusCode ? (
+                <Tooltip title={(
+                  <div>
+                    <p>{`待处理故事点：${todoStoryPoint || 0}`}</p>
+                    <p>{`处理中故事点：${doingStoryPoint || 0}`}</p>
+                    <p>{`已完成故事点：${doneStoryPoint || 0}`}</p>
+                  </div>
+                )}
+                >
+                  {`${sprintName} (${storyNum || 0})`}
+                </Tooltip>
+              ) : `${sprintName} (${storyNum || 0})`
+            }
             {
               statusCode && (
                 <SprintStatus data={{ statusCode, planning }} />
               )
             }
             {
-              assigneeIssues && assigneeIssues.length > 0 && <SprintAssigneeInfo assignees={assigneeIssues} />
+              assigneeIssues && assigneeIssues.length > 0 && <SprintAssigneeInfo style={{ width: 0 }} assignees={assigneeIssues} />
             }
           </>
         );

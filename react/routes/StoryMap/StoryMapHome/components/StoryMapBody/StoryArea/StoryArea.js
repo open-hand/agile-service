@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
 import StoryRow from './StoryRow';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 
