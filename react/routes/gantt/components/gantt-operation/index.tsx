@@ -28,6 +28,7 @@ const GanttOperation: React.FC = () => {
         style={{
           borderRadius: '16px',
           boxShadow: '0px 0px 7px 0px rgba(0, 0, 0, 0.1)',
+          height: 30,
         }}
       >
         返回今日
@@ -50,6 +51,7 @@ const GanttOperation: React.FC = () => {
           style={{
             borderRadius: '16px',
             boxShadow: '0px 0px 7px 0px rgba(0, 0, 0, 0.1)',
+            height: 30,
           }}
         >
           {text?.label}

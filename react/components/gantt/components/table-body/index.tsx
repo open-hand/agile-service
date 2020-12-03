@@ -55,7 +55,7 @@ const TableRows = () => {
                   width: columnsWidth[index],
                   minWidth: column.minWidth,
                   maxWidth: column.maxWidth,
-                  paddingLeft: index === 0 ? tableIndent * (bar._depth + 1) : 12,
+                  paddingLeft: index === 0 ? tableIndent * (bar._depth + 1) + 10 : 12,
                 }}
               >
                 {index === 0 && (
@@ -69,7 +69,7 @@ const TableRows = () => {
                       })}
                       style={{
                         left: tableIndent * (i) + 15,
-                        width: tableIndent * 1.5,
+                        width: tableIndent * 1.5 + 5,
                       }}
                     />
                   ))

@@ -8,7 +8,7 @@ function HeaderLine() {
       height: '50%',
       width: 1,
       margin: '0 30px',
-      border: '.001rem solid rgb(0, 0, 0, 0.12)',
+      background: 'rgb(0, 0, 0, 0.12)',
     }}
     />
   );
