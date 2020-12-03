@@ -37,7 +37,7 @@ const Chart: React.FC = () => {
         chartRef.current?.removeEventListener('wheel', store.handleWheel);
       };
     }
-    return () => {};
+    return () => { };
   }, [chartElementRef, store]);
   return (
     <div
@@ -59,11 +59,22 @@ const Chart: React.FC = () => {
         height={bodyScrollHeight}
         viewBox={`${translateX} 0 ${viewWidth} ${bodyScrollHeight}`}
       >
+        <defs>
+          <pattern
+            id="repeat"
+            width="5"
+            height="10"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(80 50 50)"
+          >
+            <line stroke="#a6a6a6" strokeWidth="1px" y2="10" />
+          </pattern>
+        </defs>
         {minorList.map((item) => (item.isWeek ? (
           <g key={item.key} stroke="#f0f0f0">
             <path d={`M${item.left}.5,0 L${item.left},${bodyScrollHeight}`} />
             <rect
-              fill="#F7F7F7"
+              fill="url(#repeat)"
               opacity="0.5"
               strokeWidth="0"
               x={item.left}
