@@ -194,10 +194,10 @@ public class StoryMapServiceImpl implements StoryMapService {
         if (!CollectionUtils.isEmpty(sprintIssueIds)) {
             MoveIssueVO moveIssueVO = new MoveIssueVO();
             moveIssueVO.setIssueIds(sprintIssueIds);
-            moveIssueVO.setBefore(false);
             moveIssueVO.setRankIndex(false);
             Long outIssueId = sprintMapper.queryOutIssueId(projectId, sprintId);
             moveIssueVO.setOutsetIssueId(ObjectUtils.isEmpty(outIssueId) ? 0L : outIssueId);
+            moveIssueVO.setBefore(ObjectUtils.isEmpty(outIssueId) ? true : false);
             moveIssueVO.setRankIndex(false);
             issueService.batchIssueToSprint(projectId, sprintId, moveIssueVO);
         }
