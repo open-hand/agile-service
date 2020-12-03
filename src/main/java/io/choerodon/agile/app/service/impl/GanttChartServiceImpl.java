@@ -47,16 +47,16 @@ public class GanttChartServiceImpl implements GanttChartService {
 //        if (isSprintEmpty(searchVO)) {
 //            throw new CommonException("error.otherArgs.sprint.empty");
 //        }
-        //设置不查询史诗
-        boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
-        if (illegalIssueTypeId) {
-            return new ArrayList<>();
-        }
         List<GanttChartVO> result = listByProjectIdAndSearch(projectId, searchVO);
         return toTree(result);
     }
 
     private List<GanttChartVO> listByProjectIdAndSearch(Long projectId, SearchVO searchVO) {
+        //设置不查询史诗
+        boolean illegalIssueTypeId = buildIssueType(searchVO, projectId);
+        if (illegalIssueTypeId) {
+            return new ArrayList<>();
+        }
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (condition) {
             String filterSql;
