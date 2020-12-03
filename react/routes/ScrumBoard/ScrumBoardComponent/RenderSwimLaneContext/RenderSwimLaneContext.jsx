@@ -81,6 +81,7 @@ class SwimLaneContext extends React.Component {
         className={classnames('c7n-swimlaneContext-container', {
           shouldBeIndent: fromEpic,
           noStoryInEpic: fromEpic && Array.from(parentIssueArr).length === 0,
+          taskNoStoryInEpicIndent: fromEpic && key === 'other',
           [mode]: true,
         })}
         header={(
