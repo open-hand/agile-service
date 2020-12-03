@@ -142,7 +142,21 @@ export function getSystemFields(excludeCodes = []) {
     name: '更新时间',
     defaultShow: false,
     fieldType: 'datetime',
-  }];
+  },
+  {
+    code: 'estimatedStartTime',
+    name: '预计开始时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
+  {
+    code: 'estimatedEndTime',
+    name: '预计结束时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
+
+  ];
   return IsInProgramStore.isInProgram ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }
 
