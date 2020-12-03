@@ -164,9 +164,9 @@ const StoryMapHome = observer(() => {
   return (
     <Page
       className="c7nagile-StoryMap"
-      service={[
-        'choerodon.code.project.cooperation.story-map.ps.default',
-      ]}
+      // service={[
+      //   'choerodon.code.project.cooperation.story-map.ps.default',
+      // ]}
     >
       <Header title="故事地图">
         {!isInProgram && isEmpty && !loading ? <Button onClick={handleCreateEpicClick} icon="playlist_add">创建史诗</Button> : null}
@@ -193,11 +193,7 @@ const StoryMapHome = observer(() => {
       }}
       >
         <Loading loading={loading} />
-        {
-          !isEmpty && (
-            <StoryMapSearch issueSearchStore={issueSearchStore} />
-          )
-        }
+        <StoryMapSearch issueSearchStore={issueSearchStore} />
 
         {!isEmpty ? (
           <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
