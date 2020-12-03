@@ -82,6 +82,17 @@ public class WorkCalendarRefController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("获取项目工作日历设置(包含项目下冲刺的设置)")
+    @GetMapping
+    public ResponseEntity<List<WorkCalendarRefVO>> list(@ApiParam(value = "项目id", required = true)
+                                                        @PathVariable(name = "project_id") Long projectId,
+                                                        @ApiParam(value = "年份", required = true)
+                                                        @RequestParam(name = "year") Integer year) {
+        return ResponseEntity.ok(workCalendarRefService.list(projectId, year));
+    }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除项目工作日历")
     @DeleteMapping(value = "/{calendar_id}")
     public ResponseEntity deleteProjectWorkCalendarRef(@ApiParam(value = "项目id", required = true)

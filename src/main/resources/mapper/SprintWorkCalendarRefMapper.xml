@@ -28,4 +28,10 @@
         and (year = #{year} or year = (#{year}+1))
     </select>
 
+    <select id="listByProjectId" resultType="io.choerodon.agile.infra.dto.WorkCalendarRefDTO">
+        select * from agile_work_calendar_ref
+        where project_id = #{projectId}
+        and (year = #{year} or year = (#{year}+1))
+    </select>
+
 </mapper>
