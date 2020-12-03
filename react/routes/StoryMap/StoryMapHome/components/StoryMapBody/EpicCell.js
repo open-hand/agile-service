@@ -191,7 +191,6 @@ class EpicCell extends Component {
         {
           !StoryMapStore.hiddenColumnNoStory || (epicId ? storys.length > 0 : noEpicStoryLength > 0) ? (
             <Cell
-              key={String(epicId)}
               className={`epicCell-${epicId}`}
               saveRef={connectDropTarget}
               epicIndex={index}

@@ -327,7 +327,7 @@ class SprintApi extends Api<SprintApi> {
 
   loadSprintsWidthInfo(sprintIds: string[]) {
     return axios({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/story_map/sprint_info`,
       params: {
         organizationId: getOrganizationId(),
