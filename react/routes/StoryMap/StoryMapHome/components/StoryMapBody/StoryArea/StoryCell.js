@@ -59,7 +59,7 @@ class StoryCell extends Component {
                 {
                   adding ? null : (
                     <>
-                      {featureList.filter((feature) => !feature.adding).map((feature, index) => {
+                      {featureList.filter((feature) => !feature.adding && feature.issueId).map((feature, index) => {
                         const targetFeature = targetEpic.feature[feature.issueId] || {};
                         if (targetFeature) {
                           const storys = this.getStorys(targetFeature);

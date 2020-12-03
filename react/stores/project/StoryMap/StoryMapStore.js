@@ -134,61 +134,61 @@ class StoryMapStore {
     };
   }
 
-  @action
-  getDatas = (firstLoad) => {
+  @action initStoryMapData = (storyMapData, firstLoad) => {
+    this.pageDataMap.set(this.page, storyMapData);
+    const { featureWithoutEpic = [] } = storyMapData;
+
+    let newStoryList = [];
+    let newEpicWithFeature = [];
+
+    for (let i = 1; i <= this.page; i++) {
+      const pageStoryList = this.pageDataMap.get(i).storyList || [];
+      const pageEpicWidthFeature = (this.pageDataMap.get(i).epicWithFeature || []).map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] }));
+
+      newStoryList = [...newStoryList, ...pageStoryList];
+      newEpicWithFeature = [...newEpicWithFeature, ...pageEpicWidthFeature];
+    }
+
+    if (featureWithoutEpic.length > 0 && newEpicWithFeature.find((item) => !item.issueId)) {
+      newEpicWithFeature = [...newEpicWithFeature, {
+        issueId: 0,
+        featureCommonDTOList: featureWithoutEpic,
+      }];
+    }
+
+    const newStoryMapData = {
+      ...storyMapData,
+      featureWithoutEpic,
+      storyList: newStoryList,
+      epicWithFeature: sortBy(newEpicWithFeature, 'epicRank'),
+    };
+    this.setTotalPage(storyMapData.totalPage);
+
+    this.initStoryData(newStoryMapData, firstLoad);
+  }
+
+  getStoryMap = (firstLoad = false, page = this.page) => {
+    this.setLoading(true);
     if (firstLoad) {
-      this.setLoading(true);
-      Promise.all([issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprintsWidthInfo()]).then(([issueTypes, versionList, prioritys, sprintList]) => {
+      Promise.all([storyMapApi.getStoryMap(this.searchVO, { page, size: this.pageSize }), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprintsWidthInfo()]).then(([storyMapData, issueTypes, versionList, prioritys, sprintList]) => {
         this.issueTypes = issueTypes;
         this.prioritys = prioritys;
         this.initVersionList(versionList);
         this.initSprintList(sprintList);
+        this.initStoryMapData(storyMapData, firstLoad);
         this.setLoading(false);
       }).catch(() => {
         this.setLoading(false);
       });
+    } else {
+      storyMapApi.getStoryMap(this.searchVO, { page, size: this.pageSize }).then((storyMapData) => {
+        this.initStoryMapData(storyMapData, firstLoad);
+        this.setLoading(false);
+      }).catch((error) => {
+        console.log(error);
+        this.setLoading(false);
+      });
     }
-  };
-
-  getStoryMap = (firstLoad = false, page = this.page) => {
-    this.setLoading(true);
-    this.getDatas(firstLoad);
-    storyMapApi.getStoryMap(this.searchVO, { page, size: this.pageSize }).then((storyMapData) => {
-      this.pageDataMap.set(this.page, storyMapData);
-      const { featureWithoutEpic = [] } = storyMapData;
-
-      let newStoryList = [];
-      let newEpicWithFeature = [];
-
-      for (let i = 1; i <= this.page; i++) {
-        const pageStoryList = this.pageDataMap.get(i).storyList || [];
-        const pageEpicWidthFeature = (this.pageDataMap.get(i).epicWithFeature || []).map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] }));
-
-        newStoryList = [...newStoryList, ...pageStoryList];
-        newEpicWithFeature = [...newEpicWithFeature, ...pageEpicWidthFeature];
-      }
-
-      if (featureWithoutEpic.length > 0 && newEpicWithFeature.find((item) => !item.issueId)) {
-        newEpicWithFeature = [...newEpicWithFeature, {
-          issueId: 0,
-          featureCommonDTOList: featureWithoutEpic,
-        }];
-      }
-
-      const newStoryMapData = {
-        ...storyMapData,
-        featureWithoutEpic,
-        storyList: newStoryList,
-        epicWithFeature: sortBy(newEpicWithFeature, 'epicRank'),
-      };
-
-      this.initStoryData(newStoryMapData, firstLoad);
-      this.setLoading(false);
-      this.setTotalPage(storyMapData.totalPage);
-    }).catch((error) => {
-      console.log(error);
-      this.setLoading(false);
-    });
   }
 
   getAfterMoveStoryMap = ({ fromPage, toPage }) => {

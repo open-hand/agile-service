@@ -77,7 +77,7 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
       >
         { loading && (
           <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
-            {loading === 'success' ? '修改成功' : ['正在删除，请稍等片刻', <span className={styles.dot}>…</span>]}
+            {loading === 'success' ? '删除成功' : ['正在删除，请稍等片刻', <span className={styles.dot}>…</span>]}
             <Progress status={'success' as ProgressStatus} value={Math.round(progress * 100)} />
           </div>
         )}
@@ -103,7 +103,7 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
             handleDelete();
           }}
         >
-          确定
+          删除
         </Button>
       </div>
     </div>

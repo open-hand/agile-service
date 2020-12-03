@@ -246,6 +246,7 @@ export default DragSource(
 
       const fromPage = Math.ceil((targetEpicIndex + 1) / StoryMapStore.pageSize);
       const toPage = Math.ceil((toEpicIndex + 1) / StoryMapStore.pageSize);
+
       storyMapApi.move(storyMapDragVO).then(() => {
         StoryMapStore.setClickIssue(null);
         // StoryMapStore.removeStoryFromStoryMap(story);

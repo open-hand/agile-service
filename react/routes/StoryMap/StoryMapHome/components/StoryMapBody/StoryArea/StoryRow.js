@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
-import SprintStoryPointInfo from '@/components/SprintStoryPointInfo';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import StoryCell from './StoryCell';
 import TitleCell from './TitleCell';
@@ -32,7 +31,7 @@ class StoryRow extends Component {
     } = this.props;
     const { versionId } = version || {};
     const {
-      sprintId, statusCode, todoStoryPoint, doingStoryPoint, doneStoryPoint,
+      sprintId, statusCode,
     } = sprint || {};
     return (
       <>
@@ -49,27 +48,6 @@ class StoryRow extends Component {
               {...this.props}
             />
           ))}
-          <div style={{
-            position: 'sticky',
-            right: 10,
-            zIndex: 5,
-            width: 0,
-          }}
-          >
-            {
-                        statusCode && (
-                          <div style={{
-                            marginTop: 10,
-                            position: 'relative',
-                            right: tableOverflow ? 116 : 130,
-                            width: 0,
-                          }}
-                          >
-                            <SprintStoryPointInfo show data={{ todoStoryPoint, doingStoryPoint, doneStoryPoint }} />
-                          </div>
-                        )
-                    }
-          </div>
         </tr>
         )}
         <tr style={{ ...storyCollapse ? { height: 0 } : {} }}>
