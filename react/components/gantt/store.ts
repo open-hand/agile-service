@@ -299,7 +299,8 @@ class GanttStore {
 
   // 内容区滚动高度
   @computed get bodyClientHeight() {
-    return this.height - HEADER_HEIGHT;
+    // 1是边框
+    return this.height - HEADER_HEIGHT - 1;
   }
 
   @computed get getColumnsWidth(): number[] {
@@ -648,7 +649,6 @@ class GanttStore {
     const baseTop = TOP_PADDING + ROW_HEIGHT / 2 - height / 2;
     const topStep = ROW_HEIGHT;
 
-    // TODO 后期需优化 增加上周下周等内容
     const dateTextFormat = (startX: number) => dayjs(startX * pxUnitAmp).format('YYYY-MM-DD');
     const _dateFormat = (date: string) => {
       if (!date) return '待设置';
