@@ -10,7 +10,7 @@ import './index.less';
 export interface IssueSearchProps {
   store: IssueSearchStore
   onClear: () => void
-  onClickSaveFilter: () => void
+  onClickSaveFilter?: () => void
   urlFilter?: string
   onChange: () => void
 }

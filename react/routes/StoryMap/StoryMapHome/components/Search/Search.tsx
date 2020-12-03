@@ -33,7 +33,7 @@ const StoryMapSearch: React.FC<Props> = ({ issueSearchStore }) => {
           StoryMapStore.clearData();
           StoryMapStore.getStoryMap();
         }}
-        onClickSaveFilter={handleClickSaveFilter}
+        // onClickSaveFilter={handleClickSaveFilter}
       />
     </div>
 

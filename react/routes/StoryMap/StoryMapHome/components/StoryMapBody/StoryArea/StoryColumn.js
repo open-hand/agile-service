@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { DropTarget } from 'react-dnd';
+import { CardHeight } from '../../../Constants';
 import Column from '../Column';
 import StoryCard from './StoryCard';
 import CreateStory from './CreateStory';
@@ -35,7 +36,7 @@ class StoryColumn extends Component {
       <Column
         width={width}
         saveRef={connectDropTarget}
-        style={{ background: isOver ? 'rgb(240,240,240)' : 'white', position: 'relative' }}
+        style={{ background: isOver ? 'rgb(240,240,240)' : 'white', position: 'relative', minHeight: storys ? (storys.length + 1) * CardHeight : undefined }}
       >
         {
           (!!epicInViewportMap.get(epicId) && (id ? rowInViewportMap.get(id) : true)) && (
