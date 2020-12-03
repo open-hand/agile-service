@@ -111,10 +111,7 @@ export default DragSource(
         }
 
         storyMapApi.move(storyMapDragVO).then(() => {
-          // StoryMapStore.removeStoryFromStoryMap(story);
-          const targetEpicIndex = StoryMapStore.getEpicList.findIndex((epic) => epic.issueId === targetEpicId);
-          const targetEpicPage = Math.ceil((targetEpicIndex + 1) / StoryMapStore.pageSize);
-          StoryMapStore.getStoryMap(false, targetEpicPage);
+          StoryMapStore.getStoryMap();
           StoryMapStore.loadIssueList();
         });
       }

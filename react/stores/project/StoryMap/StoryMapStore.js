@@ -93,9 +93,6 @@ class StoryMapStore {
   @action clearData = () => {
     this.storyMapData = {};
     this.storyData = {};
-    this.page = 1;
-    this.totalPage = 0;
-    this.pageDataMap = observable.map();
   }
 
   @action clear() {
@@ -117,9 +114,6 @@ class StoryMapStore {
     this.foldCompletedEpic = false;
     this.epicInViewportMap = observable.map();
     this.rowInViewportMap = observable.map();
-    this.page = 1;
-    this.pageSize = 10;
-    this.totalPage = 0;
   }
 
   @action resetSearchVO() {
@@ -135,42 +129,24 @@ class StoryMapStore {
   }
 
   @action initStoryMapData = (storyMapData, firstLoad) => {
-    this.pageDataMap.set(this.page, storyMapData);
+    let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
     const { featureWithoutEpic = [] } = storyMapData;
-
-    let newStoryList = [];
-    let newEpicWithFeature = [];
-
-    for (let i = 1; i <= this.page; i++) {
-      const pageStoryList = this.pageDataMap.get(i).storyList || [];
-      const pageEpicWidthFeature = (this.pageDataMap.get(i).epicWithFeature || []).map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] }));
-
-      newStoryList = [...newStoryList, ...pageStoryList];
-      newEpicWithFeature = [...newEpicWithFeature, ...pageEpicWidthFeature];
-    }
-
-    if (featureWithoutEpic.length > 0 && newEpicWithFeature.find((item) => !item.issueId)) {
-      newEpicWithFeature = [...newEpicWithFeature, {
-        issueId: 0,
-        featureCommonDTOList: featureWithoutEpic,
-      }];
-    }
-
+    epicWithFeature = sortBy(epicWithFeature, 'epicRank');
     const newStoryMapData = {
       ...storyMapData,
-      featureWithoutEpic,
-      storyList: newStoryList,
-      epicWithFeature: sortBy(newEpicWithFeature, 'epicRank'),
+      epicWithFeature: featureWithoutEpic.length > 0 ? epicWithFeature.map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] })).concat({
+        issueId: 0,
+        featureCommonDTOList: featureWithoutEpic,
+      }) : epicWithFeature.map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] })),
     };
-    this.setTotalPage(storyMapData.totalPage);
 
     this.initStoryData(newStoryMapData, firstLoad);
   }
 
-  getStoryMap = (firstLoad = false, page = this.page) => {
+  getStoryMap = (firstLoad = false) => {
     this.setLoading(true);
     if (firstLoad) {
-      Promise.all([storyMapApi.getStoryMap(this.searchVO, { page, size: this.pageSize }), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprintsWidthInfo()]).then(([storyMapData, issueTypes, versionList, prioritys, sprintList]) => {
+      Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprintsWidthInfo()]).then(([storyMapData, issueTypes, versionList, prioritys, sprintList]) => {
         this.issueTypes = issueTypes;
         this.prioritys = prioritys;
         this.initVersionList(versionList);
@@ -181,75 +157,8 @@ class StoryMapStore {
         this.setLoading(false);
       });
     } else {
-      storyMapApi.getStoryMap(this.searchVO, { page, size: this.pageSize }).then((storyMapData) => {
+      storyMapApi.getStoryMap(this.searchVO).then((storyMapData) => {
         this.initStoryMapData(storyMapData, firstLoad);
-        this.setLoading(false);
-      }).catch((error) => {
-        console.log(error);
-        this.setLoading(false);
-      });
-    }
-  }
-
-  getAfterMoveStoryMap = ({ fromPage, toPage }) => {
-    this.setLoading(true);
-    if (fromPage !== toPage) {
-      Promise.all([storyMapApi.getStoryMap(this.searchVO, { page: fromPage, size: this.pageSize }), storyMapApi.getStoryMap(this.searchVO, { page: toPage, size: this.pageSize })]).then(([fromData, toData]) => {
-        this.pageDataMap.set(fromPage, fromData);
-        this.pageDataMap.set(toPage, toData);
-        const { featureWithoutEpic = [] } = this.storyMapData;
-
-        let newStoryList = [];
-        let newEpicWithFeature = [];
-
-        for (let i = 1; i <= this.page; i++) {
-          const pageStoryList = this.pageDataMap.get(i).storyList || [];
-          const pageEpicWidthFeature = (this.pageDataMap.get(i).epicWithFeature || []).map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] }));
-
-          newStoryList = [...newStoryList, ...pageStoryList];
-          newEpicWithFeature = [...newEpicWithFeature, ...pageEpicWidthFeature];
-        }
-
-        const newStoryMapData = {
-          ...this.storyMapData,
-          storyList: newStoryList,
-          epicWithFeature: sortBy(featureWithoutEpic.length > 0 && !newEpicWithFeature.find((item) => !item.issueId) ? newEpicWithFeature.concat({
-            issueId: 0,
-            featureCommonDTOList: featureWithoutEpic,
-          }) : newEpicWithFeature, 'epicRank'),
-        };
-        this.initStoryData(newStoryMapData);
-        this.setLoading(false);
-      }).catch((error) => {
-        console.log(error);
-        this.setLoading(false);
-      });
-    } else {
-      storyMapApi.getStoryMap(this.searchVO, { page: fromPage, size: this.pageSize }).then((replaceData) => {
-        this.pageDataMap.set(fromPage, replaceData);
-
-        const { featureWithoutEpic = [] } = this.storyMapData;
-
-        let newStoryList = [];
-        let newEpicWithFeature = [];
-
-        for (let i = 1; i <= this.page; i++) {
-          const pageStoryList = this.pageDataMap.get(i).storyList || [];
-          const pageEpicWidthFeature = (this.pageDataMap.get(i).epicWithFeature || []).map((epic) => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] }));
-
-          newStoryList = [...newStoryList, ...pageStoryList];
-          newEpicWithFeature = [...newEpicWithFeature, ...pageEpicWidthFeature];
-        }
-
-        const newStoryMapData = {
-          ...this.storyMapData,
-          storyList: newStoryList,
-          epicWithFeature: sortBy(featureWithoutEpic.length > 0 && !newEpicWithFeature.find((item) => !item.issueId) ? newEpicWithFeature.concat({
-            issueId: 0,
-            featureCommonDTOList: featureWithoutEpic,
-          }) : newEpicWithFeature, 'epicRank'),
-        };
-        this.initStoryData(newStoryMapData);
         this.setLoading(false);
       }).catch((error) => {
         console.log(error);
@@ -613,10 +522,7 @@ class StoryMapStore {
       epicId, featureId, storyMapVersionDTOList, storyMapSprintList,
     } = story;
     if (targetVersionOrSprintId || targetVersionOrSprintId) {
-      const epicIndex = this.getEpicList.findIndex((epic) => epic.issueId === epicId);
-      const epicPage = Math.ceil((epicIndex + 1) / this.pageSize);
-
-      this.getStoryMap(false, epicPage);
+      this.getStoryMap();
       this.setClickIssue();
       // if (this.storyData[epicId]) {
       //   const targetEpic = this.storyData[epicId];
@@ -840,24 +746,6 @@ class StoryMapStore {
 
   @action setRowInViewportMap = (key, value) => {
     this.rowInViewportMap.set(key, value);
-  }
-
-  @observable pageSize = 10;
-
-  @action setPageSize = (pageSize) => {
-    this.pageSize = pageSize;
-  }
-
-  @observable page = 1;
-
-  @action setPage = (page) => {
-    this.page = page;
-  }
-
-  @observable totalPage = 0;
-
-  @action setTotalPage = (totalPage) => {
-    this.totalPage = totalPage;
   }
 
   @observable tableWidth = 0;

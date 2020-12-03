@@ -28,10 +28,7 @@ class IssueDetail extends Component {
     const { refresh } = this.props;
     const { selectedIssueMap } = StoryMapStore;
     const { epicId } = selectedIssueMap.values().next().value || {};
-    const epicIndex = StoryMapStore.getEpicList.findIndex((epic) => epic.issueId === epicId);
-    const page = Math.ceil((epicIndex + 1) / StoryMapStore.pageSize);
-
-    refresh(false, page);
+    refresh();
     StoryMapStore.setClickIssue(null);
   }
 
