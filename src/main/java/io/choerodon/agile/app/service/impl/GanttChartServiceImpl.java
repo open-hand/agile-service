@@ -52,6 +52,11 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (illegalIssueTypeId) {
             return new ArrayList<>();
         }
+        List<GanttChartVO> result = listByProjectIdAndSearch(projectId, searchVO);
+        return toTree(result);
+    }
+
+    private List<GanttChartVO> listByProjectIdAndSearch(Long projectId, SearchVO searchVO) {
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
         if (condition) {
             String filterSql;
@@ -68,8 +73,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
                 List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false);
-                List<GanttChartVO> result = buildFromIssueDto(issueDTOList, projectId);
-                return toTree(result);
+                return buildFromIssueDto(issueDTOList, projectId);
             } else {
                 return new ArrayList<>();
             }
@@ -122,7 +126,7 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     @Override
     public List<GanttChartTreeVO> listByUser(Long projectId, SearchVO searchVO) {
-        List<GanttChartVO> ganttChartList = listByTask(projectId, searchVO);
+        List<GanttChartVO> ganttChartList = listByProjectIdAndSearch(projectId, searchVO);
         List<GanttChartVO> unassigned = new ArrayList<>();
         Map<String, List<GanttChartVO>> map = new HashMap<>();
         ganttChartList.forEach(g -> {
