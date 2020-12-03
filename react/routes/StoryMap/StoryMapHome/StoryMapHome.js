@@ -44,7 +44,7 @@ const HEX = {
 const StoryMapHome = observer(() => {
   const issueSearchStore = useIssueSearchStore({
     // @ts-ignore
-    getSystemFields: () => getSystemFields(['issueTypeId']),
+    getSystemFields: () => getSystemFields(['issueTypeId', 'quickFilterIds']),
     transformFilter,
     // @ts-ignore
     defaultChosenFields: Array.isArray(localPageCacheStore.getItem('storyMapFilter')) ? new Map(localPageCacheStore.getItem('storyMapFilter').map((item) => [item.code, item])) : undefined,
@@ -185,7 +185,7 @@ const StoryMapHome = observer(() => {
         <SwitchSwimLine />
         <CheckBox style={{ margin: '0 20px' }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>
         <CheckBox name="foldCompletedEpic" checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起史诗已完成列</CheckBox>
-        <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button>
+        {/* <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button> */}
       </Header>
       <Breadcrumb />
       <Content style={{

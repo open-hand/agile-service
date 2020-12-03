@@ -8,13 +8,13 @@ class StoryArea extends Component {
   renderWithSwimVersion=() => {
     const { isFullScreen } = StoryMapStore;
     const versionList = isFullScreen ? StoryMapStore.versionList.filter((version) => version.storyNum) : StoryMapStore.versionList;
-    return versionList.map((version, index) => <StoryRow rowIndex={index} isLastRow={index === versionList.length - 1} version={version} storyCollapse={version.collapse} />);
+    return versionList.slice(0, 5).map((version, index) => <StoryRow rowIndex={index} isLastRow={index === versionList.length - 1} version={version} storyCollapse={version.collapse} />);
   }
 
   renderWithSwimSprint=() => {
     const { isFullScreen } = StoryMapStore;
     const sprintList = isFullScreen ? StoryMapStore.sprintList.filter((sprint) => sprint.storyNum) : StoryMapStore.sprintList;
-    return sprintList.map((sprint, index) => <StoryRow rowIndex={index} isLastRow={index === sprintList.length - 1} sprint={sprint} storyCollapse={sprint.collapse} />);
+    return sprintList.slice(0, 5).map((sprint, index) => <StoryRow rowIndex={index} isLastRow={index === sprintList.length - 1} sprint={sprint} storyCollapse={sprint.collapse} />);
   }
 
   renderWithNone=() => <StoryRow isLastRow rowIndex={0} />
