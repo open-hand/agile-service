@@ -43,8 +43,8 @@ const tableColumns = [{
   render: (record) => (
     <Tooltip title={record.summary}>
       {!record.group ? (
-        <span style={{ cursor: 'pointer', color: 'black' }}>
-          <TypeTag data={record.issueTypeVO} style={{ marginRight: 5 }} />
+        <span style={{ cursor: 'pointer', color: 'rgba(0,0,0,0.87)' }}>
+          <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
           <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
         </span>
       ) : record.summary}
@@ -52,12 +52,12 @@ const tableColumns = [{
   ),
 },
 {
-  width: 100,
-  minWidth: 100,
+  width: 80,
+  minWidth: 80,
   name: 'assignee',
   label: '经办人',
   // @ts-ignore
-  render: (record) => <UserHead user={record.assignee} />,
+  render: (record) => record.assignee?.realName,
 },
 {
   flex: 1,
@@ -267,7 +267,7 @@ const GanttPage: React.FC = () => {
               unit={unit}
               onRow={onRow}
               onBarClick={onRow.onClick}
-              tableIndent={28}
+              tableIndent={20}
               expandIcon={getExpandIcon}
               renderBar={renderBar}
               renderBarThumb={renderBarThumb}

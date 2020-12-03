@@ -62,12 +62,12 @@ const Chart: React.FC = () => {
         <defs>
           <pattern
             id="repeat"
-            width="5"
+            width="4.5"
             height="10"
             patternUnits="userSpaceOnUse"
-            patternTransform="rotate(80 50 50)"
+            patternTransform="rotate(70 50 50)"
           >
-            <line stroke="#a6a6a6" strokeWidth="1px" y2="10" />
+            <line stroke="#c6c6c6" strokeWidth="1px" y2="10" />
           </pattern>
         </defs>
         {minorList.map((item) => (item.isWeek ? (

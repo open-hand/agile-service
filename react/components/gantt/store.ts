@@ -345,8 +345,8 @@ class GanttStore {
 
   getMajorList(): Gantt.Major[] {
     const majorFormatMap: { [key in Gantt.Sight]: string } = {
-      day: 'YYYY年 MM月',
-      week: 'YYYY年 MM月',
+      day: 'YYYY年MM月',
+      week: 'YYYY年MM月',
       month: 'YYYY年',
       quarter: 'YYYY年',
       halfYear: 'YYYY年',
@@ -645,8 +645,8 @@ class GanttStore {
     const { pxUnitAmp, data } = this;
     const minStamp = 11 * pxUnitAmp;
     const height = 8;
-    const baseTop = 14;
-    const topStep = 28;
+    const baseTop = TOP_PADDING + ROW_HEIGHT / 2 - height / 2;
+    const topStep = ROW_HEIGHT;
 
     // TODO 后期需优化 增加上周下周等内容
     const dateTextFormat = (startX: number) => dayjs(startX * pxUnitAmp).format('YYYY-MM-DD');
