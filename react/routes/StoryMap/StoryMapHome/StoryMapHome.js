@@ -5,7 +5,7 @@ import React, {
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import { Button, Icon } from 'choerodon-ui';
+import { Button } from 'choerodon-ui';
 import {
   CheckBox,
 } from 'choerodon-ui/pro';
