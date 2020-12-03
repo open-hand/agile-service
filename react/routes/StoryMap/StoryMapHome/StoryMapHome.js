@@ -50,8 +50,8 @@ const StoryMapHome = observer(() => {
     defaultChosenFields: Array.isArray(localPageCacheStore.getItem('storyMapFilter')) ? new Map(localPageCacheStore.getItem('storyMapFilter').map((item) => [item.code, item])) : undefined,
   });
 
-  const handleRefresh = (firstLoad = false, page = StoryMapStore.page) => {
-    StoryMapStore.getStoryMap(firstLoad, page);
+  const handleRefresh = (firstLoad = false) => {
+    StoryMapStore.getStoryMap(firstLoad);
   };
   const ref = useRef(null);
   StoryMapStore.setMiniMapRef(ref);
@@ -65,9 +65,6 @@ const StoryMapHome = observer(() => {
 
     const cacheSearchVO = localPageCacheStore.getItem('storyMapSearchVO');
     cacheSearchVO && StoryMapStore.setSearchVO(cacheSearchVO);
-
-    const screenWidth = window.screen.width;
-    StoryMapStore.setPageSize(Math.ceil(screenWidth / ColumnWidth));
 
     handleRefresh(true);
     return () => { StoryMapStore.clear(); };

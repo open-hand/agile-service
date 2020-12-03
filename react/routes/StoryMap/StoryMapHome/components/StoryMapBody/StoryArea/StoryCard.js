@@ -241,16 +241,10 @@ export default DragSource(
         }
       }
 
-      const targetEpicIndex = StoryMapStore.getEpicList.findIndex((epic) => epic.issueId === targetEpicId);
-      const toEpicIndex = StoryMapStore.getEpicList.findIndex((epic) => epic.issueId === epicId);
-
-      const fromPage = Math.ceil((targetEpicIndex + 1) / StoryMapStore.pageSize);
-      const toPage = Math.ceil((toEpicIndex + 1) / StoryMapStore.pageSize);
-
       storyMapApi.move(storyMapDragVO).then(() => {
         StoryMapStore.setClickIssue(null);
         // StoryMapStore.removeStoryFromStoryMap(story);
-        StoryMapStore.getAfterMoveStoryMap({ fromPage, toPage });
+        StoryMapStore.getStoryMap();
       });
     },
   },

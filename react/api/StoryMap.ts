@@ -72,14 +72,13 @@ class StoryMapApi {
      * @param searchVO 搜索条件
      * @returns
      */
-  getStoryMap(searchVO: mainAdvancedSearch, pagination: { page: number, size: number}) {
+  getStoryMap(searchVO: mainAdvancedSearch) {
     return axios({
       method: 'post',
-      url: `${this.prefix}/story_map/page_main`,
+      url: `${this.prefix}/story_map/main`,
       data: searchVO,
       params: {
         organizationId,
-        ...pagination,
       },
     });
   }
