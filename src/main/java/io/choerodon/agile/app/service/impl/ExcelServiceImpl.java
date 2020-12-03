@@ -873,14 +873,21 @@ public class ExcelServiceImpl implements ExcelService {
 
                     boolean sonsOk = true;
                     Map<Integer, IssueCreateVO> sonMap = new HashMap<>();
-                    for (Integer sonRow : sonSet) {
+                    for (Integer sonRowNum : sonSet) {
                         IssueCreateVO son = new IssueCreateVO();
-                        validateData(projectId, dataSheet.getRow(sonRow), headerMap, withoutParentRows, errorRowColMap, son, result, issueTypeCol, parentCol);
-                        if (!ObjectUtils.isEmpty(errorRowColMap.get(sonRow))) {
+                        Row sonRow = dataSheet.getRow(sonRowNum);
+                        for (int col = 0; col < columnNum; col++) {
+                            Cell cell = sonRow.getCell(col);
+                            if (cell != null && !dateTypeColumns.contains(col)) {
+                                sonRow.getCell(col).setCellType(CellType.STRING);
+                            }
+                        }
+                        validateData(projectId, sonRow, headerMap, withoutParentRows, errorRowColMap, son, result, issueTypeCol, parentCol);
+                        if (!ObjectUtils.isEmpty(errorRowColMap.get(sonRowNum))) {
                             sonsOk = false;
                             break;
                         } else {
-                            sonMap.put(sonRow, son);
+                            sonMap.put(sonRowNum, son);
                         }
                     }
                     if (!sonsOk) {
@@ -902,6 +909,7 @@ public class ExcelServiceImpl implements ExcelService {
                     rowNum = Collections.max(sonSet);
                     transactionManager.commit(status);
                 } catch (Exception e) {
+                    LOGGER.error("insert data error when import excel, exception: {}", e);
                     processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol);
                     rowNum = Collections.max(sonSet);
                     transactionManager.rollback(status);
@@ -1508,7 +1516,7 @@ public class ExcelServiceImpl implements ExcelService {
         int rowNum = row.getRowNum();
         if (!isCellEmpty(cell)) {
             String value = cell.toString();
-            String regex = "(([0-9]+(，|,))|(！[0-9]+(，|,)))*(([0-9]+)|(！[0-9]+))";
+            String regex = "(([0-9]+(，|,))|((!|！)[0-9]+(，|,)))*(([0-9]+)|((!|！)[0-9]+))";
             if (Pattern.matches(regex, value)) {
                 RelatedIssueVO relatedIssueVO = new RelatedIssueVO();
                 issueCreateVO.setRelatedIssueVO(relatedIssueVO);
@@ -1518,7 +1526,7 @@ public class ExcelServiceImpl implements ExcelService {
                 List<String> values = splitByRegex(value);
                 boolean ok = true;
                 for (String str : values) {
-                    if (str.startsWith("！")) {
+                    if (str.startsWith("！") || str.startsWith("!")) {
                         relatedRows.add(Integer.valueOf(str.substring(1)) - 1);
                     } else {
                         int num = Integer.valueOf(str);
