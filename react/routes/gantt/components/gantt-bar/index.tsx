@@ -25,17 +25,17 @@ const GanttBar: React.FC<GanttBarProps> = ({
 }) => {
   const { task: issue } = bar;
   const statusType = issue.statusVO.type;
-  const hasChildren = issue.children && issue.children.length > 0;
-  const totalCount = issue.children?.length || 0;
-  // @ts-ignore
-  const completeCount = issue.children?.filter((item) => item.completed).length || 0;
+  const subTasks = issue.children ? issue.children.filter((i) => i.issueTypeVO.typeCode === 'sub_task') : [];
+  const hasChildren = subTasks && subTasks.length > 0;
+  const totalCount = subTasks?.length || 0;
+  const completeCount = subTasks?.filter((item) => item.completed).length || 0;
   // @ts-ignore
   let [color1, color2] = STATUS_COLOR[statusType];
   const percent = totalCount ? completeCount / totalCount : 0;
   let diff = 0;
   if (issue.estimatedStartTime && issue.estimatedEndTime) {
     // 延期
-    if (dayjs(issue.estimatedEndTime).isBefore(dayjs()) && issue.completed) {
+    if (dayjs(issue.estimatedEndTime).isBefore(dayjs()) && !issue.completed) {
       color1 = '#FF5C6A';
       color2 = '#FFBAC0';
     }

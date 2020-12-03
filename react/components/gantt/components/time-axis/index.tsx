@@ -42,7 +42,7 @@ const TimeAxis: React.FC = () => {
           <div
             key={item.key}
             className={classNames(styles.minor, {
-              [styles.weekends]: item.isWeek,
+              // [styles.weekends]: item.isWeek,
             })}
             style={{ width: item.width, left: item.left }}
           >
