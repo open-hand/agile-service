@@ -1,6 +1,8 @@
 import React, {
   useState, useEffect, useCallback, useMemo,
 } from 'react';
+// eslint-disable-next-line camelcase
+import { unstable_batchedUpdates } from 'react-dom';
 import { Button, Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
@@ -11,7 +13,6 @@ import {
 } from '@choerodon/boot';
 import GanttComponent, { GanttProps } from '@/components/gantt';
 import { ganttApi, issueApi, workCalendarApi } from '@/api';
-import UserHead from '@/components/UserHead';
 import { Gantt } from '@/components/gantt/types';
 import TypeTag from '@/components/TypeTag';
 import Loading from '@/components/Loading';
@@ -80,6 +81,7 @@ const GanttPage: React.FC = () => {
   const [type, setType] = useState<string>('task');
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const [workCalendar, setWorkCalendar] = useState<any>();
+  const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
   const [filterManageVisible, setFilterManageVisible] = useState<boolean>();
   const [loading, setLoading] = useState(false);
   const issueSearchStore = useIssueSearchStore({
@@ -98,8 +100,9 @@ const GanttPage: React.FC = () => {
       }
       filter.otherArgs.sprint = [sprintId];
       setLoading(true);
-      const [workCalendarRes, res] = await Promise.all([
+      const [workCalendarRes, projectWorkCalendarRes, res] = await Promise.all([
         workCalendarApi.getWorkSetting(year),
+        workCalendarApi.getYearCalendar(year),
         type === 'task' ? ganttApi.loadByTask(filter) : ganttApi.loadByUser(filter),
       ]);
       // setColumns(headers.map((h: any) => ({
@@ -107,10 +110,13 @@ const GanttPage: React.FC = () => {
       //   name: h.fieldCode,
       //   label: h.name,
       // })));
-      setWorkCalendar(workCalendarRes);
-      setColumns(tableColumns);
-      setData(res);
-      setLoading(false);
+      unstable_batchedUpdates(() => {
+        setWorkCalendar(workCalendarRes);
+        setProjectWorkCalendar(projectWorkCalendarRes);
+        setColumns(tableColumns);
+        setData(res);
+        setLoading(false);
+      });
     })();
   }, [issueSearchStore, sprintId, type]);
   useEffect(() => {
@@ -148,20 +154,25 @@ const GanttPage: React.FC = () => {
     if (!workCalendar) {
       return false;
     }
-    const day = dayjs(date).weekday();
+    const weekDay = dayjs(date).weekday();
+    const day = dayjs(date).format('YYYY-MM-DD');
     const { saturdayWork, sundayWork, timeZoneWorkCalendarDTOS } = workCalendar;
     const unWorkDays = timeZoneWorkCalendarDTOS.map((w: any) => w.workDay);
-    if (!saturdayWork && day === 6) {
+    const projectSetting = find(projectWorkCalendar, { workDay: day });
+    if (projectSetting) {
+      return projectSetting.status === 0;
+    }
+    if (!saturdayWork && weekDay === 6) {
       return true;
     }
-    if (!sundayWork && day === 0) {
+    if (!sundayWork && weekDay === 0) {
       return true;
     }
     if (unWorkDays.includes(dayjs(date).format('YYYY-MM-DD'))) {
       return true;
     }
     return false;
-  }, [workCalendar]);
+  }, [projectWorkCalendar, workCalendar]);
   const handleClickFilterManage = () => {
     setFilterManageVisible(true);
   };

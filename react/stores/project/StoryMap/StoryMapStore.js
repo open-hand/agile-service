@@ -151,48 +151,38 @@ class StoryMapStore {
 
   getStoryMap = async (firstLoad = false) => {
     this.setLoading(true);
-    if (firstLoad) {
-      const [allVersion, allSprints] = await Promise.all([
-        versionApi.loadNamesByStatus(),
-        sprintApi.loadSprints(),
-      ]);
-      const versionList = allVersion.slice(0, 5);
-      const sprintIds = allSprints.slice(0, 5).map((s) => s.sprintId);
-      if (this.swimLine === 'version') {
-        if (!this.searchVO.otherArgs.version || this.searchVO.otherArgs.version.length <= 0) {
-          this.searchVO.otherArgs.version = versionList.map((v) => v.versionId);
-        }
-      } else if (this.swimLine === 'sprint') {
-        if (!this.searchVO.otherArgs.version || this.searchVO.otherArgs.version.length <= 0) {
-          this.searchVO.otherArgs.version = versionList.map((v) => v.versionId);
-        }
+    const [allVersion, allSprints] = await Promise.all([
+      versionApi.loadNamesByStatus(),
+      sprintApi.loadSprints(),
+    ]);
+    const versionList = allVersion.slice(0, 5);
+    const sprintIds = allSprints.slice(0, 5).map((s) => s.sprintId);
+    if (versionList.length > 0 && this.swimLine === 'version') {
+      if (!this.searchVO.otherArgs.version || this.searchVO.otherArgs.version.length <= 0) {
+        this.issueSearchStore.handleFilterChange('version', versionList.map((v) => v.versionId));
+        return;
       }
-      Promise.all([
-        storyMapApi.getStoryMap(this.searchVO),
-        issueTypeApi.loadAllWithStateMachineId(),
-        priorityApi.loadByProject(),
-        sprintApi.loadSprintsWidthInfo(sprintIds),
-      ]).then(([storyMapData, issueTypes, prioritys, sprintList]) => {
-        this.issueTypes = issueTypes;
-        this.prioritys = prioritys;
-        this.initVersionList(versionList);
-        this.initSprintList(sprintList);
-        this.initStoryMapData(storyMapData, firstLoad);
-        this.setLoading(false);
-      }).catch(() => {
-        this.setLoading(false);
-      });
-    } else {
-      storyMapApi.getStoryMap(this.searchVO).then((storyMapData) => {
-        this.resetVersionList();
-        this.resetSprintList();
-        this.initStoryMapData(storyMapData, firstLoad);
-        this.setLoading(false);
-      }).catch((error) => {
-        console.log(error);
-        this.setLoading(false);
-      });
+    } else if (sprintIds.length > 0 && this.swimLine === 'sprint') {
+      if (!this.searchVO.otherArgs.sprint || this.searchVO.otherArgs.sprint.length <= 0) {
+        this.issueSearchStore.handleFilterChange('sprint', sprintIds);
+        return;
+      }
     }
+    Promise.all([
+      storyMapApi.getStoryMap(this.searchVO),
+      issueTypeApi.loadAllWithStateMachineId(),
+      priorityApi.loadByProject(),
+      sprintApi.loadSprintsWidthInfo(sprintIds),
+    ]).then(([storyMapData, issueTypes, prioritys, sprintList]) => {
+      this.issueTypes = issueTypes;
+      this.prioritys = prioritys;
+      this.initVersionList(versionList);
+      this.initSprintList(sprintList);
+      this.initStoryMapData(storyMapData, firstLoad);
+      this.setLoading(false);
+    }).catch(() => {
+      this.setLoading(false);
+    });
   }
 
     loadIssueList = () => {
