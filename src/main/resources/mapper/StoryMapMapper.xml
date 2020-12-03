@@ -214,6 +214,12 @@
             <id property="versionId" column="version_version_id"/>
             <id property="name" column="version_name"/>
         </collection>
+
+        <collection property="storyMapSprintList" autoMapping="true" ofType="io.choerodon.agile.api.vo.SprintNameVO">
+            <id property="sprintId" column="sprint_id"/>
+            <id property="sprintName" column="sprint_name"/>
+            <id property="statusCode" column="sprint_status_code"/>
+        </collection>
     </resultMap>
 
     <select id="selectDemandStoryList" resultMap="storyDemandListMap">
@@ -225,7 +231,10 @@
         ai.status_id as ai_status_id,
         ais.is_completed AS ai_completed,
         version_info.version_id as version_version_id,
-        version_info.name as version_name
+        version_info.name as version_name,
+        asp.sprint_id as sprint_id,
+        asp.sprint_name as sprint_name,
+        asp.status_code as sprint_status_code
         from agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         LEFT JOIN agile_issue_status ais ON ai.status_id = ais.status_id and ais.project_id = #{projectId}
@@ -234,6 +243,8 @@
             from agile_version_issue_rel avir, agile_product_version apv
             where avir.version_id = apv.version_id and avir.project_id = #{projectId}
         ) version_info on ai.issue_id = version_info.issue_id
+        LEFT JOIN agile_issue_sprint_rel aisl on aisl.project_id = ai.project_id and aisl.issue_id = ai.issue_id
+        LEFT JOIN agile_sprint asp on asp.project_id = aisl.project_id and asp.sprint_id = aisl.sprint_id
         where ai.project_id = #{projectId} and ai.type_code = 'story'
         and (ai.epic_id is null or ai.epic_id = 0)
         and (ai.feature_id is null or ai.feature_id = 0)

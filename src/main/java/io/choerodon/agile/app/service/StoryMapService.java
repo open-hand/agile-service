@@ -20,7 +20,7 @@ public interface StoryMapService {
 
     void storyMapMove(Long projectId, StoryMapDragVO storyMapDragVO);
 
-    List<SprintSearchVO> storyMapSprintInfo(Long projectId);
+    List<SprintSearchVO> storyMapSprintInfo(Long projectId, List<Long> sprintIds);
 
     StoryMapVO pageStoryMap(Long projectId, Long organizationId, SearchVO searchVO,Integer page, Integer size);
 }

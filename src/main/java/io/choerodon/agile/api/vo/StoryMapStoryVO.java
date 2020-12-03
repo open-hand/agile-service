@@ -38,6 +38,8 @@ public class StoryMapStoryVO {
 
     private List<StoryMapVersionVO> storyMapVersionVOList;
 
+    private List<SprintNameVO> storyMapSprintList;
+
     public Long getIssueId() {
         return issueId;
     }
@@ -124,5 +126,13 @@ public class StoryMapStoryVO {
 
     public Boolean getCompleted() {
         return completed;
+    }
+
+    public List<SprintNameVO> getStoryMapSprintList() {
+        return storyMapSprintList;
+    }
+
+    public void setStoryMapSprintList(List<SprintNameVO> storyMapSprintList) {
+        this.storyMapSprintList = storyMapSprintList;
     }
 }

@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.assembler;
 
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.StatusVO;
-import io.choerodon.agile.api.vo.StoryMapStoryVO;
-import io.choerodon.agile.api.vo.StoryMapVersionVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.business.StoryMapStoryDTO;
 import org.springframework.stereotype.Component;
@@ -33,6 +30,7 @@ public class StoryMapAssembler extends AbstractAssembler {
             storyMapStoryVO.setIssueTypeVO(issueTypeDTOMap.get(storyMapStoryDTO.getIssueTypeId()));
             storyMapStoryVO.setStatusVO(statusMapDTOMap.get(storyMapStoryDTO.getStatusId()));
             storyMapStoryVO.setStoryMapVersionVOList(toTargetList(storyMapStoryDTO.getStoryMapVersionDTOList(), StoryMapVersionVO.class));
+            storyMapStoryVO.setStoryMapSprintList(toTargetList(storyMapStoryDTO.getStoryMapSprintList(), SprintNameVO.class));
             result.add(storyMapStoryVO);
         });
         return result;
