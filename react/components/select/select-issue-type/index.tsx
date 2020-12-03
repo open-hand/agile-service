@@ -6,6 +6,7 @@ import { issueTypeApi, sprintApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IIssueType, ISprint } from '@/common/types';
+import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   filterList?: string[]
@@ -13,10 +14,12 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (sprints: IIssueType[]) => void
   dataRef?: React.MutableRefObject<any>
   valueField?: string
+  flat?: boolean
+
 }
 
 const SelectIssueType: React.FC<Props> = forwardRef(({
-  filterList = ['feature'], isProgram, valueField, dataRef,
+  filterList = ['feature'], isProgram, valueField, dataRef, flat,
   afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
@@ -64,8 +67,10 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
     paging: false,
   }), []);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
+
   return (
-    <Select
+    <Component
       ref={ref}
       {...props}
       {...otherProps}

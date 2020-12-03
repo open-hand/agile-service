@@ -5,6 +5,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IVersion } from '@/common/types';
 import { getProjectId } from '@/utils/common';
+import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   projectId?: string
@@ -13,9 +14,10 @@ interface Props extends Partial<SelectProps> {
   valueField?: string
   afterLoad?: (versions: IVersion[]) => void
   request?: Function
+  flat?:boolean
 }
 const SelectVersion: React.FC<Props> = forwardRef(({
-  request, projectId, valueField, dataRef = { current: null }, afterLoad, statusArr = [], ...otherProps
+  request, projectId, valueField, dataRef = { current: null }, afterLoad, statusArr = [], flat, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'version',
@@ -41,8 +43,10 @@ const SelectVersion: React.FC<Props> = forwardRef(({
     paging: false,
   }), [projectId]);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
+
   return (
-    <Select
+    <Component
       multiple
       ref={ref}
       clearButton

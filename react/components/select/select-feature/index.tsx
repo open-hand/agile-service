@@ -4,22 +4,26 @@ import { featureApi } from '@/api';
 import { find } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { Issue } from '@/common/types';
+import FlatSelect from '@/components/flat-select';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 
-interface Props {
+interface Props extends Partial<SelectProps> {
   featureId?: string,
   featureName?: string,
   dataRef?: React.MutableRefObject<any>
-  afterLoad?: (epics: (Issue | {issueId: string, summary: string})[]) => void
+  afterLoad?: (epics: (Issue | { issueId: string, summary: string })[]) => void
+  flat?: boolean
+  request?: SelectConfig<Issue>['request']
 }
 
 const SelectFeature: React.FC<Props> = forwardRef(({
-  dataRef, featureId, featureName, afterLoad, ...otherProps
+  dataRef, featureId, featureName, afterLoad, request, flat, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<Issue> => ({
     name: 'feature',
     textField: 'summary',
     valueField: 'issueId',
-    request: ({ filter, page }) => featureApi.getByEpicId(undefined, filter, page),
+    request: request || (({ filter, page }) => featureApi.getByEpicId(undefined, filter, page)),
     // @ts-ignore
     middleWare: (features) => {
       if (featureId && featureName) {
@@ -47,16 +51,18 @@ const SelectFeature: React.FC<Props> = forwardRef(({
       }
       return features;
     },
-    optionRenderer: (feature) => (
-      <Tooltip title={feature.summary} placement="left">
-        {feature.summary}
-      </Tooltip>
-    ),
+    // optionRenderer: (feature) => (
+    //   <Tooltip title={feature.summary} placement="left">
+    //     {feature.summary}
+    //   </Tooltip>
+    // ),
     paging: true,
-  }), [featureId, featureName]);
+  }), [featureId, request, featureName]);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
+
   return (
-    <Select
+    <Component
       ref={ref}
       clearButton
       {...props}
