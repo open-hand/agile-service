@@ -24,6 +24,8 @@ import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import HeaderLine from '@/components/HeaderLine';
+import { User } from '@/common/types';
+
 import { transformFilter } from './components/search/util';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
@@ -34,6 +36,12 @@ import GanttStore from './store';
 import GanttOperation from './components/gantt-operation';
 import './index.less';
 
+const renderTooltip = (user:User) => {
+  const {
+    loginName, realName, email, ldap,
+  } = user || {};
+  return ldap ? `${realName}(${loginName})` : `${realName}(${email})`;
+};
 const { Option } = FlatSelect;
 const tableColumns = [{
   flex: 2,
@@ -58,7 +66,11 @@ const tableColumns = [{
   name: 'assignee',
   label: '经办人',
   // @ts-ignore
-  render: (record) => record.assignee?.realName,
+  render: (record) => (
+    <Tooltip title={renderTooltip(record.assignee)}>
+      <span>{record.assignee?.realName}</span>
+    </Tooltip>
+  ),
 },
 {
   flex: 1,
