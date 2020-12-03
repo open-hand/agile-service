@@ -62,6 +62,12 @@ class StoryMapStore {
 
   @observable storyMapData = {};
 
+  issueSearchStore = null;
+
+  setIssueSearchStore(issueSearchStore) {
+    this.issueSearchStore = issueSearchStore;
+  }
+
   @action setStoryMapData = (data) => {
     this.storyMapData = data;
   }
@@ -143,10 +149,21 @@ class StoryMapStore {
     this.initStoryData(newStoryMapData, firstLoad);
   }
 
-  getStoryMap = (firstLoad = false) => {
+  getStoryMap = async (firstLoad = false) => {
     this.setLoading(true);
     if (firstLoad) {
-      Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject(), sprintApi.loadSprintsWidthInfo()]).then(([storyMapData, issueTypes, versionList, prioritys, sprintList]) => {
+      const [allVersion, allSprints] = await Promise.all([
+        versionApi.loadNamesByStatus(),
+        sprintApi.loadSprints(),
+      ]);
+      const versionList = allVersion.slice(0, 5);
+      const sprintIds = allSprints.slice(0, 5).map((s) => s.sprintId);
+      Promise.all([
+        storyMapApi.getStoryMap(this.searchVO),
+        issueTypeApi.loadAllWithStateMachineId(),
+        priorityApi.loadByProject(),
+        sprintApi.loadSprintsWidthInfo(sprintIds),
+      ]).then(([storyMapData, issueTypes, prioritys, sprintList]) => {
         this.issueTypes = issueTypes;
         this.prioritys = prioritys;
         this.initVersionList(versionList);

@@ -47,9 +47,9 @@ const StoryMapHome = observer(() => {
     getSystemFields: () => getSystemFields(['issueTypeId', 'quickFilterIds']),
     transformFilter,
     // @ts-ignore
-    defaultChosenFields: Array.isArray(localPageCacheStore.getItem('storyMapFilter')) ? new Map(localPageCacheStore.getItem('storyMapFilter').map((item) => [item.code, item])) : undefined,
+    // defaultChosenFields: Array.isArray(localPageCacheStore.getItem('storyMapFilter')) ? new Map(localPageCacheStore.getItem('storyMapFilter').map((item) => [item.code, item])) : undefined,
   });
-
+  StoryMapStore.setIssueSearchStore(issueSearchStore);
   const handleRefresh = (firstLoad = false) => {
     StoryMapStore.getStoryMap(firstLoad);
   };
