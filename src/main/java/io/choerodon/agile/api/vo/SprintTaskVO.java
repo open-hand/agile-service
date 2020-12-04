@@ -5,6 +5,10 @@ import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
 
 public class SprintTaskVO {
+    @ApiModelProperty(value = "冲刺")
+    private Long sprintId;
+    @ApiModelProperty(value = "冲刺名称")
+    private String sprintName;
     @ApiModelProperty(value = "主要负责人")
     private Long mainResponsibleId;
     @ApiModelProperty(value = "经办人")
@@ -21,6 +25,22 @@ public class SprintTaskVO {
     private BigDecimal remainingTimeRate;
     @ApiModelProperty(value = "主要负责人完成工时占比")
     private BigDecimal remainingTimeCompleteRate;
+
+    public Long getSprintId() {
+        return sprintId;
+    }
+
+    public void setSprintId(Long sprintId) {
+        this.sprintId = sprintId;
+    }
+
+    public String getSprintName() {
+        return sprintName;
+    }
+
+    public void setSprintName(String sprintName) {
+        this.sprintName = sprintName;
+    }
 
     public Long getMainResponsibleId() {
         return mainResponsibleId;

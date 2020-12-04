@@ -12,7 +12,6 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,8 +49,10 @@ public class TeamPerformanceController {
     public ResponseEntity<List<SprintBugVO>> querySprintBugCount(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                  @ApiParam(value = "环境", required = true)
-                                                                 @RequestParam(name = "environment") String environment) {
-        return ResponseEntity.ok(teamPerformanceService.querySprintBugCount(projectId, environment));
+                                                                 @RequestParam(name = "environment") String environment,
+                                                                 @ApiParam(value = "类别", required = true)
+                                                                 @RequestParam(name = "type") String type) {
+        return ResponseEntity.ok(teamPerformanceService.querySprintBugCount(projectId, environment, type));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -61,9 +62,45 @@ public class TeamPerformanceController {
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                 @ApiParam(value = "环境", required = true)
                                                                 @RequestParam(name = "environment") String environment,
+                                                                @ApiParam(value = "类别", required = true)
+                                                                @RequestParam(name = "type") String type,
                                                                 @SortDefault(value = "bugCount", direction =
                                                                         Sort.Direction.DESC)
                                                                         PageRequest pageRequest) {
-        return ResponseEntity.ok(teamPerformanceService.querySprintBugRank(projectId, environment, pageRequest));
+        return ResponseEntity.ok(teamPerformanceService.querySprintBugRank(projectId, environment, type, pageRequest));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "团队绩效-所有冲刺故事点统计")
+    @GetMapping(value = "/history_story_point")
+    public ResponseEntity<List<SprintStoryPointVO>> queryHistorySprintStoryPoint(@ApiParam(value = "项目id",
+            required = true)
+                                                                                 @PathVariable(name = "project_id") Long projectId) {
+        return ResponseEntity.ok(teamPerformanceService.queryHistorySprintStoryPoint(projectId));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "团队绩效-所有冲刺任务工时统计")
+    @GetMapping(value = "/history_task_time")
+    public ResponseEntity<List<SprintTaskVO>> queryHistorySprintTaskTime(@ApiParam(value = "项目id", required = true)
+                                                                         @PathVariable(name = "project_id") Long projectId) {
+        return ResponseEntity.ok(teamPerformanceService.queryHistorySprintTaskTime(projectId));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "团队绩效-所有冲刺bug变化统计")
+    @GetMapping(value = "/history_bug_count")
+    public ResponseEntity<List<SprintBugVO>> queryHistorySprintBugCount(@ApiParam(value = "项目id", required = true)
+                                                                        @PathVariable(name = "project_id") Long projectId,
+                                                                        @ApiParam(value = "环境")
+                                                                        @RequestParam(name = "environment", required
+                                                                                = false) String environment,
+                                                                        @ApiParam(value = "环境")
+                                                                        @RequestParam(name = "responsibleId", required
+                                                                                 = false) Long responsibleId,
+                                                                        @ApiParam(value = "类别", required = true)
+                                                                        @RequestParam(name = "type") String type) {
+        return ResponseEntity.ok(teamPerformanceService.queryHistorySprintBugCount(projectId, environment,
+                responsibleId, type));
     }
 }
