@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo.business;
 
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -255,6 +256,12 @@ public class IssueVO {
     private List<ProgramVersionFeatureRelVO> programVersionFeatureRelVOS;
 
     private String errorMsg;
+
+    private UserMessageDTO mainResponsible;
+
+    private UserMessageDTO testResponsible;
+
+    private String environment;
 
     public String getErrorMsg() {
         return errorMsg;
@@ -875,5 +882,29 @@ public class IssueVO {
 
     public void setPiTargetInfoVOS(List<PiTargetInfoVO> piTargetInfoVOS) {
         this.piTargetInfoVOS = piTargetInfoVOS;
+    }
+
+    public UserMessageDTO getMainResponsible() {
+        return mainResponsible;
+    }
+
+    public void setMainResponsible(UserMessageDTO mainResponsible) {
+        this.mainResponsible = mainResponsible;
+    }
+
+    public UserMessageDTO getTestResponsible() {
+        return testResponsible;
+    }
+
+    public void setTestResponsible(UserMessageDTO testResponsible) {
+        this.testResponsible = testResponsible;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }
