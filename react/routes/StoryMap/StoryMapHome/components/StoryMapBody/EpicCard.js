@@ -62,13 +62,9 @@ class EpicCard extends Component {
         {
           epicName && (
             <div className="status">
-              <Tooltip mouseEnterDelay={0.5} title={`状态： ${statusVO && statusVO.name}`}>
-                <div>
-                  <StatusTag
-                    data={statusVO || {}}
-                  />
-                </div>
-              </Tooltip>
+              <StatusTag
+                data={statusVO || {}}
+              />
             </div>
           )
         }
