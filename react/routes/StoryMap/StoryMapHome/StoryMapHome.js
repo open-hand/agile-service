@@ -18,7 +18,7 @@ import FilterManage from '@/components/FilterManage';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import { useIssueSearchStore } from '@/components/issue-search';
-import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import { getSystemFieldsInStoryMap } from '@/stores/project/issue/IssueStore';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import Minimap from './components/MiniMap';
 import Empty from '../../../components/Empty';
@@ -32,7 +32,6 @@ import IssueDetail from './components/IssueDetail';
 import StoryMapSearch from './components/Search';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
-import { ColumnWidth } from './Constants';
 
 const HEX = {
   'c7nagile-StoryMap-EpicCard': '#D9C2FB',
@@ -44,10 +43,10 @@ const HEX = {
 const StoryMapHome = observer(() => {
   const issueSearchStore = useIssueSearchStore({
     // @ts-ignore
-    getSystemFields: () => getSystemFields(['issueTypeId', 'quickFilterIds']),
+    getSystemFields: () => getSystemFieldsInStoryMap(['issueTypeId', 'quickFilterIds']),
     transformFilter,
     // @ts-ignore
-    // defaultChosenFields: Array.isArray(localPageCacheStore.getItem('storyMapFilter')) ? new Map(localPageCacheStore.getItem('storyMapFilter').map((item) => [item.code, item])) : undefined,
+    defaultChosenFields: Array.isArray(localPageCacheStore.getItem('storyMapFilter')) ? new Map(localPageCacheStore.getItem('storyMapFilter').map((item) => [item.code, item])) : undefined,
   });
   StoryMapStore.setIssueSearchStore(issueSearchStore);
   const handleRefresh = (firstLoad = false) => {
