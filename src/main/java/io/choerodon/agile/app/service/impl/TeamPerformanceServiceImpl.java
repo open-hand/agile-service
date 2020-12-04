@@ -85,21 +85,42 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
     }
 
     @Override
-    public Page<SprintBugVO> querySprintBugRank(Long projectId, String environment, PageRequest pageRequest) {
+    public Page<SprintBugVO> querySprintBugRank(Long projectId, String environment, String type, PageRequest pageRequest) {
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         Page<SprintBugVO> sprintBugPage = PageHelper.doPageAndSort(pageRequest,
                 () -> teamPerformanceMapper.querySprintBugCount(projectId,
-                        environment,
-                        Objects.isNull(agilePluginService) ? false : true));
+                        environment, type, Objects.isNull(agilePluginService) ? false : true));
         sprintBugPage.setContent(handleUser(sprintBugPage.getContent()));
         return sprintBugPage;
     }
 
     @Override
-    public List<SprintBugVO> querySprintBugCount(Long projectId, String environment) {
+    public List<SprintBugVO> querySprintBugCount(Long projectId, String environment, String type) {
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
-        List<SprintBugVO> sprintBugs = teamPerformanceMapper.querySprintBugCount(projectId,
-                environment,
+        List<SprintBugVO> sprintBugs = teamPerformanceMapper.querySprintBugCount(projectId, environment, type,
+                Objects.isNull(agilePluginService) ? false : true);
+        return handleUser(sprintBugs);
+    }
+
+    @Override
+    public List<SprintStoryPointVO> queryHistorySprintStoryPoint(Long projectId) {
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        return teamPerformanceMapper.queryHistorySprintStoryPoint(projectId,
+                Objects.isNull(agilePluginService) ? false : true);
+    }
+
+    @Override
+    public List<SprintTaskVO> queryHistorySprintTaskTime(Long projectId) {
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        return teamPerformanceMapper.queryHistorySprintTaskTime(projectId,
+                Objects.isNull(agilePluginService) ? false : true);
+    }
+
+    @Override
+    public List<SprintBugVO> queryHistorySprintBugCount(Long projectId, String environment, Long responsibleId, String type) {
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        List<SprintBugVO> sprintBugs = teamPerformanceMapper.queryHistorySprintBugCount(projectId, environment,
+                responsibleId, type,
                 Objects.isNull(agilePluginService) ? false : true);
         return handleUser(sprintBugs);
     }
@@ -109,10 +130,10 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
             return sprintBugs;
         }
         List<Long> mainResponsibleId =
-                sprintBugs.stream().filter(sprintBugVO -> Objects.nonNull(sprintBugVO.getMainResponsibleId()))
-                        .map(SprintBugVO::getMainResponsibleId).collect(Collectors.toList());
+                sprintBugs.stream().filter(sprintBugVO -> Objects.nonNull(sprintBugVO.getResponsibleId()))
+                        .map(SprintBugVO::getResponsibleId).collect(Collectors.toList());
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(mainResponsibleId, true);
-        sprintBugs.forEach(sprintBug -> handleUser(sprintBug, usersMap.get(sprintBug.getMainResponsibleId())));
+        sprintBugs.forEach(sprintBug -> handleUser(sprintBug, usersMap.get(sprintBug.getResponsibleId())));
         return sprintBugs;
     }
 

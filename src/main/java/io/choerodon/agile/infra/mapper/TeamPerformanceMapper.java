@@ -33,10 +33,45 @@ public interface TeamPerformanceMapper extends BaseMapper<SprintDTO> {
      *
      * @param projectId
      * @param environment
+     * @param type
      * @param isPlugin
      * @return
      */
-    List<SprintBugVO> querySprintBugCount(@Param("projectId") Long projectId, @Param("environment") String environment,
+    List<SprintBugVO> querySprintBugCount(@Param("projectId") Long projectId,
+                                          @Param("environment") String environment,
+                                          @Param("type") String type,
                                           @Param("isPlugin") boolean isPlugin);
 
+    /**
+     * 查询所有冲刺故事点
+     *
+     * @param projectId
+     * @param isPlugin
+     * @return
+     */
+    List<SprintStoryPointVO> queryHistorySprintStoryPoint(@Param("projectId") Long projectId, @Param("isPlugin") boolean isPlugin);
+
+    /**
+     * 查询所有冲刺任务工时统计
+     *
+     * @param projectId
+     * @param isPlugin
+     * @return
+     */
+    List<SprintTaskVO> queryHistorySprintTaskTime(@Param("projectId") Long projectId, @Param("isPlugin") boolean isPlugin);
+
+    /**
+     * 所有冲刺bug变化统计
+     * @param projectId
+     * @param environment
+     * @param responsibleId
+     * @param type
+     * @param isPlugin
+     * @return
+     */
+    List<SprintBugVO> queryHistorySprintBugCount(@Param("projectId") Long projectId,
+                                                 @Param("environment") String environment,
+                                                 @Param("responsibleId") Long responsibleId,
+                                                 @Param("type") String type,
+                                                 @Param("isPlugin") boolean isPlugin);
 }

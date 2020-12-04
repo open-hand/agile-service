@@ -1,14 +1,14 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.swagger.annotations.ApiModelProperty;
 
-import java.math.BigDecimal;
-import java.util.Map;
-
 public class SprintBugVO {
+    @ApiModelProperty(value = "冲刺")
+    private Long sprintId;
+    @ApiModelProperty(value = "冲刺名称")
+    private String sprintName;
     @ApiModelProperty(value = "主要负责人")
-    private Long mainResponsibleId;
+    private Long responsibleId;
     @ApiModelProperty(value = "经办人")
     private String name;
     @ApiModelProperty(value = "经办人登陆名")
@@ -20,12 +20,28 @@ public class SprintBugVO {
     @ApiModelProperty(value = "bug数量")
     private Integer bugCount;
 
-    public Long getMainResponsibleId() {
-        return mainResponsibleId;
+    public Long getSprintId() {
+        return sprintId;
     }
 
-    public void setMainResponsibleId(Long mainResponsibleId) {
-        this.mainResponsibleId = mainResponsibleId;
+    public void setSprintId(Long sprintId) {
+        this.sprintId = sprintId;
+    }
+
+    public String getSprintName() {
+        return sprintName;
+    }
+
+    public void setSprintName(String sprintName) {
+        this.sprintName = sprintName;
+    }
+
+    public Long getResponsibleId() {
+        return responsibleId;
+    }
+
+    public void setResponsibleId(Long responsibleId) {
+        this.responsibleId = responsibleId;
     }
 
     public String getName() {

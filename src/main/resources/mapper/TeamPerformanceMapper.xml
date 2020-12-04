@@ -43,6 +43,13 @@
             FROM agile_sprint asp
             JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = asp.sprint_id AND aisr.project_id = asp.project_id
             JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code IN ('task', 'sub_task')
+            JOIN
+            (
+                SELECT adl.issue_id, max(adl.new_value) AS new_value
+                FROM agile_data_log adl
+                WHERE adl.project_id = #{projectId} AND adl.field = 'timeestimate'
+                GROUP BY adl.issue_id
+            ) adlm ON adlm.issue_id = ai.issue_id
             WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
             <if test="isPlugin">
                 AND asp.type = 'pi'
@@ -55,6 +62,13 @@
             JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = asp.sprint_id AND aisr.project_id = asp.project_id
             JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code IN ('task', 'sub_task')
             JOIN agile_issue_status ais ON ais.status_id = ai.status_id AND ais.is_completed = 1 AND ais.project_id = ai.project_id
+            JOIN
+            (
+                SELECT adl.issue_id, max(adl.new_value) AS new_value
+                FROM agile_data_log adl
+                WHERE adl.project_id = #{projectId} AND adl.field = 'timeestimate'
+                GROUP BY adl.issue_id
+            ) adlm ON adlm.issue_id = ai.issue_id
             WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
             <if test="isPlugin">
                 AND asp.type = 'pi'
@@ -64,7 +78,14 @@
     </select>
 
     <select id="querySprintBugCount" resultType="io.choerodon.agile.api.vo.SprintBugVO">
-        SELECT ai.main_responsible_id, COUNT(ai.issue_id) bug_count
+        SELECT
+        <if test="type != null and type == 'dev'">
+            ai.main_responsible_id AS responsible_id,
+        </if>
+        <if test="type != null and type == 'test'">
+            ai.test_responsible_id AS responsible_id,
+        </if>
+        COUNT(ai.issue_id) bug_count
         FROM agile_sprint asp
         JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = asp.sprint_id AND aisr.project_id = asp.project_id
         JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code =
@@ -73,6 +94,124 @@
         <if test="isPlugin">
            AND asp.type = 'pi'
         </if>
-        GROUP BY ai.main_responsible_id
+        <if test="type != null and type == 'dev'">
+            GROUP BY ai.main_responsible_id
+        </if>
+        <if test="type != null and type == 'test'">
+            GROUP BY ai.test_responsible_id
+        </if>
+    </select>
+
+    <select id="queryHistorySprintStoryPoint" resultType="io.choerodon.agile.api.vo.SprintStoryPointVO">
+        SELECT ai.sprint_id,                                ai.sprint_name,
+        SUM(ai.story_points) AS story_points,               SUM(ai.story_points_complate) AS story_points_complete
+        FROM
+        (
+            SELECT asp.sprint_id,               asp.sprint_name,
+            ai.story_points,                    0 AS story_points_complate
+            FROM agile_sprint asp
+            JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = asp.sprint_id AND aisr.project_id = asp.project_id
+            JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code =
+            'story'
+            WHERE asp.project_id = #{projectId}
+            <if test="isPlugin">
+                AND asp.type = 'pi'
+            </if>
+
+            UNION ALL
+
+            SELECT asp.sprint_id,                            asp.sprint_name,
+            0 AS story_points,                               ai.story_points AS story_points_complate
+            FROM agile_sprint asp
+            JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = asp.sprint_id AND aisr.project_id = asp.project_id
+            JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code =
+            'story'
+            JOIN agile_issue_status ais ON ais.status_id = ai.status_id AND ais.is_completed = 1 AND ais.project_id =
+            ai.project_id
+            WHERE asp.project_id = #{projectId}
+            <if test="isPlugin">
+                AND asp.type = 'pi'
+            </if>
+        ) ai
+        GROUP BY ai.sprint_id, ai.sprint_name
+        ORDER BY ai.sprint_id ASC
+    </select>
+
+    <select id="queryHistorySprintTaskTime" resultType="io.choerodon.agile.api.vo.SprintTaskVO">
+        SELECT ai.sprint_id,									 ai.sprint_name,
+		SUM(ai.remaining_time) AS remaining_time,                SUM(ai.remaining_time_complate) AS remaining_time_complete
+        FROM
+        (
+            SELECT asp.sprint_id,							 asp.sprint_name,
+			adlm.new_value AS remaining_time,                0 AS remaining_time_complate
+            FROM agile_sprint asp
+            JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = asp.sprint_id AND aisr.project_id = asp.project_id
+            JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code IN ('task', 'sub_task')
+            JOIN
+            (
+                SELECT adl.issue_id, max(adl.new_value) AS new_value
+                FROM agile_data_log adl
+                WHERE adl.project_id = #{projectId} AND adl.field = 'timeestimate'
+                GROUP BY adl.issue_id
+            ) adlm ON adlm.issue_id = ai.issue_id
+            WHERE asp.project_id = #{projectId}
+            <if test="isPlugin">
+                AND asp.type = 'pi'
+            </if>
+
+            UNION ALL
+
+            SELECT asp.sprint_id,                          asp.sprint_name,
+			0 AS remaining_time,                           adlm.new_value AS remaining_time_complate
+            FROM agile_sprint asp
+            JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = asp.sprint_id AND aisr.project_id = asp.project_id
+            JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code IN ('task', 'sub_task')
+            JOIN agile_issue_status ais ON ais.status_id = ai.status_id AND ais.is_completed = 1 AND ais.project_id = ai.project_id
+            JOIN
+            (
+                SELECT adl.issue_id, max(adl.new_value) AS new_value
+                FROM agile_data_log adl
+                WHERE adl.project_id = #{projectId} AND adl.field = 'timeestimate'
+                GROUP BY adl.issue_id
+            ) adlm ON adlm.issue_id = ai.issue_id
+			WHERE asp.project_id = #{projectId}
+            <if test="isPlugin">
+                AND asp.type = 'pi'
+            </if>
+        ) ai
+        GROUP BY ai.sprint_id, ai.sprint_name
+		ORDER BY ai.sprint_id ASC
+    </select>
+
+    <select id="queryHistorySprintBugCount" resultType="io.choerodon.agile.api.vo.SprintBugVO">
+        SELECT asp.sprint_id,                   asp.sprint_name,
+        <if test="type != null and type == 'dev'">
+            ai.main_responsible_id AS responsible_id,
+        </if>
+        <if test="type != null and type == 'test'">
+            ai.test_responsible_id AS responsible_id,
+        </if>
+        COUNT(ai.issue_id) bug_count
+        FROM agile_sprint asp
+        JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = asp.sprint_id AND aisr.project_id = asp.project_id
+        JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code =
+        'bug'
+        <if test="responsibleId != null">
+            AND ai.main_responsible_id = #{responsibleId}
+        </if>
+        <if test="environment != null and environment !=''">
+            AND ai.environment = #{environment}
+        </if>
+        WHERE asp.project_id = #{projectId}
+        <if test="isPlugin">
+            AND asp.type = 'pi'
+        </if>
+        <if test="type != null and type == 'dev'">
+            GROUP BY asp.sprint_id, ai.main_responsible_id, asp.sprint_name
+        </if>
+        <if test="type != null and type == 'test'">
+            GROUP BY asp.sprint_id, ai.test_responsible_id, asp.sprint_name
+        </if>
+        ORDER BY asp.sprint_id ASC
     </select>
 </mapper>
