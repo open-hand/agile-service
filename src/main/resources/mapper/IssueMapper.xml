@@ -502,6 +502,32 @@
         END
     </select>
 
+    <select id="selectWithSubByIssueIds" resultMap="IssueWithSub">
+        select
+        ai.issue_id as issue_issue_id,
+        ai.summary,
+        ai.assignee_id,
+        ai.estimated_start_time,
+        ai.estimated_end_time,
+        ai.object_version_number,
+        ai.issue_type_id,
+        ai.parent_issue_id,
+        ai.relate_issue_id,
+        ai.status_id,
+        ais.is_completed as completed
+        from agile_issue ai
+        left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
+        where ai.issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
+            #{issueId}
+        </foreach>
+        or ai.issue_id in
+        <foreach collection="childrenIds" item="child" open="(" separator="," close=")">
+            #{child}
+        </foreach>
+        order by issue_issue_id desc
+    </select>
+
     <select id="queryIssueIdsListWithSub" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select
             ai1.issue_id ,
@@ -3378,5 +3404,6 @@
            )
          )
     </select>
+
 
 </mapper>
