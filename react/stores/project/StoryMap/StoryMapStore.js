@@ -164,21 +164,20 @@ class StoryMapStore {
       versionList = allVersion.slice(0, 5);
       if (versionList.length > 0) {
         if (!this.searchVO.otherArgs.version || this.searchVO.otherArgs.version.length <= 0) {
-          this.issueSearchStore.handleFilterChange('version', versionList.map((v) => v.versionId));
-          return;
+          this.searchVO.otherArgs.version = versionList.map((v) => v.versionId);
         }
+        versionList = allVersion.filter((version) => this.searchVO.otherArgs.version.includes(version.versionId));
       }
     } else if (this.swimLine === 'sprint') {
-      console.log('ss');
       if (!this.allSprints) {
         allSprints = await sprintApi.loadSprints();
       }
       sprintIds = allSprints.slice(0, 5).map((s) => s.sprintId);
       if (sprintIds.length > 0) {
         if (!this.searchVO.otherArgs.sprint || this.searchVO.otherArgs.sprint.length <= 0) {
-          this.issueSearchStore.handleFilterChange('sprint', sprintIds);
-          return;
+          this.searchVO.otherArgs.sprint = sprintIds;
         }
+        sprintIds = this.searchVO.otherArgs.sprint;
       }
     }
 
