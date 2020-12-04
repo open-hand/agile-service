@@ -100,6 +100,7 @@ import { Tooltip } from 'choerodon-ui';
             initValue={this.transToArr(componentIssueRelVOList, 'name', 'array')}
             editor={(
               <SelectComponent
+                valueField="name"
                 required={required}
                 dataRef={this.dataRef}
                 getPopupContainer={() => document.getElementById('detail')}

@@ -19,7 +19,7 @@ const SelectLabel: React.FC<Props> = forwardRef(({
   const config = useMemo((): SelectConfig => ({
     name: 'label',
     textField: 'labelName',
-    valueField: valueField || 'labelName',
+    valueField: valueField || 'labelId',
     request: () => issueLabelApi.loads(),
     middleWare: (data: ILabel[]) => {
       if (dataRef) {
