@@ -122,12 +122,15 @@ public class IssueCreateVO {
 
     private RelatedIssueVO relatedIssueVO;
 
+    @Encrypt
     private Long mainResponsibleId;
 
+    @Encrypt
     private Long testResponsibleId;
 
     private String environment;
 
+    @Encrypt
     private List<Long> programVersionIds;
 
     public List<Long> getProgramVersionIds() {

@@ -422,6 +422,20 @@ public class EncryptionUtils {
             search.getOtherArgs().put("assigneeId",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
+
+        // mainResponsibleIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("mainResponsibleIds"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("mainResponsibleIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // testResponsibleIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("testResponsibleIds"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("testResponsibleIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
         //userId
         decryptUserId(search, oaMapOptional);
     }
