@@ -7,6 +7,7 @@ function SprintField({ field, value, onChange }) {
     <SelectSprint
       key={field.code}
       flat
+      hasUnassign
       statusList={[]}
       value={value || []}
       placeholder={field.name}
