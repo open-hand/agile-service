@@ -169,6 +169,7 @@ class StoryMapStore {
         }
       }
     } else if (this.swimLine === 'sprint') {
+      console.log('ss');
       if (!this.allSprints) {
         allSprints = await sprintApi.loadSprints();
       }
@@ -185,15 +186,16 @@ class StoryMapStore {
       storyMapApi.getStoryMap(this.searchVO),
       issueTypeApi.loadAllWithStateMachineId(),
       priorityApi.loadByProject(),
-      sprintApi.loadSprintsWidthInfo(sprintIds),
+      this.swimLine === 'sprint' && sprintApi.loadSprintsWidthInfo(sprintIds),
     ]).then(([storyMapData, issueTypes, prioritys, sprintList]) => {
       this.issueTypes = issueTypes;
       this.prioritys = prioritys;
       this.initVersionList(versionList);
-      this.initSprintList(sprintList);
+      this.initSprintList(sprintList || []);
       this.initStoryMapData(storyMapData, firstLoad);
       this.setLoading(false);
-    }).catch(() => {
+    }).catch((error) => {
+      console.log(error);
       this.setLoading(false);
     });
   }
