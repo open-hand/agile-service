@@ -19,7 +19,7 @@ const SelectComponent: React.FC<Props> = forwardRef(({
   const config = useMemo((): SelectConfig => ({
     name: 'component',
     textField: 'name',
-    valueField: valueField || 'name',
+    valueField: valueField || 'componentId',
     request: () => componentApi.loadAllComponents(),
     middleWare: (components) => {
       // @ts-ignore
