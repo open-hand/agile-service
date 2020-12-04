@@ -90,6 +90,10 @@ interface IExportSearch {
     userId?: string
   },
   searchArgs?: {
+    estimatedStartTimeScopeStart?: string,
+    estimatedStartTimeScopeEnd?: string,
+    estimatedEndTimeScopeStart?: string,
+    estimatedEndTimeScopeEnd?: string,
     createStartDate: string,
     createEndDate: string,
     updateStartDate: string,
