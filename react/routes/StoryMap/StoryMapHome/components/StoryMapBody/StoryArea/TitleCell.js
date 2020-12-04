@@ -1,13 +1,11 @@
 import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
+import SprintStatus from '@/components/tag/sprint-status-tag/SprintStatus';
 import { Icon, Tooltip } from 'choerodon-ui';
+import SprintAssigneeInfo from './SprintAssigneeInfo';
 import Cell from '../Cell';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 import './TitleCell.less';
-import { toJS } from 'mobx';
-import SprintStatus from '@/components/tag/sprint-status-tag/SprintStatus';
-import SprintStoryPointInfo from '@/components/SprintStoryPointInfo';
-import SprintAssigneeInfo from './SprintAssigneeInfo';
 
 @observer
 class TitleCell extends Component {
@@ -85,16 +83,15 @@ class TitleCell extends Component {
       collapse ? null : (
         <Cell
           style={{
-          // borderBottom: storyCollapse ? '1px solid #D8D8D8' : 'none',
             padding: '10px 0',
-            boxShadow: storyCollapse ? 'inset 0 -1px 0 #D8D8D8,inset 1px 0 0 #D8D8D8' : 'inset 1px 0 0 #D8D8D8',
-            ...lastCollapse || epicIndex === 0 ? { boxShadow: storyCollapse ? 'inset 0 -1px 0 #D8D8D8' : 'none' } : {},
+            background: 'white',
             ...showTitle ? {
               position: 'sticky',
               zIndex: 5,
               left: 0,
             // background: 'white',
             } : {},
+            boxShadow: 'rgb(216, 216, 216) 0px -1px 0px inset',
           }}
         >
           <div style={{ display: 'flex' }} className="c7nagile-StoryMap-TitleCell">
