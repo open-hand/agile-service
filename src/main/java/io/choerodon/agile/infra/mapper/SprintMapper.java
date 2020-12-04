@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.SprintSearchVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -132,4 +133,23 @@ public interface SprintMapper extends BaseMapper<SprintDTO> {
     List<SprintDTO> selectNotDoneByProjectId(@Param("projectId") Long projectId);
 
     List<AssigneeIssueDTO> queryAssigneeIssueByPlanSprintId(@Param("sprintIds") Set<Long> sprintIds, @Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+
+    /**
+     * 根据对冲刺下面的用户进行分组统计
+     *
+     * @param projectId projectId
+     * @param sprintIds  sprintIds
+     * @return AssigneeIssueDTO
+     */
+    List<AssigneeIssueDTO> queryAssigneeIssueBySprintIds(@Param("projectId") Long projectId, @Param("sprintIds") List<Long> sprintIds);
+
+    /**
+     * 查询冲刺的故事点完成情况
+     * @param projectId
+     * @param sprintIds
+     * @return
+     */
+    List<SprintSearchVO> queryStoryPointProgress(@Param("projectId")  Long projectId, @Param("sprintIds") List<Long> sprintIds);
+
+    Long queryOutIssueId(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 }

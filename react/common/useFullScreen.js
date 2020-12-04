@@ -13,6 +13,9 @@ function toFullScreen(dom = document.documentElement) {
 }
 
 function exitFullScreen() {
+  if (!document.fullscreen) {
+    return;
+  }
   if (document.exitFullscreen) {
     document.exitFullscreen();
   } else if (document.msExitFullscreen) {

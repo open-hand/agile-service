@@ -38,13 +38,23 @@
   }
 
   &-right {
-    width: 130px;
     margin-left: auto;
     display: flex;
     align-items: center;
     height: 20px;
     margin-top: 9px;
-    margin-right: 30px;
+    &-btn {
+      color: #5365EA;
+      border: 1px solid #D9E6F2;
+      font-weight: 500;
+      border-radius: 6px;
+      span {
+        white-space: nowrap;
+      }
+    }
+    &-saveBtn {
+      background: rgba(83, 101, 234, 0.08);
+    }
   }
 
   &-urlFilter {

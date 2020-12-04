@@ -25,9 +25,11 @@ class IssueDetail extends Component {
   }
 
   handleDeleteIssue = () => {
-    StoryMapStore.setClickIssue(null);
     const { refresh } = this.props;
+    const { selectedIssueMap } = StoryMapStore;
+    const { epicId } = selectedIssueMap.values().next().value || {};
     refresh();
+    StoryMapStore.setClickIssue(null);
   }
 
   render() {
@@ -35,6 +37,7 @@ class IssueDetail extends Component {
     const { selectedIssueMap } = StoryMapStore;
     const visible = selectedIssueMap.size;
     const { programId, issueId } = selectedIssueMap.values().next().value || {};
+
     return (
       <EditIssue
         visible={visible}

@@ -1,37 +1,38 @@
 /* eslint-disable no-nested-ternary */
 import React, {
-  Fragment, useEffect, useRef, useMemo,
+  Fragment, useEffect, useRef, useCallback,
 } from 'react';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import { Button, Icon } from 'choerodon-ui';
+import { Button } from 'choerodon-ui';
 import {
-  Select, DataSet, CheckBox, Modal,
+  CheckBox,
 } from 'choerodon-ui/pro';
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import HeaderLine from '@/components/HeaderLine';
+import FilterManage from '@/components/FilterManage';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import Minimap from '../../../components/MiniMap';
+import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
+import { useIssueSearchStore } from '@/components/issue-search';
+import { getSystemFieldsInStoryMap } from '@/stores/project/issue/IssueStore';
+import { transformFilter } from '@/routes/Issue/stores/utils';
+import Minimap from './components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from './emptyStory.svg';
 import Loading from '../../../components/Loading';
 import StoryMapBody from './components/StoryMapBody';
 import SideIssueList from './components/SideIssueList';
 import SwitchSwimLine from './components/SwitchSwimLine';
-import CreateVersion from './components/CreateVersion';
 import CreateEpicModal from './components/CreateEpicModal';
 import IssueDetail from './components/IssueDetail';
-import StoryFilterDropDown from './components/StoryFilterDropDown';
-import StoryFilter from './components/StoryFilter';
-import StoryMapStore from '../../../stores/project/StoryMap/StoryMapStore';
+import StoryMapSearch from './components/Search';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
 
-const { Option } = Select;
 const HEX = {
   'c7nagile-StoryMap-EpicCard': '#D9C2FB',
   'c7nagile-StoryMap-StoryCard': '#AEE9E0',
@@ -40,17 +41,31 @@ const HEX = {
 };
 
 const StoryMapHome = observer(() => {
-  const handleRefresh = () => {
-    StoryMapStore.getStoryMap();
+  const issueSearchStore = useIssueSearchStore({
+    // @ts-ignore
+    getSystemFields: () => getSystemFieldsInStoryMap(['issueTypeId', 'quickFilterIds']),
+    transformFilter,
+    // @ts-ignore
+    defaultChosenFields: Array.isArray(localPageCacheStore.getItem('storyMapFilter')) ? new Map(localPageCacheStore.getItem('storyMapFilter').map((item) => [item.code, item])) : undefined,
+  });
+  StoryMapStore.setIssueSearchStore(issueSearchStore);
+  const handleRefresh = (firstLoad = false) => {
+    StoryMapStore.getStoryMap(firstLoad);
   };
   const ref = useRef(null);
   StoryMapStore.setMiniMapRef(ref);
 
   useEffect(() => {
-    handleRefresh();
     const defaultHiddenNoStoryValue = localPageCacheStore.getItem('stroyMap.hidden.no.stroy');
     defaultHiddenNoStoryValue && StoryMapStore.setHiddenColumnNoStory(defaultHiddenNoStoryValue);
 
+    const defaultFoldCompletedEpic = localPageCacheStore.getItem('stroyMap.fold.completedEpic');
+    defaultFoldCompletedEpic && StoryMapStore.setFoldCompletedEpic(defaultFoldCompletedEpic);
+
+    const cacheSearchVO = localPageCacheStore.getItem('storyMapSearchVO');
+    cacheSearchVO && StoryMapStore.setSearchVO(cacheSearchVO);
+
+    handleRefresh(true);
     return () => { StoryMapStore.clear(); };
   }, []);
   const handleOpenIssueList = () => {
@@ -64,10 +79,6 @@ const StoryMapHome = observer(() => {
 
   const handleCreateEpicClick = () => {
     StoryMapStore.setCreateEpicModalVisible(true);
-  };
-  const handleCreateVersion = (version) => {
-    StoryMapStore.afterCreateVersion(version);
-    document.getElementsByClassName('minimap-container-scroll')[0].scrollTop = 0;
   };
 
   const handleCreateEpic = (newEpic) => {
@@ -103,9 +114,6 @@ const StoryMapHome = observer(() => {
     );
   };
 
-  const handleIssueRefresh = () => {
-    handleRefresh();
-  };
   /**
    * 问题宽度localStorage.getItem('agile.EditIssue.width')
    * @param {*} width
@@ -116,13 +124,26 @@ const StoryMapHome = observer(() => {
     }
   };
 
-  const handleCheckBoxChange = (value, oldValue) => {
+  const handleNoStoryCheckBoxChange = (value) => {
     localPageCacheStore.setItem('stroyMap.hidden.no.stroy', value);
     StoryMapStore.setHiddenColumnNoStory(value);
   };
 
+  const handleCompletedEpicCheckBoxChange = (value) => {
+    localPageCacheStore.setItem('stroyMap.fold.completedEpic', value);
+    StoryMapStore.setFoldCompletedEpic(value);
+    StoryMapStore.foldCompletedEpicColumn(value);
+  };
+
+  const handleClickFilterManage = useCallback(() => {
+    // const editFilterInfo = IssueStore.getEditFilterInfo;
+    // const filterListVisible = IssueStore.getFilterListVisible;
+    // IssueStore.setFilterListVisible(!filterListVisible);
+    StoryMapStore.setFilterListVisible(!StoryMapStore.filterListVisible);
+  }, []);
+
   const {
-    loading, selectedIssueMap,
+    loading, selectedIssueMap, storyMapData, storyData,
   } = StoryMapStore;
   const isEmpty = StoryMapStore.getIsEmpty;
   /**
@@ -138,12 +159,13 @@ const StoryMapHome = observer(() => {
 
   const { isInProgram } = useIsInProgram(); // 判断是否为项目群下的子项目 是则不显示史诗
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7nagile-StoryMap-fullScreen');
+
   return (
     <Page
       className="c7nagile-StoryMap"
-      service={[
-        'choerodon.code.project.cooperation.story-map.ps.default',
-      ]}
+      // service={[
+      //   'choerodon.code.project.cooperation.story-map.ps.default',
+      // ]}
     >
       <Header title="故事地图">
         {!isInProgram && isEmpty && !loading ? <Button onClick={handleCreateEpicClick} icon="playlist_add">创建史诗</Button> : null}
@@ -160,21 +182,22 @@ const StoryMapHome = observer(() => {
         </Button>
         <HeaderLine />
         <SwitchSwimLine />
-        <StoryFilterDropDown />
-        <CheckBox name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleCheckBoxChange}>隐藏无故事的列</CheckBox>
+        <CheckBox style={{ margin: '0 20px' }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>
+        <CheckBox name="foldCompletedEpic" checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起史诗已完成列</CheckBox>
+        {/* <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button> */}
       </Header>
       <Breadcrumb />
       <Content style={{
-        padding: 0, borderTop: '1px solid #D8D8D8',
+        padding: 0, borderTop: '1px solid #D8D8D8', overflow: 'hidden',
       }}
       >
         <Loading loading={loading} />
+        <StoryMapSearch issueSearchStore={issueSearchStore} />
+
         {!isEmpty ? (
-          <>
-            <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
-              <StoryMapBody />
-            </Minimap>
-          </>
+          <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
+            <StoryMapBody />
+          </Minimap>
         ) : (
           loading ? null : (
               // eslint-disable-next-line react/jsx-indent
@@ -190,10 +213,14 @@ const StoryMapHome = observer(() => {
               />
           )
         )}
+        <FilterManage
+          visible={StoryMapStore.filterListVisible}
+          setVisible={StoryMapStore.setFilterListVisible}
+          issueSearchStore={issueSearchStore}
+        />
         <SideIssueList handleClickOutside={handleCloseIssueList} eventTypes={['click']} />
-        <CreateVersion onOk={handleCreateVersion} />
         <CreateEpicModal onOk={handleCreateEpic} />
-        <IssueDetail refresh={handleIssueRefresh} isFullScreen={isFullScreen} onChangeWidth={setIssueWidth} />
+        <IssueDetail refresh={handleRefresh} isFullScreen={isFullScreen} onChangeWidth={setIssueWidth} />
       </Content>
     </Page>
   );

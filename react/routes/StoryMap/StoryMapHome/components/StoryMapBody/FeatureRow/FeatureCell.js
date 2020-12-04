@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import { find } from 'lodash';
+import { toJS } from 'mobx';
 import FeatureColumn from './FeatureColumn';
 import Cell from '../Cell';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
@@ -45,41 +46,40 @@ class FeatureCell extends Component {
     const { storyData, swimLine } = StoryMapStore;
     const targetEpic = storyData[epicId] || {};
     const { collapse } = otherData || {};
+    // 无特性的故事不会显示在板子上,当隐藏无故事的列时，隐藏特性列
+    const storysWithFeature = (otherData.storys || []).filter((item) => item.featureId && item.featureId !== '0');
     return (
-      (collapse || (StoryMapStore.hiddenColumnNoStory && otherData.storys.length === 0)) ? null : (
+      (collapse || (StoryMapStore.hiddenColumnNoStory && storysWithFeature.length === 0)) ? null : (
         <Cell
           epicIndex={epicIndex}
           lastCollapse={lastCollapse}
           collapse={collapse}
           style={{
             position: 'sticky',
-            top: 82,
+            top: 97,
             zIndex: 6,
             background: 'white',
-            ...collapse ? { zIndex: 'unset' } : {}, 
+            ...collapse ? { zIndex: 'unset' } : {},
           }}
         >
-          { (
-            <div style={{ display: 'flex' }}>        
-              {adding ? null : (
-                <Fragment>
-                  {featureCommonDTOList.filter(feature => !feature.adding).map(feature => {
-                    const targetFeature = targetEpic.feature[feature.issueId] || {};
-                    if (targetFeature) {
-                      const storys = this.getStorys(targetFeature);
-                      return (
-                        (!StoryMapStore.hiddenColumnNoStory || storys.length > 0) ? <FeatureColumn epic={epic} feature={feature} otherData={otherData ? otherData.feature[feature.issueId] : {}} /> : ''
-                      )
-                    } else {
-                      return null;
-                    }
-                  })}             
-                  {/* 没有关联feature，但是关联了史诗的故事 */}
-                  {otherData && otherData.feature.none && otherData.feature.none.storys.length > 0 ? <FeatureColumn isLast={isLastColumn} epic={epic} feature={{ issueId: 'none' }} otherData={otherData.feature.none} /> : null}                  
-                </Fragment>
-              )}
-            </div>
-        )}
+          <div style={{ display: 'flex' }}>
+            {adding ? null : (
+              <>
+                {featureCommonDTOList.filter((feature) => !feature.adding).map((feature) => {
+                  const targetFeature = targetEpic.feature[feature.issueId] || {};
+                  if (targetFeature) {
+                    const storys = this.getStorys(targetFeature);
+                    return (
+                      (!StoryMapStore.hiddenColumnNoStory || storys.length > 0) ? <FeatureColumn epic={epic} feature={feature} otherData={otherData ? otherData.feature[feature.issueId] : {}} /> : ''
+                    );
+                  }
+                  return null;
+                })}
+                {/* 没有关联feature，但是关联了史诗的故事 */}
+                {otherData && otherData.feature.none && otherData.feature.none.storys.length > 0 ? <FeatureColumn isLast={isLastColumn} epic={epic} feature={{ issueId: 'none' }} otherData={otherData.feature.none} /> : null}
+              </>
+            )}
+          </div>
         </Cell>
       )
     );

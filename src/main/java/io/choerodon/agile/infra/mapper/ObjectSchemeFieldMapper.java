@@ -96,4 +96,15 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
      * @return
      */
     List<ObjectSchemeFieldDTO> selectFieldsWithPages(@Param("objectSchemeField") ObjectSchemeFieldDTO objectSchemeField);
+
+    /**
+     * 根据fieldCodes查询字段
+     * @param fieldCodes
+     * @return
+     */
+    List<ObjectSchemeFieldDetailVO> selectFieldsByFieldCodes(@Param("fieldCodes") List<String> fieldCodes);
+
+    List<ObjectSchemeFieldDTO> selectNotSyncField(@Param("systemFieldIds") List<Long> systemFieldIds);
+
+    List<ObjectSchemeFieldDTO> selectNotSyncFieldByFieldConfig(@Param("organizationId") Long organizationId, @Param("issueType") String issueType);
 }

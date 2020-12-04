@@ -56,6 +56,7 @@ interface CopyCondition {
   subTask: boolean,
   summary: string,
   epicName?: string,
+  customField?: boolean,
 }
 
 interface ICustomFieldData {
@@ -85,8 +86,14 @@ interface IExportSearch {
     sprint?: any,
     summary?: string,
     version?: any,
+    starBeacon?: boolean
+    userId?: string
   },
   searchArgs?: {
+    estimatedStartTimeScopeStart?: string,
+    estimatedStartTimeScopeEnd?: string,
+    estimatedEndTimeScopeStart?: string,
+    estimatedEndTimeScopeEnd?: string,
     createStartDate: string,
     createEndDate: string,
     updateStartDate: string,
@@ -149,6 +156,12 @@ class IssueApi extends Api<IssueApi> {
         transformId,
         objectVersionNumber,
       },
+    }).then((res: any) => {
+      if (typeof (res) === 'object') {
+        const { errorMsg } = res;
+        errorMsg && Choerodon.prompt(errorMsg, 'error');
+      }
+      return res;
     });
   }
 
@@ -180,7 +193,7 @@ class IssueApi extends Api<IssueApi> {
     return axios({
       method: 'post',
       url: `${this.prefix}/issues/${issueId}/clone_issue`,
-      data: copyCondition,
+      data: { customField: true, ...copyCondition },
       params: {
         organizationId,
         applyType,
@@ -309,21 +322,23 @@ class IssueApi extends Api<IssueApi> {
  * @export
  * @returns
  */
-  downloadTemplateForImport() {
+  downloadTemplateForImport(data: { systemFields: string[], customFields: string[] }) {
     const organizationId = getOrganizationId();
     if (getApplyType() === 'program') {
       return axios({
-        method: 'get',
+        method: 'post',
         url: `${this.prefix}/issues/template`,
         responseType: 'arraybuffer',
+        data,
       });
     }
     return axios({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/excel/download`,
       params: {
         organizationId,
       },
+      data,
       responseType: 'arraybuffer',
     });
   }
@@ -464,6 +479,14 @@ class IssueApi extends Api<IssueApi> {
         type: 'issue',
         organizationId: getOrganizationId(),
       },
+    });
+  }
+
+  batchDelete(issueIds: string[]) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issues/batch_delete`,
+      data: issueIds,
     });
   }
 }

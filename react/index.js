@@ -27,6 +27,7 @@ const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 // 敏捷设置
 const Settings = React.lazy(() => import('./routes/settings'));
 const ProjectReport = React.lazy(() => import('./routes/project-report'));
+const GanttPage = React.lazy(() => import('./routes/gantt'));
 
 const { AppState } = stores;
 
@@ -68,6 +69,7 @@ class Agile extends React.Component {
               {/* 开发-迭代计划 */}
               <Route path={`${match.url}/scrumboard`} component={ScrumBoard} />
               <Route path={`${match.url}/iterationBoard/:id`} component={IterationBoard} />
+              <Route path={`${match.url}/gantt`} component={GanttPage} />
               {/* 运营 */}
               <Route path={`${match.url}/reporthost`} component={ReportHost} />
               {/* 设置页面 */}

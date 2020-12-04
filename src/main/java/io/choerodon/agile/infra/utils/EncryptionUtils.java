@@ -46,9 +46,9 @@ public class EncryptionUtils {
 
     private static ObjectMapper encryptMapper;
 
-    public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","type_code"};
+    public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","type_code","last_update_date"};
 
-    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds"};
+    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds","testResponsibleIds"};
 
     public static final String[] IGNORE_VALUES = {"0","none"};
     public static final String BLANK_KEY = "";
@@ -420,6 +420,20 @@ public class EncryptionUtils {
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("assigneeId"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("assigneeId",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // mainResponsibleIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("mainResponsibleIds"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("mainResponsibleIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // testResponsibleIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("testResponsibleIds"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("testResponsibleIds",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
         //userId

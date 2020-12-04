@@ -1,50 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui';
-import { unionBy } from 'lodash';
-import { configTheme } from '@/utils/common';
-import SelectFocusLoad from '@/components/SelectFocusLoad';
-import { getSelectStyle } from '../utils';
+import SelectMember from '@/components/select/select-user';
 
-let list = [];
-const { Option } = Select;
 function MemberField({
   field, value, onChange, request,
 }) {
   const { code, name } = field;
   const [, setValue] = useState(0);
+  useEffect(() => {
+  }, [value]);
+  const defaultValue = useMemo(() => value, []);
   return (
-    <SelectFocusLoad
-      {...configTheme({
-        list: list.concat([{ id: '0', realName: '未分配' }]),
-        textField: 'realName',
-        valueFiled: 'id',
-      })}
-      type="user"
-      loadWhenMount
-      style={getSelectStyle(field, value)}
-      dropdownMatchSelectWidth={false}
-      mode="multiple"
-      showCheckAll={false}
-      allowClear
+    <SelectMember
+      key={code}
+      flat
+      value={value || []}
+      autoQueryConfig={{ selectedUserIds: defaultValue }}
       placeholder={name}
-      saveList={(v) => {
-        const shouldRender = list.length === 0 && value && value.length > 0;
-        list = unionBy(list, v, 'id');
-        // 已保存筛选条件含有用户，并且这个时候select并没有显示，那么选了自定义筛选，要渲染一次
-        if (list.length > 0 && shouldRender) {
-          setValue(Math.random());
-        }
-      }}
-      filter
-      onChange={onChange}
-      value={value}
-      getPopupContainer={(triggerNode) => triggerNode.parentNode}
-      render={(user) => <Option value={user.id}>{user.realName || user.loginName}</Option>}
+      multiple
+      maxTagCount={3}
       request={request}
-    >
-      {code === 'assigneeId' ? <Option value="0">未分配</Option> : undefined}
-    </SelectFocusLoad>
+      dropdownMatchSelectWidth={false}
+      clearButton
+      onChange={onChange}
+      extraOptions={code === 'assigneeId' ? [{ id: '0', realName: '未分配' }] : undefined}
+    />
   );
 }
 export default observer(MemberField);

@@ -40,4 +40,13 @@ public interface WorkCalendarRefMapper extends BaseMapper<WorkCalendarRefDTO> {
      * @return SprintWorkCalendarRefDO
      */
     List<WorkCalendarRefDTO> queryWithNextYearByYear(@Param("projectId")Long projectId, @Param("sprintId")Long sprintId, @Param("year")Integer year);
+
+    /**
+     * 根据项目id查工作日历设置
+     *
+     * @param projectId
+     * @param year
+     * @return
+     */
+    List<WorkCalendarRefDTO> listByProjectId(@Param("projectId") Long projectId, @Param("year") Integer year);
 }

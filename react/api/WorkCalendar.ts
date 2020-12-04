@@ -29,8 +29,22 @@ class WorkCalendarApi {
   }
 
   /**
+   * 根据年份获取冲刺工作日历设置
+   * @param year //1999
+   */
+  getYearCalendar(year: number) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/work_calendar_ref`,
+      params: {
+        year,
+      },
+    });
+  }
+
+  /**
  * 获取冲刺有关于组织层时区设置
- * @param {*} year 
+ * @param {*} year
  */
   getWorkSetting(year:number) {
     const orgId = getOrganizationId();
@@ -45,8 +59,8 @@ class WorkCalendarApi {
 
   /**
    * 创建工作日历
-   * @param sprintId 
-   * @param data 
+   * @param sprintId
+   * @param data
    */
   create(sprintId: number, data: IWorkCalendar) {
     return axios.post(`${this.prefix}/work_calendar_ref/sprint/${sprintId}`, data);
@@ -54,7 +68,7 @@ class WorkCalendarApi {
 
   /**
        * 删除工作日历
-       * @param calendarId 
+       * @param calendarId
        */
   delete(calendarId: number) {
     return axios.delete(`${this.prefix}/work_calendar_ref/${calendarId}`);

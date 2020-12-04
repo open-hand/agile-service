@@ -1,11 +1,11 @@
 package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
-import io.choerodon.agile.infra.dto.PredefinedDTO;
-import io.choerodon.agile.infra.enums.ExcelImportTemplateColumn;
+import io.choerodon.agile.infra.enums.ExcelImportTemplate;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -92,151 +92,6 @@ public class ExcelUtil {
     private static final String EXCEPTION = "Exception:{}";
     private static final String ERROR_IO_WORKBOOK_WRITE_OUTPUTSTREAM = "error.io.workbook.write.output.stream";
 
-    private static void initGuideSheetByRow(Workbook workbook, Sheet sheet, int rowNum, String fieldName, String requestStr, Boolean hasStyle) {
-        CellStyle ztStyle = workbook.createCellStyle();
-        Font ztFont = workbook.createFont();
-        ztFont.setColor(Font.COLOR_RED);
-        ztStyle.setFont(ztFont);
-        Row row = sheet.createRow(rowNum);
-        row.createCell(0).setCellValue(fieldName);
-        Cell cell = row.createCell(1);
-        cell.setCellValue(substring(requestStr));
-        if (hasStyle) {
-            cell.setCellStyle(ztStyle);
-        }
-    }
-
-    protected static void initGuideSheetRemind(Workbook workbook, Sheet sheet, String remindInfo,
-                                             int startRow, int lastRow, int firstCol, int lastCol) {
-        CellStyle ztStyle = workbook.createCellStyle();
-        Font ztFont = workbook.createFont();
-        ztFont.setColor(Font.COLOR_RED);
-        ztStyle.setFont(ztFont);
-        ztStyle.setAlignment(CellStyle.ALIGN_CENTER);
-        ztStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-        sheet.addMergedRegion(new CellRangeAddress(startRow, lastRow, firstCol, lastCol));
-        Row row = sheet.getRow(0);
-        Cell cell = row.createCell(2);
-        cell.setCellValue(substring(remindInfo));
-        cell.setCellStyle(ztStyle);
-    }
-
-    public static List<GuideSheet> initGuideSheet() {
-        int i = 0;
-        GuideSheet[] guideSheets = {
-                new GuideSheet(i++, "问题类型", "必选项", true),
-                new GuideSheet(i++, "所属史诗", "非必选项，普通应用项目未加入项目群ART且问题类型为故事可选，否则不可选", true),
-                new GuideSheet(i++, "模块", "非必输项", false),
-                new GuideSheet(i++, "冲刺", "非必输项，任务/故事下的子任务冲刺默认和父级一致", false),
-                new GuideSheet(i++, "概要", "必输项，限制44个字符以内", true),
-                new GuideSheet(i++, "子任务概述", "非必输项，故事、任务类型下可创建子任务", false),
-                new GuideSheet(i++, "描述", "非必输，仅支持填写纯文本", false),
-                new GuideSheet(i++, "经办人", "非必选项", false),
-                new GuideSheet(i++, "报告人", "非必选项", false),
-                new GuideSheet(i++, "优先级", "必选项", true),
-                new GuideSheet(i++, "预估时间", "非必输项，仅支持3位整数或者0.5，预估时间以小时为单位", false),
-                new GuideSheet(i++, "版本", "非必选项", false),
-                new GuideSheet(i++, "故事点", "非必输，仅支持3位整数或者0.5，仅故事类型须填写，否则不生效", false),
-                new GuideSheet(i++, "史诗名称", "如果问题类型选择史诗，此项必填, 限制10个字符", true),
-        };
-        return Arrays.asList(guideSheets);
-    }
-
-    public static void createGuideSheet(Workbook wb, List<GuideSheet> guideSheets, boolean withFeature) {
-        Sheet sheet = initGuide(wb, guideSheets, withFeature);
-        initGuideSheetRemind(wb, sheet, "请至下一页，填写信息",0, 9, 2, 4);
-        initExample(wb, sheet, withFeature);
-    }
-
-    protected static Sheet initGuide(Workbook wb, List<GuideSheet> guideSheets, boolean withFeature) {
-        if (withFeature) {
-            GuideSheet guideSheet = new GuideSheet(1, "所属特性", "非必须项，普通应用项目加入项目群后且问题类型为故事可选，否则不可选", true);
-            guideSheets.set(1, guideSheet);
-            guideSheets = guideSheets.subList(0, guideSheets.size() - 1);
-        }
-        Sheet sheet = wb.createSheet("要求");
-        sheet.setColumnWidth(0, 5000);
-        sheet.setColumnWidth(1, 17000);
-
-        for (GuideSheet guideSheet : guideSheets) {
-            initGuideSheetByRow(wb, sheet, guideSheet.rowNum(),
-                    guideSheet.fieldName(), guideSheet.requestStr(), guideSheet.hasStyle());
-        }
-
-        sheet.setColumnWidth(2, 3000);
-        return sheet;
-    }
-
-    private static void initExample(Workbook wb, Sheet sheet, boolean withFeature) {
-        sheet.setColumnWidth(ExcelImportTemplateColumn.Issue.SUMMARY_COL, 8000);
-        sheet.setColumnWidth(ExcelImportTemplateColumn.Issue.SUB_TASK_COL, 6000);
-        sheet.setColumnWidth(ExcelImportTemplateColumn.Issue.DESCRIPTION_COL, 8500);
-        sheet.setColumnWidth(ExcelImportTemplateColumn.Issue.PRIORITY_COL, 6000);
-        sheet.setColumnWidth(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL, 9000);
-
-        Row row = sheet.createRow(18);
-        row.createCell(0).setCellValue("示例：");
-
-        CellStyle blueBackground = wb.createCellStyle();
-        blueBackground.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
-        blueBackground.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-        CellStyle coralBackground = wb.createCellStyle();
-        coralBackground.setFillForegroundColor(IndexedColors.CORAL.getIndex());
-        coralBackground.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-        String[] data1 = {"问题类型*", "所属史诗", "模块", "冲刺", "概述*",
-                "子任务概述(仅子任务生效)", "描述", "经办人","报告人", "优先级*", "预估时间(小时)",
-                "版本", "故事点", "史诗名称(仅问题类型为史诗时生效)"};
-        String secondColumnValue = "可以选择史诗";
-        if (withFeature) {
-            data1[1] = "所属特性";
-            secondColumnValue = "可以选择特性";
-        }
-        int startRow = 20;
-        createRow(sheet, startRow++, subArray(data1, withFeature), blueBackground);
-
-        String[] data2 = {"史诗", "", "敏捷管理", "", "请输入史诗的概述",
-                "", "请输入导入史诗类型的问题的描述信息", "", "", "高", "", "", "", "导入问题"};
-        if (withFeature) {
-            data2[0] = "特性";
-            data2[4] = "请输入特性的概述";
-        }
-        createRow(sheet, startRow++, subArray(data2, withFeature), null);
-
-        String[] data3 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事1",
-                "", "导入故事并且导入故事下的子任务", "张三", "张三", "中", "8", "0.1", "2", ""};
-        createRow(sheet, startRow++, subArray(data3, withFeature), coralBackground);
-
-        String[] data4 = {"", "", "", "", "", "故事1的子任务1的概述", "请输入子任务1的描述信息", "李四", "李四", "高", "2", "", "", ""};
-        createRow(sheet, startRow++, subArray(data4, withFeature), coralBackground);
-
-        String[] data5 = {"", "", "", "", "", "故事1的子任务2的概述", "请输入子任务2的描述信息", "王五", "王五", "中", "4", "", "", ""};
-        createRow(sheet, startRow++, subArray(data5, withFeature), coralBackground);
-
-        String[] data6 = {"", "", "", "", "", "故事1的子任务3的概述……", "请输入子任务3的描述信息", "陈七", "陈七", "低", "2", "", "", ""};
-        createRow(sheet, startRow++, subArray(data6, withFeature), coralBackground);
-
-        String[] data7 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务1", "", "请输入任务2的描述信息", "王五", "王五", "中", "5", "0.2", "", ""};
-        createRow(sheet, startRow++, subArray(data7, withFeature), null);
-
-        String[] data8 = {"", "", "", "", "", "任务1的子任务4的概述", "请输入子任务4的描述信息", "小六", "小六", "中", "2", "0.2", "", ""};
-        createRow(sheet, startRow++, subArray(data8, withFeature), null);
-
-        String[] data9 = {"", "", "", "", "", "任务1的子任务5的概述", "请输入子任务5的描述信息", "初八", "初八", "中", "2", "0.2", "", ""};
-        createRow(sheet, startRow++, subArray(data9, withFeature), null);
-
-
-        String[] data10 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事2", "", "仅导入故事", "张三", "张三", "中", "8", "0.1", "2", ""};
-        createRow(sheet, startRow++, subArray(data10, withFeature), coralBackground);
-
-        String[] data11 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务2", "", "请输入任务2的描述信息", "张三", "张三", "中", "8", "0.1", "", ""};
-        createRow(sheet, startRow++, subArray(data11, withFeature), null);
-
-        String[] data12 = {"缺陷", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入缺陷的概述：缺陷1", "", "请输入缺陷2的描述信息", "李四", "李四", "低", "0.5", "0.1", "", ""};
-        createRow(sheet, startRow++, subArray(data12, withFeature), coralBackground);
-    }
-
     private static String[] subArray(String[] data, boolean withFeature) {
         if (withFeature) {
             int len = data.length;
@@ -261,196 +116,20 @@ public class ExcelUtil {
         }
     }
 
-    public static Workbook generateExcelAwesome(Workbook generateExcel,
-                                                List<Integer> errorRows,
-                                                Map<Integer, List<Integer>> errorMapList,
-                                                String[] fieldsName,
-                                                List<String> priorityList,
-                                                List<String> issueTypeList,
-                                                List<String> versionList,
-                                                String sheetName,
-                                                List<String> componentList,
-                                                List<String> sprintList,
-                                                List<String> users,
-                                                PredefinedDTO theSecondColumnPredefined,
-                                                boolean withFeature) {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        // create guide sheet
-        createGuideSheet(workbook, initGuideSheet(), withFeature);
-        Sheet resultSheet = workbook.createSheet(sheetName);
-        CellStyle style = CatalogExcelUtil.getHeadStyle(workbook);
-        Map<Integer,Integer> widthMap = new HashMap<>();
-        widthMap.put(ExcelImportTemplateColumn.Issue.EPIC_COL, 8000);
-        widthMap.put(ExcelImportTemplateColumn.Issue.SUB_TASK_COL, 8000);
-        widthMap.put(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL, 8000);
-        generateHeaders(resultSheet, style, Arrays.asList(fieldsName), widthMap);
 
-        List<PredefinedDTO> predefinedList = new ArrayList<>();
-        predefinedList.add(
-                new PredefinedDTO(
-                        priorityList,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        issueTypeList,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        versionList,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        componentList,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        sprintList,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        users,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        users,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getIndex()
-                ));
-        predefinedList.add(theSecondColumnPredefined);
-
-        for (PredefinedDTO predefined : predefinedList) {
-            workbook =
-                    dropDownList2007(
-                            workbook,
-                            resultSheet,
-                            predefined.values(),
-                            predefined.startRow(),
-                            predefined.endRow(),
-                            predefined.startCol(),
-                            predefined.endCol(),
-                            predefined.hidden(),
-                            predefined.hiddenSheetIndex());
-        }
-
-        Sheet sheet = generateExcel.getSheetAt(1);
-        int size = sheet.getPhysicalNumberOfRows();
-        XSSFCellStyle ztStyle = workbook.createCellStyle();
-        Font ztFont = workbook.createFont();
-        ztFont.setColor(Font.COLOR_RED);
-        ztStyle.setFont(ztFont);
-        int index = 1;
-        for (int i = 1; i <= size; i++) {
-            if (errorRows.contains(i)) {
-                Row row = sheet.getRow(i);
-                Row newRow = resultSheet.createRow(index++);
-                for (int j = 0; j < fieldsName.length; j++) {
-                    Cell cell = newRow.createCell(j);
-                    if (row.getCell(j) != null) {
-                        cell.setCellValue(substring(row.getCell(j).toString()));
-                    }
-                    if (errorMapList.get(i) != null) {
-                        List<Integer> errList = errorMapList.get(i);
-                        if (errList.contains(j)) {
-                            cell.setCellStyle(ztStyle);
-                        }
-                    }
-                }
-            }
-        }
-        return workbook;
-    }
-
-    public static void generateHeaders(Sheet sheet, CellStyle style, List<String> headers,
-                                       Map<Integer, Integer> widthMap) {
+    public static void generateHeaders(Sheet sheet, CellStyle style, List<String> headers) {
         Row row = sheet.createRow(0);
-        int columnNum = headers.size();
         int defaultWidth = 4000;
-        for (int i = 0; i < columnNum; i++) {
-            if (!ObjectUtils.isEmpty(widthMap)
-                    && !ObjectUtils.isEmpty(widthMap.get(i))) {
-                sheet.setColumnWidth(i, widthMap.get(i));
-            } else {
-                sheet.setColumnWidth(i, defaultWidth);
-            }
-        }
         for (int i = 0; i < headers.size(); i++) {
+            String value = headers.get(i);
+            Integer width = ExcelImportTemplate.IssueHeader.getWidthByValue(value);
+            if (width == null) {
+                sheet.setColumnWidth(i, defaultWidth);
+            } else {
+                sheet.setColumnWidth(i, width);
+            }
             CatalogExcelUtil.initCell(row.createCell(i), style, headers.get(i));
         }
-    }
-
-
-    public static <T> SXSSFWorkbook generateExcel(List<T> list, Class<T> clazz, String[] fieldsName, String[] fields, String sheetName) {
-        //1、创建工作簿
-        SXSSFWorkbook workbook = new SXSSFWorkbook();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if (list != null && !list.isEmpty()) {
-            //1.3、列标题样式
-            CellStyle style2 = createCellStyle(workbook, (short) 13, CellStyle.ALIGN_LEFT, true);
-            //1.4、强制换行
-            CellStyle cellStyle = workbook.createCellStyle();
-            cellStyle.setWrapText(true);
-            //2、创建工作表
-            SXSSFSheet sheet = workbook.createSheet(sheetName);
-            //设置默认列宽
-            sheet.setDefaultColumnWidth(13);
-            SXSSFRow row2 = sheet.createRow(0);
-            row2.setHeight((short) 260);
-            for (int j = 0; j < list.size(); j++) {
-                SXSSFRow row = sheet.createRow(j + 1);
-                row.setHeight((short) 260);
-                Object data = list.get(j);
-                for (int i = 0; i < fieldsName.length; i++) {
-                    //3.3设置列标题
-                    SXSSFCell cell2 = row2.createCell(i);
-                    //加载单元格样式
-                    cell2.setCellStyle(style2);
-                    cell2.setCellValue(fieldsName[i]);
-                    //4、操作单元格；将数据写入excel
-                    handleWriteCell(row, i, data, cellStyle, fields, clazz, null, formatter);
-                }
-            }
-        }
-        return workbook;
     }
 
     public static Workbook initIssueExportWorkbook(String sheetName, String[] fieldsName) {
@@ -642,7 +321,7 @@ public class ExcelUtil {
 
     }
 
-    protected static String substring(String str) {
+    public static String substring(String str) {
         if (StringUtils.hasText(str) && str.length() > CELL_MAX_LENGTH) {
             return str.substring(0, CELL_MAX_LENGTH);
         } else {
@@ -744,7 +423,8 @@ public class ExcelUtil {
             cell.setCellValue(substring(datas.get(i)));
         }
         XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper((XSSFSheet) realSheet);
-        XSSFDataValidationConstraint dvConstraint = (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(hiddenSheetName + "!$A$1:$A" + datas.size());
+        int dateSize = datas.size();
+        String columnLetter = CellReference.convertNumToColString(startCol);
         CellRangeAddressList addressList = null;
         XSSFDataValidation validation = null;
         // 单元格样式
@@ -753,6 +433,7 @@ public class ExcelUtil {
         style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
         // 循环指定单元格下拉数据
         for (int i = startRow; i <= endRow; i++) {
+            XSSFDataValidationConstraint dvConstraint = buildDataValidationConstraint(columnLetter, hiddenSheetName, i, dateSize, dvHelper);
             row = (XSSFRow) realSheet.createRow(i);
             cell = row.createCell(startCol);
             cell.setCellStyle(style);
@@ -763,4 +444,259 @@ public class ExcelUtil {
 
         return workbook;
     }
+
+    /**
+     * 公式讲解参考
+     * @see <a href="https://zhuanlan.zhihu.com/p/38156200">参考</a>
+     * @param columnLetter
+     * @param hiddenSheetName
+     * @param rowNum
+     * @param dateSize
+     * @param dvHelper
+     * @return
+     */
+    private static XSSFDataValidationConstraint buildDataValidationConstraint(String columnLetter,
+                                                                              String hiddenSheetName,
+                                                                              int rowNum,
+                                                                              int dateSize,
+                                                                              XSSFDataValidationHelper dvHelper) {
+        int realRow = rowNum + 1;
+        StringBuilder formulaBuilder = new StringBuilder();
+        formulaBuilder
+                .append("OFFSET(")
+                .append(hiddenSheetName)
+                .append("!$A1, ")
+                .append("MATCH($")
+                .append(columnLetter)
+                .append(realRow)
+                .append("&\"*\", ")
+                .append(hiddenSheetName)
+                .append("!$A1:$A")
+                .append(dateSize)
+                .append(", 0) - 1, 0, COUNTIF(")
+                .append(hiddenSheetName)
+                .append("!$A1:$A")
+                .append(dateSize)
+                .append(", $")
+                .append(columnLetter)
+                .append(realRow)
+                .append("&\"*\"), 1)");
+        String listFormula = formulaBuilder.toString();
+        return (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(listFormula);
+    }
+
+    /**
+     * 不同workbook 的sheet 复制，复制数据、样式<br/>
+     *
+     * <br/>建议用于 不同book间复制，同时复制数据和样式<br/>
+     * eg: copySheet(srcSheet, desSheet, mapping)
+     *
+     *
+     * @see <a href="https://segmentfault.com/a/1190000015284947">只参考了不同workbook的sheet复制，如果需要其他方法请参考原文</a>
+     * @param mapping 不同文件间复制时，如果要复制样式，必传，否则不复制样式
+     */
+    public static void copySheet(Sheet srcSheet, Sheet desSheet, StyleMapping mapping) {
+        copySheet(srcSheet, desSheet, true, true, mapping);
+    }
+
+    /**
+     * 把一个excel中的styleTable复制到另一个excel中<br>
+     * 如果是同一个excel文件，就不用复制styleTable了
+     * @return StyleMapping 两个文件中styleTable的映射关系
+     * @see StyleMapping
+     */
+    public static StyleMapping copyCellStyle(Workbook srcBook, Workbook desBook){
+        if (null == srcBook || null == desBook) {
+            throw new CommonException("源excel 或 目标excel 不存在");
+        }
+        if (srcBook.equals(desBook)) {
+            throw new CommonException("不要使用此方法在同一个文件中copy style，同一个excel中复制sheet不需要copy Style");
+        }
+        if ((srcBook instanceof HSSFWorkbook && desBook instanceof XSSFWorkbook) ||
+                (srcBook instanceof XSSFWorkbook && desBook instanceof HSSFWorkbook)) {
+            throw new CommonException("不支持在不同的版本的excel中复制样式）");
+        }
+
+//        logger.debug("src中style number:{}, des中style number:{}", srcBook.getNumCellStyles(), desBook.getNumCellStyles());
+        short[] src2des = new short[srcBook.getNumCellStyles()];
+        short[] des2src = new short[desBook.getNumCellStyles() + srcBook.getNumCellStyles()];
+
+        for(short i=0;i<srcBook.getNumCellStyles();i++){
+            //建立双向映射
+            CellStyle srcStyle = srcBook.getCellStyleAt(i);
+            CellStyle desStyle = desBook.createCellStyle();
+            src2des[srcStyle.getIndex()] = desStyle.getIndex();
+            des2src[desStyle.getIndex()] = srcStyle.getIndex();
+
+            //复制样式
+            desStyle.cloneStyleFrom(srcStyle);
+        }
+
+
+        return new StyleMapping(des2src, src2des);
+    }
+
+
+    /**
+     * sheet 复制, 灵活控制是否控制数据、样式<br/>
+     *
+     * <br/>不建议直接使用
+     *
+     * @param copyValueFlag 控制是否复制数据
+     * @param copyStyleFlag 控制是否复制样式
+     * @param mapping       不同book中复制样式时，必传
+     */
+    private static void copySheet(Sheet srcSheet, Sheet desSheet, boolean copyValueFlag, boolean copyStyleFlag, StyleMapping mapping) {
+        if (srcSheet.getWorkbook() == desSheet.getWorkbook()) {
+//            logger.warn("统一workbook内复制sheet建议使用 workbook的cloneSheet方法");
+        }
+
+        //合并区域处理
+        copyMergedRegion(srcSheet, desSheet);
+
+        //行复制
+        Iterator<Row> rowIterator = srcSheet.rowIterator();
+
+        int areadlyColunm = 0;
+        while (rowIterator.hasNext()) {
+            Row srcRow = rowIterator.next();
+            Row desRow = desSheet.createRow(srcRow.getRowNum());
+            copyRow(srcRow, desRow, copyValueFlag, copyStyleFlag, mapping);
+
+            //调整列宽(增量调整)
+            if (srcRow.getPhysicalNumberOfCells() > areadlyColunm) {
+                for (int i = areadlyColunm; i < srcRow.getPhysicalNumberOfCells(); i++) {
+                    desSheet.setColumnWidth(i, srcSheet.getColumnWidth(i));
+                }
+                areadlyColunm = srcRow.getPhysicalNumberOfCells();
+            }
+        }
+    }
+
+    /**
+     * 复制行
+     */
+    private static void copyRow(Row srcRow, Row desRow,boolean copyValueFlag, boolean copyStyleFlag, StyleMapping mapping) {
+        Iterator<Cell> it = srcRow.cellIterator();
+        while (it.hasNext()) {
+            Cell srcCell = it.next();
+            Cell desCell = desRow.createCell(srcCell.getColumnIndex());
+            copyCell(srcCell, desCell, copyValueFlag, copyStyleFlag, mapping);
+        }
+    }
+
+    /**
+     * 复制单元格
+     * @param copyValueFlag 控制是否复制单元格的内容
+     * @param copyStyleFlag 控制是否复制样式
+     * @param mapping 不同文件间复制时，如果需要连带样式复制，必传，否则不复制样式
+     */
+    private static void copyCell(Cell srcCell, Cell desCell, boolean copyValueFlag, boolean copyStyleFlag, StyleMapping mapping) {
+        Workbook srcBook = srcCell.getSheet().getWorkbook();
+        Workbook desBook = desCell.getSheet().getWorkbook();
+
+        //复制样式
+        //如果是同一个excel文件内，连带样式一起复制
+        if (srcBook == desBook && copyStyleFlag) {
+            //同文件，复制引用
+            desCell.setCellStyle(srcCell.getCellStyle());
+        } else if (copyStyleFlag) {
+            //不同文件，通过映射关系复制
+            if (null != mapping) {
+                short desIndex = mapping.desIndex(srcCell.getCellStyle().getIndex());
+                desCell.setCellStyle(desBook.getCellStyleAt(desIndex));
+            }
+        }
+
+        //复制评论
+        if (srcCell.getCellComment() != null) {
+            desCell.setCellComment(srcCell.getCellComment());
+        }
+
+        //复制内容
+        desCell.setCellType(srcCell.getCellTypeEnum());
+
+        if (copyValueFlag) {
+            switch (srcCell.getCellTypeEnum()) {
+                case STRING:
+                    desCell.setCellValue(srcCell.getStringCellValue());
+                    break;
+                case NUMERIC:
+                    desCell.setCellValue(srcCell.getNumericCellValue());
+                    break;
+                case FORMULA:
+                    desCell.setCellFormula(srcCell.getCellFormula());
+                    break;
+                case BOOLEAN:
+                    desCell.setCellValue(srcCell.getBooleanCellValue());
+                    break;
+                case ERROR:
+                    desCell.setCellValue(srcCell.getErrorCellValue());
+                    break;
+                case BLANK:
+                    //nothing to do
+                    break;
+                default:
+                    break;
+            }
+        }
+
+    }
+
+    /**
+     * 复制区域（合并单元格）
+     */
+    private static void copyMergedRegion(Sheet srcSheet, Sheet desSheet) {
+        int sheetMergerCount = srcSheet.getNumMergedRegions();
+        for (int i = 0; i < sheetMergerCount; i++) {
+            desSheet.addMergedRegion(srcSheet.getMergedRegion(i));
+            CellRangeAddress cellRangeAddress = srcSheet.getMergedRegion(i);
+        }
+    }
+
+    /**
+     * 存放两个excel文件中的styleTable的映射关系，以便于在复制表格时，在目标文件中获取到对应的样式
+     */
+    public static class StyleMapping {
+        /**
+         *
+         */
+        private short[] des2srcIndexMapping;
+        /**
+         *
+         */
+        private short[] src2desIndexMapping;
+
+        /**
+         * 不允许其他类创建此类型对象
+         */
+        private StyleMapping() {
+        }
+
+        public StyleMapping(short[] des2srcIndexMapping, short[] src2desIndexMapping) {
+            this.des2srcIndexMapping = des2srcIndexMapping;
+            this.src2desIndexMapping = src2desIndexMapping;
+        }
+
+        public short srcIndex(short desIndex) {
+            if (desIndex < 0 || desIndex >= this.des2srcIndexMapping.length) {
+                throw new CommonException("索引越界：源文件styleNum=" + this.des2srcIndexMapping.length + " 访问位置=" + desIndex);
+            }
+            return this.des2srcIndexMapping[desIndex];
+        }
+
+        /**
+         * 根据源文件的style的index,获取目标文件的style的index
+         * @param srcIndex 源excel中style的index
+         * @return desIndex 目标excel中style的index
+         */
+        public short desIndex(short srcIndex) {
+            if (srcIndex < 0 || srcIndex >= this.src2desIndexMapping.length) {
+                throw new CommonException("索引越界：源文件styleNum=" + this.src2desIndexMapping.length + " 访问位置=" + srcIndex);
+            }
+
+            return this.src2desIndexMapping[srcIndex];
+        }
+    }
+
 }

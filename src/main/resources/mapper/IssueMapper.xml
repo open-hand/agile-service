@@ -32,6 +32,9 @@
         <id column="relate_issue_num" property="relateIssueNum"/>
         <id column="parent_relate_num" property="parentRelateNum"/>
         <id column="parent_relate_description" property="parentRelateDescription"/>
+        <id column="main_responsible_id" property="mainResponsibleId"/>
+        <id column="test_responsible_id" property="testResponsibleId"/>
+        <id column="environment" property="environment"/>
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
         <association property="activeSprint" column="issue_id" select="queryActiveSprintNameByIssueId"/>
@@ -69,6 +72,7 @@
         <id property="reporterId" column="reporter_id"/>
         <id property="description" column="description"/>
         <id property="assigneeId" column="assignee_id"/>
+        <id property="featureId" column="feature_id"/>
         <id property="projectId" column="project_id"/>
         <id property="epicId" column="epic_id"/>
         <id property="sprintId" column="sprint_id"/>
@@ -134,7 +138,10 @@
             ai.estimated_start_time,
             ai.estimated_end_time,
             ai3.description as parent_issue_description,
-            ai4.description as parent_relate_description
+            ai4.description as parent_relate_description,
+            ai.main_responsible_id,
+            ai.test_responsible_id,
+            ai.environment
         FROM agile_issue ai
             LEFT JOIN agile_issue ai2 ON ai2.issue_id = ai.epic_id
             LEFT JOIN lookup_value alv2 ON ai2.color_code = alv2.value_code
@@ -337,6 +344,11 @@
         <result property="resolution" column="resolution"/>
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
+        <result property="objectVersionNumber" column="object_version_number"/>
+        <result property="completed" column="completed"/>
+        <result property="mainResponsibleId" column="main_responsible_id"/>
+        <result property="testResponsibleId" column="test_responsible_id"/>
+        <result property="environment" column="environment"/>
         <collection property="versionIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
             <id property="versionId" column="version_id"/>
@@ -416,11 +428,14 @@
         ai.parent_issue_id,
         ai.relate_issue_id,
         ai.estimated_start_time,
-        ai.estimated_end_time
+        ai.estimated_end_time,
+        ai.object_version_number,
+        ais.is_completed as completed,
+        ai.main_responsible_id,
+        ai.test_responsible_id,
+        ai.environment
         FROM agile_issue ai
-        <if test="isExcelExported">
-          left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
-        </if>
+        left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
         left join agile_issue ai3 on ai.epic_id = ai3.issue_id
         LEFT JOIN lookup_value alv2 ON ai3.color_code = alv2.value_code
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -775,6 +790,15 @@
                 where alir.label_id = ail.label_id
                 AND ail.label_name LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.label}) ,'%') )
             </if>
+            <if test='searchVO.searchArgs.estimatedStartTimeScopeStart != null and searchVO.searchArgs.estimatedStartTimeScopeStart != "" and searchVO.searchArgs.estimatedStartTimeScopeEnd != null and searchVO.searchArgs.estimatedStartTimeScopeEnd != ""'>
+                and ai.estimated_start_time &gt;= #{searchVO.searchArgs.estimatedStartTimeScopeStart} and ai.estimated_start_time &lt;=
+                #{searchVO.searchArgs.estimatedStartTimeScopeEnd}
+            </if>
+
+            <if test='searchVO.searchArgs.estimatedEndTimeScopeStart != null and searchVO.searchArgs.estimatedEndTimeScopeStart != "" and searchVO.searchArgs.estimatedEndTimeScopeEnd != null and searchVO.searchArgs.estimatedEndTimeScopeEnd != ""'>
+                and ai.estimated_end_time &gt;= #{searchVO.searchArgs.estimatedEndTimeScopeStart} and ai.estimated_end_time &lt;=
+                #{searchVO.searchArgs.estimatedEndTimeScopeEnd}
+            </if>
         </if>
     </sql>
 
@@ -905,6 +929,24 @@
                      close=")">
                 #{issueId}
             </foreach>
+        </if>
+
+        <if test="searchVO.otherArgs.mainResponsibleIds != null and searchVO.otherArgs.mainResponsibleIds.size > 0">
+            and ai.main_responsible_id in
+            <foreach collection="searchVO.otherArgs.mainResponsibleIds" item="mainResponsibleId" open="(" close=")" separator=",">
+                  #{mainResponsibleId}
+            </foreach>
+        </if>
+
+        <if test="searchVO.otherArgs.testResponsibleIds != null and searchVO.otherArgs.testResponsibleIds.size > 0">
+            and ai.test_responsible_id in
+            <foreach collection="searchVO.otherArgs.testResponsibleIds" item="testResponsibleId" open="(" close=")" separator=",">
+                #{testResponsibleId}
+            </foreach>
+        </if>
+
+        <if test="searchVO.otherArgs.environment != null">
+            and ai.environment = #{searchVO.otherArgs.environment}
         </if>
     </sql>
 
@@ -1088,14 +1130,17 @@
                     ai.project_id,
                     ai.last_update_date
                 from
-                    agile_issue_sprint_rel aisr,
+                    <if test="searchType != 'myStarBeacon'">
+                        agile_issue_sprint_rel aisr,
+                    </if>
                     agile_issue ai,
                     agile_issue_status ais
-                where aisr.project_id in
-                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                    #{projectId}
-                </foreach>
-                <if test="searchType == null">
+                where 1=1
+                <if test="searchType != 'myStarBeacon'">
+                    AND aisr.project_id IN
+                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                        #{projectId}
+                    </foreach>
                     AND aisr.sprint_id in (
                         select sprint_id
                         from agile_sprint asp
@@ -1163,14 +1208,17 @@
                     select
                         IF(ai.type_code = 'bug',ai.relate_issue_id,ai.parent_issue_id) as issue_id
                     from
-                        agile_issue_sprint_rel aisr,
+                        <if test="searchType != 'myStarBeacon'">
+                            agile_issue_sprint_rel aisr,
+                        </if>
                         agile_issue ai,
                         agile_issue_status ais
-                    where aisr.project_id in
-                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                        #{projectId}
-                    </foreach>
-                    <if test="searchType == null">
+                    where 1=1
+                    <if test="searchType != 'myStarBeacon'">
+                        AND aisr.project_id in
+                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                            #{projectId}
+                        </foreach>
                         AND aisr.sprint_id in (
                             select sprint_id
                             from agile_sprint asp
@@ -1196,7 +1244,9 @@
                             and fsb.user_id = #{userId}
                         )
                     </if>
-                    AND ai.issue_id = aisr.issue_id
+                    <if test="searchType != 'myStarBeacon'">
+                        AND ai.issue_id = aisr.issue_id
+                    </if>
                     AND ai.type_code in ('sub_task','bug')
                     AND ais.project_id = ai.project_id
                 )
@@ -1244,7 +1294,7 @@
                 OR
                 (
                     <choose>
-                        <when test="searchType == null or searchType == 'myStarBeacon'">
+                        <when test="searchType == null">
                             ai.type_code IN ('sub_task','bug')
                             AND (
                                 ai.parent_issue_id in
@@ -1257,24 +1307,8 @@
                                     #{parentIssue}
                                 </foreach>
                             )
-                            <choose>
-                                <when test="searchType == null">
-                                    AND ai.assignee_id = #{userId}
-                                    AND ais.is_completed != 1
-                                </when>
-                                <when test="searchType != null and searchType == 'myStarBeacon'">
-                                    AND ai.issue_id in (
-                                    select fsb.instance_id
-                                    from fd_star_beacon fsb
-                                    where fsb.type = 'issue'
-                                    and fsb.project_id in
-                                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                                        #{projectId}
-                                    </foreach>
-                                    and fsb.user_id = #{userId}
-                                    )
-                                </when>
-                            </choose>
+                            AND ai.assignee_id = #{userId}
+                            AND ais.is_completed != 1
                         </when>
                         <otherwise>
                             ai.type_code = 'bug'
@@ -1639,14 +1673,21 @@
     <select id="queryIssueByIssueIds" resultMap="issueSearch">
         SELECT
         ai.issue_id, CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
-        ai.type_code, ai.summary,
+        ai.type_code,
+        ai.summary,
         ai.issue_type_id,
         ai.priority_id,
-        ai.reporter_id, ai.description,
-        ai.assignee_id, ai.project_id,
-        ai.epic_id, asp1.sprint_id,
-        ai.story_points, ai.status_id,
-        ai.object_version_number, ai.priority_code,
+        ai.reporter_id,
+        ai.description,
+        ai.assignee_id,
+        ai.project_id,
+        ai.epic_id,
+        ai.feature_id,
+        asp1.sprint_id,
+        ai.story_points,
+        ai.status_id,
+        ai.object_version_number,
+        ai.priority_code,
         ai1.epic_name AS issue_epic_name,
         alv2.name AS color,
         apv1.version_id AS version_id,
@@ -1716,6 +1757,7 @@
         LEFT JOIN agile_issue_comment aic on aic.issue_id=ai.issue_id
         LEFT JOIN agile_issue_attachment aia on aia.issue_id=ai.issue_id
         LEFT JOIN agile_data_log adl on adl.issue_id=ai.issue_id and adl.project_id=ai.project_id
+        left join fd_field_value t1 on (t1.project_id = ai.project_id and t1.instance_id = ai.issue_id and t1.scheme_code = 'agile_issue')
         WHERE ai.project_id = #{projectId} AND ai.issue_id IN
         <foreach collection="issueIds" item="issueId" open="("
                  separator="," close=")">
@@ -1732,7 +1774,8 @@
     <select id="queryIssueEpicSelectList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
             issue_id,
-            epic_name
+            epic_name,
+            creation_date
         FROM
             agile_issue
         WHERE
@@ -3088,7 +3131,8 @@
         ai.type_code,
         ai.apply_type,
         ai.relate_issue_id,
-        ai.object_version_number
+        ai.object_version_number,
+        ai.created_by
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         WHERE
@@ -3192,6 +3236,147 @@
             )
         </if>
         order by t1.issue_id desc
+    </select>
+
+    <select id="listMyStarIssuesByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        SELECT
+            ai.issue_id, ai.summary,
+            ai.project_id, ai.type_code,
+            ai.issue_type_id,
+            CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+            ai.reporter_id,
+            ai.last_update_date,
+            ai.priority_id,
+            ai.assignee_id,
+            ai.issue_type_id,
+            ai.status_id,
+            ai.parent_issue_id,
+            ai.type_code,
+            ai.relate_issue_id,
+            ai.last_update_date
+        FROM
+            agile_issue ai,
+            agile_project_info api,
+            agile_issue_status ais
+        WHERE
+            ai.project_id = api.project_id
+            AND ais.project_id = ai.project_id
+            AND ai.status_id = ais.status_id
+            AND ai.project_id IN
+            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                #{projectId}
+            </foreach>
+            AND
+            (
+                (
+                    ai.issue_id IN
+                    <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                        #{parentIssue}
+                    </foreach>
+                )
+                OR
+                (
+                    ai.type_code IN ('sub_task','bug')
+                    AND (
+                        ai.parent_issue_id IN
+                        <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                            #{parentIssue}
+                        </foreach>
+                        OR
+                        ai.relate_issue_id IN
+                        <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                            #{parentIssue}
+                        </foreach>
+                    )
+                    AND ai.issue_id IN (
+                    SELECT fsb.instance_id
+                    FROM fd_star_beacon fsb
+                    WHERE fsb.type = 'issue'
+                    AND fsb.project_id IN
+                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                        #{projectId}
+                    </foreach>
+                    AND fsb.user_id = #{userId}
+                    )
+                )
+            )
+        ORDER BY
+        ai.project_id ASC,
+        ai.last_update_date DESC
+    </select>
+
+    <select id="listUndoneAvailableParents" resultType="io.choerodon.agile.api.vo.business.IssueVO">
+        select
+        t1.issue_id,
+        t1.summary,
+        CONCAT_WS('-', t2.project_code, t1.issue_num) as issue_num
+        from agile_issue t1
+        left join agile_project_info t2 on t1.project_id = t2.project_id
+        left join agile_issue_status t3 on t3.status_id = t1.status_id and t3.project_id = t1.project_id
+        where t1.project_id = #{projectId}
+        and t3.is_completed = 0
+        and (
+            t1.type_code = 'story'
+            or t1.type_code = 'task'
+            or (t1.type_code = 'bug' and (t1.relate_issue_id is null or t1.relate_issue_id = 0))
+        )
+    </select>
+
+
+
+    <resultMap id="issueCreateVOWithComponent" type="io.choerodon.agile.api.vo.business.IssueVO">
+        <id property="issueId" column="issue_id"/>
+        <result column="type_code" property="typeCode"/>
+        <result column="sprint_id" property="sprintId"/>
+        <collection property="componentIssueRelVOList"  ofType="io.choerodon.agile.api.vo.ComponentIssueRelVO">
+            <id column="component_id" property="componentId"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectByIssueNum" resultMap="issueCreateVOWithComponent">
+        select
+        t1.issue_id,
+        t1.type_code,
+        t4.sprint_id,
+        t3.component_id
+        from agile_issue t1
+        left join agile_project_info t2
+        on t1.project_id = t2.project_id
+        left join agile_component_issue_rel t3
+        on (t3.project_id = #{projectId} and t3.issue_id = t1.issue_id)
+        left join agile_issue_sprint_rel t4 on t1.issue_id = t4.issue_id
+        left join agile_sprint t5 on (t4.sprint_id = t5.sprint_id and t5.status_code != 'closed')
+        where t1.project_id = #{projectId}
+        and CONCAT_WS( '-', t2.project_code, t1.issue_num ) = #{issueNum}
+    </select>
+
+    <select id="selectSubListByIssueIds" resultType="java.lang.Long">
+        select ai.issue_id from agile_issue ai
+        where ai.project_id = #{projectId}
+        and ai.type_code in ('sub_task','bug')
+        and ai.issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+            #{issueId}
+        </foreach>
+        and (
+           ai.parent_issue_id in (
+             select ai1.issue_id from agile_issue ai1
+             where ai1.project_id = #{projectId}
+             and ai1.issue_id in
+            <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+            </foreach>
+            )
+            or
+            ai.relate_issue_id in (
+            select ai1.issue_id from agile_issue ai1
+            where ai1.project_id = #{projectId}
+            and ai1.issue_id in
+            <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+            </foreach>
+           )
+         )
     </select>
 
 </mapper>

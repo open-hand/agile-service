@@ -4,20 +4,22 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { issueLabelApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
+import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
   valueField?: string
   afterLoad?: (sprints: ILabel[]) => void
+  flat?:boolean
 }
 
 const SelectLabel: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, ...otherProps
+  dataRef, valueField, afterLoad, flat, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'label',
     textField: 'labelName',
-    valueField: valueField || 'labelName',
+    valueField: valueField || 'labelId',
     request: () => issueLabelApi.loads(),
     middleWare: (data: ILabel[]) => {
       if (dataRef) {
@@ -33,8 +35,10 @@ const SelectLabel: React.FC<Props> = forwardRef(({
     paging: false,
   }), []);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
+
   return (
-    <Select
+    <Component
       ref={ref}
       multiple
       combo

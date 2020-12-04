@@ -19,10 +19,12 @@ type IChosenField = (IField | ILocalField) & {
 }
 export type IChosenFields = Map<string, IChosenField>
 
+export type IBatchAction = undefined | 'edit' | 'delete'
+
 export interface IssueSearchStoreProps {
   getSystemFields: () => ILocalField[]
   transformFilter: (chosenFields: IChosenFields) => any
-  defaultChosenFields: IChosenFields,
+  defaultChosenFields?: IChosenFields,
 }
 class IssueSearchStore {
   query: () => void = () => { }
@@ -190,6 +192,24 @@ class IssueSearchStore {
     const currentFilterDTO = this.getCustomFieldFilters()
       ? flattenObject(this.getCustomFieldFilters()) : {};
     return !isFilterSame({}, currentFilterDTO);
+  }
+
+  @observable batchAction: IBatchAction;
+
+  @action setBatchAction = (data: IBatchAction) => {
+    this.batchAction = data;
+  }
+
+  @observable overflowLine: boolean = false;
+
+  @action setOverflowLine = (data: boolean) => {
+    this.overflowLine = data;
+  }
+
+  @observable folded: boolean | undefined;
+
+  @action setFolded = (data: boolean) => {
+    this.folded = data;
   }
 }
 export default IssueSearchStore;

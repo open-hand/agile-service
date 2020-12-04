@@ -8,7 +8,7 @@ import {
   Select, Form, Input, Button, Modal, Spin,
 } from 'choerodon-ui';
 import moment from 'moment';
-import reactComponentDebounce from '@/components/DebounceComponent';
+import reactComponentDebounce from '@choerodon/react-component-debounce';
 import {
   featureApi, epicApi, fieldApi, issueTypeApi,
   issueApi,
@@ -36,6 +36,7 @@ import WSJF from './WSJF';
 import FieldTeam from './FieldTeam';
 import FieldStartTime from './FieldStartTime';
 import FieldEndTime from './FieldEndTime';
+import { OldSelectProgramVersion as SelectProgramVersion } from '../select/select-program-version';
 
 const DebounceInput = reactComponentDebounce({
   valuePropName: 'value',
@@ -147,7 +148,7 @@ class CreateIssue extends Component {
   }
 
   handleSave = (data, fileList) => {
-    const { fields } = this.state;
+    const { fields, newIssueTypeCode } = this.state;
     const {
       onOk, form, request, applyType,
     } = this.props;
@@ -178,6 +179,9 @@ class CreateIssue extends Component {
         if (fileList.some((one) => !one.url)) {
           handleFileUpload(fileList, () => { }, config);
         }
+      }
+      if (newIssueTypeCode === 'feature' && data.programVersion) {
+        featureApi.updateVersions(res.issueId, data.programVersion);
       }
       form.resetFields();
       this.setState({
@@ -313,6 +317,7 @@ class CreateIssue extends Component {
           estimatedStartTime,
           subBugParent,
           subTaskParent,
+          programVersion,
         } = values;
         const { typeCode } = originIssueTypes.find((t) => t.id === typeId);
         // 手动检验描述是否必输校验
@@ -391,6 +396,7 @@ class CreateIssue extends Component {
           },
           featureId, // 特性字段
           teamProjectIds,
+          programVersion,
           estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
           estimatedStartTime: estimatedStartTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
         };
@@ -623,18 +629,18 @@ class CreateIssue extends Component {
               )}
               <IsProjectMember>
                 {(isProjectMember) => isProjectMember && (
-                <span
-                  onClick={this.assigneeMe}
-                  role="none"
-                  style={{
-                    display: 'inline-block',
-                    color: 'rgba(63, 81, 181)',
-                    marginLeft: 10,
-                    cursor: 'pointer',
-                  }}
-                >
-                  分配给我
-                </span>
+                  <span
+                    onClick={this.assigneeMe}
+                    role="none"
+                    style={{
+                      display: 'inline-block',
+                      color: 'rgba(63, 81, 181)',
+                      marginLeft: 10,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    分配给我
+                  </span>
                 )}
               </IsProjectMember>
             </div>
@@ -955,6 +961,18 @@ class CreateIssue extends Component {
       case 'subProject':
         return newIssueTypeCode === 'feature'
           && <FieldTeam form={form} teamProjectIds={teamProjectIds} field={field || {}} />;
+      case 'programVersion':
+        return (
+          newIssueTypeCode === 'feature' && (
+            <FormItem key={field.id} label="版本3333">
+              {getFieldDecorator('programVersion', {
+                rules: [{ required: field.required, message: '版本为必输项' }],
+              })(
+                <SelectProgramVersion mode="multiple" placeholder="版本" />,
+              )}
+            </FormItem>
+          )
+        );
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>
@@ -1056,6 +1074,7 @@ class CreateIssue extends Component {
         cancelText="取消"
         confirmLoading={createLoading}
         width={MODAL_WIDTH.middle}
+        maskClosable={false}
       >
         <Content>
           <Spin spinning={loading}>

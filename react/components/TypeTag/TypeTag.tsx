@@ -16,16 +16,14 @@ const TypeTag: React.FC<Props> = ({
   let {
     colour, name = '', icon,
   } = data || {};
-  const { typeCode } = data || {};
-  if (typeCode === 'feature') {
-    if (!featureType || featureType === 'business') {
-      colour = '#3D5AFE';
-      name = '特性';
-      icon = 'characteristic';
-    } else if (featureType === 'enabler') {
-      colour = '#FFCA28';
-      name = '使能';
-    }
+  if (featureType === 'business') {
+    colour = '#3D5AFE';
+    name = '特性';
+    icon = 'characteristic';
+  } else if (featureType === 'enabler') {
+    colour = '#FFCA28';
+    name = '使能';
+    icon = 'characteristic';
   }
   if (icon === 'agile-backlog') {
     icon = 'highlight';

@@ -9,7 +9,6 @@ import io.choerodon.agile.infra.dto.business.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -289,13 +288,7 @@ public interface AgilePluginService {
      */
     String[] changeFeatureHeaders(String[] copyFieldsName);
 
-    /**
-     * 获取特性的预定义字段
-     * @param organizationId
-     * @param projectId
-     * @return
-     */
-    PredefinedDTO getFeaturePredefined(Long organizationId, Long projectId);
+    List<SubFeatureVO> listFeature(Long organizationId, Long projectId);
 
     Map<String, Long> getFeatureMap(Long organizationId, Long projectId);
 
@@ -305,4 +298,65 @@ public interface AgilePluginService {
      * @param versionId
      */
     void deleteProgramVersionRel(Long projectId, Long versionId);
+
+    List<IssueDTO> selectEpicBySubProjectFeature(Long subProjectId);
+
+    void listStatusLinkageByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds, String applyType, List<StatusSettingVO> list);
+
+    /**
+     * 故事改变状态联动改变特性的状态
+     * @param projectId
+     * @param issueDTO
+     * @param applyType
+     */
+    void storyLinkageFeature(Long projectId, IssueDTO issueDTO, String applyType);
+
+    /**
+     * 设置特性类型和团队信息
+     * @param issues
+     * @param organizationId
+     */
+    void setFeatureTypeAndFeatureTeams(List<IssueListFieldKVVO> issues,  Long organizationId);
+
+    /**
+     * 项目群子项目版本列表要返回关联的项目群版本信息
+     * @param productVersionPageVOS
+     * @param projectId
+     * @param content
+     */
+    void settingProgramVersions(List<ProductVersionPageVO> productVersionPageVOS, Long projectId, List<Long> content);
+
+    /**
+     * 版本关联特性
+     * @param programId
+     * @param organizationId
+     * @param featureIds
+     * @param programVersionIds
+     */
+    void linkFeatureByBacklog(Long programId,Long organizationId, List<Long> featureIds, List<Long> programVersionIds);
+
+    /**
+     * 获取字段Code
+     * @param fieldCodeS
+     * @param typeCode
+     */
+    void getIssueTypeFieldCodes(List<String> fieldCodeS, String typeCode);
+
+    /**
+     * 处理冲刺是否是规划中
+     * @param projectId
+     * @param list
+     */
+    void handlerSprintPlanInfo(Long projectId, List<SprintSearchVO> list);
+
+    /**
+     * 故事地图分页查询
+     * @param projectId
+     * @param epicIds
+     * @param searchVO
+     * @param page
+     * @param size
+     * @return
+     */
+    StoryMapVO handlerBusinessPageStoryMap(Long projectId, List<Long> epicIds, SearchVO searchVO, Integer page, Integer size);
 }

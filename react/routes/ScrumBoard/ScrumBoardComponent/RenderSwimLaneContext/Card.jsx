@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import classNames from 'classnames';
 import TypeTag from '@/components/TypeTag';
+import Star from '@/components/tag/star';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import moment from 'moment';
 import { calcDays } from '@/utils/Date';
@@ -114,6 +115,7 @@ class Card extends Component {
                 <Priority
                   priorityVO={issue.priorityVO}
                 />
+                {issue.starBeacon && <Star active={issue.starBeacon} style={{ margin: '0 5px' }} />}
                 {
                   !completed && (
                     delayDays > 0 || (delayDays >= -1 && delayDays < 0)

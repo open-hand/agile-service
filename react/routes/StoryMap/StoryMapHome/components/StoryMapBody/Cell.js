@@ -12,13 +12,13 @@ class Cell extends Component {
         {...otherProps}
         ref={saveRef}
         style={{
-          padding: CellPadding, 
+          padding: CellPadding,
           boxShadow: epicIndex === 0 ? 'inset 0 -1px 0 #D8D8D8' : 'inset 1px -1px 0 #D8D8D8',
-          // border: 'none',     
+          // border: 'none',
           // ...isLastEpic ? { borderRight: 'solid 1px #D8D8D8' } : {},
           ...lastCollapse ? { boxShadow: 'inset 0 -1px 0 #D8D8D8' } : {},
           ...collapse ? { boxShadow: 'none' } : {},
-          ...style, 
+          ...style,
         }}
       >
         {children}

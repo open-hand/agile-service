@@ -1,16 +1,22 @@
 import { IExportSearch } from '@/api';
+import { findIndex } from 'lodash';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
+import { stores } from '@choerodon/boot';
 
+const { AppState } = stores;
 function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes'> {
+  const userId = String(AppState.userInfo.id);
   const {
     issueTypeId,
     assigneeId,
     statusId,
     priorityId,
     issueIds,
-    quickFilterIds,
+    quickFilterIds = [],
     createDate = [],
     updateDate = [],
+    estimatedStartTime = [],
+    estimatedEndTime = [],
     contents,
     component,
     epic,
@@ -21,6 +27,12 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     summary,
     version,
   } = data;
+  const starBeaconIndex = findIndex(quickFilterIds, (item) => item === 'myStarBeacon');
+  let starBeacon;
+
+  if (starBeaconIndex !== -1 && quickFilterIds.splice(starBeaconIndex, 1)) {
+    starBeacon = true;
+  }
   return {
     advancedSearchArgs: {
       issueTypeId,
@@ -38,12 +50,19 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       sprint,
       summary,
       version,
+      starBeacon,
+      userId: starBeacon ? userId : undefined,
     },
     searchArgs: {
+      estimatedStartTimeScopeStart: estimatedStartTime[0],
+      estimatedStartTimeScopeEnd: estimatedStartTime[1],
+      estimatedEndTimeScopeStart: estimatedEndTime[0],
+      estimatedEndTimeScopeEnd: estimatedEndTime[1],
       createStartDate: createDate[0],
       createEndDate: createDate[1],
       updateStartDate: updateDate[0],
       updateEndDate: updateDate[1],
+
     },
     quickFilterIds,
     contents,

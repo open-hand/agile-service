@@ -138,7 +138,38 @@ public class IssueListFieldKVVO {
 
     private Date estimatedEndTime;
 
+    @ApiModelProperty("项目名")
     private String projectName;
+
+    @ApiModelProperty("特性关联团队")
+    private List<ProjectVO> featureTeams;
+
+    @ApiModelProperty("星标")
+    private Boolean starBeacon;
+
+    @Encrypt
+    private Long mainResponsibleId;
+
+    @Encrypt
+    private Long testResponsibleId;
+
+    private String environment;
+
+    public Boolean getStarBeacon() {
+        return starBeacon;
+    }
+
+    public void setStarBeacon(Boolean starBeacon) {
+        this.starBeacon = starBeacon;
+    }
+
+    public List<ProjectVO> getFeatureTeams() {
+        return featureTeams;
+    }
+
+    public void setFeatureTeams(List<ProjectVO> featureTeams) {
+        this.featureTeams = featureTeams;
+    }
 
     public String getProjectName() {
         return projectName;
@@ -472,5 +503,29 @@ public class IssueListFieldKVVO {
 
     public void setProjectVO(ProjectVO projectVO) {
         this.projectVO = projectVO;
+    }
+
+    public Long getMainResponsibleId() {
+        return mainResponsibleId;
+    }
+
+    public void setMainResponsibleId(Long mainResponsibleId) {
+        this.mainResponsibleId = mainResponsibleId;
+    }
+
+    public Long getTestResponsibleId() {
+        return testResponsibleId;
+    }
+
+    public void setTestResponsibleId(Long testResponsibleId) {
+        this.testResponsibleId = testResponsibleId;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }

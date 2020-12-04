@@ -38,7 +38,6 @@ interface demandAdvancedSearch {
     }
 }
 
-
 interface StoryMapWidthVO {
     objectVersionNumber?: number, // 修改时需要
     issueId: number,
@@ -86,7 +85,7 @@ class StoryMapApi {
 
   /**
 * 故事地图拖拽移动卡片
-* @param storyMapDragVO 
+* @param storyMapDragVO
 */
   move(storyMapDragVO: DragStoryMap) {
     return axios({
@@ -102,7 +101,7 @@ class StoryMapApi {
 
   /**
      * 获取故事地图的需求池中问题列表
-     * @param searchVO 
+     * @param searchVO
      */
   getDemands(searchVO: demandAdvancedSearch) {
     return axios({
@@ -117,7 +116,7 @@ class StoryMapApi {
 
   /**
    * 创建故事地图列宽度
-   * @param storyMapWidthVO 
+   * @param storyMapWidthVO
    */
   createWidth(storyMapWidthVO: StoryMapWidthVO) {
     return axios({
@@ -132,7 +131,7 @@ class StoryMapApi {
 
   /**
      * 更改故事地图列宽度
-     * @param storyMapWidthVO 
+     * @param storyMapWidthVO
      */
   changeWidth(storyMapWidthVO: StoryMapWidthVO) {
     return axios({
@@ -146,8 +145,8 @@ class StoryMapApi {
   }
 
   /**
-       * 故事地图的史诗、特性进行排序 
-       * @param sortVO 
+       * 故事地图的史诗、特性进行排序
+       * @param sortVO
        */
   sort(sortVO: SortVO) {
     return axios.post(`/agile/v1/projects/${getProjectId()}/rank`, sortVO);

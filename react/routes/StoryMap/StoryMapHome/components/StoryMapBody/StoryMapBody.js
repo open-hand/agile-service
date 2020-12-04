@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import { IsInProgram } from '@/hooks/useIsInProgram';
 import EpicRow from './EpicRow';
@@ -12,7 +11,7 @@ class StoryMapBody extends Component {
   render() {
     return (
       <div className="c7nagile-StoryMapBody">
-        <table>
+        <table className="c7nagile-StoryMapBody-table">
           <tbody>
             <EpicRow />
             {/* 在项目群下才显示 */}

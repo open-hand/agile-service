@@ -16,7 +16,7 @@ class Version extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.versionRefresh();
   }
 
@@ -92,7 +92,7 @@ class Version extends Component {
             onMouseUp={() => {
               if (BacklogStore.getIsDragging) {
                 versionApi.addIssues(
-                  0, draggableIds,
+                  0, BacklogStore.getIssueWithEpicOrVersion,
                 ).then((res) => {
                   issueRefresh();
                   refresh();

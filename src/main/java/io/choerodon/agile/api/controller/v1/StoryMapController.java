@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.SprintSearchVO;
 import io.choerodon.agile.api.vo.business.StoryMapDragVO;
 import io.choerodon.agile.api.vo.StoryMapVO;
 import io.choerodon.agile.app.service.StoryMapService;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -69,4 +71,29 @@ public class StoryMapController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("故事地图冲刺泳道查询冲刺的问题计数信息")
+    @PostMapping(value = "/sprint_info")
+    public ResponseEntity<List<SprintSearchVO>> storyMapSprintInfo(@ApiParam(value = "项目id", required = true)
+                                             @PathVariable(name = "project_id") Long projectId,
+                                             @RequestBody @Encrypt List<Long> sprintIds) {
+        return new ResponseEntity<>(storyMapService.storyMapSprintInfo(projectId,sprintIds),HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询故事地图整体(分页)")
+    @PostMapping("/page_main")
+    public ResponseEntity<StoryMapVO> pageStoryMap(@ApiParam(value = "项目id", required = true)
+                                                    @PathVariable(name = "project_id") Long projectId,
+                                                    @ApiParam(value = "组织id", required = true)
+                                                    @RequestParam Long organizationId,
+                                                    @RequestParam Integer page,
+                                                    @RequestParam Integer size,
+                                                    @ApiParam(value = "search DTO", required = true)
+                                                    @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return Optional.ofNullable(storyMapService.pageStoryMap(projectId, organizationId, searchVO, page, size))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.storyMap.get"));
+    }
 }

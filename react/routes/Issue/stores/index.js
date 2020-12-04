@@ -49,7 +49,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
           }
         },
       },
-    })), []);
+    })), [intl, issueSearchStore, organizationId, projectId]);
     IssueStore.dataSet = dataSet;
     /**
     * detail data

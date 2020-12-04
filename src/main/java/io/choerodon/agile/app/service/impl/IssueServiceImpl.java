@@ -30,6 +30,7 @@ import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.utils.PageableHelper;
+import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
@@ -38,6 +39,7 @@ import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.hzero.core.base.AopProxy;
+import org.hzero.core.message.MessageAccessor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -53,6 +55,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 敏捷开发Issue
@@ -440,7 +443,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private void setListStarBeacon(List<IssueSubListVO> issues, StarBeaconDTO starBeaconDTO) {
         if (!Objects.isNull(issues) && !issues.isEmpty()) {
             List<Long> issueIds = issues.stream().map(IssueSubListVO::getIssueId).collect(Collectors.toList());
-            List<Long> starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, starBeaconDTO.getProjectId(), starBeaconDTO.getUserId());
+            List<Long> starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, Arrays.asList(starBeaconDTO.getProjectId()), starBeaconDTO.getUserId());
             if (!Objects.isNull(starIssueIds) && !starIssueIds.isEmpty()) {
                 issues.forEach(issue -> {
                     if (starIssueIds.contains(issue.getIssueId())) {
@@ -682,13 +685,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
          * 修改属性报错，导致数据回滚但是状态机实例已经完成状态变更，导致issue无论变更什么状态都无效
          * 抛异常并清空当前实例的状态机的状态信息
          */
+        boolean transformFlag;
         try {
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId);
-            statusLinkageService.updateParentStatus(projectId,issueId,applyType);
+            transformFlag = statusLinkageService.updateParentStatus(projectId,issueId,applyType);
         }
         catch (Exception e) {
             stateMachineClientService.cleanInstanceCache(projectId,issueId,applyType);
             throw new CommonException("error.update.status.transform.setting",e);
+        }
+        if (!transformFlag) {
+            IssueVO error = new IssueVO();
+            error.setErrorMsg(MessageAccessor.getMessage("error.update.status.transform.parent_status_update_failed").getDesc());
+            return error;
         }
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
@@ -1075,7 +1084,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public List<IssueEpicVO> listEpicSelectData(Long projectId) {
-        return issueAssembler.toTargetList(issueMapper.queryIssueEpicSelectList(projectId), IssueEpicVO.class);
+        return issueAssembler.toTargetList(Stream.of(issueMapper.queryIssueEpicSelectList(projectId),
+                Optional.ofNullable(agilePluginService).map(service -> service
+                        .selectEpicBySubProjectFeature(projectId)).orElse(Collections.emptyList()))
+                .flatMap(Collection::stream).sorted(Comparator.comparing(AuditDomain::getCreationDate).reversed())
+                .collect(Collectors.toList()), IssueEpicVO.class);
     }
 
 
@@ -1297,7 +1310,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         }
     }
-    
+
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"labelId"}, instanceId = "issueId", idPosition = "arg")
     public void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId) {
@@ -1863,8 +1876,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (copyConditionVO.getSubTask()) {
                 List<IssueDTO> subIssueDTOList = issueDetailDTO.getSubIssueDTOList();
                 if (subIssueDTOList != null && !subIssueDTOList.isEmpty()) {
-                    subIssueDTOList.forEach(issueDO -> copySubIssue(issueDO, newIssueId, projectId));
+                    subIssueDTOList.forEach(issueDO -> copySubIssue(issueDO, newIssueId, projectId,copyConditionVO));
                 }
+            }
+            if (copyConditionVO.getCustomField()) {
+                // 复制自定义字段的值
+                fieldValueService.copyCustomFieldValue(projectId, issueDetailDTO, newIssueId);
             }
             return queryIssue(projectId, newIssueId, organizationId);
         } else {
@@ -1906,7 +1923,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         updateIssue(projectId, issueUpdateVO, fieldList);
     }
 
-    protected void copySubIssue(IssueDTO issueDTO, Long newIssueId, Long projectId) {
+    protected void copySubIssue(IssueDTO issueDTO, Long newIssueId, Long projectId, CopyConditionVO copyConditionVO) {
         IssueDetailDTO subIssueDetailDTO = issueMapper.queryIssueDetail(issueDTO.getProjectId(), issueDTO.getIssueId());
         IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToSubIssueCreateDto(subIssueDetailDTO, newIssueId);
         IssueSubVO newSubIssue = stateMachineClientService.createSubIssue(issueSubCreateVO);
@@ -1917,6 +1934,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             subIssueUpdateVO.setIssueId(newSubIssue.getIssueId());
             subIssueUpdateVO.setObjectVersionNumber(newSubIssue.getObjectVersionNumber());
             updateIssue(projectId, subIssueUpdateVO, Lists.newArrayList(REMAIN_TIME_FIELD));
+        }
+        if (Boolean.TRUE.equals(copyConditionVO.getCustomField())) {
+            fieldValueService.copyCustomFieldValue(projectId, subIssueDetailDTO, newSubIssue.getIssueId());
         }
     }
 
@@ -2279,7 +2299,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    protected String getQuickFilter(List<Long> quickFilterIds) {
+    @Override
+    public String getQuickFilter(List<Long> quickFilterIds) {
         List<String> sqlQuerys = quickFilterMapper.selectSqlQueryByIds(quickFilterIds);
         if (sqlQuerys.isEmpty()) {
             return null;
@@ -2582,20 +2603,24 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        String type = workBenchIssueSearchVO.getType();
-        queryUserProjects(organizationId, projectId, projectIds, projects, userId, type);
+        String searchType = workBenchIssueSearchVO.getType();
+        queryUserProjects(organizationId, projectId, projectIds, projects, userId, searchType);
 
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        String searchType = workBenchIssueSearchVO.getType();
         Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId, searchType));
         List<IssueDTO> parentIssuesDTOS = parentPage.getContent();
         if (CollectionUtils.isEmpty(parentIssuesDTOS)) {
             return new Page<>();
         }
         List<Long> parentIssues = parentIssuesDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
+        List<IssueDTO> allIssue;
+        if (Objects.equals(searchType, "myStarBeacon")) {
+            allIssue = issueMapper.listMyStarIssuesByProjectIdsAndUserId(projectIds, parentIssues, userId);
+        } else {
+            allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
+        }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
@@ -2626,12 +2651,31 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 userIds.add(assigneeId);
             }
         });
-
+        if (agilePluginService != null) {
+            agilePluginService.setFeatureTypeAndFeatureTeams(list, organizationId);
+        }
+        if (Objects.equals(searchType, "myStarBeacon")) {
+            setListStarBeacon(list, userId, projectIds);
+        }
         if (!userIds.isEmpty()) {
             setAssignee(list, userIds);
         }
         PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
         return new Page<>(list, pageInfo, parentPage.getTotalElements());
+    }
+
+    private void setListStarBeacon(List<IssueListFieldKVVO> issues, Long userId, List<Long> projectIds) {
+        if (!CollectionUtils.isEmpty(issues)) {
+            List<Long> issueIds = issues.stream().map(IssueListFieldKVVO::getIssueId).collect(Collectors.toList());
+            List<Long> starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, projectIds, userId);
+            if (!CollectionUtils.isEmpty(starIssueIds)) {
+                issues.forEach(issue -> {
+                    if (starIssueIds.contains(issue.getIssueId())) {
+                        issue.setStarBeacon(true);
+                    }
+                });
+            }
+        }
     }
 
     private void setAssignee(List<IssueListFieldKVVO> list, Set<Long> userIds) {

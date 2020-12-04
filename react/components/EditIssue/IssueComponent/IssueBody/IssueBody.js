@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useContext } from 'react';
+import React, { Fragment, useContext } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import FieldStar from './Field/FieldStar';
@@ -26,6 +26,8 @@ import { InjectedComponent } from '../../injectComponent';
 import './IssueBody.less';
 
 const { TabPane } = Tabs;
+// eslint-disable-next-line no-undef
+const TestLink = C7NTryImport('@choerodon/testmanager/lib/components/test-case-link-list', Fragment);
 
 function IssueBody(props) {
   const {
@@ -80,7 +82,10 @@ function IssueBody(props) {
           <IssueAttachment {...props} />
           {
             issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
-              <IssueWSJF {...props} />
+              <>
+                <IssueWSJF {...props} />
+                <InjectedComponent.PIAim {...props} />
+              </>
             )
           }
           {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
@@ -91,9 +96,8 @@ function IssueBody(props) {
 
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
             ? <SubBug {...props} /> : ''}
-          {/* {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
-            ? <TestLink {...props} /> : ''测试用例关联链接 后端无返回数据
-          } */}
+          {issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
+            ? <TestLink {...props} /> : '' }
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
           {['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}

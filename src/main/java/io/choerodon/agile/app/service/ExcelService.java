@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.api.vo.ExcelTemplateVO;
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
@@ -19,7 +20,7 @@ import java.util.Map;
  */
 public interface ExcelService {
 
-    void download(Long projectId, Long organizationId, HttpServletRequest request, HttpServletResponse response);
+    void download(Long projectId, Long organizationId, HttpServletResponse response, ExcelTemplateVO excelTemplateVO);
 
     void batchImport(Long projectId, Long organizationId, Long userId, Workbook workbook);
 
@@ -30,7 +31,7 @@ public interface ExcelService {
     void asyncExportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
                            HttpServletResponse response, Long organizationId, Sort sort, ServletRequestAttributes requestAttributes);
 
-    FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status, String action);
+    FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status, String action, String websocketKey);
 
     void processExportField(List<String> exportFieldCodes,
                             String[] fieldsName,
@@ -41,5 +42,5 @@ public interface ExcelService {
 
     void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId);
 
-    void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process);
+    void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process, String websocketKey);
 }

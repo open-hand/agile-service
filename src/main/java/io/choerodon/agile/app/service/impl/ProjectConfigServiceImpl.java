@@ -10,12 +10,10 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.EnumUtil;
-import io.choerodon.agile.infra.utils.ProjectUtil;
-import io.choerodon.agile.infra.utils.SagaTopic;
+import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -490,18 +488,18 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         // 关联状态机
         if (!CollectionUtils.isEmpty(issueTypeIds)) {
             for (Long issueTypeId:issueTypeIds) {
-                linkStatus(projectId,issueTypeId,applyType,status.getId(),statusVO.getDefaultStatus());
+                linkStatus(projectId,issueTypeId,applyType,status.getId(),statusVO.getDefaultStatus(), statusVO.getTransferAll());
             }
         }
         return status;
     }
 
     @Override
-    public StatusMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus) {
+    public StatusMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus, Boolean transferAll) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         IssueStatusDTO issueStatusDTO = issueStatusMapper.selectByStatusId(projectId, statusId);
+        StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
         if (ObjectUtils.isEmpty(issueStatusDTO)) {
-            StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
             issueStatusDTO = new IssueStatusDTO();
             issueStatusDTO.setProjectId(projectId);
             issueStatusDTO.setStatusId(statusId);
@@ -525,8 +523,15 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             if (Boolean.TRUE.equals(defaultStatus)) {
                 defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
             }
-            // 默认可以全部流转到当前状态
-            transformAll(statusMachineNodeVOS,organizationId,statusId,stateMachineId,stateMachineNode.getId());
+            // 默认可以全部流转到当前状态(设置为)
+            if (ObjectUtils.isEmpty(transferAll) || Boolean.TRUE.equals(transferAll)) {
+                transformAll(statusMachineNodeVOS, organizationId, statusId, stateMachineId, stateMachineNode.getId());
+            }
+            else {
+                String nodeName = statusVO.getName() + "转换到" + statusVO.getName();
+                StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO(nodeName, stateMachineId, stateMachineNode.getId(), stateMachineNode.getId(), TransformType.CUSTOM, TransformConditionStrategy.ALL, organizationId);
+                statusMachineTransformMapper.batchInsert(Arrays.asList(statusMachineTransformDTO));
+            }
         }
         instanceCache.cleanStateMachine(stateMachineId);
         return modelMapper.map(stateMachineNode, StatusMachineNodeVO.class);
@@ -705,6 +710,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             statusSettingVO.setStatusFieldSettingVOS(statusFieldSettingMap.get(statusSettingVO.getId()));
             statusSettingVO.setStatusNoticeSettingVOS(statusNoticSettingMap.get(statusSettingVO.getId()));
             statusSettingVO.setStatusLinkageVOS(statusLinkageMap.get(statusSettingVO.getId()));
+        }
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (agilePluginService != null) {
+            agilePluginService.listStatusLinkageByStatusIds(projectId, issueTypeId, statusIds, applyType, list);
         }
         page.setContent(list);
         return page;

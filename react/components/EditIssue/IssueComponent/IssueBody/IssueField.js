@@ -11,6 +11,9 @@ import EditIssueContext from '../../stores';
 import FieldPro from './Field/FieldPro';
 import FieldStartTime from './Field/FieldStartTime';
 import FieldEndTime from './Field/FieldEndTime';
+import FieldProgramVersion from './Field/FieldProgramVersion';
+import FieldMember from './Field/FieldMember';
+import FieldEnvironment from './Field/FieldEnvironment';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -56,10 +59,7 @@ const IssueField = observer((props) => {
       case 'lastUpdateDate':
         return (<FieldDateTime {...props} field={field} />);
       case 'component':
-        if (typeCode !== 'sub_task') {
-          return (<FieldComponent {...props} />);
-        }
-        return '';
+        return (<FieldComponent {...props} />);
       case 'timeTrace':
         return (<FieldTimeTrace {...props} />);
       case 'pi':
@@ -87,6 +87,13 @@ const IssueField = observer((props) => {
         return typeCode !== 'issue_epic' && (
           <FieldEndTime {...props} field={field} />
         );
+      case 'programVersion':
+        return <FieldProgramVersion {...props} field={field} />;
+      case 'testResponsible':
+      case 'mainResponsible':
+        return <FieldMember {...props} field={field} />;
+      case 'environment':
+        return <FieldEnvironment {...props} field={field} />;
       default:
         return renderNormalField(field);
     }
@@ -96,12 +103,13 @@ const IssueField = observer((props) => {
   let fields = applyType === 'program' ? toJS(store.customFields).filter((item) => hideFields.indexOf(item.fieldCode) === -1) : toJS(store.customFields);
   // 系统字段单独控制是否显示
   if (typeCode === 'sub_task') {
-    fields = fields.filter((field) => ['component', 'epic'].indexOf(field.fieldCode) === -1);
+    fields = fields.filter((field) => ['epic'].indexOf(field.fieldCode) === -1);
   } else if (typeCode === 'issue_epic') {
     fields = fields.filter((field) => field.fieldCode !== 'epic');
   } else if (typeCode === 'feature') {
     // fields.splice(4, 0, { fieldCode: 'teams', fieldName: '负责团队和冲刺' });
     // fields.splice(4, 0, { fieldCode: 'teamSprint', fieldName: '团队Sprint' });
+    // fields.splice(4, 0, { fieldCode: 'programVersion', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {
     fields = fields.slice(0, 4);

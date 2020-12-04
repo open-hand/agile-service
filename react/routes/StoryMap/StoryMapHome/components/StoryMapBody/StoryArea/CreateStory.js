@@ -35,7 +35,7 @@ class CreateStory extends Component {
     if (value && value.trim()) {
       const { swimLine } = StoryMapStore;
       const {
-        onCreate, epic, feature, version,
+        onCreate, epic, feature, version, sprint,
       } = this.props;
       const storyType = StoryMapStore.getIssueTypeByCode('story');
       const defaultPriority = StoryMapStore.getDefaultPriority;
@@ -53,6 +53,9 @@ class CreateStory extends Component {
             ...version,
             relationType: 'fix',
           }],
+        } : {},
+        ...swimLine === 'sprint' && sprint.sprintId !== 'none' ? {
+          sprintId: sprint.sprintId,
         } : {},
       };
       if (!await checkCanQuickCreate(storyType.typeCode)) {
@@ -75,7 +78,7 @@ class CreateStory extends Component {
           value: '',
         });
         const { versionIssueRelVOList } = res;
-        onCreate({ ...res, storyMapVersionDTOList: versionIssueRelVOList });
+        onCreate({ ...res, storyMapVersionDTOList: versionIssueRelVOList, storyMapSprintList: [{ sprintId: sprint && sprint.sprintId !== 'none' ? sprint.sprintId : 0 }] });
         fieldApi.quickCreateDefault(res.issueId, dto);
       }).finally(() => {
         this.canAdd = true;

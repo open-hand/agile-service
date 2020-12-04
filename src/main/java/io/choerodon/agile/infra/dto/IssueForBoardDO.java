@@ -71,6 +71,16 @@ public class IssueForBoardDO {
     @Encrypt(ignoreValue = "0")/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long relateIssueId;
 
+    private Boolean starBeacon;
+
+    public Boolean getStarBeacon() {
+        return starBeacon;
+    }
+
+    public void setStarBeacon(Boolean starBeacon) {
+        this.starBeacon = starBeacon;
+    }
+
     public String getRank() {
         return rank;
     }

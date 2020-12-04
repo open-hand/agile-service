@@ -14,8 +14,8 @@ public enum AgileSystemFieldContext {
     PRIORITY(FieldCode.PRIORITY,"story,issue_epic,bug,task,sub_task"),
     COMPONENT(FieldCode.COMPONENT,"story,issue_epic,bug,task,sub_task"),
     LABEL(FieldCode.LABEL,"story,issue_epic,bug,task,sub_task"),
-    INFLUENCE_VERSION(FieldCode.INFLUENCE_VERSION,"story,issue_epic,bug,task,sub_task"),
-    FIX_VERSION(FieldCode.FIX_VERSION,"bug"),
+    INFLUENCE_VERSION(FieldCode.INFLUENCE_VERSION,"bug"),
+    FIX_VERSION(FieldCode.FIX_VERSION,"story,issue_epic,bug,task,sub_task"),
     EPIC(FieldCode.EPIC,"story,bug,task"),
     SPRINT(FieldCode.SPRINT,"story,issue_epic,bug,task,sub_task"),
     EPIC_NAME(FieldCode.EPIC_NAME,"issue_epic"),
@@ -26,6 +26,9 @@ public enum AgileSystemFieldContext {
     TIME_TRACE(FieldCode.TIME_TRACE,"story,bug,task,sub_task"),
     ESTIMATED_START_TIME(FieldCode.ESTIMATED_START_TIME,"story,issue_epic,bug,task,sub_task"),
     ESTIMATED_END_TIME(FieldCode.ESTIMATED_END_TIME,"story,issue_epic,bug,task,sub_task"),
+    MAIN_RESPONSIBLE(FieldCode.MAIN_RESPONSIBLE,"story,task,bug"),
+    TEST_RESPONSIBLE(FieldCode.TEST_RESPONSIBLE,"bug"),
+    ENVIRONMENT(FieldCode.ENVIRONMENT,"bug"),
     ;
     private String fieldCode;
     private String context;

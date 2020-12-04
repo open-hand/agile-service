@@ -27,7 +27,6 @@ class SideIssueList extends Component {
     StoryMapStore.clearSideFilter();
   }
 
-
   handleCollapseClick = () => {
     StoryMapStore.setIssueListCollapse(!StoryMapStore.issueListCollapse);
   }
@@ -53,7 +52,7 @@ class SideIssueList extends Component {
 
   render() {
     const {
-      issueList, issueListCollapse, issueListLoading,
+      issueList,
     } = StoryMapStore;
     const { filter } = this.state;
     const issues = issueList.filter(this.handleFilter);
@@ -87,7 +86,7 @@ class SideIssueList extends Component {
             mode="multiple"
             style={{ width: 100 }}
             onChange={this.setFilter.bind(this, 'statusList')}
-            getPopupContainer={trigger => trigger.parentNode}
+            getPopupContainer={(trigger) => trigger.parentNode}
             placeholder="状态"
           >
             {issueStatus.map(({ text, value }) => <Option value={value}>{text}</Option>)}
@@ -104,7 +103,7 @@ class SideIssueList extends Component {
             mode="multiple"
             style={{ width: 100 }}
             onChange={this.setFilter.bind(this, 'versionList')}
-            getPopupContainer={trigger => trigger.parentNode}
+            getPopupContainer={(trigger) => trigger.parentNode}
             placeholder="版本"
             dropdownStyle={{
               width: 180,
@@ -125,7 +124,7 @@ class SideIssueList extends Component {
           </div>
           {issues.length > 0 ? (
             <div className="c7nagile-SideIssueList-content-list">
-              {issues.map(issue => <IssueItem issue={issue} />)}
+              {issues.map((issue) => <IssueItem issue={issue} />)}
             </div>
           ) : <div style={{ textAlign: 'center', color: 'rgba(0, 0, 0, 0.54)' }}>暂无数据</div>}
         </div>

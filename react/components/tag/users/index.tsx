@@ -23,7 +23,7 @@ const Users: React.FC<UsersProps> = ({ data, maxTagCount = 3 }) => {
       {visibleData.map((user: User) => (
         <UserHead
           // size={20}
-          key={user.id}
+          key={user?.id}
           // @ts-ignore
           style={{ display: 'inline-block' }}
           hiddenText

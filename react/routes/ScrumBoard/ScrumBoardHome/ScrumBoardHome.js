@@ -6,7 +6,6 @@ import {
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
-import { merge } from 'lodash';
 import { toJS } from 'mobx';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
@@ -32,6 +31,7 @@ import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 import { service } from '../setting/Setting';
 import SelectPriority from './SelectPriority';
 import CreateIssue from '../ScrumBoardComponent/create-issue';
+import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
 
 const { Option } = Select;
 const { AppState } = stores;
@@ -72,11 +72,13 @@ class ScrumBoardHome extends Component {
     const scrumboardInitValue = localPageCacheStore.getItem('scrumboard');
     if (scrumboardInitValue) {
       const {
-        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters = [], assigneeFilter, sprintFilter, priorityIds,
+        onlyMeChecked, onlyStoryChecked, moreChecked, starBeacon, personalFilters = [], assigneeFilter, sprintFilter, priorityIds,
       } = scrumboardInitValue;
+
       ScrumBoardStore.addQuickSearchFilter(
         onlyMeChecked,
         onlyStoryChecked,
+        starBeacon,
         moreChecked,
         personalFilters,
       );
@@ -130,19 +132,21 @@ class ScrumBoardHome extends Component {
   onQuickSearchChange = (
     onlyMeChecked = false,
     onlyStoryChecked = false,
+    starBeacon = false,
     moreChecked,
     personalFilters,
   ) => {
     ScrumBoardStore.addQuickSearchFilter(
       onlyMeChecked,
       onlyStoryChecked,
+      starBeacon,
       moreChecked,
       personalFilters,
     );
-    localPageCacheStore.setItem('scrumboard', {
-      ...(localPageCacheStore.getItem('scrumboard') || {}),
+    localPageCacheStore.mergeSetItem('scrumboard', {
       onlyMeChecked,
       onlyStoryChecked,
+      starBeacon,
       moreChecked,
       personalFilters,
     });
@@ -156,8 +160,7 @@ class ScrumBoardHome extends Component {
 
   onSprintChange = (value) => {
     ScrumBoardStore.addSprintFilter(value);
-    localPageCacheStore.setItem('scrumboard', {
-      ...(localPageCacheStore.getItem('scrumboard') || {}),
+    localPageCacheStore.mergeSetItem('scrumboard', {
       sprintFilter: value,
     });
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
@@ -371,8 +374,7 @@ class ScrumBoardHome extends Component {
 
   handlePriorityChange = (value) => {
     ScrumBoardStore.setPriority(value);
-    localPageCacheStore.setItem('scrumboard', {
-      ...(localPageCacheStore.getItem('scrumboard') || {}),
+    localPageCacheStore.mergeSetItem('scrumboard', {
       priorityIds: value,
     });
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
@@ -385,7 +387,7 @@ class ScrumBoardHome extends Component {
   render() {
     const { HeaderStore } = this.props;
     const {
-      updateParentStatus,
+      updateParentStatus, expandAll,
     } = this.state;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
@@ -447,6 +449,7 @@ class ScrumBoardHome extends Component {
           >
             配置看板
           </Button>
+          <ExpandAllButton />
           <ScrumBoardFullScreen />
           {
             currentSprintIsDoing && (

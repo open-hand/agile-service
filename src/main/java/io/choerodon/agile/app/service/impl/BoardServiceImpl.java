@@ -9,10 +9,8 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
@@ -23,6 +21,7 @@ import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
+import org.hzero.core.message.MessageAccessor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +96,8 @@ public class BoardServiceImpl implements BoardService {
     private StatusLinkageService statusLinkageService;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired
+    private StarBeaconMapper starBeaconMapper;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -384,7 +385,8 @@ public class BoardServiceImpl implements BoardService {
         List<Long> assigneeIds = new ArrayList<>();
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();
-        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, boardQuery.getSprintId(), boardQuery.getAssigneeId(), boardQuery.getOnlyStory(), filterSql, boardQuery.getAssigneeFilterIds(), searchList, boardQuery.getPriorityIds());
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, boardQuery.getSprintId(), boardQuery.getAssigneeId(), boardQuery.getOnlyStory(), filterSql, boardQuery.getAssigneeFilterIds(), searchList, boardQuery.getPriorityIds(), boardQuery.getStarBeacon(), userId);
         Boolean condition = boardQuery.getAssigneeId() != null && boardQuery.getOnlyStory();
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -510,18 +512,23 @@ public class BoardServiceImpl implements BoardService {
             stateMachineClientService.executeTransform(projectId, issueId, transformId, issueMoveVO.getObjectVersionNumber(),
                     SchemeApplyType.AGILE, new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO))));
         }
-        
+        boolean transformFlag;
         /**
          * 修改属性报错，导致数据回滚但是状态机实例已经完成状态变更，导致issue无论变更什么状态都无效
          * 抛异常并清空当前实例的状态机的状态信息
          */
         try {
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
-            statusLinkageService.updateParentStatus(projectId,issueId,SchemeApplyType.AGILE);
+            transformFlag = statusLinkageService.updateParentStatus(projectId,issueId,SchemeApplyType.AGILE);
         }
         catch (Exception e) {
             stateMachineClientService.cleanInstanceCache(projectId,issueId,SchemeApplyType.AGILE);
             throw new CommonException("error.update.status.transform.setting",e);
+        }
+        if (!transformFlag) {
+            IssueMoveVO error = new IssueMoveVO();
+            error.setErrorMsg(MessageAccessor.getMessage("error.update.status.transform.parent_status_update_failed").getDesc());
+            return error;
         }
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (backlogExpandService != null) {

@@ -84,7 +84,7 @@ class SprintApi extends Api<SprintApi> {
  * 根据冲刺状态数组获取冲刺，["started", "sprint_planning", "closed"]，不论是普通项目还是子项目都可以
  * @param {*} arr
  */
-  loadSprints(arr: Array<string> = [], projectId?:number) {
+  loadSprints(arr: Array<string> = [], projectId?: number) {
     return this.request({
       method: 'post',
       url: `/agile/v1/projects/${projectId || this.projectId}/sprint/names`,
@@ -251,7 +251,7 @@ class SprintApi extends Api<SprintApi> {
    * 根据冲刺id查询冲刺的时间范围内非工作日(包含周六周天)
    * @param sprintId
    */
-  getRestDays(sprintId: string):Promise<string[]> {
+  getRestDays(sprintId: string): Promise<string[]> {
     return axios.get(`${this.prefix}/sprint/query_non_workdays/${sprintId}/${getOrganizationId()}`);
   }
 
@@ -323,6 +323,17 @@ class SprintApi extends Api<SprintApi> {
    */
   addIssues(sprintId: number, moveCardsInfo: MoveIssueCardsInfo) {
     return axios.post(`${this.prefix}/issues/to_sprint/${sprintId}`, moveCardsInfo);
+  }
+
+  loadSprintsWidthInfo(sprintIds: string[]) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/story_map/sprint_info`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data: sprintIds,
+    });
   }
 }
 

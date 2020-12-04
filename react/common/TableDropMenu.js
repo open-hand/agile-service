@@ -17,7 +17,7 @@ import './TableDropMenu.less';
 
 const TableDropMenu = (props) => {
   const {
-    menu, isHasMenu = !!menu, text, onClickEdit, className,
+    menu, isHasMenu = !!menu, text, onClickEdit, className, menuPermissionProps = {},
   } = props;
   const { permission } = props;
   const {
@@ -54,14 +54,16 @@ const TableDropMenu = (props) => {
           )
           : renderText()}
       </span>
-      {isHasMenu && menu
-        ? (
-          <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-            <Dropdown overlay={menu} trigger="click">
-              <Icon shape="circle" type="more_vert" />
-            </Dropdown>
-          </div>
-        ) : null}
+      <Permission {...menuPermissionProps}>
+        {isHasMenu && menu
+          ? (
+            <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <Dropdown overlay={menu} trigger="click">
+                <Icon shape="circle" type="more_vert" />
+              </Dropdown>
+            </div>
+          ) : null}
+      </Permission>
     </div>
   );
 };

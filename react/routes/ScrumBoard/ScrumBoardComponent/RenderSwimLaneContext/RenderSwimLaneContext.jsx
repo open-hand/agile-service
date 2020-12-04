@@ -5,6 +5,7 @@ import { Collapse } from 'choerodon-ui';
 import { isEqual } from 'lodash';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import './RenderSwimLaneContext.less';
+import scrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import SwimLaneHeader from './SwimLaneHeader';
 
 const { Panel } = Collapse;
@@ -37,6 +38,21 @@ class SwimLaneContext extends React.Component {
     };
   }
 
+  componentDidMount() {
+    if (this.props.mode !== 'swimlane_none') {
+      scrumBoardStore.bindFunction('expandOrUp', this.handleExpandOrUPPanel);
+    }
+    // isEqual(getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]),)
+  }
+
+  componentWillUnmount() {
+    scrumBoardStore.removeBindFunction('expandOrUp');
+  }
+
+  handleExpandOrUPPanel = (expandAll = true) => {
+    this.panelOnChange(expandAll ? getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]) : []);
+  }
+
   static getDerivedStateFromProps(props, state) {
     const { mode } = props;
     const issues = [...props.parentIssueArr.values(), props.otherIssueWithoutParent];
@@ -65,6 +81,7 @@ class SwimLaneContext extends React.Component {
         className={classnames('c7n-swimlaneContext-container', {
           shouldBeIndent: fromEpic,
           noStoryInEpic: fromEpic && Array.from(parentIssueArr).length === 0,
+          taskNoStoryInEpicIndent: fromEpic && key === 'other',
           [mode]: true,
         })}
         header={(

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { CardWidth, CardHeight, CardMargin } from '../../Constants';
+import {
+  CardWidth, CardHeight, CardMargin, CardPadding,
+} from '../../Constants';
 import './Card.less';
 
 class Card extends Component {
@@ -15,6 +16,7 @@ class Card extends Component {
           width: CardWidth,
           height: CardHeight,
           margin: CardMargin,
+          padding: CardPadding,
           textAlign: 'left',
           ...style,
         }}

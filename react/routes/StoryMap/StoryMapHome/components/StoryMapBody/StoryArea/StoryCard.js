@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Tooltip } from 'choerodon-ui';
+import StatusTag from '@/components/StatusTag';
 import { DragSource } from 'react-dnd';
 import { find } from 'lodash';
 import { observer } from 'mobx-react';
 import { storyMapApi } from '@/api';
 
+import { TypeTag } from '@/components';
 import AutoScroll from '../../../../../../common/AutoScroll';
 import Card from '../Card';
 import './StoryCard.less';
@@ -46,15 +48,15 @@ class StoryCard extends Component {
 
   handlRemoveStory = (e) => {
     e.stopPropagation();
-    const { story, version } = this.props;
-    const { issueId, storyMapVersionDTOList } = story;
+    const { story, version, sprint } = this.props;
+    const { issueId, storyMapVersionDTOList, storyMapSprintList } = story;
     const { swimLine } = StoryMapStore;
     // 未规划或无泳道
-    if (swimLine === 'none' || storyMapVersionDTOList.length === 0) {
+    if (swimLine === 'none' || storyMapVersionDTOList.length === 0 || storyMapSprintList.length === 0) {
       const storyMapDragVO = {
         // 问题id列表，移动到版本，配合versionId使用
-        // versionIssueIds: [],     
-        epicId: 0, // 要关联的史诗id          
+        // versionIssueIds: [],
+        epicId: 0, // 要关联的史诗id
         epicIssueIds: [issueId],
         featureId: 0, // 要关联的特性id
         // 问题id列表，移动到特性，配合featureId使用
@@ -77,6 +79,15 @@ class StoryCard extends Component {
         StoryMapStore.removeStoryFromStoryMap(story, version.versionId);
         StoryMapStore.loadIssueList();
       });
+    } else if (swimLine === 'sprint') {
+      const storyMapDragVO = {
+        sprintId: 0,
+        sprintIssueIds: [issueId],
+      };
+      storyMapApi.move(storyMapDragVO).then(() => {
+        StoryMapStore.removeStoryFromStoryMap(story, sprint.sprintId);
+        StoryMapStore.loadIssueList();
+      });
     }
   }
 
@@ -87,9 +98,11 @@ class StoryCard extends Component {
 
   render() {
     const {
-      story, connectDragSource, index, rowIndex,
+      story, index, rowIndex, canBeOperated,
     } = this.props;
-    const { issueId, issueNum, summary } = story;
+    const {
+      issueId, summary, statusVO = {},
+    } = story;
     const { selectedIssueMap } = StoryMapStore;
     return (
       <Card
@@ -98,11 +111,22 @@ class StoryCard extends Component {
         onClick={this.handleClick}
         onMouseDown={this.handleMouseDown}
       >
-        <Icon type="close" className="c7nagile-StoryMap-StoryCard-delete" onClick={this.handlRemoveStory} />
+        {
+          canBeOperated && (
+            <Icon type="close" className="c7nagile-StoryMap-StoryCard-delete" onClick={this.handlRemoveStory} />
+          )
+        }
         <div className="summary">
-          <Tooltip title={summary} getPopupContainer={trigger => trigger.parentNode} placement={index === 0 && rowIndex === 0 ? 'bottom' : 'top'}>
+          <Tooltip title={summary} getPopupContainer={(trigger) => trigger.parentNode} placement={index === 0 && rowIndex === 0 ? 'bottom' : 'top'}>
             {summary}
           </Tooltip>
+        </div>
+        <div className="bottom">
+          <div className="status">
+            <StatusTag
+              data={statusVO || {}}
+            />
+          </div>
         </div>
       </Card>
     );
@@ -124,36 +148,46 @@ export default DragSource(
         });
       }
 
-      return { story: props.story, version: props.version };
+      return { story: props.story, version: props.version, sprint: props.sprint };
     },
-    endDrag(props, monitor) {
+    endDrag(props, monitor) { // props: target, monitor: source
       const item = monitor.getItem();
       const dropResult = monitor.getDropResult();
+
       if (!dropResult) {
         return;
       }
-      const { story, version: sourceVersion } = item;
+      const { story, version: sourceVersion, sprint: sourceSprint } = item;
       const {
-        issueId, epicId, storyMapVersionDTOList,
+        issueId, epicId, storyMapVersionDTOList, storyMapSprintList,
       } = story;
       const featureId = story.featureId || 'none';
-      const { epic: { issueId: targetEpicId }, feature: { issueId: targetFeatureId }, version } = dropResult;
+      const {
+        epic: { issueId: targetEpicId }, feature: { issueId: targetFeatureId }, version, sprint,
+      } = dropResult;
       const { versionId: targetVersionId } = version || {};
-      const storyMapDragVO = {
-        versionIssueIds: [],
-        versionId: 0, // 要关联的版本id
-        epicId: 0, // 要关联的史诗id
-        versionIssueRelVOList: [],
-        // 问题id列表，移动到史诗，配合epicId使用
-        epicIssueIds: [],
-        featureId: 0, // 要关联的特性id
-        // 问题id列表，移动到特性，配合featureId使用
-        featureIssueIds: [],
-      };
-      // 史诗，特性，版本都不变时
+      const { sprintId: targetSprintId } = sprint || {};
+      const storyMapDragVO = {}; // {
+      //   versionIssueIds: [],
+      //   versionId: 0, // 要关联的版本id
+      //   epicId: 0, // 要关联的史诗id
+      //   versionIssueRelVOList: [],
+      //   // 问题id列表，移动到史诗，配合epicId使用
+      //   epicIssueIds: [],
+      //   featureId: 0, // 要关联的特性id
+      //   // 问题id列表，移动到特性，配合featureId使用
+      //   featureIssueIds: [],
+      //   sprintIssueIds: [],
+      //   sprintId: 0, // 要关联的版本id
+      // }
+      // 史诗，特性，版本，冲刺都不变时
       if (epicId === targetEpicId && featureId === targetFeatureId) {
         if (StoryMapStore.swimLine === 'version') {
           if (find(storyMapVersionDTOList, { versionId: targetVersionId }) || (storyMapVersionDTOList.length === 0 && targetVersionId === 'none')) {
+            return;
+          }
+        } else if (StoryMapStore.swimLine === 'sprint') {
+          if (find(storyMapSprintList, { sprintId: targetSprintId }) || (storyMapSprintList.length === 0 && targetSprintId === 'none')) {
             return;
           }
         } else if (StoryMapStore.swimLine === 'none') {
@@ -170,11 +204,11 @@ export default DragSource(
           storyMapDragVO.epicId = targetEpicId;
           storyMapDragVO.epicIssueIds = [issueId];
           storyMapDragVO.featureId = 0;
+          storyMapDragVO.featureIssueIds = [];
         } else {
           storyMapDragVO.featureId = targetFeatureId;
+          storyMapDragVO.featureIssueIds = [issueId];
         }
-        storyMapDragVO.featureId = targetFeatureId === 'none' ? 0 : targetFeatureId;
-        storyMapDragVO.featureIssueIds = [issueId];
       }
       // 对版本进行处理
       if (StoryMapStore.swimLine === 'version') {
@@ -191,16 +225,18 @@ export default DragSource(
 
         if (!find(storyMapVersionDTOList, { versionId: targetVersionId })) {
           storyMapDragVO.versionIssueIds = [issueId];
-          // 拖到未规划
-          if (targetVersionId === 'none') {
-            storyMapDragVO.versionId = 0;
-          } else {
-            storyMapDragVO.versionId = targetVersionId;
-          }
+          storyMapDragVO.versionId = targetVersionId === 'none' ? 0 : targetVersionId;
         }
       }
 
-      // console.log(storyMapDragVO);
+      // 对冲刺进行处理
+      if (StoryMapStore.swimLine === 'sprint') {
+        if (!find(storyMapSprintList, { sprintId: targetSprintId })) {
+          storyMapDragVO.sprintIssueIds = [issueId];
+          storyMapDragVO.sprintId = targetSprintId === 'none' ? 0 : targetSprintId;
+        }
+      }
+
       storyMapApi.move(storyMapDragVO).then(() => {
         StoryMapStore.setClickIssue(null);
         // StoryMapStore.removeStoryFromStoryMap(story);

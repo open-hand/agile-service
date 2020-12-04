@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 import Api from './Api';
 
 interface VersionCreateVO {
@@ -70,11 +70,65 @@ class VersionApi extends Api<VersionApi> {
   }
 
   /**
+   * 查询可关联的项目群版本
+   * @param programId
+   */
+  loadProgramVersion(selectAll: boolean = false, teamProjectIds?: string[]) {
+    return this.request({
+      method: 'get',
+      url: `/agile/v1/projects/${getProjectId()}/program_version/list_program_version`,
+      params: {
+        organizationId: getOrganizationId(),
+        teamProjectIds: teamProjectIds ? String(teamProjectIds) : undefined,
+        selectAll,
+      },
+    });
+  }
+
+  /**
+   * 关联项目群某个版本
+   * @param programVersionId
+   * @param productVersionId
+   */
+  linkProgramVersion(programVersionId: string, productVersionId: string) {
+    return this.request({
+      method: 'get',
+      url: `/agile/v1/projects/${getProjectId()}/program_version/link_program_version`,
+      params: {
+        programVersionId,
+        productVersionId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
+   * 删除项目所关联的项目群版本
+   * @param programVersionId
+   * @param programId
+   */
+  deleteLinkProgramVersion(programVersionId: string, productVersionId: string) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/program_version/delete_program_version_rel`,
+      params: {
+        programVersionId,
+        productVersionId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
    * 根据状态查询版本名
    * @param statusArr
    */
   loadNamesByStatus(statusArr: Array<string> = []) {
-    return axios.post(`${this.prefix}/product_version/names`, statusArr);
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/product_version/names`,
+      data: statusArr,
+    });
   }
 
   /**
@@ -190,4 +244,5 @@ class VersionApi extends Api<VersionApi> {
 }
 
 const versionApi = new VersionApi();
-export { versionApi };
+const versionApiConfig = new VersionApi(true);
+export { versionApi, versionApiConfig };

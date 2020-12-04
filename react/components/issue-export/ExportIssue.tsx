@@ -1,5 +1,5 @@
 import React, {
-  memo, ReactElement, useEffect, useMemo, useState,
+  memo, ReactElement, useCallback, useEffect, useMemo, useState,
 } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
@@ -19,7 +19,7 @@ import { IChosenFieldField } from '../chose-field/types';
 interface FormPartProps {
   title: string | ReactElement,
   className?: string,
-  children: ReactElement | ReactElement[] | null,
+  children: ReactElement | ReactElement[] | null | Array<ReactElement | null>,
   btnOnClick?: (nextBtnStatusCode: 'ALL' | 'NONE') => boolean,
 }
 const FormPart: React.FC<FormPartProps> = memo((props) => {
@@ -64,7 +64,7 @@ interface IDownLoadInfo {
 }
 const ExportIssue: React.FC = () => {
   const {
-    prefixCls, checkOptions: propsCheckOptions, store, fields,
+    prefixCls, checkOptions: propsCheckOptions, store, fields, modal,
   } = useExportIssueStore();
   // 添加筛选配置 数据
   const [choseDataProps, choseComponentProps] = useChoseField({
@@ -72,6 +72,7 @@ const ExportIssue: React.FC = () => {
     defaultValue: store.getCurrentChosenFieldsArr,
     events: {
       initField: (data) => store.initField(data),
+      initFieldFinish: (cField, sField, current) => store.initFieldFinish(cField, sField, current),
       initChosenField: (data) => store.initChosenField(data),
       choseField: (data) => handleChange(data),
     },
@@ -87,6 +88,7 @@ const ExportIssue: React.FC = () => {
   const [filterData, filterComponentProps] = useIssueFilterForm({
     fields,
     value: choseFieldStore.getAllChosenField,
+    defaultValue: store.getCurrentChosenFieldsArr,
     extraFormItems: store.getExtraFields,
     systemDataSetField: store.dataSetSystemFields,
     extraRenderFields: store.renderField,
@@ -104,10 +106,11 @@ const ExportIssue: React.FC = () => {
       store.setDownloadInfo(res);
     });
   }, [store]);
+
   /**
  * 输出 excel
  */
-  const exportExcel = async () => {
+  const exportExcel = useCallback(async () => {
     let search: any = {};
     if (await filterData.dataSet.current?.validate()) {
       search = getCustomFieldFilters([...choseFieldStore.getAllChosenField, ...store.getExtraFields], filterData.dataSet.current!, store.transformSystemFilter);
@@ -121,8 +124,12 @@ const ExportIssue: React.FC = () => {
     search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions);
     search = store.exportBefore(search);
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
-    return store.exportAxios(search, field ? `${field.value},${field.order}` : undefined);
-  };
+    store.exportAxios(search, field ? `${field.value},${field.order}` : undefined);
+    return false;
+  }, [checkBoxDataProps.checkedOptions, checkOptions, choseFieldStore.getAllChosenField, filterData.dataSet, store]);
+  useEffect(() => {
+    modal?.handleOk(exportExcel);
+  }, [exportExcel, modal]);
   const handleChangeFieldStatus = (status: 'ALL' | 'NONE') => {
     if (status !== 'ALL') {
       checkBoxDataProps.actions.checkAll();
@@ -133,23 +140,14 @@ const ExportIssue: React.FC = () => {
   };
   const handleFinish = (messageData: any) => {
     store.setExportBtnHidden(false);
+    modal?.update({ okProps: { loading: false } });
     store.setDownloadInfo(messageData);
   };
   const renderExport = () => {
     if (store.exportButtonConfig?.component) {
       return typeof (store.exportButtonConfig?.component) === 'function' ? store.exportButtonConfig?.component(exportExcel) : store.exportButtonConfig?.component;
     }
-    return (
-      <Button
-        icon="unarchive"
-        style={{ color: '#3f51b5' }}
-        onClick={exportExcel}
-        hidden={store.exportBtnHidden}
-        {...store.exportButtonConfig?.buttonProps}
-      >
-        {store.exportButtonConfig?.buttonChildren ?? '导出问题'}
-      </Button>
-    );
+    return null;
   };
   return (
     <div>
@@ -168,7 +166,10 @@ const ExportIssue: React.FC = () => {
       <WsProgress
         messageKey="agile-export-issue"
         onFinish={handleFinish}
-        onStart={() => store.setExportBtnHidden(true)}
+        onStart={() => {
+          modal?.update({ okProps: { loading: true } });
+          store.setExportBtnHidden(true);
+        }}
         autoDownload={{ fileName: `${getProjectName()}.xlsx` }}
         downloadInfo={store.downloadInfo.id ? {
           url: store.downloadInfo.fileUrl!,

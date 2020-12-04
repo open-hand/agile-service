@@ -34,6 +34,8 @@ public class StatusVO {
 
     private Boolean defaultStatus;
 
+    private Boolean transferAll;
+
     public StatusVO() {
     }
 
@@ -122,5 +124,13 @@ public class StatusVO {
 
     public void setDefaultStatus(Boolean defaultStatus) {
         this.defaultStatus = defaultStatus;
+    }
+
+    public Boolean getTransferAll() {
+        return transferAll;
+    }
+
+    public void setTransferAll(Boolean transferAll) {
+        this.transferAll = transferAll;
     }
 }

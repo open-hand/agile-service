@@ -23,7 +23,7 @@ const FieldStar = ({
       disabled={disabled}
       onClick={handleStarClick}
       style={{ margin: '6px 5px 0' }}
-      activeTooltip="取消"
+      activeTooltip="取消关注"
       inActiveTooltip="关注"
       active={starBeacon}
     />

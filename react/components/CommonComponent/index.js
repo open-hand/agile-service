@@ -1,4 +1,4 @@
-export UploadButton from './UploadButton';
-export UploadButtonNow from './UploadButtonNow';
-export NumericInput from './NumericInput';
-export DatetimeAgo from './DatetimeAgo';
+export { default as UploadButton } from './UploadButton';
+export { default as UploadButtonNow } from './UploadButtonNow';
+export { default as NumericInput } from './NumericInput';
+export { default as DatetimeAgo } from './DatetimeAgo';

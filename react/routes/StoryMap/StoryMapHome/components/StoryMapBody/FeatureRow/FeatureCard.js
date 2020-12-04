@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
+import StatusTag from '@/components/StatusTag';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 import Card from '../Card';
 import './FeatureCard.less';
@@ -18,16 +19,25 @@ class FeatureCard extends Component {
   render() {
     const { feature } = this.props;
     const {
-      featureType, summary, issueId, issueNum, programId,
+      featureType, summary, issueId, statusVO,
     } = feature;
     const { selectedIssueMap } = StoryMapStore;
     return (
-      <Card className={`c7nagile-StoryMap-FeatureCard minimapCard ${featureType || 'none'} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`} onClick={this.handleClick}>
+      <Card className={`c7nagile-StoryMap-FeatureCard minimapCard ${featureType || 'none'} ${statusVO && statusVO.completed ? 'completedCard' : undefined} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`} onClick={this.handleClick}>
         <div className="summary">
-          <Tooltip title={`${summary || '无特性'}`} getPopupContainer={trigger => trigger.parentNode}>
+          <Tooltip title={`${summary || '无特性'}`} getPopupContainer={(trigger) => trigger.parentNode}>
             {summary || '无特性'}
           </Tooltip>
         </div>
+        {
+          summary && (
+          <div className="status">
+            <StatusTag
+              data={statusVO || {}}
+            />
+          </div>
+          )
+        }
       </Card>
     );
   }

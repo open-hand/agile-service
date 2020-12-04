@@ -1,16 +1,16 @@
 /* eslint-disable react/state-in-constructor */
 import React, { Component } from 'react';
-import { stores, WSHandler, Choerodon } from '@choerodon/boot';
+import { WSHandler, Choerodon } from '@choerodon/boot';
 import {
-  Modal, Button, Icon, Progress, Divider,
+  Modal, Button, Progress, Divider,
 } from 'choerodon-ui';
+import { observer } from 'mobx-react';
 import { Button as ButtonPro } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import './ImportIssue.less';
 import { issueApi } from '@/api';
+import { getApplyType } from '@/utils/common';
 import ImportFields from './ImportFields';
-
-const { AppState } = stores;
 
 const ImportIssueForm = (formProps) => {
   const { title, children, bottom } = formProps;
@@ -64,7 +64,12 @@ class ImportIssue extends Component {
   };
 
   exportExcel = () => {
-    issueApi.downloadTemplateForImport().then((excel) => {
+    const importFieldsData = { systemFields: [], customFields: [] };
+    const allFields = this.importFieldsRef.current?.allFields || [];
+    const fields = this.importFieldsRef.current?.fields || [];
+    importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system));
+    importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system));
+    issueApi.downloadTemplateForImport(importFieldsData).then((excel) => {
       const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const fileName = '问题导入模板.xlsx';
       FileSaver.saveAs(blob, fileName);
@@ -82,9 +87,6 @@ class ImportIssue extends Component {
   };
 
   upload = (file) => {
-    console.log('导入的字段：');
-    console.log(this.importFieldsRef.current.fields);
-
     if (!file) {
       Choerodon.prompt('请选择文件');
       return;
@@ -152,12 +154,6 @@ class ImportIssue extends Component {
       successCount,
     } = wsData;
 
-    if (status === 'success') {
-      this.loadLatestImport();
-      this.setState({
-        wsData: null,
-      });
-    }
     if (status === 'doing') {
       return (
         <div className="c7n-importIssue-progress-area">
@@ -273,7 +269,7 @@ class ImportIssue extends Component {
             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           />
           <WSHandler
-            messageKey="agile-import"
+            messageKey={getApplyType() === 'program' ? 'agile-import' : 'agile-import-issues'}
             onMessage={this.handleMessage}
           >
             {this.renderProgress()}
@@ -303,4 +299,4 @@ class ImportIssue extends Component {
   }
 }
 
-export default ImportIssue;
+export default observer(ImportIssue);

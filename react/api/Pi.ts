@@ -1,22 +1,26 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import Api from './Api';
 
-class PiApi {
+class PiApi extends Api<PiApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
 
   /**
    * 根据状态获取PI
-   * @param statusList 
+   * @param statusList
    */
-  async getPiListByStatus(statusList = ['todo', 'doing', 'done']) {
-    const res = await axios({
+  getPiListByStatus(statusList = ['todo', 'doing', 'done']) {
+    return this.request({
       method: 'post',
       url: `${this.prefix}/pi/query_pi_by_status`,
       data: statusList,
+      transformResponse: (res) => {
+        const data = JSON.parse(res);
+        return data.map((pi: { code: string, name: string }) => ({ ...pi, piName: `${pi.code}-${pi.name}` }));
+      },
     });
-    return res.map((pi: { code: string, name: string}) => ({ ...pi, piName: `${pi.code}-${pi.name}` }));
   }
 
   /**
@@ -28,8 +32,8 @@ class PiApi {
 
   /**
    * 在子项目获取当前PI
-   * @param programId 
-   * @param artId 
+   * @param programId
+   * @param artId
    */
   getCurrent(programId: number, artId: number) {
     return axios({
@@ -44,39 +48,43 @@ class PiApi {
 
   /**
    * 子项目下,根据活跃的ART和PI状态查询PI
-   * @param data  状态列表，[todo、doing、done]
-   * @param programId 
+   * @param statusList  状态列表，[todo、doing、done]
+   * @param programId
    */
-  getPiByPiStatus(data:Array<string>, programId:number) {
+  getPiByPiStatus(statusList: Array<string>, programId: number) {
     return axios({
       method: 'post',
       url: `${this.prefix}/project_invoke_program/pi/query_pi_by_status`,
       params: {
         programId,
       },
-      data,
+      transformResponse: (res: any) => {
+        const data: any = JSON.parse(res);
+        return data.map((pi: { code: string, name: string }) => ({ ...pi, piName: `${pi.code}-${pi.name}` }));
+      },
+      data: statusList,
     });
   }
 
   /**
    * 查询feature 关联过的特性记录(PI历程)
-   * @param issueId 
+   * @param issueId
    */
-  getFeatureLog(issueId:number) {
+  getFeatureLog(issueId: number) {
     return axios.get(`${this.prefix}/pi/${issueId}/list_feature_pi_log`);
   }
 
   /**
    * 批量将feature加入到pi中
-   * @param issueIds 
-   * @param sourceId 
+   * @param issueIds
+   * @param sourceId
    * @param destinationId pi Id
-   * @param before 
-   * @param outsetIssueId 
-   * @param rankIndex 
+   * @param before
+   * @param outsetIssueId
+   * @param rankIndex
    */
-  addFeatures(issueIds:Array<number>, sourceId:number = 0, destinationId:number = 0,
-    before:boolean = false, outsetIssueId:number = 0, rankIndex:number = 0) {
+  addFeatures(issueIds: Array<number>, sourceId: number = 0, destinationId: number = 0,
+    before: boolean = false, outsetIssueId: number = 0, rankIndex: number = 0) {
     return axios.post(`${this.prefix}/pi/to_pi/${destinationId}`, {
       before,
       issueIds,
@@ -88,4 +96,5 @@ class PiApi {
 }
 
 const piApi = new PiApi();
-export { piApi };
+const piApiConfig = new PiApi(true);
+export { piApi, piApiConfig };

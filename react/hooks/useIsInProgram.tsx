@@ -48,6 +48,8 @@ const useIsInProgram = (): ChildrenProps => {
         setIsShowFeature(showFeature);
         setLoading(false);
       });
+    } else {
+      setLoading(false);
     }
   }, [isProgram]);
 

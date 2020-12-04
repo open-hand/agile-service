@@ -6,6 +6,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
+import { Observer } from 'mobx-react-lite';
 
 interface EventsProps extends IChosenFieldFieldEvents {
   loadRecordAxios?: (store: IssueExportStore) => Promise<any> /** 查询导出记录 */
@@ -23,6 +24,7 @@ interface Props {
   dataSetSystemFields?: FieldProps[], /** dataSet 数据管理 系统字段配置 */
   defaultCheckedExportFields?: string[], /** 默认选中导出字段 */
   defaultInitFieldAction?: (data: IChosenFieldField, store: IssueExportStore) => IChosenFieldField | false | undefined | void, /** 初始化字段时调用，当返回值不为IChosenFieldField 则跳过此字段 */
+  defaultInitFieldFinishAction?: (data: { customFields: IChosenFieldField[], systemFields: IChosenFieldField[], currentChosenField: Map<string, IChosenFieldField> }, store: IssueExportStore) => void, /** 初始化字段完成时调用 */
   transformSystemFilter?: (data: any) => any, /** 提交数据前 对系统筛选字段数据转换 */
   transformExportFieldCodes?: (data: Array<string>) => Array<string>, /** 提交数据 对系统导出字段数据转换 */
   events?: EventsProps,
@@ -47,11 +49,15 @@ class IssueExportStore {
 
   defaultInitFieldAction: any;
 
+  defaultInitFieldFinishAction: any;
+
   defaultExportBefore = (data: any) => data;
 
   renderField: any;
 
   exportButtonConfig: Props['exportButtonConfig'];
+
+  @observable innerState = observable.map<string, any>();
 
   @observable extraFields: IChosenFieldField[];
 
@@ -66,6 +72,7 @@ class IssueExportStore {
     this.transformExportFieldCodes = props?.transformExportFieldCodes || ((data) => data);
     this.defaultCheckedExportFields = props?.defaultCheckedExportFields || [];
     this.defaultInitFieldAction = props?.defaultInitFieldAction || ((data: IChosenFieldField, store: IssueExportStore) => data);
+    this.defaultInitFieldFinishAction = props?.defaultInitFieldFinishAction || ((data: any) => data);
     this.extraFields = props?.extraFields || [];
     this.renderField = props?.renderField;
     this.exportButtonConfig = props?.exportButtonConfig || {};
@@ -77,6 +84,14 @@ class IssueExportStore {
 
   @observable currentChosenFields = observable.map<string, IChosenFieldField>();
 
+  @action setState(key: string, value: any) {
+    this.innerState.set(key, value);
+  }
+
+  getState(key: string) {
+    return this.innerState.get(key);
+  }
+
   @action
   setDownloadInfo(data: IDownLoadInfo) {
     this.downloadInfo = data;
@@ -84,7 +99,7 @@ class IssueExportStore {
 
   @action addExtraField(data: IChosenFieldField) {
     const fieldIndex = findIndex(this.extraFields, { code: data.code });
-    fieldIndex && this.extraFields.splice(fieldIndex, 1, data);
+    fieldIndex !== -1 ? this.extraFields.splice(fieldIndex, 1, data) : this.extraFields.push(data);
   }
 
   @computed get getExtraFields() {
@@ -120,6 +135,13 @@ class IssueExportStore {
     const that = this;
     const { initField = this.defaultInitFieldAction } = this.events;
     return initField(field, that);
+  }
+
+  @action
+  initFieldFinish(customFields: IChosenFieldField[], systemFields: IChosenFieldField[], currentChosenField: Map<string, IChosenFieldField>): IChosenFieldField | false {
+    const that = this;
+    const { initFieldFinish = this.defaultInitFieldFinishAction } = this.events;
+    return initFieldFinish({ customFields, systemFields, currentChosenField }, that);
   }
 
   @action

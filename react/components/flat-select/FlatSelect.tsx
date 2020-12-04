@@ -6,6 +6,7 @@ import { Icon, Animate } from 'choerodon-ui/pro';
 import isString from 'lodash/isString';
 import noop from 'lodash/noop';
 import isNil from 'lodash/isNil';
+import classNames from 'classnames';
 import { Select, SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { pxToRem, toPx } from 'choerodon-ui/lib/_util/UnitConvertor';
 import measureTextWidth from 'choerodon-ui/pro/lib/_util/measureTextWidth';
@@ -61,7 +62,7 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     const { name, multiple } = this;
     const hasValue = !this.isEmpty();
     const placeholder = this.hasFloatLabel ? undefined : this.getPlaceholders()[0];
-    const width = (hasValue ? 0 : measureTextWidth(placeholder || '') + 32);
+    const width = (hasValue ? 0 : measureTextWidth(placeholder || '') + 36);
     if (multiple) {
       return (
         <input
@@ -111,7 +112,7 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
                 ref: this.saveTagContainer,
                 onScroll: stopPropagation,
                 style:
-                height && height !== 'auto' ? { height: pxToRem(toPx(height)! - 2) } : undefined,
+                  height && height !== 'auto' ? { height: pxToRem(toPx(height)! - 2) } : undefined,
               }}
               transitionName="zoom"
               exclusive
@@ -132,11 +133,15 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     const finalText = isString(text) ? text : this.getText(this.getValue());
     const hasValue = this.getValue() !== undefined && this.getValue() !== null;
     const placeholder = this.hasFloatLabel ? undefined : this.getPlaceholders()[0];
-    const width = (hasValue ? measureTextWidth(finalText) + 52 : measureTextWidth(placeholder || '') + 32);
+    const { clearButton } = this.props;
+    const width = (hasValue ? measureTextWidth(finalText) + (clearButton ? 52 : 35) : measureTextWidth(placeholder || '') + 32);
     if (isValidElement(text)) {
       otherProps.style = { ...otherProps.style, width, textIndent: -1000 };
     } else {
       otherProps.style = { width, ...otherProps.style };
+    }
+    if (!clearButton) {
+      otherProps.className = classNames(otherProps.className, `${this.prefixCls}-no-clearButton`);
     }
     return (
       <input

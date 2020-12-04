@@ -247,7 +247,7 @@ function CustomFields({
     </div>
   ));
   const types = [selectTypes, inputTypes, dateTypes].filter((arr) => arr.length > 0);
-  const result = types.map((type) => <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 4 }}>{render(type)}</div>);
+  const result = types.map((type) => <div className="c7n-issue-search-left-type" style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 4 }}>{render(type)}</div>);
   if (result.length > 0) {
     result[0].props.children.unshift(children);
     result[result.length - 1].props.children.push(<ChooseField key="choose" />);

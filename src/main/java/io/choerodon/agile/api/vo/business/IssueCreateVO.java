@@ -118,6 +118,69 @@ public class IssueCreateVO {
 
     private Date estimatedEndTime;
 
+    private List<PageFieldViewUpdateVO> customFields;
+
+    private RelatedIssueVO relatedIssueVO;
+
+    @Encrypt
+    private Long mainResponsibleId;
+
+    @Encrypt
+    private Long testResponsibleId;
+
+    private String environment;
+
+    @Encrypt
+    private List<Long> programVersionIds;
+
+    public List<Long> getProgramVersionIds() {
+        return programVersionIds;
+    }
+
+    public void setProgramVersionIds(List<Long> programVersionIds) {
+        this.programVersionIds = programVersionIds;
+    }
+
+    public Long getMainResponsibleId() {
+        return mainResponsibleId;
+    }
+
+    public void setMainResponsibleId(Long mainResponsibleId) {
+        this.mainResponsibleId = mainResponsibleId;
+    }
+
+    public Long getTestResponsibleId() {
+        return testResponsibleId;
+    }
+
+    public void setTestResponsibleId(Long testResponsibleId) {
+        this.testResponsibleId = testResponsibleId;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
+    }
+
+    public RelatedIssueVO getRelatedIssueVO() {
+        return relatedIssueVO;
+    }
+
+    public void setRelatedIssueVO(RelatedIssueVO relatedIssueVO) {
+        this.relatedIssueVO = relatedIssueVO;
+    }
+
+    public List<PageFieldViewUpdateVO> getCustomFields() {
+        return customFields;
+    }
+
+    public void setCustomFields(List<PageFieldViewUpdateVO> customFields) {
+        this.customFields = customFields;
+    }
+
     public Date getEstimatedStartTime() {
         return estimatedStartTime;
     }

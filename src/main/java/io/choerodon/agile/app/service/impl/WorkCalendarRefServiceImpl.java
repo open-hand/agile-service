@@ -80,4 +80,9 @@ public class WorkCalendarRefServiceImpl implements WorkCalendarRefService {
         }
         return workCalendarRefDTO;
     }
+
+    @Override
+    public List<WorkCalendarRefVO> list(Long projectId, Integer year) {
+        return sprintCreateAssembler.toTargetList(workCalendarRefMapper.listByProjectId(projectId, year), WorkCalendarRefVO.class);
+    }
 }

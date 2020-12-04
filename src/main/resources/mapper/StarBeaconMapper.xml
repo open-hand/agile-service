@@ -24,7 +24,10 @@
         <foreach collection="issueIds" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
-        and fsb.project_id = #{projectId}
+        and fsb.project_id in
+        <foreach collection="projectIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
         and fsb.user_id = #{userId}
     </select>
 

@@ -3,7 +3,7 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import {
-  debounce, isEmpty, isEqual, pick,
+  debounce, isEmpty, isEqual, pick, includes,
 } from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { fieldApi, personalFilterApi } from '@/api';
@@ -51,7 +51,7 @@ export function flattenObject(object) {
   delete result.text;
   return result;
 }
-export function getSystemFields() {
+export function getSystemFields(excludeCodes = []) {
   const systemFields = [{
     code: 'issueIds',
     name: 'issueId',
@@ -142,10 +142,131 @@ export function getSystemFields() {
     name: '更新时间',
     defaultShow: false,
     fieldType: 'datetime',
-  }];
-  return IsInProgramStore.isInProgram ? systemFields : systemFields.filter((f) => f.code !== 'feature');
-}
+  },
+  {
+    code: 'estimatedStartTime',
+    name: '预计开始时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
+  {
+    code: 'estimatedEndTime',
+    name: '预计结束时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
 
+  ];
+  return IsInProgramStore.isInProgram ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
+}
+export function getSystemFieldsInStoryMap(excludeCodes = []) {
+  const systemFields = [{
+    code: 'issueIds',
+    name: 'issueId',
+    defaultShow: true,
+    noDisplay: true, // 不需要展示，仅作为一个筛选项
+  }, {
+    code: 'starBeacon',
+    name: 'starBeacon',
+    defaultShow: true,
+    noDisplay: true, // 不需要展示，仅作为一个筛选项
+  }, {
+    code: 'userId',
+    name: 'userId',
+    defaultShow: true,
+    noDisplay: true, // 不需要展示，仅作为一个筛选项
+  }, {
+    code: 'quickFilterIds',
+    name: '快速筛选',
+    defaultShow: true,
+    noDisplay: true,
+  }, {
+    code: 'contents',
+    name: '概要',
+    defaultShow: true,
+    noDisplay: true,
+  }, {
+    code: 'sprint',
+    name: '冲刺',
+    defaultShow: true,
+    fieldType: 'multiple',
+  }, {
+    code: 'version',
+    name: '版本',
+    defaultShow: true,
+    fieldType: 'multiple',
+  }, {
+    code: 'issueTypeId',
+    name: '问题类型',
+    defaultShow: true,
+    fieldType: 'multiple',
+  }, {
+    code: 'statusId',
+    name: '状态',
+    defaultShow: true,
+    fieldType: 'multiple',
+  }, {
+    code: 'assigneeId',
+    name: '经办人',
+    defaultShow: true,
+    fieldType: 'member',
+  }, {
+    code: 'reporterIds',
+    name: '报告人',
+    defaultShow: false,
+    fieldType: 'member',
+  }, {
+    code: 'component',
+    name: '模块',
+    defaultShow: false,
+    fieldType: 'multiple',
+  }, {
+    code: 'label',
+    name: '标签',
+    defaultShow: false,
+    fieldType: 'multiple',
+  }, {
+    code: 'priorityId',
+    name: '优先级',
+    defaultShow: true,
+    fieldType: 'multiple',
+  }, {
+    code: 'epic',
+    name: '史诗',
+    defaultShow: !IsInProgramStore.isInProgram,
+    fieldType: 'multiple',
+  }, {
+    code: 'feature',
+    name: '特性',
+    defaultShow: true,
+    fieldType: 'multiple',
+  }, {
+    code: 'createDate',
+    name: '创建时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  }, {
+    code: 'updateDate',
+    name: '更新时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
+  {
+    code: 'estimatedStartTime',
+    name: '预计开始时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
+  {
+    code: 'estimatedEndTime',
+    name: '预计结束时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  },
+
+  ];
+  return IsInProgramStore.isInProgram ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
+}
 class IssueStore {
   // 当前加载状态
   @observable loading = false;
@@ -166,7 +287,7 @@ class IssueStore {
     return this.filterListVisible;
   }
 
-  @action setFilterListVisible(data) {
+  @action setFilterListVisible = (data) => {
     this.filterListVisible = data;
   }
 
@@ -178,17 +299,6 @@ class IssueStore {
 
   @action setUpdateFilterName(data) {
     this.updateFilterName = data;
-  }
-
-  // 控制保存模态框是否显示
-  @observable saveFilterVisible = false;
-
-  @computed get getSaveFilterVisible() {
-    return this.saveFilterVisible;
-  }
-
-  @action setSaveFilterVisible(data) {
-    this.saveFilterVisible = data;
   }
 
   // 控制导出模态框是否显示

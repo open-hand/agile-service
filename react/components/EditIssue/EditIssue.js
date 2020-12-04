@@ -208,7 +208,7 @@ function EditIssue() {
       position: 'fixed',
       right: 0,
       // eslint-disable-next-line no-nested-ternary
-      top: isFullScreen ? 0 : HeaderStore.announcementClosed ? 50 : 100,
+      top: isFullScreen ? 0 : HeaderStore.announcementClosed ? 48 : 100,
       bottom: 0,
       // height: 'calc(100vh - 50px)',
       zIndex: 101,
@@ -222,7 +222,7 @@ function EditIssue() {
           minWidth: 440,
         }}
         defaultSize={{
-          width: localStorage.getItem('agile.EditIssue.width') || 605,
+          width: localStorage.getItem('agile.EditIssue.width') || 640,
           height: '100%',
         }}
         onResizeEnd={handleResizeEnd}
@@ -267,6 +267,7 @@ function EditIssue() {
               disabled={rightDisabled}
               store={store}
               issueId={currentIssueId}
+              programId={programId}
               reloadIssue={loadIssueDetail}
               onUpdate={onUpdate}
               onDeleteSubIssue={onDeleteSubIssue}

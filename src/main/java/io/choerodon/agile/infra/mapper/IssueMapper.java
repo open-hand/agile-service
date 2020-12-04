@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.mapper;
 import io.choerodon.agile.api.vo.IssueIdSprintIdVO;
 import io.choerodon.agile.api.vo.IssueOverviewVO;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -11,10 +12,7 @@ import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -539,4 +537,18 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueVO> listAvailableParents(@Param("projectId") Long projectId,
                                        @Param("issueType") String issueType,
                                        @Param("param") String param);
+
+    List<IssueDTO> listMyStarIssuesByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds, @Param("parentIssues") List<Long> parentIssues, @Param("userId") Long userId);
+
+    /**
+     * 查询项目下未完成的issue，包含story, task和bug(不包含子缺陷)
+     * @param projectId
+     * @return
+     */
+    List<IssueVO> listUndoneAvailableParents(@Param("projectId") Long projectId);
+
+    IssueVO selectByIssueNum(@Param("projectId") Long projectId,
+                             @Param("issueNum") String issueNum);
+
+    List<Long> selectSubListByIssueIds(@Param("projectId") Long projectId, @Param("issueIds")  List<Long> issueIds);
 }

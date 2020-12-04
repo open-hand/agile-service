@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { ModalProps } from 'choerodon-ui/lib/modal';
+import { ModalProps } from 'choerodon-ui/pro/lib/modal/Modal';
 
 export interface User {
   email: string
@@ -71,6 +71,16 @@ export interface Priority {
   enable: boolean,
   id: string,
   name: string,
+}
+export interface IProgramVersion {
+  id: string,
+  name: string,
+  programId: string,
+  statusCode: string,
+  versionBase: {
+    id: string,
+    name: string,
+  }
 }
 
 export interface IModalProps extends ModalProps {

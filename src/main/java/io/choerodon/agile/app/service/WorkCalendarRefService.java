@@ -49,4 +49,13 @@ public interface WorkCalendarRefService {
     void deleteWorkCalendarRef(Long projectId, Long calendarId);
 
     WorkCalendarRefDTO create(WorkCalendarRefDTO workCalendarRefDTO);
+
+    /**
+     * 根据项目id获取工作日历设置
+     *
+     * @param projectId
+     * @param year
+     * @return
+     */
+    List<WorkCalendarRefVO> list(Long projectId, Integer year);
 }

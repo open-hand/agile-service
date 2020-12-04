@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo.business;
 
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -234,6 +235,18 @@ public class IssueVO {
 
     private Date estimatedEndTime;
 
+    private Long sprintId;
+
+    private List<PiTargetInfoVO> piTargetInfoVOS;
+
+    public Long getSprintId() {
+        return sprintId;
+    }
+
+    public void setSprintId(Long sprintId) {
+        this.sprintId = sprintId;
+    }
+
     private Boolean starBeacon;
 
     private Boolean parentStarBeacon;
@@ -241,6 +254,22 @@ public class IssueVO {
     private Boolean relateStarBeacon;
 
     private List<ProgramVersionFeatureRelVO> programVersionFeatureRelVOS;
+
+    private String errorMsg;
+
+    private UserMessageDTO mainResponsible;
+
+    private UserMessageDTO testResponsible;
+
+    private String environment;
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
 
     public Boolean getParentStarBeacon() {
         return parentStarBeacon;
@@ -845,5 +874,37 @@ public class IssueVO {
 
     public void setProgramVersionFeatureRelVOS(List<ProgramVersionFeatureRelVO> programVersionFeatureRelVOS) {
         this.programVersionFeatureRelVOS = programVersionFeatureRelVOS;
+    }
+
+    public List<PiTargetInfoVO> getPiTargetInfoVOS() {
+        return piTargetInfoVOS;
+    }
+
+    public void setPiTargetInfoVOS(List<PiTargetInfoVO> piTargetInfoVOS) {
+        this.piTargetInfoVOS = piTargetInfoVOS;
+    }
+
+    public UserMessageDTO getMainResponsible() {
+        return mainResponsible;
+    }
+
+    public void setMainResponsible(UserMessageDTO mainResponsible) {
+        this.mainResponsible = mainResponsible;
+    }
+
+    public UserMessageDTO getTestResponsible() {
+        return testResponsible;
+    }
+
+    public void setTestResponsible(UserMessageDTO testResponsible) {
+        this.testResponsible = testResponsible;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }

@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.dto.business;
 
+import io.choerodon.agile.api.vo.IssueProgressVO;
+import io.choerodon.agile.api.vo.SprintNameVO;
+import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.infra.dto.StoryMapVersionDTO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -27,7 +30,11 @@ public class StoryMapStoryDTO {
     @Encrypt
     private Long statusId;
 
+    private StatusVO statusVO;
+
     private List<StoryMapVersionDTO> storyMapVersionDTOList;
+
+    private List<SprintNameVO> storyMapSprintList;
 
     public Long getIssueId() {
         return issueId;
@@ -99,5 +106,21 @@ public class StoryMapStoryDTO {
 
     public Boolean getCompleted() {
         return completed;
+    }
+
+    public List<SprintNameVO> getStoryMapSprintList() {
+        return storyMapSprintList;
+    }
+
+    public void setStoryMapSprintList(List<SprintNameVO> storyMapSprintList) {
+        this.storyMapSprintList = storyMapSprintList;
+    }
+
+    public StatusVO getStatusVO() {
+        return statusVO;
+    }
+
+    public void setStatusVO(StatusVO statusVO) {
+        this.statusVO = statusVO;
     }
 }

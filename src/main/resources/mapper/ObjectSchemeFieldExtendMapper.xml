@@ -199,6 +199,24 @@
         order by t4.rank desc, t4.id asc
     </select>
 
+    <select id="listConfigsByFieldCodes" resultType="io.choerodon.agile.api.vo.PageConfigFieldVO">
+        select
+        fosf.id as field_id,
+        fosf.name as field_name,
+        fosf.default_value,
+        fosf.field_type,
+        fosf.code as field_code,
+        fosf.is_required as required,
+       'system' as created_level,
+        fosf.extra_config
+        from fd_object_scheme_field fosf
+        where
+        fosf.code in
+        <foreach collection="fieldCodes" item="fieldCode" open="(" close=")" separator=",">
+           #{fieldCode}
+        </foreach>
+    </select>
+
     <select id="selectProjectIdsByOrganizationId" resultType="java.lang.Long">
         select distinct project_id
         from fd_object_scheme_field_extend

@@ -4,6 +4,7 @@ import React, {
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { omit, debounce } from 'lodash';
 import { Button, DataSet } from 'choerodon-ui/pro';
+import { usePersistFn } from 'ahooks';
 import { SearchMatcher } from 'choerodon-ui/pro/lib/select/Select';
 import { Renderer } from 'choerodon-ui/pro/lib/field/FormField';
 
@@ -49,6 +50,7 @@ export interface SelectConfig<T = {}> {
   renderer?: (item: T) => JSX.Element
   request: ({ filter, page }: LoadConfig) => Promise<T[] | { list: T[], hasNextPage: boolean }>
   middleWare?: MiddleWare<T>,
+  afterLoad?: (data: T[]) => void
   paging?: boolean
   props?: object
 }
@@ -65,23 +67,27 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   const dataSetRef = useRef<DataSet>();
   const cacheRef = useRef<Map<any, T>>(new Map());
   const defaultRender = useCallback((item: T) => getValueByPath(item, config.textField), [config.textField]);
+  const firstRef = useRef(true);
   const {
     textField = 'meaning',
     valueField = 'value',
     optionRenderer = defaultRender,
     // renderer,
-    request,
+    request: requestFn,
     middleWare = noop,
+    afterLoad: afterLoadFn,
     paging = true,
     props,
   } = config;
+  const request = usePersistFn(requestFn);
+  const afterLoad = usePersistFn(afterLoadFn || noop);
   const renderer = useCallback(({ value, maxTagTextLength }) => {
     const item = cacheRef.current?.get(value);
     if (item) {
       const result = optionRenderer(item);
       return maxTagTextLength
-      && typeof result === 'string'
-      && (result as string).length > maxTagTextLength
+        && typeof result === 'string'
+        && (result as string).length > maxTagTextLength
         ? `${(result as string).slice(0, maxTagTextLength)}...`
         : result;
     }
@@ -94,14 +100,23 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     batchedUpdates(() => {
       if (paging) {
         const { list, hasNextPage } = res as { list: T[], hasNextPage: boolean };
+        if (afterLoad && firstRef.current) {
+          afterLoad(list);
+          firstRef.current = false;
+        }
         setData((d) => (page > 1 ? d.concat(list) : list));
         setPage(page);
         setCanLoadMore(hasNextPage);
       } else {
+        if (afterLoad && firstRef.current) {
+          afterLoad(res as T[]);
+          firstRef.current = false;
+        }
         setData(res as T[]);
       }
     });
-  }, [paging, request]);
+  // TODO: 更好的实现
+  }, [afterLoad, paging, request]);
   const searchData = useMemo(() => debounce((filter: string) => {
     loadData({ filter });
   }, 500), [loadData]);
