@@ -3,7 +3,6 @@ package io.choerodon.agile.infra.mapper;
 import io.choerodon.agile.api.vo.IssueIdSprintIdVO;
 import io.choerodon.agile.api.vo.IssueOverviewVO;
 import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -376,6 +375,10 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                    @Param("childrenIds") Set<Long> childrenIds,
                                                    @Param("isExcelExported") boolean isExcelExported);
 
+    List<IssueDTO> selectWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
+                                           @Param("childrenIds") Set<Long> childrenIds);
+
+
     /**
      * 查询issueIds对应的issueDo
      *
@@ -551,4 +554,5 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                              @Param("issueNum") String issueNum);
 
     List<Long> selectSubListByIssueIds(@Param("projectId") Long projectId, @Param("issueIds")  List<Long> issueIds);
+
 }
