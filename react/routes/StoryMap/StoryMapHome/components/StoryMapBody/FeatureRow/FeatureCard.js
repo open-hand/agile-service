@@ -32,13 +32,9 @@ class FeatureCard extends Component {
         {
           summary && (
           <div className="status">
-            <Tooltip mouseEnterDelay={0.5} title={`状态： ${statusVO && statusVO.name}`}>
-              <div>
-                <StatusTag
-                  data={statusVO || {}}
-                />
-              </div>
-            </Tooltip>
+            <StatusTag
+              data={statusVO || {}}
+            />
           </div>
           )
         }
