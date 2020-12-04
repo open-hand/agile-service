@@ -19,6 +19,7 @@ function VersionField({ field, value, onChange }) {
       dropdownMatchSelectWidth={false}
       clearButton
       onChange={onChange}
+      valueField="versionId"
     />
   );
 }

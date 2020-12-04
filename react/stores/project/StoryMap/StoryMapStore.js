@@ -151,23 +151,36 @@ class StoryMapStore {
 
   getStoryMap = async (firstLoad = false) => {
     this.setLoading(true);
-    const [allVersion, allSprints] = await Promise.all([
-      versionApi.loadNamesByStatus(),
-      sprintApi.loadSprints(),
-    ]);
-    const versionList = allVersion.slice(0, 5);
-    const sprintIds = allSprints.slice(0, 5).map((s) => s.sprintId);
-    if (versionList.length > 0 && this.swimLine === 'version') {
-      if (!this.searchVO.otherArgs.version || this.searchVO.otherArgs.version.length <= 0) {
-        this.issueSearchStore.handleFilterChange('version', versionList.map((v) => v.versionId));
-        return;
+    let { allVersion } = this;
+    let { allSprints } = this;
+    let versionList = (allVersion || []).slice(0, 5);
+    let sprintIds = (allSprints || []).slice(0, 5).map((s) => s.sprintId);
+    if (this.swimLine === 'version') {
+      if (!this.allVersion) {
+        allVersion = await versionApi.loadNamesByStatus();
+
+        this.allVersion = allVersion;
       }
-    } else if (sprintIds.length > 0 && this.swimLine === 'sprint') {
-      if (!this.searchVO.otherArgs.sprint || this.searchVO.otherArgs.sprint.length <= 0) {
-        this.issueSearchStore.handleFilterChange('sprint', sprintIds);
-        return;
+      versionList = allVersion.slice(0, 5);
+      if (versionList.length > 0) {
+        if (!this.searchVO.otherArgs.version || this.searchVO.otherArgs.version.length <= 0) {
+          this.issueSearchStore.handleFilterChange('version', versionList.map((v) => v.versionId));
+          return;
+        }
+      }
+    } else if (this.swimLine === 'sprint') {
+      if (!this.allSprints) {
+        allSprints = await sprintApi.loadSprints();
+      }
+      sprintIds = allSprints.slice(0, 5).map((s) => s.sprintId);
+      if (sprintIds.length > 0) {
+        if (!this.searchVO.otherArgs.sprint || this.searchVO.otherArgs.sprint.length <= 0) {
+          this.issueSearchStore.handleFilterChange('sprint', sprintIds);
+          return;
+        }
       }
     }
+
     Promise.all([
       storyMapApi.getStoryMap(this.searchVO),
       issueTypeApi.loadAllWithStateMachineId(),
@@ -185,104 +198,104 @@ class StoryMapStore {
     });
   }
 
-    loadIssueList = () => {
-      storyMapApi.getDemands(this.sideSearchVO).then((res) => {
-        this.setIssueList(res.demandStoryList);
-      });
+  loadIssueList = () => {
+    storyMapApi.getDemands(this.sideSearchVO).then((res) => {
+      this.setIssueList(res.demandStoryList);
+    });
+  }
+
+  @action handleSideFilterChange = (field, values) => {
+    this.sideSearchVO.advancedSearchArgs[field] = values;
+    this.loadIssueList();
+  }
+
+  clearSideFilter = () => {
+    this.sideSearchVO = {
+      searchArgs: {
+        assigneeId: null,
+      },
+      advancedSearchArgs: {
+        versionList: [],
+        statusList: [],
+      },
+    };
+  }
+
+  @action setIssueList(issueList) {
+    this.issueList = issueList;
+  }
+
+  @action setSideIssueListVisible(sideIssueListVisible) {
+    this.sideIssueListVisible = sideIssueListVisible;
+  }
+
+  @action setCreateModalVisible(createModalVisible) {
+    this.createModalVisible = createModalVisible;
+  }
+
+  @action setCreateEpicModalVisible(createEpicModalVisible) {
+    this.createEpicModalVisible = createEpicModalVisible;
+  }
+
+  @action setCreateFeatureModalVisible(createFeatureModalVisible) {
+    this.createFeatureModalVisible = createFeatureModalVisible;
+  }
+
+  @action toggleSideIssueListVisible(visible) {
+    // 关闭Issue详情侧边
+    if (!visible) {
+      this.setClickIssue();
     }
 
-    @action handleSideFilterChange = (field, values) => {
-      this.sideSearchVO.advancedSearchArgs[field] = values;
-      this.loadIssueList();
-    }
+    this.sideIssueListVisible = visible;
+  }
 
-    clearSideFilter = () => {
-      this.sideSearchVO = {
-        searchArgs: {
-          assigneeId: null,
-        },
-        advancedSearchArgs: {
-          versionList: [],
-          statusList: [],
-        },
-      };
-    }
+  @action setIsFullScreen(isFullScreen) {
+    this.isFullScreen = isFullScreen;
+  }
 
-    @action setIssueList(issueList) {
-      this.issueList = issueList;
-    }
+  @action setLoading(loading) {
+    this.loading = loading;
+  }
 
-    @action setSideIssueListVisible(sideIssueListVisible) {
-      this.sideIssueListVisible = sideIssueListVisible;
-    }
+  @action switchSwimLine(swimLine) {
+    this.swimLine = swimLine;
+    localStorage.setItem('agile.StoryMap.SwimLine', swimLine);
+    this.getStoryMap();
+  }
 
-    @action setCreateModalVisible(createModalVisible) {
-      this.createModalVisible = createModalVisible;
-    }
-
-    @action setCreateEpicModalVisible(createEpicModalVisible) {
-      this.createEpicModalVisible = createEpicModalVisible;
-    }
-
-    @action setCreateFeatureModalVisible(createFeatureModalVisible) {
-      this.createFeatureModalVisible = createFeatureModalVisible;
-    }
-
-    @action toggleSideIssueListVisible(visible) {
-      // 关闭Issue详情侧边
-      if (!visible) {
-        this.setClickIssue();
+  @action initVersionList(versionList) {
+    this.versionList = versionList.concat([{
+      versionId: 'none',
+      name: '未计划部分',
+    }]).map((version) => {
+      const oldVersion = find(this.versionList, { versionId: version.versionId });
+      if (oldVersion) {
+        return { ...version, storyNum: 0, collapse: oldVersion.collapse };
       }
+      return { ...version, storyNum: 0, collapse: false };
+    });
+  }
 
-      this.sideIssueListVisible = visible;
-    }
-
-    @action setIsFullScreen(isFullScreen) {
-      this.isFullScreen = isFullScreen;
-    }
-
-    @action setLoading(loading) {
-      this.loading = loading;
-    }
-
-    @action switchSwimLine(swimLine) {
-      this.swimLine = swimLine;
-      localStorage.setItem('agile.StoryMap.SwimLine', swimLine);
-      this.getStoryMap();
-    }
-
-    @action initVersionList(versionList) {
-      this.versionList = versionList.concat([{
-        versionId: 'none',
-        name: '未计划部分',
-      }]).map((version) => {
-        const oldVersion = find(this.versionList, { versionId: version.versionId });
-        if (oldVersion) {
-          return { ...version, storyNum: 0, collapse: oldVersion.collapse };
-        }
-        return { ...version, storyNum: 0, collapse: false };
-      });
-    }
-
-    @action initSprintList(sprintList) {
-      this.sprintList = sprintList.concat([{
-        sprintId: 'none',
-        sprintName: '未计划部分',
-      }]).map((sprint) => {
-        const oldSprint = find(this.sprintList, { sprintId: sprint.sprintId });
-        if (oldSprint) {
-          return { ...sprint, storyNum: 0, collapse: oldSprint.collapse };
-        }
-        return { ...sprint, storyNum: 0, collapse: false };
-      });
-    }
+  @action initSprintList(sprintList) {
+    this.sprintList = sprintList.concat([{
+      sprintId: 'none',
+      sprintName: '未计划部分',
+    }]).map((sprint) => {
+      const oldSprint = find(this.sprintList, { sprintId: sprint.sprintId });
+      if (oldSprint) {
+        return { ...sprint, storyNum: 0, collapse: oldSprint.collapse };
+      }
+      return { ...sprint, storyNum: 0, collapse: false };
+    });
+  }
 
   @action resetVersionList() {
-      this.versionList = this.versionList.map((version) => ({
-        ...version,
-        storyNum: 0,
-      }));
-    }
+    this.versionList = this.versionList.map((version) => ({
+      ...version,
+      storyNum: 0,
+    }));
+  }
 
   @action resetSprintList() {
     this.sprintList = this.sprintList.map((sprint) => (
@@ -317,7 +330,7 @@ class StoryMapStore {
     return sprintObj;
   }
 
-    @action initStoryData(storyMapData, firstLoad) {
+  @action initStoryData(storyMapData, firstLoad) {
     const {
       epicWithFeature, storyList, storyMapWidth,
     } = storyMapData;
@@ -363,210 +376,210 @@ class StoryMapStore {
     }
   }
 
-    @action foldCompletedEpicColumn(fold) {
-      const {
-        epicWithFeature = [],
-      } = this.storyMapData;
-      epicWithFeature.forEach((epic) => {
-        const { issueId: epicId, statusVO = {} } = epic;
-        const { completed } = statusVO;
-        if (epicId) {
-          this.storyData[epicId] = {
-            ...this.storyData[epicId],
-            collapse: completed && fold,
-          };
-        }
-      });
-    }
+  @action foldCompletedEpicColumn(fold) {
+    const {
+      epicWithFeature = [],
+    } = this.storyMapData;
+    epicWithFeature.forEach((epic) => {
+      const { issueId: epicId, statusVO = {} } = epic;
+      const { completed } = statusVO;
+      if (epicId) {
+        this.storyData[epicId] = {
+          ...this.storyData[epicId],
+          collapse: completed && fold,
+        };
+      }
+    });
+  }
 
-    @action addStoryToStoryData(story, storyData = this.storyData) {
-      const {
-        epicId, featureId, storyMapVersionDTOList, storyMapSprintList,
-      } = story;
-      if (epicId !== undefined && storyData[epicId] && storyData.epicId === story.epicData) {
-        const targetEpic = storyData[epicId];
-        const { feature, storys } = targetEpic;
-        storys.push(story);
-        const targetFeature = feature[featureId || 'none'];
-        if (targetFeature) {
-          targetFeature.storys.push(story);
-          // 故事按照version泳道分类
-          // if (this.swimLine === 'version') {
-          if (storyMapVersionDTOList.length === 0) {
-            this.addStoryNumToVersion('none');
-            if (!targetFeature.version.none) {
-              targetFeature.version.none = [];
-            }
-            targetFeature.version.none.push(story);
+  @action addStoryToStoryData(story, storyData = this.storyData) {
+    const {
+      epicId, featureId, storyMapVersionDTOList, storyMapSprintList,
+    } = story;
+    if (epicId !== undefined && storyData[epicId] && storyData.epicId === story.epicData) {
+      const targetEpic = storyData[epicId];
+      const { feature, storys } = targetEpic;
+      storys.push(story);
+      const targetFeature = feature[featureId || 'none'];
+      if (targetFeature) {
+        targetFeature.storys.push(story);
+        // 故事按照version泳道分类
+        // if (this.swimLine === 'version') {
+        if (storyMapVersionDTOList.length === 0) {
+          this.addStoryNumToVersion('none');
+          if (!targetFeature.version.none) {
+            targetFeature.version.none = [];
           }
-          storyMapVersionDTOList.forEach((version) => {
-            const { versionId } = version;
-            // if (!targetFeature.version[versionId]) {
-            //   set(targetFeature.version, {
-            //     [versionId]: [],
-            //   });
-            // }
-            this.addStoryNumToVersion(versionId);
-            if (!targetFeature.version[versionId]) {
-              targetFeature.version[versionId] = [];
-            }
-            targetFeature.version[versionId].push(story);
-          });
-
-          // 冲刺
-          if (!storyMapSprintList || storyMapSprintList.length === 0) {
-            this.addStoryNumToSprint('none');
-            if (!targetFeature.sprint.none) {
-              targetFeature.sprint.none = [];
-            }
-            targetFeature.sprint.none.push(story);
+          targetFeature.version.none.push(story);
+        }
+        storyMapVersionDTOList.forEach((version) => {
+          const { versionId } = version;
+          // if (!targetFeature.version[versionId]) {
+          //   set(targetFeature.version, {
+          //     [versionId]: [],
+          //   });
+          // }
+          this.addStoryNumToVersion(versionId);
+          if (!targetFeature.version[versionId]) {
+            targetFeature.version[versionId] = [];
           }
-          (storyMapSprintList || []).forEach((sprint) => {
-            const { sprintId } = sprint;
-            this.addStoryNumToSprint(sprintId);
-            if (!targetFeature.sprint[sprintId]) {
-              targetFeature.sprint[sprintId] = [];
-            }
-            targetFeature.sprint[sprintId].push(story);
-          });
+          targetFeature.version[versionId].push(story);
+        });
+
+        // 冲刺
+        if (!storyMapSprintList || storyMapSprintList.length === 0) {
+          this.addStoryNumToSprint('none');
+          if (!targetFeature.sprint.none) {
+            targetFeature.sprint.none = [];
+          }
+          targetFeature.sprint.none.push(story);
         }
-
-        // }
+        (storyMapSprintList || []).forEach((sprint) => {
+          const { sprintId } = sprint;
+          this.addStoryNumToSprint(sprintId);
+          if (!targetFeature.sprint[sprintId]) {
+            targetFeature.sprint[sprintId] = [];
+          }
+          targetFeature.sprint[sprintId].push(story);
+        });
       }
-    }
 
-    @action addStoryNumToVersion(versionId) {
-      const version = find(this.versionList, { versionId });
-      if (version) {
-        version.storyNum += 1;
+      // }
+    }
+  }
+
+  @action addStoryNumToVersion(versionId) {
+    const version = find(this.versionList, { versionId });
+    if (version) {
+      version.storyNum += 1;
+    }
+  }
+
+  @action addStoryNumToSprint(sprintId) {
+    const sprint = find(this.sprintList, { sprintId });
+    if (sprint) {
+      sprint.storyNum += 1;
+    }
+  }
+
+  @action collapse(epicId) {
+    this.storyData[epicId].collapse = !this.storyData[epicId].collapse;
+  }
+
+  @action collapseStory(id) {
+    switch (this.swimLine) {
+      case 'version': {
+        const targetVersion = find(this.versionList, { versionId: id });
+        targetVersion.collapse = !targetVersion.collapse;
+        break;
       }
-    }
-
-    @action addStoryNumToSprint(sprintId) {
-      const sprint = find(this.sprintList, { sprintId });
-      if (sprint) {
-        sprint.storyNum += 1;
+      case 'sprint': {
+        const targetSprint = find(this.sprintList, { sprintId: id });
+        targetSprint.collapse = !targetSprint.collapse;
+        break;
       }
+      default: break;
     }
+  }
 
-    @action collapse(epicId) {
-      this.storyData[epicId].collapse = !this.storyData[epicId].collapse;
+  @action addEpic(epicData) {
+    const epic = {
+      adding: true,
+      featureCommonDTOList: [],
+    };
+    // 删掉之前正在创建的
+    this.removeAddingEpic();
+    const currentIndex = findIndex(this.storyMapData.epicWithFeature, { issueId: epicData.issueId });
+    // console.log(currentIndex);
+    this.storyMapData.epicWithFeature.splice(currentIndex + 1, 0, epic);
+  }
+
+  @action removeAddingEpic() {
+    remove(this.storyMapData.epicWithFeature, { adding: true });
+  }
+
+  @action removeAddingFeature(epicId) {
+    const targetEpic = find(this.storyMapData.epicWithFeature, { issueId: epicId });
+    if (targetEpic) {
+      remove(targetEpic.featureCommonDTOList, { adding: true });
     }
+  }
 
-    @action collapseStory(id) {
-      switch (this.swimLine) {
-        case 'version': {
-          const targetVersion = find(this.versionList, { versionId: id });
-          targetVersion.collapse = !targetVersion.collapse;
-          break;
-        }
-        case 'sprint': {
-          const targetSprint = find(this.sprintList, { sprintId: id });
-          targetSprint.collapse = !targetSprint.collapse;
-          break;
-        }
-        default: break;
-      }
-    }
-
-    @action addEpic(epicData) {
-      const epic = {
-        adding: true,
-        featureCommonDTOList: [],
-      };
-      // 删掉之前正在创建的
-      this.removeAddingEpic();
-      const currentIndex = findIndex(this.storyMapData.epicWithFeature, { issueId: epicData.issueId });
-      // console.log(currentIndex);
-      this.storyMapData.epicWithFeature.splice(currentIndex + 1, 0, epic);
-    }
-
-    @action removeAddingEpic() {
-      remove(this.storyMapData.epicWithFeature, { adding: true });
-    }
-
-    @action removeAddingFeature(epicId) {
-      const targetEpic = find(this.storyMapData.epicWithFeature, { issueId: epicId });
-      if (targetEpic) {
-        remove(targetEpic.featureCommonDTOList, { adding: true });
-      }
-    }
-
-    @action afterCreateEpic(index, newEpic) {
-      this.storyMapData.epicWithFeature[index] = { ...newEpic, featureCommonDTOList: [] };
-      set(this.storyData, {
-        [newEpic.issueId]: {
-          epicId: newEpic.issueId,
-          collapse: false,
-          storys: [],
-          feature: {
-            none: {
-              storys: [],
-              version: this.getInitVersions(),
-              sprint: this.getInitSprints(),
-              width: 1,
-            },
+  @action afterCreateEpic(index, newEpic) {
+    this.storyMapData.epicWithFeature[index] = { ...newEpic, featureCommonDTOList: [] };
+    set(this.storyData, {
+      [newEpic.issueId]: {
+        epicId: newEpic.issueId,
+        collapse: false,
+        storys: [],
+        feature: {
+          none: {
+            storys: [],
+            version: this.getInitVersions(),
+            sprint: this.getInitSprints(),
+            width: 1,
           },
         },
-      });
-    }
+      },
+    });
+  }
 
-    @action afterCreateEpicInModal(newEpic) {
-      this.storyMapData.epicWithFeature.unshift({ ...newEpic, featureCommonDTOList: [] });
-      set(this.storyData, {
-        [newEpic.issueId]: {
-          epicId: newEpic.issueId,
-          collapse: false,
-          storys: [],
-          feature: {
-            none: {
-              storys: [],
-              version: this.getInitVersions(),
-              sprint: this.getInitSprints(),
-              width: 1,
-            },
+  @action afterCreateEpicInModal(newEpic) {
+    this.storyMapData.epicWithFeature.unshift({ ...newEpic, featureCommonDTOList: [] });
+    set(this.storyData, {
+      [newEpic.issueId]: {
+        epicId: newEpic.issueId,
+        collapse: false,
+        storys: [],
+        feature: {
+          none: {
+            storys: [],
+            version: this.getInitVersions(),
+            sprint: this.getInitSprints(),
+            width: 1,
           },
         },
-      });
-    }
+      },
+    });
+  }
 
-    @action addFeature(epic) {
-      const feature = {
-        adding: true,
-      };
+  @action addFeature(epic) {
+    const feature = {
+      adding: true,
+    };
 
-      const currentIndex = findIndex(this.storyMapData.epicWithFeature, { issueId: epic.issueId });
-      // console.log(currentIndex);
-      // console.log(epic, currentIndex);
-      this.storyMapData.epicWithFeature[currentIndex].featureCommonDTOList.push(feature);
-    }
+    const currentIndex = findIndex(this.storyMapData.epicWithFeature, { issueId: epic.issueId });
+    // console.log(currentIndex);
+    // console.log(epic, currentIndex);
+    this.storyMapData.epicWithFeature[currentIndex].featureCommonDTOList.push(feature);
+  }
 
-    @action afterCreateFeature(epicIndex, newFeature) {
-      const { length } = this.storyMapData.epicWithFeature[epicIndex].featureCommonDTOList;
-      this.storyMapData.epicWithFeature[epicIndex].featureCommonDTOList[length - 1] = newFeature;
-      const { issueId: epicId } = this.storyMapData.epicWithFeature[epicIndex];
-      set(this.storyData[epicId].feature, {
-        [newFeature.issueId]: {
-          storys: [],
-          version: this.getInitVersions(),
-          sprint: this.getInitSprints(),
-          width: 1,
-        },
-      });
-    }
+  @action afterCreateFeature(epicIndex, newFeature) {
+    const { length } = this.storyMapData.epicWithFeature[epicIndex].featureCommonDTOList;
+    this.storyMapData.epicWithFeature[epicIndex].featureCommonDTOList[length - 1] = newFeature;
+    const { issueId: epicId } = this.storyMapData.epicWithFeature[epicIndex];
+    set(this.storyData[epicId].feature, {
+      [newFeature.issueId]: {
+        storys: [],
+        version: this.getInitVersions(),
+        sprint: this.getInitSprints(),
+        width: 1,
+      },
+    });
+  }
 
-    @action afterCreateStory(newStory) {
-      this.addStoryToStoryData(newStory);
-      this.storyMapData.storyList.push(newStory);
-    }
+  @action afterCreateStory(newStory) {
+    this.addStoryToStoryData(newStory);
+    this.storyMapData.storyList.push(newStory);
+  }
 
   @action removeStoryFromStoryMap(story, targetVersionOrSprintId) {
-      const {
-        epicId, featureId, storyMapVersionDTOList, storyMapSprintList,
-      } = story;
-      if (targetVersionOrSprintId) {
-        this.getStoryMap();
-        this.setClickIssue();
+    const {
+      epicId, featureId, storyMapVersionDTOList, storyMapSprintList,
+    } = story;
+    if (targetVersionOrSprintId) {
+      this.getStoryMap();
+      this.setClickIssue();
       // if (this.storyData[epicId]) {
       //   const targetEpic = this.storyData[epicId];
       //   const { feature } = targetEpic;
@@ -578,55 +591,55 @@ class StoryMapStore {
       //     targetFeature.version.none.push(story);
       //   }
       // }
-      } else {
-        remove(this.storyMapData.storyList, { issueId: story.issueId });
-        if (this.storyData[epicId]) {
-          const targetEpic = this.storyData[epicId];
-          const { feature } = targetEpic;
-          remove(targetEpic.storys, { issueId: story.issueId });
-          const targetFeature = feature[featureId || 'none'];
-          remove(targetFeature.storys, { issueId: story.issueId });
-          // 从各个版本移除
-          if (storyMapVersionDTOList.length === 0) {
-            if (targetFeature.version.none) {
-              remove(targetFeature.version.none, { issueId: story.issueId });
-              const version = find(this.versionList, { versionId: 'none' });
-              if (version) {
-                version.storyNum -= 1;
-              }
+    } else {
+      remove(this.storyMapData.storyList, { issueId: story.issueId });
+      if (this.storyData[epicId]) {
+        const targetEpic = this.storyData[epicId];
+        const { feature } = targetEpic;
+        remove(targetEpic.storys, { issueId: story.issueId });
+        const targetFeature = feature[featureId || 'none'];
+        remove(targetFeature.storys, { issueId: story.issueId });
+        // 从各个版本移除
+        if (storyMapVersionDTOList.length === 0) {
+          if (targetFeature.version.none) {
+            remove(targetFeature.version.none, { issueId: story.issueId });
+            const version = find(this.versionList, { versionId: 'none' });
+            if (version) {
+              version.storyNum -= 1;
             }
-            storyMapVersionDTOList.forEach((version) => {
-              const { versionId } = version;
-              remove(targetFeature.version[versionId], { issueId: story.issueId });
-              const v = find(this.versionList, { versionId });
-              if (version) {
-                v.storyNum -= 1;
-              }
-            });
-            // 从各个冲刺移除
-            if (storyMapSprintList.length === 0) {
-              if (targetFeature.sprint.none) {
-                remove(targetFeature.sprint.none, { issueId: story.issueId });
-                const sprint = find(this.sprintList, { sprintId: 'none' });
-                if (sprint) {
-                  sprint.storyNum -= 1;
-                }
-              }
-            }
-            storyMapSprintList.forEach((sprint) => {
-              const { sprintId } = sprint;
-              remove(targetFeature.sprint[sprintId], { issueId: story.issueId });
-              const v = find(this.sprintList, { sprintId });
-              if (sprint) {
-                v.storyNum -= 1;
-              }
-            });
           }
+          storyMapVersionDTOList.forEach((version) => {
+            const { versionId } = version;
+            remove(targetFeature.version[versionId], { issueId: story.issueId });
+            const v = find(this.versionList, { versionId });
+            if (version) {
+              v.storyNum -= 1;
+            }
+          });
+          // 从各个冲刺移除
+          if (storyMapSprintList.length === 0) {
+            if (targetFeature.sprint.none) {
+              remove(targetFeature.sprint.none, { issueId: story.issueId });
+              const sprint = find(this.sprintList, { sprintId: 'none' });
+              if (sprint) {
+                sprint.storyNum -= 1;
+              }
+            }
+          }
+          storyMapSprintList.forEach((sprint) => {
+            const { sprintId } = sprint;
+            remove(targetFeature.sprint[sprintId], { issueId: story.issueId });
+            const v = find(this.sprintList, { sprintId });
+            if (sprint) {
+              v.storyNum -= 1;
+            }
+          });
         }
       }
     }
+  }
 
-    @action setFeatureWidth({
+  @action setFeatureWidth({
     epicId,
     featureId,
     width,
@@ -634,176 +647,176 @@ class StoryMapStore {
     this.storyData[epicId].feature[featureId].width = width;
   }
 
-    changeWidth({
+  changeWidth({
+    width,
+    issueId,
+    type,
+  }, {
+    epicId,
+    featureId,
+    initWidth,
+  }) {
+    const { storyMapWidth } = this.storyMapData;
+    const targetWidth = find(storyMapWidth, { type, issueId });
+    const targetIndex = findIndex(storyMapWidth, { type, issueId });
+    const storyMapWidthVO = {
+      ...targetWidth,
+      projectId: getProjectId(),
       width,
       issueId,
       type,
-    }, {
-      epicId,
-      featureId,
-      initWidth,
-    }) {
-      const { storyMapWidth } = this.storyMapData;
-      const targetWidth = find(storyMapWidth, { type, issueId });
-      const targetIndex = findIndex(storyMapWidth, { type, issueId });
-      const storyMapWidthVO = {
-        ...targetWidth,
-        projectId: getProjectId(),
-        width,
-        issueId,
-        type,
-      };
-      if (!targetWidth) {
-        storyMapApi.createWidth(storyMapWidthVO).then((res) => {
-          if (res.failed) {
-            this.setFeatureWidth({
-              epicId,
-              featureId,
-              width: initWidth,
-            });
-          } else {
-            this.addWidthVO(res);
-          }
-        }).catch((err) => {
+    };
+    if (!targetWidth) {
+      storyMapApi.createWidth(storyMapWidthVO).then((res) => {
+        if (res.failed) {
           this.setFeatureWidth({
             epicId,
             featureId,
             width: initWidth,
           });
+        } else {
+          this.addWidthVO(res);
+        }
+      }).catch((err) => {
+        this.setFeatureWidth({
+          epicId,
+          featureId,
+          width: initWidth,
         });
-      } else {
-        storyMapApi.changeWidth(storyMapWidthVO).then((res) => {
-          if (res.failed) {
-            this.setFeatureWidth({
-              epicId,
-              featureId,
-              width: initWidth,
-            });
-          } else {
-            action(() => {
-              storyMapWidth[targetIndex] = res;
-            })();
-          }
-        }).catch((err) => {
+      });
+    } else {
+      storyMapApi.changeWidth(storyMapWidthVO).then((res) => {
+        if (res.failed) {
           this.setFeatureWidth({
             epicId,
             featureId,
             width: initWidth,
           });
+        } else {
+          action(() => {
+            storyMapWidth[targetIndex] = res;
+          })();
+        }
+      }).catch((err) => {
+        this.setFeatureWidth({
+          epicId,
+          featureId,
+          width: initWidth,
         });
-      }
-    }
-
-    @action addWidthVO(storyMapWidthVO) {
-      const { storyMapWidth } = this.storyMapData;
-      storyMapWidth.push(storyMapWidthVO);
-    }
-
-    @action setClickIssue(clickIssue) {
-      this.selectedIssueMap.clear();
-      if (clickIssue) {
-        this.sideIssueListVisible = false;
-        this.selectedIssueMap.set(clickIssue.issueId, clickIssue);
-      }
-    }
-
-    sortEpic(source, destination, sourceIndex, resultIndex) {
-      if (!source || !destination || source.issueId === destination.issueId) {
-        return;
-      }
-      const sortVO = {
-        projectId: getProjectId(),
-        objectVersionNumber: source.epicRankObjectVersionNumber, // 乐观锁
-        issueId: source.issueId,
-        type: 'epic',
-        before: true, // 是否拖动到第一个
-        after: false,
-        referenceIssueId: destination.issueId,
-      };
-
-      storyMapApi.sort(sortVO).then(() => {
-        const [removed] = this.storyMapData.epicWithFeature.splice(sourceIndex, 1);
-        this.storyMapData.epicWithFeature.splice(resultIndex, 0, removed);
       });
     }
+  }
 
-    getIssueTypeByCode(typeCode) {
-      return find(this.issueTypes, { typeCode });
+  @action addWidthVO(storyMapWidthVO) {
+    const { storyMapWidth } = this.storyMapData;
+    storyMapWidth.push(storyMapWidthVO);
+  }
+
+  @action setClickIssue(clickIssue) {
+    this.selectedIssueMap.clear();
+    if (clickIssue) {
+      this.sideIssueListVisible = false;
+      this.selectedIssueMap.set(clickIssue.issueId, clickIssue);
     }
+  }
 
-    setMiniMapRef(ref) {
-      this.miniMap = ref;
+  sortEpic(source, destination, sourceIndex, resultIndex) {
+    if (!source || !destination || source.issueId === destination.issueId) {
+      return;
     }
+    const sortVO = {
+      projectId: getProjectId(),
+      objectVersionNumber: source.epicRankObjectVersionNumber, // 乐观锁
+      issueId: source.issueId,
+      type: 'epic',
+      before: true, // 是否拖动到第一个
+      after: false,
+      referenceIssueId: destination.issueId,
+    };
 
-    @computed get getEpicList() {
-      const { epicWithFeature } = this.storyMapData || {};
-      return epicWithFeature || [];
+    storyMapApi.sort(sortVO).then(() => {
+      const [removed] = this.storyMapData.epicWithFeature.splice(sourceIndex, 1);
+      this.storyMapData.epicWithFeature.splice(resultIndex, 0, removed);
+    });
+  }
+
+  getIssueTypeByCode(typeCode) {
+    return find(this.issueTypes, { typeCode });
+  }
+
+  setMiniMapRef(ref) {
+    this.miniMap = ref;
+  }
+
+  @computed get getEpicList() {
+    const { epicWithFeature } = this.storyMapData || {};
+    return epicWithFeature || [];
+  }
+
+  @computed get getIsEmpty() {
+    const { epicWithFeature, featureWithoutEpic } = this.storyMapData;
+    if (epicWithFeature && featureWithoutEpic) {
+      return featureWithoutEpic.length === 0 && epicWithFeature.filter((epic) => epic.issueId).length === 0;
+    } if (epicWithFeature) {
+      return epicWithFeature.filter((epic) => epic.issueId).length === 0;
     }
+    return false;
+  }
 
-    @computed get getIsEmpty() {
-      const { epicWithFeature, featureWithoutEpic } = this.storyMapData;
-      if (epicWithFeature && featureWithoutEpic) {
-        return featureWithoutEpic.length === 0 && epicWithFeature.filter((epic) => epic.issueId).length === 0;
-      } if (epicWithFeature) {
-        return epicWithFeature.filter((epic) => epic.issueId).length === 0;
-      }
-      return false;
-    }
+  @computed get getEpicType() {
+    return find(this.issueTypes, { typeCode: 'issue_epic' });
+  }
 
-    @computed get getEpicType() {
-      return find(this.issueTypes, { typeCode: 'issue_epic' });
-    }
+  @computed get getFeatureType() {
+    return find(this.issueTypes, { typeCode: 'feature' });
+  }
 
-    @computed get getFeatureType() {
-      return find(this.issueTypes, { typeCode: 'feature' });
-    }
+  @computed get getDefaultPriority() {
+    return find(this.prioritys, { default: true }) || this.prioritys[0];
+  }
 
-    @computed get getDefaultPriority() {
-      return find(this.prioritys, { default: true }) || this.prioritys[0];
-    }
+  @observable tableOverflow = false;
 
-    @observable tableOverflow = false;
+  @action setTableOverflow({ tableWidth = 0, containerWidth = 0 }) {
+    this.tableOverflow = tableWidth > containerWidth;
+  }
 
-    @action setTableOverflow({ tableWidth = 0, containerWidth = 0 }) {
-      this.tableOverflow = tableWidth > containerWidth;
-    }
+  // 筛选列表是否显示
+  @observable filterListVisible = false;
 
-    // 筛选列表是否显示
-    @observable filterListVisible = false;
+  @computed get getFilterListVisible() {
+    return this.filterListVisible;
+  }
 
-    @computed get getFilterListVisible() {
-      return this.filterListVisible;
-    }
+  @action setFilterListVisible = (data) => {
+    this.filterListVisible = data;
+  }
 
-    @action setFilterListVisible = (data) => {
-      this.filterListVisible = data;
-    }
+  @observable epicInViewportMap = observable.map();
 
-    @observable epicInViewportMap = observable.map();
+  @action setEpicInViewportMap = (key, value) => {
+    this.epicInViewportMap.set(key, value);
+  }
 
-    @action setEpicInViewportMap = (key, value) => {
-      this.epicInViewportMap.set(key, value);
-    }
+  @observable rowInViewportMap = observable.map();
 
-    @observable rowInViewportMap = observable.map();
+  @action setRowInViewportMap = (key, value) => {
+    this.rowInViewportMap.set(key, value);
+  }
 
-    @action setRowInViewportMap = (key, value) => {
-      this.rowInViewportMap.set(key, value);
-    }
+  @observable tableWidth = 0;
 
-    @observable tableWidth = 0;
+  @action setTableWidth = (data) => {
+    this.tableWidth = data;
+  }
 
-    @action setTableWidth = (data) => {
-      this.tableWidth = data;
-    }
+  @observable scrollWidth = 0;
 
-    @observable scrollWidth = 0;
+  @action setScrollWidth = (data) => {
+    this.scrollWidth = data;
+  }
 
-    @action setScrollWidth = (data) => {
-      this.scrollWidth = data;
-    }
-
-    @observable pageDataMap = observable.map();
+  @observable pageDataMap = observable.map();
 }
 
 export default new StoryMapStore();
