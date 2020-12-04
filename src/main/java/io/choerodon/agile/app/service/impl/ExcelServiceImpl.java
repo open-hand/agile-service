@@ -2606,6 +2606,7 @@ public class ExcelServiceImpl implements ExcelService {
                         exportIssuesVO.setVersionName(exportIssuesVersionName(exportIssuesVO));
                         exportIssuesVO.setDescription(getDes(exportIssuesVO.getDescription()));
                         setFoundationFieldValue(foundationCodeValue, issueId, exportIssuesVO);
+                        resetRemainingTimeIfCompleted(issue, exportIssuesVO);
                         issueMap.put(issueId, exportIssuesVO);
                         processParentSonRelation(parentSonMap, issue);
                     });
@@ -2625,6 +2626,12 @@ public class ExcelServiceImpl implements ExcelService {
         String fileName = project.getName() + FILESUFFIX;
         //把workbook上传到对象存储服务中
         downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
+    }
+
+    private void resetRemainingTimeIfCompleted(IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        if (Boolean.TRUE.equals(issue.getCompleted())) {
+            exportIssuesVO.setRemainingTime(new BigDecimal(0));
+        }
     }
 
     protected Double getProcess(Integer currentNum, Integer totalNum) {
