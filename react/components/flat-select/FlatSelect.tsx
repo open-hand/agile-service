@@ -62,7 +62,7 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     const { name, multiple } = this;
     const hasValue = !this.isEmpty();
     const placeholder = this.hasFloatLabel ? undefined : this.getPlaceholders()[0];
-    const width = (hasValue ? 0 : measureTextWidth(placeholder || '') + 32);
+    const width = (hasValue ? 0 : measureTextWidth(placeholder || '') + 36);
     if (multiple) {
       return (
         <input
@@ -112,7 +112,7 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
                 ref: this.saveTagContainer,
                 onScroll: stopPropagation,
                 style:
-                height && height !== 'auto' ? { height: pxToRem(toPx(height)! - 2) } : undefined,
+                  height && height !== 'auto' ? { height: pxToRem(toPx(height)! - 2) } : undefined,
               }}
               transitionName="zoom"
               exclusive
@@ -134,7 +134,7 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     const hasValue = this.getValue() !== undefined && this.getValue() !== null;
     const placeholder = this.hasFloatLabel ? undefined : this.getPlaceholders()[0];
     const { clearButton } = this.props;
-    const width = (hasValue ? measureTextWidth(finalText) + (clearButton ? 52 : 35) : measureTextWidth(placeholder || '') + 36);
+    const width = (hasValue ? measureTextWidth(finalText) + (clearButton ? 52 : 35) : measureTextWidth(placeholder || '') + 32);
     if (isValidElement(text)) {
       otherProps.style = { ...otherProps.style, width, textIndent: -1000 };
     } else {

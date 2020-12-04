@@ -3,6 +3,7 @@ import { Select } from 'choerodon-ui/pro';
 import { IStatusCirculation, statusTransformApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   issueTypeId?: string
@@ -10,11 +11,12 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (statuss: IStatusCirculation[]) => void
   request?: Function
+  flat?: boolean
 }
 
 const SelectStatus: React.FC<Props> = forwardRef(
   ({
-    request, issueTypeId, expectStatusId, dataRef, afterLoad, ...otherProps
+    request, issueTypeId, expectStatusId, dataRef, afterLoad, flat, ...otherProps
   }, ref: React.Ref<Select>) => {
     const config = useMemo((): SelectConfig<IStatusCirculation> => ({
       name: 'status',
@@ -46,8 +48,9 @@ const SelectStatus: React.FC<Props> = forwardRef(
       paging: false,
     }), [afterLoad, dataRef, expectStatusId, issueTypeId, request]);
     const props = useSelect(config);
+    const Component = flat ? FlatSelect : Select;
     return (
-      <Select
+      <Component
         ref={ref}
         {...props}
         {...otherProps}

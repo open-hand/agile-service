@@ -4,16 +4,18 @@ import { epicApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IEpic } from '@/components/charts/epic-report/search';
+import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   isProgram?: boolean
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (epics: IEpic[]) => void
   dontAddEpic0?: boolean
+  flat?:boolean
 }
 
 const SelectEpic: React.FC<Props> = forwardRef(({
-  isProgram, afterLoad, dataRef, dontAddEpic0, ...otherProps
+  isProgram, afterLoad, dataRef, dontAddEpic0, flat, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'epic',
@@ -37,8 +39,10 @@ const SelectEpic: React.FC<Props> = forwardRef(({
     paging: false,
   }), []);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
+
   return (
-    <Select
+    <Component
       ref={ref}
       clearButton
       {...props}

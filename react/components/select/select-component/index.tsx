@@ -4,15 +4,17 @@ import { componentApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IComponent } from '@/common/types';
+import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   valueField?: string
   afterLoad?: (components: IComponent[]) => void
+  flat?:boolean
 }
 
 const SelectComponent: React.FC<Props> = forwardRef(({
-  dataRef, afterLoad, valueField, ...otherProps
+  dataRef, afterLoad, valueField, flat, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'component',
@@ -35,8 +37,10 @@ const SelectComponent: React.FC<Props> = forwardRef(({
     paging: false,
   }), []);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
+
   return (
-    <Select
+    <Component
       ref={ref}
       clearButton
       multiple
