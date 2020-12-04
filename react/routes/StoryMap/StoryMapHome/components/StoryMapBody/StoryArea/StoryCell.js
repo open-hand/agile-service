@@ -62,7 +62,7 @@ class StoryCell extends Component {
                       {featureList.filter((feature) => !feature.adding && feature.issueId).map((feature, index) => {
                         const targetFeature = targetEpic.feature[feature.issueId] || {};
                         if (targetFeature) {
-                          const storys = this.getStorys(targetFeature);
+                          const storys = this.getStorys(targetFeature) || [];
                           return (
                             (!StoryMapStore.hiddenColumnNoStory || storys.length > 0)
                               ? (
