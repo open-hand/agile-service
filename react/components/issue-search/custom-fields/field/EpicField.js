@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { unionBy } from 'lodash';
-import SelectFocusLoad from '@/components/SelectFocusLoad';
-import { configTheme } from '@/utils/common';
 import SelectEpic from '@/components/select/select-epic';
-import { getSelectStyle } from '../utils';
+import { epicApi } from '@/api';
 
-const list = [];
 function EpicField({ field, value, onChange }) {
   const [, setValue] = useState(0);
   return (
@@ -14,6 +10,7 @@ function EpicField({ field, value, onChange }) {
       key={field.code}
       flat
       value={value || []}
+      request={() => epicApi.loadEpicsForSelect()}
       placeholder={field.name}
       multiple
       maxTagCount={3}

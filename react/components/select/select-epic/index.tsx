@@ -8,21 +8,22 @@ import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   isProgram?: boolean
+  request?: SelectConfig<any>['request']
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (epics: IEpic[]) => void
   dontAddEpic0?: boolean
-  flat?:boolean
+  flat?: boolean
 }
 
 const SelectEpic: React.FC<Props> = forwardRef(({
-  isProgram, afterLoad, dataRef, dontAddEpic0, flat, ...otherProps
+  isProgram, afterLoad, dataRef, dontAddEpic0, request, flat, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'epic',
     textField: 'epicName',
     valueField: 'issueId',
-    request: () => (isProgram ? epicApi.loadProgramEpics() : epicApi.loadEpics()),
-    middleWare: (epicList:IEpic[]) => {
+    request: request || (() => (isProgram ? epicApi.loadProgramEpics() : epicApi.loadEpics())),
+    middleWare: (epicList: IEpic[]) => {
       if (isProgram && !dontAddEpic0) {
         epicList.unshift({ issueId: '0', epicName: '未分配史诗' });
       }
