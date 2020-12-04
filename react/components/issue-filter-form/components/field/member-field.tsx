@@ -33,7 +33,6 @@ function useMemberLocalMap(config?: MemberLocalMapConfig): [{ userMaps: Map<stri
             userMaps.set(id!, { ...list[0], id: String(list[0].id) });
           }
           finishStack.push(id);
-          console.log(`.user_id:${id}`, key, finishStack);
           if (finishStack.length === userMaps.size) {
             config?.events.onFinish(finishStack);
           }

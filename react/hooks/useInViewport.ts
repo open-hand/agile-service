@@ -42,7 +42,6 @@ function useInViewport(targets: Map<string, BasicTarget>): Map<string, InViewpor
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
-      console.log(entries);
       for (const entry of entries) {
         if (entry.isIntersecting) {
           setInViewport(inViewPortMap, entry.target.className.split('-')[1], true);
@@ -54,7 +53,6 @@ function useInViewport(targets: Map<string, BasicTarget>): Map<string, InViewpor
     });
 
     for (const el of targets.values()) {
-      console.log(el);
       observer.observe(el as Element);
     }
 
@@ -63,7 +61,6 @@ function useInViewport(targets: Map<string, BasicTarget>): Map<string, InViewpor
     };
   }, [inViewPortMap, targets]);
 
-  console.log(inViewPortMap);
   return inViewPortMap;
 }
 
