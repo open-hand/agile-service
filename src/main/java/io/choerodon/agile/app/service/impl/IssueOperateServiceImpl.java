@@ -40,19 +40,22 @@ public class IssueOperateServiceImpl implements IssueOperateService {
     @Override
     public void batchDeleteIssue(Long projectId, List<Long> issueIds) {
         if (!CollectionUtils.isEmpty(issueIds)) {
+            String messageCode = WEBSOCKET_BATCH_DELETE_ISSUE + "-" + projectId;
             Long userId = DetailsHelper.getUserDetails().getUserId();
+            BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
+            batchUpdateFieldStatusVO.setKey(messageCode);
+            batchUpdateFieldStatusVO.setUserId(userId);
             boolean projectOwner = userService.isProjectOwner(projectId, userId);
             if (Boolean.FALSE.equals(projectOwner)) {
+                batchUpdateFieldStatusVO.setStatus("failed");
+                batchUpdateFieldStatusVO.setError("您无删除权限");
+                messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 return;
             }
-            String messageCode = WEBSOCKET_BATCH_DELETE_ISSUE + "-" + projectId;
-            BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
             Double progress = 0.0;
             double incremental = Math.ceil(issueIds.size() <= 20 ? 1 : (issueIds.size()*1.0) / 20) ;
             try {
                 batchUpdateFieldStatusVO.setStatus("doing");
-                batchUpdateFieldStatusVO.setKey(messageCode);
-                batchUpdateFieldStatusVO.setUserId(userId);
                 batchUpdateFieldStatusVO.setProcess(progress);
                 messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 // 查询子任务ids
