@@ -10,8 +10,18 @@ interface Props {
   disabled?: boolean,
   checked: boolean,
   name: string,
-  record?: Record | null,
+  record?: { id: any, [propsName: string]: any } | null,
   onChange: (value: boolean) => any,
+}
+function randomString() {
+  const length = 12;
+  const characterLibrary = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz0123456789';
+  const characterLibraryLength = characterLibrary.length;
+  let randomStr = '';
+  for (let i = 0; i < length; i += 1) {
+    randomStr += characterLibrary.charAt(Math.floor(Math.random() * characterLibraryLength));
+  }
+  return randomStr;
 }
 const CheckBox: React.FC<Props> = ({
   disabled, checked: propsChecked, onChange, defaultChecked,
@@ -48,10 +58,10 @@ const CheckBox: React.FC<Props> = ({
         checked={checked}
         // onClick=
         onChange={handleChange}
-        id={`page-checkbox-${record?.id}-${name}`}
+        id={`page-checkbox-${record?.id || randomString()}-${name}`}
       />
       {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-      <label htmlFor={`page-checkbox-${record?.id}-${name}`} />
+      <label htmlFor={`page-checkbox-${record?.id || randomString()}-${name}`} />
     </div>
   );
   return (
