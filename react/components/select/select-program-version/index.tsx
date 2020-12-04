@@ -124,7 +124,6 @@ const SelectProgramVersion: React.FC<Props> = forwardRef(({
 export default SelectProgramVersion;
 const OldSelectProgramVersion: React.FC<OldProps> = ({ teamProjectIds, ...restProps }) => {
   const [versionData, method] = useGetVersionData({ teamProjectIds });
-  console.log('OldSelect....111');
   const OptionComponent = versionData.headOptions.map((item) => {
     const options = (versionData.option.get(item.id) || []);
 

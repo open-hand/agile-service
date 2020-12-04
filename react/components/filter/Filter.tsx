@@ -1,13 +1,18 @@
-import React, { useCallback, useMemo } from 'react';
+import React, {
+  useCallback, useMemo, useState, useRef, useEffect,
+} from 'react';
 import { find, uniq, pull } from 'lodash';
 import { Button, Icon } from 'choerodon-ui/pro';
 import classNames from 'classnames';
 import SelectField, { SelectFieldProps } from '@/components/field/select-field';
 import Field from '@/components/field';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { BasicTarget } from 'ahooks/lib/utils/dom';
+import { useSize } from 'ahooks';
 import { ISystemField, ICustomField, IFilterField } from '.';
 import { getFlatElement, renderGroupedFields, renderFields } from './utils';
+import styles from './Filter.less';
 
 export interface IFilter {
   [key: string]: any
@@ -17,6 +22,11 @@ export type IRenderFields = (arg: {
   getFieldElement: (field: IFilterField) => { element: React.ReactElement, removeButton: React.ReactElement | null }
   selectField: React.ReactElement | null
   resetButton: React.ReactElement | null
+  foldButton?: React.ReactElement | null
+  folded?: boolean | undefined,
+  overflowLine?: boolean,
+  filterRef?: React.MutableRefObject<HTMLDivElement | null>,
+
 }) => React.ReactElement
 
 export interface FilterProps {
@@ -49,6 +59,10 @@ const Filter: React.FC<FilterProps> = ({
   filter,
   selectFieldGroups,
 }) => {
+  const [folded, setFolded] = useState<boolean | undefined>();
+  const [overflowLine, setOverflowLine] = useState<boolean>(false);
+  const filterRef = useRef<HTMLDivElement | null>(null);
+
   const handleFilterChange = useCallback((code: string, v: any) => {
     const clonedFilter = { ...filter };
     if (v === null || v === undefined) {
@@ -237,26 +251,52 @@ const Filter: React.FC<FilterProps> = ({
   const resetFilter = useCallback(() => {
     onFilterChange({});
   }, [onFilterChange]);
+
+  const expandFilter = useCallback(() => {
+    setFolded(!folded);
+  }, [folded]);
+
   const renderResetButton = useCallback(() => {
     if (!Object.keys(filter).some((key) => filter[key] !== undefined && filter[key] !== null && filter[key] !== '')) {
       return null;
     }
     return (
-      <Button color={'blue' as ButtonColor} onClick={resetFilter}>
+      <Button className={styles.btn} funcType={'flat' as FuncType} onClick={resetFilter}>
         重置
       </Button>
     );
   }, [filter, resetFilter]);
+
+  const renderFoldButton = useCallback(() => (
+    <>
+      {
+       (overflowLine || folded === true) && (
+       <Button className={styles.btn} funcType={'flat' as FuncType} onClick={expandFilter}>
+         <Icon type={folded ? 'expand_more' : 'expand_less'} />
+       </Button>
+       )
+    }
+    </>
+  ), [expandFilter, folded, overflowLine]);
+
   const selectField = renderSelectField();
   const resetButton = renderResetButton();
+  const foldButton = renderFoldButton();
+
+  const searchSize = useSize(filterRef as BasicTarget);
+
+  useEffect(() => {
+    setOverflowLine((searchSize.height || 0) > 50);
+  }, [searchSize]);
+
   if (renderer) {
     return renderer({
-      fields: selectedFields, getFieldElement: renderField, selectField, resetButton,
+      fields: selectedFields, getFieldElement: renderField, selectField, resetButton, foldButton, folded, overflowLine, filterRef,
     });
   }
   return grouped
     ? renderGroupedFields({
-      fields: selectedFields, getFieldElement: renderField, selectField, resetButton,
+      fields: selectedFields, getFieldElement: renderField, selectField, resetButton, foldButton, folded, overflowLine, filterRef,
     })
     : renderFields({
       fields: selectedFields, getFieldElement: renderField, selectField, resetButton,

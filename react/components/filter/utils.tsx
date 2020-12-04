@@ -83,7 +83,7 @@ function renderField(field: IFilterField, { element, removeButton }: { element: 
   );
 }
 export const renderGroupedFields: IRenderFields = ({
-  fields, getFieldElement, selectField, resetButton,
+  fields, getFieldElement, selectField, resetButton, filterRef, folded,
 }) => {
   const selectTypes: IFilterField[] = [];
   const dateTypes: IFilterField[] = [];
@@ -115,7 +115,12 @@ export const renderGroupedFields: IRenderFields = ({
     result[result.length - 1].props.children.push(<div style={{ marginLeft: 10, marginTop: 3 }}>{selectField}</div>);
   }
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+    <div
+      ref={filterRef}
+      style={{
+        display: 'flex', alignItems: 'flex-start', height: folded ? 48 : 'unset', overflowY: 'hidden',
+      }}
+    >
       {contentField && <div>{getFieldElement(contentField).element}</div>}
       <div>
         {result}
