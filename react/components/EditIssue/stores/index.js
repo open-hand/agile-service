@@ -1,4 +1,4 @@
-import React, { createContext, useMemo } from 'react';
+import React, { createContext, useMemo, useRef } from 'react';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
 import EditIssueStore from './EditIssueStore';
@@ -14,6 +14,7 @@ export const EditIssueContextProvider = injectIntl(inject('AppState', 'HeaderSto
     current: null,
   };
   const isOnlyAgileProject = props.AppState.menuType.category === 'AGILE';
+  const descriptionEditRef = useRef(false);
   const value = {
     ...props,
     isOnlyAgileProject,
@@ -22,6 +23,7 @@ export const EditIssueContextProvider = injectIntl(inject('AppState', 'HeaderSto
     store: useMemo(() => new EditIssueStore(), []), // 防止update时创建多次store
     FieldVersionRef,
     FieldFixVersionRef,
+    descriptionEditRef,
     saveFieldVersionRef: (ref) => {
       FieldVersionRef.current = ref;
     },

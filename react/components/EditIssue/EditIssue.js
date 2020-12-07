@@ -5,7 +5,7 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores, Choerodon } from '@choerodon/boot';
-import { Spin } from 'choerodon-ui';
+import { Spin, Modal } from 'choerodon-ui';
 import { throttle } from 'lodash';
 import './EditIssue.less';
 import { useIssueTypes } from '@/hooks';
@@ -48,15 +48,13 @@ function EditIssue() {
     onDeleteSubIssue,
     disabled,
     prefixCls,
-    FieldVersionRef,
-    FieldFixVersionRef,
-    intlPrefix,
     issueStore,
     HeaderStore,
     isFullScreen,
     onChangeWidth,
     transformIssue,
     setSelect,
+    descriptionEditRef,
   } = useContext(EditIssueContext);
   const [issueTypes] = useIssueTypes();
   const container = useRef();
@@ -64,6 +62,11 @@ function EditIssue() {
 
   const loadIssueDetail = async (paramIssueId) => {
     const id = paramIssueId || currentIssueId;
+    if (idRef.current !== id && descriptionEditRef.current) {
+      Choerodon.prompt('有未保存的描述');
+      return;
+    }
+
     idRef.current = id;
     setIssueLoading(true);
     try {
