@@ -35,7 +35,7 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
     }
     return ['#FD998F', '#F96B5D'];
   }, [store.pxUnitAmp, translateX, width]);
-  const handleBeforeResize = (type:Gantt.MoveType) => () => {
+  const handleBeforeResize = (type: Gantt.MoveType) => () => {
     store.handleDragStart(data, type);
   };
   const handleResize = useCallback(({ width: newWidth, x }) => {
@@ -178,7 +178,6 @@ const TaskBar: React.FC<TaskBarProps> = ({ data }) => {
               />
             </svg>
           )}
-
         </DragResize>
       </div>
       {stepGesture !== 'moving' && <div className={styles.label} style={{ left: width + 45 }}>{label}</div>}
