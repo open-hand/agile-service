@@ -53,7 +53,7 @@ class QuickCreateIssue extends Component {
             return;
           }
           const {
-            defaultPriority, onCreate,
+            defaultPriority, onCreate, defaultAssignee,
           } = this.props;
           debounceCallback(() => {
             if (summary.trim() !== '') {
@@ -77,6 +77,7 @@ class QuickCreateIssue extends Component {
                 labelIssueRelVOList: [],
                 versionIssueRelVOList: versionIssueRelVOList || [],
                 featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
+                assigneeId: defaultAssignee,
               };
               this.setState({
                 loading: true,

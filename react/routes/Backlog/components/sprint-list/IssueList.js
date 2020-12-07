@@ -9,7 +9,7 @@ import IssueItem from './IssueItem';
 import NoneIssue from './NoneIssue';
 
 function IssueList({ data, sprintId }) {
-  const issueMap = useMemo(() => new Map(data.map(issue => [String(issue.issueId), true])), [data.length]);
+  const issueMap = useMemo(() => new Map(data.map((issue) => [String(issue.issueId), true])), [data.length]);
   const shouldIncreaseHeight = useCallback((snapshot) => {
     const { isUsingPlaceholder, draggingOverWith, draggingFromThisWith } = snapshot;
     const issueId = draggingFromThisWith || draggingOverWith;
@@ -22,7 +22,7 @@ function IssueList({ data, sprintId }) {
     }
     return (
       <Draggable draggableId={String(issue.issueId)} index={index} key={issue.issueId}>
-        {provided => <IssueItem provided={provided} issue={issue} style={{ margin: 0, ...style }} index={index} sprintId={sprintId} />}
+        {(provided) => <IssueItem provided={provided} issue={issue} style={{ margin: 0, ...style }} index={index} sprintId={sprintId} />}
       </Draggable>
     );
   }, [data]);
@@ -57,7 +57,7 @@ function IssueList({ data, sprintId }) {
                   {({ height, scrollTop, registerChild }) => (
                     <AutoSizer disableHeight>
                       {({ width }) => (
-                        <div ref={el => registerChild(el)} style={{ width: '100%' }}>
+                        <div ref={(el) => registerChild(el)} style={{ width: '100%' }}>
                           <List
                             autoHeight
                             height={height}
@@ -87,9 +87,10 @@ function IssueList({ data, sprintId }) {
                 ] : undefined}
                 sprintId={sprintId}
                 chosenFeatureId={BacklogStore.getChosenFeature !== 'all' && BacklogStore.getChosenFeature !== 'unset' ? BacklogStore.getChosenFeature : undefined}
+                defaultAssignee={BacklogStore.filterSprintAssign.get(sprintId)}
                 onCreate={(res) => {
                   BacklogStore.handleCreateIssue(res, String(sprintId));
-                  BacklogStore.refresh(false, false); // 更新侧边框 
+                  BacklogStore.refresh(false, false); // 更新侧边框
                 }}
               />
             </div>
