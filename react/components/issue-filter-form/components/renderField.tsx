@@ -67,7 +67,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       case 'epic':
       case 'epicList':
         // @ts-ignore
-        return <SelectEpic name={code} isProgram={code === 'epicList'} multiple {...otherComponentProps} />;
+        return <SelectEpic name={code} isProgram={code === 'epicList'} unassignedEpic multiple {...otherComponentProps} />;
       case 'priorityId':
         // @ts-ignore
         return <SelectPriority name={code} multiple {...otherComponentProps} />;
@@ -133,16 +133,6 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         <DateTimePicker
           name={code}
           label={name}
-          // validator={async (v) => {
-          //   console.log('code', code, v);
-          //   if (!v) {
-          //     return true;
-          //   }
-          //   if (!v[0] || !v[1]) {
-          //     return '请选择完整时间段';
-          //   }
-          //   return true;
-          // }}
           style={{ width: '100%' }}
           {...otherComponentProps}
         />

@@ -12,11 +12,12 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (epics: IEpic[]) => void
   dontAddEpic0?: boolean
+  unassignedEpic?: boolean
   flat?: boolean
 }
 
 const SelectEpic: React.FC<Props> = forwardRef(({
-  isProgram, afterLoad, dataRef, dontAddEpic0, request, flat, ...otherProps
+  isProgram, afterLoad, dataRef, dontAddEpic0, unassignedEpic, request, flat, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'epic',
@@ -24,12 +25,12 @@ const SelectEpic: React.FC<Props> = forwardRef(({
     valueField: 'issueId',
     request: request || (() => (isProgram ? epicApi.loadProgramEpics() : epicApi.loadEpics())),
     middleWare: (epicList: IEpic[]) => {
-      if (isProgram && !dontAddEpic0) {
+      if (unassignedEpic || (isProgram && !dontAddEpic0)) {
         epicList.unshift({ issueId: '0', epicName: '未分配史诗' });
       }
       if (dataRef) {
         Object.assign(dataRef, {
-          current: isProgram && !dontAddEpic0 ? epicList.unshift({ issueId: '0', epicName: '未分配史诗' }) : epicList,
+          current: (unassignedEpic || (isProgram && !dontAddEpic0)) ? epicList.unshift({ issueId: '0', epicName: '未分配史诗' }) : epicList,
         });
       }
       if (afterLoad) {

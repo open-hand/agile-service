@@ -13,6 +13,7 @@ function EpicField({ field, value, onChange }) {
       request={() => epicApi.loadEpicsForSelect()}
       placeholder={field.name}
       multiple
+      unassignedEpic
       maxTagCount={3}
       maxTagTextLength={10}
       dropdownMatchSelectWidth={false}
