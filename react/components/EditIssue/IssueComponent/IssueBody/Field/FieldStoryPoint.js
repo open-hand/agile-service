@@ -38,7 +38,8 @@ import TextEditToggle from '@/components/TextEditTogglePro';
     const { store, field, disabled } = this.props;
     const issue = store.getIssue;
     const { fieldCode, fieldName, required } = field || {};
-    const { [fieldCode]: value, typeCode } = issue;
+    const { [fieldCode]: value, typeCode, statusVO } = issue;
+    const { completed } = statusVO;
     return (
       <div className="line-start mt-10" style={{ width: '100%' }}>
         <div>
@@ -49,7 +50,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
         <div className="c7n-value-wrapper" style={{ width: '80px' }}>
           <TextEditToggle
             formKey={fieldName}
-            disabled={typeCode === 'feature' || disabled}
+            disabled={typeCode === 'feature' || (fieldCode === 'remainingTime' && completed) || disabled}
             onSubmit={this.updateIssueField}
             initValue={value ? String(value) : undefined}
             editor={({ submit }) => (
@@ -57,7 +58,21 @@ import TextEditToggle from '@/components/TextEditTogglePro';
             )}
           >
             <div style={{ whiteSpace: 'nowrap' }}>
-              {value ? `${value} ${fieldCode === 'storyPoints' ? '点' : '小时'}` : '无'}
+              {
+                fieldCode === 'storyPoints' && (
+                  <>
+                    {value ? `${value} 点` : '无'}
+                  </>
+                )
+              }
+              {
+                !completed && fieldCode === 'remainingTime' && (
+                  <>
+                    {value ? `${value} 小时` : '无'}
+                  </>
+                )
+              }
+              {completed && fieldCode === 'remainingTime' ? '0' : ''}
             </div>
           </TextEditToggle>
         </div>
