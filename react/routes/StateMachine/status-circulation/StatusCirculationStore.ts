@@ -66,15 +66,11 @@ class StatusCirculationStore {
 
   @computed
   get data() {
-    return this.statusList.map((oldFrom) => {
-      const from = { ...oldFrom };
-      // this.columnCheckedMaps.set(oldFrom.id, { checked: true, indeterminate: true });
-      return this.statusList.reduce((result, to) => ({
-        ...result,
-        ...from,
-        [to.id]: from.canTransformStatus.includes(to.id),
-      }), {});
-    });
+    return this.statusList.map((from) => this.statusList.reduce((result, to) => ({
+      ...result,
+      ...from,
+      [to.id]: from.canTransformStatus.includes(to.id),
+    }), {}));
   }
 
   @action('更改newAction.to列的全选状态')
@@ -89,9 +85,6 @@ class StatusCirculationStore {
 
       columnCheckedInfo.columnCurrentSize = columnCheckedInfo.columnCheckedIds.size;
     }
-    // if (this.checkedMaps.has(record.id)) {
-    //   this.checkedMaps.set(record.id, { ...this.checkedMaps.get(record.id)!, ...this.judgeRowCheckAll(record, newAction) });
-    // }
   }
 
   @action('更改record.id行的全选状态')
@@ -107,9 +100,6 @@ class StatusCirculationStore {
       rowCheckedInfo.rowChecked = rowCheckedInfo.rowCheckedIds.size === this.statusList.length;
       rowCheckedInfo.rowIndeterminate = rowCheckedInfo.rowCheckedIds.size !== this.statusList.length && rowCheckedInfo.rowCheckedIds.size > 1;
     }
-    // if (this.checkedMaps.has(record.id)) {
-    //   this.checkedMaps.set(record.id, { ...this.checkedMaps.get(record.id)!, ...this.judgeRowCheckAll(record, newAction) });
-    // }
   }
 
   // 待提交的动作
@@ -123,7 +113,6 @@ class StatusCirculationStore {
   @action
   checkChange(id: IStatus['id'], to: IStatus['id'], check: boolean) {
     const status = find(this.statusList, { id });
-    console.log('checkChange start', `${status?.name}--->${to} :${check}`);
     if (status) {
       // 可转换
       if (check) {
@@ -158,12 +147,10 @@ class StatusCirculationStore {
       if (oppositeActionIndex > -1) {
         this.changeColumnChecked(status, newAction);
         this.changeRowChecked(status, newAction);
-        console.log('checkChange end del', `${status?.name}--->${to} :${newAction.type}`);
         actions.splice(oppositeActionIndex, 1);
       } else if (this.validActionEffective(status, newAction)) {
         this.changeColumnChecked(status, newAction);
         this.changeRowChecked(status, newAction);
-        console.log('checkChange end add', `${status?.name}--->${to} :${newAction.type}`);
         actions.push(newAction);
       }
     }
