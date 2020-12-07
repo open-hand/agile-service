@@ -102,6 +102,7 @@ class CreateEpicModal extends Component {
 
     return (
       <Sidebar
+        maskClosable
         title="创建史诗"
         visible={visible}
         okText="创建"

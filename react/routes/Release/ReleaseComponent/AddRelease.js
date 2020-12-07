@@ -98,6 +98,7 @@ class AddRelease extends Component {
     const { getFieldDecorator } = form;
     return (
       <Sidebar
+        maskClosable
         title="创建发布版本"
         visible={visible}
         okText="创建"

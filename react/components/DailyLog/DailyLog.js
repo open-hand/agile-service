@@ -254,6 +254,7 @@ class DailyLog extends Component {
 
     return (
       <Sidebar
+        maskClosable
         className="c7n-dailyLog"
         title="登记工作日志"
         visible={visible || false}

@@ -476,6 +476,7 @@ function StateList(props) {
         </Content>
         {show && (
           <Sidebar
+        maskClosable
             title={<FormattedMessage id={showType === 'create' ? 'state.create' : 'state.edit'} />}
             visible={show}
             okText={<FormattedMessage id={showType === 'create' ? 'create' : 'save'} />}

@@ -76,6 +76,7 @@ class PublicRelease extends Component {
     } = this.props;
     return (
       <Sidebar
+        maskClosable
         title="发布版本"
         visible={visible}
         onCancel={() => onCancel()}

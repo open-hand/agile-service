@@ -118,6 +118,7 @@ class PriorityCreate extends Component {
 
     return (
       <Sidebar
+        maskClosable
         title={<FormattedMessage id="priority.create" />}
         visible={onCreatingPriority}
         okText={<FormattedMessage id="save" />}

@@ -107,6 +107,7 @@ class EditRelease extends Component {
     this.state.startDate = ReleaseStore.getVersionDetail.startDate ? moment(ReleaseStore.getVersionDetail.startDate, 'YYYY-MM-DD HH:mm:ss') : null;
     return (
       <Sidebar
+        maskClosable
         title="修改发布计划"
         visible={visible}
         destroyOnClose

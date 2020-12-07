@@ -92,6 +92,7 @@ class CreateVersion extends Component {
     const { loading, expectReleaseDate, startDate } = this.state;
     return (
       <Sidebar
+        maskClosable
         title="创建版本"
         visible={visible}
         okText="创建"

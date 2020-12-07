@@ -149,6 +149,7 @@ class RelateStory extends Component {
     } = this.state;
     return (
       <Sidebar
+        maskClosable
         className="c7n-RelateStory"
         title="关联问题"
         visible={visible || false}

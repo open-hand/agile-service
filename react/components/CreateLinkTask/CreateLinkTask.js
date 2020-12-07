@@ -143,6 +143,7 @@ class CreateLinkTask extends Component {
 
     return (
       <Sidebar
+        maskClosable
         className="c7n-newLink"
         title="创建链接"
         visible={visible || false}

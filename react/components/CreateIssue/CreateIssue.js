@@ -1065,6 +1065,7 @@ class CreateIssue extends Component {
 
     return (
       <Sidebar
+        maskClosable
         className="c7n-createIssue"
         title={title}
         visible={visible && !loading}

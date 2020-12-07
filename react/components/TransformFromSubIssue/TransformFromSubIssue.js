@@ -127,6 +127,7 @@ class TransformFromSubIssue extends Component {
 
     return (
       <Sidebar
+        maskClosable
         className="c7n-transformFromSubIssue"
         title="转化为问题"
         visible={visible || false}

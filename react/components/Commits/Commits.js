@@ -179,6 +179,7 @@ class Commits extends Component {
     ];
     return (
       <Sidebar
+        maskClosable
         className="c7n-commits"
         title="关联分支"
         visible={visible || false}

@@ -160,6 +160,7 @@ class MergeRequest extends Component {
     ];
     return (
       <Sidebar
+        maskClosable
         className="c7n-commits"
         title="关联合并请求"
         visible={visible || false}
