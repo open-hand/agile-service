@@ -33,7 +33,7 @@ class EpicRenderHeader extends Component {
   }
 
   handleExpandOrUPPanel = (expandAll = true) => {
-    this.panelOnChange(expandAll ? getDefaultExpanded([...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]) : []);
+    this.panelOnChange(expandAll ? getDefaultExpanded([...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]).slice(0, 15) : []);
   }
 
   static getDerivedStateFromProps(props, state) {

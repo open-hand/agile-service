@@ -50,7 +50,7 @@ class SwimLaneContext extends React.Component {
   }
 
   handleExpandOrUPPanel = (expandAll = true) => {
-    this.panelOnChange(expandAll ? getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]) : []);
+    this.panelOnChange(expandAll ? getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]).slice(0, 15) : []);
   }
 
   static getDerivedStateFromProps(props, state) {

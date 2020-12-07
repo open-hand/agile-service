@@ -11,16 +11,22 @@ function ExpandAllButton() {
   const [expandAll, setExpandAll] = useState<boolean>();
   function handleClick() {
     if (scrumBoardStore.currentBindFunctionMaps.has('expandOrUp-epic')) {
-      scrumBoardStore.executeBindFunction(['expandOrUp-epic'], false);
+      scrumBoardStore.executeBindFunction(['expandOrUp-epic'], !expandAll);
+      setExpandAll(!expandAll);
+
       return;
     }
-    scrumBoardStore.executeBindFunction(['expandOrUp', 'expandOrUp-epic'], false);
-
+    scrumBoardStore.executeBindFunction(['expandOrUp', 'expandOrUp-epic'], !expandAll);
+    setExpandAll(!expandAll);
     // scrumBoardStore.currentBindFunctionMaps.get('expandOrUp')(!expandAll);
   }
   return scrumBoardStore.currentBindFunctionMaps.get('expandOrUp') || scrumBoardStore.currentBindFunctionMaps.get('expandOrUp-epic') ? (
     <Button onClick={handleClick}>
-      {`全部${expandAll || true ? '收起' : '展开'}`}
+      {expandAll ? '全部收起' : (
+        <Tooltip title="全部展开只能展开前15项">
+          <span>全部展开</span>
+        </Tooltip>
+      )}
       <Icon type="baseline-arrow_right" className={classnames({ [expandStyles.expand]: expandAll })} />
     </Button>
   ) : null;
