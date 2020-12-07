@@ -17,7 +17,7 @@ const IssueDes = ({ reloadIssue }) => {
   const [editDesShow, setEditDesShow] = useState(false);
   const [fullEdit, setFullEdit] = useState(false);
   const [editDes, setEditDes] = useState('');
-  const { store, disabled } = useContext(EditIssueContext);
+  const { store, disabled, descriptionEditRef } = useContext(EditIssueContext);
   const { description, descriptionTemplate, typeCode } = store.getIssue;
   useEffect(() => {
     setEditDes(description);
@@ -38,7 +38,9 @@ const IssueDes = ({ reloadIssue }) => {
       reloadIssue(issueId);
     }
   };
-
+  useEffect(() => {
+    descriptionEditRef.current = editDesShow;
+  }, [descriptionEditRef, editDesShow]);
   const renderDes = () => {
     if (editDesShow === undefined) {
       return null;
