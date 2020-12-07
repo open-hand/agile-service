@@ -134,7 +134,7 @@ const SearchArea: React.FC = () => {
     }
     if (starBeacon) {
       result.push(
-        { key: 'commonly|starBeacon', label: '我关注的' },
+        { key: 'commonly|starBeacon', label: '我的关注' },
       );
     }
     return result;
@@ -188,7 +188,7 @@ const SearchArea: React.FC = () => {
               >
                 <OptGroup key="commonly" label="常用选项">
                   <Option value="commonly|onlyMe">仅我的问题</Option>
-                  <Option value="commonly|starBeacon">我关注的</Option>
+                  <Option value="commonly|starBeacon">我的关注</Option>
                 </OptGroup>
                 <OptGroup key="quick" label="快速筛选">
                   {quickFilters.map((filter) => (

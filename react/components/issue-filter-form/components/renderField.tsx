@@ -108,7 +108,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         return <QuickFilterField name={code} multiple disabledRequest={code === 'myStarBeacon'} {...otherComponentProps} />;
       }
       case 'starBeacon': {
-        return <CheckBox label="我关注的" name={code} />;
+        return <CheckBox label="我的关注" name={code} />;
       }
       default:
         break;
