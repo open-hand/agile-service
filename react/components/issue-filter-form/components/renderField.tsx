@@ -128,15 +128,25 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       );
     }
 
-    case 'datetime':
+    case 'datetime': {
       return (
         <DateTimePicker
           name={code}
           label={name}
+          // validator={async (v) => {
+          //   console.log('code', code, v);
+          //   if (!v) {
+          //     return true;
+          //   }
+          //   if (!v[0] || !v[1]) {
+          //     return '请选择完整时间段';
+          //   }
+          //   return true;
+          // }}
           style={{ width: '100%' }}
           {...otherComponentProps}
         />
-      );
+      ); }
     case 'date':
       return (
         <DatePicker
