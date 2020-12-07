@@ -53,6 +53,14 @@
         WHERE ais.project_id = #{projectId} AND ais.status_id = #{statusId}
     </select>
 
+    <select id="listWithCompleted" resultType="io.choerodon.agile.api.vo.StatusVO">
+        select t1.*,
+        IFNULL(t2.is_completed, 0) as completed
+        from fd_status t1
+        left join agile_issue_status t2 on (t2.project_id = #{projectId} and t1.id = t2.status_id )
+        where t1.organization_id = #{organizationId}
+    </select>
+
     <insert id="batchCreateStatusByProjectIds">
         <foreach collection="addStatusWithProjects" item="addStatusWithProject" separator=";">
             INSERT ignore agile_issue_status(project_id,name,is_enable,category_code,created_by,is_completed,status_id)

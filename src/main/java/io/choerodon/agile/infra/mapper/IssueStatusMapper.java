@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.api.vo.event.AddStatusWithProject;
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.agile.infra.dto.IssueStatusDTO;
@@ -24,4 +25,6 @@ public interface IssueStatusMapper extends BaseMapper<IssueStatusDTO> {
      * @param userId                userId
      */
     void batchCreateStatusByProjectIds(@Param("addStatusWithProjects") List<AddStatusWithProject> addStatusWithProjects, @Param("userId") Long userId);
+
+    List<StatusVO> listWithCompleted(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId);
 }

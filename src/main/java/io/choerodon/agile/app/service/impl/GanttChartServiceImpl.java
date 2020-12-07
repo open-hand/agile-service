@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,9 +44,9 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     @Override
     public List<GanttChartVO> listByTask(Long projectId, SearchVO searchVO) {
-//        if (isSprintEmpty(searchVO)) {
-//            throw new CommonException("error.otherArgs.sprint.empty");
-//        }
+        if (isSprintEmpty(searchVO)) {
+            throw new CommonException("error.otherArgs.sprint.empty");
+        }
         List<GanttChartVO> result = listByProjectIdAndSearch(projectId, searchVO);
         return toTree(result);
     }
