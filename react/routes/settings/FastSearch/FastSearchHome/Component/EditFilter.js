@@ -940,6 +940,7 @@ class AddComponent extends Component {
     const { getFieldDecorator } = form;
     return (
       <Sidebar
+        maskClosable
         className="c7n-filter"
         title="修改快速筛选"
         okText="修改"

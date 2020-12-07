@@ -90,6 +90,7 @@ class CreateFeatureModal extends Component {
     const { getFieldDecorator } = form;
     return (
       <Sidebar
+        maskClosable
         title="创建特性"
         visible={visible}
         okText="创建"

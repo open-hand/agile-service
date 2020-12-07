@@ -109,6 +109,7 @@ class AssigneeModal extends Component {
     }
     return (
       <Sidebar
+        maskClosable
         title="经办人工作量"
         visible={visible}
         onOk={onCancel.bind(this)}

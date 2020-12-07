@@ -108,6 +108,7 @@ class CreateEpic extends Component {
     const { getFieldDecorator } = form;
     return (
       <Sidebar
+        maskClosable
         title="创建史诗"
         visible={visible}
         okText="创建"

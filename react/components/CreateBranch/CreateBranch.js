@@ -117,6 +117,7 @@ class CreateBranch extends Component {
     } = this.state;
     return (
       <Sidebar
+        maskClosable
         className="c7nagile-createBranch"
         title="创建分支"
         visible={visible}

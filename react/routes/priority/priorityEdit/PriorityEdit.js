@@ -129,6 +129,7 @@ class PriorityEdit extends Component {
 
     return (
       <Sidebar
+        maskClosable
         title={<FormattedMessage id="priority.edit" />}
         visible={onEditingPriority}
         okText={<FormattedMessage id="save" />}
