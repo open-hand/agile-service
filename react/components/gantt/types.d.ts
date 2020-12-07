@@ -24,7 +24,7 @@ export namespace Gantt {
     endDate: Dayjs,
   }
   type Sight = 'day' | 'week' | 'month' | 'quarter' | 'halfYear'
-  type MoveType = 'left' | 'right' | 'move'
+  type MoveType = 'left' | 'right' | 'move' | 'create'
   interface SightConfig {
     type: Sight,
     label: string

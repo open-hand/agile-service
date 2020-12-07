@@ -852,13 +852,11 @@ class GanttStore {
   handleInvalidBarHover(barInfo: Gantt.Bar, left: number, width: number) {
     barInfo.translateX = left;
     barInfo.width = width;
-    // 只能向右拖动
-    this.handleDragStart(barInfo, 'right');
+    this.handleDragStart(barInfo, 'create');
   }
 
   @action
   handleInvalidBarDragStart(barInfo: Gantt.Bar) {
-    // 只能向右拖动
     barInfo.stepGesture = 'moving';
   }
 
