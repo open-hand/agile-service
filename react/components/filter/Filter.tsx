@@ -206,6 +206,9 @@ const Filter: React.FC<FilterProps> = ({
               handleFilterChange(field.code, undefined);
               return;
             }
+            if ((v[0] && !v[1]) || (!v[0] && v[1])) {
+              return;
+            }
           }
           if (filter[field.code] === undefined && v === null) {
             return;
@@ -270,12 +273,12 @@ const Filter: React.FC<FilterProps> = ({
   const renderFoldButton = useCallback(() => (
     <>
       {
-       (overflowLine || folded === true) && (
-       <Button className={styles.btn} funcType={'flat' as FuncType} onClick={expandFilter}>
-         <Icon type={folded ? 'expand_more' : 'expand_less'} />
-       </Button>
-       )
-    }
+        (overflowLine || folded === true) && (
+          <Button className={styles.btn} funcType={'flat' as FuncType} onClick={expandFilter}>
+            <Icon type={folded ? 'expand_more' : 'expand_less'} />
+          </Button>
+        )
+      }
     </>
   ), [expandFilter, folded, overflowLine]);
 

@@ -1,8 +1,7 @@
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
-import { AxiosRequestConfig } from 'axios';
-import Field, { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
+import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { IChosenFieldField } from '@/components/chose-field/types';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 
 interface Props {
   fields: IChosenFieldField[],
@@ -20,8 +19,21 @@ const IssueFilterFormDataSet = ({ fields, systemFields }: Props): DataSetProps =
       textField: 'realName',
       valueField: 'id',
     })),
+    ...fields.filter((field) => field.fieldType && ['datetime', 'date', 'time'].includes(field.fieldType)).map((field) => ({
+      name: field.code,
+      label: field.name,
+      validator: async (v: any, name: string, record: Record) => {
+        if (!v) {
+          return true;
+        }
+        if (!v[0] || !v[1]) {
+          record.set(name, undefined);
+        }
+        return true;
+      },
+    }
+    )),
     ...(systemFields || []),
   ],
-
 });
 export default IssueFilterFormDataSet;
