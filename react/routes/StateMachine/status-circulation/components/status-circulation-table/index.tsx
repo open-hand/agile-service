@@ -20,26 +20,7 @@ const StatusCirculationTable: React.FC = () => {
   const { store } = useStatusCirculationContext();
   const { selectedType } = useStateMachineContext();
   const { statusList, loading } = store;
-  function judgeRowCheckAll(statusId: string, record: IStatusCirculation): boolean {
-    const statusActions = store.actions.get(statusId);
-    if (statusActions && statusActions.some((item) => item.type === 'nocheck')) {
-      return false;
-    }
-    if (record.canTransformStatus.length !== statusList.length) {
-      return false;
-    }
-    return true;
-  }
-  function judgeRowCheckSome(statusId: string, record: IStatusCirculation): boolean { /**   */
-    const statusActions = store.actions.get(statusId);
-    if (statusActions && statusActions.length > 0 && statusActions.some((item) => item.type === 'check')) {
-      return true;
-    }
-    if (record.canTransformStatus.length === statusList.length) {
-      return true;
-    }
-    return false;
-  }
+
   const handleDeleteClick = useCallback((record: IStatusCirculation) => {
     Modal.open({
       title: `确认删除状态“${record.name}”`,
@@ -63,7 +44,6 @@ const StatusCirculationTable: React.FC = () => {
           {() => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const currentSize = useComputed(() => store.checkedMaps.get(status.id)?.columnCurrentSize, [store.checkedMaps.get(status.id)?.columnCurrentSize]);
-            console.log(`render column ${status.name} -- size:${currentSize}`);
             return (
               <CheckboxAll
                 name={`column-${status.name}`}
@@ -101,8 +81,6 @@ const StatusCirculationTable: React.FC = () => {
           {() => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const rowInfo = useComputed(() => store.checkedMaps.get(record.id)!, [store.checkedMaps.get(record.id)]);
-            console.log(`render row ${record.name} -- checked:${rowInfo.rowChecked} indeterminate ${rowInfo.rowIndeterminate}`);
-
             return (
               <CheckboxAll
                 name={`row-${record.name}`}
