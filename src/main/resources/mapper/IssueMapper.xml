@@ -521,10 +521,12 @@
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}
         </foreach>
-        or ai.issue_id in
-        <foreach collection="childrenIds" item="child" open="(" separator="," close=")">
-            #{child}
-        </foreach>
+        <if test="childrenIds != null and childrenIds.size > 0">
+            or ai.issue_id in
+            <foreach collection="childrenIds" item="child" open="(" separator="," close=")">
+                #{child}
+            </foreach>
+        </if>
         order by issue_issue_id desc
     </select>
 
