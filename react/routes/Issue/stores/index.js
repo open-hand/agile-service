@@ -4,7 +4,7 @@ import React, {
 import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
-import { fieldApi } from '@/api';
+import { fieldApi, permissionApi } from '@/api';
 import IssueStore, { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import IssueDataSet from '@/components/issue-table/dataSet';
@@ -19,6 +19,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
   (props) => {
     const { intl, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
     const [fields, setFields] = useState([]);
+    const [hasBatchDeletePermission, setHasBatchDeletePermission] = useState(false);
     useEffect(() => {
       const loadData = async () => {
         const Fields = await fieldApi.getFoundationHeader();
@@ -26,6 +27,15 @@ export const StoreProvider = inject('AppState')(injectIntl(
       };
       loadData();
     }, []);
+
+    useEffect(() => {
+      const getBatchDeletePermission = async () => {
+        const res = await permissionApi.check(['choerodon.code.project.cooperation.work-list.ps.issue.batchDelete']);
+        setHasBatchDeletePermission(res[0] && res[0].approve);
+      };
+      getBatchDeletePermission();
+    }, []);
+
     const issueSearchStore = useIssueSearchStore({
       getSystemFields,
       transformFilter,
@@ -38,8 +48,8 @@ export const StoreProvider = inject('AppState')(injectIntl(
       issueSearchStore,
       IssueStore,
       events: {
-        select: () => handleSelect({ dataSet }, issueSearchStore),
-        selectAll: () => handleSelect({ dataSet }, issueSearchStore),
+        select: () => handleSelect({ dataSet }, issueSearchStore, hasBatchDeletePermission),
+        selectAll: () => handleSelect({ dataSet }, issueSearchStore, hasBatchDeletePermission),
         unSelect: handleUnSelect,
         unSelectAll: handleUnSelect,
         load: () => {
@@ -49,7 +59,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
           }
         },
       },
-    })), [intl, issueSearchStore, organizationId, projectId]);
+    })), [hasBatchDeletePermission, intl, issueSearchStore, organizationId, projectId]);
     IssueStore.dataSet = dataSet;
     /**
     * detail data
