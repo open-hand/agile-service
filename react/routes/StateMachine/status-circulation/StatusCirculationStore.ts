@@ -83,15 +83,29 @@ class StatusCirculationStore {
       const columnCheckedInfo = this.checkedMaps.get(newAction.to)!;
       if (newAction.type === 'check') {
         columnCheckedInfo.columnCheckedIds.add(record.id);
-        columnCheckedInfo.rowCheckedIds.add(newAction.to);
       } else {
         columnCheckedInfo.columnCheckedIds.delete(record.id);
-        columnCheckedInfo.rowCheckedIds.delete(newAction.to);
       }
 
       columnCheckedInfo.columnCurrentSize = columnCheckedInfo.columnCheckedIds.size;
-      columnCheckedInfo.rowChecked = columnCheckedInfo.rowCheckedIds.size === this.statusList.length;
-      columnCheckedInfo.rowIndeterminate = columnCheckedInfo.rowCheckedIds.size !== this.statusList.length && columnCheckedInfo.rowCheckedIds.size > 1;
+    }
+    // if (this.checkedMaps.has(record.id)) {
+    //   this.checkedMaps.set(record.id, { ...this.checkedMaps.get(record.id)!, ...this.judgeRowCheckAll(record, newAction) });
+    // }
+  }
+
+  @action('更改record.id行的全选状态')
+  changeRowChecked(record: IStatusCirculation, newAction: StatusAction) {
+    if (this.checkedMaps.has(record.id)) {
+      const rowCheckedInfo = this.checkedMaps.get(record.id)!;
+      if (newAction.type === 'check') {
+        rowCheckedInfo.rowCheckedIds.add(newAction.to);
+      } else {
+        rowCheckedInfo.rowCheckedIds.delete(newAction.to);
+      }
+
+      rowCheckedInfo.rowChecked = rowCheckedInfo.rowCheckedIds.size === this.statusList.length;
+      rowCheckedInfo.rowIndeterminate = rowCheckedInfo.rowCheckedIds.size !== this.statusList.length && rowCheckedInfo.rowCheckedIds.size > 1;
     }
     // if (this.checkedMaps.has(record.id)) {
     //   this.checkedMaps.set(record.id, { ...this.checkedMaps.get(record.id)!, ...this.judgeRowCheckAll(record, newAction) });
@@ -143,12 +157,13 @@ class StatusCirculationStore {
       // 存在可抵消的就抵消
       if (oppositeActionIndex > -1) {
         this.changeColumnChecked(status, newAction);
+        this.changeRowChecked(status, newAction);
         console.log('checkChange end del', `${status?.name}--->${to} :${newAction.type}`);
         actions.splice(oppositeActionIndex, 1);
       } else if (this.validActionEffective(status, newAction)) {
         this.changeColumnChecked(status, newAction);
+        this.changeRowChecked(status, newAction);
         console.log('checkChange end add', `${status?.name}--->${to} :${newAction.type}`);
-
         actions.push(newAction);
       }
     }
