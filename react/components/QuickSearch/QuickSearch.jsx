@@ -225,7 +225,7 @@ class QuickSearch extends Component {
                 <OptGroup key="quickSearch" label="常用选项">
                   <Option key={-1} value={-1}>仅我的问题</Option>
                   <Option key={-2} value={-2}>仅故事</Option>
-                  <Option key={-3} value={-3}>我关注的</Option>
+                  <Option key={-3} value={-3}>我的关注</Option>
                 </OptGroup>
                 <OptGroup key="personal" label="我的筛选">
                   {
