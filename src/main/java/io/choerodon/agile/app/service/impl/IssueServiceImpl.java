@@ -177,6 +177,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private BacklogExpandService backlogExpandService;
     @Autowired
     private StarBeaconMapper starBeaconMapper;
+    @Autowired
+    private IssueStatusMapper issueStatusMapper;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -385,7 +387,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             agilePluginService.setBusinessAttributes(issue);
         }
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, issue.getApplyType());
-        Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
+        Map<Long, StatusVO> statusMapDTOMap =
+                issueStatusMapper.listWithCompleted(projectId, ConvertUtil.getOrganizationId(projectId)).stream()
+                        .collect(Collectors.toMap(StatusVO::getId, Function.identity()));
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO issueVO = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
         if (agilePluginService != null) {
