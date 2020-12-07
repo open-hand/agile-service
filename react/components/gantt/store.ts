@@ -873,6 +873,7 @@ class GanttStore {
   updateBarSize(barInfo: Gantt.Bar, { width, x }: { width: number, x: number }) {
     barInfo.width = width;
     barInfo.translateX = x;
+    barInfo.stepGesture = 'moving';
   }
 
   /**
