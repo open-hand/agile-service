@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from 'choerodon-ui';
 import classNames from 'classnames';
 import { IFilter } from '@/components/filter';
-import { find } from 'lodash';
+import { find, map } from 'lodash';
 import { IFilterField, ICustomField } from './index';
 import { IRenderFields } from './Filter';
 import InputField from './components/InputField';
@@ -103,12 +103,18 @@ export const renderGroupedFields: IRenderFields = ({
     }
   });
   const types = [selectTypes, inputTypes, dateTypes].filter((arr) => arr.length > 0);
-  const result = types.map((type) => (
+
+  const hasDateTypeIndex = types.findIndex((typeArr) => {
+    const fieldTypes = map(typeArr, 'fieldType');
+    return fieldTypes.includes('time') || fieldTypes.includes('date') || fieldTypes.includes('datetime');
+  });
+
+  const result = types.map((type, i) => (
     <div style={{
-      display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: 4,
+      display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: 4, marginTop: i === hasDateTypeIndex ? 11 : 0,
     }}
     >
-      {type.map((f, i) => renderFlatField(f, getFieldElement(f)))}
+      {type.map((f) => renderFlatField(f, getFieldElement(f)))}
     </div>
   ));
   if (result.length > 0) {
