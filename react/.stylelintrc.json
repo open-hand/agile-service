@@ -20,6 +20,7 @@
     "value-list-max-empty-lines": null,
     "font-family-no-missing-generic-family-keyword": null,
     "no-descending-specificity": null,
-    "color-hex-case": null
+    "color-hex-case": null,
+    "selector-pseudo-class-no-unknown": null
   }
 }

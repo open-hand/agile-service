@@ -12,10 +12,10 @@ import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { pageConfigApi } from '@/api/PageConfig';
 import { getMenuType } from '@/utils/common';
+import NewCheckBox from '@/components/check-box';
 import { useObjectSchemeStore } from './stores';
 import TableDropMenu from '../../../common/TableDropMenu';
 import CreateField from '../components/create-field';
-import NewCheckBox from '../components/check-box';
 import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
 

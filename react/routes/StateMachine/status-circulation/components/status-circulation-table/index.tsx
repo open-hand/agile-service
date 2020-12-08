@@ -9,7 +9,7 @@ import { IStatusCirculation } from '@/api';
 import Table, { ColumnsType } from 'antd/lib/table';
 import 'antd/lib/table/style';
 import { useStateMachineContext } from '@/routes/StateMachine/context';
-import CheckboxAll from './check-box-all';
+import CheckboxAll from '@/components/check-box';
 import { useStatusCirculationContext } from '../..';
 import Checkbox from './Checkbox';
 import DeleteStatus from './DeleteStatus';
@@ -85,6 +85,7 @@ const StatusCirculationTable: React.FC = () => {
               <CheckboxAll
                 name={`row-${record.name}`}
                 record={record}
+                className={styles.check_all}
                 indeterminate={rowInfo.rowIndeterminate}
                 checked={rowInfo.rowChecked}
                 onChange={(value) => {
