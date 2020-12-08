@@ -973,8 +973,11 @@
             </foreach>
         </if>
 
-        <if test="searchVO.otherArgs.environment != null">
-            and ai.environment = #{searchVO.otherArgs.environment}
+        <if test="searchVO.otherArgs.environment != null and searchVO.otherArgs.environment.size > 0 ">
+            and ai.environment in
+            <foreach collection="searchVO.otherArgs.environment" item="evm" open="(" close=")" separator=",">
+                #{evm}
+            </foreach>
         </if>
     </sql>
 

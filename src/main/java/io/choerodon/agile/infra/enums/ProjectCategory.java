@@ -39,7 +39,7 @@ public class ProjectCategory {
         } else if (AGILE.equals(category) || GENERAL.equals(category) || OPERATIONS.equals(category)) {
             return SchemeApplyType.AGILE;
         } else {
-            throw new CommonException("error.project.category.illegal");
+            return null;
         }
     }
 }
