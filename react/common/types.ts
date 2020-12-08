@@ -63,6 +63,7 @@ export interface IStatus {
   valueCode: 'todo' | 'doing' | 'done' | 'prepare'
   type: 'todo' | 'doing' | 'done' | 'prepare'
   name: string
+  code: string
 }
 export interface Priority {
   colour: string,
