@@ -27,7 +27,7 @@ const programSystemFields = [
   { code: 'estimatedEndTime', title: '预计结束时间' },
   { code: 'benfitHypothesis', title: '特性价值' },
   { code: 'acceptanceCritera', title: '验收标准' },
-  { code: 'programVersion', title: '项目群版本' },
+  { code: 'programVersion', title: '版本' },
 ];
 
 const projectSystemFields = [
