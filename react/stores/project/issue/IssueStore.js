@@ -155,7 +155,22 @@ export function getSystemFields(excludeCodes = []) {
     defaultShow: false,
     fieldType: 'datetime',
   },
-
+  {
+    code: 'testResponsibleIds',
+    name: '测试负责人',
+    defaultShow: false,
+    fieldType: 'member',
+  }, {
+    code: 'mainResponsibleIds',
+    name: '主要负责人',
+    defaultShow: false,
+    fieldType: 'member',
+  }, {
+    code: 'environment',
+    name: '环境',
+    defaultShow: false,
+    fieldType: 'multiple',
+  },
   ];
   return IsInProgramStore.isInProgram ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }

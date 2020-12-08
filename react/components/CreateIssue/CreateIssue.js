@@ -37,6 +37,7 @@ import FieldTeam from './FieldTeam';
 import FieldStartTime from './FieldStartTime';
 import FieldEndTime from './FieldEndTime';
 import { OldSelectProgramVersion as SelectProgramVersion } from '../select/select-program-version';
+import { OldSelectEnvironment as SelectEnvironment } from '../select/select-environment';
 
 const DebounceInput = reactComponentDebounce({
   valuePropName: 'value',
@@ -318,6 +319,9 @@ class CreateIssue extends Component {
           subBugParent,
           subTaskParent,
           programVersion,
+          environment,
+          mainResponsibleId,
+          testResponsibleId,
         } = values;
         const { typeCode } = originIssueTypes.find((t) => t.id === typeId);
         // 手动检验描述是否必输校验
@@ -397,6 +401,9 @@ class CreateIssue extends Component {
           featureId, // 特性字段
           teamProjectIds,
           programVersion,
+          environment, // 缺陷有的字段
+          mainResponsibleId,
+          testResponsibleId,
           estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
           estimatedStartTime: estimatedStartTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
         };
@@ -964,7 +971,7 @@ class CreateIssue extends Component {
       case 'programVersion':
         return (
           newIssueTypeCode === 'feature' && (
-            <FormItem key={field.id} label="版本3333">
+            <FormItem key={field.id} label="版本233">
               {getFieldDecorator('programVersion', {
                 rules: [{ required: field.required, message: '版本为必输项' }],
               })(
@@ -973,6 +980,38 @@ class CreateIssue extends Component {
             </FormItem>
           )
         );
+      case 'environment':
+        return (
+          <FormItem key={field.id} label="环境">
+            {getFieldDecorator('environment', {
+              rules: [{ required: field.required, message: '环境为必输项' }],
+            })(
+              <SelectEnvironment placeholder="环境" />,
+            )}
+          </FormItem>
+        );
+      case 'testResponsible':
+      case 'mainResponsible':
+        return (
+          <FormItem label={field.fieldName} key={`${newIssueTypeCode}-${field.id}`}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {getFieldDecorator(`${field.fieldCode}Id`, {
+                rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
+              })(
+                <SelectFocusLoad
+                  type="user"
+                  label={field.fieldName}
+                  style={{ flex: 1 }}
+                  loadWhenMount
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                  allowClear
+                />,
+              )}
+            </div>
+          </FormItem>
+
+        );
+
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>

@@ -88,6 +88,9 @@ interface IExportSearch {
     version?: any,
     starBeacon?: boolean
     userId?: string
+    testResponsibleIds?: string[]
+    mainResponsibleIds?: string[]
+    environment?: string[]
   },
   searchArgs?: {
     estimatedStartTimeScopeStart?: string,

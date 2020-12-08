@@ -22,6 +22,7 @@ import MemberField from './field/MemberField';
 import DateTimeField from './field/DateTimeField';
 import ChooseField from '../choose-field';
 import IssueSearchContext from '../context';
+import EnvironmentField from './field/EnvironmentField';
 
 function CustomField({ field }) {
   const { store } = useContext(IssueSearchContext);
@@ -134,6 +135,14 @@ function CustomField({ field }) {
     case 'updateDate':
       return (
         <DateTimeField
+          field={field}
+          value={value}
+          onChange={handleChange}
+        />
+      );
+    case 'environment':
+      return (
+        <EnvironmentField
           field={field}
           value={value}
           onChange={handleChange}

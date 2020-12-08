@@ -26,6 +26,9 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     sprint,
     summary,
     version,
+    testResponsibleIds,
+    mainResponsibleIds,
+    environment,
   } = data;
   const starBeaconIndex = findIndex(quickFilterIds, (item) => item === 'myStarBeacon');
   let starBeacon;
@@ -52,6 +55,9 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       version,
       starBeacon,
       userId: starBeacon ? userId : undefined,
+      testResponsibleIds,
+      mainResponsibleIds,
+      environment,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: estimatedStartTime[0],
