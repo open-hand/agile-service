@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Arrays;
 
@@ -81,19 +82,21 @@ public class AgileEventHandler {
         ProjectEvent projectEvent = JSON.parseObject(message, ProjectEvent.class);
         LOGGER.info("接受创建项目消息{}", message);
         String applyType = ProjectCategory.getApplyType(projectEvent.getProjectCategory());
-        //创建projectInfo
-        projectInfoService.initializationProjectInfo(projectEvent);
-        //创建项目初始化issueLinkType
-        issueLinkTypeService.initIssueLinkType(projectEvent.getProjectId());
-        if (SchemeApplyType.AGILE.equals(applyType)) {
-            //创建项目时创建默认状态机方案
-            stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
-            //创建项目时创建默认问题类型方案
-            issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
-        } else {
-            AgilePluginService pluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
-            if (pluginService != null) {
-                pluginService.initProjectIssueTypeSchemeAndArt(projectEvent);
+        if (!ObjectUtils.isEmpty(applyType)) {
+            //创建projectInfo
+            projectInfoService.initializationProjectInfo(projectEvent);
+            //创建项目初始化issueLinkType
+            issueLinkTypeService.initIssueLinkType(projectEvent.getProjectId());
+            if (SchemeApplyType.AGILE.equals(applyType)) {
+                //创建项目时创建默认状态机方案
+                stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
+                //创建项目时创建默认问题类型方案
+                issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
+            } else {
+                AgilePluginService pluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+                if (pluginService != null) {
+                    pluginService.initProjectIssueTypeSchemeAndArt(projectEvent);
+                }
             }
         }
         return message;
