@@ -29,6 +29,9 @@ function transformSystemFilter(data) {
     version,
     starBeacon,
     userId,
+    testResponsibleIds,
+    mainResponsibleIds,
+    environment,
   } = data;
   return {
     advancedSearchArgs: {
@@ -49,6 +52,9 @@ function transformSystemFilter(data) {
       sprint,
       summary,
       version,
+      testResponsibleIds,
+      mainResponsibleIds,
+      environment,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: estimatedStartTime[0],
