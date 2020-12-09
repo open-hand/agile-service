@@ -2,6 +2,7 @@ import React, {
   useMemo, useRef, useEffect, useContext, forwardRef, useImperativeHandle,
 } from 'react';
 import { useSize } from 'ahooks';
+import { Dayjs } from 'dayjs';
 import Context, { GanttContext } from './context';
 import GanttStore from './store';
 import Divider from './components/divider';
@@ -54,6 +55,7 @@ export interface GanttProps {
 }
 export interface GanttRef {
   backToday: () => void
+  getWidthByDate: (startDate: Dayjs, endDate: Dayjs) => number
 }
 const GanttComponent: React.FC<GanttProps> = forwardRef(({
   data, columns, onUpdate, startDateKey = 'startDate', endDateKey = 'endDate', isRestDay, getBarColor,
@@ -82,6 +84,7 @@ const GanttComponent: React.FC<GanttProps> = forwardRef(({
   }, [unit, store]);
   useImperativeHandle(ref, (): GanttRef => ({
     backToday: () => store.scrollToToday(),
+    getWidthByDate: store.getWidthByDate,
   }));
   return (
     <Context.Provider value={{
