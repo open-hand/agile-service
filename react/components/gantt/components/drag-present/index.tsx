@@ -26,8 +26,8 @@ const DragPresent: React.FC = () => {
       stroke="#7B90FF"
     >
       {leftLine && <path d={`M${left},0 L${left},${bodyScrollHeight}`} />}
-      <rect x={left} y="0" width={width} height={bodyScrollHeight} strokeWidth="0" />
-      {rightLine && <path d={`M${right},0 L${right},${bodyScrollHeight}`} />}
+      <rect x={left + 1} y="0" width={width} height={bodyScrollHeight} strokeWidth="0" />
+      {rightLine && <path d={`M${right + 1},0 L${right},${bodyScrollHeight}`} />}
     </g>
   );
 };

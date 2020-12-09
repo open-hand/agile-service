@@ -408,6 +408,8 @@ class GanttStore {
     return this.majorAmp2Px([...dateMap.values()]);
   }
 
+  getWidthByDate = (startDate: Dayjs, endDate: Dayjs) => (endDate.valueOf() - startDate.valueOf()) / this.pxUnitAmp
+
   majorAmp2Px(ampList: Gantt.MajorAmp[]) {
     const { pxUnitAmp } = this;
     const list = ampList.map((item) => {
