@@ -2585,31 +2585,22 @@ public class ExcelServiceImpl implements ExcelService {
                             .addCollections(labelNames)
                             .addCollections(componentMap)
                             .addCollections(foundationCodeValue);
-                    issues.forEach(issue -> {
-                        Long issueId = issue.getIssueId();
-                        ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
-                        BeanUtils.copyProperties(issue, exportIssuesVO);
-
-                        exportIssuesVO.setProjectName(project.getName());
-                        exportIssuesVO.setSprintName(getActiveSprintName(issue));
-                        setAssignee(usersMap, issue, exportIssuesVO);
-                        serReporter(usersMap, issue, exportIssuesVO);
-                        setPriorityName(priorityDTOMap, issue, exportIssuesVO);
-                        setStatusName(statusMapDTOMap, issue, exportIssuesVO);
-                        setTypeName(issueTypeDTOMap, issue, exportIssuesVO);
-                        setCloseSprintName(closeSprintNames, issueId, exportIssuesVO);
-                        setFixVersionName(fixVersionNames, issueId, exportIssuesVO);
-                        exportIssuesVO.setSprintName(exportIssuesSprintName(exportIssuesVO));
-                        setInfluenceVersionName(influenceVersionNames, issueId, exportIssuesVO);
-                        setLabelName(labelNames, issueId, exportIssuesVO);
-                        setComponentName(componentMap, issueId, exportIssuesVO);
-                        exportIssuesVO.setVersionName(exportIssuesVersionName(exportIssuesVO));
-                        exportIssuesVO.setDescription(getDes(exportIssuesVO.getDescription()));
-                        setFoundationFieldValue(foundationCodeValue, issueId, exportIssuesVO);
-                        resetRemainingTimeIfCompleted(issue, exportIssuesVO);
-                        issueMap.put(issueId, exportIssuesVO);
-                        processParentSonRelation(parentSonMap, issue);
-                    });
+                    issues.forEach(issue ->
+                            buildExcelIssueFromIssue(
+                                    project.getName(),
+                                    parentSonMap,
+                                    issueMap,
+                                    usersMap,
+                                    issueTypeDTOMap,
+                                    statusMapDTOMap,
+                                    priorityDTOMap,
+                                    closeSprintNames,
+                                    fixVersionNames,
+                                    influenceVersionNames,
+                                    labelNames,
+                                    componentMap,
+                                    foundationCodeValue,
+                                    issue));
                 }
                 ExcelUtil.writeIssue(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, sheetName, Arrays.asList(AUTO_SIZE_WIDTH), workbook, cursor);
                 boolean hasNextPage = (cursor.getPage() + 1) < page.getTotalPages();
@@ -2626,6 +2617,46 @@ public class ExcelServiceImpl implements ExcelService {
         String fileName = project.getName() + FILESUFFIX;
         //把workbook上传到对象存储服务中
         downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
+    }
+
+    protected ExportIssuesVO buildExcelIssueFromIssue(String projectName,
+                                                      Map<Long, Set<Long>> parentSonMap,
+                                                      Map<Long, ExportIssuesVO> issueMap,
+                                                      Map<Long, UserMessageDTO> usersMap,
+                                                      Map<Long, IssueTypeVO> issueTypeDTOMap,
+                                                      Map<Long, StatusVO> statusMapDTOMap,
+                                                      Map<Long, PriorityVO> priorityDTOMap,
+                                                      Map<Long, List<SprintNameDTO>> closeSprintNames,
+                                                      Map<Long, List<VersionIssueRelDTO>> fixVersionNames,
+                                                      Map<Long, List<VersionIssueRelDTO>> influenceVersionNames,
+                                                      Map<Long, List<LabelIssueRelDTO>> labelNames,
+                                                      Map<Long, List<ComponentIssueRelDTO>> componentMap,
+                                                      Map<Long, Map<String, Object>> foundationCodeValue,
+                                                      IssueDTO issue) {
+        Long issueId = issue.getIssueId();
+        ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
+        BeanUtils.copyProperties(issue, exportIssuesVO);
+
+        exportIssuesVO.setProjectName(projectName);
+        exportIssuesVO.setSprintName(getActiveSprintName(issue));
+        setAssignee(usersMap, issue, exportIssuesVO);
+        serReporter(usersMap, issue, exportIssuesVO);
+        setPriorityName(priorityDTOMap, issue, exportIssuesVO);
+        setStatusName(statusMapDTOMap, issue, exportIssuesVO);
+        setTypeName(issueTypeDTOMap, issue, exportIssuesVO);
+        setCloseSprintName(closeSprintNames, issueId, exportIssuesVO);
+        setFixVersionName(fixVersionNames, issueId, exportIssuesVO);
+        exportIssuesVO.setSprintName(exportIssuesSprintName(exportIssuesVO));
+        setInfluenceVersionName(influenceVersionNames, issueId, exportIssuesVO);
+        setLabelName(labelNames, issueId, exportIssuesVO);
+        setComponentName(componentMap, issueId, exportIssuesVO);
+        exportIssuesVO.setVersionName(exportIssuesVersionName(exportIssuesVO));
+        exportIssuesVO.setDescription(getDes(exportIssuesVO.getDescription()));
+        setFoundationFieldValue(foundationCodeValue, issueId, exportIssuesVO);
+        resetRemainingTimeIfCompleted(issue, exportIssuesVO);
+        issueMap.put(issueId, exportIssuesVO);
+        processParentSonRelation(parentSonMap, issue);
+        return exportIssuesVO;
     }
 
     private void resetRemainingTimeIfCompleted(IssueDTO issue, ExportIssuesVO exportIssuesVO) {
