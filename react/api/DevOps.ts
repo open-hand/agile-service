@@ -48,6 +48,19 @@ class DevOpsApi {
   }
 
   /**
+   * 加载已经启用的服务列表
+   */
+  loadProjectActiveService(page: number, size: number, param?: string) {
+    return axios.get(`${this.prefix}/app_service/list_service_under_org`, {
+      params: {
+        page,
+        size,
+        param,
+      },
+    });
+  }
+
+  /**
    * 根据服务id加载分支
    * @param applicationId 
    * @param page 
@@ -90,7 +103,7 @@ class DevOpsApi {
    * 根据issueId获取问题关联的请求合并列表
    * @param issueId 
    */
-  loadMergeRequest(issueId:number) {
+  loadMergeRequest(issueId: number) {
     return axios.get(`${this.issuePrefix}/issue/${issueId}/merge_request/list`);
   }
 

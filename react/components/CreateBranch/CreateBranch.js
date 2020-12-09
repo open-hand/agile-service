@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import React, { Component } from 'react';
 import _ from 'lodash';
 import {
@@ -7,6 +8,7 @@ import {
   stores, Content, Choerodon,
 } from '@choerodon/boot';
 import { devOpsApi } from '@/api';
+import SelectApp from './SelectApp';
 import './CreateBranch.less';
 import './commom.less';
 
@@ -46,7 +48,9 @@ class CreateBranch extends Component {
 
   componentDidMount() {
     setTimeout(() => {
-      this.Select.focus();
+      if (this.Select) {
+        this.Select.focus();
+      }
     });
   }
 
@@ -54,23 +58,26 @@ class CreateBranch extends Component {
     e.preventDefault();
     const { form, issueId, onOk } = this.props;
     form.validateFieldsAndScroll((err, values) => {
-      if (!err) {
+      if (values.app || values.app2) {
+        delete err.app;
+        delete err.app2;
+      }
+      if (!err || Object.keys(err).length === 0) {
         const devopsBranchVO = {
           branchName: values.type === 'custom' ? values.name : `${values.type}-${values.name}`,
           issueId,
           originBranch: values.branch,
         };
-        const applicationId = values.app;
-        const projectId = AppState.currentMenuType.id;
+        const applicationId = values.app || values.app2;
         this.setState({
           confirmLoading: true,
         });
-        devOpsApi.createBranch(applicationId, devopsBranchVO).then((res) => {
+        devOpsApi.createBranch(applicationId, devopsBranchVO).then(() => {
           this.setState({
             confirmLoading: false,
           });
           onOk();
-        }).catch((error) => {
+        }).catch(() => {
           this.setState({
             confirmLoading: false,
           });
@@ -104,9 +111,24 @@ class CreateBranch extends Component {
     });
   };
 
+  handleSourceChange = () => {
+    const { form } = this.props;
+    form.resetFields(['app', 'app2', 'branch']);
+  }
+
+  handleAppChange = () => {
+    const { form } = this.props;
+    form.resetFields(['branch']);
+  }
+
+  getApp=() => {
+    const { form } = this.props;
+    return form.getFieldValue('app') || form.getFieldValue('app2');
+  }
+
   render() {
     const {
-      visible, store, form, form: { getFieldDecorator },
+      visible, store, form, form: { getFieldDecorator, getFieldValue },
       onCancel, issueNum, typeCode,
     } = this.props;
     const {
@@ -114,6 +136,8 @@ class CreateBranch extends Component {
       originApps, branchs, branchsObj, branchsSize,
       branchsInput, tags, tagsObj, tagsSize,
     } = this.state;
+    const source = getFieldValue('source') || 'self';
+    const app = this.getApp();
     return (
       <Sidebar
         className="c7nagile-createBranch"
@@ -134,13 +158,29 @@ class CreateBranch extends Component {
         >
           <Form layout="vertical" className="c7nagile-sidebar-form c7nagile-form">
             <FormItem className="branch-formItem">
-              {getFieldDecorator('app', {
+              {getFieldDecorator('source', {
+                rules: [{ required: true, message: '请选择服务来源' }],
+                initialValue: 'self',
+              })(
+                <Select label="服务来源" onChange={this.handleSourceChange}>
+                  <Option value="self">
+                    本项目
+                  </Option>
+                  <Option value="other">
+                    其他项目
+                  </Option>
+                </Select>,
+              )}
+            </FormItem>
+            <FormItem className="branch-formItem">
+              {source === 'self' ? getFieldDecorator('app', {
                 rules: [{ required: true, message: '请选择应用' }],
               })(
                 <Select
+                  key="self"
                   ref={(select) => { this.Select = select; }}
                   defaultOpen
-                  label="应用名称"
+                  label="应用服务"
                   allowClear
                   onFocus={this.onApplicationNameChange}
                   filter
@@ -150,12 +190,15 @@ class CreateBranch extends Component {
                       .indexOf(input.toLowerCase()) >= 0
                   }
                   loading={selectLoading}
+                  onChange={this.handleAppChange}
                 >
-                  {originApps.map(app => (
-                    <Option value={app.id} key={app.id}>{app.name}</Option>
+                  {originApps.map(a => (
+                    <Option value={a.id} key={a.id}>{a.name}</Option>
                   ))}
                 </Select>,
-              )}
+              ) : getFieldDecorator('app2', {
+                rules: [{ required: true, message: '请选择应用' }],
+              })(<SelectApp key="other" onChange={this.handleAppChange} />)}
             </FormItem>
             <FormItem className="branch-formItem">
               {getFieldDecorator('branch', {
@@ -164,7 +207,7 @@ class CreateBranch extends Component {
                 <Select
                   label="分支来源"
                   allowClear
-                  disabled={!form.getFieldValue('app')}
+                  disabled={!app}
                   filter
                   filterOption={false}
                   optionLabelProp="value"
@@ -173,7 +216,7 @@ class CreateBranch extends Component {
                     this.setState({
                       branchsInput: input,
                     });
-                    devOpsApi.loadBranchesByService(form.getFieldValue('app'), undefined, undefined, {
+                    devOpsApi.loadBranchesByService(app, undefined, undefined, {
                       searchParam: {
                         branchName: input,
                       },
@@ -191,7 +234,7 @@ class CreateBranch extends Component {
                         Choerodon.prompt(res.message);
                       }
                     });
-                    devOpsApi.loadTagsByService(form.getFieldValue('app'), undefined, undefined, {
+                    devOpsApi.loadTagsByService(app, undefined, undefined, {
                       searchParam: {
                         tagName: input,
                       },
@@ -219,7 +262,7 @@ class CreateBranch extends Component {
                     ))}
                     {
                       branchsObj.number < branchsObj.totalPages ? (
-                        <Option key="more">
+                        <Option key="more-branch">
                           <div
                             role="none"
                             style={{
@@ -229,7 +272,7 @@ class CreateBranch extends Component {
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
-                              devOpsApi.loadBranchesByService(form.getFieldValue('app'), 1, branchsSize + 5, {
+                              devOpsApi.loadBranchesByService(app, 1, branchsSize + 5, {
                                 searchParam: {
                                   branchName: branchsInput,
                                 },
@@ -262,7 +305,7 @@ class CreateBranch extends Component {
                     ))}
                     {
                       tagsObj.number < tagsObj.totalPages ? (
-                        <Option key="more">
+                        <Option key="more-tag">
                           <div
                             role="none"
                             style={{
@@ -272,11 +315,11 @@ class CreateBranch extends Component {
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
-                              devOpsApi.loadTagsByService(form.getFieldValue('app'), 1, tagsSize + 5, { 
+                              devOpsApi.loadTagsByService(app, 1, tagsSize + 5, {
                                 searchParam: {
                                   tagName: branchsInput,
                                 },
-                                param: null, 
+                                param: null,
                               }).then((res) => {
                                 if (res && !res.failed) {
                                   this.setState({
