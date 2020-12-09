@@ -45,6 +45,16 @@ public class GanttChartVO {
 
     private Boolean completed;
 
+    private Date actualCompletedDate;
+
+    public Date getActualCompletedDate() {
+        return actualCompletedDate;
+    }
+
+    public void setActualCompletedDate(Date actualCompletedDate) {
+        this.actualCompletedDate = actualCompletedDate;
+    }
+
     public Boolean getCompleted() {
         return completed;
     }

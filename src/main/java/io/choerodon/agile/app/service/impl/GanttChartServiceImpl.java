@@ -73,7 +73,12 @@ public class GanttChartServiceImpl implements GanttChartService {
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
                 List<IssueDTO> issueDTOList = issueMapper.selectWithSubByIssueIds(issueIds, childrenIds);
-                return buildFromIssueDto(issueDTOList, projectId);
+                issueIds.addAll(childrenIds);
+                Map<Long, Date> completedDateMap =
+                        issueMapper.selectActuatorCompletedDateByIssueIds(issueIds, projectId)
+                                .stream()
+                                .collect(Collectors.toMap(GanttChartVO::getIssueId, GanttChartVO::getActualCompletedDate));
+                return buildFromIssueDto(issueDTOList, projectId, completedDateMap);
             } else {
                 return new ArrayList<>();
             }
@@ -185,7 +190,9 @@ public class GanttChartServiceImpl implements GanttChartService {
         return result;
     }
 
-    private List<GanttChartVO> buildFromIssueDto(List<IssueDTO> issueList, Long projectId) {
+    private List<GanttChartVO> buildFromIssueDto(List<IssueDTO> issueList,
+                                                 Long projectId,
+                                                 Map<Long, Date> completedDateMap) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -212,6 +219,10 @@ public class GanttChartServiceImpl implements GanttChartService {
                 if (!ObjectUtils.isEmpty(assignee)) {
                     ganttChart.setAssignee(assignee);
                 }
+            }
+            Date completedDate = completedDateMap.get(i.getIssueId());
+            if (completedDate != null) {
+                ganttChart.setActualCompletedDate(completedDate);
             }
             setParentId(ganttChart, i);
         });

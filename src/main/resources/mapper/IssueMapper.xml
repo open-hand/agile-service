@@ -3410,5 +3410,26 @@
          )
     </select>
 
+    <select id="selectActuatorCompletedDateByIssueIds" resultType="io.choerodon.agile.api.vo.GanttChartVO">
+        select
+        t2.issue_id,
+        t3.creation_date as actual_completed_date
+        from (
+            select
+            t1.issue_id,
+            max(t1.log_id) as log_id
+            from agile_data_log t1
+            where t1.project_id = #{projectId}
+            and t1.field in ('resolution', 'Auto Resolution')
+            and t1.new_value is not null
+            and t1.issue_id in
+            <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+            </foreach>
+            group by t1.issue_id
+        ) t2
+        left join agile_data_log t3 on t2.log_id = t3.log_id
+    </select>
+
 
 </mapper>
