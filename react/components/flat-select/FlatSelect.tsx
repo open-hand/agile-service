@@ -62,7 +62,7 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     const { name, multiple } = this;
     const hasValue = !this.isEmpty();
     const placeholder = this.hasFloatLabel ? undefined : this.getPlaceholders()[0];
-    const width = (hasValue ? 0 : measureTextWidth(placeholder || '') + 36);
+    const width = (hasValue ? 0 : measureTextWidth(placeholder || '') + 37);
     if (multiple) {
       return (
         <input
