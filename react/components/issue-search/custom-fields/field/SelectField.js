@@ -1,29 +1,25 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Select } from 'choerodon-ui';
-import { configTheme } from '@/utils/common';
-import { getSelectStyle } from '../utils';
+import FlatSelect from '@/components/flat-select';
 
-const { Option } = Select;
+const { Option } = FlatSelect;
 function SelectField({ field, value, onChange }) {
   const { fieldOptions, name } = field;
   return (
-    <Select
-      {...configTheme({
-        list: fieldOptions,
-        textField: 'value',
-        valueFiled: 'id',
-      })}
+    <FlatSelect
+      key={field.code}
       value={value}
       onChange={onChange}
       placeholder={name}
-      mode="multiple"
-      style={getSelectStyle(field, value)}
       dropdownMatchSelectWidth={false}
-      allowClear
+      multiple
+      clearButton
+      maxTagCount={3}
+      maxTagTextLength={10}
+      getPopupContainer={(triggerNode) => triggerNode.parentNode}
     >
-      {(fieldOptions || []).map(option => <Option value={String(option.id)}>{option.value}</Option>)}    
-    </Select>
+      {(fieldOptions || []).map((option) => <Option value={String(option.id)}>{option.value}</Option>)}
+    </FlatSelect>
   );
 }
 export default observer(SelectField);
