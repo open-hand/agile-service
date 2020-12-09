@@ -25,6 +25,9 @@ public class SprintTaskVO {
     private BigDecimal remainingTimeRate;
     @ApiModelProperty(value = "主要负责人完成工时占比")
     private BigDecimal remainingTimeCompleteRate;
+    @ApiModelProperty(value = "主要负责人完成工时比计划工时")
+    private BigDecimal remainingTimePlanCompleteRate;
+
 
     public Long getSprintId() {
         return sprintId;
@@ -104,5 +107,13 @@ public class SprintTaskVO {
 
     public void setRemainingTimeCompleteRate(BigDecimal remainingTimeCompleteRate) {
         this.remainingTimeCompleteRate = remainingTimeCompleteRate;
+    }
+
+    public BigDecimal getRemainingTimePlanCompleteRate() {
+        return remainingTimePlanCompleteRate;
+    }
+
+    public void setRemainingTimePlanCompleteRate(BigDecimal remainingTimePlanCompleteRate) {
+        this.remainingTimePlanCompleteRate = remainingTimePlanCompleteRate;
     }
 }

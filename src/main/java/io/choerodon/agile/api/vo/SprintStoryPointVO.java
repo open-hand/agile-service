@@ -25,6 +25,9 @@ public class SprintStoryPointVO {
     private BigDecimal mainStoryPointsRate;
     @ApiModelProperty(value = "主要负责人完成故事点占比")
     private BigDecimal mainStoryPointsCompleteRate;
+    @ApiModelProperty(value = "主要负责人完成故事计划故事点占比")
+    private BigDecimal mainStoryPointsPlanCompleteRate;
+
 
     public Long getSprintId() {
         return sprintId;
@@ -104,5 +107,13 @@ public class SprintStoryPointVO {
 
     public void setMainStoryPointsCompleteRate(BigDecimal mainStoryPointsCompleteRate) {
         this.mainStoryPointsCompleteRate = mainStoryPointsCompleteRate;
+    }
+
+    public BigDecimal getMainStoryPointsPlanCompleteRate() {
+        return mainStoryPointsPlanCompleteRate;
+    }
+
+    public void setMainStoryPointsPlanCompleteRate(BigDecimal mainStoryPointsPlanCompleteRate) {
+        this.mainStoryPointsPlanCompleteRate = mainStoryPointsPlanCompleteRate;
     }
 }
