@@ -48,6 +48,7 @@ const StatusCirculationTable: React.FC = () => {
               <CheckboxAll
                 name={`column-${status.name}`}
                 // indeterminate=
+                className={styles.check_all}
                 record={status}
                 indeterminate={!!(currentSize && currentSize > 1 && currentSize < store.statusList.length)}
                 checked={currentSize === store.statusList.length}
