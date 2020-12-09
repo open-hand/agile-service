@@ -14,6 +14,8 @@ function transformSystemFilter(data:any) {
     quickFilterIds,
     createDate = [],
     updateDate = [],
+    estimatedStartTime = [],
+    estimatedEndTime = [],
     contents,
     component,
     epic,
@@ -24,6 +26,9 @@ function transformSystemFilter(data:any) {
     version,
     starBeacon,
     userId,
+    testResponsibleIds,
+    mainResponsibleIds,
+    environment,
   } = data;
   return {
     advancedSearchArgs: {
@@ -43,8 +48,15 @@ function transformSystemFilter(data:any) {
       label,
       summary,
       version,
+      testResponsibleIds,
+      mainResponsibleIds,
+      environment,
     },
     searchArgs: {
+      estimatedStartTimeScopeStart: estimatedStartTime[0],
+      estimatedStartTimeScopeEnd: estimatedStartTime[1],
+      estimatedEndTimeScopeStart: estimatedEndTime[0],
+      estimatedEndTimeScopeEnd: estimatedEndTime[1],
       createStartDate: createDate[0],
       createEndDate: createDate[1],
       updateStartDate: updateDate[0],
