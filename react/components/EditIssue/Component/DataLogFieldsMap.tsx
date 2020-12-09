@@ -635,6 +635,39 @@ const fieldsMap = new Map([
       },
     },
   }],
+  ['Feature Sprint Link', {
+    name: '冲刺',
+    create: {
+      render: (log: ILog) => {
+        const { newString } = log;
+        return (
+          <span>
+            将
+            <span className="c7n-Log-field">【冲刺】</span>
+            <span>由</span>
+            <span className="c7n-Log-value">【无】</span>
+            改变为
+            <span className="c7n-Log-value">{`【${newString}】`}</span>
+          </span>
+        );
+      },
+    },
+    delete: {
+      render: (log: ILog) => {
+        const { oldString } = log;
+        return (
+          <span>
+            将
+            <span className="c7n-Log-field">【冲刺】</span>
+            <span>由</span>
+            <span className="c7n-Log-value">{`【${oldString}】`}</span>
+            改变为
+            <span className="c7n-Log-value">【无】</span>
+          </span>
+        );
+      },
+    },
+  }],
 ]);
 
 export default fieldsMap;
