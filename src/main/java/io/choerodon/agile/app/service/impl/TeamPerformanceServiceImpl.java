@@ -155,9 +155,18 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
         sprintTask.setRemainingTimeRate(DataUtil.divide(
                 DataUtil.multiply(sprintTask.getRemainingTime(), new BigDecimal(100)),
                 sumStoryPoints, 2));
+
         sprintTask.setRemainingTimeCompleteRate(DataUtil.divide(
                 DataUtil.multiply(sprintTask.getRemainingTimeComplete(), new BigDecimal(100)),
                 sumStoryPointsComplete, 2));
+
+
+        BigDecimal remainingTimePlanCompleteRate = Objects.isNull(sprintTask.getRemainingTime()) ||
+                sprintTask.getRemainingTime().compareTo(new BigDecimal(0)) == 0 ?
+                new BigDecimal(100) : DataUtil.divide(
+                DataUtil.multiply(sprintTask.getRemainingTimeComplete(), new BigDecimal(100)),
+                sprintTask.getRemainingTime(), 2);
+        sprintTask.setRemainingTimePlanCompleteRate(remainingTimePlanCompleteRate);
     }
 
     private void handleUser(SprintTaskVO sprintTask, UserMessageDTO mainResponsible) {
@@ -177,9 +186,18 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
         sprintStoryPoint.setMainStoryPointsRate(DataUtil.divide(
                 DataUtil.multiply(sprintStoryPoint.getStoryPoints(), new BigDecimal(100)),
                 sumStoryPoints, 2));
+
         sprintStoryPoint.setMainStoryPointsCompleteRate(DataUtil.divide(
                 DataUtil.multiply(sprintStoryPoint.getStoryPointsComplete(), new BigDecimal(100)),
                 sumStoryPointsComplete, 2));
+
+        BigDecimal mainStoryPointsPlanCompleteRate = Objects.isNull(sprintStoryPoint.getStoryPoints()) ||
+                sprintStoryPoint.getStoryPoints().compareTo(new BigDecimal(0)) == 0 ?
+                new BigDecimal(100) : DataUtil.divide(
+                DataUtil.multiply(sprintStoryPoint.getStoryPointsComplete(), new BigDecimal(100)),
+                sprintStoryPoint.getStoryPoints(), 2);
+        sprintStoryPoint.setMainStoryPointsPlanCompleteRate(mainStoryPointsPlanCompleteRate);
+
     }
 
 
