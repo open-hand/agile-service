@@ -72,6 +72,23 @@ class Commits extends Component {
     } = this.props;
     const column = [
       {
+        title: '所属项目',
+        dataIndex: 'projectName',
+        width: '25%',
+        render: projectName => (
+          <div style={{ width: '100%', overflow: 'hidden' }}>
+            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={projectName}>
+              <p style={{
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, 
+              }}
+              >
+                {projectName}
+              </p>
+            </Tooltip>
+          </div>
+        ),
+      },
+      {
         title: '应用名称',
         dataIndex: 'appServiceName',
         width: '25%',
