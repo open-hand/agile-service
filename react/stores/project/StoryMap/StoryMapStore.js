@@ -151,28 +151,30 @@ class StoryMapStore {
 
   getStoryMap = async (firstLoad = false) => {
     this.setLoading(true);
-    let { allVersion } = this;
-    let { allSprints } = this;
-    let versionList = (allVersion || []).slice(0, 5);
-    let sprintIds = (allSprints || []).slice(0, 5).map((s) => s.sprintId);
+    let versionList = (this.allVersion || []).slice(0, 5);
+    let sprintIds = (this.allSprints || []).slice(0, 5).map((s) => s.sprintId);
     if (this.swimLine === 'version') {
       if (!this.allVersion) {
-        allVersion = await versionApi.loadNamesByStatus();
-
-        this.allVersion = allVersion;
+        const allVersion = await versionApi.loadNamesByStatus();
+        const planingVersions = allVersion.filter((v) => v.statusCode === 'version_planning');
+        const otherVersions = allVersion.filter((v) => v.statusCode !== 'version_planning');
+        this.allVersion = [...planingVersions.reverse(), ...otherVersions];
       }
-      versionList = allVersion.slice(0, 5);
+      versionList = this.allVersion.slice(0, 5);
       if (versionList.length > 0) {
         if (!this.searchVO.otherArgs.version || this.searchVO.otherArgs.version.length <= 0) {
           this.searchVO.otherArgs.version = versionList.map((v) => v.versionId);
         }
-        versionList = allVersion.filter((version) => this.searchVO.otherArgs.version.includes(version.versionId));
+        versionList = this.allVersion.filter((version) => this.searchVO.otherArgs.version.includes(version.versionId));
       }
     } else if (this.swimLine === 'sprint') {
       if (!this.allSprints) {
-        allSprints = await sprintApi.loadSprints();
+        const allSprints = await sprintApi.loadSprints();
+        const planingSprints = allSprints.filter((v) => v.statusCode === 'sprint_planning').reverse();
+        const otherSprints = allSprints.filter((v) => v.statusCode !== 'sprint_planning');
+        this.allSprints = [...planingSprints, ...otherSprints];
       }
-      sprintIds = allSprints.slice(0, 5).map((s) => s.sprintId);
+      sprintIds = this.allSprints.slice(0, 5).map((s) => s.sprintId);
       if (sprintIds.length > 0) {
         if (!this.searchVO.otherArgs.sprint || this.searchVO.otherArgs.sprint.length <= 0) {
           this.searchVO.otherArgs.sprint = sprintIds;

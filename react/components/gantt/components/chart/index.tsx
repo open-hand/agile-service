@@ -39,7 +39,6 @@ const Chart: React.FC = () => {
     }
     return () => { };
   }, [chartElementRef, store]);
-  console.log(translateX);
   return (
     <div
       ref={chartRef}
