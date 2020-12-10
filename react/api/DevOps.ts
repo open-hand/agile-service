@@ -1,18 +1,19 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import Api from './Api';
 
 interface ICreateBranch {
   branchName: string,
   issueId: number,
   originBranch: string,
 }
-class DevOpsApi {
+class DevOpsApi extends Api {
   get prefix() {
-    return `/devops/v1/projects/${getProjectId()}`;
+    return `/devops/v1/projects/${this.projectId}`;
   }
 
   get issuePrefix() {
-    return `/devops/v1/project/${getProjectId()}`;
+    return `/devops/v1/project/${this.projectId}`;
   }
 
   /**
@@ -21,7 +22,11 @@ class DevOpsApi {
    * @param devopsBranchVO 
    */
   createBranch(applicationId: number, devopsBranchVO: ICreateBranch) {
-    return axios.post(`${this.prefix}/app_service/${applicationId}/git/branch`, devopsBranchVO);
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_service/${applicationId}/git/branch`,
+      data: devopsBranchVO,
+    });
   }
 
   /**

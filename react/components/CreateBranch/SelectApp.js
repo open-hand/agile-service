@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Select } from 'choerodon-ui';
+import { find } from 'lodash';
 import { useSetState, useLockFn, useDebounceFn } from 'ahooks';
 import { devOpsApi } from '@/api';
 
 const { Option, OptGroup } = Select;
 
 
-const SelectApp = (props) => {
+const SelectApp = ({ onChange, onAppChange, ...props }) => {
   const [state, setState] = useSetState({
     loading: false,
     data: [],
@@ -41,6 +42,11 @@ const SelectApp = (props) => {
       hasNextPage,
     });
   });
+  const handleChange = useCallback((appId) => {
+    const { projectId } = find(state.data, project => project.appServices.find(s => String(s.id) === String(appId)));
+    onChange(appId);
+    onAppChange(appId, String(projectId));
+  }, [onAppChange, onChange, state.data]);
   const { data, loading, hasNextPage } = state;
   return (
     <Select
@@ -50,6 +56,7 @@ const SelectApp = (props) => {
       filterOption={() => true}
       loading={loading}
       onFilterChange={handleSearch}
+      onChange={handleChange}
       {...props}
     >
       {data.map(project => (

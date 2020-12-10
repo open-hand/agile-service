@@ -1,18 +1,18 @@
 /* eslint-disable no-param-reassign */
 import React, { Component } from 'react';
-import _ from 'lodash';
 import {
   Modal, Form, Input, Select, Icon,
 } from 'choerodon-ui';
 import {
-  stores, Content, Choerodon,
+  Content, Choerodon,
 } from '@choerodon/boot';
+import { getProjectId } from '@/utils/common';
 import { devOpsApi } from '@/api';
 import SelectApp from './SelectApp';
 import './CreateBranch.less';
 import './commom.less';
 
-const { AppState } = stores;
+
 const { Sidebar } = Modal;
 const { Option, OptGroup } = Select;
 const FormItem = Form.Item;
@@ -58,7 +58,7 @@ class CreateBranch extends Component {
     e.preventDefault();
     const { form, issueId, onOk } = this.props;
     form.validateFieldsAndScroll((err, values) => {
-      if (values.app || values.app2) {
+      if (err && (values.app || values.app2)) {
         delete err.app;
         delete err.app2;
       }
@@ -69,10 +69,11 @@ class CreateBranch extends Component {
           originBranch: values.branch,
         };
         const applicationId = values.app || values.app2;
+        const changeProject = values.app2;
         this.setState({
           confirmLoading: true,
         });
-        devOpsApi.createBranch(applicationId, devopsBranchVO).then(() => {
+        devOpsApi.project(changeProject ? this.projectId : getProjectId()).createBranch(applicationId, devopsBranchVO).then(() => {
           this.setState({
             confirmLoading: false,
           });
@@ -119,6 +120,11 @@ class CreateBranch extends Component {
   handleAppChange = () => {
     const { form } = this.props;
     form.resetFields(['branch']);
+  }
+
+  handleOtherAppChange= (appId, projectId) => {
+    this.projectId = projectId;
+    this.handleAppChange();
   }
 
   getApp=() => {
@@ -198,7 +204,7 @@ class CreateBranch extends Component {
                 </Select>,
               ) : getFieldDecorator('app2', {
                 rules: [{ required: true, message: '请选择应用' }],
-              })(<SelectApp key="other" onChange={this.handleAppChange} />)}
+              })(<SelectApp key="other" onAppChange={this.handleOtherAppChange} />)}
             </FormItem>
             <FormItem className="branch-formItem">
               {getFieldDecorator('branch', {
