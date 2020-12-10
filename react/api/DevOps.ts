@@ -29,6 +29,16 @@ class DevOpsApi extends Api {
     });
   }
 
+  checkBranchName(applicationId: number, branchName: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/app_service/${applicationId}/git/check_branch_name`,
+      params: {
+        branch_name: branchName,
+      },
+    });
+  }
+  
   /**
    * 统计分支相关数据
    * @param issueId 

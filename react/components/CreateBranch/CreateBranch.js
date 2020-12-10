@@ -86,13 +86,16 @@ class CreateBranch extends Component {
     });
   };
 
-  getProjectId=() => {
+  getProjectId = () => {
     const { form } = this.props;
     const changeProject = form.getFieldValue('app2');
     return changeProject ? this.projectId : getProjectId();
   }
 
-  checkName = (rule, value, callback) => {
+  checkName = async (rule, value, callback) => {
+    const { form } = this.props;
+    const type = form.getFieldValue('type');
+    const branchName = type === 'custom' ? value : `${type}-${value}`;
     // eslint-disable-next-line no-useless-escape
     const endWith = /(\/|\.|\.lock)$/;
     const contain = /(\s|~|\^|:|\?|\*|\[|\\|\.\.|@\{|\/{2,}){1}/;
@@ -101,6 +104,8 @@ class CreateBranch extends Component {
       callback('不能以"/"、"."、".lock"结尾');
     } else if (contain.test(value) || single.test(value)) {
       callback('只能包含字母、数字、\'——\'、\'_\'');
+    } else if (this.getApp() && !await devOpsApi.project(this.getProjectId()).checkBranchName(this.getApp(), branchName)) {
+      callback('分支名称已存在');
     } else {
       callback();
     }
@@ -125,14 +130,17 @@ class CreateBranch extends Component {
   handleAppChange = () => {
     const { form } = this.props;
     form.resetFields(['branch']);
+    setTimeout(() => {
+      form.validateFields(['name'], { force: true });
+    });
   }
 
-  handleOtherAppChange= (appId, projectId) => {
+  handleOtherAppChange = (appId, projectId) => {
     this.projectId = projectId;
     this.handleAppChange();
   }
 
-  getApp=() => {
+  getApp = () => {
     const { form } = this.props;
     return form.getFieldValue('app') || form.getFieldValue('app2');
   }
@@ -362,6 +370,11 @@ class CreateBranch extends Component {
                 <Select
                   allowClear
                   label="分支类型"
+                  onChange={() => {
+                    setTimeout(() => {
+                      form.validateFields(['name'], { force: true });
+                    });
+                  }}
                 >
                   {['feature', 'bugfix', 'release', 'hotfix', 'custom'].map(s => (
                     <Option value={s} key={s}>
