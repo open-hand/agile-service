@@ -1,7 +1,9 @@
 import React, { useCallback } from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
-import { useSetState, useLockFn, useDebounceFn } from 'ahooks';
+import {
+  useSetState, useLockFn, useDebounceFn, useMount,
+} from 'ahooks';
 import { devOpsApi } from '@/api';
 
 const { Option, OptGroup } = Select;
@@ -29,7 +31,10 @@ const SelectApp = ({ onChange, onAppChange, ...props }) => {
       hasNextPage,
     }));
   });
-  const { run: handleSearch } = useDebounceFn(async (input) => {
+  const { run: handleSearch, flush } = useDebounceFn(async (input, force) => {
+    if (input === state.search && !force) {
+      return;
+    }
     setState({
       loading: true,
       search: input,
@@ -41,6 +46,10 @@ const SelectApp = ({ onChange, onAppChange, ...props }) => {
       loading: false,
       hasNextPage,
     });
+  });
+  useMount(() => {
+    handleSearch('', true);
+    flush();
   });
   const handleChange = useCallback((appId) => {
     const { projectId } = find(state.data, project => project.appServices.find(s => String(s.id) === String(appId)));
