@@ -7,13 +7,14 @@ import { Button, Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
 import dayjs from 'dayjs';
+import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import GanttComponent, { GanttProps } from '@/components/gantt';
+import GanttComponent, { GanttProps, Gantt } from 'react-gantt-component';
+import 'react-gantt-component/dist/react-gantt-component.cjs.production.min.css';
 import { ganttApi, issueApi, workCalendarApi } from '@/api';
-import { Gantt } from '@/components/gantt/types';
 import TypeTag from '@/components/TypeTag';
 import Loading from '@/components/Loading';
 import SelectSprint from '@/components/select/select-sprint';
@@ -25,7 +26,6 @@ import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import HeaderLine from '@/components/HeaderLine';
 import { User } from '@/common/types';
-
 import { transformFilter } from './components/search/util';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
@@ -36,7 +36,8 @@ import GanttStore from './store';
 import GanttOperation from './components/gantt-operation';
 import './index.less';
 
-const renderTooltip = (user:User) => {
+dayjs.extend(weekday);
+const renderTooltip = (user: User) => {
   const {
     loginName, realName, email, ldap,
   } = user || {};
