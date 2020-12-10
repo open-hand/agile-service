@@ -56,8 +56,8 @@ class Commits extends Component {
 
   createMergeRequest(record) {
     const win = window.open('');
-    const { appServiceId } = record;
-    devOpsApi.loadGitUrl(appServiceId)
+    const { appServiceId, projectId } = record;
+    devOpsApi.project(projectId).loadGitUrl(appServiceId)
       .then((res) => {
         const url = `${res}/merge_requests/new?change_branches=true&merge_request[source_branch]=${record.branchName}&merge_request[target_branch]=master`;
         win.location.href = url;
