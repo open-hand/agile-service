@@ -212,8 +212,9 @@ const GanttPage: React.FC = () => {
       bar={bar}
       width={width}
       height={height}
+      onClick={onRow.onClick}
     />
-  ), [type]);
+  ), [onRow.onClick, type]);
   const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((item, t) => (
     <div
       role="none"
