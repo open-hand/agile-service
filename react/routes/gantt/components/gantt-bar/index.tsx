@@ -4,6 +4,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { Tooltip } from 'choerodon-ui/pro';
 import { Gantt } from '@/components/gantt/types';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
+import { GanttProps } from '@/components/gantt';
 import Context from '../../context';
 import styles from './index.less';
 
@@ -12,6 +13,7 @@ interface GanttBarProps {
   bar: Gantt.Bar
   width: number
   height: number
+  onClick:GanttProps['onBarClick']
 }
 function format(h: number) {
   if (h >= 24) {
@@ -23,7 +25,7 @@ function format(h: number) {
   return `${h}小时`;
 }
 const GanttBar: React.FC<GanttBarProps> = ({
-  type, bar, width, height,
+  type, bar, width, height, onClick,
 }) => {
   const { store } = useContext(Context);
   const { ganttRef } = store;
@@ -103,6 +105,14 @@ const GanttBar: React.FC<GanttBarProps> = ({
       </Tooltip>
       {delayVisible && (
         <div
+          role="none"
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick && onClick(bar.task);
+          }}
           className={styles.delay}
           style={{ width: delayWidth, marginLeft: width }}
         />
