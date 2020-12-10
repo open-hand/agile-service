@@ -69,11 +69,10 @@ class CreateBranch extends Component {
           originBranch: values.branch,
         };
         const applicationId = values.app || values.app2;
-        const changeProject = values.app2;
         this.setState({
           confirmLoading: true,
         });
-        devOpsApi.project(changeProject ? this.projectId : getProjectId()).createBranch(applicationId, devopsBranchVO).then(() => {
+        devOpsApi.project(this.getProjectId()).createBranch(applicationId, devopsBranchVO).then(() => {
           this.setState({
             confirmLoading: false,
           });
@@ -86,6 +85,12 @@ class CreateBranch extends Component {
       }
     });
   };
+
+  getProjectId=() => {
+    const { form } = this.props;
+    const changeProject = form.getFieldValue('app2');
+    return changeProject ? this.projectId : getProjectId();
+  }
 
   checkName = (rule, value, callback) => {
     // eslint-disable-next-line no-useless-escape
@@ -222,7 +227,7 @@ class CreateBranch extends Component {
                     this.setState({
                       branchsInput: input,
                     });
-                    devOpsApi.loadBranchesByService(app, undefined, undefined, {
+                    devOpsApi.project(this.getProjectId()).loadBranchesByService(app, undefined, undefined, {
                       searchParam: {
                         branchName: input,
                       },
@@ -240,7 +245,7 @@ class CreateBranch extends Component {
                         Choerodon.prompt(res.message);
                       }
                     });
-                    devOpsApi.loadTagsByService(app, undefined, undefined, {
+                    devOpsApi.project(this.getProjectId()).loadTagsByService(app, undefined, undefined, {
                       searchParam: {
                         tagName: input,
                       },
