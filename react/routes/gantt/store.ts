@@ -3,10 +3,9 @@
 /* eslint-disable no-underscore-dangle */
 import { createRef } from 'react';
 import {
-  observable, computed, action, runInAction,
+  observable, action,
 } from 'mobx';
-import { Gantt } from '@/components/gantt/types';
-import { GanttRef } from '@/components/gantt/Gantt';
+import { GanttRef, Gantt } from 'react-gantt-component';
 // 视图日视图、周视图、月视图、季视图、年视图
 export const units = [
   {
