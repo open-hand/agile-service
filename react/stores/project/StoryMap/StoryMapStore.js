@@ -163,7 +163,7 @@ class StoryMapStore {
       versionList = this.allVersion.slice(0, 5);
       if (versionList.length > 0) {
         if (!this.searchVO.otherArgs.version || this.searchVO.otherArgs.version.length <= 0) {
-          this.searchVO.otherArgs.version = versionList.map((v) => v.versionId);
+          this.issueSearchStore.handleFilterChange('version', versionList.map((v) => v.versionId));
         }
         versionList = this.allVersion.filter((version) => this.searchVO.otherArgs.version.includes(version.versionId));
       }
@@ -177,7 +177,8 @@ class StoryMapStore {
       sprintIds = this.allSprints.slice(0, 5).map((s) => s.sprintId);
       if (sprintIds.length > 0) {
         if (!this.searchVO.otherArgs.sprint || this.searchVO.otherArgs.sprint.length <= 0) {
-          this.searchVO.otherArgs.sprint = sprintIds;
+          // this.searchVO.otherArgs.sprint = sprintIds;
+          this.issueSearchStore.handleFilterChange('sprint', sprintIds);
         }
         sprintIds = this.searchVO.otherArgs.sprint;
       }
