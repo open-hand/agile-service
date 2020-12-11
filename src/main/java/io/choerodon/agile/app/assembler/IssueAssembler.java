@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.StatusType;
+import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
 
@@ -44,6 +45,8 @@ public class IssueAssembler extends AbstractAssembler {
     private SprintNameAssembler sprintNameAssembler;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private IssueStatusMapper issueStatusMapper;
 
     /**
      * issueDetailDO转换到IssueDTO
@@ -565,7 +568,9 @@ public class IssueAssembler extends AbstractAssembler {
         if (!issueDTOs.isEmpty()) {
             Map<Long, IssueTypeVO> testIssueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.TEST);
             Map<Long, IssueTypeVO> agileIssueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
-            Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
+            Map<Long, StatusVO> statusMapDTOMap =
+                    issueStatusMapper.listWithCompleted(projectId, ConvertUtil.getOrganizationId(projectId)).stream()
+                            .collect(Collectors.toMap(StatusVO::getId, Function.identity()));
             Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
             List<Long> assigneeIds = issueDTOs.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).distinct().collect(Collectors.toList());
             Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
