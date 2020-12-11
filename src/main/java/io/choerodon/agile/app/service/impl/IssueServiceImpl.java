@@ -2546,7 +2546,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
-
         return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds));
     }
 
