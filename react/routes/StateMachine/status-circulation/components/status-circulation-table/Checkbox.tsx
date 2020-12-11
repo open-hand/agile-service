@@ -25,6 +25,7 @@ const CheckBoxPart: React.FC<Props> = ({ store, status, record }) => {
   }
   return (
     <CheckBox
+      disabled={status.id === record.id}
       checked={finalChecked}
       name={`path-${status.name}`}
       record={record}
