@@ -200,6 +200,7 @@ const Filter: React.FC<FilterProps> = ({
           isText,
           isTime,
         })}
+        multiple={!(!field.system && (field.fieldType === 'single' || field.fieldType === 'radio'))}
         onChange={(v: any) => {
           if (isTime && v && v.length > 0) {
             if (v[0] === undefined && v[1] === undefined) {
@@ -274,7 +275,7 @@ const Filter: React.FC<FilterProps> = ({
     <>
       {
         (overflowLine || folded === true) && (
-          <Button className={styles.btn} funcType={'flat' as FuncType} onClick={expandFilter}>
+          <Button className={`${styles.btn} ${folded === true ? styles.foldedBtn : ''}`} funcType={'flat' as FuncType} onClick={expandFilter}>
             <Icon type={folded ? 'expand_more' : 'expand_less'} />
           </Button>
         )
