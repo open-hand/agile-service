@@ -15,9 +15,10 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (versions: IVersion[]) => void
   request?: Function
   flat?:boolean
+  hasUnassign?: boolean
 }
 const SelectVersion: React.FC<Props> = forwardRef(({
-  request, projectId, valueField, dataRef = { current: null }, afterLoad, statusArr = [], flat, ...otherProps
+  request, projectId, valueField, dataRef = { current: null }, afterLoad, statusArr = [], flat, hasUnassign, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'version',
@@ -38,7 +39,11 @@ const SelectVersion: React.FC<Props> = forwardRef(({
       if (afterLoad) {
         afterLoad(versions);
       }
-      return versions;
+      let newVersion = versions;
+      if (hasUnassign) {
+        newVersion = [{ versionId: '0', name: '未分配版本' } as IVersion, ...versions];
+      }
+      return newVersion;
     },
     paging: false,
   }), [projectId]);
