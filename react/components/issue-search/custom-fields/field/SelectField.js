@@ -4,15 +4,15 @@ import FlatSelect from '@/components/flat-select';
 
 const { Option } = FlatSelect;
 function SelectField({ field, value, onChange }) {
-  const { fieldOptions, name } = field;
+  const { fieldOptions, name, fieldType } = field;
   return (
     <FlatSelect
-      key={field.code}
+      key={`${field.code}-${value}`}
       value={value}
       onChange={onChange}
       placeholder={name}
       dropdownMatchSelectWidth={false}
-      multiple
+      multiple={fieldType === 'checkbox' || fieldType === 'multiple'}
       clearButton
       maxTagCount={3}
       maxTagTextLength={10}

@@ -232,7 +232,7 @@ const SearchArea: React.FC = () => {
               <Button
                 onClick={handleClickExpandFilter}
                 funcType={'flat' as FuncType}
-                className={`${prefixCls}-search-right-btn`}
+                className={`${prefixCls}-search-right-btn ${folded === true ? 'foldedBtn' : ''}`}
               >
                 <Icon type={folded ? 'expand_more' : 'expand_less'} />
               </Button>
