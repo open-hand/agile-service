@@ -297,6 +297,10 @@ const GanttPage: React.FC = () => {
               renderBar={renderBar}
               renderBarThumb={renderBarThumb}
               tableCollapseAble={false}
+              scrollTop={{
+                right: -4,
+                bottom: 8,
+              }}
             />
           )}
           <IssueDetail refresh={loadData} />
