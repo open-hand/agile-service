@@ -1,9 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.api.vo.GanttChartVO;
-import io.choerodon.agile.api.vo.IssueIdSprintIdVO;
-import io.choerodon.agile.api.vo.IssueOverviewVO;
-import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -461,7 +458,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<Long> queryProjectIds();
 
-    List<IssueDTO> listIssueInfoByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<IssueDTO> listIssueInfoByIssueIds(@Param("projectId") Long projectId,
+                                           @Param("issueIds") List<Long> issueIds,
+                                           @Param("issueQueryVO") IssueQueryVO issueQueryVO);
 
     Set<Long> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
                                         @Param("projectId") Long projectId,
