@@ -197,7 +197,12 @@
         JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code =
         'bug'
         <if test="responsibleId != null">
-            AND ai.main_responsible_id = #{responsibleId}
+            <if test="type != null and type == 'dev'">
+                ai.main_responsible_id = #{responsibleId}
+            </if>
+            <if test="type != null and type == 'test'">
+                ai.test_responsible_id = #{responsibleId}
+            </if>
         </if>
         <if test="environment != null and environment !=''">
             AND ai.environment = #{environment}
