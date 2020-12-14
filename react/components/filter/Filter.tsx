@@ -200,7 +200,6 @@ const Filter: React.FC<FilterProps> = ({
           isText,
           isTime,
         })}
-        multiple={!(!field.system && (field.fieldType === 'single' || field.fieldType === 'radio'))}
         onChange={(v: any) => {
           if (isTime && v && v.length > 0) {
             if (v[0] === undefined && v[1] === undefined) {
