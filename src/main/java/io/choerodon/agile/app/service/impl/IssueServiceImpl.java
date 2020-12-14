@@ -2522,10 +2522,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
 
-//    @Override
-//    public IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum) {
-//        return issueMapper.queryIssueByIssueNum(projectId, issueNum);
-//    }
+    @Override
+    public IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum) {
+        return issueMapper.queryIssueByIssueNum(projectId, issueNum);
+    }
 
     @Override
     public List<TestCaseDTO> migrateTestCaseByProjectId(Long projectId) {

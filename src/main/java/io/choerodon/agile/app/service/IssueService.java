@@ -383,4 +383,6 @@ public interface IssueService {
     Page<IssueLinkVO> pagedQueryByOptions(Long projectId,
                                           PageRequest pageRequest,
                                           IssueQueryVO issueQueryVO);
+
+    IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum);
 }
