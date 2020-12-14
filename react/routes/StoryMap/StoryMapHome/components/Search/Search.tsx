@@ -44,7 +44,8 @@ const StoryMapSearch: React.FC<Props> = ({ issueSearchStore }) => {
             border: '1px solid #D9E6F2',
             fontWeight: 500,
             borderRadius: '6px',
-            margin: '8px 15px 0px 10px',
+            margin: '14px 15px 0px 10px',
+            height: 30,
             flexShrink: 0,
           }}
         />
