@@ -51,6 +51,10 @@ function ChooseField() {
         trigger={['click']}
       >
         <Button
+          style={{
+            height: 34,
+            paddingTop: 2,
+          }}
           onClick={(e) => {
             e.nativeEvent.stopImmediatePropagation();
             setHidden(false);
@@ -58,7 +62,7 @@ function ChooseField() {
         >
           <span style={{ display: 'flex', alignItems: 'center' }}>
             添加筛选
-            <Icon type="arrow_drop_down" />
+            <Icon type="arrow_drop_down" style={{ marginTop: -1 }} />
           </span>
         </Button>
       </Dropdown>

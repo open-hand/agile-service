@@ -1,7 +1,7 @@
 .c7nagile-issue-table {
   &-summary {
     display: inline-block;
-    margin-left: 20px;
+    margin-left: -1px;
   }
 
   .c7n-pro-table-wrapper {
@@ -10,12 +10,13 @@
     .c7n-pro-table-filter-select-wrapper {
       .c7n-pro-table-filter-select-suffix {
         right: 0 !important;
+
         .c7n-pro-table-columns-chooser {
           width: 0.45rem;
         }
       }
     }
-  
+
     .c7n-pro-table-thead {
       .c7n-pro-table-cell[data-index="issueId"] {
         padding-left: 13px;
@@ -43,8 +44,12 @@
     .c7n-pro-table-body {
       .c7n-pro-table-cell[data-index="issueId"] {
         .c7n-pro-table-cell-prefix {
+          padding-left: 0;
+
           .icon {
             margin-top: -3px;
+            margin-left: -4px;
+            margin-right: -8px;
           }
         }
       }

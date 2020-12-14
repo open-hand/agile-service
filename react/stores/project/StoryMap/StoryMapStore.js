@@ -3,6 +3,7 @@ import {
 } from 'mobx';
 import { Choerodon } from '@choerodon/boot';
 import {
+  cloneDeep,
   find, findIndex, remove, sortBy,
 } from 'lodash';
 import { getProjectId } from '@/utils/common';
@@ -151,6 +152,7 @@ class StoryMapStore {
 
   getStoryMap = async (firstLoad = false) => {
     this.setLoading(true);
+    const searchVO = cloneDeep(toJS(this.searchVO));
     let versionList = (this.allVersion || []).slice(0, 5);
     let sprintIds = (this.allSprints || []).slice(0, 5).map((s) => s.sprintId);
     if (this.swimLine === 'version') {
@@ -162,10 +164,10 @@ class StoryMapStore {
       }
       versionList = this.allVersion.slice(0, 5);
       if (versionList.length > 0) {
-        if (!this.searchVO.otherArgs.version || this.searchVO.otherArgs.version.length <= 0) {
-          this.issueSearchStore.handleFilterChange('version', versionList.map((v) => v.versionId));
+        if (!searchVO.otherArgs.version || searchVO.otherArgs.version.length <= 0) {
+          searchVO.otherArgs.version = versionList.map((v) => v.versionId);
         }
-        versionList = this.allVersion.filter((version) => this.searchVO.otherArgs.version.includes(version.versionId));
+        versionList = this.allVersion.filter((version) => searchVO.otherArgs.version.includes(version.versionId));
       }
     } else if (this.swimLine === 'sprint') {
       if (!this.allSprints) {
@@ -176,16 +178,15 @@ class StoryMapStore {
       }
       sprintIds = this.allSprints.slice(0, 5).map((s) => s.sprintId);
       if (sprintIds.length > 0) {
-        if (!this.searchVO.otherArgs.sprint || this.searchVO.otherArgs.sprint.length <= 0) {
-          // this.searchVO.otherArgs.sprint = sprintIds;
-          this.issueSearchStore.handleFilterChange('sprint', sprintIds);
+        if (!searchVO.otherArgs.sprint || searchVO.otherArgs.sprint.length <= 0) {
+          searchVO.otherArgs.sprint = sprintIds;
         }
-        sprintIds = this.searchVO.otherArgs.sprint;
+        sprintIds = searchVO.otherArgs.sprint;
       }
     }
 
     Promise.all([
-      storyMapApi.getStoryMap(this.searchVO),
+      storyMapApi.getStoryMap(searchVO),
       issueTypeApi.loadAllWithStateMachineId(),
       priorityApi.loadByProject(),
       this.swimLine === 'sprint' && sprintApi.loadSprintsWidthInfo(sprintIds),

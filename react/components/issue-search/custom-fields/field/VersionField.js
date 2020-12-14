@@ -17,6 +17,9 @@ function VersionField({ field, value, onChange }) {
       clearButton
       onChange={onChange}
       valueField="versionId"
+      onBlur={() => {
+        console.log('blur');
+      }}
     />
   );
 }
