@@ -301,6 +301,7 @@ const GanttPage: React.FC = () => {
                 right: -4,
                 bottom: 8,
               }}
+              rowHeight={34}
             />
           )}
           <IssueDetail refresh={loadData} />
