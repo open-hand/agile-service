@@ -29,6 +29,7 @@ import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.domain.PageInfo;
+import io.choerodon.core.utils.PageUtils;
 import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -2546,7 +2547,24 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
-        return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds));
+        return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null));
+    }
+
+    @Override
+    public Page<IssueLinkVO> pagedQueryByOptions(Long projectId, PageRequest pageRequest, IssueQueryVO issueQueryVO) {
+        List<Long> issueIds = issueQueryVO.getIssueIds();
+        Page emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        if (ObjectUtils.isEmpty(issueIds)) {
+            return emptyPage;
+        }
+        Page<IssueDTO> result =
+                PageHelper.doPage(pageRequest, () -> issueMapper.listIssueInfoByIssueIds(projectId, issueIds, issueQueryVO));
+        List<IssueDTO> content = result.getContent();
+        if (ObjectUtils.isEmpty(content)) {
+            return emptyPage;
+        }
+        List<IssueLinkVO> list = issueAssembler.issueDTOTOVO(projectId, content);
+        return PageUtils.copyPropertiesAndResetContent(result, list);
     }
 
     @Override

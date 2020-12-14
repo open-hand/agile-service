@@ -226,7 +226,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                                         JSONObject predefinedFields,
                                         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
                                         String appleType) {
-        List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds);
+        List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
         }
@@ -304,7 +304,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                                     List<Long> issueIds,
                                     BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
                                     boolean sendMsg) {
-        List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds);
+        List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
         if (CollectionUtils.isEmpty(customFields)) {
             throw new CommonException("error.customFields.null");
         }

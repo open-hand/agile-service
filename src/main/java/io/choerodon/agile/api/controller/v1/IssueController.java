@@ -656,6 +656,16 @@ public class IssueController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("【测试专用】根据issueIds分页查询issue")
+    @PostMapping(value = "/paged_query")
+    public ResponseEntity<Page<IssueLinkVO>> pagedQueryByOptions(@ApiParam(value = "项目id", required = true)
+                                                                 @PathVariable(name = "project_id") Long projectId,
+                                                                 @ApiIgnore @SortDefault PageRequest pageRequest,
+                                                                 @RequestBody IssueQueryVO issueQueryVO) {
+        return ResponseEntity.ok(issueService.pagedQueryByOptions(projectId, pageRequest, issueQueryVO));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询项目下的故事和任务(不包含子任务以及子bug)")
     @PostMapping(value = "/query_story_task")
     public ResponseEntity<Page<IssueListFieldKVVO>> queryStoryAndTask(@ApiParam(value = "项目id", required = true)

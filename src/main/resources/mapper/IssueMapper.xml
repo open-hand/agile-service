@@ -3172,7 +3172,17 @@
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}
         </foreach>
-
+        <if test="issueQueryVO != null">
+            <if test="issueQueryVO.summary != null">
+                and ai.summary like concat(concat('%', #{issueQueryVO.summary}),'%')
+            </if>
+            <if test="issueQueryVO.statusId != null">
+                and ai.status_id = #{issueQueryVO.statusId}
+            </if>
+            <if test="issueQueryVO.userId != null">
+                and ai.assignee_id = #{issueQueryVO.userId}
+            </if>
+        </if>
     </select>
     <select id="selectIssueBysprint" resultType="io.choerodon.agile.api.vo.IssueOverviewVO">
         SELECT

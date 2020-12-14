@@ -379,4 +379,8 @@ public interface IssueService {
      * @return
      */
     String getQuickFilter(List<Long> quickFilterIds);
+
+    Page<IssueLinkVO> pagedQueryByOptions(Long projectId,
+                                          PageRequest pageRequest,
+                                          IssueQueryVO issueQueryVO);
 }

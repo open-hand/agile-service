@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.utils;
 
 import java.util.*;
+
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.mybatis.util.StringUtil;
 
 import io.choerodon.core.domain.Page;
@@ -62,10 +64,8 @@ public class PageUtil {
     }
 
     public static Page emptyPageInfo(int page, int size) {
-        Page result = new Page();
-        result.setNumber(page);
-        result.setSize(size);
-        return result;
+        PageInfo pageInfo = new PageInfo(page, size);
+        return new Page(new ArrayList(), pageInfo, 0);
     }
 
     public static Page getPageInfo(int page, int size, int total, Collection list) {
