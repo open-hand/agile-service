@@ -15,6 +15,7 @@
                     ailt.link_name                                 AS link_type_name,
                     ailt.out_ward                                  AS ward,
                     CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
+                    ai.issue_num  AS issue_num1,
                     ai.summary,
                     ai.priority_id,
                     ai.status_id,
@@ -39,6 +40,7 @@
                     ailt1.link_name                                  AS link_type_name,
                     ailt1.in_ward                                    AS ward,
                     CONCAT_WS('-', api1.project_code, ai1.issue_num) AS issue_num,
+                    ai1.issue_num AS issue_num1,
                     ai1.summary,
                     ai1.priority_id,
                     ai1.status_id,
@@ -59,7 +61,7 @@
                     </if>
             ) a
         ORDER BY
-            a.link_type_name
+            a.issue_num1
     </select>
 
     <update id="batchUpdateRelToIssueLinkType">
