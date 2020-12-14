@@ -61,7 +61,7 @@
                     </if>
             ) a
         ORDER BY
-            a.issue_num1
+            a.issue_num1 desc
     </select>
 
     <update id="batchUpdateRelToIssueLinkType">
