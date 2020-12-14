@@ -198,10 +198,10 @@
         'bug'
         <if test="responsibleId != null">
             <if test="type != null and type == 'dev'">
-                ai.main_responsible_id = #{responsibleId}
+                AND ai.main_responsible_id = #{responsibleId}
             </if>
             <if test="type != null and type == 'test'">
-                ai.test_responsible_id = #{responsibleId}
+                AND ai.test_responsible_id = #{responsibleId}
             </if>
         </if>
         <if test="environment != null and environment !=''">
