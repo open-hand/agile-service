@@ -79,7 +79,7 @@ const SelectExistStatus: React.FC<Props> = ({
     <>
       <Form dataSet={dataSet}>
         <SelectStatus name="statusId" expectStatusIds={statusList.map((status) => status.id)} />
-        <SelectBox name="default">
+        <SelectBox name="default" style={{ marginTop: 13 }}>
           <Option value>是</Option>
           <Option value={false}>否</Option>
         </SelectBox>

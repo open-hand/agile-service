@@ -23,7 +23,7 @@ function ExpandAllButton() {
   return scrumBoardStore.currentBindFunctionMaps.get('expandOrUp') || scrumBoardStore.currentBindFunctionMaps.get('expandOrUp-epic') ? (
     <Button onClick={handleClick}>
       {expandAll ? '全部收起' : (
-        <Tooltip title="全部展开只能展开前15项">
+        <Tooltip title="仅展开前15项">
           <span>全部展开</span>
         </Tooltip>
       )}

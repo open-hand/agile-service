@@ -29,7 +29,7 @@ const DeleteStatus: React.FC<Props> = ({
     modal.handleOk(handleSubmit);
   }, [modal, handleSubmit]);
 
-  return null;
+  return <>{`确定删除状态“${data.name}”`}</>;
 };
 
 export default DeleteStatus;
