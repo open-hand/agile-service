@@ -103,7 +103,7 @@ function IssueBody(props) {
           {['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
         </TabPane>
         {
-          !disabled && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
+          issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
               <TabPane tab="拆分的Story" key="5">
                 <SplitStory {...props} />
