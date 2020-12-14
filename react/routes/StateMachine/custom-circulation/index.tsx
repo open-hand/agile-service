@@ -506,7 +506,8 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       }) => (
         <span style={{
           // @ts-ignore
-          color: STATUS[record.get('type')],
+          color: 'rgba(0,0,0,.87)',
+          // color: STATUS[record.get('type')],
         }}
         >
           {text}

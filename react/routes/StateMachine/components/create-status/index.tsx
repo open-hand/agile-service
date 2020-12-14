@@ -188,7 +188,7 @@ const CreateStatus: React.FC<Props> = ({
             </Option>
           ))}
         </Select>
-        <SelectBox name="default">
+        <SelectBox name="default" style={{ marginTop: 13 }}>
           <Option value>是</Option>
           <Option value={false}>否</Option>
         </SelectBox>

@@ -25,6 +25,7 @@ class EpicRenderHeader extends Component {
   }
 
   componentDidMount() {
+    console.log('this.', this.props);
     scrumBoardStore.bindFunction('expandOrUp-epic', this.handleExpandOrUPPanel);
   }
 

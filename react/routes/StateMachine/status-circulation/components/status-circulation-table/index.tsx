@@ -23,7 +23,7 @@ const StatusCirculationTable: React.FC = () => {
 
   const handleDeleteClick = useCallback((record: IStatusCirculation) => {
     Modal.open({
-      title: `确认删除状态“${record.name}”`,
+      title: '确认删除',
       children: <DeleteStatus
         data={record}
         selectedType={selectedType}
@@ -110,7 +110,7 @@ const StatusCirculationTable: React.FC = () => {
     width: 100,
     fixed: true,
     title: () => null,
-    render: (() => '可流转到'),
+    render: (() => <span className={styles.table_text}>可流转到</span>),
   },
   ...statusColumns,
   {
