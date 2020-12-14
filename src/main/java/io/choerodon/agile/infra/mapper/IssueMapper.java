@@ -450,7 +450,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<Long> querySubBugIdsByIssueId(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 
-//    IssueNumDTO queryIssueByIssueNum (@Param("projectId") Long projectId, @Param("issueNum") String issueNum);
+    IssueNumDTO queryIssueByIssueNum(@Param("projectId") Long projectId, @Param("issueNum") String issueNum);
 
     void updateSubBugRelateIssueId(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 
