@@ -21,7 +21,7 @@ class StoryRow extends Component {
 
   render() {
     const {
-      storyMapData, storyData, swimLine, tableOverflow, rowInViewportMap,
+      storyMapData, storyData, swimLine, tableOverflow,
     } = StoryMapStore;
     const { epicWithFeature } = storyMapData || {};
     const epicList = StoryMapStore.getEpicList;

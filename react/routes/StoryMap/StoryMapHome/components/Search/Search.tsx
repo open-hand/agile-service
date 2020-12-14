@@ -36,20 +36,26 @@ const StoryMapSearch: React.FC<Props> = ({ issueSearchStore }) => {
         }}
         // onClickSaveFilter={handleClickSaveFilter}
       />
-      <Tooltip title="故事地图默认显示最近5个冲刺/版本，您可以使用筛选选择其他或者更多的冲刺/版本。" placement="bottomLeft">
-        <Button
-          icon="help"
-          style={{
-            color: '#5365EA',
-            border: '1px solid #D9E6F2',
-            fontWeight: 500,
-            borderRadius: '6px',
-            margin: '14px 15px 0px 10px',
-            height: 30,
-            flexShrink: 0,
-          }}
-        />
-      </Tooltip>
+      <div style={{
+        marginLeft: 'auto',
+      }}
+      >
+        <Tooltip title="故事地图默认显示最近5个冲刺/版本，您可以使用筛选选择其他或者更多的冲刺/版本。" placement="bottomLeft">
+          <Button
+            icon="help"
+            style={{
+              color: '#5365EA',
+              fontWeight: 500,
+              borderRadius: '6px',
+              margin: '14px 15px 0px 2px',
+              height: 30,
+              flexShrink: 0,
+              background: 'transparent',
+            }}
+          />
+        </Tooltip>
+      </div>
+
     </div>
 
   );

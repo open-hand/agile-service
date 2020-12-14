@@ -19,7 +19,7 @@ class StoryColumn extends Component {
       storys, width, epic, feature, version, sprint, connectDropTarget, isOver, rowIndex,
     } = this.props;
     const { issueId: epicId } = epic;
-    const { epicInViewportMap, rowInViewportMap } = StoryMapStore;
+    const { epicInViewportMap } = StoryMapStore;
     // 只有未规划、版本规划中、冲刺未完成的可以创建、删除、拖拽
     let canBeOperated = true;
     let id;
@@ -39,7 +39,7 @@ class StoryColumn extends Component {
         style={{ background: isOver ? 'rgb(240,240,240)' : 'white', position: 'relative', minHeight: storys ? (storys.length + 1) * CardHeight : undefined }}
       >
         {
-          (!!epicInViewportMap.get(epicId) && (id ? rowInViewportMap.get(id) : true)) && (
+          (!!epicInViewportMap.get(epicId)) && (
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
               {storys && storys.map((story, index) => <StoryCard index={index} rowIndex={rowIndex} story={story} sprint={sprint} version={version} canBeOperated={canBeOperated} />)}
               {!StoryMapStore.isFullScreen && canBeOperated && <CreateStory onCreate={this.handleCreateStory} epic={epic} feature={feature} sprint={sprint} version={version} />}
