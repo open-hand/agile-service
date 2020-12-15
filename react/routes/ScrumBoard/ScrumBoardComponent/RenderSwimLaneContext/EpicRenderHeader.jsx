@@ -25,12 +25,27 @@ class EpicRenderHeader extends Component {
   }
 
   componentDidMount() {
-    console.log('this.', this.props);
     scrumBoardStore.bindFunction('expandOrUp-epic', this.handleExpandOrUPPanel);
+    const issueLimitArr = [];
+    let limitCount = 0;
+    const parentIssueArr = Array.from(this.props.parentIssueArr);
+    for (let i = 0; i < parentIssueArr.length && limitCount < 15; i += 1) {
+      const [key, value] = parentIssueArr[i];
+      issueLimitArr.push({ key: this.getPanelKey(key), activeNumber: value.issueArrLength });
+      limitCount += value.issueArrLength;
+    }
+    if (limitCount < 15 && this.props.otherIssueWithoutParent.interConnectedDataMap && this.props.otherIssueWithoutParent.interConnectedDataMap.size >= (15 - limitCount)) {
+      issueLimitArr.push({ key: this.getPanelKey('other'), activeNumber: 15 - limitCount });
+    }
+    if (limitCount > 15) {
+      issueLimitArr[issueLimitArr.length - 1].activeNumber = 15 - issueLimitArr[issueLimitArr.length - 1].activeNumber;
+    }
+    scrumBoardStore.bindFunction('expandOrUp-epic-store', () => issueLimitArr);
   }
 
   componentWillUnmount() {
     scrumBoardStore.removeBindFunction('expandOrUp-epic');
+    scrumBoardStore.removeBindFunction('expandOrUp-epic-store');
   }
 
   handleExpandOrUPPanel = (expandAll = true) => {

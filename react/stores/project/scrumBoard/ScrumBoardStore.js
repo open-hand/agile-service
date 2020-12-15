@@ -150,9 +150,11 @@ class ScrumBoardStore {
   @observable currentBindFunctionMaps = new Map();
 
   executeBindFunction(keys = [], ...args) {
+    const fnResult = [];
     keys.forEach((key) => {
-      this.currentBindFunctionMaps.has(key) && this.currentBindFunctionMaps.get(key)(...args);
+      this.currentBindFunctionMaps.has(key) && fnResult.push(this.currentBindFunctionMaps.get(key)(...args));
     });
+    return fnResult;
   }
 
   @action('绑定一个函数') bindFunction(key, fn) {
