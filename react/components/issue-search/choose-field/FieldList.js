@@ -1,10 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
 import {
   CheckBox, Button, TextField, Icon,
 } from 'choerodon-ui/pro';
-import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import IssueSearchContext from '../context';
 import './FieldList.less';
 
@@ -14,7 +12,7 @@ function FieldList() {
   const {
     fields, chosenFields, handleChosenFieldChange,
   } = store;
-  const systemFields = getSystemFields();
+  const systemFields = store.getSystemFields();
   const selectableSystemFields = systemFields.filter((field) => !field.defaultShow);
   const defaultShowSystemFields = systemFields.filter((field) => field.defaultShow);
   const checked = chosenFields.size - defaultShowSystemFields.length > 0;
