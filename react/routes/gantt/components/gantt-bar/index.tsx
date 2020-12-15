@@ -1,7 +1,7 @@
 import React, { useContext, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import dayjs, { Dayjs } from 'dayjs';
-import { Tooltip } from 'choerodon-ui/pro';
+import { Tooltip } from 'choerodon-ui';
 import { GanttProps, Gantt } from 'react-gantt-component';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
 import Context from '../../context';
@@ -60,32 +60,34 @@ const GanttBar: React.FC<GanttBarProps> = ({
   const delayVisible = stepGesture !== 'moving' && !loading;
   return (
     <>
-      <Tooltip title={(
-        <div>
-          {issue.summary}
+      <Tooltip
+        getPopupContainer={(t) => t.parentElement as HTMLElement}
+        title={(
           <div>
-            状态：
-            {issue.statusVO.name}
-          </div>
-          <div>
-            持续时间：
-            {format(diff)}
-          </div>
-          {type !== 'assignee' && hasChildren && (
+            {issue.summary}
+            <div>
+              状态：
+              {issue.statusVO.name}
+            </div>
+            <div>
+              持续时间：
+              {format(diff)}
+            </div>
+            {type !== 'assignee' && hasChildren && (
             <div>
               当前进度：
               {`${Math.round(percent * 100 * 100) / 100}%`}
             </div>
-          )}
-          <div>
-            预计开始：
-            {issue.estimatedStartTime}
+            )}
+            <div>
+              预计开始：
+              {issue.estimatedStartTime}
+            </div>
+            <div>
+              预计结束：
+              {issue.estimatedEndTime}
+            </div>
           </div>
-          <div>
-            预计结束：
-            {issue.estimatedEndTime}
-          </div>
-        </div>
       )}
       >
         <div style={{
