@@ -3,15 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { Progress, Spin, Tooltip } from 'choerodon-ui';
 import { featureApi } from '@/api';
+import { getProjectId } from '@/utils/common';
 import IssueItem from './IssueItem';
 
 function SplitStory(props) {
   const { store } = props;
+  const { projectId, issueId } = store.getIssue;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   useEffect(() => {
     const loadData = async () => {
-      const Data = await featureApi.getSplitStory(store.getIssue.issueId);
+      const Data = getProjectId().toString() !== projectId.toString() ? await featureApi.getSubProjectSplitStory(issueId, projectId) : await featureApi.getSplitStory(issueId);
       batchedUpdates(() => {
         setLoading(false);
         setData(Data);

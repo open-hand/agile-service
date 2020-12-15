@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 interface UFeatureColor {
   colorCode: string,
@@ -13,9 +14,9 @@ interface IFeatureLink {
   type: string,
   forward: boolean,
 }
-class FeatureApi {
+class FeatureApi extends Api<FeatureApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -188,6 +189,17 @@ class FeatureApi {
       url: `${this.prefix}/issues/list_story_by_feature_id`,
       params: {
         issueId,
+      },
+    });
+  }
+
+  getSubProjectSplitStory(featureId: number, programId: string) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/project_invoke_program/list_story_by_feature_id`,
+      params: {
+        featureId,
+        programId,
       },
     });
   }

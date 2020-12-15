@@ -72,6 +72,11 @@ const Issue = observer(() => {
       paramType, paramIssueId, paramName, paramOpenIssueId,
       // eslint-disable-next-line no-restricted-globals
     } = queryString.parse(location.search);
+    if (paramChoose || paramCurrentVersion || paramCurrentSprint || paramId
+      || paramType || paramIssueId || paramName || paramOpenIssueId) {
+      issueSearchStore.clearAllFilter();
+      localPageCacheStore.clear();
+    }
     let prefix = '';
     if (paramChoose) {
       if (paramChoose === 'version' && paramCurrentVersion) {
