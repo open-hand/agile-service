@@ -189,12 +189,12 @@ class StoryMapStore {
       storyMapApi.getStoryMap(searchVO),
       issueTypeApi.loadAllWithStateMachineId(),
       priorityApi.loadByProject(),
-      this.swimLine === 'sprint' && sprintApi.loadSprintsWidthInfo(sprintIds),
+      sprintApi.loadSprintsWidthInfo(sprintIds),
     ]).then(([storyMapData, issueTypes, prioritys, sprintList]) => {
       this.issueTypes = issueTypes;
       this.prioritys = prioritys;
-      this.initVersionList(versionList);
-      this.initSprintList(sprintList || []);
+      this.initVersionList(versionList, this.swimLine === 'version' ? searchVO.otherArgs.version && searchVO.otherArgs.version.includes('0') : true);
+      this.initSprintList(sprintList || [], this.swimLine === 'sprint' ? searchVO.otherArgs.sprint && searchVO.otherArgs.sprint.includes('0') : true);
       this.initStoryMapData(storyMapData, firstLoad);
       this.setLoading(false);
     }).catch((error) => {
@@ -269,11 +269,11 @@ class StoryMapStore {
     this.getStoryMap();
   }
 
-  @action initVersionList(versionList) {
-    this.versionList = versionList.concat([{
+  @action initVersionList(versionList, hasNoPlan) {
+    this.versionList = (hasNoPlan ? versionList.concat([{
       versionId: 'none',
       name: '未计划部分',
-    }]).map((version) => {
+    }]) : versionList).map((version) => {
       const oldVersion = find(this.versionList, { versionId: version.versionId });
       if (oldVersion) {
         return { ...version, storyNum: 0, collapse: oldVersion.collapse };
@@ -282,11 +282,11 @@ class StoryMapStore {
     });
   }
 
-  @action initSprintList(sprintList) {
-    this.sprintList = sprintList.concat([{
+  @action initSprintList(sprintList, hasNoPlan) {
+    this.sprintList = (hasNoPlan ? sprintList.concat([{
       sprintId: 'none',
       sprintName: '未计划部分',
-    }]).map((sprint) => {
+    }]) : sprintList).map((sprint) => {
       const oldSprint = find(this.sprintList, { sprintId: sprint.sprintId });
       if (oldSprint) {
         return { ...sprint, storyNum: 0, collapse: oldSprint.collapse };
