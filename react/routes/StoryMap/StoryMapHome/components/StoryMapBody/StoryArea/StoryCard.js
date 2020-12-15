@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Icon, Tooltip } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import StatusTag from '@/components/StatusTag';
 import { DragSource } from 'react-dnd';
 import { find } from 'lodash';
@@ -117,7 +118,7 @@ class StoryCard extends Component {
           )
         }
         <div className="summary">
-          <Tooltip title={summary} getPopupContainer={(trigger) => trigger.parentNode} placement={index === 0 && rowIndex === 0 ? 'bottom' : 'top'}>
+          <Tooltip title={summary}>
             {summary}
           </Tooltip>
         </div>

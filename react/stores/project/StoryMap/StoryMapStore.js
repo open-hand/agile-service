@@ -264,6 +264,7 @@ class StoryMapStore {
   }
 
   @action switchSwimLine(swimLine) {
+    this.clearData();
     this.swimLine = swimLine;
     localStorage.setItem('agile.StoryMap.SwimLine', swimLine);
     this.getStoryMap();
