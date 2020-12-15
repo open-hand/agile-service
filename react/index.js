@@ -24,6 +24,7 @@ const Priority = React.lazy(() => import('./routes/priority'));
 const State = React.lazy(() => import('./routes/state'));
 const PageConfig = React.lazy(() => import('./routes/page-config'));
 const StateMachine = React.lazy(() => import('./routes/StateMachine'));
+const TeamPerformance = React.lazy(() => import('./routes/TeamPerformance'));
 // 敏捷设置
 const Settings = React.lazy(() => import('./routes/settings'));
 const ProjectReport = React.lazy(() => import('./routes/project-report'));
@@ -66,6 +67,7 @@ class Agile extends React.Component {
               {/* 协作 */}
               <Route path={`${match.url}/work-list`} component={WorkList} />
               <Route path={`${match.url}/storyMap`} component={StoryMap} />
+              <Route path={`${match.url}/team-performance`} component={TeamPerformance} />
               {/* 开发-迭代计划 */}
               <Route path={`${match.url}/scrumboard`} component={ScrumBoard} />
               <Route path={`${match.url}/iterationBoard/:id`} component={IterationBoard} />
