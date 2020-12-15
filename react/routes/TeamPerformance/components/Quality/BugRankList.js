@@ -49,7 +49,7 @@ const BugRankList = () => {
           />
         </Form>
       </div>
-      <Spin dataSet={bugRankDataSet}>
+      <Spin dataSet={bugRankDataSet} style={{ height: '510px' }}>
         {
           (listData && listData.length > 0) && (
             <div className="list-container">

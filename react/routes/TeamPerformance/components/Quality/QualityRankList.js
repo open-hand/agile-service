@@ -54,7 +54,7 @@ const QualityRankList = () => {
           />
         </Form>
       </div>
-      <Spin dataSet={qualityRankDataSet}>
+      <Spin dataSet={qualityRankDataSet} style={{ height: '510px' }}>
         {
           (listData && listData.length > 0) && (
             <div className="list-container">
