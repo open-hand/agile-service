@@ -22,9 +22,9 @@ function CollapseAll({ tableRef, dataSet }) {
     >
       {needExpand ? '全部展开' : '全部收起'}
       <Icon
-        type="baseline-arrow_right"
+        type="baseline-arrow_drop_up"
         style={{
-          transform: 'rotate(90deg)',
+          transform: !needExpand ? 'rotate(180deg)' : undefined,
           transition: 'transform 0.3s',
         }}
       />

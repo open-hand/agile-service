@@ -1,4 +1,5 @@
 import React from 'react';
+import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import { Collapse } from 'choerodon-ui';
@@ -42,6 +43,10 @@ class SwimLaneContext extends React.Component {
     if (this.props.mode !== 'swimlane_none') {
       scrumBoardStore.bindFunction('expandOrUp', this.handleExpandOrUPPanel);
     }
+    if (this.props.mode === 'parent_child' && this.props.fromEpic) {
+      const [currentExpandStatus] = scrumBoardStore.executeBindFunction(['expand-current-status']);
+      // typeof (currentExpandStatus) === 'boolean' && this.handleExpandOrUPPanel(currentExpandStatus); 'expandOrUp-epic-store'
+    }
     // isEqual(getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]),)
   }
 
@@ -49,8 +54,24 @@ class SwimLaneContext extends React.Component {
     scrumBoardStore.removeBindFunction('expandOrUp');
   }
 
-  handleExpandOrUPPanel = (expandAll = true) => {
-    this.panelOnChange(expandAll ? getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]).slice(0, 15) : []);
+  autoExpandActive = autorun(() => {
+    const [currentExpandStatus] = scrumBoardStore.executeBindFunction(['expand-current-status']);
+    if (typeof (currentExpandStatus) === 'undefined') {
+      return;
+    }
+    const [needActiveArr = []] = scrumBoardStore.executeBindFunction(['expandOrUp-epic-store']);
+    const currentActiveItem = needActiveArr.find((activeItem) => activeItem.key === this.props.epicPrefix);
+    if (currentActiveItem) {
+      const keys = [...this.props.parentIssueArr.values()].slice(0, currentActiveItem.activeNumber).map((value) => getPanelKey(this.props.mode, value));
+      this.panelOnChange(currentExpandStatus ? keys : []);
+      // this.handleExpandOrUPPanel(currentExpandStatus, currentActiveItem.activeNumber);
+    }
+  }, [scrumBoardStore.executeBindFunction(['expand-current-status'])])
+
+  handleExpandOrUPPanel = (expandAll = true, expendNumber = 15) => {
+    console.log('handleExpandOrUPPanel start');
+
+    this.panelOnChange(expandAll ? getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]).slice(0, expendNumber) : []);
   }
 
   static getDerivedStateFromProps(props, state) {

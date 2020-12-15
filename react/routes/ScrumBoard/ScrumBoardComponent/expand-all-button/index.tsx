@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
@@ -11,15 +11,19 @@ function ExpandAllButton() {
   const [expandAll, setExpandAll] = useState<boolean>();
   function handleClick() {
     if (scrumBoardStore.currentBindFunctionMaps.has('expandOrUp-epic')) {
+      scrumBoardStore.bindFunction('expand-current-status', () => !expandAll);
       scrumBoardStore.executeBindFunction(['expandOrUp-epic'], !expandAll);
       setExpandAll(!expandAll);
 
       return;
     }
+    scrumBoardStore.removeBindFunction('expand-current-status');
+
     scrumBoardStore.executeBindFunction(['expandOrUp', 'expandOrUp-epic'], !expandAll);
     setExpandAll(!expandAll);
     // scrumBoardStore.currentBindFunctionMaps.get('expandOrUp')(!expandAll);
   }
+  useEffect(() => () => scrumBoardStore.removeBindFunction('expand-current-status'));
   return scrumBoardStore.currentBindFunctionMaps.get('expandOrUp') || scrumBoardStore.currentBindFunctionMaps.get('expandOrUp-epic') ? (
     <Button onClick={handleClick}>
       {expandAll ? '全部收起' : (
@@ -27,7 +31,7 @@ function ExpandAllButton() {
           <span>全部展开</span>
         </Tooltip>
       )}
-      <Icon type="baseline-arrow_right" className={classnames({ [expandStyles.expand]: expandAll })} />
+      <Icon type="baseline-arrow_drop_up" className={classnames({ [expandStyles.expand]: expandAll })} />
     </Button>
   ) : null;
 }
