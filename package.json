@@ -50,7 +50,7 @@
   "devDependencies": {
     "@choerodon/boot": "0.23.0-test",
     "@choerodon/compiler": "^0.0.1",
-    "@choerodon/master": "0.24.0-theme",
+    "@choerodon/master": "0.24.0",
     "@choerodon/testmanager": "^0.24.0",
     "@types/classnames": "^2.2.10",
     "@types/echarts": "^4.6.5",
