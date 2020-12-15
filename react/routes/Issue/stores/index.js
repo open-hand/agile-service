@@ -54,7 +54,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
         unSelectAll: handleUnSelect,
         load: () => {
           // 有筛选，自动展开
-          if (issueSearchStore.isHasFilter) {
+          if (issueSearchStore.isHasFilter && IssueStore.tableRef.current) {
             IssueStore.tableRef.current.tableStore.expandAll();
           }
         },

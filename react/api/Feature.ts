@@ -183,13 +183,23 @@ class FeatureApi extends Api<FeatureApi> {
    * 查询特性下拆分的故事
    * @param issueId
    */
-  getSplitStory(issueId: number, subProjectId?: string) {
+  getSplitStory(issueId: number) {
     return axios({
       method: 'post',
       url: `${this.prefix}/issues/list_story_by_feature_id`,
       params: {
         issueId,
-        subProjectId,
+      },
+    });
+  }
+
+  getSubProjectSplitStory(featureId: number, programId: string) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/project_invoke_program/list_story_by_feature_id`,
+      params: {
+        featureId,
+        programId,
       },
     });
   }

@@ -260,7 +260,7 @@ const SearchArea: React.FC = () => {
       className={`${prefixCls}-search`}
       style={{
         height: folded ? 48 : 'unset',
-        overflowY: 'hidden',
+        overflow: 'hidden',
       }}
     >
       <ListenSearchSize />
