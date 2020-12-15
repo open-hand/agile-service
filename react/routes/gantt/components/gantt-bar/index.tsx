@@ -52,10 +52,10 @@ const GanttBar: React.FC<GanttBarProps> = ({
     }
     const actualCompletedDate: Dayjs = issue.actualCompletedDate ? dayjs(issue.actualCompletedDate).endOf('day') : dayjs().hour(0).minute(0).second(0);
     const endDate: Dayjs = dayjs(issue.endDate).endOf('day');
-    if (actualCompletedDate.isBefore(endDate)) {
+    if (actualCompletedDate.isBefore(endDate) || actualCompletedDate.isSame(endDate)) {
       return 0;
     }
-    return (ganttRef.current?.getWidthByDate(endDate, actualCompletedDate) || 0) + 15;
+    return (ganttRef.current?.getWidthByDate(endDate, actualCompletedDate) || 0) + (issue.actualCompletedDate ? 0 : 15);
   }, [loading, ganttRef, issue.actualCompletedDate, issue.endDate]);
   const delayVisible = stepGesture !== 'moving' && !loading;
   return (
