@@ -22,8 +22,6 @@ public interface BoardColumnService {
 
     void delete(Long projectId, Long columnId);
 
-//    void deleteProgramBoardColumn(Long projectId, Long columnId);
-
     BoardColumnVO queryBoardColumnById(Long projectId, Long columnId);
 
     void initBoardColumns(Long projectId, Long boardId, List<StatusPayload> statusPayloads);

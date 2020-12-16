@@ -235,23 +235,6 @@ public class BoardColumnServiceImpl implements BoardColumnService {
         boardColumnMapper.updateColumnColor(boardId, size);
     }
 
-//    @Override
-//    public void deleteProgramBoardColumn(Long projectId, Long columnId) {
-//        BoardColumnDTO boardColumn = new BoardColumnDTO();
-//        boardColumn.setProjectId(projectId);
-//        boardColumn.setColumnId(columnId);
-//        BoardColumnDTO boardColumnDTO = boardColumnMapper.selectOne(boardColumn);
-//        BoardColumnValidator.checkDeleteColumn(boardColumnDTO);
-//        // 删除列
-//        if (boardColumnMapper.deleteByPrimaryKey(columnId) != 1) {
-//            throw new CommonException("error.BoardColumn.delete");
-//        }
-//        // 取消列下的状态关联，状态归为未对应的状态
-//        ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
-//        columnStatusRelDTO.setColumnId(columnId);
-//        columnStatusRelDTO.setProjectId(projectId);
-//        columnStatusRelService.delete(columnStatusRelDTO);
-//    }
 
     @Override
     public BoardColumnVO queryBoardColumnById(Long projectId, Long columnId) {
