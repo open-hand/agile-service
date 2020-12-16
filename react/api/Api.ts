@@ -72,7 +72,7 @@ class Api<T> {
     return this;
   }
 
-  org(orgId: number | undefined) {
+  org(orgId: string | number | undefined) {
     if (orgId) {
       return this.overwrite('orgId', orgId);
     }
