@@ -117,10 +117,10 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
     }
 
     @Override
-    public List<SprintBugVO> queryHistorySprintBugCount(Long projectId, String environment, Long responsibleId, String type) {
+    public List<SprintBugVO> queryHistorySprintBugCount(Long projectId, String environment, String type, Boolean other, List<Long> responsibleIds) {
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         List<SprintBugVO> sprintBugs = teamPerformanceMapper.queryHistorySprintBugCount(projectId, environment,
-                responsibleId, type,
+                type, other, responsibleIds,
                 Objects.isNull(agilePluginService) ? false : true);
         return handleUser(sprintBugs);
     }

@@ -60,9 +60,11 @@ public interface TeamPerformanceService {
      * 所有冲刺bug变化统计
      * @param projectId
      * @param environment
-     * @param responsibleId
      * @param type
+     * @param other
+     * @param responsibleIds
      * @return
      */
-    List<SprintBugVO> queryHistorySprintBugCount(Long projectId, String environment, Long responsibleId, String type);
+    List<SprintBugVO> queryHistorySprintBugCount(Long projectId, String environment, String type, Boolean other, List<Long> responsibleIds);
+
 }

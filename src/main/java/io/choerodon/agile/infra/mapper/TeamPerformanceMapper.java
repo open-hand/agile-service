@@ -64,14 +64,16 @@ public interface TeamPerformanceMapper extends BaseMapper<SprintDTO> {
      * 所有冲刺bug变化统计
      * @param projectId
      * @param environment
-     * @param responsibleId
      * @param type
+     * @param other
+     * @param responsibleIds
      * @param isPlugin
      * @return
      */
     List<SprintBugVO> queryHistorySprintBugCount(@Param("projectId") Long projectId,
                                                  @Param("environment") String environment,
-                                                 @Param("responsibleId") Long responsibleId,
                                                  @Param("type") String type,
+                                                 @Param("other") Boolean other,
+                                                 @Param("responsibleIds") List<Long> responsibleIds,
                                                  @Param("isPlugin") boolean isPlugin);
 }
