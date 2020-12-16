@@ -76,10 +76,12 @@ const transformRes = ({
           percent: rest[completeRate] || 0,
         });
       });
+      const sortPlanData = response.plan.find((item) => !!item.value) ? orderBy(response.plan, ['percent'], ['desc']) : [];
+      const sortCompleteData = response.complete.find((item) => !!item.value) ? orderBy(response.complete, ['percent'], ['desc']) : [];
       return {
         ...response,
-        plan: orderBy(response.plan, ['percent'], ['desc']),
-        complete: orderBy(response.complete, ['percent'], ['desc']),
+        plan: sortPlanData,
+        complete: sortCompleteData,
       };
     }
     return {};

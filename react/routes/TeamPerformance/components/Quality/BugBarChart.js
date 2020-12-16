@@ -128,7 +128,7 @@ const BugBarChart = observer(() => {
       show,
       type: 'slider',
       bottom: 6,
-      left: 100,
+      left: 'center',
       height: 15,
       width: '82%',
       startValue: 0,
