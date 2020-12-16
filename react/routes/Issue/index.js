@@ -118,7 +118,7 @@ const Issue = observer(() => {
         }
       }
       issueSearchStore.handleFilterChange('issueIds', [id]);
-      issueSearchStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
+      // issueSearchStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
       IssueStore.setClickedRow({
         selectedIssue: {
           issueId: id,
