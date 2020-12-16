@@ -15,7 +15,7 @@ import './commom.less';
 
 
 const { Sidebar } = Modal;
-const { Option, OptGroup } = Select;
+const { Option } = Select;
 const FormItem = Form.Item;
 class LinkBranch extends Component {
   constructor(props) {
@@ -29,7 +29,8 @@ class LinkBranch extends Component {
       originApps: [],
       branchs: [],
       branchsInput: '',
-      branchsSize: 5,
+      page: 1,
+      pageSize: 5,
       branchsObj: {},
     };
   }
@@ -127,8 +128,8 @@ class LinkBranch extends Component {
     } = this.props;
     const {
       confirmLoading, selectLoading, branchLoading,
-      originApps, branchs, branchsObj, branchsSize,
-      branchsInput,
+      originApps, branchs, branchsObj, pageSize,
+      branchsInput, page,
     } = this.state;
     const source = getFieldValue('source') || 'self';
     const app = this.getApp();
@@ -210,7 +211,7 @@ class LinkBranch extends Component {
                     this.setState({
                       branchsInput: input,
                     });
-                    devOpsApi.project(this.getProjectId()).loadBranchesByServiceFilterIssue(app, undefined, undefined, {
+                    devOpsApi.project(this.getProjectId()).loadBranchesByServiceFilterIssue(app, undefined, pageSize, {
                       searchParam: {
                         branchName: input,
                       },
@@ -218,9 +219,8 @@ class LinkBranch extends Component {
                     }, issueId).then((res) => {
                       if (res && !res.failed) {
                         this.setState({
+                          page: 1,
                           branchs: res.list,
-                          branchsSize: res.total,
-                          // branchsShowMore: res.totalPages !== 1,
                           branchsObj: res,
                           branchLoading: false,
                         });
@@ -248,18 +248,18 @@ class LinkBranch extends Component {
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
-                            devOpsApi.loadBranchesByServiceFilterIssue(app, 1, branchsSize + 5, {
+                            devOpsApi.loadBranchesByServiceFilterIssue(app, page + 1, pageSize, {
                               searchParam: {
                                 branchName: branchsInput,
                               },
                               param: null,
-                            }).then((res) => {
+                            }, issueId).then((res) => {
                               if (res && !res.failed) {
-                                this.setState({
-                                  branchs: res.list || [],
-                                  branchsSize: res.pageSize,
+                                this.setState(state => ({
+                                  page: page + 1,
+                                  branchs: state.branchs.concat(res.list || []),
                                   branchsObj: res,
-                                });
+                                }));
                               } else {
                                 Choerodon.prompt(res.message);
                               }
