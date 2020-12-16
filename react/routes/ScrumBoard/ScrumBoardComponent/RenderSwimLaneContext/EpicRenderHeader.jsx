@@ -40,7 +40,6 @@ class EpicRenderHeader extends Component {
     if (limitCount > 15) {
       issueLimitArr[issueLimitArr.length - 1].activeNumber = 15 - issueLimitArr[issueLimitArr.length - 1].activeNumber;
     }
-    console.log('issueLimitArr:', issueLimitArr);
     scrumBoardStore.bindFunction('expandOrUp-epic-store', () => issueLimitArr);
   }
 
