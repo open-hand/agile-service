@@ -205,21 +205,22 @@ const PieChart = observer(() => {
 
   return (
     <Spin spinning={isLoading}>
+
       <div className="chart-container chart-container-pie">
+        <div className="chart-handle">
+          <SwitchTabs
+            dataSet={dimensionDS}
+            onChange={handleChangeTab}
+            style={{ flexShrink: 0, height: '37px' }}
+          />
+          <Form dataSet={dimensionDS} style={{ marginLeft: '15px' }}>
+            <Select name="dimension" clearButton={false} style={{ width: '130px' }} onChange={handleChangeDimension} />
+          </Form>
+        </div>
         {
           (pieData && pieData.length > 0) && (
             <div className="pie-chart-container">
               <div className="pie-chart">
-                <div className="chart-handle">
-                  <SwitchTabs
-                    dataSet={dimensionDS}
-                    onChange={handleChangeTab}
-                    style={{ flexShrink: 0, height: '37px' }}
-                  />
-                  <Form dataSet={dimensionDS} style={{ marginLeft: '15px' }}>
-                    <Select name="dimension" clearButton={false} style={{ width: '130px' }} onChange={handleChangeDimension} />
-                  </Form>
-                </div>
                 <div className="pie-chart-main">
                   <span className="chart-title">{`${currentTab}分布`}</span>
                   <ReactEchartsCore
@@ -277,12 +278,13 @@ const PieChart = observer(() => {
           )
         }
         {
-          (Array.isArray(pieData) && pieData.length === 0) && (
-            <EmptyBlock
-              height={520}
-            />
-          )
-        }
+        (Array.isArray(pieData) && pieData.length === 0) && (
+          <EmptyBlock
+            height={450}
+            des="当前暂无数据"
+          />
+        )
+      }
       </div>
     </Spin>
   );

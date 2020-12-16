@@ -210,10 +210,10 @@ const CompeleteTendencyChart = observer(() => {
       dataZoom: [{
         show,
         type: 'slider',
+        left: 'center',
         bottom: 2,
-        left: 114,
         height: 15,
-        width: '82%',
+        width: '84%',
         startValue: 0,
         endValue: 5,
         zoomLock: true,
