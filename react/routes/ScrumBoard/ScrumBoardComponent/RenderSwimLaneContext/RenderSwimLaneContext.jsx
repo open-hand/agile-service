@@ -44,7 +44,7 @@ class SwimLaneContext extends React.Component {
       scrumBoardStore.bindFunction('expandOrUp', this.handleExpandOrUPPanel);
     }
     if (this.props.mode === 'parent_child' && this.props.fromEpic) {
-      const [currentExpandStatus] = scrumBoardStore.executeBindFunction(['expand-current-status']);
+      scrumBoardStore.bindFunction(`expandOrUp-componentDidMount-${this.props.mode}-${this.props.epicPrefix}`, () => true);
       // typeof (currentExpandStatus) === 'boolean' && this.handleExpandOrUPPanel(currentExpandStatus); 'expandOrUp-epic-store'
     }
     // isEqual(getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]),)
@@ -52,6 +52,7 @@ class SwimLaneContext extends React.Component {
 
   componentWillUnmount() {
     scrumBoardStore.removeBindFunction('expandOrUp');
+    scrumBoardStore.removeBindFunction(`expandOrUp-componentDidMount-${this.props.mode}-${this.props.epicPrefix}`);
   }
 
   autoExpandActive = autorun(() => {
@@ -59,19 +60,19 @@ class SwimLaneContext extends React.Component {
     if (typeof (currentExpandStatus) === 'undefined') {
       return;
     }
-    const [needActiveArr = []] = scrumBoardStore.executeBindFunction(['expandOrUp-epic-store']);
+    const [needActiveArr = [], componentStatus] = scrumBoardStore.executeBindFunction(['expandOrUp-epic-store', `expandOrUp-componentDidMount-${this.props.mode}-${this.props.epicPrefix}`]);
+    if (currentExpandStatus && typeof (componentStatus) === 'undefined') {
+      return;
+    }
     const currentActiveItem = needActiveArr.find((activeItem) => activeItem.key === this.props.epicPrefix);
     if (currentActiveItem) {
       const keys = [...this.props.parentIssueArr.values()].slice(0, currentActiveItem.activeNumber).map((value) => getPanelKey(this.props.mode, value));
       this.panelOnChange(currentExpandStatus ? keys : []);
-      // this.handleExpandOrUPPanel(currentExpandStatus, currentActiveItem.activeNumber);
     }
   }, [scrumBoardStore.executeBindFunction(['expand-current-status'])])
 
-  handleExpandOrUPPanel = (expandAll = true, expendNumber = 15) => {
-    console.log('handleExpandOrUPPanel start');
-
-    this.panelOnChange(expandAll ? getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]).slice(0, expendNumber) : []);
+  handleExpandOrUPPanel = (expandAll = true) => {
+    this.panelOnChange(expandAll ? getDefaultExpanded(this.props.mode, [...this.props.parentIssueArr.values(), this.props.otherIssueWithoutParent]).slice(0, 15) : []);
   }
 
   static getDerivedStateFromProps(props, state) {

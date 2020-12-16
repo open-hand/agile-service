@@ -34,12 +34,13 @@ class EpicRenderHeader extends Component {
       issueLimitArr.push({ key: this.getPanelKey(key), activeNumber: value.issueArrLength });
       limitCount += value.issueArrLength;
     }
-    if (limitCount < 15 && this.props.otherIssueWithoutParent.interConnectedDataMap && this.props.otherIssueWithoutParent.interConnectedDataMap.size >= (15 - limitCount)) {
-      issueLimitArr.push({ key: this.getPanelKey('other'), activeNumber: 15 - limitCount });
+    if (limitCount < 15 && this.props.otherIssueWithoutParent.interConnectedDataMap && this.props.otherIssueWithoutParent.interConnectedDataMap.size > 0) {
+      issueLimitArr.push({ key: 'swimlane_epic%unInterconnected', activeNumber: 15 - limitCount });
     }
     if (limitCount > 15) {
       issueLimitArr[issueLimitArr.length - 1].activeNumber = 15 - issueLimitArr[issueLimitArr.length - 1].activeNumber;
     }
+    console.log('issueLimitArr:', issueLimitArr);
     scrumBoardStore.bindFunction('expandOrUp-epic-store', () => issueLimitArr);
   }
 
