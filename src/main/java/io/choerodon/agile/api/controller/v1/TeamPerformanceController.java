@@ -89,18 +89,20 @@ public class TeamPerformanceController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "团队绩效-所有冲刺bug变化统计")
-    @GetMapping(value = "/history_bug_count")
+    @PostMapping(value = "/history_bug_count")
     public ResponseEntity<List<SprintBugVO>> queryHistorySprintBugCount(@ApiParam(value = "项目id", required = true)
                                                                         @PathVariable(name = "project_id") Long projectId,
                                                                         @ApiParam(value = "环境")
                                                                         @RequestParam(name = "environment", required
                                                                                 = false) String environment,
-                                                                        @ApiParam(value = "环境")
-                                                                        @RequestParam(name = "responsibleId", required
-                                                                                 = false) Long responsibleId,
                                                                         @ApiParam(value = "类别", required = true)
-                                                                        @RequestParam(name = "type") String type) {
+                                                                        @RequestParam(name = "type") String type,
+                                                                        @ApiParam(value = "是否包含其他")
+                                                                        @RequestParam(name = "other", defaultValue =
+                                                                                "false", required = false) Boolean other,
+                                                                        @ApiParam(value = "负责人")
+                                                                        @RequestBody List<Long> responsibleIds) {
         return ResponseEntity.ok(teamPerformanceService.queryHistorySprintBugCount(projectId, environment,
-                responsibleId, type));
+                type, other, responsibleIds));
     }
 }
