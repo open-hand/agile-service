@@ -61,7 +61,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
   return (
     <>
       <Tooltip
-        getPopupContainer={(t) => t.parentElement as HTMLElement}
+        getPopupContainer={(t) => document.getElementsByClassName('gantt-chart')[0] as HTMLElement}
         title={(
           <div>
             {issue.summary}
