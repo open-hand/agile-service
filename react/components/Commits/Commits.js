@@ -72,6 +72,23 @@ class Commits extends Component {
     } = this.props;
     const column = [
       {
+        title: '分支',
+        dataIndex: 'branchName',
+        width: '30%',
+        render: branchName => (
+          <div style={{ width: '100%', overflow: 'hidden' }}>
+            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={branchName}>
+              <p style={{
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, 
+              }}
+              >
+                {branchName}
+              </p>
+            </Tooltip>
+          </div>
+        ),
+      },
+      {
         title: '应用名称',
         dataIndex: 'appServiceName',
         width: '25%',
@@ -105,23 +122,7 @@ class Commits extends Component {
           </div>
         ),
       },
-      {
-        title: '分支',
-        dataIndex: 'branchName',
-        width: '30%',
-        render: branchName => (
-          <div style={{ width: '100%', overflow: 'hidden' }}>
-            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={branchName}>
-              <p style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, 
-              }}
-              >
-                {branchName}
-              </p>
-            </Tooltip>
-          </div>
-        ),
-      },
+      
       {
         title: '提交数',
         dataIndex: 'appId',

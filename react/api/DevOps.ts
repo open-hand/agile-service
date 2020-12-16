@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 import Api from './Api';
@@ -29,6 +30,14 @@ class DevOpsApi extends Api {
     });
   }
 
+  linkBranch(applicationId: number, devopsBranchVO: ICreateBranch) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/app_service/${applicationId}/git/update_branch_issue`,
+      data: devopsBranchVO,
+    });
+  }
+
   checkBranchName(applicationId: number, branchName: string) {
     return axios({
       method: 'get',
@@ -38,7 +47,7 @@ class DevOpsApi extends Api {
       },
     });
   }
-  
+
   /**
    * 统计分支相关数据
    * @param issueId 
@@ -90,6 +99,20 @@ class DevOpsApi extends Api {
         page,
         size,
         sort: 'creation_date,asc',
+      },
+      data: searchVO,
+    });
+  }
+
+  loadBranchesByServiceFilterIssue(applicationId: number, page: number = 1, size: number = 5, searchVO: any, issue_id: string) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_service/${applicationId}/git/page_branch_by_options_filtered_by_issue_id`,
+      params: {
+        page,
+        size,
+        sort: 'creation_date,asc',
+        issue_id,
       },
       data: searchVO,
     });
