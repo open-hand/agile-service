@@ -496,11 +496,9 @@
         t4.organization_id = 0
         AND t4.project_id = 0
         AND t4.is_system = 1
-        AND NOT EXISTS (
-           select 1 from fd_object_scheme_field_extend osfx
-           where osfx.organization_id = #{organizationId}
-           and osfx.issue_type = #{issueType}
-           and osfx.field_id = t4.id
-        )
+        AND t4.id NOT IN
+        <foreach collection="existIds" item="existId" open="(" close=")" separator=",">
+            #{existId}
+        </foreach>
     </select>
 </mapper>
