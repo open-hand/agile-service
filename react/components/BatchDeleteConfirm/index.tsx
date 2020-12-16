@@ -8,9 +8,8 @@ import { observer } from 'mobx-react-lite';
 import { Choerodon, WSHandler } from '@choerodon/boot';
 import { IModalProps } from '@/common/types';
 import { issueApi } from '@/api';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getApplyType } from '@/utils/common';
 
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { ProgressStatus } from 'choerodon-ui/lib/progress/enum';
 import styles from './index.less';
 
@@ -67,7 +66,7 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
 
   return (
     <div>
-      {`确定要删除选中的${tableDataSet.selected.length}个问题项吗？删除后，问题下的关联项将一并删除，包括子任务。`}
+      {`确定要删除选中的${tableDataSet.selected.length}个问题项吗？删除后，问题下的关联项将一并删除${getApplyType() === 'program' ? '' : '，包括子任务'}。`}
       <span style={{ color: '#F44336' }}>
         请谨慎操作！
       </span>
