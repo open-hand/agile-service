@@ -346,17 +346,6 @@ public class BoardColumnServiceImpl implements BoardColumnService {
         }
     }
 
-//    @Override
-//    public void columnSortByProgram(Long projectId, ColumnSortVO columnSortVO) {
-//        BoardColumnValidator.checkColumnSort(projectId, columnSortVO);
-//        BoardColumnDTO boardColumn = new BoardColumnDTO();
-//        boardColumn.setProjectId(projectId);
-//        boardColumn.setColumnId(columnSortVO.getColumnId());
-//        boardColumn.setBoardId(columnSortVO.getBoardId());
-//        checkBoardColumn(boardColumn);
-//        BoardColumnDTO boardColumnDTO = modelMapper.map(columnSortVO, BoardColumnDTO.class);
-//        columnSortByProgram(columnSortVO.getBoardId(), boardColumnDTO);
-//    }
 
     protected BoardColumnDTO checkBoardColumn(BoardColumnDTO boardColumn) {
         BoardColumnDTO boardColumnDTO = boardColumnMapper.selectByPrimaryKey(boardColumn);
@@ -366,21 +355,6 @@ public class BoardColumnServiceImpl implements BoardColumnService {
         return boardColumnDTO;
     }
 
-//    public void columnSortByProgram(Long boardId, BoardColumnDTO boardColumnDTO) {
-//        BoardColumnDTO originColumn = boardColumnMapper.selectByPrimaryKey(boardColumnDTO.getColumnId());
-//        try {
-//            if (originColumn.getSequence() > boardColumnDTO.getSequence()) {
-//                boardColumnMapper.columnSort(boardId, boardColumnDTO.getSequence(), originColumn.getSequence());
-//            } else if (originColumn.getSequence() < boardColumnDTO.getSequence()) {
-//                boardColumnMapper.columnSortDesc(boardId, boardColumnDTO.getSequence(), originColumn.getSequence());
-//            }
-//            if (boardColumnMapper.updateByPrimaryKeySelective(boardColumnDTO) != 1) {
-//                throw new CommonException(BOARD_COLUMN_UPDATE_ERROR);
-//            }
-//        } catch (Exception e) {
-//            throw new CommonException("error.column.sort.by.program", e);
-//        }
-//    }
 
     private void relate(Long projectId, Long boardId, String name, String categoryCode, Integer sequence, List<ColumnWithStatusRelDTO> columnWithStatusRelDTOList, String colorCode) {
         BoardColumnDTO column = new BoardColumnDTO();
