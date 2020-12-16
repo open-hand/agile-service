@@ -179,7 +179,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         if (CollectionUtils.isEmpty(existFields)) {
             return;
         }
-        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectNotSyncFieldByFieldConfig(organizationId, issueType);
+        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectNotSyncFieldByFieldConfig(organizationId, issueType, existFields);
         if (CollectionUtils.isEmpty(objectSchemeFieldDTOS)) {
             return;
         }
