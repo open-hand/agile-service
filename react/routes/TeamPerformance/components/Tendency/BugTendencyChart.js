@@ -98,8 +98,7 @@ const BugTendencyChart = observer(() => {
       },
       grid: {
         top: 50,
-        left: 32,
-        // right: 54,
+        left: 40,
         bottom: 30,
         width: '78%',
         containLabel: true,
@@ -159,10 +158,10 @@ const BugTendencyChart = observer(() => {
       dataZoom: [{
         show,
         type: 'slider',
-        left: 84,
+        left: 118,
         bottom: 2,
         height: 15,
-        width: '70%',
+        width: '66%',
         startValue: 0,
         endValue: 5,
         zoomLock: true,

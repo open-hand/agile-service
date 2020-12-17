@@ -29,11 +29,17 @@ const BugTendencyDataSet = ({ projectId }) => ({
   paging: false,
   autoQuery: false,
   transport: {
-    read: ({ data, params }) => ({
-      url: `/agile/v1/projects/${projectId}/team_performance/history_bug_count`,
-      params: { ...data, ...params },
-      method: 'get',
-    }),
+    read: ({ data, params }) => {
+      const {
+        environment, type, responsibleIds = [], other = false,
+      } = data;
+      return {
+        url: `/agile/v1/projects/${projectId}/team_performance/history_bug_count`,
+        params: { environment, type, other },
+        data: responsibleIds,
+        method: 'post',
+      };
+    },
   },
 });
 
