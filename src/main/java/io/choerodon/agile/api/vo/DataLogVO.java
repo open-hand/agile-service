@@ -56,6 +56,16 @@ public class DataLogVO {
     @ApiModelProperty(value = "是否自定义字段日志")
     private Boolean isCusLog;
 
+    private String ruleName;
+
+    public String getRuleName() {
+        return ruleName;
+    }
+
+    public void setRuleName(String ruleName) {
+        this.ruleName = ruleName;
+    }
+
     public Date getCreationDate() {
         return creationDate;
     }

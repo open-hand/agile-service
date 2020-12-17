@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.service.AgileTriggerService;
 import io.choerodon.agile.app.service.DataLogService;
 import io.choerodon.agile.app.service.FieldDataLogService;
 import io.choerodon.agile.app.service.UserService;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +38,8 @@ public class DataLogServiceImpl implements DataLogService {
     private FieldDataLogService fieldDataLogService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired(required = false)
+    private AgileTriggerService agileTriggerService;
 
     @Override
     public DataLogVO createDataLog(Long projectId, DataLogCreateVO createVO) {
@@ -51,6 +55,15 @@ public class DataLogServiceImpl implements DataLogService {
     public List<DataLogVO> listByIssueId(Long projectId, Long issueId) {
         List<DataLogVO> dataLogVOS = modelMapper.map(dataLogMapper.selectByIssueId(projectId, issueId), new TypeToken<List<DataLogVO>>() {
         }.getType());
+        Map<Long, RuleLogRelVO> ruleLogRelMap = new HashMap<>();
+        if (agileTriggerService != null) {
+            RuleLogRelVO ruleLogRelVO = new RuleLogRelVO();
+            ruleLogRelVO.setProjectId(projectId);
+            ruleLogRelVO.setInstanceId(issueId);
+            ruleLogRelVO.setBusinessType("issue");
+            List<RuleLogRelVO> ruleLogRelList = agileTriggerService.queryRuleLogRelList(ruleLogRelVO);
+            ruleLogRelMap = ruleLogRelList.stream().collect(Collectors.toMap(RuleLogRelVO::getLogId, Function.identity()));
+        }
         List<FieldDataLogVO> fieldDataLogVOS = fieldDataLogService.queryByInstanceId(projectId, issueId, ObjectSchemeCode.AGILE_ISSUE);
         for (FieldDataLogVO fieldDataLogVO : fieldDataLogVOS) {
             DataLogVO dataLogVO = modelMapper.map(fieldDataLogVO, DataLogVO.class);
@@ -59,7 +72,7 @@ public class DataLogServiceImpl implements DataLogService {
             dataLogVO.setIsCusLog(true);
             dataLogVOS.add(dataLogVO);
         }
-        fillUserAndStatus(projectId, dataLogVOS);
+        fillUserAndStatus(projectId, dataLogVOS, ruleLogRelMap);
         return dataLogVOS.stream().sorted(Comparator.comparing(DataLogVO::getCreationDate).reversed()).collect(Collectors.toList());
     }
 
@@ -69,7 +82,8 @@ public class DataLogServiceImpl implements DataLogService {
      * @param projectId
      * @param dataLogVOS
      */
-    private void fillUserAndStatus(Long projectId, List<DataLogVO> dataLogVOS) {
+    private void fillUserAndStatus(Long projectId, List<DataLogVO> dataLogVOS,
+                                   Map<Long, RuleLogRelVO> ruleLogRelMap) {
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         List<Long> createByIds = dataLogVOS.stream().filter(dataLogDTO -> dataLogDTO.getCreatedBy() != null && !Objects.equals(dataLogDTO.getCreatedBy(), 0L)).map(DataLogVO::getCreatedBy).distinct().collect(Collectors.toList());
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(createByIds, true);
@@ -85,6 +99,9 @@ public class DataLogServiceImpl implements DataLogService {
             dto.setRealName(realName);
             dto.setImageUrl(imageUrl);
             dto.setEmail(email);
+            if (ruleLogRelMap.get(dto.getLogId()) != null) {
+                dto.setRuleName(ruleLogRelMap.get(dto.getLogId()).getRuleName());
+            }
             if ("status".equals(dto.getField())) {
                 StatusVO statusMapVO = statusMapDTOMap.get(Long.parseLong(dto.getNewValue()));
                 dto.setCategoryCode(statusMapVO != null ? statusMapVO.getType() : null);

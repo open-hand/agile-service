@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.aspect;
 
 import io.choerodon.agile.api.vo.PriorityVO;
+import io.choerodon.agile.api.vo.RuleLogRelVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.DataLog;
@@ -177,6 +178,8 @@ public class DataLogAspect {
     private WikiRelationMapper wikiRelationMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired(required = false)
+    private AgileTriggerService agileTriggerService;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -1246,9 +1249,26 @@ public class DataLogAspect {
                 newValue = issueConvertDTO.getAssigneeId().toString();
                 newString = userService.queryUserNameByOption(issueConvertDTO.getAssigneeId(), false).getRealName();
             }
-            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
+            DataLogDTO dataLog = createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_ASSIGNEE, oldString, newString, oldValue, newValue);
+            processRuleLogRel(issueConvertDTO, originIssueDTO, dataLog);
             redisUtil.deleteRedisCache(new String[]{PIECHART + originIssueDTO.getProjectId() + ':' + FIELD_ASSIGNEE + "*"});
+        }
+    }
+
+    private void processRuleLogRel(IssueConvertDTO issueConvertDTO,
+                                   IssueDTO originIssueDTO,
+                                   DataLogDTO dataLog) {
+        Long ruleId = issueConvertDTO.getRuleId();
+        if (ruleId != null
+                && agileTriggerService != null) {
+            Long logId = dataLog.getLogId();
+            Long instanceId = originIssueDTO.getIssueId();
+            Long projectId = originIssueDTO.getProjectId();
+            String businessType = "issue";
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            RuleLogRelVO ruleLogRelVO = new RuleLogRelVO(logId, ruleId, businessType, instanceId, projectId, organizationId);
+            agileTriggerService.insertRuleLogRel(ruleLogRelVO);
         }
     }
 
@@ -1433,8 +1453,8 @@ public class DataLogAspect {
         return issueMapper.selectOne(issueDTO);
     }
 
-    private void createDataLog(Long projectId, Long issueId, String field, String oldString,
-                               String newString, String oldValue, String newValue) {
+    private DataLogDTO createDataLog(Long projectId, Long issueId, String field, String oldString,
+                                     String newString, String oldValue, String newValue) {
         DataLogDTO dataLogDTO = new DataLogDTO();
         dataLogDTO.setProjectId(projectId);
         dataLogDTO.setIssueId(issueId);
@@ -1443,7 +1463,7 @@ public class DataLogAspect {
         dataLogDTO.setNewString(newString);
         dataLogDTO.setOldValue(oldValue);
         dataLogDTO.setNewValue(newValue);
-        dataLogService.create(dataLogDTO);
+        return dataLogService.create(dataLogDTO);
     }
 
 }
