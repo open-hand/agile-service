@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import React, {
   useState, useEffect, useCallback, useMemo,
 } from 'react';
@@ -12,7 +13,7 @@ import classNames from 'classnames';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import GanttComponent, { GanttProps, Gantt } from 'react-gantt-component';
+import GanttComponent, { GanttProps, Gantt, GanttRef } from 'react-gantt-component';
 import 'react-gantt-component/dist/react-gantt-component.cjs.production.min.css';
 import { ganttApi, issueApi, workCalendarApi } from '@/api';
 import TypeTag from '@/components/TypeTag';
@@ -25,7 +26,7 @@ import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import HeaderLine from '@/components/HeaderLine';
-import { User } from '@/common/types';
+import { Issue, User } from '@/common/types';
 import { transformFilter } from './components/search/util';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
@@ -44,12 +45,11 @@ const renderTooltip = (user: User) => {
   return ldap ? `${realName}(${loginName})` : `${realName}(${email})`;
 };
 const { Option } = FlatSelect;
-const tableColumns = [{
+const tableColumns: GanttProps<Issue>['columns'] = [{
   flex: 2,
   minWidth: 200,
   name: 'summary',
   label: '名称',
-  // @ts-ignore
   render: (record) => (
     <Tooltip title={record.summary}>
       {!record.group ? (
@@ -66,7 +66,6 @@ const tableColumns = [{
   minWidth: 80,
   name: 'assignee',
   label: '经办人',
-  // @ts-ignore
   render: (record) => (
     <Tooltip title={renderTooltip(record.assignee)}>
       <span>{record.assignee?.realName}</span>
@@ -78,7 +77,6 @@ const tableColumns = [{
   minWidth: 100,
   name: 'estimatedStartTime',
   label: '预计开始',
-  // @ts-ignore
   render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
 {
@@ -86,7 +84,6 @@ const tableColumns = [{
   minWidth: 100,
   name: 'estimatedEndTime',
   label: '预计结束',
-  // @ts-ignore
   render: (record) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 }];
 const GanttPage: React.FC = () => {
@@ -135,16 +132,17 @@ const GanttPage: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [issueSearchStore, loadData]);
-  const handleUpdate = useCallback(async (issue: Gantt.Item, startDate: string, endDate: string) => {
+  const handleUpdate = useCallback<GanttProps<Issue>['onUpdate']>(async (issue, startDate, endDate) => {
     try {
       await issueApi.update({
-        issueId: issue.issueId as number,
-        objectVersionNumber: issue.objectVersionNumber as number,
+        issueId: issue.issueId,
+        objectVersionNumber: issue.objectVersionNumber,
         estimatedStartTime: startDate,
         estimatedEndTime: endDate,
       });
-      // eslint-disable-next-line no-param-reassign
       issue.objectVersionNumber += 1;
+      issue.estimatedStartTime = startDate;
+      issue.estimatedEndTime = endDate;
       return true;
     } catch (error) {
       return false;
@@ -190,8 +188,7 @@ const GanttPage: React.FC = () => {
     setFilterManageVisible(true);
   };
   const { unit } = store;
-  const onRow = useMemo(() => ({
-    // @ts-ignore
+  const onRow: GanttProps<Issue>['onRow'] = useMemo(() => ({
     onClick: (issue) => {
       store.setIssueId(issue.issueId);
     },
@@ -200,8 +197,8 @@ const GanttPage: React.FC = () => {
     <div
       role="none"
       onClick={onClick}
-      className={classNames('gantt-expand-icon', {
-        'gantt-expand-icon-expanded': !collapsed,
+      className={classNames('c7n-gantt-expand-icon', {
+        'c7n-gantt-expand-icon-expanded': !collapsed,
       })}
     >
       <Icon type="navigate_next" />
@@ -216,10 +213,10 @@ const GanttPage: React.FC = () => {
       onClick={onRow.onClick}
     />
   ), [onRow.onClick, type]);
-  const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((item, t) => (
+  const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((record, t) => (
     <div
       role="none"
-      className="gantt-expand-icon"
+      className="c7n-gantt-thumb-icon"
     >
       {t === 'left' ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />}
     </div>
@@ -279,8 +276,7 @@ const GanttPage: React.FC = () => {
           <Loading loading={loading} />
           {columns.length > 0 && workCalendar && (
             <GanttComponent
-              // @ts-ignore
-              ref={store.ganttRef}
+              innerRef={store.ganttRef as React.MutableRefObject<GanttRef>}
               data={data}
               columns={columns}
               onUpdate={handleUpdate}

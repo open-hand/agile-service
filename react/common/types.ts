@@ -205,6 +205,11 @@ export interface Issue {
   featureName: string
   epicColor: string
   epicName: string
+  objectVersionNumber: number
+  completed: boolean
+  estimatedStartTime?: string
+  estimatedEndTime?: string
+  actualCompletedDate?: string
   foundationFieldValue: {
     [key: string]: any
   }
