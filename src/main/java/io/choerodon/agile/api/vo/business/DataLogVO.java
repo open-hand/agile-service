@@ -1,4 +1,4 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -55,6 +55,16 @@ public class DataLogVO {
     private String email;
     @ApiModelProperty(value = "是否自定义字段日志")
     private Boolean isCusLog;
+
+    private String ruleName;
+
+    public String getRuleName() {
+        return ruleName;
+    }
+
+    public void setRuleName(String ruleName) {
+        this.ruleName = ruleName;
+    }
 
     public Date getCreationDate() {
         return creationDate;
