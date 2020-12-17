@@ -1,7 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.DataLogCreateVO;
-import io.choerodon.agile.api.vo.DataLogVO;
+import io.choerodon.agile.api.vo.business.DataLogVO;
 import io.choerodon.agile.app.service.DataLogService;
 
 import io.choerodon.core.iam.ResourceLevel;
