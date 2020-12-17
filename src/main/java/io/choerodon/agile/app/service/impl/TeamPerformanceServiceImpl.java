@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.SprintTaskVO;
 import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.TeamPerformanceService;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.mapper.TeamPerformanceMapper;
 import io.choerodon.agile.infra.utils.DataUtil;
@@ -125,14 +126,32 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
         return handleUser(sprintBugs);
     }
 
+    @Override
+    public List<UserMessageDTO> queryResponsible(Long projectId) {
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        List<Long> responsibleIds = teamPerformanceMapper.queryResponsible(projectId,
+                Objects.isNull(agilePluginService) ? false : true);
+        return obtainUser(responsibleIds);
+    }
+
+    private List<UserMessageDTO> obtainUser(List<Long> responsibleIds) {
+        List<Long> realResponsibleIds =
+                responsibleIds.stream().filter(responsibleId -> Objects.nonNull(responsibleId)).collect(Collectors.toList());
+        List<UserMessageDTO> users = userService.queryUsers(realResponsibleIds, true);
+        if(responsibleIds.size() != realResponsibleIds.size()){
+            users.add(new UserMessageDTO(null, null, null));
+        }
+        return users;
+    }
+
     private List<SprintBugVO> handleUser(List<SprintBugVO> sprintBugs) {
         if (CollectionUtils.isEmpty(sprintBugs)) {
             return sprintBugs;
         }
-        List<Long> mainResponsibleId =
+        List<Long> mainResponsibleIds =
                 sprintBugs.stream().filter(sprintBugVO -> Objects.nonNull(sprintBugVO.getResponsibleId()))
                         .map(SprintBugVO::getResponsibleId).collect(Collectors.toList());
-        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(mainResponsibleId, true);
+        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(mainResponsibleIds, true);
         sprintBugs.forEach(sprintBug -> handleUser(sprintBug, usersMap.get(sprintBug.getResponsibleId())));
         return sprintBugs;
     }

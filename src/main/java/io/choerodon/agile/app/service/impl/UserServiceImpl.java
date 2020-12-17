@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -106,6 +107,39 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserMessageDTO> queryUsers(List<Long> assigneeIdList, boolean withLoginName) {
+        List<UserMessageDTO> userMessageDTOS = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(assigneeIdList)) {
+            Long[] assigneeIds = new Long[assigneeIdList.size()];
+            assigneeIdList.toArray(assigneeIds);
+            List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(assigneeIds, false).getBody();
+            if (withLoginName) {
+                userDTOS.forEach(userDO -> {
+                    String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
+                    String noLdapName = userDO.getRealName() + "（" + userDO.getEmail() + "）";
+                    userMessageDTOS.add(
+                            new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
+                                    userDO.getLoginName(),
+                                    userDO.getRealName(),
+                                    userDO.getImageUrl(),
+                                    userDO.getEmail(),
+                                    userDO.getLdap(),
+                                    userDO.getId()));
+                });
+            } else {
+                userDTOS.forEach(userDO -> userMessageDTOS.add(
+                        new UserMessageDTO(userDO.getRealName(),
+                                userDO.getLoginName(),
+                                userDO.getRealName(),
+                                userDO.getImageUrl(),
+                                userDO.getEmail(),
+                                userDO.getLdap())));
+            }
+        }
+        return userMessageDTOS;
+    }
+
+    @Override
     public ProjectVO queryProject(Long projectId) {
         return baseFeignClient.queryProject(projectId).getBody();
     }
@@ -154,13 +188,13 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
-        boolean  isProjectOwner = baseFeignClient.checkIsProjectOwner(userId, projectId).getBody();
+        boolean isProjectOwner = baseFeignClient.checkIsProjectOwner(userId, projectId).getBody();
         if (ObjectUtils.isEmpty(isProjectOwner)) {
             return false;
         } else {
             return isProjectOwner;
         }
     }
-    
-    
+
+
 }

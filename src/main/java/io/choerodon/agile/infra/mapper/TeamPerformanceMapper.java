@@ -76,4 +76,12 @@ public interface TeamPerformanceMapper extends BaseMapper<SprintDTO> {
                                                  @Param("other") Boolean other,
                                                  @Param("responsibleIds") List<Long> responsibleIds,
                                                  @Param("isPlugin") boolean isPlugin);
+
+    /**
+     * 查询项目下所有冲刺负责人
+     * @param projectId
+     * @param isPlugin
+     * @return
+     */
+    List<Long> queryResponsible(@Param("projectId") Long projectId, @Param("isPlugin") boolean isPlugin);
 }

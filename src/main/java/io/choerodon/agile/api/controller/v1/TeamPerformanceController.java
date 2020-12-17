@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.SprintBugVO;
 import io.choerodon.agile.api.vo.SprintStoryPointVO;
 import io.choerodon.agile.api.vo.SprintTaskVO;
 import io.choerodon.agile.app.service.TeamPerformanceService;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -104,5 +105,14 @@ public class TeamPerformanceController {
                                                                         @RequestBody List<Long> responsibleIds) {
         return ResponseEntity.ok(teamPerformanceService.queryHistorySprintBugCount(projectId, environment,
                 type, other, responsibleIds));
+    }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "团队绩效-所有冲刺负责人")
+    @PostMapping(value = "/responsible")
+    public ResponseEntity<List<UserMessageDTO>> queryResponsible(@ApiParam(value = "项目id", required = true)
+                                                                        @PathVariable(name = "project_id") Long projectId) {
+        return ResponseEntity.ok(teamPerformanceService.queryResponsible(projectId));
     }
 }
