@@ -29,7 +29,7 @@ interface IIssue {
   // [ propName : string ] : any,//
 }
 interface UIssue {
-  issueId: number,
+  issueId: string,
   objectVersionNumber: number,
   [propName: string]: any,
 }

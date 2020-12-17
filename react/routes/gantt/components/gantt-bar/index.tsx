@@ -4,15 +4,16 @@ import dayjs, { Dayjs } from 'dayjs';
 import { Tooltip } from 'choerodon-ui';
 import { GanttProps, Gantt } from 'react-gantt-component';
 import STATUS_COLOR from '@/constants/STATUS_COLOR';
+import { Issue } from '@/common/types';
 import Context from '../../context';
 import styles from './index.less';
 
 interface GanttBarProps {
   type: string
-  bar: Gantt.Bar
+  bar: Gantt.Bar<Issue>
   width: number
   height: number
-  onClick:GanttProps['onBarClick']
+  onClick: GanttProps<Issue>['onBarClick']
 }
 function format(h: number) {
   if (h >= 24) {
@@ -28,7 +29,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
 }) => {
   const { store } = useContext(Context);
   const { ganttRef } = store;
-  const { task: issue, loading, stepGesture } = bar;
+  const { record: issue, loading, stepGesture } = bar;
   const statusType = issue.statusVO.type;
   const subTasks = issue.children ? issue.children.filter((i) => i.issueTypeVO.typeCode === 'sub_task') : [];
   const hasChildren = subTasks && subTasks.length > 0;
@@ -47,16 +48,16 @@ const GanttBar: React.FC<GanttBarProps> = ({
     diff = dayjs(issue.estimatedEndTime).diff(issue.estimatedStartTime, 'hour');
   }
   const delayWidth = useMemo(() => {
-    if (!issue.endDate || loading) {
+    if (!issue.estimatedEndTime || loading) {
       return 0;
     }
     const actualCompletedDate: Dayjs = issue.actualCompletedDate ? dayjs(issue.actualCompletedDate).endOf('day') : dayjs().hour(0).minute(0).second(0);
-    const endDate: Dayjs = dayjs(issue.endDate).endOf('day');
+    const endDate: Dayjs = dayjs(issue.estimatedEndTime).endOf('day');
     if (actualCompletedDate.isBefore(endDate) || actualCompletedDate.isSame(endDate)) {
       return 0;
     }
     return (ganttRef.current?.getWidthByDate(endDate, actualCompletedDate) || 0) + (issue.actualCompletedDate ? 0 : 15);
-  }, [loading, ganttRef, issue.actualCompletedDate, issue.endDate]);
+  }, [issue.estimatedEndTime, issue.actualCompletedDate, loading, ganttRef]);
   const delayVisible = stepGesture !== 'moving' && !loading;
   return (
     <>
@@ -74,10 +75,10 @@ const GanttBar: React.FC<GanttBarProps> = ({
               {format(diff)}
             </div>
             {type !== 'assignee' && hasChildren && (
-            <div>
-              当前进度：
-              {`${Math.round(percent * 100 * 100) / 100}%`}
-            </div>
+              <div>
+                当前进度：
+                {`${Math.round(percent * 100 * 100) / 100}%`}
+              </div>
             )}
             <div>
               预计开始：
@@ -88,7 +89,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
               {issue.estimatedEndTime}
             </div>
           </div>
-      )}
+        )}
       >
         <div style={{
           width,
@@ -112,7 +113,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
           }}
           onClick={(e) => {
             e.stopPropagation();
-            onClick && onClick(bar.task);
+            onClick && onClick(bar.record);
           }}
           className={styles.delay}
           style={{ width: delayWidth, marginLeft: width }}
