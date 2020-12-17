@@ -235,6 +235,7 @@ export interface ILog {
   trigger?: string,
   removeResolution?: boolean,
   resolutionChanged?: boolean,
+  ruleName?: string,
 }
 export type IReportContentType = 'chart' | 'text' | 'static_list' | 'dynamic_list'
 
