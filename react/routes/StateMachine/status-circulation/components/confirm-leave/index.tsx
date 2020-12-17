@@ -9,7 +9,7 @@ interface Props {
 const ConfirmLeave: React.FC<Props> = ({
   modal,
 }) => (
-  <div>当前页存在未保存内容，确定离开？</div>
+  <div style={{ marginTop: '-.24rem' }}>当前页存在未保存内容，确定离开？</div>
 );
 const openConfirmLeave = (props: {
   onOk: Function
