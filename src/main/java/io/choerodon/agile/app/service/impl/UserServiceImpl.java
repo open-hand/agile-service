@@ -9,7 +9,6 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -155,11 +154,13 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
-        boolean isProjectOwner = baseFeignClient.checkIsProjectOwner(userId, projectId).getBody();
+        boolean  isProjectOwner = baseFeignClient.checkIsProjectOwner(userId, projectId).getBody();
         if (ObjectUtils.isEmpty(isProjectOwner)) {
             return false;
         } else {
             return isProjectOwner;
         }
     }
+
+
 }
