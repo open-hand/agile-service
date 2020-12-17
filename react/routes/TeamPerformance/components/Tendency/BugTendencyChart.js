@@ -85,6 +85,23 @@ const BugTendencyChart = observer(() => {
       color: colors,
       dataset: sourceData,
       tooltip: {
+        trigger: 'axis',
+        confine: true,
+        formatter(params) {
+          let content = '';
+          if (params && params.length) {
+            content = `<div>冲刺：${params[0].name}</div>`;
+            params.forEach(({
+              color, seriesName, value,
+            }) => {
+              content += `<div>
+              <div style="display:inline-block; width: 10px; height: 10px; margin-right: 3px; border-radius: 50%; background:${color}"></div>
+              ${seriesName}：${value.bugCount}
+              </div>`;
+            });
+          }
+          return content;
+        },
         textStyle: {
           color: '#000',
           fontSize: 12,

@@ -54,7 +54,7 @@ const LineChart = observer(() => {
         orient: 'horizontal',
         x: 'right',
         y: 0,
-        padding: [0, 78, 0, 0],
+        padding: [10, 78, 0, 0],
         itemWidth: 20,
         itemHeight: 10,
         itemGap: 20,
@@ -77,6 +77,9 @@ const LineChart = observer(() => {
         trigger: 'axis',
         axisPointer: {
           type: 'shadow',
+          shadowStyle: {
+            color: 'rgba(176, 183, 224, 0.2)',
+          },
         },
         formatter: (params) => {
           let content = '';
@@ -108,7 +111,7 @@ const LineChart = observer(() => {
         top: 50,
         left: 8,
         right: 12,
-        bottom: 30,
+        bottom: 20,
         containLabel: true,
       },
       xAxis: {

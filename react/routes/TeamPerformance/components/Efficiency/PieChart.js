@@ -44,19 +44,12 @@ const PieChart = observer(() => {
     setIsLoading(true);
     const currentDataSet = dimensionDS.current.get('tab') === 'STORY' ? efficiencyStoryDS : efficiencyTaskDS;
     await currentDataSet.query();
-    const { plan = [], colors = [] } = currentDataSet.current.toData();
-    setPieData(plan);
+    const { plan = [], complete = [], colors = [] } = currentDataSet.current.toData();
+    const dimension = dimensionDS.current.get('dimension');
+    const currentData = dimension.toLowerCase() === 'plan' ? plan : complete;
+    setPieData(currentData);
     setColorsArr(colors);
     setIsLoading(false);
-  };
-
-  /**
-   * 切换故事点和任务工时
-   * @param {string} - key
-   */
-  const handleChangeTab = () => {
-    queryPieData();
-    dimensionDS.current.set('dimension', 'PLAN');
   };
 
   /**
@@ -86,7 +79,7 @@ const PieChart = observer(() => {
                   background: `rgba(250,211,82,${1 - i * 0.1 > 0 ? 1 - i * 0.1 : 0.9})`,
                 }}
               >
-                <span>{`${item.percent.toFixed(2)}%`}</span>
+                <span>{`${item.percent}%`}</span>
               </p>
               <p>
                 <Tooltip title={item.name} placement="bottom">
@@ -107,7 +100,7 @@ const PieChart = observer(() => {
                   background: `rgba(250,211,82,${1 - i * 0.1 > 0 ? 1 - i * 0.1 : 0.9})`,
                 }}
               >
-                <span>{`${item.percent.toFixed(2)}%`}</span>
+                <span>{`${item.percent}%`}</span>
               </p>
               <p>
                 <Tooltip title={item.name} placement="bottom">
@@ -210,7 +203,7 @@ const PieChart = observer(() => {
         <div className="chart-handle">
           <SwitchTabs
             dataSet={dimensionDS}
-            onChange={handleChangeTab}
+            onChange={() => queryPieData()}
             style={{ flexShrink: 0, height: '37px' }}
           />
           <Form dataSet={dimensionDS} style={{ marginLeft: '15px' }}>
