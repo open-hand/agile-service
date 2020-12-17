@@ -11,7 +11,7 @@ const Delay: React.FC<Props> = ({ day }) => (
         day > 99 && (
           <Tooltip title={`延期${day}天`}>
             <div className={styles.delay}>
-              延期99+天
+              延期99+
             </div>
           </Tooltip>
         )
