@@ -267,6 +267,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             }
             issueUpdateVO.setIssueId(v.getIssueId());
             issueUpdateVO.setObjectVersionNumber(v.getObjectVersionNumber());
+            handlerEstimatedTime(v, issueUpdateVO, fieldList);
             IssueVO issueVO = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
             if ("bug".equals(v.getTypeCode())) {
                 IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
@@ -295,6 +296,26 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
             messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
         });
+    }
+
+    private void handlerEstimatedTime(IssueDTO issueDTO, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
+        Date estimatedStartTime = issueDTO.getEstimatedStartTime();
+        Date estimatedEndTime = issueDTO.getEstimatedEndTime();
+        if (fieldList.contains("estimatedStartTime")) {
+            estimatedStartTime = issueUpdateVO.getEstimatedStartTime();
+        }
+        if (fieldList.contains("estimatedEndTime")) {
+            estimatedEndTime = issueUpdateVO.getEstimatedEndTime();
+        }
+        if (ObjectUtils.isEmpty(estimatedStartTime) || ObjectUtils.isEmpty(estimatedEndTime)) {
+            return;
+        }
+        if (estimatedStartTime.after(estimatedEndTime)) {
+            fieldList.remove("estimatedEndTime");
+            fieldList.remove("estimatedStartTime");
+            issueUpdateVO.setEstimatedStartTime(null);
+            issueUpdateVO.setEstimatedEndTime(null);
+        }
     }
 
     @Override

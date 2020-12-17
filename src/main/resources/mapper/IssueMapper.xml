@@ -3163,7 +3163,9 @@
         ai.apply_type,
         ai.relate_issue_id,
         ai.object_version_number,
-        ai.created_by
+        ai.created_by,
+        ai.estimated_start_time,
+        ai.estimated_end_time
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         WHERE
