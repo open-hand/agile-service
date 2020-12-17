@@ -1,4 +1,4 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
 /**
  * @author superlee

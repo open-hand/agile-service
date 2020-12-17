@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.aspect;
 
 import io.choerodon.agile.api.vo.PriorityVO;
-import io.choerodon.agile.api.vo.RuleLogRelVO;
+import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.DataLog;

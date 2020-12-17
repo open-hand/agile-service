@@ -1,6 +1,6 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.RuleLogRelVO;
+import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 
 import java.util.List;
 
