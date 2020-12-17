@@ -189,14 +189,49 @@ const fieldsMap = new Map([
     name: '经办人',
     create: {
       render: (log: ILog) => {
-        const { newString } = log;
+        const { newString, ruleName } = log;
         return (
-          <span>
-            更新
+          <>
+            {
+            ruleName && (
+              <span>
+                触发
+                <span className="c7n-Log-field">{`【${ruleName}】`}</span>
+                触发器，
+              </span>
+            )
+          }
+            <span>
+              更新
+              <span className="c7n-Log-field">【经办人】</span>
+              为
+              <span className="c7n-Log-value">{`【${newString}】`}</span>
+            </span>
+          </>
+        );
+      },
+    },
+    update: {
+      render: (log: ILog) => {
+        const { newString, oldString, ruleName } = log;
+        return (
+          <>
+            {
+            ruleName && (
+              <span>
+                触发
+                <span className="c7n-Log-field">{`【${ruleName}】`}</span>
+                触发器，
+              </span>
+            )
+          }
+            <span>将</span>
             <span className="c7n-Log-field">【经办人】</span>
-            为
+            <span>由</span>
+            <span className="c7n-Log-value">{`【${oldString}】`}</span>
+            <span>改变为</span>
             <span className="c7n-Log-value">{`【${newString}】`}</span>
-          </span>
+          </>
         );
       },
     },
