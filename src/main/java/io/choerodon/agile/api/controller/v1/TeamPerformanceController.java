@@ -110,7 +110,7 @@ public class TeamPerformanceController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "团队绩效-所有冲刺负责人")
-    @PostMapping(value = "/responsible")
+    @GetMapping(value = "/responsible")
     public ResponseEntity<List<UserMessageDTO>> queryResponsible(@ApiParam(value = "项目id", required = true)
                                                                         @PathVariable(name = "project_id") Long projectId) {
         return ResponseEntity.ok(teamPerformanceService.queryResponsible(projectId));
