@@ -45,12 +45,11 @@ const renderTooltip = (user: User) => {
   return ldap ? `${realName}(${loginName})` : `${realName}(${email})`;
 };
 const { Option } = FlatSelect;
-const tableColumns = [{
+const tableColumns: GanttProps<Issue>['columns'] = [{
   flex: 2,
   minWidth: 200,
   name: 'summary',
   label: '名称',
-  // @ts-ignore
   render: (record) => (
     <Tooltip title={record.summary}>
       {!record.group ? (
@@ -67,7 +66,6 @@ const tableColumns = [{
   minWidth: 80,
   name: 'assignee',
   label: '经办人',
-  // @ts-ignore
   render: (record) => (
     <Tooltip title={renderTooltip(record.assignee)}>
       <span>{record.assignee?.realName}</span>
@@ -79,7 +77,6 @@ const tableColumns = [{
   minWidth: 100,
   name: 'estimatedStartTime',
   label: '预计开始',
-  // @ts-ignore
   render: (record) => record.estimatedStartTime && <Tooltip title={record.estimatedStartTime}><span>{dayjs(record.estimatedStartTime).format('YYYY-MM-DD')}</span></Tooltip>,
 },
 {
@@ -87,7 +84,6 @@ const tableColumns = [{
   minWidth: 100,
   name: 'estimatedEndTime',
   label: '预计结束',
-  // @ts-ignore
   render: (record) => record.estimatedEndTime && <Tooltip title={record.estimatedEndTime}><span>{dayjs(record.estimatedEndTime).format('YYYY-MM-DD')}</span></Tooltip>,
 }];
 const GanttPage: React.FC = () => {
@@ -201,8 +197,8 @@ const GanttPage: React.FC = () => {
     <div
       role="none"
       onClick={onClick}
-      className={classNames('gantt-expand-icon', {
-        'gantt-expand-icon-expanded': !collapsed,
+      className={classNames('c7n-gantt-expand-icon', {
+        'c7n-gantt-expand-icon-expanded': !collapsed,
       })}
     >
       <Icon type="navigate_next" />
@@ -220,7 +216,7 @@ const GanttPage: React.FC = () => {
   const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((record, t) => (
     <div
       role="none"
-      className="gantt-expand-icon"
+      className="c7n-gantt-thumb-icon"
     >
       {t === 'left' ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />}
     </div>
