@@ -8,6 +8,7 @@ import io.choerodon.agile.app.service.TeamPerformanceService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.TeamPerformanceMapper;
 import io.choerodon.agile.infra.utils.DataUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
@@ -32,6 +33,9 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     @Override
     public List<SprintStoryPointVO> querySprintStoryPoint(Long projectId) {
@@ -127,19 +131,21 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
     }
 
     @Override
-    public List<UserMessageDTO> queryResponsible(Long projectId) {
+    public List<UserDTO> queryResponsible(Long projectId) {
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         List<Long> responsibleIds = teamPerformanceMapper.queryResponsible(projectId,
                 Objects.isNull(agilePluginService) ? false : true);
         return obtainUser(responsibleIds);
     }
 
-    private List<UserMessageDTO> obtainUser(List<Long> responsibleIds) {
+    private List<UserDTO> obtainUser(List<Long> responsibleIds) {
         List<Long> realResponsibleIds =
                 responsibleIds.stream().filter(responsibleId -> Objects.nonNull(responsibleId)).collect(Collectors.toList());
-        List<UserMessageDTO> users = userService.queryUsers(realResponsibleIds, true);
+        Long[] assigneeIds = new Long[realResponsibleIds.size()];
+        realResponsibleIds.toArray(assigneeIds);
+        List<UserDTO> users = baseFeignClient.listUsersByIds(assigneeIds, false).getBody();
         if(responsibleIds.size() != realResponsibleIds.size()){
-            users.add(new UserMessageDTO(null, null, null));
+            users.add(new UserDTO());
         }
         return users;
     }

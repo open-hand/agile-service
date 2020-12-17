@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.SprintBugVO;
 import io.choerodon.agile.api.vo.SprintStoryPointVO;
 import io.choerodon.agile.api.vo.SprintTaskVO;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -73,5 +74,5 @@ public interface TeamPerformanceService {
      * @param projectId
      * @return
      */
-    List<UserMessageDTO> queryResponsible(Long projectId);
+    List<UserDTO> queryResponsible(Long projectId);
 }
