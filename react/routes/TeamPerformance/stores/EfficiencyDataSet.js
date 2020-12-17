@@ -27,7 +27,7 @@ const DimensionDataSet = () => ({
         selection: 'single',
         data: [
           { meaning: '计划', value: 'PLAN' },
-          { meaning: '实际', value: 'ACTUAL' },
+          { meaning: '实际', value: 'COMPLETE' },
         ],
       }),
     },

@@ -56,13 +56,20 @@ const CompeleteTendencyChart = observer(() => {
         source: chartData,
       },
       tooltip: {
+        trigger: 'axis',
         formatter(params) {
           let content = '';
-          content = `<div>
-         <div>冲刺：${params.name}</div>
-         <div style="display:inline-block; width: 10px; height: 10px; margin-right: 3px; border-radius: 50%; background:${params.color}"></div>
-          ${params.seriesName}${currentTab}：${params.seriesName === '完成' ? params.data[fieldMap[currentTabKey].complete] : params.data[fieldMap[currentTabKey].plan]}
-         </div>`;
+          if (params && params.length) {
+            content = `<div>冲刺：${params[0].name}</div>`;
+            params.forEach(({
+              color, seriesName, value,
+            }) => {
+              content += `<div>
+              <div style="display:inline-block; width: 10px; height: 10px; margin-right: 3px; border-radius: 50%; background:${color}"></div>
+              ${seriesName}：${seriesName === '完成' ? value[fieldMap[currentTabKey].complete] : value[fieldMap[currentTabKey].plan]}
+              </div>`;
+            });
+          }
           return content;
         },
         textStyle: {

@@ -36,12 +36,23 @@ const BugBarChart = observer(() => {
       source: barData,
     },
     tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow',
+        shadowStyle: {
+          color: 'rgba(176, 183, 224, 0.2)',
+        },
+      },
       formatter(params) {
         let content = '';
-        content = `<div>
-         <div style="display:inline-block; width: 10px; height: 10px; margin-right: 3px; border-radius: 50%; background:${params.color}"></div>
-         ${params.data.realName}：${params.data.bugCount}
-         </div>`;
+        if (params && params.length) {
+          const { name, color, value } = params[0];
+          content = `<div>
+            <div style="display:inline-block; width: 10px; height: 10px; margin-right: 3px; border-radius: 50%; background:${color}"></div>
+              ${name}：${value.bugCount}
+            </div>
+          `;
+        }
         return content;
       },
       textStyle: {
@@ -57,7 +68,7 @@ const BugBarChart = observer(() => {
     },
     grid: {
       top: 50,
-      left: 8,
+      left: 10,
       right: 12,
       bottom: 30,
       containLabel: true,
