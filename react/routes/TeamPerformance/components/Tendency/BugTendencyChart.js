@@ -22,7 +22,7 @@ const fieldMap = {
 };
 
 const BugTendencyChart = observer(() => {
-  const { bugTendencyChartHandleDS, bugTendencyDS } = useContext(Store);
+  const { bugTendencyChartHandleDS, bugTendencyDS, bugResponsibleDS } = useContext(Store);
   const [show, setShow] = useState(false);
   const [chartData, setChartData] = useState(null);
 
@@ -31,15 +31,12 @@ const BugTendencyChart = observer(() => {
   }, []);
 
   const queryChartData = async () => {
-    const { type, environment, responsibleId } = bugTendencyChartHandleDS.current.toData();
+    const { type, environment } = bugTendencyChartHandleDS.current.toData();
+    const { responsibleId } = bugResponsibleDS.current.toData();
     bugTendencyDS.setQueryParameter('environment', environment);
     bugTendencyDS.setQueryParameter('type', type);
-    bugTendencyDS.setQueryParameter('responsibleId', responsibleId);
+    bugTendencyDS.setQueryParameter('responsibleIds', responsibleId);
     await bugTendencyDS.query();
-    const groupByIdData = groupBy(bugTendencyDS.toData(), 'responsibleId');
-    const responsibleData = Object.keys(groupByIdData).map((key) => ({ meaning: groupByIdData[key][0].realName || '未分配', value: key }));
-    const responsibleOptionDS = bugTendencyChartHandleDS.getField('responsibleId').get('options');
-    responsibleOptionDS.loadData(responsibleData);
     setShow(bugTendencyDS.length > 6);
     setChartData(bugTendencyDS.toData());
   };
@@ -218,9 +215,11 @@ const BugTendencyChart = observer(() => {
                       onChange={() => queryChartData()}
                     />
                   </Form>
-                  <Form dataSet={bugTendencyChartHandleDS} style={{ width: '120px', marginLeft: '15px' }}>
+                  <Form dataSet={bugResponsibleDS} style={{ maxWidth: '500px', marginLeft: '15px' }}>
                     <Select
                       name="responsibleId"
+                      maxTagCount={5}
+                      searchable
                       onChange={() => queryChartData()}
                     />
                   </Form>
