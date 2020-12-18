@@ -29,11 +29,12 @@ const useIsInProgram = (): ChildrenProps => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
+  const isProject = AppState.currentMenuType.type === 'project';
   const isProgram = type === 'program';
   const refresh = useCallback(async () => {
     if (!isProgram) {
       setLoading(true);
-      const projectProgram = shouldRequest ? await commonApi.getProjectsInProgram() : Promise.resolve(false);
+      const projectProgram = shouldRequest && isProject ? await commonApi.getProjectsInProgram() : Promise.resolve(false);
       const hasProgram = Boolean(projectProgram);
       let art = false;
       let showFeature = false;
