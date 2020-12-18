@@ -30,6 +30,7 @@ import { Issue, User } from '@/common/types';
 import { transformFilter } from './components/search/util';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
+import GanttGroupBar from './components/gantt-group-bar';
 import IssueDetail from './components/issue-detail';
 import CreateIssue from './components/create-issue';
 import Context from './context';
@@ -213,6 +214,13 @@ const GanttPage: React.FC = () => {
       onClick={onRow.onClick}
     />
   ), [onRow.onClick, type]);
+  const renderGroupBar: GanttProps['renderBar'] = useCallback((bar, { width, height }) => (
+    <GanttGroupBar
+      bar={bar}
+      width={width}
+      height={height}
+    />
+  ), []);
   const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((record, t) => (
     <div
       role="none"
@@ -291,6 +299,7 @@ const GanttPage: React.FC = () => {
               tableIndent={20}
               expandIcon={getExpandIcon}
               renderBar={renderBar}
+              renderGroupBar={renderGroupBar}
               renderBarThumb={renderBarThumb}
               tableCollapseAble={false}
               scrollTop={{
