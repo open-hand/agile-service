@@ -76,7 +76,6 @@ const BugBarChart = observer(() => {
     xAxis: {
       type: 'category',
       axisTick: { show: false },
-      interval: 0,
       axisLine: {
         show: false,
         lineStyle: {
@@ -88,7 +87,6 @@ const BugBarChart = observer(() => {
         show: false,
       },
       axisLabel: {
-        show: true,
         textStyle: {
           color: 'rgba(0, 0, 0, 0.65)',
           fontSize: 12,
@@ -98,10 +96,10 @@ const BugBarChart = observer(() => {
     },
     yAxis: {
       name: '问题计数',
-      nameTextStyle: {
-        color: '#000',
-        padding: [0, 10, 0, 0],
-      },
+      // nameTextStyle: {
+      //   color: '#000',
+      //   padding: [0, 0, 0, 0],
+      // },
       minInterval: 1,
       nameGap: 23,
       axisTick: { show: false },

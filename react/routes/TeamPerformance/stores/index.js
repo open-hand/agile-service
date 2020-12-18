@@ -7,7 +7,7 @@ import {
   BugRankDataSet, BugRankHandleDataSet, QualityRankDataSet, QualityRankHandleDataSet, BugDistributionDataSet,
 } from './QualityDataSet';
 import {
-  CompleteStoryDataSet, CompleteTaskDataSet, BugTendencyDataSet,
+  CompleteStoryDataSet, CompleteTaskDataSet, BugTendencyDataSet, BugRespnsibleDataSet,
 } from './TendencyDataSet';
 
 const Store = createContext();
@@ -105,6 +105,10 @@ export const StoreProvider = (props) => {
   const bugTendencyDS = useMemo(() => new DataSet(BugTendencyDataSet({
     projectId: id,
   })), []);
+  const bugResponsibleDS = useMemo(() => new DataSet(BugRespnsibleDataSet({
+    projectId: id,
+  })), []);
+
   const value = {
     ...props,
     dimensionDS,
@@ -125,6 +129,7 @@ export const StoreProvider = (props) => {
     completeTaskDS,
     bugTendencyChartHandleDS,
     bugTendencyDS,
+    bugResponsibleDS,
     projectId: id,
     prefixCls: 'c7n-team-performance',
   };

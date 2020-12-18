@@ -116,20 +116,17 @@ const LineChart = observer(() => {
       },
       xAxis: {
         type: 'category',
-        boundaryGap: true,
+        axisTick: { show: false },
+        axisLine: {
+          show: false,
+          lineStyle: {
+            color: '#eee',
+          },
+        },
         nameTextStyle: {
           color: '#000',
         },
-        axisTick: { show: false },
-        axisLine: {
-          lineStyle: {
-            color: '#eee',
-            type: 'solid',
-            width: 2,
-          },
-        },
         axisLabel: {
-          interval: 0,
           textStyle: {
             color: 'rgba(0, 0, 0, 0.65)',
             fontSize: 12,

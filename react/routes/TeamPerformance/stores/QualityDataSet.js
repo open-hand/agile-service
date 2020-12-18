@@ -31,15 +31,6 @@ const BugRankHandleDataSet = () => ({
       }),
       // lookupCode: 'environment',
     },
-    {
-      name: 'responsibleId',
-      label: '责任人',
-      options: new DataSet({
-        paging: false,
-        selection: 'single',
-        data: [],
-      }),
-    },
   ],
 });
 
