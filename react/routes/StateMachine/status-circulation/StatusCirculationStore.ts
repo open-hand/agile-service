@@ -1,5 +1,5 @@
 import {
-  observable, runInAction, action, computed,
+  observable, runInAction, action, computed, toJS,
 } from 'mobx';
 import { findIndex, find } from 'lodash';
 import { statusTransformApi, IStatusCirculation, IUpdateTransform } from '@/api';
@@ -26,6 +26,7 @@ interface StatusAllCheckedItem {
   rowChecked: boolean
   rowIndeterminate: boolean
   rowCheckedIds: Set<IStatusCirculation['id']>
+  originData: Partial<StatusAllCheckedItem>
 }
 class StatusCirculationStore {
   @observable statusList: IStatusCirculation[] = [];
@@ -48,13 +49,22 @@ class StatusCirculationStore {
             rowChecked,
             rowIndeterminate,
             rowCheckedIds: new Set(item.canTransformStatus),
+            originData: {
+              columnCurrentSize: 0,
+              columnCheckedIds: new Set([item.id]),
+              rowChecked,
+              rowIndeterminate,
+              rowCheckedIds: new Set(item.canTransformStatus),
+            },
           });
           return item;
         });
         statusList.forEach((item) => {
           item.canTransformStatus.forEach((canStatus) => {
             this.checkedMaps.get(canStatus)!.columnCheckedIds.add(item.id);
+            this.checkedMaps.get(canStatus)!.originData.columnCheckedIds!.add(item.id);
             this.checkedMaps.get(canStatus)!.columnCurrentSize += 1;
+            this.checkedMaps.get(canStatus)!.originData.columnCurrentSize! += 1;
           });
         });
         this.loading = false;
@@ -158,6 +168,14 @@ class StatusCirculationStore {
 
   @action clearActions() {
     this.actions.clear();
+    const newCheckMaps = observable.map<IStatusCirculation['id'], any>();
+    this.checkedMaps.forEach((value, key) => {
+      newCheckMaps.set(key, {
+        ...toJS(value.originData),
+        originData: toJS(value.originData),
+      });
+    });
+    this.checkedMaps = newCheckMaps;
   }
 
   @action clearStatusActions(statusId: IStatus['id']) {
