@@ -199,33 +199,27 @@ const BugTendencyChart = observer(() => {
         <div className="line-chart-container">
           <div className="chart-handle  line-chart-handle">
             <span className="chart-title">缺陷趋势分析</span>
-            {
-              (chartData && chartData.length > 0) && (
-                <>
-                  <SwitchTabs
-                    field="type"
-                    dataSet={bugTendencyChartHandleDS}
-                    onChange={() => queryChartData()}
-                    style={{ marginLeft: '40px' }}
-                  />
-                  <Form dataSet={bugTendencyChartHandleDS} style={{ width: '130px', marginLeft: '15px' }}>
-                    <Select
-                      name="environment"
-                      clearButton={false}
-                      onChange={() => queryChartData()}
-                    />
-                  </Form>
-                  <Form dataSet={bugResponsibleDS} style={{ maxWidth: '500px', marginLeft: '15px' }}>
-                    <Select
-                      name="responsibleId"
-                      maxTagCount={5}
-                      searchable
-                      onChange={() => queryChartData()}
-                    />
-                  </Form>
-                </>
-              )
-            }
+            <SwitchTabs
+              field="type"
+              dataSet={bugTendencyChartHandleDS}
+              onChange={() => queryChartData()}
+              style={{ marginLeft: '40px' }}
+            />
+            <Form dataSet={bugTendencyChartHandleDS} style={{ width: '130px', marginLeft: '15px' }}>
+              <Select
+                name="environment"
+                clearButton={false}
+                onChange={() => queryChartData()}
+              />
+            </Form>
+            <Form dataSet={bugResponsibleDS} style={{ maxWidth: '500px', marginLeft: '15px' }}>
+              <Select
+                name="responsibleId"
+                maxTagCount={5}
+                searchable
+                onChange={() => queryChartData()}
+              />
+            </Form>
           </div>
           {
             (chartData && chartData.length > 0) && (
@@ -245,7 +239,8 @@ const BugTendencyChart = observer(() => {
           {
             (Array.isArray(chartData) && chartData.length === 0) && (
               <EmptyBlock
-                height={340}
+                height={352}
+                des="当前暂无数据"
               />
             )
           }
