@@ -38,7 +38,7 @@ const useIsInProgram = (): ChildrenProps => {
       const hasProgram = Boolean(projectProgram);
       let art = false;
       let showFeature = false;
-      if (hasProgram) {
+      if (isProject && hasProgram) {
         art = await commonApi.getIsShowFeature();
         showFeature = Boolean(art);
       }
@@ -52,7 +52,7 @@ const useIsInProgram = (): ChildrenProps => {
     } else {
       setLoading(false);
     }
-  }, [isProgram]);
+  }, [isProgram, isProject]);
 
   useEffect(() => {
     refresh();
