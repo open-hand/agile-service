@@ -39,6 +39,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
   const [color1, color2] = STATUS_COLOR[statusType];
   const percent = totalCount ? completeCount / totalCount : 0;
   let diff = 0;
+  let delayDiff = 0;
   if (issue.estimatedStartTime && issue.estimatedEndTime) {
     // 延期
     // if (dayjs(issue.estimatedEndTime).isBefore(dayjs()) && !issue.completed) {
@@ -56,6 +57,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
     if (actualCompletedDate.isBefore(endDate) || actualCompletedDate.isSame(endDate)) {
       return 0;
     }
+    delayDiff = actualCompletedDate.diff(endDate, 'hour');
     return (ganttRef.current?.getWidthByDate(endDate, actualCompletedDate) || 0) + (issue.actualCompletedDate ? 0 : 15);
   })();
   const delayVisible = stepGesture !== 'moving' && !loading;
@@ -73,6 +75,10 @@ const GanttBar: React.FC<GanttBarProps> = ({
             <div>
               持续时间：
               {format(diff)}
+            </div>
+            <div>
+              逾期：
+              {format(delayDiff)}
             </div>
             {type !== 'assignee' && hasChildren && (
               <div>
@@ -104,8 +110,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
           <div style={{ flex: totalCount > 0 ? completeCount : 1, backgroundColor: color1 }} />
           <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
         </div>
-      </Tooltip>
-      {delayVisible && (
+        {delayVisible && (
         <div
           role="none"
           onMouseDown={(e) => {
@@ -118,7 +123,8 @@ const GanttBar: React.FC<GanttBarProps> = ({
           className={styles.delay}
           style={{ width: delayWidth, marginLeft: width }}
         />
-      )}
+        )}
+      </Tooltip>
     </>
   );
 };
