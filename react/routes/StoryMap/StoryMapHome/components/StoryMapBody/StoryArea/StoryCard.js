@@ -53,7 +53,7 @@ class StoryCard extends Component {
     const { issueId, storyMapVersionDTOList, storyMapSprintList } = story;
     const { swimLine } = StoryMapStore;
     // 未规划或无泳道
-    if (swimLine === 'none' || storyMapVersionDTOList.length === 0 || storyMapSprintList.length === 0) {
+    if (swimLine === 'none' || (storyMapVersionDTOList.length === 0 && storyMapSprintList.length === 0)) {
       const storyMapDragVO = {
         // 问题id列表，移动到版本，配合versionId使用
         // versionIssueIds: [],
