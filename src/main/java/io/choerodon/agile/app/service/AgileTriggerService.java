@@ -25,4 +25,6 @@ public interface AgileTriggerService {
      * @return
      */
     List<RuleLogRelVO> queryRuleLogRelList(RuleLogRelVO ruleLogRelVO);
+
+    void delete(RuleLogRelVO ruleLogRel);
 }
