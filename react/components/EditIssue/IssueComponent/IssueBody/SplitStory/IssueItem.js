@@ -29,7 +29,7 @@ function IssueItem({ issue }) {
         paramIssueId: issueId,
         paramName: issueNum,
       },
-    });
+    }, { blank: true });
   };
 
   return (

@@ -166,7 +166,7 @@ function getParams(path: Path, descriptor: LocationDescriptor = defaultDescripto
   return totalParams;
 }
 
-const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
+const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor, options: { blank?: boolean } = {}) => {
   new Promise<IParams | null>((resolve) => {
     const params = getParams(path, descriptor);
     resolve(params);
@@ -175,6 +175,10 @@ const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
       return;
     }
     const search = queryString.stringify(params);
+    if (options.blank) {
+      window.open(`/#${path}?${search}`);
+      return;
+    }
     if (!history) {
       error('跳转失败，未设置history');
       return;
