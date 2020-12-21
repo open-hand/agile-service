@@ -6,6 +6,7 @@ import {
 } from 'choerodon-ui/pro';
 import SelectUser from '@/components/select/select-user';
 import SelectEnvironment from '@/components/select/select-environment';
+import SelectProgramVersion from '@/components/select/select-program-version';
 import styles from './index.less';
 
 const { Option } = Select;
@@ -45,6 +46,19 @@ export default function renderField({
           label="环境"
           style={{ width: '100%' }}
           name={code}
+          onOption={({ record }) => ({
+            disabled: data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
+          })}
+        />
+      );
+    }
+    case 'programVersion': {
+      return (
+        <SelectProgramVersion
+          label="版本"
+          style={{ width: '100%' }}
+          name={code}
+          multiple
           onOption={({ record }) => ({
             disabled: data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
           })}
