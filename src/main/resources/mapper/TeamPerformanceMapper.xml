@@ -103,8 +103,9 @@
     </select>
 
     <select id="queryHistorySprintStoryPoint" resultType="io.choerodon.agile.api.vo.SprintStoryPointVO">
-        SELECT ai.sprint_id,                                ai.sprint_name,
-        SUM(ai.story_points) AS story_points,               SUM(ai.story_points_complate) AS story_points_complete
+        SELECT ai.sprint_id,                                             ai.sprint_name,
+        COALESCE(SUM(ai.story_points), 0) AS story_points,
+        COALESCE(SUM(ai.story_points_complate), 0) AS story_points_complete
         FROM
         (
             SELECT asp.sprint_id,               asp.sprint_name,
@@ -139,7 +140,8 @@
 
     <select id="queryHistorySprintTaskTime" resultType="io.choerodon.agile.api.vo.SprintTaskVO">
         SELECT ai.sprint_id,									 ai.sprint_name,
-		SUM(ai.remaining_time) AS remaining_time,                SUM(ai.remaining_time_complate) AS remaining_time_complete
+        COALESCE(SUM(ai.remaining_time), 0) AS remaining_time,
+        COALESCE(SUM(ai.remaining_time_complate), 0) AS remaining_time_complete
         FROM
         (
             SELECT asp.sprint_id,							 asp.sprint_name,
@@ -193,7 +195,7 @@
         <if test="type != null and type == 'test'">
             aspi.test_responsible_id AS responsible_id,
         </if>
-        COUNT(ai.issue_id) bug_count
+        COALESCE(COUNT(ai.issue_id), 0) AS bug_count
         FROM (
             SELECT asp.project_id, asp.sprint_id, asp.sprint_name, ai.issue_id, ai.main_responsible_id, ai.test_responsible_id
             FROM agile_sprint asp
