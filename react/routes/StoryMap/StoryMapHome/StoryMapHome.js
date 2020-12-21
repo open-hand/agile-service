@@ -23,6 +23,7 @@ import { transformFilter } from '@/routes/Issue/stores/utils';
 import Minimap from './components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from './emptyStory.svg';
+import emptyPic from './emptyData.svg';
 import Loading from '../../../components/Loading';
 import StoryMapBody from './components/StoryMapBody';
 import SideIssueList from './components/SideIssueList';
@@ -143,7 +144,7 @@ const StoryMapHome = observer(() => {
   }, []);
 
   const {
-    loading, selectedIssueMap, storyMapData, storyData,
+    loading, selectedIssueMap, storyMapData, storyData, hiddenColumnNoStory,
   } = StoryMapStore;
   const isEmpty = StoryMapStore.getIsEmpty;
   /**
@@ -195,9 +196,17 @@ const StoryMapHome = observer(() => {
         <StoryMapSearch issueSearchStore={issueSearchStore} />
 
         {!isEmpty ? (
-          <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
-            <StoryMapBody />
-          </Minimap>
+          hiddenColumnNoStory && Object.values(storyData).every((item) => !item.storys.length) ? (
+            <Empty
+              pic={emptyPic}
+              title="暂无数据"
+              description="隐藏无故事的列后无史诗数据"
+            />
+          ) : (
+            <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
+              <StoryMapBody />
+            </Minimap>
+          )
         ) : (
           loading ? null : (
               // eslint-disable-next-line react/jsx-indent
@@ -205,11 +214,7 @@ const StoryMapHome = observer(() => {
                 style={{ background: 'white', height: 'calc(100% + 120px)', marginTop: -120 }}
                 pic={epicPic}
                 title="欢迎使用敏捷用户故事地图"
-                description={(
-                  <>
-                    用户故事地图是以史诗为基础，根据版本控制进行管理规划
-                  </>
-                )}
+                description="用户故事地图是以史诗为基础，根据版本控制进行管理规划"
               />
           )
         )}

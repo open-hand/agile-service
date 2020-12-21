@@ -45,7 +45,7 @@ class EpicCard extends Component {
     const { selectedIssueMap } = StoryMapStore;
     return (
       <Card
-        className={`c7nagile-StoryMap-EpicCard minimapCard ${issueId ? '' : 'none'} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`}
+        className={`c7nagile-StoryMap-EpicCard minimapCard ${issueId ? '' : 'none'} ${statusVO && statusVO.completed ? 'completedCard' : undefined}  ${selectedIssueMap.has(issueId) ? 'selected' : ''}`}
         style={{ display: 'flex' }}
         onClick={this.handleClick}
         saveRef={this.saveRef}
