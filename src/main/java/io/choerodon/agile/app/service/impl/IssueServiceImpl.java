@@ -180,6 +180,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private StarBeaconMapper starBeaconMapper;
     @Autowired
     private IssueStatusMapper issueStatusMapper;
+    @Autowired(required = false)
+    private AgileTriggerService agileTriggerService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -839,6 +841,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         //删除日志信息
         dataLogDeleteByIssueId(projectId, issueId);
+        deleteRuleLogRel(projectId, issueId);
         issueAccessDataService.delete(projectId, issueConvertDTO.getIssueId());
         //删除rank数据
         rankMapper.deleteRankByIssueId(issueId);
@@ -852,6 +855,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         testFeignClient.deleteTestRel(projectId, issueId);
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
+        }
+    }
+
+    private void deleteRuleLogRel(Long projectId, Long issueId) {
+        if (agileTriggerService != null) {
+            RuleLogRelVO ruleLogRel = new RuleLogRelVO();
+            ruleLogRel.setBusinessType("issue");
+            ruleLogRel.setInstanceId(issueId);
+            ruleLogRel.setProjectId(projectId);
+            agileTriggerService.delete(ruleLogRel);
         }
     }
 
