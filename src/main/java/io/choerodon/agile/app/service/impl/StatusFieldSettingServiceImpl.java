@@ -334,6 +334,10 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 }).collect(Collectors.toList());
                 field.set(issueUpdateVO, labelIssueRelVOS);
                 break;
+            case FieldCode.ENVIRONMENT:
+                StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
+                field.set(issueUpdateVO, statusFieldValueSettingDTO.getStringValue());
+                break;
             default:
                 break;
         }
