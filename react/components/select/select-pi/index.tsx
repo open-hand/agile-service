@@ -31,9 +31,10 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   flat?: boolean
   addPi0?: boolean
+  doingIsFirst?: boolean
 }
 const SelectPI: React.FC<Props> = forwardRef(({
-  dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, ...otherProps
+  dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, doingIsFirst, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Props['afterLoad']>();
   afterLoadRef.current = afterLoad;
@@ -49,12 +50,17 @@ const SelectPI: React.FC<Props> = forwardRef(({
     ),
     afterLoad: afterLoadRef.current,
     middleWare: (piList) => {
+      let sortPiList = [...piList];
+      const doingPi = piList.find((item) => item.statusCode === 'doing');
+      if (doingPi && doingIsFirst) {
+        sortPiList = [doingPi, ...piList.filter((item) => item.statusCode !== 'doing')];
+      }
       if (dataRef) {
         Object.assign(dataRef, {
-          current: piList,
+          current: sortPiList,
         });
       }
-      return addPi0 ? [{ id: '0', name: '未分配PI' } as unknown as PI, ...piList] : piList;
+      return addPi0 ? [{ id: '0', name: '未分配PI' } as unknown as PI, ...sortPiList] : sortPiList;
     },
     props: {
       // @ts-ignore
