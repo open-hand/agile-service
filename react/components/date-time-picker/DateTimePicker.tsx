@@ -5,7 +5,7 @@ import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 
 interface DateTimePickerProps extends DatePickerProps {
   // 默认弹框中的值
-  defaultPickerValue: Moment,
+  defaultPickerValue?: Moment,
 }
 
 export default class DateTimePickerWithConfig extends DateTimePicker {
