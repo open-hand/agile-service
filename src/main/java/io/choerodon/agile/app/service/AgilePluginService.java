@@ -359,4 +359,11 @@ public interface AgilePluginService {
      * @return
      */
     StoryMapVO handlerBusinessPageStoryMap(Long projectId, List<Long> epicIds, SearchVO searchVO, Integer page, Integer size);
+
+    /**
+     * 状态机流转处理特性的项目群版本
+     * @param issueDTO
+     * @param specifyMap
+     */
+    void handlerSpecifyProgramField(IssueDTO issueDTO, Map<String, Object> specifyMap);
 }
