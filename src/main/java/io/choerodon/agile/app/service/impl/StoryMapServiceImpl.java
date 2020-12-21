@@ -95,7 +95,7 @@ public class StoryMapServiceImpl implements StoryMapService {
         // get project completed status
         getStatusIdByIsCompleted(projectId, searchVO);
         // get project epic
-        List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId, searchVO.getAdvancedSearchArgs());
+        List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId, searchVO);
         if (projectEpicIds != null && !projectEpicIds.isEmpty()) {
             epicIds.addAll(projectEpicIds);
         }
@@ -103,13 +103,14 @@ public class StoryMapServiceImpl implements StoryMapService {
             storyMap = agilePluginService.handlerBusinessQueryStoryMap(projectId, epicIds, searchVO);
         }
         else {
+            List<StoryMapStoryDTO> storyMapStoryDTOS = new ArrayList<>();
             if (epicIds.isEmpty()) {
                 storyMap.setEpics(new ArrayList<>());
             } else {
                 List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, epicIds, searchVO.getAdvancedSearchArgs());
                 storyMap.setEpics(epicWithInfoDTOList);
+                storyMapStoryDTOS.addAll(storyMapMapper.selectStoryList(projectId, epicIds, searchVO,filterSql,searchVO.getAssigneeFilterIds()));
             }
-            List<StoryMapStoryDTO> storyMapStoryDTOS = storyMapMapper.selectStoryList(projectId, epicIds, searchVO,filterSql,searchVO.getAssigneeFilterIds());
             storyMap.setStoryList(!epicIds.isEmpty() ? storyMapStoryDTOS : new ArrayList<>());
         }
         storyMap.setStoryMapWidth(setStoryMapWidth(projectId));
@@ -265,14 +266,14 @@ public class StoryMapServiceImpl implements StoryMapService {
         getStatusIdByIsCompleted(projectId, searchVO);
         if (agilePluginService != null) {
             // get project epic
-            List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId, searchVO.getAdvancedSearchArgs());
+            List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId, searchVO);
             if (projectEpicIds != null && !projectEpicIds.isEmpty()) {
                 epicIds.addAll(projectEpicIds);
             }
             storyMap = agilePluginService.handlerBusinessPageStoryMap(projectId, epicIds, searchVO, page, size);
         }
         else {
-            Page<Long> pageEpicIds = PageHelper.doPage(page, size, () -> storyMapMapper.selectEpicIdsByProject(projectId, searchVO.getAdvancedSearchArgs()));
+            Page<Long> pageEpicIds = PageHelper.doPage(page, size, () -> storyMapMapper.selectEpicIdsByProject(projectId, searchVO));
             List<Long> content = pageEpicIds.getContent();
             if (CollectionUtils.isEmpty(content)) {
                 storyMap.setEpics(new ArrayList<>());
