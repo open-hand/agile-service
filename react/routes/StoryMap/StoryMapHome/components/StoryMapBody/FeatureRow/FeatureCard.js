@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
 import StatusTag from '@/components/StatusTag';
@@ -25,7 +24,7 @@ class FeatureCard extends Component {
     return (
       <Card className={`c7nagile-StoryMap-FeatureCard minimapCard ${featureType || 'none'} ${statusVO && statusVO.completed ? 'completedCard' : undefined} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`} onClick={this.handleClick}>
         <div className="summary">
-          <Tooltip title={`${summary || '无特性'}`} getPopupContainer={(trigger) => trigger.parentNode}>
+          <Tooltip title={`${summary || '无特性'}`}>
             {summary || '无特性'}
           </Tooltip>
         </div>
