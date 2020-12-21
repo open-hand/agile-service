@@ -5,6 +5,7 @@ import {
   NumberField, TextArea, Col, Row,
 } from 'choerodon-ui/pro';
 import SelectUser from '@/components/select/select-user';
+import SelectEnvironment from '@/components/select/select-environment';
 import styles from './index.less';
 
 const { Option } = Select;
@@ -32,6 +33,18 @@ export default function renderField({
           searchMatcher="name"
           maxTagCount={2}
           maxTagTextLength={10}
+          onOption={({ record }) => ({
+            disabled: data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
+          })}
+        />
+      );
+    }
+    case 'environment': {
+      return (
+        <SelectEnvironment
+          label="环境"
+          style={{ width: '100%' }}
+          name={code}
           onOption={({ record }) => ({
             disabled: data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
           })}
