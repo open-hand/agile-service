@@ -188,7 +188,7 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
 
         BigDecimal remainingTimePlanCompleteRate = Objects.isNull(sprintTask.getRemainingTime()) ||
                 sprintTask.getRemainingTime().compareTo(new BigDecimal(0)) == 0 ?
-                new BigDecimal(100) : DataUtil.divide(
+                new BigDecimal(0) : DataUtil.divide(
                 DataUtil.multiply(sprintTask.getRemainingTimeComplete(), new BigDecimal(100)),
                 sprintTask.getRemainingTime(), 2);
         sprintTask.setRemainingTimePlanCompleteRate(remainingTimePlanCompleteRate);
@@ -218,7 +218,7 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
 
         BigDecimal mainStoryPointsPlanCompleteRate = Objects.isNull(sprintStoryPoint.getStoryPoints()) ||
                 sprintStoryPoint.getStoryPoints().compareTo(new BigDecimal(0)) == 0 ?
-                new BigDecimal(100) : DataUtil.divide(
+                new BigDecimal(0) : DataUtil.divide(
                 DataUtil.multiply(sprintStoryPoint.getStoryPointsComplete(), new BigDecimal(100)),
                 sprintStoryPoint.getStoryPoints(), 2);
         sprintStoryPoint.setMainStoryPointsPlanCompleteRate(mainStoryPointsPlanCompleteRate);
