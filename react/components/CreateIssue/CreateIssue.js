@@ -1104,7 +1104,6 @@ class CreateIssue extends Component {
 
     return (
       <Sidebar
-        maskClosable
         className="c7n-createIssue"
         title={title}
         visible={visible && !loading}
@@ -1115,6 +1114,7 @@ class CreateIssue extends Component {
         confirmLoading={createLoading}
         width={MODAL_WIDTH.middle}
         maskClosable={false}
+        keyboard={false}
       >
         <Content>
           <Spin spinning={loading}>
