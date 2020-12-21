@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo } from 'react';
 import {
-  Form, TextField, DataSet, TextArea, DateTimePicker, Icon,
+  Form, TextField, DataSet, TextArea, Icon,
 } from 'choerodon-ui/pro';
+import moment from 'moment';
 import { sprintApi } from '@/api';
 import { Choerodon } from '@choerodon/boot';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import DateTimePicker from '@/components/date-time-picker';
 
 async function sprintNameValidator(value) {
   const isSame = await sprintApi.validate(value);
@@ -61,7 +63,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
     <Form dataSet={dataSet}>
       <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
       <DateTimePicker name="startDate" />
-      <DateTimePicker name="endDate" />
+      <DateTimePicker name="endDate" defaultPickerValue={moment().endOf('d')} />
       <TextArea
         rowSpan={2}
         colSpan={2}
@@ -135,26 +137,25 @@ export function CreateCurrentPiSprint({
       <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
       <DateTimePicker
         name="startDate"
-        filter={(date) => {   
+        filter={(date) => {
           // 没选结束时间的时候，只判断时间点能不能选
           if (!dataSet.current.get('endDate')) {
             return BacklogStore.dateCanChoose({ date });
-          } else {
-            // 选了结束时间之后，判断形成的时间段是否和其他重叠
-            return BacklogStore.rangeCanChoose({ startDate: date, endDate: dataSet.current.get('endDate') });
           }
+          // 选了结束时间之后，判断形成的时间段是否和其他重叠
+          return BacklogStore.rangeCanChoose({ startDate: date, endDate: dataSet.current.get('endDate') });
         }}
       />
       <DateTimePicker
+        defaultPickerValue={moment().endOf('d')}
         name="endDate"
         filter={(date) => {
           // 没选开始时间的时候，只判断时间点能不能选
           if (!dataSet.current.get('startDate')) {
             return BacklogStore.dateCanChoose({ date });
-          } else {
-            // 选了开始时间之后，判断形成的时间段是否和其他重叠
-            return BacklogStore.rangeCanChoose({ startDate: dataSet.current.get('startDate'), endDate: date });
-          }          
+          }
+          // 选了开始时间之后，判断形成的时间段是否和其他重叠
+          return BacklogStore.rangeCanChoose({ startDate: dataSet.current.get('startDate'), endDate: date });
         }}
       />
       <TextArea
