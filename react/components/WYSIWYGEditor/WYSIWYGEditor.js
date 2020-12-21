@@ -37,7 +37,7 @@ class WYSIWYGEditor extends Component {
     this.value = props.value || props.defaultValue;
   }
 
-  saveRef = name => (ref) => {
+  saveRef = (name) => (ref) => {
     this[name] = ref;
     const { saveRef } = this.props;
     if (saveRef) {
@@ -68,7 +68,7 @@ class WYSIWYGEditor extends Component {
   }
 
   handleSave = async () => {
-    this.setState({      
+    this.setState({
       loading: true,
     });
     const { handleSave } = this.props;
@@ -108,7 +108,7 @@ class WYSIWYGEditor extends Component {
       loading, isFullScreen,
     } = this.state;
     return (
-      <Fragment>
+      <>
         <BaseEditor
           {...restProps}
           value={value || this.value}
@@ -119,13 +119,14 @@ class WYSIWYGEditor extends Component {
           onFullScreenClick={this.handleFullScreenClick}
           onCancel={this.handleCancel}
           onSave={this.handleSave}
-          loading={loading}          
+          loading={loading}
         />
         {
           isFullScreen && (
             <Modal
               title="描述"
               maskClosable={false}
+              keyboard={false}
               visible
               width={1200}
               wrapClassName="c7n-agile-editDescription"
@@ -143,12 +144,12 @@ class WYSIWYGEditor extends Component {
                 readOnly={readOnly}
                 bottomBar={false}
                 hideFullScreen
-                style={{ height: '100%', marginTop: 20, width: '100%' }}                
+                style={{ height: '100%', marginTop: 20, width: '100%' }}
               />
             </Modal>
           )
         }
-      </Fragment>
+      </>
     );
   }
 }
