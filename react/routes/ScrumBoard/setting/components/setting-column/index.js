@@ -42,7 +42,7 @@ class SettingColumn extends Component {
     const data = {
       boardId: ScrumBoardStore.getSelectedBoard,
       columnId: JSON.parse(draggableId).columnId,
-      projectId: parseInt(AppState.currentMenuType.id, 10),
+      projectId: AppState.currentMenuType.id,
       sequence: destinationIndex,
       objectVersionNumber: JSON.parse(draggableId).objectVersionNumber,
     };
@@ -57,13 +57,13 @@ class SettingColumn extends Component {
     const { refresh } = this.props;
     const {
       source: {
-        index: sourceIndex, 
-        droppableId: sourceDroppableId, 
-      }, 
+        index: sourceIndex,
+        droppableId: sourceDroppableId,
+      },
       destination: {
-        index: destinationIndex, 
-        droppableId: destinationDroppableId, 
-      }, draggableId, 
+        index: destinationIndex,
+        droppableId: destinationDroppableId,
+      }, draggableId,
     } = result;
     const sourceType = sourceDroppableId.split(',')[0];
     const sourceColumnId = sourceDroppableId.split(',')[1];
@@ -92,7 +92,7 @@ class SettingColumn extends Component {
     }).then((data) => {
       const newData = data;
       newData.issues = movedStatus.issues;
-      destinationStatusList.splice(destinationIndex, 1, newData);     
+      destinationStatusList.splice(destinationIndex, 1, newData);
       ScrumBoardStore.setBoardData(newState);
       refresh();
     }).catch((error) => {
@@ -148,7 +148,7 @@ class SettingColumn extends Component {
               >
                 {
                   ScrumBoardStore.getLookupValue.constraint ? (
-                    ScrumBoardStore.getLookupValue.constraint.map(item => (
+                    ScrumBoardStore.getLookupValue.constraint.map((item) => (
                       <Option key={item.valueCode} value={item.valueCode}>{item.name}</Option>
                     ))
                   ) : ''
@@ -176,7 +176,7 @@ class SettingColumn extends Component {
             >
               {
                 ScrumBoardStore.getLookupValue.constraint ? (
-                  ScrumBoardStore.getLookupValue.constraint.map(item => (
+                  ScrumBoardStore.getLookupValue.constraint.map((item) => (
                     <Option key={item.valueCode} value={item.valueCode}>{item.name}</Option>
                   ))
                 ) : ''
@@ -189,7 +189,7 @@ class SettingColumn extends Component {
             onDragEnd={this.handleDragEnd}
           >
             <Droppable droppableId="columndrop" direction="horizontal" type="columndrop">
-              {provided => (
+              {(provided) => (
                 <div
                   ref={provided.innerRef}
                   style={{
