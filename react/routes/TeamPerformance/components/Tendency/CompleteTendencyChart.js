@@ -45,12 +45,14 @@ const CompeleteTendencyChart = observer(() => {
     return {
       legend: {
         show: true,
+        icon: 'rect',
         orient: 'horizontal',
         x: 'right',
         y: 0,
         padding: [18, 50, 0, 0],
         itemGap: 20,
-        icon: 'line',
+        itemHeight: 2,
+        itemWidth: 24,
       },
       dataset: {
         source: chartData,
