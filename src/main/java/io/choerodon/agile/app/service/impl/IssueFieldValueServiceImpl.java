@@ -8,6 +8,7 @@ import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
 import io.choerodon.agile.app.service.FieldValueService;
 import io.choerodon.agile.app.service.IssueFieldValueService;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
+import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -21,7 +22,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author zhaotianxin
@@ -38,6 +41,9 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
 
     @Autowired
     private MessageClient messageClient;
+
+    @Autowired
+    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
 
     @Async
     @Override
@@ -66,6 +72,8 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
                 throw new CommonException(ERROR_ISSUE_ID);
             }
             List<PageFieldViewUpdateVO> customFields = batchUpdateFieldsValueVo.getCustomFields();
+            // 过滤掉不存在的字段
+            customFields = filterNotExistFields(customFields);
             int customFieldSize = CollectionUtils.isEmpty(customFields) ? 0 :customFields.size();
             JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
             int allCount = (ObjectUtils.isEmpty(predefinedFields) ? 0 : issueIds.size()) + customFieldSize;
@@ -90,6 +98,18 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
         }
         finally {
             messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+        }
+    }
+
+    private List<PageFieldViewUpdateVO> filterNotExistFields(List<PageFieldViewUpdateVO> customFields) {
+        List<Long> fieldIds = customFields.stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList());
+        List<Long> existFields = objectSchemeFieldMapper.filterNotExistFields(fieldIds);
+        if (CollectionUtils.isEmpty(existFields)) {
+            List<PageFieldViewUpdateVO> pageFieldViewUpdateVOS = customFields.stream().filter(customField -> existFields.contains(customField.getFieldId())).collect(Collectors.toList());
+            return CollectionUtils.isEmpty(pageFieldViewUpdateVOS) ? new ArrayList<>() : pageFieldViewUpdateVOS;
+        }
+        else {
+            return new ArrayList<>();
         }
     }
 }

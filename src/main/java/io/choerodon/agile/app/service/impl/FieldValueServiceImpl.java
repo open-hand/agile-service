@@ -137,6 +137,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (!EnumUtil.contain(FieldType.class, updateDTO.getFieldType())) {
             throw new CommonException(ERROR_FIELDTYPE_ILLEGAL);
         }
+        ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldMapper.selectByPrimaryKey(fieldId);
+        if (ObjectUtils.isEmpty(objectSchemeFieldDTO)) {
+            throw new CommonException("error.field.not.exist");
+        }
         //获取原fieldValue
         List<FieldValueDTO> oldFieldValues = fieldValueMapper.queryList(projectId, instanceId, schemeCode, fieldId);
         //删除原fieldValue
