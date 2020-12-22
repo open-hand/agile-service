@@ -264,7 +264,7 @@ public class EncryptionUtils {
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("versionList"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getAdvancedSearchArgs().put("versionList",
-                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
         // statusList
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("statusList"))).orElse(null);
