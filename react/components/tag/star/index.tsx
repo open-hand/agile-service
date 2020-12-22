@@ -33,6 +33,9 @@ const Star: React.FC<Props> = ({
       type="star_border"
       {...omit(otherProps, 'onClick')}
       onClick={disabled ? undefined : otherProps.onClick}
+      style={{
+        cursor: disabled ? 'auto' : 'pointer',
+      }}
     />
   );
   if (disabled) {
