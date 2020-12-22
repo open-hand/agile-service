@@ -137,6 +137,17 @@ class DevOpsApi extends Api {
     });
   }
 
+  removeLinkBranch(applicationId: number, branchName: string, issueId:string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/app_service/${applicationId}/git/branch/issue/remove_association`,
+      params: {
+        branch_name: branchName,
+        issue_id: issueId,
+      },
+    });
+  }
+
   /**
    * 根据issueId获取问题关联的请求合并列表
    * @param issueId 
