@@ -5,7 +5,6 @@ import io.choerodon.agile.api.vo.SprintStoryPointVO;
 import io.choerodon.agile.api.vo.SprintTaskVO;
 import io.choerodon.agile.app.service.TeamPerformanceService;
 import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
