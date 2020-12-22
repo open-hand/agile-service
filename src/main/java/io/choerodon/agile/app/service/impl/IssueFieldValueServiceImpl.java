@@ -102,9 +102,12 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
     }
 
     private List<PageFieldViewUpdateVO> filterNotExistFields(List<PageFieldViewUpdateVO> customFields) {
+        if (CollectionUtils.isEmpty(customFields)) {
+            return new ArrayList<>();
+        }
         List<Long> fieldIds = customFields.stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList());
         List<Long> existFields = objectSchemeFieldMapper.filterNotExistFields(fieldIds);
-        if (CollectionUtils.isEmpty(existFields)) {
+        if (!CollectionUtils.isEmpty(existFields)) {
             List<PageFieldViewUpdateVO> pageFieldViewUpdateVOS = customFields.stream().filter(customField -> existFields.contains(customField.getFieldId())).collect(Collectors.toList());
             return CollectionUtils.isEmpty(pageFieldViewUpdateVOS) ? new ArrayList<>() : pageFieldViewUpdateVOS;
         }
