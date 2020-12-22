@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.domain.Page;
@@ -63,6 +64,8 @@ public class StatusServiceImpl implements StatusService {
     private BaseFeignClient baseFeignClient;
     @Autowired
     private IssueStatusMapper issueStatusMapper;
+    @Autowired
+    private IssueTypeMapper issueTypeMapper;
 
     @Override
     public Page<StatusWithInfoVO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchVO statusSearchVO) {
@@ -356,11 +359,27 @@ public class StatusServiceImpl implements StatusService {
         return result;
     }
 
+    @Override
+    public List<Long> filterIssueType(Long projectId,String applyType){
+        List<Long> filterIssueType = new ArrayList<>();
+        filterIssueType.add(0L);
+        if (!Objects.equals(applyType, SchemeApplyType.PROGRAM)) {
+            List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.queryByOrgId(ConvertUtil.getOrganizationId(projectId));
+            issueTypeDTOS.forEach(v -> {
+                if (Objects.equals(v.getTypeCode(), "feature")) {
+                    filterIssueType.add(v.getId());
+                }
+            });
+        }
+        return filterIssueType;
+    }
+
     private void checkInitStatus(Long projectId, String applyType, Long statusId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
         StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
-        List<StatusMachineNodeDTO> list = nodeDeployMapper.selectInitNode(organizationId, stateMachineSchemeVO.getId(), statusId);
+        List<Long> filterIssueType = filterIssueType(projectId, applyType);
+        List<StatusMachineNodeDTO> list = nodeDeployMapper.selectInitNode(organizationId, stateMachineSchemeVO.getId(), statusId, filterIssueType);
         if (!CollectionUtils.isEmpty(list)) {
             throw new CommonException("error.delete.init.status");
         }
