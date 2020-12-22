@@ -365,7 +365,7 @@ public class EncryptionUtils {
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("version"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("version",
-                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // sprint
@@ -407,7 +407,7 @@ public class EncryptionUtils {
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("epic"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("epic",
-                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // customField
