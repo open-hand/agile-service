@@ -71,14 +71,22 @@ class CommonApi extends Api<CommonApi> {
   async getUserRolesInProject() {
     const userId = AppState.userInfo.id;
     const roles = await axios.get(`/iam/choerodon/v1/projects/${getProjectId()}/role_members/users/${userId}`);
-    return roles.some((role: { code: string; [propName: string] : any }) => role.code === 'project-admin');
+    return roles.some((role: { code: string;[propName: string]: any }) => role.code === 'project-admin');
   }
 
   /**
    * 根据type code查询其下的value值
    */
-  loadLookupValue(typeCode:string) {
+  loadLookupValue(typeCode: string) {
     return axios.get(`/agile/v1/lookup_values/${typeCode}`);
+  }
+
+  /**
+   *根据项目id检查用户是否有权限访问
+   * @param projectId
+   */
+  checkProjectViewPermission(projectId: string | number) {
+    return axios.get(`iam/choerodon/v1/projects/check-permission/${projectId}`);
   }
 }
 
