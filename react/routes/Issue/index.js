@@ -41,10 +41,9 @@ const Issue = observer(() => {
   const visibleColumns = useMemo(() => {
     if (localPageCacheStore.getItem('issues.table')) {
       const { columProps } = localPageCacheStore.getItem('issues.table');
-      if (Array.isArray(columProps) && columProps.length > 0) {
-        return columProps.map((item) => item.name);
+      if (Array.isArray(columProps)) {
+        return columProps.length > 0 ? columProps.map((item) => item.name) : [];
       }
-      return [];
     }
     return undefined;
   }, []);
@@ -62,7 +61,7 @@ const Issue = observer(() => {
   );
   useEffect(() => () => {
     const columProps = tableRef.current
-      ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden) : [];
+      ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden) : null;
     localPageCacheStore.mergeSetItem('issues.table', { pageInfo: { currentPage: dataSet.currentPage }, columProps });
   }, [dataSet]);
 

@@ -24,7 +24,6 @@ const dragDirection = (
   return type;
 };
 
-
 let BodyRow = (props) => {
   const {
     isOver,
@@ -105,7 +104,6 @@ BodyRow = DropTarget('row', rowTarget, (connect, monitor) => ({
   }))(BodyRow),
 );
 
-
 @DragDropContext(HTML5Backend)
 class DragSortingTable extends Component {
   constructor(props) {
@@ -145,6 +143,7 @@ class DragSortingTable extends Component {
       afterSequence, beforeSequence, versionId, objectVersionNumber,
     };
     this.setState(
+      // eslint-disable-next-line react/no-access-state-in-setstate
       update(this.state, {
         data: {
           $splice: [[dragIndex, 1], [hoverIndex, 0, dragRow]],
@@ -158,6 +157,7 @@ class DragSortingTable extends Component {
     return (
       <Table
         rowClassName="table-row"
+        className="c7n-agile-release-drag-table"
         columns={this.props.columns}
         dataSource={this.props.dataSource}
         pagination={this.props.pagination}
@@ -172,7 +172,7 @@ class DragSortingTable extends Component {
             e.target.parentElement.classList.add('hover-row');
           },
         })}
-        rowKey={record => record.versionId}
+        rowKey={(record) => record.versionId}
       />
     );
   }
