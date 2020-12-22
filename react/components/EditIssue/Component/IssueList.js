@@ -93,7 +93,7 @@ class IssueList extends Component {
             </p>
           </div>
         </Tooltip>
-        <Star active={starBeacon} style={{ margin: '0 8px' }} />
+        <Star disabled active={starBeacon} style={{ margin: '0 8px' }} />
         {
           showPriority && (
           <div style={{ marginRight: '8px', overflow: 'hidden' }}>
