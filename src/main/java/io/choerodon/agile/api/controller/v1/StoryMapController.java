@@ -76,7 +76,7 @@ public class StoryMapController {
     @PostMapping(value = "/sprint_info")
     public ResponseEntity<List<SprintSearchVO>> storyMapSprintInfo(@ApiParam(value = "项目id", required = true)
                                              @PathVariable(name = "project_id") Long projectId,
-                                             @RequestBody @Encrypt List<Long> sprintIds) {
+                                             @RequestBody @Encrypt(ignoreValue = {"0"}) List<Long> sprintIds) {
         return new ResponseEntity<>(storyMapService.storyMapSprintInfo(projectId,sprintIds),HttpStatus.OK);
     }
 
