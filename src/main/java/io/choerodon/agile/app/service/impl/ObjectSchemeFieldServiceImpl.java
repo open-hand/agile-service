@@ -502,7 +502,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             field.setDefaultValue(defaultValue);
         }
         field = baseCreate(field, issueTypes, issueTypeForRank);
-        if (!ObjectUtils.isEmpty(issueTypeForRank)) {
+        if (!ObjectUtils.isEmpty(issueTypeForRank)
+                && Arrays.asList(contexts).contains(issueTypeForRank)) {
             Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
             insertObjectSchemeFieldExtend(organizationId, projectId, field.getId(), fieldCreateDTO.getRequired(), issueTypeMap, issueTypeForRank, fieldCreateDTO.getCreated(), fieldCreateDTO.getEdited());
         }
