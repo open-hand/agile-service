@@ -726,8 +726,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
         Map<Long, DeleteStatusTransferVO> map = statusTransferVOS.stream().collect(Collectors.toMap(DeleteStatusTransferVO::getIssueTypeId, Function.identity()));
+        List<Long> filterIssueType = statusService.filterIssueType(projectId, applyType);
         for (StatusMachineSchemeConfigVO schemeConfigVO : statusMachineSchemeConfigVOS) {
-            if (Objects.equals(schemeConfigVO.getIssueTypeId(), 0L)) {
+            if (filterIssueType.contains(schemeConfigVO.getIssueTypeId())) {
                 continue;
             }
             // 查询状态的node
@@ -750,8 +751,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<StatusMachineSchemeConfigVO> stateMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
+        List<Long> filterIssueType = statusService.filterIssueType(projectId, applyType);
         for (StatusMachineSchemeConfigVO schemeConfigVO : stateMachineSchemeConfigVOS) {
-            if (Objects.equals(schemeConfigVO.getIssueTypeId(), 0L)) {
+            if (filterIssueType.contains(schemeConfigVO.getIssueTypeId())) {
                 continue;
             }
             // 查询状态的node

@@ -118,4 +118,6 @@ public interface StatusService {
      * @return
      */
     StatusCheckVO projectCheckName(Long projectId , Long organizationId, String name);
+
+    List<Long> filterIssueType(Long projectId, String applyType);
 }

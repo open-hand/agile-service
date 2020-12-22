@@ -178,7 +178,10 @@
         ,fd_status_machine_node fsmn
          where fsmsc.organization_id = #{organizationId}
          AND fsmsc.scheme_id = #{schemeId}
-         AND fsmsc.issue_type_id != 0
+         AND fsmsc.issue_type_id NOT IN
+         <foreach collection="filterIssueTypes" item="filterIssueType" open="(" close=")" separator=",">
+            #{filterIssueType}
+         </foreach>
          AND fsmsc.state_machine_id = fsmn.state_machine_id
          AND fsmn.status_id = #{statusId}
          AND fsmn.type = 'node_init'
