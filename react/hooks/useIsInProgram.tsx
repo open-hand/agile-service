@@ -34,7 +34,7 @@ const useIsInProgram = (): ChildrenProps => {
   const refresh = useCallback(async () => {
     if (!isProgram) {
       setLoading(true);
-      const projectProgram = shouldRequest && isProject ? await commonApi.getProjectsInProgram() : Promise.resolve(false);
+      const projectProgram = shouldRequest && isProject ? await commonApi.getProjectsInProgram() : false;
       const hasProgram = Boolean(projectProgram);
       let art = false;
       let showFeature = false;
