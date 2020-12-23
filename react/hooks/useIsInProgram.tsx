@@ -38,7 +38,7 @@ const useIsInProgram = (): ChildrenProps => {
       const hasProgram = Boolean(projectProgram);
       let art = false;
       let showFeature = false;
-      if (isProject && hasProgram) {
+      if (shouldRequest && isProject && hasProgram) {
         art = await commonApi.getIsShowFeature();
         showFeature = Boolean(art);
       }
