@@ -1,14 +1,19 @@
 package io.choerodon.agile.api.vo.business;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * @author zhaotianxin
  * @date 2020-11-12 14:25
  */
 public class ProgramVersionFeatureRelVO {
+    @Encrypt
     private Long id;
 
+    @Encrypt
     private Long featureId;
 
+    @Encrypt
     private Long programVersionId;
 
     private String name;
