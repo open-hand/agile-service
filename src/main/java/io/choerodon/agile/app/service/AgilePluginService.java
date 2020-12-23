@@ -368,7 +368,7 @@ public interface AgilePluginService {
     void handlerSpecifyProgramField(IssueDTO issueDTO, Map<String, Object> specifyMap);
 
     /**
-     * 处理项目群字段
+     * 处理状态机自定义流转项目群字段属性
      *
      * @param statusFieldSettingVO
      * @param statusFieldValueSettingDTOS
