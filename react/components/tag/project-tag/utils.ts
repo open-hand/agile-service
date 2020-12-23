@@ -1,5 +1,5 @@
 export function getColorByNumber(id: string | number) {
-  const index = Number(String(BigInt(id) % BigInt(4)));
+  const index = isNaN(id as number) ? 0 : Number(String(BigInt(id) % BigInt(4)));
   const valiable = [
     'linear-gradient(225deg,rgba(152,229,218,1) 0%,rgba(0,191,165,1) 100%)',
     'linear-gradient(226deg,rgba(255,212,163,1) 0%,rgba(255,185,106,1) 100%)',
