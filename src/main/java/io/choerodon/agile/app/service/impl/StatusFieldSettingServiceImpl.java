@@ -514,7 +514,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 default:
                     break;
             }
-            if (PROGRAM_FIELD_CODE.containsValue(statusFieldSettingVO.getFieldCode()) && agilePluginService != null) {
+            if (agilePluginService != null && PROGRAM_FIELD_CODE.containsValue(statusFieldSettingVO.getFieldCode())) {
                 agilePluginService.handlerProgramFieldValue(statusFieldSettingVO, statusFieldValueSettingDTOS);
             }
         } else {
