@@ -6,6 +6,7 @@ import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.utils.IssueNumUtil;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -114,8 +115,6 @@ public class IssueConvertDTO {
 
     private Long mainResponsibleId;
 
-    private Long testResponsibleId;
-
     private String environment;
 
     private Long ruleId;
@@ -134,14 +133,6 @@ public class IssueConvertDTO {
 
     public void setMainResponsibleId(Long mainResponsibleId) {
         this.mainResponsibleId = mainResponsibleId;
-    }
-
-    public Long getTestResponsibleId() {
-        return testResponsibleId;
-    }
-
-    public void setTestResponsibleId(Long testResponsibleId) {
-        this.testResponsibleId = testResponsibleId;
     }
 
     public String getEnvironment() {

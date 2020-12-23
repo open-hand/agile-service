@@ -125,9 +125,6 @@ public class IssueCreateVO {
     @Encrypt
     private Long mainResponsibleId;
 
-    @Encrypt
-    private Long testResponsibleId;
-
     private String environment;
 
     @Encrypt
@@ -147,14 +144,6 @@ public class IssueCreateVO {
 
     public void setMainResponsibleId(Long mainResponsibleId) {
         this.mainResponsibleId = mainResponsibleId;
-    }
-
-    public Long getTestResponsibleId() {
-        return testResponsibleId;
-    }
-
-    public void setTestResponsibleId(Long testResponsibleId) {
-        this.testResponsibleId = testResponsibleId;
     }
 
     public String getEnvironment() {

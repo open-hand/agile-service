@@ -91,7 +91,6 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         FIELD_CODE.put(FieldCode.ESTIMATED_END_TIME, "estimatedEndTime");
         FIELD_CODE.put(FieldCode.ESTIMATED_START_TIME, "estimatedStartTime");
         FIELD_CODE.put(FieldCode.MAIN_RESPONSIBLE, "mainResponsibleId");
-        FIELD_CODE.put(FieldCode.TEST_RESPONSIBLE, "testResponsibleId");
         FIELD_CODE.put(FieldCode.ENVIRONMENT, "environment");
         FIELD_CODE.put(FieldCode.PROGRAM_VERSION, "programVersion");
     }
@@ -289,7 +288,6 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             case FieldCode.ASSIGNEE:
             case FieldCode.REPORTER:
             case FieldCode.MAIN_RESPONSIBLE:
-            case FieldCode.TEST_RESPONSIBLE:
                 field.set(issueUpdateVO, handlerMember(fieldValueSettingDTO, issueDTO));
                 break;
             case FieldCode.CREATION_DATE:

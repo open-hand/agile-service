@@ -4,7 +4,6 @@ import moment from 'moment';
 import { DateTimePicker } from 'choerodon-ui/pro';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { issueApi } from '@/api';
-import { DatetimeAgo } from '../../../../CommonComponent';
 
 class FieldStartTime extends Component {
   updateIssueField = (value) => {
@@ -52,11 +51,7 @@ class FieldStartTime extends Component {
             disabled={disabled}
           >
             {
-              estimatedStartTime ? (
-                <DatetimeAgo
-                  date={estimatedStartTime}
-                />
-              ) : '无'
+              estimatedStartTime || '无'
             }
           </TextEditToggle>
         </div>
