@@ -8,6 +8,7 @@ import {
 } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 import { devOpsApi } from '@/api';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectApp from './SelectApp';
 import './CreateBranch.less';
 import './commom.less';
