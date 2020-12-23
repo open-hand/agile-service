@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.agile.api.vo.SearchVO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -135,6 +136,16 @@ public class ChartSearchVO {
      * 子项目工作量： 单位(必填)
      */
     private String latitude;
+
+    private SearchVO currentSearchVO;
+
+    public SearchVO getCurrentSearchVO() {
+        return currentSearchVO;
+    }
+
+    public void setCurrentSearchVO(SearchVO currentSearchVO) {
+        this.currentSearchVO = currentSearchVO;
+    }
 
     public Boolean getCurrentSprint() {
         return currentSprint;
