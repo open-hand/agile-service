@@ -22,14 +22,13 @@ const BugRankHandleDataSet = () => ({
       label: '环境',
       type: 'string',
       defaultValue: 'other',
-      options: new DataSet({
-        selection: 'single',
-        data: [
-          { meaning: '生产环境', value: 'pro' },
-          { meaning: '非生产环境', value: 'other' },
-        ],
+      textField: 'name',
+      valueField: 'valueCode',
+      lookupAxiosConfig: () => ({
+        url: '/agile/v1/lookup_values/environment',
+        method: 'get',
+        transformResponse: (data) => (Array.isArray(data) ? data : JSON.parse(data).lookupValues),
       }),
-      // lookupCode: 'environment',
     },
   ],
 });
