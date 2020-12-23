@@ -27,7 +27,6 @@ public enum AgileSystemFieldContext {
     ESTIMATED_START_TIME(FieldCode.ESTIMATED_START_TIME,"story,issue_epic,bug,task,sub_task"),
     ESTIMATED_END_TIME(FieldCode.ESTIMATED_END_TIME,"story,issue_epic,bug,task,sub_task"),
     MAIN_RESPONSIBLE(FieldCode.MAIN_RESPONSIBLE,"story,task,bug,sub_task"),
-    TEST_RESPONSIBLE(FieldCode.TEST_RESPONSIBLE,"bug"),
     ENVIRONMENT(FieldCode.ENVIRONMENT,"bug"),
     ;
     private String fieldCode;

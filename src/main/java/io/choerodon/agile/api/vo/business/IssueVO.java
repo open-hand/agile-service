@@ -259,8 +259,6 @@ public class IssueVO {
 
     private UserMessageDTO mainResponsible;
 
-    private UserMessageDTO testResponsible;
-
     private String environment;
 
     public String getErrorMsg() {
@@ -890,14 +888,6 @@ public class IssueVO {
 
     public void setMainResponsible(UserMessageDTO mainResponsible) {
         this.mainResponsible = mainResponsible;
-    }
-
-    public UserMessageDTO getTestResponsible() {
-        return testResponsible;
-    }
-
-    public void setTestResponsible(UserMessageDTO testResponsible) {
-        this.testResponsible = testResponsible;
     }
 
     public String getEnvironment() {

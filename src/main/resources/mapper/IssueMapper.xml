@@ -33,7 +33,6 @@
         <id column="parent_relate_num" property="parentRelateNum"/>
         <id column="parent_relate_description" property="parentRelateDescription"/>
         <id column="main_responsible_id" property="mainResponsibleId"/>
-        <id column="test_responsible_id" property="testResponsibleId"/>
         <id column="environment" property="environment"/>
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
@@ -140,7 +139,6 @@
             ai3.description as parent_issue_description,
             ai4.description as parent_relate_description,
             ai.main_responsible_id,
-            ai.test_responsible_id,
             ai.environment
         FROM agile_issue ai
             LEFT JOIN agile_issue ai2 ON ai2.issue_id = ai.epic_id
@@ -347,7 +345,6 @@
         <result property="objectVersionNumber" column="object_version_number"/>
         <result property="completed" column="completed"/>
         <result property="mainResponsibleId" column="main_responsible_id"/>
-        <result property="testResponsibleId" column="test_responsible_id"/>
         <result property="environment" column="environment"/>
         <collection property="versionIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
@@ -432,7 +429,6 @@
         ai.object_version_number,
         ais.is_completed as completed,
         ai.main_responsible_id,
-        ai.test_responsible_id,
         ai.environment
         FROM agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
@@ -963,13 +959,6 @@
             and ai.main_responsible_id in
             <foreach collection="searchVO.otherArgs.mainResponsibleIds" item="mainResponsibleId" open="(" close=")" separator=",">
                   #{mainResponsibleId}
-            </foreach>
-        </if>
-
-        <if test="searchVO.otherArgs.testResponsibleIds != null and searchVO.otherArgs.testResponsibleIds.size > 0">
-            and ai.test_responsible_id in
-            <foreach collection="searchVO.otherArgs.testResponsibleIds" item="testResponsibleId" open="(" close=")" separator=",">
-                #{testResponsibleId}
             </foreach>
         </if>
 

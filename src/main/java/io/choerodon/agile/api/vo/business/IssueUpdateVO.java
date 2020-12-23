@@ -131,9 +131,6 @@ public class IssueUpdateVO {
     @Encrypt
     private Long mainResponsibleId;
 
-    @Encrypt
-    private Long testResponsibleId;
-
     private String environment;
 
     public Boolean getAutoTranferFlag() {
@@ -414,14 +411,6 @@ public class IssueUpdateVO {
 
     public void setMainResponsibleId(Long mainResponsibleId) {
         this.mainResponsibleId = mainResponsibleId;
-    }
-
-    public Long getTestResponsibleId() {
-        return testResponsibleId;
-    }
-
-    public void setTestResponsibleId(Long testResponsibleId) {
-        this.testResponsibleId = testResponsibleId;
     }
 
     public String getEnvironment() {

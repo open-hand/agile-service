@@ -10,7 +10,7 @@
         <if test="searchVO != null">
             <if test="searchVO.otherArgs != null">
                 <if test="searchVO.otherArgs.epic != null and searchVO.otherArgs.epic.size > 0">
-                    and ai.epic_id in
+                    and ai.issue_id in
                     <foreach collection="searchVO.otherArgs.epic" item="id" open="(" separator=","
                              close=")">
                         #{id}
