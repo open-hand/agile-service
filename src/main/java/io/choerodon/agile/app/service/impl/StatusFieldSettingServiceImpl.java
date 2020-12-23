@@ -513,6 +513,9 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 default:
                     break;
             }
+            if (agilePluginService != null) {
+                agilePluginService.handlerProgramFieldValue(statusFieldSettingVO, statusFieldValueSettingDTOS);
+            }
         } else {
             List<FieldOptionDTO> fieldOptionDTOS = fieldOptionMapper.selectByIds(StringUtils.join(ids, ","));
             if (CollectionUtils.isEmpty(fieldOptionDTOS)) {
