@@ -403,8 +403,6 @@ public class ExcelServiceImpl implements ExcelService {
 
         Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.MAIN_RESPONSIBLE))
                 .ifPresent(x -> result.add(x));
-        Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.TEST_RESPONSIBLE))
-                .ifPresent(x -> result.add(x));
         Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, Arrays.asList("非生产环境", "生产环境"), FieldCode.ENVIRONMENT))
                 .ifPresent(x -> result.add(x));
         return result;
@@ -1434,9 +1432,6 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.MAIN_RESPONSIBLE:
                 validateAndSetMainResponsible(row, col, issueCreateVO, errorRowColMap, excelColumn);
                 break;
-            case FieldCode.TEST_RESPONSIBLE:
-                validateAndSetTestResponsible(row, col, issueCreateVO, errorRowColMap, excelColumn, issueType);
-                break;
             case FieldCode.ENVIRONMENT:
                 validateAndSetEnvironment(row, col, issueCreateVO, errorRowColMap, excelColumn, issueType);
                 break;
@@ -1461,27 +1456,6 @@ public class ExcelServiceImpl implements ExcelService {
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
                 issueCreateVO.setEnvironment(value);
-            }
-        }
-    }
-
-    private void validateAndSetTestResponsible(Row row,
-                                               Integer col,
-                                               IssueCreateVO issueCreateVO,
-                                               Map<Integer, List<Integer>> errorRowColMap,
-                                               ExcelColumnVO excelColumnVO,
-                                               String issueType) {
-        Cell cell = row.getCell(col);
-        int rowNum = row.getRowNum();
-        if (!isCellEmpty(cell) && BUG_CN.equals(issueType)) {
-            String value = cell.toString();
-            List<String> values = excelColumnVO.getPredefinedValues();
-            Map<String, Long> map = excelColumnVO.getValueIdMap();
-            if (!values.contains(value)) {
-                cell.setCellValue(buildWithErrorMsg(value, "请输入正确的测试负责人"));
-                addErrorColumn(rowNum, col, errorRowColMap);
-            } else {
-                issueCreateVO.setTestResponsibleId(map.get(value));
             }
         }
     }
@@ -2200,7 +2174,6 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.ASSIGNEE:
             case FieldCode.REPORTER:
             case FieldCode.MAIN_RESPONSIBLE:
-            case FieldCode.TEST_RESPONSIBLE:
                 processUser(projectId, excelColumnVO);
                 break;
             case FieldCode.EPIC:

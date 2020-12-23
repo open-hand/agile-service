@@ -35,7 +35,6 @@ public class SystemFieldPageConfig {
         SUB_PROJECT(FieldCode.SUB_PROJECT, true, true),
         PROGRAM_VERSION(FieldCode.PROGRAM_VERSION, true, true),
         MAIN_RESPONSIBLE(FieldCode.MAIN_RESPONSIBLE, true, true),
-        TEST_RESPONSIBLE(FieldCode.TEST_RESPONSIBLE, true, true),
         environment(FieldCode.ENVIRONMENT, true, true),
         ;
 

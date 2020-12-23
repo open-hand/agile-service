@@ -135,8 +135,6 @@ public class IssueDetailDTO {
 
     private Long mainResponsibleId;
 
-    private Long testResponsibleId;
-
     private String environment;
 
     public String getParentRelateDescription() {
@@ -614,14 +612,6 @@ public class IssueDetailDTO {
 
     public void setMainResponsibleId(Long mainResponsibleId) {
         this.mainResponsibleId = mainResponsibleId;
-    }
-
-    public Long getTestResponsibleId() {
-        return testResponsibleId;
-    }
-
-    public void setTestResponsibleId(Long testResponsibleId) {
-        this.testResponsibleId = testResponsibleId;
     }
 
     public String getEnvironment() {
