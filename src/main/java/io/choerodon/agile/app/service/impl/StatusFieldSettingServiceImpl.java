@@ -41,6 +41,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     private static final String[] FILTER_FIELD_TYPE = {"checkbox", "multiple", "member", "radio", "single"};
     protected static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
+    protected static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
     private static final String CLEAR = "clear";
     @Autowired
     private StatusFieldSettingMapper statusFieldSettingMapper;
@@ -92,7 +93,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         FIELD_CODE.put(FieldCode.ESTIMATED_START_TIME, "estimatedStartTime");
         FIELD_CODE.put(FieldCode.MAIN_RESPONSIBLE, "mainResponsibleId");
         FIELD_CODE.put(FieldCode.ENVIRONMENT, "environment");
-        FIELD_CODE.put(FieldCode.PROGRAM_VERSION, "programVersion");
+        PROGRAM_FIELD_CODE.put(FieldCode.PROGRAM_VERSION, "programVersion");
     }
     @Override
     public List<StatusFieldSettingVO> createOrUpdate(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType, List<StatusFieldSettingVO> list) {
@@ -512,6 +513,9 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                     break;
                 default:
                     break;
+            }
+            if (agilePluginService != null && PROGRAM_FIELD_CODE.containsValue(statusFieldSettingVO.getFieldCode())) {
+                agilePluginService.handlerProgramFieldValue(statusFieldSettingVO, statusFieldValueSettingDTOS);
             }
         } else {
             List<FieldOptionDTO> fieldOptionDTOS = fieldOptionMapper.selectByIds(StringUtils.join(ids, ","));
