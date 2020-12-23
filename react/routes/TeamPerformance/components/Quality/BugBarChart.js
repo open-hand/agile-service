@@ -96,10 +96,6 @@ const BugBarChart = observer(() => {
     },
     yAxis: {
       name: '问题计数',
-      // nameTextStyle: {
-      //   color: '#000',
-      //   padding: [0, 0, 0, 0],
-      // },
       minInterval: 1,
       nameGap: 23,
       axisTick: { show: false },
@@ -136,10 +132,10 @@ const BugBarChart = observer(() => {
     dataZoom: [{
       show,
       type: 'slider',
-      bottom: 6,
+      bottom: 0,
       left: 'center',
       height: 15,
-      width: '82%',
+      width: '77%',
       startValue: 0,
       endValue: 9,
       zoomLock: true,
@@ -157,7 +153,7 @@ const BugBarChart = observer(() => {
   });
 
   return (
-    <Spin dataSet={bugDistributionDataSet}>
+    <div className="quality-rank-container">
       <div className="bar-chart-container">
         <div className="chart-handle">
           <span className="chart-title">缺陷分布</span>
@@ -165,9 +161,9 @@ const BugBarChart = observer(() => {
             dataSet={bugChartHandleDataSet}
             field="type"
             onChange={() => queryBarData()}
-            style={{ marginLeft: '40px' }}
+            style={{ flexShrink: 0, height: '37px', marginLeft: 'auto' }}
           />
-          <Form dataSet={bugChartHandleDataSet} style={{ width: '130px', marginLeft: '15px', marginTop: '5px' }}>
+          <Form dataSet={bugChartHandleDataSet} style={{ width: '130px', marginLeft: '15px' }}>
             <Select
               name="environment"
               clearButton={false}
@@ -175,32 +171,35 @@ const BugBarChart = observer(() => {
             />
           </Form>
         </div>
-        {
-          (barData && barData.length > 0) && (
-            <div className="line-chart-main">
-              <ReactEchartsCore
-                echarts={echarts}
-                option={getOpts()}
-                notMerge
-                lazyUpdate
-                style={{
-                  height: 330,
-                }}
+        <Spin dataSet={bugDistributionDataSet} style={{ height: '510px' }}>
+          {
+            (barData && barData.length > 0) && (
+              <div className="line-chart-main">
+                <ReactEchartsCore
+                  echarts={echarts}
+                  option={getOpts()}
+                  notMerge
+                  lazyUpdate
+                  style={{
+                    height: 520,
+                  }}
+                />
+              </div>
+            )
+          }
+          {
+            (Array.isArray(barData) && barData.length === 0) && (
+              <EmptyBlock
+                pic={emptyChartPic}
+                // height={330}
+                height={510}
+                des="当前暂无数据"
               />
-            </div>
-          )
-        }
-        {
-          (Array.isArray(barData) && barData.length === 0) && (
-            <EmptyBlock
-              pic={emptyChartPic}
-              height={330}
-              des="当前暂无数据"
-            />
-          )
-        }
+            )
+          }
+        </Spin>
       </div>
-    </Spin>
+    </div>
   );
 });
 
