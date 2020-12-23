@@ -7,21 +7,22 @@ import { observer } from 'mobx-react-lite';
 import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import { usePageIssueTypeStore } from '../../stores';
 import Switch from './Switch';
-
+// @ts-ignore
+const HAS_AGILE_PRO = C7NHasModule('@choerodon/agile-pro');
 interface IssueOption {
   value: string,
   text: string,
   type: 'organization' | 'common',
 }
 const issueTypeOptions: Array<IssueOption> = [
-  { value: 'feature', text: '特性', type: 'organization' },
+  HAS_AGILE_PRO && { value: 'feature', text: '特性', type: 'organization' },
   { value: 'story', text: '故事', type: 'common' },
   { value: 'task', text: '任务', type: 'common' },
   { value: 'sub_task', text: '子任务', type: 'common' },
   { value: 'bug', text: '缺陷', type: 'common' },
   { value: 'backlog', text: '需求', type: 'common' },
   { value: 'issue_epic', text: '史诗', type: 'common' },
-];
+].filter(Boolean);
 function PageSwitch() {
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
   const { isProgram } = useIsProgramContext();
