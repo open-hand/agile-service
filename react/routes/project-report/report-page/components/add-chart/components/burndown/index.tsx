@@ -26,6 +26,7 @@ export const transformBurnDownSearch = (searchVO: BurnDownSearchVO | undefined):
     },
     projectId: searchVO.projectId,
     useCurrentSprint: searchVO.currentSprint,
+    searchVO: searchVO.currentSearchVO,
   };
 };
 export interface Props {
@@ -50,6 +51,7 @@ const BurnDownComponent: React.FC<Props> = ({ innerRef, projectId, data }) => {
     onlyStory: searchProps.quickFilter.onlyStory,
     assigneeId: searchProps.quickFilter.onlyMe ? AppState.userInfo.id : undefined,
     personalFilterIds: searchProps.quickFilter.personalFilters,
+    currentSearchVO: searchProps.searchVO,
   }),
   [searchProps]);
   useImperativeHandle(innerRef, () => ({

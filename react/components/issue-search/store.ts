@@ -3,9 +3,10 @@ import {
 } from 'mobx';
 import { find, isEmpty } from 'lodash';
 import { fieldApi, personalFilterApi } from '@/api';
-import { IField } from '@/common/types';
+import { IField, ISearchVO } from '@/common/types';
+import { getProjectId } from '@/utils/common';
 import { IPersonalFilter } from '../quick-search';
-import { flattenObject, isFilterSame } from './utils';
+import { flattenObject, isFilterSame, SearchVOToFilter } from './utils';
 
 export type ILocalField = {
   code: string,
@@ -25,6 +26,8 @@ export interface IssueSearchStoreProps {
   getSystemFields: () => ILocalField[]
   transformFilter: (chosenFields: IChosenFields) => any
   defaultChosenFields?: IChosenFields,
+  defaultSearchVO?: ISearchVO
+  projectId?: string
 }
 class IssueSearchStore {
   query: () => void = () => { }
@@ -35,14 +38,22 @@ class IssueSearchStore {
 
   defaultChosenFields?: IChosenFields;
 
+  defaultSearchVO?: ISearchVO
+
+  projectId?: string
+
   constructor({
     getSystemFields,
     transformFilter,
     defaultChosenFields,
+    defaultSearchVO,
+    projectId,
   }: IssueSearchStoreProps) {
     this.getSystemFields = getSystemFields;
     this.transformFilter = transformFilter;
     this.defaultChosenFields = defaultChosenFields;
+    this.defaultSearchVO = defaultSearchVO;
+    this.projectId = projectId;
   }
 
   setQuery(query: () => void) {
@@ -61,7 +72,7 @@ class IssueSearchStore {
   }
 
   loadMyFilterList = async () => {
-    const data = await personalFilterApi.loadAll();
+    const data = await personalFilterApi.project(this.projectId || getProjectId()).loadAll();
     this.setMyFilters(data);
   };
 
@@ -69,8 +80,27 @@ class IssueSearchStore {
   @observable fields: IField[] = []
 
   async loadCustomFields() {
-    const fields = await fieldApi.getCustomFields();
+    const fields = await fieldApi.project(this.projectId || getProjectId()).getCustomFields();
     this.setFields(fields);
+    // 自定义字段加载完，设置默认searchVO的内容
+    if (this.defaultSearchVO) {
+      this.transformChosenFields();
+    }
+  }
+
+  @action
+  transformChosenFields() {
+    const filter = SearchVOToFilter(this.defaultSearchVO || {});
+    Object.keys(filter).filter((key) => filter[key] !== undefined).forEach((key) => {
+      const systemFields = this.getSystemFields();
+      const isSystemField = find(systemFields, { code: key });
+      const field = isSystemField || find(this.fields, { id: key });
+
+      if (!field) {
+        return;
+      }
+      this.chosenFields.set(isSystemField ? key : field.code, { ...field, value: filter[key] });
+    });
   }
 
   @action setFields(fields: IField[]) {

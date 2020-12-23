@@ -9,6 +9,7 @@ import { reportApi, sprintApi } from '@/api';
 import { IQuickSearchValue } from '@/components/quick-search';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 import { getProjectId } from '@/utils/common';
+import { ISearchVO } from '@/common/types';
 
 const { AppState } = stores;
 
@@ -19,6 +20,7 @@ export interface BurnDownConfig {
   quickFilter?: IQuickSearchValue
   projectId?: string
   useCurrentSprint?: boolean
+  searchVO?: ISearchVO
 }
 
 function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnDownSearchProps, BurnDownProps] {
@@ -48,6 +50,9 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
       : false,
   );
   const [currentSprintId, setCurrentSprintId] = useState<string | undefined>(undefined);
+  const [searchVO, setSearchVO] = useControlledDefaultValue<ISearchVO | undefined>(
+    config?.searchVO || undefined,
+  );
   const handleEmpty = useCallback(() => {
     onFinish && setTimeout(onFinish);
   }, [onFinish]);
@@ -59,7 +64,7 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
         onlyStory: quickFilter.onlyStory,
         quickFilterIds: quickFilter.quickFilters,
         personalFilterIds: quickFilter.personalFilters,
-      }), sprintApi.project(projectId).getRestDays(sprintId)]);
+      }, searchVO), sprintApi.project(projectId).getRestDays(sprintId)]);
       batchedUpdates(() => {
         setData(burnDownData);
         setRestDays(resetDaysData.map((date) => moment(date).format('YYYY-MM-DD')));
@@ -69,18 +74,7 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
     } else {
       setData(null);
     }
-  }, [
-    currentSprintId,
-    onFinish,
-    projectId,
-    quickFilter.onlyMe,
-    quickFilter.onlyStory,
-    quickFilter.personalFilters,
-    quickFilter.quickFilters,
-    sprintId,
-    type,
-    useCurrentSprint,
-  ]);
+  }, [currentSprintId, onFinish, projectId, quickFilter.onlyMe, quickFilter.onlyStory, quickFilter.personalFilters, quickFilter.quickFilters, searchVO, sprintId, type, useCurrentSprint]);
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -101,6 +95,8 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
     setQuickFilter,
     restDayShow,
     setRestDayShow,
+    searchVO,
+    setSearchVO,
   };
   const props: BurnDownProps = {
     loading,

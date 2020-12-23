@@ -1,7 +1,9 @@
 import {
   observable, action,
 } from 'mobx';
-import { IReportContentType, User, IIssueColumnName } from '@/common/types';
+import {
+  IReportContentType, User, IIssueColumnName, ISearchVO,
+} from '@/common/types';
 import { IBurndownChartType } from '@/components/charts/burn-down';
 import { IPieChartType } from '@/components/charts/pie-chart';
 import { IUnit } from '@/components/charts/version-report/search';
@@ -31,6 +33,7 @@ export type BurnDownSearchVO = {
   assigneeId?: string
   quickFilterIds: string[]
   personalFilterIds: string[]
+  currentSearchVO?: ISearchVO
 }
 export type SprintSearchVO = {
   projectId: string
