@@ -22,7 +22,7 @@ const issueTypeOptions: Array<IssueOption> = [
   { value: 'bug', text: '缺陷', type: 'common' },
   { value: 'backlog', text: '需求', type: 'common' },
   { value: 'issue_epic', text: '史诗', type: 'common' },
-].filter(Boolean);
+].filter(Boolean) as Array<IssueOption>;
 function PageSwitch() {
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
   const { isProgram } = useIsProgramContext();
