@@ -25,6 +25,13 @@ const TextBlock: React.FC<Props> = ({ data: { content, key } }) => {
             onFinish();
           }
         };
+        // eslint-disable-next-line no-param-reassign
+        img.onerror = () => {
+          count += 1;
+          if (count === imgList.length) {
+            onFinish();
+          }
+        };
       });
     } else {
       onFinish();
