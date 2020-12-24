@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.report;
 
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import org.hzero.core.base.BaseConstants;
 import org.springframework.util.Assert;
 
@@ -82,6 +83,7 @@ public class ChartUnitVO extends ReportUnitVO {
         ChartSearchVO chartSearchVO = getChartSearchVO();
         Assert.notNull(chartSearchVO, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(chartSearchVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
+        EncryptionUtils.decryptSearchVO(chartSearchVO.getCurrentSearchVO());
 
         switch (this.chartCode){
             case BURN_DOWN_REPORT:
