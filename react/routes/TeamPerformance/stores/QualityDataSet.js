@@ -8,12 +8,12 @@ const BugRankHandleDataSet = () => ({
     {
       name: 'type',
       type: 'string',
-      defaultValue: 'test',
+      defaultValue: 'dev',
       options: new DataSet({
         selection: 'single',
         data: [
-          { meaning: '责任人', value: 'test' },
-          { meaning: '创建人', value: 'dev' },
+          { meaning: '责任人', value: 'dev' },
+          { meaning: '创建人', value: 'test' },
         ],
       }),
     },
