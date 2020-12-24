@@ -76,10 +76,12 @@ const GanttBar: React.FC<GanttBarProps> = ({
               持续时间：
               {format(diff)}
             </div>
-            <div>
-              逾期：
-              {format(delayDiff)}
-            </div>
+            {delayDiff > 0 && (
+              <div>
+                逾期：
+                {format(delayDiff)}
+              </div>
+            )}
             {type !== 'assignee' && hasChildren && (
               <div>
                 当前进度：
@@ -111,18 +113,18 @@ const GanttBar: React.FC<GanttBarProps> = ({
           <div style={{ flex: totalCount > 0 ? totalCount - completeCount : 0 }} />
         </div>
         {delayVisible && (
-        <div
-          role="none"
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick && onClick(bar.record);
-          }}
-          className={styles.delay}
-          style={{ width: delayWidth, marginLeft: width }}
-        />
+          <div
+            role="none"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick && onClick(bar.record);
+            }}
+            className={styles.delay}
+            style={{ width: delayWidth, marginLeft: width }}
+          />
         )}
       </Tooltip>
     </>
