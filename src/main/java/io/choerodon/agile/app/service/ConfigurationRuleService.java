@@ -71,5 +71,15 @@ public interface ConfigurationRuleService {
     List<MessageSender> generateAutoRuleTriggerSender(Long userId, String summary, Collection<ConfigurationRuleVO> values, Supplier<Boolean> operator);
 
     List<Long> selectReceiverByRuleIds(List<Long> ruleIdList, List<String> types);
+
+    /**
+     * 将rules的userTypes转化为receiverList
+     *
+     * @param rules
+     * @param projectId
+     * @param reporterId
+     * @param assigneeId
+     */
+    void convertUserTypeToReceiver(List<ConfigurationRuleVO> rules, Long projectId, Long reporterId, Long assigneeId);
 }
 

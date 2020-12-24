@@ -18,7 +18,7 @@ import UserHead from '@/components/UserHead';
     const obj = {
       issueId,
       objectVersionNumber,
-      [`${field.fieldCode}Id`]: value,
+      [`${field.fieldCode}Id`]: value || 0,
     };
     issueApi.update(obj)
       .then(() => {
@@ -34,7 +34,7 @@ import UserHead from '@/components/UserHead';
   renderEditor = () => {
     const { field } = this.props;
     const { value, fieldType, required } = field;
-    return <SelectUser required={required} />;
+    return <SelectUser required={required} clearButton />;
   }
 
   render() {
@@ -60,7 +60,7 @@ import UserHead from '@/components/UserHead';
             submitTrigger={['blur', 'change']}
           >
             <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
-              { value
+              {value
                 ? (
                   <UserHead
                     user={value}

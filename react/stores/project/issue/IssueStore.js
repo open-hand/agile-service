@@ -156,11 +156,6 @@ export function getSystemFields(excludeCodes = []) {
     fieldType: 'datetime',
   },
   {
-    code: 'testResponsibleIds',
-    name: '测试负责人',
-    defaultShow: false,
-    fieldType: 'member',
-  }, {
     code: 'mainResponsibleIds',
     name: '主要负责人',
     defaultShow: false,

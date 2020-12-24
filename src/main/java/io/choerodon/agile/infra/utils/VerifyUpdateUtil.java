@@ -105,7 +105,7 @@ public class VerifyUpdateUtil {
         } else {
             String[] ignoreValue = fieldAnnotation.ignoreValue();
             if(ArrayUtils.isEmpty(ignoreValue)){
-                field.set(objectUpdate,EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value()));
+                field.set(objectUpdate, v == null ? null : EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value()));
             }
             else {
                 if(Arrays.asList(ignoreValue).contains(v)){

@@ -1,9 +1,45 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
 
+## [0.24.0] - 2020-12-24
+
 ### Added
 
+- Workbench - my issues increase my star.
+- Support star issues.
+- Add Gantt chart function for project manager to schedule tasks.
+- Backlog issues support batch deletion.
+- Issues support association or new test cases.
+- Sprint Lane added to story map.
+- Add performance features.
+- Add project report.
+- Add trigger, can set automatic change operator when automatic change, send message notification.
+- Kanban support problem delay reminder.
+  
+
+### Changed
+
+- Agile state machine supports user-defined state flow, state change notification, flow condition restriction, parent-child problem state linkage, and automatic attribute change after state flow.
+- Optimize page field configuration.
+- Optimize story map style.
+- Partial views style optimization. 
+- Partial report optimization.
+
+
+### Fixed
+
+- Fix branch management filtering error.
+- The repair backlog is invalid according to the operator.
+- Fix batch modification repair version error.
+- FIX configuration Kanban mobile reporting error.
+- Repair work list - all problems save filter error.  
+
+
+
+
 ## [0.23.0] - 2020-09-30
+
+### Added
 
 - Add Project Overview so that project members can quickly see the progress of the iteration.
 

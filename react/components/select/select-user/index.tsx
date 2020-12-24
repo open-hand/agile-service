@@ -214,7 +214,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       }
       return newData;
     },
-  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish, JSON.stringify(selectedUserIds)]);
+  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish, JSON.stringify(selectedUserIds), extraOptions]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (
