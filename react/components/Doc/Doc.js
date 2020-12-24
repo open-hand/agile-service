@@ -145,7 +145,7 @@ class Doc extends Component {
     };
     return (
       <Sidebar
-        maskClosable
+        maskClosable={false}
         className="c7n-agile-doc"
         title="关联知识"
         visible={visible || false}
