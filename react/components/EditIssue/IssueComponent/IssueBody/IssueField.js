@@ -89,7 +89,6 @@ const IssueField = observer((props) => {
         );
       case 'programVersion':
         return <FieldProgramVersion {...props} field={field} />;
-      case 'testResponsible':
       case 'mainResponsible':
         return <FieldMember {...props} field={field} />;
       case 'environment':
