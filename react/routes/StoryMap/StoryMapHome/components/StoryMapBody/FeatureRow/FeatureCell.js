@@ -26,10 +26,10 @@ class FeatureCell extends Component {
     try {
       switch (swimLine) {
         case 'none': {
-          return targetFeature.storys;
+          return targetFeature.storys || [];
         }
         case 'version': {
-          return targetFeature.version[version.versionId];
+          return targetFeature.version[version.versionId] || [];
         }
         default: return [];
       }
