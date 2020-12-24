@@ -3,8 +3,9 @@ import React, { Component } from 'react';
 import { stores } from '@choerodon/boot';
 import moment from 'moment';
 import {
-  Select, DatePicker, Modal, Radio, Button,
+  Select, DatePicker, Modal, Radio,
 } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 import { beforeTextUpload } from '@/utils/richText';
 import { workLogApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
@@ -40,6 +41,7 @@ class DailyLog extends Component {
       createLoading: false,
       dissipateNull: false,
       startTimeNull: false,
+      loading: false,
     };
   }
 
@@ -99,9 +101,19 @@ class DailyLog extends Component {
 
   handleSave = (data) => {
     const { onOk } = this.props;
+    this.setState({
+      loading: true,
+    });
     workLogApi.create(data)
       .then((res) => {
+        this.setState({
+          loading: false,
+        });
         onOk();
+      }).catch(() => {
+        this.setState({
+          loading: false,
+        });
       });
   };
 
@@ -242,7 +254,7 @@ class DailyLog extends Component {
     const {
       createLoading, dissipate, dissipateUnit,
       startTime, radio, time, timeUnit, reduce,
-      reduceUnit, delta, edit, startTimeNull, dissipateNull,
+      reduceUnit, delta, edit, startTimeNull, dissipateNull, loading,
     } = this.state;
     const radioStyle = {
       display: 'block',
@@ -262,7 +274,7 @@ class DailyLog extends Component {
         cancelText="取消"
         confirmLoading={createLoading}
         footer={[
-          <Button key="submit" type="primary" funcType="raised" onClick={this.handleCreateDailyLog}>
+          <Button key="submit" className="c7n-dailyLog-btn" color="primary" funcType="raised" loading={loading} disabled={loading} onClick={this.handleCreateDailyLog}>
             确定
           </Button>,
           <Button key="back" onClick={onCancel} funcType="raised">取消</Button>,

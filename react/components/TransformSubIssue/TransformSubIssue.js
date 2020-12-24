@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { stores } from '@choerodon/boot';
 import _ from 'lodash';
-import { Modal, Form, Select } from 'choerodon-ui';
+import {
+  Modal, Form, Select, Tooltip,
+} from 'choerodon-ui';
 import { issueApi, statusApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import TypeTag from '../TypeTag';
@@ -144,7 +146,7 @@ class TransformSubIssue extends Component {
 
     return (
       <Sidebar
-        maskClosable
+        maskClosable={false}
         className="c7n-transformSubIssue"
         title="转化为子问题"
         visible={visible || false}
@@ -174,36 +176,39 @@ class TransformSubIssue extends Component {
                     key={issue.issueId}
                     value={issue.issueId}
                   >
-                    <div style={{ display: 'inline-flex', width: 'calc(100% - 30px)', flex: 1 }}>
-                      <div>
-                        <TypeTag
-                          data={issue.issueTypeVO}
-                        />
-                      </div>
-                      <a style={{
-                        paddingLeft: 12,
-                        paddingRight: 12,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                      >
-                        {issue.issueNum}
-                      </a>
-                      <div style={{ overflow: 'hidden', flex: 1 }}>
-                        <p style={{
-                          paddingRight: '25px',
+                    <Tooltip title={issue.summary}>
+                      <div style={{ display: 'inline-flex', width: 'calc(100% - 30px)', flex: 1 }}>
+                        <div>
+                          <TypeTag
+                            data={issue.issueTypeVO}
+                          />
+                        </div>
+                        <a style={{
+                          paddingLeft: 12,
+                          paddingRight: 12,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
-                          marginBottom: 0,
-                          maxWidth: 'unset',
                         }}
                         >
-                          {issue.summary}
-                        </p>
+                          {issue.issueNum}
+                        </a>
+                        <div style={{ overflow: 'hidden', flex: 1 }}>
+                          <p style={{
+                            paddingRight: '25px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            marginBottom: 0,
+                            maxWidth: 'unset',
+                          }}
+                          >
+                            {issue.summary}
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    </Tooltip>
+
                   </Option>
                 ))}
               </Select>,
