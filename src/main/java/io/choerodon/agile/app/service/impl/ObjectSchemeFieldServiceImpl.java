@@ -75,8 +75,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (objectSchemeFieldMapper.insert(field) != 1) {
             throw new CommonException(ERROR_FIELD_CREATE);
         }
+        String defaultValue = field.getDefaultValue();
         //  创建object_scheme_field_extend
-        insertExtendList(organizationId, projectId, field, issueTypes, issueTypeForRank);
+        insertExtendList(organizationId, projectId, field, issueTypes, issueTypeForRank, defaultValue);
         return objectSchemeFieldMapper.selectByPrimaryKey(field.getId());
     }
 
@@ -84,7 +85,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                   Long projectId,
                                   ObjectSchemeFieldDTO field,
                                   List<IssueTypeVO> issueTypes,
-                                  String issueTypeForRank) {
+                                  String issueTypeForRank,
+                                  String defaultValue) {
         Long fieldId = field.getId();
         String rank = field.getRank();
         for (IssueTypeVO issueType : issueTypes) {
@@ -100,6 +102,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 dto.setCreated(true);
                 dto.setEdited(true);
                 dto.setIssueTypeId(typeId);
+                dto.setDefaultValue(defaultValue);
                 if (Objects.equals(type, issueTypeForRank)
                         && !StringUtils.isEmpty(rank)) {
                     dto.setRank(rank);
@@ -511,11 +514,21 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (fieldCreateDTO.getFieldOptions() != null) {
             String defaultIds = fieldOptionService.handleFieldOption(organizationId, field.getId(), fieldCreateDTO.getFieldOptions());
             if (defaultIds != null && !"".equals(defaultIds)) {
-                field.setDefaultValue(defaultIds);
-                objectSchemeFieldMapper.updateOptional(field, "defaultValue");
+                updateDefaultValue(field, defaultIds);
             }
         }
         return queryById(organizationId, projectId, field.getId());
+    }
+
+    private void updateDefaultValue(ObjectSchemeFieldDTO field, String defaultValue) {
+        Long fieldId = field.getId();
+        ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
+        dto.setFieldId(fieldId);
+        List<ObjectSchemeFieldExtendDTO> result = objectSchemeFieldExtendMapper.select(dto);
+        result.forEach(r -> {
+            r.setDefaultValue(defaultValue);
+            objectSchemeFieldExtendMapper.updateOptional(r, "defaultValue");
+        });
     }
 
     @Override
@@ -651,8 +664,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         String[] contexts = updateDTO.getContext();
         String context = Arrays.asList(contexts).stream().filter(string -> !string.isEmpty()).collect(Collectors.joining(","));
         update.setContext(context);
-        updateFieldIssueType(organizationId, projectId, fieldId, contexts);
         String defaultValue = tryDecryptDefaultValue(update.getDefaultValue());
+        updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, contexts, defaultValue);
         if (defaultValue != null) {
             update.setDefaultValue(defaultValue);
         }
@@ -661,10 +674,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return queryById(organizationId, projectId, fieldId);
     }
 
-    private void updateFieldIssueType(Long organizationId,
-                                      Long projectId,
-                                      Long fieldId,
-                                      String[] contexts) {
+    private void updateFieldIssueTypeAndDefaultValue(Long organizationId,
+                                                     Long projectId,
+                                                     Long fieldId,
+                                                     String[] contexts,
+                                                     String defaultValue) {
         if (ObjectUtils.isEmpty(contexts)) {
             throw new CommonException("error.field.context.empty");
         }
@@ -681,6 +695,18 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         filterByIssueType(intersection, deleteList, insertSet, contextList, field);
 
         dealWithExtendFields(organizationId, projectId, fieldId, deleteList, insertSet, issueTypeMap);
+        updateDefaultValue(organizationId, projectId, fieldId, defaultValue);
+    }
+
+    private void updateDefaultValue(Long organizationId,
+                                    Long projectId,
+                                    Long fieldId,
+                                    String defaultValue) {
+        objectSchemeFieldExtendMapper.selectExtendField(null, organizationId, fieldId, projectId)
+                .forEach(i -> {
+                    i.setDefaultValue(defaultValue);
+                    objectSchemeFieldExtendMapper.updateByPrimaryKey(i);
+                });
     }
 
     private void dealWithExtendFields(Long organizationId,

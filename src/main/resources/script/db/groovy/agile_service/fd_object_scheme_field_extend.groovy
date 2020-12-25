@@ -58,4 +58,16 @@ databaseChangeLog(logicalFilePath: 'fd_object_scheme_field_extend.groovy') {
             column(name: "field_id")
         }
     }
+
+    changeSet(id: '2020-12-25-fd-object-scheme-field-extend-add-columns', author: 'kaiwen.li@hand-china.com') {
+        addColumn(tableName: 'fd_object_scheme_field_extend') {
+            column(name: 'default_value', type: 'VARCHAR(255)', remarks: '默认值')
+        }
+        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+            "UPDATE fd_object_scheme_field_extend t1 " +
+                    "JOIN ( SELECT t2.id, t2.default_value FROM fd_object_scheme_field t2 WHERE t2.default_value IS NOT NULL AND t2.default_value != \"\" ) t3 " +
+                    "ON t1.field_id = t3.id " +
+                    "SET t1.default_value = t3.default_value;"
+        }
+    }
 }
