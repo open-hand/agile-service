@@ -64,7 +64,7 @@ class StoryCell extends Component {
                         if (targetFeature) {
                           const storys = this.getStorys(targetFeature) || [];
                           return (
-                            (!StoryMapStore.hiddenColumnNoStory || storys.length > 0)
+                            (!StoryMapStore.hiddenColumnNoStory || (targetFeature.storys || []).length > 0)
                               ? (
                                 <StoryColumn
                                   feature={feature}
