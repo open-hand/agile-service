@@ -29,7 +29,7 @@ const QuickFilter: React.FC<Props> = ({
     <Popover
       placement="bottom"
       trigger="click"
-      content={quickFilterList.map((quickFilter) => (
+      content={quickFilterList.length > 0 ? quickFilterList.map((quickFilter) => (
         <CheckBox
           key={quickFilter.filterId}
           style={{ display: 'block', margin: '5px 0' }}
@@ -44,7 +44,11 @@ const QuickFilter: React.FC<Props> = ({
         >
           {quickFilter.name}
         </CheckBox>
-      ))}
+      )) : (
+        <div style={{ color: 'rgba(0,0,0,0.65)' }}>
+          暂无数据
+        </div>
+      )}
     >
       <Button
         color={'blue' as ButtonColor}

@@ -7,6 +7,17 @@
         from agile_issue ai
         where ai.project_id = #{projectId}
         and ai.type_code = 'issue_epic'
+        <if test="searchVO != null">
+            <if test="searchVO.otherArgs != null">
+                <if test="searchVO.otherArgs.epic != null and searchVO.otherArgs.epic.size > 0">
+                    and ai.issue_id in
+                    <foreach collection="searchVO.otherArgs.epic" item="id" open="(" separator=","
+                             close=")">
+                        #{id}
+                    </foreach>
+                </if>
+            </if>
+        </if>
         order by ai.issue_id desc
     </select>
 

@@ -2,10 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
-import io.choerodon.agile.app.service.FieldValueService;
-import io.choerodon.agile.app.service.IssueService;
-import io.choerodon.agile.app.service.ProjectConfigService;
-import io.choerodon.agile.app.service.StatusFieldSettingService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
@@ -44,6 +41,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     private static final String[] FILTER_FIELD_TYPE = {"checkbox", "multiple", "member", "radio", "single"};
     protected static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
+    protected static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
     private static final String CLEAR = "clear";
     @Autowired
     private StatusFieldSettingMapper statusFieldSettingMapper;
@@ -73,6 +71,10 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private IssueService issueService;
     @Autowired
     private FieldValueService fieldValueService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+    @Autowired
+    private LookupValueService lookupValueService;
     static {
         FIELD_CODE.put(FieldCode.ASSIGNEE, "assigneeId");
         FIELD_CODE.put(FieldCode.REPORTER, "reporterId");
@@ -89,6 +91,9 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         FIELD_CODE.put(FieldCode.LAST_UPDATE_DATE, "lastUpdateDate");
         FIELD_CODE.put(FieldCode.ESTIMATED_END_TIME, "estimatedEndTime");
         FIELD_CODE.put(FieldCode.ESTIMATED_START_TIME, "estimatedStartTime");
+        FIELD_CODE.put(FieldCode.MAIN_RESPONSIBLE, "mainResponsibleId");
+        FIELD_CODE.put(FieldCode.ENVIRONMENT, "environment");
+        PROGRAM_FIELD_CODE.put(FieldCode.PROGRAM_VERSION, "programVersion");
     }
     @Override
     public List<StatusFieldSettingVO> createOrUpdate(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType, List<StatusFieldSettingVO> list) {
@@ -181,15 +186,21 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         List<String> field = new ArrayList<>();
         Map<String,List<VersionIssueRelVO>> versionMap = new HashMap<>();
         Class aClass = issueUpdateVO.getClass();
+        Map<String,Object> specifyMap = new HashMap<>();
         list.forEach(v -> {
             List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(projectId, v.getId());
             if (Boolean.TRUE.equals(v.getSystem())) {
                 Boolean isVersion = FieldCode.FIX_VERSION.equals(v.getFieldCode()) || FieldCode.INFLUENCE_VERSION.equals(v.getFieldCode());
-                if(Boolean.TRUE.equals(isVersion)){
-                    handlerVersion(versionMap,v,statusFieldValueSettingDTOS);
-                }
-                else {
-                    handlerPredefinedValue(issueUpdateVO,aClass, field, issueDTO, v, statusFieldValueSettingDTOS);
+                if (Boolean.TRUE.equals(isVersion)) {
+                    handlerVersion(versionMap, v, statusFieldValueSettingDTOS);
+                } else if (FieldCode.PROGRAM_VERSION.equals(v.getFieldCode())) {
+                    List<Long> ids = new ArrayList<>();
+                    if (!CollectionUtils.isEmpty(statusFieldValueSettingDTOS) && !CLEAR.equals(statusFieldValueSettingDTOS.get(0).getOperateType())) {
+                        ids.addAll(statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getOptionId).collect(Collectors.toList()));
+                    }
+                    specifyMap.put(FieldCode.PROGRAM_VERSION, ids);
+                } else {
+                    handlerPredefinedValue(issueUpdateVO, aClass, field, issueDTO, v, statusFieldValueSettingDTOS);
                 }
             } else {
                 PageFieldViewUpdateVO pageFieldViewUpdateVO = new PageFieldViewUpdateVO();
@@ -200,10 +211,10 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             }
         });
         // 执行更新
-        updateIssue(issueDTO,field,issueUpdateVO,customField,versionMap);
+        updateIssue(issueDTO,field,issueUpdateVO,customField,versionMap,specifyMap);
     }
 
-    private void updateIssue(IssueDTO issueDTO,List<String> field,IssueUpdateVO issueUpdateVO,List<PageFieldViewUpdateVO> customField,Map<String,List<VersionIssueRelVO>> versionMap){
+    private void updateIssue(IssueDTO issueDTO,List<String> field,IssueUpdateVO issueUpdateVO,List<PageFieldViewUpdateVO> customField,Map<String,List<VersionIssueRelVO>> versionMap, Map<String, Object> specifyMap){
         Long organizationId = ConvertUtil.getOrganizationId(issueDTO.getProjectId());
         Long objectVersionNumber = issueDTO.getObjectVersionNumber();
         if (!CollectionUtils.isEmpty(field)) {
@@ -228,6 +239,10 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             for (PageFieldViewUpdateVO pageFieldViewUpdateVO : customField) {
                 fieldValueService.updateFieldValue(organizationId, issueDTO.getProjectId(), issueDTO.getIssueId(), pageFieldViewUpdateVO.getFieldId(), "agile_issue", pageFieldViewUpdateVO);
             }
+        }
+
+        if (agilePluginService != null) {
+           agilePluginService.handlerSpecifyProgramField(issueDTO,specifyMap);
         }
     }
 
@@ -273,6 +288,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         switch (v.getFieldCode()) {
             case FieldCode.ASSIGNEE:
             case FieldCode.REPORTER:
+            case FieldCode.MAIN_RESPONSIBLE:
                 field.set(issueUpdateVO, handlerMember(fieldValueSettingDTO, issueDTO));
                 break;
             case FieldCode.CREATION_DATE:
@@ -316,6 +332,10 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                     return labelIssueRelVO;
                 }).collect(Collectors.toList());
                 field.set(issueUpdateVO, labelIssueRelVOS);
+                break;
+            case FieldCode.ENVIRONMENT:
+                StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
+                field.set(issueUpdateVO, statusFieldValueSettingDTO.getStringValue());
                 break;
             default:
                 break;
@@ -487,8 +507,15 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                     Map<Long, IssueDTO> issueDTOMap = issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity()));
                     statusFieldValueSettingDTOS.forEach(v -> v.setName(ObjectUtils.isEmpty(issueDTOMap.get(v.getOptionId())) ? null : issueDTOMap.get(v.getOptionId()).getSummary()));
                     break;
+                case FieldCode.ENVIRONMENT:
+                    Map<String, String> environment = lookupValueService.queryMapByTypeCode("environment");
+                    statusFieldValueSettingDTOS.forEach(v -> v.setName(environment.get(v.getStringValue())));
+                    break;
                 default:
                     break;
+            }
+            if (agilePluginService != null && PROGRAM_FIELD_CODE.containsValue(statusFieldSettingVO.getFieldCode())) {
+                agilePluginService.handlerProgramFieldValue(statusFieldSettingVO, statusFieldValueSettingDTOS);
             }
         } else {
             List<FieldOptionDTO> fieldOptionDTOS = fieldOptionMapper.selectByIds(StringUtils.join(ids, ","));

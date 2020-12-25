@@ -109,7 +109,7 @@ const LineChart = observer(() => {
       },
       grid: {
         top: 50,
-        left: 8,
+        left: 13,
         right: 12,
         bottom: 20,
         containLabel: true,

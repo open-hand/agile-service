@@ -109,7 +109,21 @@ export function returnBeforeTextUpload(text, data, func, pro = 'description') {
   send[pro] = JSON.stringify(deltaOps);
   return func(send);
 }
-
+export async function uploadAndReplaceImg(text) {
+  const deltaOps = text;
+  const { imgBase, formData } = getImgInDelta(deltaOps);
+  if (imgBase.length) {
+    await fileApi.uploadImage(formData).then((imgUrlList) => {
+      replaceBase64ToUrl(imgUrlList, imgBase, deltaOps);
+      const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
+      const html = converter.convert();
+      return JSON.stringify(deltaOps);
+    });
+  }
+  const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
+  const html = converter.convert();
+  return JSON.stringify(deltaOps);
+}
 /**
  * 适用于富文本附件上传以及回调
  * @param {any []} propFileList 文件列表

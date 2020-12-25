@@ -57,8 +57,8 @@ class Commits extends Component {
 
   createMergeRequest(record) {
     const win = window.open('');
-    const { appServiceId } = record;
-    devOpsApi.loadGitUrl(appServiceId)
+    const { appServiceId, projectId } = record;
+    devOpsApi.project(projectId).loadGitUrl(appServiceId)
       .then((res) => {
         const url = `${res}/merge_requests/new?change_branches=true&merge_request[source_branch]=${record.branchName}&merge_request[target_branch]=master`;
         win.location.href = url;
@@ -72,6 +72,23 @@ class Commits extends Component {
       issueId, issueNum, time, visible, onCancel,
     } = this.props;
     const column = [
+      {
+        title: '分支',
+        dataIndex: 'branchName',
+        width: '30%',
+        render: (branchName) => (
+          <div style={{ width: '100%', overflow: 'hidden' }}>
+            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={branchName}>
+              <p style={{
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
+              }}
+              >
+                {branchName}
+              </p>
+            </Tooltip>
+          </div>
+        ),
+      },
       {
         title: '应用名称',
         dataIndex: 'appServiceName',
@@ -90,17 +107,17 @@ class Commits extends Component {
         ),
       },
       {
-        title: '分支',
-        dataIndex: 'branchName',
-        width: '30%',
-        render: (branchName) => (
+        title: '所属项目',
+        dataIndex: 'projectName',
+        width: '25%',
+        render: (projectName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
-            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={branchName}>
+            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={projectName}>
               <p style={{
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
               }}
               >
-                {branchName}
+                {projectName}
               </p>
             </Tooltip>
           </div>

@@ -3,9 +3,7 @@ import { observer } from 'mobx-react';
 import moment from 'moment';
 import { DateTimePicker } from 'choerodon-ui/pro';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import { toJS } from 'mobx';
 import { issueApi } from '@/api';
-import { DatetimeAgo } from '../../../../CommonComponent';
 
 class FieldEndTime extends Component {
   updateIssueField = (value) => {
@@ -53,11 +51,7 @@ class FieldEndTime extends Component {
             disabled={disabled}
           >
             {
-              estimatedEndTime ? (
-                <DatetimeAgo
-                  date={estimatedEndTime}
-                />
-              ) : '无'
+              estimatedEndTime || '无'
             }
           </TextEditToggle>
         </div>

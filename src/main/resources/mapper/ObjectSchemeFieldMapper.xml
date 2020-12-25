@@ -501,4 +501,14 @@
             #{existId}
         </foreach>
     </select>
+
+    <select id="filterNotExistFields" resultType="java.lang.Long">
+         select
+           id
+         from fd_object_scheme_field
+         where id in
+         <foreach collection="fieldIds" item="fieldId" open="(" close=")" separator=",">
+             #{fieldId}
+         </foreach>
+    </select>
 </mapper>

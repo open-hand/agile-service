@@ -107,4 +107,6 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
     List<ObjectSchemeFieldDTO> selectNotSyncField(@Param("systemFieldIds") List<Long> systemFieldIds);
 
     List<ObjectSchemeFieldDTO> selectNotSyncFieldByFieldConfig(@Param("organizationId") Long organizationId, @Param("issueType") String issueType, @Param("existIds") List<Long> existIds);
+
+    List<Long> filterNotExistFields(@Param("fieldIds") List<Long> fieldIds);
 }

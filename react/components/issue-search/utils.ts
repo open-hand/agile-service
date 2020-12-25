@@ -44,3 +44,48 @@ export function flattenObject(object: Object): { [key: string]: any } {
   delete result.text;
   return result;
 }
+/**
+ * 对象扁平化 {a:{b:'v'}}  = >  {b:'v'}
+ *
+ * @param {*} object
+ */
+export function SearchVOToFilter(object: { [key: string]: any }): { [key: string]: any } {
+  const result: { [key: string]: any } = {};
+  for (const [key, value] of Object.entries(object)) {
+    if (Object.prototype.toString.call(value) === '[object Object]') {
+      Object.assign(result, SearchVOToFilter(value));
+    } else if (key === 'createStartDate' || key === 'createEndDate') {
+      if (object.createStartDate && object.createEndDate) {
+        result.createDate = [object.createStartDate, object.createEndDate];
+      }
+    } else if (key === 'updateStartDate' || key === 'updateEndDate') {
+      if (object.updateStartDate && object.updateEndDate) {
+        result.updateDate = [object.updateStartDate, object.updateEndDate];
+      }
+    } else {
+      result[key] = value;
+    }
+  }
+  const {
+    date = [],
+    date_hms = [],
+    number = [],
+    option = [],
+    string = [],
+    text = [],
+  } = result;
+  [...date, ...date_hms].forEach((d) => {
+    result[d.fieldId] = [d.startDate, d.endDate];
+  });
+  [...number, ...option, ...string, ...text].forEach((d) => {
+    result[d.fieldId] = d.value;
+  });
+
+  delete result.date;
+  delete result.date_hms;
+  delete result.number;
+  delete result.option;
+  delete result.string;
+  delete result.text;
+  return result;
+}

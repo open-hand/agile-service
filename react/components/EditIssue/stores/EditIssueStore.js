@@ -92,6 +92,8 @@ class EditIssueStore {
 
   @observable createBranchShow = false;
 
+  @observable linkBranchShow = false;
+
   @observable commitShow = false;
 
   @observable mergeRequestShow = false;
@@ -120,6 +122,10 @@ class EditIssueStore {
 
   @action setCreateBranchShow(data) {
     this.createBranchShow = data;
+  }
+
+  @action setLinkBranchShow(data) {
+    this.linkBranchShow = data;
   }
 
   @computed get getCreateBranchShow() {

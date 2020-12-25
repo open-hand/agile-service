@@ -83,7 +83,7 @@ function renderField(field: IFilterField, { element, removeButton }: { element: 
   );
 }
 export const renderGroupedFields: IRenderFields = ({
-  fields, getFieldElement, selectField, resetButton, filterRef, folded,
+  fields, getFieldElement, selectField, resetButton, filterRef, foldButton, folded,
 }) => {
   const selectTypes: IFilterField[] = [];
   const dateTypes: IFilterField[] = [];
@@ -131,13 +131,14 @@ export const renderGroupedFields: IRenderFields = ({
       <div>
         {result}
       </div>
-      {resetButton && React.cloneElement(resetButton, {
+      {!folded && resetButton && React.cloneElement(resetButton, {
         style: {
           marginLeft: 'auto',
           marginRight: 10,
           flexShrink: 0,
         },
       })}
+      {foldButton}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
+import { getProjectId } from '@/utils/common';
 import EditIssue from '../../../../../components/EditIssue';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
@@ -37,14 +38,14 @@ class IssueDetail extends Component {
     const { selectedIssueMap } = StoryMapStore;
     const visible = selectedIssueMap.size;
     const { programId, issueId } = selectedIssueMap.values().next().value || {};
-
+    const programIssue = (programId && String(programId) !== String(getProjectId()));
     return (
       <EditIssue
         visible={visible}
-        programId={programId}
+        programId={programIssue ? programId : undefined}
         isFullScreen={isFullScreen}
-        disabled={isFullScreen || programId}
-        applyType={programId ? 'program' : 'agile'}
+        disabled={isFullScreen || programIssue}
+        applyType={programIssue ? 'program' : 'agile'}
         forwardedRef={this.EditIssue}
         issueId={issueId}
         onChangeWidth={onChangeWidth}

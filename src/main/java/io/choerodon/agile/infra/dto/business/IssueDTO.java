@@ -209,8 +209,6 @@ public class IssueDTO extends AuditDomain {
 
     private Long mainResponsibleId;
 
-    private Long testResponsibleId;
-
     private String environment;
 
     public Long getMainResponsibleId() {
@@ -219,14 +217,6 @@ public class IssueDTO extends AuditDomain {
 
     public void setMainResponsibleId(Long mainResponsibleId) {
         this.mainResponsibleId = mainResponsibleId;
-    }
-
-    public Long getTestResponsibleId() {
-        return testResponsibleId;
-    }
-
-    public void setTestResponsibleId(Long testResponsibleId) {
-        this.testResponsibleId = testResponsibleId;
     }
 
     public String getEnvironment() {

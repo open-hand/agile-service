@@ -76,7 +76,6 @@ public class IssueAssembler extends AbstractAssembler {
         assigneeIdList.add(issueDetailDTO.getReporterId());
         assigneeIdList.add(issueDetailDTO.getCreatedBy());
         assigneeIdList.add(issueDetailDTO.getMainResponsibleId());
-        assigneeIdList.add(issueDetailDTO.getTestResponsibleId());
         Boolean issueCommentCondition = issueVO.getIssueCommentVOList() != null && !issueVO.getIssueCommentVOList().isEmpty();
         if (issueCommentCondition) {
             assigneeIdList.addAll(issueVO.getIssueCommentVOList().stream().map(IssueCommentVO::getUserId).collect(Collectors.toList()));
@@ -116,7 +115,6 @@ public class IssueAssembler extends AbstractAssembler {
         }
         // 添加主要负责人、测试负责人信息
         issueVO.setMainResponsible(userMessageDOMap.get(issueDetailDTO.getMainResponsibleId()));
-        issueVO.setTestResponsible(userMessageDOMap.get(issueDetailDTO.getTestResponsibleId()));
         return issueVO;
     }
 

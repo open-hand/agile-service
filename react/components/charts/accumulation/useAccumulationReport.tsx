@@ -40,7 +40,7 @@ function useAccumulationReport(config?: AccumulationConfig, onFinish?: Function)
       batchedUpdates(() => {
         setData(burnDownData);
         setLoading(false);
-        onFinish && setTimeout(onFinish);
+        onFinish && setTimeout(onFinish, 1000);
       });
     }
   }, [boardId, columnIds, onFinish, projectId, quickFilterIds, range]);

@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 import Api from './Api';
@@ -22,7 +23,29 @@ class DevOpsApi extends Api<DevOpsApi> {
    * @param devopsBranchVO
    */
   createBranch(applicationId: number, devopsBranchVO: ICreateBranch) {
-    return axios.post(`${this.prefix}/app_service/${applicationId}/git/branch`, devopsBranchVO);
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_service/${applicationId}/git/branch`,
+      data: devopsBranchVO,
+    });
+  }
+
+  linkBranch(applicationId: number, devopsBranchVO: ICreateBranch) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/app_service/${applicationId}/git/update_branch_issue`,
+      data: devopsBranchVO,
+    });
+  }
+
+  checkBranchName(applicationId: number, branchName: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/app_service/${applicationId}/git/check_branch_name`,
+      params: {
+        branch_name: branchName,
+      },
+    });
   }
 
   /**
@@ -52,6 +75,19 @@ class DevOpsApi extends Api<DevOpsApi> {
   }
 
   /**
+   * 加载已经启用的服务列表
+   */
+  loadProjectActiveService(page: number, size: number, param?: string) {
+    return axios.get(`${this.prefix}/app_service/list_service_under_org`, {
+      params: {
+        page,
+        size,
+        param,
+      },
+    });
+  }
+
+  /**
    * 根据服务id加载分支
    * @param applicationId
    * @param page
@@ -66,6 +102,20 @@ class DevOpsApi extends Api<DevOpsApi> {
         page,
         size,
         sort: 'creation_date,asc',
+      },
+      data: searchVO,
+    });
+  }
+
+  loadBranchesByServiceFilterIssue(applicationId: number, page: number = 1, size: number = 5, searchVO: any, issue_id: string) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_service/${applicationId}/git/page_branch_by_options_filtered_by_issue_id`,
+      params: {
+        page,
+        size,
+        sort: 'creation_date,asc',
+        issue_id,
       },
       data: searchVO,
     });
@@ -94,7 +144,7 @@ class DevOpsApi extends Api<DevOpsApi> {
    * 根据issueId获取问题关联的请求合并列表
    * @param issueId
    */
-  loadMergeRequest(issueId:number) {
+  loadMergeRequest(issueId: number) {
     return axios.get(`${this.issuePrefix}/issue/${issueId}/merge_request/list`);
   }
 

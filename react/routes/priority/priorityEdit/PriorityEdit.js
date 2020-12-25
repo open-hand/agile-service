@@ -216,6 +216,7 @@ class PriorityEdit extends Component {
                 },
               )(
                 <Checkbox
+                  className="c7n-agile-priority-checkbox"
                   disabled={!!editingPriority.default || !editingPriority.enable}
                 >
                   设置为默认优先级

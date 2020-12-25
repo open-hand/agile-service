@@ -19,6 +19,7 @@ import IssueDropDown from '../IssueDropDown';
 import IssuePIHistory from './IssuePIHistory';
 import { FieldStoryPoint, FieldSummary } from './Field';
 import CreateBranch from '../../../CreateBranch';
+import LinkBranch from '../../../LinkBranch';
 import DailyLog from '../../../DailyLog';
 import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
@@ -39,6 +40,7 @@ function IssueBody(props) {
   } = issue;
   const { reloadIssue } = props;
   const createBranchShow = store.getCreateBranchShow;
+  const { linkBranchShow } = store;
   const workLogShow = store.getWorkLogShow;
 
   return (
@@ -136,6 +138,23 @@ function IssueBody(props) {
             }}
             onCancel={() => store.setCreateBranchShow(false)}
             visible={createBranchShow}
+          />
+        ) : null
+      }
+      {
+        linkBranchShow ? (
+          <LinkBranch
+            issueId={issueId}
+            typeCode={typeCode}
+            issueNum={issueNum}
+            onOk={() => {
+              store.setLinkBranchShow(false);
+              if (reloadIssue) {
+                reloadIssue(issueId);
+              }
+            }}
+            onCancel={() => store.setLinkBranchShow(false)}
+            visible={linkBranchShow}
           />
         ) : null
       }

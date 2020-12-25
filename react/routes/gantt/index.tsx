@@ -58,7 +58,7 @@ const tableColumns: GanttProps<Issue>['columns'] = [{
           <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
           <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
         </span>
-      ) : record.summary}
+      ) : <span style={{ color: 'rgba(0,0,0,0.87)' }}>{record.summary}</span>}
     </Tooltip>
   ),
 },

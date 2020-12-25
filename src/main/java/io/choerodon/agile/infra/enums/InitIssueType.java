@@ -81,10 +81,6 @@ public enum InitIssueType {
         List<InitIssueType> result = new ArrayList<>();
         switch (applyType) {
             case SchemeApplyType.AGILE:
-                AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
-                if (agilePluginService != null) {
-                    result.add(InitIssueType.FEATURE);
-                }
                 result.add(InitIssueType.EPIC);
                 result.add(InitIssueType.STORY);
                 result.add(InitIssueType.BUG);

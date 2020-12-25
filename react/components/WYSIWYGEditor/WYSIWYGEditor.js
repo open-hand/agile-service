@@ -83,6 +83,11 @@ class WYSIWYGEditor extends Component {
           loading: false,
         });
       }
+    } else {
+      this.setState({
+        isFullScreen: false,
+        loading: false,
+      });
     }
   }
 

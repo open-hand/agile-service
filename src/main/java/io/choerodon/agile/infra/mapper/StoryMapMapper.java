@@ -11,7 +11,7 @@ import java.util.Map;
 
 public interface StoryMapMapper {
 
-    List<Long> selectEpicIdsByProject(@Param("projectId") Long projectId, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
+    List<Long> selectEpicIdsByProject(@Param("projectId") Long projectId, @Param("searchVO") SearchVO searchVO);
 
     List<EpicWithInfoDTO> selectEpicList(@Param("projectId") Long projectId, @Param("epicIds") List<Long> epicIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 

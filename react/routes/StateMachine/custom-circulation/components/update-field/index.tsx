@@ -64,6 +64,24 @@ const transformUpdateData = (data) => {
     // @ts-ignore
       fieldType, fieldId, selected, value,
     } = fieldValue;
+    switch (key) {
+      case 'environment': {
+        if (value) {
+          updateData.push({
+            fieldId,
+            fieldValueList: [{
+              operateType: value ? 'specifier' : selected,
+              stringValue: value,
+              fieldType: 'input',
+            }],
+          });
+        }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
     switch (fieldType) {
       case 'member': {
         const isSpecifier = value !== 'reportor' && value !== 'creator' && value !== 'operator' && value !== 'clear';
@@ -80,6 +98,9 @@ const transformUpdateData = (data) => {
         break;
       }
       case 'radio': case 'single': case 'checkbox': case 'multiple': {
+        if (key === 'environment') {
+          break;
+        }
         if (value || value.length > 0) {
           updateData.push({
             fieldId,
@@ -424,6 +445,7 @@ const UpdateField = ({
       if (validate) {
         const data = getData();
         const updateData = transformUpdateData(data);
+        console.log(updateData);
         await statusTransformApi.updateField(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;

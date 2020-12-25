@@ -8,12 +8,12 @@ const BugRankHandleDataSet = () => ({
     {
       name: 'type',
       type: 'string',
-      defaultValue: 'test',
+      defaultValue: 'dev',
       options: new DataSet({
         selection: 'single',
         data: [
-          { meaning: '测试', value: 'test' },
-          { meaning: '开发', value: 'dev' },
+          { meaning: '责任人', value: 'dev' },
+          { meaning: '创建人', value: 'test' },
         ],
       }),
     },
@@ -22,14 +22,13 @@ const BugRankHandleDataSet = () => ({
       label: '环境',
       type: 'string',
       defaultValue: 'other',
-      options: new DataSet({
-        selection: 'single',
-        data: [
-          { meaning: '生产环境', value: 'pro' },
-          { meaning: '非生产环境', value: 'other' },
-        ],
+      textField: 'name',
+      valueField: 'valueCode',
+      lookupAxiosConfig: () => ({
+        url: '/agile/v1/lookup_values/environment',
+        method: 'get',
+        transformResponse: (data) => (Array.isArray(data) ? data : JSON.parse(data).lookupValues),
       }),
-      // lookupCode: 'environment',
     },
   ],
 });

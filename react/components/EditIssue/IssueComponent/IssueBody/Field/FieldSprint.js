@@ -73,7 +73,11 @@ const { Option } = Select;
               placement="top"
               title={`该问题经历迭代数${closeSprint.length + (sprintId ? 1 : 0)}`}
             >
-              <div>
+              <div style={{
+                width: '100%',
+                wordBreak: 'break-all',
+              }}
+              >
                 {
                   !closeSprint.length && !sprintId ? '无' : (
                     <div>
