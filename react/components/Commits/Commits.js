@@ -1,14 +1,17 @@
+/* eslint-disable react/jsx-no-bind */
 /* eslint-disable no-restricted-globals */
 import React, { Component } from 'react';
 import _ from 'lodash';
 import {
-  Modal, Table, Tooltip, Popover, Button, Icon,
+  Modal, Table, Tooltip, Popover, Button, Icon, Menu,
 } from 'choerodon-ui';
-import { stores, Content } from '@choerodon/boot';
+import {
+  Dropdown,
+} from 'choerodon-ui/pro';
+import { Content } from '@choerodon/boot';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { devOpsApi } from '@/api';
 
-const { AppState } = stores;
 const { Sidebar } = Modal;
 const STATUS_SHOW = {
   opened: '开放',
@@ -19,6 +22,7 @@ const STATUS_SHOW = {
 class Commits extends Component {
   constructor(props) {
     super(props);
+    this.dirty = false;
     this.state = {
       commits: [],
       loading: false,
@@ -67,6 +71,26 @@ class Commits extends Component {
       });
   }
 
+  handleMenuClick=(record, { key }) => {
+    const { issueId } = this.props;
+    switch (key) {
+      case 'delete': {
+        Modal.confirm({
+          title: '移除关联分支',
+          content: '确定要移除此关联分支吗？',
+          okText: '移除',
+          onOk: async () => {
+            await devOpsApi.project(record.projectId).removeLinkBranch(record.appServiceId, record.branchName, issueId);
+            this.dirty = true;
+            this.loadCommits();
+          },
+        });
+        break;
+      }
+      default: break;
+    }
+  }
+
   render() {
     const {
       issueId, issueNum, time, visible, onCancel,
@@ -87,6 +111,26 @@ class Commits extends Component {
               </p>
             </Tooltip>
           </div>
+        ),
+      },
+      {
+        title: '',
+        dataIndex: 'id',
+        width: '10%',
+        render: (id, record) => (
+          <Dropdown
+            overlay={(
+              // eslint-disable-next-line react/jsx-no-bind
+              <Menu onClick={this.handleMenuClick.bind(this, record)}>
+                <Menu.Item key="delete">
+                  移除关联分支
+                </Menu.Item>
+              </Menu>
+            )}
+            trigger="click"
+          >
+            <Button shape="circle" icon="more_vert" />
+          </Dropdown>
         ),
       },
       {
@@ -153,21 +197,21 @@ class Commits extends Component {
               content={(
                 <div>
                   {
-                  record.mergeRequests && record.mergeRequests.length ? (
-                    <ul>
-                      {
-                        record.mergeRequests.map((v) => (
-                          <li style={{ listStyleType: 'none' }}>
-                            <span style={{ display: 'inline-block', width: 150 }}>{v.title}</span>
-                            <span style={{ display: 'inline-block', width: 50 }}>{['opened', 'merged', 'closed'].includes(v.state) ? STATUS_SHOW[v.state] : ''}</span>
-                          </li>
-                        ))
-                      }
-                    </ul>
-                  ) : <div>暂无相关合并请求</div>
-                }
+                    record.mergeRequests && record.mergeRequests.length ? (
+                      <ul>
+                        {
+                          record.mergeRequests.map((v) => (
+                            <li style={{ listStyleType: 'none' }}>
+                              <span style={{ display: 'inline-block', width: 150 }}>{v.title}</span>
+                              <span style={{ display: 'inline-block', width: 50 }}>{['opened', 'merged', 'closed'].includes(v.state) ? STATUS_SHOW[v.state] : ''}</span>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    ) : <div>暂无相关合并请求</div>
+                  }
                 </div>
-)}
+              )}
             >
               <p style={{
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
@@ -202,8 +246,8 @@ class Commits extends Component {
         visible={visible || false}
         okText="关闭"
         okCancel={false}
-        onOk={onCancel}
         width={MODAL_WIDTH.middle}
+        onOk={() => onCancel(this.dirty)}
       >
         <Content
           style={{

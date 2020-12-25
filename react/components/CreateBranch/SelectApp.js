@@ -4,6 +4,7 @@ import { find } from 'lodash';
 import {
   useSetState, useLockFn, useDebounceFn, useMount,
 } from 'ahooks';
+import Tip from '@/components/Tip';
 import { devOpsApi } from '@/api';
 
 const { Option, OptGroup } = Select;
@@ -58,26 +59,27 @@ const SelectApp = ({ onChange, onAppChange, ...props }) => {
   }, [onAppChange, onChange, state.data]);
   const { data, loading, hasNextPage } = state;
   return (
-    <Select
-      label="应用服务"
-      allowClear
-      filter
-      filterOption={() => true}
-      loading={loading}
-      onFilterChange={handleSearch}
-      onChange={handleChange}
-      {...props}
-    >
-      {data.map(project => (
-        <OptGroup label={project.projectName} key={project.projectName}>
-          {project.appServices.map(s => (
-            <Option value={s.id} key={s.id}>
-              {s.name}
-            </Option>
-          ))}
-        </OptGroup>
-      ))}
-      {hasNextPage && (
+    <div style={{ position: 'relative' }}>
+      <Select
+        label="应用服务"
+        allowClear
+        filter
+        filterOption={() => true}
+        loading={loading}
+        onFilterChange={handleSearch}
+        onChange={handleChange}
+        {...props}
+      >
+        {data.map(project => (
+          <OptGroup label={project.projectName} key={project.projectName}>
+            {project.appServices.map(s => (
+              <Option value={s.id} key={s.id}>
+                {s.name}
+              </Option>
+            ))}
+          </OptGroup>
+        ))}
+        {hasNextPage && (
         <Option key="more">
           <div
             role="none"
@@ -91,8 +93,13 @@ const SelectApp = ({ onChange, onAppChange, ...props }) => {
             查看更多
           </div>
         </Option>
-      )}
-    </Select>
+        )}
+      </Select>
+      <div style={{ position: 'absolute', right: -25, top: 7 }}>
+        <Tip title="此处会展示出每个项目下最多5个应用服务，若想选择其他应用服务，需要手动输入服务名进行搜索" />
+      </div>      
+    </div>
+    
   );
 };
 export default SelectApp;

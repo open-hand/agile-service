@@ -14,7 +14,9 @@ const STATUS_SHOW = {
   merged: '已合并',
   closed: '关闭',
 };
-const IssueBranch = observer(({ store, disabled, projectId }) => {
+const IssueBranch = observer(({
+  store, disabled, projectId, reloadIssue,
+}) => {
   const [commitShow, setCommitShow] = useState(false);
   const [mergeRequestShow, setMergeRequestShow] = useState(false);
 
@@ -161,8 +163,11 @@ const IssueBranch = observer(({ store, disabled, projectId }) => {
             issueId={issueId}
             issueNum={issueNum}
             time={commitUpdateTime}
-            onCancel={() => {
+            onCancel={(needReload) => {
               setCommitShow(false);
+              if (needReload) {
+                reloadIssue();
+              }
             }}
             visible={commitShow}
           />
