@@ -4,7 +4,6 @@ import io.choerodon.agile.api.vo.SprintBugVO;
 import io.choerodon.agile.api.vo.SprintStoryPointVO;
 import io.choerodon.agile.api.vo.SprintTaskVO;
 import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 

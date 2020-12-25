@@ -13,6 +13,7 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -102,7 +103,7 @@ public class TeamPerformanceController {
                                                                         @RequestParam(name = "other", defaultValue =
                                                                                 "false", required = false) Boolean other,
                                                                         @ApiParam(value = "负责人")
-                                                                        @RequestBody List<Long> responsibleIds) {
+                                                                        @Encrypt @RequestBody List<Long> responsibleIds) {
         return ResponseEntity.ok(teamPerformanceService.queryHistorySprintBugCount(projectId, environment,
                 type, other, responsibleIds));
     }
