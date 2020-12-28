@@ -213,7 +213,11 @@ class CreateBranch extends Component {
                   onChange={this.handleAppChange}
                 >
                   {originApps.map((a) => (
-                    <Option value={a.id} key={a.id}>{a.name}</Option>
+                    <Option value={a.id} key={a.id} title={`${a.name}(${a.code})`}>
+                      <Tooltip title={a.code}>
+                        {`${a.name}(${a.code})`}
+                      </Tooltip>
+                    </Option>
                   ))}
                 </Select>,
               ) : getFieldDecorator('app2', {
