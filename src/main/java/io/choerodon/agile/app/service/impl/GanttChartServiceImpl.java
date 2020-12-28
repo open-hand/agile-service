@@ -68,7 +68,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             }
             boardAssembler.handleOtherArgs(searchVO);
             String orderStr = "issue_id desc";
-            List<IssueDTO> issues = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr);
+            List<IssueDTO> issues = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, true);
             List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
