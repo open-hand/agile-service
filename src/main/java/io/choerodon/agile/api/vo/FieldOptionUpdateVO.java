@@ -33,6 +33,11 @@ public class FieldOptionUpdateVO extends AuditDomain {
     private Integer sequence;
     @ApiModelProperty(value = "是否默认值")
     private Boolean isDefault;
+    @ApiModelProperty(value = "字段id")
+    @Encrypt
+    private Long fieldId;
+    @ApiModelProperty(value = "组织id")
+    private Long organizationId;
 
     public String getCode() {
         return code;
@@ -106,5 +111,21 @@ public class FieldOptionUpdateVO extends AuditDomain {
 
     public void setSequence(Integer sequence) {
         this.sequence = sequence;
+    }
+
+    public Long getFieldId() {
+        return fieldId;
+    }
+
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }
