@@ -198,7 +198,6 @@ const PieChart = observer(() => {
 
   return (
     <Spin spinning={isLoading}>
-
       <div className="chart-container chart-container-pie">
         <div className="chart-handle">
           <SwitchTabs

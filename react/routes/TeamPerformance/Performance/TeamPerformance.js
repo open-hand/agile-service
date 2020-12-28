@@ -17,7 +17,7 @@ const GroupPerformance = () => {
     <Page className={prefixCls}>
       <Breadcrumb />
       <Content>
-        <Tabs>
+        <Tabs animated={false}>
           <TabPane key="efficiency" tab="进度与效率">
             <div className={`${prefixCls}-container`}>
               <Efficiency />
