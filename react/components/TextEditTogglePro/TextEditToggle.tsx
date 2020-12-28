@@ -147,6 +147,7 @@ const TextEditToggle: React.FC<Props> = ({
     </>
   );
   const handleFocus = () => {
+    console.log('enter editor....');
     if (!disabled) {
       showEditor();
     }

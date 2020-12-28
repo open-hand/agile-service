@@ -3,7 +3,7 @@ import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import {
-  Button, Modal, Spin, message,
+  Button, Modal, Spin, message, Select,
 } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';

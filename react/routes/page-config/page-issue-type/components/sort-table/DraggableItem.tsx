@@ -1,12 +1,12 @@
 /* eslint-disable no-param-reassign */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   DraggableProvided, DraggingStyle, NotDraggingStyle,
 } from 'react-beautiful-dnd';
 import classnames from 'classnames';
 import { Menu, Modal } from 'choerodon-ui';
 import {
-  Button, Icon, Tooltip, DataSet,
+  Button, Icon, Tooltip, DataSet, Select,
 } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -14,10 +14,11 @@ import { observer } from 'mobx-react-lite';
 import moment from 'moment';
 import TableDropMenu from '@/common/TableDropMenu';
 import CheckBox from '@/components/check-box';
+import TextEditToggle from '@/components/TextEditTogglePro';
 import { usePageIssueTypeStore } from '../../stores';
 import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
 import { useSortTableContext } from './stores';
-
+import renderEditor from './renderEditor';
 // import CheckBox from './components/Checkbox';
 
 interface Props {
@@ -103,18 +104,18 @@ const DraggableItem: React.FC<Props> = ({
         name, record, dataSet,
       }, editDisabled)}
       {
-          (!disabledDel && !showSplitLine && record?.get('createdLevel') !== 'organization')
-          && (
-            <Button
-              className={`${prefixCls}-action-button`}
-              disabled={isDragDisabled}
-              style={{ marginLeft: 10 }}
-              onClick={() => onClickDel(record!, dataSet!)}
-            >
-              <Icon type="delete" style={{ fontSize: 18 }} />
-            </Button>
-          )
-        }
+        (!disabledDel && !showSplitLine && record?.get('createdLevel') !== 'organization')
+        && (
+          <Button
+            className={`${prefixCls}-action-button`}
+            disabled={isDragDisabled}
+            style={{ marginLeft: 10 }}
+            onClick={() => onClickDel(record!, dataSet!)}
+          >
+            <Icon type="delete" style={{ fontSize: 18 }} />
+          </Button>
+        )
+      }
 
     </div>
   );
@@ -123,7 +124,24 @@ const DraggableItem: React.FC<Props> = ({
     ...virtualizedStyle,
     cursor: 'all-scroll',
   });
+  const renderDefaultValue = () => {
+    const defaultValue = data.get('localDefaultValue') || data.get('defaultValue');
+    console.log('render value...120');
+    return (
+      // <Tooltip title={defaultValue} placement="top">
+      <TextEditToggle
+        initValue={0}
+        alwaysRender={false}
+        editor={() => <Select />}
+        onSubmit={() => { }}
+      >
+        {defaultValue}
+      </TextEditToggle>
+      // </Tooltip>
 
+    );
+  };
+  console.log('provided///', provided);
   return (
 
     <div
@@ -133,15 +151,36 @@ const DraggableItem: React.FC<Props> = ({
       {...provided.dragHandleProps}
       style={getStyle(provided.draggableProps.style)}
       className={classnames(`${prefixCls}`, { [`${prefixCls}-split`]: showSplitLine }, draggingClassName)}
-      onClick={(e) => { }}
     >
       <div className={`${prefixCls}-item`}>
         {renderFieldName({ value: data.get('fieldName'), record: data, dataSet: data.dataSet })}
       </div>
-      <div className={`${prefixCls}-item ${prefixCls}-item-text`}>
-        <Tooltip title={data.get('localDefaultValue') || data.get('defaultValue')} placement="top">
+      <div
+        role="none"
+        className={`${prefixCls}-item ${prefixCls}-item-text`}
+        onFocus={(e) => {
+          console.log('wrap focus');
+          e.stopPropagation();
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseDownCapture={(e) => {
+          console.log('onMouseDownCapture...');
+          e.stopPropagation();
+        }}
+        onClick={(e) => {
+          console.log('onClick');
+          e.stopPropagation();
+        }}
+      >
+        {/* {renderDefaultValue()} */}
+        <TextEditToggle
+          initValue={0}
+          alwaysRender={false}
+          editor={() => <Select />}
+          onSubmit={() => { }}
+        >
           {data.get('localDefaultValue') || data.get('defaultValue')}
-        </Tooltip>
+        </TextEditToggle>
       </div>
       <div className={`${prefixCls}-item`}>
         {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, requiredFieldCanNotEdit)}
