@@ -21,6 +21,18 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
   const fieldType = record.get('fieldType');
   const handleSubmit = useCallback((data) => {
     console.log('data', data, record.toData());
+    // const local = record.get('local');
+    // switch (fieldType) {
+    //   case 'input':
+    //   case 'text': {
+    //     record.set('defaultValue', data);
+
+    //     return
+    //   }
+
+    //   default:
+    //     break;
+    // }
   }, [record]);
   const variableProps = useMemo(() => {
     console.log('render.', fieldType);
@@ -34,7 +46,7 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
   const editor = useMemo(() => () => renderEditor({ record }), [record]);
   const constantProps = useMemo(() => {
     const key = `page-issue-type-default-edit-text-${record.id}`;
-    const submitTrigger = [Action.change, Action.blur];
+    const submitTrigger = ['change', 'blur'] as Action[];
     return {
       alwaysRender: false,
       submitTrigger,
