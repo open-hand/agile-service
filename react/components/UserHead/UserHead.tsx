@@ -1,7 +1,7 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { Tooltip } from 'choerodon-ui';
 
-function getFirst(str) {
+function getFirst(str: string) {
   if (!str) {
     return '';
   }
@@ -13,7 +13,27 @@ function getFirst(str) {
   }
   return str[0];
 }
-const UserHead = memo(({
+interface UserHeadProps {
+  user: {
+    id?: number | string,
+    loginName?: string,
+    realName: string,
+    avatar?: string,
+    imageUrl?: string | null,
+    email?: string,
+    ldap?: boolean,
+    name?: string,
+  }
+  color?: string
+  size?: number
+  hiddenText?: boolean
+  style?: React.CSSProperties
+  className?: string
+  type?: 'datalog'
+  tooltip?: boolean
+  title?: string
+}
+const UserHead: React.FC<UserHeadProps> = ({
   user,
   color,
   size,
@@ -139,5 +159,5 @@ const UserHead = memo(({
       </Tooltip>
     )
     : renderContent();
-});
+};
 export default UserHead;

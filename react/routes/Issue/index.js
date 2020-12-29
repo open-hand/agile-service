@@ -20,10 +20,11 @@ import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import ImportIssue from '@/components/ImportIssue';
 import FilterManage from '@/components/FilterManage';
+import IssueDetail, { useDetailStore } from '@/components/IssueDetail';
+import { useDetailContainerContext } from '@/components/detail-container/context';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
-import IssueDetail from './components/issue-detail';
 import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
@@ -38,6 +39,8 @@ const Issue = observer(() => {
   const [urlFilter, setUrlFilter] = useState(null);
   const importRef = useRef();
   const tableRef = useRef();
+  const detailStore = useDetailStore();
+  const { push } = useDetailContainerContext();
   IssueStore.setTableRef(tableRef);
   const visibleColumns = useMemo(() => {
     if (localPageCacheStore.getItem('issues.table')) {
@@ -239,16 +242,18 @@ const Issue = observer(() => {
           visibleColumns={visibleColumns}
           onCreateIssue={handleCreateIssue}
           onRowClick={(record) => {
+            detailStore.select(record.get('issueId'));
+            // push('issue');
             // dataSet.select(record);
-            const editFilterInfo = IssueStore.getEditFilterInfo;
-            IssueStore.setClickedRow({
-              selectedIssue: {
-                issueId: record.get('issueId'),
-              },
-              expand: true,
-            });
-            IssueStore.setFilterListVisible(false);
-            IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
+            // const editFilterInfo = IssueStore.getEditFilterInfo;
+            // IssueStore.setClickedRow({
+            //   selectedIssue: {
+            //     issueId: record.get('issueId'),
+            //   },
+            //   expand: true,
+            // });
+            // IssueStore.setFilterListVisible(false);
+            // IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
           }}
           selectedIssue={IssueStore.selectedIssue?.issueId}
         />
@@ -266,8 +271,7 @@ const Issue = observer(() => {
           />
         )}
         <IssueDetail
-          issueRefresh={refresh}
-          dataSet={dataSet}
+          store={detailStore}
         />
         <ImportIssue ref={importRef} onFinish={refresh} />
       </Content>

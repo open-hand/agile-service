@@ -202,6 +202,11 @@ interface Attachment {
   url: string
   createdBy: number
 }
+export type ISubIssue = Issue & {
+  loginName: string
+  realName: string
+  imageUrl: string
+}
 export interface Issue {
   issueId: string
   issueNum: string
@@ -246,6 +251,13 @@ export interface Issue {
   createrName: string
   createrRealName: string
   createrLoginName: string
+  assigneeId: string,
+  assigneeImageUrl: string,
+  assigneeLoginName: string,
+  assigneeName: string
+  parentSummary?: string
+  subIssueVOList: ISubIssue[]
+  subBugVOList: ISubIssue[]
 }
 
 export interface ILog {

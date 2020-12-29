@@ -60,7 +60,7 @@ const Comments: React.FC = () => {
 
   return (
     <div style={{ minHeight: '100%' }}>
-      <AddComment onSubmit={handleCreateCommit} />
+      {/* <AddComment onSubmit={handleCreateCommit} /> */}
       {renderCommits()}
     </div>
   );

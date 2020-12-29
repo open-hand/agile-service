@@ -4,9 +4,11 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import { Animate } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
+import DetailContainer from '@/components/detail-container';
 import Container from './Container';
 import Store from './store';
 import IssueDetailContext from './context';
+import { useDetailContainerContext } from '../detail-container/context';
 
 export type DemandEvents = 'update' | 'delete' | 'transfer' | 'close'
 const { HeaderStore, AppState } = stores;
@@ -25,9 +27,14 @@ const IssueDetail: React.FC<Props> = ({
   projectId, organizationId, store, outside = false,
 }) => {
   const { visible, selected } = store;
+  console.log(visible);
   useEffect(() => {
     store.load(outside, organizationId);
   }, [organizationId, outside, selected, store]);
+  const { setVisible } = useDetailContainerContext();
+  useEffect(() => {
+    setVisible(visible);
+  }, [setVisible, visible]);
   // 离开一个页面时，清空数据
   useEffect(() => {
     store.initApi(outside, organizationId);
@@ -39,32 +46,14 @@ const IssueDetail: React.FC<Props> = ({
   const checkEnableEditDetail = useCallback((hasPermission: boolean) => false, []);
 
   return (
-    <Animate
-      component="div"
-      transitionAppear
-      transitionName="slide-right"
-      onLeave={() => {
-        // 侧边完全关闭后，清除数据
-        store.destroy();
-      }}
-    >
-      {visible ? (
-        <IssueDetailContext.Provider value={{
-          id: selected,
-          store,
-          projectId,
-          hasAdminPermission: false,
-          disabledDetailEdit: !checkEnableEditDetail(false),
-          outside: false,
-          organizationId,
-          topAnnouncementHeight: HeaderStore.announcementClosed ? 0 : 50,
-        }}
-        >
-          <Container />
-        </IssueDetailContext.Provider>
-      ) : null}
-    </Animate>
+    <div>
+      s
+    </div>
   );
 };
-
-export default observer(IssueDetail);
+const ObserverIssueDetail = observer(IssueDetail);
+export default (props:Props) => (
+  <DetailContainer>
+    <ObserverIssueDetail {...props} />
+  </DetailContainer>
+);
