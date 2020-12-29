@@ -11,4 +11,6 @@ import org.apache.ibatis.annotations.Param;
 public interface WikiRelationMapper extends BaseMapper<WikiRelationDTO> {
 
     void updateByOptions(@Param("id") Long id, @Param("spaceId") Long spaceId);
+
+    void deleteByIssueId(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 }
