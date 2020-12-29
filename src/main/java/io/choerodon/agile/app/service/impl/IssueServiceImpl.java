@@ -818,7 +818,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //删除附件
         issueAttachmentService.deleteByIssueId(issueConvertDTO.getIssueId());
         // 删除issue关联的知识
-        wikiRelationMapper.deleteByIssueId(projectId, issueId);
+        if (!Objects.equals(issueConvertDTO.getTypeCode(), "feature")) {
+            wikiRelationMapper.deleteByIssueId(projectId, issueId);
+        }
         //不是子任务的issue删除子任务
         if (!(SUB_TASK).equals(issueConvertDTO.getTypeCode())) {
             if ((ISSUE_EPIC).equals(issueConvertDTO.getTypeCode())) {
