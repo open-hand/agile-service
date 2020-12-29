@@ -2560,6 +2560,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
+        if (ObjectUtils.isEmpty(issueIds)) {
+            return new ArrayList<>();
+        }
         return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null));
     }
 
