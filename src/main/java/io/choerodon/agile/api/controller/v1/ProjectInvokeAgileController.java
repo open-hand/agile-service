@@ -26,8 +26,8 @@ import java.util.Optional;
  * @author huaxin.deng@hand-china.com 2020-12-29 15:27:18
  */
 @RestController
-@RequestMapping(value = "/v1/projects/{project_id}/cross_project_invoke")
-public class CrossProjectInvokeController {
+@RequestMapping(value = "/v1/projects/{project_id}/project_invoke_agile")
+public class ProjectInvokeAgileController {
 
     @Autowired
     private IssueService issueService;
