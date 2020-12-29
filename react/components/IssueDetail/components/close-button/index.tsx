@@ -1,10 +1,10 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Button } from 'choerodon-ui/pro';
-import IssueDetailContext from '../../context';
+import { useDetailContext } from '../../context';
 import styles from './index.less';
 
 const CloseButton: React.FC = () => {
-  const { store } = useContext(IssueDetailContext);
+  const { store } = useDetailContext();
   return (
     <Button
       className={styles.close}
