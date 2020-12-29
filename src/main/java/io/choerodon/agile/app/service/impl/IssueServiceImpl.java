@@ -182,6 +182,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private IssueStatusMapper issueStatusMapper;
     @Autowired(required = false)
     private AgileTriggerService agileTriggerService;
+    @Autowired
+    private WikiRelationMapper wikiRelationMapper;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -815,7 +817,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueCommentService.deleteByIssueId(issueConvertDTO.getIssueId());
         //删除附件
         issueAttachmentService.deleteByIssueId(issueConvertDTO.getIssueId());
-
+        // 删除issue关联的知识
+        if (!Objects.equals(issueConvertDTO.getTypeCode(), "feature")) {
+            wikiRelationMapper.deleteByIssueId(projectId, issueId);
+        }
         //不是子任务的issue删除子任务
         if (!(SUB_TASK).equals(issueConvertDTO.getTypeCode())) {
             if ((ISSUE_EPIC).equals(issueConvertDTO.getTypeCode())) {
