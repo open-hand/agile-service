@@ -141,54 +141,51 @@ const DraggableItem: React.FC<Props> = ({
 
     );
   };
-  console.log('provided///', provided);
   return (
 
     <div
       role="none"
       ref={provided.innerRef}
       {...provided.draggableProps}
-      {...provided.dragHandleProps}
       style={getStyle(provided.draggableProps.style)}
       className={classnames(`${prefixCls}`, { [`${prefixCls}-split`]: showSplitLine }, draggingClassName)}
     >
-      <div className={`${prefixCls}-item`}>
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
         {renderFieldName({ value: data.get('fieldName'), record: data, dataSet: data.dataSet })}
       </div>
       <div
         role="none"
         className={`${prefixCls}-item ${prefixCls}-item-text`}
         onFocus={(e) => {
-          console.log('wrap focus');
           e.stopPropagation();
         }}
         onMouseDown={(e) => e.stopPropagation()}
         onMouseDownCapture={(e) => {
-          console.log('onMouseDownCapture...');
           e.stopPropagation();
         }}
         onClick={(e) => {
-          console.log('onClick');
-          e.stopPropagation();
+          e.preventDefault();
         }}
       >
         {/* {renderDefaultValue()} */}
         <TextEditToggle
+          key={`page-issue-type-default-edit-text-${data.id}`}
           initValue={0}
+          submitTrigger={['change'] as any}
           alwaysRender={false}
-          editor={() => <Select />}
+          editor={() => renderEditor(data)}
           onSubmit={() => { }}
         >
           {data.get('localDefaultValue') || data.get('defaultValue')}
         </TextEditToggle>
       </div>
-      <div className={`${prefixCls}-item`}>
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
         {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, requiredFieldCanNotEdit)}
       </div>
-      <div className={`${prefixCls}-item`}>
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
         {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, createdFieldCanNotEdit)}
       </div>
-      <div className={`${prefixCls}-item`}>
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
         {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, editedFieldCanNotEdit)}
       </div>
     </div>
