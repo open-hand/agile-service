@@ -19,6 +19,7 @@ import { usePageIssueTypeStore } from '../../stores';
 import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
 import { useSortTableContext } from './stores';
 import renderEditor from './renderEditor';
+import useTextEditTogglePropsWithPage from './useTextEditToggle';
 // import CheckBox from './components/Checkbox';
 
 interface Props {
@@ -33,6 +34,7 @@ const DraggableItem: React.FC<Props> = ({
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
   const { onDelete, showSplitLine, prefixCls: originPrefixCls } = useSortTableContext();
+  const textEditToggleProps = useTextEditTogglePropsWithPage(data);
   const prefixCls = `${originPrefixCls}-drag`;
   const pageConfigFieldEdited = data?.get('pageConfigFieldEdited') || {};
   const {
@@ -124,23 +126,20 @@ const DraggableItem: React.FC<Props> = ({
     ...virtualizedStyle,
     cursor: 'all-scroll',
   });
-  const renderDefaultValue = () => {
-    const defaultValue = data.get('localDefaultValue') || data.get('defaultValue');
-    console.log('render value...120');
-    return (
-      // <Tooltip title={defaultValue} placement="top">
-      <TextEditToggle
-        initValue={0}
-        alwaysRender={false}
-        editor={() => <Select />}
-        onSubmit={() => { }}
-      >
-        {defaultValue}
-      </TextEditToggle>
-      // </Tooltip>
 
+  const renderDefaultValue = useCallback(() => {
+    const fieldName = data.get('fieldName');
+    console.log(`render value:${fieldName}`);
+    return (
+      <TextEditToggle
+        disabled={disabledDel}
+        {...textEditToggleProps}
+      >
+        {data.get('localDefaultValue') || data.get('defaultValue')}
+      </TextEditToggle>
     );
-  };
+  }, [data, disabledDel, textEditToggleProps]);
+
   return (
 
     <div
@@ -167,17 +166,7 @@ const DraggableItem: React.FC<Props> = ({
           e.preventDefault();
         }}
       >
-        {/* {renderDefaultValue()} */}
-        <TextEditToggle
-          key={`page-issue-type-default-edit-text-${data.id}`}
-          initValue={0}
-          submitTrigger={['change'] as any}
-          alwaysRender={false}
-          editor={() => renderEditor(data)}
-          onSubmit={() => { }}
-        >
-          {data.get('localDefaultValue') || data.get('defaultValue')}
-        </TextEditToggle>
+        {renderDefaultValue()}
       </div>
       <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
         {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, requiredFieldCanNotEdit)}
