@@ -32,6 +32,10 @@ public class ExcelImportTemplate {
             this.successCount += count;
         }
 
+        public void addProcessNum(Integer count) {
+            this.processNum += count;
+        }
+
         public void failCountIncrease(){
             this.failCount++;
         }

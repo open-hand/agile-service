@@ -37,10 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -171,8 +167,6 @@ public class ExcelServiceImpl implements ExcelService {
     protected PageFieldService pageFieldService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
-    @Autowired
-    private PlatformTransactionManager transactionManager;
     @Autowired
     private FieldValueService fieldValueService;
     @Autowired
@@ -845,10 +839,7 @@ public class ExcelServiceImpl implements ExcelService {
                     || TASK_CN.equals(issueType)
                     || BUG_CN.equals(issueType))
                     && hasSonNodes) {
-                DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-                definition.setIsolationLevel(TransactionDefinition.ISOLATION_DEFAULT);
-                definition.setTimeout(TransactionDefinition.TIMEOUT_DEFAULT);
-                TransactionStatus status = transactionManager.getTransaction(definition);
+                List<Long> insertIds = new ArrayList<>();
                 try {
                     IssueCreateVO parent = new IssueCreateVO();
                     validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, parent, null, issueTypeCol, parentCol);
@@ -862,6 +853,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Long epicId = parent.getEpicId();
                     Optional.ofNullable(parent.getRelatedIssueVO()).ifPresent(x -> relatedIssueList.add(x));
                     IssueVO result = stateMachineClientService.createIssue(parent, APPLY_TYPE_AGILE);
+                    insertIds.add(result.getIssueId());
                     insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
                     rowIssueIdMap.put(rowNum, result.getIssueId());
 
@@ -891,12 +883,13 @@ public class ExcelServiceImpl implements ExcelService {
                     if (!sonsOk) {
                         processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol);
                         rowNum = Collections.max(sonSet);
-                        transactionManager.rollback(status);
+                        issueService.batchDeleteIssuesAgile(projectId, insertIds);
                         continue;
                     }
                     sonMap.forEach((k, v) -> {
                         Optional.ofNullable(v.getRelatedIssueVO()).ifPresent(x -> relatedIssueList.add(x));
                         IssueVO returnValue = stateMachineClientService.createIssue(v, APPLY_TYPE_AGILE);
+                        insertIds.add(returnValue.getIssueId());
                         insertCustomFields(returnValue.getIssueId(), v.getCustomFields(), projectId);
                         rowIssueIdMap.put(k, returnValue.getIssueId());
                     });
@@ -904,13 +897,13 @@ public class ExcelServiceImpl implements ExcelService {
                     importedIssueIds.add(result.getIssueId());
                     importedIssueIds.addAll(rowIssueIdMap.values());
                     progress.addSuccessCount(sonSet.size() + 1L);
+                    progress.addProcessNum(sonSet.size() + 1);
                     rowNum = Collections.max(sonSet);
-                    transactionManager.commit(status);
                 } catch (Exception e) {
                     LOGGER.error("insert data error when import excel, exception: {}", e);
                     processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol);
                     rowNum = Collections.max(sonSet);
-                    transactionManager.rollback(status);
+                    issueService.batchDeleteIssuesAgile(projectId, insertIds);
                     continue;
                 }
             } else {
@@ -930,8 +923,8 @@ public class ExcelServiceImpl implements ExcelService {
 
                 importedIssueIds.add(result.getIssueId());
                 progress.successCountIncrease();
+                progress.processNumIncrease();
             }
-            progress.processNumIncrease();
             history.setFailCount(progress.getFailCount());
             history.setSuccessCount(progress.getSuccessCount());
             sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, WEBSOCKET_IMPORT_CODE);
@@ -1138,6 +1131,8 @@ public class ExcelServiceImpl implements ExcelService {
         Long failCount = progress.getFailCount() + errorCount;
         history.setFailCount(failCount);
         int processNum = progress.getProcessNum() + errorCount;
+        progress.setFailCount(failCount);
+        progress.addProcessNum(errorCount);
         sendProcess(history, userId, processNum * 1.0 / dataRowCount, WEBSOCKET_IMPORT_CODE);
     }
 
