@@ -552,7 +552,7 @@ export default {
       const extraList = [];
       const values = selectedFeature instanceof Array ? selectedFeature : [selectedFeature];
       values.forEach((feature) => {
-        if (!find(List, { issueId: feature.issueId })) {
+        if (feature && !find(List, { issueId: feature.issueId })) {
           extraList.push(feature);
         }
       });
