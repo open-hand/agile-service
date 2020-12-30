@@ -5,6 +5,7 @@ import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
 import UserHead from '@/components/UserHead';
+// @ts-ignore
 import Delta from 'quill-delta';
 import './Comment.less';
 import { IComment } from '@/common/types';
