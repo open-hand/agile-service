@@ -183,13 +183,34 @@ export interface IField {
   system: boolean,
   extraConfig?: boolean,
 }
-
+export interface IComment {
+  id: number
+  commentText: string
+  issueId: number
+  lastUpdateDate: string
+  objectVersionNumber: number
+  projectId: number
+  userId: number
+  userImageUrl: string
+  userLoginName: string
+  userName: string
+  userRealName: string
+}
+interface Attachment {
+  id: number
+  fileName: string
+  url: string
+  createdBy: number
+}
 export interface Issue {
   issueId: string
   issueNum: string
   summary: string
+  description: string
+  creationDate: string
   typeCode?: string,
   issueTypeVO: IIssueType,
+  lastUpdateDate: string
   parentIssueId?: string
   parentIssueNum?: string
   parentIssueSummary?: string
@@ -213,6 +234,18 @@ export interface Issue {
   foundationFieldValue: {
     [key: string]: any
   }
+  issueCommentVOList: IComment[]
+  issueAttachmentVOList: Attachment[]
+  starBeacon: boolean
+  featureVO: {
+    featureType: 'business' | 'enabler'
+  }
+  createdBy: string
+  createrImageUrl: string
+  createrEmail: string
+  createrName: string
+  createrRealName: string
+  createrLoginName: string
 }
 
 export interface ILog {

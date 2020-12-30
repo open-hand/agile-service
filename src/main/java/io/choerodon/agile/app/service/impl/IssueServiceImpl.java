@@ -486,6 +486,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         //处理用户搜索
         Boolean condition = handleSearchUser(searchVO, projectId);
+        boolean isTreeView = !Boolean.FALSE.equals(searchVO.getSearchArgs().get("tree"));
         if (condition) {
             Page<Long> issueIdPage;
             String filterSql = null;
@@ -503,7 +504,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 order.put(fieldCode, sortCode);
                 PageUtil.sortResetOrder(pageRequest.getSort(), null, order);
                 List<Long> issueIdsWithSub =
-                        issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null)
+                        issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null, isTreeView)
                                 .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageRequest);
 
@@ -518,7 +519,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         .subList((pageRequest.getPage() - 1) * pageRequest.getSize(), pageRequest.getPage() * pageRequest.getSize()));
             } else {
                 String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
-                Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
                 List<Long> issueIds = issues.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
             }
@@ -526,8 +527,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Page<IssueListFieldKVVO> issueListDTOPage;
             if (issueIdPage.getContent() != null && !issueIdPage.getContent().isEmpty()) {
                 List<Long> issueIds = issueIdPage.getContent();
-                Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
-                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false);
+                Set<Long> childrenIds = new HashSet<>();
+                if (isTreeView) {
+                    childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                }
+                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, isTreeView);
                 Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
                 Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
