@@ -6,6 +6,7 @@ import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import FullEditor from '@/components/FullEditor';
 import { text2Delta } from '@/utils/richText';
+// @ts-ignore
 import Delta from 'quill-delta';
 import Section from '../section';
 import { useDetailContext } from '../../context';

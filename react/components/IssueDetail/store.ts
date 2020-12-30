@@ -6,6 +6,7 @@ import {
 } from '@/common/types';
 // @ts-ignore
 import { uploadAndReplaceImage } from '@/utils/richText';
+// @ts-ignore
 import Delta from 'quill-delta';
 import { dataLogApi, fieldApi, issueApi } from '@/api';
 import type { Events, DemandEvents } from './index';

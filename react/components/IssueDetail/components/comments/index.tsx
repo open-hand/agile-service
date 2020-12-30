@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { stores } from '@choerodon/boot';
 import { Button, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+// @ts-ignore
 import Delta from 'quill-delta';
 import Comment from './Comment';
 import AddComment from './AddComment';

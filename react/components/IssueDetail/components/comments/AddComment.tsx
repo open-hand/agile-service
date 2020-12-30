@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
+// @ts-ignore
 import Delta from 'quill-delta';
 
 interface Props {
@@ -19,7 +20,7 @@ const Comments: React.FC<Props> = ({ onSubmit }) => {
   function verifyComment(comment: Delta) {
     let result = false;
     if (comment && comment.length) {
-      comment.forEach((item) => {
+      comment.forEach((item:any) => {
         // @ts-ignore
         if (!result && item.insert && (item.insert.image || item.insert.trim())) {
           result = true;
