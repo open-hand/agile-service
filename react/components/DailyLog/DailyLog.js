@@ -274,7 +274,7 @@ class DailyLog extends Component {
         cancelText="取消"
         confirmLoading={createLoading}
         footer={[
-          <Button key="submit" className="c7n-dailyLog-btn" color="primary" funcType="raised" loading={loading} disabled={loading} onClick={this.handleCreateDailyLog}>
+          <Button key="submit" color="primary" funcType="raised" loading={loading} disabled={loading} onClick={this.handleCreateDailyLog}>
             确定
           </Button>,
           <Button key="back" onClick={onCancel} funcType="raised">取消</Button>,

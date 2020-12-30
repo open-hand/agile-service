@@ -8,5 +8,11 @@
         where id = #{id}
     </update>
 
+    <delete id="deleteByIssueId">
+        delete from  agile_wiki_relation where
+        project_id = #{projectId}
+        ANd issue_id = #{issueId}
+    </delete>
+
 
 </mapper>

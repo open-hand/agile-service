@@ -9,7 +9,7 @@ import {
 import { find } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import { devOpsApi } from '@/api';
-import SelectApp from './SelectApp';
+import SelectApp from '@/components/CreateBranch/SelectApp';
 import './LinkBranch.less';
 import './commom.less';
 

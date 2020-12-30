@@ -1,8 +1,6 @@
+/* eslint-disable react/prop-types */
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
-import { find } from 'lodash';
-import { toJS } from 'mobx';
 import FeatureColumn from './FeatureColumn';
 import Cell from '../Cell';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
@@ -10,8 +8,7 @@ import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapSto
 @observer
 class FeatureCell extends Component {
   handleAddFeatureClick=() => {
-    const { epic, otherData } = this.props;
-    const { epicId } = epic;
+    const { epic } = this.props;
     StoryMapStore.addFeature(epic);
   }
 
@@ -20,30 +17,14 @@ class FeatureCell extends Component {
     StoryMapStore.afterCreateFeature(epicIndex, newFeature);
   }
 
-  getStorys = (targetFeature) => {
-    const { swimLine } = StoryMapStore;
-    const { version } = this.props;
-    try {
-      switch (swimLine) {
-        case 'none': {
-          return targetFeature.storys || [];
-        }
-        case 'version': {
-          return targetFeature.version[version.versionId] || [];
-        }
-        default: return [];
-      }
-    } catch (error) {
-      return [];
-    }
-  }
+  getStorys = (targetFeature) => targetFeature.storys || []
 
   render() {
     const {
       epic, otherData, isLastColumn, lastCollapse, epicIndex,
     } = this.props;
     const { issueId: epicId, featureCommonDTOList, adding } = epic;
-    const { storyData, swimLine } = StoryMapStore;
+    const { storyData } = StoryMapStore;
     const targetEpic = storyData[epicId] || {};
     const { collapse } = otherData || {};
     // 无特性的故事不会显示在板子上,当隐藏无故事的列时，隐藏特性列
