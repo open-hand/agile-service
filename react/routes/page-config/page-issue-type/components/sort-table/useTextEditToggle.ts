@@ -4,6 +4,7 @@ import React, {
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import renderEditor from './renderEditor';
+import { transformDefaultValue } from '../../utils';
 
 interface ITextEditToggleConfigProps {
   key: string
@@ -16,45 +17,58 @@ interface ITextEditToggleConfigProps {
   onSubmit: (data: any) => void
   initValue: any
 }
-
+/**
+ *
+ * @param record
+ */
 function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigProps {
   const fieldType = record.get('fieldType');
   const handleSubmit = useCallback((data) => {
     console.log('data', data, record.toData());
-    // const local = record.get('local');
+    // const { };
+    const local = record.get('local');
+    record.set('defaultValue', data);
+
     // switch (fieldType) {
     //   case 'input':
+    //   case 'member':
     //   case 'text': {
     //     record.set('defaultValue', data);
-
-    //     return
+    //     break;
     //   }
 
     //   default:
     //     break;
     // }
+    const currentData = record.toData();
+    console.log('show txt', transformDefaultValue(currentData));
+    record.set('showDefaultValueText', transformDefaultValue(currentData));
   }, [record]);
   const variableProps = useMemo(() => {
-    console.log('render.', fieldType);
-    const defaultValue = record.get('localDefaultValue') || record.get('defaultValue');
-
+    let defaultValue = record.get('defaultValue');
+    let editor = () => renderEditor({ record, defaultValue });
+    if (fieldType === 'member') {
+      const defaultValueObj = record.get('defaultValueObj') || record.get('localDefaultObj') || {};
+      defaultValue = defaultValueObj.id;
+      editor = () => renderEditor({ record, defaultValue: defaultValueObj });
+    }
     return {
       initValue: defaultValue,
-      onSubmit: handleSubmit,
+      editor,
     };
-  }, [fieldType, handleSubmit, record]);
-  const editor = useMemo(() => () => renderEditor({ record }), [record]);
+  }, [fieldType, record]);
   const constantProps = useMemo(() => {
     const key = `page-issue-type-default-edit-text-${record.id}`;
     const submitTrigger = ['change', 'blur'] as Action[];
     return {
       alwaysRender: false,
       submitTrigger,
+      onSubmit: handleSubmit,
       key,
     };
-  }, [record.id]);
+  }, [handleSubmit, record.id]);
+  console.log(`generate config for ${fieldType}`);
   return {
-    editor,
     ...variableProps,
     ...constantProps,
   };

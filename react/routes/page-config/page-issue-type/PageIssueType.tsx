@@ -26,6 +26,7 @@ import CreateField from '../components/create-field';
 import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
+import { transformDefaultValue } from './utils';
 
 type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: number, localDefaultObj: any, defaultValueObj: any, };
 function PageIssueType() {
@@ -62,7 +63,7 @@ function PageIssueType() {
           required = item.dataSetRecord.get('required');
         }
         return {
-          ...omit(item, 'dataSetRecord', 'local', 'localDefaultValue', 'localSource'),
+          ...omit(item, 'dataSetRecord', 'local', 'showDefaultValueText', 'localSource'),
           rank: newRank,
           created,
           edited,
@@ -118,8 +119,8 @@ function PageIssueType() {
   const onSubmitLocal = async (data: ILocalFieldPostDataProps, oldField: boolean = false) => {
     const newData = Object.assign(data, {
       local: true,
-      localDefaultValue: oldField ? pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.defaultValueObj, data.fieldOptions)
-        : pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.localDefaultObj, data.fieldOptions, 'tempKey'),
+      showDefaultValueText: oldField ? transformDefaultValue(data)
+        : transformDefaultValue({ ...data, optionKey: 'tempKey' }),
       localSource: oldField ? 'add' : 'created',
       fieldName: data.name,
       edited: true,
