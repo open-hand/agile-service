@@ -10,7 +10,7 @@ import {
 } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { observer } from 'mobx-react-lite';
+import { Observer, observer } from 'mobx-react-lite';
 import moment from 'moment';
 import TableDropMenu from '@/common/TableDropMenu';
 import CheckBox from '@/components/check-box';
@@ -34,7 +34,6 @@ const DraggableItem: React.FC<Props> = ({
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
   const { onDelete, showSplitLine, prefixCls: originPrefixCls } = useSortTableContext();
-  const textEditToggleProps = useTextEditTogglePropsWithPage(data);
   const prefixCls = `${originPrefixCls}-drag`;
   const pageConfigFieldEdited = data?.get('pageConfigFieldEdited') || {};
   const {
@@ -44,6 +43,8 @@ const DraggableItem: React.FC<Props> = ({
   } = pageConfigFieldEdited;
   // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除
   const disabledDel = !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
+  const textEditToggleProps = useTextEditTogglePropsWithPage(data);
+
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={`${prefixCls}-text`}>
 
@@ -127,18 +128,18 @@ const DraggableItem: React.FC<Props> = ({
     cursor: 'all-scroll',
   });
 
-  const renderDefaultValue = useCallback(() => {
-    const fieldName = data.get('fieldName');
-    console.log(`render value:${fieldName}`);
-    return (
+  const renderDefaultValue = useCallback(() => (
+    disabledDel ? data.get('showDefaultValueText') : (
       <TextEditToggle
         disabled={disabledDel}
         {...textEditToggleProps}
       >
-        {data.get('localDefaultValue') || data.get('defaultValue')}
+        <Observer>
+          {() => data.get('showDefaultValueText')}
+        </Observer>
       </TextEditToggle>
-    );
-  }, [data, disabledDel, textEditToggleProps]);
+    )
+  ), [data, disabledDel, textEditToggleProps]);
 
   return (
 
