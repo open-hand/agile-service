@@ -522,17 +522,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return queryById(organizationId, projectId, field.getId());
     }
 
-//    private void updateDefaultValue(ObjectSchemeFieldDTO field, String defaultValue) {
-//        Long fieldId = field.getId();
-//        ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
-//        dto.setFieldId(fieldId);
-//        List<ObjectSchemeFieldExtendDTO> result = objectSchemeFieldExtendMapper.select(dto);
-//        result.forEach(r -> {
-//            r.setDefaultValue(defaultValue);
-//            objectSchemeFieldExtendMapper.updateOptional(r, "defaultValue");
-//        });
-//    }
-//
     @Override
     public String getFieldContext(String code) {
         List<String> contexts = new ArrayList<>();
