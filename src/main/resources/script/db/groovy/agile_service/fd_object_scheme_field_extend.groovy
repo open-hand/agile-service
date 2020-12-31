@@ -59,7 +59,7 @@ databaseChangeLog(logicalFilePath: 'fd_object_scheme_field_extend.groovy') {
         }
     }
 
-    changeSet(id: '2020-12-25-fd-object-scheme-field-extend-add-columns', author: 'kaiwen.li@hand-china.com') {
+    changeSet(id: '2020-12-25-fd-object-scheme-field-extend-add-column', author: 'kaiwen.li@hand-china.com') {
         addColumn(tableName: 'fd_object_scheme_field_extend') {
             column(name: 'default_value', type: 'VARCHAR(255)', remarks: '默认值')
         }
