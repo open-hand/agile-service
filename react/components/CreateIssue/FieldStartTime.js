@@ -3,13 +3,14 @@ import { Form, DatePicker } from 'choerodon-ui';
 import moment from 'moment';
 
 const FormItem = Form.Item;
-function FieldStartTime({ form, field }) {
+function FieldStartTime({ form, field, initialValue }) {
   const { getFieldDecorator, getFieldValue } = form;
   const issueEndValue = getFieldValue('estimatedEndTime');
   return (
     <FormItem key="estimatedStartTime">
       {getFieldDecorator('estimatedStartTime', {
         rules: [{ required: field.required, message: '预计开始时间是必填项' }],
+        initialValue,
       })(
         <DatePicker
           label="预计开始时间"

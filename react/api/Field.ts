@@ -46,7 +46,7 @@ class FieldApi extends Api<FieldApi> {
  * 加载字段配置
  * @returns {V|*}
  */
-  getFields(dto: IFiled, projectId?: number) {
+  getFields(dto: IFiled, projectId?: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
