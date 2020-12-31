@@ -686,22 +686,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         Set<String> insertSet = new HashSet<>();
         filterByIssueType(intersection, deleteList, insertSet, contextList, field);
 
-        dealWithExtendFields(organizationId, projectId, fieldId, deleteList, insertSet, issueTypeMap, defaultValue);
-        //若同步默认值，修改扩展表中的默认值
-        if (Boolean.TRUE.equals(syncDefaultValue)) {
-            updateDefaultValue(organizationId, projectId, fieldId, defaultValue);
-        }
-    }
-
-    private void updateDefaultValue(Long organizationId,
-                                    Long projectId,
-                                    Long fieldId,
-                                    String defaultValue) {
-        objectSchemeFieldExtendMapper.selectExtendField(null, organizationId, fieldId, projectId)
-                .forEach(i -> {
-                    i.setDefaultValue(defaultValue);
-                    objectSchemeFieldExtendMapper.updateByPrimaryKey(i);
-                });
+        dealWithExtendFields(organizationId, projectId, fieldId, deleteList, insertSet, issueTypeMap, defaultValue, syncDefaultValue);
     }
 
     private void dealWithExtendFields(Long organizationId,
@@ -710,7 +695,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                       List<ObjectSchemeFieldExtendDTO> deleteList,
                                       Set<String> insertSet,
                                       Map<String, Long> issueTypeMap,
-                                      String defaultValue) {
+                                      String defaultValue,
+                                      Boolean syncDefaultValue) {
         boolean onProjectLevel = (projectId != null);
         if (onProjectLevel) {
             deleteList.forEach(d -> objectSchemeFieldExtendMapper.deleteByPrimaryKey(d));
@@ -733,6 +719,22 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 projectIds.forEach(p -> insertObjectSchemeFieldExtend(organizationId, p, fieldId, false, issueTypeMap, i, true, true, defaultValue));
             });
         }
+
+        //若同步默认值，修改扩展表中的默认值
+        if (Boolean.TRUE.equals(syncDefaultValue)) {
+            updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue);
+        }
+    }
+
+    private void updateExtendDefaultValue(Long organizationId,
+                                          Long projectId,
+                                          Long fieldId,
+                                          String defaultValue) {
+        objectSchemeFieldExtendMapper.selectExtendField(null, organizationId, fieldId, projectId)
+                .forEach(i -> {
+                    i.setDefaultValue(defaultValue);
+                    objectSchemeFieldExtendMapper.updateByPrimaryKey(i);
+                });
     }
 
     private void filterByIssueType(List<ObjectSchemeFieldExtendDTO> intersection,
