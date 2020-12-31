@@ -27,10 +27,11 @@ import IssueDetail from './components/issue-detail';
 import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
+import TableModeSwitch from './components/mode-switch';
 
 const Issue = observer(() => {
   const {
-    dataSet, projectId, issueSearchStore, fields,
+    dataSet, projectId, issueSearchStore, fields, changeTableListMode, tableListMode,
   } = useContext(Store);
   const history = useHistory();
   const location = useLocation();
@@ -127,6 +128,7 @@ const Issue = observer(() => {
       await IssueStore.query();
     } else {
       const { pageInfo = {} } = localPageCacheStore.getItem('issues.table') || {};
+
       await IssueStore.query(pageInfo.currentPage);
     }
   };
@@ -211,6 +213,12 @@ const Issue = observer(() => {
         </Button>
         <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button>
         <CollapseAll dataSet={dataSet} tableRef={tableRef} />
+        <TableModeSwitch
+          data={tableListMode ? 'list' : 'tree'}
+          onChange={(mode) => {
+            changeTableListMode(mode === 'list');
+          }}
+        />
       </Header>
       <Breadcrumb />
       <Content style={{ paddingTop: 0 }} className="c7nagile-issue-content">
