@@ -31,10 +31,10 @@ const IssueDetail: React.FC<Props> = ({
   useEffect(() => {
     store.load(outside, organizationId);
   }, [organizationId, outside, selected, store]);
-  const { setVisible } = useDetailContainerContext();
-  useEffect(() => {
-    setVisible(visible);
-  }, [setVisible, visible]);
+  // const { setVisible } = useDetailContainerContext();
+  // useEffect(() => {
+  //   setVisible(visible);
+  // }, [setVisible, visible]);
   // 离开一个页面时，清空数据
   useEffect(() => {
     store.initApi(outside, organizationId);
@@ -46,14 +46,26 @@ const IssueDetail: React.FC<Props> = ({
   const checkEnableEditDetail = useCallback((hasPermission: boolean) => false, []);
 
   return (
-    <div>
-      s
-    </div>
+    <IssueDetailContext.Provider value={{
+      id: selected,
+      store,
+      projectId,
+      hasAdminPermission: false,
+      disabledDetailEdit: !checkEnableEditDetail(false),
+      outside: false,
+      organizationId,
+      topAnnouncementHeight: HeaderStore.announcementClosed ? 0 : 50,
+      applyType: 'agile',
+    }}
+    >
+      <Container />
+    </IssueDetailContext.Provider>
   );
 };
 const ObserverIssueDetail = observer(IssueDetail);
-export default (props:Props) => (
-  <DetailContainer>
-    <ObserverIssueDetail {...props} />
-  </DetailContainer>
-);
+export default ObserverIssueDetail;
+// export default (props:Props) => (
+//   <DetailContainer>
+//     <ObserverIssueDetail {...props} />
+//   </DetailContainer>
+// );

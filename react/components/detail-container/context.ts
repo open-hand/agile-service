@@ -1,7 +1,8 @@
 import { createContext, useContext } from 'react';
 
 export interface IRoute {
-
+  path: string
+  props?: Object
 }
 interface DetailContainerContext {
   outside: boolean
@@ -11,7 +12,7 @@ interface DetailContainerContext {
   push: (nextRoute: IRoute) => void
   pop: () => void
   close: () => void
-  setVisible: (visible: boolean) => void
+  // setVisible: (visible: boolean) => void
 }
 const DetailContainerContext = createContext({} as DetailContainerContext);
 

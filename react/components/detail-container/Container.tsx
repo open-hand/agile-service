@@ -1,6 +1,9 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import ResizeAble from '@/components/ResizeAble';
 import { find } from 'lodash';
+import { Button } from 'choerodon-ui/pro';
+import IssueDetail from '@/components/IssueDetail';
+import EditIssue from '@/components/EditIssue';
 import styles from './Container.less';
 import { useDetailContainerContext } from './context';
 
@@ -9,28 +12,35 @@ const Issue = () => {
   return (
     <div>
       issue
-      <button
+      <Button
         onClick={() => {
-          push('demand');
+          push({ path: 'demand' });
         }}
       >
         push
-      </button>
+      </Button>
     </div>
   );
 };
 const Demand = () => {
-  const { push } = useDetailContainerContext();
+  const { push, close } = useDetailContainerContext();
   return (
     <div>
       Demand
-      <button
+      <Button
         onClick={() => {
-          push('issue');
+          push({ path: 'issue' });
         }}
       >
         push
-      </button>
+      </Button>
+      <Button
+        onClick={() => {
+          close();
+        }}
+      >
+        关闭
+      </Button>
     </div>
   );
 };
@@ -39,14 +49,14 @@ const paths: {
   component: React.ComponentType<any>
 }[] = [{
   path: 'issue',
-  component: Issue,
+  component: EditIssue,
 }, {
   path: 'demand',
   component: Demand,
 }];
-const Container: React.FC = ({ children }) => {
+const Container: React.FC = () => {
   const {
-    outside, topAnnouncementHeight, match, routes, close, pop,
+    outside, topAnnouncementHeight, match, routes, close, pop, push,
   } = useDetailContainerContext();
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -69,15 +79,14 @@ const Container: React.FC = ({ children }) => {
   const handleResize = ({ width }) => {
     setQuery(width);
   };
-  console.log(match);
   const render = useCallback(() => {
-    const target = find(paths, { path: match });
+    const target = find(paths, { path: match.path });
     if (target) {
       // @ts-ignore
-      return React.createElement(target.component);
+      return React.createElement(target.component, match.props);
     }
     return null;
-  }, [match]);
+  }, [match.path, match.props]);
   return (
     <div
       className={styles.container}
@@ -99,20 +108,14 @@ const Container: React.FC = ({ children }) => {
         onResize={handleResize}
       >
         <div className={styles.resize} ref={container}>
-          {match ? render() : children}
           {routes.length > 1 && (
-          <button
+          <Button
             onClick={pop}
           >
             返回
-          </button>
+          </Button>
           )}
-
-          <button
-            onClick={close}
-          >
-            关闭
-          </button>
+          {match ? render() : null}
         </div>
       </ResizeAble>
     </div>

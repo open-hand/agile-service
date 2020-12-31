@@ -21,7 +21,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import ImportIssue from '@/components/ImportIssue';
 import FilterManage from '@/components/FilterManage';
 import IssueDetail, { useDetailStore } from '@/components/IssueDetail';
-import { useDetailContainerContext } from '@/components/detail-container/context';
+import DetailContainer, { useDetail } from '@/components/detail-container';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
@@ -40,7 +40,7 @@ const Issue = observer(() => {
   const importRef = useRef();
   const tableRef = useRef();
   const detailStore = useDetailStore();
-  const { push } = useDetailContainerContext();
+  const [props] = useDetail();
   IssueStore.setTableRef(tableRef);
   const visibleColumns = useMemo(() => {
     if (localPageCacheStore.getItem('issues.table')) {
@@ -178,7 +178,6 @@ const Issue = observer(() => {
   const handleClickSaveFilter = () => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
-
   return (
     <Page
       className="c7nagile-issue"
@@ -243,7 +242,13 @@ const Issue = observer(() => {
           onCreateIssue={handleCreateIssue}
           onRowClick={(record) => {
             detailStore.select(record.get('issueId'));
-            // push('issue');
+            props.push({
+              path: 'issue',
+              props: {
+                issueId: record.get('issueId'),
+                // store: detailStore,
+              },
+            });
             // dataSet.select(record);
             // const editFilterInfo = IssueStore.getEditFilterInfo;
             // IssueStore.setClickedRow({
@@ -270,9 +275,7 @@ const Issue = observer(() => {
             onOk={handleCreateIssue}
           />
         )}
-        <IssueDetail
-          store={detailStore}
-        />
+        <DetailContainer {...props} />
         <ImportIssue ref={importRef} onFinish={refresh} />
       </Content>
     </Page>
