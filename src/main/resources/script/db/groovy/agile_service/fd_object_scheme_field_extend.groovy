@@ -65,7 +65,7 @@ databaseChangeLog(logicalFilePath: 'fd_object_scheme_field_extend.groovy') {
         }
         sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
             "UPDATE fd_object_scheme_field_extend t1 " +
-                    "JOIN ( SELECT t2.id, t2.default_value FROM fd_object_scheme_field t2 WHERE t2.default_value IS NOT NULL AND t2.default_value != \"\" ) t3 " +
+                    "JOIN ( SELECT t2.id, t2.default_value FROM fd_object_scheme_field t2 WHERE t2.default_value IS NOT NULL) t3 " +
                     "ON t1.field_id = t3.id " +
                     "SET t1.default_value = t3.default_value;"
         }
