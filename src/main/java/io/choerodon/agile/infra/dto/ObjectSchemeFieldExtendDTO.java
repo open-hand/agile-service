@@ -45,6 +45,8 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
     @Column(name = "is_edited")
     private Boolean edited;
 
+    private String defaultValue;
+
     public ObjectSchemeFieldExtendDTO() {
     }
 
@@ -54,6 +56,14 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
         this.required = required;
         this.created = created;
         this.edited = edited;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     public String getIssueTypeName() {
