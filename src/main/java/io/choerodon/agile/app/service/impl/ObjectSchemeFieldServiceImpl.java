@@ -1028,6 +1028,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     a.setDefaultValue(defaultIds);
                 }
             }
+            String defaultValue = tryDecryptDefaultValue(a.getDefaultValue().toString());
+            if (defaultValue != null) {
+                a.setDefaultValue(defaultValue);
+            }
             ObjectSchemeFieldExtendDTO result =
                     insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, a.getRequired(), issueTypeMap, issueType, a.getCreated(), a.getEdited() ,a.getDefaultValue().toString());
             if (!ObjectUtils.isEmpty(rank)) {
@@ -1253,6 +1257,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 List<FieldOptionUpdateVO> fieldOptionUpdateVOList = modelMapper.map(f.getFieldOptions(), new TypeToken<List<FieldOptionUpdateVO>>(){}.getType());
                 String defaultIds = fieldOptionService.handleFieldOption(organizationId, f.getId(), fieldOptionUpdateVOList);
                 f.setDefaultValue(defaultIds);
+            }
+            String defaultValue = tryDecryptDefaultValue(f.getDefaultValue().toString());
+            if (defaultValue != null) {
+                f.setDefaultValue(defaultValue);
             }
             if (result.isEmpty() && !ObjectUtils.isEmpty(issueTypeId)) {
                 dto.setIssueTypeId(issueTypeId);
