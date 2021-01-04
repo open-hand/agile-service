@@ -1,5 +1,6 @@
 import { axios, stores, Choerodon } from '@choerodon/boot';
 import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
+import { sameProject } from '@/utils/detail';
 import Api from './Api';
 
 const { AppState } = stores;
@@ -230,9 +231,10 @@ class IssueApi extends Api<IssueApi> {
       },
     }) : this.request({
       method: 'get',
-      url: `${this.prefix}/issues/${issueId}`,
+      url: `${this.prefix}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
       params: {
         organizationId: this.orgId,
+        belongProjectId: this.projectId,
       },
     });
   }

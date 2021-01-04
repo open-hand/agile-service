@@ -1,5 +1,9 @@
 import { getProjectId, getApplyType } from './common';
 
+export function sameProject(projectId: string): boolean {
+  const same = String(projectId) === String(getProjectId());
+  return same;
+}
 export function disableIssueEdit(projectId: string): boolean {
   const same = String(projectId) === String(getProjectId());
   const isInProgram = getApplyType() === 'program';

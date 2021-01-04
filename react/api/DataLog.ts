@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import { sameProject } from '@/utils/detail';
 import Api from './Api';
 
 class DataLogApi extends Api<DataLogApi> {
@@ -34,9 +35,10 @@ class DataLogApi extends Api<DataLogApi> {
       },
     }) : this.request({
       method: 'get',
-      url: `${this.prefix}/data_log`,
+      url: `${this.prefix}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}data_log`,
       params: {
         issueId,
+        belongProjectId: this.projectId,
       },
     });
   }
