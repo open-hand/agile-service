@@ -20,7 +20,6 @@ import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import ImportIssue from '@/components/ImportIssue';
 import FilterManage from '@/components/FilterManage';
-import IssueDetail, { useDetailStore } from '@/components/IssueDetail';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
@@ -39,7 +38,6 @@ const Issue = observer(() => {
   const [urlFilter, setUrlFilter] = useState(null);
   const importRef = useRef();
   const tableRef = useRef();
-  const detailStore = useDetailStore();
   const [props] = useDetail();
   IssueStore.setTableRef(tableRef);
   const visibleColumns = useMemo(() => {
@@ -241,12 +239,16 @@ const Issue = observer(() => {
           visibleColumns={visibleColumns}
           onCreateIssue={handleCreateIssue}
           onRowClick={(record) => {
-            detailStore.select(record.get('issueId'));
-            props.push({
+            props.open({
               path: 'issue',
               props: {
                 issueId: record.get('issueId'),
                 // store: detailStore,
+              },
+              events: {
+                update: () => {
+                  refresh();
+                },
               },
             });
             // dataSet.select(record);

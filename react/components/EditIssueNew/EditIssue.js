@@ -1,11 +1,11 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/sort-comp */
 import React, {
-  useContext, useState, useEffect, useImperativeHandle, useRef,
+  useContext, useState, useEffect, useImperativeHandle, useRef, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores, Choerodon } from '@choerodon/boot';
-import { Spin, Modal } from 'choerodon-ui';
+import { Spin, Button } from 'choerodon-ui';
 import { throttle } from 'lodash';
 import './EditIssue.less';
 import { useIssueTypes } from '@/hooks';
@@ -13,6 +13,7 @@ import {
   issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, pageConfigApi,
 } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import { useDetailContainerContext } from '@/components/detail-container/context';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
 import ResizeAble from '../ResizeAble';
@@ -39,10 +40,8 @@ function EditIssue() {
     issueId: currentIssueId,
     applyType,
     programId,
-    onUpdate,
     onIssueCopy,
     backUrl,
-    onCancel,
     style,
     onDeleteIssue,
     onDeleteSubIssue,
@@ -56,10 +55,15 @@ function EditIssue() {
     setSelect,
     descriptionEditRef,
   } = useContext(EditIssueContext);
+
   const [issueTypes] = useIssueTypes();
   const container = useRef();
   const idRef = useRef();
-
+  const { push, close: onCancel, eventsMap } = useDetailContainerContext();
+  const issueEvents = eventsMap.get('issue');
+  const onUpdate = useCallback(() => {
+    issueEvents?.update();
+  }, [issueEvents]);
   const loadIssueDetail = async (paramIssueId) => {
     const id = paramIssueId || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
@@ -207,152 +211,127 @@ function EditIssue() {
   const { isInProgram } = useIsInProgram();
   const rightDisabled = disabled || (isInProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
   return (
-    <div style={{
-      position: 'fixed',
-      right: 0,
-      // eslint-disable-next-line no-nested-ternary
-      top: isFullScreen ? 0 : HeaderStore.announcementClosed ? 48 : 100,
-      bottom: 0,
-      // height: 'calc(100vh - 50px)',
-      zIndex: 101,
-      // overflow: 'hidden',
-    }}
-    >
-      <ResizeAble
-        modes={['left']}
-        size={{
-          maxWidth: window.innerWidth * 0.6,
-          minWidth: 440,
-        }}
-        defaultSize={{
-          width: localStorage.getItem('agile.EditIssue.width') || 640,
-          height: '100%',
-        }}
-        onResizeEnd={handleResizeEnd}
-        onResize={handleResize}
-      >
-        <div className={`${prefixCls}`} style={style} ref={container}>
-          <div className={`${prefixCls}-divider`} />
-          {
-            issueLoading ? (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  background: 'rgba(255, 255, 255, 0.65)',
-                  zIndex: 9999,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <Spin />
-              </div>
-            ) : null
-          }
-          <div className="c7n-content">
-            <IssueHeader
-              disabled={rightDisabled}
-              store={store}
-              reloadIssue={loadIssueDetail}
-              backUrl={backUrl}
-              onCancel={onCancel}
-              loginUserId={AppState.userInfo.id}
-              onDeleteIssue={onDeleteIssue}
-              onUpdate={onUpdate}
-            />
-            <IssueBody
-              key={issueId}
-              projectId={projectId}
-              disabled={rightDisabled}
-              store={store}
-              issueId={currentIssueId}
-              programId={programId}
-              reloadIssue={loadIssueDetail}
-              onUpdate={onUpdate}
-              onDeleteSubIssue={onDeleteSubIssue}
-              loginUserId={AppState.userInfo.id}
-              applyType={applyType}
-              onDeleteIssue={onDeleteIssue}
-              parentSummary={summary}
-            />
+
+    <div className={`${prefixCls}`} style={style} ref={container}>
+      {
+        issueLoading ? (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: 'rgba(255, 255, 255, 0.65)',
+              zIndex: 9999,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Spin />
           </div>
-          {
-            copyIssueShow ? (
-              <CopyIssue
-                issueId={issueId}
-                issueNum={issueNum}
-                issue={issue}
-                issueLink={linkIssues}
-                issueSummary={summary}
-                visible={copyIssueShow}
-                onCancel={() => store.setCopyIssueShow(false)}
-                onOk={handleCopyIssue.bind(this)}
-                applyType={applyType}
-              />
-            ) : null
-          }
-          {
-            relateStoryShow ? (
-              <RelateStory
-                issue={issue}
-                visible={relateStoryShow}
-                onCancel={() => store.setRelateStoryShow(false)}
-                onOk={handleRelateStory.bind(this)}
-              />
-            ) : null
-          }
-          {
-            transformSubIssueShow ? (
-              <TransformSubIssue
-                visible={transformSubIssueShow}
-                issueId={issueId}
-                issueNum={issueNum}
-                ovn={objectVersionNumber}
-                onCancel={() => store.setTransformSubIssueShow(false)}
-                onOk={handleTransformSubIssue.bind(this)}
-                issueTypes={issueTypes}
-              />
-            ) : null
-          }
-          {
-            transformFromSubIssueShow ? (
-              <TransformFromSubIssue
-                visible={transformFromSubIssueShow}
-                issueId={issueId}
-                issueNum={issueNum}
-                ovn={objectVersionNumber}
-                onCancel={() => store.setTransformFromSubIssueShow(false)}
-                onOk={handleTransformFromSubIssue.bind(this)}
-                store={store}
-              />
-            ) : null
-          }
-          {
-            changeParentShow ? (
-              <ChangeParent
-                issueId={issueId}
-                issueNum={issueNum}
-                visible={changeParentShow}
-                objectVersionNumber={objectVersionNumber}
-                onOk={() => {
-                  store.setChangeParentShow(false);
-                  if (onUpdate) {
-                    onUpdate();
-                  }
-                  loadIssueDetail(issueId);
-                }}
-                onCancel={() => {
-                  store.setChangeParentShow(false);
-                }}
-              />
-            ) : null
-          }
-        </div>
-      </ResizeAble>
+        ) : null
+      }
+      <div className="c7n-content">
+        <IssueHeader
+          disabled={rightDisabled}
+          store={store}
+          reloadIssue={loadIssueDetail}
+          backUrl={backUrl}
+          onCancel={onCancel}
+          loginUserId={AppState.userInfo.id}
+          onDeleteIssue={onDeleteIssue}
+          onUpdate={onUpdate}
+        />
+        <IssueBody
+          key={issueId}
+          projectId={projectId}
+          disabled={rightDisabled}
+          store={store}
+          issueId={currentIssueId}
+          programId={programId}
+          reloadIssue={loadIssueDetail}
+          onUpdate={onUpdate}
+          onDeleteSubIssue={onDeleteSubIssue}
+          loginUserId={AppState.userInfo.id}
+          applyType={applyType}
+          onDeleteIssue={onDeleteIssue}
+          parentSummary={summary}
+          push={push}
+        />
+      </div>
+      {
+        copyIssueShow ? (
+          <CopyIssue
+            issueId={issueId}
+            issueNum={issueNum}
+            issue={issue}
+            issueLink={linkIssues}
+            issueSummary={summary}
+            visible={copyIssueShow}
+            onCancel={() => store.setCopyIssueShow(false)}
+            onOk={handleCopyIssue.bind(this)}
+            applyType={applyType}
+          />
+        ) : null
+      }
+      {
+        relateStoryShow ? (
+          <RelateStory
+            issue={issue}
+            visible={relateStoryShow}
+            onCancel={() => store.setRelateStoryShow(false)}
+            onOk={handleRelateStory.bind(this)}
+          />
+        ) : null
+      }
+      {
+        transformSubIssueShow ? (
+          <TransformSubIssue
+            visible={transformSubIssueShow}
+            issueId={issueId}
+            issueNum={issueNum}
+            ovn={objectVersionNumber}
+            onCancel={() => store.setTransformSubIssueShow(false)}
+            onOk={handleTransformSubIssue.bind(this)}
+            issueTypes={issueTypes}
+          />
+        ) : null
+      }
+      {
+        transformFromSubIssueShow ? (
+          <TransformFromSubIssue
+            visible={transformFromSubIssueShow}
+            issueId={issueId}
+            issueNum={issueNum}
+            ovn={objectVersionNumber}
+            onCancel={() => store.setTransformFromSubIssueShow(false)}
+            onOk={handleTransformFromSubIssue.bind(this)}
+            store={store}
+          />
+        ) : null
+      }
+      {
+        changeParentShow ? (
+          <ChangeParent
+            issueId={issueId}
+            issueNum={issueNum}
+            visible={changeParentShow}
+            objectVersionNumber={objectVersionNumber}
+            onOk={() => {
+              store.setChangeParentShow(false);
+              if (onUpdate) {
+                onUpdate();
+              }
+              loadIssueDetail(issueId);
+            }}
+            onCancel={() => {
+              store.setChangeParentShow(false);
+            }}
+          />
+        ) : null
+      }
     </div>
   );
 }

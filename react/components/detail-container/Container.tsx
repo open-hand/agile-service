@@ -2,58 +2,23 @@ import React, { useRef, useEffect, useCallback } from 'react';
 import ResizeAble from '@/components/ResizeAble';
 import { find } from 'lodash';
 import { Button } from 'choerodon-ui/pro';
-import IssueDetail from '@/components/IssueDetail';
-import EditIssue from '@/components/EditIssue';
+import EditIssue from '@/components/EditIssueNew';
 import styles from './Container.less';
 import { useDetailContainerContext } from './context';
 
-const Issue = () => {
-  const { push } = useDetailContainerContext();
-  return (
-    <div>
-      issue
-      <Button
-        onClick={() => {
-          push({ path: 'demand' });
-        }}
-      >
-        push
-      </Button>
-    </div>
-  );
-};
-const Demand = () => {
-  const { push, close } = useDetailContainerContext();
-  return (
-    <div>
-      Demand
-      <Button
-        onClick={() => {
-          push({ path: 'issue' });
-        }}
-      >
-        push
-      </Button>
-      <Button
-        onClick={() => {
-          close();
-        }}
-      >
-        关闭
-      </Button>
-    </div>
-  );
-};
-const paths: {
+interface Route {
   path: string,
   component: React.ComponentType<any>
-}[] = [{
+}
+const paths: Route[] = [{
   path: 'issue',
   component: EditIssue,
-}, {
-  path: 'demand',
-  component: Demand,
 }];
+export function registerPath(route: Route) {
+  if (!paths.find((p) => p.path === route.path)) {
+    paths.push(route);
+  }
+}
 const Container: React.FC = () => {
   const {
     outside, topAnnouncementHeight, match, routes, close, pop, push,
@@ -109,11 +74,11 @@ const Container: React.FC = () => {
       >
         <div className={styles.resize} ref={container}>
           {routes.length > 1 && (
-          <Button
-            onClick={pop}
-          >
-            返回
-          </Button>
+            <Button
+              onClick={pop}
+            >
+              返回
+            </Button>
           )}
           {match ? render() : null}
         </div>
