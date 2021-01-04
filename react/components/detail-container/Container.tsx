@@ -1,11 +1,13 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import ResizeAble from '@/components/ResizeAble';
 import { find } from 'lodash';
-import { Button } from 'choerodon-ui/pro';
+import { Button, Icon, Tooltip } from 'choerodon-ui/pro';
 import EditIssue from '@/components/EditIssueNew';
-import styles from './Container.less';
+import './Container.less';
 import { useDetailContainerContext } from './context';
+import Back from './back.svg';
 
+const prefixCls = 'c7nagile-detail-container';
 interface Route {
   path: string,
   component: React.ComponentType<any>
@@ -57,7 +59,7 @@ const Container: React.FC = () => {
   }, [match.path, match.props]);
   return (
     <div
-      className={styles.container}
+      className={prefixCls}
       style={{
         top: outside ? 75 : 50 + topAnnouncementHeight,
       }}
@@ -75,13 +77,17 @@ const Container: React.FC = () => {
         onResizeEnd={handleResizeEnd}
         onResize={handleResize}
       >
-        <div className={styles.resize} ref={container}>
+        <div className={`${prefixCls}-resize`} ref={container}>
           {routes.length > 1 && (
-            <Button
-              onClick={pop}
-            >
-              返回
-            </Button>
+            <Tooltip title="返回" placement="top">
+              <div
+                role="none"
+                className={`${prefixCls}-back`}
+                onClick={pop}
+              >
+                <img src={Back} alt="" />
+              </div>
+            </Tooltip>
           )}
           {match ? render() : null}
         </div>
