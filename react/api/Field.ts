@@ -24,6 +24,18 @@ class FieldApi extends Api<FieldApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
+  get outPrefix() {
+    return '/agile/v1/backlog_external';
+  }
+
+  get isOutside() {
+    return false;
+  }
+
+  outside(outside: boolean) {
+    return this.overwrite('isOutside', outside);
+  }
+
   /**
      * 快速创建字段默认值
      * @param issueId
@@ -47,12 +59,11 @@ class FieldApi extends Api<FieldApi> {
  * @returns {V|*}
  */
   getFields(dto: IFiled, projectId?: string) {
-    const organizationId = getOrganizationId();
     return axios({
       method: 'post',
       url: `/agile/v1/projects/${projectId || getProjectId()}/field_value/list`,
       params: {
-        organizationId,
+        organizationId: this.orgId,
       },
       data: dto,
     });
@@ -63,12 +74,19 @@ class FieldApi extends Api<FieldApi> {
  * @returns {V|*}
  */
   getFieldAndValue(issueId: number, dto: IFiled) {
-    const organizationId = getOrganizationId();
-    return this.request({
+    return this.isOutside ? this.request({
+      method: 'post',
+      url: `${this.outPrefix}/field_value/list/${issueId}`,
+      params: {
+        projectId: this.projectId,
+        organizationId: this.orgId,
+      },
+      data: dto,
+    }) : this.request({
       method: 'post',
       url: `${this.prefix}/field_value/list/${issueId}`,
       params: {
-        organizationId,
+        organizationId: this.orgId,
       },
       data: dto,
     });

@@ -6,9 +6,9 @@ import PriorityTag from '@/components/PriorityTag';
 import StatusTag from '@/components/StatusTag';
 import TypeTag from '@/components/TypeTag';
 import styled from '@emotion/styled';
-import LINK_URL from '@/constants/LINK_URL';
-import to from '@/utils/to';
+import { disableIssueEdit } from '@/utils/detail';
 import { commonApi } from '@/api';
+import { useDetailContainerContext } from '@/components/detail-container/context';
 
 const Link = styled.a`
   overflow:hidden;
@@ -22,16 +22,25 @@ function IssueItem({ issue }) {
     issueId, issueTypeVO, issueNum, summary, priorityVO,
     statusVO, projectVO, totalCount, completedCount,
   } = issue;
+  const { push } = useDetailContainerContext();
   const handleSummaryClick = async () => {
     const isViewProject = await commonApi.checkProjectViewPermission(projectVO.id);
-    isViewProject && to(LINK_URL.workListIssue, {
-      type: 'project',
-      id: projectVO.id,
-      params: {
-        paramIssueId: issueId,
-        paramName: issueNum,
+    push({
+      path: 'issue',
+      props: {
+        disabled: disableIssueEdit(projectVO.id),
+        issueId,
+        projectId: projectVO.id,
       },
-    }, { blank: true });
+    });
+    // isViewProject && to(LINK_URL.workListIssue, {
+    //   type: 'project',
+    //   id: projectVO.id,
+    //   params: {
+    //     paramIssueId: issueId,
+    //     paramName: issueNum,
+    //   },
+    // }, { blank: true });
   };
 
   return (

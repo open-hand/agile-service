@@ -13,7 +13,7 @@ const IssueType = observer(({
   reloadIssue, onUpdate,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
-  let [issueTypeData] = useIssueTypes();
+  let [issueTypeData] = useIssueTypes({ disabled });
   const handleChangeType = (type) => {
     const issue = store.getIssue;
     const {

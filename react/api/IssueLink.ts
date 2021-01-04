@@ -13,15 +13,33 @@ class IssueLinkApi extends Api<IssueLinkApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
+  get outPrefix() {
+    return '/agile/v1/backlog_external';
+  }
+
+  get isOutside() {
+    return false;
+  }
+
+  outside(outside: boolean) {
+    return this.overwrite('isOutside', outside);
+  }
+
   /**
    * 根据issueId及applyType加载问题链接
    * @param issueId
    * @param applyType project
    */
   loadByIssueAndApplyType(issueId:number, applyType = 'project') {
-    // eslint-disable-next-line no-cond-assign
     if (applyType === 'project') {
-      return this.request({
+      return this.isOutside ? this.request({
+        method: 'get',
+        url: `${this.outPrefix}/issue_links/${issueId}`,
+        params: {
+          project_id: this.projectId,
+          organizationId: this.orgId,
+        },
+      }) : this.request({
         method: 'get',
         url: `${this.prefix}/issue_links/${issueId}`,
       });

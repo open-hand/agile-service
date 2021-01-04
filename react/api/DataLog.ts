@@ -7,12 +7,32 @@ class DataLogApi extends Api<DataLogApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
+  get outPrefix() {
+    return '/agile/v1/backlog_external';
+  }
+
+  get isOutside() {
+    return false;
+  }
+
+  outside(outside: boolean) {
+    return this.overwrite('isOutside', outside);
+  }
+
   /**
    *根据issueId查询操作记录
    * @param issueId
    */
   loadByIssue(issueId:number) {
-    return axios({
+    return this.isOutside ? this.request({
+      method: 'get',
+      url: `${this.outPrefix}/data_log`,
+      params: {
+        project_id: this.projectId,
+        organizationId: this.orgId,
+        issueId,
+      },
+    }) : this.request({
       method: 'get',
       url: `${this.prefix}/data_log`,
       params: {

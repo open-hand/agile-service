@@ -28,7 +28,7 @@ import './IssueBody.less';
 
 const { TabPane } = Tabs;
 // eslint-disable-next-line no-undef
-const TestLink = C7NTryImport('@choerodon/testmanager/lib/components/test-case-link-list', Fragment);
+const TestLink = Fragment;
 
 function IssueBody(props) {
   const {

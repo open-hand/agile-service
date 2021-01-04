@@ -17,7 +17,7 @@ class StatusApi extends Api<StatusApi> {
   }
 
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
