@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import { sameProject } from '@/utils/detail';
 import Api from './Api';
 
 interface IIssueLink {
@@ -41,7 +42,11 @@ class IssueLinkApi extends Api<IssueLinkApi> {
         },
       }) : this.request({
         method: 'get',
-        url: `${this.prefix}/issue_links/${issueId}`,
+        url: `${this.prefix}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issue_links/${issueId}`,
+        params: {
+          organizationId: this.orgId,
+          belongProjectId: this.projectId,
+        },
       });
     }
     return this.request({
