@@ -255,7 +255,7 @@
         select
             t4.id,
             t4.code,
-            t5.default_value,
+            t4.default_value,
             t4.description,
             t4.is_required,
             t4.field_type,
