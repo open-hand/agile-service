@@ -1,6 +1,7 @@
 import React, {
-  useCallback, useMemo, useState,
+  useCallback, useMemo, useRef, useState,
 } from 'react';
+import { set } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import renderEditor from './renderEditor';
@@ -23,8 +24,9 @@ interface ITextEditToggleConfigProps {
  */
 function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigProps {
   const fieldType = record.get('fieldType');
+  const initValue = record.get('defaultValue');
+  const dataRef = useRef<Array<any> | undefined>();
   const handleSubmit = useCallback((data) => {
-    console.log('data', data, record.toData());
     // const { };
     const local = record.get('local');
     record.set('defaultValue', data);
@@ -41,7 +43,6 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
     //     break;
     // }
     const currentData = record.toData();
-    console.log('show txt', transformDefaultValue(currentData));
     record.set('showDefaultValueText', transformDefaultValue(currentData));
   }, [record]);
   const variableProps = useMemo(() => {
@@ -50,27 +51,57 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
     if (fieldType === 'member') {
       const defaultValueObj = record.get('defaultValueObj') || record.get('localDefaultObj') || {};
       defaultValue = defaultValueObj.id;
-      editor = () => renderEditor({ record, defaultValue: defaultValueObj });
+      editor = () => renderEditor({ record, defaultValue: defaultValueObj, dataRef });
     }
     return {
       initValue: defaultValue,
       editor,
     };
-  }, [fieldType, record]);
+  }, [fieldType, record, record.get('defaultValue'), record.get('defaultValueObj'), record.get('localDefaultObj')]);
   const constantProps = useMemo(() => {
     const key = `page-issue-type-default-edit-text-${record.id}`;
-    const submitTrigger = ['change', 'blur'] as Action[];
+    // const submitTrigger = ['click', 'change'] as Action[]; // 'change', 'blur'
+    const submitTrigger = ['blur'] as Action[];
+    const submitOnChange = ['member', 'single', 'radio'].includes(fieldType);
+    if (submitOnChange) {
+      submitTrigger.push('change');
+    }
+    const submitOnOut = ['radio'].includes(fieldType);
+    if (submitOnOut) {
+      submitTrigger.push('click');
+    }
     return {
       alwaysRender: false,
       submitTrigger,
-      onSubmit: handleSubmit,
+      onSubmit: (value: any) => {
+        const currentData = record.toData();
+        let currentDefaultValueObj = currentData.localDefaultObj || currentData.defaultValueObj;
+        if (fieldType === 'member') {
+          const newLocalDefaultObj = dataRef.current?.find((item) => item.id === value);
+          if (newLocalDefaultObj && currentData.defaultValueObj && newLocalDefaultObj.id === currentData.defaultValueObj.id) {
+            record.getField('localDefaultObj')?.reset();
+            currentDefaultValueObj = currentData.defaultValueObj;
+            // record.set('localDefaultObj', undefined);
+          } else if (newLocalDefaultObj) {
+            record.set('localDefaultObj', newLocalDefaultObj);
+            currentDefaultValueObj = newLocalDefaultObj;
+          }
+        }
+        record.set('defaultValue', value);
+        // console.log('constantProps... onSubmit', currentDefaultValueObj, currentData);
+        record.set('showDefaultValueText', transformDefaultValue({
+          ...currentData,
+          defaultValue: value,
+          defaultValueObj: currentDefaultValueObj,
+        }));
+      },
       key,
     };
-  }, [handleSubmit, record.id]);
-  console.log(`generate config for ${fieldType}`);
+  }, [record]);
   return {
     ...variableProps,
     ...constantProps,
+    initValue,
   };
 }
 export default useTextEditTogglePropsWithPage;

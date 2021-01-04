@@ -8,13 +8,14 @@ import {
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
+import { toJS } from 'mobx';
 import { Prompt } from 'react-router-dom';
 import {
   pageConfigApi, UIssueTypeConfig,
 } from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
 import { validKeyReturnValue } from '@/common/commonValid';
-import { omit } from 'lodash';
+import { omit, set } from 'lodash';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -77,14 +78,32 @@ function PageIssueType() {
       const issueTypeFieldVO = pageIssueTypeStore.getDescriptionObj;
       const data = {
         issueType: pageIssueTypeStore.currentIssueType,
-        fields: submitData.map((item) => ({
-          fieldId: item.get('fieldId'),
-          required: item.get('required'),
-          created: item.get('created'),
-          edited: item.get('edited'),
-          rank: item.get('rank'),
-          objectVersionNumber: item.get('objectVersionNumber'),
-        })),
+        fields: submitData.map((item) => {
+          let fieldOptions = item.get('fieldOptions') as Array<any> | undefined;
+          const defaultValue = toJS(item.get('defaultValue'));
+          const fieldType = item.get('fieldType');
+          if (fieldOptions && !defaultValue) {
+            fieldOptions = fieldOptions.map((option) => ({ ...option, isDefault: false }));
+          } else if (fieldOptions && ['radio', 'single', 'checkbox', 'multiple'].includes(fieldType)) {
+            const searchDefaultArr = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+            fieldOptions = fieldOptions.map((option) => {
+              if (searchDefaultArr.includes(option.id)) {
+                return ({ ...option, isDefault: true });
+              }
+              return ({ ...option, isDefault: false });
+            });
+          }
+          return ({
+            fieldId: item.get('fieldId'),
+            required: item.get('required'),
+            created: item.get('created'),
+            edited: item.get('edited'),
+            rank: item.get('rank'),
+            defaultValue,
+            fieldOptions,
+            objectVersionNumber: item.get('objectVersionNumber'),
+          });
+        }),
         issueTypeFieldVO: issueTypeFieldVO.dirty ? {
           id: issueTypeFieldVO.id,
           template: issueTypeFieldVO.template as string,
@@ -120,7 +139,7 @@ function PageIssueType() {
     const newData = Object.assign(data, {
       local: true,
       showDefaultValueText: oldField ? transformDefaultValue(data)
-        : transformDefaultValue({ ...data, optionKey: 'tempKey' }),
+        : transformDefaultValue({ ...data, defaultValueObj: data.localDefaultObj, optionKey: 'tempKey' }),
       localSource: oldField ? 'add' : 'created',
       fieldName: data.name,
       edited: true,
