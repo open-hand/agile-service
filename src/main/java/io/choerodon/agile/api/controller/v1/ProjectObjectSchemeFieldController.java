@@ -197,4 +197,17 @@ public class ProjectObjectSchemeFieldController {
                                                                      @RequestParam String issueType) {
         return new ResponseEntity<>(objectSchemeFieldService.queryDescriptionTemplate(projectId, issueType, organizationId), HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "同步字段默认值到扩展字段类型")
+    @GetMapping(value = "/sync_default_value")
+    public ResponseEntity<Void> syncDefaultValue(@ApiParam(value = "项目id", required = true)
+                                                 @PathVariable("project_id") Long projectId,
+                                                 @ApiParam(value = "组织id", required = true)
+                                                 @RequestParam Long organizationId,
+                                                 @ApiParam(value = "字段id", required = true)
+                                                 @RequestParam("field_id") @Encrypt Long fieldId) {
+        objectSchemeFieldService.syncDefaultValue(organizationId, projectId, fieldId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

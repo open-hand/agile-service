@@ -737,6 +737,17 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 });
     }
 
+    @Override
+    public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId) {
+        ObjectSchemeFieldDTO search = new ObjectSchemeFieldDTO();
+        search.setId(fieldId);
+        search.setProjectId(projectId);
+        search.setOrganizationId(organizationId);
+
+        String defaultValue = objectSchemeFieldMapper.selectOne(search).getDefaultValue();
+        updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue);
+    }
+
     private void filterByIssueType(List<ObjectSchemeFieldExtendDTO> intersection,
                                    List<ObjectSchemeFieldExtendDTO> deleteList,
                                    Set<String> insertSet,
