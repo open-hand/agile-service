@@ -110,20 +110,22 @@ const Select = forwardRef<any, IBaseComponentProps & Partial<SelectProps & { chi
   <SelectPro
     ref={ref}
     {...otherProps}
+    trigger={multiple ? ['click'] as any : undefined}
     multiple={multiple}
     onChange={(newValue) => {
-      console.log('newValue...', newValue);
-      !multiple && otherProps.onChange && otherProps.onChange(newValue);
+      console.log('newValue...', newValue, !!(!multiple && otherProps.onChange));
+      otherProps.onChange && otherProps.onChange(newValue);
     }}
     onPopupHiddenChange={(hidden) => {
-      console.log('onBlur...', hidden);
+      console.log('blur', hidden, onBlur);
       hidden && onBlur && onBlur();
     }}
   >
     {children}
   </SelectPro>
 ));
-function renderEditor({ record, defaultValue }: { record: Record, defaultValue: any }) {
+
+function renderEditor({ record, defaultValue, dataRef }: { record: Record, defaultValue: any, dataRef?: { current: any } }) {
   const fieldType = record.get('fieldType');
   if (['date', 'time', 'datetime'].includes(fieldType)) {
     return <DatePickerPage dateType={fieldType} />;
@@ -154,6 +156,7 @@ function renderEditor({ record, defaultValue }: { record: Record, defaultValue: 
             //   // @ts-ignore
             //   queryUserRequest: async (userId: number) => (type === 'project' ? userApi.getAllInProject('', undefined, userId) : userApi.getAllInOrg('', undefined, userId)),
             // }}
+          dataRef={dataRef}
           request={({ filter, page }) => (type === 'project' ? userApi.getAllInProject(filter, page) : userApi.getAllInOrg(filter, page))}
         />
       );
