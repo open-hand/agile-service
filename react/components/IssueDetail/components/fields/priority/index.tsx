@@ -4,7 +4,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
 import { useDetailContext } from '@/components/IssueDetail/context';
 import SelectPriority from '@/components/select/select-priority';
 import Field from '../field';
-import fieldStyles from '../index.less';
+import fieldStyles from '../custom-fields/index.less';
 
 interface Props {
   readonly?: boolean,

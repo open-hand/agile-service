@@ -5,7 +5,7 @@ import moment from 'moment';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { useDetailContext } from '@/components/IssueDetail/context';
 import Field from '../field';
-import fieldStyles from '../index.less';
+import fieldStyles from '../custom-fields/index.less';
 
 interface Props {
   disabled: boolean

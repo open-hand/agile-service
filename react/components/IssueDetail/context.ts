@@ -11,6 +11,7 @@ interface Context {
   outside?: boolean
   organizationId?: string
   closeButton?: boolean
+  applyType: string
 }
 const DetailContext = createContext({} as Context);
 
