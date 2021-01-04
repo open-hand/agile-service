@@ -1255,7 +1255,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             //处理字段选项
             if (f.getFieldOptions() != null) {
                 List<FieldOptionUpdateVO> fieldOptionUpdateVOList = modelMapper.map(f.getFieldOptions(), new TypeToken<List<FieldOptionUpdateVO>>(){}.getType());
-                String defaultIds = fieldOptionService.handleFieldOption(organizationId, f.getId(), fieldOptionUpdateVOList);
+                String defaultIds = fieldOptionService.handleFieldOption(organizationId, fieldId, fieldOptionUpdateVOList);
                 f.setDefaultValue(defaultIds);
             }
             String defaultValue = tryDecryptDefaultValue(f.getDefaultValue().toString());
