@@ -2,6 +2,7 @@ import React, {
   useCallback, useMemo, useRef, useState,
 } from 'react';
 import { set } from 'lodash';
+import moment from 'moment';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import renderEditor from './renderEditor';
@@ -24,7 +25,6 @@ interface ITextEditToggleConfigProps {
  */
 function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigProps {
   const fieldType = record.get('fieldType');
-  const initValue = record.get('defaultValue');
   const dataRef = useRef<Array<any> | undefined>();
   const handleSubmit = useCallback((data) => {
     // const { };
@@ -45,19 +45,23 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
     const currentData = record.toData();
     record.set('showDefaultValueText', transformDefaultValue(currentData));
   }, [record]);
+  const initValue = useMemo(() => {
+    if (['date', 'datetime', 'time'].includes(fieldType) && record.get('extraConfig')) {
+      return 'current';
+    }
+    return typeof (record.get('defaultValue')) === 'undefined' || record.get('defaultValue') === '' ? undefined : record.get('defaultValue');
+  }, [fieldType, record, record.get('defaultValue'), record.get('extraConfig')]);
   const variableProps = useMemo(() => {
-    let defaultValue = record.get('defaultValue');
-    let editor = () => renderEditor({ record, defaultValue });
+    let editor = () => renderEditor({ record, defaultValue: initValue });
     if (fieldType === 'member') {
       const defaultValueObj = record.get('defaultValueObj') || record.get('localDefaultObj') || {};
-      defaultValue = defaultValueObj.id;
       editor = () => renderEditor({ record, defaultValue: defaultValueObj, dataRef });
     }
     return {
-      initValue: defaultValue,
+      initValue,
       editor,
     };
-  }, [fieldType, record, record.get('defaultValue'), record.get('defaultValueObj'), record.get('localDefaultObj')]);
+  }, [fieldType, initValue, record]);
   const constantProps = useMemo(() => {
     const key = `page-issue-type-default-edit-text-${record.id}`;
     // const submitTrigger = ['click', 'change'] as Action[]; // 'change', 'blur'
@@ -74,10 +78,13 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
       alwaysRender: false,
       submitTrigger,
       onSubmit: (value: any) => {
+        console.log('current onSubmit');
         const currentData = record.toData();
+        let newValue = value;
         let currentDefaultValueObj = currentData.localDefaultObj || currentData.defaultValueObj;
         if (fieldType === 'member') {
           const newLocalDefaultObj = dataRef.current?.find((item) => item.id === value);
+          console.log('current.', currentData);
           if (newLocalDefaultObj && currentData.defaultValueObj && newLocalDefaultObj.id === currentData.defaultValueObj.id) {
             record.getField('localDefaultObj')?.reset();
             currentDefaultValueObj = currentData.defaultValueObj;
@@ -87,11 +94,19 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
             currentDefaultValueObj = newLocalDefaultObj;
           }
         }
-        record.set('defaultValue', value);
+        if (['date', 'datetime', 'time'].includes(fieldType)) {
+          console.log('value', value, value === 'current');
+          newValue = value === 'current' ? currentData.defaultValue : value;
+          record.set('extraConfig', value === 'current');
+        }
+
+        record.set('defaultValue', newValue);
+
         // console.log('constantProps... onSubmit', currentDefaultValueObj, currentData);
         record.set('showDefaultValueText', transformDefaultValue({
           ...currentData,
-          defaultValue: value,
+          optionKey: currentData.localSource === 'created' ? 'tempKey' : 'id',
+          defaultValue: newValue,
           defaultValueObj: currentDefaultValueObj,
         }));
       },
@@ -101,7 +116,6 @@ function useTextEditTogglePropsWithPage(record: Record): ITextEditToggleConfigPr
   return {
     ...variableProps,
     ...constantProps,
-    initValue,
   };
 }
 export default useTextEditTogglePropsWithPage;

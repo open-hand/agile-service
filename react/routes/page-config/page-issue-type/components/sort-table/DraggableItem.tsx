@@ -16,9 +16,7 @@ import TableDropMenu from '@/common/TableDropMenu';
 import CheckBox from '@/components/check-box';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { usePageIssueTypeStore } from '../../stores';
-import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
 import { useSortTableContext } from './stores';
-import renderEditor from './renderEditor';
 import useTextEditTogglePropsWithPage from './useTextEditToggle';
 // import CheckBox from './components/Checkbox';
 

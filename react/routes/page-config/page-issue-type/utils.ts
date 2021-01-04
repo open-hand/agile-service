@@ -1,5 +1,7 @@
 import { IFieldOptionProps } from '@/api';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import moment from 'moment';
+import { toJS } from 'mobx';
 
 function transformDefaultValue({
   fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey = 'id',
@@ -29,5 +31,25 @@ function transformDefaultValue({
       return defaultValue;
   }
 }
-
-export { transformDefaultValue };
+function beforeSubmitTransform(item: Record, optionKey = 'id') {
+  let fieldOptions = item.get('fieldOptions') as Array<any> | undefined;
+  const defaultValue = toJS(item.get('defaultValue'));
+  const fieldType = item.get('fieldType');
+  if (fieldOptions && !defaultValue) {
+    fieldOptions = fieldOptions.map((option) => ({ ...option, isDefault: false }));
+  } else if (fieldOptions && ['radio', 'single', 'checkbox', 'multiple'].includes(fieldType)) {
+    const searchDefaultArr = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+    fieldOptions = fieldOptions.map((option) => {
+      if (searchDefaultArr.includes(option[optionKey])) {
+        return ({ ...option, isDefault: true });
+      }
+      return ({ ...option, isDefault: false });
+    });
+  }
+  return {
+    defaultValue: typeof (defaultValue) === 'undefined' || defaultValue === null ? '' : String(defaultValue),
+    fieldOptions,
+    extraConfig: item.get('extraConfig'),
+  };
+}
+export { transformDefaultValue, beforeSubmitTransform };

@@ -27,7 +27,7 @@ import CreateField from '../components/create-field';
 import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
-import { transformDefaultValue } from './utils';
+import { transformDefaultValue, beforeSubmitTransform } from './utils';
 
 type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: number, localDefaultObj: any, defaultValueObj: any, };
 function PageIssueType() {
@@ -56,15 +56,17 @@ function PageIssueType() {
         let { created } = item;
         let { edited } = item;
         let { required } = item;
-
+        let extraProps = {};
         if (item.dataSetRecord) {
           newRank = item.dataSetRecord.get('rank');
           created = item.dataSetRecord.get('created');
           edited = item.dataSetRecord.get('edited');
           required = item.dataSetRecord.get('required');
+          extraProps = beforeSubmitTransform(item.dataSetRecord, 'tempKey');
         }
         return {
           ...omit(item, 'dataSetRecord', 'local', 'showDefaultValueText', 'localSource'),
+          ...extraProps,
           rank: newRank,
           created,
           edited,
@@ -78,32 +80,15 @@ function PageIssueType() {
       const issueTypeFieldVO = pageIssueTypeStore.getDescriptionObj;
       const data = {
         issueType: pageIssueTypeStore.currentIssueType,
-        fields: submitData.map((item) => {
-          let fieldOptions = item.get('fieldOptions') as Array<any> | undefined;
-          const defaultValue = toJS(item.get('defaultValue'));
-          const fieldType = item.get('fieldType');
-          if (fieldOptions && !defaultValue) {
-            fieldOptions = fieldOptions.map((option) => ({ ...option, isDefault: false }));
-          } else if (fieldOptions && ['radio', 'single', 'checkbox', 'multiple'].includes(fieldType)) {
-            const searchDefaultArr = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
-            fieldOptions = fieldOptions.map((option) => {
-              if (searchDefaultArr.includes(option.id)) {
-                return ({ ...option, isDefault: true });
-              }
-              return ({ ...option, isDefault: false });
-            });
-          }
-          return ({
-            fieldId: item.get('fieldId'),
-            required: item.get('required'),
-            created: item.get('created'),
-            edited: item.get('edited'),
-            rank: item.get('rank'),
-            defaultValue,
-            fieldOptions,
-            objectVersionNumber: item.get('objectVersionNumber'),
-          });
-        }),
+        fields: submitData.map((item) => ({
+          fieldId: item.get('fieldId'),
+          required: item.get('required'),
+          created: item.get('created'),
+          edited: item.get('edited'),
+          rank: item.get('rank'),
+          objectVersionNumber: item.get('objectVersionNumber'),
+          ...beforeSubmitTransform(item),
+        })),
         issueTypeFieldVO: issueTypeFieldVO.dirty ? {
           id: issueTypeFieldVO.id,
           template: issueTypeFieldVO.template as string,
@@ -115,6 +100,7 @@ function PageIssueType() {
           created: item.get('created'),
           edited: item.get('edited'),
           rank: item.get('rank'),
+          ...beforeSubmitTransform(item),
         })),
         createdFields: CreatedFields,
         deleteIds: pageIssueTypeStore.getDeleteIds,
