@@ -112,6 +112,18 @@ class IssueApi extends Api<IssueApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
+  get outPrefix() {
+    return `/agile/v1/projects/${this.projectId}/project_invoke_agile`;
+  }
+
+  get isOutside() {
+    return false;
+  }
+
+  outside(outside: boolean) {
+    return this.overwrite('isOutside', outside);
+  }
+
   /**
     * 创建问题 敏捷/测试
     * @param issueObj
@@ -210,7 +222,13 @@ class IssueApi extends Api<IssueApi> {
     */
   load(issueId: number) {
     const organizationId = getOrganizationId();
-    return this.request({
+    return this.isOutside ? this.request({
+      method: 'get',
+      url: `${this.prefix}/issues/${issueId}`,
+      params: {
+        organizationId,
+      },
+    }) : this.request({
       method: 'get',
       url: `${this.prefix}/issues/${issueId}`,
       params: {

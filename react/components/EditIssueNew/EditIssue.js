@@ -33,17 +33,17 @@ const defaultProps = {
 function EditIssue() {
   const [issueLoading, setIssueLoading] = useState(false);
   const {
+    outside,
     projectId,
+    organizationId,
     afterIssueUpdate,
     store,
     forwardedRef,
     issueId: currentIssueId,
     applyType,
     programId,
-    onIssueCopy,
     backUrl,
     style,
-    onDeleteIssue,
     onDeleteSubIssue,
     disabled,
     prefixCls,
@@ -55,15 +55,25 @@ function EditIssue() {
     setSelect,
     descriptionEditRef,
   } = useContext(EditIssueContext);
-
-  const [issueTypes] = useIssueTypes();
+  const [issueTypes] = useIssueTypes({ disabled });
   const container = useRef();
   const idRef = useRef();
-  const { push, close: onCancel, eventsMap } = useDetailContainerContext();
+  const { push, close, eventsMap } = useDetailContainerContext();
   const issueEvents = eventsMap.get('issue');
   const onUpdate = useCallback(() => {
     issueEvents?.update();
   }, [issueEvents]);
+  const onCancel = useCallback(() => {
+    close();
+    issueEvents?.close();
+  }, [close, issueEvents]);
+  const onIssueCopy = useCallback(() => {
+    issueEvents?.copy();
+  }, [issueEvents]);
+  const onDeleteIssue = useCallback(() => {
+    close();
+    issueEvents?.delete();
+  }, [close, issueEvents]);
   const loadIssueDetail = async (paramIssueId) => {
     const id = paramIssueId || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
@@ -90,9 +100,9 @@ function EditIssue() {
         context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
-      const fields = await fieldApi.project(projectId).getFieldAndValue(id, param);
+      const fields = await fieldApi.project(projectId).org(organizationId).getFieldAndValue(id, param);
       const { description, issueTypeVO: { typeCode } } = issue;
-      if (!description || description === JSON.stringify([{ insert: '\n' }])) { // 加载默认模版
+      if (!disabled && (!description || description === JSON.stringify([{ insert: '\n' }]))) { // 加载默认模版
         const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(typeCode) || {};
         const { template } = issueTemplateInfo;
         issue.descriptionTemplate = template;
@@ -245,6 +255,7 @@ function EditIssue() {
           onUpdate={onUpdate}
         />
         <IssueBody
+          outside={outside}
           key={issueId}
           projectId={projectId}
           disabled={rightDisabled}

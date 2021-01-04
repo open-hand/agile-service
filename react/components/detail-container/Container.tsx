@@ -13,6 +13,9 @@ interface Route {
 const paths: Route[] = [{
   path: 'issue',
   component: EditIssue,
+}, {
+  path: 'program_issue',
+  component: EditIssue,
 }];
 export function registerPath(route: Route) {
   if (!paths.find((p) => p.path === route.path)) {
