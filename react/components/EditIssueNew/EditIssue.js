@@ -86,7 +86,7 @@ function EditIssue() {
     try {
       // 1. 加载详情
       let issue = await (programId
-        ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.project(projectId).load(id));
+        ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).load(id));
       if (idRef.current !== id) {
         return;
       }
@@ -100,7 +100,7 @@ function EditIssue() {
         context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
-      const fields = await fieldApi.project(projectId).org(organizationId).getFieldAndValue(id, param);
+      const fields = await fieldApi.project(projectId).org(organizationId).outside(outside).getFieldAndValue(id, param);
       const { description, issueTypeVO: { typeCode } } = issue;
       if (!disabled && (!description || description === JSON.stringify([{ insert: '\n' }]))) { // 加载默认模版
         const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(typeCode) || {};
@@ -128,7 +128,7 @@ function EditIssue() {
       ] = await Promise.all([
         knowledgeApi.project(projectId).loadByIssue(id),
         programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
-        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.project(projectId).loadByIssue(id),
+        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
         programId || applyType === 'program' ? null : issueLinkApi.project(projectId).loadByIssueAndApplyType(id),
         programId || applyType === 'program' ? null : devOpsApi.project(projectId).countBranches(id),
       ]);

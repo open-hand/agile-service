@@ -6,8 +6,7 @@ import PriorityTag from '@/components/PriorityTag';
 import StatusTag from '@/components/StatusTag';
 import TypeTag from '@/components/TypeTag';
 import styled from '@emotion/styled';
-import LINK_URL from '@/constants/LINK_URL';
-import to from '@/utils/to';
+import { disableIssueEdit } from '@/utils/detail';
 import { commonApi } from '@/api';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 
@@ -29,6 +28,7 @@ function IssueItem({ issue }) {
     push({
       path: 'issue',
       props: {
+        disabled: disableIssueEdit(projectVO.id),
         issueId,
         projectId: projectVO.id,
       },

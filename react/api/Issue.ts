@@ -113,7 +113,7 @@ class IssueApi extends Api<IssueApi> {
   }
 
   get outPrefix() {
-    return `/agile/v1/projects/${this.projectId}/project_invoke_agile`;
+    return '/agile/v1/backlog_external';
   }
 
   get isOutside() {
@@ -221,18 +221,18 @@ class IssueApi extends Api<IssueApi> {
     * @param issueId
     */
   load(issueId: number) {
-    const organizationId = getOrganizationId();
     return this.isOutside ? this.request({
       method: 'get',
-      url: `${this.prefix}/issues/${issueId}`,
+      url: `${this.outPrefix}/issues/${issueId}`,
       params: {
-        organizationId,
+        project_id: this.projectId,
+        organizationId: this.orgId,
       },
     }) : this.request({
       method: 'get',
       url: `${this.prefix}/issues/${issueId}`,
       params: {
-        organizationId,
+        organizationId: this.orgId,
       },
     });
   }
