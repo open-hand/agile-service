@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
+import { sameProject } from '@/utils/detail';
 import Api from './Api';
 
 interface IFiled {
@@ -84,9 +85,10 @@ class FieldApi extends Api<FieldApi> {
       data: dto,
     }) : this.request({
       method: 'post',
-      url: `${this.prefix}/field_value/list/${issueId}`,
+      url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}field_value/list/${issueId}`,
       params: {
         organizationId: this.orgId,
+        instanceProjectId: this.projectId,
       },
       data: dto,
     });

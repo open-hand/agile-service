@@ -13,6 +13,7 @@ import {
 } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
+import { sameProject } from '@/utils/detail';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
 import TransformSubIssue from '../TransformSubIssue';
@@ -50,6 +51,7 @@ function EditIssue() {
     setSelect,
     descriptionEditRef,
   } = useContext(EditIssueContext);
+  const otherProject = !sameProject(projectId);
   const [issueTypes] = useIssueTypes({ disabled });
   const container = useRef();
   const idRef = useRef();
@@ -113,6 +115,7 @@ function EditIssue() {
       if (setSelect) {
         setSelect(issue);
       }
+
       // 3. 加载额外信息
       const [
         doc,
@@ -121,11 +124,11 @@ function EditIssue() {
         linkIssues,
         branches,
       ] = await Promise.all([
-        knowledgeApi.project(projectId).loadByIssue(id),
-        outside || programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
+        otherProject || outside ? null : knowledgeApi.project(projectId).loadByIssue(id),
+        otherProject || outside || programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
         programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
         programId || applyType === 'program' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
-        outside || programId || applyType === 'program' ? null : devOpsApi.project(projectId).countBranches(id),
+        otherProject || outside || programId || applyType === 'program' ? null : devOpsApi.project(projectId).countBranches(id),
       ]);
       if (idRef.current !== id) {
         return;
@@ -255,6 +258,7 @@ function EditIssue() {
           onDeleteIssue={onDeleteIssue}
           parentSummary={summary}
           push={push}
+          otherProject={otherProject}
         />
       </div>
       {
