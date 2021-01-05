@@ -38,7 +38,7 @@ function IssueBody(props) {
   const {
     issueId, issueNum, typeCode, issueTypeVO = {},
   } = issue;
-  const { reloadIssue } = props;
+  const { reloadIssue, otherProject, outside } = props;
   const createBranchShow = store.getCreateBranchShow;
   const { linkBranchShow } = store;
   const workLogShow = store.getWorkLogShow;
@@ -90,7 +90,7 @@ function IssueBody(props) {
               </>
             )
           }
-          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
+          {!outside && !otherProject && issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueDoc {...props} /> : ''}
 
           {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
@@ -102,7 +102,7 @@ function IssueBody(props) {
             ? <TestLink {...props} /> : '' }
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
-          {['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
+          {!outside && !otherProject && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
         </TabPane>
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
