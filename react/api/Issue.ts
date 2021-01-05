@@ -231,7 +231,7 @@ class IssueApi extends Api<IssueApi> {
       },
     }) : this.request({
       method: 'get',
-      url: `${this.prefix}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
+      url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
       params: {
         organizationId: this.orgId,
         belongProjectId: this.projectId,
