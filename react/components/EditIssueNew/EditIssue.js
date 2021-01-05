@@ -5,8 +5,7 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores, Choerodon } from '@choerodon/boot';
-import { Spin, Button } from 'choerodon-ui';
-import { throttle } from 'lodash';
+import { Spin } from 'choerodon-ui';
 import './EditIssue.less';
 import { useIssueTypes } from '@/hooks';
 import {
@@ -16,7 +15,6 @@ import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
-import ResizeAble from '../ResizeAble';
 import TransformSubIssue from '../TransformSubIssue';
 import TransformFromSubIssue from '../TransformFromSubIssue';
 import ChangeParent from '../ChangeParent';
@@ -48,9 +46,6 @@ function EditIssue() {
     disabled,
     prefixCls,
     issueStore,
-    HeaderStore,
-    isFullScreen,
-    onChangeWidth,
     transformIssue,
     setSelect,
     descriptionEditRef,
@@ -59,7 +54,7 @@ function EditIssue() {
   const container = useRef();
   const idRef = useRef();
   const { push, close, eventsMap } = useDetailContainerContext();
-  const issueEvents = eventsMap.get('issue');
+  const issueEvents = eventsMap.get(applyType === 'program' ? 'program_issue' : 'issue');
   const onUpdate = useCallback(() => {
     issueEvents?.update();
   }, [issueEvents]);
@@ -188,20 +183,9 @@ function EditIssue() {
     loadIssueDetail();
   };
 
-  const handleResizeEnd = ({ width }) => {
-    localStorage.setItem('agile.EditIssue.width', `${width}px`);
-  };
-
   useImperativeHandle(forwardedRef, () => ({
     loadIssueDetail,
   }));
-
-  const handleResize = throttle(({ width }) => {
-    setQuery(width);
-    if (onChangeWidth) {
-      onChangeWidth(width);// 设置宽度
-    }
-  }, 150);
 
   const issue = store.getIssue;
   const {
