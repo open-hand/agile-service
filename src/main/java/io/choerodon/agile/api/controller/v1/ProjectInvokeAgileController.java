@@ -94,7 +94,7 @@ public class ProjectInvokeAgileController {
     @ApiOperation("根据issueId查询issueLink")
     @GetMapping(value = "/issue_links/{issueId}")
     public ResponseEntity<List<IssueLinkVO>> listIssueLinkByIssueId(@ApiParam(value = "项目id", required = true)
-                                                                    @RequestParam(name = "project_id") Long projectId,
+                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                     @ApiParam(value = "issueId", required = true)
                                                                     @PathVariable @Encrypt Long issueId,
                                                                     @ApiParam(value = "所属项目id", required = true)
