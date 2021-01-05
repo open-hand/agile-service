@@ -105,6 +105,18 @@ const FormDataSet = ({
       record?.set('defaultValue', null);
       record?.set('check', false);
     }
+    if (name === 'context') {
+      const contextValues = [...record?.get('context')];
+
+      const currentFieldValue = [...record?.get('syncIssueType')];
+      // 清除不存在的值
+      if (currentFieldValue.length > 0) {
+        const newFieldValue = contextValues.length > 0 ? currentFieldValue.filter((item) => contextValues.includes(item)) : undefined;
+        if (!newFieldValue || newFieldValue.length < currentFieldValue.length) {
+          record?.set('syncIssueType', newFieldValue);
+        }
+      }
+    }
   }
 
   return {
@@ -192,6 +204,31 @@ const FormDataSet = ({
         defaultValue: false,
         type: 'boolean' as FieldType,
       },
+      ...isEdit ? [{
+        name: 'syncIssueType',
+        label: formatMessage({ id: 'field.default.sync' }),
+        valueField: type === 'project' ? 'valueCode' : 'typeCode',
+        textField: 'name',
+        multiple: true,
+        dynamicProps: {
+          options: ({ record, name }: { record: Record, name: string }) => {
+            const contextValues = [...record.get('context')];
+
+            if (contextValues && contextValues.length > 0) {
+              const optionDataSet = new DataSet({
+                autoCreate: false,
+                autoQuery: false,
+              });
+              const searchKey = type === 'project' ? 'valueCode' : 'typeCode';
+              const records: Record[] = record.getField('context')?.options?.filter((item: Record) => contextValues.includes(item.get(searchKey))) || [];
+              const dataArr = records.map((item) => item.toData());
+              optionDataSet.loadData(dataArr);
+              return optionDataSet;
+            }
+            return undefined;
+          },
+        },
+      }] : [],
     ],
     events: {
       update: handleUpdate,

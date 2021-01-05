@@ -201,6 +201,24 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   /**
+   * 同步主默认值到 issueType 类型
+   * @param fieldId
+   * @param issueTypeStr
+   */
+  syncDefaultValue(fieldId: string, issueTypeStr: string, extraConfig?: boolean) {
+    return axios({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/sync_default_value`,
+      params: {
+        field_id: fieldId,
+        issue_types: issueTypeStr,
+        extra_config: extraConfig,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
    * 删除字段
    * @param fieldId
    */
