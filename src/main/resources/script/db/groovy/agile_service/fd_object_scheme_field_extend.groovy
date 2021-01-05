@@ -70,4 +70,16 @@ databaseChangeLog(logicalFilePath: 'fd_object_scheme_field_extend.groovy') {
                     "SET t1.default_value = t3.default_value;"
         }
     }
+
+    changeSet(id: '2021-01-05-fd-object-scheme-field-extend-add-column', author: 'huaxin.deng@hand-china.com') {
+        addColumn(tableName: 'fd_object_scheme_field_extend') {
+            column(name: 'extra_config', type: 'TINYINT UNSIGNED(1)', remarks: '额外配置（是否当前时间/是否包括小数）')
+        }
+        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+            "UPDATE fd_object_scheme_field_extend t1 " +
+                    "JOIN ( SELECT t2.id, t2.extra_config FROM fd_object_scheme_field t2 WHERE t2.extra_config IS NOT NULL) t3 " +
+                    "ON t1.field_id = t3.id " +
+                    "SET t1.extra_config = t3.extra_config;"
+        }
+    }
 }
