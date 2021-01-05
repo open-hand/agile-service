@@ -51,10 +51,10 @@ public class ProjectInvokeAgileController {
                                               @ApiParam(value = "issueId", required = true)
                                               @PathVariable @Encrypt Long issueId,
                                               @ApiParam(value = "所属项目id", required = true)
-                                              @RequestParam Long belongProjectId,
+                                              @RequestParam Long instanceProjectId,
                                               @ApiParam(value = "组织id", required = true)
                                               @RequestParam(required = false) Long organizationId) {
-        return Optional.ofNullable(issueService.queryIssue(belongProjectId, issueId, organizationId))
+        return Optional.ofNullable(issueService.queryIssue(instanceProjectId, issueId, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssue"));
     }
@@ -69,10 +69,10 @@ public class ProjectInvokeAgileController {
                                                                                       @ApiParam(value = "组织id", required = true)
                                                                                       @RequestParam Long organizationId,
                                                                                       @ApiParam(value = "所属项目id", required = true)
-                                                                                      @RequestParam Long belongProjectId,
+                                                                                      @RequestParam Long instanceProjectId,
                                                                                       @ApiParam(value = "参数对象", required = true)
                                                                                       @RequestBody @Valid PageFieldViewParamVO paramDTO) {
-        return new ResponseEntity<>(pageFieldService.queryPageFieldViewListWithInstanceId(organizationId, belongProjectId, instanceId, paramDTO), HttpStatus.OK);
+        return new ResponseEntity<>(pageFieldService.queryPageFieldViewListWithInstanceId(organizationId, instanceProjectId, instanceId, paramDTO), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -83,14 +83,14 @@ public class ProjectInvokeAgileController {
                                                          @ApiParam(value = "issue id", required = true)
                                                          @RequestParam @Encrypt Long issueId,
                                                          @ApiParam(value = "所属项目id", required = true)
-                                                         @RequestParam Long belongProjectId) {
-        return Optional.ofNullable(dataLogService.listByIssueId(belongProjectId, issueId))
+                                                         @RequestParam Long instanceProjectId) {
+        return Optional.ofNullable(dataLogService.listByIssueId(instanceProjectId, issueId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.dataLogList.get"));
     }
 
 
-    @Permission(permissionLogin = true)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据issueId查询issueLink")
     @GetMapping(value = "/issue_links/{issueId}")
     public ResponseEntity<List<IssueLinkVO>> listIssueLinkByIssueId(@ApiParam(value = "项目id", required = true)
@@ -98,11 +98,11 @@ public class ProjectInvokeAgileController {
                                                                     @ApiParam(value = "issueId", required = true)
                                                                     @PathVariable @Encrypt Long issueId,
                                                                     @ApiParam(value = "所属项目id", required = true)
-                                                                    @RequestParam Long belongProjectId,
+                                                                    @RequestParam Long instanceProjectId,
                                                                     @ApiParam(value = "是否包含测试任务")
                                                                     @RequestParam(required = false,name = "no_issue_test",defaultValue = "false")
                                                                         Boolean noIssueTest) {
-        return Optional.ofNullable(issueLinkService.listIssueLinkByIssueId(issueId, belongProjectId, noIssueTest))
+        return Optional.ofNullable(issueLinkService.listIssueLinkByIssueId(issueId, instanceProjectId, noIssueTest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLink.listIssueLinkByIssueId"));
     }
