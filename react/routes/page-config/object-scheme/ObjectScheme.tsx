@@ -54,6 +54,22 @@ function ObjectScheme() {
     };
     schemeTableDataSet.delete(record, modalProps);
   }
+  async function handleSyncDefault() {
+    const record = schemeTableDataSet.current;
+    const id = record?.get('id');
+    const issueTypes = record?.get('context');
+    const extraConfig = record?.get('extraConfig');
+
+    await pageConfigApi.syncDefaultValue(id, issueTypes, extraConfig);
+  }
+  function handleClickMenu({ key }: { key: string }) {
+    if (key === 'del') {
+      handleRemove();
+    }
+    if (key === 'sync') {
+      handleSyncDefault();
+    }
+  }
   function handleCheckChange(value: boolean) {
     if (handleContinueCheckChange()) {
       return value;
@@ -144,7 +160,10 @@ function ObjectScheme() {
       return text;
     }
     const menu = (
-      <Menu onClick={handleRemove}>
+      <Menu onClick={handleClickMenu}>
+        <Menu.Item key="sync">
+          <span>{formatMessage({ id: 'defaultValue.sync' })}</span>
+        </Menu.Item>
         <Menu.Item key="del">
           <span>{formatMessage({ id: 'delete' })}</span>
         </Menu.Item>

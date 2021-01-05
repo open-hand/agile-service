@@ -12,7 +12,7 @@ import moment from 'moment';
 import { toJS } from 'mobx';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
-import { userApi } from '@/api';
+import { pageConfigApi, userApi } from '@/api';
 import Store from './stores';
 import DragList from '../drag-list';
 import './index.less';
@@ -35,6 +35,7 @@ interface IFieldPostData extends FiledOptions {
   check?: boolean,
   objectVersionNumber?: number,
   extraConfig: any,
+  syncIssueType?: string[] // 同步主默认值的问题类型
 }
 export type IFieldPostDataProps = IFieldPostData;
 function CreateField() {
@@ -147,7 +148,8 @@ function CreateField() {
       }
       return validResult && onSubmitLocal(dataTransformPostData(obj));
     }
-    const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${formDataSet.current?.get('id')}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
+    const fieldId = formDataSet.current?.get('id');
+    const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${fieldId}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
     const method = isEdit ? 'put' : 'post';
     formDataSet.transport[isEdit ? 'update' : 'create'] = ({ data: [data] }) => ({
       url,
@@ -160,8 +162,11 @@ function CreateField() {
         return JSON.stringify(postData);
       },
     });
+    const syncIssueTypeArr = isEdit ? [...current?.get('syncIssueType')] : [];
+    const extraConfig = isEdit ? current?.get('extraConfig') : undefined;
     try {
       if ((await formDataSet.submit()) !== false) {
+        syncIssueTypeArr.length > 0 && await pageConfigApi.syncDefaultValue(fieldId, String(syncIssueTypeArr), extraConfig);
         handleRefresh && handleRefresh();
         return true;
       }
@@ -296,10 +301,20 @@ function CreateField() {
       case 'radio': case 'single': case 'checkbox': case 'multiple': {
         return (
           <>
+            <DragList
+              title={formatMessage({ id: `field.${fieldType}` })}
+              data={fieldOptions}
+              tips={formatMessage({ id: 'field.dragList.tips' })}
+              formatMessage={formatMessage}
+              onChange={onTreeChange}
+              onCreate={onTreeCreate}
+              onDelete={onTreeDelete}
+              onInvalid={onTreeDelete}
+            />
             <Select
               name="defaultValue"
               key={`${singleList.indexOf(fieldType) !== -1 ? 'single' : 'multiple'}-defaultValue-select`}
-              style={{ width: '100%', marginBottom: '20px' }}
+              style={{ width: '100%', marginTop: '20px' }}
               multiple={!(singleList.indexOf(fieldType) !== -1)}
             >
               {fieldOptions
@@ -318,16 +333,6 @@ function CreateField() {
                   return [];
                 })}
             </Select>
-            <DragList
-              title={formatMessage({ id: `field.${fieldType}` })}
-              data={fieldOptions}
-              tips={formatMessage({ id: 'field.dragList.tips' })}
-              formatMessage={formatMessage}
-              onChange={onTreeChange}
-              onCreate={onTreeCreate}
-              onDelete={onTreeDelete}
-              onInvalid={onTreeDelete}
-            />
           </>
         );
       }
@@ -371,6 +376,7 @@ function CreateField() {
           onOption={contextOptionSetter}
         />
         {getAttachFields()}
+        {isEdit ? <Select name="syncIssueType" /> : null}
       </Form>
     </div>
   );
