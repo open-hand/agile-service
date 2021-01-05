@@ -31,7 +31,7 @@ class ComponentApi {
     return axios.post(`${this.prefix}/component/query_all?no_issue_test=true&page=${page}&size=${size}`, filters);
   }
 
-  loadAllComponents(filter?: string, projectId?: number) {
+  loadAllComponents(filter?: string, projectId?: string) {
     return axios.post(
       `/agile/v1/projects/${projectId || getProjectId()}/component/query_all?size=${999}&page=${1}`, {
         advancedSearchArgs: {},

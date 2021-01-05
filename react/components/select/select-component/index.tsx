@@ -11,16 +11,17 @@ interface Props extends Partial<SelectProps> {
   valueField?: string
   afterLoad?: (components: IComponent[]) => void
   flat?:boolean
+  projectId?: string
 }
 
 const SelectComponent: React.FC<Props> = forwardRef(({
-  dataRef, afterLoad, valueField, flat, ...otherProps
+  dataRef, afterLoad, valueField, flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'component',
     textField: 'name',
     valueField: valueField || 'componentId',
-    request: () => componentApi.loadAllComponents(),
+    request: () => componentApi.loadAllComponents(undefined, projectId),
     middleWare: (components) => {
       // @ts-ignore
       const data = components.content || [];

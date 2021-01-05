@@ -182,6 +182,9 @@ export interface IField {
   name: string,
   system: boolean,
   extraConfig?: boolean,
+  fieldCode?: string
+  fieldName?: string
+  projectId?: string | number
 }
 export interface IComment {
   id: number
