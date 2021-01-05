@@ -32,9 +32,10 @@ interface Props extends Partial<SelectProps> {
   flat?: boolean
   addPi0?: boolean
   doingIsFirst?: boolean
+  projectId?: string
 }
 const SelectPI: React.FC<Props> = forwardRef(({
-  dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, doingIsFirst, ...otherProps
+  dataRef, statusList, disabledCurrentPI = false, afterLoad, request, flat, addPi0, doingIsFirst, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Props['afterLoad']>();
   afterLoadRef.current = afterLoad;
@@ -42,7 +43,7 @@ const SelectPI: React.FC<Props> = forwardRef(({
     name: 'all_pi',
     textField: 'piName',
     valueField: 'id',
-    request: request || (() => piApi.getPiListByStatus(statusList)),
+    request: request || (() => piApi.project(projectId).getPiListByStatus(statusList)),
     optionRenderer: (pi) => (
       <FragmentForSearch name={pi.id === '0' ? pi.name : `${pi.code}-${pi.name}`}>
         {renderPi(pi)}

@@ -35,3 +35,4 @@ export * from './StatusTransform';
 export * from './PageConfig';
 export * from './ProjectReport';
 export * from './Gantt';
+export * from './MoveIssue';

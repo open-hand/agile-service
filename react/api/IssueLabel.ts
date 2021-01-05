@@ -10,7 +10,7 @@ class IssueLabelApi {
   /**
    * 查询当前项目下的Issue标签
    */
-  loads(projectId?: number) {
+  loads(projectId?: string) {
     return axios.get(
       `/agile/v1/projects/${projectId || getProjectId()}/issue_labels`,
     );

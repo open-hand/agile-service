@@ -30,7 +30,7 @@ class UserApi extends Api<UserApi> {
    * @param page
    * @param id 根据id查询
    */
-  getAllInProject(param?: string, page?: number, userId?: number, size?: number, projectId?: number): Promise<{
+  getAllInProject(param?: string, page?: number, userId?: number, size?: number, projectId?: string): Promise<{
     list: User[]
     hasNextPage: boolean
   }> {
