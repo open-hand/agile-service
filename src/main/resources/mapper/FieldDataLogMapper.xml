@@ -43,4 +43,24 @@
         </foreach>
     </insert>
 
+    <delete id="deleteByInstanceIdAndFieldIds">
+        delete from fd_field_data_log
+        where proejct_id = #{projectId}
+        and instance_id = #{instanceId}
+        and scheme_code = #{schemeCode}
+        <if test="fieldIds != null and fieldIds.size > 0">
+            and field_id in
+            <foreach collection="fieldIds" item="fieldId" open="(" close=")" separator=",">
+                #{fieldId}
+            </foreach>
+        </if>
+    </delete>
+
+    <update id="updateProjectId">
+        update fd_field_data_log set project_id = #{targetProjectId}
+        where project_id = #{projectId}
+        AND instance_id = #{instanceId}
+        AND scheme_code = #{schemeCode}
+    </update>
+
 </mapper>

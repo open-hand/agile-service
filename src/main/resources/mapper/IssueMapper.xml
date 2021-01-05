@@ -3441,5 +3441,14 @@
         left join agile_data_log t3 on t2.log_id = t3.log_id
     </select>
 
+    <select id="selectSubIssueIds" resultType="java.lang.Long">
+        select ai.issue_id from agile_issue ai
+        where
+        ai.type_code in ('sub_task','bug')
+        AND
+        (ai.parent_issue_id = #{issueId}
+         OR ai.relate_issue_id = #{issueId})
+    </select>
+
 
 </mapper>
