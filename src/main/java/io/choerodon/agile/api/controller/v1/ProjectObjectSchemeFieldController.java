@@ -201,13 +201,15 @@ public class ProjectObjectSchemeFieldController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "同步字段默认值到扩展字段类型")
     @GetMapping(value = "/sync_default_value")
-    public ResponseEntity<Void> syncDefaultValue(@ApiParam(value = "项目id", required = true)
-                                                 @PathVariable("project_id") Long projectId,
-                                                 @ApiParam(value = "组织id", required = true)
-                                                 @RequestParam Long organizationId,
-                                                 @ApiParam(value = "字段id", required = true)
-                                                 @RequestParam("field_id") @Encrypt Long fieldId) {
-        objectSchemeFieldService.syncDefaultValue(organizationId, projectId, fieldId);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity syncDefaultValue(@ApiParam(value = "项目id", required = true)
+                                           @PathVariable("project_id") Long projectId,
+                                           @ApiParam(value = "组织id", required = true)
+                                           @RequestParam Long organizationId,
+                                           @ApiParam(value = "字段id", required = true)
+                                           @RequestParam("field_id") @Encrypt Long fieldId,
+                                           @ApiParam(value = "需要同步默认值的问题类型", required = true)
+                                           @RequestParam("issue_types") String syncDefaultValueIssueTypes) {
+        objectSchemeFieldService.syncDefaultValue(organizationId, projectId, fieldId, syncDefaultValueIssueTypes);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }
