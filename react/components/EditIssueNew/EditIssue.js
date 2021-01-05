@@ -258,6 +258,7 @@ function EditIssue() {
           outside={outside}
           key={issueId}
           projectId={projectId}
+          organizationId={organizationId}
           disabled={rightDisabled}
           store={store}
           issueId={currentIssueId}

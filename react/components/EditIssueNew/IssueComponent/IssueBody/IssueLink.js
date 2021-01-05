@@ -28,7 +28,9 @@ import Divider from './Divider';
   }
 
   renderLinkList(link, i) {
-    const { reloadIssue, store, disabled } = this.props;
+    const {
+      reloadIssue, store, disabled, push, projectId, organizationId,
+    } = this.props;
     const { issueId: id } = store.getIssue;
     return (
       <LinkList
@@ -38,7 +40,15 @@ import Divider from './Divider';
         }}
         i={i}
         onOpen={(issueId, linkedIssueId) => {
-          reloadIssue(issueId === id ? linkedIssueId : issueId);
+          const rightId = issueId === id ? linkedIssueId : issueId;
+          push({
+            path: 'issue',
+            props: {
+              issueId: rightId,
+              projectId,
+              organizationId,
+            },
+          });
         }}
         onRefresh={() => {
           reloadIssue(id);
