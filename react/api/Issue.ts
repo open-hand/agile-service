@@ -234,7 +234,7 @@ class IssueApi extends Api<IssueApi> {
       url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
       params: {
         organizationId: this.orgId,
-        belongProjectId: this.projectId,
+        instanceProjectId: this.projectId,
       },
     });
   }
