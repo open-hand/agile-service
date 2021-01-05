@@ -35,7 +35,7 @@ class DataLogApi extends Api<DataLogApi> {
       },
     }) : this.request({
       method: 'get',
-      url: `${this.prefix}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}data_log`,
+      url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}data_log`,
       params: {
         issueId,
         belongProjectId: this.projectId,
