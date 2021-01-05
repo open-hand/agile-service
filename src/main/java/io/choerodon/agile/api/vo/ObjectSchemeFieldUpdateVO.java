@@ -25,8 +25,6 @@ public class ObjectSchemeFieldUpdateVO {
     private Long objectVersionNumber;
     @ApiModelProperty(value = "字段选项列表")
     private List<FieldOptionUpdateVO> fieldOptions;
-    @ApiModelProperty(value = "是否同步默认值")
-    private Boolean syncDefaultValue;
 
     public List<FieldOptionUpdateVO> getFieldOptions() {
         return fieldOptions;
@@ -92,11 +90,4 @@ public class ObjectSchemeFieldUpdateVO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
-    public Boolean getSyncDefaultValue() {
-        return syncDefaultValue;
-    }
-
-    public void setSyncDefaultValue(Boolean syncDefaultValue) {
-        this.syncDefaultValue = syncDefaultValue;
-    }
 }

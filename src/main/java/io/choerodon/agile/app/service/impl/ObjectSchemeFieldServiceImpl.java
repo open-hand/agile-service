@@ -656,7 +656,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         String context = Arrays.asList(contexts).stream().filter(string -> !string.isEmpty()).collect(Collectors.joining(","));
         update.setContext(context);
         String defaultValue = tryDecryptDefaultValue(update.getDefaultValue());
-        updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, contexts, defaultValue, updateDTO.getSyncDefaultValue());
+        updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, contexts, defaultValue);
         if (defaultValue != null) {
             update.setDefaultValue(defaultValue);
         }
@@ -669,8 +669,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                      Long projectId,
                                                      Long fieldId,
                                                      String[] contexts,
-                                                     String defaultValue,
-                                                     Boolean syncDefaultValue) {
+                                                     String defaultValue) {
         if (ObjectUtils.isEmpty(contexts)) {
             throw new CommonException("error.field.context.empty");
         }
@@ -686,7 +685,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         Set<String> insertSet = new HashSet<>();
         filterByIssueType(intersection, deleteList, insertSet, contextList, field);
 
-        dealWithExtendFields(organizationId, projectId, fieldId, deleteList, insertSet, issueTypeMap, defaultValue, syncDefaultValue);
+        dealWithExtendFields(organizationId, projectId, fieldId, deleteList, insertSet, issueTypeMap, defaultValue);
     }
 
     private void dealWithExtendFields(Long organizationId,
@@ -695,8 +694,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                       List<ObjectSchemeFieldExtendDTO> deleteList,
                                       Set<String> insertSet,
                                       Map<String, Long> issueTypeMap,
-                                      String defaultValue,
-                                      Boolean syncDefaultValue) {
+                                      String defaultValue) {
         boolean onProjectLevel = (projectId != null);
         if (onProjectLevel) {
             deleteList.forEach(d -> objectSchemeFieldExtendMapper.deleteByPrimaryKey(d));
@@ -720,21 +718,35 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             });
         }
 
-        //若同步默认值，修改扩展表中的默认值
-        if (Boolean.TRUE.equals(syncDefaultValue)) {
-            updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue);
-        }
     }
 
     private void updateExtendDefaultValue(Long organizationId,
                                           Long projectId,
                                           Long fieldId,
-                                          String defaultValue) {
-        objectSchemeFieldExtendMapper.selectExtendField(null, organizationId, fieldId, projectId)
-                .forEach(i -> {
-                    i.setDefaultValue(defaultValue);
-                    objectSchemeFieldExtendMapper.updateByPrimaryKey(i);
-                });
+                                          String defaultValue,
+                                          List<String> issueTypes) {
+        if (!CollectionUtils.isEmpty(issueTypes)) {
+            objectSchemeFieldExtendMapper.selectExtendField(null, organizationId, fieldId, projectId)
+                    .forEach(i -> {
+                        if (issueTypes.contains(i.getIssueType())) {
+                            i.setDefaultValue(defaultValue);
+                            objectSchemeFieldExtendMapper.updateByPrimaryKey(i);
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String syncDefaultValueIssueTypes) {
+        ObjectSchemeFieldDTO search = new ObjectSchemeFieldDTO();
+        search.setId(fieldId);
+        search.setProjectId(projectId);
+        search.setOrganizationId(organizationId);
+
+        String defaultValue = objectSchemeFieldMapper.selectOne(search).getDefaultValue();
+
+        List<String> issueTypes = Arrays.asList(syncDefaultValueIssueTypes.split(","));
+        updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue, issueTypes);
     }
 
     private void filterByIssueType(List<ObjectSchemeFieldExtendDTO> intersection,
