@@ -208,8 +208,9 @@ public class ProjectObjectSchemeFieldController {
                                            @ApiParam(value = "字段id", required = true)
                                            @RequestParam("field_id") @Encrypt Long fieldId,
                                            @ApiParam(value = "需要同步默认值的问题类型", required = true)
-                                           @RequestParam("issue_types") String syncDefaultValueIssueTypes) {
-        objectSchemeFieldService.syncDefaultValue(organizationId, projectId, fieldId, syncDefaultValueIssueTypes);
+                                           @RequestParam("issue_types") String syncDefaultValueIssueTypes,
+                                           @RequestParam("extra_config") Boolean extraConfig) {
+        objectSchemeFieldService.syncDefaultValue(organizationId, projectId, fieldId, syncDefaultValueIssueTypes, extraConfig);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

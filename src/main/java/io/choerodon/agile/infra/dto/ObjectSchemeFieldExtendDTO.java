@@ -47,6 +47,8 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
 
     private String defaultValue;
 
+    private Boolean extraConfig;
+
     public ObjectSchemeFieldExtendDTO() {
     }
 
@@ -152,5 +154,13 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
 
     public void setEdited(Boolean edited) {
         this.edited = edited;
+    }
+
+    public Boolean getExtraConfig() {
+        return extraConfig;
+    }
+
+    public void setExtraConfig(Boolean extraConfig) {
+        this.extraConfig = extraConfig;
     }
 }

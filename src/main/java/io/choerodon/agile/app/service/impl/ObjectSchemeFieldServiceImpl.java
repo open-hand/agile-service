@@ -77,8 +77,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             throw new CommonException(ERROR_FIELD_CREATE);
         }
         String defaultValue = field.getDefaultValue();
+        Boolean extraConfig = field.getExtraConfig();
         //  创建object_scheme_field_extend
-        insertExtendList(organizationId, projectId, field, issueTypes, issueTypeForRank, defaultValue);
+        insertExtendList(organizationId, projectId, field, issueTypes, issueTypeForRank, defaultValue, extraConfig);
         return objectSchemeFieldMapper.selectByPrimaryKey(field.getId());
     }
 
@@ -87,7 +88,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                   ObjectSchemeFieldDTO field,
                                   List<IssueTypeVO> issueTypes,
                                   String issueTypeForRank,
-                                  String defaultValue) {
+                                  String defaultValue,
+                                  Boolean extraConfig) {
         Long fieldId = field.getId();
         String rank = field.getRank();
         for (IssueTypeVO issueType : issueTypes) {
@@ -104,6 +106,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 dto.setEdited(true);
                 dto.setIssueTypeId(typeId);
                 dto.setDefaultValue(defaultValue);
+                dto.setExtraConfig(extraConfig);
                 if (Objects.equals(type, issueTypeForRank)
                         && !StringUtils.isEmpty(rank)) {
                     dto.setRank(rank);
@@ -517,7 +520,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (!ObjectUtils.isEmpty(issueTypeForRank)
                 && Arrays.asList(contexts).contains(issueTypeForRank)) {
             Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
-            insertObjectSchemeFieldExtend(organizationId, projectId, field.getId(), fieldCreateDTO.getRequired(), issueTypeMap, issueTypeForRank, fieldCreateDTO.getCreated(), fieldCreateDTO.getEdited(), field.getDefaultValue());
+            insertObjectSchemeFieldExtend(organizationId, projectId, field.getId(), fieldCreateDTO.getRequired(), issueTypeMap, issueTypeForRank, fieldCreateDTO.getCreated(), fieldCreateDTO.getEdited(), field.getDefaultValue(), field.getExtraConfig());
         }
         return queryById(organizationId, projectId, field.getId());
     }
@@ -656,7 +659,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         String context = Arrays.asList(contexts).stream().filter(string -> !string.isEmpty()).collect(Collectors.joining(","));
         update.setContext(context);
         String defaultValue = tryDecryptDefaultValue(update.getDefaultValue());
-        updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, contexts, defaultValue);
+        updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, contexts, defaultValue, update.getExtraConfig());
         if (defaultValue != null) {
             update.setDefaultValue(defaultValue);
         }
@@ -669,7 +672,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                      Long projectId,
                                                      Long fieldId,
                                                      String[] contexts,
-                                                     String defaultValue) {
+                                                     String defaultValue,
+                                                     Boolean extraConfig) {
         if (ObjectUtils.isEmpty(contexts)) {
             throw new CommonException("error.field.context.empty");
         }
@@ -685,7 +689,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         Set<String> insertSet = new HashSet<>();
         filterByIssueType(intersection, deleteList, insertSet, contextList, field);
 
-        dealWithExtendFields(organizationId, projectId, fieldId, deleteList, insertSet, issueTypeMap, defaultValue);
+        dealWithExtendFields(organizationId, projectId, fieldId, deleteList, insertSet, issueTypeMap, defaultValue, extraConfig);
     }
 
     private void dealWithExtendFields(Long organizationId,
@@ -694,11 +698,12 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                       List<ObjectSchemeFieldExtendDTO> deleteList,
                                       Set<String> insertSet,
                                       Map<String, Long> issueTypeMap,
-                                      String defaultValue) {
+                                      String defaultValue,
+                                      Boolean extraConfig) {
         boolean onProjectLevel = (projectId != null);
         if (onProjectLevel) {
             deleteList.forEach(d -> objectSchemeFieldExtendMapper.deleteByPrimaryKey(d));
-            insertSet.forEach(i -> insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, false, issueTypeMap, i, true, true, defaultValue));
+            insertSet.forEach(i -> insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, false, issueTypeMap, i, true, true, defaultValue, extraConfig));
         } else {
             //组织层新增或删除，项目层数据同时新增或删除
             deleteList.forEach(d -> {
@@ -713,8 +718,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             Set<Long> projectIds =
                     objectSchemeFieldExtendMapper.selectProjectIdsByOrganizationId(organizationId);
             insertSet.forEach(i -> {
-                insertObjectSchemeFieldExtend(organizationId, null, fieldId, false, issueTypeMap, i, true, true, defaultValue);
-                projectIds.forEach(p -> insertObjectSchemeFieldExtend(organizationId, p, fieldId, false, issueTypeMap, i, true, true, defaultValue));
+                insertObjectSchemeFieldExtend(organizationId, null, fieldId, false, issueTypeMap, i, true, true, defaultValue, extraConfig);
+                projectIds.forEach(p -> insertObjectSchemeFieldExtend(organizationId, p, fieldId, false, issueTypeMap, i, true, true, defaultValue, extraConfig));
             });
         }
 
@@ -724,12 +729,15 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                           Long projectId,
                                           Long fieldId,
                                           String defaultValue,
-                                          List<String> issueTypes) {
+                                          List<String> issueTypes,
+                                          Boolean extraConfig) {
         if (!CollectionUtils.isEmpty(issueTypes)) {
             objectSchemeFieldExtendMapper.selectExtendField(null, organizationId, fieldId, projectId)
                     .forEach(i -> {
                         if (issueTypes.contains(i.getIssueType())) {
                             i.setDefaultValue(defaultValue);
+                            //同步修改默认值时，同步修改额外配置
+                            i.setExtraConfig(extraConfig);
                             objectSchemeFieldExtendMapper.updateByPrimaryKey(i);
                         }
                     });
@@ -737,16 +745,21 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
-    public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String syncDefaultValueIssueTypes) {
+    public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String syncDefaultValueIssueTypes, Boolean extraConfig) {
+
+        String defaultValue = getObjectSchemeFieldByFieldId(organizationId, projectId, fieldId).getDefaultValue();
+
+        List<String> issueTypes = Arrays.asList(syncDefaultValueIssueTypes.split(","));
+        updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue, issueTypes, extraConfig);
+    }
+
+    private ObjectSchemeFieldDTO getObjectSchemeFieldByFieldId(Long organizationId, Long projectId, Long fieldId) {
         ObjectSchemeFieldDTO search = new ObjectSchemeFieldDTO();
         search.setId(fieldId);
         search.setProjectId(projectId);
         search.setOrganizationId(organizationId);
 
-        String defaultValue = objectSchemeFieldMapper.selectOne(search).getDefaultValue();
-
-        List<String> issueTypes = Arrays.asList(syncDefaultValueIssueTypes.split(","));
-        updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue, issueTypes);
+        return objectSchemeFieldMapper.selectOne(search);
     }
 
     private void filterByIssueType(List<ObjectSchemeFieldExtendDTO> intersection,
@@ -785,7 +798,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                                      String issueType,
                                                                      Boolean created,
                                                                      Boolean edited,
-                                                                     String defaultValue) {
+                                                                     String defaultValue,
+                                                                     Boolean extraConfig) {
         ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
         dto.setIssueType(issueType);
         dto.setFieldId(fieldId);
@@ -806,6 +820,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             dto.setEdited(edited);
             dto.setRank(getMinRank(organizationId, projectId, issueType, null));
             dto.setDefaultValue(defaultValue);
+            dto.setExtraConfig(extraConfig);
             objectSchemeFieldExtendMapper.insertSelective(dto);
             extendId = dto.getId();
         } else {
@@ -814,6 +829,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             existedExtendField.setRequired(required);
             existedExtendField.setEdited(Optional.ofNullable(edited).orElse(true));
             existedExtendField.setDefaultValue(defaultValue);
+            dto.setExtraConfig(extraConfig);
             if (objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(existedExtendField) != 1) {
                 throw new CommonException("error.extend.field.update");
             }
@@ -926,8 +942,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 extendList = objectSchemeFieldExtendMapper.selectExtendField(null, organizationId, fieldId, null);
             }
             Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
+            ObjectSchemeFieldDTO objectSchemeFieldDTO = getObjectSchemeFieldByFieldId(organizationId, projectId, fieldId);
             extendList.forEach(e ->
-                    insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, required, issueTypeMap, e.getIssueType(), e.getCreated(), e.getEdited(), null));
+                    insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, required, issueTypeMap, e.getIssueType(), e.getCreated(), e.getEdited(), objectSchemeFieldDTO.getDefaultValue(), objectSchemeFieldDTO.getExtraConfig()));
         } else {
             objectSchemeFieldExtendMapper.batchUpdateRequired(null, organizationId, fieldId, required);
         }
@@ -1045,7 +1062,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 a.setDefaultValue(defaultValue);
             }
             ObjectSchemeFieldExtendDTO result =
-                    insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, a.getRequired(), issueTypeMap, issueType, a.getCreated(), a.getEdited() ,a.getDefaultValue().toString());
+                    insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, a.getRequired(), issueTypeMap, issueType, a.getCreated(), a.getEdited() ,a.getDefaultValue().toString(), a.getExtraConfig());
             if (!ObjectUtils.isEmpty(rank)) {
                 result.setRank(rank);
                 objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(result);
@@ -1281,6 +1298,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 dto.setEdited(f.getEdited());
                 dto.setRank(f.getRank());
                 dto.setDefaultValue(f.getDefaultValue().toString());
+                dto.setExtraConfig(f.getExtraConfig());
                 objectSchemeFieldExtendMapper.insertSelective(dto);
             } else {
                 updateObjectSchemeFieldExtend(f, result);
@@ -1296,6 +1314,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         target.setRank(field.getRank());
         target.setDefaultValue(field.getDefaultValue().toString());
         target.setObjectVersionNumber(field.getObjectVersionNumber());
+        target.setExtraConfig(field.getExtraConfig());
         if (objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(target) != 1) {
             throw new CommonException("error.page.config.field.update");
         }
