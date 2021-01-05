@@ -24,4 +24,5 @@ public interface IssueCommentMapper extends BaseMapper<IssueCommentDTO> {
      */
     List<IssueCommentDTO> queryIssueCommentList(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 
+    void updateTransferProject(@Param("projectId") Long projectId, @Param("issueId") Long issueId, @Param("targetProjectId") Long targetProjectId);
 }

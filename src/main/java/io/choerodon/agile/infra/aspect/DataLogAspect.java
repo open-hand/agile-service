@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.aspect;
 
 import io.choerodon.agile.api.vo.PriorityVO;
+import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.*;
@@ -8,6 +9,7 @@ import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
@@ -23,6 +25,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
@@ -136,6 +139,8 @@ public class DataLogAspect {
     private static final String FIELD_ESTIMATED_START_TIME = "Estimated Start Time";
     private static final String ESTIMATED_END_TIME = "estimatedEndTime";
     private static final String FIELD_ESTIMATED_END_TIME = "Estimated End Time";
+    private static final String PROJECT_MOVE = "projectMove";
+    private static final String FIELD_PROJECT_MOVE = "Project Move";
 
 
     @Autowired
@@ -180,6 +185,8 @@ public class DataLogAspect {
     private ModelMapper modelMapper;
     @Autowired(required = false)
     private AgileTriggerService agileTriggerService;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -255,6 +262,9 @@ public class DataLogAspect {
                     case KNOWLEDGE_RELATION_DELETE:
                         handleKnowledgeRelationDelete(args);
                         break;
+                    case PROJECT_MOVE:
+                        handlerProjectMove(args);
+                         break;
                     default:
                         break;
                 }
@@ -333,6 +343,41 @@ public class DataLogAspect {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
         }
         return result;
+    }
+
+    private void handlerProjectMove(Object[] args) {
+        IssueDTO issueDTO = (IssueDTO) args[0];
+        if (!ObjectUtils.isEmpty(issueDTO)) {
+            IssueDTO olderIssue = issueMapper.selectByPrimaryKey(issueDTO.getIssueId());
+            Long projectId = olderIssue.getProjectId();
+            Long targetProjectId = issueDTO.getProjectId();
+            if (Objects.equals(projectId, targetProjectId)) {
+                return;
+            }
+            String olderValue = null;
+            String newValue = null;
+            String olderString = null;
+            String newString = null;
+            Set<Long> projectIds = new HashSet<>();
+            projectIds.add(projectId);
+            projectIds.add(targetProjectId);
+            List<ProjectVO> projectVOS = baseFeignClient.queryByIds(projectIds).getBody();
+            if (CollectionUtils.isEmpty(projectVOS) || !Objects.equals(projectVOS.size(),projectIds.size())) {
+                throw new CommonException("error.project.not.found");
+            }
+            Map<Long, ProjectVO> projectVOMap = projectVOS.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
+            ProjectVO olderProject = projectVOMap.get(projectId);
+            ProjectVO targetProject = projectVOMap.get(targetProjectId);
+            if (!ObjectUtils.isEmpty(olderProject)) {
+                olderString = olderProject.getName();
+                olderValue = projectId.toString();
+            }
+            if (!ObjectUtils.isEmpty(targetProject)) {
+                newString = targetProject.getName();
+                newValue = targetProjectId.toString();
+            }
+            createDataLog(targetProjectId, issueDTO.getIssueId(), FIELD_PROJECT_MOVE, olderString, newString, olderValue, newValue);
+        }
     }
 
     private Object handleDeleteWorkLogDataLog(Object[] args) {

@@ -188,4 +188,11 @@
             AND fv.field_id = #{fieldId}
         </if>
     </select>
+
+    <update id="updateProjectId">
+        update fd_field_value set project_id = #{targetProjectId}
+        where project_id = #{projectId}
+        AND instance_id = #{issueId}
+        AND scheme_code = #{schemeCode}
+    </update>
 </mapper>
