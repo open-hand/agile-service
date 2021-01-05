@@ -1,10 +1,12 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.vo.IssueLinkVO;
 import io.choerodon.agile.api.vo.PageFieldViewParamVO;
 import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.api.vo.business.DataLogVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.DataLogService;
+import io.choerodon.agile.app.service.IssueLinkService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.PageFieldService;
 import io.choerodon.core.exception.CommonException;
@@ -37,6 +39,9 @@ public class ProjectInvokeAgileController {
 
     @Autowired
     private DataLogService dataLogService;
+
+    @Autowired
+    private IssueLinkService issueLinkService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询单个issue")
@@ -82,5 +87,23 @@ public class ProjectInvokeAgileController {
         return Optional.ofNullable(dataLogService.listByIssueId(belongProjectId, issueId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.dataLogList.get"));
+    }
+
+
+    @Permission(permissionLogin = true)
+    @ApiOperation("根据issueId查询issueLink")
+    @GetMapping(value = "/issue_links/{issueId}")
+    public ResponseEntity<List<IssueLinkVO>> listIssueLinkByIssueId(@ApiParam(value = "项目id", required = true)
+                                                                    @RequestParam(name = "project_id") Long projectId,
+                                                                    @ApiParam(value = "issueId", required = true)
+                                                                    @PathVariable @Encrypt Long issueId,
+                                                                    @ApiParam(value = "所属项目id", required = true)
+                                                                    @RequestParam Long belongProjectId,
+                                                                    @ApiParam(value = "是否包含测试任务")
+                                                                    @RequestParam(required = false,name = "no_issue_test",defaultValue = "false")
+                                                                        Boolean noIssueTest) {
+        return Optional.ofNullable(issueLinkService.listIssueLinkByIssueId(issueId, belongProjectId, noIssueTest))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.IssueLink.listIssueLinkByIssueId"));
     }
 }
