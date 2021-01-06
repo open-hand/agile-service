@@ -45,7 +45,7 @@
 
     <delete id="deleteByInstanceIdAndFieldIds">
         delete from fd_field_data_log
-        where proejct_id = #{projectId}
+        where project_id = #{projectId}
         and instance_id = #{instanceId}
         and scheme_code = #{schemeCode}
         <if test="fieldIds != null and fieldIds.size > 0">

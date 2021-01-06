@@ -232,6 +232,8 @@ public class EncryptionUtils {
                         Class<?> aClass = Class.forName(className);
                         List list = jsonToList(valueNode, aClass);
                         field.set(object, list);
+                    } else if (field.getType() == Object.class){
+                        field.set(object, valueNode.textValue());
                     }
                 } catch (Exception e) {
                     LOGGER.error("reflect error: {}", e);

@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.dto.WikiRelationDTO;
 import io.choerodon.agile.infra.feign.KnowledgebaseClient;
 import io.choerodon.agile.infra.mapper.WikiRelationMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
+import io.choerodon.agile.infra.utils.FeignUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -19,8 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -46,6 +49,8 @@ public class WikiRelationServiceImpl implements WikiRelationService {
     private IWikiRelationService iWikiRelationService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private FeignUtil feignUtil;
 
     private Boolean checkRepeat(WikiRelationDTO wikiRelationDTO) {
         WikiRelationDTO wikiRelation = new WikiRelationDTO();
@@ -77,12 +82,18 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         List<WikiRelationVO> result = new ArrayList<>();
         if (wikiRelationDTOList != null && !wikiRelationDTOList.isEmpty()) {
             List<Long> spaceIds = wikiRelationDTOList.stream().map(WikiRelationDTO::getSpaceId).collect(Collectors.toList());
-            Map<Long, WorkSpaceVO> workSpaceMap = knowledgebaseClient.querySpaceByIds(projectId, spaceIds).getBody().stream().collect(Collectors.toMap(WorkSpaceVO::getId, Function.identity()));
+            Map<Long, WorkSpaceVO> workSpaceMap = new HashMap<>();
+            if (feignUtil.isExist(FeignUtil.KNOWLEDGEBASE_SERVICE)) {
+                workSpaceMap.putAll(knowledgebaseClient.querySpaceByIds(projectId, spaceIds).getBody().stream().collect(Collectors.toMap(WorkSpaceVO::getId, Function.identity())));
+            }
             for (WikiRelationDTO wikiRelation : wikiRelationDTOList) {
-                WikiRelationVO wikiRelationVO = new WikiRelationVO();
-                BeanUtils.copyProperties(wikiRelation, wikiRelationVO);
-                wikiRelationVO.setWorkSpaceVO(workSpaceMap.get(wikiRelationVO.getSpaceId()));
-                result.add(wikiRelationVO);
+                WorkSpaceVO workSpaceVO = workSpaceMap.get(wikiRelation.getSpaceId());
+                if (!ObjectUtils.isEmpty(workSpaceVO)) {
+                    WikiRelationVO wikiRelationVO = new WikiRelationVO();
+                    BeanUtils.copyProperties(wikiRelation, wikiRelationVO);
+                    wikiRelationVO.setWorkSpaceVO(workSpaceVO);
+                    result.add(wikiRelationVO);
+                }
             }
         }
         KnowledgeRelationVO knowledgeRelation = new KnowledgeRelationVO();

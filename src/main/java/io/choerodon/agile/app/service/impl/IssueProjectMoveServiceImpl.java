@@ -125,6 +125,10 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     private RedisUtil redisUtil;
     @Autowired
     private SprintValidator sprintValidator;
+    @Autowired
+    private FieldValueService fieldValueService;
+    @Autowired
+    private FeignUtil feignUtil;
 
     @Override
     public void issueProjectMove(Long projectId, Long issueId, Long targetProjectId, JSONObject jsonObject) {
@@ -149,7 +153,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException("");
         }
-        List<String> agileProjectCategoryS = Arrays.asList(AGILE_PROJECT_CATEGORY);
+        List<String> agileProjectCategoryS = new ArrayList<>();
+        agileProjectCategoryS.addAll(Arrays.asList(AGILE_PROJECT_CATEGORY));
         if (!Objects.equals(issueDTO.getTypeCode(), ISSUE_EPIC)) {
             if (!Objects.equals(projectVO.getCategory(), targetProjectVO.getCategory()) && (!agileProjectCategoryS.contains(projectVO.getCategory()) || !agileProjectCategoryS.contains(targetProjectVO.getCategory()))) {
                 throw new CommonException("error.transfer.project.illegal");
@@ -313,6 +318,10 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         if (agilePluginService != null) {
             agilePluginService.handlerProgramPredefinedFields(targetProjectVO.getId(),jsonObject,programValueMap,issueDTO.getApplyType());
         }
+        Object influenceVersions = jsonObject.get("influenceVersionList");
+        jsonObject.remove("influenceVersionList");
+        Object customFields = jsonObject.get("customFields");
+        jsonObject.remove("customFields");
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(jsonObject, issueUpdateVO);
         // 转换附件
@@ -332,16 +341,39 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         IssueDTO issue = buildIssue(projectVO.getId(), issueDTO, issueUpdateVO.getStatusId(), targetProjectVO.getId());
         IssueDTO dto = issueAccessDataService.transferProject(issue);
         // 更新issue的值
-        if (Boolean.FALSE.equals(isSubIssue(issueDTO))) {
+        if (!ObjectUtils.isEmpty(jsonObject)) {
             issueUpdateVO.setIssueId(issueId);
             issueUpdateVO.setObjectVersionNumber(dto.getObjectVersionNumber());
             issueService.updateIssue(targetProjectVO.getId(), issueUpdateVO, fieldList);
+            if (!ObjectUtils.isEmpty(influenceVersions)) {
+                List<VersionIssueRelVO> list = EncryptionUtils.jsonToList(influenceVersions, VersionIssueRelVO.class);
+                IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
+                issueUpdateVO1.setIssueId(issueId);
+                issueUpdateVO1.setVersionIssueRelVOList(list);
+                issueUpdateVO1.setVersionType("influence");
+                issueService.updateIssue(targetProjectVO.getId(), issueUpdateVO1, new ArrayList<>());
+            }
+        }
+        // 修改自定义字段的值
+        if (!ObjectUtils.isEmpty(customFields)) {
+            addCustomFieldValues(targetProjectVO, issueDTO, customFields);
         }
         // 修改agile_feature和wsjf表中数据的projectId
         if (agilePluginService != null) {
             agilePluginService.projectMoveUpdateFeatureValue(projectVO.getId(), issueDTO, targetProjectVO.getId());
             agilePluginService.handlerFeatureField(targetProjectVO.getId(),issueDTO,programValueMap);
         }
+    }
+
+    private void addCustomFieldValues(ProjectVO targetProjectVO, IssueDTO issueDTO, Object customFields) {
+        List<PageFieldViewUpdateVO> list = EncryptionUtils.jsonToList(customFields, PageFieldViewUpdateVO.class);
+        List<Long> fieldIds = list.stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList());
+        List<Long> existFields = objectSchemeFieldMapper.filterNotExistFields(fieldIds);
+        if (CollectionUtils.isEmpty(existFields)) {
+            return;
+        }
+        list = list.stream().filter(v -> existFields.contains(v.getFieldId())).collect(Collectors.toList());
+        fieldValueService.handlerCustomFields(targetProjectVO.getId(), list, AGILE_SCHEME_CODE, Arrays.asList(issueDTO.getIssueId()), null, false);
     }
 
     private IssueDTO buildIssue(Long projectId, IssueDTO issueDTO, Long status, Long targetProjectId) {
@@ -351,7 +383,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             issue.setProgramId(targetProjectId);
         }
         issue.setIssueId(issueDTO.getIssueId());
-        Long statusId = null;
+        Long statusId = status;
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         //获取状态机id
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, issueDTO.getApplyType(), issueDTO.getIssueTypeId());
@@ -359,12 +391,11 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             throw new CommonException("error.createIssue.stateMachineNotFound");
         }
         //获取初始状态
-        statusId = instanceService.queryInitStatusId(organizationId, stateMachineId);
-        if (statusId == null) {
-            throw new CommonException("error.init.status.not.found");
-        }
-        if (Boolean.FALSE.equals(isSubIssue(issueDTO)) && ObjectUtils.isEmpty(status)) {
-            statusId = status;
+        if (ObjectUtils.isEmpty(status)) {
+            statusId = instanceService.queryInitStatusId(organizationId, stateMachineId);
+            if (statusId == null) {
+                throw new CommonException("error.init.status.not.found");
+            }
         }
         issue.setStatusId(statusId);
         // 设置issueNum
@@ -377,10 +408,6 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             issue.setEpicSequence(sequence);
         }
         return issue;
-    }
-
-    private Boolean isSubIssue(IssueDTO issueDTO){
-        return (Objects.equals(SUB_TASK, issueDTO.getTypeCode()) || (Objects.equals(BUG_TYPE, issueDTO.getTypeCode()) && ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && issueDTO.getRelateIssueId() != 0L));
     }
 
     private void handlerIssueSelfValue(Long projectId, IssueDetailDTO issueDTO) {
@@ -432,7 +459,9 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
 
     private void handlerNeedCleanValue(ProjectVO projectVO, IssueDetailDTO issueDTO, IssueTypeVO issueTypeVO, ProjectVO targetProjectVO) {
         // 清空测试用例
-//        testFeignClient.deleteTestRel(projectVO.getId(), issueDTO.getIssueId());
+        if (feignUtil.isExist(FeignUtil.TEST_MANAGER_SERVICE)) {
+            testFeignClient.deleteTestRel(projectVO.getId(), issueDTO.getIssueId());
+        }
         // 删除问题关联
         issueLinkService.deleteByIssueId(issueDTO.getIssueId());
         // 删除rank值
