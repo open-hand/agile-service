@@ -15,7 +15,7 @@ import styles from './Confirm.less';
 import transformValue, { IFieldWithValue } from './transformValue';
 import renderField from './renderField';
 
-export interface IssueWithSubIssueVOList extends Issue {
+export interface IssueWithSubIssueVOList extends Omit<Issue, 'subIssueVOList'> {
   subIssueVOList: Issue[]
 }
 
