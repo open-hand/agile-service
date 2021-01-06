@@ -1802,15 +1802,17 @@
 
     <select id="queryIssueEpicSelectList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
-            issue_id,
-            epic_name,
-            creation_date
+            ai.issue_id,
+            ai.epic_name,
+            ai.creation_date,
+            alv.name AS epicColor
         FROM
-            agile_issue
+            agile_issue ai
+            LEFT JOIN lookup_value alv ON ai.color_code = alv.value_code
         WHERE
-            project_id = #{projectId}
-            AND type_code = 'issue_epic'
-        ORDER BY epic_sequence DESC
+            ai.project_id = #{projectId}
+            AND ai.type_code = 'issue_epic'
+        ORDER BY ai.epic_sequence DESC
     </select>
 
     <delete id="batchRemoveFromVersion">

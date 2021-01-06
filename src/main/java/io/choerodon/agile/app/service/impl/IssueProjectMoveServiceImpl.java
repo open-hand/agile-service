@@ -127,6 +127,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     private SprintValidator sprintValidator;
     @Autowired
     private FieldValueService fieldValueService;
+    @Autowired
+    private FeignUtil feignUtil;
 
     @Override
     public void issueProjectMove(Long projectId, Long issueId, Long targetProjectId, JSONObject jsonObject) {
@@ -457,7 +459,9 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
 
     private void handlerNeedCleanValue(ProjectVO projectVO, IssueDetailDTO issueDTO, IssueTypeVO issueTypeVO, ProjectVO targetProjectVO) {
         // 清空测试用例
-//        testFeignClient.deleteTestRel(projectVO.getId(), issueDTO.getIssueId());
+        if (feignUtil.isExist(FeignUtil.TEST_MANAGER_SERVICE)) {
+            testFeignClient.deleteTestRel(projectVO.getId(), issueDTO.getIssueId());
+        }
         // 删除问题关联
         issueLinkService.deleteByIssueId(issueDTO.getIssueId());
         // 删除rank值

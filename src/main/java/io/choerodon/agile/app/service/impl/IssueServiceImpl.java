@@ -298,7 +298,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private StateMachineNodeService stateMachineNodeService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
-
+    @Autowired
+    private FeignUtil feignUtil;
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
         handleCreateIssueRearAction(issueConvertDTO, issueId, projectInfoDTO, issueCreateVO.getLabelIssueRelVOList(), issueCreateVO.getComponentIssueRelVOList(), issueCreateVO.getVersionIssueRelVOList(), issueCreateVO.getIssueLinkCreateVOList());
@@ -865,7 +866,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 //        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
         //delete cache
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
-        testFeignClient.deleteTestRel(projectId, issueId);
+        if (feignUtil.isExist(FeignUtil.TEST_MANAGER_SERVICE)) {
+            testFeignClient.deleteTestRel(projectId, issueId);
+        }
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
