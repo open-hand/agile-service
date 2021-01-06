@@ -7,10 +7,25 @@ class MoveIssueApi extends Api<MoveIssueApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
-  getProjectListMoveTo() {
+  getFieldsLosed(targetProject: string, issueId: string, typeCode: string) {
     return this.request({
       method: 'get',
-      url: '/iam/choerodon/v1/organizations/7/users/10635/projects/paging?page=0&size=0',
+      url: `${this.prefix}/project_move/list_lost_field`,
+      params: {
+        targetProject,
+        typeCode,
+        issueId,
+      },
+    });
+  }
+
+  getProjectListMoveTo(typeCode: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/project_move/list_move_projects`,
+      params: {
+        typeCode,
+      },
     });
   }
 }

@@ -9,11 +9,11 @@ import { Issue, IField } from '@/common/types';
 import { includes } from 'lodash';
 import TypeTag from '@/components/TypeTag';
 import { DataSet } from 'choerodon-ui/pro/lib';
-import { fieldApi } from '@/api';
-import SelectComponent from '@/components/select/select-component';
+import { fieldApi, moveIssueApi } from '@/api';
 import styles from './Confirm.less';
 import transformValue, { IFieldWithValue } from './transformValue';
 import renderField from './renderField';
+import store from '../../store';
 
 export interface IssueWithSubIssueVOList extends Omit<Issue, 'subIssueVOList'> {
   subIssueVOList: Issue[]
@@ -28,26 +28,16 @@ interface Props {
     typeCode: string,
     issueTypeId: string
   }
+  dataRef: React.MutableRefObject<Map<string, any>>,
 }
 
-const fieldMap = new Map([
-  ['component', 'componentIssueRelVOList'],
-  ['label', 'labelIssueRelVOList'],
-  ['epic', 'issueEpicName'],
-  ['fixVersion', 'versionIssueRelVOList'],
-  ['sprint', 'sprint'], // activeSprint + closeSprint
-  ['assignee', 'assignee'], // assigneeId + assigneeImageUrl + assigneeLoginName + assigneeName + assigneeRealName
-
-]);
-
 const Confirm: React.FC<Props> = ({
-  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType,
+  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, dataRef,
 }) => {
-  const [selfFields, setSelfFields] = useState<IField[]>([]);
-  const [subTaskFields, setSubTaskFields] = useState<IField[]>([]);
-  const dataRef = useRef<Map<string, any>>(new Map());
+  const { selfFields, subTaskFields, moveToProjectList } = store;
+  const [fieldsLosed, setFieldsLosed] = useState<IField[]>([]);
   const {
-    issueTypeVO, issueNum, summary, typeCode, subIssueVOList,
+    issueId, issueTypeVO, issueNum, summary, typeCode, subIssueVOList,
   } = issue;
   const targetProjectId = dataSet?.current?.get('targetProjectId');
   const issueType = dataSet?.current?.get('issueType');
@@ -103,7 +93,7 @@ const Confirm: React.FC<Props> = ({
         schemeCode: 'agile_issue',
       }, targetProjectId).then((res: IField[]) => {
         const finalFields = getFinalFields(res || []);
-        setSelfFields(finalFields);
+        store.setSelfFields(finalFields);
       });
       if (subIssueVOList && subIssueVOList.length) {
         fieldApi.getFields({
@@ -112,18 +102,27 @@ const Confirm: React.FC<Props> = ({
           schemeCode: 'agile_issue',
         }, targetProjectId).then((res: IField[]) => {
           const finalFields = getFinalFields(res || []);
-          setSubTaskFields(finalFields);
+          store.setSubTaskFields(finalFields);
         });
       }
     }
   }, [filterFields, getFinalFields, issueType, subIssueVOList, targetProjectId, targetProjectType]);
 
+  useEffect(() => {
+    if (targetProjectId && issueId && targetIssueType.typeCode) {
+      moveIssueApi.getFieldsLosed(targetProjectId, issueId, targetIssueType.typeCode).then((res: IField[]) => {
+        setFieldsLosed(res);
+      });
+    }
+  }, [issueId, targetIssueType.typeCode, targetProjectId]);
+
+  const targetProject = moveToProjectList.find((item: any) => item.id === targetProjectId) || { name: '' };
   return (
     <div className={styles.confirm}>
       <div className={styles.tip}>
         <Icon type="report" />
         <p className={styles.tipText}>
-          C7NF-03将移动到【xxx项目名称】中，其【自定义字段1】、【自定义字段2】、【自定义字段3】的字段值，与该问题的问题项、测试用例、文档、需求的关联关系，会永久丢失。
+          {`C7NF-03将移动到【${targetProject?.name}】中${fieldsLosed.length > 0 ? `，其${fieldsLosed.map((item) => `【${item.name}】`).join('、')}的字段值，与该问题的问题项、测试用例、文档、需求的关联关系，会永久丢失` : ''}。`}
         </p>
       </div>
       <div className={styles.content}>
