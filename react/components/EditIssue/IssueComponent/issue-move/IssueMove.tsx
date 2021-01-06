@@ -13,7 +13,7 @@ import {
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { toJS } from 'mobx';
-import { stores } from '@choerodon/boot';
+import { stores, Choerodon } from '@choerodon/boot';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import {
   issueTypeApi, projectApi, moveIssueApi, commonApi,
@@ -174,7 +174,13 @@ const IssueMove: React.FC<Props> = ({
       };
     }
     console.log(submitData);
-    return false;
+    return moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
+      Choerodon.prompt('移动成功');
+      return false;
+    }).catch(() => {
+      Choerodon.prompt('移动失败');
+      return false;
+    });
   }, [dataSet, issue.issueId, selfFields, targetProjectId, targetTypeCode]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);

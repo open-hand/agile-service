@@ -81,7 +81,7 @@ const renderField = ({
     fieldCode, system, fieldType, projectId,
   } = field;
   const {
-    issueId, statusId, statusVO, componentIssueRelVOList,
+    issueId,
   } = issue;
   switch (fieldCode) {
     case 'status': {
@@ -91,8 +91,8 @@ const renderField = ({
         <TextEditToggle
           disabled={disabled}
           className="moveIssue-textEditToggle"
+          initValue={undefined}
           onSubmit={submit}
-          initValue={dataRef.current.get('status')?.find((item: any) => item.defaultStatus)?.id}
           editor={() => (
             <SelectStatus
               dataSet={dataSet}
@@ -102,6 +102,7 @@ const renderField = ({
               applyType={targetProject.projectType === 'program' ? 'program' : 'agile'}
               afterLoad={(data) => {
                 dataRef.current.set('status', data);
+                dataSet.current?.set(`${issueId}-status`, (data || []).find((item: any) => item.defaultStatus)?.id);
               }}
             />
           )}
@@ -209,7 +210,7 @@ const renderField = ({
           disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
-          initValue={dataRef.current.get('epic')?.find((item: any) => item.defaultStatus)?.id}
+          initValue={undefined}
           editor={() => (
             <SelectEpic
               dataSet={dataSet}
