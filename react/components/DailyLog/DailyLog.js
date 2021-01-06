@@ -31,7 +31,7 @@ class DailyLog extends Component {
     this.state = {
       dissipate: undefined,
       dissipateUnit: '小时',
-      startTime: null,
+      startTime: moment(),
       radio: 1,
       time: undefined,
       timeUnit: '小时',
