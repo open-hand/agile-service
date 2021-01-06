@@ -1,5 +1,5 @@
 import React, {
-  useMemo, useImperativeHandle, useState, useEffect, useCallback,
+  useMemo, useImperativeHandle, useState, useEffect, useCallback, useRef,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
@@ -23,7 +23,10 @@ import Confirm from './components/confirm-data';
 import Finish from './components/finish';
 import styles from './IssueMove.less';
 import { IssueWithSubIssueVOList } from './components/confirm-data/Confirm';
+import transformValue, { submitFieldMap } from './transformValue';
 import { IFieldWithValue } from './components/confirm-data/transformValue';
+
+import store from './store';
 
 const isDEV = process.env.NODE_ENV === 'development';
 // @ts-ignore
@@ -41,11 +44,11 @@ interface Props {
 const IssueMove: React.FC<Props> = ({
   modal, issue, fieldsWithValue,
 }) => {
-  const { isInProgram, loading } = useIsInProgram();
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [step1NextDisabled, setsStep1NextDisabled] = useState<boolean>(true);
   const [targetProjectType, setTargetProjectType] = useState<'program' | 'project' | 'subProject'>('project');
+  const dataRef = useRef<Map<string, any>>(new Map());
 
   const issueTypeDataSet = useMemo(() => new DataSet({
     paging: false,
@@ -133,12 +136,50 @@ const IssueMove: React.FC<Props> = ({
     modal?.close();
   };
 
-  const handleSubmit = useCallback(async () => false, []);
+  const { selfFields, subTaskFields } = store;
+  const targetTypeCode = dataSet.current?.get('issueType');
+  const targetProjectId = dataSet.current?.get('targetProjectId');
+
+  const handleSubmit = useCallback(async () => {
+    console.log(dataSet.current?.data);
+    let submitData: any = {
+      issueId: issue.issueId,
+      typeCode: targetTypeCode,
+    };
+    for (const [k, v] of Object.entries(dataSet.current?.data || {})) {
+      if (k.indexOf(`${issue.issueId}-`) > -1 && k.split('-')[1]) {
+        const fieldInfo = selfFields.find((item) => item.fieldCode === k.split('-')[1]);
+        if (fieldInfo?.system && submitFieldMap.get(k.split('-')[1])) {
+          submitData = {
+            ...submitData,
+            [submitFieldMap.get(k.split('-')[1]) as string]: transformValue({
+              k,
+              v,
+              dataRef,
+              targetProjectId,
+            }),
+          };
+        } else {
+          submitData = {
+            ...submitData,
+            [k.split('-')[1] as string]: v,
+          };
+        }
+      }
+    }
+    if (Object.keys(dataSet.current?.data || {}).find(((k: string) => k.indexOf('fixVersion') > -1))) {
+      submitData = {
+        ...submitData,
+        versionType: 'fix',
+      };
+    }
+    console.log(submitData);
+    return false;
+  }, [dataSet, issue.issueId, selfFields, targetProjectId, targetTypeCode]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [modal, handleSubmit]);
 
-  const targetTypeCode = dataSet.current?.get('issueType');
   const targetIssueType = {
     typeCode: targetTypeCode,
     // @ts-ignore
@@ -159,9 +200,9 @@ const IssueMove: React.FC<Props> = ({
         />
       </Steps>
       <div className={styles.step_content}>
-        {currentStep === 1 && <SelectProject dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} />}
-        {currentStep === 2 && <Confirm issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} />}
-        {currentStep === 3 && <Finish />}
+        {currentStep === 1 && <SelectProject issue={issue} dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} />}
+        {currentStep === 2 && <Confirm issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} dataRef={dataRef} />}
+        {currentStep === 3 && <Finish issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} dataRef={dataRef} />}
       </div>
       <div className={styles.steps_action}>
         {currentStep === 1 && (

@@ -15,7 +15,6 @@ import SelectPI from '@/components/select/select-pi';
 import SelectTeam from '@/components/select/select-team';
 import SelectProgramVersion from '@/components/select/select-program-version';
 import SelectFeature from '@/components/select/select-feature';
-import { IState } from 'ahooks/lib/useTextSelection';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import { epicApi } from '@/api';
 import { UserHead } from '@/components';
@@ -38,7 +37,8 @@ interface Props {
     projectId: string,
     projectType: 'program' | 'project' | 'subProject',
   },
-  dataRef: React.MutableRefObject<Map<string, any>>
+  dataRef: React.MutableRefObject<Map<string, any>>,
+  disabled?: boolean
 }
 
 const submit = () => {};
@@ -75,7 +75,7 @@ const renderComponent = (name: string, symbol = ',') => {
 const getFieldValue = (dataSet: DataSet, name: string) => dataSet.current?.get(name);
 
 const renderField = ({
-  dataSet, issue, field, fieldsWithValue, targetIssueType, targetProject, dataRef,
+  dataSet, issue, field, fieldsWithValue, targetIssueType, targetProject, dataRef, disabled = false,
 }: Props) => {
   const {
     fieldCode, system, fieldType, projectId,
@@ -83,14 +83,13 @@ const renderField = ({
   const {
     issueId, statusId, statusVO, componentIssueRelVOList,
   } = issue;
-  console.log('dataRef：');
-  console.log(dataRef.current);
   switch (fieldCode) {
     case 'status': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-status`);
       const fieldValueItem = dataRef.current.get('status')?.find((item: any) => item.id === fieldValue);
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={dataRef.current.get('status')?.find((item: any) => item.defaultStatus)?.id}
@@ -133,6 +132,7 @@ const renderField = ({
       const allFieldValueItem = [...fieldValueItem, ...(newComponents.map((name: string) => ({ name })))];
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -170,6 +170,7 @@ const renderField = ({
       const allFieldValueItem = [...fieldValueItem, ...(newLabels.map((name: string) => ({ labelName: name })))];
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -205,6 +206,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('epic')?.find((item: any) => item.issueId === fieldValue);
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={dataRef.current.get('epic')?.find((item: any) => item.defaultStatus)?.id}
@@ -250,6 +252,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('fixVersion')?.filter((item: any) => includes(fieldValue, item.versionId)) || [];
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -284,6 +287,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('sprint')?.find((item: any) => fieldValue === item.sprintId);
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -325,6 +329,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('assignee')?.find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -358,6 +363,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('pi')?.find((item: any) => fieldValue === item.id) || [];
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -397,6 +403,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('subProject')?.filter((item: any) => includes(fieldValue, item.projectId)) || [];
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -428,6 +435,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('programVersion')?.filter((item: any) => includes(fieldValue, item.id)) || [];
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -462,6 +470,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('feature')?.find((item: any) => fieldValue === item.issueId);
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -496,6 +505,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('mainResponsible')?.find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -529,6 +539,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('reporter')?.find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -567,6 +578,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get(fieldItem.fieldCode)?.find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
+          disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
