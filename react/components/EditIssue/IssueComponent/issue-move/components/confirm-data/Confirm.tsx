@@ -122,7 +122,7 @@ const Confirm: React.FC<Props> = ({
       <div className={styles.tip}>
         <Icon type="report" />
         <p className={styles.tipText}>
-          {`C7NF-03将移动到【${targetProject?.name}】中${fieldsLosed.length > 0 ? `，其${fieldsLosed.map((item) => `【${item.name}】`).join('、')}的字段值，与该问题的问题项、测试用例、文档、需求的关联关系，会永久丢失` : ''}。`}
+          {`${issue.issueNum}将移动到【${targetProject?.name}】中${fieldsLosed.length > 0 ? `，其${fieldsLosed.map((item) => `【${item.name}】`).join('、')}的字段值，与该问题的问题项、测试用例、文档、需求的关联关系，会永久丢失` : ''}。`}
         </p>
       </div>
       <div className={styles.content}>

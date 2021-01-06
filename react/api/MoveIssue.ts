@@ -28,6 +28,17 @@ class MoveIssueApi extends Api<MoveIssueApi> {
       },
     });
   }
+
+  moveIssueToProject(issueId: string, targetProjectId: string, data: any) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/project_move/${issueId}`,
+      params: {
+        targetProjectId,
+      },
+      data,
+    });
+  }
 }
 
 const moveIssueApi = new MoveIssueApi();
