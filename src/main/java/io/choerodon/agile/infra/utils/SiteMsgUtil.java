@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.core.enums.MessageAdditionalType;
 import org.apache.commons.collections4.CollectionUtils;
@@ -41,6 +42,13 @@ public class SiteMsgUtil {
     private static final String MSG_TYPE_EMAIL = "EMAIL";
     private static final String MSG_TYPE_WEB = "WEB";
     private static final String MSG_TYPE_WEBHOOK = "WEB_HOOK";
+    private static final String ISSUE_SUMMARY = "issueSummary";
+    private static final String LINK = "link";
+    private static final String COMMENT = "comment";
+    private static final String ACTION = "action";
+    private static final String COMMENT_USER = "commentUser";
+    private static final String COMMENT_TYPE = "commentType";
+    private static final String ISSUE_TYPE = "issueType";
 
     @Autowired
     private BaseFeignClient baseFeignClient;
@@ -252,5 +260,36 @@ public class SiteMsgUtil {
         messageSender.setTypeCodeList(noticeTypeList);
         messageSender.setReceiverAddressList(receiverList);
         return messageSender;
+    }
+
+    //发送问题评论消息
+    public void sendIssueComment(Long projectId, Set<Long> userIds, Map<Long, String> actionMap, String projectName, String summary, String url, String comment, String commentUserName, String commentType, String issueType) {
+        List<MessageSender> senderList = new ArrayList<>();
+        List<Receiver> receiverList = new ArrayList<>();
+        handleReceiver(receiverList, userIds);
+        Map<Long, Receiver> usersMap = receiverList.stream().collect(Collectors.toMap(Receiver::getUserId, Function.identity()));
+
+        userIds.forEach(userId -> {
+            if (usersMap.get(userId) == null) {
+                return;
+            }
+            Map<String, String> argsMap = new HashMap<>(8);
+            argsMap.put(PROJECT_NAME, projectName);
+            argsMap.put(ISSUE_SUMMARY, summary);
+            argsMap.put(LINK, url);
+            argsMap.put(COMMENT, comment);
+            argsMap.put(ACTION, actionMap.get(userId));
+            argsMap.put(COMMENT_USER, commentUserName);
+            argsMap.put(COMMENT_TYPE, commentType);
+            argsMap.put(ISSUE_TYPE, issueType);
+
+            MessageSender messageSender = new MessageSender();
+            messageSender.setTenantId(ConvertUtil.getOrganizationId(projectId));
+            messageSender.setMessageCode("ISSUE_COMMENT");
+            messageSender.setReceiverAddressList(Collections.singletonList(usersMap.get(userId)));
+            messageSender.setArgs(argsMap);
+            senderList.add(messageSender);
+        });
+        senderList.forEach(sender -> messageClient.async().sendMessage(sender));
     }
 }

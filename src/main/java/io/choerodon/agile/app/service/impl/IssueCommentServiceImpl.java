@@ -9,7 +9,10 @@ import io.choerodon.agile.infra.dto.IssueCommentDTO;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
+import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -41,9 +44,13 @@ public class IssueCommentServiceImpl implements IssueCommentService {
     @Autowired
     private UserService userService;
     @Autowired
+    private IssueMapper issueMapper;
+    @Autowired
     private IIssueCommentService iIssueCommentService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private SendMsgUtil sendMsgUtil;
 
     @Override
     public IssueCommentVO createIssueComment(Long projectId, IssueCommentCreateVO issueCommentCreateVO) {
@@ -51,7 +58,10 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         issueCommentDTO.setUserId(customUserDetails.getUserId());
         issueCommentDTO.setProjectId(projectId);
-        return queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
+        IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueCommentVO.getIssueId());
+        sendMsgUtil.sendMsgByIssueComment(projectId, issueDTO, issueCommentVO);
+        return issueCommentVO;
     }
 
     @Override
@@ -59,7 +69,14 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         if (fieldList != null && !fieldList.isEmpty()) {
             IssueCommentDTO issueCommentDTO = issueCommentAssembler.toTarget(issueCommentUpdateVO, IssueCommentDTO.class);
             iIssueCommentService.updateBase(issueCommentDTO, fieldList.toArray(new String[fieldList.size()]));
-            return queryByProjectIdAndCommentId(projectId, issueCommentDTO.getCommentId());
+            IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, issueCommentDTO.getCommentId());
+            IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueCommentVO.getIssueId());
+            if (issueCommentVO.getReplyToUserId() == null){
+                sendMsgUtil.sendMsgByIssueComment(projectId, issueDTO, issueCommentVO);
+            } else {
+                sendMsgUtil.sendMsgByIssueCommentReplay(projectId, issueDTO, issueCommentVO);
+            }
+            return issueCommentVO;
         } else {
             return null;
         }
@@ -130,7 +147,10 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         issueCommentDTO.setUserId(customUserDetails.getUserId());
         issueCommentDTO.setProjectId(projectId);
-        return queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
+        IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueCommentVO.getIssueId());
+        sendMsgUtil.sendMsgByIssueCommentReplay(projectId, issueDTO, issueCommentVO);
+        return issueCommentVO;
     }
 
     @Override

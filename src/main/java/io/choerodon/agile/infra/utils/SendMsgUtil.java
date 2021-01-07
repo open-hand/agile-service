@@ -13,7 +13,11 @@ import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.entity.MessageSender;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +45,10 @@ public class SendMsgUtil {
     private static final String SUB_TASK = "sub_task";
     private static final String STATUS_ID = "statusId";
 
+    private static final String FEATURE_URL_TEMPLATE1 = "#/agile/feature?type=project&id=";
+    private static final String FEATURE_URL_TEMPLATE2 = "&name=";
+    private static final String FEATURE_URL_TEMPLATE3 = "&category=";
+    private static final String FEATURE_URL_TEMPLATE4 = "&organizationId=";
     @Autowired
     private SiteMsgUtil siteMsgUtil;
 
@@ -92,6 +100,13 @@ public class SendMsgUtil {
                 + URL_TEMPLATE3 + result.getIssueNum() 
                 + URL_TEMPLATE4 + paramIssueId 
                 + URL_TEMPLATE5 + result.getIssueId();
+    }
+
+    public String getFeatureUrl(IssueVO result, ProjectVO projectVO) {
+        return FEATURE_URL_TEMPLATE1 + projectVO.getId()
+                + FEATURE_URL_TEMPLATE2 + convertProjectName(projectVO)
+                + FEATURE_URL_TEMPLATE3 + projectVO.getCategory()
+                + FEATURE_URL_TEMPLATE4 + projectVO.getOrganizationId();
     }
 
     @Async
@@ -311,4 +326,96 @@ public class SendMsgUtil {
         return projectVO;
     }
 
+    @Async
+    public void sendMsgByIssueComment(Long projectId, IssueDTO issueDTO, IssueCommentVO issueCommentVO) {
+        IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
+        Map<Long, String> actionMap = new HashMap<>(3);
+        String url;
+        String issueType;
+
+        ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+        if ("feature".equals(issueVO.getTypeCode())) {
+            issueType = "特性";
+            url = getFeatureUrl(issueVO, projectVO);
+        } else {
+            issueType = "问题";
+            url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId());
+        }
+        Set<Long> userIds = new HashSet<>();
+        if (issueVO.getCreatedBy() != null &&
+                !issueVO.getCreatedBy().equals(issueCommentVO.getUserId())) {
+            actionMap.put(issueVO.getCreatedBy(), "创建的");
+            userIds.add(issueVO.getCreatedBy());
+        }
+        if (issueVO.getReporterId() != null &&
+                !userIds.contains(issueVO.getReporterId()) &&
+                !issueVO.getReporterId().equals(issueCommentVO.getUserId())) {
+            actionMap.put(issueVO.getReporterId(), "负责的");
+            userIds.add(issueVO.getReporterId());
+        }
+        if (issueVO.getAssigneeId() != null &&
+                !userIds.contains(issueVO.getAssigneeId()) &&
+                !issueVO.getAssigneeId().equals(issueCommentVO.getUserId())) {
+            actionMap.put(issueCommentVO.getUserId(), "处理的");
+            userIds.add(issueVO.getAssigneeId());
+        }
+
+        String summary = issueVO.getIssueNum() + "-" + issueVO.getSummary();
+        String comment = Optional.ofNullable(issueCommentVO.getCommentText()).map(SendMsgUtil::getText).orElse("无");
+
+        if (CollectionUtils.isNotEmpty(userIds)) {
+            siteMsgUtil.sendIssueComment(
+                    projectId, userIds, actionMap, projectVO.getName(), summary, url, comment, issueCommentVO.getUserRealName(), "评论", issueType);
+        }
+    }
+
+    @Async
+    public void sendMsgByIssueCommentReplay(Long projectId, IssueDTO issueDTO, IssueCommentVO issueCommentVO) {
+        Map<Long, String> actionMap = new HashMap<>(1);
+        actionMap.put(issueCommentVO.getReplyToUserId(), "评论的");
+        IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
+        String url;
+        String issueType;
+
+        ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+        if ("feature".equals(issueVO.getTypeCode())) {
+            issueType = "特性";
+            url = getFeatureUrl(issueVO, projectVO);
+        } else {
+            issueType = "问题";
+            url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId());
+        }
+        Set<Long> userIds = new HashSet<>();
+        userIds.add(issueCommentVO.getReplyToUserId());
+
+        String summary = issueVO.getIssueNum() + "-" + issueVO.getSummary();
+        String comment = Optional.ofNullable(issueCommentVO.getCommentText()).map(SendMsgUtil::getText).orElse("无");
+        siteMsgUtil.sendIssueComment(
+                projectId, userIds, actionMap, projectVO.getName(), summary, url, comment, issueCommentVO.getUserRealName(), "评论", issueType);
+    }
+
+    public static String getText(String rawText) {
+        if (StringUtils.isEmpty(rawText)){
+            return null;
+        }
+        StringBuilder result = new StringBuilder();
+        try {
+            JSONArray root = JSONArray.parseArray(rawText);
+            for (Object o : root) {
+                JSONObject object = (JSONObject) o;
+                if (!(object.get("insert") instanceof JSONObject)) {
+                    result.append(object.getString("insert"));
+                } else if (!(((JSONObject) object.get("insert")).get("image") instanceof JSONObject)) {
+                    result.append("<img style=\"width: auto;height: auto;max-width: 650px;\" src=\"" + ((JSONObject) object.get("insert")).getString("image") + "\"></img>");
+                }
+            }
+        } catch (Exception e) {
+            return rawText;
+        }
+        if (result.length() == 0) {
+            return null;
+        }
+        StringUtils.replace(rawText, "\n", "<br >");
+        return result.toString();
+    }
 }
