@@ -89,6 +89,8 @@ class CopyIssue extends Component {
         okText="复制"
         cancelText="取消"
         confirmLoading={this.state.loading}
+        maskClosable={false}
+        keyboard={false}
       >
         <Form layout="vertical" style={{ width: 472 }}>
           <FormItem style={{ marginTop: 20 }}>
