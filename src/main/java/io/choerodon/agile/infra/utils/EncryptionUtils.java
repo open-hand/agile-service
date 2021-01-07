@@ -369,7 +369,18 @@ public class EncryptionUtils {
             search.getOtherArgs().put("version",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
-
+        // influenceVersion
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("influenceVersion"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("influenceVersion",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+        // fixVersion
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("fixVersion"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("fixVersion",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
         // sprint
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("sprint"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {

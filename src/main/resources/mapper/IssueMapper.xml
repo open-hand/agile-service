@@ -941,6 +941,43 @@
             </foreach>)
             )
         </if>
+
+        <if test='searchVO.otherArgs.fixVersion != null and searchVO.otherArgs.fixVersion.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.fixVersionNull != null and searchVO.otherArgs.fixVersionNull == true'>
+                ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
+                left join agile_version_issue_rel avir44
+                on ai31.issue_id = avir44.issue_id
+                WHERE avir44.version_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT avir3.issue_id FROM
+            agile_version_issue_rel avir3 WHERE avir3.version_id in
+            <foreach collection="searchVO.otherArgs.fixVersion" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            and relation_type = 'fix'
+            )
+            )
+        </if>
+        <if test='searchVO.otherArgs.influenceVersion != null and searchVO.otherArgs.influenceVersion.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.influenceVersionNull != null and searchVO.otherArgs.versionNull == true'>
+                ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
+                left join agile_version_issue_rel avir44
+                on ai31.issue_id = avir44.issue_id
+                WHERE avir44.version_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT avir3.issue_id FROM
+            agile_version_issue_rel avir3 WHERE avir3.version_id in
+            <foreach collection="searchVO.otherArgs.influenceVersion" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            AND relation_type = 'influence'
+             )
+            )
+        </if>
         <if test='searchVO.otherArgs.label != null and searchVO.otherArgs.label.size > 0'>
             AND (
             <if test='searchVO.otherArgs.labelNull != null and searchVO.otherArgs.labelNull == true'>

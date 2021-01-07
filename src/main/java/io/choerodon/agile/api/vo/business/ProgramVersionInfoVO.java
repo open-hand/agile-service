@@ -1,17 +1,18 @@
 package io.choerodon.agile.api.vo.business;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author zhaotianxin
  * @date 2020-11-16 11:20
  */
 public class ProgramVersionInfoVO {
-    @Autowired
+    @Encrypt
     private Long id;
 
     private String name;
 
+    @Encrypt
     private Long productVersionId;
 
     private Long objectVersionNumber;
