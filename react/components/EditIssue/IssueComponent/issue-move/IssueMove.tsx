@@ -1,22 +1,20 @@
 import React, {
-  useMemo, useImperativeHandle, useState, useEffect, useCallback, useRef,
+  useMemo, useState, useEffect, useCallback, useRef,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Form, Radio, DataSet, Modal, Button,
+  DataSet, Modal, Button,
 } from 'choerodon-ui/pro';
 import { Steps } from 'choerodon-ui';
 import {
   includes, map, compact, uniq,
 } from 'lodash';
 import {
-  IModalProps, Issue, AppStateProps, IIssueType,
+  IModalProps, AppStateProps, IIssueType, IField,
 } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
-import { toJS } from 'mobx';
 import { stores, Choerodon } from '@choerodon/boot';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import {
   issueTypeApi, projectApi, moveIssueApi, commonApi,
 } from '@/api';
@@ -39,12 +37,13 @@ const { Step } = Steps;
 
 interface Props {
   issue: IssueWithSubIssueVOList,
- modal?:IModalProps
- fieldsWithValue: IFieldWithValue[]
+  modal?:IModalProps
+  fieldsWithValue: IFieldWithValue[]
+  onMoveIssue: () => void,
 }
 
 const IssueMove: React.FC<Props> = ({
-  modal, issue, fieldsWithValue,
+  modal, issue, fieldsWithValue, onMoveIssue,
 }) => {
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -150,61 +149,57 @@ const IssueMove: React.FC<Props> = ({
   const targetProjectId = dataSet.current?.get('targetProjectId');
 
   const handleSubmit = useCallback(async () => {
-    console.log(toJS(dataSet.current?.data));
     let submitData: any = {
       issueId: issue.issueId,
       typeCode: targetTypeCode,
+      subIssues: [],
     };
-    if (issue.subIssueVOList && issue.subIssueVOList.length) {
-      submitData = {
-        ...submitData,
-        subIssues: [],
-      };
-    }
     for (const [k, v] of Object.entries(dataSet.current?.data || {})) {
       const kIssueId = k.split('-')[0];
       const isSelf = kIssueId === issue.issueId;
       if (kIssueId && k.split('-')[1]) {
-        const fieldInfo = (isSelf ? selfFields : subTaskFields).find((item) => item.fieldCode === k.split('-')[1]);
+        const fieldInfo = (isSelf ? selfFields : subTaskFields).find((item: IField) => item.fieldCode === k.split('-')[1]);
         if (fieldInfo) {
-          if (fieldInfo.system && submitFieldMap.get(k.split('-')[1])) { // 系统字段
-            const fieldAndValue = {
-              [submitFieldMap.get(k.split('-')[1]) as string]: transformValue({
-                k,
-                v,
-                dataRef,
-                targetProjectId,
-              }),
-            };
-            if (isSelf) {
-              submitData = {
-                ...submitData,
-                ...fieldAndValue,
+          if (fieldInfo.system) { // 系统字段
+            if (submitFieldMap.get(k.split('-')[1])) {
+              const fieldAndValue = {
+                [submitFieldMap.get(k.split('-')[1]) as string]: transformValue({
+                  k,
+                  v,
+                  dataRef,
+                  targetProjectId,
+                }),
               };
-              if (k.indexOf('fixVersion') > -1) {
+              if (isSelf) {
                 submitData = {
                   ...submitData,
-                  versionType: 'fix',
-                };
-              }
-            } else {
-              const currentSubIssueItemIndex = submitData.subIssues.findIndex((item: any) => item.issueId === kIssueId);
-              if (currentSubIssueItemIndex === -1) {
-                submitData.subIssues.push({
-                  issueId: kIssueId,
                   ...fieldAndValue,
-                });
+                };
+                if (k.indexOf('fixVersion') > -1) {
+                  submitData = {
+                    ...submitData,
+                    versionType: 'fix',
+                  };
+                }
               } else {
-                submitData.subIssues[currentSubIssueItemIndex] = {
-                  ...submitData.subIssues[currentSubIssueItemIndex],
-                  ...fieldAndValue,
-                };
-              }
-              if (k.indexOf('fixVersion') > -1) {
-                submitData.subIssues[currentSubIssueItemIndex] = {
-                  ...submitData.subIssues[currentSubIssueItemIndex],
-                  versionType: 'fix',
-                };
+                const currentSubIssueItemIndex = submitData.subIssues.findIndex((item: any) => item.issueId === kIssueId);
+                if (currentSubIssueItemIndex === -1) {
+                  submitData.subIssues.push({
+                    issueId: kIssueId,
+                    ...fieldAndValue,
+                  });
+                } else {
+                  submitData.subIssues[currentSubIssueItemIndex] = {
+                    ...submitData.subIssues[currentSubIssueItemIndex],
+                    ...fieldAndValue,
+                  };
+                }
+                if (k.indexOf('fixVersion') > -1) {
+                  submitData.subIssues[currentSubIssueItemIndex] = {
+                    ...submitData.subIssues[currentSubIssueItemIndex],
+                    versionType: 'fix',
+                  };
+                }
               }
             }
           } else if (isSelf) { // 非系统字段，自己
@@ -222,30 +217,47 @@ const IssueMove: React.FC<Props> = ({
               }];
             }
           } else { // 非系统字段，子任务
-            const currentSubIssueItemIndex = submitData.subIssues.find((item: any) => item.issueId === kIssueId);
+            const currentSubIssueItemIndex = submitData.subIssues.findIndex((item: any) => item.issueId === kIssueId);
             if (currentSubIssueItemIndex === -1) {
               submitData.subIssues.push({
                 issueId: kIssueId,
-                [k.split('-')[1] as string]: v,
+                customFields: [
+                  {
+                    fieldId: fieldInfo.fieldId,
+                    fieldType: fieldInfo.fieldType,
+                    value: v,
+                  },
+                ],
+              });
+            } else if (submitData.subIssues[currentSubIssueItemIndex].customFields) {
+              submitData.subIssues[currentSubIssueItemIndex].customFields.push({
+                fieldId: fieldInfo.fieldId,
+                fieldType: fieldInfo.fieldType,
+                value: v,
               });
             } else {
-              submitData.subIssues[currentSubIssueItemIndex] = {
-                ...submitData.subIssues[currentSubIssueItemIndex],
-                [k.split('-')[1] as string]: v,
-              };
+              submitData.subIssues[currentSubIssueItemIndex].customFields = [
+                {
+                  fieldId: fieldInfo.fieldId,
+                  fieldType: fieldInfo.fieldType,
+                  value: v,
+                },
+              ];
             }
           }
         }
       }
     }
     return moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
+      dataSet.reset();
+      onMoveIssue();
       Choerodon.prompt('移动成功');
       return false;
     }).catch(() => {
       Choerodon.prompt('移动失败');
       return false;
     });
-  }, [dataSet, issue.issueId, issue.subIssueVOList, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
+  }, [dataSet, issue.issueId, onMoveIssue, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [modal, handleSubmit]);
@@ -306,7 +318,7 @@ const IssueMove: React.FC<Props> = ({
             <Button style={{ marginLeft: 8 }} color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleSubmit}>
               确定
             </Button>
-            <Button onClick={handleCancel}>
+            <Button onClick={handleCancel} funcType={'raised' as FuncType}>
               取消
             </Button>
           </>
@@ -318,7 +330,7 @@ const IssueMove: React.FC<Props> = ({
 
 const ObserverIssueMove = observer(IssueMove);
 
-const openIssueMove = ({ issue, customFields }: { issue: IssueWithSubIssueVOList, customFields: IFieldWithValue[] }) => {
+const openIssueMove = ({ issue, customFields, onMoveIssue }: { issue: IssueWithSubIssueVOList, customFields: IFieldWithValue[], onMoveIssue: () => void }) => {
   Modal.open({
     key: 'issueMoveModal',
     drawer: true,
@@ -327,7 +339,7 @@ const openIssueMove = ({ issue, customFields }: { issue: IssueWithSubIssueVOList
     style: {
       width: MODAL_WIDTH.middle,
     },
-    children: <ObserverIssueMove issue={issue} fieldsWithValue={customFields} />,
+    children: <ObserverIssueMove issue={issue} fieldsWithValue={customFields} onMoveIssue={onMoveIssue} />,
     footer: null,
   });
 };

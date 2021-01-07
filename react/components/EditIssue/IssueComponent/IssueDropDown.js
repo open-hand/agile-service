@@ -90,7 +90,7 @@ const IssueDropDown = ({
     } else if (e.key === '10') {
       store.setRelateStoryShow(true);
     } else if (e.key === 'item_11') {
-      openIssueMove({ issue, customFields: store.customFields });
+      openIssueMove({ issue, customFields: store.customFields, onMoveIssue: onDeleteIssue });
     }
   };
   const getMenu = () => (
