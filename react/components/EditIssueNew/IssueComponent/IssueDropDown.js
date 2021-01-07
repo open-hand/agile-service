@@ -36,13 +36,11 @@ const IssueDropDown = ({
             }
           </div>
         ),
-      onOk() {
-        return issueApi.delete(issueId, createdBy)
-          .then((res) => {
-            if (onDeleteIssue) {
-              onDeleteIssue();
-            }
-          });
+      async onOk() {
+        await issueApi.delete(issueId, createdBy);
+        if (onDeleteIssue) {
+          onDeleteIssue();
+        }
       },
       onCancel() { },
       okText: '删除',
