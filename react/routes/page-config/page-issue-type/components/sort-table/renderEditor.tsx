@@ -26,7 +26,8 @@ const Select = forwardRef<any, IBaseComponentProps & Partial<SelectProps & { chi
   <SelectPro
     ref={ref}
     {...otherProps}
-    trigger={multiple ? ['click'] as any : undefined}
+    trigger={['click'] as any}
+    // trigger={multiple ? ['click'] as any : undefined}
     multiple={multiple}
     onChange={(newValue) => {
       console.log('newValue...', newValue, !!(!multiple && otherProps.onChange));
@@ -68,6 +69,7 @@ function renderEditor({ record, defaultValue, dataRef }: { record: Record, defau
       return (
         <SelectUser
           extraOptions={defaultValue ? [defaultValue] : undefined}
+          trigger={['click'] as any}
             // autoQueryConfig={{
             //   selectedUserIds: defaultValue || [],
             //   // @ts-ignore
