@@ -175,7 +175,7 @@ const StoryMapHome = observer(() => {
         <SwitchSwimLine />
         {isInProgram && <CheckBox style={{ marginLeft: 20 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>}
         <CheckBox name="foldCompletedEpic" style={{ marginLeft: 20 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起已完成的史诗列</CheckBox>
-        {/* <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button> */}
+        {/* <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button> */}
       </Header>
       <Breadcrumb />
       <Content style={{

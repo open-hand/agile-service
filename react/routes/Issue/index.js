@@ -211,7 +211,7 @@ const Issue = observer(() => {
         >
           导出问题
         </Button>
-        <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button>
+        <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
         <CollapseAll dataSet={dataSet} tableRef={tableRef} />
         <TableModeSwitch
           data={tableListMode ? 'list' : 'tree'}

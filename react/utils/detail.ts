@@ -1,6 +1,9 @@
 import { getProjectId, getApplyType } from './common';
 
 export function sameProject(projectId: string): boolean {
+  if (!projectId) {
+    return true;
+  }
   const same = String(projectId) === String(getProjectId());
   return same;
 }
