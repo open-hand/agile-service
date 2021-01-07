@@ -23,7 +23,7 @@ const FilterManage: React.FC<Props> = ({ visible, setVisible, issueSearchStore }
       style={{ width: 350, top: HeaderStore.announcementClosed ? 50 : 100 }}
     >
       <div className="c7n-filterList-header">
-        <span>筛选管理</span>
+        <span>个人筛选</span>
         <Button
           shape="circle"
           icon="close"
