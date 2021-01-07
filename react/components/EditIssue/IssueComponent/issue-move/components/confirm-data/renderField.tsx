@@ -250,7 +250,7 @@ const renderField = ({
                   textOverflow: 'ellipsis',
                 }}
               >
-                {fieldValueItem.fieldValueItem}
+                {fieldValueItem.epicName}
               </div>
             ) : '无'
         }
@@ -377,7 +377,7 @@ const renderField = ({
     }
     case 'pi': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-pi`);
-      const fieldValueItem = dataRef.current.get('pi')?.find((item: any) => fieldValue === item.id) || [];
+      const fieldValueItem = dataRef.current.get('pi')?.find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
@@ -494,7 +494,6 @@ const renderField = ({
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
-          alwaysRender={false}
           editor={() => (
             <SelectFeature
               dataSet={dataSet}
@@ -502,6 +501,9 @@ const renderField = ({
               projectId={targetProject.projectId}
               afterLoad={(data: any) => {
                 dataRef.current.set('feature', data);
+                if (issue.featureId && data.find((item: any) => item.issueId === issue.featureId)) {
+                  dataSet.current?.set(`${issueId}-feature`, issue.featureId);
+                }
               }}
             />
           )}
