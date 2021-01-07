@@ -77,6 +77,15 @@ function EditIssue() {
     }
     close();
   }, [close, issueEvents]);
+
+  const onMoveIssue = useCallback(() => {
+    const callback = issueEvents?.delete || issueEvents?.update;
+    if (callback) {
+      callback();
+    }
+    close();
+  }, [close, issueEvents]);
+
   const loadIssueDetail = async (paramIssueId) => {
     const id = paramIssueId || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
