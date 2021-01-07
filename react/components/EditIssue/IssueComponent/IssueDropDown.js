@@ -3,12 +3,11 @@ import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
 import { Permission } from '@choerodon/boot';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
-import openIssueMove from '../../EditIssueNew/IssueComponent/issue-move';
+import openIssueMove from './issue-move';
 
 const { confirm } = Modal;
 const IssueDropDown = ({

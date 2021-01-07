@@ -15,7 +15,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
   } = statusArgs;
   const config = useMemo(() => ({
     name: 'status',
-    request: () => statusApi.loadTransformStatusByIssue(
+    request: () => statusApi.project(projectId).loadTransformStatusByIssue(
       statusId,
       issueId,
       typeId,

@@ -27,6 +27,8 @@ const createCurrentPiSprintKey = Modal.key();
 const { Panel } = SideNav;
 @observer
 class BacklogHome extends Component {
+  IssueDetailRef = React.createRef();
+
   componentDidMount() {
     BacklogStore.resetData();
     BacklogStore.refresh();
@@ -184,7 +186,7 @@ class BacklogHome extends Component {
                   store={BacklogStore}
                   refresh={this.refresh}
                   issueRefresh={() => {
-                    this.IssueDetail.refreshIssueDetail();
+                    this.IssueDetailRef.current.refreshIssueDetail();
                   }}
                 />
               </Panel>
@@ -205,7 +207,7 @@ class BacklogHome extends Component {
                   <Epic
                     refresh={this.refresh}
                     issueRefresh={() => {
-                      this.IssueDetail.refreshIssueDetail();
+                      this.IssueDetailRef.current.refreshIssueDetail();
                     }}
                   />
                 </Panel>
@@ -226,7 +228,7 @@ class BacklogHome extends Component {
                     refresh={this.refresh}
                     isInProgram={isShowFeature}
                     issueRefresh={() => {
-                      this.IssueDetail.refreshIssueDetail();
+                      this.IssueDetailRef.current.refreshIssueDetail();
                     }}
                   />
                 </Panel>
@@ -240,9 +242,7 @@ class BacklogHome extends Component {
             <CreateIssue />
             <IssueDetail
               refresh={() => this.refresh(false)}
-              onRef={(ref) => {
-                this.IssueDetail = ref;
-              }}
+              innerRef={this.IssueDetailRef}
             />
           </div>
         </Content>

@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import ResizeAble from '@/components/ResizeAble';
 import { find } from 'lodash';
-import { Button, Icon, Tooltip } from 'choerodon-ui/pro';
-import EditIssue from '@/components/EditIssueNew';
+import { Tooltip } from 'choerodon-ui/pro';
+import EditIssue from '@/components/EditIssue';
 import './Container.less';
 import { useDetailContainerContext } from './context';
 import Back from './back.svg';

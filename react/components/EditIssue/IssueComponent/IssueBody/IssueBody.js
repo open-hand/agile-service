@@ -28,7 +28,7 @@ import './IssueBody.less';
 
 const { TabPane } = Tabs;
 // eslint-disable-next-line no-undef
-const TestLink = C7NTryImport('@choerodon/testmanager/lib/components/test-case-link-list', Fragment);
+const TestLink = Fragment;
 
 function IssueBody(props) {
   const {
@@ -38,7 +38,7 @@ function IssueBody(props) {
   const {
     issueId, issueNum, typeCode, issueTypeVO = {},
   } = issue;
-  const { reloadIssue } = props;
+  const { reloadIssue, otherProject, outside } = props;
   const createBranchShow = store.getCreateBranchShow;
   const { linkBranchShow } = store;
   const workLogShow = store.getWorkLogShow;
@@ -83,14 +83,14 @@ function IssueBody(props) {
           <IssueDes {...props} />
           <IssueAttachment {...props} />
           {
-            issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
+            !outside && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
               <>
                 <IssueWSJF {...props} />
                 <InjectedComponent.PIAim {...props} />
               </>
             )
           }
-          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
+          {!outside && !otherProject && issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueDoc {...props} /> : ''}
 
           {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
@@ -102,7 +102,7 @@ function IssueBody(props) {
             ? <TestLink {...props} /> : '' }
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
-          {['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
+          {!outside && !otherProject && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
         </TabPane>
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'

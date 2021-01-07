@@ -1,21 +1,21 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/sort-comp */
 import React, {
-  useContext, useState, useEffect, useImperativeHandle, useRef,
+  useContext, useState, useEffect, useImperativeHandle, useRef, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores, Choerodon } from '@choerodon/boot';
-import { Spin, Modal } from 'choerodon-ui';
-import { throttle } from 'lodash';
+import { Spin } from 'choerodon-ui';
 import './EditIssue.less';
 import { useIssueTypes } from '@/hooks';
 import {
   issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, pageConfigApi,
 } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import { useDetailContainerContext } from '@/components/detail-container/context';
+import { sameProject } from '@/utils/detail';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
-import ResizeAble from '../ResizeAble';
 import TransformSubIssue from '../TransformSubIssue';
 import TransformFromSubIssue from '../TransformFromSubIssue';
 import ChangeParent from '../ChangeParent';
@@ -32,34 +32,51 @@ const defaultProps = {
 function EditIssue() {
   const [issueLoading, setIssueLoading] = useState(false);
   const {
+    outside,
     projectId,
+    organizationId,
     afterIssueUpdate,
     store,
     forwardedRef,
     issueId: currentIssueId,
     applyType,
     programId,
-    onUpdate,
-    onIssueCopy,
     backUrl,
-    onCancel,
     style,
-    onDeleteIssue,
     onDeleteSubIssue,
     disabled,
     prefixCls,
     issueStore,
-    HeaderStore,
-    isFullScreen,
-    onChangeWidth,
     transformIssue,
     setSelect,
     descriptionEditRef,
   } = useContext(EditIssueContext);
-  const [issueTypes] = useIssueTypes();
+  const otherProject = !sameProject(projectId);
+  const [issueTypes] = useIssueTypes({ disabled });
   const container = useRef();
   const idRef = useRef();
-
+  const { push, close, eventsMap } = useDetailContainerContext();
+  const issueEvents = eventsMap.get(applyType === 'program' ? 'program_issue' : 'issue');
+  const onUpdate = useCallback(() => {
+    issueEvents?.update();
+  }, [issueEvents]);
+  const onCancel = useCallback(() => {
+    close();
+    issueEvents?.close();
+  }, [close, issueEvents]);
+  const onIssueCopy = useCallback(() => {
+    const callback = issueEvents?.copy || issueEvents?.update;
+    if (callback) {
+      callback();
+    }
+  }, [issueEvents]);
+  const onDeleteIssue = useCallback(() => {
+    const callback = issueEvents?.delete || issueEvents?.update;
+    if (callback) {
+      callback();
+    }
+    close();
+  }, [close, issueEvents]);
   const loadIssueDetail = async (paramIssueId) => {
     const id = paramIssueId || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
@@ -72,7 +89,7 @@ function EditIssue() {
     try {
       // 1. 加载详情
       let issue = await (programId
-        ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.project(projectId).load(id));
+        ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).load(id));
       if (idRef.current !== id) {
         return;
       }
@@ -86,9 +103,9 @@ function EditIssue() {
         context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
-      const fields = await fieldApi.project(projectId).getFieldAndValue(id, param);
+      const fields = await fieldApi.project(projectId).org(organizationId).outside(outside).getFieldAndValue(id, param);
       const { description, issueTypeVO: { typeCode } } = issue;
-      if (!description || description === JSON.stringify([{ insert: '\n' }])) { // 加载默认模版
+      if (!disabled && (!description || description === JSON.stringify([{ insert: '\n' }]))) { // 加载默认模版
         const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(typeCode) || {};
         const { template } = issueTemplateInfo;
         issue.descriptionTemplate = template;
@@ -104,6 +121,7 @@ function EditIssue() {
       if (setSelect) {
         setSelect(issue);
       }
+
       // 3. 加载额外信息
       const [
         doc,
@@ -112,11 +130,11 @@ function EditIssue() {
         linkIssues,
         branches,
       ] = await Promise.all([
-        knowledgeApi.project(projectId).loadByIssue(id),
-        programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
-        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.project(projectId).loadByIssue(id),
-        programId || applyType === 'program' ? null : issueLinkApi.project(projectId).loadByIssueAndApplyType(id),
-        programId || applyType === 'program' ? null : devOpsApi.project(projectId).countBranches(id),
+        otherProject || outside ? null : knowledgeApi.project(projectId).loadByIssue(id),
+        otherProject || outside || programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
+        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.org(organizationId).outside(outside).project(projectId).loadByIssue(id),
+        programId || applyType === 'program' ? null : issueLinkApi.org(organizationId).outside(outside).project(projectId).loadByIssueAndApplyType(id),
+        otherProject || outside || programId || applyType === 'program' ? null : devOpsApi.project(projectId).countBranches(id),
       ]);
       if (idRef.current !== id) {
         return;
@@ -174,20 +192,9 @@ function EditIssue() {
     loadIssueDetail();
   };
 
-  const handleResizeEnd = ({ width }) => {
-    localStorage.setItem('agile.EditIssue.width', `${width}px`);
-  };
-
   useImperativeHandle(forwardedRef, () => ({
     loadIssueDetail,
   }));
-
-  const handleResize = throttle(({ width }) => {
-    setQuery(width);
-    if (onChangeWidth) {
-      onChangeWidth(width);// 设置宽度
-    }
-  }, 150);
 
   const issue = store.getIssue;
   const {
@@ -207,152 +214,130 @@ function EditIssue() {
   const { isInProgram } = useIsInProgram();
   const rightDisabled = disabled || (isInProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
   return (
-    <div style={{
-      position: 'fixed',
-      right: 0,
-      // eslint-disable-next-line no-nested-ternary
-      top: isFullScreen ? 0 : HeaderStore.announcementClosed ? 48 : 100,
-      bottom: 0,
-      // height: 'calc(100vh - 50px)',
-      zIndex: 101,
-      // overflow: 'hidden',
-    }}
-    >
-      <ResizeAble
-        modes={['left']}
-        size={{
-          maxWidth: window.innerWidth * 0.6,
-          minWidth: 440,
-        }}
-        defaultSize={{
-          width: localStorage.getItem('agile.EditIssue.width') || 640,
-          height: '100%',
-        }}
-        onResizeEnd={handleResizeEnd}
-        onResize={handleResize}
-      >
-        <div className={`${prefixCls}`} style={style} ref={container}>
-          <div className={`${prefixCls}-divider`} />
-          {
-            issueLoading ? (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  background: 'rgba(255, 255, 255, 0.65)',
-                  zIndex: 9999,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <Spin />
-              </div>
-            ) : null
-          }
-          <div className="c7n-content">
-            <IssueHeader
-              disabled={rightDisabled}
-              store={store}
-              reloadIssue={loadIssueDetail}
-              backUrl={backUrl}
-              onCancel={onCancel}
-              loginUserId={AppState.userInfo.id}
-              onDeleteIssue={onDeleteIssue}
-              onUpdate={onUpdate}
-            />
-            <IssueBody
-              key={issueId}
-              projectId={projectId}
-              disabled={rightDisabled}
-              store={store}
-              issueId={currentIssueId}
-              programId={programId}
-              reloadIssue={loadIssueDetail}
-              onUpdate={onUpdate}
-              onDeleteSubIssue={onDeleteSubIssue}
-              loginUserId={AppState.userInfo.id}
-              applyType={applyType}
-              onDeleteIssue={onDeleteIssue}
-              parentSummary={summary}
-            />
+
+    <div className={`${prefixCls}`} style={style} ref={container}>
+      {
+        issueLoading ? (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: 'rgba(255, 255, 255, 0.65)',
+              zIndex: 9999,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Spin />
           </div>
-          {
-            copyIssueShow ? (
-              <CopyIssue
-                issueId={issueId}
-                issueNum={issueNum}
-                issue={issue}
-                issueLink={linkIssues}
-                issueSummary={summary}
-                visible={copyIssueShow}
-                onCancel={() => store.setCopyIssueShow(false)}
-                onOk={handleCopyIssue.bind(this)}
-                applyType={applyType}
-              />
-            ) : null
-          }
-          {
-            relateStoryShow ? (
-              <RelateStory
-                issue={issue}
-                visible={relateStoryShow}
-                onCancel={() => store.setRelateStoryShow(false)}
-                onOk={handleRelateStory.bind(this)}
-              />
-            ) : null
-          }
-          {
-            transformSubIssueShow ? (
-              <TransformSubIssue
-                visible={transformSubIssueShow}
-                issueId={issueId}
-                issueNum={issueNum}
-                ovn={objectVersionNumber}
-                onCancel={() => store.setTransformSubIssueShow(false)}
-                onOk={handleTransformSubIssue.bind(this)}
-                issueTypes={issueTypes}
-              />
-            ) : null
-          }
-          {
-            transformFromSubIssueShow ? (
-              <TransformFromSubIssue
-                visible={transformFromSubIssueShow}
-                issueId={issueId}
-                issueNum={issueNum}
-                ovn={objectVersionNumber}
-                onCancel={() => store.setTransformFromSubIssueShow(false)}
-                onOk={handleTransformFromSubIssue.bind(this)}
-                store={store}
-              />
-            ) : null
-          }
-          {
-            changeParentShow ? (
-              <ChangeParent
-                issueId={issueId}
-                issueNum={issueNum}
-                visible={changeParentShow}
-                objectVersionNumber={objectVersionNumber}
-                onOk={() => {
-                  store.setChangeParentShow(false);
-                  if (onUpdate) {
-                    onUpdate();
-                  }
-                  loadIssueDetail(issueId);
-                }}
-                onCancel={() => {
-                  store.setChangeParentShow(false);
-                }}
-              />
-            ) : null
-          }
-        </div>
-      </ResizeAble>
+        ) : null
+      }
+      <div className="c7n-content">
+        <IssueHeader
+          disabled={rightDisabled}
+          store={store}
+          reloadIssue={loadIssueDetail}
+          backUrl={backUrl}
+          onCancel={onCancel}
+          loginUserId={AppState.userInfo.id}
+          onDeleteIssue={onDeleteIssue}
+          onUpdate={onUpdate}
+        />
+        <IssueBody
+          outside={outside}
+          key={issueId}
+          projectId={projectId}
+          organizationId={organizationId}
+          disabled={rightDisabled}
+          store={store}
+          issueId={currentIssueId}
+          programId={programId}
+          reloadIssue={loadIssueDetail}
+          onUpdate={onUpdate}
+          onDeleteSubIssue={onDeleteSubIssue}
+          loginUserId={AppState.userInfo.id}
+          applyType={applyType}
+          onDeleteIssue={onDeleteIssue}
+          parentSummary={summary}
+          push={push}
+          otherProject={otherProject}
+        />
+      </div>
+      {
+        copyIssueShow ? (
+          <CopyIssue
+            issueId={issueId}
+            issueNum={issueNum}
+            issue={issue}
+            issueLink={linkIssues}
+            issueSummary={summary}
+            visible={copyIssueShow}
+            onCancel={() => store.setCopyIssueShow(false)}
+            onOk={handleCopyIssue.bind(this)}
+            applyType={applyType}
+          />
+        ) : null
+      }
+      {
+        relateStoryShow ? (
+          <RelateStory
+            issue={issue}
+            visible={relateStoryShow}
+            onCancel={() => store.setRelateStoryShow(false)}
+            onOk={handleRelateStory.bind(this)}
+          />
+        ) : null
+      }
+      {
+        transformSubIssueShow ? (
+          <TransformSubIssue
+            visible={transformSubIssueShow}
+            issueId={issueId}
+            issueNum={issueNum}
+            ovn={objectVersionNumber}
+            onCancel={() => store.setTransformSubIssueShow(false)}
+            onOk={handleTransformSubIssue.bind(this)}
+            issueTypes={issueTypes}
+          />
+        ) : null
+      }
+      {
+        transformFromSubIssueShow ? (
+          <TransformFromSubIssue
+            visible={transformFromSubIssueShow}
+            issueId={issueId}
+            issueNum={issueNum}
+            ovn={objectVersionNumber}
+            onCancel={() => store.setTransformFromSubIssueShow(false)}
+            onOk={handleTransformFromSubIssue.bind(this)}
+            store={store}
+          />
+        ) : null
+      }
+      {
+        changeParentShow ? (
+          <ChangeParent
+            issueId={issueId}
+            issueNum={issueNum}
+            visible={changeParentShow}
+            objectVersionNumber={objectVersionNumber}
+            onOk={() => {
+              store.setChangeParentShow(false);
+              if (onUpdate) {
+                onUpdate();
+              }
+              loadIssueDetail(issueId);
+            }}
+            onCancel={() => {
+              store.setChangeParentShow(false);
+            }}
+          />
+        ) : null
+      }
     </div>
   );
 }
