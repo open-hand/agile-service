@@ -431,8 +431,8 @@ export default {
   component: {
     props: {
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filter: false,
-      filterOption: false,
+      filterOption: filterOptionByName,
+      onFilterChange: false,
       loadWhenMount: true,
     },
     request: ({ filter }) => componentApi.loadAllComponents(filter),
@@ -440,6 +440,7 @@ export default {
       <Option
         key={component.name}
         value={component.name}
+        name={component.name}
       >
         {[...component.name].length > 10 ? (
           <Tooltip title={component.name} placement="top" arrowPointAtCenter>
@@ -484,8 +485,8 @@ export default {
   version: {
     props: {
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filter: false,
       filterOption,
+      onFilterChange: false,
       loadWhenMount: true,
     },
     request: ({ filter, page }, statusList = ['version_planning']) => versionApi.loadNamesByStatus(statusList),
