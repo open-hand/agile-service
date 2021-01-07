@@ -56,7 +56,7 @@ interface MemberLocalStoreMapDataProps {
 interface MemberLocalStoreMapMethodProps {
   addOneQueryUser: (id: string) => void,
 }
-function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStoreMapDataProps, MemberLocalStoreMapMethodProps] {
+function useMemberLocalStoreMap(config?: MemberLocalMapConfig, projectId?: string): [MemberLocalStoreMapDataProps, MemberLocalStoreMapMethodProps] {
   const [finish, setFinish] = useState<boolean>();
   const [innerMode, setInnerMode] = useState<'outer' | 'inner'>('inner');
   const userMaps = useMemo(() => {
@@ -98,7 +98,7 @@ function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStor
             return { list: res ? [res] : [] };
           }) as Promise<{ list: User[] }>;
         }
-        (queryUserRequest ?? userApi.getById(id)).then((res: any) => {
+        (queryUserRequest ?? userApi.project(projectId).getById(id)).then((res: any) => {
           const { list } = res;
           if (list[0]) {
             userMaps.set(id!, { ...list[0], id: String(list[0].id) });
@@ -156,7 +156,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     }
     return ids ? [ids] : undefined;
   }, [JSON.stringify(autoQueryConfig?.selectedUserIds)]);
-  const [loadExtraData, loadExtraDataMethod] = useMemberLocalStoreMap(autoQueryConfig);
+  const [loadExtraData, loadExtraDataMethod] = useMemberLocalStoreMap(autoQueryConfig, projectId);
   const autoQueryUsers = (ids: string[], currentData: User[]) => {
     const idSets = new Set<string>(ids);
     let newIds = Array.from(idSets);

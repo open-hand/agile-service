@@ -2,25 +2,32 @@ import React, {
   useEffect, useState, useCallback, useRef,
 } from 'react';
 import { observer } from 'mobx-react-lite';
+import { toJS } from 'mobx';
 import {
   Icon, Row, Col, Tooltip,
 } from 'choerodon-ui';
-import { Issue, IField } from '@/common/types';
-import { includes } from 'lodash';
+import { Issue, IField, User } from '@/common/types';
+import {
+  includes, map, uniq, compact, flatten,
+} from 'lodash';
+import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import TypeTag from '@/components/TypeTag';
 import { DataSet } from 'choerodon-ui/pro/lib';
-import { fieldApi, moveIssueApi } from '@/api';
+import {
+  fieldApi, moveIssueApi, issueApi, userApi,
+} from '@/api';
 import styles from './Confirm.less';
 import transformValue, { IFieldWithValue } from './transformValue';
 import renderField from './renderField';
 import store from '../../store';
+import SubTask from '../../../IssueBody/SubTask';
 
 export interface IssueWithSubIssueVOList extends Omit<Issue, 'subIssueVOList'> {
   subIssueVOList: Issue[]
 }
 
 interface Props {
-  issue: IssueWithSubIssueVOList,
+  issue: any,
   dataSet: DataSet,
   fieldsWithValue: IFieldWithValue[]
   targetProjectType: 'program' | 'project' | 'subProject'
@@ -34,7 +41,9 @@ interface Props {
 const Confirm: React.FC<Props> = ({
   issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, dataRef,
 }) => {
-  const { selfFields, subTaskFields, moveToProjectList } = store;
+  const {
+    selfFields, subTaskFields, moveToProjectList, subTaskDetailMap, subTaskTypeId, selectedUserIds, selectedUsers,
+  } = store;
   const [fieldsLosed, setFieldsLosed] = useState<IField[]>([]);
   const {
     issueId, issueTypeVO, issueNum, summary, typeCode, subIssueVOList,
@@ -116,7 +125,97 @@ const Confirm: React.FC<Props> = ({
     }
   }, [issueId, targetIssueType.typeCode, targetProjectId]);
 
+  useEffect(() => {
+    if (subTaskTypeId) {
+      const detailRequestArr: Promise<Issue>[] = [];
+      const customFieldsRequestArr: Promise<IFieldWithValue>[] = [];
+      subIssueVOList.forEach((subTask: any) => {
+        detailRequestArr.push(issueApi.load(subTask.issueId));
+        customFieldsRequestArr.push(fieldApi.getFieldAndValue(subTask.issueId, {
+          schemeCode: 'agile_issue',
+          context: 'sub_task',
+          pageCode: 'agile_issue_edit',
+        }));
+      });
+      let subTaskSelectedUserIds: any[] = [...store.selectedUserIds];
+      Promise.all(detailRequestArr).then((res: Issue[]) => {
+        res.forEach((subTask) => {
+          subTaskSelectedUserIds = [...subTaskSelectedUserIds, ...[subTask.assigneeId, subTask.reporterId, subTask.mainResponsible?.id]];
+          subTaskDetailMap.set(`${subTask.issueId}-detail`, subTask);
+        });
+        const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
+        store.setSelectUserIds(uniqUserIds);
+      });
+      Promise.all(customFieldsRequestArr).then((res: IFieldWithValue[]) => {
+        res.forEach((fieldWidthValue, i) => {
+          fieldsWithValue.forEach((item) => {
+            if (!item.system && item.fieldType === 'member' && !item.projectId) {
+              subTaskSelectedUserIds = [...subTaskSelectedUserIds, item.value];
+            }
+          });
+          const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
+          store.setSelectUserIds(uniqUserIds);
+          subTaskDetailMap.set(`${subIssueVOList[i].issueId}-fields`, fieldWidthValue);
+        });
+      });
+    }
+  }, [fieldsWithValue, subIssueVOList, subTaskDetailMap, subTaskTypeId]);
+
   const targetProject = moveToProjectList.find((item: any) => item.id === targetProjectId) || { name: '' };
+
+  useEffect(() => {
+    const selectedUserRequestArr: Promise<any[]>[] = [];
+    if (selectedUserIds && selectedUserIds.length) {
+      selectedUserIds.forEach((id) => {
+        selectedUserRequestArr.push(userApi.project(targetProjectId).getById(id));
+      });
+      Promise.all(selectedUserRequestArr).then((res) => {
+        store.setSelectedUsers(flatten(flatten(res).map((item) => item.list)));
+      });
+    }
+  }, [selectedUserIds, targetProjectId]);
+
+  useEffect(() => {
+    const memberFieldsCodeAndValue = new Map([
+      [`${issue.issueId}-assignee`, issue.assigneeId],
+      [`${issue.issueId}-reporter`, issue.reporterId],
+      [`${issue.issueId}-mainResponsible`, issue.mainResponsible?.id],
+    ]);
+    fieldsWithValue.forEach((field) => {
+      const {
+        fieldCode, projectId, fieldType, system, value,
+      } = field;
+      if (!system && !projectId && fieldType === 'member' && value) {
+        memberFieldsCodeAndValue.set(`${issue.issueId}-${fieldCode}`, value);
+      }
+    });
+
+    for (const [k, v] of subTaskDetailMap.entries()) {
+      const subTaskIssueId = k.split('-')[0];
+      const isDetail = k.split('-')[1] === 'detail';
+      if (isDetail) {
+        memberFieldsCodeAndValue.set(`${subTaskIssueId}-assignee`, v.assigneeId);
+        memberFieldsCodeAndValue.set(`${subTaskIssueId}-reporter`, v.reporterId);
+        memberFieldsCodeAndValue.set(`${subTaskIssueId}-mainResponsible`, v.mainResponsible?.id);
+      } else {
+        v.forEach((field: IFieldWithValue) => {
+          const {
+            fieldCode, projectId, fieldType, system, value,
+          } = field;
+          if (!system && !projectId && fieldType === 'member' && value) {
+            memberFieldsCodeAndValue.set(`${subTaskIssueId}-${fieldCode}`, value);
+          }
+        });
+      }
+    }
+
+    for (const [k, v] of memberFieldsCodeAndValue.entries()) {
+      if (v && selectedUsers.find((user) => user.id === v)) {
+        dataSet.current?.set(k, v);
+      }
+    }
+  }, [dataSet, fieldsWithValue, issue.assigneeId, issue.issueId, issue.mainResponsible?.id, issue.reporterId, selectedUsers, subTaskDetailMap]);
+
   return (
     <div className={styles.confirm}>
       <div className={styles.tip}>
@@ -174,6 +273,7 @@ const Confirm: React.FC<Props> = ({
                             projectType: targetProjectType,
                           },
                           dataRef,
+                          selectedUsers,
                         })}
                       </Col>
                     </Row>
@@ -182,8 +282,8 @@ const Confirm: React.FC<Props> = ({
               }
             </div>
           </div>
-          {/* {
-            subIssueVOList.map((subTask) => (
+          {
+            subTaskTypeId ? subIssueVOList.map((subTask: any) => (
               <div className={styles.issueItem}>
                 <div className={styles.issueItemHeader}>
                   <TypeTag data={subTask.issueTypeVO} />
@@ -191,7 +291,7 @@ const Confirm: React.FC<Props> = ({
                   <span className={styles.summary}>{subTask.summary}</span>
                 </div>
                 <div className={styles.issueItemFields}>
-                  <Row key={`${issue.issueId}-fieldHeader`} className={styles.fieldHeaderRow}>
+                  <Row key={`${subTask.issueId}-fieldHeader`} className={styles.fieldHeaderRow}>
                     <Col span={7}>
                       <span className={styles.fieldHeader}>字段</span>
                     </Col>
@@ -204,8 +304,10 @@ const Confirm: React.FC<Props> = ({
                   </Row>
                   {
                   subTaskFields.map((subTaskField) => {
-                    const { fieldCode, fieldName, system } = subTaskField;
-                    const transformedOriginValue = transformValue({ issue, field: subTaskField, fieldsWithValue });
+                    const { fieldCode, fieldName } = subTaskField;
+                    const subTaskDetail = subTaskDetailMap.get(`${subTask.issueId}-detail`) || {};
+                    const subTaskCustomFields = subTaskDetailMap.get(`${subTask.issueId}-fields`) || [];
+                    const transformedOriginValue = transformValue({ issue: subTaskDetail, field: subTaskField, fieldsWithValue: subTaskCustomFields });
                     return (
                       <Row key={fieldCode} className={styles.fieldRow}>
                         <Col span={7}>
@@ -219,15 +321,19 @@ const Confirm: React.FC<Props> = ({
                         <Col span={9}>
                           {renderField({
                             dataSet,
-                            issue,
+                            issue: subTaskDetail,
                             field: subTaskField,
-                            fieldsWithValue,
-                            targetIssueType,
+                            fieldsWithValue: subTaskCustomFields,
+                            targetIssueType: {
+                              typeCode: 'sub_task',
+                              issueTypeId: subTaskTypeId,
+                            },
                             targetProject: {
                               projectId: targetProjectId,
                               projectType: targetProjectType,
                             },
                             dataRef,
+                            selectedUsers,
                           })}
                         </Col>
                       </Row>
@@ -236,8 +342,8 @@ const Confirm: React.FC<Props> = ({
               }
                 </div>
               </div>
-            ))
-          } */}
+            )) : null
+          }
         </div>
       </div>
     </div>

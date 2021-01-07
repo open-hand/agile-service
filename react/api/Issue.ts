@@ -221,7 +221,7 @@ class IssueApi extends Api<IssueApi> {
     * 根据问题id加载问题
     * @param issueId
     */
-  load(issueId: number) {
+  load(issueId: string) {
     return this.isOutside ? this.request({
       method: 'get',
       url: `${this.outPrefix}/issues/${issueId}`,

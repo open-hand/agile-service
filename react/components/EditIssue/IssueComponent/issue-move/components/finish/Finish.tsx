@@ -1,5 +1,7 @@
 import React from 'react';
-import { Icon, Row, Col } from 'choerodon-ui';
+import {
+  Icon, Row, Col, Tooltip,
+} from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import { TypeTag } from '@/components';
@@ -23,7 +25,9 @@ interface Props {
 const Finish: React.FC<Props> = ({
   issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, dataRef,
 }) => {
-  const { selfFields, subTaskFields } = store;
+  const {
+    selfFields, subTaskFields, subTaskDetailMap, subTaskTypeId, selectedUsers,
+  } = store;
 
   const {
     issueTypeVO, issueNum, summary, typeCode, subIssueVOList,
@@ -71,6 +75,7 @@ const Finish: React.FC<Props> = ({
                           },
                           dataRef,
                           disabled: true,
+                          selectedUsers,
                         })}
                       </Col>
                     </Row>
@@ -79,6 +84,52 @@ const Finish: React.FC<Props> = ({
               }
             </div>
           </div>
+          {
+            subTaskTypeId ? subIssueVOList.map((subTask) => (
+              <div className={styles.issueItem}>
+                <div className={styles.issueItemHeader}>
+                  <TypeTag data={subTask.issueTypeVO} />
+                  <span className={styles.issueNum}>{subTask.issueNum}</span>
+                  <span className={styles.summary}>{subTask.summary}</span>
+                </div>
+                <div className={styles.issueItemFields}>
+                  {
+                  subTaskFields.map((subTaskField) => {
+                    const { fieldCode, fieldName } = subTaskField;
+                    const subTaskDetail = subTaskDetailMap.get(`${subTask.issueId}-detail`) || {};
+                    const subTaskCustomFields = subTaskDetailMap.get(`${subTask.issueId}-fields`) || [];
+                    return (
+                      <Row key={fieldCode} className={styles.fieldRow}>
+                        <Col span={8}>
+                          <span className={styles.fieldReadOnly}>{fieldName}</span>
+                        </Col>
+                        <Col span={16}>
+                          {renderField({
+                            dataSet,
+                            issue: subTaskDetail,
+                            field: subTaskField,
+                            fieldsWithValue: subTaskCustomFields,
+                            targetIssueType: {
+                              typeCode: 'sub_task',
+                              issueTypeId: subTaskTypeId,
+                            },
+                            targetProject: {
+                              projectId: targetProjectId,
+                              projectType: targetProjectType,
+                            },
+                            dataRef,
+                            disabled: true,
+                            selectedUsers,
+                          })}
+                        </Col>
+                      </Row>
+                    );
+                  })
+              }
+                </div>
+              </div>
+            )) : null
+          }
         </div>
       </div>
     </div>
