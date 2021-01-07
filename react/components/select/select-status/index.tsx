@@ -48,7 +48,7 @@ const SelectStatus: React.FC<Props> = forwardRef(
         return data;
       },
       paging: false,
-    }), [afterLoad, dataRef, expectStatusId, issueTypeId, request]);
+    }), [applyType, dataRef, expectStatusId, issueTypeId, projectId, request]);
     const props = useSelect(config);
     const Component = flat ? FlatSelect : Select;
     return (

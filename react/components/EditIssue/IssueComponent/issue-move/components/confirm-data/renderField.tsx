@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { map, includes } from 'lodash';
 import STATUS from '@/constants/STATUS';
 import { Tooltip } from 'choerodon-ui';
+import { toJS } from 'mobx';
 import { IField, IStatus, User } from '@/common/types';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectStatus from '@/components/select/select-status';
@@ -18,6 +19,7 @@ import SelectFeature from '@/components/select/select-feature';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import { epicApi } from '@/api';
 import { UserHead } from '@/components';
+import store from '../../store';
 
 export interface IFieldWithValue extends IField {
   value: any,
@@ -38,7 +40,8 @@ interface Props {
     projectType: 'program' | 'project' | 'subProject',
   },
   dataRef: React.MutableRefObject<Map<string, any>>,
-  disabled?: boolean
+  disabled?: boolean,
+  selectedUsers: User[]
 }
 
 const submit = () => {};
@@ -75,7 +78,7 @@ const renderComponent = (name: string, symbol = ',') => {
 const getFieldValue = (dataSet: DataSet, name: string) => dataSet.current?.get(name);
 
 const renderField = ({
-  dataSet, issue, field, fieldsWithValue, targetIssueType, targetProject, dataRef, disabled = false,
+  dataSet, issue, field, fieldsWithValue, targetIssueType, targetProject, dataRef, disabled = false, selectedUsers,
 }: Props) => {
   const {
     fieldCode, system, fieldType, projectId,
@@ -89,12 +92,14 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('status')?.find((item: any) => item.id === fieldValue);
       return (
         <TextEditToggle
+          key={`${issueId}-status`}
           disabled={disabled}
           className="moveIssue-textEditToggle"
           initValue={undefined}
           onSubmit={submit}
           editor={() => (
             <SelectStatus
+              key={`${issueId}-status`}
               dataSet={dataSet}
               name={`${issueId}-status`}
               issueTypeId={targetIssueType.issueTypeId}
@@ -104,6 +109,7 @@ const renderField = ({
                 dataRef.current.set('status', data);
                 dataSet.current?.set(`${issueId}-status`, (data || []).find((item: any) => item.defaultStatus)?.id);
               }}
+              clearButton={false}
             />
           )}
         >
@@ -137,6 +143,7 @@ const renderField = ({
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectComponent
               dataSet={dataSet}
@@ -175,6 +182,7 @@ const renderField = ({
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectLabel
               dataSet={dataSet}
@@ -211,6 +219,7 @@ const renderField = ({
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectEpic
               dataSet={dataSet}
@@ -257,6 +266,7 @@ const renderField = ({
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectFixVersion
               dataSet={dataSet}
@@ -292,6 +302,7 @@ const renderField = ({
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectSprint
               dataSet={dataSet}
@@ -327,18 +338,23 @@ const renderField = ({
     }
     case 'assignee': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-assignee`);
-      const fieldValueItem = dataRef.current.get('assignee')?.find((item: any) => fieldValue === item.id);
+      const fieldValueItem = [...selectedUsers, ...(dataRef.current.get('assignee') || [])].find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectUser
               dataSet={dataSet}
+              key={`${issueId}-assignee`}
               name={`${issueId}-assignee`}
               projectId={targetProject.projectId}
+              autoQueryConfig={{
+                selectedUserIds: issue.assigneeId,
+              }}
               afterLoad={(data: any) => {
                 dataRef.current.set('assignee', data);
               }}
@@ -368,6 +384,7 @@ const renderField = ({
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectPI
               dataSet={dataSet}
@@ -408,6 +425,7 @@ const renderField = ({
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectTeam
               dataSet={dataSet}
@@ -440,6 +458,7 @@ const renderField = ({
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectProgramVersion
               dataSet={dataSet}
@@ -475,6 +494,7 @@ const renderField = ({
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectFeature
               dataSet={dataSet}
@@ -503,18 +523,22 @@ const renderField = ({
     }
     case 'mainResponsible': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-mainResponsible`);
-      const fieldValueItem = dataRef.current.get('mainResponsible')?.find((item: any) => fieldValue === item.id);
+      const fieldValueItem = [...selectedUsers, ...(dataRef.current.get('mainResponsible') || [])].find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectUser
               dataSet={dataSet}
               name={`${issueId}-mainResponsible`}
               projectId={targetProject.projectId}
+              autoQueryConfig={{
+                selectedUserIds: issue.mainResponsible?.id,
+              }}
               afterLoad={(data: any) => {
                 dataRef.current.set('mainResponsible', data);
               }}
@@ -537,13 +561,14 @@ const renderField = ({
     }
     case 'reporter': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-reporter`);
-      const fieldValueItem = dataRef.current.get('reporter')?.find((item: any) => fieldValue === item.id);
+      const fieldValueItem = [...selectedUsers, ...(dataRef.current.get('reporter') || [])].find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectUser
               dataSet={dataSet}
@@ -551,6 +576,9 @@ const renderField = ({
               projectId={targetProject.projectId}
               afterLoad={(data: any) => {
                 dataRef.current.set('reporter', data);
+              }}
+              autoQueryConfig={{
+                selectedUserIds: issue.reporterId,
               }}
             />
           )}
@@ -576,13 +604,14 @@ const renderField = ({
     const fieldItem = fieldsWithValue.find((item: IFieldWithValue) => item.fieldCode === fieldCode);
     if (fieldItem && fieldItem.fieldCode) {
       const fieldValue = getFieldValue(dataSet, `${issueId}-${fieldItem.fieldCode}`);
-      const fieldValueItem = dataRef.current.get(fieldItem.fieldCode)?.find((item: any) => fieldValue === item.id);
+      const fieldValueItem = [...selectedUsers, ...(dataRef.current.get(fieldItem.fieldCode) || [])].find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectUser
               dataSet={dataSet}
@@ -590,6 +619,9 @@ const renderField = ({
               projectId={targetProject.projectId}
               afterLoad={(data: any) => {
                 dataRef.current.set(fieldItem.fieldCode as string, data);
+              }}
+              autoQueryConfig={{
+                selectedUserIds: issue.value,
               }}
             />
           )}

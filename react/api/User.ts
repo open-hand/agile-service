@@ -6,7 +6,7 @@ import Api from './Api';
 
 class UserApi extends Api<UserApi> {
   get prefix() {
-    return `/iam/choerodon/v1/projects/${getProjectId()}`;
+    return `/iam/choerodon/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -20,7 +20,7 @@ class UserApi extends Api<UserApi> {
  * 根据用户id查询用户信息
  * @param userId
  */
-  getById(userId: number | string) {
+  getById(userId: string | string) {
     return axios.get(`${this.prefix}/users?id=${userId}`);
   }
 

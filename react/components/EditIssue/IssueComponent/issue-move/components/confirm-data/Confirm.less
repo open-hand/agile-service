@@ -33,6 +33,12 @@
         &:not(:first-child) {
           padding-top: 20px;
         }
+        &:not(:last-child) {
+          .issueItemFields {
+            border-bottom: 1px dotted#5365EA;
+            padding-bottom: 15px;
+          }
+        }
         .issueItemHeader {
           display: flex;
           align-items: center;
@@ -51,10 +57,6 @@
         .issueItemFields {
           padding-top: 11px;
           border-top: 1px solid #F1F1F1;
-          &:not(:last-child) {
-            border-bottom: 1px dotted#5365EA;
-            padding-bottom: 15px;
-          }
           .fieldHeaderRow {
              margin-bottom: 15px;
              padding: 0 16px;

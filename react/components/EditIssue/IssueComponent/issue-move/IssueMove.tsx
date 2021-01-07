@@ -6,7 +6,9 @@ import {
   Form, Radio, DataSet, Modal, Button,
 } from 'choerodon-ui/pro';
 import { Steps } from 'choerodon-ui';
-import { includes } from 'lodash';
+import {
+  includes, map, compact, uniq,
+} from 'lodash';
 import {
   IModalProps, Issue, AppStateProps, IIssueType,
 } from '@/common/types';
@@ -102,6 +104,7 @@ const IssueMove: React.FC<Props> = ({
               }
               if (issue.subIssueVOList && issue.subIssueVOList.length) {
                 excludeTypeCode.push('bug');
+                store.setSubTaskTypeId((issueTypes || []).find((item: IIssueType) => item.typeCode === 'sub_task')?.id);
               }
             } else {
               setTargetProjectType('program');
@@ -136,44 +139,105 @@ const IssueMove: React.FC<Props> = ({
     modal?.close();
   };
 
+  useEffect(() => {
+    const userIds = [issue.assigneeId, issue.reporterId, issue.mainResponsible?.id, ...(map(fieldsWithValue.filter((item) => !item.system && item.fieldType === 'member' && !item.projectId), 'value'))];
+    const uniqUserIds = uniq(compact(userIds));
+    store.setSelectUserIds(uniqUserIds);
+  }, [fieldsWithValue, issue.assigneeId, issue.mainResponsible?.id, issue.reporterId]);
+
   const { selfFields, subTaskFields } = store;
   const targetTypeCode = dataSet.current?.get('issueType');
   const targetProjectId = dataSet.current?.get('targetProjectId');
 
   const handleSubmit = useCallback(async () => {
-    console.log(dataSet.current?.data);
+    console.log(toJS(dataSet.current?.data));
     let submitData: any = {
       issueId: issue.issueId,
       typeCode: targetTypeCode,
     };
+    if (issue.subIssueVOList && issue.subIssueVOList.length) {
+      submitData = {
+        ...submitData,
+        subIssues: [],
+      };
+    }
     for (const [k, v] of Object.entries(dataSet.current?.data || {})) {
-      if (k.indexOf(`${issue.issueId}-`) > -1 && k.split('-')[1]) {
-        const fieldInfo = selfFields.find((item) => item.fieldCode === k.split('-')[1]);
-        if (fieldInfo?.system && submitFieldMap.get(k.split('-')[1])) {
-          submitData = {
-            ...submitData,
-            [submitFieldMap.get(k.split('-')[1]) as string]: transformValue({
-              k,
-              v,
-              dataRef,
-              targetProjectId,
-            }),
-          };
-        } else {
-          submitData = {
-            ...submitData,
-            [k.split('-')[1] as string]: v,
-          };
+      const kIssueId = k.split('-')[0];
+      const isSelf = kIssueId === issue.issueId;
+      if (kIssueId && k.split('-')[1]) {
+        const fieldInfo = (isSelf ? selfFields : subTaskFields).find((item) => item.fieldCode === k.split('-')[1]);
+        if (fieldInfo) {
+          if (fieldInfo.system && submitFieldMap.get(k.split('-')[1])) { // 系统字段
+            const fieldAndValue = {
+              [submitFieldMap.get(k.split('-')[1]) as string]: transformValue({
+                k,
+                v,
+                dataRef,
+                targetProjectId,
+              }),
+            };
+            if (isSelf) {
+              submitData = {
+                ...submitData,
+                ...fieldAndValue,
+              };
+              if (k.indexOf('fixVersion') > -1) {
+                submitData = {
+                  ...submitData,
+                  versionType: 'fix',
+                };
+              }
+            } else {
+              const currentSubIssueItemIndex = submitData.subIssues.findIndex((item: any) => item.issueId === kIssueId);
+              if (currentSubIssueItemIndex === -1) {
+                submitData.subIssues.push({
+                  issueId: kIssueId,
+                  ...fieldAndValue,
+                });
+              } else {
+                submitData.subIssues[currentSubIssueItemIndex] = {
+                  ...submitData.subIssues[currentSubIssueItemIndex],
+                  ...fieldAndValue,
+                };
+              }
+              if (k.indexOf('fixVersion') > -1) {
+                submitData.subIssues[currentSubIssueItemIndex] = {
+                  ...submitData.subIssues[currentSubIssueItemIndex],
+                  versionType: 'fix',
+                };
+              }
+            }
+          } else if (isSelf) { // 非系统字段，自己
+            if (submitData.customFields) {
+              submitData.customFields.push({
+                fieldId: fieldInfo.fieldId,
+                fieldType: fieldInfo.fieldType,
+                value: v,
+              });
+            } else {
+              submitData.customFields = [{
+                fieldId: fieldInfo.fieldId,
+                fieldType: fieldInfo.fieldType,
+                value: v,
+              }];
+            }
+          } else { // 非系统字段，子任务
+            const currentSubIssueItemIndex = submitData.subIssues.find((item: any) => item.issueId === kIssueId);
+            if (currentSubIssueItemIndex === -1) {
+              submitData.subIssues.push({
+                issueId: kIssueId,
+                [k.split('-')[1] as string]: v,
+              });
+            } else {
+              submitData.subIssues[currentSubIssueItemIndex] = {
+                ...submitData.subIssues[currentSubIssueItemIndex],
+                [k.split('-')[1] as string]: v,
+              };
+            }
+          }
         }
       }
     }
-    if (Object.keys(dataSet.current?.data || {}).find(((k: string) => k.indexOf('fixVersion') > -1))) {
-      submitData = {
-        ...submitData,
-        versionType: 'fix',
-      };
-    }
-    console.log(submitData);
     return moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
       Choerodon.prompt('移动成功');
       return false;
@@ -181,7 +245,7 @@ const IssueMove: React.FC<Props> = ({
       Choerodon.prompt('移动失败');
       return false;
     });
-  }, [dataSet, issue.issueId, selfFields, targetProjectId, targetTypeCode]);
+  }, [dataSet, issue.issueId, issue.subIssueVOList, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [modal, handleSubmit]);

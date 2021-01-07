@@ -175,6 +175,7 @@ interface FieldOption {
 }
 export interface IField {
   code: string,
+  fieldId: string,
   fieldOptions?: FieldOption[],
   fieldType: string,
   fieldTypeName?: string,
@@ -227,6 +228,7 @@ export interface Issue {
   sameParentIssueVOList?: Issue[],
   sameParentBugVOList?: Issue[]
   assigneeRealName: string
+  reporterId: string
   reporterRealName: string
   statusVO: IStatus
   priorityVO: IPriority
@@ -261,6 +263,9 @@ export interface Issue {
   parentSummary?: string
   subIssueVOList: ISubIssue[]
   subBugVOList: ISubIssue[]
+  mainResponsible?: {
+    id: string
+  }
 }
 
 export interface ILog {

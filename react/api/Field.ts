@@ -74,7 +74,7 @@ class FieldApi extends Api<FieldApi> {
  * 加载字段配置（包含值）
  * @returns {V|*}
  */
-  getFieldAndValue(issueId: number, dto: IFiled) {
+  getFieldAndValue(issueId: string, dto: IFiled) {
     return this.isOutside ? this.request({
       method: 'post',
       url: `${this.outPrefix}/field_value/list/${issueId}`,
