@@ -8,7 +8,7 @@ import { Modal as ModalPro } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
-import openIssueMove from './issue-move';
+import openIssueMove from '../../EditIssueNew/IssueComponent/issue-move';
 
 const { confirm } = Modal;
 const IssueDropDown = ({

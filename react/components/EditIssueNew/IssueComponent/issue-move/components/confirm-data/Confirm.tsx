@@ -20,7 +20,6 @@ import styles from './Confirm.less';
 import transformValue, { IFieldWithValue } from './transformValue';
 import renderField from './renderField';
 import store from '../../store';
-import SubTask from '../../../IssueBody/SubTask';
 
 export interface IssueWithSubIssueVOList extends Omit<Issue, 'subIssueVOList'> {
   subIssueVOList: Issue[]
