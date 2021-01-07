@@ -65,11 +65,17 @@ function EditIssue() {
     issueEvents?.close();
   }, [close, issueEvents]);
   const onIssueCopy = useCallback(() => {
-    issueEvents?.copy();
+    const callback = issueEvents?.copy || issueEvents?.update;
+    if (callback) {
+      callback();
+    }
   }, [issueEvents]);
   const onDeleteIssue = useCallback(() => {
+    const callback = issueEvents?.delete || issueEvents?.update;
+    if (callback) {
+      callback();
+    }
     close();
-    issueEvents?.delete();
   }, [close, issueEvents]);
   const loadIssueDetail = async (paramIssueId) => {
     const id = paramIssueId || currentIssueId;
