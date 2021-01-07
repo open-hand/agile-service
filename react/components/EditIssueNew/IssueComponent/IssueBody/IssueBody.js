@@ -83,7 +83,7 @@ function IssueBody(props) {
           <IssueDes {...props} />
           <IssueAttachment {...props} />
           {
-            issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
+            !outside && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
               <>
                 <IssueWSJF {...props} />
                 <InjectedComponent.PIAim {...props} />
