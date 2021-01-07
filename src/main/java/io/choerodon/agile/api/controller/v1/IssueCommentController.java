@@ -52,6 +52,19 @@ public class IssueCommentController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("创建issue评论回复")
+    @PostMapping("/replay")
+    public ResponseEntity<IssueCommentVO> createIssueCommentReplay(@ApiParam(value = "项目id", required = true)
+                                                             @PathVariable(name = "project_id") Long projectId,
+                                                                   @ApiParam(value = "创建issue评论回复对象", required = true)
+                                                             @RequestBody IssueCommentReplayCreateVO issueCommentReplayCreateVO) {
+        issueCommentValidator.verifyCreateReplayData(issueCommentReplayCreateVO);
+        return Optional.ofNullable(issueCommentService.createIssueCommentReplay(projectId, issueCommentReplayCreateVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
+                .orElseThrow(() -> new CommonException("error.IssueComment.createIssueCommentReplay"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更新issue评论")
     @PostMapping(value = "/update")
     public ResponseEntity<IssueCommentVO> updateIssueComment(@ApiParam(value = "项目id", required = true)
@@ -79,6 +92,18 @@ public class IssueCommentController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("通过commentId查询评论下对应回复")
+    @GetMapping(value = "/replay/{comment_id}")
+    public ResponseEntity<List<IssueCommentReplayVO>> queryIssueCommentReplayList(@ApiParam(value = "项目id", required = true)
+                                                                                      @PathVariable(name = "project_id") Long projectId,
+                                                                                  @ApiParam(value = "comment_id", required = true)
+                                                                                      @PathVariable(name = "comment_id") @Encrypt Long commentId) {
+        return Optional.ofNullable(issueCommentService.queryIssueCommentReplayList(projectId, commentId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.IssueComment.queryIssueCommentReplayList"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("通过commentId删除")
     @DeleteMapping(value = "/{commentId}")
     public ResponseEntity deleteIssueComment(@ApiParam(value = "项目id", required = true)
@@ -86,6 +111,17 @@ public class IssueCommentController {
                                              @ApiParam(value = "commentId", required = true)
                                              @PathVariable @Encrypt Long commentId) {
         issueCommentService.deleteIssueComment(projectId, commentId);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("通过commentId删除评论及其回复")
+    @DeleteMapping(value = "/replay/{commentId}")
+    public ResponseEntity deleteIssueCommentReplay(@ApiParam(value = "项目id", required = true)
+                                             @PathVariable(name = "project_id") Long projectId,
+                                             @ApiParam(value = "评论id", required = true)
+                                             @PathVariable @Encrypt Long commentId) {
+        issueCommentService.deleteIssueCommentReplay(projectId, commentId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 

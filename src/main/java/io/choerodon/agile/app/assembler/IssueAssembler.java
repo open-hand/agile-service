@@ -105,13 +105,29 @@ public class IssueAssembler extends AbstractAssembler {
         issueVO.setReporterLoginName(reporterLoginName);
         issueVO.setReporterRealName(reporterRealName);
         if (issueCommentCondition) {
-            issueVO.getIssueCommentVOList().forEach(issueCommentDTO -> {
-                UserMessageDTO commentUser = userMessageDOMap.get(issueCommentDTO.getUserId());
-                issueCommentDTO.setUserName(commentUser != null ? commentUser.getName() : null);
-                issueCommentDTO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
-                issueCommentDTO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
-                issueCommentDTO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
-            });
+            Map<Long, IssueCommentVO> commentMap = new HashMap<>(issueVO.getIssueCommentVOList().size());
+            for (int i = issueVO.getIssueCommentVOList().size() - 1; i >= 0; i--) {
+                IssueCommentVO issueCommentVO = issueVO.getIssueCommentVOList().get(i);
+                UserMessageDTO commentUser = userMessageDOMap.get(issueCommentVO.getUserId());
+                issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
+                issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
+                issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
+                issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
+                issueCommentVO.setReplaySize(0);
+                commentMap.put(issueCommentVO.getCommentId(), issueCommentVO);
+                if (issueCommentVO.getParentId() != null
+                        && issueCommentVO.getParentId() != 0L
+                        && !ObjectUtils.isEmpty(commentMap.get(issueCommentVO.getParentId()))) {
+                    //设置被回复人信息
+                    IssueCommentVO parentComment = commentMap.get(issueCommentVO.getParentId());
+                    parentComment.setReplaySize(parentComment.getReplaySize() + 1);
+                    issueCommentVO.setReplyToUserId(parentComment.getUserId());
+                    issueCommentVO.setReplyToUserName(parentComment.getUserName());
+                    issueCommentVO.setReplyToUserLoginName(parentComment.getUserLoginName());
+                    issueCommentVO.setReplyToUserRealName(parentComment.getUserRealName());
+                    issueCommentVO.setReplyToUserImageUrl(parentComment.getUserImageUrl());
+                }
+            }
         }
         // 添加主要负责人、测试负责人信息
         issueVO.setMainResponsible(userMessageDOMap.get(issueDetailDTO.getMainResponsibleId()));
@@ -172,7 +188,7 @@ public class IssueAssembler extends AbstractAssembler {
      */
     public List<IssueCompletedStatusVO> issueDTOToIssueCountVO(List<IssueOverviewVO> issueList, Set<Long> priority){
         Set<Long> userIdList = new HashSet<>();
-        rx.Observable.from(priority)
+        Observable.from(priority)
                 .mergeWith(Observable.from(issueList.stream().map(IssueOverviewVO::getCreatedBy).collect(Collectors.toSet())))
                 .toList().subscribe(userIdList::addAll);
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(new ArrayList<>(userIdList), true);
@@ -366,13 +382,29 @@ public class IssueAssembler extends AbstractAssembler {
         issueSubVO.setCreaterName(createrName);
         issueSubVO.setCreaterImageUrl(createrName != null ? userMessageDOMap.get(issueSubVO.getCreatedBy()).getImageUrl() : null);
         if (issueCommentCondition) {
-            issueSubVO.getIssueCommentVOList().forEach(issueCommentDTO -> {
-                UserMessageDTO commentUser = userMessageDOMap.get(issueCommentDTO.getUserId());
-                issueCommentDTO.setUserName(commentUser != null ? commentUser.getName() : null);
-                issueCommentDTO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
-                issueCommentDTO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
-                issueCommentDTO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
-            });
+            Map<Long, IssueCommentVO> commentMap = new HashMap<>(issueSubVO.getIssueCommentVOList().size());
+            for (int i = issueSubVO.getIssueCommentVOList().size() - 1; i >= 0; i--) {
+                IssueCommentVO issueCommentVO = issueSubVO.getIssueCommentVOList().get(i);
+                UserMessageDTO commentUser = userMessageDOMap.get(issueCommentVO.getUserId());
+                issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
+                issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
+                issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
+                issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
+                issueCommentVO.setReplaySize(0);
+                commentMap.put(issueCommentVO.getCommentId(), issueCommentVO);
+                if (issueCommentVO.getParentId() != null
+                        && issueCommentVO.getParentId() != 0L
+                        && !ObjectUtils.isEmpty(commentMap.get(issueCommentVO.getParentId()))) {
+                    //设置被回复人信息
+                    IssueCommentVO parentComment = commentMap.get(issueCommentVO.getParentId());
+                    parentComment.setReplaySize(parentComment.getReplaySize() + 1);
+                    issueCommentVO.setReplyToUserId(parentComment.getUserId());
+                    issueCommentVO.setReplyToUserName(parentComment.getUserName());
+                    issueCommentVO.setReplyToUserLoginName(parentComment.getUserLoginName());
+                    issueCommentVO.setReplyToUserRealName(parentComment.getUserRealName());
+                    issueCommentVO.setReplyToUserImageUrl(parentComment.getUserImageUrl());
+                }
+            }
         }
         return issueSubVO;
     }
@@ -562,7 +594,7 @@ public class IssueAssembler extends AbstractAssembler {
     }
 
     public  List<IssueLinkVO> issueDTOTOVO(Long projectId, List<IssueDTO> issueDTOs){
-        List<io.choerodon.agile.api.vo.IssueLinkVO> issueLinkVOList = new ArrayList<>(issueDTOs.size());
+        List<IssueLinkVO> issueLinkVOList = new ArrayList<>(issueDTOs.size());
         if (!issueDTOs.isEmpty()) {
             Map<Long, IssueTypeVO> testIssueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.TEST);
             Map<Long, IssueTypeVO> agileIssueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);

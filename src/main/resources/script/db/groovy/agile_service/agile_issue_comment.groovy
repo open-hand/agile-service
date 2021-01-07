@@ -31,4 +31,10 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue_comment.groovy') {
             column(name: "issue_id")
         }
     }
+
+    changeSet( author: 'chihao.ran@hand-china.com',id: '2021-01-06-agile-issue-comment-add-column') {
+        addColumn(tableName: "agile_issue_comment"){
+            column(name:"parent_id",type:"BIGINT UNSIGNED",remarks:"父评论id", defaultValue: "0")
+        }
+    }
 }

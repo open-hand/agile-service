@@ -43,6 +43,11 @@ public class IssueCommentDTO extends AuditDomain {
     private String commentText;
 
     /**
+     * 父评论id
+     */
+    private Long parentId;
+
+    /**
      * 项目id
      */
     @NotNull(message = "error.IssueCommentDTO.projectIdNotNull")
@@ -97,6 +102,14 @@ public class IssueCommentDTO extends AuditDomain {
 
     public void setIssueAttachmentDTOList(List<IssueAttachmentDTO> issueAttachmentDTOList) {
         this.issueAttachmentDTOList = issueAttachmentDTOList;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 
     @Override

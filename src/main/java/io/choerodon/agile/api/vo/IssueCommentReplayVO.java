@@ -1,13 +1,13 @@
 package io.choerodon.agile.api.vo;
 
 
-
-import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
 import java.util.List;
+
+import io.choerodon.agile.infra.utils.StringUtil;
 
 /**
  * 敏捷开发Issue评论
@@ -15,7 +15,7 @@ import java.util.List;
  * @author dinghuang123@gmail.com
  * @since 2018-05-14 21:59:45
  */
-public class IssueCommentVO {
+public class IssueCommentReplayVO {
 
     @ApiModelProperty(value = "主键id")
     @Encrypt
@@ -72,9 +72,6 @@ public class IssueCommentVO {
 
     @ApiModelProperty("被回复的用户图标")
     private String replyToUserImageUrl;
-
-    @ApiModelProperty("评论下的回复")
-    private Integer replaySize;
 
     @ApiModelProperty(value = "附件列表")
     private List<IssueAttachmentVO> issueAttachmentVOList;
@@ -221,14 +218,6 @@ public class IssueCommentVO {
 
     public void setReplyToUserImageUrl(String replyToUserImageUrl) {
         this.replyToUserImageUrl = replyToUserImageUrl;
-    }
-
-    public Integer getReplaySize() {
-        return replaySize;
-    }
-
-    public void setReplaySize(Integer replaySize) {
-        this.replaySize = replaySize;
     }
 
     @Override
