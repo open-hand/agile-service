@@ -109,13 +109,14 @@ const IssueMove: React.FC<Props> = ({
               setTargetProjectType('program');
             }
             await issueTypeDataSet.loadData(issueTypes.filter((item) => !includes(excludeTypeCode, item.typeCode)));
-            if (issue.typeCode === 'feature') {
-              moveDataSet.current.set('issueType', 'feature');
-            }
           } else {
             issueTypeDataSet.loadData([]);
           }
-          moveDataSet.current.set('issueType', undefined);
+          if (issue.typeCode === 'feature') {
+            moveDataSet.current.set('issueType', 'feature');
+          } else if (moveDataSet.current?.get('issueType')) {
+            moveDataSet.current.set('issueType', undefined);
+          }
         }
         if (name === 'targetProjectId' || name === 'issueType') {
           Promise.all([moveDataSet.current?.getField('targetProjectId')?.checkValidity(), moveDataSet.current?.getField('issueType')?.checkValidity()]).then((validateRes) => {
