@@ -30,7 +30,7 @@ const Finish: React.FC<Props> = ({
   } = store;
 
   const {
-    issueTypeVO, issueNum, summary, typeCode, subIssueVOList,
+    issueId, issueTypeVO, issueNum, summary, typeCode, subIssueVOList,
   } = issue;
   const targetProjectId = dataSet?.current?.get('targetProjectId');
   const issueType = dataSet?.current?.get('issueType');
@@ -60,7 +60,14 @@ const Finish: React.FC<Props> = ({
                   return (
                     <Row key={fieldCode} className={styles.fieldRow}>
                       <Col span={8}>
-                        <span className={styles.fieldReadOnly}>{fieldName}</span>
+                        <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
+                          {fieldName}
+                          {
+                            dataSet.current?.getField(`${issueId}-${fieldCode}`)?.props?.required && (
+                              <span className={styles.required}>*</span>
+                            )
+                          }
+                        </span>
                       </Col>
                       <Col span={16}>
                         {renderField({
@@ -102,7 +109,14 @@ const Finish: React.FC<Props> = ({
                     return (
                       <Row key={fieldCode} className={styles.fieldRow}>
                         <Col span={8}>
-                          <span className={styles.fieldReadOnly}>{fieldName}</span>
+                          <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
+                            {fieldName}
+                            {
+                              dataSet.current?.getField(`${subTask.issueId}-${fieldCode}`)?.props?.required && (
+                                <span className={styles.required}>*</span>
+                              )
+                            }
+                          </span>
                         </Col>
                         <Col span={16}>
                           {renderField({

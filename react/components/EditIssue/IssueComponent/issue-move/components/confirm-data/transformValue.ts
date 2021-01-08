@@ -36,6 +36,8 @@ const transformValue = ({ issue, field, fieldsWithValue }: {issue: any, field: I
       return issue.reporterRealName || '无';
     case 'mainResponsible':
       return issue.mainResponsible?.realName || '无';
+    case 'epicName':
+      return issue.epicName || '无';
     default:
       break;
   }
