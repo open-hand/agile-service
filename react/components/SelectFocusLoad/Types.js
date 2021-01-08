@@ -431,11 +431,11 @@ export default {
   component: {
     props: {
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filterOption: filterOptionByName,
-      onFilterChange: false,
+      // filterOption: filterOptionByName,
+      // onFilterChange: false,
       loadWhenMount: true,
     },
-    request: ({ filter }) => componentApi.loadAllComponents(filter),
+    request: ({ filter, page }) => componentApi.loadAllComponents(filter, undefined, page, 10),
     render: (component) => (
       <Option
         key={component.name}
