@@ -18,6 +18,7 @@ import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.exception.CommonException;
@@ -61,7 +62,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     private static final String RANK_FIELD = "rank";
     private static final String ISSUE_NULL = "error.issue.is.null";
     private static final String AGILE_SCHEME_CODE = "agile_issue";
-    private static final  String[] AGILE_PROJECT_CATEGORY = {ProjectCategory.GENERAL, ProjectCategory.AGILE};
+    private static final String FEATURE = "feature";
 
     @Autowired
     private BaseFeignClient baseFeignClient;
@@ -151,18 +152,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException("");
         }
-        List<String> agileProjectCategoryS = new ArrayList<>();
-        agileProjectCategoryS.addAll(Arrays.asList(AGILE_PROJECT_CATEGORY));
-        if (!Objects.equals(issueDTO.getTypeCode(), ISSUE_EPIC)) {
-            if (!Objects.equals(projectVO.getCategory(), targetProjectVO.getCategory()) && (!agileProjectCategoryS.contains(projectVO.getCategory()) || !agileProjectCategoryS.contains(targetProjectVO.getCategory()))) {
-                throw new CommonException("error.transfer.project.illegal");
-            }
-        } else {
-            agileProjectCategoryS.add(ProjectCategory.PROGRAM);
-            if (!agileProjectCategoryS.contains(targetProjectVO.getCategory())) {
-                throw new CommonException("error.transfer.project.illegal");
-            }
-        }
+        checkProject(issueDTO.getTypeCode(), targetProjectVO);
+
         JSONArray subIssues = jsonObject.getJSONArray("subIssues");
         jsonObject.remove("subIssues");
         // 处理issue相关的数据
@@ -174,25 +165,47 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(targetProjectVO.getId());
     }
 
+    private void checkProject(String typeCode, ProjectVO targetProjectVO) {
+        List<String> codes = targetProjectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+        if (Objects.equals(typeCode, ISSUE_EPIC)) {
+            if (!codes.contains(ProjectCategory.MODULE_AGILE) || !codes.contains(ProjectCategory.MODULE_PROGRAM)) {
+                throw new CommonException("error.transfer.project.illegal");
+            }
+        } else if (Objects.equals(typeCode, FEATURE) && !codes.contains(ProjectCategory.MODULE_PROGRAM)) {
+            throw new CommonException("error.transfer.project.illegal");
+        } else {
+            if (!codes.contains(ProjectCategory.MODULE_AGILE)) {
+                throw new CommonException("error.transfer.project.illegal");
+            }
+        }
+    }
+
     @Override
     public List<ProjectVO> listMoveProject(Long projectId, String typeCode) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-        List<String> agileProjectCategoryS = Arrays.asList(AGILE_PROJECT_CATEGORY);
         List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(projectVO.getOrganizationId(), userId).getBody();
-        if (!Objects.equals(typeCode, ISSUE_EPIC)) {
-            projectVOS = projectVOS.stream()
-                    .filter(v -> Boolean.TRUE.equals(v.getEnabled()) && !Objects.equals(v.getId(),projectId))
-                    .filter(v -> Objects.equals(v.getCategory(), projectVO.getCategory()) || (agileProjectCategoryS.contains(v.getCategory()) && agileProjectCategoryS.contains(projectVO.getCategory())))
-                    .collect(Collectors.toList());
-        } else {
-            agileProjectCategoryS.add(ProjectCategory.PROGRAM);
-            projectVOS = projectVOS.stream()
-                    .filter(v -> Boolean.TRUE.equals(v.getEnabled()) && !Objects.equals(v.getId(),projectId))
-                    .filter(v -> !agileProjectCategoryS.contains(v.getCategory()))
-                    .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(projectVOS)) {
+            return projectVOS.stream()
+                    .filter(v -> Boolean.TRUE.equals(v.getEnabled()) && !Objects.equals(v.getId(), projectId))
+                    .filter(v -> {
+                        List<String> codes = v.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+                        return checkProjectCategory(codes, typeCode);
+                    }).collect(Collectors.toList());
         }
-        return projectVOS;
+        return new ArrayList<>();
+    }
+
+    private boolean checkProjectCategory(List<String> codes, String typeCode) {
+        if (Objects.equals(typeCode, ISSUE_EPIC)) {
+            return codes.contains(ProjectCategory.MODULE_AGILE) || codes.contains(ProjectCategory.MODULE_PROGRAM);
+        }
+        else if (Objects.equals(typeCode, FEATURE)) {
+            return codes.contains(ProjectCategory.MODULE_PROGRAM);
+        }
+        else {
+            return codes.contains(ProjectCategory.MODULE_AGILE);
+        }
     }
 
     @Override
