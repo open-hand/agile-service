@@ -1,3 +1,4 @@
+/* eslint-disable no-const-assign */
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -9,6 +10,7 @@ import { Modal } from 'choerodon-ui/pro';
 import { getFileSuffix } from '@/utils/common';
 import Preview from '@/components/Preview';
 import './SingleFileUpload.less';
+import FileSaver from 'file-saver';
 
 const previewSuffix = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'pdf', 'jpg', 'jpeg', 'gif', 'png'];
 const modalKey = Modal.key();
@@ -16,6 +18,10 @@ function SingleFileUplaod(props) {
   const {
     url, fileService, fileName, hasDeletePermission, onDeleteFile,
   } = props;
+
+  const handleDownLoadFile = () => {
+    FileSaver.saveAs(`${fileService || ''}${url}`, fileName);
+  };
 
   const handlePreviewClick = (service, name, fileUrl) => {
     Modal.open({
@@ -28,9 +34,10 @@ function SingleFileUplaod(props) {
       className: 'c7n-agile-preview-Modal',
       cancelText: '关闭',
       fullScreen: true,
-      children: <Preview service={service} fileName={name} fileUrl={fileUrl} />,
+      children: <Preview service={service} fileName={name} fileUrl={fileUrl} handleDownLoadFile={handleDownLoadFile} />,
     });
   };
+
   const previewAble = previewSuffix.includes(getFileSuffix(url));
   return (
     <div className="c7n-agile-singleFileUpload">
@@ -45,7 +52,7 @@ function SingleFileUplaod(props) {
           </Tooltip>
         )}
       </span>
-      <a className="c7n-agile-singleFileUpload-download" href={fileService ? `${fileService}${url}` : `${url}`}>
+      <a className="c7n-agile-singleFileUpload-download" onClick={handleDownLoadFile}>
         <span className="c7n-agile-singleFileUpload-icon">
           <Tooltip title="下载">
             <Icon type="get_app" style={{ color: '#000' }} />
