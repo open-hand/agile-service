@@ -1,5 +1,5 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Select } from 'choerodon-ui/pro';
+import { Select, Tooltip } from 'choerodon-ui/pro';
 import { componentApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
@@ -48,6 +48,11 @@ const SelectComponent: React.FC<Props> = forwardRef(({
       combo
       {...props}
       {...otherProps}
+      optionRenderer={({ record, text, value }) => (
+        <Tooltip title={text}>
+          <span>{text}</span>
+        </Tooltip>
+      )}
     />
   );
 });

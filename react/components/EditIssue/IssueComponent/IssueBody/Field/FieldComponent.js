@@ -105,6 +105,10 @@ import { Tooltip } from 'choerodon-ui';
                 dataRef={this.dataRef}
                 getPopupContainer={() => document.getElementById('detail')}
                 style={{ marginTop: 0, paddingTop: 0 }}
+                dropdownMatchSelectWidth={false}
+                dropdownMenuStyle={{
+                  maxWidth: 400,
+                }}
               />
             )}
           >
