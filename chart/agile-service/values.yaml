@@ -93,6 +93,9 @@ env:
     CHOERODON_CLEANPERMISSION: false
     # minio地址
     SERVICES_ATTACHMENT_URL: http://minio.example.choerodon.io
+    # 域名地址
+    SERVICES_DOMAIN_URL: http://example.com
+
 
     ## Skywalking 配置参数
     # SKYWALKING_OPTS: >-
