@@ -72,6 +72,10 @@ public class ProjectCategory {
         if (codes.contains(MODULE_AGILE) && codes.contains(MODULE_PROGRAM)) {
             throw new CommonException("can not create agile project with N_AGILE and N_PROGRAM");
         }
+        if (codes.contains(MODULE_BACKLOG)
+                && !(codes.contains(MODULE_AGILE) || codes.contains(MODULE_PROGRAM))) {
+            throw new CommonException("can not create N_REQUIREMENT without N_AGILE or N_PROGRAM");
+        }
         return codes.contains(MODULE_AGILE)
                 || codes.contains(MODULE_PROGRAM);
     }
