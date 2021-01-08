@@ -19,6 +19,7 @@ import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { ISprint, User } from '@/common/types';
 import { userApi } from '@/api';
 import SelectEnvironment from '@/components/select/select-environment';
+import SelectProgramVersion from '@/components/select/select-program-version';
 import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
 import PIField from './field/pi-field';
@@ -113,6 +114,9 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       }
       case 'environment': {
         return <SelectEnvironment name={code} multiple clearButton {...otherComponentProps} />;
+      }
+      case 'programVersion': {
+        return <SelectProgramVersion name={code} multiple clearButton {...otherComponentProps} />;
       }
       default:
         break;
