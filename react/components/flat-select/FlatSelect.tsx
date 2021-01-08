@@ -22,6 +22,11 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     dropdownMatchSelectWidth: false,
   };
 
+  getTriggerIconFont() {
+    // return 'baseline-arrow_drop_down';
+    return this.isFocus && this.searchable ? 'search' : 'baseline-arrow_drop_down';
+  }
+
   // @ts-ignore
   getWrapperClassNames(...args): string {
     const { prefixCls, multiple, range } = this;
