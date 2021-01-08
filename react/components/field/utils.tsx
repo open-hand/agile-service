@@ -136,6 +136,7 @@ export function getFieldElement(field: IFilterField, flat?: boolean): React.Reac
           flat={flat}
             // @ts-ignore
           selectedUserIds={defaultValue ? defaultValue.map((item: string) => ({ id: item })) : undefined}
+          clearButton
         />
       );
     }
