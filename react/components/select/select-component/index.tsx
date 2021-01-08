@@ -44,12 +44,12 @@ const SelectComponent: React.FC<Props> = forwardRef(({
       return data;
     },
     paging: true,
-    optionRenderer: (c) => (
+    optionRenderer: !flat ? (c) => (
       <Tooltip title={c.name} placement="left">
         {c.name}
       </Tooltip>
-    ),
-  }), [dataRef, projectId, selected, valueField]);
+    ) : undefined,
+  }), [dataRef, projectId, selected, valueField, flat]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
@@ -59,6 +59,7 @@ const SelectComponent: React.FC<Props> = forwardRef(({
       clearButton
       multiple
       combo
+      maxTagTextLength={10}
       {...props}
       {...otherProps}
     />
