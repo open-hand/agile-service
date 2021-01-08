@@ -7,13 +7,19 @@ import { getProjectId } from '@/utils/common';
 import IssueItem from './IssueItem';
 
 function SplitStory(props) {
-  const { store } = props;
+  const { store, outside } = props;
   const { projectId, issueId } = store.getIssue;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   useEffect(() => {
     const loadData = async () => {
-      const Data = getProjectId().toString() !== projectId.toString() ? await featureApi.getSubProjectSplitStory(issueId, projectId) : await featureApi.getSplitStory(issueId);
+      let Data;
+      if (outside) {
+        Data = await await featureApi.getSplitStoryOutside(issueId, projectId);
+      } else {
+        Data = getProjectId().toString() !== projectId.toString() ? await featureApi.getSubProjectSplitStory(issueId, projectId) : await featureApi.getSplitStory(issueId);
+      }
+
       batchedUpdates(() => {
         setLoading(false);
         setData(Data);
