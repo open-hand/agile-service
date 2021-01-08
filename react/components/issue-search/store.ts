@@ -127,7 +127,7 @@ class IssueSearchStore {
     } else {
       const { value } = this.chosenFields.get(code) as IChosenField;
       this.chosenFields.delete(code);
-      if (!isEmpty(value)) {
+      if (value !== null && value !== undefined) {
         this.query();
       }
     }
