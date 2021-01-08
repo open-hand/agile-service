@@ -48,6 +48,7 @@ const IssueMove: React.FC<Props> = ({
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [step1NextDisabled, setsStep1NextDisabled] = useState<boolean>(true);
+  const [step2NextDisabled, setsStep2NextDisabled] = useState<boolean>(true);
   const [targetProjectType, setTargetProjectType] = useState<'program' | 'project' | 'subProject'>('project');
   const dataRef = useRef<Map<string, any>>(new Map());
 
@@ -128,6 +129,10 @@ const IssueMove: React.FC<Props> = ({
             moveDataSet.current?.set(`${subTask.issueId}-sprint`, value);
           });
         }
+        if (name !== 'targetProjectId' && name !== 'issueType') {
+          const validate = await moveDataSet.validate();
+          setsStep2NextDisabled(!validate);
+        }
         setUpdateCount((count) => count + 1);
       },
     },
@@ -163,7 +168,7 @@ const IssueMove: React.FC<Props> = ({
     for (const [k, v] of Object.entries(dataSet.current?.data || {})) {
       const kIssueId = k.split('-')[0];
       const isSelf = kIssueId === issue.issueId;
-      if (kIssueId && k.split('-')[1]) {
+      if (kIssueId && k.split('-')[1] && v) {
         const fieldInfo = (isSelf ? selfFields : subTaskFields).find((item: IField) => item.fieldCode === k.split('-')[1]);
         if (fieldInfo) {
           if (fieldInfo.system) { // 系统字段
@@ -274,6 +279,9 @@ const IssueMove: React.FC<Props> = ({
     issueTypeId: targetTypeCode && issueTypeDataSet.toData().find((item: IIssueType) => item.typeCode === targetTypeCode)?.id,
   };
 
+  console.log('step2NextDisabled：');
+  console.log(step2NextDisabled);
+
   return (
     <div className={styles.issueMove}>
       <Steps current={currentStep - 1}>
@@ -308,7 +316,7 @@ const IssueMove: React.FC<Props> = ({
             <Button style={{ marginLeft: 8 }} color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handlePre}>
               上一步
             </Button>
-            <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleNext}>
+            <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleNext} disabled={step2NextDisabled}>
               下一步
             </Button>
             <Button onClick={handleCancel} funcType={'raised' as FuncType}>

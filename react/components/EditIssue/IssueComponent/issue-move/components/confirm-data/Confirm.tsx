@@ -11,6 +11,7 @@ import {
   includes, map, uniq, compact, flatten,
 } from 'lodash';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import TypeTag from '@/components/TypeTag';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import {
@@ -45,10 +46,15 @@ const Confirm: React.FC<Props> = ({
   } = store;
   const [fieldsLosed, setFieldsLosed] = useState<IField[]>([]);
   const {
-    issueId, issueTypeVO, issueNum, summary, typeCode, subIssueVOList,
+    issueId, issueTypeVO, issueNum, summary, typeCode, subIssueVOList, epicName,
   } = issue;
   const targetProjectId = dataSet?.current?.get('targetProjectId');
   const issueType = dataSet?.current?.get('issueType');
+
+  const addField = useCallback((name, props) => {
+    const field = new DataSetField({ ...props, name }, dataSet, dataSet.current);
+    dataSet?.current?.fields.set(name, field);
+  }, [dataSet]);
 
   const filterFields = useCallback((arr: IField[]) => {
     const excludeCodes: string[] = ['summary', 'issueType', 'description', 'remainingTime', 'storyPoints', 'priority', 'estimatedStartTime', 'estimatedEndTime', 'benfitHypothesis', 'acceptanceCritera', 'environment'];
@@ -64,6 +70,7 @@ const Confirm: React.FC<Props> = ({
       fieldCode: 'status',
       system: true,
       code: 'status',
+      required: true,
     } as IField;
 
     const reporterField = {
@@ -71,6 +78,7 @@ const Confirm: React.FC<Props> = ({
       fieldCode: 'reporter',
       system: true,
       code: 'reporter',
+      required: true,
     } as IField;
     const resAdded = [
       statusField,
@@ -101,6 +109,18 @@ const Confirm: React.FC<Props> = ({
         schemeCode: 'agile_issue',
       }, targetProjectId).then((res: IField[]) => {
         const finalFields = getFinalFields(res || []);
+        finalFields.forEach((item) => {
+          if (item.fieldCode !== 'epicName') {
+            addField(`${issueId}-${item.fieldCode}`, {
+              required: item.required,
+            });
+          } else {
+            addField(`${issueId}-${item.fieldCode}`, {
+              required: item.required,
+              maxLength: 20,
+            });
+          }
+        });
         store.setSelfFields(finalFields);
       });
       if (subIssueVOList && subIssueVOList.length) {
@@ -110,11 +130,18 @@ const Confirm: React.FC<Props> = ({
           schemeCode: 'agile_issue',
         }, targetProjectId).then((res: IField[]) => {
           const finalFields = getFinalFields(res || []);
+          subIssueVOList.forEach((subTask: Issue) => {
+            finalFields.forEach((item) => {
+              addField(`${subTask.issueId}-${item.fieldCode}`, {
+                required: item.required,
+              });
+            });
+          });
           store.setSubTaskFields(finalFields);
         });
       }
     }
-  }, [filterFields, getFinalFields, issueType, subIssueVOList, targetProjectId, targetProjectType]);
+  }, [addField, filterFields, getFinalFields, issueId, issueType, subIssueVOList, targetProjectId, targetProjectType]);
 
   useEffect(() => {
     if (targetProjectId && issueId && targetIssueType.typeCode) {
@@ -215,6 +242,11 @@ const Confirm: React.FC<Props> = ({
     }
   }, [dataSet, fieldsWithValue, issue.assigneeId, issue.issueId, issue.mainResponsible?.id, issue.reporterId, selectedUsers, subTaskDetailMap]);
 
+  useEffect(() => {
+    if (epicName && !dataSet.current?.get(`${issueId}-epicName`)) {
+      dataSet.current?.set(`${issueId}-epicName`, epicName);
+    }
+  }, [dataSet, epicName, issueId]);
   return (
     <div className={styles.confirm}>
       <div className={styles.tip}>
@@ -253,7 +285,14 @@ const Confirm: React.FC<Props> = ({
                   return (
                     <Row key={fieldCode} className={styles.fieldRow}>
                       <Col span={7}>
-                        <span className={styles.fieldReadOnly}>{fieldName}</span>
+                        <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
+                          {fieldName}
+                          {
+                            dataSet.current?.getField(`${issueId}-${fieldCode}`)?.props?.required && (
+                              <span className={styles.required}>*</span>
+                            )
+                          }
+                        </span>
                       </Col>
                       <Col span={8}>
                         <Tooltip title={transformedOriginValue}>
@@ -311,7 +350,14 @@ const Confirm: React.FC<Props> = ({
                     return (
                       <Row key={fieldCode} className={styles.fieldRow}>
                         <Col span={7}>
-                          <span className={styles.fieldReadOnly}>{fieldName}</span>
+                          <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
+                            {fieldName}
+                            {
+                              dataSet.current?.getField(`${subTask.issueId}-${fieldCode}`)?.props?.required && (
+                                <span className={styles.required}>*</span>
+                              )
+                            }
+                          </span>
                         </Col>
                         <Col span={8}>
                           <Tooltip title={transformedOriginValue}>

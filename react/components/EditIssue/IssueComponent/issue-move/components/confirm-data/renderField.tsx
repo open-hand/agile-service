@@ -16,10 +16,9 @@ import SelectPI from '@/components/select/select-pi';
 import SelectTeam from '@/components/select/select-team';
 import SelectProgramVersion from '@/components/select/select-program-version';
 import SelectFeature from '@/components/select/select-feature';
-import { DataSet } from 'choerodon-ui/pro/lib';
+import { DataSet, TextField } from 'choerodon-ui/pro/lib';
 import { epicApi } from '@/api';
 import { UserHead } from '@/components';
-import store from '../../store';
 
 export interface IFieldWithValue extends IField {
   value: any,
@@ -602,6 +601,25 @@ const renderField = ({
                 无
               </div>
             )}
+        </TextEditToggle>
+      );
+    }
+    case 'epicName': {
+      const fieldValue = getFieldValue(dataSet, `${issueId}-epicName`);
+      return (
+        <TextEditToggle
+          disabled={disabled}
+          className="moveIssue-textEditToggle"
+          onSubmit={submit}
+          initValue={undefined}
+          editor={() => (
+            <TextField
+              dataSet={dataSet}
+              name={`${issueId}-epicName`}
+            />
+          )}
+        >
+          {fieldValue || '无'}
         </TextEditToggle>
       );
     }

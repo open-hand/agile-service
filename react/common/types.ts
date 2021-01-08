@@ -186,6 +186,7 @@ export interface IField {
   fieldCode?: string
   fieldName?: string
   projectId?: string | number
+  required: boolean
 }
 export interface IComment {
   id: number
