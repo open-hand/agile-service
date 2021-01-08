@@ -8,7 +8,7 @@ import Comment from '../../Component/Comment';
 import EditIssueContext from '../../stores';
 
 function IssueCommit({
-  disabled, reloadIssue, store, loginUserId, hasPermission, projectId,
+  disabled, reloadIssue, store, loginUserId, hasPermission, projectId, outside,
 }) {
   const { applyType } = useContext(EditIssueContext);
   const [addCommit, setAddCommit] = useState(false);
@@ -97,7 +97,7 @@ function IssueCommit({
   };
   return (
     <div id="commit" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
-      {(!disabled || (disabled && applyType === 'agile')) && (
+      {(!disabled || (disabled && applyType === 'agile' && !outside)) && (
         <div style={{ marginBottom: 10 }}>
           {
             addCommit ? (
