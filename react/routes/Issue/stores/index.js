@@ -30,6 +30,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
     useEffect(() => {
       if (typeof (tableListMode) === 'boolean') {
         tableListMode ? localPageCacheStore.setItem('issues.table.mode', 'list') : localPageCacheStore.remove('issues.table.mode');
+        handleUnSelect({ dataSet }, issueSearchStore, hasBatchDeletePermission);
         IssueStore.query();
       }
     }, [tableListMode]);

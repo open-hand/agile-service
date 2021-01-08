@@ -206,7 +206,7 @@ const Issue = observer(() => {
           onClick={() => openExportIssueModal(
             issueSearchStore.getAllFields,
             issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
-            dataSet, tableRef,
+            dataSet, tableRef, tableListMode,
           )}
         >
           导出问题

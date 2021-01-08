@@ -5,10 +5,11 @@ import IssueExportStore from '@/components/issue-export/stores/store';
 import { issueApi } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { omit, set } from 'lodash';
 import { getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields } from './utils';
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
-  tableDataSet: DataSet, tableRef: React.RefObject<Table>) {
+  tableDataSet: DataSet, tableRef: React.RefObject<Table>, tableListMode: boolean) {
   const store = new IssueExportStore({
     defaultInitFieldAction: (data, self) => {
       if (data.code === 'sprint') {
@@ -33,12 +34,24 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     },
     dataSetSystemFields: getFilterFormSystemFields(),
     transformSystemFilter: getTransformSystemFilter,
-    transformExportFieldCodes: getExportFieldCodes,
+    transformExportFieldCodes: (data, { dataSet }) => {
+      data.push(...(dataSet.current?.get('required-option') || []));
+      return getExportFieldCodes(data);
+    },
     events: {
-      exportAxios: (searchData, sort) => issueApi.export(searchData, sort),
+      exportAxios: (searchData, sort) => {
+        set(searchData, 'searchArgs.tree', tableListMode);
+        return issueApi.export(searchData, sort);
+      },
       loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file'),
     },
+    checkboxOptionsExtraConfig: new Map(['issueTypeId', 'issueNum', 'issueId'].map((item) => [item, { checkBoxProps: { disabled: true, defaultChecked: true, name: 'required-option' } }])),
+    defaultInitOptions: ({ dataSet }) => {
+      dataSet.addField('required-option', { multiple: true });
+      dataSet.current?.set('required-option', ['issueTypeId', 'issueNum', 'issueId']);
+    },
   });
+
   originOpenExportIssueModal(fields, chosenFields, tableDataSet, tableRef, store);
 }
 export { openExportIssueModal };
