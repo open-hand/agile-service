@@ -123,10 +123,15 @@ const IssueMove: React.FC<Props> = ({
             setsStep1NextDisabled(!validateRes.every((validate) => !!validate));
           });
         }
+        if (name === `${issue.issueId}-sprint` && issue.subIssueVOList && issue.subIssueVOList.length) {
+          issue.subIssueVOList.forEach((subTask) => {
+            moveDataSet.current?.set(`${subTask.issueId}-sprint`, value);
+          });
+        }
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [issue.subIssueVOList, issue.typeCode, issueTypeDataSet]);
+  }), [issue.issueId, issue.subIssueVOList, issue.typeCode, issueTypeDataSet]);
 
   const handlePre = () => {
     setCurrentStep(currentStep - 1);

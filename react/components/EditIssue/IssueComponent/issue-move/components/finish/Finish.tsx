@@ -76,6 +76,7 @@ const Finish: React.FC<Props> = ({
                           dataRef,
                           disabled: true,
                           selectedUsers,
+                          isSelf: true,
                         })}
                       </Col>
                     </Row>
