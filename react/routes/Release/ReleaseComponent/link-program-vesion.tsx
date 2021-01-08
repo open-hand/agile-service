@@ -5,10 +5,11 @@ import {
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import { versionApiConfig } from '@/api';
+import { versionApi, versionApiConfig } from '@/api';
 import { IsInProgram } from '@/hooks/useIsInProgram';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { getProjectId } from '@/utils/common';
+import useSelect, { SelectConfig } from '@/hooks/useSelect';
 
 interface Props {
   modal?: IModalProps,
@@ -23,16 +24,6 @@ const LinkProgramVersion: React.FC<Props> = (props) => {
     fields: [{
       name: 'programVersion',
       label: '项目群版本',
-      textField: 'name',
-      valueField: 'id',
-      defaultValue: props.defaultValue,
-      options: new DataSet({
-        autoQuery: true,
-        fields: [{ name: 'id', type: 'string' as FieldType }, { name: 'name', type: 'string' as FieldType }],
-        transport: {
-          read: versionApiConfig.loadProgramVersion(false, [getProjectId()]),
-        },
-      }),
     }],
     transport: {
       submit: ({ data, params }) => ({
@@ -41,21 +32,35 @@ const LinkProgramVersion: React.FC<Props> = (props) => {
         data: null,
       }),
     },
-  }), [props.defaultValue, props.programId, props.versionId]);
+  }), [props.defaultValue, props.versionId]);
+  const config = useMemo((): SelectConfig<any> => ({
+    name: 'programVersion',
+    textField: 'name',
+    valueField: 'id',
+    paging: false,
+    afterLoad: () => {
+      props.defaultValue && ds.current?.init('programVersion', props.defaultValue);
+    },
+    request: () => versionApi.loadProgramVersion(false, [getProjectId()]),
+  }), [ds, props.defaultValue]);
+  const selectProps = useSelect(config);
   const handleOnOk = useCallback(async () => {
+    if (!ds.current?.dirty) {
+      return true;
+    }
     if (await ds.current?.validate()) {
       await ds.submit();
       props.onRefresh && props.onRefresh();
       return true;
     }
     return false;
-  }, []);
+  }, [ds, props]);
   useEffect(() => {
     props.modal?.handleOk(handleOnOk);
   }, []);
   return (
     <Form dataSet={ds}>
-      <Select name="programVersion" />
+      <Select name="programVersion" {...selectProps} />
     </Form>
   );
 };
