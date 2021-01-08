@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -167,7 +168,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private InstanceService instanceService;
     @Autowired
-    private TestFeignClient testFeignClient;
+    private TestServiceClientOperator testServiceClientOperator;
     @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
@@ -298,8 +299,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private StateMachineNodeService stateMachineNodeService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
-    @Autowired
-    private FeignUtil feignUtil;
+
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
         handleCreateIssueRearAction(issueConvertDTO, issueId, projectInfoDTO, issueCreateVO.getLabelIssueRelVOList(), issueCreateVO.getComponentIssueRelVOList(), issueCreateVO.getVersionIssueRelVOList(), issueCreateVO.getIssueLinkCreateVOList());
@@ -866,9 +866,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 //        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
         //delete cache
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
-        if (feignUtil.isExist(FeignUtil.TEST_MANAGER_SERVICE)) {
-            testFeignClient.deleteTestRel(projectId, issueId);
-        }
+        testServiceClientOperator.deleteTestRel(projectId, issueId);
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
