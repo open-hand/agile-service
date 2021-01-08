@@ -14,6 +14,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -44,6 +45,8 @@ public class SendMsgUtil {
     private static final String ERROR_PROJECT_NOTEXIST = "error.project.notExist";
     private static final String SUB_TASK = "sub_task";
     private static final String STATUS_ID = "statusId";
+    private static final String INSERT = "insert";
+    private static final String IMAGE = "image";
 
     private static final String FEATURE_URL_TEMPLATE1 = "#/agile/feature?type=project&id=";
     private static final String FEATURE_URL_TEMPLATE2 = "&name=";
@@ -102,7 +105,7 @@ public class SendMsgUtil {
                 + URL_TEMPLATE5 + result.getIssueId();
     }
 
-    public String getFeatureUrl(IssueVO result, ProjectVO projectVO) {
+    public String getFeatureUrl(ProjectVO projectVO) {
         return FEATURE_URL_TEMPLATE1 + projectVO.getId()
                 + FEATURE_URL_TEMPLATE2 + convertProjectName(projectVO)
                 + FEATURE_URL_TEMPLATE3 + projectVO.getCategory()
@@ -336,36 +339,35 @@ public class SendMsgUtil {
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         if ("feature".equals(issueVO.getTypeCode())) {
             issueType = "特性";
-            url = getFeatureUrl(issueVO, projectVO);
+            url = getFeatureUrl(projectVO);
         } else {
             issueType = "问题";
             url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId());
         }
-        Set<Long> userIds = new HashSet<>();
-        if (issueVO.getCreatedBy() != null &&
-                !issueVO.getCreatedBy().equals(issueCommentVO.getUserId())) {
-            actionMap.put(issueVO.getCreatedBy(), "创建的");
-            userIds.add(issueVO.getCreatedBy());
-        }
-        if (issueVO.getReporterId() != null &&
-                !userIds.contains(issueVO.getReporterId()) &&
-                !issueVO.getReporterId().equals(issueCommentVO.getUserId())) {
-            actionMap.put(issueVO.getReporterId(), "负责的");
-            userIds.add(issueVO.getReporterId());
-        }
-        if (issueVO.getAssigneeId() != null &&
-                !userIds.contains(issueVO.getAssigneeId()) &&
-                !issueVO.getAssigneeId().equals(issueCommentVO.getUserId())) {
-            actionMap.put(issueCommentVO.getUserId(), "处理的");
-            userIds.add(issueVO.getAssigneeId());
-        }
-
+        //设置动作与发送人
+        setIssueCommentMessageActionAndUser(actionMap, issueCommentVO.getUserId(), issueVO);
         String summary = issueVO.getIssueNum() + "-" + issueVO.getSummary();
         String comment = Optional.ofNullable(issueCommentVO.getCommentText()).map(SendMsgUtil::getText).orElse("无");
 
-        if (CollectionUtils.isNotEmpty(userIds)) {
-            siteMsgUtil.sendIssueComment(
-                    projectId, userIds, actionMap, projectVO.getName(), summary, url, comment, issueCommentVO.getUserRealName(), "评论", issueType);
+        if (CollectionUtils.isNotEmpty(actionMap.keySet())) {
+            siteMsgUtil.sendIssueComment(actionMap, projectVO, summary, url, comment, issueCommentVO, issueType);
+        }
+    }
+
+    private void setIssueCommentMessageActionAndUser(Map<Long, String> actionMap, Long userId, IssueVO issueVO) {
+        if (issueVO.getCreatedBy() != null &&
+                !issueVO.getCreatedBy().equals(userId)) {
+            actionMap.put(issueVO.getCreatedBy(), "创建的");
+        }
+        if (issueVO.getReporterId() != null &&
+                actionMap.get(issueVO.getReporterId()) == null &&
+                !issueVO.getReporterId().equals(userId)) {
+            actionMap.put(issueVO.getReporterId(), "负责的");
+        }
+        if (issueVO.getAssigneeId() != null &&
+                actionMap.get(issueVO.getAssigneeId()) == null &&
+                !issueVO.getAssigneeId().equals(userId)) {
+            actionMap.put(issueVO.getAssigneeId(), "处理的");
         }
     }
 
@@ -380,18 +382,15 @@ public class SendMsgUtil {
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         if ("feature".equals(issueVO.getTypeCode())) {
             issueType = "特性";
-            url = getFeatureUrl(issueVO, projectVO);
+            url = getFeatureUrl(projectVO);
         } else {
             issueType = "问题";
             url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId());
         }
-        Set<Long> userIds = new HashSet<>();
-        userIds.add(issueCommentVO.getReplyToUserId());
 
         String summary = issueVO.getIssueNum() + "-" + issueVO.getSummary();
         String comment = Optional.ofNullable(issueCommentVO.getCommentText()).map(SendMsgUtil::getText).orElse("无");
-        siteMsgUtil.sendIssueComment(
-                projectId, userIds, actionMap, projectVO.getName(), summary, url, comment, issueCommentVO.getUserRealName(), "评论", issueType);
+        siteMsgUtil.sendIssueComment(actionMap, projectVO, summary, url, comment, issueCommentVO, issueType);
     }
 
     public static String getText(String rawText) {
@@ -400,13 +399,13 @@ public class SendMsgUtil {
         }
         StringBuilder result = new StringBuilder();
         try {
-            JSONArray root = JSONArray.parseArray(rawText);
+            JSONArray root = JSON.parseArray(rawText);
             for (Object o : root) {
                 JSONObject object = (JSONObject) o;
-                if (!(object.get("insert") instanceof JSONObject)) {
-                    result.append(object.getString("insert"));
-                } else if (!(((JSONObject) object.get("insert")).get("image") instanceof JSONObject)) {
-                    result.append("<img style=\"width: auto;height: auto;max-width: 650px;\" src=\"" + ((JSONObject) object.get("insert")).getString("image") + "\"></img>");
+                if (!(object.get(INSERT) instanceof JSONObject)) {
+                    result.append(object.getString(INSERT));
+                } else if (!(((JSONObject) object.get(INSERT)).get(IMAGE) instanceof JSONObject)) {
+                    result.append("<img style=\"width: auto;height: auto;max-width: 650px;\" src=\"").append(((JSONObject) object.get(INSERT)).getString(IMAGE)).append("\"></img>");
                 }
             }
         } catch (Exception e) {
