@@ -58,7 +58,7 @@ const GanttBar: React.FC<GanttBarProps> = ({
       return 0;
     }
     delayDiff = (issue.actualCompletedDate ? dayjs(issue.actualCompletedDate) : dayjs()).diff(dayjs(issue.estimatedEndTime), 'hour');
-    return (ganttRef.current?.getWidthByDate(endDate, actualCompletedDate) || 0) + (issue.actualCompletedDate ? 0 : 15);
+    return (ganttRef.current?.getWidthByDate(endDate, actualCompletedDate) || 0) + (issue.completed && issue.actualCompletedDate ? 0 : 15);
   })();
   const delayVisible = stepGesture !== 'moving' && !loading;
   return (
