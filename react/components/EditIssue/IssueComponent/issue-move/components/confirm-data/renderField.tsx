@@ -42,6 +42,7 @@ interface Props {
   dataRef: React.MutableRefObject<Map<string, any>>,
   disabled?: boolean,
   selectedUsers: User[]
+  isSelf?: boolean
 }
 
 const submit = () => {};
@@ -78,7 +79,7 @@ const renderComponent = (name: string, symbol = ',') => {
 const getFieldValue = (dataSet: DataSet, name: string) => dataSet.current?.get(name);
 
 const renderField = ({
-  dataSet, issue, field, fieldsWithValue, targetIssueType, targetProject, dataRef, disabled = false, selectedUsers,
+  dataSet, issue, field, fieldsWithValue, targetIssueType, targetProject, dataRef, disabled = false, selectedUsers, isSelf = false,
 }: Props) => {
   const {
     fieldCode, system, fieldType, projectId,
@@ -107,7 +108,9 @@ const renderField = ({
               applyType={targetProject.projectType === 'program' ? 'program' : 'agile'}
               afterLoad={(data) => {
                 dataRef.current.set('status', data);
-                dataSet.current?.set(`${issueId}-status`, (data || []).find((item: any) => item.defaultStatus)?.id);
+                if (!dataSet.current?.get(`${issueId}-status`)) {
+                  dataSet.current?.set(`${issueId}-status`, (data || []).find((item: any) => item.defaultStatus)?.id);
+                }
               }}
               clearButton={false}
             />
@@ -298,7 +301,7 @@ const renderField = ({
       const fieldValueItem = dataRef.current.get('sprint')?.find((item: any) => fieldValue === item.sprintId);
       return (
         <TextEditToggle
-          disabled={disabled}
+          disabled={disabled || !isSelf}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
@@ -320,7 +323,7 @@ const renderField = ({
             ? (
               <p
                 style={{
-                  color: '#4d90fe',
+                  color: isSelf ? '#4d90fe' : 'rgba(0, 0, 0, 0.65)',
                   fontSize: '13px',
                   lineHeight: '20px',
                   display: 'inline-block',
@@ -329,7 +332,10 @@ const renderField = ({
                 {fieldValueItem.sprintName}
               </p>
             ) : (
-              <div>
+              <div style={{
+                color: isSelf ? '#000000' : 'rgba(0, 0, 0, 0.65)',
+              }}
+              >
                 无
               </div>
             )}

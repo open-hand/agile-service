@@ -273,6 +273,7 @@ const Confirm: React.FC<Props> = ({
                           },
                           dataRef,
                           selectedUsers,
+                          isSelf: true,
                         })}
                       </Col>
                     </Row>
