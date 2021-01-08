@@ -204,6 +204,17 @@ class FeatureApi extends Api<FeatureApi> {
     });
   }
 
+  getSplitStoryOutside(featureId: number, projectId: string) {
+    return axios({
+      method: 'post',
+      url: 'agile/v1/program_external/list_story_by_feature_id',
+      params: {
+        featureId,
+        project_id: projectId,
+      },
+    });
+  }
+
   /**
    * 将批量的issue加入到特性中
    * @param featureId
