@@ -108,6 +108,8 @@ ribbon:
 services:
   attachment:
     url: example.com
+  domain:
+    url: example.com
 #logging:
 #  level:
 #    io.choerodon.agile: debug

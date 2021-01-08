@@ -77,6 +77,7 @@ public class DataLogAspect {
     private static final String CREATE_COMMENT = "createComment";
     private static final String UPDATE_COMMENT = "updateComment";
     private static final String DELETE_COMMENT = "deleteComment";
+    private static final String DELETE_COMMENT_REPLAY = "deleteCommentReplay";
     private static final String CREATE_WORKLOG = "createWorkLog";
     private static final String DELETE_WORKLOG = "deleteWorkLog";
     private static final String EPIC_NAME_FIELD = "epicName";
@@ -250,6 +251,9 @@ public class DataLogAspect {
                     case DELETE_COMMENT:
                         handleDeleteCommentDataLog(args);
                         break;
+                    case DELETE_COMMENT_REPLAY:
+                        handleDeleteCommentReplayDataLog(args);
+                        break;
                     case CREATE_WORKLOG:
                         result = handleCreateWorkLogDataLog(args, pjp);
                         break;
@@ -343,6 +347,27 @@ public class DataLogAspect {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
         }
         return result;
+    }
+
+    private void handleDeleteCommentReplayDataLog(Object[] args) {
+        IssueCommentDTO issueCommentDTO = null;
+        for (Object arg : args) {
+            if (arg instanceof IssueCommentDTO) {
+                issueCommentDTO = (IssueCommentDTO) arg;
+            }
+        }
+        if (issueCommentDTO != null) {
+            createDataLog(issueCommentDTO.getProjectId(), issueCommentDTO.getIssueId(), FIELD_COMMENT,
+                    issueCommentDTO.getCommentText(), null, issueCommentDTO.getCommentId().toString(), null);
+            IssueCommentDTO childRecord = new IssueCommentDTO();
+            childRecord.setProjectId(issueCommentDTO.getProjectId());
+            childRecord.setParentId(issueCommentDTO.getCommentId());
+            List<IssueCommentDTO> childCommentList = issueCommentMapper.select(childRecord);
+            if (!CollectionUtils.isEmpty(childCommentList)) {
+                childCommentList.forEach(childComment -> createDataLog(childComment.getProjectId(), childComment.getIssueId(), FIELD_COMMENT,
+                        childComment.getCommentText(), null, childComment.getCommentId().toString(), null));
+            }
+        }
     }
 
     private void handlerProjectMove(Object[] args) {
