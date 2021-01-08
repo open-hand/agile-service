@@ -1,6 +1,5 @@
 package io.choerodon.agile.infra.feign;
 
-import io.choerodon.agile.api.vo.WorkSpaceVO;
 import io.choerodon.agile.infra.feign.fallback.KnowledgebaseClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +13,6 @@ import java.util.List;
 public interface KnowledgebaseClient {
 
     @PostMapping(value = "/v1/projects/{project_id}/work_space/query_by_space_ids")
-    ResponseEntity<List<WorkSpaceVO>> querySpaceByIds(@PathVariable(value = "project_id") Long projectId,
+    ResponseEntity<String> querySpaceByIds(@PathVariable(value = "project_id") Long projectId,
                                                       @RequestBody List<Long> spaceIds);
 }

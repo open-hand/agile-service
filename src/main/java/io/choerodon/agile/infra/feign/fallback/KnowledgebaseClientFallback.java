@@ -12,7 +12,7 @@ import java.util.List;
 public class KnowledgebaseClientFallback implements KnowledgebaseClient {
 
     @Override
-    public ResponseEntity<List<WorkSpaceVO>> querySpaceByIds(Long projectId, List<Long> spaceIds) {
+    public ResponseEntity<String> querySpaceByIds(Long projectId, List<Long> spaceIds) {
         throw new CommonException("error.spaceList.get");
     }
 }

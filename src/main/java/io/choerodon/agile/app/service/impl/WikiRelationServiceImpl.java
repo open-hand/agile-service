@@ -1,16 +1,14 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.KnowledgeRelationVO;
 import io.choerodon.agile.api.vo.WikiRelationVO;
 import io.choerodon.agile.api.vo.WorkSpaceVO;
 import io.choerodon.agile.app.service.IWikiRelationService;
 import io.choerodon.agile.app.service.WikiRelationService;
 import io.choerodon.agile.infra.dto.WikiRelationDTO;
-import io.choerodon.agile.infra.feign.KnowledgebaseClient;
+import io.choerodon.agile.infra.feign.operator.KnowledgebaseClientOperator;
 import io.choerodon.agile.infra.mapper.WikiRelationMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
-import io.choerodon.agile.infra.utils.FeignUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -43,14 +41,12 @@ public class WikiRelationServiceImpl implements WikiRelationService {
     private WikiRelationMapper wikiRelationMapper;
 
     @Autowired
-    private KnowledgebaseClient knowledgebaseClient;
+    private KnowledgebaseClientOperator knowledgebaseClientOperator;
 
     @Autowired
     private IWikiRelationService iWikiRelationService;
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private FeignUtil feignUtil;
 
     private Boolean checkRepeat(WikiRelationDTO wikiRelationDTO) {
         WikiRelationDTO wikiRelation = new WikiRelationDTO();
@@ -83,9 +79,7 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         if (wikiRelationDTOList != null && !wikiRelationDTOList.isEmpty()) {
             List<Long> spaceIds = wikiRelationDTOList.stream().map(WikiRelationDTO::getSpaceId).collect(Collectors.toList());
             Map<Long, WorkSpaceVO> workSpaceMap = new HashMap<>();
-            if (feignUtil.isExist(FeignUtil.KNOWLEDGEBASE_SERVICE)) {
-                workSpaceMap.putAll(knowledgebaseClient.querySpaceByIds(projectId, spaceIds).getBody().stream().collect(Collectors.toMap(WorkSpaceVO::getId, Function.identity())));
-            }
+            workSpaceMap.putAll(knowledgebaseClientOperator.querySpaceByIds(projectId, spaceIds).stream().collect(Collectors.toMap(WorkSpaceVO::getId, Function.identity())));
             for (WikiRelationDTO wikiRelation : wikiRelationDTOList) {
                 WorkSpaceVO workSpaceVO = workSpaceMap.get(wikiRelation.getSpaceId());
                 if (!ObjectUtils.isEmpty(workSpaceVO)) {
