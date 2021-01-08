@@ -259,16 +259,17 @@ const IssueMove: React.FC<Props> = ({
         }
       }
     }
-    return moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
+
+    moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
       dataSet.reset();
       onMoveIssue();
       Choerodon.prompt('移动成功');
-      return false;
+      modal?.close();
     }).catch(() => {
       Choerodon.prompt('移动失败');
-      return false;
     });
-  }, [dataSet, issue.issueId, onMoveIssue, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
+    return false;
+  }, [dataSet, issue.issueId, modal, onMoveIssue, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [modal, handleSubmit]);
