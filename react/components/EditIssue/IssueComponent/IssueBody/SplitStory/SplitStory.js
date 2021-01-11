@@ -50,7 +50,7 @@ function SplitStory(props) {
           }
         </div>
       </Tooltip>
-      {storyList.map((issue) => <IssueItem issue={issue} />)}
+      {storyList.map((issue) => <IssueItem issue={issue} outside={outside} />)}
     </Spin>
   );
 }
