@@ -527,11 +527,10 @@ class ScrumBoardHome extends Component {
                   )}
               </div>
             </div>
-
-            <IssueDetail
-              refresh={this.refresh}
-            />
           </Spin>
+          <IssueDetail
+            refresh={this.refresh}
+          />
           <CreateIssue refresh={this.refresh} />
         </Content>
         {

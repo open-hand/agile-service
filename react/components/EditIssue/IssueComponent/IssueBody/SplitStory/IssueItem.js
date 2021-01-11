@@ -17,17 +17,18 @@ const Link = styled.a`
   cursor:pointer;
   color:#3f51b5;
 `;
-function IssueItem({ issue }) {
+function IssueItem({ issue, outside }) {
   const {
     issueId, issueTypeVO, issueNum, summary, priorityVO,
     statusVO, projectVO, totalCount, completedCount,
   } = issue;
   const { push } = useDetailContainerContext();
   const handleSummaryClick = async () => {
-    const isViewProject = await commonApi.checkProjectViewPermission(projectVO.id);
+    // const isViewProject = await commonApi.checkProjectViewPermission(projectVO.id);
     push({
       path: 'issue',
       props: {
+        outside,
         disabled: disableIssueEdit(projectVO.id),
         issueId,
         projectId: projectVO.id,
