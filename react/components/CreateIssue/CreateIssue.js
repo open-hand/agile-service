@@ -230,6 +230,7 @@ class CreateIssue extends Component {
 
   loadIssueTypes = () => {
     const { applyType, form } = this.props;
+
     issueTypeApi.loadAllWithStateMachineId(applyType).then((res) => {
       if (res && res.length) {
         const defaultType = this.getDefaultType(res);
