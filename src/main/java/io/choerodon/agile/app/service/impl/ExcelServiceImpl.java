@@ -789,7 +789,7 @@ public class ExcelServiceImpl implements ExcelService {
         boolean withFeature = (withFeature(projectId, organizationId) && agilePluginService != null);
         //获取日期类型的列
         Set<Integer> dateTypeColumns = new HashSet<>();
-        processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history, dateTypeColumns);
+        processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history, dateTypeColumns, WEBSOCKET_IMPORT_CODE);
         validateRequiredSystemField(headerMap, withFeature, history);
 
         Sheet dataSheet = workbook.getSheetAt(1);
@@ -2037,7 +2037,8 @@ public class ExcelServiceImpl implements ExcelService {
                                   Map<Integer, ExcelColumnVO> headerMap,
                                   boolean withFeature,
                                   FileOperationHistoryDTO history,
-                                  Set<Integer> dateTypeColumns) {
+                                  Set<Integer> dateTypeColumns,
+                                  String websocketKey) {
         boolean containsCustomFields = false;
         for (int i = 0; i < headerNames.size(); i++) {
             String headerName = headerNames.get(i);
@@ -2056,7 +2057,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
         }
         if (containsCustomFields) {
-            validateCustomField(headerMap, projectId, history, "agileIssueType", dateTypeColumns);
+            validateCustomField(headerMap, projectId, history, "agileIssueType", dateTypeColumns, websocketKey);
         }
     }
 
@@ -2075,7 +2076,8 @@ public class ExcelServiceImpl implements ExcelService {
                                        Long projectId,
                                        FileOperationHistoryDTO history,
                                        String issueTypeList,
-                                       Set<Integer> dateTypeColumns) {
+                                       Set<Integer> dateTypeColumns,
+                                       String websocketKey) {
         List<ExcelColumnVO> customFields = new ArrayList<>();
         for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
             ExcelColumnVO value = entry.getValue();
@@ -2096,7 +2098,7 @@ public class ExcelServiceImpl implements ExcelService {
 
         Map<String, ObjectSchemeFieldDetailVO> fieldMap = new HashMap<>();
         objectSchemeFieldDetails.forEach(o -> fieldMap.put(o.getName(), o));
-        String status = "error_custom_field_header";
+        String status = "error_custom_field_header_";
         List<String> multiValueFieldType = Arrays.asList("checkbox", "multiple");
         List<String> fieldTypes = Arrays.asList("multiple", "single", "checkbox", "radio");
         List<String> dateTypes = Arrays.asList("date", "datetime", "time");
@@ -2107,6 +2109,7 @@ public class ExcelServiceImpl implements ExcelService {
                 status += headerName;
                 history.setStatus(status);
                 fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
+                sendProcess(history, history.getUserId(), 0.0, websocketKey);
                 throw new CommonException("error.illegal.custom.field.header." + headerName);
             } else {
                 String fieldCode = detail.getCode();
