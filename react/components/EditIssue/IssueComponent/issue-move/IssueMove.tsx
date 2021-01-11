@@ -64,17 +64,21 @@ const IssueMove: React.FC<Props> = ({
   }, []);
 
   const resetData = useCallback((ds: DataSet, excludeFieldsCode: string[]) => {
-    const fields = ds.current?.fields || [];
-    console.log('删除前--- dataSet的fields：');
-    console.log(toJS(ds.current?.fields));
-    fields.forEach((field: Field) => {
-      console.log(field.get('name'));
+    const fieldNames: string[] = [];
+    (ds.current?.fields || []).forEach((field: Field) => {
       if (!includes(excludeFieldsCode, field.get('name'))) {
-        removeField(ds, field.get('name'));
+        field.reset();
+        ds.current?.set(field.get('name'), undefined);
+        fieldNames.push(field.get('name'));
       }
     });
-    console.log('删除后--- dataSet的fields：');
-    console.log(toJS(ds.current?.fields));
+    // console.log('删除前--- dataSet的fields：');
+    // console.log(toJS(ds.current?.fields), toJS(ds.current?.data));
+    fieldNames.forEach((name: string) => {
+      removeField(ds, name);
+    });
+    // console.log('删除后--- dataSet的fields：');
+    // console.log(toJS(ds.current?.fields), toJS(ds.current?.data));
     store.dataMap.clear();
   }, [removeField]);
 
@@ -161,7 +165,7 @@ const IssueMove: React.FC<Props> = ({
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [issue.issueId, issue.subIssueVOList, issue.typeCode, issueTypeDataSet]);
+  }), [issue.issueId, issue.subIssueVOList, issue.typeCode, issueTypeDataSet, resetData]);
 
   const handlePre = () => {
     setCurrentStep(currentStep - 1);
