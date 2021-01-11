@@ -45,13 +45,12 @@ interface Props {
 const IssueMove: React.FC<Props> = ({
   modal, issue, fieldsWithValue, onMoveIssue,
 }) => {
+  const { dataMap } = store;
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [step1NextDisabled, setsStep1NextDisabled] = useState<boolean>(true);
   const [step2NextDisabled, setsStep2NextDisabled] = useState<boolean>(true);
   const [targetProjectType, setTargetProjectType] = useState<'program' | 'project' | 'subProject'>('project');
-  const dataRef = useRef<Map<string, any>>(new Map());
-
   const issueTypeDataSet = useMemo(() => new DataSet({
     paging: false,
     data: [],
@@ -85,6 +84,8 @@ const IssueMove: React.FC<Props> = ({
         dataSet: moveDataSet, name, value,
       }) => {
         if (name === 'targetProjectId') {
+          // dataSet.current?.reset();
+          // console.log(dataSet.current?.data);
           if (value) {
             const targetProjectInfo = await projectApi.loadBasicInfo(value);
             let targetIsInProgram = false;
@@ -177,7 +178,7 @@ const IssueMove: React.FC<Props> = ({
                 [submitFieldMap.get(k.split('-')[1]) as string]: transformValue({
                   k,
                   v,
-                  dataRef,
+                  dataMap,
                   targetProjectId,
                 }),
               };
@@ -269,7 +270,7 @@ const IssueMove: React.FC<Props> = ({
       Choerodon.prompt('移动失败');
     });
     return false;
-  }, [dataSet, issue.issueId, modal, onMoveIssue, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
+  }, [dataMap, dataSet, issue.issueId, modal, onMoveIssue, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [modal, handleSubmit]);
@@ -279,9 +280,6 @@ const IssueMove: React.FC<Props> = ({
     // @ts-ignore
     issueTypeId: targetTypeCode && issueTypeDataSet.toData().find((item: IIssueType) => item.typeCode === targetTypeCode)?.id,
   };
-
-  console.log('step2NextDisabled：');
-  console.log(step2NextDisabled);
 
   return (
     <div className={styles.issueMove}>
@@ -298,8 +296,8 @@ const IssueMove: React.FC<Props> = ({
       </Steps>
       <div className={styles.step_content}>
         {currentStep === 1 && <SelectProject issue={issue} dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} />}
-        {currentStep === 2 && <Confirm issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} dataRef={dataRef} />}
-        {currentStep === 3 && <Finish issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} dataRef={dataRef} />}
+        {currentStep === 2 && <Confirm issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} />}
+        {currentStep === 3 && <Finish issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} />}
       </div>
       <div className={styles.steps_action}>
         {currentStep === 1 && (

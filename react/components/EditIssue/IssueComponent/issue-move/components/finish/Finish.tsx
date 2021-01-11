@@ -19,14 +19,13 @@ interface Props {
     typeCode: string,
     issueTypeId: string
   }
-  dataRef: React.MutableRefObject<Map<string, any>>,
 }
 
 const Finish: React.FC<Props> = ({
-  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, dataRef,
+  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType,
 }) => {
   const {
-    selfFields, subTaskFields, subTaskDetailMap, subTaskTypeId, selectedUsers,
+    dataMap, selfFields, subTaskFields, subTaskDetailMap, subTaskTypeId, selectedUsers,
   } = store;
 
   const {
@@ -80,7 +79,7 @@ const Finish: React.FC<Props> = ({
                             projectId: targetProjectId,
                             projectType: targetProjectType,
                           },
-                          dataRef,
+                          dataMap,
                           disabled: true,
                           selectedUsers,
                           isSelf: true,
@@ -132,7 +131,7 @@ const Finish: React.FC<Props> = ({
                               projectId: targetProjectId,
                               projectType: targetProjectType,
                             },
-                            dataRef,
+                            dataMap,
                             disabled: true,
                             selectedUsers,
                           })}
