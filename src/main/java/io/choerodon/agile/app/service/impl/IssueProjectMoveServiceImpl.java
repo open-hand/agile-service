@@ -135,22 +135,14 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             throw new CommonException("error.transfer.project.is.null");
         }
         // 两个是否是在同一个组织下,并且项目群项目、普通项目、运维项目不能相互转换
-        Set<Long> projectIds = new HashSet<>();
-        projectIds.add(projectId);
-        projectIds.add(targetProjectId);
-        List<ProjectVO> projectVOS = baseFeignClient.queryByIds(projectIds).getBody();
-        if (CollectionUtils.isEmpty(projectVOS) || !Objects.equals(projectVOS.size(),projectIds.size())) {
-            throw new CommonException("error.project.not.found");
-        }
-        Map<Long, ProjectVO> projectVOMap = projectVOS.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
-        ProjectVO projectVO = projectVOMap.get(projectId);
-        ProjectVO targetProjectVO = projectVOMap.get(targetProjectId);
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO targetProjectVO = baseFeignClient.queryProject(targetProjectId).getBody();
         if (!Objects.equals(projectVO.getOrganizationId(), targetProjectVO.getOrganizationId())) {
             throw new CommonException("error.transfer.across.organizations");
         }
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (ObjectUtils.isEmpty(issueDTO)) {
-            throw new CommonException("");
+            throw new CommonException(ISSUE_NULL);
         }
         checkProject(issueDTO.getTypeCode(), targetProjectVO);
 
