@@ -6,7 +6,7 @@ interface IComponent {
   defaultAssigneeRole: string,
   description: string
   managerId: number,
-  projectId:number,
+  projectId: number,
   name: string,
 }
 class ComponentApi {
@@ -31,9 +31,9 @@ class ComponentApi {
     return axios.post(`${this.prefix}/component/query_all?no_issue_test=true&page=${page}&size=${size}`, filters);
   }
 
-  loadAllComponents(filter?: string, projectId?: number) {
+  loadAllComponents(filter?: string, projectId?: string, page: number = 1, size: number = 999) {
     return axios.post(
-      `/agile/v1/projects/${projectId || getProjectId()}/component/query_all?size=${999}&page=${1}`, {
+      `/agile/v1/projects/${projectId || getProjectId()}/component/query_all?size=${size}&page=${page}`, {
         advancedSearchArgs: {},
         searchArgs: {},
         contents: filter && filter !== '' ? [filter] : undefined,
@@ -53,7 +53,7 @@ class ComponentApi {
    * @param obj
    */
   create(obj: IComponent) {
-    const projectId:number = AppState.currentMenuType.id;
+    const projectId: number = AppState.currentMenuType.id;
     const component = {
       ...obj,
       projectId,
@@ -111,7 +111,7 @@ class ComponentApi {
    * 检查模块名称是否重复
    * @param componentName
    */
-  checkName(componentName:string) {
+  checkName(componentName: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/component/check_name`,

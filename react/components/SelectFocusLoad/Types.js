@@ -431,15 +431,16 @@ export default {
   component: {
     props: {
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filter: false,
-      filterOption: false,
+      // filterOption: filterOptionByName,
+      // onFilterChange: false,
       loadWhenMount: true,
     },
-    request: ({ filter }) => componentApi.loadAllComponents(filter),
+    request: ({ filter, page }) => componentApi.loadAllComponents(filter, undefined, page, 10),
     render: (component) => (
       <Option
         key={component.name}
         value={component.name}
+        name={component.name}
       >
         {[...component.name].length > 10 ? (
           <Tooltip title={component.name} placement="top" arrowPointAtCenter>
@@ -484,8 +485,8 @@ export default {
   version: {
     props: {
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filter: false,
       filterOption,
+      onFilterChange: false,
       loadWhenMount: true,
     },
     request: ({ filter, page }, statusList = ['version_planning']) => versionApi.loadNamesByStatus(statusList),
@@ -552,7 +553,7 @@ export default {
       const extraList = [];
       const values = selectedFeature instanceof Array ? selectedFeature : [selectedFeature];
       values.forEach((feature) => {
-        if (!find(List, { issueId: feature.issueId })) {
+        if (feature && !find(List, { issueId: feature.issueId })) {
           extraList.push(feature);
         }
       });

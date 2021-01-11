@@ -1,41 +1,55 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Select } from 'choerodon-ui/pro';
+import { Select, Tooltip } from 'choerodon-ui/pro';
 import { componentApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IComponent } from '@/common/types';
 import FlatSelect from '@/components/flat-select';
+import { find, toArray, uniqBy } from 'lodash';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   valueField?: string
   afterLoad?: (components: IComponent[]) => void
-  flat?:boolean
+  flat?: boolean
+  projectId?: string
+  selected?: IComponent[]
 }
 
 const SelectComponent: React.FC<Props> = forwardRef(({
-  dataRef, afterLoad, valueField, flat, ...otherProps
+  dataRef, afterLoad, valueField, flat, projectId, selected, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const config = useMemo((): SelectConfig => ({
+  const config = useMemo((): SelectConfig<IComponent> => ({
     name: 'component',
     textField: 'name',
     valueField: valueField || 'componentId',
-    request: () => componentApi.loadAllComponents(),
+    request: ({ page, filter }) => componentApi.loadAllComponents(filter, projectId, page, 10),
     middleWare: (components) => {
       // @ts-ignore
-      const data = components.content || [];
+      let data = components || [];
       if (dataRef) {
         Object.assign(dataRef, {
           current: data,
         });
       }
+      if (selected) {
+        selected.forEach((item) => {
+          data.push(item);
+        });
+      }
+      data = uniqBy(data, 'componentId');
       if (afterLoad) {
         afterLoad(data);
       }
       return data;
     },
-    paging: false,
-  }), []);
+    paging: true,
+    optionRenderer: !flat ? (c) => (
+      <Tooltip title={c.name} placement="left">
+        {c.name}
+      </Tooltip>
+    ) : undefined,
+  }), [dataRef, projectId, selected, valueField, flat]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
@@ -45,6 +59,7 @@ const SelectComponent: React.FC<Props> = forwardRef(({
       clearButton
       multiple
       combo
+      maxTagTextLength={10}
       {...props}
       {...otherProps}
     />
