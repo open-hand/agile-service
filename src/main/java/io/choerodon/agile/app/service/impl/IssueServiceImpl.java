@@ -2599,6 +2599,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public Page<IssueListFieldKVVO> queryStoryAndTask(Long projectId, PageRequest pageRequest, SearchVO searchVO) {
+        //连表查询需要设置主表别名
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", new HashMap<>());
+        pageRequest.setSort(sort);
         Page<IssueDTO> pageInfo = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryStoryAndTaskByProjectId(projectId, searchVO));
         List<IssueDTO> list = pageInfo.getContent();
         if (!CollectionUtils.isEmpty(list)) {
