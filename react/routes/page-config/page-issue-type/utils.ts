@@ -5,7 +5,7 @@ import { toJS } from 'mobx';
 
 function transformDefaultValue({
   fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey = 'id',
-}: { fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey?: 'tempKey' | 'id' }) {
+}: { fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey?: 'tempKey' | 'id' | string }) {
   if (!defaultValue && !defaultValueObj) {
     return defaultValue;
   }
@@ -21,7 +21,7 @@ function transformDefaultValue({
     case 'single':
     case 'radio': {
       const valueArr = String(defaultValue).split(',');
-      return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey])).map((item) => item.value).join(',') || defaultValue;
+      return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey as keyof typeof option])).map((item) => item.value).join(',') || defaultValue;
     }
     case 'member': {
       const { realName } = defaultValueObj || {};
@@ -52,4 +52,5 @@ function beforeSubmitTransform(item: Record, optionKey = 'id') {
     extraConfig: item.get('extraConfig'),
   };
 }
+
 export { transformDefaultValue, beforeSubmitTransform };
