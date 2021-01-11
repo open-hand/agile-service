@@ -221,7 +221,7 @@ class ImportIssue extends Component {
       );
     }
     if (status.startsWith('error_custom_field_header')) {
-      const msg = status.split('error_custom_field_header')[1];
+      const msg = status.split('error_custom_field_header_')[1];
       return (
         <div>
           <span className="c7n-importIssue-text">
