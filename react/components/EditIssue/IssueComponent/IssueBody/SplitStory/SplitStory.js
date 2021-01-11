@@ -7,7 +7,7 @@ import { getProjectId } from '@/utils/common';
 import IssueItem from './IssueItem';
 
 function SplitStory(props) {
-  const { store, outside } = props;
+  const { store, outside, organizationId } = props;
   const { projectId, issueId } = store.getIssue;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
@@ -50,7 +50,7 @@ function SplitStory(props) {
           }
         </div>
       </Tooltip>
-      {storyList.map((issue) => <IssueItem issue={issue} outside={outside} />)}
+      {storyList.map((issue) => <IssueItem issue={issue} outside={outside} organizationId={organizationId} />)}
     </Spin>
   );
 }

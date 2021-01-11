@@ -17,7 +17,7 @@ const Link = styled.a`
   cursor:pointer;
   color:#3f51b5;
 `;
-function IssueItem({ issue, outside }) {
+function IssueItem({ issue, outside, organizationId }) {
   const {
     issueId, issueTypeVO, issueNum, summary, priorityVO,
     statusVO, projectVO, totalCount, completedCount,
@@ -31,6 +31,7 @@ function IssueItem({ issue, outside }) {
         outside,
         disabled: disableIssueEdit(projectVO.id),
         issueId,
+        organizationId,
         projectId: projectVO.id,
       },
     });
