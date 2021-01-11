@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { Choerodon } from '@choerodon/boot';
 import { Select } from 'choerodon-ui';
-import { merge, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import EventEmitter from 'wolfy87-eventemitter';
 import {
   sprintApi, quickFilterApi, userApi, personalFilterApi,
@@ -25,17 +25,17 @@ class QuickSearch extends Component {
     this.defaultSelectUsersValue = [];
     if (scrumboardInitValue) {
       const {
-        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters, assigneeFilter, sprintFilter,
+        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters, assigneeFilter, selectSprint,
       } = scrumboardInitValue;
       onlyMeChecked && this.defaultQuickFilterValue.push({
         key: -1,
       });
+      selectSprint && ScrumBoardStore.setSelectSprint(selectSprint);
       onlyStoryChecked && this.defaultQuickFilterValue.push({ key: -2 });
       moreChecked && this.defaultQuickFilterValue.push(...moreChecked.map((item) => ({ key: item })));
       personalFilters && this.defaultQuickFilterValue.push(...personalFilters.map((item) => ({ key: `personal%${item}` })));
       assigneeFilter && this.defaultSelectUsersValue.push(...assigneeFilter.map((item) => ({ ...item, id: item.key, realName: item.label })));
     }
-
     this.state = {
       userDataArray: [],
       quickSearchArray: [],
@@ -133,8 +133,7 @@ class QuickSearch extends Component {
     this.setState({
       selectUsers: value,
     });
-    localPageCacheStore.setItem('scrumboard', {
-      ...(localPageCacheStore.getItem('scrumboard') || {}),
+    localPageCacheStore.mergeSetItem('scrumboard', {
       assigneeFilter: value,
     });
     onAssigneeChange(flattenValue);
@@ -142,6 +141,9 @@ class QuickSearch extends Component {
 
   handleSprintChange = (value) => {
     const { onSprintChange } = this.props;
+    localPageCacheStore.mergeSetItem('scrumboard', {
+      selectSprint: value,
+    });
     ScrumBoardStore.setSelectSprint(value);
     onSprintChange(value && value.key);
   }
@@ -197,7 +199,6 @@ class QuickSearch extends Component {
     } = this.state;
 
     const { sprintNotClosedArray, selectSprint } = ScrumBoardStore;
-
     // showRealQuickSearch 用于在待办事项中销毁组件
     // 具体查看 Backlog/BacklogComponent/SprintComponent/SprintItem.js 中 clearFilter 方法
     return (

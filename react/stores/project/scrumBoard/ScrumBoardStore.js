@@ -486,6 +486,8 @@ class ScrumBoardStore {
   @action resetDataBeforeUnmount() {
     this.spinIf = true;
     this.swimLaneData = null;
+    this.selectSprint = undefined;
+    this.sprintNotClosedArray = [];
     this.headerData = new Map();
     this.clearFilter();
     this.currentSprintExist = false;
