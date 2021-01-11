@@ -151,9 +151,9 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(autoQueryConfig?.selectedUserIds);
     if (Array.isArray(ids)) {
-      return ids;
+      return ids.filter((i) => i !== '0');
     }
-    return ids ? [ids] : undefined;
+    return ids ? [ids].filter((i) => i !== '0') : undefined;
   }, [JSON.stringify(autoQueryConfig?.selectedUserIds)]);
   const [loadExtraData, loadExtraDataMethod] = useMemberLocalStoreMap(autoQueryConfig);
   const autoQueryUsers = (ids: string[], currentData: User[]) => {
