@@ -1,7 +1,10 @@
+import { createRef, useRef } from 'react';
 import { observable, action } from 'mobx';
 import { IField, User } from '@/common/types';
 
 class Store {
+  dataMap = observable.map();
+
   @observable selfFields: IField[] = [];
 
   @action setSelfFields = (data: IField[]) => {

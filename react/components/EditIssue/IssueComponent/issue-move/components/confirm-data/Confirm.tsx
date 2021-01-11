@@ -35,14 +35,13 @@ interface Props {
     typeCode: string,
     issueTypeId: string
   }
-  dataRef: React.MutableRefObject<Map<string, any>>,
 }
 
 const Confirm: React.FC<Props> = ({
-  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, dataRef,
+  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType,
 }) => {
   const {
-    selfFields, subTaskFields, moveToProjectList, subTaskDetailMap, subTaskTypeId, selectedUserIds, selectedUsers,
+    dataMap, selfFields, subTaskFields, moveToProjectList, subTaskDetailMap, subTaskTypeId, selectedUserIds, selectedUsers,
   } = store;
   const [fieldsLosed, setFieldsLosed] = useState<IField[]>([]);
   const {
@@ -310,7 +309,7 @@ const Confirm: React.FC<Props> = ({
                             projectId: targetProjectId,
                             projectType: targetProjectType,
                           },
-                          dataRef,
+                          dataMap,
                           selectedUsers,
                           isSelf: true,
                         })}
@@ -378,7 +377,7 @@ const Confirm: React.FC<Props> = ({
                               projectId: targetProjectId,
                               projectType: targetProjectType,
                             },
-                            dataRef,
+                            dataMap,
                             selectedUsers,
                           })}
                         </Col>

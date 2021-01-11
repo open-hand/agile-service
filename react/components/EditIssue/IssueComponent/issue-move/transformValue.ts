@@ -19,12 +19,12 @@ export const submitFieldMap = new Map([
 interface Props {
   k: string,
   v: any,
-  dataRef: React.MutableRefObject<Map<string, any>>
+  dataMap: Map<string, any>
   targetProjectId: string
 }
 
 const transformValue = ({
-  k, v, dataRef, targetProjectId,
+  k, v, dataMap, targetProjectId,
 }: Props) => {
   const fieldCode = k.split('-')[1];
   switch (fieldCode) {
@@ -42,7 +42,7 @@ const transformValue = ({
     case 'component': {
       const componentList: any[] = [];
       (v || []).forEach((component: string) => {
-        const target = find(dataRef.current?.get('component') || [], { name: component });
+        const target = find(dataMap?.get('component') || [], { name: component });
         if (target) {
           componentList.push(target);
         } else {
@@ -57,7 +57,7 @@ const transformValue = ({
     case 'label': {
       const labelList: any = [];
       (v || []).forEach((label: string) => {
-        const target = find(dataRef.current?.get('label'), { labelName: label });
+        const target = find(dataMap?.get('label'), { labelName: label });
         if (target) {
           labelList.push(target);
         } else {
@@ -72,7 +72,7 @@ const transformValue = ({
     case 'fixVersion': {
       const versionList: any[] = [];
       (v || []).forEach((versionId: string) => {
-        const target = find(dataRef.current?.get('fixVersion'), { versionId });
+        const target = find(dataMap?.get('fixVersion'), { versionId });
         if (target) {
           versionList.push(target);
         }

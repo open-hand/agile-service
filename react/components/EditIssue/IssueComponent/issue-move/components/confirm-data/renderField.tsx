@@ -38,7 +38,7 @@ interface Props {
     projectId: string,
     projectType: 'program' | 'project' | 'subProject',
   },
-  dataRef: React.MutableRefObject<Map<string, any>>,
+  dataMap: Map<string, any>,
   disabled?: boolean,
   selectedUsers: User[]
   isSelf?: boolean
@@ -78,7 +78,7 @@ const renderComponent = (name: string, symbol = ',') => {
 const getFieldValue = (dataSet: DataSet, name: string) => dataSet.current?.get(name);
 
 const renderField = ({
-  dataSet, issue, field, fieldsWithValue, targetIssueType, targetProject, dataRef, disabled = false, selectedUsers, isSelf = false,
+  dataSet, issue, field, fieldsWithValue, targetIssueType, targetProject, dataMap, disabled = false, selectedUsers, isSelf = false,
 }: Props) => {
   const {
     fieldCode, system, fieldType, projectId,
@@ -89,7 +89,7 @@ const renderField = ({
   switch (fieldCode) {
     case 'status': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-status`);
-      const fieldValueItem = dataRef.current.get('status')?.find((item: any) => item.id === fieldValue);
+      const fieldValueItem = dataMap.get('status')?.find((item: any) => item.id === fieldValue);
       return (
         <TextEditToggle
           key={`${issueId}-status`}
@@ -106,9 +106,11 @@ const renderField = ({
               projectId={targetProject.projectId}
               applyType={targetProject.projectType === 'program' ? 'program' : 'agile'}
               afterLoad={(data) => {
-                dataRef.current.set('status', data);
-                if (!dataSet.current?.get(`${issueId}-status`)) {
-                  dataSet.current?.set(`${issueId}-status`, (data || []).find((item: any) => item.defaultStatus)?.id);
+                dataMap.set('status', data);
+                const defaultStatus = (data || []).find((item: any) => item.defaultStatus);
+                const statusValue = dataSet.current?.get(`${issueId}-status`);
+                if (!statusValue) {
+                  dataSet.current?.set(`${issueId}-status`, defaultStatus?.id);
                 }
               }}
               clearButton={false}
@@ -136,7 +138,7 @@ const renderField = ({
     }
     case 'component': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-component`) || [];
-      const fieldValueItem = dataRef.current.get('component')?.filter((item: any) => includes(fieldValue, item.componentId)) || [];
+      const fieldValueItem = dataMap.get('component')?.filter((item: any) => includes(fieldValue, item.componentId)) || [];
       const newComponents = fieldValue.filter((item: string) => !includes(map(fieldValueItem, 'componentId'), item));
       const allFieldValueItem = [...fieldValueItem, ...(newComponents.map((name: string) => ({ name })))];
       return (
@@ -153,7 +155,7 @@ const renderField = ({
               valueField="name"
               projectId={targetProject.projectId}
               afterLoad={(data) => {
-                dataRef.current.set('component', data);
+                dataMap.set('component', data);
               }}
             />
           )}
@@ -175,7 +177,7 @@ const renderField = ({
     }
     case 'label': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-label`) || [];
-      const fieldValueItem = dataRef.current.get('label')?.filter((item: any) => includes(fieldValue, item.labelId)) || [];
+      const fieldValueItem = dataMap.get('label')?.filter((item: any) => includes(fieldValue, item.labelId)) || [];
       const newLabels = (fieldValue || []).filter((item: string) => !includes(map(fieldValueItem, 'labelId'), item));
       const allFieldValueItem = [...fieldValueItem, ...(newLabels.map((name: string) => ({ labelName: name })))];
       return (
@@ -192,7 +194,7 @@ const renderField = ({
               valueField="labelName"
               projectId={targetProject.projectId}
               afterLoad={(data) => {
-                dataRef.current.set('label', data);
+                dataMap.set('label', data);
               }}
             />
           )}
@@ -214,7 +216,7 @@ const renderField = ({
     }
     case 'epic': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-epic`);
-      const fieldValueItem = dataRef.current.get('epic')?.find((item: any) => item.issueId === fieldValue);
+      const fieldValueItem = dataMap.get('epic')?.find((item: any) => item.issueId === fieldValue);
       return (
         <TextEditToggle
           disabled={disabled}
@@ -227,7 +229,7 @@ const renderField = ({
               dataSet={dataSet}
               name={`${issueId}-epic`}
               afterLoad={(data) => {
-                dataRef.current.set('epic', data);
+                dataMap.set('epic', data);
               }}
               dontAddEpic0
               unassignedEpic
@@ -261,7 +263,7 @@ const renderField = ({
     }
     case 'fixVersion': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-fixVersion`) || [];
-      const fieldValueItem = dataRef.current.get('fixVersion')?.filter((item: any) => includes(fieldValue, item.versionId)) || [];
+      const fieldValueItem = dataMap.get('fixVersion')?.filter((item: any) => includes(fieldValue, item.versionId)) || [];
       return (
         <TextEditToggle
           disabled={disabled}
@@ -275,7 +277,7 @@ const renderField = ({
               name={`${issueId}-fixVersion`}
               projectId={targetProject.projectId}
               afterLoad={(data: any) => {
-                dataRef.current.set('fixVersion', data);
+                dataMap.set('fixVersion', data);
               }}
               statusArr={['version_planning']}
               valueField="versionId"
@@ -297,7 +299,7 @@ const renderField = ({
     }
     case 'sprint': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-sprint`);
-      const fieldValueItem = dataRef.current.get('sprint')?.find((item: any) => fieldValue === item.sprintId);
+      const fieldValueItem = dataMap.get('sprint')?.find((item: any) => fieldValue === item.sprintId);
       return (
         <TextEditToggle
           disabled={disabled || !isSelf}
@@ -311,7 +313,7 @@ const renderField = ({
               name={`${issueId}-sprint`}
               projectId={targetProject.projectId}
               afterLoad={(data: any) => {
-                dataRef.current.set('sprint', data);
+                dataMap.set('sprint', data);
               }}
               statusList={['sprint_planning', 'started']}
               isProgram={targetProject.projectType === 'program'}
@@ -343,7 +345,7 @@ const renderField = ({
     }
     case 'assignee': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-assignee`);
-      const fieldValueItem = [...selectedUsers, ...(dataRef.current.get('assignee') || [])].find((item: any) => fieldValue === item.id);
+      const fieldValueItem = [...selectedUsers, ...(dataMap.get('assignee') || [])].find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
@@ -361,7 +363,7 @@ const renderField = ({
                 selectedUserIds: issue.assigneeId,
               }}
               afterLoad={(data: any) => {
-                dataRef.current.set('assignee', data);
+                dataMap.set('assignee', data);
               }}
             />
           )}
@@ -382,7 +384,7 @@ const renderField = ({
     }
     case 'pi': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-pi`);
-      const fieldValueItem = dataRef.current.get('pi')?.find((item: any) => fieldValue === item.id);
+      const fieldValueItem = dataMap.get('pi')?.find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
@@ -397,7 +399,7 @@ const renderField = ({
               projectId={targetProject.projectId}
               statusList={['doing, todo']}
               afterLoad={(data: any) => {
-                dataRef.current.set('pi', data);
+                dataMap.set('pi', data);
               }}
             />
           )}
@@ -423,7 +425,7 @@ const renderField = ({
     }
     case 'subProject': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-subProject`) || [];
-      const fieldValueItem = dataRef.current.get('subProject')?.filter((item: any) => includes(fieldValue, item.projectId)) || [];
+      const fieldValueItem = dataMap.get('subProject')?.filter((item: any) => includes(fieldValue, item.projectId)) || [];
       return (
         <TextEditToggle
           disabled={disabled}
@@ -437,7 +439,7 @@ const renderField = ({
               name={`${issueId}-subProject`}
               projectId={targetProject.projectId}
               afterLoad={(data: any) => {
-                dataRef.current.set('subProject', data);
+                dataMap.set('subProject', data);
               }}
               multiple
             />
@@ -456,7 +458,7 @@ const renderField = ({
     }
     case 'programVersion': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-programVersion`) || [];
-      const fieldValueItem = dataRef.current.get('programVersion')?.filter((item: any) => includes(fieldValue, item.id)) || [];
+      const fieldValueItem = dataMap.get('programVersion')?.filter((item: any) => includes(fieldValue, item.id)) || [];
       return (
         <TextEditToggle
           disabled={disabled}
@@ -470,7 +472,7 @@ const renderField = ({
               name={`${issueId}-programVersion`}
               projectId={targetProject.projectId}
               afterLoad={(data: any) => {
-                dataRef.current.set('programVersion', data);
+                dataMap.set('programVersion', data);
               }}
               multiple
             />
@@ -492,20 +494,21 @@ const renderField = ({
     }
     case 'feature': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-feature`);
-      const fieldValueItem = dataRef.current.get('feature')?.find((item: any) => fieldValue === item.issueId);
+      const fieldValueItem = dataMap.get('feature')?.find((item: any) => fieldValue === item.issueId);
       return (
         <TextEditToggle
           disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
+          alwaysRender={false}
           editor={() => (
             <SelectFeature
               dataSet={dataSet}
               name={`${issueId}-feature`}
               projectId={targetProject.projectId}
               afterLoad={(data: any) => {
-                dataRef.current.set('feature', data);
+                dataMap.set('feature', data);
                 if (issue.featureId && data.find((item: any) => item.issueId === issue.featureId)) {
                   dataSet.current?.set(`${issueId}-feature`, issue.featureId);
                 }
@@ -530,7 +533,7 @@ const renderField = ({
     }
     case 'mainResponsible': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-mainResponsible`);
-      const fieldValueItem = [...selectedUsers, ...(dataRef.current.get('mainResponsible') || [])].find((item: any) => fieldValue === item.id);
+      const fieldValueItem = [...selectedUsers, ...(dataMap.get('mainResponsible') || [])].find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
@@ -547,7 +550,7 @@ const renderField = ({
                 selectedUserIds: issue.mainResponsible?.id,
               }}
               afterLoad={(data: any) => {
-                dataRef.current.set('mainResponsible', data);
+                dataMap.set('mainResponsible', data);
               }}
             />
           )}
@@ -568,7 +571,7 @@ const renderField = ({
     }
     case 'reporter': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-reporter`);
-      const fieldValueItem = [...selectedUsers, ...(dataRef.current.get('reporter') || [])].find((item: any) => fieldValue === item.id);
+      const fieldValueItem = [...selectedUsers, ...(dataMap.get('reporter') || [])].find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
@@ -582,7 +585,7 @@ const renderField = ({
               name={`${issueId}-reporter`}
               projectId={targetProject.projectId}
               afterLoad={(data: any) => {
-                dataRef.current.set('reporter', data);
+                dataMap.set('reporter', data);
               }}
               autoQueryConfig={{
                 selectedUserIds: issue.reporterId,
@@ -630,7 +633,7 @@ const renderField = ({
     const fieldItem = fieldsWithValue.find((item: IFieldWithValue) => item.fieldCode === fieldCode);
     if (fieldItem && fieldItem.fieldCode) {
       const fieldValue = getFieldValue(dataSet, `${issueId}-${fieldItem.fieldCode}`);
-      const fieldValueItem = [...selectedUsers, ...(dataRef.current.get(fieldItem.fieldCode) || [])].find((item: any) => fieldValue === item.id);
+      const fieldValueItem = [...selectedUsers, ...(dataMap.get(fieldItem.fieldCode) || [])].find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
@@ -644,7 +647,7 @@ const renderField = ({
               name={`${issueId}-${fieldCode}`}
               projectId={targetProject.projectId}
               afterLoad={(data: any) => {
-                dataRef.current.set(fieldItem.fieldCode as string, data);
+                dataMap.set(fieldItem.fieldCode as string, data);
               }}
               autoQueryConfig={{
                 selectedUserIds: issue.value,
