@@ -52,13 +52,13 @@ const GanttBar: React.FC<GanttBarProps> = ({
     if (!issue.estimatedEndTime || loading) {
       return 0;
     }
-    const actualCompletedDate: Dayjs = issue.actualCompletedDate ? dayjs(issue.actualCompletedDate).startOf('day') : dayjs().hour(0).minute(0).second(0);
+    const actualCompletedDate: Dayjs = issue.completed && issue.actualCompletedDate ? dayjs(issue.actualCompletedDate).startOf('day') : dayjs().hour(0).minute(0).second(0);
     const endDate: Dayjs = dayjs(issue.estimatedEndTime).endOf('day');
     if (actualCompletedDate.isBefore(endDate) || actualCompletedDate.isSame(endDate)) {
       return 0;
     }
     delayDiff = (issue.actualCompletedDate ? dayjs(issue.actualCompletedDate) : dayjs()).diff(dayjs(issue.estimatedEndTime), 'hour');
-    return (ganttRef.current?.getWidthByDate(endDate, actualCompletedDate) || 0) + (issue.actualCompletedDate ? 0 : 15);
+    return (ganttRef.current?.getWidthByDate(endDate, actualCompletedDate) || 0) + (issue.completed && issue.actualCompletedDate ? 0 : 15);
   })();
   const delayVisible = stepGesture !== 'moving' && !loading;
   return (
