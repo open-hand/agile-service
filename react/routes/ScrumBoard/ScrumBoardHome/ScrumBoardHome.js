@@ -527,11 +527,11 @@ class ScrumBoardHome extends Component {
               </div>
             </div>
 
-            <IssueDetail
-              refresh={this.refresh}
-            />
           </Spin>
           <CreateIssue refresh={this.refresh} />
+          <IssueDetail
+            refresh={this.refresh}
+          />
         </Content>
         {
           ScrumBoardStore.getUpdateParent ? (

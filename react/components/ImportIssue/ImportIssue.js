@@ -202,6 +202,34 @@ class ImportIssue extends Component {
         </div>
       );
     }
+    if (status === 'empty_data_sheet') {
+      return (
+        <div>
+          <span className="c7n-importIssue-text">
+            导入数据为空
+          </span>
+        </div>
+      );
+    }
+    if (status === 'template_error_missing_required_column') {
+      return (
+        <div>
+          <span className="c7n-importIssue-text">
+            模版不正确，缺少必要的列
+          </span>
+        </div>
+      );
+    }
+    if (status.startsWith('error_custom_field_header')) {
+      const msg = status.split('error_custom_field_header')[1];
+      return (
+        <div>
+          <span className="c7n-importIssue-text">
+            {`自定义字段${msg}不存在`}
+          </span>
+        </div>
+      );
+    }
     return (
       <div>
         正在查询导入信息，请稍后
