@@ -11,7 +11,13 @@ import SelectUser from '@/components/select/select-user';
 import { getMenuType } from '@/utils/common';
 import { userApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import SelectComponent from '@/components/select/select-component';
+import SelectLabel from '@/components/select/select-label';
+import SelectVersion from '@/components/select/select-version';
+import SelectSprint from '@/components/select/select-sprint';
+import SelectEpic from '@/components/select/select-epic';
 import SelectPickDate from './select-date-pick';
+import { InjectedRenderComponent } from './injectComponent';
 
 interface IBaseComponentProps {
   onChange?: (value: any) => void
@@ -44,6 +50,39 @@ const Select = forwardRef<any, IBaseComponentProps & Partial<SelectProps & { chi
 
 function renderEditor({ record, defaultValue, dataRef }: { record: Record, defaultValue: any, dataRef?: { current: any } }) {
   const fieldType = record.get('fieldType');
+  const fieldCode = record.get('fieldCode');
+  switch (fieldCode) {
+    case 'component':
+      return (
+        <SelectComponent
+          multiple={['checkbox', 'multiple'].includes(fieldType)}
+          afterLoad={(list) => {
+
+          }}
+        />
+      );
+    case 'label':
+      return <SelectLabel multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+    case 'influenceVersion':
+    case 'fixVersion':
+      return <SelectVersion multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+    case 'sprint':
+      return <SelectSprint multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+    case 'epic':
+      return <SelectEpic multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+    case 'backlogType':
+      // @ts-ignore
+      return <InjectedRenderComponent.backlogType multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+    case 'backlogClassification':
+      // @ts-ignore
+      return <InjectedRenderComponent.backlogClassification multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+    case 'progressFeedback':
+      // @ts-ignore
+      return <InjectedRenderComponent.progressFeedback multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+    default:
+      break;
+  }
+
   if (['date', 'time', 'datetime'].includes(fieldType)) {
     return <SelectPickDate dateType={fieldType} />;
   }

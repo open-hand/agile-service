@@ -27,11 +27,12 @@ interface Props {
   draggingClassName?: string,
   isDragDisabled?: boolean,
 }
+
 const DraggableItem: React.FC<Props> = ({
   data, isDragDisabled, virtualizedStyle, provided, draggingClassName,
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
-  const { onDelete, showSplitLine, prefixCls: originPrefixCls } = useSortTableContext();
+  const { onDelete, showSplitLine /** 显示则代表时组织层 */, prefixCls: originPrefixCls } = useSortTableContext();
   const prefixCls = `${originPrefixCls}-drag`;
   const pageConfigFieldEdited = data?.get('pageConfigFieldEdited') || {};
   const {
@@ -41,7 +42,7 @@ const DraggableItem: React.FC<Props> = ({
   } = pageConfigFieldEdited;
   // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除
   const disabledDel = !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
-  const textEditToggleProps = useTextEditTogglePropsWithPage(data);
+  const textEditToggleProps = useTextEditTogglePropsWithPage(data, !showSplitLine);
 
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={`${prefixCls}-text`}>
@@ -127,17 +128,15 @@ const DraggableItem: React.FC<Props> = ({
   });
 
   const renderDefaultValue = useCallback(() => (
-    disabledDel ? data.get('showDefaultValueText') : (
-      <TextEditToggle
-        disabled={disabledDel}
-        {...textEditToggleProps}
-      >
-        <Observer>
-          {() => data.get('showDefaultValueText')}
-        </Observer>
-      </TextEditToggle>
-    )
-  ), [data, disabledDel, textEditToggleProps]);
+    <TextEditToggle
+      {...textEditToggleProps}
+    >
+      <Observer>
+        {() => data.get('showDefaultValueText')}
+      </Observer>
+    </TextEditToggle>
+
+  ), [data, textEditToggleProps]);
 
   return (
 
