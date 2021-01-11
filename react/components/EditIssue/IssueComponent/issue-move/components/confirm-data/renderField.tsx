@@ -232,7 +232,6 @@ const renderField = ({
                 dataMap.set('epic', data);
               }}
               dontAddEpic0
-              unassignedEpic
               request={() => (targetProject.projectType === 'program' ? epicApi.project(targetProject.projectId).loadProgramEpics() : epicApi.project(targetProject.projectId).loadEpicsForSelect())}
             />
           )}
@@ -241,10 +240,10 @@ const renderField = ({
             fieldValueItem ? (
               <div
                 style={{
-                  color: fieldValueItem.color,
+                  color: fieldValueItem.epicColor,
                   borderWidth: '1px',
                   borderStyle: 'solid',
-                  borderColor: fieldValueItem.color,
+                  borderColor: fieldValueItem.epicColor,
                   borderRadius: '2px',
                   fontSize: '13px',
                   lineHeight: '20px',

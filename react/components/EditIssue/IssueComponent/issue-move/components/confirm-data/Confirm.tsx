@@ -85,7 +85,7 @@ const Confirm: React.FC<Props> = ({
       reporterField,
     ];
     const filtered = filterFields(resAdded);
-    if (targetProjectType === 'subProject') {
+    if (targetProjectType === 'subProject' && targetIssueType.typeCode === 'story') {
       const epicFieldIndex = filtered.findIndex((item) => item.fieldCode === 'epic');
       if (epicFieldIndex > -1) {
         const featureField = {
@@ -98,7 +98,7 @@ const Confirm: React.FC<Props> = ({
       }
     }
     return filtered;
-  }, [filterFields, targetProjectType]);
+  }, [filterFields, targetIssueType.typeCode, targetProjectType]);
 
   useEffect(() => {
     if (targetProjectId && issueType) {
@@ -246,6 +246,9 @@ const Confirm: React.FC<Props> = ({
       dataSet.current?.set(`${issueId}-epicName`, epicName);
     }
   }, [dataSet, epicName, issueId]);
+
+  // console.log('进入confirm dataSet data：');
+  // console.log(toJS(dataSet.current?.data), toJS(dataMap));
   return (
     <div className={styles.confirm}>
       <div className={styles.tip}>

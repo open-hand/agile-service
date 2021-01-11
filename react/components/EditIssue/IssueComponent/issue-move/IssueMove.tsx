@@ -9,6 +9,7 @@ import { Steps } from 'choerodon-ui';
 import {
   includes, map, compact, uniq,
 } from 'lodash';
+import { toJS } from 'mobx';
 import {
   IModalProps, AppStateProps, IIssueType, IField,
 } from '@/common/types';
@@ -18,6 +19,7 @@ import { stores, Choerodon } from '@choerodon/boot';
 import {
   issueTypeApi, projectApi, moveIssueApi, commonApi,
 } from '@/api';
+import Field from 'choerodon-ui/pro/lib/data-set/Field';
 import SelectProject from './components/select-project';
 import Confirm from './components/confirm-data';
 import Finish from './components/finish';
@@ -55,6 +57,30 @@ const IssueMove: React.FC<Props> = ({
     paging: false,
     data: [],
   }), []);
+
+  const removeField = useCallback((ds: DataSet, name: string) => {
+    ds?.fields?.delete(name);
+    ds?.current?.fields.delete(name);
+  }, []);
+
+  const resetData = useCallback((ds: DataSet, excludeFieldsCode: string[]) => {
+    const fieldNames: string[] = [];
+    (ds.current?.fields || []).forEach((field: Field) => {
+      if (!includes(excludeFieldsCode, field.get('name'))) {
+        field.reset();
+        ds.current?.set(field.get('name'), undefined);
+        fieldNames.push(field.get('name'));
+      }
+    });
+    // console.log('删除前--- dataSet的fields：');
+    // console.log(toJS(ds.current?.fields), toJS(ds.current?.data));
+    fieldNames.forEach((name: string) => {
+      removeField(ds, name);
+    });
+    // console.log('删除后--- dataSet的fields：');
+    // console.log(toJS(ds.current?.fields), toJS(ds.current?.data));
+    store.dataMap.clear();
+  }, [removeField]);
 
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
@@ -121,6 +147,8 @@ const IssueMove: React.FC<Props> = ({
           }
         }
         if (name === 'targetProjectId' || name === 'issueType') {
+          resetData(moveDataSet, ['targetProjectId', 'issueType']); // 改变项目或者问题类型应该重置
+
           Promise.all([moveDataSet.current?.getField('targetProjectId')?.checkValidity(), moveDataSet.current?.getField('issueType')?.checkValidity()]).then((validateRes) => {
             setsStep1NextDisabled(!validateRes.every((validate) => !!validate));
           });
@@ -137,7 +165,7 @@ const IssueMove: React.FC<Props> = ({
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [issue.issueId, issue.subIssueVOList, issue.typeCode, issueTypeDataSet]);
+  }), [issue.issueId, issue.subIssueVOList, issue.typeCode, issueTypeDataSet, resetData]);
 
   const handlePre = () => {
     setCurrentStep(currentStep - 1);
