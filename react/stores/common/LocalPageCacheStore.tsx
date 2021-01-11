@@ -1,5 +1,6 @@
 import { getProjectId } from '@/utils/common';
-import { merge } from 'lodash';
+import { toJS } from 'mobx';
+import { merge, omit } from 'lodash';
 
 interface LocalPageCacheStoreInterface {
   getItem: (code: string) => any,
@@ -16,7 +17,17 @@ class LocalPageCacheStore implements LocalPageCacheStoreInterface {
   }
 
   mergeSetItem<T extends object>(pageKey: string, data: T) {
-    pages.set(`${getProjectId()}-${pageKey}`, merge(pages.get(`${getProjectId()}-${pageKey}`), data));
+    const oldData = pages.get(`${getProjectId()}-${pageKey}`);
+    const omitKeys = [];
+    if (typeof (oldData) === 'object' && typeof (data) === 'object') {
+      for (const [key, value] of Object.entries(data)) {
+        if (typeof (value) === 'undefined' || (Array.isArray(toJS(value)) && value.length === 0)) {
+          omitKeys.push(key);
+        }
+      }
+    }
+    const newData = merge(omit(oldData, omitKeys), data);
+    pages.set(`${getProjectId()}-${pageKey}`, newData);
   }
 
   getItem(pageKey: string) {

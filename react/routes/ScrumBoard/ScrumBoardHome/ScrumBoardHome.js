@@ -85,7 +85,6 @@ class ScrumBoardHome extends Component {
       assigneeFilter && ScrumBoardStore.addAssigneeFilter(assigneeFilter.map((item) => item.key));
       if (sprintFilter) {
         ScrumBoardStore.addSprintFilter(sprintFilter);
-        ScrumBoardStore.setSprintData(sprintFilter);
       }
       priorityIds && ScrumBoardStore.setPriority(priorityIds);
     }
@@ -532,6 +531,9 @@ class ScrumBoardHome extends Component {
             refresh={this.refresh}
           />
           <CreateIssue refresh={this.refresh} />
+          <IssueDetail
+            refresh={this.refresh}
+          />
         </Content>
         {
           ScrumBoardStore.getUpdateParent ? (
