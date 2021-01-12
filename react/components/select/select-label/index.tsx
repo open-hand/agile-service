@@ -13,10 +13,11 @@ interface Props extends Partial<SelectProps> {
   flat?:boolean
   projectId?: string
   dontCombo?: boolean
+  extraOptions?: any[]
 }
 
 const SelectLabel: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, projectId, dontCombo = false, ...otherProps
+  dataRef, valueField, afterLoad, flat, projectId, dontCombo = false, extraOptions = [], ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'label',
@@ -26,13 +27,13 @@ const SelectLabel: React.FC<Props> = forwardRef(({
     middleWare: (data: ILabel[]) => {
       if (dataRef) {
         Object.assign(dataRef, {
-          current: data,
+          current: [...extraOptions, ...data],
         });
       }
       if (afterLoad) {
-        afterLoad(data);
+        afterLoad([...extraOptions, ...data]);
       }
-      return data;
+      return [...extraOptions, ...data];
     },
     paging: false,
   }), []);

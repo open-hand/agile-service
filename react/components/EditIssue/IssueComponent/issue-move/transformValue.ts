@@ -45,11 +45,6 @@ const transformValue = ({
         const target = find(dataMap?.get('component') || [], { name: component });
         if (target) {
           componentList.push(target);
-        } else {
-          componentList.push({
-            name: component && component.slice(0, 100),
-            projectId: targetProjectId,
-          });
         }
       });
       return componentList;
@@ -82,6 +77,7 @@ const transformValue = ({
     default:
       break;
   }
+  return false;
 };
 
 export default transformValue;

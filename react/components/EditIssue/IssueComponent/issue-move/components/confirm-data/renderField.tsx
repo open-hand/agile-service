@@ -3,7 +3,9 @@ import { map, includes } from 'lodash';
 import STATUS from '@/constants/STATUS';
 import { Tooltip } from 'choerodon-ui';
 import { toJS } from 'mobx';
-import { IField, IStatus, User } from '@/common/types';
+import {
+  IField, IStatus, User, ILabel,
+} from '@/common/types';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectStatus from '@/components/select/select-status';
 import SelectComponent from '@/components/select/select-component';
@@ -19,6 +21,7 @@ import SelectFeature from '@/components/select/select-feature';
 import { DataSet, TextField } from 'choerodon-ui/pro/lib';
 import { epicApi } from '@/api';
 import { UserHead } from '@/components';
+import Item from 'choerodon-ui/lib/list/Item';
 
 export interface IFieldWithValue extends IField {
   value: any,
@@ -180,13 +183,15 @@ const renderField = ({
       const fieldValueItem = dataMap.get('label')?.filter((item: any) => includes(fieldValue, item.labelId)) || [];
       const newLabels = (fieldValue || []).filter((item: string) => !includes(map(fieldValueItem, 'labelId'), item));
       const allFieldValueItem = [...fieldValueItem, ...(newLabels.map((name: string) => ({ labelName: name })))];
+      const issueLabelNames = (issue.labelIssueRelVOList || []).map((item: ILabel) => ({
+        labelName: item.labelName, projectId: targetProject.projectId,
+      }));
       return (
         <TextEditToggle
           disabled={disabled}
           className="moveIssue-textEditToggle"
           onSubmit={submit}
           initValue={undefined}
-          alwaysRender={false}
           editor={() => (
             <SelectLabel
               dataSet={dataSet}
@@ -195,7 +200,9 @@ const renderField = ({
               projectId={targetProject.projectId}
               afterLoad={(data) => {
                 dataMap.set('label', data);
+                dataSet.current?.set(`${issueId}-label`, issueLabelNames.map((item: { labelName: string}) => item.labelName));
               }}
+              extraOptions={issueLabelNames}
               dontCombo
             />
           )}
