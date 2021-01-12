@@ -1,23 +1,23 @@
 /* eslint-disable no-param-reassign */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   DraggableProvided, DraggingStyle, NotDraggingStyle,
 } from 'react-beautiful-dnd';
 import classnames from 'classnames';
 import { Menu, Modal } from 'choerodon-ui';
 import {
-  Button, Icon, Tooltip, DataSet,
+  Button, Icon, Tooltip, DataSet, Select,
 } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { observer } from 'mobx-react-lite';
+import { Observer, observer } from 'mobx-react-lite';
 import moment from 'moment';
 import TableDropMenu from '@/common/TableDropMenu';
 import CheckBox from '@/components/check-box';
+import TextEditToggle from '@/components/TextEditTogglePro';
 import { usePageIssueTypeStore } from '../../stores';
-import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
 import { useSortTableContext } from './stores';
-
+import useTextEditTogglePropsWithPage from './useTextEditToggle';
 // import CheckBox from './components/Checkbox';
 
 interface Props {
@@ -27,11 +27,12 @@ interface Props {
   draggingClassName?: string,
   isDragDisabled?: boolean,
 }
+
 const DraggableItem: React.FC<Props> = ({
   data, isDragDisabled, virtualizedStyle, provided, draggingClassName,
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
-  const { onDelete, showSplitLine, prefixCls: originPrefixCls } = useSortTableContext();
+  const { onDelete, showSplitLine /** 显示则代表时组织层 */, prefixCls: originPrefixCls } = useSortTableContext();
   const prefixCls = `${originPrefixCls}-drag`;
   const pageConfigFieldEdited = data?.get('pageConfigFieldEdited') || {};
   const {
@@ -41,6 +42,8 @@ const DraggableItem: React.FC<Props> = ({
   } = pageConfigFieldEdited;
   // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除
   const disabledDel = !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
+  const textEditToggleProps = useTextEditTogglePropsWithPage(data, !showSplitLine);
+
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={`${prefixCls}-text`}>
 
@@ -103,18 +106,18 @@ const DraggableItem: React.FC<Props> = ({
         name, record, dataSet,
       }, editDisabled)}
       {
-          (!disabledDel && !showSplitLine && record?.get('createdLevel') !== 'organization')
-          && (
-            <Button
-              className={`${prefixCls}-action-button`}
-              disabled={isDragDisabled}
-              style={{ marginLeft: 10 }}
-              onClick={() => onClickDel(record!, dataSet!)}
-            >
-              <Icon type="delete" style={{ fontSize: 18 }} />
-            </Button>
-          )
-        }
+        (!disabledDel && !showSplitLine && record?.get('createdLevel') !== 'organization')
+        && (
+          <Button
+            className={`${prefixCls}-action-button`}
+            disabled={isDragDisabled}
+            style={{ marginLeft: 10 }}
+            onClick={() => onClickDel(record!, dataSet!)}
+          >
+            <Icon type="delete" style={{ fontSize: 18 }} />
+          </Button>
+        )
+      }
 
     </div>
   );
@@ -124,32 +127,52 @@ const DraggableItem: React.FC<Props> = ({
     cursor: 'all-scroll',
   });
 
+  const renderDefaultValue = useCallback(() => (
+    <TextEditToggle
+      {...textEditToggleProps}
+    >
+      <Observer>
+        {() => data.get('showDefaultValueText')}
+      </Observer>
+    </TextEditToggle>
+
+  ), [data, textEditToggleProps]);
+
   return (
 
     <div
       role="none"
       ref={provided.innerRef}
       {...provided.draggableProps}
-      {...provided.dragHandleProps}
       style={getStyle(provided.draggableProps.style)}
       className={classnames(`${prefixCls}`, { [`${prefixCls}-split`]: showSplitLine }, draggingClassName)}
-      onClick={(e) => { }}
     >
-      <div className={`${prefixCls}-item`}>
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
         {renderFieldName({ value: data.get('fieldName'), record: data, dataSet: data.dataSet })}
       </div>
-      <div className={`${prefixCls}-item ${prefixCls}-item-text`}>
-        <Tooltip title={data.get('localDefaultValue') || data.get('defaultValue')} placement="top">
-          {data.get('localDefaultValue') || data.get('defaultValue')}
-        </Tooltip>
+      <div
+        role="none"
+        className={`${prefixCls}-item ${prefixCls}-item-text`}
+        onFocus={(e) => {
+          e.stopPropagation();
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseDownCapture={(e) => {
+          e.stopPropagation();
+        }}
+        onClick={(e) => {
+          e.preventDefault();
+        }}
+      >
+        {renderDefaultValue()}
       </div>
-      <div className={`${prefixCls}-item`}>
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
         {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, requiredFieldCanNotEdit)}
       </div>
-      <div className={`${prefixCls}-item`}>
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
         {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, createdFieldCanNotEdit)}
       </div>
-      <div className={`${prefixCls}-item`}>
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
         {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, editedFieldCanNotEdit)}
       </div>
     </div>

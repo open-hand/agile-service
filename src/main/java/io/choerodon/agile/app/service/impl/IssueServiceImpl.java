@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -167,7 +168,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private InstanceService instanceService;
     @Autowired
-    private TestFeignClient testFeignClient;
+    private TestServiceClientOperator testServiceClientOperator;
     @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
@@ -486,6 +487,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         //处理用户搜索
         Boolean condition = handleSearchUser(searchVO, projectId);
+        boolean isTreeView = !Boolean.FALSE.equals(searchVO.getSearchArgs().get("tree"));
         if (condition) {
             Page<Long> issueIdPage;
             String filterSql = null;
@@ -503,7 +505,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 order.put(fieldCode, sortCode);
                 PageUtil.sortResetOrder(pageRequest.getSort(), null, order);
                 List<Long> issueIdsWithSub =
-                        issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null)
+                        issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null, isTreeView)
                                 .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageRequest);
 
@@ -518,7 +520,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         .subList((pageRequest.getPage() - 1) * pageRequest.getSize(), pageRequest.getPage() * pageRequest.getSize()));
             } else {
                 String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
-                Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
                 List<Long> issueIds = issues.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
             }
@@ -526,8 +528,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Page<IssueListFieldKVVO> issueListDTOPage;
             if (issueIdPage.getContent() != null && !issueIdPage.getContent().isEmpty()) {
                 List<Long> issueIds = issueIdPage.getContent();
-                Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
-                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false);
+                Set<Long> childrenIds = new HashSet<>();
+                if (isTreeView) {
+                    childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                }
+                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, isTreeView);
                 Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
                 Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
@@ -861,7 +866,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 //        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
         //delete cache
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
-        testFeignClient.deleteTestRel(projectId, issueId);
+        testServiceClientOperator.deleteTestRel(projectId, issueId);
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
@@ -2594,6 +2599,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public Page<IssueListFieldKVVO> queryStoryAndTask(Long projectId, PageRequest pageRequest, SearchVO searchVO) {
+        //连表查询需要设置主表别名
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", new HashMap<>());
+        pageRequest.setSort(sort);
         Page<IssueDTO> pageInfo = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryStoryAndTaskByProjectId(projectId, searchVO));
         List<IssueDTO> list = pageInfo.getContent();
         if (!CollectionUtils.isEmpty(list)) {

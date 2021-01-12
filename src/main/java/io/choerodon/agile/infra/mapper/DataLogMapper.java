@@ -86,4 +86,6 @@ public interface DataLogMapper extends BaseMapper<DataLogDTO> {
                                   @Param("field") String field,
                                   @Param("startDate") Date startDate,
                                   @Param("endDate") Date endDate);
+
+    void updateProject(@Param("projectId") Long projectId, @Param("issueId") Long issueId, @Param("targetProjectId") Long targetProjectId);
 }

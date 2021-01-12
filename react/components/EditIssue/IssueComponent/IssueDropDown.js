@@ -3,11 +3,11 @@ import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
 import { Permission } from '@choerodon/boot';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
+import openIssueMove from './issue-move';
 
 const { confirm } = Modal;
 const IssueDropDown = ({
@@ -89,6 +89,8 @@ const IssueDropDown = ({
       store.setCreateSubBugShow(true);
     } else if (e.key === '10') {
       store.setRelateStoryShow(true);
+    } else if (e.key === 'item_11') {
+      openIssueMove({ issue, customFields: store.customFields, onMoveIssue: onDeleteIssue });
     }
   };
   const getMenu = () => (
@@ -176,6 +178,27 @@ const IssueDropDown = ({
           <Menu.Item key="10">
             关联问题
           </Menu.Item>
+        )
+      }
+      {
+        typeCode !== 'sub_task' && (
+        <Permission
+          service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+          noAccessChildren={(
+            <Menu.Item
+              key="move"
+              disabled={disableFeatureDeleteWhilePiDoing || (loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
+            >
+              移动
+            </Menu.Item>
+        )}
+        >
+          <Menu.Item
+            key="move"
+          >
+            移动
+          </Menu.Item>
+        </Permission>
         )
       }
     </Menu>

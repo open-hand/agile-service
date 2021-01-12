@@ -139,7 +139,7 @@ const IssueTable: React.FC<Props> = ({
           lock={'left' as ColumnLock}
           name="issueId"
           hidden={columnHidden('issueId')}
-          width={320}
+          width={400}
           header={() => (
             <div className="c7nagile-issue-table-summary">
               概要

@@ -154,7 +154,7 @@
         t4.id,
         t4.field_id,
         t6.name as field_name,
-        t6.default_value,
+        t4.default_value,
         t6.field_type,
         t6.code as field_code,
         t4.is_required as required,
@@ -168,7 +168,7 @@
             when t6.organization_id != 0 and t6.project_id is null then 'organization'
             else 'project'
         end as created_level,
-        t6.extra_config
+        t4.extra_config
         from fd_object_scheme_field_extend t4
         join (
             select
@@ -291,8 +291,8 @@
         t5.name as field_name,
         t5.field_type,
         t5.is_system as system,
-        t5.default_value,
-        t5.extra_config,
+        t4.default_value,
+        t4.extra_config,
         t5.code as field_code,
         t4.is_required as required,
         case
@@ -318,7 +318,9 @@
             t1.organization_id,
             t1.is_created,
             t1.is_edited,
-            t1.rank
+            t1.rank,
+            t1.default_value,
+            t1.extra_config
             from fd_object_scheme_field_extend t1
             where t1.organization_id = #{organizationId}
             and t1.project_id is null
@@ -345,7 +347,9 @@
                     t2.organization_id,
                     t2.is_created,
                     t2.is_edited,
-                    t2.rank
+                    t2.rank,
+                    t2.default_value,
+                    t2.extra_config
                 from fd_object_scheme_field_extend t2
                 where t2.organization_id = #{organizationId}
                 and t2.project_id = #{projectId}

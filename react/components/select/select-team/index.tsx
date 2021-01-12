@@ -7,28 +7,44 @@ import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   projectDataRef?: React.RefObject<Array<any>>,
-  afterLoad?: (projects: any[]) => void
+  afterLoad?: (projects: any) => void
   flat?: boolean
+  request?: () => Promise<any>
+  textField?: string
+  valueField?: string
+  projectId?: string
 }
 
 const SelectTeam: React.FC<Props> = forwardRef(({
-  projectDataRef = { current: null }, afterLoad, flat, ...otherProps
+  request, textField, valueField, projectDataRef = { current: null }, afterLoad, flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
   const config = useMemo((): SelectConfig => ({
     name: 'team',
-    textField: 'projName',
-    valueField: 'projectId',
-    request: () => commonApi.getSubProjects(true),
+    textField: textField || 'projName',
+    valueField: valueField || 'projectId',
+    request: () => {
+      if (!request) {
+        return commonApi.getSubProjects(true, projectId);
+      }
+      return request();
+    },
     paging: false,
     // @ts-ignore
     afterLoad: afterLoadRef.current,
     middleWare: (projects) => {
-      // @ts-ignore
+      if (Array.isArray(projects)) {
+        // @ts-ignore
       // eslint-disable-next-line
-        projectDataRef.current = projects;
-      return projects || [];
+      projectDataRef.current = projects;
+        return projects || [];
+      }
+      // @ts-ignore
+
+      // eslint-disable-next-line no-param-reassign
+      projectDataRef.current = (projects as any).content || [];
+      return (projects as any).content || [];
     },
   }), []);
   const props = useSelect(config);

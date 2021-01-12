@@ -1,5 +1,11 @@
 @import '~choerodon-ui/lib/style/themes/default';
-
+.c7nagile-detail-container-resize[max-width~="600px"] {
+  #detail {
+    .line-start {
+      width: 100%;
+    }
+  }
+}
 .c7n-agile-EditIssue {
   min-width: 4.4rem;
   height: 100%;
@@ -51,13 +57,7 @@
     }
   }
 
-  &[max-width~="600px"] {
-    #detail {
-      .line-start {
-        width: 100%;
-      }
-    }
-  }
+
 
   #detail, #wsjf {
     .line-start {

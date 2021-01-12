@@ -8,7 +8,7 @@ import './index.less';
 
 export default function ClickText(props) {
   const {
-    value, clickAble, onClick, record, permissionCode, showToolTip, 
+    value, clickAble, onClick, record, permissionCode, showToolTip,
   } = props;
 
   function handleClick() {
@@ -20,25 +20,23 @@ export default function ClickText(props) {
   }
 
   const text = clickAble
-    ? <a className="c7n-click-text" onClick={handleClick}>{value}</a>
+    ? <a role="none" className="c7n-agile-table-cell-click" onClick={handleClick}>{value}</a>
     : <span>{ value }</span>;
 
- 
   if (isEmpty(permissionCode)) {
     return (showToolTip ? <Tooltip title={value}>{text}</Tooltip>
       : text);
-  } else {
-    return (
-      <Permission
-        service={permissionCode}
-        noAccessChildren={value}
-        defaultChildren={value}
-      >
-        {showToolTip ? <Tooltip title={value}>{text}</Tooltip>
-          : text }
-      </Permission>
-    );
   }
+  return (
+    <Permission
+      service={permissionCode}
+      noAccessChildren={value}
+      defaultChildren={value}
+    >
+      {showToolTip ? <Tooltip title={value}>{text}</Tooltip>
+        : text }
+    </Permission>
+  );
 }
 
 ClickText.propTypes = {

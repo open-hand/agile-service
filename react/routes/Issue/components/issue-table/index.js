@@ -2,10 +2,10 @@ import React, {
   useContext, Fragment,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import _ from 'lodash';
+import _, { map } from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
 import { Table } from 'choerodon-ui/pro';
-import { map } from 'lodash';
+
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
@@ -33,14 +33,14 @@ function IssueTable({ tableRef, onCreateIssue }) {
       expand: true,
     });
     IssueStore.setFilterListVisible(false);
-    IssueStore.setEditFilterInfo(map(editFilterInfo, item => Object.assign(item, { isEditing: false })));
+    IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
   };
   const renderTag = (listField, nameField) => ({ record }) => {
     const list = record.get(listField);
     if (list) {
       if (list.length > 0) {
         return (
-          <Tooltip title={<div>{_.map(list, item => item[nameField]).map(name => <div>{name}</div>)}</div>}>
+          <Tooltip title={<div>{_.map(list, (item) => item[nameField]).map((name) => <div>{name}</div>)}</div>}>
             <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
               <Tag
                 color="blue"
@@ -98,9 +98,9 @@ function IssueTable({ tableRef, onCreateIssue }) {
           align="left"
           lock="left"
           name="issueId"
-          width={320}
+          width={400}
           header={() => (
-            <div style={{ display: "inline-block" }}>
+            <div style={{ display: 'inline-block' }}>
               <CollapseAll tableRef={tableRef} />
               概要
             </div>
@@ -111,14 +111,14 @@ function IssueTable({ tableRef, onCreateIssue }) {
             },
           })}
           renderer={({ record }) => (
-            <Fragment>
+            <>
               <TypeTag data={record.get('issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} />
               <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`问题概要： ${record.get('summary')}`}>
                 <span className="c7n-agile-table-cell-click">
                   {record.get('summary')}
                 </span>
               </Tooltip>
-            </Fragment>
+            </>
           )}
         />
         <Column
@@ -185,7 +185,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           className="c7n-agile-table-cell"
           renderer={({ record }) => (
             <div style={{ display: 'inline-flex' }}>
-              {record.get('reporterId') && record.get('reporterId') !== '0' && (
+              {record?.get('reporterId') && record.get('reporterId') !== '0' && (
                 <UserHead
                   user={{
                     id: record.get('reporterId'),
@@ -218,7 +218,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
         <Column hidden name="epic" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />
         {isInProgram && <Column hidden name="feature" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />}
         <Column name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />
-        {fields.map(field => (
+        {fields.map((field) => (
           <Column
             hidden
             name={field.code}

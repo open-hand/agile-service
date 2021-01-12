@@ -266,7 +266,7 @@ const GanttPage: React.FC = () => {
         >
           {isFullScreen ? '退出全屏' : '全屏'}
         </Button>
-        <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button>
+        <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
       </Header>
       <Breadcrumb />
       <Content style={{

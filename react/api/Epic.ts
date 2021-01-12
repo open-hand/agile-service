@@ -11,7 +11,10 @@ class EpicApi extends Api<EpicApi> {
    * 查询当前项目下所有史诗
    */
   loadEpics() {
-    return axios.get(`${this.prefix}/issues/epics`);
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/issues/epics`,
+    });
   }
 
   /**
@@ -39,9 +42,10 @@ class EpicApi extends Api<EpicApi> {
   /**
    * 在项目群中获取史诗列表 供下拉列表使用
    */
-  loadProgramEpics = () => axios.get(
-    `${this.prefix}/issues/epics/select_program_data`,
-  )
+  loadProgramEpics = () => this.request({
+    method: 'get',
+    url: `${this.prefix}/issues/epics/select_program_data`,
+  })
 
   /**
    * 将批量的issue加入到史诗中

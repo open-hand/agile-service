@@ -230,6 +230,8 @@ const en_US = {
   'field.label': 'label',
   'field.member': 'member',
   'field.default': 'defaultValue',
+  'field.default.sync': 'defaultValue sync to',
+  'defaultValue.sync':'defaultValue sync',
   'field.decimal': 'decimal',
   'field.urlError': 'URL error',
   'field.useCurrentDate': 'Use Current Date',

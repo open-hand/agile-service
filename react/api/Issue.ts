@@ -1,5 +1,6 @@
 import { axios, stores, Choerodon } from '@choerodon/boot';
 import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
+import { sameProject } from '@/utils/detail';
 import Api from './Api';
 
 const { AppState } = stores;
@@ -112,6 +113,18 @@ class IssueApi extends Api<IssueApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
+  get outPrefix() {
+    return '/agile/v1/backlog_external';
+  }
+
+  get isOutside() {
+    return false;
+  }
+
+  outside(outside: boolean) {
+    return this.overwrite('isOutside', outside);
+  }
+
   /**
     * 创建问题 敏捷/测试
     * @param issueObj
@@ -208,13 +221,20 @@ class IssueApi extends Api<IssueApi> {
     * 根据问题id加载问题
     * @param issueId
     */
-  load(issueId: number) {
-    const organizationId = getOrganizationId();
-    return this.request({
+  load(issueId: string) {
+    return this.isOutside ? this.request({
       method: 'get',
-      url: `${this.prefix}/issues/${issueId}`,
+      url: `${this.outPrefix}/issues/${issueId}`,
       params: {
-        organizationId,
+        project_id: this.projectId,
+        organizationId: this.orgId,
+      },
+    }) : this.request({
+      method: 'get',
+      url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
+      params: {
+        organizationId: this.orgId,
+        instanceProjectId: this.projectId,
       },
     });
   }

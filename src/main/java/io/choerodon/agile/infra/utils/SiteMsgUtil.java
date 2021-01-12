@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
+import io.choerodon.agile.api.vo.IssueCommentVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
@@ -14,6 +15,7 @@ import org.hzero.core.base.BaseConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -41,6 +43,13 @@ public class SiteMsgUtil {
     private static final String MSG_TYPE_EMAIL = "EMAIL";
     private static final String MSG_TYPE_WEB = "WEB";
     private static final String MSG_TYPE_WEBHOOK = "WEB_HOOK";
+    private static final String ISSUE_SUMMARY = "issueSummary";
+    private static final String LINK = "link";
+    private static final String COMMENT = "comment";
+    private static final String ACTION = "action";
+    private static final String COMMENT_USER = "commentUser";
+    private static final String COMMENT_TYPE = "commentType";
+    private static final String ISSUE_TYPE = "issueType";
 
     @Autowired
     private BaseFeignClient baseFeignClient;
@@ -48,6 +57,8 @@ public class SiteMsgUtil {
     private UserService userService;
     @Autowired
     private MessageClient messageClient;
+    @Value("${services.domain.url}")
+    private String domainUrl;
 
     public void issueCreate(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
@@ -252,5 +263,33 @@ public class SiteMsgUtil {
         messageSender.setTypeCodeList(noticeTypeList);
         messageSender.setReceiverAddressList(receiverList);
         return messageSender;
+    }
+
+    //发送问题评论消息
+    public void sendIssueComment(Map<Long, String> actionMap, ProjectVO projectVO, String summary, String url, String comment, IssueCommentVO issueCommentVO, String issueType) {
+        List<MessageSender> senderList = new ArrayList<>();
+        List<Receiver> receiverList = new ArrayList<>();
+        handleReceiver(receiverList, actionMap.keySet());
+        Map<Long, Receiver> usersMap = receiverList.stream().collect(Collectors.toMap(Receiver::getUserId, Function.identity()));
+        boolean replayAble = issueCommentVO.getParentId() != null && issueCommentVO.getParentId() != 0L;
+        actionMap.forEach((userId, action) -> {
+            Map<String, String> argsMap = new HashMap<>(8);
+            argsMap.put(PROJECT_NAME, projectVO.getName());
+            argsMap.put(ISSUE_SUMMARY, summary);
+            argsMap.put(LINK, domainUrl + "/" + url);
+            argsMap.put(COMMENT, comment);
+            argsMap.put(ACTION, action);
+            argsMap.put(COMMENT_USER, issueCommentVO.getUserRealName());
+            argsMap.put(COMMENT_TYPE, replayAble ? "评论" : "回复");
+            argsMap.put(ISSUE_TYPE, issueType);
+
+            MessageSender messageSender = new MessageSender();
+            messageSender.setTenantId(ConvertUtil.getOrganizationId(projectVO.getId()));
+            messageSender.setMessageCode("ISSUE_COMMENT");
+            messageSender.setReceiverAddressList(Collections.singletonList(usersMap.get(userId)));
+            messageSender.setArgs(argsMap);
+            senderList.add(messageSender);
+        });
+        senderList.forEach(sender -> messageClient.async().sendMessage(sender));
     }
 }

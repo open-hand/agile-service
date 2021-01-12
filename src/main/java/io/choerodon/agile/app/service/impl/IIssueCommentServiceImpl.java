@@ -52,7 +52,22 @@ public class IIssueCommentServiceImpl implements IIssueCommentService {
         if (isDelete != 1) {
             throw new CommonException(DELETE_ERROR);
         }
+        issueCommentMapper.updateChildRecordParentNull(issueCommentDTO.getProjectId(), issueCommentDTO.getCommentId());
         BaseFieldUtil.updateIssueLastUpdateInfo(issueCommentDTO.getIssueId(), issueCommentDTO.getProjectId());
         return isDelete;
+    }
+
+    @Override
+    @DataLog(type = "deleteCommentReplay")
+    public void deleteBaseReplay(IssueCommentDTO issueCommentDTO) {
+        int isDelete = issueCommentMapper.delete(issueCommentDTO);
+        if (isDelete != 1) {
+            throw new CommonException(DELETE_ERROR);
+        }
+        IssueCommentDTO childRecord = new IssueCommentDTO();
+        childRecord.setProjectId(issueCommentDTO.getProjectId());
+        childRecord.setParentId(issueCommentDTO.getCommentId());
+        issueCommentMapper.delete(childRecord);
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueCommentDTO.getIssueId(), issueCommentDTO.getProjectId());
     }
 }

@@ -448,39 +448,41 @@
         (
             select aii.issue_id
             from agile_issue aii
-            where (
-            aii.parent_issue_id in
+            where aii.issue_id in
             <foreach collection="issueIds" item="issueId" open="(" separator=","
                      close=")">
                 #{issueId}
             </foreach>
-            <if test="childrenIds != null and childrenIds.size > 0">
-                and aii.issue_id in
-                <foreach collection="childrenIds" item="id" open="(" separator=","
+            <if test="withSubIssues">
+                or (
+                aii.parent_issue_id in
+                <foreach collection="issueIds" item="issueId" open="(" separator=","
                          close=")">
-                    #{id}
+                    #{issueId}
                 </foreach>
-            </if>
-            )
-            or (
-            aii.relate_issue_id in
-            <foreach collection="issueIds" item="issueId" open="(" separator=","
-                     close=")">
-                #{issueId}
-            </foreach>
-            <if test="childrenIds != null and childrenIds.size > 0">
-                and aii.issue_id in
-                <foreach collection="childrenIds" item="id" open="(" separator=","
+                <if test="childrenIds != null and childrenIds.size > 0">
+                    and aii.issue_id in
+                    <foreach collection="childrenIds" item="id" open="(" separator=","
+                             close=")">
+                        #{id}
+                    </foreach>
+                </if>
+                )
+                or (
+                aii.relate_issue_id in
+                <foreach collection="issueIds" item="issueId" open="(" separator=","
                          close=")">
-                    #{id}
+                    #{issueId}
                 </foreach>
+                <if test="childrenIds != null and childrenIds.size > 0">
+                    and aii.issue_id in
+                    <foreach collection="childrenIds" item="id" open="(" separator=","
+                             close=")">
+                        #{id}
+                    </foreach>
+                </if>
+                )
             </if>
-            )
-            or aii.issue_id in
-            <foreach collection="issueIds" item="issueId" open="(" separator=","
-                     close=")">
-                #{issueId}
-            </foreach>
         )
 
         <!-- mysql的按照顺序排序在h2会报错，所以用下面的 -->
@@ -549,11 +551,18 @@
                 ai.issue_type_id
             from (
                 select
-                    distinct case
-                    when search.type_code = 'sub_task' then search.parent_issue_id
-                    when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
-                    else search.issue_issue_id
-                    end as issue_issue_id
+                <choose>
+                    <when test="isTreeView">
+                        distinct case
+                        when search.type_code = 'sub_task' then search.parent_issue_id
+                        when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
+                        else search.issue_issue_id
+                        end as issue_issue_id
+                    </when>
+                    <otherwise>
+                        distinct search.issue_issue_id
+                    </otherwise>
+                </choose>
                 from (
                     <include refid="queryIssueIdsListWithSubSql"/>
                 )search
@@ -930,6 +939,43 @@
                      close=")">
                 #{id}
             </foreach>)
+            )
+        </if>
+
+        <if test='searchVO.otherArgs.fixVersion != null and searchVO.otherArgs.fixVersion.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.fixVersionNull != null and searchVO.otherArgs.fixVersionNull == true'>
+                ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
+                left join agile_version_issue_rel avir44
+                on ai31.issue_id = avir44.issue_id
+                WHERE avir44.version_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT avir3.issue_id FROM
+            agile_version_issue_rel avir3 WHERE avir3.version_id in
+            <foreach collection="searchVO.otherArgs.fixVersion" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            and relation_type = 'fix'
+            )
+            )
+        </if>
+        <if test='searchVO.otherArgs.influenceVersion != null and searchVO.otherArgs.influenceVersion.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.influenceVersionNull != null and searchVO.otherArgs.versionNull == true'>
+                ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
+                left join agile_version_issue_rel avir44
+                on ai31.issue_id = avir44.issue_id
+                WHERE avir44.version_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT avir3.issue_id FROM
+            agile_version_issue_rel avir3 WHERE avir3.version_id in
+            <foreach collection="searchVO.otherArgs.influenceVersion" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            AND relation_type = 'influence'
+             )
             )
         </if>
         <if test='searchVO.otherArgs.label != null and searchVO.otherArgs.label.size > 0'>
@@ -1793,15 +1839,17 @@
 
     <select id="queryIssueEpicSelectList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
-            issue_id,
-            epic_name,
-            creation_date
+            ai.issue_id,
+            ai.epic_name,
+            ai.creation_date,
+            alv.name AS epicColor
         FROM
-            agile_issue
+            agile_issue ai
+            LEFT JOIN lookup_value alv ON ai.color_code = alv.value_code
         WHERE
-            project_id = #{projectId}
-            AND type_code = 'issue_epic'
-        ORDER BY epic_sequence DESC
+            ai.project_id = #{projectId}
+            AND ai.type_code = 'issue_epic'
+        ORDER BY ai.epic_sequence DESC
     </select>
 
     <delete id="batchRemoveFromVersion">
@@ -3430,6 +3478,15 @@
             group by t1.issue_id
         ) t2
         left join agile_data_log t3 on t2.log_id = t3.log_id
+    </select>
+
+    <select id="selectSubIssueIds" resultType="java.lang.Long">
+        select ai.issue_id from agile_issue ai
+        where
+        ai.type_code in ('sub_task','bug')
+        AND
+        (ai.parent_issue_id = #{issueId}
+         OR ai.relate_issue_id = #{issueId})
     </select>
 
 

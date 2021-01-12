@@ -134,4 +134,10 @@
         AND adl.creation_date &lt;= #{endDate}
         AND adl.new_value IS NOT NULL
     </select>
+
+    <update id="updateProject">
+        update agile_data_log set project_id = #{targetProjectId}
+        where project_id = #{projectId}
+        AND issue_id = #{issueId}
+    </update>
 </mapper>

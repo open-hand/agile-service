@@ -299,7 +299,8 @@
             t1.id,
             t1.field_id,
             t1.issue_type_id,
-            t1.is_required
+            t1.is_required,
+            t1.default_value
         from fd_object_scheme_field_extend t1
         where t1.organization_id = #{organizationId}
         and t1.project_id is null
@@ -333,7 +334,8 @@
             t2.id,
             t2.field_id,
             t2.issue_type_id,
-            t2.is_required
+            t2.is_required,
+            t2.default_value
             from fd_object_scheme_field_extend t2
             where t2.organization_id = #{organizationId}
             and t2.project_id = #{projectId}

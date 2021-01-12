@@ -1,11 +1,12 @@
+import { set } from 'lodash';
 /* eslint-disable import/no-anonymous-default-export */
 export default ({
-  projectId, organizationId, issueSearchStore, events, searchDTO,
+  projectId, organizationId, issueSearchStore, events, searchDTO, tableListMode,
 }) => ({
   primaryKey: 'issueId',
   autoQuery: false,
   modifiedCheck: false,
-  parentField: 'parentId',
+  parentField: tableListMode ? undefined : 'parentId',
   expandField: 'expand',
   idField: 'issueId',
   paging: 'server',
@@ -20,6 +21,7 @@ export default ({
       },
       transformRequest: () => {
         const search = searchDTO || issueSearchStore.getCustomFieldFilters();
+        set(search, 'searchArgs.tree', !tableListMode);
         return JSON.stringify(search);
       },
     }),

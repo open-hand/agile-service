@@ -367,11 +367,13 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                             @Param("searchVO") SearchVO searchVO,
                                             @Param("filterSql") String filterSql,
                                             @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
-                                            @Param("orderStr") String orderStr);
+                                            @Param("orderStr") String orderStr,
+                                            @Param("isTreeView") Boolean isTreeView);
 
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
                                                    @Param("childrenIds") Set<Long> childrenIds,
-                                                   @Param("isExcelExported") boolean isExcelExported);
+                                                   @Param("isExcelExported") boolean isExcelExported,
+                                                   @Param("withSubIssues") boolean withSubIssues);
 
     List<IssueDTO> selectWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
                                            @Param("childrenIds") Set<Long> childrenIds);
@@ -557,4 +559,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<GanttChartVO> selectActuatorCompletedDateByIssueIds(@Param("issueIds") List<Long> issueIds,
                                                                   @Param("projectId") Long projectId);
+
+    List<Long> selectSubIssueIds(@Param("issueId") Long issueId);
 }

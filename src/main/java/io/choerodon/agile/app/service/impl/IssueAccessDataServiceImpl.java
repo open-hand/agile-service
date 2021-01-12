@@ -174,4 +174,10 @@ public class IssueAccessDataServiceImpl implements IssueAccessDataService {
         issueMapper.updateStayDate(projectId, sprintId, nowDate);
     }
 
+    @Override
+    @DataLog(type = "projectMove")
+    public IssueDTO transferProject(IssueDTO issueDTO) {
+        issueMapper.updateByPrimaryKeySelective(issueDTO);
+        return issueMapper.selectByPrimaryKey(issueDTO.getIssueId());
+    }
 }

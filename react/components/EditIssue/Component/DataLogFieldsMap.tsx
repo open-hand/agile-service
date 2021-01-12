@@ -703,6 +703,9 @@ const fieldsMap = new Map([
       },
     },
   }],
+  ['Project Move', {
+    name: '所属项目',
+  }],
 ]);
 
 export default fieldsMap;

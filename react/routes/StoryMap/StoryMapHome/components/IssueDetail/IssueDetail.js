@@ -1,60 +1,63 @@
-import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
+import React, { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 import { getProjectId } from '@/utils/common';
-import EditIssue from '../../../../../components/EditIssue';
+import DetailContainer, { useDetail } from '@/components/detail-container';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
-@inject('AppState')
-@observer
-class IssueDetail extends Component {
-  constructor(props) {
-    super(props);
-    this.EditIssue = React.createRef();
-  }
-
-  /**
-   * 刷新issue详情的数据
-   */
-  refreshIssueDetail() {
-    if (this.EditIssue.current) {
-      this.EditIssue.current.loadIssueDetail();
-    }
-  }
-
-  handleCancel = () => {
+const IssueDetail = (props) => {
+  const { refresh, isFullScreen, onChangeWidth } = props;
+  const [detailProps] = useDetail();
+  const { open, close } = detailProps;
+  const handleCancel = () => {
     StoryMapStore.setClickIssue(null);
-  }
+  };
 
-  handleDeleteIssue = () => {
-    const { refresh } = this.props;
-    const { selectedIssueMap } = StoryMapStore;
-    const { epicId } = selectedIssueMap.values().next().value || {};
+  const handleDeleteIssue = () => {
     refresh();
     StoryMapStore.setClickIssue(null);
-  }
+  };
 
-  render() {
-    const { refresh, isFullScreen, onChangeWidth } = this.props;
-    const { selectedIssueMap } = StoryMapStore;
-    const visible = selectedIssueMap.size;
-    const { programId, issueId } = selectedIssueMap.values().next().value || {};
-    const programIssue = (programId && String(programId) !== String(getProjectId()));
-    return (
-      <EditIssue
-        visible={visible}
-        programId={programIssue ? programId : undefined}
-        isFullScreen={isFullScreen}
-        disabled={isFullScreen || programIssue}
-        applyType={programIssue ? 'program' : 'agile'}
-        forwardedRef={this.EditIssue}
-        issueId={issueId}
-        onChangeWidth={onChangeWidth}
-        onCancel={this.handleCancel}
-        onDeleteIssue={this.handleDeleteIssue}
-        onUpdate={refresh}
-      />
-    );
-  }
-}
+  const { selectedIssueMap } = StoryMapStore;
+  const visible = selectedIssueMap.size;
+  const { programId, issueId } = selectedIssueMap.values().next().value || {};
+  const programIssue = (programId && String(programId) !== String(getProjectId()));
 
-export default IssueDetail;
+  useEffect(() => {
+    if (visible) {
+      open({
+        path: 'issue',
+        props: {
+          issueId,
+          programId: programIssue ? programId : undefined,
+          isFullScreen,
+          disabled: isFullScreen || programIssue,
+          applyType: programIssue ? 'program' : 'agile',
+        // onChangeWidth={onChangeWidth}
+        // onCancel={this.handleCancel}
+        // onDeleteIssue={this.handleDeleteIssue}
+        // onUpdate={refresh}
+        },
+        events: {
+          update: refresh,
+          delete: () => {
+            handleDeleteIssue();
+          },
+          close: () => {
+            handleCancel();
+          },
+          copy: () => {
+            refresh();
+            // handleIssueCopy();
+          },
+        },
+      });
+    } else {
+      close();
+    }
+  }, [visible, issueId]);
+  return (
+    <DetailContainer {...detailProps} />
+  );
+};
+
+export default observer(IssueDetail);

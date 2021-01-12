@@ -1,0 +1,56 @@
+.date {
+  width: 2.5rem;
+  //   height: 5rem;
+  //   padding: .1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &_time {
+    width: 100%;
+    color: fade(#000, 65);
+    font-size: 12px;
+  }
+
+  &_options {
+    width: 100%;
+    padding: 0.08rem 0;
+    border-top: 1px solid #e8e8e8;
+    overflow: auto;
+    list-style: none;
+    outline: none;
+    margin-bottom: 0;
+
+    & >&_item {
+      position: relative;
+      display: block;
+      height: auto;
+      padding: 0.04rem 0.12rem;
+      overflow: hidden;
+      color: #000;
+      font-weight: normal;
+      line-height: 0.2rem;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    &_item_active,
+    &_item:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+
+  &_picker {
+    transform: opacity 1s;
+  }
+
+  &_picker_hidden {
+    opacity: 0;
+    //   height: 0;
+    display: none;
+    visibility: hidden;
+  }
+}

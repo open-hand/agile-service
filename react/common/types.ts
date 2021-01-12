@@ -175,6 +175,7 @@ interface FieldOption {
 }
 export interface IField {
   code: string,
+  fieldId: string,
   fieldOptions?: FieldOption[],
   fieldType: string,
   fieldTypeName?: string,
@@ -182,14 +183,44 @@ export interface IField {
   name: string,
   system: boolean,
   extraConfig?: boolean,
+  fieldCode?: string
+  fieldName?: string
+  projectId?: string | number
+  required: boolean
 }
-
+export interface IComment {
+  id: number
+  commentText: string
+  issueId: number
+  lastUpdateDate: string
+  objectVersionNumber: number
+  projectId: number
+  userId: number
+  userImageUrl: string
+  userLoginName: string
+  userName: string
+  userRealName: string
+}
+interface Attachment {
+  id: number
+  fileName: string
+  url: string
+  createdBy: number
+}
+export type ISubIssue = Issue & {
+  loginName: string
+  realName: string
+  imageUrl: string
+}
 export interface Issue {
   issueId: string
   issueNum: string
   summary: string
+  description: string
+  creationDate: string
   typeCode?: string,
   issueTypeVO: IIssueType,
+  lastUpdateDate: string
   parentIssueId?: string
   parentIssueNum?: string
   parentIssueSummary?: string
@@ -198,6 +229,7 @@ export interface Issue {
   sameParentIssueVOList?: Issue[],
   sameParentBugVOList?: Issue[]
   assigneeRealName: string
+  reporterId: string
   reporterRealName: string
   statusVO: IStatus
   priorityVO: IPriority
@@ -212,6 +244,28 @@ export interface Issue {
   actualCompletedDate?: string
   foundationFieldValue: {
     [key: string]: any
+  }
+  issueCommentVOList: IComment[]
+  issueAttachmentVOList: Attachment[]
+  starBeacon: boolean
+  featureVO: {
+    featureType: 'business' | 'enabler'
+  }
+  createdBy: string
+  createrImageUrl: string
+  createrEmail: string
+  createrName: string
+  createrRealName: string
+  createrLoginName: string
+  assigneeId: string,
+  assigneeImageUrl: string,
+  assigneeLoginName: string,
+  assigneeName: string
+  parentSummary?: string
+  subIssueVOList: ISubIssue[]
+  subBugVOList: ISubIssue[]
+  mainResponsible?: {
+    id: string
   }
 }
 

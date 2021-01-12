@@ -1,0 +1,30 @@
+.issueMoveModal {
+  
+  :global {
+    .c7n-pro-modal-body {
+      height: calc(100% - 55px);
+      padding-bottom: 0;
+      max-height: unset;
+      :local {
+        .issueMove {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          .step_content {
+            flex: 1;
+            overflow-y: scroll;
+            overflow-x: hidden;
+          }
+          .steps_action {
+            border-top: 0.01rem solid #e0e0e0;
+            padding-top: 12px;
+            padding-bottom: 12px;
+            margin-left: -24px;
+            margin-right: -24px;
+            padding-left: 24px;
+          }
+        }
+      }
+    }
+  }
+}

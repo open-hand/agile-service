@@ -24,7 +24,7 @@ const SubTask = observer(({
 
   const [expand, setExpand] = useState(false);
   const [summary, setSummary] = useState(false);
-  const [issueTypes] = useIssueTypes();
+  const [issueTypes] = useIssueTypes({ disabled });
   const {
     issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId,
   } = store.getIssue;

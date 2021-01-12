@@ -3,18 +3,19 @@ import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import {
-  Button, Modal, Spin, message,
+  Button, Modal, Spin, message, Select,
 } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
+import { toJS } from 'mobx';
 import { Prompt } from 'react-router-dom';
 import {
   pageConfigApi, UIssueTypeConfig,
 } from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
 import { validKeyReturnValue } from '@/common/commonValid';
-import { omit } from 'lodash';
+import { omit, set } from 'lodash';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -26,6 +27,7 @@ import CreateField from '../components/create-field';
 import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
+import { transformDefaultValue, beforeSubmitTransform } from './utils';
 
 type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: number, localDefaultObj: any, defaultValueObj: any, };
 function PageIssueType() {
@@ -54,15 +56,17 @@ function PageIssueType() {
         let { created } = item;
         let { edited } = item;
         let { required } = item;
-
+        let extraProps = {};
         if (item.dataSetRecord) {
           newRank = item.dataSetRecord.get('rank');
           created = item.dataSetRecord.get('created');
           edited = item.dataSetRecord.get('edited');
           required = item.dataSetRecord.get('required');
+          extraProps = beforeSubmitTransform(item.dataSetRecord, 'tempKey');
         }
         return {
-          ...omit(item, 'dataSetRecord', 'local', 'localDefaultValue', 'localSource'),
+          ...omit(item, 'dataSetRecord', 'local', 'showDefaultValueText', 'localSource'),
+          ...extraProps,
           rank: newRank,
           created,
           edited,
@@ -83,6 +87,7 @@ function PageIssueType() {
           edited: item.get('edited'),
           rank: item.get('rank'),
           objectVersionNumber: item.get('objectVersionNumber'),
+          ...beforeSubmitTransform(item),
         })),
         issueTypeFieldVO: issueTypeFieldVO.dirty ? {
           id: issueTypeFieldVO.id,
@@ -95,6 +100,7 @@ function PageIssueType() {
           created: item.get('created'),
           edited: item.get('edited'),
           rank: item.get('rank'),
+          ...beforeSubmitTransform(item),
         })),
         createdFields: CreatedFields,
         deleteIds: pageIssueTypeStore.getDeleteIds,
@@ -118,8 +124,8 @@ function PageIssueType() {
   const onSubmitLocal = async (data: ILocalFieldPostDataProps, oldField: boolean = false) => {
     const newData = Object.assign(data, {
       local: true,
-      localDefaultValue: oldField ? pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.defaultValueObj, data.fieldOptions)
-        : pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.localDefaultObj, data.fieldOptions, 'tempKey'),
+      showDefaultValueText: oldField ? transformDefaultValue(data)
+        : transformDefaultValue({ ...data, defaultValueObj: data.localDefaultObj, optionKey: 'tempKey' }),
       localSource: oldField ? 'add' : 'created',
       fieldName: data.name,
       edited: true,

@@ -78,12 +78,17 @@ const ExportIssue: React.FC = () => {
     },
   });
   const { store: choseFieldStore } = choseDataProps;
-  const checkOptions = useMemo(() => {
-    const newCheckOptions = propsCheckOptions.concat([...(choseFieldStore.getOriginalField.get('custom') || [])].map((option) => ({ value: option.code, label: option.name })));
+  const checkOptions = useMemo(() => { // checkBokProps
+    const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig.get(option.value) })) || [];
+    newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig.get(option.code) })));
     return newCheckOptions;
-  }, [choseFieldStore.getOriginalField, propsCheckOptions]);
+  }, [choseFieldStore.getOriginalField, propsCheckOptions, store.checkboxOptionsExtraConfig]);
   // 选择字段框配置 数据
-  const [checkBoxDataProps, checkBoxComponentProps] = useTableColumnCheckBoxes({ options: checkOptions, defaultValue: store.defaultCheckedExportFields });
+  const [checkBoxDataProps, checkBoxComponentProps] = useTableColumnCheckBoxes({
+    options: checkOptions,
+    defaultValue: store.defaultCheckedExportFields,
+    events: { initOptions: store.defaultInitOptions },
+  });
 
   const [filterData, filterComponentProps] = useIssueFilterForm({
     fields,
@@ -117,11 +122,11 @@ const ExportIssue: React.FC = () => {
     } else {
       return false;
     }
+    search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
     if (checkBoxDataProps.checkedOptions.length === 0) {
       Choerodon.prompt('请至少选择一个字段导出');
       return false;
     }
-    search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions);
     search = store.exportBefore(search);
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
     store.exportAxios(search, field ? `${field.value},${field.order}` : undefined);

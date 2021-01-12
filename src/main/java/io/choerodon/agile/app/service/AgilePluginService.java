@@ -374,4 +374,27 @@ public interface AgilePluginService {
      * @param statusFieldValueSettingDTOS
      */
     void handlerProgramFieldValue(StatusFieldSettingVO statusFieldSettingVO, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS);
+
+    /**
+     * 跨项目转交处理Feature需要清空得数据
+     * @param projectId
+     * @param issueDTO
+     */
+    void handlerFeatureCleanValue(Long projectId, IssueDetailDTO issueDTO);
+
+    /**
+     * 项目群子项目需要清空逻辑
+     * @param issueDTO
+     * @param issueUpdateVO
+     * @param fieldList
+     */
+    void handlerFeatureSelfValue(IssueDetailDTO issueDTO, IssueUpdateVO issueUpdateVO, List<String> fieldList);
+
+    /**
+     * 修改agile_feature和wsjf表中数据的projectId
+     * @param projectId
+     * @param issueDTO
+     * @param targetProjectId
+     */
+    void projectMoveUpdateFeatureValue(Long projectId, IssueDTO issueDTO, Long targetProjectId);
 }

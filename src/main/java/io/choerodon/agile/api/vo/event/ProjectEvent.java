@@ -28,6 +28,16 @@ public class ProjectEvent {
 
     private Long programId;
 
+    private List<ProjectEventCategory> projectCategoryVOS;
+
+    public List<ProjectEventCategory> getProjectCategoryVOS() {
+        return projectCategoryVOS;
+    }
+
+    public void setProjectCategoryVOS(List<ProjectEventCategory> projectCategoryVOS) {
+        this.projectCategoryVOS = projectCategoryVOS;
+    }
+
     public Long getProjectId() {
         return projectId;
     }

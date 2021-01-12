@@ -1,0 +1,24 @@
+@import '~choerodon-ui/lib/style/themes/default';
+
+.switch {
+    position: absolute;
+    right: 20px;
+    display: flex;
+    align-items: center;
+}
+.selected {
+    color: @primary-color;
+}
+.icon {
+    cursor: pointer;
+    &_list {
+        font-size: 20px;
+        margin-right: .06rem;
+    }
+    &_tree {
+        font-size: 17px;
+    }
+}
+.disabled {
+    color: @disabled-color;
+}

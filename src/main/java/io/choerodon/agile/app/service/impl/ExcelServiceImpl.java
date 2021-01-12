@@ -2486,6 +2486,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
         project.setCode(projectInfoDTO.getProjectCode());
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
+        boolean isTreeView = !Boolean.FALSE.equals(searchVO.getSearchArgs().get("tree"));
 
         String sheetName = project.getName();
         Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);
@@ -2500,7 +2501,7 @@ public class ExcelServiceImpl implements ExcelService {
             while (true) {
                 //查询所有父节点问题
                 Page<IssueDTO> page =
-                        PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                        PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
                 if (CollectionUtils.isEmpty(page.getContent())) {
                     break;
                 }
@@ -2509,9 +2510,12 @@ public class ExcelServiceImpl implements ExcelService {
                 Map<Long, Set<Long>> parentSonMap = new HashMap<>();
                 List<IssueDTO> issues = new ArrayList<>();
                 if (!parentIds.isEmpty()) {
-                    Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                    Set<Long> childrenIds = new HashSet<>();
+                    if (isTreeView) {
+                        childrenIds = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                    }
                     cursor.addCollections(childrenIds);
-                    issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true);
+                    issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true, isTreeView);
                 }
                 Map<Long, ExportIssuesVO> issueMap = new LinkedHashMap<>();
                 cursor
@@ -2572,6 +2576,9 @@ public class ExcelServiceImpl implements ExcelService {
                                     componentMap,
                                     foundationCodeValue,
                                     issue));
+                }
+                if (!isTreeView) {
+                    parentSonMap.clear();
                 }
                 ExcelUtil.writeIssue(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, sheetName, Arrays.asList(AUTO_SIZE_WIDTH), workbook, cursor);
                 boolean hasNextPage = (cursor.getPage() + 1) < page.getTotalPages();

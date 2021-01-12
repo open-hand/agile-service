@@ -27,7 +27,7 @@ const TableDropMenu = (props) => {
   const renderText = () => {
     const textA = (
       // eslint-disable-next-line jsx-a11y/interactive-supports-focus
-      <a role="button" onClick={onClickEdit} onKeyDown={null}>
+      <a className="c7n-agile-table-cell-click" role="button" onClick={onClickEdit} onKeyDown={null}>
         {text}
       </a>
     );

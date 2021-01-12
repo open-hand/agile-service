@@ -5,12 +5,15 @@ import { find } from 'lodash';
 import { Select } from 'choerodon-ui/pro';
 import { sprintApi } from '@/api';
 import { Tooltip } from 'choerodon-ui';
+import FlatSelect from '@/components/flat-select';
 
 const { OptGroup, Option } = Select;
 interface Props {
   teamIds: number[],
   piId: number
   afterLoad?: (data: any[]) => void
+  flat?: boolean
+  dataRef?: React.MutableRefObject<any>
 }
 interface Sprint {
   sprintId: number,
@@ -24,7 +27,7 @@ interface Team {
   sprints: Sprint[]
 }
 const SelectSprint: React.FC<Props> = forwardRef(({
-  teamIds, piId, afterLoad,
+  teamIds, piId, afterLoad, flat, dataRef,
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -32,6 +35,9 @@ const SelectSprint: React.FC<Props> = forwardRef(({
     ...result,
     ...(team.sprints || []),
   ], []), [teams]);
+  Object.assign(dataRef, {
+    current: sprints,
+  });
   const loadData = useCallback(async () => {
     if (piId && Array.isArray(teamIds) && teamIds.length > 0) {
       const res = await sprintApi.getTeamSprints(piId, teamIds);
@@ -49,8 +55,11 @@ const SelectSprint: React.FC<Props> = forwardRef(({
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const Component = flat ? FlatSelect : Select;
+
   return (
-    <Select
+    <Component
       ref={ref}
       multiple
       // @ts-ignore
@@ -70,7 +79,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
           </OptGroup>
         ))
       }
-    </Select>
+    </Component>
   );
 });
 export default SelectSprint;
