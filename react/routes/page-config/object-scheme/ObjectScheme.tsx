@@ -18,6 +18,8 @@ import TableDropMenu from '../../../common/TableDropMenu';
 import CreateField from '../components/create-field';
 import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
+import { disabledEditDefaultFields, orgDisabledEditDefaultFields } from '../page-issue-type/components/sort-table/useTextEditToggle';
+import openEditSystemField from './components/edit-system-field';
 
 const { Column } = Table;
 enum IRequireScopeType {
@@ -142,6 +144,10 @@ function ObjectScheme() {
       handleRefresh,
       record,
     };
+    if (record?.get('system')) {
+      openEditSystemField(record);
+      return;
+    }
     Modal.open({
       key: editModelKey,
       title: formatMessage({ id: 'field.edit' }),
@@ -156,7 +162,8 @@ function ObjectScheme() {
   const renderDropDown = ({ text, record }: RenderProps) => {
     const system = record?.get('system');
     const projectId = record?.get('projectId');
-    if (system || (getMenuType() === 'project' && !projectId)) {
+    const disabledFields = getMenuType() === 'project' ? disabledEditDefaultFields : orgDisabledEditDefaultFields;
+    if ((system && disabledFields.includes(record?.get('code'))) || (getMenuType() === 'project' && projectId === null)) {
       return text;
     }
     const menu = (

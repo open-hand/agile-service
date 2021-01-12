@@ -6,7 +6,9 @@ import moment from 'moment';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import renderEditor from './renderEditor';
-import { transformDefaultValue } from '../../utils';
+import {
+  fieldTextValueConfig, transformDefaultValue, orgDisabledEditDefaultFields, disabledEditDefaultFields,
+} from '../../utils';
 
 interface ITextEditToggleConfigProps {
   key: string
@@ -20,18 +22,7 @@ interface ITextEditToggleConfigProps {
   onSubmit: (data: any) => void
   initValue: any
 }
-const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description'];
-const orgDisabledEditDefaultFields = [...disabledEditDefaultFields, 'component', 'label', 'influenceVersion', 'fixVersion', 'epic', 'sprint', 'pi', 'subProject'];
-const fieldTextValueConfig = {
-  epic: { optionKey: 'issueId', textKey: 'epicName' },
-  influenceVersion: { optionKey: 'versionId', textKey: 'name' },
-  fixVersion: { optionKey: 'versionId', textKey: 'name' },
-  component: { optionKey: 'componentId', textKey: 'name' },
-  label: { optionKey: 'labelId', textKey: 'labelName' },
-  sprint: { optionKey: 'sprintId', textKey: 'sprintName' },
-  backlogType: { optionKey: 'id', textKey: 'name' },
-  backlogClassification: { optionKey: 'id', textKey: 'name' },
-};
+
 /**
  *
  * @param record
@@ -41,7 +32,6 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
   const dataRef = useRef<Array<any> | undefined>();
   const handleSubmit = useCallback((value: any) => {
     const currentData = record.toData();
-    console.log('current onSubmit', fieldTextValueConfig[currentData.fieldCode as keyof typeof fieldTextValueConfig]);
 
     let newValue = value;
     let currentDefaultValueObj = currentData.localDefaultObj || currentData.defaultValueObj;
@@ -127,3 +117,4 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
   };
 }
 export default useTextEditTogglePropsWithPage;
+export { disabledEditDefaultFields, orgDisabledEditDefaultFields };
