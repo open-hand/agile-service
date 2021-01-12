@@ -1,4 +1,6 @@
-import React, { createContext, useMemo, useRef } from 'react';
+import React, {
+  createContext, useEffect, useMemo, useRef,
+} from 'react';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
 import EditIssueStore from './EditIssueStore';
@@ -18,7 +20,7 @@ export const EditIssueContextProvider = injectIntl(inject('AppState', 'HeaderSto
     ...props,
     prefixCls: 'c7n-agile-EditIssue',
     intlPrefix: 'agile.EditIssue',
-    store: useMemo(() => new EditIssueStore({ tab: props.tab }), [props.tab]), // 防止update时创建多次store
+    store: useMemo(() => new EditIssueStore(), []), // 防止update时创建多次store
     FieldVersionRef,
     FieldFixVersionRef,
     descriptionEditRef,
@@ -29,7 +31,9 @@ export const EditIssueContextProvider = injectIntl(inject('AppState', 'HeaderSto
       FieldFixVersionRef.current = ref;
     },
   };
-
+  useEffect(() => {
+    value.store.setTab(props.tab);
+  }, [props.tab, value.store]);
   return (
     <EditIssueContext.Provider value={value}>
       {props.children}

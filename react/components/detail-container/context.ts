@@ -6,11 +6,14 @@ export interface IRoute {
   props?: Object
   events?: DetailEvents
 }
+export interface IRouteWithKey extends IRoute {
+  key:React.Key
+}
 interface DetailContainerContext {
   outside: boolean
   topAnnouncementHeight: number
-  routes: IRoute[]
-  match: IRoute
+  routes: IRouteWithKey[]
+  match: IRouteWithKey
   open: (route: IRoute) => void
   push: (nextRoute: IRoute) => void
   pop: () => void

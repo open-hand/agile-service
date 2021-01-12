@@ -122,15 +122,13 @@ class EditIssueStore {
 
   @observable tab = 'detail';
 
-  constructor({ tab }) {
-    if (tab) {
-      this.tab = tab;
-    }
-  }
-
   @action
   setTab(tab) {
-    this.tab = tab;
+    if (tab) {
+      this.tab = tab;
+    } else {
+      this.tab = 'detail';
+    }
   }
 
   @action setCreateBranchShow(data) {
