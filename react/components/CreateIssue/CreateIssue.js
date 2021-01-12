@@ -247,6 +247,10 @@ class CreateIssue extends Component {
             Object.assign(result, {
               [name]: field.defaultValueObjs?.map((c) => c.name),
             });
+          } else if (name === 'issueLabel') {
+            Object.assign(result, {
+              [name]: field.defaultValueObjs?.map((c) => c.labelName),
+            });
           } else {
             Object.assign(result, {
               [name]: field.defaultValue,
@@ -739,7 +743,13 @@ class CreateIssue extends Component {
                 mode="tags"
                 loadWhenMount
                 type="label"
-              />,
+              >
+                {field.defaultValueObjs?.map((label) => (
+                  <Option key={label.labelName} value={label.labelName}>
+                    {label.labelName}
+                  </Option>
+                ))}
+              </SelectFocusLoad>,
             )}
           </FormItem>
         );
