@@ -848,7 +848,7 @@ class CreateIssue extends Component {
                   type="component"
                   allowClear
                 >
-                  {field?.defaultValueObjs.map((component) => (
+                  {field.defaultValueObjs?.map((component) => (
                     <Option
                       key={component.name}
                       value={component.name}
