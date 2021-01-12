@@ -2,18 +2,22 @@ import React, { createContext, useMemo } from 'react';
 import { inject } from 'mobx-react';
 import { DataSet } from 'choerodon-ui/pro';
 import { injectIntl } from 'react-intl';
+import { AppStateProps } from '@/common/types';
 import IssueTypeDataSet from './IssueTypeDataSet';
 
-const Store = createContext();
+interface Context {
+  AppState: AppStateProps,
+  issueTypeDataSet: DataSet,
+}
+
+const Store = createContext({} as Context);
 export default Store;
 
-export const StoreProvider = injectIntl(inject('AppState')(
+export const StoreProvider: React.FC<Context> = inject('AppState')(
   (props) => {
-    const { AppState: { currentMenuType: { organizationId } }, intl: { formatMessage } } = props;
-    const issueTypeDataSet = useMemo(() => new DataSet(IssueTypeDataSet(formatMessage, organizationId)));
+    const issueTypeDataSet = useMemo(() => new DataSet(IssueTypeDataSet()), []);
     const value = {
       ...props,
-      prefixCls: 'agile-issue-type',
       intlPrefix: 'issue-type',
       issueTypeDataSet,
     };
@@ -23,4 +27,4 @@ export const StoreProvider = injectIntl(inject('AppState')(
       </Store.Provider>
     );
   },
-));
+);

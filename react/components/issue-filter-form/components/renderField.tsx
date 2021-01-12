@@ -11,7 +11,6 @@ import SelectEpic from '@/components/select/select-epic';
 import SelectPriority from '@/components/select/select-priority';
 import SelectLabel from '@/components/select/select-label';
 import SelectComponent from '@/components/select/select-component';
-import SelectProgramVersion from '@/components/select/select-program-version';
 import SelectVersion from '@/components/select/select-version';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IChosenFieldField } from '@/components/chose-field/types';
