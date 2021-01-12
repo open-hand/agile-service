@@ -2,6 +2,7 @@
 import React, { Fragment, useContext } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
+import { useDetailContainerContext } from '@/components/detail-container/context';
 import FieldStar from './Field/FieldStar';
 import IssueDetail from './IssueDetail';
 import IssueDes from './IssueDes';
@@ -34,6 +35,7 @@ function IssueBody(props) {
   const {
     prefixCls, disabled, store, isOnlyAgileProject, applyType,
   } = useContext(EditIssueContext);
+  const { match } = useDetailContainerContext();
   const issue = store.getIssue;
   const {
     issueId, issueNum, typeCode, issueTypeVO = {},
@@ -77,8 +79,14 @@ function IssueBody(props) {
           }
         </div>
       </div>
-      <Tabs defaultActiveKey="1">
-        <TabPane tab="详情" key="1">
+      <Tabs
+        activeKey={store.tab}
+        onChange={(activeKey) => {
+          store.setTab(activeKey);
+          match.props.tab = activeKey;
+        }}
+      >
+        <TabPane tab="详情" key="detail">
           <IssueDetail {...props} />
           <IssueDes {...props} />
           <IssueAttachment {...props} />
@@ -107,22 +115,22 @@ function IssueBody(props) {
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
-              <TabPane tab="拆分的Story" key="5">
+              <TabPane tab="拆分的Story" key="split_story">
                 <SplitStory {...props} />
               </TabPane>
             ) : ''
         }
-        <TabPane tab="评论" key="2">
+        <TabPane tab="评论" key="comment">
           <IssueCommit {...props} />
         </TabPane>
-        <TabPane tab="记录" key="3">
+        <TabPane tab="记录" key="record">
           {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
           {issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueWorkLog {...props} /> : ''}
           <IssueLog {...props} />
         </TabPane>
         {applyType !== 'program' && !isOnlyAgileProject
-          ? <TabPane tab="开发" key="4"><IssueBranch {...props} /></TabPane> : ''}
+          ? <TabPane tab="开发" key="development"><IssueBranch {...props} /></TabPane> : ''}
       </Tabs>
       {
         createBranchShow ? (

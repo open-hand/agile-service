@@ -120,6 +120,19 @@ class EditIssueStore {
 
   @observable wsjfDTOShow = true;
 
+  @observable tab = 'detail';
+
+  constructor({ tab }) {
+    if (tab) {
+      this.tab = tab;
+    }
+  }
+
+  @action
+  setTab(tab) {
+    this.tab = tab;
+  }
+
   @action setCreateBranchShow(data) {
     this.createBranchShow = data;
   }
