@@ -5,7 +5,7 @@ import {
 } from '@choerodon/boot';
 import { map, find } from 'lodash';
 import {
-  Select, Form, Input, Button, Modal, Spin,
+  Select, Form, Input, Button, Modal, Spin, Tooltip,
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@choerodon/react-component-debounce';
@@ -228,22 +228,25 @@ class CreateIssue extends Component {
     });
   }
 
-  setDefaultValue=(fields) => {
+  setDefaultValue = (fields) => {
     const { form } = this.props;
     const defaultScope = new Map([
+      ['assignee', 'assigneedId'],
       ['component', 'componentIssueRel'],
+      ['summary', 'summary'],
       ['label', 'issueLabel'],
       ['fixVersion', 'fixVersionIssueRel'],
       ['sprint', 'sprintId'],
       ['epic', 'epicId'],
     ]);
-    // componentIssueRel
     const setFields = fields.reduce((result, field) => {
       const name = defaultScope.get(field.fieldCode);
       if (name && field.defaultValue) {
-        Object.assign(result, {
-          [name]: field.defaultValue,
-        });
+        if (!form.getFieldValue(name)) {
+          Object.assign(result, {
+            [name]: field.defaultValue,
+          });
+        }
       }
       return result;
     }, {});
@@ -557,6 +560,7 @@ class CreateIssue extends Component {
                                 newIssueTypeCode: typeCode,
                               });
                               this.loadDefaultTemplate(typeCode);
+                              this.setDefaultValue(res);
                             });
                           })}
                         >
@@ -843,7 +847,25 @@ class CreateIssue extends Component {
                   mode="multiple"
                   type="component"
                   allowClear
-                />,
+                >
+                  {field?.defaultValueObjs.map((component) => (
+                    <Option
+                      key={component.name}
+                      value={component.name}
+                      name={component.name}
+                    >
+                      {[...component.name].length > 10 ? (
+                        <Tooltip title={component.name} placement="top" arrowPointAtCenter>
+                          <span style={{ whiteSpace: 'nowrap' }}>
+                            {component.name.substring(0, 10)}
+                            ...
+                          </span>
+                        </Tooltip>
+                      ) : <span>{component.name}</span>}
+
+                    </Option>
+                  ))}
+                </SelectFocusLoad>,
               )}
             </FormItem>
           )

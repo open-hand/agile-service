@@ -9,6 +9,7 @@ import {
 import { getProjectId } from '@/utils/common';
 import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
+import { fields2Map } from '@/utils/defaultValue';
 import TypeTag from '../TypeTag';
 import { deBounce } from './Utils';
 import './QuickCreateIssue.less';
@@ -55,8 +56,15 @@ class QuickCreateIssue extends Component {
           const {
             defaultPriority, onCreate, defaultAssignee,
           } = this.props;
-          debounceCallback(() => {
+          debounceCallback(async () => {
             if (summary.trim() !== '') {
+              const param = {
+                schemeCode: 'agile_issue',
+                context: currentType.typeCode,
+                pageCode: 'agile_issue_create',
+              };
+              const fields = await fieldApi.getFields(param);
+              const fieldsMap = fields2Map(fields);
               const issue = {
                 priorityCode: `priority-${defaultPriority.id}`,
                 priorityId: defaultPriority.id,
@@ -69,7 +77,7 @@ class QuickCreateIssue extends Component {
                 parentIssueId: 0,
                 relateIssueId: 0,
                 featureVO: {},
-                sprintId: sprintId || 0,
+                sprintId: sprintId || fieldsMap.get('sprint').defaultValue || 0,
                 epicName: currentTypeCode === 'issue_epic' ? summary.trim() : undefined,
                 componentIssueRelVOList: [],
                 description: '',

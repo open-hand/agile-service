@@ -58,7 +58,6 @@ const SelectComponent: React.FC<Props> = forwardRef(({
       ref={ref}
       clearButton
       multiple
-      combo
       maxTagTextLength={10}
       {...props}
       {...otherProps}
