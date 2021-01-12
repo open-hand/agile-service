@@ -58,7 +58,7 @@ const IssueDetail = ({ refresh, innerRef }) => {
     } else {
       close();
     }
-  }, [visible, issueId, open, programId, refresh, close]);
+  }, [visible, issueId]);
   return (
     <DetailContainer {...detailProps} />
   );
