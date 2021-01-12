@@ -35,7 +35,7 @@ class EpicApi extends Api<EpicApi> {
   /**
    * 查询当前项目下的史诗，供下拉列表使用
    */
-  loadEpicsForSelect = (projectId?:number) => axios.get(
+  loadEpicsForSelect = (projectId?:string) => axios.get(
     `/agile/v1/projects/${projectId || getProjectId()}/issues/epics/select_data`,
   )
 
