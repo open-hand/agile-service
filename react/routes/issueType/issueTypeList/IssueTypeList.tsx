@@ -7,10 +7,11 @@ import {
 import {
   Content, Page, Breadcrumb,
 } from '@choerodon/boot';
-
-import './IssueTypeList.less';
+import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
+import { IIssueType } from '@/common/types';
 import TypeTag from '../../../components/TypeTag/TypeTag';
 import Store from '../stores';
+import styles from './IssueTypeList.less';
 
 const { Column } = Table;
 
@@ -20,16 +21,16 @@ const { Column } = Table;
  */
 function IssueTypeList() {
   const context = useContext(Store);
-  const { issueTypeDataSet, prefixCls } = context;
+  const { issueTypeDataSet } = context;
 
   /**
    * render Name
    * @param {*} param0
    */
-  function renderName({ record }) {
-    const colour = record.get('colour');
-    const name = record.get('name');
-    const icon = record.get('icon');
+  function renderName({ record }: RenderProps) {
+    const colour = record?.get('colour');
+    const name = record?.get('name');
+    const icon = record?.get('icon');
     const data = {
       colour,
       name,
@@ -37,7 +38,7 @@ function IssueTypeList() {
     };
     return (
       <TypeTag
-        data={data}
+        data={data as IIssueType}
         showName
         style={{ margin: 0 }}
       />
@@ -45,14 +46,14 @@ function IssueTypeList() {
   }
   return (
     <Page
-      className={prefixCls}
+      className={styles.issueType}
       service={[
         'choerodon.code.organization.setting.issue.issue-type.ps.default',
       ]}
     >
       <Breadcrumb />
       <Content style={{ paddingTop: '0' }}>
-        <Table dataSet={issueTypeDataSet} className={`${prefixCls}-table`}>
+        <Table dataSet={issueTypeDataSet} className={styles.issueTypeTable}>
           <Column name="name" renderer={renderName} />
           <Column name="description" />
         </Table>
