@@ -196,6 +196,7 @@ const renderField = ({
               afterLoad={(data) => {
                 dataMap.set('label', data);
               }}
+              dontCombo
             />
           )}
         >
@@ -232,7 +233,7 @@ const renderField = ({
                 dataMap.set('epic', data);
               }}
               dontAddEpic0
-              request={() => (targetProject.projectType === 'program' ? epicApi.project(targetProject.projectId).loadProgramEpics() : epicApi.project(targetProject.projectId).loadEpicsForSelect())}
+              request={() => (targetProject.projectType === 'program' ? epicApi.project(targetProject.projectId).loadProgramEpics() : epicApi.loadEpicsForSelect(targetProject.projectId))}
             />
           )}
         >

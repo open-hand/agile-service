@@ -20,6 +20,7 @@ import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { ISprint, User } from '@/common/types';
 import { userApi } from '@/api';
 import SelectEnvironment from '@/components/select/select-environment';
+import SelectProgramVersion from '@/components/select/select-program-version';
 import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
 import PIField from './field/pi-field';
