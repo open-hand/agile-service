@@ -6,6 +6,7 @@ import {
 import React, {
   forwardRef, useCallback, useMemo, useState,
 } from 'react';
+import { set } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import SelectUser from '@/components/select/select-user';
 import { getMenuType } from '@/utils/common';
@@ -36,11 +37,12 @@ const Select = forwardRef<any, IBaseComponentProps & Partial<SelectProps & { chi
     // trigger={multiple ? ['click'] as any : undefined}
     multiple={multiple}
     onChange={(newValue) => {
-      console.log('newValue...', newValue, !!(!multiple && otherProps.onChange));
+      console.log('newValue...', newValue);
       otherProps.onChange && otherProps.onChange(newValue);
     }}
+    // onBlur={onBlur}
     onPopupHiddenChange={(hidden) => {
-      console.log('blur', hidden, onBlur);
+      console.log('blur', hidden);
       hidden && onBlur && onBlur();
     }}
   >
@@ -55,30 +57,39 @@ function renderEditor({ record, defaultValue, dataRef }: { record: Record, defau
     case 'component':
       return (
         <SelectComponent
+          trigger={['click'] as any}
           multiple={['checkbox', 'multiple'].includes(fieldType)}
-          afterLoad={(list) => {
+          dataRef={dataRef}
 
-          }}
         />
       );
     case 'label':
-      return <SelectLabel multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+      return <SelectLabel multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} />;
     case 'influenceVersion':
     case 'fixVersion':
-      return <SelectVersion multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+      return <SelectVersion multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} />;
     case 'sprint':
-      return <SelectSprint multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+      return <SelectSprint multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} />;
     case 'epic':
-      return <SelectEpic multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+      return <SelectEpic multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} />;
     case 'backlogType':
       // @ts-ignore
-      return <InjectedRenderComponent.backlogType multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+      return (
+        <InjectedRenderComponent.backlogType
+        // @ts-ignore
+          trigger={['click'] as any}
+          // @ts-ignore
+          multiple={['checkbox', 'multiple'].includes(fieldType)}
+          // @ts-ignore
+          afterLoad={(list) => dataRef && set(dataRef, 'current', list)}
+        />
+      );
     case 'backlogClassification':
       // @ts-ignore
-      return <InjectedRenderComponent.backlogClassification multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+      return <InjectedRenderComponent.backlogClassification trigger={['click'] as any} multiple={['checkbox', 'multiple'].includes(fieldType)} afterLoad={(list) => dataRef && set(dataRef, 'current', list)} />;
     case 'progressFeedback':
       // @ts-ignore
-      return <InjectedRenderComponent.progressFeedback multiple={['checkbox', 'multiple'].includes(fieldType)} />;
+      return <InjectedRenderComponent.progressFeedback trigger={['click'] as any} multiple={['checkbox', 'multiple'].includes(fieldType)} afterLoad={(list) => dataRef && set(dataRef, 'current', list)} />;
     default:
       break;
   }

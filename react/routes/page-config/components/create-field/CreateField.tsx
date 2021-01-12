@@ -146,7 +146,7 @@ function CreateField() {
         const { list: userInfoList } = await userApi.getById(obj.defaultValue);
         obj.localDefaultObj = userInfoList && userInfoList.length > 0 ? userInfoList[0] : {};
       }
-      return validResult && onSubmitLocal(dataTransformPostData(obj));
+      return validResult && onSubmitLocal({ ...dataTransformPostData(obj), defaultValue: toJS(current?.get('defaultValue')) });
     }
     const fieldId = formDataSet.current?.get('id');
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${fieldId}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;

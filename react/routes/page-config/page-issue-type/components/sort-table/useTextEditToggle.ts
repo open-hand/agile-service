@@ -20,9 +20,11 @@ interface ITextEditToggleConfigProps {
   onSubmit: (data: any) => void
   initValue: any
 }
-const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent'];
+const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback'];
 const orgDisabledEditDefaultFields = [...disabledEditDefaultFields, 'component', 'label', 'influenceVersion', 'fixVersion', 'epic', 'sprint', 'pi', 'subProject'];
-
+const fieldTextValueConfig = {
+  epic: { optionKey: 'issueId', textKey: 'epicName' },
+};
 /**
  *
  * @param record
@@ -31,13 +33,13 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
   const fieldType = record.get('fieldType');
   const dataRef = useRef<Array<any> | undefined>();
   const handleSubmit = useCallback((value: any) => {
-    console.log('current onSubmit');
     const currentData = record.toData();
+    console.log('current onSubmit', fieldTextValueConfig[currentData.fieldCode as keyof typeof fieldTextValueConfig]);
+
     let newValue = value;
     let currentDefaultValueObj = currentData.localDefaultObj || currentData.defaultValueObj;
     if (fieldType === 'member') {
       const newLocalDefaultObj = dataRef.current?.find((item) => item.id === value);
-      console.log('current.', currentData);
       if (newLocalDefaultObj && currentData.defaultValueObj && newLocalDefaultObj.id === currentData.defaultValueObj.id) {
         record.getField('localDefaultObj')?.reset();
         currentDefaultValueObj = currentData.defaultValueObj;
@@ -54,15 +56,17 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
     }
 
     record.set('defaultValue', newValue);
-
-    // console.log('constantProps... onSubmit', currentDefaultValueObj, currentData);
+    console.log('dataRef.current', dataRef.current);
     record.set('showDefaultValueText', transformDefaultValue({
       ...currentData,
+      // @ts-ignore
       optionKey: currentData.localSource === 'created' ? 'tempKey' : 'id',
       defaultValue: newValue,
       defaultValueObj: currentDefaultValueObj,
+      fieldOptions: currentData.fieldOptions || dataRef.current,
+      ...fieldTextValueConfig[currentData.fieldCode as keyof typeof fieldTextValueConfig],
     }));
-  }, [record]);
+  }, [fieldType, record]);
   const initValue = useMemo(() => {
     if (['date', 'datetime', 'time'].includes(fieldType) && record.get('extraConfig')) {
       return 'current';
@@ -70,7 +74,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
     return typeof (record.get('defaultValue')) === 'undefined' || record.get('defaultValue') === '' ? undefined : record.get('defaultValue');
   }, [fieldType, record, record.get('defaultValue'), record.get('extraConfig')]);
   const variableProps = useMemo(() => {
-    let editor = () => renderEditor({ record, defaultValue: initValue });
+    let editor = () => renderEditor({ record, defaultValue: initValue, dataRef });
     if (fieldType === 'member') {
       const defaultValueObj = record.get('defaultValueObj') || record.get('localDefaultObj') || {};
       editor = () => renderEditor({ record, defaultValue: defaultValueObj, dataRef });
