@@ -82,8 +82,9 @@ class QuickCreateIssue extends Component {
                 componentIssueRelVOList: [],
                 description: '',
                 issueLinkCreateVOList: [],
-                labelIssueRelVOList: [],
+                labelIssueRelVOList: fieldsMap.get('label').defaultValueObjs || [],
                 versionIssueRelVOList: versionIssueRelVOList || [],
+                fixVersionIssueRel: fieldsMap.get('fixVersion').defaultValue || [],
                 featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
                 assigneeId: defaultAssignee,
               };
