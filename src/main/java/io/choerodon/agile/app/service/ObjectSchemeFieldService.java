@@ -206,4 +206,12 @@ public interface ObjectSchemeFieldService {
     List<ObjectSchemeFieldVO> listPageFieldWithOption(Long organizationId, Long projectId, String schemeCode, List<String> issueTypeList);
 
     void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String syncDefaultValueIssueTypes, Boolean extraConfig);
+
+    /**
+     * 设置预定义字段的默认值对象
+     * @param pageFieldViews
+     * @param projectId
+     * @param organizationId
+     */
+    void setDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
 }
