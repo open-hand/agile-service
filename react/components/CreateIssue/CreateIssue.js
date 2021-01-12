@@ -228,6 +228,28 @@ class CreateIssue extends Component {
     });
   }
 
+  setDefaultValue=(fields) => {
+    const { form } = this.props;
+    const defaultScope = new Map([
+      ['component', 'componentIssueRel'],
+      ['label', 'issueLabel'],
+      ['fixVersion', 'fixVersionIssueRel'],
+      ['sprint', 'sprintId'],
+      ['epic', 'epicId'],
+    ]);
+    // componentIssueRel
+    const setFields = fields.reduce((result, field) => {
+      const name = defaultScope.get(field.fieldCode);
+      if (name && field.defaultValue) {
+        Object.assign(result, {
+          [name]: field.defaultValue,
+        });
+      }
+      return result;
+    }, {});
+    form.setFieldsValue(setFields);
+  }
+
   loadIssueTypes = () => {
     const { applyType, form } = this.props;
 
@@ -249,6 +271,7 @@ class CreateIssue extends Component {
             newIssueTypeCode: defaultType.typeCode,
           }, () => {
             this.setDefaultSprint();
+            this.setDefaultValue(fields);
           });
         });
       }
