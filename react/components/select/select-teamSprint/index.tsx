@@ -35,9 +35,11 @@ const SelectSprint: React.FC<Props> = forwardRef(({
     ...result,
     ...(team.sprints || []),
   ], []), [teams]);
-  Object.assign(dataRef, {
-    current: sprints,
-  });
+  if (dataRef) {
+    Object.assign(dataRef, {
+      current: sprints,
+    });
+  }
   const loadData = useCallback(async () => {
     if (piId && Array.isArray(teamIds) && teamIds.length > 0) {
       const res = await sprintApi.getTeamSprints(piId, teamIds);
