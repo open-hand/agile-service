@@ -1248,21 +1248,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     @Override
     public void setDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId) {
         //模块、标签、冲刺、史诗、修复的版本、影响的版本
-        List<IssueComponentVO> issueComponentList = modelMapper.map(issueComponentMapper.selectByProjectId(projectId), new TypeToken<List<IssueComponentVO>>(){}.getType());
-        List<IssueLabelVO> issueLabelList = modelMapper.map(issueLabelMapper.selectByProjectIds(Collections.singletonList(projectId)), new TypeToken<List<IssueLabelVO>>(){}.getType());
-        List<EpicDataVO> epicDataList = modelMapper.map(issueMapper.queryEpicList(projectId), new TypeToken<List<EpicDataVO>>(){}.getType());
-        List<ProductVersionNameVO> influenceVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, null), new TypeToken<List<ProductVersionNameVO>>(){}.getType());
-        List<ProductVersionNameVO> fixVersionList = influenceVersionList.stream().filter(v -> Objects.equals(v.getStatusCode(), "version_planning")).collect(Collectors.toList());
-        List<String> sprintStatusCodes = Arrays.asList("sprint_planning", "started");
-        List<SprintNameVO> sprintNameList = modelMapper.map(sprintMapper.queryNameByOptions(Collections.singletonList(projectId), sprintStatusCodes), new TypeToken<List<SprintNameVO>>(){}.getType());
-
-        Map<Long, IssueComponentVO> issueComponentMap = issueComponentList.stream().collect(Collectors.toMap(IssueComponentVO::getComponentId, Function.identity()));
-        Map<Long, IssueLabelVO> issueLabelMap = issueLabelList.stream().collect(Collectors.toMap(IssueLabelVO::getLabelId, Function.identity()));
-        Map<Long, SprintNameVO> sprintNameMap = sprintNameList.stream().collect(Collectors.toMap(SprintNameVO::getSprintId, Function.identity()));
-        Map<Long, EpicDataVO> epicDataMap = epicDataList.stream().collect(Collectors.toMap(EpicDataVO::getIssueId, Function.identity()));
-        Map<Long, ProductVersionNameVO> influenceVersionMap = influenceVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
-        Map<Long, ProductVersionNameVO> fixVersionMap = fixVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
-
         for (PageFieldViewVO view : pageFieldViews) {
             Object defaultValue = view.getDefaultValue();
             if (!Objects.isNull(defaultValue) && !Objects.equals(defaultValue.toString(), "")) {
@@ -1273,6 +1258,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 switch (view.getFieldCode()) {
                     //多选
                     case "component":
+                        List<IssueComponentVO> issueComponentList = modelMapper.map(issueComponentMapper.selectByProjectId(projectId), new TypeToken<List<IssueComponentVO>>(){}.getType());
+                        Map<Long, IssueComponentVO> issueComponentMap = issueComponentList.stream().collect(Collectors.toMap(IssueComponentVO::getComponentId, Function.identity()));
+
                         ids = (String[]) view.getDefaultValue();
                         defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
                         if (!CollectionUtils.isEmpty(defaultIds)) {
@@ -1286,6 +1274,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         break;
                     //多选
                     case "label":
+                        List<IssueLabelVO> issueLabelList = modelMapper.map(issueLabelMapper.selectByProjectIds(Collections.singletonList(projectId)), new TypeToken<List<IssueLabelVO>>(){}.getType());
+                        Map<Long, IssueLabelVO> issueLabelMap = issueLabelList.stream().collect(Collectors.toMap(IssueLabelVO::getLabelId, Function.identity()));
+
                         ids = (String[]) view.getDefaultValue();
                         defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
                         if (!CollectionUtils.isEmpty(defaultIds)) {
@@ -1299,6 +1290,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         break;
                     //多选
                     case "influenceVersion":
+                        List<ProductVersionNameVO> influenceVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, null), new TypeToken<List<ProductVersionNameVO>>(){}.getType());
+                        Map<Long, ProductVersionNameVO> influenceVersionMap = influenceVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
+
                         ids = (String[]) view.getDefaultValue();
                         defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
                         if (!CollectionUtils.isEmpty(defaultIds)) {
@@ -1312,6 +1306,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         break;
                     //多选
                     case "fixVersion":
+                        List<ProductVersionNameVO> fixVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, Collections.singletonList("version_planning")), new TypeToken<List<ProductVersionNameVO>>(){}.getType());
+                        Map<Long, ProductVersionNameVO> fixVersionMap = fixVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
+
                         ids = (String[]) view.getDefaultValue();
                         defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
                         if (!CollectionUtils.isEmpty(defaultIds)) {
@@ -1325,6 +1322,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         break;
                     //单选
                     case "sprint":
+                        List<String> sprintStatusCodes = Arrays.asList("sprint_planning", "started");
+                        List<SprintNameVO> sprintNameList = modelMapper.map(sprintMapper.queryNameByOptions(Collections.singletonList(projectId), sprintStatusCodes), new TypeToken<List<SprintNameVO>>(){}.getType());
+                        Map<Long, SprintNameVO> sprintNameMap = sprintNameList.stream().collect(Collectors.toMap(SprintNameVO::getSprintId, Function.identity()));
+
                         defaultId = Long.parseLong(view.getDefaultValue().toString());
                         if (sprintNameMap.containsKey(defaultId)) {
                             view.setDefaultValueObj(sprintNameMap.get(defaultId));
@@ -1332,6 +1333,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         break;
                     //单选
                     case "epic":
+                        List<EpicDataVO> epicDataList = modelMapper.map(issueMapper.queryEpicList(projectId), new TypeToken<List<EpicDataVO>>(){}.getType());
+                        Map<Long, EpicDataVO> epicDataMap = epicDataList.stream().collect(Collectors.toMap(EpicDataVO::getIssueId, Function.identity()));
+
                         defaultId = Long.parseLong(view.getDefaultValue().toString());
                         if (epicDataMap.containsKey(defaultId)) {
                             view.setDefaultValueObj(epicDataMap.get(defaultId));
