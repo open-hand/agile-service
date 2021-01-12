@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.api.vo.PageConfigFieldEditedVO;
+import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 import org.apache.commons.collections.map.MultiKeyMap;
@@ -102,4 +103,12 @@ public interface BacklogExpandService {
     void getBacklogFieldCodes(List<String> fieldCodeS, String typeCode);
 
     Boolean checkFieldPageConfig(String issueType, String code, Boolean created, Boolean edited);
+
+    /**
+     * 设置需求预定义字段的默认值对象
+     * @param pageFieldViews
+     * @param projectId
+     * @param organizationId
+     */
+    void setBacklogDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
 }

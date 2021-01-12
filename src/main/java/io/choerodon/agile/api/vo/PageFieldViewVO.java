@@ -47,6 +47,8 @@ public class PageFieldViewVO {
     private Object valueStr;
     @ApiModelProperty(value = "字段值（Long/String/Long[]）")
     private Object value;
+    @ApiModelProperty(value = "预定义字段默认值对象结合")
+    private List<Object> defaultValueObjs;
 
     public Object getValueStr() {
         return valueStr;
@@ -182,5 +184,13 @@ public class PageFieldViewVO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public List<Object> getDefaultValueObjs() {
+        return defaultValueObjs;
+    }
+
+    public void setDefaultValueObjs(List<Object> defaultValueObjs) {
+        this.defaultValueObjs = defaultValueObjs;
     }
 }

@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
@@ -64,6 +65,16 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private AgilePluginService agilePluginService;
     @Autowired
     private BaseFeignClient baseFeignClient;
+    @Autowired
+    private IssueComponentMapper issueComponentMapper;
+    @Autowired
+    private IssueLabelMapper issueLabelMapper;
+    @Autowired
+    private SprintMapper sprintMapper;
+    @Autowired
+    private IssueMapper issueMapper;
+    @Autowired
+    private ProductVersionMapper productVersionMapper;
 
     @Override
     public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field,
@@ -515,6 +526,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             if (defaultIds != null && !"".equals(defaultIds)) {
                 field.setDefaultValue(defaultIds);
                 objectSchemeFieldMapper.updateOptional(field, "defaultValue");
+                objectSchemeFieldExtendMapper.selectExtendField(null, organizationId, field.getId(), projectId).stream().forEach(f -> {
+                    f.setDefaultValue(defaultIds);
+                    objectSchemeFieldExtendMapper.updateByPrimaryKey(f);
+                });
             }
         }
         if (!ObjectUtils.isEmpty(issueTypeForRank)
@@ -1122,7 +1137,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<PageConfigFieldVO> pageConfigFields = queryPageConfigFields(organizationId, projectId, issueType);
         result.setFields(pageConfigFields);
         //处理默认值
-        processDefaultValue(pageConfigFields, organizationId);
+        processDefaultValue(pageConfigFields, organizationId, projectId);
         //处理字段是否可被编辑
         processFieldEdited(issueType, pageConfigFields);
         if (!ObjectUtils.isEmpty(projectId)) {
@@ -1201,7 +1216,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     private void processDefaultValue(List<PageConfigFieldVO> pageConfigFields,
-                                     Long organizationId) {
+                                     Long organizationId,
+                                     Long projectId) {
         List<PageFieldViewVO> pageFieldViews = new ArrayList<>();
         pageConfigFields.forEach(p -> {
             PageFieldViewVO vo = new PageFieldViewVO();
@@ -1209,10 +1225,12 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             vo.setDefaultValue(p.getDefaultValue());
             vo.setFieldType(p.getFieldType());
             vo.setExtraConfig(p.getExtraConfig());
+            vo.setFieldCode(p.getFieldCode());
             pageFieldViews.add(vo);
         });
         optionService.fillOptions(organizationId, null, pageFieldViews);
         FieldValueUtil.handleDefaultValue(pageFieldViews);
+        setDefaultValueObjs(pageFieldViews, projectId, organizationId);
         Map<Long, PageFieldViewVO> pageFieldViewMap =
                 pageFieldViews.stream().collect(Collectors.toMap(PageFieldViewVO::getFieldId, x -> x));
         pageConfigFields.forEach(p -> {
@@ -1222,8 +1240,119 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 p.setDefaultValue(vo.getDefaultValue());
                 p.setDefaultValueObj(vo.getDefaultValueObj());
                 p.setFieldOptions(vo.getFieldOptions());
+                p.setDefaultValueObjs(vo.getDefaultValueObjs());
             }
         });
+    }
+
+    @Override
+    public void setDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId) {
+        //模块、标签、冲刺、史诗、修复的版本、影响的版本
+        List<IssueComponentVO> issueComponentList = modelMapper.map(issueComponentMapper.selectByProjectId(projectId), new TypeToken<List<IssueComponentVO>>(){}.getType());
+        List<IssueLabelVO> issueLabelList = modelMapper.map(issueLabelMapper.selectByProjectIds(Collections.singletonList(projectId)), new TypeToken<List<IssueLabelVO>>(){}.getType());
+        List<EpicDataVO> epicDataList = modelMapper.map(issueMapper.queryEpicList(projectId), new TypeToken<List<EpicDataVO>>(){}.getType());
+        List<ProductVersionNameVO> influenceVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, null), new TypeToken<List<ProductVersionNameVO>>(){}.getType());
+        List<ProductVersionNameVO> fixVersionList = influenceVersionList.stream().filter(v -> Objects.equals(v.getStatusCode(), "version_planning")).collect(Collectors.toList());
+        List<String> sprintStatusCodes = Arrays.asList("sprint_planning", "started");
+        List<SprintNameVO> sprintNameList = modelMapper.map(sprintMapper.queryNameByOptions(Collections.singletonList(projectId), sprintStatusCodes), new TypeToken<List<SprintNameVO>>(){}.getType());
+
+        Map<Long, IssueComponentVO> issueComponentMap = issueComponentList.stream().collect(Collectors.toMap(IssueComponentVO::getComponentId, Function.identity()));
+        Map<Long, IssueLabelVO> issueLabelMap = issueLabelList.stream().collect(Collectors.toMap(IssueLabelVO::getLabelId, Function.identity()));
+        Map<Long, SprintNameVO> sprintNameMap = sprintNameList.stream().collect(Collectors.toMap(SprintNameVO::getSprintId, Function.identity()));
+        Map<Long, EpicDataVO> epicDataMap = epicDataList.stream().collect(Collectors.toMap(EpicDataVO::getIssueId, Function.identity()));
+        Map<Long, ProductVersionNameVO> influenceVersionMap = influenceVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
+        Map<Long, ProductVersionNameVO> fixVersionMap = fixVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
+
+        for (PageFieldViewVO view : pageFieldViews) {
+            Object defaultValue = view.getDefaultValue();
+            if (!Objects.isNull(defaultValue) && !Objects.equals(defaultValue.toString(), "")) {
+                List<Long> defaultIds;
+                String[] ids;
+                long defaultId;
+                List<Object> defaultObjs = new ArrayList<>();
+                switch (view.getFieldCode()) {
+                    //多选
+                    case "component":
+                        ids = (String[]) view.getDefaultValue();
+                        defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
+                        if (!CollectionUtils.isEmpty(defaultIds)) {
+                            defaultIds.forEach(id -> {
+                                if (issueComponentMap.containsKey(id)) {
+                                    defaultObjs.add(issueComponentMap.get(id));
+                                }
+                            });
+                            view.setDefaultValueObjs(defaultObjs);
+                        }
+                        break;
+                    //多选
+                    case "label":
+                        ids = (String[]) view.getDefaultValue();
+                        defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
+                        if (!CollectionUtils.isEmpty(defaultIds)) {
+                            defaultIds.forEach(id -> {
+                                if (issueLabelMap.containsKey(id)) {
+                                    defaultObjs.add(issueLabelMap.get(id));
+                                }
+                            });
+                            view.setDefaultValueObjs(defaultObjs);
+                        }
+                        break;
+                    //多选
+                    case "influenceVersion":
+                        ids = (String[]) view.getDefaultValue();
+                        defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
+                        if (!CollectionUtils.isEmpty(defaultIds)) {
+                            defaultIds.forEach(id -> {
+                                if (influenceVersionMap.containsKey(id)) {
+                                    defaultObjs.add(influenceVersionMap.get(id));
+                                }
+                            });
+                            view.setDefaultValueObjs(defaultObjs);
+                        }
+                        break;
+                    //多选
+                    case "fixVersion":
+                        ids = (String[]) view.getDefaultValue();
+                        defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
+                        if (!CollectionUtils.isEmpty(defaultIds)) {
+                            defaultIds.forEach(id -> {
+                                if (fixVersionMap.containsKey(id)) {
+                                    defaultObjs.add(fixVersionMap.get(id));
+                                }
+                            });
+                            view.setDefaultValueObjs(defaultObjs);
+                        }
+                        break;
+                    //单选
+                    case "sprint":
+                        defaultId = Long.parseLong(view.getDefaultValue().toString());
+                        if (sprintNameMap.containsKey(defaultId)) {
+                            view.setDefaultValueObj(sprintNameMap.get(defaultId));
+                        }
+                        break;
+                    //单选
+                    case "epic":
+                        defaultId = Long.parseLong(view.getDefaultValue().toString());
+                        if (epicDataMap.containsKey(defaultId)) {
+                            view.setDefaultValueObj(epicDataMap.get(defaultId));
+                        }
+                        break;
+                    case "pi":
+                        if (agilePluginService != null) {
+                            agilePluginService.setBussinessDefaultValueObjs(pageFieldViews, projectId, organizationId);
+                        }
+                        break;
+                    case "backlogClassification":
+                    case "backlogType":
+                        if (backlogExpandService != null) {
+                            backlogExpandService.setBacklogDefaultValueObjs(pageFieldViews, projectId, organizationId);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
     private void updateTemplate(Long projectId,

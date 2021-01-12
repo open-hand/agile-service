@@ -397,4 +397,12 @@ public interface AgilePluginService {
      * @param targetProjectId
      */
     void projectMoveUpdateFeatureValue(Long projectId, IssueDTO issueDTO, Long targetProjectId);
+
+    /**
+     * 设置商业版预定义字段的默认值对象
+     * @param pageFieldViews
+     * @param projectId
+     * @param organizationId
+     */
+    void setBussinessDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
 }

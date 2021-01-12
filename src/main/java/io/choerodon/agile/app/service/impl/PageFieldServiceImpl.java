@@ -382,6 +382,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         //填充option
         optionService.fillOptions(organizationId, projectId, pageFieldViews);
         FieldValueUtil.handleDefaultValue(pageFieldViews);
+        objectSchemeFieldService.setDefaultValueObjs(pageFieldViews, projectId, organizationId);
         return pageFieldViews;
     }
 
