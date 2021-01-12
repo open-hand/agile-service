@@ -21,7 +21,6 @@ function transformDefaultValue({
     case 'single':
     case 'radio': {
       const valueArr = String(defaultValue).split(',');
-      console.log('valueArr', valueArr, fieldOptions, fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey as keyof typeof option])).map((item) => item[textKey as keyof typeof item]).join(','));
       return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey as keyof typeof option])).map((item) => item[textKey as keyof typeof item]).join(',') || defaultValue;
     }
     case 'member': {

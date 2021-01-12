@@ -20,10 +20,17 @@ interface ITextEditToggleConfigProps {
   onSubmit: (data: any) => void
   initValue: any
 }
-const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback'];
+const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description'];
 const orgDisabledEditDefaultFields = [...disabledEditDefaultFields, 'component', 'label', 'influenceVersion', 'fixVersion', 'epic', 'sprint', 'pi', 'subProject'];
 const fieldTextValueConfig = {
   epic: { optionKey: 'issueId', textKey: 'epicName' },
+  influenceVersion: { optionKey: 'versionId', textKey: 'name' },
+  fixVersion: { optionKey: 'versionId', textKey: 'name' },
+  component: { optionKey: 'componentId', textKey: 'name' },
+  label: { optionKey: 'labelId', textKey: 'labelName' },
+  sprint: { optionKey: 'sprintId', textKey: 'sprintName' },
+  backlogType: { optionKey: 'id', textKey: 'name' },
+  backlogClassification: { optionKey: 'id', textKey: 'name' },
 };
 /**
  *
