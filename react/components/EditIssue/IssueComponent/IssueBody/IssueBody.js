@@ -3,6 +3,7 @@ import React, { Fragment, useContext } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { useDetailContainerContext } from '@/components/detail-container/context';
+import useHasDevops from '@/hooks/useHasDevops';
 import FieldStar from './Field/FieldStar';
 import IssueDetail from './IssueDetail';
 import IssueDes from './IssueDes';
@@ -33,7 +34,7 @@ const TestLink = Fragment;
 
 function IssueBody(props) {
   const {
-    prefixCls, disabled, store, isOnlyAgileProject, applyType,
+    prefixCls, disabled, store, applyType,
   } = useContext(EditIssueContext);
   const { match } = useDetailContainerContext();
   const issue = store.getIssue;
@@ -41,6 +42,7 @@ function IssueBody(props) {
     issueId, issueNum, typeCode, issueTypeVO = {},
   } = issue;
   const { reloadIssue, otherProject, outside } = props;
+  const hasDevops = useHasDevops();
   const createBranchShow = store.getCreateBranchShow;
   const { linkBranchShow } = store;
   const workLogShow = store.getWorkLogShow;
@@ -129,7 +131,7 @@ function IssueBody(props) {
             ? <IssueWorkLog {...props} /> : ''}
           <IssueLog {...props} />
         </TabPane>
-        {applyType !== 'program' && !isOnlyAgileProject
+        {applyType !== 'program' && hasDevops
           ? <TabPane tab="开发" key="development"><IssueBranch {...props} /></TabPane> : ''}
       </Tabs>
       {

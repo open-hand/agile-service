@@ -5,6 +5,7 @@ import {
 import { Permission } from '@choerodon/boot';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
+import useHasDevops from '@/hooks/useHasDevops';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
@@ -14,8 +15,9 @@ const IssueDropDown = ({
   onDeleteIssue, loginUserId, reloadIssue,
 }) => {
   const {
-    store, onUpdate, isOnlyAgileProject, applyType,
+    store, onUpdate, applyType,
   } = useContext(EditIssueContext);
+  const hasDevops = useHasDevops();
   const issue = store.getIssue;
   const {
     issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi,
@@ -153,7 +155,7 @@ const IssueDropDown = ({
         )
       }
       {
-        applyType !== 'program' && !isOnlyAgileProject && (
+        applyType !== 'program' && hasDevops && (
           <Menu.Item key="6">
             创建分支
           </Menu.Item>
