@@ -6,6 +6,7 @@ import { toJS } from 'mobx';
 import { find } from 'lodash';
 import SelectUser from '@/components/select/select-user';
 import SelectSprint from '@/components/select/select-sprint';
+import SelectProgramVersion from '@/components/select/select-program-version';
 import SelectIssueType from '@/components/select/select-issue-type';
 import SelectEpic from '@/components/select/select-epic';
 import SelectPriority from '@/components/select/select-priority';
