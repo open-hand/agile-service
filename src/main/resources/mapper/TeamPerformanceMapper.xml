@@ -197,7 +197,9 @@
         </if>
         COALESCE(COUNT(ai.issue_id), 0) AS bug_count
         FROM (
-            SELECT asp.project_id, asp.sprint_id, asp.sprint_name, ai.issue_id, ai.main_responsible_id, ai.created_by
+            SELECT asp.project_id, asp.sprint_id, asp.sprint_name, ai.issue_id,
+            COALESCE(ai.main_responsible_id, 0) AS main_responsible_id,
+            COALESCE(ai.created_by, 0) AS created_by
             FROM agile_sprint asp
             LEFT JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = asp.sprint_id AND aisr.project_id = asp.project_id
             LEFT JOIN agile_issue ai ON ai.issue_id = aisr.issue_id AND ai.project_id = aisr.project_id AND ai.type_code IN

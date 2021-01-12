@@ -7,6 +7,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @date 2020-11-16 11:20
  */
 public class ProgramVersionInfoVO {
+
     @Encrypt
     private Long id;
 
