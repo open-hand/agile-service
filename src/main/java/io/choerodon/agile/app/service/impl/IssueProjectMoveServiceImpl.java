@@ -5,10 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.FieldValueDTO;
+import io.choerodon.agile.infra.dto.IssueSprintRelDTO;
 import io.choerodon.agile.infra.dto.LookupValueDTO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
@@ -32,7 +32,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -128,6 +127,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     private SprintValidator sprintValidator;
     @Autowired
     private FieldValueService fieldValueService;
+    @Autowired
+    private IssueSprintRelMapper issueSprintRelMapper;
 
     @Override
     public void issueProjectMove(Long projectId, Long issueId, Long targetProjectId, JSONObject jsonObject) {
@@ -160,7 +161,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     private void checkProject(String typeCode, ProjectVO targetProjectVO) {
         List<String> codes = targetProjectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
         if (Objects.equals(typeCode, ISSUE_EPIC)) {
-            if (!codes.contains(ProjectCategory.MODULE_AGILE) || !codes.contains(ProjectCategory.MODULE_PROGRAM)) {
+            if (!(codes.contains(ProjectCategory.MODULE_AGILE) || codes.contains(ProjectCategory.MODULE_PROGRAM))) {
                 throw new CommonException("error.transfer.project.illegal");
             }
         } else if (Objects.equals(typeCode, FEATURE) && !codes.contains(ProjectCategory.MODULE_PROGRAM)) {
@@ -256,10 +257,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         handlerNeedCleanValue(projectVO, issueDTO, issueTypeVO, targetProjectVO);
         // 处理issue表本身需要清空的值
         handlerIssueSelfValue(projectVO.getId(), issueDTO);
-        // 处理移动的时候同时改变issue的问题类型
-        handlerChangeIssueType(issueId, jsonObject, issueTypeVO);
         // 处理issue需要转交的数据
-        handlerNeedTransferValue(projectVO, issueId, targetProjectVO, jsonObject);
+        handlerNeedTransferValue(projectVO, issueId, targetProjectVO, jsonObject, issueTypeVO);
     }
 
     private void handlerChangeIssueType(Long issueId, JSONObject jsonObject, IssueTypeVO issueTypeVO) {
@@ -312,7 +311,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         }
     }
 
-    private void handlerNeedTransferValue(ProjectVO projectVO, Long issueId, ProjectVO targetProjectVO, JSONObject jsonObject) {
+    private void handlerNeedTransferValue(ProjectVO projectVO, Long issueId, ProjectVO targetProjectVO, JSONObject jsonObject, IssueTypeVO issueTypeVO) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException(ISSUE_NULL);
@@ -339,22 +338,20 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         if (agileTriggerService != null) {
             agileTriggerService.updateRuleLogProjectId(projectVO.getId(), targetProjectVO.getId(), issueId);
         }
-
         // 修改issue项目并指定合适的状态
         IssueDTO issue = buildIssue(projectVO.getId(), issueDTO, issueUpdateVO.getStatusId(), targetProjectVO.getId());
         IssueDTO dto = issueAccessDataService.transferProject(issue);
+        // 处理移动的时候同时改变issue的问题类型
+        handlerChangeIssueType(issueId, jsonObject, issueTypeVO);
         // 更新issue的值
         if (!ObjectUtils.isEmpty(jsonObject)) {
+            IssueDTO issue1 = issueMapper.selectByPrimaryKey(issueId);
             issueUpdateVO.setIssueId(issueId);
-            issueUpdateVO.setObjectVersionNumber(dto.getObjectVersionNumber());
+            issueUpdateVO.setObjectVersionNumber(issue1.getObjectVersionNumber());
             issueService.updateIssue(targetProjectVO.getId(), issueUpdateVO, fieldList);
             if (!ObjectUtils.isEmpty(influenceVersions)) {
                 List<VersionIssueRelVO> list = EncryptionUtils.jsonToList(influenceVersions, VersionIssueRelVO.class);
-                IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
-                issueUpdateVO1.setIssueId(issueId);
-                issueUpdateVO1.setVersionIssueRelVOList(list);
-                issueUpdateVO1.setVersionType("influence");
-                issueService.updateIssue(targetProjectVO.getId(), issueUpdateVO1, new ArrayList<>());
+                issueService.handleUpdateVersionIssueRel(list, targetProjectVO.getId(), issueDTO.getIssueId(), "influence");
             }
         }
         // 修改自定义字段的值
@@ -443,15 +440,15 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
                 issueUpdateVO.setVersionType("fix");
             }
         }
-        IssueVO issueVO = issueService.updateIssue(projectId, issueUpdateVO, field);
+        issueService.updateIssue(projectId, issueUpdateVO, field);
         if (Objects.equals(issueDTO.getTypeCode(), "bug")) {
-            IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
-            issueUpdateVO1.setVersionIssueRelVOList(new ArrayList<>());
-            issueUpdateVO1.setVersionType("influence");
-            issueUpdateVO1.setIssueId(issueDTO.getIssueId());
-            issueUpdateVO1.setObjectVersionNumber(issueVO.getObjectVersionNumber());
-            issueService.updateIssue(projectId, issueUpdateVO1, Collections.emptyList());
+            issueService.handleUpdateVersionIssueRel(new ArrayList<>(), projectId, issueDTO.getIssueId(), "influence");
         }
+        // 清空原项目和冲刺的关系
+        IssueSprintRelDTO issueSprintRelDTO = new IssueSprintRelDTO();
+        issueSprintRelDTO.setIssueId(issueDTO.getIssueId());
+        issueSprintRelDTO.setProjectId(projectId);
+        issueSprintRelMapper.delete(issueSprintRelDTO);
         if ((ISSUE_EPIC).equals(issueDTO.getTypeCode())) {
             //如果是epic，会把该epic下的issue的epicId置为0
             issueAccessDataService.batchUpdateIssueEpicId(projectId, issueDTO.getIssueId());
