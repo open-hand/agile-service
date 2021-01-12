@@ -3,12 +3,25 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import moment from 'moment';
 import { toJS } from 'mobx';
 
+const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description'];
+const orgDisabledEditDefaultFields = [...disabledEditDefaultFields, 'component', 'label', 'influenceVersion', 'fixVersion', 'epic', 'sprint', 'pi', 'subProject'];
+const fieldTextValueConfig = {
+  epic: { optionKey: 'issueId', textKey: 'epicName' },
+  influenceVersion: { optionKey: 'versionId', textKey: 'name' },
+  fixVersion: { optionKey: 'versionId', textKey: 'name' },
+  component: { optionKey: 'componentId', textKey: 'name' },
+  label: { optionKey: 'labelId', textKey: 'labelName' },
+  sprint: { optionKey: 'sprintId', textKey: 'sprintName' },
+  backlogType: { optionKey: 'id', textKey: 'name' },
+  backlogClassification: { optionKey: 'id', textKey: 'name' },
+};
 function transformDefaultValue({
-  fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey = 'id', textKey = 'value',
-}: { fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey?: 'tempKey' | 'id' | string, textKey?: 'value' | string }) {
+  fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey: propsOptionKey = 'id', textKey: propsTextKey = 'value', fieldCode,
+}: { fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey?: 'tempKey' | 'id' | string, textKey?: 'value' | string, fieldCode?:string }) {
   if (!defaultValue && !defaultValueObj) {
     return defaultValue;
   }
+  const { optionKey = propsOptionKey, textKey = propsTextKey } = fieldTextValueConfig[fieldCode as keyof typeof fieldTextValueConfig] || {};
   switch (fieldType) {
     case 'datetime':
       return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
@@ -53,4 +66,6 @@ function beforeSubmitTransform(item: Record, optionKey = 'id') {
   };
 }
 
-export { transformDefaultValue, beforeSubmitTransform };
+export {
+  transformDefaultValue, beforeSubmitTransform, disabledEditDefaultFields, fieldTextValueConfig, orgDisabledEditDefaultFields,
+};

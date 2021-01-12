@@ -29,6 +29,7 @@ interface IFiled {
   fieldName: string,
   fieldType: string,
   defaultValueObj: any,
+  defaultValueObjs?:Array<any>,
   fieldOptions: Array<IFieldOption> | null
   id: string,
   issueType: PageConfigIssueType,
