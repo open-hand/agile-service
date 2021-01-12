@@ -4,8 +4,8 @@ import moment from 'moment';
 import { toJS } from 'mobx';
 
 function transformDefaultValue({
-  fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey = 'id',
-}: { fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey?: 'tempKey' | 'id' | string }) {
+  fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey = 'id', textKey = 'value',
+}: { fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey?: 'tempKey' | 'id' | string, textKey?: 'value' | string }) {
   if (!defaultValue && !defaultValueObj) {
     return defaultValue;
   }
@@ -21,7 +21,8 @@ function transformDefaultValue({
     case 'single':
     case 'radio': {
       const valueArr = String(defaultValue).split(',');
-      return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey as keyof typeof option])).map((item) => item.value).join(',') || defaultValue;
+      console.log('valueArr', valueArr, fieldOptions, fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey as keyof typeof option])).map((item) => item[textKey as keyof typeof item]).join(','));
+      return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey as keyof typeof option])).map((item) => item[textKey as keyof typeof item]).join(',') || defaultValue;
     }
     case 'member': {
       const { realName } = defaultValueObj || {};
