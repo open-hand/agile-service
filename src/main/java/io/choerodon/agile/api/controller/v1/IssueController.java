@@ -612,7 +612,7 @@ public class IssueController {
     @PostMapping(value = "/query_story_task")
     public ResponseEntity<Page<IssueListFieldKVVO>> queryStoryAndTask(@ApiParam(value = "项目id", required = true)
                                                          @PathVariable(name = "project_id") Long projectId,
-                                                         @SortDefault(value = "issueId", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                          PageRequest pageRequest,
                                                           @RequestBody(required = false) SearchVO searchVO) {
         return Optional.ofNullable(issueService.queryStoryAndTask(projectId, pageRequest, searchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

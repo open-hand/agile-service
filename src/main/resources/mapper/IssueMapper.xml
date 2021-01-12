@@ -670,6 +670,7 @@
                  )
              </if>
         </if>
+        order by char_length(issue_num) desc,issue_num desc
     </select>
 
     <select id="selectIssueSubTaskAndSubBugIds" resultType="java.lang.Long">
