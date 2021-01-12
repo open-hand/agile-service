@@ -243,9 +243,15 @@ class CreateIssue extends Component {
       const name = defaultScope.get(field.fieldCode);
       if (name && field.defaultValue) {
         if (!form.getFieldValue(name)) {
-          Object.assign(result, {
-            [name]: field.defaultValue,
-          });
+          if (name === 'componentIssueRel') {
+            Object.assign(result, {
+              [name]: field.defaultValueObjs?.map((c) => c.name),
+            });
+          } else {
+            Object.assign(result, {
+              [name]: field.defaultValue,
+            });
+          }
         }
       }
       return result;

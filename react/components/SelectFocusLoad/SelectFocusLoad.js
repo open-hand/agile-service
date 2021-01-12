@@ -112,7 +112,7 @@ const SelectFocusLoad = (props) => {
   }
   // 渲染去掉重复项
   const Options = uniqBy(totalList.map(render).concat(React.Children.toArray(children)), (option) => option.props.value);
-
+  console.log(Options, children);
   return (
     <Select
       filter
