@@ -53,10 +53,10 @@ const Container: React.FC = () => {
     const target = find(paths, { path: match.path });
     if (target) {
       // @ts-ignore
-      return React.createElement(target.component, match.props);
+      return React.createElement(target.component, { ...match.props, key: match.key });
     }
     return null;
-  }, [match.path, match.props]);
+  }, [match.key, match.path, match.props]);
   return (
     <div
       className={prefixCls}

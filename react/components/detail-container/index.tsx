@@ -4,7 +4,7 @@ import React, {
 import { Animate } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import Container, { registerPath } from './Container';
-import DetailContainerContext, { IRoute } from './context';
+import DetailContainerContext, { IRoute, IRouteWithKey } from './context';
 // 默认展示children，push之后再匹配
 const { HeaderStore } = stores;
 export { registerPath };
@@ -12,7 +12,7 @@ export interface DetailEvents {
   [type: string]: () => void
 }
 export const useDetail = (): [DetailContainerProps] => {
-  const [routes, setRoutes] = useState<IRoute[]>([]);
+  const [routes, setRoutes] = useState<IRouteWithKey[]>([]);
   const [visible, setVisible] = useState(false);
   const eventsMap = useRef<Map<string, DetailEvents>>(new Map());
   const updateEventsMap = useCallback((path: string, events?: DetailEvents) => {
@@ -22,13 +22,15 @@ export const useDetail = (): [DetailContainerProps] => {
   }, []);
   const match = routes[routes.length - 1];
   const push = useCallback((nextRoute: IRoute) => {
-    setRoutes((r) => ([...r, nextRoute]));
-    updateEventsMap(nextRoute.path, nextRoute.events);
+    const routeWithKey = { ...nextRoute, key: Math.random() };
+    setRoutes((r) => ([...r, routeWithKey]));
+    updateEventsMap(routeWithKey.path, routeWithKey.events);
     setVisible(true);
   }, [updateEventsMap]);
   const open = useCallback((route: IRoute) => {
-    setRoutes([route]);
-    updateEventsMap(route.path, route.events);
+    const routeWithKey = { ...route, key: Math.random() };
+    setRoutes([routeWithKey]);
+    updateEventsMap(routeWithKey.path, routeWithKey.events);
     setVisible(true);
   }, [updateEventsMap]);
   const pop = useCallback(() => {
@@ -60,8 +62,8 @@ export const useDetail = (): [DetailContainerProps] => {
 };
 interface DetailContainerProps {
   visible: boolean
-  routes: IRoute[]
-  match: IRoute
+  routes: IRouteWithKey[]
+  match: IRouteWithKey
   open: (route: IRoute) => void
   push: (nextRoute: IRoute) => void
   pop: () => void
