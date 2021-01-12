@@ -153,16 +153,6 @@ const DraggableItem: React.FC<Props> = ({
       <div
         role="none"
         className={`${prefixCls}-item ${prefixCls}-item-text`}
-        onFocus={(e) => {
-          e.stopPropagation();
-        }}
-        onMouseDown={(e) => e.stopPropagation()}
-        onMouseDownCapture={(e) => {
-          e.stopPropagation();
-        }}
-        onClick={(e) => {
-          e.preventDefault();
-        }}
       >
         {renderDefaultValue()}
       </div>

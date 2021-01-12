@@ -33,7 +33,7 @@ const Select = forwardRef<any, IBaseComponentProps & Partial<SelectProps & { chi
   <SelectPro
     ref={ref}
     {...otherProps}
-    trigger={['click'] as any}
+    // trigger={['click'] as any}
     // trigger={multiple ? ['click'] as any : undefined}
     multiple={multiple}
     onChange={(newValue) => {
@@ -57,7 +57,7 @@ function renderEditor({ record, defaultValue, dataRef }: { record: Record, defau
     case 'component':
       return (
         <SelectComponent
-          trigger={['click'] as any}
+          // trigger={['click'] as any}
           multiple={['checkbox', 'multiple'].includes(fieldType)}
           dataRef={dataRef}
 
@@ -67,7 +67,7 @@ function renderEditor({ record, defaultValue, dataRef }: { record: Record, defau
       return <SelectLabel multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} />;
     case 'influenceVersion':
     case 'fixVersion':
-      return <SelectVersion multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} />;
+      return <SelectVersion valueField="versionId" multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} />;
     case 'sprint':
       return <SelectSprint multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} />;
     case 'epic':
@@ -119,7 +119,6 @@ function renderEditor({ record, defaultValue, dataRef }: { record: Record, defau
       return (
         <SelectUser
           extraOptions={defaultValue ? [defaultValue] : undefined}
-          trigger={['click'] as any}
             // autoQueryConfig={{
             //   selectedUserIds: defaultValue || [],
             //   // @ts-ignore
