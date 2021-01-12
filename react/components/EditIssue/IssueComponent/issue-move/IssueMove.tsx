@@ -52,6 +52,7 @@ const IssueMove: React.FC<Props> = ({
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [step1NextDisabled, setsStep1NextDisabled] = useState<boolean>(true);
   const [step2NextDisabled, setsStep2NextDisabled] = useState<boolean>(true);
+  const [submitBtnDisable, setSubmitBtnDisable] = useState<boolean>(false);
   const [targetProjectType, setTargetProjectType] = useState<'program' | 'project' | 'subProject'>('project');
   const issueTypeDataSet = useMemo(() => new DataSet({
     paging: false,
@@ -72,13 +73,9 @@ const IssueMove: React.FC<Props> = ({
         fieldNames.push(field.get('name'));
       }
     });
-    // console.log('删除前--- dataSet的fields：');
-    // console.log(toJS(ds.current?.fields), toJS(ds.current?.data));
     fieldNames.forEach((name: string) => {
       removeField(ds, name);
     });
-    // console.log('删除后--- dataSet的fields：');
-    // console.log(toJS(ds.current?.fields), toJS(ds.current?.data));
     store.dataMap.clear();
   }, [removeField]);
 
@@ -289,12 +286,15 @@ const IssueMove: React.FC<Props> = ({
       }
     }
 
+    setSubmitBtnDisable(true);
     moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
       dataSet.reset();
       onMoveIssue();
       Choerodon.prompt('移动成功');
+      setSubmitBtnDisable(false);
       modal?.close();
     }).catch(() => {
+      setSubmitBtnDisable(false);
       Choerodon.prompt('移动失败');
     });
     return false;
@@ -356,7 +356,7 @@ const IssueMove: React.FC<Props> = ({
             <Button style={{ marginLeft: 8 }} color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handlePre}>
               上一步
             </Button>
-            <Button style={{ marginLeft: 8 }} color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleSubmit}>
+            <Button style={{ marginLeft: 8 }} color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleSubmit} disabled={submitBtnDisable}>
               确定
             </Button>
             <Button onClick={handleCancel} funcType={'raised' as FuncType}>

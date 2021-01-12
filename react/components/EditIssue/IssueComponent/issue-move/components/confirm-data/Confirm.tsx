@@ -237,8 +237,13 @@ const Confirm: React.FC<Props> = ({
     for (const [k, v] of memberFieldsCodeAndValue.entries()) {
       if (v && selectedUsers.find((user) => user.id === v)) {
         dataSet.current?.set(k, v);
+      } else {
+        dataSet.current?.set(k, undefined);
       }
     }
+    return () => {
+      memberFieldsCodeAndValue.clear();
+    };
   }, [dataSet, fieldsWithValue, issue.assigneeId, issue.issueId, issue.mainResponsible?.id, issue.reporterId, selectedUsers, subTaskDetailMap]);
 
   useEffect(() => {
@@ -247,8 +252,6 @@ const Confirm: React.FC<Props> = ({
     }
   }, [dataSet, epicName, issueId]);
 
-  // console.log('进入confirm dataSet data：');
-  // console.log(toJS(dataSet.current?.data), toJS(dataMap));
   return (
     <div className={styles.confirm}>
       <div className={styles.tip}>
