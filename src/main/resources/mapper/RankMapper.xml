@@ -13,12 +13,12 @@
     <select id="selectEpicIdsByProject" resultType="java.lang.Long">
         select ai.issue_id from (
            select ai.issue_id,
-            CONVERT(ai.issue_num,UNSIGNED) as issue_num
+            CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert
             from agile_issue ai
             where ai.project_id = #{projectId}
             and ai.type_code = 'issue_epic'
         ) ai
-        order by ai.issue_num desc
+        order by ai.issue_num_convert desc
     </select>
 
     <select id="checkRankEmpty" resultType="java.lang.Long">

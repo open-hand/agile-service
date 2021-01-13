@@ -422,7 +422,7 @@ public class ReportServiceImpl implements ReportService {
             throw new CommonException(VERSION_REPORT_ERROR);
         }
         Map<String,String> orders = new HashMap<>();
-        orders.put("issueNum", "issue_num1");
+        orders.put("issueNum", "issue_num_convert");
         Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", orders);
         pageRequest.setSort(sort);
         //pageable.resetOrder("ai", new HashMap<>());

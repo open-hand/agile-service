@@ -45,7 +45,7 @@
     <select id="selectEpicList" resultMap="epicWithInfoListMap">
         select
             ai.issue_id as ai_issue_id,
-            CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
+            CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
             IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) as ai_issue_num,
             ai.type_code as ai_type_code,
             ai.summary as ai_summary,
@@ -69,7 +69,7 @@
                  close=")">
             #{epicId}
         </foreach>
-        order by issue_num1 desc
+        order by issue_num_convert desc
     </select>
 
     <resultMap id="storyListMap" type="io.choerodon.agile.infra.dto.business.StoryMapStoryDTO">
@@ -240,7 +240,7 @@
     <select id="selectDemandStoryList" resultMap="storyDemandListMap">
         select
         ai.issue_id as ai_issue_id,
-        CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
         IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) as ai_issue_num,
         ai.summary as ai_summary,
         ai.issue_type_id as ai_issue_type_id,
@@ -289,7 +289,7 @@
                 #{statusId}
             </foreach>
         </if>
-        order by issue_num1 desc
+        order by issue_num_convert desc
     </select>
 
     <select id="countEpicProgress" resultType="io.choerodon.agile.api.vo.IssueProgressVO">
