@@ -556,6 +556,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
         Map<String, String> order = new HashMap<>(1);
         order.put("issueId", "issue_issue_id");
+        order.put("issueNum", "issue_num_convert");
         return PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, order));
     }
 
