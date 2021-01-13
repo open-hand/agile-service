@@ -512,6 +512,7 @@
         ai.parent_issue_id,
         ai.relate_issue_id,
         ai.status_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num,
         ais.is_completed as completed
         from agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
@@ -525,7 +526,7 @@
                 #{child}
             </foreach>
         </if>
-        order by issue_issue_id desc
+        order by issue_num desc
     </select>
 
     <select id="queryIssueIdsListWithSub" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -649,6 +650,7 @@
         select
         ai.issue_id as issue_id,
         ai.summary,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
         CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
         ai.reporter_id,
         ai.last_update_date,
@@ -670,7 +672,6 @@
                  )
              </if>
         </if>
-        order by char_length(issue_num) desc,issue_num desc
     </select>
 
     <select id="selectIssueSubTaskAndSubBugIds" resultType="java.lang.Long">
@@ -1398,6 +1399,7 @@
         ai.issue_id, ai.summary,
         ai.project_id, ai.type_code,
         ai.issue_type_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
         CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -1430,6 +1432,7 @@
             ai.issue_id, ai.summary,
             ai.project_id, ai.type_code,
             ai.issue_type_id,
+            CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
             CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
             FROM agile_issue ai
             LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -2058,6 +2061,7 @@
     <select id="listByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueInfoDTO">
         SELECT
         ai.issue_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
         CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -2066,7 +2070,7 @@
                  close=")">
             #{issueId}
         </foreach>
-        ORDER BY ai.issue_id
+        ORDER BY issue_num1
     </select>
 
     <select id="listIssueWithLinkedIssues" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -2080,6 +2084,7 @@
         ai.assignee_id,
         ai.project_id,
         ai.issue_type_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
         CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -2200,6 +2205,7 @@
         ai.assignee_id,
         ai.project_id,
         ai.issue_type_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
         CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -2675,6 +2681,7 @@
     <select id="queryUnDistributedIssues" resultType="io.choerodon.agile.infra.dto.UndistributedIssueDTO">
         SELECT
           ai.issue_id,
+          CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
           CONCAT_WS('-',api.project_code,ai.issue_num) AS issue_num,
           ai.type_code,
           ai.summary,
@@ -2687,12 +2694,13 @@
         where ai.project_id = #{projectId}
         and ai.type_code in ('story','task','bug')
         and (ai.assignee_id is null or ai.assignee_id = 0)
-        order by ai.issue_id desc
+        order by issue_num1 desc
     </select>
 
     <select id="queryUnfinishedIssues" resultType="io.choerodon.agile.infra.dto.UnfinishedIssueDTO">
         SELECT
           ai.issue_id,
+          CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
           CONCAT_WS('-',api.project_code,ai.issue_num) AS issue_num,
           ai.type_code,
           ai.summary,
@@ -2705,7 +2713,7 @@
         where ai.project_id = #{projectId}
         and ai.type_code in ('story','task','bug')
         and ai.assignee_id= #{assigneeId}
-        order by ai.issue_id desc
+        order by issue_num1 desc
         limit 6
     </select>
 
@@ -3291,6 +3299,7 @@
         select
         t1.issue_id,
         t1.summary,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
         CONCAT_WS('-', t2.project_code, t1.issue_num) AS issue_num,
         t1.type_code,
         t1.issue_type_id
@@ -3316,7 +3325,7 @@
                 or CONCAT_WS('-', t2.project_code, t1.issue_num) like CONCAT(CONCAT('%', #{param}), '%')
             )
         </if>
-        order by t1.issue_id desc
+        order by issue_num1 desc
     </select>
 
     <select id="listMyStarIssuesByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">

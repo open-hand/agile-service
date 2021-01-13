@@ -421,7 +421,10 @@ public class ReportServiceImpl implements ReportService {
         if (versionDO == null || Objects.equals(versionDO.getStatusCode(), VERSION_ARCHIVED_CODE)) {
             throw new CommonException(VERSION_REPORT_ERROR);
         }
-        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", new HashMap<>());
+        Map<String,String> orders = new HashMap<>();
+        orders.put("issueNum", "issue_num1");
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", orders);
+        pageRequest.setSort(sort);
         //pageable.resetOrder("ai", new HashMap<>());
         Page<IssueDTO> reportIssuePage = PageHelper.doPageAndSort(pageRequest, () -> reportMapper.
                 queryReportIssues(projectId, versionId, status, type));

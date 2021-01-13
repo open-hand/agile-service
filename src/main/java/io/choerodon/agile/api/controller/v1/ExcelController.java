@@ -99,7 +99,7 @@ public class ExcelController {
     @PostMapping(value = "/export")
     public void exportIssues(@ApiIgnore
                              @ApiParam(value = "分页信息", required = true)
-                             @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+                             @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                      PageRequest pageRequest,
                              @ApiParam(value = "项目id", required = true)
                              @PathVariable(name = "project_id") Long projectId,
