@@ -23,7 +23,7 @@ import Field from 'choerodon-ui/pro/lib/data-set/Field';
 import SelectProject from './components/select-project';
 import Confirm from './components/confirm-data';
 import styles from './IssueMove.less';
-import { IssueWithSubIssueVOList } from './components/confirm-data/Confirm';
+import { IssueWithSubIssueVOList, ILoseItems } from './components/confirm-data/Confirm';
 import transformValue, { submitFieldMap } from './transformValue';
 import { IFieldWithValue } from './components/confirm-data/transformValue';
 
@@ -41,10 +41,11 @@ interface Props {
   modal?:IModalProps
   fieldsWithValue: IFieldWithValue[]
   onMoveIssue: () => void,
+  loseItems: ILoseItems,
 }
 
 const IssueMove: React.FC<Props> = ({
-  modal, issue, fieldsWithValue, onMoveIssue,
+  modal, issue, fieldsWithValue, onMoveIssue, loseItems,
 }) => {
   const { dataMap } = store;
   const [updateCount, setUpdateCount] = useState<number>(0);
@@ -182,7 +183,7 @@ const IssueMove: React.FC<Props> = ({
   const targetTypeCode = dataSet.current?.get('issueType');
   const targetProjectId = dataSet.current?.get('targetProjectId');
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     setBtnLoading(true);
     let submitData: any = {
       issueId: issue.issueId,
@@ -287,16 +288,14 @@ const IssueMove: React.FC<Props> = ({
       dataSet.reset();
       onMoveIssue();
       Choerodon.prompt('移动成功');
-      setTimeout(() => {
-        setBtnLoading(false);
-      }, 2000);
+      setBtnLoading(false);
       modal?.close();
     }).catch(() => {
       setBtnLoading(false);
       Choerodon.prompt('移动失败');
     });
     return false;
-  }, [dataMap, dataSet, issue.issueId, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
+  }, [dataMap, dataSet, issue.issueId, modal, onMoveIssue, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
 
   const targetIssueType = issueTypeDataSet.toData().find((item: IIssueType) => item.typeCode === targetTypeCode) as IIssueType;
   return (
@@ -311,7 +310,7 @@ const IssueMove: React.FC<Props> = ({
       </Steps>
       <div className={styles.step_content}>
         {currentStep === 1 && <SelectProject issue={issue} dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} />}
-        {currentStep === 2 && <Confirm issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} />}
+        {currentStep === 2 && <Confirm issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} loseItems={loseItems} />}
       </div>
       <div className={styles.steps_action}>
         {currentStep === 1 && (
@@ -344,7 +343,9 @@ const IssueMove: React.FC<Props> = ({
 
 const ObserverIssueMove = observer(IssueMove);
 
-const openIssueMove = ({ issue, customFields, onMoveIssue }: { issue: IssueWithSubIssueVOList, customFields: IFieldWithValue[], onMoveIssue: () => void }) => {
+const openIssueMove = ({
+  issue, customFields, onMoveIssue, loseItems,
+}: { issue: IssueWithSubIssueVOList, customFields: IFieldWithValue[], onMoveIssue: () => void, loseItems: ILoseItems}) => {
   Modal.open({
     key: 'issueMoveModal',
     drawer: true,
@@ -353,7 +354,7 @@ const openIssueMove = ({ issue, customFields, onMoveIssue }: { issue: IssueWithS
     style: {
       width: MODAL_WIDTH.middle,
     },
-    children: <ObserverIssueMove issue={issue} fieldsWithValue={customFields} onMoveIssue={onMoveIssue} />,
+    children: <ObserverIssueMove issue={issue} fieldsWithValue={customFields} onMoveIssue={onMoveIssue} loseItems={loseItems} />,
     footer: null,
   });
 };

@@ -6,6 +6,8 @@ import { Permission } from '@choerodon/boot';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
+import useHasBacklog from '@/hooks/useHasBacklog';
+import useHasTest from '@/hooks/useHasTest';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
@@ -17,10 +19,15 @@ const IssueDropDown = ({
   const {
     store, onUpdate, applyType,
   } = useContext(EditIssueContext);
+
+  const docs = store.getDoc;
   const hasDevops = useHasDevops();
+  const hasTest = useHasTest();
+  const hasBacklog = useHasBacklog();
+
   const issue = store.getIssue;
   const {
-    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi,
+    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi, issueTypeVO,
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
   const handleDeleteIssue = () => {
@@ -92,7 +99,17 @@ const IssueDropDown = ({
     } else if (e.key === '10') {
       store.setRelateStoryShow(true);
     } else if (e.key === 'item_11') {
-      openIssueMove({ issue, customFields: store.customFields, onMoveIssue: onDeleteIssue });
+      openIssueMove({
+        issue,
+        customFields: store.customFields,
+        onMoveIssue: onDeleteIssue,
+        loseItems: {
+          test: hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1, // 还需要添加length判断
+          doc: docs && docs.knowledgeRelationList?.length,
+          backlog: store.backlogLinks && store.backlogLinks.length,
+          linkIssue: store.getLinkIssues && store.getLinkIssues.length,
+        },
+      });
     }
   };
   const getMenu = () => (

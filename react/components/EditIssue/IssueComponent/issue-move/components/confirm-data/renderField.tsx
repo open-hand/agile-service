@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import { map, includes } from 'lodash';
 import STATUS from '@/constants/STATUS';
 import { Tooltip } from 'choerodon-ui';
-import { toJS } from 'mobx';
 import {
   IField, IStatus, User, ILabel, IIssueType,
 } from '@/common/types';
