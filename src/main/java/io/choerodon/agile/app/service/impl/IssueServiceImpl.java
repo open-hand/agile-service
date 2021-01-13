@@ -503,6 +503,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Map<String, String> order = new HashMap<>(1);
                 String sortCode = fieldCode.split("\\.")[1];
                 order.put(fieldCode, sortCode);
+                order.put("issueNum", "issue_num_convert");
                 PageUtil.sortResetOrder(pageRequest.getSort(), null, order);
                 List<Long> issueIdsWithSub =
                         issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null, isTreeView)
