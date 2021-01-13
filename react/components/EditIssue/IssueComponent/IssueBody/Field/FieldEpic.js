@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Button } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
@@ -8,9 +9,12 @@ import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectEpic from '@/components/select/select-epic';
 import SelectFeature from '@/components/select/select-feature';
 import { IsInProgram } from '@/hooks/useIsInProgram';
+import styles from './FieldEpic.less';
 
 @inject('AppState')
 @observer class FieldEpic extends Component {
+  ref = React.createRef();
+
   updateIssueEpic = async (newEpicId, done) => {
     const { store, onUpdate, reloadIssue } = this.props;
     const issue = store.getIssue;
@@ -66,7 +70,9 @@ import { IsInProgram } from '@/hooks/useIsInProgram';
   };
 
   render() {
-    const { store, disabled } = this.props;
+    const {
+      store, disabled, push, outside, projectId, organizationId,
+    } = this.props;
     const issue = store.getIssue;
     const {
       epicColor, epicId, issueEpicName, typeCode,
@@ -77,7 +83,7 @@ import { IsInProgram } from '@/hooks/useIsInProgram';
     return (
       <IsInProgram>
         {
-          ({ isShowFeature }) => (
+          ({ isShowFeature, program }) => (
             <>
               {typeCode === 'story' && isShowFeature
                 ? (
@@ -87,12 +93,21 @@ import { IsInProgram } from '@/hooks/useIsInProgram';
                         特性
                       </span>
                     </div>
-                    <div className="c7n-value-wrapper">
+                    <div className="c7n-value-wrapper" style={{ maxWidth: 'unset', display: 'flex', flexWrap: 'nowrap' }} ref={this.ref}>
                       <TextEditToggle
+                        className={styles.feature}
                         disabled={disabled}
                         onSubmit={this.updateIssueFeature}
                         initValue={featureName ? featureId || [] : []}
-                        editor={<SelectFeature featureId={featureId} featureName={featureName} />}
+                        editor={(
+                          <SelectFeature
+                            featureId={featureId}
+                            featureName={featureName}
+                            style={{
+                              width: 200,
+                            }}
+                          />
+                        )}
                         submitTrigger={['change', 'blur']}
                       >
                         {featureName ? (
@@ -108,6 +123,40 @@ import { IsInProgram } from '@/hooks/useIsInProgram';
                           </div>
                         )}
                       </TextEditToggle>
+                      {featureId && (
+                        <div
+                          role="none"
+                          style={{
+                            width: 60,
+                            height: 20,
+                            lineHeight: '20px',
+                            fontSize: '12px',
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            // margin: '10px 0 0 10px',
+                            marginLeft: 10,
+                            color: 'white',
+                            background: '#3f51b5',
+                            borderRadius: '2px',
+                          }}
+                          onClick={() => {
+                            push({
+                              path: 'program_issue',
+                              props: {
+                                outside,
+                                issueId: featureId,
+                                disabled: true,
+                                applyType: 'program',
+                                projectId,
+                                programId: program.id,
+                                organizationId,
+                              },
+                            });
+                          }}
+                        >
+                          查看详情
+                        </div>
+                      )}
                     </div>
                   </div>
                 ) : ''}
@@ -125,30 +174,30 @@ import { IsInProgram } from '@/hooks/useIsInProgram';
                     editor={({ submit }) => <SelectEpic required={required} onChange={submit} />}
                   >
                     {
-                issueEpicName ? (
-                  <div
-                    style={{
-                      color: epicColor,
-                      borderWidth: '1px',
-                      borderStyle: 'solid',
-                      borderColor: epicColor,
-                      borderRadius: '2px',
-                      fontSize: '13px',
-                      lineHeight: '20px',
-                      padding: '0 8px',
-                      display: 'inline-block',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {issueEpicName}
-                  </div>
-                ) : (
-                  <div>
-                    无
-                  </div>
-                )
-              }
+                      issueEpicName ? (
+                        <div
+                          style={{
+                            color: epicColor,
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderColor: epicColor,
+                            borderRadius: '2px',
+                            fontSize: '13px',
+                            lineHeight: '20px',
+                            padding: '0 8px',
+                            display: 'inline-block',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {issueEpicName}
+                        </div>
+                      ) : (
+                        <div>
+                          无
+                        </div>
+                      )
+                    }
                   </TextEditToggle>
                 </div>
               </div>

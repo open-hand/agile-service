@@ -2,7 +2,6 @@ import React, { useState, ReactNode } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import { find } from 'lodash';
-import IsProgramContext from '@/hooks/useIsProgrom';
 import permission from '@/components/permission';
 import Status from './status';
 import StatusCirculation from './status-circulation';
@@ -51,9 +50,7 @@ const StateMachine: React.FC = (props) => {
       setSelectedType: handleChangeSelectedType,
     }}
     >
-      <IsProgramContext.Provider value={{ isProgram: AppState.currentMenuType.category === 'PROGRAM' }}>
-        {Component && <Component {...props} tab={tabComponent} />}
-      </IsProgramContext.Provider>
+      {Component && <Component {...props} tab={tabComponent} />}
     </StateMachineContext.Provider>
   );
 };

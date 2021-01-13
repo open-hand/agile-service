@@ -21,7 +21,7 @@ class IsInProgramStore {
   @observable artInfo = {};
 
   refresh = async () => {
-    if (AppState.currentMenuType?.category !== 'PROGRAM' && AppState.currentMenuType?.type === 'project') {
+    if (!(AppState.menuType.categories || []).map((c) => c.code).includes('N_PROGRAM') && AppState.currentMenuType?.type === 'project') {
       const program = await commonApi.getProjectsInProgram();
       const hasProgram = Boolean(program);
       this.setIsInProgram(hasProgram);
