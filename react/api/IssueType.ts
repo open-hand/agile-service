@@ -55,6 +55,82 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       // @ts-ignore
     }).then((res) => res.filter((type) => type.typeCode !== 'backlog'));
   }
+
+  delete(typeId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      params: {
+        typeId,
+      },
+    });
+  }
+
+  start(typeId: string) {
+    return axios({
+      method: 'post',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      params: {
+        typeId,
+      },
+    });
+  }
+
+  stop(typeId: string) {
+    return axios({
+      method: 'post',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      params: {
+        typeId,
+      },
+    });
+  }
+
+  getType(typeId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      params: {
+        typeId,
+      },
+    });
+  }
+
+  checkName(name: string) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      params: {
+        name,
+      },
+    });
+  }
+
+  checkCode(code: string) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      params: {
+        code,
+      },
+    });
+  }
+
+  create(data: any) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      data,
+    });
+  }
+
+  update(typeId: string, data: any) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      data,
+    });
+  }
 }
 
 const issueTypeApi = new IssueTypeApi();
