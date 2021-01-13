@@ -176,7 +176,7 @@ public class SprintController {
                                                                  @ApiParam(value = "组织id", required = true)
                                                                      @RequestParam Long organizationId,
                                                                  @ApiParam(value = "分页信息", required = true)
-                                                                     @SortDefault(value = "issue_id", direction = Sort.Direction.DESC)
+                                                                     @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                                                      @ApiIgnore PageRequest pageRequest) {
         return Optional.ofNullable(sprintService.queryIssueByOptions(projectId, sprintId, status, pageRequest, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

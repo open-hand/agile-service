@@ -214,8 +214,11 @@
     </select>
 
     <select id="queryRemoveIssueIdsDuringSprintWithOutSubEpicIssue" resultType="java.lang.Long">
-        SELECT DISTINCT ai.issue_id
-        FROM (SELECT adl2.issue_id
+        select ai.issue_id from (
+           SELECT DISTINCT ai.issue_id,
+           CONVERT(ai.issue_num,UNSIGNED) as issue_num
+            FROM (
+              SELECT adl2.issue_id
               FROM agile_data_log adl2
               WHERE
                   adl2.project_id = #{sprintDTO.projectId} AND
@@ -227,7 +230,8 @@
                                             FROM agile_issue_sprint_rel ais
                                             WHERE ais.sprint_id = #{sprintDTO.sprintId})) aa LEFT JOIN agile_issue ai
                 ON ai.issue_id = aa.issue_id
-        WHERE ai.type_code in ('story', 'task', 'bug', 'sub_task')
+                WHERE ai.type_code in ('story', 'task', 'bug', 'sub_task')
+        ) ai
     </select>
 
     <select id="queryRemoveIssueValueDurationSprint"
@@ -803,49 +807,52 @@
     </select>
 
     <select id="queryReportIssueIds" resultType="java.lang.Long">
-        SELECT
-        ai.issue_id
-        FROM
-        agile_issue_sprint_rel aisr
-        LEFT JOIN (
-        SELECT
-        adl.issue_id,
-        adl.new_value
-        FROM
-        agile_data_log adl,
-        (
-        SELECT
-        MAX( adl1.log_id ) AS log_id
-        FROM
-        agile_issue_sprint_rel aisr1,
-        agile_data_log adl1
-        WHERE
-        aisr1.project_id = #{projectId}
-        AND aisr1.sprint_id = #{sprintId}
-        AND aisr1.issue_id = adl1.issue_id
-        AND adl1.project_id = #{projectId}
-        AND adl1.field = 'resolution'
-        <if test="actualEndDate != null">
-            AND adl1.creation_date &lt; #{actualEndDate}
-        </if>
-        GROUP BY
-        adl1.issue_id
-        ) a
-        WHERE
-        adl.log_id = a.log_id
-        ) adl2 ON adl2.issue_id = aisr.issue_id,
-        agile_issue ai
-        WHERE
-        aisr.project_id = #{projectId}
-        AND aisr.sprint_id = #{sprintId}
-        AND aisr.issue_id = ai.issue_id
-        AND ai.type_code in ('story', 'task', 'bug', 'sub_task')
-        <if test="status">
-            and adl2.new_value is not null
-        </if>
-        <if test="!status">
-            and adl2.new_value is null
-        </if>
+        select ai.issue_id from (
+            SELECT
+            ai.issue_id,
+            CONVERT(ai.issue_num,UNSIGNED) as issue_num
+            FROM
+            agile_issue_sprint_rel aisr
+            LEFT JOIN (
+            SELECT
+            adl.issue_id,
+            adl.new_value
+            FROM
+            agile_data_log adl,
+            (
+            SELECT
+            MAX( adl1.log_id ) AS log_id
+            FROM
+            agile_issue_sprint_rel aisr1,
+            agile_data_log adl1
+            WHERE
+            aisr1.project_id = #{projectId}
+            AND aisr1.sprint_id = #{sprintId}
+            AND aisr1.issue_id = adl1.issue_id
+            AND adl1.project_id = #{projectId}
+            AND adl1.field = 'resolution'
+            <if test="actualEndDate != null">
+                AND adl1.creation_date &lt; #{actualEndDate}
+            </if>
+            GROUP BY
+            adl1.issue_id
+            ) a
+            WHERE
+            adl.log_id = a.log_id
+            ) adl2 ON adl2.issue_id = aisr.issue_id,
+            agile_issue ai
+            WHERE
+            aisr.project_id = #{projectId}
+            AND aisr.sprint_id = #{sprintId}
+            AND aisr.issue_id = ai.issue_id
+            AND ai.type_code in ('story', 'task', 'bug', 'sub_task')
+            <if test="status">
+                and adl2.new_value is not null
+            </if>
+            <if test="!status">
+                and adl2.new_value is null
+            </if>
+        ) ai
     </select>
 
     <select id="queryIssueByIssueIds" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -1095,7 +1102,9 @@
 
     <select id="queryReportIssues" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
-        ai.issue_id, CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
+        ai.issue_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
+        CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
         ai.issue_type_id,
         ai.status_id,
         ai.type_code,
