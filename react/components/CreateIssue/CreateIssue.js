@@ -238,6 +238,7 @@ class CreateIssue extends Component {
       ['fixVersion', 'fixVersionIssueRel'],
       ['sprint', 'sprintId'],
       ['epic', 'epicId'],
+      ['pi', 'pi'],
     ]);
     const setFields = fields.reduce((result, field) => {
       const name = defaultScope.get(field.fieldCode);
@@ -1009,7 +1010,16 @@ class CreateIssue extends Component {
               <SelectFocusLoad
                 label="PI"
                 type="pi"
-              />,
+              >
+                {field.defaultValueObjs?.map((pi) => (
+                  <Option
+                    key={pi.id}
+                    value={pi.id}
+                  >
+                    {`${pi.code}-${pi.name}`}
+                  </Option>
+                ))}
+              </SelectFocusLoad>,
             )}
           </FormItem>
         );
