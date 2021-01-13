@@ -6,7 +6,6 @@ import { Permission } from '@choerodon/boot';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
-import useHasBacklog from '@/hooks/useHasBacklog';
 import useHasTest from '@/hooks/useHasTest';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
@@ -23,11 +22,10 @@ const IssueDropDown = ({
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
-  const hasBacklog = useHasBacklog();
 
   const issue = store.getIssue;
   const {
-    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi, issueTypeVO,
+    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi, issueTypeVO, parentRelateSummary,
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
   const handleDeleteIssue = () => {
@@ -200,7 +198,7 @@ const IssueDropDown = ({
         )
       }
       {
-        typeCode !== 'sub_task' && (
+        (typeCode !== 'sub_task' && !parentRelateSummary) && ( // 子缺陷、子任务不能移
         <Permission
           service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
           noAccessChildren={(

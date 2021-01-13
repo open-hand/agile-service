@@ -10,6 +10,16 @@
           display: flex;
           flex-direction: column;
           height: 100%;
+          :global {
+            .c7n-steps {
+              display: block;
+              .c7n-steps-item-wait .c7n-steps-item-icon {
+                background-color: #ffffff;
+                color: #969ABE;
+                border: 1px solid #D9E6F2;
+              }
+            }
+          }
           .step_content {
             flex: 1;
             overflow-y: scroll;
