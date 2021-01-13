@@ -28,23 +28,30 @@ export interface IssueWithSubIssueVOList extends Omit<Issue, 'subIssueVOList'> {
   subIssueVOList: Issue[]
 }
 
+export interface ILoseItems {
+  test: boolean,
+  doc: boolean,
+  backlog: boolean,
+  linkIssue: boolean,
+}
 interface Props {
   issue: any,
   dataSet: DataSet,
   fieldsWithValue: IFieldWithValue[]
   targetProjectType: 'program' | 'project' | 'subProject'
   targetIssueType?: IIssueType
+  loseItems: ILoseItems,
 }
 
 const Confirm: React.FC<Props> = ({
-  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType,
+  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, loseItems,
 }) => {
   const {
     dataMap, selfFields, subTaskFields, moveToProjectList, subTaskDetailMap, subTaskTypeId, selectedUserIds, selectedUsers,
   } = store;
   const [fieldsLosed, setFieldsLosed] = useState<IField[]>([]);
   const {
-    issueId, issueTypeVO, issueNum, summary, typeCode, subIssueVOList, epicName,
+    issueId, issueNum, summary, typeCode, subIssueVOList, epicName,
   } = issue;
   const targetProjectId = dataSet?.current?.get('targetProjectId');
   const issueType = dataSet?.current?.get('issueType');
@@ -106,20 +113,22 @@ const Confirm: React.FC<Props> = ({
         pageCode: 'agile_issue_create',
         schemeCode: 'agile_issue',
       }, targetProjectId).then((res: IField[]) => {
-        const finalFields = getFinalFields(res || []);
-        finalFields.forEach((item) => {
-          if (item.fieldCode !== 'epicName') {
-            addField(`${issueId}-${item.fieldCode}`, {
-              required: item.required,
-            });
-          } else {
-            addField(`${issueId}-${item.fieldCode}`, {
-              required: item.required,
-              maxLength: 20,
-            });
-          }
+        batchedUpdates(() => {
+          const finalFields = getFinalFields(res || []);
+          finalFields.forEach((item) => {
+            if (item.fieldCode !== 'epicName') {
+              addField(`${issueId}-${item.fieldCode}`, {
+                required: item.required,
+              });
+            } else {
+              addField(`${issueId}-${item.fieldCode}`, {
+                required: item.required,
+                maxLength: 20,
+              });
+            }
+          });
+          store.setSelfFields(finalFields);
         });
-        store.setSelfFields(finalFields);
       });
       if (subIssueVOList && subIssueVOList.length) {
         fieldApi.getFields({
@@ -127,15 +136,17 @@ const Confirm: React.FC<Props> = ({
           pageCode: 'agile_issue_create',
           schemeCode: 'agile_issue',
         }, targetProjectId).then((res: IField[]) => {
-          const finalFields = getFinalFields(res || []);
-          subIssueVOList.forEach((subTask: Issue) => {
-            finalFields.forEach((item) => {
-              addField(`${subTask.issueId}-${item.fieldCode}`, {
-                required: item.required,
+          batchedUpdates(() => {
+            const finalFields = getFinalFields(res || []);
+            subIssueVOList.forEach((subTask: Issue) => {
+              finalFields.forEach((item) => {
+                addField(`${subTask.issueId}-${item.fieldCode}`, {
+                  required: item.required,
+                });
               });
             });
+            store.setSubTaskFields(finalFields);
           });
-          store.setSubTaskFields(finalFields);
         });
       }
     }
@@ -163,23 +174,27 @@ const Confirm: React.FC<Props> = ({
       });
       let subTaskSelectedUserIds: any[] = [...store.selectedUserIds];
       Promise.all(detailRequestArr).then((res: Issue[]) => {
-        res.forEach((subTask) => {
-          subTaskSelectedUserIds = [...subTaskSelectedUserIds, ...[subTask.assigneeId, subTask.reporterId, subTask.mainResponsible?.id]];
-          subTaskDetailMap.set(`${subTask.issueId}-detail`, subTask);
-        });
-        const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
-        store.setSelectUserIds(uniqUserIds);
-      });
-      Promise.all(customFieldsRequestArr).then((res: IFieldWithValue[]) => {
-        res.forEach((fieldWidthValue, i) => {
-          fieldsWithValue.forEach((item) => {
-            if (!item.system && item.fieldType === 'member' && !item.projectId) {
-              subTaskSelectedUserIds = [...subTaskSelectedUserIds, item.value];
-            }
+        batchedUpdates(() => {
+          res.forEach((subTask) => {
+            subTaskSelectedUserIds = [...subTaskSelectedUserIds, ...[subTask.assigneeId, subTask.reporterId, subTask.mainResponsible?.id]];
+            subTaskDetailMap.set(`${subTask.issueId}-detail`, subTask);
           });
           const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
           store.setSelectUserIds(uniqUserIds);
-          subTaskDetailMap.set(`${subIssueVOList[i].issueId}-fields`, fieldWidthValue);
+        });
+      });
+      Promise.all(customFieldsRequestArr).then((res: IFieldWithValue[]) => {
+        res.forEach((fieldWidthValue, i) => {
+          batchedUpdates(() => {
+            fieldsWithValue.forEach((item) => {
+              if (!item.system && item.fieldType === 'member' && !item.projectId) {
+                subTaskSelectedUserIds = [...subTaskSelectedUserIds, item.value];
+              }
+            });
+            const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
+            store.setSelectUserIds(uniqUserIds);
+            subTaskDetailMap.set(`${subIssueVOList[i].issueId}-fields`, fieldWidthValue);
+          });
         });
       });
     }
@@ -232,14 +247,16 @@ const Confirm: React.FC<Props> = ({
         });
       }
     }
-
-    for (const [k, v] of memberFieldsCodeAndValue.entries()) {
-      if (v && selectedUsers.find((user) => user.id === v)) {
-        dataSet.current?.set(k, v);
-      } else {
-        dataSet.current?.set(k, undefined);
+    batchedUpdates(() => {
+      for (const [k, v] of memberFieldsCodeAndValue.entries()) {
+        if (v && selectedUsers.find((user) => user.id === v)) {
+          dataSet.current?.set(k, v);
+        } else {
+          dataSet.current?.set(k, undefined);
+        }
       }
-    }
+    });
+
     return () => {
       memberFieldsCodeAndValue.clear();
     };
@@ -251,12 +268,26 @@ const Confirm: React.FC<Props> = ({
     }
   }, [dataSet, epicName, issueId]);
 
+  const loseItemNames = [];
+
+  for (const [k, v] of Object.entries(loseItems)) {
+    const loseItemMap = new Map([
+      ['test', '测试用例'],
+      ['doc', '文档'],
+      ['backlog', '需求'],
+      ['linkIssue', '问题项'],
+    ]);
+    if (v) {
+      loseItemNames.push(loseItemMap.get(k));
+    }
+  }
+
   return (
     <div className={styles.confirm}>
       <div className={styles.tip}>
         <Icon type="report" />
         <p className={styles.tipText}>
-          {`${issue.issueNum}将移动到【${targetProject?.name}】中${fieldsLosed.length > 0 ? `，其${fieldsLosed.map((item) => `【${item.name}】`).join('、')}的字段值，与该问题的问题项、测试用例、文档、需求的关联关系，会永久丢失` : ''}。`}
+          {`${issue.issueNum}将移动到【${targetProject?.name}】中${fieldsLosed.length > 0 ? `，其${fieldsLosed.map((item) => `【${item.name}】`).join('、')}的字段值${!loseItemNames.length ? '，会永久丢失' : `，与该问题的${loseItemNames.join('、')}的关联关系，会永久丢失`}` : `${!loseItemNames.length ? '' : `，该问题的${loseItemNames.join('、')}的关联关系，会永久丢失`}`}。`}
         </p>
       </div>
       <div className={styles.content}>

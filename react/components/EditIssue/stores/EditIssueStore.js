@@ -246,5 +246,11 @@ class EditIssueStore {
   @computed get getWSJFDTOShow() {
     return this.wsjfDTOShow;
   }
+
+  @observable backlogLinks = [];
+
+  @action setBacklogLinks = (data) => {
+    this.backlogLinks = data;
+  }
 }
 export default EditIssueStore;
