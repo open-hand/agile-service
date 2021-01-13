@@ -4,7 +4,7 @@ import STATUS from '@/constants/STATUS';
 import { Tooltip } from 'choerodon-ui';
 import { toJS } from 'mobx';
 import {
-  IField, IStatus, User, ILabel,
+  IField, IStatus, User, ILabel, IIssueType,
 } from '@/common/types';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectStatus from '@/components/select/select-status';
@@ -33,10 +33,7 @@ interface Props {
   issue: any,
   field: IField,
   fieldsWithValue: IFieldWithValue[],
-  targetIssueType: {
-    typeCode: string,
-    issueTypeId: string
-  },
+  targetIssueType?: IIssueType,
   targetProject: {
     projectId: string,
     projectType: 'program' | 'project' | 'subProject',
@@ -105,7 +102,7 @@ const renderField = ({
               key={`${issueId}-status`}
               dataSet={dataSet}
               name={`${issueId}-status`}
-              issueTypeId={targetIssueType.issueTypeId}
+              issueTypeId={targetIssueType?.id}
               projectId={targetProject.projectId}
               applyType={targetProject.projectType === 'program' ? 'program' : 'agile'}
               afterLoad={(data) => {

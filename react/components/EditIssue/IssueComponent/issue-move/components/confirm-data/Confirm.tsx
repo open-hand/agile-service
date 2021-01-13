@@ -6,7 +6,9 @@ import { toJS } from 'mobx';
 import {
   Icon, Row, Col, Tooltip,
 } from 'choerodon-ui';
-import { Issue, IField, User } from '@/common/types';
+import {
+  Issue, IField, User, IIssueType,
+} from '@/common/types';
 import {
   includes, map, uniq, compact, flatten,
 } from 'lodash';
@@ -31,10 +33,7 @@ interface Props {
   dataSet: DataSet,
   fieldsWithValue: IFieldWithValue[]
   targetProjectType: 'program' | 'project' | 'subProject'
-  targetIssueType: {
-    typeCode: string,
-    issueTypeId: string
-  }
+  targetIssueType?: IIssueType
 }
 
 const Confirm: React.FC<Props> = ({
@@ -85,7 +84,7 @@ const Confirm: React.FC<Props> = ({
       reporterField,
     ];
     const filtered = filterFields(resAdded);
-    if (targetProjectType === 'subProject' && targetIssueType.typeCode === 'story') {
+    if (targetProjectType === 'subProject' && targetIssueType?.typeCode === 'story') {
       const epicFieldIndex = filtered.findIndex((item) => item.fieldCode === 'epic');
       if (epicFieldIndex > -1) {
         const featureField = {
@@ -98,7 +97,7 @@ const Confirm: React.FC<Props> = ({
       }
     }
     return filtered;
-  }, [filterFields, targetIssueType.typeCode, targetProjectType]);
+  }, [filterFields, targetIssueType?.typeCode, targetProjectType]);
 
   useEffect(() => {
     if (targetProjectId && issueType) {
@@ -143,12 +142,12 @@ const Confirm: React.FC<Props> = ({
   }, [addField, filterFields, getFinalFields, issueId, issueType, subIssueVOList, targetProjectId, targetProjectType]);
 
   useEffect(() => {
-    if (targetProjectId && issueId && targetIssueType.typeCode) {
-      moveIssueApi.getFieldsLosed(targetProjectId, issueId, targetIssueType.typeCode).then((res: IField[]) => {
+    if (targetProjectId && issueId && targetIssueType?.typeCode) {
+      moveIssueApi.getFieldsLosed(targetProjectId, issueId, targetIssueType?.typeCode).then((res: IField[]) => {
         setFieldsLosed(res);
       });
     }
-  }, [issueId, targetIssueType.typeCode, targetProjectId]);
+  }, [issueId, targetIssueType?.typeCode, targetProjectId]);
 
   useEffect(() => {
     if (subTaskTypeId) {
@@ -267,7 +266,7 @@ const Confirm: React.FC<Props> = ({
         <div className={styles.contentMain}>
           <div className={styles.issueItem}>
             <div className={styles.issueItemHeader}>
-              <TypeTag data={issueTypeVO} />
+              <TypeTag data={targetIssueType as IIssueType} />
               <span className={styles.issueNum}>{issueNum}</span>
               <span className={styles.summary}>{summary}</span>
             </div>
@@ -377,8 +376,8 @@ const Confirm: React.FC<Props> = ({
                             fieldsWithValue: subTaskCustomFields,
                             targetIssueType: {
                               typeCode: 'sub_task',
-                              issueTypeId: subTaskTypeId,
-                            },
+                              id: subTaskTypeId,
+                            } as IIssueType,
                             targetProject: {
                               projectId: targetProjectId,
                               projectType: targetProjectType,

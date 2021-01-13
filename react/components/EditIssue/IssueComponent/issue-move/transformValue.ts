@@ -47,7 +47,7 @@ const transformValue = ({
           componentList.push(target);
         }
       });
-      return componentList;
+      return componentList.length ? componentList : undefined;
     }
     case 'label': {
       const labelList: any = [];
@@ -62,7 +62,7 @@ const transformValue = ({
           });
         }
       });
-      return labelList;
+      return labelList.length ? labelList : undefined;
     }
     case 'fixVersion': {
       const versionList: any[] = [];
@@ -72,7 +72,7 @@ const transformValue = ({
           versionList.push(target);
         }
       });
-      return versionList;
+      return versionList.length ? versionList : undefined;
     }
     default:
       break;
