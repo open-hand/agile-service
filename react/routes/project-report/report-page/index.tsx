@@ -6,6 +6,7 @@ import { Button, Dropdown, Menu } from 'choerodon-ui/pro';
 import { IReportContentType } from '@/common/types';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
+import useIsProgram from '@/hooks/useIsProgram';
 import openAddModal from './components/add-modal';
 import BlockList from './components/block-list';
 import BaseInfo from './components/base-info';
@@ -24,7 +25,7 @@ interface Props {
 const ReportPage: React.FC<Props> = ({ store, edit, preview: forcePreview }) => {
   const baseInfoRef = useRef<BaseInfoRef>({} as BaseInfoRef);
   const [preview, setPreview] = useState(forcePreview !== undefined ? forcePreview : false);
-  const isProgram = AppState.currentMenuType.category === 'PROGRAM';
+  const { isProgram } = useIsProgram();
   const addBlock = useMemo(() => (
     <Dropdown
       trigger={['click' as Action]}

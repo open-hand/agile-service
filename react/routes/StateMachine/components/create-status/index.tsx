@@ -4,20 +4,19 @@ import React, {
 import {
   Modal, Form, DataSet, TextField, Select, SelectBox,
 } from 'choerodon-ui/pro';
-import { stores, axios } from '@choerodon/boot';
+import { axios } from '@choerodon/boot';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { IStatus, IIssueType } from '@/common/types';
 import StatusTypeTag from '@/components/tag/status-type-tag';
-import { find } from 'lodash';
 import './index.less';
 import { useIssueTypes } from '@/hooks';
 import { statusTransformApiConfig } from '@/api';
 import { observer } from 'mobx-react-lite';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
+import useIsProgram from '@/hooks/useIsProgram';
 
-const { AppState } = stores;
 const { Option } = SelectBox;
 const key = Modal.key();
 interface Props {
@@ -36,7 +35,7 @@ const CreateStatus: React.FC<Props> = ({
   const [hasStatusIssueTypes, setHasStatusIssueTypes] = useState<IIssueType[]>([]);
   const hasStatusIssueTypesRef = useRef<IIssueType[]>([]);
   hasStatusIssueTypesRef.current = hasStatusIssueTypes;
-  const isProgram = AppState.currentMenuType.category === 'PROGRAM';
+  const { isProgram } = useIsProgram();
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     transport: {
