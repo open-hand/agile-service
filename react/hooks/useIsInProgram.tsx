@@ -13,6 +13,7 @@ const HAS_AGILE_PRO = C7NHasModule('@choerodon/agile-pro');
 const shouldRequest = isDEV || HAS_AGILE_PRO;
 interface ChildrenProps {
   isInProgram: boolean,
+  program: object | boolean,
   isShowFeature: boolean,
   artInfo: object | boolean,
   loading: boolean,
@@ -23,23 +24,27 @@ interface Props {
 }
 
 const useIsInProgram = (): ChildrenProps => {
+  const [isInProgram, setIsInProgram] = useState<boolean>(false);
+  const [program, setProgram] = useState<object | boolean>(false);
   const [isShowFeature, setIsShowFeature] = useState<boolean>(false);
   const [artInfo, setArtInfo] = useState<object | boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const { isProgram } = useIsProgram();
   const isProject = AppState.currentMenuType.type === 'project';
-  const codes = useCategoryCodes();
-  const isInProgram = codes.includes('N_PROGRAM_PROJECT');
   const refresh = useCallback(async () => {
     if (!isProgram) {
       setLoading(true);
+      const projectProgram = shouldRequest && isProject ? await commonApi.getProjectsInProgram() : false;
+      const hasProgram = Boolean(projectProgram);
       let art = false;
       let showFeature = false;
-      if (shouldRequest && isProject && isInProgram) {
+      if (shouldRequest && isProject && hasProgram) {
         art = await commonApi.getIsShowFeature();
         showFeature = Boolean(art);
       }
       batchedUpdates(() => {
+        setIsInProgram(hasProgram);
+        setProgram(projectProgram);
         setArtInfo(art);
         setIsShowFeature(showFeature);
         setLoading(false);
@@ -47,14 +52,14 @@ const useIsInProgram = (): ChildrenProps => {
     } else {
       setLoading(false);
     }
-  }, [isInProgram, isProgram, isProject]);
+  }, [isProgram, isProject]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
   return {
-    isInProgram, isShowFeature, artInfo, loading, refresh,
+    isInProgram, program, isShowFeature, artInfo, loading, refresh,
   };
 };
 

@@ -62,7 +62,10 @@ function EditIssue() {
   }, [issueEvents]);
   const onCancel = useCallback(() => {
     close();
-    issueEvents?.close();
+    const callback = issueEvents?.close;
+    if (callback) {
+      callback();
+    }
   }, [close, issueEvents]);
   const onIssueCopy = useCallback(() => {
     const callback = issueEvents?.copy || issueEvents?.update;
