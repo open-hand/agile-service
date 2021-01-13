@@ -9,6 +9,7 @@ import { Button } from 'choerodon-ui/pro';
 import { beforeTextUpload } from '@/utils/richText';
 import { workLogApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import SelectNumber from '@/components/select/select-number';
 import WYSIWYGEditor from '../WYSIWYGEditor';
 import './DailyLog.less';
 
@@ -43,12 +44,13 @@ class DailyLog extends Component {
       startTimeNull: false,
       loading: false,
     };
+    this.selectRef = React.createRef();
   }
 
   componentDidMount() {
-    setTimeout(() => {
-      this.Select.focus();
-    });
+    // setTimeout(() => {
+    //   this.Select.focus();
+    // });
   }
 
   onRadioChange = (e) => {
@@ -62,12 +64,15 @@ class DailyLog extends Component {
     });
   }
 
-  handleCreateDailyLog = () => {
+  handleCreateDailyLog = async () => {
     const {
       dissipate, startTime, radio, delta,
     } = this.state;
     const { issueId } = this.props;
-    if (!dissipate || !startTime) {
+    if ((!await this.selectRef.current.checkValidity())) {
+      return;
+    }
+    if (!startTime) {
       this.setState({
         dissipateNull: !dissipate,
         startTimeNull: !startTime,
@@ -147,29 +152,9 @@ class DailyLog extends Component {
   }
 
   handleChangeDissipate = (value) => {
-    const { dissipate } = this.state;
-    // 只允许输入整数，选择时可选0.5
-    if (value === '0.5') {
-      this.setState({
-        dissipate: '0.5',
-        dissipateNull: false,
-      });
-    } else if (/^(0|[1-9][0-9]*)(\[0-9]*)?$/.test(value) || value === '') {
-      this.setState({
-        dissipate: String(value).slice(0, 3), // 限制最长三位,
-        dissipateNull: !value,
-      });
-    } else if (value.toString().charAt(value.length - 1) === '.') {
-      this.setState({
-        dissipate: value.slice(0, -1),
-        dissipateNull: !value.slice(0, -1),
-      });
-    } else {
-      this.setState({
-        dissipate,
-        dissipateNull: !dissipate,
-      });
-    }
+    this.setState({
+      dissipate: value,
+    });
   };
 
   handleChangeTime = (value) => {
@@ -254,7 +239,7 @@ class DailyLog extends Component {
     const {
       createLoading, dissipate, dissipateUnit,
       startTime, radio, time, timeUnit, reduce,
-      reduceUnit, delta, edit, startTimeNull, dissipateNull, loading,
+      reduceUnit, delta, edit, startTimeNull, loading, dissipateNull,
     } = this.state;
     const radioStyle = {
       display: 'block',
@@ -283,30 +268,18 @@ class DailyLog extends Component {
       >
         <div>
           <section className="info">
-            <div className="line-info">
-              <Select
-                defaultOpen
-                getPopupContainer={(trigger) => trigger.parentNode}
-                label="耗费时间*"
-                value={dissipate && dissipate.toString()}
-                mode="combobox"
-                ref={(e) => {
-                  this.Select = e;
-                  this.componentRef = e;
-                }}
-                onPopupFocus={(e) => {
-                  this.componentRef.rcSelect.focus();
-                }}
-                tokenSeparators={[',']}
-                style={{ flex: 1, marginTop: 0, paddingTop: 0 }}
-                onChange={(value) => this.handleChangeDissipate(value)}
-              >
-                {storyPointList.map((sp) => (
-                  <Option key={sp.toString()} value={sp}>
-                    {sp}
-                  </Option>
-                ))}
-              </Select>
+            <div className="line-info" style={{ alignItems: 'flex-start' }}>
+              <div style={{ flex: 1, marginTop: 0, paddingTop: 0 }}>
+                <SelectNumber
+                  ref={this.selectRef}
+                  required
+                  style={{ width: '100%' }}
+                  labelLayout="float"
+                  value={dissipate}
+                  label="耗费时间"
+                  onChange={(value) => this.handleChangeDissipate(value)}
+                />
+              </div>
               <Select
                 value={dissipateUnit}
                 style={{ width: 160, marginLeft: 18 }}
@@ -316,9 +289,6 @@ class DailyLog extends Component {
                   <Option key={type} value={type}>{type}</Option>))}
               </Select>
             </div>
-            {dissipateNull
-              ? <div className="error-text">耗费时间必填</div>
-              : ''}
             <div
               className="dataPicker"
               style={{
