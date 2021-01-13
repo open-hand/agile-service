@@ -1,8 +1,5 @@
-import { stores } from '@choerodon/boot';
+import useCategoryCodes from './useCategoryCodes';
 
-const { AppState } = stores;
-
-const useCategoryCodes = () => (AppState.menuType.categories ? AppState.menuType.categories.map((c: any) => c.code) : []);
 const useHasDevops = () => {
   const codes = useCategoryCodes();
   return codes.includes('N_DEVOPS');

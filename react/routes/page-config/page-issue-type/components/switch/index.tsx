@@ -4,7 +4,7 @@ import React, {
 import { pageConfigApi, PageConfigIssueType } from '@/api';
 import { Modal } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { useIsProgramContext } from '@/hooks/useIsProgrom';
+import useIsProgram from '@/hooks/useIsProgram';
 import { usePageIssueTypeStore } from '../../stores';
 import Switch from './Switch';
 // @ts-ignore
@@ -25,7 +25,7 @@ const issueTypeOptions: Array<IssueOption> = [
 ].filter(Boolean) as Array<IssueOption>;
 function PageSwitch() {
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
-  const { isProgram } = useIsProgramContext();
+  const { isProgram } = useIsProgram();
   const { pageIssueTypeStore, isProject } = usePageIssueTypeStore();
   const handleSelectBox = (val: any) => {
     if (pageIssueTypeStore.getDirty) {
