@@ -547,8 +547,8 @@
                 ai.status_id,
                 ai.assignee_id,
                 ai.last_update_date,
-                concat(api.project_code,'-', ai.issue_num) as issue_num_convert,
-                CONVERT(ai.issue_num,SIGNED) as issue_num,
+                concat(api.project_code,'-', ai.issue_num) as issue_num1,
+                CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
                 ai.issue_type_id
             from (
                 select
