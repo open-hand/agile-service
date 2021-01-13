@@ -168,6 +168,23 @@ class Commits extends Component {
         ),
       },
       {
+        title: '来源分支',
+        dataIndex: 'originBranch',
+        width: '25%',
+        render: (originBranch) => (
+          <div style={{ width: '100%', overflow: 'hidden' }}>
+            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={originBranch}>
+              <p style={{
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
+              }}
+              >
+                {originBranch}
+              </p>
+            </Tooltip>
+          </div>
+        ),
+      },
+      {
         title: '提交数',
         dataIndex: 'appId',
         width: '15%',
