@@ -79,7 +79,7 @@ class QuickCreateIssue extends Component {
                 featureVO: {},
                 sprintId: sprintId || fieldsMap.get('sprint').defaultValue || 0,
                 epicName: currentTypeCode === 'issue_epic' ? summary.trim() : undefined,
-                componentIssueRelVOList: [],
+                componentIssueRelVOList: fieldsMap.get('component').defaultValueObjs || [],
                 description: '',
                 issueLinkCreateVOList: [],
                 labelIssueRelVOList: fieldsMap.get('label').defaultValueObjs || [],
