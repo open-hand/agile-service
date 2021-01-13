@@ -22,7 +22,6 @@ import {
 import Field from 'choerodon-ui/pro/lib/data-set/Field';
 import SelectProject from './components/select-project';
 import Confirm from './components/confirm-data';
-import Finish from './components/finish';
 import styles from './IssueMove.less';
 import { IssueWithSubIssueVOList } from './components/confirm-data/Confirm';
 import transformValue, { submitFieldMap } from './transformValue';
@@ -51,8 +50,8 @@ const IssueMove: React.FC<Props> = ({
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [step1NextDisabled, setsStep1NextDisabled] = useState<boolean>(true);
-  const [step2NextDisabled, setsStep2NextDisabled] = useState<boolean>(true);
-  const [submitBtnDisable, setSubmitBtnDisable] = useState<boolean>(false);
+  const [submitBtnDisable, setSubmitBtnDisable] = useState<boolean>(true);
+  const [btnLoading, setBtnLoading] = useState<boolean>(false);
   const [targetProjectType, setTargetProjectType] = useState<'program' | 'project' | 'subProject'>('project');
   const issueTypeDataSet = useMemo(() => new DataSet({
     paging: false,
@@ -107,8 +106,6 @@ const IssueMove: React.FC<Props> = ({
         dataSet: moveDataSet, name, value,
       }) => {
         if (name === 'targetProjectId') {
-          // dataSet.current?.reset();
-          // console.log(dataSet.current?.data);
           if (value) {
             const targetProjectInfo = await projectApi.loadBasicInfo(value);
             let targetIsInProgram = false;
@@ -157,7 +154,7 @@ const IssueMove: React.FC<Props> = ({
         }
         if (name !== 'targetProjectId' && name !== 'issueType') {
           const validate = await moveDataSet.validate();
-          setsStep2NextDisabled(!validate);
+          setSubmitBtnDisable(!validate);
         }
         setUpdateCount((count) => count + 1);
       },
@@ -186,6 +183,7 @@ const IssueMove: React.FC<Props> = ({
   const targetProjectId = dataSet.current?.get('targetProjectId');
 
   const handleSubmit = useCallback(async () => {
+    setBtnLoading(true);
     let submitData: any = {
       issueId: issue.issueId,
       typeCode: targetTypeCode,
@@ -194,7 +192,7 @@ const IssueMove: React.FC<Props> = ({
     for (const [k, v] of Object.entries(dataSet.current?.data || {})) {
       const kIssueId = k.split('-')[0];
       const isSelf = kIssueId === issue.issueId;
-      if (kIssueId && k.split('-')[1] && v) {
+      if (kIssueId && kIssueId !== 'undefined' && k.split('-')[1] && v) {
         const fieldInfo = (isSelf ? selfFields : subTaskFields).find((item: IField) => item.fieldCode === k.split('-')[1]);
         if (fieldInfo) {
           if (fieldInfo.system) { // 系统字段
@@ -285,30 +283,22 @@ const IssueMove: React.FC<Props> = ({
         }
       }
     }
-
-    setSubmitBtnDisable(true);
     moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
       dataSet.reset();
       onMoveIssue();
       Choerodon.prompt('移动成功');
-      setSubmitBtnDisable(false);
+      setTimeout(() => {
+        setBtnLoading(false);
+      }, 2000);
       modal?.close();
     }).catch(() => {
-      setSubmitBtnDisable(false);
+      setBtnLoading(false);
       Choerodon.prompt('移动失败');
     });
     return false;
-  }, [dataMap, dataSet, issue.issueId, modal, onMoveIssue, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
-  useEffect(() => {
-    modal?.handleOk(handleSubmit);
-  }, [modal, handleSubmit]);
+  }, [dataMap, dataSet, issue.issueId, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
 
-  const targetIssueType = {
-    typeCode: targetTypeCode,
-    // @ts-ignore
-    issueTypeId: targetTypeCode && issueTypeDataSet.toData().find((item: IIssueType) => item.typeCode === targetTypeCode)?.id,
-  };
-
+  const targetIssueType = issueTypeDataSet.toData().find((item: IIssueType) => item.typeCode === targetTypeCode) as IIssueType;
   return (
     <div className={styles.issueMove}>
       <Steps current={currentStep - 1}>
@@ -318,14 +308,10 @@ const IssueMove: React.FC<Props> = ({
         <Step
           title={<span style={{ color: currentStep === 2 ? '#3F51B5' : '', fontSize: 14 }}>确认数据信息</span>}
         />
-        <Step
-          title={<span style={{ color: currentStep === 3 ? '#3F51B5' : '', fontSize: 14 }}>完成</span>}
-        />
       </Steps>
       <div className={styles.step_content}>
         {currentStep === 1 && <SelectProject issue={issue} dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} />}
         {currentStep === 2 && <Confirm issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} />}
-        {currentStep === 3 && <Finish issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} />}
       </div>
       <div className={styles.steps_action}>
         {currentStep === 1 && (
@@ -343,21 +329,8 @@ const IssueMove: React.FC<Props> = ({
             <Button style={{ marginLeft: 8 }} color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handlePre}>
               上一步
             </Button>
-            <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleNext} disabled={step2NextDisabled}>
-              下一步
-            </Button>
-            <Button onClick={handleCancel} funcType={'raised' as FuncType}>
-              取消
-            </Button>
-          </>
-        )}
-        {currentStep === 3 && (
-          <>
-            <Button style={{ marginLeft: 8 }} color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handlePre}>
-              上一步
-            </Button>
-            <Button style={{ marginLeft: 8 }} color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleSubmit} disabled={submitBtnDisable}>
-              确定
+            <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleSubmit} disabled={submitBtnDisable} loading={btnLoading}>
+              确认
             </Button>
             <Button onClick={handleCancel} funcType={'raised' as FuncType}>
               取消
