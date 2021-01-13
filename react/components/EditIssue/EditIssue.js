@@ -98,6 +98,7 @@ function EditIssue() {
 
     idRef.current = id;
     setIssueLoading(true);
+    store.setIssue({});
     try {
       // 1. 加载详情
       let issue = await (programId
