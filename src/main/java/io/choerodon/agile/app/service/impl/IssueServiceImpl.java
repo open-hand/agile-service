@@ -1477,7 +1477,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public Page<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, PageRequest pageRequest) {
         //连表查询需要设置主表别名
         Map<String,String> orders = new HashMap<>();
-        orders.put("issueNum","issue_num1");
+        orders.put("issueNum","issue_num_convert");
         Sort sort = PageUtil.sortResetOrder( pageRequest.getSort(), "ai", orders);
         pageRequest.setSort(sort);
         //pageable.resetOrder("ai", new HashMap<>());
@@ -2161,7 +2161,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public Page<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
         //连表查询需要设置主表别名
         HashMap<String, String> orders = new HashMap<>();
-        orders.put("issueNum","issue_num1");
+        orders.put("issueNum","issue_num_convert");
         Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, orders);
         //pageable.resetOrder(SEARCH, new HashMap<>());
         pageRequest.setSort(sort);
@@ -2181,7 +2181,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public Page<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
         Map<String, String> orders = new HashMap<>();
-        orders.put("issueNum","issue_num1");
+        orders.put("issueNum","issue_num_convert");
         Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, orders);
         //pageable.resetOrder(SEARCH, new HashMap<>());
         Page<IssueDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest, () ->
@@ -2245,7 +2245,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public Page<IssueNumVO> queryIssueByOptionForAgile(Long projectId, Long issueId, String issueNum, Boolean self, String content, PageRequest pageRequest) {
         Map<String, String> orders = new HashMap<>();
-        orders.put("issueNum", "issue_num1");
+        orders.put("issueNum", "issue_num_convert");
         Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, orders);
         pageRequest.setSort(sort);
         //pageable.resetOrder("search", new HashMap<>());
@@ -2609,7 +2609,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public Page<IssueListFieldKVVO> queryStoryAndTask(Long projectId, PageRequest pageRequest, SearchVO searchVO) {
         //连表查询需要设置主表别名
         Map<String, String> orders = new HashMap<>();
-        orders.put("issueNum","issue_num1");
+        orders.put("issueNum","issue_num_convert");
         Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", orders);
         pageRequest.setSort(sort);
         Page<IssueDTO> pageInfo = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryStoryAndTaskByProjectId(projectId, searchVO));

@@ -216,7 +216,7 @@
     <select id="queryRemoveIssueIdsDuringSprintWithOutSubEpicIssue" resultType="java.lang.Long">
         select ai.issue_id from (
            SELECT DISTINCT ai.issue_id,
-           CONVERT(ai.issue_num,UNSIGNED) as issue_num
+           CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert
             FROM (
               SELECT adl2.issue_id
               FROM agile_data_log adl2
@@ -810,7 +810,7 @@
         select ai.issue_id from (
             SELECT
             ai.issue_id,
-            CONVERT(ai.issue_num,UNSIGNED) as issue_num
+            CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert
             FROM
             agile_issue_sprint_rel aisr
             LEFT JOIN (
@@ -1103,7 +1103,7 @@
     <select id="queryReportIssues" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
         ai.issue_id,
-        CONVERT(ai.issue_num,UNSIGNED) as issue_num1,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
         CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
         ai.issue_type_id,
         ai.status_id,
