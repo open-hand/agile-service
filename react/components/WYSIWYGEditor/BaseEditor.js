@@ -135,14 +135,13 @@ class BaseEditor extends Component {
     }
   }
 
-  saveRef = name => (ref) => {
+  saveRef = (name) => (ref) => {
     this[name] = ref;
     const { saveRef } = this.props;
     if (saveRef) {
       saveRef(ref);
     }
   }
-
 
   handleChange = (content, delta, source, editor) => {
     const { onChange } = this.props;
@@ -170,6 +169,7 @@ class BaseEditor extends Component {
       loading,
       onFullScreenClick,
       hideFullScreen,
+      saveText = '保存',
     } = this.props;
     const readOnly = mode === 'read';
     const {
@@ -178,7 +178,7 @@ class BaseEditor extends Component {
     const newStyle = { ...defaultStyle, ...style };
     const editHeight = newStyle.height === '100%' ? `calc(100% - ${toolbarHeight || '42px'})` : (newStyle.height - (toolbarHeight || 42));
     return (
-      <div style={newStyle}>      
+      <div style={newStyle}>
         <div className="c7n-quill-editor">
           <div style={{ flex: 1, overflow: 'hidden' }}>
             <div className={`react-quill-editor react-quill-editor-${mode}`}>
@@ -199,20 +199,22 @@ class BaseEditor extends Component {
           {
           bottomBar && !readOnly && (
             <div
-              className="c7n-quill-editor-bottomBar"              
+              className="c7n-quill-editor-bottomBar"
             >
               <Button
+                className="c7n-quill-cancelBtn"
                 type="primary"
                 onClick={onCancel}
               >
                 取消
               </Button>
               <Button
+                className="c7n-quill-saveBtn"
                 type="primary"
                 loading={loading}
                 onClick={onSave}
               >
-                保存
+                { saveText }
               </Button>
             </div>
           )

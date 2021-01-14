@@ -89,7 +89,7 @@ function EditIssue() {
     close();
   }, [close, issueEvents]);
 
-  const loadIssueDetail = async (paramIssueId) => {
+  const loadIssueDetail = async (paramIssueId, callback) => {
     const id = paramIssueId || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
       Choerodon.prompt('有未保存的描述');
@@ -112,6 +112,7 @@ function EditIssue() {
       if (afterIssueUpdate) {
         afterIssueUpdate(issue);
       }
+
       // 2. 根据详情加载fields
       const param = {
         schemeCode: 'agile_issue',
@@ -126,6 +127,9 @@ function EditIssue() {
         issue.descriptionTemplate = template;
       }
       setIssueLoading(false);
+      if (callback) {
+        callback();
+      }
       if (transformIssue) {
         issue = transformIssue(issue);
       }
