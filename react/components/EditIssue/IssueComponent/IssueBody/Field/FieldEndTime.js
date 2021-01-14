@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import moment from 'moment';
-import { DateTimePicker } from 'choerodon-ui/pro';
+import DateTimePicker from '@/components/date-time-picker';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { issueApi } from '@/api';
 
@@ -46,7 +46,13 @@ class FieldEndTime extends Component {
             initValue={estimatedEndTime ? moment(estimatedEndTime) : undefined}
             onSubmit={this.updateIssueField}
             alwaysRender={false}
-            editor={() => <DateTimePicker required={required} min={estimatedStartTime && moment(estimatedStartTime).add(1, 's')} />}
+            editor={() => (
+              <DateTimePicker
+                required={required}
+                min={estimatedStartTime && moment(estimatedStartTime).add(1, 's')}
+                defaultPickerValue={moment().endOf('d')}
+              />
+            )}
             submitTrigger={['blur']}
             disabled={disabled}
           >
