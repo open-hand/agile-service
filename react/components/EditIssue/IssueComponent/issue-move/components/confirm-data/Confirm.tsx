@@ -282,12 +282,25 @@ const Confirm: React.FC<Props> = ({
     }
   }
 
+  let tipText = `${issue.issueNum}将移动到【${targetProject?.name}】中`;
+
+  if (fieldsLosed.length || loseItemNames.length) {
+    if (fieldsLosed.length) {
+      tipText += `，${fieldsLosed.map((item) => `【${item.name}】`).join('、')}的字段值将永久丢失。`;
+    }
+    if (loseItemNames.length) {
+      tipText += `且该问题与其他${loseItemNames.join('、')}的关联关系，将永久丢失。`;
+    }
+  } else {
+    tipText += '。';
+  }
+
   return (
     <div className={styles.confirm}>
       <div className={styles.tip}>
         <Icon type="report" />
         <p className={styles.tipText}>
-          {`${issue.issueNum}将移动到【${targetProject?.name}】中${fieldsLosed.length > 0 ? `，其${fieldsLosed.map((item) => `【${item.name}】`).join('、')}的字段值${!loseItemNames.length ? '，会永久丢失' : `，与该问题的${loseItemNames.join('、')}的关联关系，会永久丢失`}` : `${!loseItemNames.length ? '' : `，该问题的${loseItemNames.join('、')}的关联关系，会永久丢失`}`}。`}
+          {tipText}
         </p>
       </div>
       <div className={styles.content}>

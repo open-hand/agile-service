@@ -10,7 +10,7 @@ import IssueDetail from './IssueDetail';
 import IssueDes from './IssueDes';
 import IssueAttachment from './IssueAttachment';
 import IssueDoc from './IssueDoc';
-import IssueCommit from './IssueCommit';
+import IssueCommit from '../commentsWithReply';
 import SplitStory from './SplitStory';
 import IssueWorkLog from './IssueWorkLog';
 import IssueLog from './IssueLog';
