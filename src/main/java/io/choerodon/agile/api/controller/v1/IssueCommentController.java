@@ -53,7 +53,7 @@ public class IssueCommentController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建issue评论回复")
-    @PostMapping("/replay")
+    @PostMapping("/reply")
     public ResponseEntity<IssueCommentVO> createIssueCommentReplay(@ApiParam(value = "项目id", required = true)
                                                              @PathVariable(name = "project_id") Long projectId,
                                                                    @ApiParam(value = "创建issue评论回复对象", required = true)
@@ -93,7 +93,7 @@ public class IssueCommentController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("通过commentId查询评论下对应回复")
-    @GetMapping(value = "/replay/{comment_id}")
+    @GetMapping(value = "/reply/{comment_id}")
     public ResponseEntity<List<IssueCommentReplayVO>> queryIssueCommentReplayList(@ApiParam(value = "项目id", required = true)
                                                                                       @PathVariable(name = "project_id") Long projectId,
                                                                                   @ApiParam(value = "comment_id", required = true)
@@ -116,7 +116,7 @@ public class IssueCommentController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("通过commentId删除评论及其回复")
-    @DeleteMapping(value = "/replay/{commentId}")
+    @DeleteMapping(value = "/reply/{commentId}")
     public ResponseEntity deleteIssueCommentReplay(@ApiParam(value = "项目id", required = true)
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "评论id", required = true)

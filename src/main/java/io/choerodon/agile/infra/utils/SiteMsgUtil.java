@@ -271,7 +271,7 @@ public class SiteMsgUtil {
         List<Receiver> receiverList = new ArrayList<>();
         handleReceiver(receiverList, actionMap.keySet());
         Map<Long, Receiver> usersMap = receiverList.stream().collect(Collectors.toMap(Receiver::getUserId, Function.identity()));
-        boolean replayAble = issueCommentVO.getParentId() != null && issueCommentVO.getParentId() != 0L;
+        boolean replyAble = issueCommentVO.getParentId() != null && issueCommentVO.getParentId() != 0L;
         actionMap.forEach((userId, action) -> {
             Map<String, String> argsMap = new HashMap<>(8);
             argsMap.put(PROJECT_NAME, projectVO.getName());
@@ -280,7 +280,7 @@ public class SiteMsgUtil {
             argsMap.put(COMMENT, comment);
             argsMap.put(ACTION, action);
             argsMap.put(COMMENT_USER, issueCommentVO.getUserRealName());
-            argsMap.put(COMMENT_TYPE, replayAble ? "评论" : "回复");
+            argsMap.put(COMMENT_TYPE, replyAble ? "评论" : "回复");
             argsMap.put(ISSUE_TYPE, issueType);
 
             MessageSender messageSender = new MessageSender();

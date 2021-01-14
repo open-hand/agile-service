@@ -16,7 +16,7 @@
     <select id="queryIssueCommentList" resultMap="issueCommentDetail">
         SELECT *
         FROM agile_issue_comment
-        WHERE issue_id = #{issueId} AND project_id = #{projectId}
+        WHERE issue_id = #{issueId} AND project_id = #{projectId} AND parent_id = 0
     </select>
 
     <select id="queryIssueAttachmentByCommentId" resultType="io.choerodon.agile.infra.dto.IssueAttachmentDTO">
@@ -45,6 +45,7 @@
         comment_text,
         project_id,
         parent_id,
+        reply_to_user_id,
         object_version_number,
         created_by,
         creation_date,
@@ -53,6 +54,12 @@
         from agile_issue_comment
         where project_id = #{projectId}
         and parent_id = #{parentId}
-        order by creation_date desc
     </select>
+
+    <update id="updateChildNewParent">
+        update
+        agile_issue_comment set parent_id = #{newCommentId}
+        where project_id = #{projectId}
+        and parent_id = #{oldCommentId}
+    </update>
 </mapper>

@@ -9,6 +9,7 @@ import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 
 @Service
@@ -52,7 +53,19 @@ public class IIssueCommentServiceImpl implements IIssueCommentService {
         if (isDelete != 1) {
             throw new CommonException(DELETE_ERROR);
         }
-        issueCommentMapper.updateChildRecordParentNull(issueCommentDTO.getProjectId(), issueCommentDTO.getCommentId());
+
+        IssueCommentDTO childRecord = new IssueCommentDTO();
+        childRecord.setParentId(issueCommentDTO.getCommentId());
+        childRecord.setIssueId(issueCommentDTO.getIssueId());
+        childRecord.setProjectId(issueCommentDTO.getProjectId());
+
+        IssueCommentDTO firstReply = issueCommentMapper.selectOne(childRecord);
+        if (!ObjectUtils.isEmpty(firstReply)) {
+            firstReply.setParentId(0L);
+            firstReply.setReplyToUserId(0L);
+            issueCommentMapper.updateByPrimaryKeySelective(firstReply);
+            issueCommentMapper.updateChildNewParent(issueCommentDTO.getProjectId(), issueCommentDTO.getCommentId(), firstReply.getCommentId());
+        }
         BaseFieldUtil.updateIssueLastUpdateInfo(issueCommentDTO.getIssueId(), issueCommentDTO.getProjectId());
         return isDelete;
     }
@@ -65,6 +78,7 @@ public class IIssueCommentServiceImpl implements IIssueCommentService {
             throw new CommonException(DELETE_ERROR);
         }
         IssueCommentDTO childRecord = new IssueCommentDTO();
+        childRecord.setIssueId(issueCommentDTO.getIssueId());
         childRecord.setProjectId(issueCommentDTO.getProjectId());
         childRecord.setParentId(issueCommentDTO.getCommentId());
         issueCommentMapper.delete(childRecord);

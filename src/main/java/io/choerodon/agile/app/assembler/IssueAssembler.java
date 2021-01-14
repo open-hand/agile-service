@@ -105,27 +105,21 @@ public class IssueAssembler extends AbstractAssembler {
         issueVO.setReporterLoginName(reporterLoginName);
         issueVO.setReporterRealName(reporterRealName);
         if (issueCommentCondition) {
-            Map<Long, IssueCommentVO> commentMap = new HashMap<>(issueVO.getIssueCommentVOList().size());
-            for (int i = issueVO.getIssueCommentVOList().size() - 1; i >= 0; i--) {
-                IssueCommentVO issueCommentVO = issueVO.getIssueCommentVOList().get(i);
-                UserMessageDTO commentUser = userMessageDOMap.get(issueCommentVO.getUserId());
-                issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
-                issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
-                issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
-                issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
-                issueCommentVO.setReplaySize(0);
-                commentMap.put(issueCommentVO.getCommentId(), issueCommentVO);
-                if (issueCommentVO.getParentId() != null
-                        && issueCommentVO.getParentId() != 0L
-                        && !ObjectUtils.isEmpty(commentMap.get(issueCommentVO.getParentId()))) {
-                    //设置被回复人信息
-                    IssueCommentVO parentComment = commentMap.get(issueCommentVO.getParentId());
-                    parentComment.setReplaySize(parentComment.getReplaySize() + 1);
-                    issueCommentVO.setReplyToUserId(parentComment.getUserId());
-                    issueCommentVO.setReplyToUserName(parentComment.getUserName());
-                    issueCommentVO.setReplyToUserLoginName(parentComment.getUserLoginName());
-                    issueCommentVO.setReplyToUserRealName(parentComment.getUserRealName());
-                    issueCommentVO.setReplyToUserImageUrl(parentComment.getUserImageUrl());
+            Map<Long, Integer> parentSizeMap = new HashMap<>(issueVO.getIssueCommentVOList().size());
+            Iterator<IssueCommentVO> iterator = issueVO.getIssueCommentVOList().iterator();
+            while (iterator.hasNext()) {
+                IssueCommentVO issueCommentVO = iterator.next();
+                if (issueCommentVO.getParentId() != null && issueCommentVO.getParentId() != 0L) {
+                    Integer size = parentSizeMap.get(issueCommentVO.getParentId()) != null ? parentSizeMap.get(issueCommentVO.getParentId()) : 0;
+                    parentSizeMap.put(issueCommentVO.getParentId(), size + 1);
+                    iterator.remove();
+                } else {
+                    UserMessageDTO commentUser = userMessageDOMap.get(issueCommentVO.getUserId());
+                    issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
+                    issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
+                    issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
+                    issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
+                    issueCommentVO.setReplySize(parentSizeMap.get(issueCommentVO.getCommentId()) != null ? parentSizeMap.get(issueCommentVO.getCommentId()) : 0);
                 }
             }
         }
@@ -390,14 +384,14 @@ public class IssueAssembler extends AbstractAssembler {
                 issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
                 issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
                 issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
-                issueCommentVO.setReplaySize(0);
+                issueCommentVO.setReplySize(0);
                 commentMap.put(issueCommentVO.getCommentId(), issueCommentVO);
                 if (issueCommentVO.getParentId() != null
                         && issueCommentVO.getParentId() != 0L
                         && !ObjectUtils.isEmpty(commentMap.get(issueCommentVO.getParentId()))) {
                     //设置被回复人信息
                     IssueCommentVO parentComment = commentMap.get(issueCommentVO.getParentId());
-                    parentComment.setReplaySize(parentComment.getReplaySize() + 1);
+                    parentComment.setReplySize(parentComment.getReplySize() + 1);
                     issueCommentVO.setReplyToUserId(parentComment.getUserId());
                     issueCommentVO.setReplyToUserName(parentComment.getUserName());
                     issueCommentVO.setReplyToUserLoginName(parentComment.getUserLoginName());

@@ -74,7 +74,7 @@ public class IssueCommentVO {
     private String replyToUserImageUrl;
 
     @ApiModelProperty("评论下的回复")
-    private Integer replaySize;
+    private Integer replySize;
 
     @ApiModelProperty(value = "附件列表")
     private List<IssueAttachmentVO> issueAttachmentVOList;
@@ -223,12 +223,12 @@ public class IssueCommentVO {
         this.replyToUserImageUrl = replyToUserImageUrl;
     }
 
-    public Integer getReplaySize() {
-        return replaySize;
+    public Integer getReplySize() {
+        return replySize;
     }
 
-    public void setReplaySize(Integer replaySize) {
-        this.replaySize = replaySize;
+    public void setReplySize(Integer replySize) {
+        this.replySize = replySize;
     }
 
     @Override

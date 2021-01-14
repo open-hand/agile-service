@@ -19,6 +19,10 @@ public class IssueCommentReplayCreateVO {
     @Encrypt
     private Long parentId;
 
+    @ApiModelProperty(value = "被回复人id")
+    @Encrypt
+    private Long replyToUserId;
+
     @ApiModelProperty(value = "评论内容")
     private String commentText;
 
@@ -44,6 +48,14 @@ public class IssueCommentReplayCreateVO {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    public Long getReplyToUserId() {
+        return replyToUserId;
+    }
+
+    public void setReplyToUserId(Long replyToUserId) {
+        this.replyToUserId = replyToUserId;
     }
 
     @Override

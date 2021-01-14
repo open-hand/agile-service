@@ -44,6 +44,9 @@ public class IssueCommentValidator {
                 throw new CommonException("error.IssueCommentRule.issue");
             }
         }
+        if(issueCommentReplayCreateVO.getReplyToUserId() == null){
+            throw new CommonException("error.IssueCommentRule.replyToUserId");
+        }
         if (issueCommentReplayCreateVO.getParentId() == null) {
             throw new CommonException("error.IssueCommentRule.parentId");
         } else {
