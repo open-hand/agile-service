@@ -95,7 +95,7 @@ const zh_CN = {
   'field.member': '成员选择',
   'field.default': '默认值',
   'field.default.sync': '将默认值同步到',
-  'defaultValue.sync':'默认值同步',
+  'defaultValue.sync':'同步默认值',
   'field.decimal': '小数输入',
   'field.urlError': 'URL格式错误',
   'field.useCurrentDate': '使用当前日期和时间为默认值',

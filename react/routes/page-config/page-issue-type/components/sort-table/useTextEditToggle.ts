@@ -1,13 +1,11 @@
-import React, {
-  useCallback, useMemo, useRef, useState,
+import {
+  useCallback, useMemo, useRef,
 } from 'react';
-import { set } from 'lodash';
-import moment from 'moment';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import renderEditor from './renderEditor';
 import {
-  fieldTextValueConfig, transformDefaultValue, orgDisabledEditDefaultFields, disabledEditDefaultFields,
+  transformDefaultValue, orgDisabledEditDefaultFields, disabledEditDefaultFields,
 } from '../../utils';
 
 interface ITextEditToggleConfigProps {
@@ -47,13 +45,11 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
       }
     }
     if (['date', 'datetime', 'time'].includes(fieldType)) {
-      console.log('value', value, value === 'current');
       newValue = value === 'current' ? currentData.defaultValue : value;
       record.set('extraConfig', value === 'current');
     }
 
     record.set('defaultValue', newValue);
-    console.log('dataRef.current', dataRef.current);
     record.set('showDefaultValueText', transformDefaultValue({
       ...currentData,
       // @ts-ignore
@@ -61,7 +57,6 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
       defaultValue: newValue,
       defaultValueObj: currentDefaultValueObj,
       fieldOptions: currentData.fieldOptions || dataRef.current,
-      ...fieldTextValueConfig[currentData.fieldCode as keyof typeof fieldTextValueConfig],
     }));
   }, [fieldType, record]);
   const initValue = useMemo(() => {
@@ -71,10 +66,14 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
     return typeof (record.get('defaultValue')) === 'undefined' || record.get('defaultValue') === '' ? undefined : record.get('defaultValue');
   }, [fieldType, record, record.get('defaultValue'), record.get('extraConfig')]);
   const variableProps = useMemo(() => {
-    let editor = () => renderEditor({ record, defaultValue: initValue, dataRef });
+    let editor = () => renderEditor({
+      record, defaultValue: initValue, dataRef, style: { minWidth: 165, maxWidth: 300 },
+    });
     if (fieldType === 'member') {
       const defaultValueObj = record.get('defaultValueObj') || record.get('localDefaultObj') || {};
-      editor = () => renderEditor({ record, defaultValue: defaultValueObj, dataRef });
+      editor = () => renderEditor({
+        record, defaultValue: defaultValueObj, dataRef, style: { minWidth: 165, maxWidth: 300 },
+      });
     }
     return {
       initValue,

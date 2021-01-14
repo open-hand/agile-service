@@ -6,7 +6,7 @@ import {
 } from 'choerodon-ui/pro/lib';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 
 interface Props {
     record: Record
@@ -56,7 +56,6 @@ const openEditSystemField = (record: Record) => {
       submit: ({ data: submitData }) => pageConfigApiConfig.updateField(data.id, submitData[0]),
     },
   });
-  console.log('data', data);
   const contextNameArr = String(data.contextName).split(',');
   Modal.open({
     key: Modal.key(),

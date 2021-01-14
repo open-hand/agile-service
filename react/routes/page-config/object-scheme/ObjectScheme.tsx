@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Table, Button, CheckBox, Modal, Menu, Icon,
+  Table, Button, Modal, Menu, Icon,
 } from 'choerodon-ui/pro';
 import { Tag } from 'choerodon-ui';
 import {
@@ -20,6 +20,7 @@ import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
 import { disabledEditDefaultFields, orgDisabledEditDefaultFields } from '../page-issue-type/components/sort-table/useTextEditToggle';
 import openEditSystemField from './components/edit-system-field';
+import SyncDefaultValueEditForm from './components/sync-default-value-modal';
 
 const { Column } = Table;
 enum IRequireScopeType {
@@ -56,13 +57,28 @@ function ObjectScheme() {
     };
     schemeTableDataSet.delete(record, modalProps);
   }
-  async function handleSyncDefault() {
+  function handleSyncDefault() {
     const record = schemeTableDataSet.current;
-    const id = record?.get('id');
-    const issueTypes = record?.get('context');
-    const extraConfig = record?.get('extraConfig');
+    const issueTypes: string = record?.get('context');
+    const issueTypesArr: string[] = issueTypes.split(',');
 
-    await pageConfigApi.syncDefaultValue(id, issueTypes, extraConfig);
+    const extraConfig = record?.get('extraConfig');
+    const contextName: string = record?.get('contextName');
+    const contextNameArr = contextName.split(',');
+    Modal.open({
+      key: Modal.key(),
+      title: '默认值同步',
+      children: <SyncDefaultValueEditForm
+        prefixCls={prefixCls}
+        record={record!}
+        text={contextName}
+        extraConfig={extraConfig}
+        defaultValue={issueTypesArr}
+        options={issueTypesArr.map((item: any, index) => ({ code: item, name: contextNameArr[index] }))}
+      />,
+      className: `${prefixCls}-detail-sync`,
+      okText: '确定',
+    });
   }
   function handleClickMenu({ key }: { key: string }) {
     if (key === 'del') {
@@ -166,24 +182,31 @@ function ObjectScheme() {
     if ((system && disabledFields.includes(record?.get('code'))) || (getMenuType() === 'project' && projectId === null)) {
       return text;
     }
-    const menu = (
-      <Menu onClick={handleClickMenu}>
-        <Menu.Item key="sync">
-          <span>{formatMessage({ id: 'defaultValue.sync' })}</span>
-        </Menu.Item>
+    const menuItems = [
+      <Menu.Item key="sync">
+        <span>{formatMessage({ id: 'defaultValue.sync' })}</span>
+      </Menu.Item>,
+    ];
+    if (!system) {
+      menuItems.push(
         <Menu.Item key="del">
           <span>{formatMessage({ id: 'delete' })}</span>
-        </Menu.Item>
+        </Menu.Item>,
+      );
+    }
+    const menu = (
+      <Menu onClick={handleClickMenu}>
+        {menuItems}
       </Menu>
-
     );
+
     return (
       <div className="c7n-table-cell-drop-menu">
         <TableDropMenu
           menu={menu}
           onClickEdit={openEditFieldModal}
           text={text}
-          isHasMenu={!(system || (getMenuType() === 'project' && !projectId))}
+          isHasMenu={(system && !disabledFields.includes(record?.get('code'))) || !((!system && getMenuType() === 'project' && !projectId))}
         />
       </div>
     );

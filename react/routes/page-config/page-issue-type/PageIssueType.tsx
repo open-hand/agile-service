@@ -125,7 +125,9 @@ function PageIssueType() {
     const newData = Object.assign(data, {
       local: true,
       showDefaultValueText: oldField ? transformDefaultValue(data)
-        : transformDefaultValue({ ...data, defaultValueObj: data.localDefaultObj, optionKey: 'tempKey' }),
+        : transformDefaultValue({
+          ...data, defaultValueObj: data.localDefaultObj, fieldOptions: data.fieldOptions || data.localDefaultObj, optionKey: 'tempKey',
+        }),
       localSource: oldField ? 'add' : 'created',
       fieldName: data.name,
       edited: true,

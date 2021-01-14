@@ -37,12 +37,10 @@ const Select = forwardRef<any, IBaseComponentProps & Partial<SelectProps & { chi
     // trigger={multiple ? ['click'] as any : undefined}
     multiple={multiple}
     onChange={(newValue) => {
-      console.log('newValue...', newValue);
       otherProps.onChange && otherProps.onChange(newValue);
     }}
     // onBlur={onBlur}
     onPopupHiddenChange={(hidden) => {
-      console.log('blur', hidden);
       hidden && onBlur && onBlur();
     }}
   >
@@ -52,7 +50,7 @@ const Select = forwardRef<any, IBaseComponentProps & Partial<SelectProps & { chi
 
 function renderEditor({
   record, defaultValue, dataRef, ...otherProps
-}: { record: Record, defaultValue?: any, dataRef?: { current: any }, [propsName:string]:any }) {
+}: { record: Record, defaultValue?: any, dataRef?: { current: any }, style?: React.CSSProperties, [propsName: string]: any }) {
   const fieldType = record.get('fieldType');
   const fieldCode = record.get('fieldCode');
   switch (fieldCode) {
@@ -74,7 +72,7 @@ function renderEditor({
     case 'sprint':
       return <SelectSprint multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} {...otherProps} />;
     case 'epic':
-      return <SelectEpic multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} />;
+      return <SelectEpic multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} {...otherProps} />;
     case 'backlogType':
       // @ts-ignore
       return (
@@ -119,6 +117,7 @@ function renderEditor({
       return <TextField maxLength={100} {...otherProps} />;
     case 'text':
       return <TextArea rows={3} maxLength={255} {...otherProps} />;
+    case 'multiMember':
     case 'member':
     {
       const type = getMenuType();
@@ -130,6 +129,7 @@ function renderEditor({
             //   // @ts-ignore
             //   queryUserRequest: async (userId: number) => (type === 'project' ? userApi.getAllInProject('', undefined, userId) : userApi.getAllInOrg('', undefined, userId)),
             // }}
+          multiple={fieldType === 'multiMember'}
           clearButton
           dataRef={dataRef}
           request={({ filter, page }) => (type === 'project' ? userApi.getAllInProject(filter, page) : userApi.getAllInOrg(filter, page))}
