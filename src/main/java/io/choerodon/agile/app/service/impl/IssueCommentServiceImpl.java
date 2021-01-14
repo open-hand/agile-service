@@ -7,7 +7,6 @@ import io.choerodon.agile.app.service.IIssueCommentService;
 import io.choerodon.agile.app.service.IssueCommentService;
 import io.choerodon.agile.infra.dto.IssueCommentDTO;
 import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
@@ -58,6 +57,8 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         issueCommentDTO.setUserId(customUserDetails.getUserId());
         issueCommentDTO.setProjectId(projectId);
+        issueCommentDTO.setParentId(0L);
+        issueCommentDTO.setReplyToUserId(0L);
         IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueCommentVO.getIssueId());
         sendMsgUtil.sendMsgByIssueComment(projectId, issueDTO, issueCommentVO);
@@ -89,30 +90,23 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             return new ArrayList<>();
         }
         List<Long> userIds = new ArrayList<>();
-        issueCommentVOList.forEach(issueCommentVO -> userIds.add(issueCommentVO.getUserId()));
+        issueCommentVOList.forEach(issueCommentVO -> {
+            userIds.add(issueCommentVO.getUserId());
+        });
         Map<Long, UserMessageDTO> userMessageMap = userService.queryUsersMap(
                 userIds.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList()), true);
-        Map<Long, IssueCommentVO> commentMap = new HashMap<>(issueCommentVOList.size());
         issueCommentVOList.forEach(issueCommentVO -> {
             UserMessageDTO commentUser = userMessageMap.get(issueCommentVO.getUserId());
             issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
             issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
             issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
             issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
-            issueCommentVO.setReplaySize(0);
-            commentMap.put(issueCommentVO.getCommentId(), issueCommentVO);
-            if (issueCommentVO.getParentId() != null
-                    && issueCommentVO.getParentId() != 0L
-                    && !ObjectUtils.isEmpty(commentMap.get(issueCommentVO.getParentId()))) {
-                //设置被回复人信息
-                IssueCommentVO parentComment = commentMap.get(issueCommentVO.getParentId());
-                parentComment.setReplaySize(parentComment.getReplaySize() + 1);
-                issueCommentVO.setReplyToUserId(parentComment.getUserId());
-                issueCommentVO.setReplyToUserName(parentComment.getUserName());
-                issueCommentVO.setReplyToUserLoginName(parentComment.getUserLoginName());
-                issueCommentVO.setReplyToUserRealName(parentComment.getUserRealName());
-                issueCommentVO.setReplyToUserImageUrl(parentComment.getUserImageUrl());
-            }
+
+            IssueCommentDTO childSizeRecord = new IssueCommentDTO();
+            childSizeRecord.setProjectId(projectId);
+            childSizeRecord.setIssueId(issueId);
+            childSizeRecord.setParentId(issueCommentVO.getCommentId());
+            issueCommentVO.setReplySize(issueCommentMapper.selectCount(childSizeRecord));
         });
         return issueCommentVOList;
     }
@@ -170,13 +164,15 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         }
 
         List<Long> userIds = new ArrayList<>();
-        userIds.add(parentIssueComment.getUserId());
-        issueCommentVOList.forEach(issueCommentVO -> userIds.add(issueCommentVO.getUserId()));
+        issueCommentVOList.forEach(issueCommentVO -> {
+            userIds.add(issueCommentVO.getUserId());
+            userIds.add(issueCommentVO.getReplyToUserId());
+        });
         Map<Long, UserMessageDTO> userMessageMap = userService.queryUsersMap(
                 userIds.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList()), true);
-        UserMessageDTO parentUser = userMessageMap.get(parentIssueComment.getUserId());
 
         issueCommentVOList.forEach(issueCommentVO -> {
+            UserMessageDTO replyToUser = userMessageMap.get(issueCommentVO.getReplyToUserId());
             UserMessageDTO commentUser = userMessageMap.get(issueCommentVO.getUserId());
             issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
             issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
@@ -184,10 +180,10 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
             //设置被回复人信息
             issueCommentVO.setReplyToUserId(parentIssueComment.getUserId());
-            issueCommentVO.setReplyToUserName(parentUser != null ? parentUser.getImageUrl() : null);
-            issueCommentVO.setReplyToUserLoginName(parentUser != null ? parentUser.getRealName() : null);
-            issueCommentVO.setReplyToUserRealName(parentUser != null ? parentUser.getRealName() : null);
-            issueCommentVO.setReplyToUserImageUrl(parentUser != null ? parentUser.getLoginName() : null);
+            issueCommentVO.setReplyToUserName(replyToUser != null ? replyToUser.getName() : null);
+            issueCommentVO.setReplyToUserLoginName(replyToUser != null ? replyToUser.getLoginName() : null);
+            issueCommentVO.setReplyToUserRealName(replyToUser != null ? replyToUser.getRealName() : null);
+            issueCommentVO.setReplyToUserImageUrl(replyToUser != null ? replyToUser.getImageUrl() : null);
         });
         return issueCommentVOList;
     }
@@ -203,20 +199,20 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         issueCommentDTO.setProjectId(projectId);
         issueCommentDTO.setCommentId(commentId);
         IssueCommentVO issueCommentVO = modelMapper.map(issueCommentMapper.selectOne(issueCommentDTO), IssueCommentVO.class);
-        UserDTO userDTO = userService.queryUserNameByOption(issueCommentVO.getUserId(), true);
-        issueCommentVO.setUserName(userDTO.getRealName());
-        issueCommentVO.setUserImageUrl(userDTO.getImageUrl());
+
+        List<Long> userIds = new ArrayList<>();
+        userIds.add(commentId);
         if (issueCommentVO.getParentId() != null && issueCommentVO.getParentId() != 0L) {
             //如果父评论不为空，则设置父评论的user信息至被回复人
-            IssueCommentDTO parentCommentRecord = new IssueCommentDTO();
-            parentCommentRecord.setProjectId(projectId);
-            parentCommentRecord.setCommentId(issueCommentVO.getParentId() );
-            IssueCommentDTO parentCommentDTO = issueCommentMapper.selectOne(parentCommentRecord);
-            UserDTO parentUserDTO = userService.queryUserNameByOption(parentCommentDTO.getUserId(), true);
-            issueCommentVO.setReplyToUserId(parentCommentDTO.getUserId());
-            issueCommentVO.setReplyToUserName(parentUserDTO.getRealName());
-            issueCommentVO.setReplyToUserImageUrl(parentUserDTO.getImageUrl());
+            userIds.add(issueCommentVO.getReplyToUserId());
         }
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(userIds, true);
+        UserMessageDTO user = userMap.get(issueCommentDTO.getUserId());
+        UserMessageDTO replyToUser = userMap.get(issueCommentDTO.getReplyToUserId());
+        issueCommentVO.setUserName(user != null ? user.getName() : null);
+        issueCommentVO.setUserImageUrl(user != null ? user.getImageUrl() : null);
+        issueCommentVO.setReplyToUserName(replyToUser != null ? replyToUser.getName() : null);
+        issueCommentVO.setReplyToUserImageUrl(replyToUser != null ? replyToUser.getImageUrl() : null);
         return issueCommentVO;
     }
 

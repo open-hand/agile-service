@@ -48,6 +48,11 @@ public class IssueCommentDTO extends AuditDomain {
     private Long parentId;
 
     /**
+     * 被回复人id
+     */
+    private Long replyToUserId;
+
+    /**
      * 项目id
      */
     @NotNull(message = "error.IssueCommentDTO.projectIdNotNull")
@@ -55,6 +60,14 @@ public class IssueCommentDTO extends AuditDomain {
 
     @Transient
     private List<IssueAttachmentDTO> issueAttachmentDTOList;
+
+    public Long getReplyToUserId() {
+        return replyToUserId;
+    }
+
+    public void setReplyToUserId(Long replyToUserId) {
+        this.replyToUserId = replyToUserId;
+    }
 
     public Long getCommentId() {
         return commentId;
