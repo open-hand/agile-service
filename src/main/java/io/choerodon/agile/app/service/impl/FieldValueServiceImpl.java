@@ -388,6 +388,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         Object value = null;
         switch (objectSchemeFieldDTO.getFieldType()) {
             case FieldType.CHECKBOX:
+            case FieldType.MULTI_MEMBER:
             case FieldType.MULTIPLE:
                 List<FieldValueDTO> fieldValueDTOS = listMap.get(objectSchemeFieldDTO.getId());
                 List<String> values = new ArrayList<>();
