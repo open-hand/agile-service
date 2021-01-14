@@ -5,7 +5,6 @@ import React, {
 import { stores } from '@choerodon/boot';
 import { DefaultPriorityContext } from '@/hooks/useDefaultPriority';
 import { PriorityContext } from '@/hooks/usePriorities';
-import { IsOwnerContext } from '@/hooks/useIsOwner';
 
 const { AppState } = stores;
 function wrapWithContexts(contexts, values, children) {
@@ -44,5 +43,4 @@ const AgileProvider = (contexts) => function AgileDataProvider({ children, proje
 export default AgileProvider([
   DefaultPriorityContext,
   PriorityContext,
-  IsOwnerContext,
 ]);
