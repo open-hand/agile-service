@@ -146,6 +146,7 @@ function CreateField() {
       const validResult = await formDataSet.validate();
       if (['member', 'multiMember'].includes(obj.fieldType) && obj?.defaultValue !== '') {
         const userIds = Array.isArray(originDefaultValue) ? originDefaultValue : [originDefaultValue];
+        console.log('userIds...', userDataRef.current);
         obj.localDefaultObj = userDataRef.current?.filter((item) => userIds.includes(item.id)) || {};
       }
       return validResult && onSubmitLocal({ ...dataTransformPostData(obj), defaultValue: originDefaultValue });

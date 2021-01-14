@@ -42,7 +42,7 @@ const DraggableItem: React.FC<Props> = ({
   } = pageConfigFieldEdited;
   // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除
   const disabledDel = !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
-  const textEditToggleProps = useTextEditTogglePropsWithPage(data, !showSplitLine);
+  const textEditToggleProps = useTextEditTogglePropsWithPage(data, !showSplitLine, { className: `${prefixCls}-item-defaultValue` });
 
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={`${prefixCls}-text`}>
@@ -132,7 +132,7 @@ const DraggableItem: React.FC<Props> = ({
       {...textEditToggleProps}
     >
       <Observer>
-        {() => data.get('showDefaultValueText')}
+        {() => data.get('showDefaultValueText') || ''}
       </Observer>
     </TextEditToggle>
 

@@ -36,7 +36,6 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
     } = props;
     const isEdit = !!record;
     const store = useStore(type, id, organizationId);
-    const defaultUserId = isEdit && record?.get('defaultValue');
     const filterContext = ['global'];
     if (type === 'project') {
       filterContext.push('feature');

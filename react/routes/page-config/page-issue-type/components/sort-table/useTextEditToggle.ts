@@ -1,6 +1,7 @@
-import {
+import React, {
   useCallback, useMemo, useRef,
 } from 'react';
+import { Select } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import renderEditor from './renderEditor';
@@ -15,7 +16,7 @@ interface ITextEditToggleConfigProps {
   editor: () => JSX.Element
   editorExtraContent?: () => JSX.Element
   // children: JSX.Element
-  // className?: string
+  className?: string
   disabled?: boolean
   onSubmit: (data: any) => void
   initValue: any
@@ -25,7 +26,7 @@ interface ITextEditToggleConfigProps {
  *
  * @param record
  */
-function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITextEditToggleConfigProps {
+function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { className }: { className?: string }): ITextEditToggleConfigProps {
   const fieldType = record.get('fieldType');
   const dataRef = useRef<Array<any> | undefined>();
   const handleSubmit = useCallback((value: any) => {
@@ -69,8 +70,8 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
     let editor = () => renderEditor({
       record, defaultValue: initValue, dataRef, style: { minWidth: 165, maxWidth: 300 },
     });
-    if (fieldType === 'member') {
-      const defaultValueObj = record.get('defaultValueObj') || record.get('localDefaultObj') || {};
+    if (fieldType === 'member' || fieldType === 'multiMember') {
+      const defaultValueObj = record.get('defaultValueObjs') || record.get('defaultValueObj') || record.get('localDefaultObj') || undefined;
       editor = () => renderEditor({
         record, defaultValue: defaultValueObj, dataRef, style: { minWidth: 165, maxWidth: 300 },
       });
@@ -112,7 +113,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
     ...variableProps,
     ...constantProps,
     disabled,
-
+    className: !disabled ? className : undefined,
   };
 }
 export default useTextEditTogglePropsWithPage;
