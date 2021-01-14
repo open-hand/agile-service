@@ -13,10 +13,20 @@ public final class SagaTopic {
          * 创建项目SagaCode
          */
         public static final String PROJECT_CREATE = "iam-create-project";
+
+        /**
+         * 更新项目SagaCode
+         */
+        public static final String PROJECT_UPDATE = "iam-update-project";
         /**
          * 创建项目SagaTaskCode
          */
         public static final String TASK_PROJECT_CREATE = "agile-create-project";
+
+        /**
+         * 更新项目SagaTaskCode
+         */
+        public static final String TASK_PROJECT_UPDATE = "agile-update-project";
     }
 
     public static class Organization {
