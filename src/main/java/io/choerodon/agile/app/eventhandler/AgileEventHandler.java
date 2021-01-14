@@ -1,13 +1,14 @@
 package io.choerodon.agile.app.eventhandler;
 
 import com.alibaba.fastjson.JSON;
-import io.choerodon.agile.api.vo.ProjectInfoVO;
 import io.choerodon.agile.api.vo.event.OrganizationCreateEventPayload;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.ProjectEventCategory;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.enums.InitStatus;
 import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.asgard.saga.annotation.SagaTask;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public class AgileEventHandler {
 
     @Autowired
     private ProjectInfoService projectInfoService;
+    @Autowired
+    private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private IssueLinkTypeService issueLinkTypeService;
     @Autowired
@@ -128,8 +131,9 @@ public class AgileEventHandler {
         ProjectEvent projectEvent = JSON.parseObject(message, ProjectEvent.class);
         LOGGER.info("接受更新项目消息{}", message);
         Long projectId = projectEvent.getProjectId();
-        ProjectInfoVO projectInfo = projectInfoService.queryProjectInfoByProjectId(projectId);
-        if (projectInfo == null) {
+        ProjectInfoDTO dto = new ProjectInfoDTO();
+        dto.setProjectId(projectId);
+        if (projectInfoMapper.select(dto).isEmpty()) {
             List<ProjectEventCategory> projectEventCategories = projectEvent.getProjectCategoryVOS();
             if (!ObjectUtils.isEmpty(projectEventCategories)) {
                 initIfAgileProject(projectEvent, projectEventCategories);
