@@ -114,6 +114,7 @@ function ComponentHome() {
   const renderTable = () => (
     <Table
       dataSet={dataSet}
+      dragRow
     >
       <Column
         name="name"

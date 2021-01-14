@@ -16,7 +16,7 @@ function FieldEndTime({ form, field, initialValue }) {
           label="预计结束时间"
           placeholder="预计结束时间"
           format="YYYY-MM-DD HH:mm:ss"
-          showTime
+          showTime={{ defaultValue: moment('23:59:59', 'HH:mm:ss') }}
           allowClear={!field.required}
           disabledDate={(endValue) => {
             if (!endValue || !issueStartValue) {

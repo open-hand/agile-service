@@ -1,22 +1,8 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { withRouter } from 'react-router-dom';
-import { injectIntl } from 'react-intl';
-import TextEditToggle from '../../../../TextEditToggle';
+import { observer } from 'mobx-react';
 import { DatetimeAgo } from '../../../../CommonComponent';
 
-const { Text, Edit } = TextEditToggle;
-
-@inject('AppState')
 @observer class FieldDateTime extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
-  componentDidMount() {
-  }
-
   render() {
     const { store, field } = this.props;
     const { fieldCode, fieldName } = field;
@@ -30,23 +16,13 @@ const { Text, Edit } = TextEditToggle;
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <TextEditToggle
-            disabled
-            originData={fieldName}
-          >
-            <Text>
-              <DatetimeAgo
-                date={value}
-              />
-            </Text>
-            <Edit>
-              <span>{value}</span>
-            </Edit>
-          </TextEditToggle>
+          <DatetimeAgo
+            date={value}
+          />
         </div>
       </div>
     );
   }
 }
 
-export default withRouter(injectIntl(FieldDateTime));
+export default FieldDateTime;
