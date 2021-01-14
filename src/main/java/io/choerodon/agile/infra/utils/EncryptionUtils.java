@@ -48,7 +48,7 @@ public class EncryptionUtils {
 
     public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","type_code","last_update_date"};
 
-    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds"};
+    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds","fixVersion","influenceVersion"};
 
     public static final String[] IGNORE_VALUES = {"0","none"};
     public static final String BLANK_KEY = "";

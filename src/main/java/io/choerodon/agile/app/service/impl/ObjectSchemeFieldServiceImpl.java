@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.utils.*;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -515,7 +516,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         field.setOrganizationId(organizationId);
         field.setProjectId(projectId);
 
-        String defaultValue = tryDecryptDefaultValue(field.getDefaultValue());
+        String defaultValue = tryDecryptDefaultValue(field.getFieldType(), field.getDefaultValue());
         if (defaultValue != null) {
             field.setDefaultValue(defaultValue);
         }
@@ -673,7 +674,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         String[] contexts = updateDTO.getContext();
         String context = Arrays.asList(contexts).stream().filter(string -> !string.isEmpty()).collect(Collectors.joining(","));
         update.setContext(context);
-        String defaultValue = tryDecryptDefaultValue(update.getDefaultValue());
+        String defaultValue = tryDecryptDefaultValue(update.getFieldType(), update.getDefaultValue());
         updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, contexts, defaultValue, update.getExtraConfig());
         if (defaultValue != null) {
             update.setDefaultValue(defaultValue);
@@ -853,13 +854,25 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return objectSchemeFieldExtendMapper.selectByPrimaryKey(extendId);
     }
 
-    private String tryDecryptDefaultValue(String defaultValue) {
-        try {
-            return EncryptionUtils.decrypt(defaultValue);
-        } catch (Exception e) {
-            //do nothing
+    private String tryDecryptDefaultValue(String fieldType, String defaultValue) {
+        if (EncryptContext.isEncrypt()) {
+            if (Objects.equals(FieldType.MULTI_MEMBER, fieldType) && !ObjectUtils.isEmpty(defaultValue)) {
+                String[] splits = defaultValue.split(",");
+                List<String> list = new ArrayList<>();
+                for (String split : splits) {
+                    list.add(EncryptionUtils.decrypt(split));
+                }
+                return list.stream().collect(Collectors.joining(","));
+            } else {
+                try {
+                    return EncryptionUtils.decrypt(defaultValue);
+                } catch (Exception e) {
+                    //do nothing
+                }
+                return null;
+            }
         }
-        return null;
+        return defaultValue;
     }
 
     @Override
@@ -1072,7 +1085,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     a.setDefaultValue(defaultIds);
                 }
             }
-            String defaultValue = tryDecryptDefaultValue(a.getDefaultValue().toString());
+            String defaultValue = tryDecryptDefaultValue(a.getFieldType(), a.getDefaultValue().toString());
             if (defaultValue != null) {
                 a.setDefaultValue(defaultValue);
             }
@@ -1420,7 +1433,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 String defaultIds = fieldOptionService.handleFieldOption(organizationId, fieldId, fieldOptionUpdateVOList);
                 f.setDefaultValue(defaultIds);
             }
-            String defaultValue = tryDecryptDefaultValue(f.getDefaultValue().toString());
+            String defaultValue = tryDecryptDefaultValue(f.getFieldType(), f.getDefaultValue().toString());
             if (defaultValue != null) {
                 f.setDefaultValue(defaultValue);
             }

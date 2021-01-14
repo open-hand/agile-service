@@ -340,7 +340,7 @@
                      open="(" close=")" separator=",">
                 #{parentId}
             </foreach>
-        )
+        ) ai1
         order by ai1.issue_num_convert
     </select>
 
