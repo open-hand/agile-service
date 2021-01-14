@@ -1,5 +1,5 @@
 import React, {
-  useState, useContext, useEffect,
+  useState, useContext, useEffect, useRef,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
@@ -9,6 +9,7 @@ import {
 import { Choerodon } from '@choerodon/boot';
 import SelectUser from '@/components/select/select-user';
 import moment from 'moment';
+import { User } from '@/common/types';
 import { toJS } from 'mobx';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
@@ -46,7 +47,7 @@ function CreateField() {
     schemeCode, isEdit, handleRefresh,
   } = ctx;
   const [fieldOptions, setFieldOptions] = useState<Array<any>>([]);
-
+  const userDataRef = useRef<User[] | undefined>();
   useEffect(() => {
     if (isEdit && formDataSet.status === 'ready') {
       setFieldOptions(formDataSet.current?.get('fieldOptions') || []);
@@ -104,11 +105,13 @@ function CreateField() {
   // 创建或者编辑的提交操作
   async function handleOk() {
     const { current } = formDataSet;
+    const originDefaultValue = toJS(current?.get('defaultValue'));
     const obj: FiledOptions & { localDefaultObj?: any } = {
       fieldOptions: null,
       fieldType: current?.get('fieldType'),
-      defaultValue: String(current?.get('defaultValue') || ''),
+      defaultValue: String(originDefaultValue || ''),
     };
+
     if (singleList.indexOf(obj.fieldType) !== -1) {
       if (fieldOptions.length === 0) {
         Choerodon.prompt('字段列表不能为空');
@@ -127,9 +130,8 @@ function CreateField() {
         Choerodon.prompt('字段列表不能为空');
         return false;
       }
-      const defaultValueArr = toJS(current?.get('defaultValue'));
       obj.fieldOptions = fieldOptions.map((o) => {
-        if (Array.isArray(defaultValueArr) && defaultValueArr.some((v) => v === o.id || v === o.tempKey || v === o.code)) {
+        if (Array.isArray(originDefaultValue) && originDefaultValue.some((v) => v === o.id || v === o.tempKey || v === o.code)) {
           return { ...o, isDefault: true };
         }
         return { ...o, isDefault: false };
@@ -142,11 +144,11 @@ function CreateField() {
     formDataSet.current?.set('updateFieldOptions', obj.fieldOptions);
     if (onSubmitLocal) {
       const validResult = await formDataSet.validate();
-      if (obj.fieldType === 'member' && obj?.defaultValue !== '') {
-        const { list: userInfoList } = await userApi.getById(obj.defaultValue);
-        obj.localDefaultObj = userInfoList && userInfoList.length > 0 ? userInfoList[0] : {};
+      if (['member', 'multiMember'].includes(obj.fieldType) && obj?.defaultValue !== '') {
+        const userIds = Array.isArray(originDefaultValue) ? originDefaultValue : [originDefaultValue];
+        obj.localDefaultObj = userDataRef.current?.filter((item) => userIds.includes(item.id)) || {};
       }
-      return validResult && onSubmitLocal({ ...dataTransformPostData(obj), defaultValue: toJS(current?.get('defaultValue')) });
+      return validResult && onSubmitLocal({ ...dataTransformPostData(obj), defaultValue: originDefaultValue });
     }
     const fieldId = formDataSet.current?.get('id');
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${fieldId}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
@@ -336,15 +338,20 @@ function CreateField() {
           </>
         );
       }
+      case 'multiMember':
       case 'member':
         return (
           <SelectUser
+            key={`page-config-create-or-edit-member-${fieldType}`}
             name="defaultValue"
-            autoQueryConfig={{
-              selectedUserIds: current?.get('defaultValue'),
-              // @ts-ignore
-              queryUserRequest: async (userId: number) => (type === 'project' ? userApi.getAllInProject('', undefined, userId) : userApi.getAllInOrg('', undefined, userId)),
-            }}
+            selectedUser={current?.get('defaultValueObj')}
+            // autoQueryConfig={{
+            //   selectedUserIds: current?.get('defaultValue'),
+            //   // @ts-ignore
+            //   queryUserRequest: async (userId: number) => (type === 'project' ? userApi.getAllInProject('', undefined, userId) : userApi.getAllInOrg('', undefined, userId)),
+            // }}
+            dataRef={userDataRef}
+            multiple={fieldType === 'multiMember'}
             request={({ filter, page }) => (type === 'project' ? userApi.getAllInProject(filter, page) : userApi.getAllInOrg(filter, page))}
           />
         );

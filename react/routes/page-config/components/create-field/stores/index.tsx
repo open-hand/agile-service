@@ -78,7 +78,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
         });
         formDataSet.query().then((data) => {
           const dateList = ['date', 'datetime', 'time'];
-          const multipleList = ['checkbox', 'multiple'];
+          const multipleList = ['checkbox', 'multiple', 'multiMember'];
           const dateFormat = ['YYYY-MM-DD', 'YYYY-MM-DD HH:mm:ss', 'HH:mm:ss'];
           const dateIndex = dateList.indexOf(data.fieldType);
           if (dateIndex !== -1) {
