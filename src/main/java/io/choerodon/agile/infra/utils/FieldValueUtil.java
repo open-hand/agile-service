@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.choerodon.agile.api.vo.FieldDataLogCreateVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
@@ -172,12 +173,11 @@ public class FieldValueUtil {
      * @param pageFieldViews
      */
     public static void handleDefaultValue(List<PageFieldViewVO> pageFieldViews) {
-        Map<Long, UserDTO> userMap = handleUserMap(pageFieldViews.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER) && x.getDefaultValue() != null && !"".equals(String.valueOf(x.getDefaultValue()).trim()))
-                .map(x -> Long.parseLong(String.valueOf(x.getDefaultValue()))).collect(Collectors.toList()));
+        List<Long> userIds = getUserIds(pageFieldViews);
+        Map<Long, UserDTO> userMap = handleUserMap(userIds);
         for (PageFieldViewVO view : pageFieldViews) {
             switch (view.getFieldType()) {
                 case FieldType.CHECKBOX:
-                case FieldType.MULTI_MEMBER:
                 case FieldType.MULTIPLE:
                     handleDefaultValueIds(view);
                     break;
@@ -208,6 +208,9 @@ public class FieldValueUtil {
                         view.setDefaultValueObj(userMap.getOrDefault(defaultValue, new UserDTO()));
                     }
                     break;
+                case FieldType.MULTI_MEMBER:
+                     handlerMultiMember(view, userMap);
+                    break;
                 case FieldType.INPUT:
                 case FieldType.TEXT:
                     break;
@@ -215,6 +218,41 @@ public class FieldValueUtil {
                     break;
             }
         }
+    }
+
+    private static void handlerMultiMember(PageFieldViewVO view, Map<Long, UserDTO> userMap) {
+        Object defaultValue = view.getDefaultValue();
+        if (defaultValue != null && !"".equals(defaultValue)) {
+            String[] defaultIdStrs = String.valueOf(defaultValue).split(",");
+            if (defaultIdStrs != null) {
+                String[] defaultIds = new String[defaultIdStrs.length];
+                List<Object> userDTOS = new ArrayList<>();
+                for (int i = 0; i < defaultIdStrs.length; i++) {
+                    defaultIds[i] = EncryptionUtils.encrypt(Long.valueOf(defaultIdStrs[i]));
+                    UserDTO userDTO = userMap.get(Long.valueOf(defaultIdStrs[i]));
+                    if (!ObjectUtils.isEmpty(userDTO)) {
+                        userDTOS.add(userDTO);
+                    }
+                }
+                view.setDefaultValue(defaultIds);
+                view.setDefaultValueObjs(userDTOS);
+            }
+        }
+    }
+
+    private static List<Long> getUserIds(List<PageFieldViewVO> pageFieldViews) {
+        List<Long> userIds = new ArrayList<>();
+        pageFieldViews.stream().filter(x -> (x.getFieldType().equals(FieldType.MEMBER) || x.getFieldType().equals(FieldType.MULTI_MEMBER)) && x.getDefaultValue() != null && !"".equals(String.valueOf(x.getDefaultValue()).trim()))
+                .forEach(v -> {
+                    if (Objects.equals(FieldType.MEMBER, v.getFieldType())) {
+                        userIds.add(Long.valueOf(v.getDefaultValue().toString()));
+                    } else {
+                        String[] split = v.getDefaultValue().toString().split(",");
+                        List<Long> ids = Stream.of(split).map(id -> Long.valueOf(id)).collect(Collectors.toList());
+                        userIds.addAll(ids);
+                    }
+                });
+        return userIds;
     }
 
     /**
