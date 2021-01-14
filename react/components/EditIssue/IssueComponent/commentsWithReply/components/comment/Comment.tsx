@@ -1,120 +1,97 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Icon, Popconfirm } from 'choerodon-ui';
-import { text2Delta } from '@/utils/richText';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
-import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
-import UserHead from '@/components/UserHead';
-// @ts-ignore
-import Delta from 'quill-delta';
+import React, { useCallback, useState, useContext } from 'react';
+import { observer } from 'mobx-react-lite';
 import './Comment.less';
 import { IComment } from '@/common/types';
-import { useDetailContext } from '../../../../../IssueDetail/context';
+import { issueCommentApi, UComment } from '@/api/IssueComment';
+import CommentItem, { ReplyComment } from './CommentItem';
+import EditIssueContext from '../../../../stores';
 
 interface Props {
+  projectId?: string
   hasPermission: boolean
   comment: IComment
-  onDelete: Function
-  onUpdate: (delta: Delta) => Promise<any>
+  onDelete?: Function
+  reload: Function
 }
-const Comment: React.FC<Props> = ({
-  hasPermission, comment, onDelete, onUpdate,
-}) => {
-  const { outside } = useDetailContext();
-  const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState<Delta>();
-  useEffect(() => {
-    const delta = text2Delta(comment.commentText);
-    setValue(delta);
-  }, [comment.commentText]);
-  const handleUpdate = useCallback(async (delta: Delta) => {
-    await onUpdate(delta);
-    setEditing(false);
-  }, [onUpdate]);
 
-  const canEditOrDelete = hasPermission;
+const Comment: React.FC<Props> = (props) => {
+  const { store } = useContext(EditIssueContext);
+  const { commentExpandMap, commentReplysMap } = store;
+  const { comment, reload } = props;
+  const [expand, setExpand] = useState(false);
+  const [replys, setReplys] = useState<IComment[]>([]);
 
-  const handleChange = useCallback((delta: Delta) => {
-    setValue(delta);
-  }, []);
+  const handleFold = useCallback(() => {
+    // setExpand(false);
+    commentExpandMap.set(comment.commentId, false);
+  }, [comment.commentId, commentExpandMap]);
+
+  const getReplys = useCallback(() => {
+    // setExpand(true);
+    commentExpandMap.set(comment.commentId, true);
+    issueCommentApi.getReplys(comment.commentId).then((res: ReplyComment[]) => {
+      // setReplys(res);
+      commentReplysMap.set(comment.commentId, res || []);
+    });
+  }, [comment.commentId, commentExpandMap, commentReplysMap]);
+
+  const onReply = useCallback(() => {
+    const callback = () => {
+      // commentReplysMap.clear();
+      // commentExpandMap.clear();
+      getReplys();
+    };
+    reload(callback);
+  }, [getReplys, reload]);
+
   return (
     <div
       className="c7n-comment"
     >
-      <div className="line-justify">
-        <div className="c7n-title-commit" style={{ flex: 1 }}>
-          <UserHead
-            // @ts-ignore
-            user={{
-              id: comment.userId,
-              name: comment.userName,
-              realName: comment.userRealName,
-              loginName: comment.userLoginName,
-              avatar: comment.userImageUrl,
-            }}
-            color="#3f51b5"
-          />
-          <div style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
-            <DatetimeAgo
-              date={comment.lastUpdateDate}
-            />
+      <div className="c7n-comment-self">
+        <CommentItem
+          isReply={false}
+          {...props}
+          onReply={onReply}
+          onDelete={reload}
+          onUpdate={reload}
+          parentId={comment.commentId}
+        />
+        {
+          commentExpandMap.get(comment.commentId) && (
+            <div className="c7n-comment-replys">
+              {
+                (commentReplysMap.get(comment.commentId) || []).map((item: IComment) => (
+                  <CommentItem
+                    isReply
+                    {...props}
+                    onReply={reload}
+                    onDelete={reload}
+                    onUpdate={reload}
+                    comment={item}
+                    parentId={comment.commentId}
+                  />
+                ))
+              }
+            </div>
+          )
+        }
+        {
+          comment.replySize > 0 && (
+          <div className="c7n-comment-expand">
+            {
+              commentExpandMap.get(comment.commentId) ? <span role="none" onClick={handleFold}>收起评论</span> : (
+                <span role="none" onClick={getReplys}>
+                  {`打开评论(${comment.replySize})`}
+                </span>
+              )
+            }
           </div>
-        </div>
-        <div className="c7n-action">
-          {
-            hasPermission && (
-              <Icon
-                type="mode_edit mlr-3 pointer"
-                onClick={() => {
-                  if (canEditOrDelete) {
-                    setEditing(true);
-                  }
-                }}
-              />
-            )
-          }
-
-          {
-            hasPermission && (
-              <Popconfirm
-                title="确认要删除该评论吗?"
-                placement="left"
-                onConfirm={() => onDelete()}
-                okText="删除"
-                cancelText="取消"
-                okType="danger"
-              >
-                <Icon
-                  type="delete_forever mlr-3 pointer"
-                />
-              </Popconfirm>
-            )
-          }
-        </div>
+          )
+        }
       </div>
-      {
-        editing ? (
-          <div className="c7n-conent-commit" style={{ marginTop: 10 }}>
-            <WYSIWYGEditor
-              autoFocus
-              bottomBar
-              value={value}
-              onChange={handleChange}
-              style={{ height: 200, width: '100%' }}
-              handleDelete={() => {
-                setEditing(false);
-              }}
-              handleSave={handleUpdate}
-            />
-          </div>
-        ) : (
-          <div style={{ marginTop: 10 }}>
-            <WYSIWYGViewer data={comment.commentText} />
-          </div>
-        )
-      }
     </div>
   );
 };
 
-export default Comment;
+export default observer(Comment);

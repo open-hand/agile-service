@@ -270,7 +270,7 @@ class Store {
   }
 
   @action
-  async deleteComment(commentId: number) {
+  async deleteComment(commentId: string) {
     // await demandApi.project(this.projectId).deleteComment(commentId, this.outside, this.projectId);
     // this.refresh();
   }

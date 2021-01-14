@@ -26,9 +26,9 @@ const Comments: React.FC = () => {
         {
           comments.reverse().map((comment) => (
             <Comment
-              key={comment.id}
+              key={comment.commentId}
               comment={comment}
-              onDelete={() => { store.deleteComment(comment.id); }}
+              onDelete={() => { store.deleteComment(comment.commentId); }}
               onUpdate={(delta) => store.updateComment(delta, comment)}
               hasPermission={hasAdminPermission || String(comment.userId) === String(loginUserId)}
             />
