@@ -193,7 +193,9 @@ class IssueSearchStore {
   @action
   clearAllFilter() {
     for (const [, field] of this.chosenFields) {
-      if (field.value) {
+      if (field.archive) {
+        this.handleChosenFieldChange(false, field as IField);
+      } else if (field.value) {
         field.value = undefined;
       }
     }
