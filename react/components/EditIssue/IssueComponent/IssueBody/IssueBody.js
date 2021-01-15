@@ -10,7 +10,7 @@ import IssueDetail from './IssueDetail';
 import IssueDes from './IssueDes';
 import IssueAttachment from './IssueAttachment';
 import IssueDoc from './IssueDoc';
-import IssueCommit from '../commentsWithReply';
+import Comments from '../commentsWithReply';
 import SplitStory from './SplitStory';
 import IssueWorkLog from './IssueWorkLog';
 import IssueLog from './IssueLog';
@@ -126,7 +126,7 @@ function IssueBody(props) {
             ) : ''
         }
         <TabPane tab="评论" key="comment">
-          <IssueCommit {...props} />
+          <Comments {...props} />
         </TabPane>
         <TabPane tab="记录" key="record">
           {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
