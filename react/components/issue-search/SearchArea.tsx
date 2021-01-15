@@ -32,6 +32,7 @@ const SearchArea: React.FC = () => {
   } = store;
   const myFilters = store.getMyFilters;
   const selectedQuickFilterIds = chosenFields.get('quickFilterIds') ? toJS(chosenFields.get('quickFilterIds')?.value) : undefined;
+  const archiveFields = [...chosenFields.values()].filter((field) => field.archive);
   const getSelectedQuickFilters = () => (selectedQuickFilterIds || []).map((id: string) => {
     const target = find(quickFilters, { filterId: id });
     return target ? { key: `quick|${target.filterId}`, label: target.name } : {};
@@ -218,13 +219,15 @@ const SearchArea: React.FC = () => {
           </Button>
         )}
         {onClickSaveFilter && !findSameFilter() && isHasFilter && !folded && (
-          <Button
-            onClick={onClickSaveFilter}
-            funcType={'flat' as FuncType}
-            className={`${prefixCls}-search-right-btn ${prefixCls}-search-right-saveBtn`}
-          >
-            保存筛选
-          </Button>
+          <Tooltip title={archiveFields.length > 0 && `${archiveFields.map((f) => f.name).join(',')}字段已被废弃，请去掉该字段后保存`}>
+            <Button
+              onClick={archiveFields.length > 0 ? undefined : onClickSaveFilter}
+              funcType={'flat' as FuncType}
+              className={`${prefixCls}-search-right-btn ${prefixCls}-search-right-saveBtn`}
+            >
+              保存筛选
+            </Button>
+          </Tooltip>
         )}
         {
           (overflowLine || folded === true) && (
