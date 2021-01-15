@@ -100,12 +100,15 @@ function CustomField({ field }) {
           onChange={handleChange}
         />
       );
+    case 'influenceVersion':
+    case 'fixVersion':
     case 'version':
       return (
         <VersionField
           field={field}
           value={value}
           onChange={handleChange}
+          disabled={field.archive}
         />
       );
     case 'epic':

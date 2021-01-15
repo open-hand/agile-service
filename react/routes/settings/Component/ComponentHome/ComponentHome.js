@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { Button, Tooltip, Icon } from 'choerodon-ui';
 import { Modal, Table } from 'choerodon-ui/pro';
@@ -110,11 +110,20 @@ function ComponentHome() {
       service={['choerodon.code.project.setting.issue.ps.deletecomponent']}
     />
   );
-
+  const handleDragEnd = useCallback((ds, columns, result) => {
+    const { source, destination } = result;
+    if (!destination) {
+      return;
+    }
+    const sourceIndex = source.index;
+    const destinationIndex = destination.index;
+    console.log(ds.toData());
+  }, []);
   const renderTable = () => (
     <Table
       dataSet={dataSet}
       dragRow
+      onDragEnd={handleDragEnd}
     >
       <Column
         name="name"

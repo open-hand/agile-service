@@ -1035,14 +1035,14 @@ class CreateIssue extends Component {
 
         );
       case 'estimatedStartTime':
-        return newIssueTypeCode !== 'issue_epic' && (
+        return (
           <FieldStartTime
             form={form}
             field={field || {}}
           />
         );
       case 'estimatedEndTime':
-        return newIssueTypeCode !== 'issue_epic' && (
+        return (
           <FieldEndTime
             form={form}
             field={field || {}}

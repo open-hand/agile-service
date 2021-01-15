@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import SelectVersion from '@/components/select/select-version';
 
-function VersionField({ field, value, onChange }) {
+function VersionField({
+  field, value, onChange, ...props
+}) {
   const [, setValue] = useState(0);
   return (
     <SelectVersion
@@ -17,9 +19,7 @@ function VersionField({ field, value, onChange }) {
       clearButton
       onChange={onChange}
       valueField="versionId"
-      onBlur={() => {
-        console.log('blur');
-      }}
+      {...props}
     />
   );
 }
