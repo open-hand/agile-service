@@ -13,7 +13,7 @@ import openIssueMove from './issue-move';
 
 const { confirm } = Modal;
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue,
+  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef,
 }) => {
   const {
     store, onUpdate, applyType,
@@ -102,7 +102,7 @@ const IssueDropDown = ({
         customFields: store.customFields,
         onMoveIssue: onDeleteIssue,
         loseItems: {
-          test: hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1, // 还需要添加length判断
+          test: hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && testLinkStoreRef.current?.data?.length,
           doc: docs && docs.knowledgeRelationList?.length,
           backlog: store.backlogLinks && store.backlogLinks.length,
           linkIssue: store.getLinkIssues && store.getLinkIssues.length,
