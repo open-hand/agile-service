@@ -10,8 +10,6 @@ const { AppState } = stores;
  * @param isShowFeature 判断项目是否显示特性 需先使用loadIsShowFeature
  */
 class IsInProgramStore {
-  @observable isOwner = true;
-
   @observable isInProgram = false;
 
   @observable program = false;
@@ -54,15 +52,6 @@ class IsInProgramStore {
 
   @computed get getIsShowFeature() {
     return this.isShowFeature;
-  }
-
-  getIsOwner = async () => {
-    const isOwner = await commonApi.getUserRolesInProject();
-    this.setIsOwner(isOwner);
-  }
-
-  @action setIsOwner(data) {
-    this.isOwner = data;
   }
 
   @action setArtInfo(data) {

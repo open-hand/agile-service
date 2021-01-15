@@ -44,29 +44,37 @@
     align-items: center;
     height: 20px;
     margin-top: 9px;
+
     .c7n-pro-btn {
       height: 30px !important;
     }
+
     &-btn {
       color: #5365EA;
       border: 1px solid #D9E6F2;
       font-weight: 500;
       border-radius: 6px;
+
       span {
         white-space: nowrap;
       }
     }
+
     .foldedBtn {
       background-color: #5365EA;
       color: #ffffff;
+
       &:hover {
         color: #5365EA;
       }
-      &:active, &:focus {
+
+      &:active,
+      &:focus {
         background-color: #5365EA;
         color: #ffffff;
       }
     }
+
     &-saveBtn {
       background: rgba(83, 101, 234, 0.08);
     }
@@ -94,4 +102,17 @@
       padding: 0 10px;
     }
   }
+
+  &-hidden_my_filter {
+    & > div:first-child {
+      display: none;
+    }
+
+    & > div:nth-child(2) > div {
+      & > ul > li > ul > li {
+        padding-left: .12rem;
+      }
+    }
+  }
+
 }

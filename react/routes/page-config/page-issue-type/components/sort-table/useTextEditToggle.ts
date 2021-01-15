@@ -1,13 +1,12 @@
 import React, {
-  useCallback, useMemo, useRef, useState,
+  useCallback, useMemo, useRef,
 } from 'react';
-import { set } from 'lodash';
-import moment from 'moment';
+import { Select } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import renderEditor from './renderEditor';
 import {
-  fieldTextValueConfig, transformDefaultValue, orgDisabledEditDefaultFields, disabledEditDefaultFields,
+  transformDefaultValue, orgDisabledEditDefaultFields, disabledEditDefaultFields,
 } from '../../utils';
 
 interface ITextEditToggleConfigProps {
@@ -17,7 +16,7 @@ interface ITextEditToggleConfigProps {
   editor: () => JSX.Element
   editorExtraContent?: () => JSX.Element
   // children: JSX.Element
-  // className?: string
+  className?: string
   disabled?: boolean
   onSubmit: (data: any) => void
   initValue: any
@@ -27,7 +26,7 @@ interface ITextEditToggleConfigProps {
  *
  * @param record
  */
-function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITextEditToggleConfigProps {
+function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { className }: { className?: string }): ITextEditToggleConfigProps {
   const fieldType = record.get('fieldType');
   const dataRef = useRef<Array<any> | undefined>();
   const handleSubmit = useCallback((value: any) => {
@@ -47,13 +46,11 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
       }
     }
     if (['date', 'datetime', 'time'].includes(fieldType)) {
-      console.log('value', value, value === 'current');
       newValue = value === 'current' ? currentData.defaultValue : value;
       record.set('extraConfig', value === 'current');
     }
 
     record.set('defaultValue', newValue);
-    console.log('dataRef.current', dataRef.current);
     record.set('showDefaultValueText', transformDefaultValue({
       ...currentData,
       // @ts-ignore
@@ -61,7 +58,6 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
       defaultValue: newValue,
       defaultValueObj: currentDefaultValueObj,
       fieldOptions: currentData.fieldOptions || dataRef.current,
-      ...fieldTextValueConfig[currentData.fieldCode as keyof typeof fieldTextValueConfig],
     }));
   }, [fieldType, record]);
   const initValue = useMemo(() => {
@@ -71,10 +67,14 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
     return typeof (record.get('defaultValue')) === 'undefined' || record.get('defaultValue') === '' ? undefined : record.get('defaultValue');
   }, [fieldType, record, record.get('defaultValue'), record.get('extraConfig')]);
   const variableProps = useMemo(() => {
-    let editor = () => renderEditor({ record, defaultValue: initValue, dataRef });
-    if (fieldType === 'member') {
-      const defaultValueObj = record.get('defaultValueObj') || record.get('localDefaultObj') || {};
-      editor = () => renderEditor({ record, defaultValue: defaultValueObj, dataRef });
+    let editor = () => renderEditor({
+      record, defaultValue: initValue, dataRef, style: { minWidth: 165, maxWidth: 300 },
+    });
+    if (fieldType === 'member' || fieldType === 'multiMember') {
+      const defaultValueObj = record.get('defaultValueObjs') || record.get('defaultValueObj') || record.get('localDefaultObj') || undefined;
+      editor = () => renderEditor({
+        record, defaultValue: defaultValueObj, dataRef, style: { minWidth: 165, maxWidth: 300 },
+      });
     }
     return {
       initValue,
@@ -113,7 +113,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean): ITe
     ...variableProps,
     ...constantProps,
     disabled,
-
+    className: !disabled ? className : undefined,
   };
 }
 export default useTextEditTogglePropsWithPage;

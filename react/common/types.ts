@@ -189,7 +189,7 @@ export interface IField {
   required: boolean
 }
 export interface IComment {
-  id: number
+  commentId: string
   commentText: string
   issueId: number
   lastUpdateDate: string
@@ -200,6 +200,7 @@ export interface IComment {
   userLoginName: string
   userName: string
   userRealName: string
+  replySize: number
 }
 interface Attachment {
   id: number

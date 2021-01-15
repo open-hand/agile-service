@@ -6,15 +6,14 @@ import { Choerodon } from '@choerodon/boot';
 import {
   Button, Icon, Dropdown, Input, Menu, Form,
 } from 'choerodon-ui';
+import { debounce } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
 import { fields2Map } from '@/utils/defaultValue';
 import TypeTag from '../TypeTag';
-import { deBounce } from './Utils';
 import './QuickCreateIssue.less';
 
-const debounceCallback = deBounce(500);
 const FormItem = Form.Item;
 
 const propTypes = {
@@ -36,7 +35,7 @@ class QuickCreateIssue extends Component {
     });
   };
 
-  handleCreate = () => {
+  handleCreate = debounce(() => {
     const { currentTypeCode } = this.state;
     const {
       form, issueTypes, sprintId, epicId, versionIssueRelVOList, chosenFeatureId,
@@ -45,6 +44,9 @@ class QuickCreateIssue extends Component {
       const { summary } = values;
       if (summary && summary.trim()) {
         if (!err) {
+          this.setState({
+            loading: true,
+          });
           const currentType = issueTypes.find((t) => t.typeCode === currentTypeCode);
           if (!await checkCanQuickCreate(currentType.typeCode)) {
             Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
@@ -56,66 +58,63 @@ class QuickCreateIssue extends Component {
           const {
             defaultPriority, onCreate, defaultAssignee,
           } = this.props;
-          debounceCallback(async () => {
-            if (summary.trim() !== '') {
-              const param = {
+          if (summary.trim() !== '') {
+            const param = {
+              schemeCode: 'agile_issue',
+              context: currentType.typeCode,
+              pageCode: 'agile_issue_create',
+            };
+            const fields = await fieldApi.getFields(param);
+            const fieldsMap = fields2Map(fields);
+            const issue = {
+              priorityCode: `priority-${defaultPriority.id}`,
+              priorityId: defaultPriority.id,
+              projectId: getProjectId(),
+              programId: getProjectId(),
+              epicId: epicId || 0,
+              summary: summary.trim(),
+              issueTypeId: currentType.id,
+              typeCode: currentType.typeCode,
+              parentIssueId: 0,
+              relateIssueId: 0,
+              featureVO: {},
+              sprintId: sprintId || fieldsMap.get('sprint').defaultValue || 0,
+              epicName: currentTypeCode === 'issue_epic' ? summary.trim() : undefined,
+              componentIssueRelVOList: fieldsMap.get('component').defaultValueObjs || [],
+              description: '',
+              issueLinkCreateVOList: [],
+              labelIssueRelVOList: fieldsMap.get('label').defaultValueObjs || [],
+              versionIssueRelVOList: versionIssueRelVOList || [],
+              fixVersionIssueRel: fieldsMap.get('fixVersion').defaultValue || [],
+              featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
+              assigneeId: defaultAssignee,
+            };
+            issueApi.create(issue).then((res) => {
+              this.setState({
+                loading: false,
+                create: false,
+              });
+              const dto = {
                 schemeCode: 'agile_issue',
-                context: currentType.typeCode,
+                context: res.typeCode,
                 pageCode: 'agile_issue_create',
               };
-              const fields = await fieldApi.getFields(param);
-              const fieldsMap = fields2Map(fields);
-              const issue = {
-                priorityCode: `priority-${defaultPriority.id}`,
-                priorityId: defaultPriority.id,
-                projectId: getProjectId(),
-                programId: getProjectId(),
-                epicId: epicId || 0,
-                summary: summary.trim(),
-                issueTypeId: currentType.id,
-                typeCode: currentType.typeCode,
-                parentIssueId: 0,
-                relateIssueId: 0,
-                featureVO: {},
-                sprintId: sprintId || fieldsMap.get('sprint').defaultValue || 0,
-                epicName: currentTypeCode === 'issue_epic' ? summary.trim() : undefined,
-                componentIssueRelVOList: fieldsMap.get('component').defaultValueObjs || [],
-                description: '',
-                issueLinkCreateVOList: [],
-                labelIssueRelVOList: fieldsMap.get('label').defaultValueObjs || [],
-                versionIssueRelVOList: versionIssueRelVOList || [],
-                fixVersionIssueRel: fieldsMap.get('fixVersion').defaultValue || [],
-                featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
-                assigneeId: defaultAssignee,
-              };
+              fieldApi.quickCreateDefault(res.issueId, dto);
+              if (onCreate) {
+                onCreate(res);
+              }
+            }).catch(() => {
               this.setState({
-                loading: true,
+                loading: false,
               });
-              issueApi.create(issue).then((res) => {
-                this.setState({
-                  loading: false,
-                  create: false,
-                });
-                const dto = {
-                  schemeCode: 'agile_issue',
-                  context: res.typeCode,
-                  pageCode: 'agile_issue_create',
-                };
-                fieldApi.quickCreateDefault(res.issueId, dto);
-                if (onCreate) {
-                  onCreate(res);
-                }
-              }).catch(() => {
-                this.setState({
-                  loading: false,
-                });
-              });
-            }
-          }, this);
+            });
+          }
         }
       }
     });
-  };
+  }, 500, {
+    leading: true,
+  });
 
   render() {
     const {

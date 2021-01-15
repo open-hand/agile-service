@@ -2,12 +2,21 @@ import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 import Api from './Api';
 
-interface IComment {
-    issueId: number,
+export interface IComment {
+    issueId: string,
     commentText: string,
 }
-interface UComment extends IComment {
-    objectVersionNumber:number,
+export interface UComment {
+  commentId: string
+  objectVersionNumber:number,
+  commentText: string,
+}
+
+export interface IReplyCreate {
+  issueId: string,
+  parentId: string
+  replyToUserId: string
+  commentText: string,
 }
 class IssueCommentApi extends Api<IssueCommentApi> {
   get prefix() {
@@ -39,13 +48,35 @@ class IssueCommentApi extends Api<IssueCommentApi> {
   }
 
   /**
-   * 根据commitId删除评论
+   * 根据commitId删除评论, 单条
    * @param commitId
    */
-  delete(commitId:number) {
+  delete(commitId:string) {
     return this.request({
       method: 'delete',
       url: `${this.prefix}/issue_comment/${commitId}`,
+    });
+  }
+
+  deleteWithReply(commentId: string) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/issue_comment/reply/${commentId}`,
+    });
+  }
+
+  createReply(data: IReplyCreate) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_comment/reply`,
+      data,
+    });
+  }
+
+  getReplys(commentId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/issue_comment/reply/${commentId}`,
     });
   }
 }

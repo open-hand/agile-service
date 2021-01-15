@@ -288,8 +288,13 @@ const Confirm: React.FC<Props> = ({
     if (fieldsLosed.length) {
       tipText += `，${fieldsLosed.map((item) => `【${item.name}】`).join('、')}的字段值将永久丢失。`;
     }
+
     if (loseItemNames.length) {
-      tipText += `且该问题与其他${loseItemNames.join('、')}的关联关系，将永久丢失。`;
+      if (fieldsLosed.length) {
+        tipText += `且该问题与其他${loseItemNames.join('、')}的关联关系，将永久丢失。`;
+      } else {
+        tipText += `，该问题与其他${loseItemNames.join('、')}的关联关系，将永久丢失。`;
+      }
     }
   } else {
     tipText += '。';

@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useRef } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { useDetailContainerContext } from '@/components/detail-container/context';
@@ -10,7 +10,7 @@ import IssueDetail from './IssueDetail';
 import IssueDes from './IssueDes';
 import IssueAttachment from './IssueAttachment';
 import IssueDoc from './IssueDoc';
-import IssueCommit from '../commentsWithReply';
+import Comments from '../commentsWithReply';
 import SplitStory from './SplitStory';
 import IssueWorkLog from './IssueWorkLog';
 import IssueLog from './IssueLog';
@@ -48,6 +48,8 @@ function IssueBody(props) {
   const { linkBranchShow } = store;
   const workLogShow = store.getWorkLogShow;
   const hasTest = useHasTest();
+  const testLinkStoreRef = useRef();
+
   return (
     <section className={`${prefixCls}-body`} id="scroll-area" style={{ position: 'relative' }}>
       <div style={{ paddingRight: 20 }}>
@@ -60,7 +62,7 @@ function IssueBody(props) {
           <FieldStar {...props} />
           <div style={{ flexShrink: 0, marginLeft: 'auto', color: 'rgba(0, 0, 0, 0.65)' }}>
             {!disabled && (
-              <IssueDropDown {...props} />
+              <IssueDropDown {...props} testLinkStoreRef={testLinkStoreRef} />
             )}
           </div>
         </div>
@@ -110,7 +112,7 @@ function IssueBody(props) {
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
             ? <SubBug {...props} /> : ''}
           {hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
-            ? <TestLink {...props} /> : ''}
+            ? <TestLink {...props} testLinkStoreRef={testLinkStoreRef} /> : ''}
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
           {!outside && !otherProject && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
@@ -124,7 +126,7 @@ function IssueBody(props) {
             ) : ''
         }
         <TabPane tab="评论" key="comment">
-          <IssueCommit {...props} />
+          <Comments {...props} />
         </TabPane>
         <TabPane tab="记录" key="record">
           {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}

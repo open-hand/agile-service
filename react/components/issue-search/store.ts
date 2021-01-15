@@ -14,9 +14,12 @@ export type ILocalField = {
   fieldType: IField['fieldType'],
   defaultShow?: boolean
   noDisplay?: boolean
+
 }
 type IChosenField = (IField | ILocalField) & {
   value: any
+  // 废弃的字段
+  archive?: boolean
 }
 export type IChosenFields = Map<string, IChosenField>
 
@@ -190,7 +193,9 @@ class IssueSearchStore {
   @action
   clearAllFilter() {
     for (const [, field] of this.chosenFields) {
-      if (field.value) {
+      if (field.archive) {
+        this.handleChosenFieldChange(false, field as IField);
+      } else if (field.value) {
         field.value = undefined;
       }
     }

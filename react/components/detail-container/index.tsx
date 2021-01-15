@@ -45,6 +45,11 @@ export const useDetail = (): [DetailContainerProps] => {
     setVisible(false);
   }, []);
   const clear = useCallback(() => {
+    eventsMap.current.forEach((events) => {
+      if (events.close) {
+        events.close();
+      }
+    });
     setRoutes([]);
   }, []);
   return [{

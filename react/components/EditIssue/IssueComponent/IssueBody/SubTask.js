@@ -99,11 +99,12 @@ const SubTask = observer(({
     }
     const subIssueType = issueTypes.find((t) => t.typeCode === 'sub_task');
     if (summary) {
+      creatingRef.current = true;
       if (!await checkCanQuickCreate(subIssueType.typeCode)) {
         Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
+        creatingRef.current = false;
         return;
       }
-      creatingRef.current = true;
       const issue = {
         summary,
         priorityId,

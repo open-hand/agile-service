@@ -67,7 +67,6 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>((props, ref) => {
   });
   const [visible, setVisible] = useState<boolean>(false);
 
-  console.log('props', props);
   function handleChange(code?: string) {
     setOptionValue(code);
     if (code === 'custom') {
@@ -118,7 +117,6 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>((props, ref) => {
                 onSelect={(newDate: any) => handleChangeDate(newDate)}
                 format="YYYY-MM-DD HH:mm:ss"
                 onViewModeChange={(newMode) => {
-                  console.log('onViewModeChange', newMode);
                   setMode(newMode);
                 }}
                 mode={props.dateType === 'datetime' ? 'dateTime' : props.dateType as any}

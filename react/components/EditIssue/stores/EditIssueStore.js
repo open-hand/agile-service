@@ -252,5 +252,9 @@ class EditIssueStore {
   @action setBacklogLinks = (data) => {
     this.backlogLinks = data;
   }
+
+  commentExpandMap = observable.map();
+
+  commentReplysMap = observable.map();
 }
 export default EditIssueStore;

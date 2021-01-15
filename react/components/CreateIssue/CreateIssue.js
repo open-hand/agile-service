@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-closing-tag-location */
 import React, { Component } from 'react';
 import {
-  stores, Content, Choerodon,
+  stores, Content, Choerodon, Permission,
 } from '@choerodon/boot';
 import { map, find } from 'lodash';
 import {
@@ -1003,35 +1003,46 @@ class CreateIssue extends Component {
         );
       case 'pi':
         return (
-          <FormItem key={field.id} label="PI">
-            {getFieldDecorator('pi', {
-              rules: [{ required: field.required, message: '请选择pi' }],
-            })(
-              <SelectFocusLoad
-                label="PI"
-                type="pi"
-              >
-                {field.defaultValueObjs?.map((pi) => (
-                  <Option
-                    key={pi.id}
-                    value={pi.id}
+          <Permission service={[
+            'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.completepi',
+            'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.startpi',
+            'choerodon.code.project.plan.feature.ps.pi.plan',
+          ]}
+          >
+            {(hasPermission) => (
+              <FormItem key={field.id} label="PI">
+                {getFieldDecorator('pi', {
+                  rules: [{ required: field.required, message: '请选择pi' }],
+                })(
+                  <SelectFocusLoad
+                    label="PI"
+                    type="pi"
+                    optionArgs={!hasPermission}
                   >
-                    {`${pi.code}-${pi.name}`}
-                  </Option>
-                ))}
-              </SelectFocusLoad>,
+                    {field.defaultValueObjs?.map((pi) => (
+                      <Option
+                        key={pi.id}
+                        value={pi.id}
+                      >
+                        {`${pi.code}-${pi.name}`}
+                      </Option>
+                    ))}
+                  </SelectFocusLoad>,
+                )}
+              </FormItem>
             )}
-          </FormItem>
+          </Permission>
+
         );
       case 'estimatedStartTime':
-        return newIssueTypeCode !== 'issue_epic' && (
+        return (
           <FieldStartTime
             form={form}
             field={field || {}}
           />
         );
       case 'estimatedEndTime':
-        return newIssueTypeCode !== 'issue_epic' && (
+        return (
           <FieldEndTime
             form={form}
             field={field || {}}

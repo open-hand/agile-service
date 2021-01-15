@@ -158,12 +158,13 @@ export default function renderField(field) {
         maxLength={255}
       />
     );
-  } if (field.fieldType === 'member') {
+  } if (['member', 'multiMember'].includes(field.fieldType)) {
     return (
       <SelectFocusLoad
         label={fieldName}
         allowClear
         type="user"
+        mode={field.fieldType === 'multiMember' ? 'multiple' : undefined}
         saveList={(v) => {
           // 假如本项目无此人，则将默认值手动增添进去
           if (field.defaultValue && field.defaultValueObj) {

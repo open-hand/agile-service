@@ -532,8 +532,8 @@ export default {
       loadWhenMount: true,
     },
     request: () => piApi.getUnfinished(),
-    render: (pi) => (
-      <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
+    render: (pi, disabledCurrentPI) => (
+      <Option disabled={disabledCurrentPI && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
         {`${pi.code}-${pi.name}`}
       </Option>
     ),

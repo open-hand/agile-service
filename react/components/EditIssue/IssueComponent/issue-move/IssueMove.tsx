@@ -110,7 +110,7 @@ const IssueMove: React.FC<Props> = ({
           if (value) {
             const targetProjectInfo = await projectApi.loadBasicInfo(value);
             let targetIsInProgram = false;
-            const targetIsProgram = targetProjectInfo.category === 'PROGRAM';
+            const targetIsProgram = (targetProjectInfo.categories || []).find((item: any) => item.code === 'N_PROGRAM');
             if (!targetIsInProgram && shouldRequest) {
               targetIsInProgram = Boolean(await commonApi.getProjectsInProgram(value));
             }
