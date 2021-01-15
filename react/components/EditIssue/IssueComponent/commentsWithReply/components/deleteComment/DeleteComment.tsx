@@ -11,11 +11,13 @@ interface Props {
   projectId?: string,
   onDelete: Function,
   modal?: IModalProps,
+  parentId: string
+  reload: Function
 }
 const DeleteComment: React.FC<Props> = ({
-  comment, isReply, modal, onDelete, projectId,
+  comment, isReply, modal, onDelete, projectId, parentId, reload,
 }) => {
-  const [deleteType, setDeleteType] = useState('deleteWithReply');
+  const [deleteType, setDeleteType] = useState('deleteOnly');
   const handleChange = useCallback((value) => {
     if (value) {
       setDeleteType(value);
@@ -28,19 +30,23 @@ const DeleteComment: React.FC<Props> = ({
     if (deleteType === 'deleteWithReply') {
       return issueCommentApi.project(projectId).deleteWithReply(comment.commentId).then(() => {
         modal?.close();
-        if (onDelete) {
-          onDelete();
+        if (onDelete && isReply) {
+          onDelete(parentId);
+        } else {
+          reload();
         }
       });
     }
     return issueCommentApi.project(projectId).delete(comment.commentId)
       .then(() => {
         modal?.close();
-        if (onDelete) {
-          onDelete();
+        if (onDelete && isReply) {
+          onDelete(parentId);
+        } else {
+          reload();
         }
       });
-  }, [comment.commentId, deleteType, modal, onDelete, projectId]);
+  }, [comment.commentId, deleteType, isReply, modal, onDelete, parentId, projectId, reload]);
 
   useEffect(() => {
     modal?.handleOk(handleDelete);
@@ -53,10 +59,25 @@ const DeleteComment: React.FC<Props> = ({
       >
         {`确定要删除“${comment.userRealName}”的${isReply ? '回复' : '评论'}？删除后将无法恢复，请谨慎操作！`}
       </p>
-      <div>
-        <CheckBox name="delete" value="deleteWithReply" onChange={handleChange} checked={deleteType === 'deleteWithReply'}>删除评论以及回复</CheckBox>
-        <CheckBox name="delete" value="deleteOnly" onChange={handleChange} checked={deleteType === 'deleteOnly'}>仅删除评论</CheckBox>
-      </div>
+      {
+        !!comment.replySize && (
+        <div>
+          <CheckBox
+            name="delete"
+            value="deleteWithReply"
+            onChange={handleChange}
+            checked={deleteType === 'deleteWithReply'}
+            style={{
+              marginRight: 10,
+            }}
+          >
+            删除评论以及回复
+
+          </CheckBox>
+          <CheckBox name="delete" value="deleteOnly" onChange={handleChange} checked={deleteType === 'deleteOnly'}>仅删除评论</CheckBox>
+        </div>
+        )
+      }
     </div>
   );
 };

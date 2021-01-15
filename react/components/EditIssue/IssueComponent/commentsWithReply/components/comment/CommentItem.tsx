@@ -30,10 +30,11 @@ interface Props {
   onReply: Function
   isReply: boolean
   parentId: string
+  reload: Function
 }
 
 const CommentItem: React.FC<Props> = ({
-  hasPermission, comment, onDelete, onUpdate, onReply, projectId, isReply, parentId,
+  hasPermission, comment, onDelete, onUpdate, onReply, projectId, isReply, parentId, reload,
 }) => {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState<Delta>();
@@ -109,9 +110,9 @@ const CommentItem: React.FC<Props> = ({
 
   const handleClickDltBtn = useCallback(() => {
     openDeleteModal({
-      comment, isReply, projectId, onDelete,
+      comment, isReply, projectId, onDelete, parentId, reload,
     });
-  }, [comment, isReply, onDelete, projectId]);
+  }, [comment, isReply, onDelete, parentId, projectId, reload]);
 
   const canEditOrDelete = hasPermission;
 

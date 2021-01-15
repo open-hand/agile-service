@@ -18,28 +18,21 @@ const Comment: React.FC<Props> = (props) => {
   const { store } = useContext(EditIssueContext);
   const { commentExpandMap, commentReplysMap } = store;
   const { comment, reload } = props;
-  const [expand, setExpand] = useState(false);
-  const [replys, setReplys] = useState<IComment[]>([]);
 
   const handleFold = useCallback(() => {
-    // setExpand(false);
     commentExpandMap.set(comment.commentId, false);
   }, [comment.commentId, commentExpandMap]);
 
-  const getReplys = useCallback(() => {
-    // setExpand(true);
-    commentExpandMap.set(comment.commentId, true);
-    issueCommentApi.getReplys(comment.commentId).then((res: ReplyComment[]) => {
-      // setReplys(res);
-      commentReplysMap.set(comment.commentId, res || []);
+  const getReplys = useCallback((id?: string) => {
+    issueCommentApi.getReplys(id || comment.commentId).then((res: ReplyComment[]) => {
+      commentReplysMap.set(id || comment.commentId, res || []);
+      commentExpandMap.set(id || comment.commentId, true);
     });
   }, [comment.commentId, commentExpandMap, commentReplysMap]);
 
-  const onReply = useCallback(() => {
+  const onReply = useCallback((id?: string) => {
     const callback = () => {
-      // commentReplysMap.clear();
-      // commentExpandMap.clear();
-      getReplys();
+      getReplys(id);
     };
     reload(callback);
   }, [getReplys, reload]);
@@ -53,8 +46,8 @@ const Comment: React.FC<Props> = (props) => {
           isReply={false}
           {...props}
           onReply={onReply}
-          onDelete={reload}
-          onUpdate={reload}
+          onDelete={onReply}
+          onUpdate={onReply}
           parentId={comment.commentId}
         />
         {
@@ -65,9 +58,10 @@ const Comment: React.FC<Props> = (props) => {
                   <CommentItem
                     isReply
                     {...props}
-                    onReply={reload}
-                    onDelete={reload}
-                    onUpdate={reload}
+                    onReply={onReply}
+                    onDelete={onReply}
+                    onUpdate={onReply}
+                    reload={reload}
                     comment={item}
                     parentId={comment.commentId}
                   />
@@ -81,7 +75,7 @@ const Comment: React.FC<Props> = (props) => {
           <div className="c7n-comment-expand">
             {
               commentExpandMap.get(comment.commentId) ? <span role="none" onClick={handleFold}>收起评论</span> : (
-                <span role="none" onClick={getReplys}>
+                <span role="none" onClick={() => { getReplys(); }}>
                   {`打开评论(${comment.replySize})`}
                 </span>
               )
