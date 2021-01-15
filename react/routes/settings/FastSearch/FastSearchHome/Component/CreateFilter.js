@@ -27,6 +27,7 @@ const customFieldType = {
   single: 'option',
   multiple: 'option',
   member: 'option',
+  multiMember: 'option',
   date: 'date',
 };
 
@@ -181,6 +182,7 @@ const OPERATION_FILTER = {
   single: arrOperation5,
   multiple: arrOperation6,
   member: arrOperation2,
+  multiMember: arrOperation2,
   date: arrOperation3,
 };
 
@@ -655,7 +657,7 @@ const CreateFilter = (props) => {
         <Select label="值" />
       );
     } if ((['assignee', 'reporter', 'created_user',
-      'last_updated_user'].indexOf(filter) > -1 && !id) || (id && type === 'member')) {
+      'last_updated_user'].indexOf(filter) > -1 && !id) || (id && ['member', 'multiMember'].includes(type))) {
       if (['=', '!='].indexOf(operation) > -1) {
         // return normal value
         return (

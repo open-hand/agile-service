@@ -10,8 +10,8 @@ import {
 } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+
 import { Observer, observer } from 'mobx-react-lite';
-import moment from 'moment';
 import TableDropMenu from '@/common/TableDropMenu';
 import CheckBox from '@/components/check-box';
 import TextEditToggle from '@/components/TextEditTogglePro';
@@ -45,7 +45,7 @@ const DraggableItem: React.FC<Props> = ({
   const textEditToggleProps = useTextEditTogglePropsWithPage(data, !showSplitLine, { className: `${prefixCls}-item-defaultValue` });
 
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
-    <div className={`${prefixCls}-text`}>
+    <div className={classnames(`${prefixCls}-text`, { [`${prefixCls}-text-edit`]: !textEditToggleProps.disabled })}>
 
       <TableDropMenu
         menu={(

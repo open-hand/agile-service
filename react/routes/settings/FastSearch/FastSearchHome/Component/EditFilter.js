@@ -137,6 +137,7 @@ const customFieldType = {
   single: 'option',
   multiple: 'option',
   member: 'option',
+  multiMember: 'option',
   date: 'date',
 };
 class AddComponent extends Component {
@@ -184,7 +185,7 @@ class AddComponent extends Component {
     // [=, !=, in, notIn]
     const equal_notEqual_in_notin = new Set(['priority', 'issue_type', 'status']);
     // [=, !=, in, notIn, is, isNot]
-    const equal_notEqual_in_notIn_is_isNot = new Set(['assignee', 'reporter', 'created_user', 'last_updated_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'feature', 'member']);
+    const equal_notEqual_in_notIn_is_isNot = new Set(['assignee', 'reporter', 'created_user', 'last_updated_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'feature', 'member', 'multiMember']);
     // [>, >=, <, <=]
     const greater_greaterAndEqual_lessThan_lessThanAndEqual = new Set(['last_update_date', 'creation_date', 'date', 'datetime', 'time']);
     // [>, >=, <, <=, is, isNot]
@@ -414,7 +415,10 @@ class AddComponent extends Component {
     const { state } = this;
     const { quickFilterFiled } = state;
     const customFields = quickFilterFiled.filter((item) => item.id);
-    const customMemberField = quickFilterFiled.find((item) => item.type === 'member') || {};
+    // const customMemberField = quickFilterFiled.find((item) => ['member', 'multiMember'].includes(item.type)) || {};
+    // const customMemberField = quickFilterFiled.find((item) => item.type === 'member') || {};
+
+    console.log('tempOption:customMemberField.. state', filter, OPTION_FILTER, OPTION_FILTER[filter].state, state);
     customFields.forEach((item) => {
       OPTION_FILTER[item.code] = {
         url: '',
@@ -423,15 +427,36 @@ class AddComponent extends Component {
         name: 'value',
         state: `origin${item.code}`,
       };
+      if (['member', 'multiMember'].includes(item.type)) {
+        OPTION_FILTER[item.code] = {
+          url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=999`,
+          prop: 'list',
+          id: 'id',
+          name: 'realName',
+          state: 'originUsers',
+        };
+      }
     });
+    // quickFilterFiled.forEach((item) => {
+    //   if (['member', 'multiMember'].includes(item.type)) {
+    //     console.log('item..', item);
+    //     OPTION_FILTER[item.code] = {
+    //       url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=999`,
+    //       prop: 'list',
+    //       id: 'id',
+    //       name: 'realName',
+    //       state: 'originUsers',
+    //     };
+    //   }
+    // });
 
-    OPTION_FILTER[customMemberField.code] = {
-      url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
-      prop: 'list',
-      id: 'id',
-      name: 'realName',
-      state: 'originUsers',
-    };
+    // OPTION_FILTER[customMemberField.code] = {
+    //   url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
+    //   prop: 'list',
+    //   id: 'id',
+    //   name: 'realName',
+    //   state: 'originUsers',
+    // };
     const arr = (state[OPTION_FILTER[filter].state] || []).map((v) => (
       <Option key={v[OPTION_FILTER[filter].id]} value={v[OPTION_FILTER[filter].id]}>
         {v[OPTION_FILTER[filter].name]}
@@ -558,11 +583,12 @@ class AddComponent extends Component {
   };
 
   transformInit(arr) {
-    return arr.map((a, i) => ({
+    const tm = arr.map((a, i) => ({
       fieldCode: a.fieldCode,
       operation: a.operation,
       value: this.transformInitialValue(i, a.fieldCode, a.operation, a.value),
     }));
+    return tm;
   }
 
   transformInitialValue(index, filter, operation, value) {
@@ -571,7 +597,9 @@ class AddComponent extends Component {
     const orgId = AppState.currentMenuType.organizationId;
     const { quickFilterFiled } = state;
     const customFields = quickFilterFiled.filter((item) => item.id);
-    const customMemberField = quickFilterFiled.find((item) => item.type === 'member') || {};
+    // const customMemberField = quickFilterFiled.find((item) => item.type === 'member') || {};
+    console.log('quickFilterFiled', quickFilterFiled);
+    // const customMemberField = quickFilterFiled.find((item) => ['member', 'multiMember'].includes(item.type)) || {};
     customFields.forEach((item) => {
       OPTION_FILTER[item.code] = {
         url: '',
@@ -581,14 +609,18 @@ class AddComponent extends Component {
         state: `origin${item.code}`,
       };
     });
-
-    OPTION_FILTER[customMemberField.code] = {
-      url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=999`,
-      prop: 'list',
-      id: 'id',
-      name: 'realName',
-      state: 'originUsers',
-    };
+    quickFilterFiled.forEach((item) => {
+      if (['member', 'multiMember'].includes(item.type)) {
+        console.log('item..', item);
+        OPTION_FILTER[item.code] = {
+          url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=999`,
+          prop: 'list',
+          id: 'id',
+          name: 'realName',
+          state: 'originUsers',
+        };
+      }
+    });
 
     const field = quickFilterFiled.find((item) => item.fieldCode === filter) || {};
 
@@ -817,7 +849,7 @@ class AddComponent extends Component {
       return (
         <Select label="值" />
       );
-    } if (['assignee', 'priority', 'status', 'reporter', 'created_user', 'last_update_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'issue_type', 'feature'].indexOf(filter) > -1 || (field.id && (field.type === 'member' || field.type === 'single' || field.type === 'multiple' || field.type === 'radio' || field.type === 'checkbox'))) {
+    } if (['assignee', 'priority', 'status', 'reporter', 'created_user', 'last_update_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'issue_type', 'feature'].indexOf(filter) > -1 || (field.id && (field.type === 'member' || field.type === 'multiMember' || field.type === 'single' || field.type === 'multiple' || field.type === 'radio' || field.type === 'checkbox'))) {
       // select
       if (['=', '!='].indexOf(operation) > -1) {
         // return normal value
