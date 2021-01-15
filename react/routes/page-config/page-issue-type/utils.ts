@@ -20,7 +20,7 @@ function transformDefaultValue({
   fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey: propsOptionKey = 'id', textKey: propsTextKey = 'value', fieldCode,
 }: { fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | Array<User> | null, optionKey?: 'tempKey' | 'id' | string, textKey?: 'value' | string, fieldCode?: string }) {
   if (!defaultValue && !defaultValueObj) {
-    return defaultValue;
+    return defaultValue || '';
   }
   const { optionKey = propsOptionKey, textKey = propsTextKey } = fieldTextValueConfig[fieldCode as keyof typeof fieldTextValueConfig] || {};
   switch (fieldType) {

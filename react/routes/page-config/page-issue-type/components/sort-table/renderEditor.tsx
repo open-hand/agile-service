@@ -1,12 +1,12 @@
-import { Button } from 'choerodon-ui';
 import {
-  Select as SelectPro, Radio, DatePicker, CheckBox, TextField, TextArea, NumberField,
+  Select as SelectPro, TextField, TextArea, NumberField,
 } from 'choerodon-ui/pro/lib';
 
 import React, {
-  forwardRef, useCallback, useMemo, useState,
+  forwardRef,
 } from 'react';
 import { set } from 'lodash';
+import { toJS } from 'mobx';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import SelectUser from '@/components/select/select-user';
 import { getMenuType } from '@/utils/common';
@@ -49,10 +49,11 @@ const Select = forwardRef<any, IBaseComponentProps & Partial<SelectProps & { chi
 ));
 
 function renderEditor({
-  record, defaultValue, dataRef, ...otherProps
+  record, defaultValue: propsDefaultValue, dataRef, ...otherProps
 }: { record: Record, defaultValue?: any, dataRef?: { current: any }, style?: React.CSSProperties, [propsName: string]: any }) {
   const fieldType = record.get('fieldType');
   const fieldCode = record.get('fieldCode');
+  const defaultValue = toJS(propsDefaultValue);
   switch (fieldCode) {
     case 'component':
       return (
@@ -123,7 +124,7 @@ function renderEditor({
       const type = getMenuType();
       return (
         <SelectUser
-          extraOptions={defaultValue ? [defaultValue] : undefined}
+          selectedUser={defaultValue}
             // autoQueryConfig={{
             //   selectedUserIds: defaultValue || [],
             //   // @ts-ignore
