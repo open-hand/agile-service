@@ -142,6 +142,9 @@ public class DataLogAspect {
     private static final String FIELD_ESTIMATED_END_TIME = "Estimated End Time";
     private static final String PROJECT_MOVE = "projectMove";
     private static final String FIELD_PROJECT_MOVE = "Project Move";
+    private static final String STATIC_FILE_CREATE = "createStaticFile";
+    private static final String STATIC_FILE_DELETE = "deleteStaticFile";
+    private static final String FIELD_STATIC_FILE = "Static File";
 
 
     @Autowired
@@ -188,6 +191,8 @@ public class DataLogAspect {
     private AgileTriggerService agileTriggerService;
     @Autowired
     private BaseFeignClient baseFeignClient;
+    @Autowired
+    private StaticFileHeaderMapper staticFileHeaderMapper;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -268,7 +273,13 @@ public class DataLogAspect {
                         break;
                     case PROJECT_MOVE:
                         handlerProjectMove(args);
-                         break;
+                        break;
+                    case STATIC_FILE_CREATE:
+                        result = handleStaticFileCreate(args, pjp);
+                        break;
+                    case STATIC_FILE_DELETE:
+                        handleStaticFileDelete(args);
+                        break;
                     default:
                         break;
                 }
@@ -345,6 +356,41 @@ public class DataLogAspect {
             }
         } catch (Throwable e) {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
+        }
+        return result;
+    }
+
+    private void handleStaticFileDelete(Object[] args) {
+        Long id = null;
+        for (Object arg : args) {
+            if (arg instanceof Long) {
+                id = (Long) arg;
+            }
+        }
+        if (id != null) {
+            StaticFileHeaderDTO staticFileHeader = staticFileHeaderMapper.selectByPrimaryKey(id);
+            createDataLog(staticFileHeader.getProjectId(), staticFileHeader.getIssueId(), FIELD_STATIC_FILE,
+                    staticFileHeader.getUrl(), null, staticFileHeader.getId().toString(), null);
+        }
+    }
+
+    private Object handleStaticFileCreate(Object[] args, ProceedingJoinPoint pjp) {
+        StaticFileHeaderDTO staticFileHeaderDTO = null;
+        Object result = null;
+        for (Object arg : args) {
+            if (arg instanceof StaticFileHeaderDTO) {
+                staticFileHeaderDTO = (StaticFileHeaderDTO) arg;
+            }
+        }
+        if (staticFileHeaderDTO != null) {
+            try {
+                result = pjp.proceed();
+                staticFileHeaderDTO = (StaticFileHeaderDTO) result;
+                createDataLog(staticFileHeaderDTO.getProjectId(), staticFileHeaderDTO.getIssueId(), FIELD_STATIC_FILE,
+                        null, staticFileHeaderDTO.getUrl(), null, staticFileHeaderDTO.getId().toString());
+            } catch (Throwable e) {
+                throw new CommonException(ERROR_METHOD_EXECUTE, e);
+            }
         }
         return result;
     }

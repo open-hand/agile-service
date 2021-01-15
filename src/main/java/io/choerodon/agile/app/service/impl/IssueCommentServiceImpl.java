@@ -201,7 +201,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         IssueCommentVO issueCommentVO = modelMapper.map(issueCommentMapper.selectOne(issueCommentDTO), IssueCommentVO.class);
 
         List<Long> userIds = new ArrayList<>();
-        userIds.add(commentId);
+        userIds.add(issueCommentVO.getUserId());
         if (issueCommentVO.getParentId() != null && issueCommentVO.getParentId() != 0L) {
             //如果父评论不为空，则设置父评论的user信息至被回复人
             userIds.add(issueCommentVO.getReplyToUserId());
