@@ -1,17 +1,15 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores } from '@choerodon/boot';
-import { Button, Icon } from 'choerodon-ui/pro';
 import Delta from 'quill-delta';
 import { beforeTextUpload } from '@/utils/richText';
 import { issueCommentApi, IComment } from '@/api/IssueComment';
 import Comment from './components/comment';
-import AddComment from './components/AddComment';
+import AddComment from './components/addComment';
 import EditIssueContext from '../../stores';
 
 import styles from './Comments.less';
 
-const EXPAND_NUM = 5;
 const { AppState } = stores;
 
 interface Props {
