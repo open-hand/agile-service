@@ -123,7 +123,7 @@ import styles from './FieldEpic.less';
                           </div>
                         )}
                       </TextEditToggle>
-                      {featureId && (
+                      {featureId ? (
                         <div
                           role="none"
                           style={{
@@ -156,7 +156,7 @@ import styles from './FieldEpic.less';
                         >
                           查看详情
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 ) : ''}
