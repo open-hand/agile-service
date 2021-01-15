@@ -11,7 +11,7 @@ import Delta from 'quill-delta';
 import './Comment.less';
 import { IComment } from '@/common/types';
 import { issueCommentApi, UComment, IReplyCreate } from '@/api/IssueComment';
-import { useDetailContext } from '../../../../../IssueDetail/context';
+import openDeleteModal from '../deleteComment';
 
 export interface ReplyComment extends IComment {
   replyToUserId: string
@@ -107,14 +107,11 @@ const CommentItem: React.FC<Props> = ({
     setEditing(false);
   }, [comment.commentId, comment.objectVersionNumber, updateComment, value]);
 
-  const handleDelete = useCallback(() => {
-    issueCommentApi.project(projectId).delete(comment.commentId)
-      .then(() => {
-        if (onDelete) {
-          onDelete();
-        }
-      });
-  }, [comment.commentId, onDelete, projectId]);
+  const handleClickDltBtn = useCallback(() => {
+    openDeleteModal({
+      comment, isReply, projectId, onDelete,
+    });
+  }, [comment, isReply, onDelete, projectId]);
 
   const canEditOrDelete = hasPermission;
 
@@ -207,18 +204,10 @@ const CommentItem: React.FC<Props> = ({
 
             {
               hasPermission && (
-                <Popconfirm
-                  title="确认要删除该评论吗?"
-                  placement="left"
-                  onConfirm={handleDelete}
-                  okText="删除"
-                  cancelText="取消"
-                  okType="danger"
-                >
-                  <Icon
-                    type="delete_forever mlr-3 pointer"
-                  />
-                </Popconfirm>
+                <Icon
+                  type="delete_forever mlr-3 pointer"
+                  onClick={handleClickDltBtn}
+                />
               )
             }
           </div>
