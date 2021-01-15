@@ -14,5 +14,5 @@ public interface IIssueCommentService {
      * 删除评论及其回复
      * @param issueCommentDTO 要删除的及其回复的评论
      */
-    void deleteBaseReplay(IssueCommentDTO issueCommentDTO);
+    void deleteBaseReply(IssueCommentDTO issueCommentDTO);
 }

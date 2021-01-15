@@ -15,7 +15,7 @@ import io.choerodon.agile.infra.utils.StringUtil;
  * @author dinghuang123@gmail.com
  * @since 2018-05-14 21:59:45
  */
-public class IssueCommentReplayVO {
+public class IssueCommentReplyVO {
 
     @ApiModelProperty(value = "主键id")
     @Encrypt

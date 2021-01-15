@@ -75,7 +75,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             if (issueCommentVO.getReplyToUserId() == null){
                 sendMsgUtil.sendMsgByIssueComment(projectId, issueDTO, issueCommentVO);
             } else {
-                sendMsgUtil.sendMsgByIssueCommentReplay(projectId, issueDTO, issueCommentVO);
+                sendMsgUtil.sendMsgByIssueCommentReply(projectId, issueDTO, issueCommentVO);
             }
             return issueCommentVO;
         } else {
@@ -136,19 +136,19 @@ public class IssueCommentServiceImpl implements IssueCommentService {
     }
 
     @Override
-    public IssueCommentVO createIssueCommentReplay(Long projectId, IssueCommentReplayCreateVO issueCommentReplayCreateVO) {
-        IssueCommentDTO issueCommentDTO = issueCommentAssembler.toTarget(issueCommentReplayCreateVO, IssueCommentDTO.class);
+    public IssueCommentVO createIssueCommentReply(Long projectId, IssueCommentReplyCreateVO issueCommentReplyCreateVO) {
+        IssueCommentDTO issueCommentDTO = issueCommentAssembler.toTarget(issueCommentReplyCreateVO, IssueCommentDTO.class);
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         issueCommentDTO.setUserId(customUserDetails.getUserId());
         issueCommentDTO.setProjectId(projectId);
         IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueCommentVO.getIssueId());
-        sendMsgUtil.sendMsgByIssueCommentReplay(projectId, issueDTO, issueCommentVO);
+        sendMsgUtil.sendMsgByIssueCommentReply(projectId, issueDTO, issueCommentVO);
         return issueCommentVO;
     }
 
     @Override
-    public List<IssueCommentReplayVO> queryIssueCommentReplayList(Long projectId, Long commentId) {
+    public List<IssueCommentReplyVO> queryIssueCommentReplyList(Long projectId, Long commentId) {
         IssueCommentDTO parentIssueComment = issueCommentMapper.selectByPrimaryKey(commentId);
         if (ObjectUtils.isEmpty(parentIssueComment)) {
             throw new CommonException("error.IssueCommentRule.issueComment");
@@ -157,8 +157,8 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         IssueCommentDTO issueCommentDTO = new IssueCommentDTO();
         issueCommentDTO.setProjectId(projectId);
         issueCommentDTO.setParentId(commentId);
-        List<IssueCommentReplayVO> issueCommentVOList = modelMapper.map(
-                issueCommentMapper.selectIssueCommentDesByParentId(projectId, commentId), new TypeToken<List<IssueCommentReplayVO>>(){}.getType());
+        List<IssueCommentReplyVO> issueCommentVOList = modelMapper.map(
+                issueCommentMapper.selectIssueCommentDesByParentId(projectId, commentId), new TypeToken<List<IssueCommentReplyVO>>(){}.getType());
         if (CollectionUtils.isEmpty(issueCommentVOList)) {
             return new ArrayList<>();
         }
@@ -189,9 +189,9 @@ public class IssueCommentServiceImpl implements IssueCommentService {
     }
 
     @Override
-    public void deleteIssueCommentReplay(Long projectId, Long commentId) {
+    public void deleteIssueCommentReply(Long projectId, Long commentId) {
         IssueCommentDTO issueCommentDTO = getCommentById(projectId, commentId);
-        iIssueCommentService.deleteBaseReplay(issueCommentDTO);
+        iIssueCommentService.deleteBaseReply(issueCommentDTO);
     }
 
     private IssueCommentVO queryByProjectIdAndCommentId(Long projectId, Long commentId) {

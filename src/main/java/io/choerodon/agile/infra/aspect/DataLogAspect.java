@@ -77,7 +77,7 @@ public class DataLogAspect {
     private static final String CREATE_COMMENT = "createComment";
     private static final String UPDATE_COMMENT = "updateComment";
     private static final String DELETE_COMMENT = "deleteComment";
-    private static final String DELETE_COMMENT_REPLAY = "deleteCommentReplay";
+    private static final String DELETE_COMMENT_REPLY = "deleteCommentReply";
     private static final String CREATE_WORKLOG = "createWorkLog";
     private static final String DELETE_WORKLOG = "deleteWorkLog";
     private static final String EPIC_NAME_FIELD = "epicName";
@@ -256,8 +256,8 @@ public class DataLogAspect {
                     case DELETE_COMMENT:
                         handleDeleteCommentDataLog(args);
                         break;
-                    case DELETE_COMMENT_REPLAY:
-                        handleDeleteCommentReplayDataLog(args);
+                    case DELETE_COMMENT_REPLY:
+                        handleDeleteCommentReplyDataLog(args);
                         break;
                     case CREATE_WORKLOG:
                         result = handleCreateWorkLogDataLog(args, pjp);
@@ -395,7 +395,7 @@ public class DataLogAspect {
         return result;
     }
 
-    private void handleDeleteCommentReplayDataLog(Object[] args) {
+    private void handleDeleteCommentReplyDataLog(Object[] args) {
         IssueCommentDTO issueCommentDTO = null;
         for (Object arg : args) {
             if (arg instanceof IssueCommentDTO) {
