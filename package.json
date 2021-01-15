@@ -52,7 +52,7 @@
     "@choerodon/boot": "0.22.3",
     "@choerodon/compiler": "^0.0.1",
     "@choerodon/master": "0.25.0",
-    "@choerodon/testmanager": "^0.24.0",
+    "@choerodon/testmanager": "^0.25.0",
     "@types/classnames": "^2.2.10",
     "@types/echarts": "^4.6.5",
     "@types/file-saver": "^2.0.1",
