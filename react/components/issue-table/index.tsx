@@ -14,6 +14,7 @@ import { IField, IIssueColumnName } from '@/common/types';
 import { TableMode, ColumnAlign, ColumnLock } from 'choerodon-ui/pro/lib/table/enum';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
+import UserTag from '../tag/user-tag';
 
 const { Column } = Table;
 interface Props extends Partial<TableProps> {
@@ -294,11 +295,11 @@ const IssueTable: React.FC<Props> = ({
             renderer={({ record }) => {
               const { fieldType, code } = field;
               const value = record?.get('foundationFieldValue')[code];
-              if (fieldType === 'member') {
+              if (['member', 'multiMember'].includes(fieldType)) {
                 return value && (
                   <div style={{ display: 'inline-flex' }}>
-                    <UserHead
-                      user={value}
+                    <UserTag
+                      data={value}
                     />
                   </div>
                 );

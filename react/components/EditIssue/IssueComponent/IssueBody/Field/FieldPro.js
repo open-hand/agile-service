@@ -9,6 +9,7 @@ import {
 import { fieldApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import UserHead from '@/components/UserHead';
+import UserTag from '@/components/tag/user-tag';
 
 const EditorMap = new Map([
   ['text', TextArea],
@@ -95,25 +96,12 @@ const EditorMap = new Map([
           return <Editor required={required} autoSize />;
         }
         case 'multiMember': {
-          return <Editor required={required} autoSize multiple />;
+          return <Editor required={required} multiple />;
         }
         default: return <Editor required={required} />;
       }
     }
     return null;
-  }
-
-  renderUser() {
-    const { field: { valueStr } } = this.props;
-    return Array.isArray(toJS(valueStr)) ? valueStr.map((item) => (
-      <UserHead
-        user={item}
-      />
-    )) : (
-      <UserHead
-        user={valueStr}
-      />
-    );
   }
 
   render() {
@@ -148,7 +136,7 @@ const EditorMap = new Map([
           >
             <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
               {['member', 'multiMember'].includes(fieldType) && valueStr
-                ? this.renderUser() : (valueStr || '无')}
+                ? <UserTag data={valueStr} /> : (valueStr || '无')}
             </div>
           </TextEditToggle>
         </div>
