@@ -18,6 +18,8 @@ public class BoardAssembler extends AbstractAssembler {
         if (args != null) {
             assertNull(args, "sprint");
             assertNull(args, "version");
+            assertNull(args, "fixVersion");
+            assertNull(args, "influenceVersion");
             assertNull(args, "component");
             assertNull(args, "epic");
             assertNull(args, "label");

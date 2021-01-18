@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.ComponentForListVO;
+import io.choerodon.agile.api.vo.MoveComponentVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.SearchVO;
 
@@ -102,7 +103,7 @@ public class IssueComponentController {
                                                                     @ApiParam(value = "查询参数")
                                                                      @RequestBody(required = false) SearchVO searchVO,
                                                                     @ApiParam(value = "分页信息", required = true)
-                                                                     @SortDefault(value = "component_id", direction = Sort.Direction.DESC)
+                                                                     @SortDefault(sort = {"rank","component_id"}, direction = Sort.Direction.DESC)
                                                                      @ApiIgnore PageRequest pageRequest) {
         return Optional.ofNullable(issueComponentService.queryComponentByProjectId(projectId, componentId, noIssueTest, searchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -148,4 +149,13 @@ public class IssueComponentController {
                 .orElseThrow(() -> new CommonException("error.checkName.get"));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("排序")
+    @PostMapping(value = "/move")
+    public ResponseEntity moveComponent(@ApiParam(value = "项目id", required = true)
+                                                      @PathVariable(name = "project_id") Long projectId,
+                                                 @RequestBody MoveComponentVO moveComponentVO) {
+        issueComponentService.moveComponent(projectId, moveComponentVO);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

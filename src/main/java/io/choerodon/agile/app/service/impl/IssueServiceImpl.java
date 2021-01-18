@@ -1314,16 +1314,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         componentIssueRelDTO.setProjectId(projectId);
         issueValidator.verifyComponentIssueRelData(componentIssueRelDTO);
         //重名校验
-        if (componentIssueRelDTO.getName() != null && componentIssueRelDTO.getComponentId() == null) {
-            if (issueComponentMapper.checkNameExist(componentIssueRelDTO.getName(), componentIssueRelDTO.getProjectId())) {
-                componentIssueRelDTO.setComponentId(issueComponentMapper.queryComponentIdByNameAndProjectId(
-                        componentIssueRelDTO.getName(), componentIssueRelDTO.getProjectId()));
-            } else {
-                IssueComponentDTO issueComponentDTO = new IssueComponentDTO(componentIssueRelDTO.getName(), componentIssueRelDTO.getProjectId());
-                issueComponentDTO = issueComponentService.createBase(issueComponentDTO);
-                componentIssueRelDTO.setComponentId(issueComponentDTO.getComponentId());
-            }
-        }
+//        if (componentIssueRelDTO.getName() != null && componentIssueRelDTO.getComponentId() == null) {
+//            if (issueComponentMapper.checkNameExist(componentIssueRelDTO.getName(), componentIssueRelDTO.getProjectId())) {
+//                componentIssueRelDTO.setComponentId(issueComponentMapper.queryComponentIdByNameAndProjectId(
+//                        componentIssueRelDTO.getName(), componentIssueRelDTO.getProjectId()));
+//            } else {
+//                IssueComponentDTO issueComponentDTO = new IssueComponentDTO(componentIssueRelDTO.getName(), componentIssueRelDTO.getProjectId());
+//                issueComponentDTO = issueComponentService.createBase(issueComponentDTO);
+//                componentIssueRelDTO.setComponentId(issueComponentDTO.getComponentId());
+//            }
+//        }
         if (issueValidator.existComponentIssueRel(componentIssueRelDTO)) {
             componentIssueRelService.create(componentIssueRelDTO);
         }

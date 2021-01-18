@@ -964,7 +964,7 @@
         </if>
         <if test='searchVO.otherArgs.influenceVersion != null and searchVO.otherArgs.influenceVersion.size > 0'>
             AND (
-            <if test='searchVO.otherArgs.influenceVersionNull != null and searchVO.otherArgs.versionNull == true'>
+            <if test='searchVO.otherArgs.influenceVersionNull != null and searchVO.otherArgs.influenceVersionNull == true'>
                 ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
                 left join agile_version_issue_rel avir44
                 on ai31.issue_id = avir44.issue_id
