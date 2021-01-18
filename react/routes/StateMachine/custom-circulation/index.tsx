@@ -7,7 +7,7 @@ import {
   Table, DataSet, Menu, Dropdown, Icon, Modal,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { useIssueTypes } from '@/hooks';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { find, filter } from 'lodash';
 import moment from 'moment';
 import STATUS from '@/constants/STATUS';
@@ -211,7 +211,7 @@ const transformFieldValue = (fieldSetting) => {
 };
 
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
-  const [issueTypes] = useIssueTypes();
+  const { data: issueTypes } = useProjectIssueTypes();
   const { selectedType, setSelectedType } = useStateMachineContext();
 
   const customCirculationDataSet = useMemo(() => new DataSet({
