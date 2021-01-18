@@ -8,18 +8,18 @@ import {
 import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import UserHead from '@/components/UserHead';
+import { IFieldType } from '@/common/types';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 
-export type IFieldType =
-  'text' | 'input' | 'member' | 'single' | 'multiple' | 'radio' | 'checkbox' |
-  'number' | 'time' | 'date' | 'datetime'
-
+export { IFieldType };
 const getEditorByFieldType = (fieldType: IFieldType, outside: boolean) => {
   switch (fieldType) {
     case 'text':
       return <TextArea />;
     case 'input':
       return <TextField />;
+    case 'multiMember':
+      return <SelectUser />;
     case 'member':
       return <SelectUser />;
     case 'single':

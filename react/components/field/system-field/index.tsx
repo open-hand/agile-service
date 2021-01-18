@@ -18,6 +18,8 @@ const getEditorByFieldType = (fieldType: IFieldType, outside: boolean) => {
       return <TextArea />;
     case 'input':
       return <TextField />;
+    case 'multiMember':
+      return <SelectUser />;
     case 'member':
       return <SelectUser />;
     case 'single':

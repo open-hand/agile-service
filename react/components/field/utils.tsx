@@ -127,7 +127,7 @@ export function getFieldElement(field: IFilterField, flat?: boolean): React.Reac
         </Component>
       );
     }
-
+    case 'multiMember':
     case 'member':
     {
       return (

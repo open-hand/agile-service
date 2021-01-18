@@ -25,7 +25,7 @@ const Field: React.FC<IFieldProps> = ({
   const { fieldType, title } = field;
   const element = render ? render(field, getFieldElement(field, flat)) : getFieldElement(field, flat);
   const shouldMultipleOnFilter = useMemo(() => mode === 'filter'
-    && ['member', 'radio', 'single', 'checkbox', 'multiple'].includes(fieldType),
+    && ['member', 'multiMember', 'radio', 'single', 'checkbox', 'multiple'].includes(fieldType),
   [fieldType, mode]);
   const shouldRangeOnFilter = useMemo(() => mode === 'filter'
     && ['date', 'datetime', 'time'].includes(field.fieldType),
