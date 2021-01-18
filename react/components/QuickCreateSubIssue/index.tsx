@@ -11,6 +11,7 @@ import { FormProps } from 'choerodon-ui/lib/form';
 import { getProjectId } from '@/utils/common';
 import { fieldApi, issueApi } from '@/api';
 import { WrappedFormUtils } from 'choerodon-ui/lib/form/Form';
+import { fields2Map } from '@/utils/defaultValue';
 import TypeTag from '../TypeTag';
 
 const FormItem = Form.Item;
@@ -48,22 +49,30 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
             setLoading(false);
             return;
           }
+          const param = {
+            schemeCode: 'agile_issue',
+            context: currentType.typeCode,
+            pageCode: 'agile_issue_create',
+          };
+          const fields = await fieldApi.getFields(param);
+          const fieldsMap = fields2Map(fields);
           const issue = {
             summary,
             priorityId,
             priorityCode: `priority-${priorityId}`,
             projectId: getProjectId(),
             parentIssueId,
-            sprintId,
             issueTypeId: currentType.id,
+            sprintId: sprintId || fieldsMap.get('sprint').defaultValue || 0,
+            componentIssueRelVOList: fieldsMap.get('component').defaultValueObjs || [],
+            labelIssueRelVOList: fieldsMap.get('label').defaultValueObjs || [],
+            fixVersionIssueRel: fieldsMap.get('fixVersion').defaultValue || [],
+            assigneeId: fieldsMap.get('assignee').defaultValue,
+            estimatedEndTime: fieldsMap.get('estimatedEndTime').defaultValue,
+            estimatedStartTime: fieldsMap.get('estimatedStartTime').defaultValue,
           };
           const res = await issueApi.createSubtask(issue);
-          const dto = {
-            schemeCode: 'agile_issue',
-            context: currentType.typeCode,
-            pageCode: 'agile_issue_create',
-          };
-          fieldApi.quickCreateDefault(res.issueId, dto);
+          fieldApi.quickCreateDefault(res.issueId, param);
           setLoading(false);
           handleCancel();
           onCreate && onCreate();
