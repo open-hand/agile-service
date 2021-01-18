@@ -151,8 +151,7 @@ public class StaticFileServiceImpl implements StaticFileService {
     }
 
     @Override
-    public ResponseEntity<byte[]> selectStaticFileResult(String fileHeaderIdStr, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
-        Long fileHeaderId = Long.parseLong(EncryptionUtils.decrypt(fileHeaderIdStr));
+    public ResponseEntity<byte[]> selectStaticFileResult(Long fileHeaderId, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         String path;
         try {
             path = URLDecoder.decode(httpRequest.getServletPath(), Charset.defaultCharset().name());
@@ -160,6 +159,7 @@ public class StaticFileServiceImpl implements StaticFileService {
             path = httpRequest.getServletPath();
         }
         // 获取文件相对路径
+        String fileHeaderIdStr = String.valueOf(fileHeaderId);
         String relativePath = path.substring(path.indexOf(fileHeaderIdStr) + fileHeaderIdStr.length() + 1);
         if (INDEX.equals(relativePath)) {
             relativePath = INDEX_HTML;
