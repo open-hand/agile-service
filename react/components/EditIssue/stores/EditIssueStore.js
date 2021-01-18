@@ -2,6 +2,7 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import { find } from 'lodash';
+import { uiApi } from '@/api';
 
 const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
 class EditIssueStore {
@@ -256,5 +257,17 @@ class EditIssueStore {
   commentExpandMap = observable.map();
 
   commentReplysMap = observable.map();
+
+  @observable linkedUI = [];
+
+  @action setLinkedUI = (data) => {
+    this.linkedUI = data;
+  }
+
+  getLinkedUI = () => {
+    uiApi.getLinkedUI(this.issue.issueId).then((res) => {
+      this.setLinkedUI(res || []);
+    });
+  }
 }
 export default EditIssueStore;
