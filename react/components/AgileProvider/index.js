@@ -2,17 +2,23 @@
 import React, {
   useContext, useRef, useEffect, useState,
 } from 'react';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { stores } from '@choerodon/boot';
 import { DefaultPriorityContext } from '@/hooks/useDefaultPriority';
 import { PriorityContext } from '@/hooks/usePriorities';
 
+const queryClient = new QueryClient();
 const { AppState } = stores;
 function wrapWithContexts(contexts, values, children) {
-  return contexts.reduce((last, Context, index) => (
-    <Context.Provider value={values.get(Context)}>
-      {last}
-    </Context.Provider>
-  ), children);
+  return (
+    <QueryClientProvider client={queryClient}>
+      {contexts.reduce((last, Context, index) => (
+        <Context.Provider value={values.get(Context)}>
+          {last}
+        </Context.Provider>
+      ), children)}
+    </QueryClientProvider>
+  );
 }
 const AgileProvider = (contexts) => function AgileDataProvider({ children, projectId }) {
   const dataRef = useRef(new Map());
