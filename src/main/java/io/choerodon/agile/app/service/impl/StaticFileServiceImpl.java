@@ -14,8 +14,6 @@ import org.hzero.boot.file.FileClient;
 import org.hzero.boot.file.dto.FileDTO;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -65,8 +63,6 @@ import io.choerodon.mybatis.helper.snowflake.SnowflakeHelper;
 @Transactional(rollbackFor = Exception.class)
 public class StaticFileServiceImpl implements StaticFileService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StaticFileServiceImpl.class);
-
     private static final String ZIP = ".ZIP";
     private static final String TAR = ".TAR";
     private static final String TAR_GZ = ".TAR.GZ";
@@ -79,6 +75,18 @@ public class StaticFileServiceImpl implements StaticFileService {
     private static final String PATH_SPLIT = "/";
 
     private static final String BUCKET_NAME = "agile-service";
+
+    private static final String IO_EXCEPTION_CODE = "error.uncompressed.io";
+    private static final String INDEX_NULL_EXCEPTION_CODE = "error.staticFile.index.null";
+    private static final String INDEX_EMPTY_EXCEPTION_CODE = "error.staticFile.index.empty";
+    private static final String COMPRESSED_TYPE_EXCEPTION_CODE = "error.compressed.type.not.support";
+    private static final String RAR4_EXCEPTION_CODE = "error.compressed.rar4";
+    private static final String DELETE_NULL_EXCEPTION_CODE = "error.delete.staticFileHeader.null";
+    private static final String HEADER_NULL_EXCEPTION_CODE = "error.staticFileHeader.null";
+    private static final String HEADER_ID_NULL_EXCEPTION_CODE = "error.fileHeaderId.null";
+    private static final String ISSUE_NULL_EXCEPTION_CODE = "error.issue.null";
+    private static final String ISSUE_ID_NULL_EXCEPTION_CODE = "error.issueId.null";
+    private static final String MALFORMED_EXCEPTION_CODE = "error.malformed.url";
 
     @Value("${services.attachment.url}")
     private String attachmentUrl;
@@ -105,6 +113,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         Long organizationId = projectUtil.getOrganizationId(projectId);
         List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
         if (!CollectionUtils.isEmpty(files)) {
+            validFileType(files);
             for (MultipartFile multipartFile : files) {
                 try {
                     StaticFileHeaderVO staticFileHeaderVO = unCompress(multipartFile, projectId, issueId, organizationId);
@@ -112,11 +121,33 @@ public class StaticFileServiceImpl implements StaticFileService {
                         result.add(staticFileHeaderVO);
                     }
                 } catch (IOException e) {
-                    throw new CommonException("error.uncompressed.io", e);
+                    throw new CommonException(IO_EXCEPTION_CODE, e);
                 }
             }
         }
         return result;
+    }
+
+    private void validFileType(List<MultipartFile> files) {
+        files.forEach(multipartFile -> {
+            boolean notIndex;
+            String fileUpperName = getUpperName(multipartFile.getOriginalFilename());
+            //判断压缩类型，调用不同的解压方法
+            if (fileUpperName.endsWith(ZIP)) {
+                notIndex = validIndexExistByApache(multipartFile, ZIP);
+            } else if (fileUpperName.endsWith(TAR)) {
+                notIndex = validIndexExistByApache(multipartFile, TAR);
+            } else if (fileUpperName.endsWith(TAR_GZ)) {
+                notIndex = validIndexExistByApache(multipartFile, TAR_GZ);
+            } else if (fileUpperName.endsWith(RAR)) {
+                notIndex = validIndexExistByRar(multipartFile);
+            } else {
+                throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
+            }
+            if (notIndex) {
+                throw new CommonException(INDEX_NULL_EXCEPTION_CODE);
+            }
+        });
     }
 
     @Override
@@ -182,7 +213,7 @@ public class StaticFileServiceImpl implements StaticFileService {
     public void deleteStaticFileRelated(Long projectId, Long fileHeaderId) {
         StaticFileHeaderDTO staticFileHeader = staticFileHeaderMapper.selectByPrimaryKey(fileHeaderId);
         if (ObjectUtils.isEmpty(staticFileHeader)) {
-            throw new CommonException("error.delete.staticFileHeader.null");
+            throw new CommonException(DELETE_NULL_EXCEPTION_CODE);
         }
         staticFileHeader.setIssueId(0L);
         staticFileHeaderMapper.updateByPrimaryKey(staticFileHeader);
@@ -194,7 +225,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         Long organizationId = projectUtil.getOrganizationId(projectId);
         StaticFileHeaderDTO staticFileHeader = staticFileHeaderMapper.selectByPrimaryKey(fileHeaderId);
         if (ObjectUtils.isEmpty(staticFileHeader)) {
-            throw new CommonException("error.delete.staticFileHeader.null");
+            throw new CommonException(DELETE_NULL_EXCEPTION_CODE);
         }
         StaticFileLineDTO lineRecord = new StaticFileLineDTO();
         lineRecord.setHeaderId(fileHeaderId);
@@ -228,10 +259,10 @@ public class StaticFileServiceImpl implements StaticFileService {
 
     private List<StaticFileHeaderDTO> validStaticFileRelatedIssue(Long projectId, StaticFileRelatedVO staticFileRelatedVO) {
         if (ObjectUtils.isEmpty(staticFileRelatedVO.getIssueId())) {
-            throw new CommonException("error.issueId.null");
+            throw new CommonException(ISSUE_ID_NULL_EXCEPTION_CODE);
         }
         if (CollectionUtils.isEmpty(staticFileRelatedVO.getFileHeaderIds())) {
-            throw new CommonException("error.fileHeaderId.null");
+            throw new CommonException(HEADER_ID_NULL_EXCEPTION_CODE);
         }
 
         IssueDTO issueRecord = new IssueDTO();
@@ -239,12 +270,12 @@ public class StaticFileServiceImpl implements StaticFileService {
         issueRecord.setProjectId(projectId);
         IssueDTO issue = issueMapper.selectOne(issueRecord);
         if (ObjectUtils.isEmpty(issue)) {
-            throw new CommonException("error.issue.null");
+            throw new CommonException(ISSUE_NULL_EXCEPTION_CODE);
         }
         String ids = staticFileRelatedVO.getFileHeaderIds().stream().map(String::valueOf).collect(Collectors.joining(","));
         List<StaticFileHeaderDTO> staticFileHeaders = staticFileHeaderMapper.selectByIds(ids);
         if (CollectionUtils.isEmpty(staticFileHeaders) || staticFileHeaders.size() < staticFileRelatedVO.getFileHeaderIds().size()) {
-            throw new CommonException("error.staticFileHeader.null");
+            throw new CommonException(HEADER_NULL_EXCEPTION_CODE);
         }
         return staticFileHeaders;
     }
@@ -268,7 +299,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         } else if (fileUpperName.endsWith(RAR)) {
             return unRar(multipartFile, projectId, issueId, organizationId);
         } else {
-            throw new CommonException("error.compressed.type.not.support");
+            throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
         }
     }
 
@@ -292,12 +323,13 @@ public class StaticFileServiceImpl implements StaticFileService {
             FileHeader fileHeader;
             while (Objects.nonNull(fileHeader = archive.nextFileHeader())) {
                 if (!fileHeader.isDirectory()) {
+                    byte[] bytes = inputToByte(archive.getInputStream(fileHeader));
                     //跳过文件夹与不能读取数据的项
-                    if (fileHeader.getFileName().contains(MACOSX) || fileHeader.getFileName().contains(DS_STORE)) {
-                        //跳过冗余文件
+                    if (fileHeader.getFileName().contains(MACOSX) || fileHeader.getFileName().contains(DS_STORE) || bytes.length <= 0) {
+                        //跳过冗余文件和空文件
                         continue;
                     }
-                    String url = fileClient.uploadFile(organizationId, BUCKET_NAME, null, getEntryFileName(fileHeader.getFileName()), inputToByte(archive.getInputStream(fileHeader)));
+                    String url = fileClient.uploadFile(organizationId, BUCKET_NAME, null, getEntryFileName(fileHeader.getFileName()), bytes);
                     urls.add(url);
                     StaticFileLineDTO staticFileLine = new StaticFileLineDTO(
                             projectId,
@@ -309,7 +341,7 @@ public class StaticFileServiceImpl implements StaticFileService {
                 }
             }
         } catch (RarException e) {
-            throw new CommonException("error.compressed.rar4");
+            throw new CommonException(RAR4_EXCEPTION_CODE);
         }
         //获取上传的文件信息
         List<FileDTO> files = fileClient.getFiles(organizationId, BUCKET_NAME, urls);
@@ -340,7 +372,6 @@ public class StaticFileServiceImpl implements StaticFileService {
      */
     private StaticFileHeaderVO unCompressedByApache(MultipartFile multipartFile, Long projectId, Long issueId, Long organizationId, String suffix) throws IOException {
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        long startTime1 = System.currentTimeMillis();
         String headerUrl = fileClient.uploadFile(organizationId, BUCKET_NAME, null, multipartFile.getOriginalFilename(), multipartFile);
         StaticFileHeaderDTO staticFileHeader = new StaticFileHeaderDTO(
                 projectId,
@@ -359,17 +390,17 @@ public class StaticFileServiceImpl implements StaticFileService {
                 //根据文件后缀名获取不同的压缩流
                 ArchiveInputStream in = getArchiveInputStream(bufferedInputStream, suffix)
         ) {
-            long startTime = System.currentTimeMillis();
             ArchiveEntry entry;
             while (Objects.nonNull(entry = in.getNextEntry())) {
                 if (!entry.isDirectory() && in.canReadEntryData(entry)) {
                     //跳过文件夹与不能读取数据的项
-                    if (entry.getName().contains(MACOSX) || entry.getName().contains(DS_STORE)) {
+                    byte[] bytes = inputToByte(in);
+                    if (entry.getName().contains(MACOSX) || entry.getName().contains(DS_STORE) || bytes.length <= 0) {
                         //跳过冗余文件
                         continue;
                     }
                     //文件上传
-                    String url = fileClient.uploadFile(organizationId, BUCKET_NAME, null, getEntryFileName(entry.getName()), inputToByte(in));
+                    String url = fileClient.uploadFile(organizationId, BUCKET_NAME, null, getEntryFileName(entry.getName()), bytes);
                     urls.add(url);
                     StaticFileLineDTO staticFileLine = new StaticFileLineDTO(
                             projectId,
@@ -405,7 +436,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         } else if (TAR_GZ.equals(suffix)) {
             return new TarArchiveInputStream(new GzipCompressorInputStream(bufferedInputStream));
         } else {
-            throw new CommonException("error.compressed.suffix");
+            throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
         }
     }
 
@@ -443,10 +474,10 @@ public class StaticFileServiceImpl implements StaticFileService {
                 }
             }
         } catch (IOException e) {
-            throw new CommonException("error.uncompressed.io", e);
+            throw new CommonException(IO_EXCEPTION_CODE, e);
         }
         if (notIndex) {
-            throw new CommonException("error.staticFile.index.null");
+            throw new CommonException(INDEX_NULL_EXCEPTION_CODE);
         }
         return result;
     }
@@ -468,10 +499,10 @@ public class StaticFileServiceImpl implements StaticFileService {
                 }
             }
         } catch (RarException e) {
-            throw new CommonException("error.compressed.rar4");
+            throw new CommonException(RAR4_EXCEPTION_CODE);
         }
         if (notIndex) {
-            throw new CommonException("error.staticFile.index.null");
+            throw new CommonException(INDEX_NULL_EXCEPTION_CODE);
         }
         return result;
     }
@@ -497,7 +528,7 @@ public class StaticFileServiceImpl implements StaticFileService {
             URL netUrl = new URL(url);
             dealUrl = netUrl.getFile().substring(BUCKET_NAME.length() + 2);
         } catch (MalformedURLException e) {
-            throw new CommonException("error.malformed.url", e);
+            throw new CommonException(MALFORMED_EXCEPTION_CODE, e);
         }
         return dealUrl;
     }
@@ -518,5 +549,54 @@ public class StaticFileServiceImpl implements StaticFileService {
 
     private String getRealUrl(String url) {
         return attachmentUrl + "/" + BUCKET_NAME + "/" + url;
+    }
+
+
+    private boolean validIndexExistByApache(MultipartFile multipartFile, String suffix) {
+        boolean notIndex = true;
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(multipartFile.getInputStream());
+             ArchiveInputStream in = getArchiveInputStream(bufferedInputStream, suffix)
+        ) {
+            ArchiveEntry entry;
+            while (Objects.nonNull(entry = in.getNextEntry())) {
+                String entryName = entry.getName();
+                // 忽略mac压缩包冗余文件夹
+                if (entryName.contains(MACOSX) || entryName.contains(DS_STORE)) {
+                    continue;
+                }
+                if (!entry.isDirectory() && entryName.contains(INDEX_HTML)) {
+                    if (inputToByte(in).length <= 0) {
+                        throw new CommonException(INDEX_EMPTY_EXCEPTION_CODE);
+                    }
+                    notIndex = false;
+                }
+            }
+        } catch (IOException e) {
+            throw new CommonException(IO_EXCEPTION_CODE, e);
+        }
+        return notIndex;
+    }
+
+    private boolean validIndexExistByRar(MultipartFile multipartFile) {
+        boolean notIndex = true;
+        try {
+            Archive archive = new Archive(multipartFile.getInputStream());
+            FileHeader fileHeader;
+            while (Objects.nonNull(fileHeader = archive.nextFileHeader())) {
+                String name = fileHeader.getFileName();
+                if (name.contains(MACOSX) || name.contains(DS_STORE)) {
+                    continue;
+                }
+                if (!fileHeader.isDirectory() && name.contains(INDEX_HTML)) {
+                    if (inputToByte(archive.getInputStream(fileHeader)).length <= 0) {
+                        throw new CommonException(INDEX_EMPTY_EXCEPTION_CODE);
+                    }
+                    notIndex = false;
+                }
+            }
+        } catch (RarException | IOException e) {
+            throw new CommonException(RAR4_EXCEPTION_CODE);
+        }
+        return notIndex;
     }
 }
