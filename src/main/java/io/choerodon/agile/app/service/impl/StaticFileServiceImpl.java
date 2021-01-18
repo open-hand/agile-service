@@ -44,12 +44,13 @@ import io.choerodon.agile.api.vo.StaticFileRelatedVO;
 import io.choerodon.agile.app.service.StaticFileDealService;
 import io.choerodon.agile.app.service.StaticFileService;
 import io.choerodon.agile.infra.dto.StaticFileHeaderDTO;
+import io.choerodon.agile.infra.dto.StaticFileIssueRelDTO;
 import io.choerodon.agile.infra.dto.StaticFileLineDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StaticFileHeaderMapper;
+import io.choerodon.agile.infra.mapper.StaticFileIssueRelMapper;
 import io.choerodon.agile.infra.mapper.StaticFileLineMapper;
-import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -87,6 +88,7 @@ public class StaticFileServiceImpl implements StaticFileService {
     private static final String ISSUE_NULL_EXCEPTION_CODE = "error.issue.null";
     private static final String ISSUE_ID_NULL_EXCEPTION_CODE = "error.issueId.null";
     private static final String MALFORMED_EXCEPTION_CODE = "error.malformed.url";
+    private static final String RELATED_EXCEPTION_CODE = "error.file.issue.related.exist";
 
     @Value("${services.attachment.url}")
     private String attachmentUrl;
@@ -96,6 +98,8 @@ public class StaticFileServiceImpl implements StaticFileService {
     private StaticFileHeaderMapper staticFileHeaderMapper;
     @Autowired
     private StaticFileLineMapper staticFileLineMapper;
+    @Autowired
+    private StaticFileIssueRelMapper staticFileIssueRelMapper;
     @Autowired
     private IssueMapper issueMapper;
     @Autowired
@@ -180,7 +184,6 @@ public class StaticFileServiceImpl implements StaticFileService {
     public List<StaticFileHeaderVO> selectFileListByProject(Long projectId) {
         StaticFileHeaderDTO record = new StaticFileHeaderDTO();
         record.setProjectId(projectId);
-        record.setIssueId(0L);
         List<StaticFileHeaderDTO> staticFileHeaderList = staticFileHeaderMapper.select(record);
         List<StaticFileHeaderVO> result = modelMapper.map(staticFileHeaderList, new TypeToken<List<StaticFileHeaderVO>>() {
         }.getType());
@@ -194,10 +197,7 @@ public class StaticFileServiceImpl implements StaticFileService {
 
     @Override
     public List<StaticFileHeaderVO> selectFileListByIssue(Long projectId, Long issueId) {
-        StaticFileHeaderDTO record = new StaticFileHeaderDTO();
-        record.setProjectId(projectId);
-        record.setIssueId(issueId);
-        List<StaticFileHeaderDTO> staticFileHeaderList = staticFileHeaderMapper.select(record);
+        List<StaticFileHeaderDTO> staticFileHeaderList = staticFileHeaderMapper.selectFileListByIssue(projectId, issueId);
         List<StaticFileHeaderVO> result = modelMapper.map(staticFileHeaderList, new TypeToken<List<StaticFileHeaderVO>>() {
         }.getType());
         if (!CollectionUtils.isEmpty(result)) {
@@ -209,13 +209,16 @@ public class StaticFileServiceImpl implements StaticFileService {
     }
 
     @Override
-    public void deleteStaticFileRelated(Long projectId, Long fileHeaderId) {
+    public void deleteStaticFileRelated(Long projectId, Long fileHeaderId, Long issueId) {
         StaticFileHeaderDTO staticFileHeader = staticFileHeaderMapper.selectByPrimaryKey(fileHeaderId);
         if (ObjectUtils.isEmpty(staticFileHeader)) {
             throw new CommonException(DELETE_NULL_EXCEPTION_CODE);
         }
-        staticFileHeader.setIssueId(0L);
-        staticFileHeaderMapper.updateByPrimaryKey(staticFileHeader);
+        StaticFileIssueRelDTO record = new StaticFileIssueRelDTO();
+        record.setProjectId(projectId);
+        record.setStaticFileId(fileHeaderId);
+        record.setIssueId(issueId);
+        staticFileIssueRelMapper.delete(record);
     }
 
     @Override
@@ -238,25 +241,18 @@ public class StaticFileServiceImpl implements StaticFileService {
         if (!CollectionUtils.isEmpty(fileUrls)) {
             fileClient.deleteFileByUrl(organizationId, BUCKET_NAME, fileUrls);
         }
+
+        StaticFileIssueRelDTO relRecord = new StaticFileIssueRelDTO();
+        relRecord.setProjectId(projectId);
+        relRecord.setStaticFileId(fileHeaderId);
+
+        staticFileIssueRelMapper.delete(relRecord);
         staticFileLineMapper.delete(lineRecord);
         staticFileDealService.deleteBase(fileHeaderId);
     }
 
     @Override
     public List<StaticFileHeaderVO> updateStaticFileRelatedIssue(Long projectId, StaticFileRelatedVO staticFileRelatedVO) {
-        List<StaticFileHeaderVO> staticFileHeaderVOList = new ArrayList<>();
-        List<StaticFileHeaderDTO> staticFileHeaderDTOs = validStaticFileRelatedIssue(projectId, staticFileRelatedVO);
-        staticFileHeaderDTOs.forEach(staticFileHeaderDTO -> {
-            staticFileHeaderDTO.setIssueId(staticFileHeaderDTO.getIssueId());
-            staticFileHeaderMapper.updateByPrimaryKeySelective(staticFileHeaderDTO);
-            StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
-            staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
-            staticFileHeaderVOList.add(staticFileHeaderVO);
-        });
-        return staticFileHeaderVOList;
-    }
-
-    private List<StaticFileHeaderDTO> validStaticFileRelatedIssue(Long projectId, StaticFileRelatedVO staticFileRelatedVO) {
         if (ObjectUtils.isEmpty(staticFileRelatedVO.getIssueId())) {
             throw new CommonException(ISSUE_ID_NULL_EXCEPTION_CODE);
         }
@@ -276,7 +272,38 @@ public class StaticFileServiceImpl implements StaticFileService {
         if (CollectionUtils.isEmpty(staticFileHeaders) || staticFileHeaders.size() < staticFileRelatedVO.getFileHeaderIds().size()) {
             throw new CommonException(HEADER_NULL_EXCEPTION_CODE);
         }
-        return staticFileHeaders;
+        List<StaticFileHeaderVO> staticFileHeaderVOList = new ArrayList<>();
+        staticFileHeaders.forEach(staticFileHeaderDTO -> {
+            StaticFileIssueRelDTO newRelDTO = new StaticFileIssueRelDTO();
+            newRelDTO.setIssueId(staticFileRelatedVO.getIssueId());
+            newRelDTO.setStaticFileId(staticFileHeaderDTO.getId());
+            StaticFileIssueRelDTO oldRelDTO = staticFileIssueRelMapper.selectOne(newRelDTO);
+            if (!ObjectUtils.isEmpty(oldRelDTO)) {
+                //关联关系已存在
+                throw new CommonException(RELATED_EXCEPTION_CODE);
+            }
+            //创建关联关系
+            newRelDTO.setProjectId(projectId);
+            newRelDTO.setOrganizationId(projectUtil.getOrganizationId(projectId));
+            staticFileIssueRelMapper.insert(newRelDTO);
+
+            StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
+            staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
+            staticFileHeaderVOList.add(staticFileHeaderVO);
+        });
+        return staticFileHeaderVOList;
+    }
+
+    @Override
+    public List<StaticFileHeaderVO> selectFileListExcludeIssue(Long projectId, Long issueId) {
+        List<StaticFileHeaderVO> staticFileHeaderVOList = new ArrayList<>();
+        List<StaticFileHeaderDTO> staticFileHeaderList = staticFileHeaderMapper.selectFileListExcludeIssue(projectId, issueId);
+        staticFileHeaderList.forEach(staticFileHeaderDTO -> {
+            StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
+            staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
+            staticFileHeaderVOList.add(staticFileHeaderVO);
+        });
+        return staticFileHeaderVOList;
     }
 
     private byte[] getFileByteArray(StaticFileLineDTO file) throws IOException {
@@ -304,12 +331,8 @@ public class StaticFileServiceImpl implements StaticFileService {
     private StaticFileHeaderVO unRar(MultipartFile multipartFile, Long projectId, Long issueId, Long organizationId) throws IOException {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         String headerUrl = fileClient.uploadFile(organizationId, BUCKET_NAME, null, multipartFile.getOriginalFilename(), multipartFile);
-        StaticFileHeaderDTO staticFileHeader = new StaticFileHeaderDTO(
-                projectId,
-                organizationId,
-                issueId,
-                dealUrl(headerUrl),
-                multipartFile.getOriginalFilename());
+        StaticFileHeaderDTO staticFileHeader = createStaticFileHeader(projectId, organizationId, issueId, dealUrl(headerUrl), multipartFile.getOriginalFilename());
+
         staticFileDealService.createBase(staticFileHeader);
 
         List<StaticFileLineDTO> lineList = new ArrayList<>();
@@ -371,13 +394,7 @@ public class StaticFileServiceImpl implements StaticFileService {
     private StaticFileHeaderVO unCompressedByApache(MultipartFile multipartFile, Long projectId, Long issueId, Long organizationId, String suffix) throws IOException {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         String headerUrl = fileClient.uploadFile(organizationId, BUCKET_NAME, null, multipartFile.getOriginalFilename(), multipartFile);
-        StaticFileHeaderDTO staticFileHeader = new StaticFileHeaderDTO(
-                projectId,
-                organizationId,
-                issueId,
-                dealUrl(headerUrl),
-                multipartFile.getOriginalFilename());
-        staticFileDealService.createBase(staticFileHeader);
+        StaticFileHeaderDTO staticFileHeader = createStaticFileHeader(projectId, organizationId, issueId, dealUrl(headerUrl), multipartFile.getOriginalFilename());
 
         List<StaticFileLineDTO> lineList = new ArrayList<>();
         List<String> urls = new ArrayList<>();
@@ -424,6 +441,23 @@ public class StaticFileServiceImpl implements StaticFileService {
         StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeader, StaticFileHeaderVO.class);
         staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
         return staticFileHeaderVO;
+    }
+
+    private StaticFileHeaderDTO createStaticFileHeader(Long projectId, Long organizationId, Long issueId, String url, String originalFilename) {
+        StaticFileHeaderDTO staticFileHeader = new StaticFileHeaderDTO(
+                projectId,
+                organizationId,
+                url,
+                originalFilename);
+        staticFileDealService.createBase(staticFileHeader);
+        StaticFileIssueRelDTO staticFileIssueRelDTO = new StaticFileIssueRelDTO(
+                staticFileHeader.getId(),
+                issueId,
+                projectId,
+                organizationId
+        );
+        staticFileIssueRelMapper.insert(staticFileIssueRelDTO);
+        return staticFileHeader;
     }
 
     private ArchiveInputStream getArchiveInputStream(BufferedInputStream bufferedInputStream, String suffix) throws IOException {
