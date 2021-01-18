@@ -151,7 +151,7 @@ public class StaticFileServiceImpl implements StaticFileService {
     }
 
     @Override
-    public ResponseEntity<byte[]> selectStaticFileResult(Long projectId, String fileHeaderIdStr, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+    public ResponseEntity<byte[]> selectStaticFileResult(String fileHeaderIdStr, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         Long fileHeaderId = Long.parseLong(EncryptionUtils.decrypt(fileHeaderIdStr));
         String path;
         try {
@@ -165,7 +165,6 @@ public class StaticFileServiceImpl implements StaticFileService {
             relativePath = INDEX_HTML;
         }
         StaticFileLineDTO record = new StaticFileLineDTO();
-        record.setProjectId(projectId);
         record.setHeaderId(fileHeaderId);
         record.setRelativePath(relativePath);
         StaticFileLineDTO file = staticFileLineMapper.selectOne(record);
@@ -174,7 +173,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         }
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(file.getFileType()))
-                .body(getFileByteArray(file, projectId));
+                .body(getFileByteArray(file));
     }
 
     @Override
@@ -280,10 +279,9 @@ public class StaticFileServiceImpl implements StaticFileService {
         return staticFileHeaders;
     }
 
-    private byte[] getFileByteArray(StaticFileLineDTO file, Long projectId) throws IOException {
-        Long organizationId = projectUtil.getOrganizationId(projectId);
+    private byte[] getFileByteArray(StaticFileLineDTO file) throws IOException {
         InputStream inputStream =
-                fileClient.downloadFile(organizationId, BUCKET_NAME, getRealUrl(file.getUrl()));
+                fileClient.downloadFile(file.getOrganizationId(), BUCKET_NAME, getRealUrl(file.getUrl()));
         return IOUtils.toByteArray(inputStream);
     }
 

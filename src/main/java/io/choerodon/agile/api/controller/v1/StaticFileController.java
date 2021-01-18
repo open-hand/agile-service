@@ -106,19 +106,4 @@ public class StaticFileController {
         staticFileService.deleteStaticFile(projectId, fileHeaderId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
-
-    @ApiOperation(value = "请求资源")
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping(value = "/resource/{fileHeaderId}/**")
-    public ResponseEntity<byte[]> resource(
-            @ApiParam(value = "项目id", required = true)
-            @PathVariable(name = "project_id") Long projectId,
-            @PathVariable @Encrypt String fileHeaderId,
-            HttpServletResponse httpResponse,
-            WebRequest webRequest,
-            HttpServletRequest httpRequest) throws IOException {
-        return staticFileService.selectStaticFileResult(projectId, fileHeaderId,
-                webRequest, httpRequest, httpResponse
-        );
-    }
 }
