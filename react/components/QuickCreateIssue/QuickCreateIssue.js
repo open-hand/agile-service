@@ -87,7 +87,9 @@ class QuickCreateIssue extends Component {
               versionIssueRelVOList: versionIssueRelVOList || [],
               fixVersionIssueRel: fieldsMap.get('fixVersion').defaultValue || [],
               featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
-              assigneeId: defaultAssignee,
+              assigneeId: defaultAssignee || fieldsMap.get('assignee').defaultValue,
+              estimatedEndTime: fieldsMap.get('estimatedEndTime').defaultValue,
+              estimatedStartTime: fieldsMap.get('estimatedStartTime').defaultValue,
             };
             issueApi.create(issue).then((res) => {
               this.setState({
