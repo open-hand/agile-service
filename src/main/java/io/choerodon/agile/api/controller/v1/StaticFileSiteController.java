@@ -37,7 +37,7 @@ public class StaticFileSiteController {
     @Permission(level = ResourceLevel.SITE, permissionPublic = true)
     @GetMapping(value = "/resource/{fileHeaderId}/**")
     public ResponseEntity<byte[]> resource(
-            @ApiParam(value = "项目id", required = true)
+            @ApiParam(value = "静态资源头id", required = true)
             @PathVariable @Encrypt String fileHeaderId,
             HttpServletResponse httpResponse,
             WebRequest webRequest,
