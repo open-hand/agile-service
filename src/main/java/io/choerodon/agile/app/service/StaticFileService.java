@@ -28,14 +28,13 @@ public interface StaticFileService {
 
     /**
      * 重定向资源请求
-     * @param projectId 项目id
      * @param fileHeaderIdStr 静态文件头id
-     * @param webRequest
-     * @param httpRequest
-     * @param httpResponse
-     * @return
+     * @param webRequest webRequest
+     * @param httpRequest httpRequest
+     * @param httpResponse httpResponse
+     * @return 请求的资源
      */
-    ResponseEntity<byte[]> selectStaticFileResult(Long projectId, String fileHeaderIdStr, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException;
+    ResponseEntity<byte[]> selectStaticFileResult(String fileHeaderIdStr, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException;
 
     /**
      * 查询项目下未关联问题的静态文件头
