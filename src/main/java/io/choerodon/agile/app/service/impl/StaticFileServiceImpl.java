@@ -198,7 +198,6 @@ public class StaticFileServiceImpl implements StaticFileService {
         }
         StaticFileLineDTO lineRecord = new StaticFileLineDTO();
         lineRecord.setHeaderId(fileHeaderId);
-        lineRecord.setProjectId(projectId);
         List<StaticFileLineDTO> fileLineList = staticFileLineMapper.select(lineRecord);
         fileUrls.add(getRealUrl(staticFileHeader.getUrl()));
         if (!CollectionUtils.isEmpty(fileLineList)) {
@@ -343,7 +342,6 @@ public class StaticFileServiceImpl implements StaticFileService {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         long startTime1 = System.currentTimeMillis();
         String headerUrl = fileClient.uploadFile(organizationId, BUCKET_NAME, null, multipartFile.getOriginalFilename(), multipartFile);
-        LOGGER.info("压缩文件上传时间{}ms", System.currentTimeMillis() - startTime1);
         StaticFileHeaderDTO staticFileHeader = new StaticFileHeaderDTO(
                 projectId,
                 organizationId,
@@ -382,7 +380,6 @@ public class StaticFileServiceImpl implements StaticFileService {
                     lineList.add(staticFileLine);
                 }
             }
-            LOGGER.info("上传时间{}ms", System.currentTimeMillis() - startTime);
             //获取上传的文件信息
             List<FileDTO> files = fileClient.getFiles(organizationId, BUCKET_NAME, urls);
             Map<String, FileDTO> fileMap = files.stream().collect(Collectors.toMap(file -> dealUrl(file.getFileUrl()), file -> file));
