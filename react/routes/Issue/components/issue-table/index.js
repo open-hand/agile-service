@@ -13,6 +13,7 @@ import StatusTag from '@/components/StatusTag';
 import UserHead from '@/components/UserHead';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import UserTag from '@/components/tag/user-tag';
 import CollapseAll from './CollapseAll';
 import Store from '../../stores';
 import './index.less';
@@ -227,12 +228,10 @@ function IssueTable({ tableRef, onCreateIssue }) {
             renderer={({ record }) => {
               const { fieldType, code } = field;
               const value = record.get('foundationFieldValue')[code];
-              if (fieldType === 'member') {
+              if (['member', 'multiMember'].includes(fieldType)) {
                 return value && (
                   <div style={{ display: 'inline-flex' }}>
-                    <UserHead
-                      user={value}
-                    />
+                    <UserTag data={value} />
                   </div>
                 );
               }
