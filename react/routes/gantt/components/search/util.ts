@@ -95,6 +95,7 @@ export function transformFilter(chosenFields: IChosenFields) {
       case 'multiple':
       case 'radio':
       case 'checkbox':
+      case 'multiMember':
       case 'member': {
         const v = Array.isArray(value) ? value : [value];
         if (v.length > 0) {

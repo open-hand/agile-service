@@ -174,6 +174,7 @@ function CustomField({ field }) {
           onChange={handleChange}
         />
       );
+    case 'multiMember':
     case 'member':
       return (
         <MemberField
@@ -214,7 +215,7 @@ function CustomFields({
   const { store } = useContext(IssueSearchContext);
   const { chosenFields } = store;
   for (const [, field] of chosenFields) {
-    if (['single', 'multiple', 'radio', 'checkbox', 'member'].includes(field.fieldType)) {
+    if (['single', 'multiple', 'radio', 'checkbox', 'member', 'multiMember'].includes(field.fieldType)) {
       selectTypes.push(field);
     } else if (['time', 'datetime', 'date'].includes(field.fieldType)) {
       dateTypes.push(field);

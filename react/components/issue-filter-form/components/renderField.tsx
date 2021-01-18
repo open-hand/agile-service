@@ -144,7 +144,8 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           style={{ width: '100%' }}
           {...otherComponentProps}
         />
-      ); }
+      );
+    }
     case 'date':
       return (
         <DatePicker
@@ -214,6 +215,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             })}
         </Select>
       );
+    case 'multiMember':
     case 'member':
     {
       // eslint-disable-next-line react-hooks/rules-of-hooks
