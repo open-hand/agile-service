@@ -214,20 +214,24 @@ public class StaticFileServiceImpl implements StaticFileService {
     }
 
     @Override
-    public StaticFileHeaderVO updateStaticFileRelatedIssue(Long projectId, StaticFileRelatedVO staticFileRelatedVO) {
-        StaticFileHeaderDTO staticFileHeaderDTO = validStaticFileRelatedIssue(projectId, staticFileRelatedVO);
-        staticFileHeaderDTO.setIssueId(staticFileHeaderDTO.getIssueId());
-        staticFileHeaderMapper.updateByPrimaryKeySelective(staticFileHeaderDTO);
-        StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
-        staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
-        return staticFileHeaderVO;
+    public List<StaticFileHeaderVO> updateStaticFileRelatedIssue(Long projectId, StaticFileRelatedVO staticFileRelatedVO) {
+        List<StaticFileHeaderVO> staticFileHeaderVOList = new ArrayList<>();
+        List<StaticFileHeaderDTO> staticFileHeaderDTOs = validStaticFileRelatedIssue(projectId, staticFileRelatedVO);
+        staticFileHeaderDTOs.forEach(staticFileHeaderDTO -> {
+            staticFileHeaderDTO.setIssueId(staticFileHeaderDTO.getIssueId());
+            staticFileHeaderMapper.updateByPrimaryKeySelective(staticFileHeaderDTO);
+            StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
+            staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
+            staticFileHeaderVOList.add(staticFileHeaderVO);
+        });
+        return staticFileHeaderVOList;
     }
 
-    private StaticFileHeaderDTO validStaticFileRelatedIssue(Long projectId, StaticFileRelatedVO staticFileRelatedVO) {
+    private List<StaticFileHeaderDTO> validStaticFileRelatedIssue(Long projectId, StaticFileRelatedVO staticFileRelatedVO) {
         if (ObjectUtils.isEmpty(staticFileRelatedVO.getIssueId())) {
             throw new CommonException("error.issueId.null");
         }
-        if (ObjectUtils.isEmpty(staticFileRelatedVO.getFileHeaderId())) {
+        if (CollectionUtils.isEmpty(staticFileRelatedVO.getFileHeaderIds())) {
             throw new CommonException("error.fileHeaderId.null");
         }
 
@@ -238,15 +242,12 @@ public class StaticFileServiceImpl implements StaticFileService {
         if (ObjectUtils.isEmpty(issue)) {
             throw new CommonException("error.issue.null");
         }
-
-        StaticFileHeaderDTO staticFileHeaderRecord = new StaticFileHeaderDTO();
-        staticFileHeaderRecord.setId(staticFileRelatedVO.getFileHeaderId());
-        staticFileHeaderRecord.setProjectId(projectId);
-        StaticFileHeaderDTO staticFileHeader = staticFileHeaderMapper.selectOne(staticFileHeaderRecord);
-        if (ObjectUtils.isEmpty(staticFileHeader)) {
+        String ids = staticFileRelatedVO.getFileHeaderIds().stream().map(String::valueOf).collect(Collectors.joining(","));
+        List<StaticFileHeaderDTO> staticFileHeaders = staticFileHeaderMapper.selectByIds(ids);
+        if (CollectionUtils.isEmpty(staticFileHeaders) || staticFileHeaders.size() < staticFileRelatedVO.getFileHeaderIds().size()) {
             throw new CommonException("error.staticFileHeader.null");
         }
-        return staticFileHeader;
+        return staticFileHeaders;
     }
 
     private byte[] getFileByteArray(StaticFileLineDTO file, Long projectId) throws IOException {
