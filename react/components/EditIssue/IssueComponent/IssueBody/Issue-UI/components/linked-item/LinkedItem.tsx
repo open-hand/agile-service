@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Icon } from 'choerodon-ui';
 import FileSaver from 'file-saver';
-import { getProjectId } from '@/utils/common';
-import { API_HOST } from '@choerodon/master';
+import to from '@/utils/to';
 import styles from './LinkedItem.less';
 import openDeleteModal, { IUi } from '../delete/DeleteUI';
 import EditIssueContext from '../../../../../stores';
@@ -20,8 +19,14 @@ const LinkItem: React.FC<Props> = ({ ui }) => {
   }, [ui.fileName, ui.url]);
 
   const handlePreview = useCallback(() => {
-    if (API_HOST && ui.id) {
-      window.open(`${API_HOST}/v1/projects/${getProjectId()}/static_file/resource/${ui.id}/index`);
+    if (ui.id) {
+      to(`/agile/ui-preview/${ui.id}`, {
+        type: 'project',
+        params: {
+          fullPage: 'true',
+        },
+      },
+      { blank: true });
     }
   }, [ui.id]);
   return (
