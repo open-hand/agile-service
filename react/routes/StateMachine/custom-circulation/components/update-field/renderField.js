@@ -317,6 +317,7 @@ export default function renderField({
         </Select>
       );
     }
+    case 'multiMember':
     case 'member': {
       if (code === 'assignee') {
         extraOptionsMap.member = [
