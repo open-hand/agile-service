@@ -277,10 +277,11 @@ public class SiteMsgUtil {
             argsMap.put(PROJECT_NAME, projectVO.getName());
             argsMap.put(ISSUE_SUMMARY, summary);
             argsMap.put(LINK, domainUrl + "/" + url);
+            argsMap.put(URL, url);
             argsMap.put(COMMENT, comment);
             argsMap.put(ACTION, action);
             argsMap.put(COMMENT_USER, issueCommentVO.getUserRealName());
-            argsMap.put(COMMENT_TYPE, replyAble ? "评论" : "回复");
+            argsMap.put(COMMENT_TYPE, replyAble ? "回复" : "评论");
             argsMap.put(ISSUE_TYPE, issueType);
 
             MessageSender messageSender = new MessageSender();
