@@ -6,6 +6,7 @@ import useProjectKey from './useProjectKey';
 
 export interface ProjectIssueTypesConfig {
   projectId?: string
+  /** 只返回某一类的问题类型 */
   typeCode?: string
 }
 export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, options?: UseQueryOptions<IIssueType[]>) {
@@ -17,6 +18,7 @@ export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, o
       const issueTypes = (!isProgram ? data.filter((item: IIssueType) => item.typeCode !== 'feature') : data);
       return config?.typeCode ? issueTypes.filter((type) => type.typeCode === config?.typeCode) : issueTypes;
     },
+    placeholderData: [] as IIssueType[],
     ...options,
   });
 }

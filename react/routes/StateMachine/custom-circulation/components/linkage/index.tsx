@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { Form, DataSet, Select } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
-import { useIssueTypes } from '@/hooks';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { IIssueType } from '@/common/types';
 import SelectStatus from '@/components/select/select-status';
 import { statusTransformApi } from '@/api';
@@ -23,7 +23,7 @@ const Linkage = ({
 // @ts-ignore
   modal, record, selectedType, customCirculationDataSet,
 }) => {
-  const [issueTypes] = useIssueTypes();
+  const { data: issueTypes } = useProjectIssueTypes();
   const [loading, setLoading] = useState(false);
   const linkageDataSet = useMemo(() => new DataSet({
     autoCreate: true,

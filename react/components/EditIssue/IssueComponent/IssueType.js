@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Dropdown, Menu, Icon } from 'choerodon-ui';
 import { find } from 'lodash';
-import { useIssueTypes } from '@/hooks';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { issueApi } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import TypeTag from '../../TypeTag';
@@ -13,7 +13,7 @@ const IssueType = observer(({
   reloadIssue, onUpdate,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
-  let [issueTypeData] = useIssueTypes({ disabled });
+  let { data: issueTypeData } = useProjectIssueTypes(undefined, { enabled: !disabled });
   const handleChangeType = (type) => {
     const issue = store.getIssue;
     const {
