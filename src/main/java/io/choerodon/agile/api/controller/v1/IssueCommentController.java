@@ -54,14 +54,14 @@ public class IssueCommentController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建issue评论回复")
     @PostMapping("/reply")
-    public ResponseEntity<IssueCommentVO> createIssueCommentReplay(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<IssueCommentVO> createIssueCommentReply(@ApiParam(value = "项目id", required = true)
                                                              @PathVariable(name = "project_id") Long projectId,
-                                                                   @ApiParam(value = "创建issue评论回复对象", required = true)
-                                                             @RequestBody IssueCommentReplayCreateVO issueCommentReplayCreateVO) {
-        issueCommentValidator.verifyCreateReplayData(issueCommentReplayCreateVO);
-        return Optional.ofNullable(issueCommentService.createIssueCommentReplay(projectId, issueCommentReplayCreateVO))
+                                                                  @ApiParam(value = "创建issue评论回复对象", required = true)
+                                                             @RequestBody IssueCommentReplyCreateVO issueCommentReplyCreateVO) {
+        issueCommentValidator.verifyCreateReplyData(issueCommentReplyCreateVO);
+        return Optional.ofNullable(issueCommentService.createIssueCommentReply(projectId, issueCommentReplyCreateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException("error.IssueComment.createIssueCommentReplay"));
+                .orElseThrow(() -> new CommonException("error.IssueComment.createIssueCommentReply"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -94,13 +94,13 @@ public class IssueCommentController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("通过commentId查询评论下对应回复")
     @GetMapping(value = "/reply/{comment_id}")
-    public ResponseEntity<List<IssueCommentReplayVO>> queryIssueCommentReplayList(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<List<IssueCommentReplyVO>> queryIssueCommentReplyList(@ApiParam(value = "项目id", required = true)
                                                                                       @PathVariable(name = "project_id") Long projectId,
-                                                                                  @ApiParam(value = "comment_id", required = true)
+                                                                                @ApiParam(value = "comment_id", required = true)
                                                                                       @PathVariable(name = "comment_id") @Encrypt Long commentId) {
-        return Optional.ofNullable(issueCommentService.queryIssueCommentReplayList(projectId, commentId))
+        return Optional.ofNullable(issueCommentService.queryIssueCommentReplyList(projectId, commentId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.IssueComment.queryIssueCommentReplayList"));
+                .orElseThrow(() -> new CommonException("error.IssueComment.queryIssueCommentReplyList"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -117,11 +117,11 @@ public class IssueCommentController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("通过commentId删除评论及其回复")
     @DeleteMapping(value = "/reply/{commentId}")
-    public ResponseEntity deleteIssueCommentReplay(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity deleteIssueCommentReply(@ApiParam(value = "项目id", required = true)
                                              @PathVariable(name = "project_id") Long projectId,
-                                             @ApiParam(value = "评论id", required = true)
+                                                  @ApiParam(value = "评论id", required = true)
                                              @PathVariable @Encrypt Long commentId) {
-        issueCommentService.deleteIssueCommentReplay(projectId, commentId);
+        issueCommentService.deleteIssueCommentReply(projectId, commentId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 

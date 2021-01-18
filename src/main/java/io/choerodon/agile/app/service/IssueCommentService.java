@@ -61,10 +61,10 @@ public interface IssueCommentService {
     /**
      * 创建问题评论回复
      * @param projectId 项目id
-     * @param issueCommentReplayCreateVO 创建issue评论回复对象
+     * @param issueCommentReplyCreateVO 创建issue评论回复对象
      * @return 创建的问题评论回复
      */
-    IssueCommentVO createIssueCommentReplay(Long projectId, IssueCommentReplayCreateVO issueCommentReplayCreateVO);
+    IssueCommentVO createIssueCommentReply(Long projectId, IssueCommentReplyCreateVO issueCommentReplyCreateVO);
 
     /**
      * 根据评论Id和项目id查询评论回复列表
@@ -73,7 +73,7 @@ public interface IssueCommentService {
      * @param commentId 评论id
      * @return IssueCommentVO 评论回复列表
      */
-    List<IssueCommentReplayVO> queryIssueCommentReplayList(Long projectId, Long commentId);
+    List<IssueCommentReplyVO> queryIssueCommentReplyList(Long projectId, Long commentId);
 
     /**
      * 删除issueComment及其评论
@@ -81,5 +81,5 @@ public interface IssueCommentService {
      * @param projectId projectId
      * @param commentId commentId
      */
-    void deleteIssueCommentReplay(Long projectId, Long commentId);
+    void deleteIssueCommentReply(Long projectId, Long commentId);
 }

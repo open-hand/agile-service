@@ -71,8 +71,8 @@ public class IIssueCommentServiceImpl implements IIssueCommentService {
     }
 
     @Override
-    @DataLog(type = "deleteCommentReplay")
-    public void deleteBaseReplay(IssueCommentDTO issueCommentDTO) {
+    @DataLog(type = "deleteCommentReply")
+    public void deleteBaseReply(IssueCommentDTO issueCommentDTO) {
         int isDelete = issueCommentMapper.delete(issueCommentDTO);
         if (isDelete != 1) {
             throw new CommonException(DELETE_ERROR);

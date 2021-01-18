@@ -3,7 +3,7 @@ package io.choerodon.agile.api.validator;
 
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.IssueCommentCreateVO;
-import io.choerodon.agile.api.vo.IssueCommentReplayCreateVO;
+import io.choerodon.agile.api.vo.IssueCommentReplyCreateVO;
 import io.choerodon.agile.infra.dto.IssueCommentDTO;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -36,21 +36,21 @@ public class IssueCommentValidator {
         }
     }
 
-    public void verifyCreateReplayData(IssueCommentReplayCreateVO issueCommentReplayCreateVO) {
-        if (issueCommentReplayCreateVO.getIssueId() == null) {
+    public void verifyCreateReplyData(IssueCommentReplyCreateVO issueCommentReplyCreateVO) {
+        if (issueCommentReplyCreateVO.getIssueId() == null) {
             throw new CommonException("error.IssueCommentRule.issueId");
         } else {
-            if (issueMapper.selectByPrimaryKey(issueCommentReplayCreateVO.getIssueId()) == null) {
+            if (issueMapper.selectByPrimaryKey(issueCommentReplyCreateVO.getIssueId()) == null) {
                 throw new CommonException("error.IssueCommentRule.issue");
             }
         }
-        if(issueCommentReplayCreateVO.getReplyToUserId() == null){
+        if(issueCommentReplyCreateVO.getReplyToUserId() == null){
             throw new CommonException("error.IssueCommentRule.replyToUserId");
         }
-        if (issueCommentReplayCreateVO.getParentId() == null) {
+        if (issueCommentReplyCreateVO.getParentId() == null) {
             throw new CommonException("error.IssueCommentRule.parentId");
         } else {
-            if (issueCommentMapper.selectByPrimaryKey(issueCommentReplayCreateVO.getParentId()) == null) {
+            if (issueCommentMapper.selectByPrimaryKey(issueCommentReplyCreateVO.getParentId()) == null) {
                 throw new CommonException("error.IssueCommentRule.issueComment");
             }
         }

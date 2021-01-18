@@ -372,7 +372,7 @@ public class SendMsgUtil {
     }
 
     @Async
-    public void sendMsgByIssueCommentReplay(Long projectId, IssueDTO issueDTO, IssueCommentVO issueCommentVO) {
+    public void sendMsgByIssueCommentReply(Long projectId, IssueDTO issueDTO, IssueCommentVO issueCommentVO) {
         Map<Long, String> actionMap = new HashMap<>(1);
         actionMap.put(issueCommentVO.getReplyToUserId(), "评论的");
         IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);

@@ -9,7 +9,7 @@ import io.choerodon.agile.infra.utils.StringUtil;
 /**
  * @author dinghuang123@gmail.com
  */
-public class IssueCommentReplayCreateVO {
+public class IssueCommentReplyCreateVO {
 
     @ApiModelProperty(value = "问题id")
     @Encrypt
