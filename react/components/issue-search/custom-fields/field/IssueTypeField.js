@@ -4,7 +4,7 @@ import { unionBy } from 'lodash';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/utils/common';
 import { issueTypeApi } from '@/api';
-import SelectIssueType from '@/components/select/select-issue-type';
+import SelectIssueType from '@/components/select/select-issue-type-pro';
 import { getSelectStyle } from '../utils';
 
 const list = [];

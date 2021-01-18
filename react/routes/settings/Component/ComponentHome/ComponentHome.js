@@ -8,6 +8,7 @@ import {
 } from '@choerodon/boot';
 import './ComponentHome.less';
 import TableAction from '@/components/TableAction';
+import { componentApi } from '@/api';
 import CreateComponent from '../ComponentComponent/AddComponent';
 import EditComponent from '../ComponentComponent/EditComponent';
 import DeleteComponent from '../ComponentComponent/DeleteComponent';
@@ -110,14 +111,32 @@ function ComponentHome() {
       service={['choerodon.code.project.setting.issue.ps.deletecomponent']}
     />
   );
-  const handleDragEnd = useCallback((ds, columns, result) => {
+  const handleDragEnd = useCallback(async (ds, columns, result) => {
     const { source, destination } = result;
     if (!destination) {
       return;
     }
     const sourceIndex = source.index;
     const destinationIndex = destination.index;
-    console.log(ds.toData());
+    if (destinationIndex === sourceIndex) {
+      return;
+    }
+    let before = false;
+    let outsetId = null;
+    // 向后移动
+    if (destinationIndex > sourceIndex) {
+      before = false;
+      outsetId = ds.get(destinationIndex - 1)?.get('componentId');
+    } else {
+      before = true;
+      outsetId = ds.get(destinationIndex + 1)?.get('componentId');
+    }
+    await componentApi.move({
+      before,
+      componentIds: [ds.get(destinationIndex)?.get('componentId')],
+      outsetId,
+    });
+    ds.query(ds.currentPage);
   }, []);
   const renderTable = () => (
     <Table
