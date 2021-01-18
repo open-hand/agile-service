@@ -23,7 +23,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       params: {
         apply_type: applyType,
       },
-      cache: true,
+      // cache: true,
     });
   }
 
