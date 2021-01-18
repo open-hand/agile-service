@@ -1,18 +1,24 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Divider, Icon } from 'choerodon-ui';
+import { Divider, Icon, Tooltip } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import LinkedItem from './components/linked-item';
 import UploadUI from './components/upload';
+import openLinkUI from './components/link';
 import './IssueUI.less';
 
 import EditIssueContext from '../../../stores';
+import { IUi } from './components/delete/DeleteUI';
 
 const IssueUI = (props: any) => {
   const { store } = useContext(EditIssueContext);
 
   useEffect(() => {
     store.getLinkedUI();
+  }, [store]);
+
+  const handleLinkUI = useCallback(() => {
+    openLinkUI({ store });
   }, [store]);
 
   const { linkedUI } = store;
@@ -24,12 +30,14 @@ const IssueUI = (props: any) => {
           <span>UI&UX文件</span>
         </div>
         <div className="c7n-title-right">
-          <Button icon="device_hub" />
+          <Tooltip title="关联UI/UX文件">
+            <Button icon="device_hub" onClick={handleLinkUI} />
+          </Tooltip>
           <UploadUI {...props} />
         </div>
       </div>
       {
-        linkedUI.map((ui: any) => (
+        linkedUI.map((ui: IUi) => (
           <LinkedItem ui={ui} />
         ))
       }
