@@ -28,6 +28,7 @@ import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
 import { InjectedComponent } from '../../injectComponent';
 import './IssueBody.less';
+import IssueUI from './Issue-UI';
 
 const { TabPane } = Tabs;
 // eslint-disable-next-line no-undef
@@ -95,6 +96,8 @@ function IssueBody(props) {
           <IssueDetail {...props} />
           <IssueDes {...props} />
           <IssueAttachment {...props} />
+          {issueTypeVO.typeCode && ['issue_epic', 'feature'].indexOf(issueTypeVO.typeCode) === -1
+            ? <IssueUI {...props} /> : ''}
           {
             !outside && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
               <>

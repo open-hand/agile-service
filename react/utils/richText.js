@@ -128,7 +128,7 @@ export async function uploadAndReplaceImg(text) {
  * 适用于富文本附件上传以及回调
  * @param {any []} propFileList 文件列表
  * @param {function} func 回调
- * @param {{issueType:string,issueId:number,fileName:string}} config 附件上传的额外信息
+ * @param {{issueType?:string,issueId:number,fileName:string}} config 附件上传的额外信息
  */
 export function handleFileUpload(propFileList, func, config, projectId) {
   const fileList = propFileList.filter((i) => !i.url);

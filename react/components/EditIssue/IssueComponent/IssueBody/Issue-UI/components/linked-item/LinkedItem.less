@@ -1,0 +1,22 @@
+.linkedItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #3F51B5;
+  padding-right: 10px;
+  &:not(:last-child) {
+    margin-bottom: 12px;
+  }
+  .left {
+    display: flex;
+    cursor: pointer;
+    :global {
+      .icon {
+        margin-right: 2px;
+      }
+    }
+  }
+  .right {
+    cursor: pointer;
+  }
+}
