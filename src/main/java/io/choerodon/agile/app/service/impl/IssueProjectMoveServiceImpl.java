@@ -316,9 +316,10 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException(ISSUE_NULL);
         }
+        String applyType = getApplyType(targetProjectVO);
         Map<String,Object> programValueMap = new HashMap<>();
         if (agilePluginService != null) {
-            agilePluginService.handlerProgramPredefinedFields(targetProjectVO.getId(),jsonObject,programValueMap,issueDTO.getApplyType());
+            agilePluginService.handlerProgramPredefinedFields(targetProjectVO.getId(),jsonObject,programValueMap,applyType);
         }
         Object influenceVersions = jsonObject.get("influenceVersionList");
         jsonObject.remove("influenceVersionList");
@@ -339,6 +340,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             agileTriggerService.updateRuleLogProjectId(projectVO.getId(), targetProjectVO.getId(), issueId);
         }
         // 修改issue项目并指定合适的状态
+        issueDTO.setApplyType(applyType);
         IssueDTO issue = buildIssue(projectVO.getId(), issueDTO, issueUpdateVO.getStatusId(), targetProjectVO.getId());
         IssueDTO dto = issueAccessDataService.transferProject(issue);
         // 处理移动的时候同时改变issue的问题类型
@@ -346,6 +348,11 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         // 更新issue的值
         if (!ObjectUtils.isEmpty(jsonObject)) {
             IssueDTO issue1 = issueMapper.selectByPrimaryKey(issueId);
+            if (!ObjectUtils.isEmpty(programValueMap.get("featureId"))) {
+                Long featureId = Long.valueOf(programValueMap.get("featureId").toString());
+                issueUpdateVO.setFeatureId(featureId);
+                fieldList.add("featureId");
+            }
             issueUpdateVO.setIssueId(issueId);
             issueUpdateVO.setObjectVersionNumber(issue1.getObjectVersionNumber());
             issueService.updateIssue(targetProjectVO.getId(), issueUpdateVO, fieldList);
@@ -362,6 +369,15 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         if (agilePluginService != null) {
             agilePluginService.projectMoveUpdateFeatureValue(projectVO.getId(), issueDTO, targetProjectVO.getId());
             agilePluginService.handlerFeatureField(targetProjectVO.getId(),issueDTO,programValueMap);
+        }
+    }
+
+    private String getApplyType(ProjectVO targetProjectVO) {
+        List<String> codes = targetProjectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+        if (codes.contains(ProjectCategory.MODULE_AGILE)) {
+            return SchemeApplyType.AGILE;
+        } else {
+            return SchemeApplyType.PROGRAM;
         }
     }
 
@@ -385,13 +401,13 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         issue.setIssueId(issueDTO.getIssueId());
         Long statusId = status;
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        //获取状态机id
-        Long stateMachineId = projectConfigService.queryStateMachineId(projectId, issueDTO.getApplyType(), issueDTO.getIssueTypeId());
-        if (stateMachineId == null) {
-            throw new CommonException("error.createIssue.stateMachineNotFound");
-        }
         //获取初始状态
         if (ObjectUtils.isEmpty(status)) {
+            //获取状态机id
+            Long stateMachineId = projectConfigService.queryStateMachineId(targetProjectId, issueDTO.getApplyType(), issueDTO.getIssueTypeId());
+            if (stateMachineId == null) {
+                throw new CommonException("error.createIssue.stateMachineNotFound");
+            }
             statusId = instanceService.queryInitStatusId(organizationId, stateMachineId);
             if (statusId == null) {
                 throw new CommonException("error.init.status.not.found");
@@ -407,6 +423,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             Integer sequence = issueMapper.queryMaxEpicSequenceByProject(targetProjectId);
             issue.setEpicSequence(sequence);
         }
+        issue.setApplyType(issueDTO.getApplyType());
         return issue;
     }
 
