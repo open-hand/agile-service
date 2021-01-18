@@ -41,6 +41,10 @@ public class IssueComponentDTO extends AuditDomain {
 
     private String defaultAssigneeRole;
 
+    private String rank;
+
+
+
     public void setComponentId(Long componentId) {
         this.componentId = componentId;
     }
@@ -87,5 +91,13 @@ public class IssueComponentDTO extends AuditDomain {
 
     public String getDefaultAssigneeRole() {
         return defaultAssigneeRole;
+    }
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
     }
 }

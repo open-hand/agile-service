@@ -25,4 +25,10 @@ databaseChangeLog(logicalFilePath:'agile_issue_component.groovyoovy') {
             column(name: 'default_assignee_role', type: 'VARCHAR(255)', remarks: 'default assignee role')
         }
     }
+
+    changeSet(id:  '2021-01-18-agile-issue-component-add-column', author: 'ztxemail@163.com') {
+        addColumn(tableName: 'agile_issue_component') {
+            column(name: 'rank', type: 'VARCHAR(255)', remarks: '模块排序')
+        }
+    }
 }
