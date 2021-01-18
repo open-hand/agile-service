@@ -325,7 +325,7 @@ export type IIssueColumnName =
   'feature';
 
 export type IFieldType =
-  'text' | 'input' | 'member' | 'single' | 'multiple' | 'radio' | 'checkbox' |
+  'text' | 'input' | 'member' |'multiMember'| 'single' | 'multiple' | 'radio' | 'checkbox' |
   'number' | 'time' | 'date' | 'datetime'
 
 export type ISystemFieldCode =
