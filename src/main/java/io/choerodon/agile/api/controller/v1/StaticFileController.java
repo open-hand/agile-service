@@ -27,7 +27,7 @@ import io.choerodon.swagger.annotation.Permission;
  * 2021/01/11 11:25
  */
 @RestController
-@RequestMapping(value = "/v1/organizations/{project_id}/static_file")
+@RequestMapping(value = "/v1/projects/{project_id}/static_file")
 public class StaticFileController {
 
     @Autowired
