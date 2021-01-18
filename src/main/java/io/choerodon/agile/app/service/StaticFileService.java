@@ -72,5 +72,5 @@ public interface StaticFileService {
      * @param staticFileRelatedVO 关联参数
      * @return 静态文件头
      */
-    StaticFileHeaderVO updateStaticFileRelatedIssue(Long projectId, StaticFileRelatedVO staticFileRelatedVO);
+    List<StaticFileHeaderVO> updateStaticFileRelatedIssue(Long projectId, StaticFileRelatedVO staticFileRelatedVO);
 }

@@ -74,7 +74,7 @@ public class StaticFileController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("将未关联问题的静态文件关联问题")
     @PostMapping("/related")
-    public ResponseEntity<StaticFileHeaderVO> updateStaticFileRelatedIssue(
+    public ResponseEntity<List<StaticFileHeaderVO>> updateStaticFileRelatedIssue(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @RequestBody @Encrypt StaticFileRelatedVO staticFileRelatedVO) {
