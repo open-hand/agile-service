@@ -15,7 +15,7 @@ class UiApi extends Api<UiApi> {
   getLinkedUI(issueId: string) {
     return this.request({
       method: 'get',
-      url: `${this.prefix}/static_file/${issueId} `,
+      url: `${this.prefix}/static_file/related/${issueId}`,
     });
   }
 
