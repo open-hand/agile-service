@@ -12,7 +12,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
  * @author chihao.ran@hand-china.com
  * 2021/01/13 16:07
  */
-@Table(name = "agile_static_file_issue_rel")
+@Table(name = "agile_issue_static_file_rel")
 @ModifyAudit
 @VersionAudit
 public class StaticFileIssueRelDTO extends AuditDomain {

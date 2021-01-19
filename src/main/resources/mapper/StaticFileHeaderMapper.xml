@@ -11,7 +11,7 @@
             asfh.creation_date
         FROM
             agile_static_file_header asfh
-        LEFT JOIN agile_static_file_issue_rel asfir ON asfir.static_file_id = asfh.id AND asfir.issue_id = #{issueId}
+        LEFT JOIN agile_issue_static_file_rel asfir ON asfir.static_file_id = asfh.id AND asfir.issue_id = #{issueId}
         WHERE
             asfh.project_id = #{projectId}
             AND asfir.id IS NULL
@@ -29,7 +29,7 @@
         WHERE
         asfh.project_id = #{projectId}
         AND asfh.id in (
-        SELECT asfir.static_file_id FROM agile_static_file_issue_rel asfir
+        SELECT asfir.static_file_id FROM agile_issue_static_file_rel asfir
         WHERE asfir.issue_id = #{issueId}
         AND asfir.project_id = #{projectId})
     </select>

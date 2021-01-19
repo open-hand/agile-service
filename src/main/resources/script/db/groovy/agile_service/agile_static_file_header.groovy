@@ -6,9 +6,6 @@ databaseChangeLog(logicalFilePath: 'agile_static_file_header.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'attachment id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id') {
-                constraints(nullable: false)
-            }
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
                 constraints(nullable: false)
             }
@@ -26,12 +23,6 @@ databaseChangeLog(logicalFilePath: 'agile_static_file_header.groovy') {
             column(name: "creation_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
             column(name: "last_updated_by", type: "BIGINT UNSIGNED", defaultValue: "0")
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
-        }
-    }
-
-    changeSet(id: '2021-01-13-agile-static-file-header-drop-column', author: 'chihao.ran@hand-china.com') {
-        dropColumn(tableName: 'agile-static-file-header') {
-            column(name: 'issue_id')
         }
     }
 }
