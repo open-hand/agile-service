@@ -334,8 +334,6 @@ public class StaticFileServiceImpl implements StaticFileService {
         String headerUrl = fileClient.uploadFile(organizationId, BUCKET_NAME, null, multipartFile.getOriginalFilename(), multipartFile);
         StaticFileHeaderDTO staticFileHeader = createStaticFileHeader(projectId, organizationId, issueId, dealUrl(headerUrl), multipartFile.getOriginalFilename());
 
-        staticFileDealService.createBase(staticFileHeader);
-
         List<StaticFileLineDTO> lineList = new ArrayList<>();
         List<String> urls = new ArrayList<>();
         String prefixPath = getIndexPrefixPathByRar(multipartFile);
