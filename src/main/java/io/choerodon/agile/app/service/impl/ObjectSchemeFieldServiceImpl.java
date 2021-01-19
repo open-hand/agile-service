@@ -786,7 +786,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     defaultValue = defaultIds;
                 }
             }
-            String value = tryDecryptDefaultValue(updateDTO.getDefaultValue());
+            String value = tryDecryptDefaultValue(fieldDTO.getFieldType(), updateDTO.getDefaultValue());
             if (defaultValue != null) {
                 defaultValue = value;
             }
