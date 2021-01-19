@@ -4,7 +4,7 @@ import React, {
 import { Select } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
-import renderEditor from './renderEditor';
+import renderEditor from '../../../components/renderEditor';
 import {
   transformDefaultValue, orgDisabledEditDefaultFields, disabledEditDefaultFields,
 } from '../../utils';
@@ -68,12 +68,24 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
   }, [fieldType, record, record.get('defaultValue'), record.get('extraConfig')]);
   const variableProps = useMemo(() => {
     let editor = () => renderEditor({
-      record, defaultValue: initValue, dataRef, style: { minWidth: 165, maxWidth: 300 },
+      data: {
+        fieldType,
+        fieldCode: record.get('fieldCode'),
+        defaultValue: initValue,
+        extraConfig: record.get('extraConfig'),
+        fieldOptions: record.get('fieldOptions'),
+      },
+      dataRef,
+      style: { minWidth: 165, maxWidth: 300 },
     });
     if (fieldType === 'member' || fieldType === 'multiMember') {
       const defaultValueObj = record.get('defaultValueObjs') || record.get('defaultValueObj') || record.get('localDefaultObj') || undefined;
       editor = () => renderEditor({
-        record, defaultValue: defaultValueObj, dataRef, style: { minWidth: 165, maxWidth: 300 },
+        data: {
+          fieldType, fieldCode: record.get('fieldCode'), defaultValue: defaultValueObj, extraConfig: record.get('extraConfig'), fieldOptions: record.get('fieldOptions'),
+        },
+        dataRef,
+        style: { minWidth: 165, maxWidth: 300 },
       });
     }
     return {

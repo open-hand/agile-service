@@ -11,6 +11,7 @@ import SelectUser from '@/components/select/select-user';
 import moment from 'moment';
 import { User } from '@/common/types';
 import { toJS } from 'mobx';
+import { set } from 'lodash';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { pageConfigApi, userApi } from '@/api';
@@ -18,12 +19,13 @@ import Store from './stores';
 import DragList from '../drag-list';
 import './index.less';
 import * as images from '../../images';
+import beforeSubmitProcessData from './util';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
 const multipleList = ['checkbox', 'multiple'];
 interface FiledOptions {
-  fieldOptions: any,
+  fieldOptions?: any,
   fieldType: string,
   defaultValue: string,
 }
@@ -75,81 +77,34 @@ function CreateField() {
       disabled: currentValue === 'global' ? contextValue.length > 0 && contextValue.indexOf('global') < 0 : contextValue.indexOf('global') >= 0,
     };
   };
-  const dataTransformPostData = (fieldOption: FiledOptions): IFieldPostData => {
-    const data = formDataSet.toData()[0] as IFieldPostData;
-    const dateList = ['date', 'datetime', 'time'];
-    const prefix = type === 'project' ? 'pro_' : 'org_';
-    const { name, check } = data;
-    const { context } = data;
-    // if (context && context.length === formDataSet.getField('context')?.options?.length) {
-    //   context = ['global'];
-    // }
-    const transformTime = {} as { defaultValue: string };
-    const dateFormat = ['YYYY-MM-DD', 'YYYY-MM-DD HH:mm:ss', 'HH:mm:ss'];
-    const dateIndex = dateList.indexOf(data.fieldType);
-    if (dateIndex !== -1 && fieldOption?.defaultValue !== '') {
-      const dateFormatVal = moment(fieldOption.defaultValue);
-      transformTime.defaultValue = dateFormatVal.isValid() ? dateFormatVal.format(dateFormat[1]) : moment(fieldOption.defaultValue, dateFormat).format(dateFormat[1]);
-    }
-    const postData: IFieldPostData = {
-      context,
-      code: `${prefix}${data.code}`,
-      name,
-      ...fieldOption,
-      ...transformTime,
-      schemeCode,
-      extraConfig: check,
-    };
-    return postData;
-  };
+
   // 创建或者编辑的提交操作
   async function handleOk() {
     const { current } = formDataSet;
+    const fieldType = current?.get('fieldType');
     const originDefaultValue = toJS(current?.get('defaultValue'));
-    const obj: FiledOptions & { localDefaultObj?: any } = {
-      fieldOptions: null,
-      fieldType: current?.get('fieldType'),
-      defaultValue: String(originDefaultValue || ''),
-    };
-
-    if (singleList.indexOf(obj.fieldType) !== -1) {
+    if (singleList.indexOf(fieldType) !== -1) {
       if (fieldOptions.length === 0) {
         Choerodon.prompt('字段列表不能为空');
         return false;
       }
-      obj.fieldOptions = fieldOptions.map((o) => {
-        if (obj.defaultValue
-          && (o.id === obj.defaultValue || o.code === obj.defaultValue
-            || o.tempKey === obj.defaultValue)) {
-          return { ...o, isDefault: true };
-        }
-        return { ...o, isDefault: false };
-      });
-    } else if (multipleList.indexOf(obj.fieldType) !== -1) {
+    } else if (multipleList.indexOf(fieldType) !== -1) {
       if (fieldOptions.length === 0) {
         Choerodon.prompt('字段列表不能为空');
         return false;
       }
-      obj.fieldOptions = fieldOptions.map((o) => {
-        if (Array.isArray(originDefaultValue) && originDefaultValue.some((v) => v === o.id || v === o.tempKey || v === o.code)) {
-          return { ...o, isDefault: true };
-        }
-        return { ...o, isDefault: false };
-      });
-      // if (obj.defaultValue && Array.isArray(obj.defaultValue)) {
-      //   obj.defaultValue = obj.defaultValue.join(',');
-      // }
     }
+    const postData = beforeSubmitProcessData(current!, { fieldOptions, schemeCode });
+
     // 防止使用dataSet提交时 忽略filedOptions
-    formDataSet.current?.set('updateFieldOptions', obj.fieldOptions);
+    formDataSet.current?.set('updateFieldOptions', postData.fieldOptions);
     if (onSubmitLocal) {
       const validResult = await formDataSet.validate();
-      if (['member', 'multiMember'].includes(obj.fieldType) && obj?.defaultValue !== '') {
+      if (['member', 'multiMember'].includes(postData.fieldType) && postData?.defaultValue !== '') {
         const userIds = Array.isArray(originDefaultValue) ? originDefaultValue : [originDefaultValue];
-        console.log('userIds...', userDataRef.current);
-        obj.localDefaultObj = userDataRef.current?.filter((item) => userIds.includes(item.id)) || {};
+        set(postData, 'localDefaultObj', userDataRef.current?.filter((item) => userIds.includes(item.id)) || {});
       }
-      return validResult && onSubmitLocal({ ...dataTransformPostData(obj), defaultValue: originDefaultValue });
+      return validResult && onSubmitLocal({ ...postData, defaultValue: originDefaultValue });
     }
     const fieldId = formDataSet.current?.get('id');
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${fieldId}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
@@ -158,7 +113,6 @@ function CreateField() {
       url,
       method,
       transformRequest: () => {
-        const postData: IFieldPostData = dataTransformPostData(obj);
         if (isEdit) {
           postData.objectVersionNumber = formDataSet.current?.get('objectVersionNumber');
         }
@@ -169,7 +123,11 @@ function CreateField() {
     const extraConfig = isEdit ? current?.get('extraConfig') : undefined;
     try {
       if ((await formDataSet.submit()) !== false) {
-        syncIssueTypeArr.length > 0 && await pageConfigApi.syncDefaultValue(fieldId, String(syncIssueTypeArr), extraConfig);
+        syncIssueTypeArr.length > 0 && await pageConfigApi.syncDefaultValue(fieldId, String(syncIssueTypeArr),
+          {
+            extraConfig,
+            custom: true,
+          });
         handleRefresh && handleRefresh();
         return true;
       }

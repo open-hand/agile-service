@@ -1,33 +1,35 @@
 import React, {
-  forwardRef, useState, useMemo, useEffect,
+  forwardRef, useState, useMemo, useEffect, useRef, useCallback,
 } from 'react';
 import { Select, DatePicker } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import DaysView from 'choerodon-ui/pro/lib/date-picker/DaysView';
 import TimesView from 'choerodon-ui/pro/lib/date-picker/TimesView';
 import DateTimesView from 'choerodon-ui/pro/lib/date-picker/DateTimesView';
-
+import { set } from 'lodash';
 import moment, { Moment } from 'moment';
 import { Observer } from 'mobx-react-lite';
 import { observer } from 'mobx-react';
 import {
   observable, action, computed, toJS,
 } from 'mobx';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import styles from './index.less';
 
 interface IBaseComponentProps {
-    onChange?: (value: any) => void
-    onBlur?: () => void
-    value?: any
-    style?: React.CSSProperties
+  onChange?: (value: any) => void
+  onBlur?: () => void
+  value?: any
+  style?: React.CSSProperties
 }
 interface IDatePickerPageOption {
-    text: any
-    value: string
-    render?: (option: IDatePickerPageOption, dateValue: Moment | undefined) => React.ReactNode
+  text: any
+  value: string
+  render?: (option: IDatePickerPageOption, dateValue: Moment | undefined) => React.ReactNode
 }
 interface DatePickerPageProps extends IBaseComponentProps {
-    dateType: 'date' | 'datetime' | 'time'
+  dateType: 'date' | 'datetime' | 'time'
+  defaultValue?: any
 }
 @observer
 class ObserverDateTimesView extends DateTimesView {
@@ -42,16 +44,25 @@ const DateViews = {
 };
 
 type DateViewsKey = 'dateTime' | 'date' | 'time';
-const SelectPickDate = forwardRef<any, DatePickerPageProps>((props, ref) => {
+const dateFormat = {
+  date: 'YYYY-MM-DD',
+  datetime: 'YYYY-MM-DD HH:mm:ss',
+  time: 'HH:mm:ss',
+};
+const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
+  value: propsValue, defaultValue, dateType, onChange, onBlur, ...otherProps
+}, ref) => {
+  console.log('otherProps.', otherProps);
+  const innerRef = useRef<Select>();
   const [value, setValue] = useState<Moment | undefined>(() => {
-    const momentValue = moment(props.value, 'YYYY-MM-DD HH:mm:ss');
+    const momentValue = moment(propsValue || defaultValue, 'YYYY-MM-DD HH:mm:ss');
     return momentValue.isValid() ? momentValue : moment();
   });
   const [mode, setMode] = useState(() => {
-    if (props.dateType === 'datetime') {
+    if (dateType === 'datetime') {
       return 'dateTime';
     }
-    return props.dateType;
+    return dateType;
   });
   const [options, setOptions] = useState<IDatePickerPageOption[]>(() => [
     { text: '当前时间', value: 'current' },
@@ -60,36 +71,47 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>((props, ref) => {
       value: 'custom',
     }]);
   const [optionValue, setOptionValue] = useState<string | undefined>(() => {
-    if (props.value) {
-      return moment(props.value, 'YYYY-MM-DD HH:mm:ss').isValid() ? 'custom' : props.value;
+    if (propsValue || defaultValue) {
+      console.log('propsValue', propsValue);
+      return moment(propsValue || defaultValue, 'YYYY-MM-DD HH:mm:ss').isValid() ? 'custom' : propsValue || defaultValue;
     }
     return undefined;
   });
   const [visible, setVisible] = useState<boolean>(false);
 
   function handleChange(code?: string) {
+    console.log('ref....', innerRef);
     setOptionValue(code);
     if (code === 'custom') {
       setVisible(true);
     } else {
-      props.onChange && props.onChange(code);
+      onChange && onChange(code);
+      innerRef.current?.choose(new Record({ meaning: 'custom', value: moment().format(dateFormat[dateType]) }));
     }
   }
   function handleChangeDate(date: Moment) {
     setValue(date);
     setVisible(false);
-    props.onChange && props.onChange(date.format('YYYY-MM-DD HH:mm:ss'));
+    onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
+    innerRef.current?.choose(new Record({ meaning: 'current', value: date.format(dateFormat[dateType]) }));
   }
   const DateView = DateViews[mode as DateViewsKey];
-
+  const handleBindRef = useCallback((newRef) => {
+    if (newRef) {
+      ref && Object.assign(ref, { current: newRef });
+      Object.assign(innerRef, { current: newRef });
+    }
+    console.log('ref...', newRef);
+  }, [ref]);
   return (
     <Select
-      ref={ref as any}
+      ref={handleBindRef}
       trigger={['click'] as any}
+      {...otherProps}
       dropdownMatchSelectWidth={false}
       onPopupHiddenChange={(hidden) => {
-        hidden && props.onBlur && props.onBlur();
-        setMode(props.dateType === 'datetime' ? 'dateTime' : props.dateType);
+        hidden && onBlur && onBlur();
+        setMode(dateType === 'datetime' ? 'dateTime' : dateType);
       }}
       popupContent={(
         <div
@@ -119,14 +141,14 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>((props, ref) => {
                 onViewModeChange={(newMode) => {
                   setMode(newMode);
                 }}
-                mode={props.dateType === 'datetime' ? 'dateTime' : props.dateType as any}
+                mode={dateType === 'datetime' ? 'dateTime' : dateType as any}
                 step={{}}
               />
             ) : null}
           </div>
 
         </div>
-            )}
+      )}
     />
   );
 });

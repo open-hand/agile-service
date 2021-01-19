@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { AxiosRequestConfig } from 'axios';
+import { IFieldType } from '@/common/types';
 import { getProjectId, getOrganizationId, getMenuType } from '@/utils/common';
 import Api from './Api';
 
@@ -12,6 +13,13 @@ export enum PageConfigIssueType {
   epic = 'issue_epic',
   demand = 'demand',
   null = '',
+}
+interface ISyncDefaultPostData{
+  defaultValue?: any
+  extraConfig?: boolean
+  fieldOptions?: Array<IFieldOption & { isDefault: boolean }>
+  custom: boolean
+  fieldType?: IFieldType
 }
 export interface IFieldOption {
   id: string,
@@ -29,7 +37,7 @@ interface IFiled {
   fieldName: string,
   fieldType: string,
   defaultValueObj: any,
-  defaultValueObjs?:Array<any>,
+  defaultValueObjs?: Array<any>,
   fieldOptions: Array<IFieldOption> | null
   id: string,
   issueType: PageConfigIssueType,
@@ -94,6 +102,20 @@ class PageConfigApi extends Api<PageConfigApi> {
       url: `${this.prefixOrgOrPro}/object_scheme_field/list`,
       params: {
         schemeCode,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
+   * 通过字段id加载字段详情
+   * @param fieldId
+   */
+  loadById(fieldId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/${fieldId}`,
+      params: {
         organizationId: getOrganizationId(),
       },
     });
@@ -206,16 +228,16 @@ class PageConfigApi extends Api<PageConfigApi> {
    * @param fieldId
    * @param issueTypeStr
    */
-  syncDefaultValue(fieldId: string, issueTypeStr: string, extraConfig?: boolean) {
+  syncDefaultValue(fieldId: string, issueTypeStr: string, data: ISyncDefaultPostData) {
     return axios({
-      method: 'get',
+      method: 'post',
       url: `${this.prefixOrgOrPro}/object_scheme_field/sync_default_value`,
       params: {
         field_id: fieldId,
         issue_types: issueTypeStr,
-        extra_config: extraConfig,
         organizationId: getOrganizationId(),
       },
+      data,
     });
   }
 
