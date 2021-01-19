@@ -34,7 +34,7 @@ public interface StaticFileService {
      * @param httpResponse httpResponse
      * @return 请求的资源
      */
-    ResponseEntity<byte[]> selectStaticFileResult(Long fileHeaderId, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException;
+    ResponseEntity<byte[]> selectStaticFileResult(String fileHeaderId, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException;
 
     /**
      * 查询项目下未关联问题的静态文件头

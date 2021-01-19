@@ -38,7 +38,7 @@ public class StaticFileSiteController {
     @GetMapping(value = "/resource/{fileHeaderId}/**")
     public ResponseEntity<byte[]> resource(
             @ApiParam(value = "静态资源头id", required = true)
-            @PathVariable @Encrypt Long fileHeaderId,
+            @PathVariable String fileHeaderId,
             HttpServletResponse httpResponse,
             WebRequest webRequest,
             HttpServletRequest httpRequest) throws IOException {
@@ -52,7 +52,7 @@ public class StaticFileSiteController {
     @GetMapping(value = "/test/resource/{fileHeaderId}/**")
     public ResponseEntity<byte[]> testResource(
             @ApiParam(value = "静态资源头id", required = true)
-            @PathVariable @Encrypt Long fileHeaderId,
+            @PathVariable @Encrypt String fileHeaderId,
             HttpServletResponse httpResponse,
             WebRequest webRequest,
             HttpServletRequest httpRequest) throws IOException {

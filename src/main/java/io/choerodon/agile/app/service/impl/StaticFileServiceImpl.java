@@ -51,6 +51,7 @@ import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StaticFileHeaderMapper;
 import io.choerodon.agile.infra.mapper.StaticFileIssueRelMapper;
 import io.choerodon.agile.infra.mapper.StaticFileLineMapper;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -155,7 +156,8 @@ public class StaticFileServiceImpl implements StaticFileService {
     }
 
     @Override
-    public ResponseEntity<byte[]> selectStaticFileResult(Long fileHeaderId, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+    public ResponseEntity<byte[]> selectStaticFileResult(String fileHeaderIdStr, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+        Long fileHeaderId = EncryptionUtils.decrypt(fileHeaderIdStr, EncryptionUtils.BLANK_KEY);
         String path;
         try {
             path = URLDecoder.decode(httpRequest.getServletPath(), Charset.defaultCharset().name());
@@ -163,7 +165,6 @@ public class StaticFileServiceImpl implements StaticFileService {
             path = httpRequest.getServletPath();
         }
         // 获取文件相对路径
-        String fileHeaderIdStr = String.valueOf(fileHeaderId);
         String relativePath = path.substring(path.indexOf(fileHeaderIdStr) + fileHeaderIdStr.length() + 1);
         if (INDEX.equals(relativePath)) {
             relativePath = INDEX_HTML;
