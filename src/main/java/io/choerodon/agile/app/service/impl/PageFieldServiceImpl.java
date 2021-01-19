@@ -410,7 +410,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         Map<Long, Map<String, Object>> result = new HashMap<>();
         Map<Long, ObjectSchemeFieldDTO> fieldMap = fieldDTOS.stream().collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
         Map<Long, List<FieldValueDTO>> valuesMap = values.stream().collect(Collectors.groupingBy(FieldValueDTO::getInstanceId));
-        Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER)).map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
+        Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> (x.getFieldType().equals(FieldType.MEMBER) || x.getFieldType().equals(FieldType.MULTI_MEMBER))).map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
         for (Long instanceId : instanceIds) {
             Map<String, Object> codeValueMap = new HashMap<>();
             List<FieldValueDTO> instanceValues = valuesMap.get(instanceId);

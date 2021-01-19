@@ -171,7 +171,8 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.REPORTER, "报告人", true, null));
             HEADERS.add(new Header(FieldCode.PRIORITY, "优先级*", true, null));
             HEADERS.add(new Header(FieldCode.REMAINING_TIME, "预估时间(小时)", true, null));
-            HEADERS.add(new Header(FieldCode.FIX_VERSION, "版本", false, null));
+            HEADERS.add(new Header(FieldCode.FIX_VERSION, "修复的版本", false, null));
+            HEADERS.add(new Header(FieldCode.INFLUENCE_VERSION, "影响的版本", false, null));
             HEADERS.add(new Header(FieldCode.STORY_POINTS, "故事点", true, null));
             HEADERS.add(new Header(FieldCode.EPIC_NAME, "史诗名称(仅问题类型为史诗时生效)", false, 8000));
             HEADERS.add(new Header(FieldCode.LABEL, "标签", false, null));
