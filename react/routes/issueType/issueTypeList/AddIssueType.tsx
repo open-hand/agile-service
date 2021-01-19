@@ -9,7 +9,8 @@ import { IModalProps } from '@/common/types';
 import { CompactPicker } from 'react-color';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Choerodon } from '@choerodon/boot';
-import { issueTypeApi } from '@/api';
+import { issueTypeApi, IUpdate, ICreate } from '@/api';
+import { getIsOrganization } from '@/utils/common';
 import styles from './AddIssueType.less';
 
 interface Props {
@@ -19,44 +20,21 @@ interface Props {
 }
 
 const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
-  const [color, setColor] = useState<string>('#3F51B5');
+  const [colour, setColor] = useState<string>('#3F51B5');
   const [pickerDisplay, setPickerDisplay] = useState<boolean>(false);
   const [initType, setInitType] = useState<any>();
+  const isOrganization = getIsOrganization();
 
   const checkName = useCallback(async (value) => {
     if (typeId && value === initType?.name) {
       return true;
     }
-    const res = await issueTypeApi.checkName(value);
+    const res = await isOrganization ? issueTypeApi.orgCheckName(value, typeId) : issueTypeApi.checkName(value, typeId);
     if (res) {
       return true;
     }
     return '名称重复';
-  }, [initType?.name, typeId]);
-
-  const checkCode = useCallback(async (value: string) => {
-    if (typeId && value === initType?.code) {
-      return true;
-    }
-    const startEndWith = /^_|_$/g;
-    const contain = /[0-9a-z_]/g;
-    const series = /_{2,}/g;
-
-    if (startEndWith.test(value)) {
-      return '不能以_开头或结尾';
-    }
-    if (!contain.test(value)) {
-      return '只能包含数字、小写字母、下划线';
-    }
-    if (series.test(value)) {
-      return '不能包含两个_';
-    }
-    // const res = await issueTypeApi.checkCode(value);
-    // if (!res) {
-    //   return '编码重复';
-    // }
-    return true;
-  }, [initType?.code, typeId]);
+  }, [initType?.name, isOrganization, typeId]);
 
   const standardTypeDataSet = useMemo(() => new DataSet({
     data: [
@@ -90,15 +68,7 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
         label: '名称',
         required: true,
         maxLength: 6,
-        // validator: checkName,
-      },
-      {
-        name: 'code',
-        type: 'string' as FieldType,
-        label: '编码',
-        required: true,
-        maxLength: 32,
-        validator: checkCode,
+        validator: checkName,
       },
       {
         name: 'description',
@@ -106,7 +76,7 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
         label: '问题类型描述',
       },
       {
-        name: 'standardType',
+        name: 'typeCode',
         type: 'string' as FieldType,
         textField: 'name',
         valueField: 'code',
@@ -120,7 +90,7 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
         label: '选择图标',
       },
     ],
-  }), [checkCode, standardTypeDataSet]);
+  }), [checkName, standardTypeDataSet]);
 
   const handleChangeColor = useCallback((newColor: any) => {
     setColor(newColor.hex);
@@ -136,27 +106,35 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
 
   const handleSubmit = useCallback(async () => {
     const validate = await addDataSet.validate();
-    console.log(validate, addDataSet.current?.data, color);
-    const data = addDataSet.current?.data;
-    if (!typeId) {
-      issueTypeApi.create(data).then(() => {
-        Choerodon.prompt('创建成功');
-        typeTableDataSet.query();
-        modal.close();
-      }).catch(() => {
-        Choerodon.prompt('创建失败');
-      });
-    } else {
-      issueTypeApi.update(typeId, data).then(() => {
-        Choerodon.prompt('编辑成功');
-        typeTableDataSet.query(typeTableDataSet.currentPage);
-        modal.close();
-      }).catch(() => {
-        Choerodon.prompt('编辑失败');
-      });
+    if (validate) {
+      const data = {
+        id: typeId,
+        colour,
+        name: addDataSet.current?.get('name'),
+        description: addDataSet.current?.get('description'),
+        typeCode: addDataSet.current?.get('typeCode'),
+        icon: addDataSet.current?.get('icon'),
+      };
+      if (!typeId) {
+        issueTypeApi[isOrganization ? 'orgCreate' : 'create'](data as ICreate).then(() => {
+          Choerodon.prompt('创建成功');
+          typeTableDataSet.query();
+          modal.close();
+        }).catch(() => {
+          Choerodon.prompt('创建失败');
+        });
+      } else {
+        issueTypeApi[isOrganization ? 'orgUpdate' : 'update'](typeId, data as IUpdate).then(() => {
+          Choerodon.prompt('编辑成功');
+          typeTableDataSet.query(typeTableDataSet.currentPage);
+          modal.close();
+        }).catch(() => {
+          Choerodon.prompt('编辑失败');
+        });
+      }
     }
     return false;
-  }, [addDataSet, color, modal, typeId, typeTableDataSet]);
+  }, [addDataSet, colour, isOrganization, modal, typeId, typeTableDataSet]);
 
   useEffect(() => {
     modal?.handleOk(handleSubmit);
@@ -173,21 +151,20 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
     <div className={styles.addIssueType}>
       <Form dataSet={addDataSet}>
         <TextField name="name" />
-        <TextField name="code" />
         <TextArea name="description" />
-        <Select name="standardType" />
+        <Select name="typeCode" />
         <IconPicker name="icon" />
       </Form>
       <div className={styles.colorPicker}>
         <div className={styles.swatch} onClick={handleClickSwatch} role="none">
-          <div className={styles.color} style={{ background: color }} />
+          <div className={styles.color} style={{ background: colour }} />
         </div>
         {
           pickerDisplay
             ? (
               <div className={styles.popover}>
                 <div className={styles.cover} onClick={handlePickerHidden} role="none" />
-                <CompactPicker color={color} onChange={handleChangeColor} />
+                <CompactPicker color={colour} onChange={handleChangeColor} />
               </div>
             )
             : null

@@ -3,6 +3,16 @@ import { getProjectId, getOrganizationId } from '@/utils/common';
 import { IIssueType } from '@/common/types';
 import Api from './Api';
 
+export interface ICreate {
+  name: string
+  icon: string
+  description: string
+  colour: string
+}
+
+export interface IUpdate extends ICreate {
+  id: string
+}
 class IssueTypeApi extends Api<IssueTypeApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -10,6 +20,145 @@ class IssueTypeApi extends Api<IssueTypeApi> {
 
   get OrgPrefix() {
     return `/agile/v1/organizations/${getOrganizationId()}`;
+  }
+
+  load({ params, data }: { params: { page: number, size: number}, data: any}) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_type/list`,
+      params: {
+        ...params,
+        organization: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  create(data: ICreate) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_type/issue_type`,
+      params: {
+        organization: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  getType(typeId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/issue_type/issue_type/${typeId}`,
+      params: {
+        organization: getOrganizationId(),
+      },
+    });
+  }
+
+  update(typeId: string, data: IUpdate) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/issue_type/issue_type/${typeId}`,
+      params: {
+        organization: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  checkName(name: string, typeId?: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/issue_type/check_name`,
+      params: {
+        name,
+        organization: getOrganizationId(),
+        id: typeId,
+      },
+    });
+  }
+
+  canDelete(typeId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/issue_type/${typeId}/deleted`,
+      params: {
+        organization: getOrganizationId(),
+      },
+    });
+  }
+
+  delete(typeId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/issue_type/${typeId}`,
+      params: {
+        organization: getOrganizationId(),
+      },
+    });
+  }
+
+  orgLoad({ params, data }: { params: { page: number, size: number}, data: any}) {
+    return this.request({
+      method: 'post',
+      url: `${this.OrgPrefix}/issue_type/list`,
+      params,
+      data,
+    });
+  }
+
+  orgCreate(data: ICreate) {
+    return this.request({
+      method: 'post',
+      url: `${this.OrgPrefix}/issue_type/issue_type`,
+      data,
+    });
+  }
+
+  orgGetType(typeId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/issue_type/${typeId}`,
+    });
+  }
+
+  orgUpdate(typeId: string, data: IUpdate) {
+    return axios({
+      method: 'put',
+      url: `${this.OrgPrefix}/issue_type/issue_type/${typeId}`,
+      data,
+    });
+  }
+
+  orgCheckName(name: string, typeId?: string) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/check_name`,
+      params: {
+        name,
+        id: typeId,
+      },
+    });
+  }
+
+  orgCanDelete(typeId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/${typeId}/deleted`,
+      params: {
+        organization: getOrganizationId(),
+      },
+    });
+  }
+
+  orgDelete(typeId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.OrgPrefix}/issue_type/${typeId}`,
+      params: {
+        organization: getOrganizationId(),
+      },
+    });
   }
 
   /**
@@ -56,16 +205,6 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     }).then((res) => res.filter((type) => type.typeCode !== 'backlog'));
   }
 
-  delete(typeId: string) {
-    return axios({
-      method: 'delete',
-      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      params: {
-        typeId,
-      },
-    });
-  }
-
   start(typeId: string) {
     return axios({
       method: 'post',
@@ -86,49 +225,14 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
-  getType(typeId: string) {
+  getUsage(page = 0, size = 15) {
     return axios({
       method: 'get',
       url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      params: {
-        typeId,
+      param: {
+        page,
+        size,
       },
-    });
-  }
-
-  checkName(name: string) {
-    return axios({
-      method: 'get',
-      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      params: {
-        name,
-      },
-    });
-  }
-
-  checkCode(code: string) {
-    return axios({
-      method: 'get',
-      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      params: {
-        code,
-      },
-    });
-  }
-
-  create(data: any) {
-    return axios({
-      method: 'get',
-      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      data,
-    });
-  }
-
-  update(typeId: string, data: any) {
-    return axios({
-      method: 'get',
-      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      data,
     });
   }
 }
