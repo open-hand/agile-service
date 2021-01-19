@@ -273,7 +273,7 @@ public class SiteMsgUtil {
         Map<Long, Receiver> usersMap = receiverList.stream().collect(Collectors.toMap(Receiver::getUserId, Function.identity()));
         boolean replyAble = issueCommentVO.getParentId() != null && issueCommentVO.getParentId() != 0L;
         actionMap.forEach((userId, action) -> {
-            Map<String, String> argsMap = new HashMap<>(8);
+            Map<String, String> argsMap = new HashMap<>(9);
             argsMap.put(PROJECT_NAME, projectVO.getName());
             argsMap.put(ISSUE_SUMMARY, summary);
             argsMap.put(LINK, domainUrl + "/" + url);
