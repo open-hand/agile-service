@@ -199,6 +199,8 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put("storyPoints", "故事点");
         FIELD_MAP.put("remainingTime", "剩余预估时间");
         FIELD_MAP.put("versionName", "版本");
+        FIELD_MAP.put("fixVersionName", "修复的版本");
+        FIELD_MAP.put("influenceVersionName", "影响的版本");
         FIELD_MAP.put("epicName", "所属史诗");
         FIELD_MAP.put("labelName", "标签");
         FIELD_MAP.put("componentName", "模块");
@@ -377,6 +379,9 @@ public class ExcelServiceImpl implements ExcelService {
                 .ofNullable(processVersionPredefined(projectId, cursor, systemFields))
                 .ifPresent(x -> result.add(x));
         Optional
+                .ofNullable(processInfluenceVersionPredefined(projectId, cursor, systemFields))
+                .ifPresent(x -> result.add(x));
+        Optional
                 .ofNullable(processComponentPredefined(projectId, cursor, systemFields))
                 .ifPresent(x -> result.add(x));
         Optional
@@ -541,6 +546,30 @@ public class ExcelServiceImpl implements ExcelService {
                 col,
                 col,
                 FieldCode.FIX_VERSION,
+                cursor.getAndIncreaseSheetNum());
+    }
+
+    private PredefinedDTO processInfluenceVersionPredefined(Long projectId,
+                                                   ExcelImportTemplate.Cursor cursor,
+                                                   List<String> fieldCodes) {
+        int col = fieldCodes.indexOf(FieldCode.INFLUENCE_VERSION);
+        if (col == -1) {
+            return null;
+        }
+        List<ProductVersionCommonDTO> productVersionCommons = productVersionMapper.listByProjectId(projectId);
+        List<String> versionList = new ArrayList<>();
+        productVersionCommons.forEach(p -> {
+            String statusCode = p.getStatusCode();
+            if (VERSION_PLANNING.equals(statusCode)) {
+                versionList.add(p.getName());
+            }
+        });
+        return new PredefinedDTO(versionList,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.INFLUENCE_VERSION,
                 cursor.getAndIncreaseSheetNum());
     }
 
@@ -1367,6 +1396,9 @@ public class ExcelServiceImpl implements ExcelService {
         int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
         String issueType = row.getCell(issueTypeCol).toString();
         switch (fieldCode) {
+            case FieldCode.ISSUE_TYPE:
+                validateAndSetIssueType(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                break;
             case FieldCode.ASSIGNEE:
                 validateAndSetAssignee(row, col, excelColumn, errorRowColMap, issueCreateVO);
                 break;
@@ -1382,11 +1414,11 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.FIX_VERSION:
                 validateAndSetFixVersion(row, col, excelColumn, errorRowColMap, issueCreateVO);
                 break;
+            case FieldCode.INFLUENCE_VERSION:
+                validateAndSetInfluenceVersion(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                break;
             case FieldCode.STORY_POINTS:
                 validateAndSetStoryPoint(row, col, errorRowColMap, issueCreateVO, issueType);
-                break;
-            case FieldCode.ISSUE_TYPE:
-                validateAndSetIssueType(row, col, excelColumn, errorRowColMap, issueCreateVO);
                 break;
             case FieldCode.EPIC_NAME:
                 validateAndSetEpicName(row, col, errorRowColMap, issueCreateVO, issueType, projectId, headerMap);
@@ -1858,6 +1890,36 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
+    private void validateAndSetInfluenceVersion(Row row,
+                                          Integer col,
+                                          ExcelColumnVO excelColumn,
+                                          Map<Integer, List<Integer>> errorRowColMap,
+                                          IssueCreateVO issueCreateVO) {
+        Cell cell = row.getCell(col);
+        if (!Objects.equals("bug", issueCreateVO.getTypeCode())) {
+            return;
+        }
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString();
+            List<String> values = excelColumn.getPredefinedValues();
+            Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
+            if (!values.contains(value)) {
+                cell.setCellValue(buildWithErrorMsg(value, "请输入正确的影响版本"));
+                addErrorColumn(row.getRowNum(), col, errorRowColMap);
+            } else {
+                List<VersionIssueRelVO> versionIssueRelList = issueCreateVO.getVersionIssueRelVOList();
+                if (CollectionUtils.isEmpty(versionIssueRelList)) {
+                    versionIssueRelList = new ArrayList<>();
+                }
+                VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
+                versionIssueRelVO.setVersionId(valueIdMap.get(value));
+                versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
+                versionIssueRelList.add(versionIssueRelVO);
+                issueCreateVO.setVersionIssueRelVOList(versionIssueRelList);
+            }
+        }
+    }
+
     private void validateAndSetRemainingTime(Row row,
                                              Integer col,
                                              Map<Integer, List<Integer>> errorRowColMap,
@@ -2161,6 +2223,9 @@ public class ExcelServiceImpl implements ExcelService {
                 processParentIssue(projectId, excelColumnVO);
                 break;
             case FieldCode.FIX_VERSION:
+                processVersion(projectId, excelColumnVO);
+                break;
+            case FieldCode.INFLUENCE_VERSION:
                 processVersion(projectId, excelColumnVO);
                 break;
             case FieldCode.COMPONENT:

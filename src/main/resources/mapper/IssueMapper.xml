@@ -3299,7 +3299,7 @@
         select
         t1.issue_id,
         t1.summary,
-        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
+        CONVERT(t1.issue_num,UNSIGNED) as issue_num_convert,
         CONCAT_WS('-', t2.project_code, t1.issue_num) AS issue_num,
         t1.type_code,
         t1.issue_type_id

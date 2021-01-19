@@ -163,7 +163,12 @@ public class IssueAssembler extends AbstractAssembler {
             issueListFieldKVVO.setStatusVO(statusMapDTOMap.get(issueDO.getStatusId()));
             issueListFieldKVVO.setAssigneeImageUrl(assigneeImageUrl);
             issueListFieldKVVO.setReporterImageUrl(reporterImageUrl);
-            issueListFieldKVVO.setVersionIssueRelVOS(toTargetList(issueDO.getVersionIssueRelDTOS(), VersionIssueRelVO.class));
+            List<VersionIssueRelVO> versionList = toTargetList(issueDO.getVersionIssueRelDTOS(), VersionIssueRelVO.class);
+            issueListFieldKVVO.setVersionIssueRelVOS(versionList);
+            if (!CollectionUtils.isEmpty(versionList)) {
+                issueListFieldKVVO.setFixVersionIssueRelVOS(versionList.stream().filter(versionIssueRelDTO -> Objects.equals("fix",versionIssueRelDTO.getRelationType())).collect(Collectors.toList()));
+                issueListFieldKVVO.setInfluenceVersionIssueRelVOS(versionList.stream().filter(versionIssueRelDTO -> Objects.equals("influence",versionIssueRelDTO.getRelationType())).collect(Collectors.toList()));
+            }
             issueListFieldKVVO.setIssueComponentBriefVOS(toTargetList(issueDO.getIssueComponentBriefDTOS(), IssueComponentBriefVO.class));
             issueListFieldKVVO.setIssueSprintVOS(toTargetList(issueDO.getIssueSprintDTOS(), IssueSprintVO.class));
             issueListFieldKVVO.setLabelIssueRelVOS(toTargetList(issueDO.getLabelIssueRelDTOS(), LabelIssueRelVO.class));
