@@ -80,6 +80,7 @@ export default function renderField({ code, fieldType, fieldOptions }) {
           name={code}
           style={{ width: '100%' }}
           multiple={!(singleList.indexOf(fieldType) !== -1)}
+          searchable
         >
           {fieldOptions
               && fieldOptions.length > 0

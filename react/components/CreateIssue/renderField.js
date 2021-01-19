@@ -107,6 +107,8 @@ export default function renderField(field) {
   } if (field.fieldType === 'single') {
     return (
       <Select
+        filter
+        filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
         label={fieldName}
         allowClear={!required}
         getPopupContainer={(triggerNode) => triggerNode.parentNode}
@@ -126,6 +128,8 @@ export default function renderField(field) {
   } if (field.fieldType === 'multiple') {
     return (
       <Select
+        filter
+        filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
         label={fieldName}
         mode="multiple"
         getPopupContainer={(triggerNode) => triggerNode.parentNode}
