@@ -6,7 +6,7 @@ import {
   Select, DatePicker, Modal, Radio,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
-import { beforeTextUpload } from '@/utils/richText';
+import { uploadAndReplaceImg } from '@/utils/richText';
 import { workLogApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectNumber from '@/components/select/select-number';
@@ -87,20 +87,20 @@ class DailyLog extends Component {
     if (radio === '4' || radio === 4) {
       num = this.transformTime('reduce', 'reduceUnit');
     }
-    const extra = {
-      issueId,
-      projectId: AppState.currentMenuType.id,
-      startDate: startTime.format('YYYY-MM-DD HH:mm:ss'),
-      workTime: this.transformTime('dissipate', 'dissipateUnit'),
-      residualPrediction: TYPE[radio],
-      predictionTime: [3, 4].indexOf(radio) === -1 ? undefined : num,
-    };
-    const deltaOps = delta;
-    if (deltaOps) {
-      beforeTextUpload(deltaOps, extra, this.handleSave);
-    } else {
-      extra.description = '';
+    try {
+      const text = await uploadAndReplaceImg(delta);
+      const extra = {
+        issueId,
+        projectId: AppState.currentMenuType.id,
+        startDate: startTime.format('YYYY-MM-DD HH:mm:ss'),
+        workTime: this.transformTime('dissipate', 'dissipateUnit'),
+        residualPrediction: TYPE[radio],
+        predictionTime: [3, 4].indexOf(radio) === -1 ? undefined : num,
+        description: text,
+      };
       this.handleSave(extra);
+    } catch (error) {
+      this.setState({ createLoading: false });
     }
   };
 

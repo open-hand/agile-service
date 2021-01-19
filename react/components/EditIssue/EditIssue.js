@@ -263,6 +263,7 @@ function EditIssue() {
           onUpdate={onUpdate}
         />
         <IssueBody
+          setIssueLoading={setIssueLoading}
           outside={outside}
           key={issueId}
           projectId={projectId}

@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { stores } from '@choerodon/boot';
 import Delta from 'quill-delta';
-import { beforeTextUpload } from '@/utils/richText';
+import { uploadAndReplaceImg } from '@/utils/richText';
 import { issueCommentApi, IComment } from '@/api/IssueComment';
 import Comment from './components/comment';
 import AddComment from './components/addComment';
@@ -36,7 +36,8 @@ const Comments: React.FC<Props> = ({
   };
 
   const handleCreateCommit = async (delta: Delta) => {
-    beforeTextUpload(delta, { issueId, commentText: '' }, newCommit, 'commentText');
+    const commentText = await uploadAndReplaceImg(delta);
+    newCommit({ issueId, commentText });
   };
 
   const reload = (callback: Function) => {

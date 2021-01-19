@@ -15,7 +15,7 @@ import {
   pageConfigApi,
 } from '@/api';
 import {
-  beforeTextUpload, handleFileUpload, validateFile, normFile, text2Delta,
+  uploadAndReplaceImg, handleFileUpload, validateFile, normFile, text2Delta,
 } from '@/utils/richText';
 import {
   getProjectName, getProjectId,
@@ -404,56 +404,56 @@ class CreateIssue extends Component {
         }));
         const issueLinkCreateVOList = this.getIssueLinks(keys, linkTypes, linkIssues);
 
-        const extra = {
-          programId: getProjectId(),
-          projectId: getProjectId(),
-          issueTypeId: typeId,
-          typeCode,
-          summary: summary.trim(),
-          priorityId: priorityId || 0,
-          priorityCode: `priority-${priorityId || 0}`,
-          sprintId: sprintId || 0,
-          epicId: epicId || 0,
-          piId: pi || 0,
-          epicName,
-          parentIssueId: subTaskParent || parentIssueId || 0, // 子任务
-          relateIssueId: subBugParent || relateIssueId || 0, // 子bug
-          assigneeId: assigneedId,
-          labelIssueRelVOList,
-          versionIssueRelVOList: fixVersionIssueRelVOList,
-          componentIssueRelVOList,
-          storyPoints,
-          remainingTime: estimatedTime,
-          issueLinkCreateVOList,
-          featureVO: {
-            benfitHypothesis,
-            acceptanceCritera,
-            featureType,
-          },
-          wsjfVO: {
-            userBusinessValue,
-            timeCriticality,
-            rrOeValue,
-            jobSize,
-          },
-          featureId, // 特性字段
-          teamProjectIds,
-          programVersion,
-          environment, // 缺陷有的字段
-          mainResponsibleId,
-          testResponsibleId,
-          estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
-          estimatedStartTime: estimatedStartTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
-        };
         this.setState({ createLoading: true });
         const deltaOps = description;
-        if (deltaOps) {
-          beforeTextUpload(deltaOps, extra, (data) => {
-            this.handleSave(data, fileList);
-          });
-        } else {
-          extra.description = '';
+        try {
+          const text = await uploadAndReplaceImg(deltaOps);
+          const extra = {
+            description: text,
+            programId: getProjectId(),
+            projectId: getProjectId(),
+            issueTypeId: typeId,
+            typeCode,
+            summary: summary.trim(),
+            priorityId: priorityId || 0,
+            priorityCode: `priority-${priorityId || 0}`,
+            sprintId: sprintId || 0,
+            epicId: epicId || 0,
+            piId: pi || 0,
+            epicName,
+            parentIssueId: subTaskParent || parentIssueId || 0, // 子任务
+            relateIssueId: subBugParent || relateIssueId || 0, // 子bug
+            assigneeId: assigneedId,
+            labelIssueRelVOList,
+            versionIssueRelVOList: fixVersionIssueRelVOList,
+            componentIssueRelVOList,
+            storyPoints,
+            remainingTime: estimatedTime,
+            issueLinkCreateVOList,
+            featureVO: {
+              benfitHypothesis,
+              acceptanceCritera,
+              featureType,
+            },
+            wsjfVO: {
+              userBusinessValue,
+              timeCriticality,
+              rrOeValue,
+              jobSize,
+            },
+            featureId, // 特性字段
+            teamProjectIds,
+            programVersion,
+            environment, // 缺陷有的字段
+            mainResponsibleId,
+            testResponsibleId,
+            estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
+            estimatedStartTime: estimatedStartTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
+          };
           this.handleSave(extra, fileList);
+        } catch (error) {
+          console.log(error);
+          this.setState({ createLoading: false });
         }
       }
     });

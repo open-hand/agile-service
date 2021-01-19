@@ -13,7 +13,7 @@ import { Prompt } from 'react-router-dom';
 import {
   pageConfigApi, UIssueTypeConfig,
 } from '@/api/PageConfig';
-import { beforeTextUpload, text2Delta } from '@/utils/richText';
+import { uploadAndReplaceImg, text2Delta } from '@/utils/richText';
 import { validKeyReturnValue } from '@/common/commonValid';
 import { omit, set } from 'lodash';
 import styles from './index.less';
@@ -106,9 +106,15 @@ function PageIssueType() {
         deleteIds: pageIssueTypeStore.getDeleteIds,
       };
       if (issueTypeFieldVO.dirty) {
-        beforeTextUpload(text2Delta(issueTypeFieldVO.template), data.issueTypeFieldVO!, () => {
+        uploadAndReplaceImg(text2Delta(issueTypeFieldVO.template)).then((text) => {
+          if (data.issueTypeFieldVO) {
+            data.issueTypeFieldVO.template = text;
+          }
           handleRequest(data);
-        }, 'template');
+        }).catch(() => {
+          setBtnLoading(false);
+          pageIssueTypeStore.setLoading(false);
+        });
       } else {
         handleRequest(data);
       }
