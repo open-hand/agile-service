@@ -76,6 +76,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private IssueMapper issueMapper;
     @Autowired
     private ProductVersionMapper productVersionMapper;
+    @Autowired
+    private IssueLabelService issueLabelService;
 
     @Override
     public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field,
@@ -757,16 +759,41 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                             objectSchemeFieldExtendMapper.updateByPrimaryKey(i);
                         }
                     });
+            //如果修改了标签，则启动标签垃圾回收
+            ObjectSchemeFieldDTO objectSchemeFieldDTO = getObjectSchemeFieldDTO(FieldCode.LABEL);
+            if (Objects.equals(fieldId, objectSchemeFieldDTO.getId())) {
+                issueLabelService.labelGarbageCollection(projectId);
+            }
         }
     }
 
     @Override
-    public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String syncDefaultValueIssueTypes, Boolean extraConfig) {
+    public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String syncDefaultValueIssueTypes, ObjectSchemeFieldUpdateVO updateDTO) {
 
-        String defaultValue = getObjectSchemeFieldByFieldId(organizationId, projectId, fieldId).getDefaultValue();
+        String defaultValue;
+        ObjectSchemeFieldDTO fieldDTO = getObjectSchemeFieldByFieldId(organizationId, projectId, fieldId);
+        //组织层下的组织字段，项目层下的自定义字段查询默认值
+        if (Boolean.TRUE.equals(updateDTO.getCustom())) {
+            defaultValue = fieldDTO.getDefaultValue();
+        }
+        //组织层下的系统字段，项目层下的系统字段和组织字段处理默认值
+        else {
+            defaultValue = updateDTO.getDefaultValue();
+            //处理字段选项
+            if (updateDTO.getFieldOptions() != null) {
+                String defaultIds = fieldOptionService.handleFieldOption(organizationId, fieldId, updateDTO.getFieldOptions());
+                if (defaultIds != null && !"".equals(defaultIds)) {
+                    defaultValue = defaultIds;
+                }
+            }
+            String value = tryDecryptDefaultValue(updateDTO.getDefaultValue());
+            if (defaultValue != null) {
+                defaultValue = value;
+            }
+        }
 
         List<String> issueTypes = Arrays.asList(syncDefaultValueIssueTypes.split(","));
-        updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue, issueTypes, extraConfig);
+        updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue, issueTypes, updateDTO.getExtraConfig());
     }
 
     private ObjectSchemeFieldDTO getObjectSchemeFieldByFieldId(Long organizationId, Long projectId, Long fieldId) {
@@ -1270,7 +1297,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 List<Object> defaultObjs = new ArrayList<>();
                 switch (view.getFieldCode()) {
                     //多选
-                    case "component":
+                    case FieldCode.COMPONENT:
                         List<IssueComponentVO> issueComponentList = modelMapper.map(issueComponentMapper.selectByProjectId(projectId), new TypeToken<List<IssueComponentVO>>(){}.getType());
                         Map<Long, IssueComponentVO> issueComponentMap = issueComponentList.stream().collect(Collectors.toMap(IssueComponentVO::getComponentId, Function.identity()));
 
@@ -1286,7 +1313,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         }
                         break;
                     //多选
-                    case "label":
+                    case FieldCode.LABEL:
                         List<IssueLabelVO> issueLabelList = modelMapper.map(issueLabelMapper.selectByProjectIds(Collections.singletonList(projectId)), new TypeToken<List<IssueLabelVO>>(){}.getType());
                         Map<Long, IssueLabelVO> issueLabelMap = issueLabelList.stream().collect(Collectors.toMap(IssueLabelVO::getLabelId, Function.identity()));
 
@@ -1302,7 +1329,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         }
                         break;
                     //多选
-                    case "influenceVersion":
+                    case FieldCode.INFLUENCE_VERSION:
                         List<ProductVersionNameVO> influenceVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, null), new TypeToken<List<ProductVersionNameVO>>(){}.getType());
                         Map<Long, ProductVersionNameVO> influenceVersionMap = influenceVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
 
@@ -1318,7 +1345,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         }
                         break;
                     //多选
-                    case "fixVersion":
+                    case FieldCode.FIX_VERSION:
                         List<ProductVersionNameVO> fixVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, Collections.singletonList("version_planning")), new TypeToken<List<ProductVersionNameVO>>(){}.getType());
                         Map<Long, ProductVersionNameVO> fixVersionMap = fixVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
 
@@ -1334,7 +1361,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         }
                         break;
                     //单选
-                    case "sprint":
+                    case FieldCode.SPRINT:
                         List<String> sprintStatusCodes = Arrays.asList("sprint_planning", "started");
                         List<SprintNameVO> sprintNameList = modelMapper.map(sprintMapper.queryNameByOptions(Collections.singletonList(projectId), sprintStatusCodes), new TypeToken<List<SprintNameVO>>(){}.getType());
                         Map<Long, SprintNameVO> sprintNameMap = sprintNameList.stream().collect(Collectors.toMap(SprintNameVO::getSprintId, Function.identity()));
@@ -1345,7 +1372,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         }
                         break;
                     //单选
-                    case "epic":
+                    case FieldCode.EPIC:
                         List<EpicDataVO> epicDataList = modelMapper.map(issueMapper.queryEpicList(projectId), new TypeToken<List<EpicDataVO>>(){}.getType());
                         Map<Long, EpicDataVO> epicDataMap = epicDataList.stream().collect(Collectors.toMap(EpicDataVO::getIssueId, Function.identity()));
 
@@ -1354,13 +1381,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                             view.setDefaultValueObj(epicDataMap.get(defaultId));
                         }
                         break;
-                    case "pi":
+                    case FieldCode.PROGRAM_VERSION:
                         if (agilePluginService != null) {
                             agilePluginService.setBussinessDefaultValueObjs(pageFieldViews, projectId, organizationId);
                         }
                         break;
-                    case "backlogClassification":
-                    case "backlogType":
+                    case FieldCode.BACKLOG_TYPE:
+                    case FieldCode.BACKLOG_CLASSIFICATION:
                         if (backlogExpandService != null) {
                             backlogExpandService.setBacklogDefaultValueObjs(pageFieldViews, projectId, organizationId);
                         }
@@ -1448,6 +1475,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 objectSchemeFieldExtendMapper.insertSelective(dto);
             } else {
                 updateObjectSchemeFieldExtend(f, result);
+                //修改标签，执行标签垃圾回收
+                if (Objects.equals(f.getFieldCode(), FieldCode.LABEL)) {
+                    issueLabelService.labelGarbageCollection(projectId);
+                }
             }
         });
     }
@@ -1484,4 +1515,42 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         return result;
     }
+
+    @Override
+    public ObjectSchemeFieldDTO getObjectSchemeFieldDTO(String fieldCode) {
+        ObjectSchemeFieldDTO search = new ObjectSchemeFieldDTO();
+        search.setCode(fieldCode);
+        search.setSchemeCode("agile_issue");
+        return objectSchemeFieldMapper.selectOne(search);
+    }
+
+    @Override
+    public void checkObjectSchemeFieldDefaultValueOfSingle(Long projectId, Long id, String fieldCode) {
+        ObjectSchemeFieldDTO fieldDTO = getObjectSchemeFieldDTO(fieldCode);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
+        objectSchemeFieldExtendList.forEach(f -> {
+            String defaultValue = f.getDefaultValue();
+            if (!Objects.isNull(defaultValue) && Objects.equals(defaultValue, id.toString())) {
+                throw new CommonException("this.is.default.value");
+            }
+        });
+    }
+
+    @Override
+    public void checkObjectSchemeFieldDefaultValueOfMultiple(Long projectId, Long id, String fieldCode) {
+        ObjectSchemeFieldDTO fieldDTO = getObjectSchemeFieldDTO(fieldCode);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
+        objectSchemeFieldExtendList.forEach(f -> {
+            String defaultValue = f.getDefaultValue();
+            if (!Objects.isNull(defaultValue) && !Objects.equals(defaultValue, "")) {
+                List<String> componentIds = new ArrayList<>(Arrays.asList(defaultValue.split(",")));
+                if (componentIds.contains(id.toString())) {
+                    throw new CommonException("this.is.default.value");
+                }
+            }
+        });
+    }
+
 }

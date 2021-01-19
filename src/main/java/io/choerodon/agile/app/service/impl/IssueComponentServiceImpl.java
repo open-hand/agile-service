@@ -4,6 +4,9 @@ import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueComponentValidator;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.service.ObjectSchemeFieldService;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.ComponentForListDTO;
@@ -29,8 +32,6 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,29 +76,9 @@ public class IssueComponentServiceImpl implements IssueComponentService {
         if (checkComponentName(projectId, issueComponentVO.getName())) {
             throw new CommonException("error.componentName.exist");
         }
-        checkComponentRank(projectId);
         IssueComponentValidator.checkCreateComponent(projectId, issueComponentVO);
         IssueComponentDTO issueComponentDTO = modelMapper.map(issueComponentVO, IssueComponentDTO.class);
-        issueComponentDTO.setRank(issueComponentMapper.queryMaxRank(projectId));
         return modelMapper.map(createBase(issueComponentDTO), IssueComponentVO.class);
-    }
-
-    private void checkComponentRank(Long projectId) {
-        List<IssueComponentDTO> list = issueComponentMapper.querNoRankList(projectId);
-        if (!CollectionUtils.isEmpty(list)) {
-            String max = issueComponentMapper.queryMaxRank(projectId);
-            String nextRank = null;
-            if (ObjectUtils.isEmpty(max)) {
-                nextRank = RankUtil.mid();
-            } else {
-                nextRank = RankUtil.genNext(max);
-            }
-            for (IssueComponentDTO issueComponentDTO : list) {
-                issueComponentDTO.setRank(nextRank);
-                updateBase(issueComponentDTO);
-                nextRank = RankUtil.genNext(nextRank);
-            }
-        }
     }
 
     private Boolean checkNameUpdate(Long projectId, Long componentId, String componentName) {
@@ -117,7 +98,6 @@ public class IssueComponentServiceImpl implements IssueComponentService {
         if (checkNameUpdate(projectId, id, issueComponentVO.getName())) {
             throw new CommonException("error.componentName.exist");
         }
-        checkComponentRank(projectId);
         issueComponentVO.setComponentId(id);
         IssueComponentDTO issueComponentDTO = modelMapper.map(issueComponentVO, IssueComponentDTO.class);
         return modelMapper.map(updateBase(issueComponentDTO), IssueComponentVO.class);
@@ -278,65 +258,5 @@ public class IssueComponentServiceImpl implements IssueComponentService {
             throw new CommonException("error.component.delete");
         }
         redisUtil.deleteRedisCache(new String[]{PIECHART + issueComponentDTO.getProjectId() + ':' + CPMPONENT + "*"});
-    }
-
-    @Override
-    public void moveComponent(Long projectId, MoveComponentVO moveComponentVO) {
-        if (CollectionUtils.isEmpty(moveComponentVO.getComponentIds())) {
-            throw new CommonException("error.componentIds.not.null");
-        }
-        checkComponentRank(projectId);
-        List<IssueComponentDTO> issueComponentDTOS = new ArrayList<>();
-        if (Boolean.TRUE.equals(moveComponentVO.getBefore())) {
-           beforeRank(projectId,moveComponentVO,issueComponentDTOS);
-        } else {
-           afterRank(projectId, moveComponentVO,issueComponentDTOS);
-        }
-        for (IssueComponentDTO issueComponentDTO : issueComponentDTOS) {
-            issueComponentMapper.updateRank(projectId,issueComponentDTO);
-        }
-    }
-
-    private void afterRank(Long projectId, MoveComponentVO moveComponentVO, List<IssueComponentDTO> issueComponentDTOS) {
-        String leftRank = issueComponentMapper.queryRank(projectId, moveComponentVO.getOutsetId());
-        String rightRank = issueComponentMapper.queryRightRank(projectId, leftRank);
-        List<Long> componentIds = moveComponentVO.getComponentIds();
-        if (ObjectUtils.isEmpty(rightRank)) {
-            rightRank = RankUtil.genPre(leftRank);
-            for (Long componentId : componentIds) {
-                IssueComponentDTO issueComponentDTO = new IssueComponentDTO();
-                issueComponentDTO.setComponentId(componentId);
-                issueComponentDTO.setRank(rightRank);
-                issueComponentDTOS.add(issueComponentDTO);
-                rightRank = RankUtil.genPre(rightRank);
-            }
-        } else {
-            leftRank = RankUtil.between(rightRank, leftRank);
-            for (Long componentId : componentIds) {
-                IssueComponentDTO issueComponentDTO = new IssueComponentDTO();
-                issueComponentDTO.setComponentId(componentId);
-                issueComponentDTO.setRank(leftRank);
-                issueComponentDTOS.add(issueComponentDTO);
-                leftRank = RankUtil.between(rightRank, leftRank);
-            }
-        }
-    }
-
-    private void beforeRank(Long projectId, MoveComponentVO moveComponentVO, List<IssueComponentDTO> issueComponentDTOS) {
-        String rightRank = issueComponentMapper.queryRank(projectId, moveComponentVO.getOutsetId());
-        String leftRank = issueComponentMapper.queryLeftRank(projectId, rightRank);
-        List<Long> componentIds = moveComponentVO.getComponentIds();
-        if (ObjectUtils.isEmpty(leftRank)) {
-            leftRank = RankUtil.genNext(rightRank);
-        } else {
-            leftRank = RankUtil.between(rightRank, leftRank);
-        }
-        for (Long componentId : componentIds) {
-            IssueComponentDTO issueComponentDTO = new IssueComponentDTO();
-            issueComponentDTO.setComponentId(componentId);
-            issueComponentDTO.setRank(leftRank);
-            issueComponentDTOS.add(issueComponentDTO);
-            leftRank = RankUtil.between(rightRank,leftRank);
-        }
     }
 }

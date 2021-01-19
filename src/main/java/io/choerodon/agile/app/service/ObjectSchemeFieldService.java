@@ -205,7 +205,7 @@ public interface ObjectSchemeFieldService {
 
     List<ObjectSchemeFieldVO> listPageFieldWithOption(Long organizationId, Long projectId, String schemeCode, List<String> issueTypeList);
 
-    void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String syncDefaultValueIssueTypes, Boolean extraConfig);
+    void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String syncDefaultValueIssueTypes, ObjectSchemeFieldUpdateVO updateDTO);
 
     /**
      * 设置预定义字段的默认值对象
@@ -214,4 +214,27 @@ public interface ObjectSchemeFieldService {
      * @param organizationId
      */
     void setDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
+
+    /**
+     * 根据schemeCode查询预定义字段
+     * @param fieldCode
+     * @return
+     */
+    ObjectSchemeFieldDTO getObjectSchemeFieldDTO(String fieldCode);
+
+    /**
+     * 单选类型系统字段的默认值校验
+     * @param projectId
+     * @param id
+     * @param fieldCode
+     */
+    void checkObjectSchemeFieldDefaultValueOfSingle(Long projectId, Long id, String fieldCode);
+
+    /**
+     * 多选类型系统字段的默认值校验
+     * @param projectId
+     * @param id
+     * @param fieldCode
+     */
+    void checkObjectSchemeFieldDefaultValueOfMultiple(Long projectId, Long id, String fieldCode);
 }
