@@ -11,11 +11,14 @@ import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { IIssueType } from '@/common/types';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { issueTypeApi } from '@/api';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import { getIsOrganization } from '@/utils/common';
 import TypeTag from '../../../components/TypeTag/TypeTag';
 import AddIssueType from './AddIssueType';
 import Store from '../stores';
 import styles from './IssueTypeList.less';
+import openUsage from './Usage';
 
 const { Column } = Table;
 
@@ -26,6 +29,7 @@ const { Column } = Table;
 function IssueTypeList() {
   const context = useContext(Store);
   const { issueTypeDataSet } = context;
+  const isOrganization = getIsOrganization();
 
   const handleEdit = useCallback(({ record, dataSet }) => {
     Modal.open({
@@ -62,11 +66,11 @@ function IssueTypeList() {
         />
       </div>
     );
-  }, []);
+  }, [handleEdit]);
 
   const renderAction = useCallback(({ dataSet, record }: RenderProps) => {
     const handleDelete = () => {
-      issueTypeApi.delete(record?.get('id')).then(() => {
+      issueTypeApi[isOrganization ? 'orgDelete' : 'delete'](record?.get('id')).then(() => {
         Choerodon.prompt('删除成功');
         dataSet?.query(dataSet?.toData().length === 1 ? dataSet?.currentPage - 1 : dataSet?.currentPage);
       }).catch(() => {
@@ -149,7 +153,13 @@ function IssueTypeList() {
         />
       </Dropdown>
     );
-  }, []);
+  }, [isOrganization]);
+
+  const renderUsage = useCallback(({ record }: RenderProps) => (
+    <div className={styles.usage} role="none" onClick={() => openUsage({ record })}>
+      8个关联项目
+    </div>
+  ), []);
 
   const renderSource = useCallback(({ record }: RenderProps) => {
     const sourceMap = new Map([
@@ -198,7 +208,7 @@ function IssueTypeList() {
           <Column name="name" renderer={renderName} />
           <Column name="action" width={50} renderer={renderAction} />
           <Column name="description" />
-          <Column name="usage" />
+          <Column name="usage" renderer={renderUsage} />
           <Column
             name="source"
             renderer={renderSource}

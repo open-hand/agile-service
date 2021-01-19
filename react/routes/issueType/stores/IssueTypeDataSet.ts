@@ -1,6 +1,8 @@
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { getOrganizationId } from '@/utils/common';
+import { getOrganizationId, getIsOrganization } from '@/utils/common';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
+
+import { issueTypeApiConfig } from '@/api';
 
 const IssueTypeDataSet = (
 ): DataSetProps => ({
@@ -45,10 +47,12 @@ const IssueTypeDataSet = (
     },
   ],
   transport: {
-    read: () => ({
-      url: `/agile/v1/organizations/${getOrganizationId()}/issue_type/list`,
-      method: 'post',
-    }),
+    read: ({ params, data }: { params: { page: number, size: number}, data: any}) => {
+      if (getIsOrganization()) {
+        return issueTypeApiConfig.orgLoad({ params, data });
+      }
+      return issueTypeApiConfig.load({ params, data });
+    },
   },
 });
 export default IssueTypeDataSet;

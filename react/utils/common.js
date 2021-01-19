@@ -6,6 +6,7 @@ import humanize from './humanizeDuration';
 
 const { AppState } = stores;
 
+export const getIsOrganization = () => AppState.currentMenuType.type === 'organization';
 export const getProjectId = () => (AppState.currentMenuType ? AppState.currentMenuType.id : 0);
 export const getProjectName = () => (AppState.currentMenuType ? AppState.currentMenuType.name : '');
 export const getOrganizationId = () => (AppState.currentMenuType
