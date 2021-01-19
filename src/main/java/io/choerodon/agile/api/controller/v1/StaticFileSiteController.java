@@ -46,18 +46,4 @@ public class StaticFileSiteController {
                 webRequest, httpRequest, httpResponse
         );
     }
-
-    @ApiOperation(value = "请求资源")
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping(value = "/test/resource/{fileHeaderId}/**")
-    public ResponseEntity<byte[]> testResource(
-            @ApiParam(value = "静态资源头id", required = true)
-            @PathVariable @Encrypt String fileHeaderId,
-            HttpServletResponse httpResponse,
-            WebRequest webRequest,
-            HttpServletRequest httpRequest) throws IOException {
-        return staticFileService.selectStaticFileResult(fileHeaderId,
-                webRequest, httpRequest, httpResponse
-        );
-    }
 }
