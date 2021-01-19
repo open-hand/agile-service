@@ -297,7 +297,18 @@ class DailyLog extends Component {
             >
               <DatePicker
                 style={{ width: '100%' }}
-                label="工作日期*"
+                label={(
+                  <span>
+                    工作日期
+                    <span style={{ color: 'red' }}>*</span>
+                  </span>
+                )}
+                placeholder={(
+                  <span>
+                    工作日期
+                    <span style={{ color: 'red' }}>*</span>
+                  </span>
+                )}
                 value={startTime}
                 format={DATA_FORMAT}
                 onChange={this.changeEndTime}
