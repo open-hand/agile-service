@@ -1,6 +1,6 @@
 import { pageConfigApi, pageConfigApiConfig } from '@/api';
 import { IModalProps } from '@/common/types';
-import renderEditor from '@/routes/page-config/page-issue-type/components/sort-table/renderEditor';
+import renderEditor from '@/routes/page-config/components/renderEditor';
 import {
   Form, DataSet, Modal, Select,
 } from 'choerodon-ui/pro/lib';
@@ -21,7 +21,7 @@ const EditSystemField: React.FC<Props> = observer(({
     const syncIssueType = ds.current?.get('syncIssueType');
     const id = ds.current?.get('id');
     if (await ds.submit() !== false) {
-      syncIssueType && Array.isArray(syncIssueType) && pageConfigApi.syncDefaultValue(id, String(syncIssueType));
+      // syncIssueType && Array.isArray(syncIssueType) && pageConfigApi.syncDefaultValue(id, String(syncIssueType),{});
       return true;
     }
     return false;
@@ -31,7 +31,7 @@ const EditSystemField: React.FC<Props> = observer(({
   }, []);
   return (
     <Form dataSet={ds}>
-      {renderEditor({ record, name: 'defaultValue' })}
+      {renderEditor({ data: record.toData() as any, name: 'defaultValue' })}
       <Select name="syncIssueType">
         {options.map((option) => <Select.Option value={option.code}>{option.name}</Select.Option>)}
       </Select>

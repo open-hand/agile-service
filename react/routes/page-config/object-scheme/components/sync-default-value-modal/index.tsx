@@ -1,55 +1,145 @@
 import { pageConfigApi, pageConfigApiConfig } from '@/api';
 import { IModalProps } from '@/common/types';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import renderEditor from '@/routes/page-config/page-issue-type/components/sort-table/renderEditor';
+import beforeSubmitProcessData from '@/routes/page-config/components/create-field/util';
+import renderEditor from '@/routes/page-config/components/renderEditor';
+import { getMenuType } from '@/utils/common';
 import {
   Form, DataSet, Modal, Select,
 } from 'choerodon-ui/pro/lib';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+  useCallback, useEffect, useMemo, useState,
+} from 'react';
 
 interface Props {
-  prefixCls:string
+  prefixCls: string
   record: Record
+  defaultTypes: Array<string>
   text: string
-  defaultValue: any
-  extraConfig?: boolean
   options: Array<{ name: string, code: string }>
   modal?: IModalProps
 }
+const dateList = ['datetime', 'time', 'date'];
 const SyncDefaultValueEditForm: React.FC<Props> = ({
-  text, record, defaultValue, options, extraConfig, modal, prefixCls,
+  text, record, options, modal, prefixCls, defaultTypes,
 }) => {
-  const [showText, setShowText] = useState<string>(text);
-  const [value, setValue] = useState(defaultValue);
-  function handleSubmit(data: any) {
-    setValue(data);
-    setShowText(options.filter((option) => data.includes(option.code)).map((item) => item.name).toString());
-  }
+  const initValue = useMemo(() => {
+    let defaultValue = record.get('defaultValue');
+    if (defaultValue === '') {
+      defaultValue = undefined;
+    }
+    if (defaultValue && ['checkbox', 'multiple', 'radio', 'single', 'multiMember'].includes(record.get('fieldType'))) {
+      defaultValue = String(defaultValue).split(',');
+    }
+    return defaultValue;
+  }, [record]);
+  const ds = useMemo(() => {
+    const defaultValueFieldProps = dateList.includes(record.get('fieldType')); // valueField
+
+    return new DataSet({
+      autoCreate: true,
+      autoQuery: false,
+      fields: [
+        {
+          name: 'defaultValue',
+          label: '默认值',
+          defaultValue: initValue,
+        },
+        {
+          name: 'syncIssueType',
+          label: '将默认值同步到',
+          multiple: true,
+          required: true,
+          defaultValue: defaultTypes,
+          // defaultValidationMessages: '请选择同步的问题类型',
+        },
+      ],
+    });
+  }, [defaultTypes, initValue]);
 
   const handleOk = useCallback(async () => {
-    await pageConfigApi.syncDefaultValue(record.get('id'), String(value), extraConfig);
-    return true;
-  }, [extraConfig, record, value]);
+    if (await ds.validate()) {
+      const syncIssueType = ds.current!.get('syncIssueType');
+      const defaultValue = ds.current!.get('defaultValue');
+      // const originFieldOptions: any[] | undefined = record.get('fieldOptions');
+      // const extraConfig = record.get('extraConfig');
+      record.set('defaultValue', defaultValue);
+      const newData = beforeSubmitProcessData(record);
+      // if (!record.get('system') && ['checkbox', 'multiple', 'radio', 'single'].includes(record.get('fieldType'))) {
+      //   fieldOptions = !defaultValue || defaultValue.length === 0 ? originFieldOptions?.map((item) => ({ ...item, isDefault: false }))
+      //     : originFieldOptions?.map((item) => ({ ...item, isDefault: defaultValue.includes(item.id) }));
+      // }
+      // if()
+      if (!(record.get('system') || (getMenuType() === 'project' && record.get('projectId') === null))) {
+        await pageConfigApi.updateField(record.get('id'), newData);
+      }
+      await pageConfigApi.syncDefaultValue(record.get('id'), String(syncIssueType), {
+        extraConfig: newData.extraConfig,
+        fieldType: newData.fieldType,
+        fieldOptions: newData.fieldOptions,
+        defaultValue: newData.defaultValue,
+        custom: false,
+      });
+      return true;
+    }
+    return false;
+  }, [record]);
   useEffect(() => {
     modal?.handleOk(handleOk);
   }, [handleOk, modal]);
+  const handleChangeDate = useCallback((value) => {
+    if (value === 'current') {
+      record.set('check', true);
+    } else {
+      record.set('check', false);
+    }
+  }, [record]);
   return (
-    <div className={`${prefixCls}-detail-sync-form`}>
-      <span>是否将默认值同步至:</span>
-      <TextEditToggle
-        initValue={value}
-        onSubmit={handleSubmit}
-        editor={() => (
-          <Select name="syncIssueType" required style={{ minWidth: 280 }} multiple validationRenderer={() => '请选择同步的问题类型'}>
-            {options.map((option) => <Select.Option value={option.code}>{option.name}</Select.Option>)}
-          </Select>
-        )}
-      >
-        {showText}
-      </TextEditToggle>
-    </div>
+    <Form dataSet={ds}>
+      {renderEditor({
+        data: {
+          ...record.toData(),
+          defaultValue: ['datetime', 'time', 'date'].includes(record.get('fieldType')) && record.get('extraConfig') ? 'current' : initValue,
+        },
+        onChange: ['datetime', 'time', 'date'].includes(record.get('fieldType')) ? handleChangeDate : undefined,
+        name: 'defaultValue',
+      })}
+      <Select name="syncIssueType" required style={{ minWidth: 280 }} multiple>
+        {options.map((option) => <Select.Option value={option.code}>{option.name}</Select.Option>)}
+      </Select>
+    </Form>
+
   );
 };
+
+const openSyncDefaultValueEditForm = async (record: Record, prefixCls: string) => {
+  const issueTypes: string = record?.get('context');
+  const issueTypesArr: string[] = issueTypes.split(',');
+  const contextName: string = record?.get('contextName');
+  const contextNameArr = contextName.split(',');
+  record.set('fieldCode', record.get('code'));
+  let newRecord = record;
+  if (!record.get('system')) { // && ['checkbox', 'multiple', 'radio', 'single'].includes(record.get('fieldType'))
+    const data = await pageConfigApi.loadById(record.get('id'));
+    // record.set('fieldOptions', fieldOptions);
+    newRecord = new Record({ ...data, check: data.extraConfig });
+  }
+
+  Modal.open({
+    key: Modal.key(),
+    title: '默认值同步',
+    children: <SyncDefaultValueEditForm
+      prefixCls={prefixCls}
+      record={newRecord}
+      text={contextName}
+      defaultTypes={issueTypesArr}
+      options={issueTypesArr.map((item: any, index) => ({ code: item, name: contextNameArr[index] }))}
+    />,
+    className: `${prefixCls}-detail-sync`,
+    okText: '确定',
+  });
+};
+export { openSyncDefaultValueEditForm };
 export default SyncDefaultValueEditForm;
