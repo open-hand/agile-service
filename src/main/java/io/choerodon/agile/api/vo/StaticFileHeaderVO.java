@@ -15,9 +15,6 @@ public class StaticFileHeaderVO {
     private Long id;
     @ApiModelProperty(value = "项目id")
     private Long projectId;
-    @ApiModelProperty(value = "问题id")
-    @Encrypt
-    private Long issueId;
     @ApiModelProperty(value = "ui/ux图原压缩包url")
     private String url;
     @ApiModelProperty(value = "文件名")
@@ -39,14 +36,6 @@ public class StaticFileHeaderVO {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
-    }
-
-    public Long getIssueId() {
-        return issueId;
-    }
-
-    public void setIssueId(Long issueId) {
-        this.issueId = issueId;
     }
 
     public String getUrl() {

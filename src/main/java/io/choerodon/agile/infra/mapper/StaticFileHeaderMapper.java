@@ -1,5 +1,10 @@
 package io.choerodon.agile.infra.mapper;
 
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+import io.choerodon.agile.api.vo.StaticFileHeaderVO;
 import io.choerodon.agile.infra.dto.StaticFileHeaderDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -9,4 +14,21 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface StaticFileHeaderMapper extends BaseMapper<StaticFileHeaderDTO> {
 
+    /**
+     * 获取该项目下没有关联传入id的所有的静态文件列表
+     *
+     * @param projectId 项目id
+     * @param issueId   问题id
+     * @return 静态文件头
+     */
+    List<StaticFileHeaderDTO> selectFileListExcludeIssue(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
+
+    /**
+     * 获取该项目下没有关联的所有的静态文件列表
+     *
+     * @param projectId 项目id
+     * @param issueId   问题id
+     * @return 静态文件头
+     */
+    List<StaticFileHeaderDTO> selectFileListByIssue(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 }

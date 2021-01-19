@@ -369,7 +369,7 @@ public class DataLogAspect {
         }
         if (id != null) {
             StaticFileHeaderDTO staticFileHeader = staticFileHeaderMapper.selectByPrimaryKey(id);
-            createDataLog(staticFileHeader.getProjectId(), staticFileHeader.getIssueId(), FIELD_STATIC_FILE,
+            createDataLog(staticFileHeader.getProjectId(), null, FIELD_STATIC_FILE,
                     staticFileHeader.getUrl(), null, staticFileHeader.getId().toString(), null);
         }
     }
@@ -386,7 +386,7 @@ public class DataLogAspect {
             try {
                 result = pjp.proceed();
                 staticFileHeaderDTO = (StaticFileHeaderDTO) result;
-                createDataLog(staticFileHeaderDTO.getProjectId(), staticFileHeaderDTO.getIssueId(), FIELD_STATIC_FILE,
+                createDataLog(staticFileHeaderDTO.getProjectId(), null, FIELD_STATIC_FILE,
                         null, staticFileHeaderDTO.getUrl(), null, staticFileHeaderDTO.getId().toString());
             } catch (Throwable e) {
                 throw new CommonException(ERROR_METHOD_EXECUTE, e);

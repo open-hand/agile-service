@@ -48,7 +48,7 @@ public class StaticFileController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("获取该项目下未关联问题的静态文件列表")
+    @ApiOperation("获取该项目所有的静态文件列表")
     @GetMapping
     public ResponseEntity<List<StaticFileHeaderVO>> getFileListByProject(
             @ApiParam(value = "项目id", required = true)
@@ -59,8 +59,21 @@ public class StaticFileController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("获取问题下未关的静态文件列表")
+    @ApiOperation("获取该项目下没有关联传入id的所有的静态文件列表")
     @GetMapping("/{issueId}")
+    public ResponseEntity<List<StaticFileHeaderVO>> getFileListExcludeIssue(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "问题id", required = true)
+            @PathVariable(name = "issueId") @Encrypt Long issueId){
+        return Optional.ofNullable(staticFileService.selectFileListExcludeIssue(projectId, issueId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.attachment.select.project.excludeIssue.list"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("获取问题下关联的静态文件列表")
+    @GetMapping("/related/{issueId}")
     public ResponseEntity<List<StaticFileHeaderVO>> getFileListByIssue(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
@@ -72,7 +85,7 @@ public class StaticFileController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("将未关联问题的静态文件关联问题")
+    @ApiOperation("静态文件与问题相关联")
     @PostMapping("/related")
     public ResponseEntity<List<StaticFileHeaderVO>> updateStaticFileRelatedIssue(
             @ApiParam(value = "项目id", required = true)
@@ -85,13 +98,15 @@ public class StaticFileController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除静态文件列表与问题的关联关系")
-    @DeleteMapping("/related/{fileHeaderId}")
+    @DeleteMapping("/related/{issueId}/{fileHeaderId}")
     public ResponseEntity deleteStaticFileRelated(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "问题id", required = true)
+            @PathVariable(name = "issueId") @Encrypt Long issueId,
             @ApiParam(value = "静态文件头id", required = true)
             @PathVariable(name = "fileHeaderId") @Encrypt Long fileHeaderId){
-        staticFileService.deleteStaticFileRelated(projectId, fileHeaderId);
+        staticFileService.deleteStaticFileRelated(projectId, fileHeaderId, issueId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 

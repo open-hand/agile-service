@@ -1,21 +1,21 @@
 package script.db.groovy.agile_service
 
-databaseChangeLog(logicalFilePath: 'agile_static_file_header.groovy') {
-    changeSet(id: '2021-01-13-agile-static-file-header', author: 'chihao.ran@hand-china.com') {
-        createTable(tableName: "agile_static_file_header") {
-            column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'attachment id') {
+databaseChangeLog(logicalFilePath: 'agile_issue_static_file_rel.groovy') {
+    changeSet(id: '2021-01-18-agile_issue_static_file_rel', author: 'chihao.ran@hand-china.com') {
+        createTable(tableName: "agile_issue_static_file_rel") {
+            column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
+            }
+            column(name: 'static_file_id', type: 'BIGINT UNSIGNED', remarks: 'static file header id') {
+                constraints(nullable: false)
+            }
+            column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: 'issue id') {
+                constraints(nullable: false)
             }
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
                 constraints(nullable: false)
             }
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: 'organization id') {
-                constraints(nullable: false)
-            }
-            column(name: 'url', type: 'VARCHAR(500)', remarks: 'url') {
-                constraints(nullable: false)
-            }
-            column(name: 'file_name', type: 'VARCHAR(500)', remarks: 'file name') {
                 constraints(nullable: false)
             }
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")

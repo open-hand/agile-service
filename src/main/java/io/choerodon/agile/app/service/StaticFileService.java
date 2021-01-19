@@ -34,7 +34,7 @@ public interface StaticFileService {
      * @param httpResponse httpResponse
      * @return 请求的资源
      */
-    ResponseEntity<byte[]> selectStaticFileResult(Long fileHeaderId, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException;
+    ResponseEntity<byte[]> selectStaticFileResult(String fileHeaderId, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException;
 
     /**
      * 查询项目下未关联问题的静态文件头
@@ -55,8 +55,9 @@ public interface StaticFileService {
      * 删除静态文件列表与问题的关联关系
      * @param projectId 项目id
      * @param fileHeaderId 静态文件头id
+     * @param issueId 问题id
      */
-    void deleteStaticFileRelated(Long projectId, Long fileHeaderId);
+    void deleteStaticFileRelated(Long projectId, Long fileHeaderId, Long issueId);
 
     /**
      * 删除静态文件列表与问题的关联关系
@@ -72,4 +73,12 @@ public interface StaticFileService {
      * @return 静态文件头
      */
     List<StaticFileHeaderVO> updateStaticFileRelatedIssue(Long projectId, StaticFileRelatedVO staticFileRelatedVO);
+
+    /**
+     * 获取该项目下没有关联传入id的所有的静态文件列表
+     * @param projectId 项目id
+     * @param issueId 问题id
+     * @return 静态文件头
+     */
+    List<StaticFileHeaderVO> selectFileListExcludeIssue(Long projectId, Long issueId);
 }

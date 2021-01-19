@@ -21,17 +21,15 @@ public class StaticFileHeaderDTO extends AuditDomain {
     private Long id;
     private Long projectId;
     private Long organizationId;
-    private Long issueId;
     private String url;
     private String fileName;
 
     public StaticFileHeaderDTO() {
     }
 
-    public StaticFileHeaderDTO(Long projectId, Long organizationId, Long issueId, String url, String fileName) {
+    public StaticFileHeaderDTO(Long projectId, Long organizationId, String url, String fileName) {
         this.projectId = projectId;
         this.organizationId = organizationId;
-        this.issueId = issueId;
         this.url = url;
         this.fileName = fileName;
     }
@@ -58,14 +56,6 @@ public class StaticFileHeaderDTO extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
-    }
-
-    public Long getIssueId() {
-        return issueId;
-    }
-
-    public void setIssueId(Long issueId) {
-        this.issueId = issueId;
     }
 
     public String getUrl() {
