@@ -771,22 +771,14 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String syncDefaultValueIssueTypes, ObjectSchemeFieldUpdateVO updateDTO) {
 
         String defaultValue;
-        ObjectSchemeFieldDTO fieldDTO = getObjectSchemeFieldByFieldId(organizationId, projectId, fieldId);
         //组织层下的组织字段，项目层下的自定义字段查询默认值
         if (Boolean.TRUE.equals(updateDTO.getCustom())) {
-            defaultValue = fieldDTO.getDefaultValue();
+            defaultValue = getObjectSchemeFieldByFieldId(organizationId, projectId, fieldId).getDefaultValue();
         }
         //组织层下的系统字段，项目层下的系统字段和组织字段处理默认值
         else {
             defaultValue = updateDTO.getDefaultValue();
-            //处理字段选项
-            if (updateDTO.getFieldOptions() != null) {
-                String defaultIds = fieldOptionService.handleFieldOption(organizationId, fieldId, updateDTO.getFieldOptions());
-                if (defaultIds != null && !"".equals(defaultIds)) {
-                    defaultValue = defaultIds;
-                }
-            }
-            String value = tryDecryptDefaultValue(fieldDTO.getFieldType(), updateDTO.getDefaultValue());
+            String value = tryDecryptDefaultValue(updateDTO.getFieldType(), updateDTO.getDefaultValue());
             if (defaultValue != null) {
                 defaultValue = value;
             }
@@ -1105,13 +1097,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         addFields.forEach(a -> {
             Long fieldId = a.getFieldId();
             String rank = a.getRank();
-            if (a.getFieldOptions() != null) {
-                List<FieldOptionUpdateVO> fieldOptionUpdateVOList = modelMapper.map(a.getFieldOptions(), new TypeToken<List<FieldOptionUpdateVO>>(){}.getType());
-                String defaultIds = fieldOptionService.handleFieldOption(organizationId, fieldId, fieldOptionUpdateVOList);
-                if (defaultIds != null && !"".equals(defaultIds)) {
-                    a.setDefaultValue(defaultIds);
-                }
-            }
             String defaultValue = tryDecryptDefaultValue(a.getFieldType(), a.getDefaultValue().toString());
             if (defaultValue != null) {
                 a.setDefaultValue(defaultValue);
@@ -1453,12 +1438,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             Long issueTypeId = issueTypeMap.get(issueType);
             if (Boolean.FALSE.equals(onProjectLevel)) {
                 result = result.stream().filter(v -> ObjectUtils.isEmpty(v.getProjectId())).collect(Collectors.toList());
-            }
-            //处理字段选项
-            if (f.getFieldOptions() != null) {
-                List<FieldOptionUpdateVO> fieldOptionUpdateVOList = modelMapper.map(f.getFieldOptions(), new TypeToken<List<FieldOptionUpdateVO>>(){}.getType());
-                String defaultIds = fieldOptionService.handleFieldOption(organizationId, fieldId, fieldOptionUpdateVOList);
-                f.setDefaultValue(defaultIds);
             }
             String defaultValue = tryDecryptDefaultValue(f.getFieldType(), f.getDefaultValue().toString());
             if (defaultValue != null) {
