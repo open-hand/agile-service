@@ -118,7 +118,8 @@
         is_created as created,
         is_edited as edited,
         rank,
-        object_version_number
+        object_version_number,
+        default_value
         from fd_object_scheme_field_extend
         where 1=1
         AND organization_id = #{organizationId}

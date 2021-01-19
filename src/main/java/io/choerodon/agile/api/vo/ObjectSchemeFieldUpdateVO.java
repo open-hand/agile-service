@@ -25,6 +25,8 @@ public class ObjectSchemeFieldUpdateVO {
     private Long objectVersionNumber;
     @ApiModelProperty(value = "字段选项列表")
     private List<FieldOptionUpdateVO> fieldOptions;
+    @ApiModelProperty(value = "是否自定义字段")
+    private Boolean custom;
 
     public List<FieldOptionUpdateVO> getFieldOptions() {
         return fieldOptions;
@@ -90,4 +92,11 @@ public class ObjectSchemeFieldUpdateVO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
+    public Boolean getCustom() {
+        return custom;
+    }
+
+    public void setCustom(Boolean custom) {
+        this.custom = custom;
+    }
 }

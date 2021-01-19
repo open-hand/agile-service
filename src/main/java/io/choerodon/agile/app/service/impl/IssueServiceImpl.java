@@ -810,11 +810,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueConvertDTO == null) {
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
+        //史诗删除默认值校验
+        if(Objects.equals(issueConvertDTO.getTypeCode(), IssueTypeCode.ISSUE_EPIC.value())) {
+            objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfSingle(projectId, issueId, FieldCode.EPIC);
+        }
         //删除issueLink
         issueLinkService.deleteByIssueId(issueConvertDTO.getIssueId());
         //删除标签关联
         labelIssueRelService.deleteByIssueId(issueConvertDTO.getIssueId());
-        //没有issue使用的标签进行垃圾回收
+        //没有issue使用且没有设为默认值的标签进行垃圾回收
         issueLabelService.labelGarbageCollection(projectId);
         //删除模块关联
         componentIssueRelService.deleteByIssueId(issueConvertDTO.getIssueId());
@@ -1378,7 +1382,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             } else {
                 labelIssueRelService.batchDeleteByIssueId(issueId);
             }
-            //没有issue使用的标签进行垃圾回收
+            //没有issue使用且没有设为默认值的标签进行垃圾回收
             issueLabelService.labelGarbageCollection(projectId);
         }
 
