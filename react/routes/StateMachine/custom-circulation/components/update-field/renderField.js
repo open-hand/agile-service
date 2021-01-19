@@ -291,6 +291,7 @@ export default function renderField({
       const isMultiple = !(singleList.indexOf(fieldType) !== -1);
       return (
         <Select
+          searchable
           placeholder="字段值"
           name={code}
           style={{ width: '100%' }}
