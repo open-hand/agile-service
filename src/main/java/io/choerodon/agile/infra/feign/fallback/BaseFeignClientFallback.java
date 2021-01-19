@@ -83,6 +83,11 @@ public class BaseFeignClientFallback implements BaseFeignClient {
         throw new CommonException("error.iamServiceFeignFallback.listProjectsByOrgId");
     }
 
+    @Override
+    public ResponseEntity<List<ProjectVO>> listWithCategoryByOrganizationIds(Long organizationId, Boolean enabled) {
+        throw new CommonException("error.iamServiceFeignFallback.listWithCategoryByOrganizationIds");
+    }
+
 
     @Override
     public ResponseEntity<TimeZoneWorkCalendarDTO> queryTimeZoneDetailByOrganizationId(Long organizationId) {

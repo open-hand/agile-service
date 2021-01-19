@@ -5,7 +5,6 @@ import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.agile.api.vo.IssueTypeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.IssueTypeWithInfoVO;
 
 import java.util.List;
 import java.util.Map;
@@ -19,17 +18,22 @@ public interface IssueTypeService {
 
     IssueTypeVO queryById(Long organizationId, Long issueTypeId);
 
-    IssueTypeVO create(Long organizationId, IssueTypeVO issueTypeVO);
+    IssueTypeVO create(Long organizationId,
+                       Long projectId,
+                       IssueTypeVO issueTypeVO);
 
     IssueTypeVO update(IssueTypeVO issueTypeVO);
 
-    Boolean delete(Long organizationId, Long issueTypeId);
+    void delete(Long organizationId, Long projectId, Long issueTypeId);
 
     Map<String, Object> checkDelete(Long organizationId, Long issueTypeId);
 
-    Page<IssueTypeWithInfoVO> queryIssueTypeList(PageRequest pageRequest, Long organizationId, IssueTypeSearchVO issueTypeSearchVO);
+    Page<IssueTypeVO> pagedQuery(PageRequest pageRequest,
+                                 Long organizationId,
+                                 Long projectId,
+                                 IssueTypeSearchVO issueTypeSearchVO);
 
-    Boolean checkName(Long organizationId, String name, Long id);
+    Boolean checkName(Long organizationId, Long projectId, String name, Long id);
 
     List<IssueTypeVO> queryByOrgId(Long organizationId);
 
@@ -56,9 +60,27 @@ public interface IssueTypeService {
 
     /**
      * 查询issueType map, key为typeCode, value为id
+     *
      * @param organizationId
      * @return
      */
     Map<String, Long> queryIssueTypeMap(Long organizationId);
 
+    /**
+     * @param organizationId
+     * @param projectId
+     * @param issueTypeId
+     * @return
+     */
+    IssueTypeVO query(Long organizationId, Long projectId, Long issueTypeId);
+
+    /**
+     * 判断问题类型是否可以被删除
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueTypeId
+     * @return
+     */
+    boolean deleted(Long organizationId, Long projectId, Long issueTypeId);
 }

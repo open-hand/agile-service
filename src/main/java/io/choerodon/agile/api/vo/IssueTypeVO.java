@@ -1,7 +1,5 @@
 package io.choerodon.agile.api.vo;
 
-import com.google.common.base.MoreObjects;
-
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -41,6 +39,56 @@ public class IssueTypeVO {
     @ApiModelProperty(value = "状态机id")
     @Encrypt
     private Long stateMachineId;
+
+    private Long projectId;
+
+    private Boolean enabled;
+
+    private Boolean referenced;
+
+    private Integer usageCount;
+
+    private String source;
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public Integer getUsageCount() {
+        return usageCount;
+    }
+
+    public void setUsageCount(Integer usageCount) {
+        this.usageCount = usageCount;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public Boolean getReferenced() {
+        return referenced;
+    }
+
+    public void setReferenced(Boolean referenced) {
+        this.referenced = referenced;
+    }
 
     public Long getId() {
         return id;
@@ -132,18 +180,23 @@ public class IssueTypeVO {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", id)
-                .add("name", name)
-                .add("icon", icon)
-                .add("description", description)
-                .add("organizationId", organizationId)
-                .add("colour", colour)
-                .add("typeCode", typeCode)
-                .add("initialize", initialize)
-                .add("objectVersionNumber", objectVersionNumber)
-                .add("stateMachineName", stateMachineName)
-                .add("stateMachineId", stateMachineId)
-                .toString();
+        return "IssueTypeVO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", icon='" + icon + '\'' +
+                ", description='" + description + '\'' +
+                ", organizationId=" + organizationId +
+                ", colour='" + colour + '\'' +
+                ", typeCode='" + typeCode + '\'' +
+                ", initialize=" + initialize +
+                ", objectVersionNumber=" + objectVersionNumber +
+                ", stateMachineName='" + stateMachineName + '\'' +
+                ", stateMachineId=" + stateMachineId +
+                ", projectId=" + projectId +
+                ", enabled=" + enabled +
+                ", referenced=" + referenced +
+                ", usageCount=" + usageCount +
+                ", source='" + source + '\'' +
+                '}';
     }
 }

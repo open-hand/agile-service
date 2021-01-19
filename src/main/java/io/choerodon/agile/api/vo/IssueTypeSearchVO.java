@@ -14,6 +14,26 @@ public class IssueTypeSearchVO {
     @ApiModelProperty(value = "其他参数")
     private String param;
 
+    private Long organizationId;
+
+    private Long projectId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
     public String getName() {
         return name;
     }

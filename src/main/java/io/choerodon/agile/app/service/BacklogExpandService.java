@@ -9,6 +9,7 @@ import org.apache.commons.collections.map.MultiKeyMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -111,4 +112,11 @@ public interface BacklogExpandService {
      * @param organizationId
      */
     void setBacklogDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
+
+    /**
+     * 根据传入项目id判断是否开启了需求池
+     *
+     * @return 开启了需求池的项目id
+     */
+    Set<Long> listProjectIdsWhichEnableBacklog(Set<Long> projectIds);
 }
