@@ -125,4 +125,73 @@
         where type_code = #{typeCode}
     </select>
 
+    <select id="selectByOptions" resultType="io.choerodon.agile.api.vo.IssueTypeVO">
+        select
+        t1.*,
+        t1.is_initialize as initialize
+        from fd_issue_type t1
+        where 1=1
+        <choose>
+            <when test="projectId == 0">
+                and t1.organization_id = #{organizationId}
+                and t1.project_id = #{projectId}
+            </when>
+            <otherwise>
+                and t1.id in (
+                    select t2.id
+                    from fd_issue_type t2
+                    where t2.organization_id = #{organizationId}
+                    and t2.project_id = #{projectId}
+                    and t2.source != 'system'
+                    union
+                    select t3.id
+                    from fd_issue_type t3
+                    where t3.organization_id = #{organizationId}
+                    and t3.project_id = #{projectId}
+                    and t3.source = 'system'
+                    union
+                    select t4.id
+                    from fd_issue_type t4
+                    where t4.organization_id = #{organizationId}
+                    and t4.project_id = 0
+                    and t4.source = 'system'
+                    and t4.type_code not in (
+                        select t5.type_code
+                        from fd_issue_type t5
+                        where t5.organization_id = #{organizationId}
+                        and t5.project_id = #{projectId}
+                        and t5.source = 'system'
+                    )
+                )
+            </otherwise>
+        </choose>
+        <if test="issueTypeSearchVO != null">
+            <if test="issueTypeSearchVO.name != null">
+                and t1.name like concat('%',#{issueTypeSearchVO.name},'%')
+            </if>
+            <if test="issueTypeSearchVO.description != null">
+                and t1.description like concat('%',#{issueTypeSearchVO.description},'%')
+            </if>
+            <if test="issueTypeSearchVO.param != null">
+                and (t1.name like concat('%',#{issueTypeSearchVO.param},'%')
+                or t1.description like concat('%',#{issueTypeSearchVO.param},'%')
+                )
+            </if>
+        </if>
+    </select>
+
+    <select id="selectByReferenceId" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+        select
+        t1.id,
+        t1.reference_id,
+        t1.project_id
+        from fd_issue_type t1
+        where t1.organization_id = #{organizationId}
+        and t1.project_id != 0
+        and t1.reference_id in
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
 </mapper>

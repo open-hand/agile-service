@@ -54,4 +54,23 @@ databaseChangeLog(logicalFilePath: 'fd_issue_type.groovy') {
 //            "delete FROM fd_issue_type where name = '特性'"
 //        }
 //    }
+
+    changeSet(id: '2021-01-15-fd-issue-type-add-column-project', author: 'kaiwen.li@hand-china.com') {
+        addColumn(tableName: 'fd_issue_type') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id', defaultValue: "0") {
+                constraints(nullable: false)
+            }
+            column(name: 'enabled', type: 'TINYINT UNSIGNED', remarks: '启停用', defaultValue: '1') {
+                constraints(nullable: false)
+            }
+            column(name: 'referenced', type: 'TINYINT UNSIGNED', remarks: '是否可以被引用', defaultValue: '0') {
+                constraints(nullable: false)
+            }
+            column(name: 'source', type: 'VARCHAR(64)', remarks: '来源system/organization/project', defaultValue: 'system') {
+                constraints(nullable: false)
+            }
+            column(name: 'reference_id', type: 'BIGINT UNSIGNED', remarks: '引用id')
+        }
+        dropUniqueConstraint(constraintName: 'uk_type_code', tableName: 'fd_issue_type')
+    }
 }

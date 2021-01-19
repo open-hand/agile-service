@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.IssueTypeSearchVO;
+import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.agile.infra.dto.IssueTypeWithInfoDTO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -40,4 +41,25 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      * @return
      */
     List<IssueTypeDTO> selectByTypeCode(@Param("typeCode") String typeCode);
+
+    /**
+     * 根据条件查询issueType
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueTypeSearchVO
+     * @return
+     */
+    List<IssueTypeVO> selectByOptions(@Param("organizationId") Long organizationId,
+                                      @Param("projectId") Long projectId,
+                                      @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO);
+
+    /**
+     * 根据reference_id查询
+     * @param ids
+     * @param organizationId
+     * @return
+     */
+    List<IssueTypeDTO> selectByReferenceId(@Param("ids") Set<Long> ids,
+                                           @Param("organizationId") Long organizationId);
 }
