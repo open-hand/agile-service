@@ -35,8 +35,9 @@ const Comments: React.FC<Props> = ({ onSubmit }) => {
     if (delta && verifyComment(delta)) {
       try {
         await onSubmit(delta);
-      } finally {
         cancel();
+      } catch (error) {
+        //
       }
     } else {
       cancel();

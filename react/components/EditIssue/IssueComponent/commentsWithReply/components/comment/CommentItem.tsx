@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
-import { text2Delta, beforeTextUpload } from '@/utils/richText';
+import { text2Delta, uploadAndReplaceImg } from '@/utils/richText';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
@@ -49,7 +49,7 @@ const CommentItem: React.FC<Props> = ({
   function verifyComment(delta: Delta) {
     let result = false;
     if (delta && delta.length) {
-      delta.forEach((item:any) => {
+      delta.forEach((item: any) => {
         // @ts-ignore
         if (!result && item.insert && (item.insert.image || item.insert.trim())) {
           result = true;
@@ -70,12 +70,19 @@ const CommentItem: React.FC<Props> = ({
   const handleReply = useCallback(async () => {
     if (replyValue && verifyComment(replyValue)) {
       try {
-        beforeTextUpload(replyValue, {
-          issueId: comment.issueId, parentId, replyToUserId: comment.userId, commentText: '',
-        }, newReply, 'commentText');
-      } finally {
+        const commentText = await uploadAndReplaceImg(replyValue);
+        newReply({
+          // @ts-ignore
+          issueId: comment.issueId,
+          parentId,
+          // @ts-ignore
+          replyToUserId: comment.userId,
+          commentText,
+        });
         setReplying(false);
         setReplyValue(undefined);
+      } catch {
+        //
       }
     } else {
       setReplying(false);
@@ -94,17 +101,12 @@ const CommentItem: React.FC<Props> = ({
   }, [onUpdate, projectId]);
 
   const handleUpdate = useCallback(async (delta: Delta) => {
-    const extra: UComment = {
+    const commentText = await uploadAndReplaceImg(value);
+    updateComment({
       commentId: comment.commentId,
       objectVersionNumber: comment.objectVersionNumber,
-      commentText: '',
-    };
-    if (value) {
-      beforeTextUpload(value, extra, updateComment, 'commentText');
-    } else {
-      extra.commentText = '';
-      updateComment(extra);
-    }
+      commentText,
+    });
     setEditing(false);
   }, [comment.commentId, comment.objectVersionNumber, updateComment, value]);
 
@@ -140,7 +142,7 @@ const CommentItem: React.FC<Props> = ({
         <div className="line-justify">
           <div className="c7n-title-commit" style={{ flex: 1 }}>
             <UserHead
-            // @ts-ignore
+              // @ts-ignore
               user={{
                 id: comment.userId,
                 name: comment.userName,
@@ -187,21 +189,21 @@ const CommentItem: React.FC<Props> = ({
           <div className="c7n-action">
             <Icon type="message_notification" onClick={handleClickReply} />
             {
-            hasPermission && (
-              <Icon
-                type="mode_edit mlr-3 pointer"
-                onClick={() => {
-                  if (canEditOrDelete) {
-                    if (replying) {
-                      setReplying(false);
-                      setReplyValue(undefined);
+              hasPermission && (
+                <Icon
+                  type="mode_edit mlr-3 pointer"
+                  onClick={() => {
+                    if (canEditOrDelete) {
+                      if (replying) {
+                        setReplying(false);
+                        setReplyValue(undefined);
+                      }
+                      setEditing(true);
                     }
-                    setEditing(true);
-                  }
-                }}
-              />
-            )
-          }
+                  }}
+                />
+              )
+            }
 
             {
               hasPermission && (
@@ -214,26 +216,26 @@ const CommentItem: React.FC<Props> = ({
           </div>
         </div>
         {
-            editing ? (
-              <div className="c7n-conent-commit" style={{ marginTop: 10 }}>
-                <WYSIWYGEditor
-                  autoFocus
-                  bottomBar
-                  value={value}
-                  onChange={handleChange}
-                  style={{ height: 200, width: '100%' }}
-                  handleDelete={() => {
-                    setEditing(false);
-                  }}
-                  handleSave={handleUpdate}
-                />
-              </div>
-            ) : (
-              <div style={{ marginTop: 10, paddingLeft: 23 }}>
-                <WYSIWYGViewer data={comment.commentText} />
-              </div>
-            )
-          }
+          editing ? (
+            <div className="c7n-conent-commit" style={{ marginTop: 10 }}>
+              <WYSIWYGEditor
+                autoFocus
+                bottomBar
+                value={value}
+                onChange={handleChange}
+                style={{ height: 200, width: '100%' }}
+                handleDelete={() => {
+                  setEditing(false);
+                }}
+                handleSave={handleUpdate}
+              />
+            </div>
+          ) : (
+            <div style={{ marginTop: 10, paddingLeft: 23 }}>
+              <WYSIWYGViewer data={comment.commentText} />
+            </div>
+          )
+        }
       </div>
       {
         replying && (
