@@ -27,6 +27,8 @@ public class ObjectSchemeFieldUpdateVO {
     private List<FieldOptionUpdateVO> fieldOptions;
     @ApiModelProperty(value = "是否自定义字段")
     private Boolean custom;
+    @ApiModelProperty(value = "字段类型")
+    private String fieldType;
 
     public List<FieldOptionUpdateVO> getFieldOptions() {
         return fieldOptions;
@@ -98,5 +100,13 @@ public class ObjectSchemeFieldUpdateVO {
 
     public void setCustom(Boolean custom) {
         this.custom = custom;
+    }
+
+    public String getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(String fieldType) {
+        this.fieldType = fieldType;
     }
 }

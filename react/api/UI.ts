@@ -5,10 +5,10 @@ class UiApi extends Api<UiApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
-  getUIUnLinked() {
+  getUIUnLinked(issueId: string) {
     return this.request({
       method: 'get',
-      url: `${this.prefix}/static_file `,
+      url: `${this.prefix}/static_file/${issueId} `,
     });
   }
 
@@ -40,17 +40,17 @@ class UiApi extends Api<UiApi> {
     });
   }
 
-  deleteLink(fileHeaderId: string) {
-    return this.request({
-      method: 'delete',
-      url: `${this.prefix}/static_file/related/${fileHeaderId}`,
-    });
-  }
-
   deleteUI(fileHeaderId: string) {
     return this.request({
       method: 'delete',
       url: `${this.prefix}/static_file/${fileHeaderId}`,
+    });
+  }
+
+  deleteLink(issueId: string, fileHeaderId: string) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/static_file/related/${issueId}/${fileHeaderId}`,
     });
   }
 }

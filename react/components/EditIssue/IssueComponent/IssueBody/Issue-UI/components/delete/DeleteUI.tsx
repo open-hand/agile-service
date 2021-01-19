@@ -21,25 +21,28 @@ interface Props {
   modal?: IModalProps
 }
 const DeleteUI: React.FC<Props> = ({ ui, store, modal }) => {
-  const [deleteType, setDeleteType] = useState('deleteOnly');
+  const { issue } = store;
+  const [deleteType, setDeleteType] = useState('deleteLinkOnly');
   const handleChange = useCallback((value) => {
     if (value) {
       setDeleteType(value);
     } else {
-      setDeleteType(deleteType === 'deleteWithReply' ? 'deleteOnly' : 'deleteWithReply');
+      setDeleteType(deleteType === 'deleteWithLink' ? 'deleteLinkOnly' : 'deleteWithLink');
     }
   }, [deleteType]);
 
   const handleDelete = useCallback(() => {
-    if (deleteType === 'deleteWithReply') {
-      return uiApi.deleteLink(ui.id).then(() => {
+    if (deleteType === 'deleteWithLink') {
+      return uiApi.deleteUI(ui.id).then(() => {
         store.getLinkedUI();
       });
     }
-    return uiApi.deleteUI(ui.id).then(() => {
+    // @ts-ignore
+    return uiApi.deleteLink(issue.issueId, ui.id).then(() => {
       store.getLinkedUI();
     });
-  }, [deleteType, store, ui.id]);
+    // @ts-ignore
+  }, [deleteType, issue.issueId, store, ui.id]);
 
   useEffect(() => {
     modal?.handleOk(handleDelete);
@@ -55,16 +58,16 @@ const DeleteUI: React.FC<Props> = ({ ui, store, modal }) => {
       <div>
         <CheckBox
           name="delete"
-          value="deleteOnly"
+          value="deleteLinkOnly"
           onChange={handleChange}
-          checked={deleteType === 'deleteOnly'}
+          checked={deleteType === 'deleteLinkOnly'}
           style={{
             marginRight: 10,
           }}
         >
           仅删除关联关系
         </CheckBox>
-        <CheckBox name="delete" value="deleteWithReply" onChange={handleChange} checked={deleteType === 'deleteWithReply'}>文件与关联关系一并删除</CheckBox>
+        <CheckBox name="delete" value="deleteWithLink" onChange={handleChange} checked={deleteType === 'deleteWithLink'}>文件与关联关系一并删除</CheckBox>
       </div>
     </div>
   );
