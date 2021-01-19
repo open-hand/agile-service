@@ -55,7 +55,7 @@ databaseChangeLog(logicalFilePath: 'fd_issue_type.groovy') {
 //        }
 //    }
 
-    changeSet(id: '2021-01-15-add-column-project', author: 'kaiwen.li@hand-china.com') {
+    changeSet(id: '2021-01-15-fd-issue-type-add-column-project', author: 'kaiwen.li@hand-china.com') {
         addColumn(tableName: 'fd_issue_type') {
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id', defaultValue: "0") {
                 constraints(nullable: false)
