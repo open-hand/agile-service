@@ -32,10 +32,12 @@ const Link: React.FC<Props> = ({ modal, store }) => {
   }), []);
 
   useEffect(() => {
-    uiApi.getUIUnLinked().then((res: IUi[]) => {
+    // @ts-ignore
+    uiApi.getUIUnLinked(issue.issueId).then((res: IUi[]) => {
       optionDataSet.loadData(res);
     });
-  }, [optionDataSet]);
+    // @ts-ignore
+  }, [issue.issueId, optionDataSet]);
 
   const linkedDataSet = useMemo(() => new DataSet({
     autoCreate: true,
