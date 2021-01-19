@@ -6,6 +6,7 @@ import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;
@@ -330,7 +331,7 @@ public class SendMsgUtil {
     }
 
     @Async
-    public void sendMsgByIssueComment(Long projectId, IssueDTO issueDTO, IssueCommentVO issueCommentVO) {
+    public void sendMsgByIssueComment(Long projectId, IssueDetailDTO issueDTO, IssueCommentVO issueCommentVO) {
         IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
         Map<Long, String> actionMap = new HashMap<>(3);
         String url;
@@ -346,7 +347,7 @@ public class SendMsgUtil {
         }
         //设置动作与发送人
         setIssueCommentMessageActionAndUser(actionMap, issueCommentVO.getUserId(), issueVO);
-        String summary = issueVO.getIssueNum() + "-" + issueVO.getSummary();
+        String summary = String.join("-", issueVO.getIssueNum(), issueVO.getSummary());
         String comment = Optional.ofNullable(issueCommentVO.getCommentText()).map(SendMsgUtil::getText).orElse("无");
 
         if (CollectionUtils.isNotEmpty(actionMap.keySet())) {
@@ -372,7 +373,7 @@ public class SendMsgUtil {
     }
 
     @Async
-    public void sendMsgByIssueCommentReply(Long projectId, IssueDTO issueDTO, IssueCommentVO issueCommentVO) {
+    public void sendMsgByIssueCommentReply(Long projectId, IssueDetailDTO issueDTO, IssueCommentVO issueCommentVO) {
         Map<Long, String> actionMap = new HashMap<>(1);
         actionMap.put(issueCommentVO.getReplyToUserId(), "评论的");
         IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
@@ -388,7 +389,7 @@ public class SendMsgUtil {
             url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId());
         }
 
-        String summary = issueVO.getIssueNum() + "-" + issueVO.getSummary();
+        String summary = String.join("-", issueVO.getIssueNum(), issueVO.getSummary());
         String comment = Optional.ofNullable(issueCommentVO.getCommentText()).map(SendMsgUtil::getText).orElse("无");
         siteMsgUtil.sendIssueComment(actionMap, projectVO, summary, url, comment, issueCommentVO, issueType);
     }
