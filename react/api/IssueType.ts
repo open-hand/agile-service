@@ -28,7 +28,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       url: `${this.prefix}/issue_type/list`,
       params: {
         ...params,
-        organization: getOrganizationId(),
+        organizationId: getOrganizationId(),
       },
       data,
     });
@@ -39,7 +39,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       method: 'post',
       url: `${this.prefix}/issue_type`,
       params: {
-        organization: getOrganizationId(),
+        organizationId: getOrganizationId(),
       },
       data,
     });
@@ -50,7 +50,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       method: 'get',
       url: `${this.prefix}/issue_type/${typeId}`,
       params: {
-        organization: getOrganizationId(),
+        organizationId: getOrganizationId(),
       },
     });
   }
@@ -60,7 +60,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       method: 'put',
       url: `${this.prefix}/issue_type/${typeId}`,
       params: {
-        organization: getOrganizationId(),
+        organizationId: getOrganizationId(),
       },
       data,
     });
@@ -72,7 +72,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       url: `${this.prefix}/issue_type/check_name`,
       params: {
         name,
-        organization: getOrganizationId(),
+        organizationId: getOrganizationId(),
         id: typeId,
       },
     });
@@ -83,7 +83,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       method: 'get',
       url: `${this.prefix}/issue_type/${typeId}/deleted`,
       params: {
-        organization: getOrganizationId(),
+        organizationId: getOrganizationId(),
       },
     });
   }
@@ -93,7 +93,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       method: 'delete',
       url: `${this.prefix}/issue_type/${typeId}`,
       params: {
-        organization: getOrganizationId(),
+        organizationId: getOrganizationId(),
       },
     });
   }
@@ -146,7 +146,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       method: 'get',
       url: `${this.OrgPrefix}/issue_type/${typeId}/deleted`,
       params: {
-        organization: getOrganizationId(),
+        organizationId: getOrganizationId(),
       },
     });
   }
@@ -156,7 +156,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       method: 'delete',
       url: `${this.OrgPrefix}/issue_type/${typeId}`,
       params: {
-        organization: getOrganizationId(),
+        organizationId: getOrganizationId(),
       },
     });
   }
