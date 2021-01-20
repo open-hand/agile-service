@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_issue_type_extend.groovy') {
     changeSet(id: '2021-01-20-fd-issue-type-extend', author: 'kaiwen.li@hand-china.com') {
-        createTable(tableName: 'fd_issue_type_extend') {
+        createTable(tableName: 'fd_issue_type_extend', remarks: '问题类型扩展表，记录问题类型启停用') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: 'true')
             }
@@ -10,6 +10,9 @@ databaseChangeLog(logicalFilePath: 'fd_issue_type_extend.groovy') {
                 constraints(nullable: false)
             }
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
+                constraints(nullable: false)
+            }
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
             column(name: 'enabled', type: 'TINYINT UNSIGNED', remarks: '启停用') {

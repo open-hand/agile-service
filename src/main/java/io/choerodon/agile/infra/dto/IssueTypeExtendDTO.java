@@ -25,7 +25,17 @@ public class IssueTypeExtendDTO extends AuditDomain {
 
     private Long projectId;
 
+    private Long organizationId;
+
     private Boolean enabled;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Long getId() {
         return id;

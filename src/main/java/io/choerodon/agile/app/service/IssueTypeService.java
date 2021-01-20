@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.ProjectIssueTypeVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -14,7 +15,6 @@ import java.util.Map;
  * @Date 2018/8/8
  */
 public interface IssueTypeService {
-
 
     IssueTypeVO queryById(Long organizationId, Long issueTypeId);
 
@@ -83,4 +83,24 @@ public interface IssueTypeService {
      * @param enabled
      */
     void updateEnabled(Long organizationId, Long projectId, Long issueTypeId, Boolean enabled);
+
+    /**
+     * 组织问题类型更新是否可以被引用
+     *
+     * @param organizationId
+     * @param issueTypeId
+     * @param referenced
+     */
+    void updateReferenced(Long organizationId, Long issueTypeId, Boolean referenced);
+
+    /**
+     * 组织问题类型查询使用详情
+     *
+     * @param organizationId
+     * @param issueTypeId
+     * @param pageRequest
+     * @return
+     */
+    Page<ProjectIssueTypeVO> usageDetail(Long organizationId, Long issueTypeId,
+                                         PageRequest pageRequest);
 }
