@@ -1,8 +1,8 @@
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { withRouter } from 'react-router-dom';
 import {
-  Table, Dropdown, Icon, Menu, Modal, Button,
+  Table, Dropdown, Icon, Menu, Modal, Button, DataSet,
 } from 'choerodon-ui/pro';
 import {
   Content, Page, Breadcrumb, Choerodon, Header,
@@ -14,6 +14,9 @@ import { issueTypeApi } from '@/api';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { getIsOrganization } from '@/utils/common';
+import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import to from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 import TypeTag from '../../../components/TypeTag/TypeTag';
 import AddIssueType from './AddIssueType';
 import Store from '../stores';
@@ -30,6 +33,19 @@ function IssueTypeList() {
   const context = useContext(Store);
   const { issueTypeDataSet } = context;
   const isOrganization = getIsOrganization();
+  const addRef = useRef<{addDataSet: DataSet, submit:(fn?: Function) => Promise<boolean>}>();
+
+  const handleLinkToPage = useCallback(() => {
+    addRef.current?.submit(() => {
+      to(LINK_URL.pageConfig, { type: isOrganization ? 'org' : 'project' });
+    });
+  }, [isOrganization]);
+
+  const handleLinkToStatus = useCallback(() => {
+    addRef.current?.submit(() => {
+      to(LINK_URL.status, { type: isOrganization ? 'org' : 'project' });
+    });
+  }, [isOrganization]);
 
   const handleEdit = useCallback(({ record, dataSet }) => {
     Modal.open({
@@ -41,9 +57,22 @@ function IssueTypeList() {
       key: Modal.key(),
       title: '编辑问题类型',
       // @ts-ignore
-      children: <AddIssueType typeId={record?.get('id')} typeTableDataSet={dataSet} />,
+      children: <AddIssueType typeId={record?.get('id')} typeTableDataSet={dataSet} addRef={addRef} />,
+      okText: '保存',
+      footer: (okBtn: Button, cancelBtn: Button) => (
+        <div>
+          {okBtn}
+          <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage}>跳转配置页面</Button>
+          {
+            !isOrganization && (
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToStatus}>跳转状态机</Button>
+            )
+          }
+          {cancelBtn}
+        </div>
+      ),
     });
-  }, []);
+  }, [handleLinkToPage, handleLinkToStatus, isOrganization]);
   /**
    * render Name
    * @param {*} param0
@@ -70,11 +99,17 @@ function IssueTypeList() {
 
   const renderAction = useCallback(({ dataSet, record }: RenderProps) => {
     const handleDelete = () => {
-      issueTypeApi[isOrganization ? 'orgDelete' : 'delete'](record?.get('id')).then(() => {
-        Choerodon.prompt('删除成功');
-        dataSet?.query(dataSet?.toData().length === 1 ? dataSet?.currentPage - 1 : dataSet?.currentPage);
-      }).catch(() => {
-        Choerodon.prompt('删除失败');
+      issueTypeApi[isOrganization ? 'orgGetDeleteDisable' : 'getDeleteDisable'](record?.get('id')).then((disable: boolean) => {
+        if (disable) {
+          Choerodon.prompt(`至少启用一个${record?.get('typeCode') === 'sub_task' ? '子级' : '父级'}问题类型`);
+        } else {
+          issueTypeApi[isOrganization ? 'orgDelete' : 'delete'](record?.get('id')).then(() => {
+            Choerodon.prompt('删除成功');
+            dataSet?.query(dataSet?.toData().length === 1 ? dataSet?.currentPage - 1 : dataSet?.currentPage);
+          }).catch(() => {
+            Choerodon.prompt('删除失败');
+          });
+        }
       });
     };
 
@@ -118,6 +153,7 @@ function IssueTypeList() {
       switch (e.key) {
         case 'delete': {
           Modal.open({
+            className: styles.delete_modal,
             style: {
               width: 416,
             },
@@ -154,7 +190,7 @@ function IssueTypeList() {
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this)}>
         {
-          record?.get('scource') !== 'system' && ( // 添加后端返回的是否可删除
+          record?.get('deleted') && (
             <Menu.Item key="delete">删除</Menu.Item>
           )
         }
@@ -189,6 +225,7 @@ function IssueTypeList() {
           type="more_vert"
           style={{
             fontSize: 18,
+            cursor: 'pointer',
           }}
         />
       </Dropdown>
@@ -197,7 +234,7 @@ function IssueTypeList() {
 
   const renderUsage = useCallback(({ record }: RenderProps) => (
     <div className={styles.usage} role="none" onClick={() => openUsage({ record })}>
-      8个关联项目
+      {record?.get('usageCount') ? `${record?.get('usageCount')}个关联项目` : '无'}
     </div>
   ), []);
 
@@ -236,7 +273,20 @@ function IssueTypeList() {
       key: Modal.key(),
       title: '添加问题类型',
       // @ts-ignore
-      children: <AddIssueType typeTableDataSet={issueTypeDataSet} />,
+      children: <AddIssueType typeTableDataSet={issueTypeDataSet} addRef={addRef} />,
+      okText: '保存',
+      footer: (okBtn: Button, cancelBtn: Button) => (
+        <div>
+          {okBtn}
+          <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage}>保存并配置页面</Button>
+          {
+            !isOrganization && (
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToStatus}>保存并配置状态机</Button>
+            )
+          }
+          {cancelBtn}
+        </div>
+      ),
     });
   };
 
