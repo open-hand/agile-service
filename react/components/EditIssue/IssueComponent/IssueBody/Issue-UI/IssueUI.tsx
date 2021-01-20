@@ -18,8 +18,8 @@ const IssueUI = (props: any) => {
   }, [store]);
 
   const handleLinkUI = useCallback(() => {
-    openLinkUI({ store });
-  }, [store]);
+    openLinkUI({ store, reloadIssue: props.reloadIssue });
+  }, [props.reloadIssue, store]);
 
   const { linkedUI } = store;
   return (
@@ -38,7 +38,7 @@ const IssueUI = (props: any) => {
       </div>
       {
         linkedUI.map((ui: IUi) => (
-          <LinkedItem ui={ui} />
+          <LinkedItem ui={ui} reloadIssue={props.reloadIssue} />
         ))
       }
     </div>

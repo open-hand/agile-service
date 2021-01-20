@@ -7,11 +7,11 @@ import {
 import {
   Content, Page, Breadcrumb, Choerodon, Header,
 } from '@choerodon/boot';
+import { C7NIcon } from '@choerodon/master';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { IIssueType } from '@/common/types';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { issueTypeApi } from '@/api';
-import { getIsOrganization } from '@/utils/common';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
@@ -29,8 +29,7 @@ const { Column } = Table;
  */
 function IssueTypeList() {
   const context = useContext(Store);
-  const { issueTypeDataSet } = context;
-  const isOrganization = getIsOrganization();
+  const { issueTypeDataSet, isOrganization } = context;
   const addRef = useRef<{addDataSet: DataSet, submit:(fn?: Function) => Promise<boolean>}>();
 
   const handleLinkToPage = useCallback(() => {
@@ -55,7 +54,7 @@ function IssueTypeList() {
       key: Modal.key(),
       title: '编辑问题类型',
       // @ts-ignore
-      children: <AddIssueType typeId={record?.get('id')} typeTableDataSet={dataSet} addRef={addRef} />,
+      children: <AddIssueType typeId={record?.get('id')} typeTableDataSet={dataSet} addRef={addRef} isOrganization={isOrganization} />,
       okText: '保存',
       footer: (okBtn: Button, cancelBtn: Button) => (
         <div>
@@ -271,7 +270,7 @@ function IssueTypeList() {
       key: Modal.key(),
       title: '引用问题类型',
       // @ts-ignore
-      children: <AddIssueType typeTableDataSet={issueTypeDataSet} addRef={addRef} />,
+      children: <AddIssueType typeTableDataSet={issueTypeDataSet} addRef={addRef} isOrganization={isOrganization} />,
       okText: '保存',
       footer: (okBtn: Button, cancelBtn: Button) => (
         <div>
@@ -299,14 +298,17 @@ function IssueTypeList() {
         <Button icon="playlist_add" onClick={handleAdd}>添加问题类型</Button>
         {
           !isOrganization && (
-          <Button icon="playlist_add" onClick={openLink}>关联问题类型</Button>
+          <Button onClick={openLink} className={styles.linkBtn}>
+            <C7NIcon type="Quote" />
+            关联问题类型
+          </Button>
           )
         }
       </Header>
       <Breadcrumb />
       <Content style={{ paddingTop: '0' }}>
         <Table dataSet={issueTypeDataSet} className={styles.issueTypeTable}>
-          <Column name="name" renderer={renderName} />
+          <Column name="name" width={150} renderer={renderName} />
           <Column name="action" width={50} renderer={renderAction} />
           <Column name="description" />
           {

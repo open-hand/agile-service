@@ -100,6 +100,10 @@ const Usage: React.FC<Props> = ({ modal, record }) => {
                       imageUrl: 'https://minio.choerodon.com.cn/hzero-iam/7/9f3345bdadb34d77b4055840b417b67f@file_fa123f7e8bd34dd4992b5407c277a1df_apple-touch-icon-144.png',
                       name: 'Choerodon持续交付与测试',
                     }}
+                    size={30}
+                    textStyle={{
+                      color: 'rgba(0, 0, 0, 0.85)',
+                    }}
                   />
                   <div className={`${styles.status} ${styles[`status_${!!(item.enabled)}`]}`}>
                     {
