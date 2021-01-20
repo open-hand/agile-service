@@ -78,6 +78,24 @@ function IssueTypeList() {
       });
     };
 
+    const handleReferenced = () => {
+      issueTypeApi.referenced(record?.get('id')).then(() => {
+        Choerodon.prompt('启用成功');
+        dataSet?.query(dataSet?.currentPage);
+      }).catch(() => {
+        Choerodon.prompt('启用失败');
+      });
+    };
+
+    const handleDontReferenced = () => {
+      issueTypeApi.dontReferenced(record?.get('id')).then(() => {
+        Choerodon.prompt('启用成功');
+        dataSet?.query(dataSet?.currentPage);
+      }).catch(() => {
+        Choerodon.prompt('启用失败');
+      });
+    };
+
     const handleStart = () => {
       issueTypeApi.start(record?.get('id')).then(() => {
         Choerodon.prompt('启用成功');
@@ -96,7 +114,7 @@ function IssueTypeList() {
       });
     };
 
-    const handleMenuClick = (e: { key: 'delete' | 'start' | 'stop' }) => {
+    const handleMenuClick = (e: { key: 'delete' | 'start' | 'stop' | 'referenced' | 'dontReferenced'}) => {
       switch (e.key) {
         case 'delete': {
           Modal.open({
@@ -118,6 +136,14 @@ function IssueTypeList() {
           handleStop();
           break;
         }
+        case 'referenced': {
+          handleReferenced();
+          break;
+        }
+        case 'dontReferenced': {
+          handleDontReferenced();
+          break;
+        }
         default: {
           break;
         }
@@ -127,20 +153,34 @@ function IssueTypeList() {
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this)}>
-        <Menu.Item key="delete">删除</Menu.Item>
         {
-          record?.get('enabled') && (
+          record?.get('scource') !== 'system' && ( // 添加后端返回的是否可删除
+            <Menu.Item key="delete">删除</Menu.Item>
+          )
+        }
+        {
+          isOrganization && record?.get('referenced') && (
+            <Menu.Item key="referenced">不允许引用</Menu.Item>
+          )
+        }
+        {
+          isOrganization && !record?.get('referenced') && (
+            <Menu.Item key="dontReferenced">允许引用</Menu.Item>
+          )
+        }
+        {
+          !isOrganization && record?.get('enabled') && (
             <Menu.Item key="stop">停用</Menu.Item>
           )
         }
         {
-          !record?.get('enabled') && (
+          !isOrganization && !record?.get('enabled') && (
             <Menu.Item key="start">启用</Menu.Item>
           )
         }
       </Menu>
     );
-    return (
+    return isOrganization && record?.get('source') === 'system' ? null : (
       <Dropdown
         overlay={menu}
         trigger={['click'] as Action[]}
@@ -164,7 +204,7 @@ function IssueTypeList() {
   const renderSource = useCallback(({ record }: RenderProps) => {
     const sourceMap = new Map([
       ['system', '系统'],
-      ['org', '组织'],
+      ['organization', '组织'],
       ['project', '项目'],
     ]);
     return sourceMap.get(record?.get('source'));
@@ -174,6 +214,14 @@ function IssueTypeList() {
     <div className={`${styles.status} ${styles[`status_${value}`]}`}>
       {
         value ? '启用' : '停用'
+      }
+    </div>
+  ), []);
+
+  const renderReferenced = useCallback(({ value }) => (
+    <div>
+      {
+        value ? '是' : '否'
       }
     </div>
   ), []);
@@ -188,7 +236,7 @@ function IssueTypeList() {
       key: Modal.key(),
       title: '添加问题类型',
       // @ts-ignore
-      children: <AddIssueType />,
+      children: <AddIssueType typeTableDataSet={issueTypeDataSet} />,
     });
   };
 
@@ -208,12 +256,25 @@ function IssueTypeList() {
           <Column name="name" renderer={renderName} />
           <Column name="action" width={50} renderer={renderAction} />
           <Column name="description" />
-          <Column name="usage" renderer={renderUsage} />
+          {
+            isOrganization && (
+              <Column name="usage" renderer={renderUsage} />
+            )
+          }
           <Column
             name="source"
             renderer={renderSource}
           />
-          <Column name="enabled" renderer={renderStatus} />
+          {
+            isOrganization && (
+              <Column name="referenced" renderer={renderReferenced} />
+            )
+          }
+          {
+            !isOrganization && (
+              <Column name="enabled" renderer={renderStatus} />
+            )
+          }
         </Table>
       </Content>
     </Page>
