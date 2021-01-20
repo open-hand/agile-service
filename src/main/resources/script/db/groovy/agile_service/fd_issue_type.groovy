@@ -60,10 +60,7 @@ databaseChangeLog(logicalFilePath: 'fd_issue_type.groovy') {
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id', defaultValue: "0") {
                 constraints(nullable: false)
             }
-            column(name: 'enabled', type: 'TINYINT UNSIGNED', remarks: '启停用', defaultValue: '1') {
-                constraints(nullable: false)
-            }
-            column(name: 'referenced', type: 'TINYINT UNSIGNED', remarks: '是否可以被引用', defaultValue: '0') {
+            column(name: 'referenced', type: 'TINYINT UNSIGNED', remarks: '是否可以被引用', defaultValue: '1') {
                 constraints(nullable: false)
             }
             column(name: 'source', type: 'VARCHAR(64)', remarks: '来源system/organization/project', defaultValue: 'system') {

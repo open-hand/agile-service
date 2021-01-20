@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
 import io.choerodon.agile.infra.dto.IssueTypeSchemeConfigDTO;
 import io.choerodon.agile.infra.dto.ProjectConfigDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
@@ -59,6 +60,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private IssueMapper issueMapper;
     @Autowired
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
+    @Autowired
+    private IssueTypeExtendMapper issueTypeExtendMapper;
 
     private static final String ORGANIZATION ="organization";
 
@@ -101,16 +104,31 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         issueTypeVO.setInitialize(false);
         issueTypeVO.setReferenced(ZERO.equals(projectId));
-        issueTypeVO.setEnabled(true);
         String source = ZERO.equals(projectId) ? ORGANIZATION : PROJECT;
         issueTypeVO.setSource(source);
         IssueTypeDTO issueType = modelMapper.map(issueTypeVO, IssueTypeDTO.class);
         IssueTypeVO result = modelMapper.map(createIssueType(issueType), IssueTypeVO.class);
         if (!ZERO.equals(projectId)) {
+            updateEnabled(result.getId(), projectId, true);
             //项目层创建问题类型,初始化默认状态机
             initDefaultStateMachine(organizationId, projectId, result, categoryCodes);
         }
         return result;
+    }
+
+    private void updateEnabled(Long issueTypeId, Long projectId, boolean enabled) {
+        IssueTypeExtendDTO dto = new IssueTypeExtendDTO();
+        dto.setProjectId(projectId);
+        dto.setIssueTypeId(issueTypeId);
+        List<IssueTypeExtendDTO> list = issueTypeExtendMapper.select(dto);
+        if (list.isEmpty()) {
+            dto.setEnabled(enabled);
+            issueTypeExtendMapper.insert(dto);
+        } else {
+            dto = list.get(0);
+            dto.setEnabled(enabled);
+            issueTypeExtendMapper.updateByPrimaryKey(dto);
+        }
     }
 
     private Set<String> validateTypeCode(String typeCode, Long projectId) {
@@ -261,6 +279,12 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             throw new CommonException("error.issue.type.not.deleted");
         }
         issueTypeMapper.delete(dto);
+        if (!ZERO.equals(projectId)) {
+            IssueTypeExtendDTO extend = new IssueTypeExtendDTO();
+            extend.setProjectId(projectId);
+            extend.setIssueTypeId(issueTypeId);
+            issueTypeExtendMapper.delete(extend);
+        }
         //todo 删除关联数据
     }
 
@@ -478,7 +502,18 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 continue;
             }
             //创建默认问题类型
-            createIssueType(new IssueTypeDTO(initIssueType.getIcon(), initIssueType.getName(), initIssueType.getDescription(), organizationId, initIssueType.getColour(), initIssueType.getTypeCode(), true));
+            IssueTypeDTO dto = new IssueTypeDTO();
+            dto.setIcon(initIssueType.getIcon());
+            dto.setName(initIssueType.getName());
+            dto.setDescription(initIssueType.getDescription());
+            dto.setColour(initIssueType.getColour());
+            dto.setOrganizationId(organizationId);
+            dto.setTypeCode(initIssueType.getTypeCode());
+            dto.setInitialize(true);
+            dto.setProjectId(ZERO);
+            dto.setReferenced(true);
+            dto.setSource("system");
+            createIssueType(dto);
         }
     }
 
@@ -533,7 +568,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             throw new CommonException("error.issue.type.not.found");
         }
         List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, null);
-        //子任务至少要有一个，故事和任务只要要有一个
+        //子任务至少要有一个，故事和任务至少要有一个
         Map<String, Integer> typeCodeCountMap = new HashMap<>();
         issueTypes.forEach(x -> {
             if (Boolean.TRUE.equals(x.getEnabled())) {
@@ -559,7 +594,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public void updateEnabled(Long organizationId, Long projectId, Long issueTypeId, Boolean enabled) {
+    public void updateEnabled(Long organizationId,
+                              Long projectId,
+                              Long issueTypeId,
+                              Boolean enabled) {
         //只有项目层问题类型可以被启停用
         if (ZERO.equals(projectId)) {
             return;
@@ -568,32 +606,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 && !canDisable(organizationId, projectId, issueTypeId)) {
             throw new CommonException("error.issue.type.can.not.disable");
         }
-        Long id = createIfSystemIssueType(organizationId, projectId, issueTypeId);
-        IssueTypeDTO dto = issueTypeMapper.selectByPrimaryKey(id);
-        dto.setEnabled(enabled);
-        issueTypeMapper.updateByPrimaryKey(dto);
-    }
-
-    private Long createIfSystemIssueType(Long organizationId, Long projectId, Long issueTypeId) {
-        IssueTypeDTO dto = new IssueTypeDTO();
-        dto.setProjectId(projectId);
-        dto.setOrganizationId(organizationId);
-        dto.setId(issueTypeId);
-        IssueTypeDTO issueType = issueTypeMapper.selectOne(dto);
-        if (issueType == null) {
-            dto.setProjectId(ZERO);
-            issueType = issueTypeMapper.selectOne(dto);
-            if (issueType == null) {
-                throw new CommonException("error.issue.type.not.found");
-            }
-            issueType.setId(null);
-            issueType.setProjectId(projectId);
-            issueTypeMapper.insert(issueType);
-            Set<String> categoryCodes = validateTypeCode(issueType.getTypeCode(), projectId);
-            IssueTypeVO vo = modelMapper.map(issueType, IssueTypeVO.class);
-            initDefaultStateMachine(organizationId, projectId, vo, categoryCodes);
-        }
-        return issueType.getId();
+        updateEnabled(issueTypeId, projectId, enabled);
     }
 
     @Override
