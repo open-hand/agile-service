@@ -3,7 +3,6 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.IssueTypeSchemeConfigDTO;
 import io.choerodon.agile.infra.dto.ProjectConfigDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeType;
@@ -67,11 +66,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private static final List<String> AGILE_ISSUE_TYPES =
             Arrays.asList(
-                    IssueTypeCode.BUG.value(),
+//                    IssueTypeCode.BUG.value(),
+//                    IssueTypeCode.ISSUE_EPIC.value(),
                     IssueTypeCode.STORY.value(),
                     IssueTypeCode.SUB_TASK.value(),
-                    IssueTypeCode.TASK.value(),
-                    IssueTypeCode.ISSUE_EPIC.value()
+                    IssueTypeCode.TASK.value()
                     );
 
     private static final List<String> PROGRAM_ISSUE_TYPES =
@@ -127,22 +126,25 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         Set<String> codes = ProjectCategoryUtil.getCategoryCodeAndValidate(project.getCategories());
         List<String> issueTypes = new ArrayList<>(AGILE_ISSUE_TYPES);
-        issueTypes.add(IssueTypeCode.BACKLOG.value());
+//        issueTypes.add(IssueTypeCode.BACKLOG.value());
         if (codes.contains(ProjectCategory.MODULE_AGILE)
                 && !issueTypes.contains(typeCode)) {
             throw new CommonException("error.illegal.type.code");
         }
-        issueTypes.clear();
-        issueTypes.addAll(PROGRAM_ISSUE_TYPES);
-        issueTypes.add(IssueTypeCode.BACKLOG.value());
-        if (codes.contains(ProjectCategory.MODULE_PROGRAM)
-                && !issueTypes.contains(typeCode)) {
-            throw new CommonException("error.illegal.type.code");
+        if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
+            throw new CommonException("error.program.can.not.create.custom.issue.type");
         }
-        if (!codes.contains(ProjectCategory.MODULE_BACKLOG)
-                && IssueTypeCode.BACKLOG.value().equals(typeCode)) {
-            throw new CommonException("error.project.backlog.not.open");
-        }
+//        issueTypes.clear();
+//        issueTypes.addAll(PROGRAM_ISSUE_TYPES);
+//        issueTypes.add(IssueTypeCode.BACKLOG.value());
+//        if (codes.contains(ProjectCategory.MODULE_PROGRAM)
+//                && !issueTypes.contains(typeCode)) {
+//            throw new CommonException("error.illegal.type.code");
+//        }
+//        if (!codes.contains(ProjectCategory.MODULE_BACKLOG)
+//                && IssueTypeCode.BACKLOG.value().equals(typeCode)) {
+//            throw new CommonException("error.project.backlog.not.open");
+//        }
         return codes;
     }
 
@@ -195,25 +197,19 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                 Long projectId,
                                 String name,
                                 Long issueTypeId) {
-        IssueTypeDTO example = new IssueTypeDTO();
-        example.setOrganizationId(organizationId);
-        example.setName(name);
-        example.setProjectId(projectId);
-        List<IssueTypeDTO> list = issueTypeMapper.select(example);
+        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, null);
+        Map<String, Long> nameMap =
+                issueTypes.stream().collect(Collectors.toMap(IssueTypeVO::getName, IssueTypeVO::getId));
+        Long id = nameMap.get(name);
         if (issueTypeId == null) {
             //新增
-            return !list.isEmpty();
+            return (id != null);
         } else {
             //编辑
-            if (list.isEmpty()) {
+            if (id == null) {
                 return false;
             } else {
-                IssueTypeDTO dto = list.get(0);
-                if (issueTypeId.equals(dto.getId())) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return !id.equals(issueTypeId);
             }
         }
     }
@@ -248,31 +244,22 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public Map<String, Object> checkDelete(Long organizationId, Long issueTypeId) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("canDelete", true);
-        IssueTypeDTO issueType = issueTypeMapper.selectByPrimaryKey(issueTypeId);
-        if (issueType == null) {
-            throw new CommonException("error.base.notFound");
-        } else if (!issueType.getOrganizationId().equals(organizationId)) {
-            throw new CommonException("error.issueType.illegal");
-        }
-        //判断要删除的issueType是否有使用中的issue【toDo】
-
-        return result;
-    }
-
-    @Override
     public void delete(Long organizationId,
-                          Long projectId,
-                          Long issueTypeId) {
-        if (!deleted(organizationId, projectId, issueTypeId)) {
+                       Long projectId,
+                       Long issueTypeId) {
+        IssueTypeDTO dto = new IssueTypeDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setId(issueTypeId);
+        IssueTypeDTO result = issueTypeMapper.selectOne(dto);
+        if (result == null) {
+            return;
+        }
+        IssueTypeVO vo = modelMapper.map(result, IssueTypeVO.class);
+        setDeleted(Arrays.asList(vo), organizationId, projectId);
+        if (Boolean.FALSE.equals(vo.getDeleted())) {
             throw new CommonException("error.issue.type.not.deleted");
         }
-        IssueTypeDTO dto = new IssueTypeDTO();
-        dto.setOrganizationId(organizationId);
-        dto.setProjectId(projectId);
-        dto.setId(issueTypeId);
         issueTypeMapper.delete(dto);
         //todo 删除关联数据
     }
@@ -290,7 +277,66 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             //组织层统计使用情况
             statisticsUsage(result.getContent(), organizationId);
         }
+        setDeleted(result.getContent(), organizationId, projectId);
         return result;
+    }
+
+    private void setDeleted(List<IssueTypeVO> result, Long organizationId, Long projectId) {
+        if (ObjectUtils.isEmpty(result)) {
+            return;
+        }
+        if (ZERO.equals(projectId)) {
+            setOrganizationLevelDeleted(result, organizationId);
+        } else {
+            setProjectLevelDeleted(result, projectId);
+        }
+    }
+
+    private void setProjectLevelDeleted(List<IssueTypeVO> result,
+                                        Long projectId) {
+        Set<Long> issueTypeIds = setSystemIssueTypeDeletedFalse(result);
+        if (!issueTypeIds.isEmpty()) {
+            Map<Long, Integer> countMap =
+                    issueMapper.selectCountGroupByIssueTypeId(projectId, issueTypeIds)
+                            .stream()
+                            .collect(Collectors.toMap(IssueTypeCountVO::getIssueTypeId, IssueTypeCountVO::getCount));
+            result.forEach(x -> {
+                if (Boolean.FALSE.equals(x.getInitialize())) {
+                    Integer count = countMap.get(x.getId());
+                    boolean deleted = (count == null || count == 0);
+                    x.setDeleted(deleted);
+                }
+            });
+        }
+    }
+
+    private void setOrganizationLevelDeleted(List<IssueTypeVO> result,
+                                             Long organizationId) {
+        Set<Long> issueTypeIds = setSystemIssueTypeDeletedFalse(result);
+        //组织层如果被引用，不能删除
+        if (!issueTypeIds.isEmpty()) {
+            Map<Long, List<IssueTypeDTO>> map =
+                    issueTypeMapper.selectByReferenceId(issueTypeIds, organizationId).stream()
+                            .collect(Collectors.groupingBy(IssueTypeDTO::getReferenceId));
+            result.forEach(x -> {
+                if (Boolean.FALSE.equals(x.getInitialize())) {
+                    boolean deleted = ObjectUtils.isEmpty(map.get(x.getId()));
+                    x.setDeleted(deleted);
+                }
+            });
+        }
+    }
+
+    private Set<Long> setSystemIssueTypeDeletedFalse(List<IssueTypeVO> result) {
+        Set<Long> issueTypeIds = new HashSet<>();
+        result.forEach(x -> {
+            if (Boolean.TRUE.equals(x.getInitialize())) {
+                x.setDeleted(false);
+            } else {
+                issueTypeIds.add(x.getId());
+            }
+        });
+        return issueTypeIds;
     }
 
     private void statisticsUsage(List<IssueTypeVO> result, Long organizationId) {
@@ -465,6 +511,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         dto.setOrganizationId(organizationId);
         dto.setProjectId(projectId);
         IssueTypeDTO result = issueTypeMapper.selectOne(dto);
+        if (!ZERO.equals(projectId) && result == null) {
+            //查组织层
+            dto.setProjectId(ZERO);
+            result = issueTypeMapper.selectOne(dto);
+        }
         if (result != null) {
             return modelMapper.map(result, IssueTypeVO.class);
         } else {
@@ -473,30 +524,76 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public boolean deleted(Long organizationId, Long projectId, Long issueTypeId) {
+    public Boolean canDisable(Long organizationId, Long projectId, Long issueTypeId) {
+        if (ZERO.equals(projectId)) {
+            return false;
+        }
         IssueTypeDTO dto = issueTypeMapper.selectByPrimaryKey(issueTypeId);
         if (dto == null) {
-            throw new CommonException("error.issue.type.not.existed");
+            throw new CommonException("error.issue.type.not.found");
         }
-        if (!dto.getProjectId().equals(projectId)
-                || !dto.getOrganizationId().equals(organizationId)) {
-            return false;
-        }
-        if (Boolean.TRUE.equals(dto.getInitialize())) {
-            return false;
-        }
-        if (!ZERO.equals(projectId)) {
-            IssueDTO issue = new IssueDTO();
-            issue.setProjectId(projectId);
-            issue.setIssueTypeId(issueTypeId);
-            int count = issueMapper.selectCount(issue);
-            int backlogCount = 0;
-            if (backlogExpandService != null) {
-                //todo 判断需求池能不能删除
+        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, null);
+        //子任务至少要有一个，故事和任务只要要有一个
+        Map<String, Integer> typeCodeCountMap = new HashMap<>();
+        issueTypes.forEach(x -> {
+            if (Boolean.TRUE.equals(x.getEnabled())) {
+                String typeCode = x.getTypeCode();
+                Integer count = typeCodeCountMap.computeIfAbsent(typeCode, y -> 0);
+                count++;
+                typeCodeCountMap.put(typeCode, count);
             }
-            return count == 0 && backlogCount == 0;
+        });
+        String dtoTypeCode = dto.getTypeCode();
+        Optional.ofNullable(typeCodeCountMap.get(dtoTypeCode)).orElse(0);
+        if (IssueTypeCode.SUB_TASK.value().equals(dtoTypeCode)) {
+            int count = Optional.ofNullable(typeCodeCountMap.get(dtoTypeCode)).orElse(0);
+            return count > 1;
+        }
+        if (IssueTypeCode.TASK.value().equals(dtoTypeCode)
+                || IssueTypeCode.STORY.value().equals(dtoTypeCode)) {
+            int taskCount = Optional.ofNullable(typeCodeCountMap.get(IssueTypeCode.TASK.value())).orElse(0);
+            int storyCount = Optional.ofNullable(typeCodeCountMap.get(IssueTypeCode.STORY.value())).orElse(0);
+            return (taskCount + storyCount > 1);
         }
         return true;
+    }
+
+    @Override
+    public void updateEnabled(Long organizationId, Long projectId, Long issueTypeId, Boolean enabled) {
+        //只有项目层问题类型可以被启停用
+        if (ZERO.equals(projectId)) {
+            return;
+        }
+        if (Boolean.FALSE.equals(enabled)
+                && !canDisable(organizationId, projectId, issueTypeId)) {
+            throw new CommonException("error.issue.type.can.not.disable");
+        }
+        Long id = createIfSystemIssueType(organizationId, projectId, issueTypeId);
+        IssueTypeDTO dto = issueTypeMapper.selectByPrimaryKey(id);
+        dto.setEnabled(enabled);
+        issueTypeMapper.updateByPrimaryKey(dto);
+    }
+
+    private Long createIfSystemIssueType(Long organizationId, Long projectId, Long issueTypeId) {
+        IssueTypeDTO dto = new IssueTypeDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setId(issueTypeId);
+        IssueTypeDTO issueType = issueTypeMapper.selectOne(dto);
+        if (issueType == null) {
+            dto.setProjectId(ZERO);
+            issueType = issueTypeMapper.selectOne(dto);
+            if (issueType == null) {
+                throw new CommonException("error.issue.type.not.found");
+            }
+            issueType.setId(null);
+            issueType.setProjectId(projectId);
+            issueTypeMapper.insert(issueType);
+            Set<String> categoryCodes = validateTypeCode(issueType.getTypeCode(), projectId);
+            IssueTypeVO vo = modelMapper.map(issueType, IssueTypeVO.class);
+            initDefaultStateMachine(organizationId, projectId, vo, categoryCodes);
+        }
+        return issueType.getId();
     }
 
     @Override

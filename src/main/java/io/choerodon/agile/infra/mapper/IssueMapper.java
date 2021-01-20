@@ -561,4 +561,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                                   @Param("projectId") Long projectId);
 
     List<Long> selectSubIssueIds(@Param("issueId") Long issueId);
+
+    List<IssueTypeCountVO> selectCountGroupByIssueTypeId(@Param("projectId") Long projectId,
+                                                         @Param("issueTypeIds") Set<Long> issueTypeIds);
 }

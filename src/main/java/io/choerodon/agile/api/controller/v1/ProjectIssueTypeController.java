@@ -87,15 +87,6 @@ public class ProjectIssueTypeController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "校验问题类型名字是否可以被删除")
-    @GetMapping(value = "/{id}/deleted")
-    public ResponseEntity<Boolean> deleted(@PathVariable("project_id") Long projectId,
-                                           @PathVariable(value = "id") @Encrypt Long issueTypeId,
-                                           @RequestParam Long organizationId) {
-        return new ResponseEntity<>(issueTypeService.deleted(organizationId, projectId, issueTypeId), HttpStatus.OK);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除问题类型")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity delete(@PathVariable("project_id") Long projectId,
@@ -103,5 +94,25 @@ public class ProjectIssueTypeController {
                                  @RequestParam Long organizationId) {
         issueTypeService.delete(organizationId, projectId, issueTypeId);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "校验问题类型是否可以被禁用")
+    @GetMapping(value = "/{id}/can_disable")
+    public ResponseEntity<Boolean> canDisable(@PathVariable("project_id") Long projectId,
+                                              @PathVariable("id") @Encrypt Long issueTypeId,
+                                              @RequestParam Long organizationId) {
+        return new ResponseEntity<>(issueTypeService.canDisable(organizationId, projectId, issueTypeId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "校验问题类型是否可以被禁用")
+    @GetMapping(value = "/{id}/update_enabled")
+    public ResponseEntity updateEnabled(@PathVariable("project_id") Long projectId,
+                                        @RequestParam Long organizationId,
+                                        @PathVariable(value = "id") @Encrypt Long issueTypeId,
+                                        @RequestParam Boolean enabled) {
+        issueTypeService.updateEnabled(organizationId, projectId, issueTypeId, enabled);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -3499,5 +3499,18 @@
          OR ai.relate_issue_id = #{issueId})
     </select>
 
+    <select id="selectCountGroupByIssueTypeId" resultType="io.choerodon.agile.api.vo.IssueTypeCountVO">
+        select
+        t1.issue_type_id,
+        count(t1.issue_id) as count
+        from agile_issue t1
+        where t1.project_id = #{projectId}
+        and t1.issue_type_id in
+        <foreach collection="issueTypeIds" item="issueTypeId" open="(" close=")" separator=",">
+            #{issueTypeId}
+        </foreach>
+        group by t1.issue_type_id
+    </select>
+
 
 </mapper>

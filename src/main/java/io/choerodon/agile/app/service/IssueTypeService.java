@@ -26,8 +26,6 @@ public interface IssueTypeService {
 
     void delete(Long organizationId, Long projectId, Long issueTypeId);
 
-    Map<String, Object> checkDelete(Long organizationId, Long issueTypeId);
-
     Page<IssueTypeVO> pagedQuery(PageRequest pageRequest,
                                  Long organizationId,
                                  Long projectId,
@@ -74,13 +72,15 @@ public interface IssueTypeService {
      */
     IssueTypeVO query(Long organizationId, Long projectId, Long issueTypeId);
 
+    Boolean canDisable(Long organizationId, Long projectId, Long issueTypeId);
+
     /**
-     * 判断问题类型是否可以被删除
+     * 更新启停用字段
      *
      * @param organizationId
      * @param projectId
      * @param issueTypeId
-     * @return
+     * @param enabled
      */
-    boolean deleted(Long organizationId, Long projectId, Long issueTypeId);
+    void updateEnabled(Long organizationId, Long projectId, Long issueTypeId, Boolean enabled);
 }

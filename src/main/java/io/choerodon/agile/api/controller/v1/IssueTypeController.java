@@ -87,14 +87,6 @@ public class IssueTypeController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "校验问题类型名字是否可以被删除")
-    @GetMapping(value = "/{id}/deleted")
-    public ResponseEntity<Boolean> deleted(@PathVariable("organization_id") Long organizationId,
-                                           @PathVariable(value = "id") @Encrypt Long issueTypeId) {
-        return new ResponseEntity<>(issueTypeService.deleted(organizationId, 0L, issueTypeId), HttpStatus.OK);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除问题类型")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity delete(@PathVariable("organization_id") Long organizationId,
