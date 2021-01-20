@@ -23,20 +23,32 @@ const propTypes = {
 };
 @Form.create({})
 class QuickCreateIssue extends Component {
-  state = {
-    create: false,
-    loading: false,
-    currentTypeCode: 'task',
+  constructor(props) {
+    super(props);
+    this.state = {
+      create: false,
+      loading: false,
+      currentTypeId: props.issueTypes[0]?.id,
+    };
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (!prevState.currentTypeId && nextProps.issueTypes.length > 0) {
+      return {
+        currentTypeId: nextProps.issueTypes[0]?.id,
+      };
+    }
+    return null;
   }
 
   handleChangeType = ({ key }) => {
     this.setState({
-      currentTypeCode: key,
+      currentTypeId: key,
     });
   };
 
   handleCreate = debounce(() => {
-    const { currentTypeCode } = this.state;
+    const { currentTypeId } = this.state;
     const {
       form, issueTypes, sprintId, epicId, versionIssueRelVOList, chosenFeatureId,
     } = this.props;
@@ -47,7 +59,7 @@ class QuickCreateIssue extends Component {
           this.setState({
             loading: true,
           });
-          const currentType = issueTypes.find((t) => t.typeCode === currentTypeCode);
+          const currentType = issueTypes.find((t) => t.id === currentTypeId);
           if (!await checkCanQuickCreate(currentType.typeCode)) {
             Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
             this.setState({
@@ -79,7 +91,7 @@ class QuickCreateIssue extends Component {
               relateIssueId: 0,
               featureVO: {},
               sprintId: sprintId || fieldsMap.get('sprint')?.defaultValue || 0,
-              epicName: currentTypeCode === 'issue_epic' ? summary.trim() : undefined,
+              epicName: currentTypeId === 'issue_epic' ? summary.trim() : undefined,
               componentIssueRelVOList: fieldsMap.get('component')?.defaultValueObjs || [],
               description: '',
               issueLinkCreateVOList: [],
@@ -123,10 +135,10 @@ class QuickCreateIssue extends Component {
 
   render() {
     const {
-      create, loading, currentTypeCode,
+      create, loading, currentTypeId,
     } = this.state;
     const { issueTypes, form: { getFieldDecorator } } = this.props;
-    const currentType = issueTypes.find((t) => t.typeCode === currentTypeCode);
+    const currentType = issueTypes.find((t) => t.id === currentTypeId);
 
     const typeList = (
       <Menu
@@ -139,7 +151,7 @@ class QuickCreateIssue extends Component {
       >
         {
           issueTypes.map((type) => (
-            <Menu.Item key={type.typeCode}>
+            <Menu.Item key={type.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <TypeTag
                   data={type}
