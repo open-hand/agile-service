@@ -106,7 +106,7 @@ public class ProjectIssueTypeController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "校验问题类型是否可以被禁用")
+    @ApiOperation(value = "更新问题类型启停用")
     @GetMapping(value = "/{id}/update_enabled")
     public ResponseEntity updateEnabled(@PathVariable("project_id") Long projectId,
                                         @RequestParam Long organizationId,

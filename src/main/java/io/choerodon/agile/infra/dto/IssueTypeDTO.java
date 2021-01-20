@@ -28,6 +28,7 @@ public class IssueTypeDTO extends AuditDomain {
     @Column(name = "is_initialize")
     private Boolean initialize;
     private Long projectId;
+    @Transient
     private Boolean enabled;
     private Boolean referenced;
     private Long referenceId;

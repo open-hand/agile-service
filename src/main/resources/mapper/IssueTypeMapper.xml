@@ -128,8 +128,10 @@
     <select id="selectByOptions" resultType="io.choerodon.agile.api.vo.IssueTypeVO">
         select
         t1.*,
-        t1.is_initialize as initialize
+        t1.is_initialize as initialize,
+        ifnull(t2.enabled, 1) as enabled
         from fd_issue_type t1
+        left join fd_issue_type_extend t2 on t1.id = t2.issue_type_id
         where 1=1
         <choose>
             <when test="projectId == 0">
@@ -142,26 +144,12 @@
                     from fd_issue_type t2
                     where t2.organization_id = #{organizationId}
                     and t2.project_id = #{projectId}
-                    and t2.source != 'system'
                     union
                     select t3.id
                     from fd_issue_type t3
                     where t3.organization_id = #{organizationId}
-                    and t3.project_id = #{projectId}
+                    and t3.project_id = 0
                     and t3.source = 'system'
-                    union
-                    select t4.id
-                    from fd_issue_type t4
-                    where t4.organization_id = #{organizationId}
-                    and t4.project_id = 0
-                    and t4.source = 'system'
-                    and t4.type_code not in (
-                        select t5.type_code
-                        from fd_issue_type t5
-                        where t5.organization_id = #{organizationId}
-                        and t5.project_id = #{projectId}
-                        and t5.source = 'system'
-                    )
                 )
             </otherwise>
         </choose>
