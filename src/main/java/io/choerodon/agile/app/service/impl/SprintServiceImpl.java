@@ -529,8 +529,10 @@ public class SprintServiceImpl implements SprintService {
         sprint.setActualEndDate(actualEndDate);
         Date startDate = sprint.getStartDate();
         Page<Long> reportIssuePage = new Page<>();
-        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", new HashMap<>());
-        //pageable.resetOrder("ai", new HashMap<>());
+        Map<String, String> maps = new HashMap<>();
+        maps.put("issueNum","issue_num_convert");
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", maps);
+        pageRequest.setSort(sort);
         switch (status) {
             case DONE:
                 reportIssuePage = PageHelper.doPageAndSort(pageRequest, () -> reportMapper.queryReportIssueIds(projectId, sprintId, actualEndDate, true));
