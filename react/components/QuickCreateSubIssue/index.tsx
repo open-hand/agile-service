@@ -27,16 +27,16 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: 'sub_task' });
   const [expand, setExpand] = useState(false);
-  const [typeCode, setTypeCode] = useState<string | undefined>();
+  const [id, setId] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
-  const currentType = issueTypes?.find((t) => t.typeCode === typeCode);
+  const currentType = issueTypes?.find((t) => t.id === id);
   useEffect(() => {
     if (issueTypes && issueTypes.length > 0) {
-      setTypeCode(issueTypes[0].typeCode);
+      setId(issueTypes[0].id);
     }
   }, [issueTypes]);
   const handleMenuClick = useCallback(({ key }) => {
-    setTypeCode(key);
+    setId(key);
   }, []);
   const handleCreate = useLockFn(async () => {
     (form as WrappedFormUtils).validateFields(async (err, values) => {
@@ -44,7 +44,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       if (currentType && summary && summary.trim()) {
         if (!err) {
           setLoading(true);
-          if (!await checkCanQuickCreate(typeCode)) {
+          if (!await checkCanQuickCreate(currentType.typeCode)) {
             Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
             setLoading(false);
             return;
@@ -108,7 +108,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                       >
                         {
                           issueTypes.map((type) => (
-                            <Menu.Item key={type.typeCode}>
+                            <Menu.Item key={type.id}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <TypeTag
                                   data={type}
