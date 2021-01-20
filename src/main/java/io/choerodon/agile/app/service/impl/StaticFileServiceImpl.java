@@ -16,6 +16,8 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.web.ResourceProperties;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -73,6 +76,11 @@ public class StaticFileServiceImpl implements StaticFileService {
     private static final String MACOSX = "__MACOSX";
     private static final String DS_STORE = ".DS_Store";
     private static final String INDEX_HTML = "index.html";
+    private static final String START_HTML = "start_with_pages.html";
+    private static final String HTML_CONTENT_TYPE = "text/html";
+    private static final String SVG_CONTENT_TYPE = "text/html";
+
+
     private static final String INDEX = "index";
     private static final String PATH_SPLIT = "/";
 
@@ -158,6 +166,8 @@ public class StaticFileServiceImpl implements StaticFileService {
     @Override
     public ResponseEntity<byte[]> selectStaticFileResult(String fileHeaderIdStr, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         Long fileHeaderId = EncryptionUtils.decrypt(fileHeaderIdStr, EncryptionUtils.BLANK_KEY);
+        StaticFileLineDTO file;
+
         String path;
         try {
             path = URLDecoder.decode(httpRequest.getServletPath(), Charset.defaultCharset().name());
@@ -167,18 +177,50 @@ public class StaticFileServiceImpl implements StaticFileService {
         // 获取文件相对路径
         String relativePath = path.substring(path.indexOf(fileHeaderIdStr) + fileHeaderIdStr.length() + 1);
         if (INDEX.equals(relativePath)) {
-            relativePath = INDEX_HTML;
+            file = getIndexFile(fileHeaderId);
+        } else {
+            StaticFileLineDTO record = new StaticFileLineDTO();
+            record.setHeaderId(fileHeaderId);
+            record.setRelativePath(relativePath);
+            file = staticFileLineMapper.selectOne(record);
         }
-        StaticFileLineDTO record = new StaticFileLineDTO();
-        record.setHeaderId(fileHeaderId);
-        record.setRelativePath(relativePath);
-        StaticFileLineDTO file = staticFileLineMapper.selectOne(record);
         if (ObjectUtils.isEmpty(file)) {
             return ResponseEntity.ok().body(new byte[0]);
         }
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(file.getFileType()))
+                .contentType(MediaType.parseMediaType(dealContentType(file)))
+                .cacheControl(getCacheControl(file))
                 .body(getFileByteArray(file));
+    }
+
+    private CacheControl getCacheControl(StaticFileLineDTO file) {
+        if (HTML_CONTENT_TYPE.equals(file.getFileType())) {
+            return CacheControl.noStore();
+        } else {
+            return CacheControl.maxAge(1, TimeUnit.DAYS).cachePublic();
+        }
+    }
+
+    private StaticFileLineDTO getIndexFile(Long fileHeaderId) {
+        StaticFileLineDTO file;
+        StaticFileLineDTO record = new StaticFileLineDTO();
+        record.setHeaderId(fileHeaderId);
+
+        record.setRelativePath(START_HTML);
+        file = staticFileLineMapper.selectOne(record);
+        if(ObjectUtils.isEmpty(file)){
+            record.setRelativePath(INDEX_HTML);
+            file = staticFileLineMapper.selectOne(record);
+        }
+        return file;
+    }
+
+    private String dealContentType(StaticFileLineDTO file) {
+        if (file.getRelativePath().toUpperCase().endsWith(".SVG")) {
+            return "image/svg+xml";
+        } else {
+            return file.getFileType();
+        }
     }
 
     @Override
