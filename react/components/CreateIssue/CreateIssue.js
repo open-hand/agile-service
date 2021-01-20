@@ -238,7 +238,10 @@ class CreateIssue extends Component {
       ['fixVersion', 'fixVersionIssueRel'],
       ['sprint', 'sprintId'],
       ['epic', 'epicId'],
-      // ['pi', 'pi'],
+      ['storyPoints', 'storyPoints'],
+      ['remainingTime', 'estimatedTime'],
+      ['estimatedStartTime', 'estimatedStartTime'],
+      ['estimatedEndTime', 'estimatedEndTime'],
     ]);
     const setFields = fields.reduce((result, field) => {
       const name = defaultScope.get(field.fieldCode);
@@ -254,7 +257,7 @@ class CreateIssue extends Component {
             });
           } else {
             Object.assign(result, {
-              [name]: field.defaultValue,
+              [name]: this.transformValue(field.fieldType, field.defaultValue),
             });
           }
         }

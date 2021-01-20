@@ -90,6 +90,8 @@ class QuickCreateIssue extends Component {
               assigneeId: defaultAssignee || fieldsMap.get('assignee').defaultValue,
               estimatedEndTime: fieldsMap.get('estimatedEndTime').defaultValue,
               estimatedStartTime: fieldsMap.get('estimatedStartTime').defaultValue,
+              storyPoints: fieldsMap.get('storyPoints').defaultValue,
+              estimatedTime: fieldsMap.get('estimatedTime').defaultValue,
             };
             issueApi.create(issue).then((res) => {
               this.setState({
