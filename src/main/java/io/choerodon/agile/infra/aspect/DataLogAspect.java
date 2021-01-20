@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.aspect;
 
 import io.choerodon.agile.api.vo.PriorityVO;
 import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.api.vo.StaticFileRelatedVO;
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.*;
@@ -144,7 +145,10 @@ public class DataLogAspect {
     private static final String FIELD_PROJECT_MOVE = "Project Move";
     private static final String STATIC_FILE_CREATE = "createStaticFile";
     private static final String STATIC_FILE_DELETE = "deleteStaticFile";
+    private static final String STATIC_FILE_REL_CREATE = "createStaticFileRelated";
+    private static final String STATIC_FILE_REL_DELETE = "deleteStaticFileRelated";
     private static final String FIELD_STATIC_FILE = "Static File";
+    private static final String FIELD_STATIC_FILE_REL = "Static File Rel";
 
 
     @Autowired
@@ -193,6 +197,8 @@ public class DataLogAspect {
     private BaseFeignClient baseFeignClient;
     @Autowired
     private StaticFileHeaderMapper staticFileHeaderMapper;
+    @Autowired
+    private StaticFileIssueRelMapper staticFileIssueRelMapper;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -280,6 +286,12 @@ public class DataLogAspect {
                     case STATIC_FILE_DELETE:
                         handleStaticFileDelete(args);
                         break;
+                    case STATIC_FILE_REL_CREATE:
+                        handleStaticFileRelCreate(args, pjp);
+                        break;
+                    case STATIC_FILE_REL_DELETE:
+                        handleStaticFileRelDelete(args);
+                        break;
                     default:
                         break;
                 }
@@ -360,33 +372,84 @@ public class DataLogAspect {
         return result;
     }
 
-    private void handleStaticFileDelete(Object[] args) {
-        Long id = null;
+    private void handleStaticFileRelDelete(Object[] args) {
+        StaticFileHeaderDTO staticFileHeaderDTO = null;
+        StaticFileIssueRelDTO staticFileIssueRelDTO = null;
+
         for (Object arg : args) {
-            if (arg instanceof Long) {
-                id = (Long) arg;
+            if (arg instanceof StaticFileHeaderDTO) {
+                staticFileHeaderDTO = (StaticFileHeaderDTO) arg;
+            }else if (arg instanceof StaticFileIssueRelDTO) {
+                staticFileIssueRelDTO = (StaticFileIssueRelDTO) arg;
             }
         }
-        if (id != null) {
-            StaticFileHeaderDTO staticFileHeader = staticFileHeaderMapper.selectByPrimaryKey(id);
-            createDataLog(staticFileHeader.getProjectId(), null, FIELD_STATIC_FILE,
-                    staticFileHeader.getUrl(), null, staticFileHeader.getId().toString(), null);
+        if (!ObjectUtils.isEmpty(staticFileHeaderDTO) && !ObjectUtils.isEmpty(staticFileIssueRelDTO)) {
+            createDataLog(staticFileHeaderDTO.getProjectId(), staticFileIssueRelDTO.getIssueId(), FIELD_STATIC_FILE_REL,
+                    staticFileHeaderDTO.getUrl(), null, staticFileHeaderDTO.getId().toString(), null);
+        }
+    }
+
+    private void handleStaticFileRelCreate(Object[] args, ProceedingJoinPoint pjp) {
+        StaticFileHeaderDTO staticFileHeaderDTO = null;
+        StaticFileIssueRelDTO staticFileIssueRelDTO = null;
+        for (Object arg : args) {
+            if (arg instanceof StaticFileHeaderDTO) {
+                staticFileHeaderDTO = (StaticFileHeaderDTO) arg;
+            }else if (arg instanceof StaticFileIssueRelDTO) {
+                staticFileIssueRelDTO = (StaticFileIssueRelDTO) arg;
+            }
+        }
+        if (!ObjectUtils.isEmpty(staticFileHeaderDTO) && !ObjectUtils.isEmpty(staticFileIssueRelDTO)) {
+            try {
+                createDataLog(staticFileHeaderDTO.getProjectId(), staticFileIssueRelDTO.getIssueId(), FIELD_STATIC_FILE_REL,
+                        null, staticFileHeaderDTO.getUrl(), null, staticFileHeaderDTO.getId().toString());
+            } catch (Throwable e) {
+                throw new CommonException(ERROR_METHOD_EXECUTE, e);
+            }
+        }
+    }
+
+    private void handleStaticFileDelete(Object[] args) {
+        StaticFileHeaderDTO staticFileHeaderDTO = null;
+        StaticFileIssueRelDTO staticFileIssueRelDTO = null;
+        for (Object arg : args) {
+            if (arg instanceof StaticFileHeaderDTO) {
+                staticFileHeaderDTO = (StaticFileHeaderDTO) arg;
+            } else if (arg instanceof StaticFileIssueRelDTO) {
+                staticFileIssueRelDTO = (StaticFileIssueRelDTO) arg;
+            }
+        }
+        if (!ObjectUtils.isEmpty(staticFileHeaderDTO) && !ObjectUtils.isEmpty(staticFileIssueRelDTO)) {
+            Long fileId = staticFileHeaderDTO.getId();
+            Long projectId = staticFileHeaderDTO.getProjectId();
+            String url = staticFileHeaderDTO.getUrl();
+
+            staticFileIssueRelDTO.setStaticFileId(fileId);
+            List<StaticFileIssueRelDTO> staticFileIssueRelList = staticFileIssueRelMapper.select(staticFileIssueRelDTO);
+            if (!CollectionUtils.isEmpty(staticFileIssueRelList)) {
+                staticFileIssueRelList.forEach(staticFileIssueRel -> createDataLog(projectId, staticFileIssueRel.getIssueId(), FIELD_STATIC_FILE,
+                        url, null, fileId.toString(), null));
+            }
         }
     }
 
     private Object handleStaticFileCreate(Object[] args, ProceedingJoinPoint pjp) {
         StaticFileHeaderDTO staticFileHeaderDTO = null;
+        StaticFileIssueRelDTO staticFileIssueRelDTO = null;
+
         Object result = null;
         for (Object arg : args) {
             if (arg instanceof StaticFileHeaderDTO) {
                 staticFileHeaderDTO = (StaticFileHeaderDTO) arg;
+            }else if (arg instanceof StaticFileIssueRelDTO) {
+                staticFileIssueRelDTO = (StaticFileIssueRelDTO) arg;
             }
         }
-        if (staticFileHeaderDTO != null) {
+        if (!ObjectUtils.isEmpty(staticFileHeaderDTO) && !ObjectUtils.isEmpty(staticFileIssueRelDTO)) {
             try {
                 result = pjp.proceed();
                 staticFileHeaderDTO = (StaticFileHeaderDTO) result;
-                createDataLog(staticFileHeaderDTO.getProjectId(), null, FIELD_STATIC_FILE,
+                createDataLog(staticFileHeaderDTO.getProjectId(), staticFileIssueRelDTO.getIssueId(), FIELD_STATIC_FILE,
                         null, staticFileHeaderDTO.getUrl(), null, staticFileHeaderDTO.getId().toString());
             } catch (Throwable e) {
                 throw new CommonException(ERROR_METHOD_EXECUTE, e);
