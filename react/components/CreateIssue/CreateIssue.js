@@ -24,6 +24,7 @@ import { observer } from 'mobx-react';
 import { IsProjectMember } from '@/hooks/useIsProjectMember';
 import { IsInProgram } from '@/hooks/useIsInProgram';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import UserHead from '@/components/UserHead';
 import { UploadButton } from '../CommonComponent';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
@@ -674,7 +675,20 @@ class CreateIssue extends Component {
                   loadWhenMount
                   getPopupContainer={(triggerNode) => triggerNode.parentNode}
                   allowClear
-                />,
+                >
+                  {field.defaultValueObj && (
+                  <Option key={field.defaultValueObj.id} value={field.defaultValueObj.id}>
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
+                    }}
+                    >
+                      <UserHead
+                        user={field.defaultValueObj}
+                      />
+                    </div>
+                  </Option>
+                  )}
+                </SelectFocusLoad>,
               )}
               <IsProjectMember>
                 {(isProjectMember) => isProjectMember && (
