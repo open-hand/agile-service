@@ -80,6 +80,8 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         // @ts-ignore
         return <SelectComponent name={code} valueField="componentId" multiple {...otherComponentProps} />;
       case 'version':
+      case 'fixVersion':
+      case 'influenceVersion':
         // @ts-ignore
         return <SelectVersion name={code} valueField="versionId" {...otherComponentProps} />;
       case 'feature': {
