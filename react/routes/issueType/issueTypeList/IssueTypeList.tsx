@@ -11,8 +11,6 @@ import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { IIssueType } from '@/common/types';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { issueTypeApi } from '@/api';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { getIsOrganization } from '@/utils/common';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import to from '@/utils/to';
@@ -22,9 +20,9 @@ import AddIssueType from './AddIssueType';
 import Store from '../stores';
 import styles from './IssueTypeList.less';
 import openUsage from './Usage';
+import openLink from './LinkType';
 
 const { Column } = Table;
-
 /**
  * 问题类型页面
  * 鼠标点击相关方案，出现弹窗是否进入关联的相关方案 待定
@@ -271,7 +269,7 @@ function IssueTypeList() {
         width: 480,
       },
       key: Modal.key(),
-      title: '添加问题类型',
+      title: '引用问题类型',
       // @ts-ignore
       children: <AddIssueType typeTableDataSet={issueTypeDataSet} addRef={addRef} />,
       okText: '保存',
@@ -299,6 +297,11 @@ function IssueTypeList() {
     >
       <Header>
         <Button icon="playlist_add" onClick={handleAdd}>添加问题类型</Button>
+        {
+          !isOrganization && (
+          <Button icon="playlist_add" onClick={openLink}>关联问题类型</Button>
+          )
+        }
       </Header>
       <Breadcrumb />
       <Content style={{ paddingTop: '0' }}>
