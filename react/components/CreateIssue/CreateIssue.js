@@ -489,6 +489,9 @@ class CreateIssue extends Component {
     // const filterSubType = (type) => (!['sub_task'].includes(type.typeCode));
     const filterEpic = (type) => (!['issue_epic'].includes(type.typeCode));
     const filterFeature = (type) => (!['feature'].includes(type.typeCode));
+    if (mode === 'sub_task') {
+      return originIssueTypes.filter((type) => type.typeCode === 'sub_task');
+    }
     const issueTypes = applyFilter(originIssueTypes, [
       // filterSubType,
       {
@@ -540,7 +543,7 @@ class CreateIssue extends Component {
       case 'issueType':
         return (
           [
-            ['sub_task', 'sub_bug', 'feature'].includes(mode) || hiddenIssueType
+            ['sub_bug', 'feature'].includes(mode) || hiddenIssueType
               ? getFieldDecorator('typeId', {
                 rules: [{ required: true, message: '问题类型为必输项' }], // 不需要展示，但是要有值
                 initialValue: defaultTypeId || '',

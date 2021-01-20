@@ -14,6 +14,7 @@ import SelectVersion from '@/components/select/select-version';
 import SelectSprint from '@/components/select/select-sprint';
 import SelectEpic from '@/components/select/select-epic';
 import { IField, IFieldType } from '@/common/types';
+import SelectEnvironment from '@/components/select/select-environment';
 import SelectPickDate from './select-date-pick';
 import { InjectedRenderComponent } from '../page-issue-type/components/sort-table/injectComponent';
 
@@ -50,6 +51,8 @@ function renderEditor({
       return <SelectSprint multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} style={style} {...otherProps} />;
     case 'epic':
       return <SelectEpic multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} style={style} {...otherProps} />;
+    case 'environment':
+      return <SelectEnvironment multiple={['checkbox', 'multiple'].includes(fieldType)} afterLoad={(list) => dataRef && set(dataRef, 'current', list)} style={style} {...otherProps} />;
     case 'backlogType':
       // @ts-ignore
       return (

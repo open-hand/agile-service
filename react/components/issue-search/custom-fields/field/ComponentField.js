@@ -16,6 +16,9 @@ function ComponentField({ field, value, onChange }) {
       multiple
       maxTagCount={3}
       dropdownMatchSelectWidth={false}
+      dropdownMenuStyle={{
+        maxWidth: 250,
+      }}
       clearButton
       onChange={onChange}
     />

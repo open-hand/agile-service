@@ -21,13 +21,13 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import ImportIssue from '@/components/ImportIssue';
 import FilterManage from '@/components/FilterManage';
 import DetailContainer, { useDetail } from '@/components/detail-container';
+import TableModeSwitch from '@/components/tree-list-switch';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
 import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
-import TableModeSwitch from './components/mode-switch';
 
 const Issue = observer(() => {
   const {

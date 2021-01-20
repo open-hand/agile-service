@@ -5,7 +5,7 @@ import { toJS } from 'mobx';
 import { User } from '@/common/types';
 
 const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description'];
-const orgDisabledEditDefaultFields = [...disabledEditDefaultFields, 'component', 'label', 'influenceVersion', 'fixVersion', 'epic', 'sprint', 'pi', 'subProject'];
+const orgDisabledEditDefaultFields = [...disabledEditDefaultFields, 'component', 'label', 'influenceVersion', 'fixVersion', 'epic', 'sprint', 'pi', 'subProject', 'backlogClassification', 'backlogType', 'programVersion'];
 const fieldTextValueConfig = {
   epic: { optionKey: 'issueId', textKey: 'epicName' },
   influenceVersion: { optionKey: 'versionId', textKey: 'name' },

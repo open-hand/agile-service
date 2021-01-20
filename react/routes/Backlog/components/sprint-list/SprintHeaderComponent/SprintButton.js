@@ -52,8 +52,10 @@ function SprintButton({
   };
   const openCloseSprint = async () => {
     const completeMessage = await sprintApi.loadSprintAndCountIssue(sprintId);
+    const defaultValuePrompt = await sprintApi.beforeChangeCheck(sprintId) ? `冲刺${data.sprintName}是默认选项，完成后冲刺字段默认值将清空` : undefined;
     CloseSprint({
       completeMessage,
+      defaultValuePrompt,
       sprintId,
       afterClose: () => {
         BacklogStore.refresh();

@@ -50,6 +50,19 @@ public class IssueTypeVO {
 
     private String source;
 
+    /**
+     * 是否可以被删除
+     */
+    private Boolean deleted;
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
     public String getSource() {
         return source;
     }
