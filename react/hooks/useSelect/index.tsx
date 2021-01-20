@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { omit, debounce } from 'lodash';
-import { Button, DataSet } from 'choerodon-ui/pro';
+import { Button, DataSet, Tooltip } from 'choerodon-ui/pro';
 import { usePersistFn } from 'ahooks';
 import { SearchMatcher } from 'choerodon-ui/pro/lib/select/Select';
 import { Renderer } from 'choerodon-ui/pro/lib/field/FormField';
@@ -46,13 +46,14 @@ export interface SelectConfig<T = {}> {
   name: string
   textField: string
   valueField: string
-  optionRenderer?: (item: T) => JSX.Element
+  optionRenderer?: (item: T, tooltip?: boolean) => JSX.Element
   renderer?: (item: T) => JSX.Element
   request: ({ filter, page }: LoadConfig) => Promise<T[] | { list: T[], hasNextPage: boolean }>
   middleWare?: MiddleWare<T>,
   afterLoad?: (data: T[]) => void
   paging?: boolean
   props?: object
+  tooltip?: boolean
 }
 
 export interface RefHandle {
@@ -66,7 +67,10 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   const textRef = useRef<string>('');
   const dataSetRef = useRef<DataSet>();
   const cacheRef = useRef<Map<any, T>>(new Map());
-  const defaultRender = useCallback((item: T) => getValueByPath(item, config.textField), [config.textField]);
+  const defaultRender = useCallback((item: T, tooltip?: boolean) => {
+    const text = getValueByPath(item, config.textField);
+    return tooltip ? <Tooltip title={text} placement="bottomLeft">{text}</Tooltip> : text;
+  }, [config.textField]);
   const firstRef = useRef(true);
   const {
     textField = 'meaning',
@@ -85,11 +89,12 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     const item = cacheRef.current?.get(value);
     if (item) {
       const result = optionRenderer(item);
-      return maxTagTextLength
+      const text = maxTagTextLength
         && typeof result === 'string'
         && (result as string).length > maxTagTextLength
         ? `${(result as string).slice(0, maxTagTextLength)}...`
         : result;
+      return text;
     }
     return null;
   }, [optionRenderer]);
@@ -115,7 +120,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
         setData(res as T[]);
       }
     });
-  // TODO: 更好的实现
+    // TODO: 更好的实现
   }, [afterLoad, paging, request]);
   const searchData = useMemo(() => debounce((filter: string) => {
     loadData({ filter });
@@ -196,7 +201,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     if (record.get('loadMoreButton') === true) {
       return loadMoreButton;
     }
-    return optionRenderer(record.toData());
+    return optionRenderer(record.toData(), config.tooltip);
   };
   const selectProps = {
     searchable: true,
