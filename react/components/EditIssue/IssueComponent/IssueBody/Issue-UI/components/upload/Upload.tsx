@@ -52,6 +52,7 @@ const UploadUI: React.FC<Props> = (props) => {
       .then(() => {
         Choerodon.prompt('上传成功');
         store.getLinkedUI();
+        reloadIssue();
       })
       .catch(() => {
         const temp = arr.slice();
@@ -62,7 +63,7 @@ const UploadUI: React.FC<Props> = (props) => {
           }
         });
       });
-  }, [issueId, store]);
+  }, [issueId, reloadIssue, store]);
 
   const handleUpdate = useCallback((arr) => {
     if (arr.length > 0 && arr.some((one: any) => !one.url)) {

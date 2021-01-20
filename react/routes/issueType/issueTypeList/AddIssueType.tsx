@@ -18,15 +18,15 @@ interface Props {
   typeId?: string
   typeTableDataSet: DataSet
   addRef: React.MutableRefObject<{ addDataSet: DataSet, submit: (fn?: Function) => Promise<boolean> }>
+  isOrganization: boolean,
 }
 
 const AddIssueType: React.FC<Props> = ({
-  modal, typeId, typeTableDataSet, addRef,
+  modal, typeId, typeTableDataSet, addRef, isOrganization,
 }) => {
   const [colour, setColor] = useState<string>('#3F51B5');
   const [pickerDisplay, setPickerDisplay] = useState<boolean>(false);
   const [initType, setInitType] = useState<any>();
-  const isOrganization = getIsOrganization();
   const isSystemType = initType?.source === 'system';
 
   const checkName = useCallback(async (value) => {

@@ -15,9 +15,10 @@ import { IUi } from '../delete/DeleteUI';
 interface Props {
   modal?: IModalProps,
   store: EditIssueStore
+  reloadIssue: Function
 }
 
-const Link: React.FC<Props> = ({ modal, store }) => {
+const Link: React.FC<Props> = ({ modal, store, reloadIssue }) => {
   const { issue } = store;
   const optionDataSet: DataSet = useMemo(() => new DataSet({
     fields: [{
@@ -65,6 +66,7 @@ const Link: React.FC<Props> = ({ modal, store }) => {
         }).then(() => {
           modal?.close();
           store.getLinkedUI();
+          reloadIssue();
           Choerodon.prompt('关联成功');
           return true;
         }).catch(() => {
@@ -74,7 +76,7 @@ const Link: React.FC<Props> = ({ modal, store }) => {
     }
     return false;
     // @ts-ignore
-  }, [issue.issueId, linkedDataSet, modal, store]);
+  }, [issue.issueId, linkedDataSet, modal, reloadIssue, store]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
