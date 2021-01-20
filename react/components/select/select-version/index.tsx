@@ -45,11 +45,7 @@ const SelectVersion: React.FC<Props> = forwardRef(({
       }
       return newVersion;
     },
-    optionRenderer: !flat ? (c) => (
-      <Tooltip title={c.name} placement="left">
-        {c.name}
-      </Tooltip>
-    ) : undefined,
+    tooltip: true,
     paging: false,
   }), [projectId]);
   const props = useSelect(config);
