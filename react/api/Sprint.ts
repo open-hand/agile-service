@@ -335,6 +335,21 @@ class SprintApi extends Api<SprintApi> {
       data: sprintIds,
     });
   }
+
+  /**
+   * 改变（删除、完成）冲刺前检查默认值是否为｛sprintId｝冲刺
+   * @param sprintId
+   */
+  beforeChangeCheck(sprintId: string):Promise<boolean> {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/sprint/check_default_value`,
+      params: {
+        sprintId,
+      },
+
+    });
+  }
 }
 
 const sprintApi = new SprintApi();
