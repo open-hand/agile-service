@@ -259,9 +259,8 @@ public class StaticFileServiceImpl implements StaticFileService {
         }
         StaticFileIssueRelDTO record = new StaticFileIssueRelDTO();
         record.setProjectId(projectId);
-        record.setStaticFileId(fileHeaderId);
         record.setIssueId(issueId);
-        staticFileIssueRelMapper.delete(record);
+        staticFileDealService.deleteStaticFileRelated(staticFileHeader, record);
     }
 
     @Override
@@ -287,11 +286,12 @@ public class StaticFileServiceImpl implements StaticFileService {
 
         StaticFileIssueRelDTO relRecord = new StaticFileIssueRelDTO();
         relRecord.setProjectId(projectId);
-        relRecord.setStaticFileId(fileHeaderId);
 
-        staticFileIssueRelMapper.delete(relRecord);
+        staticFileDealService.deleteRel(relRecord, staticFileHeader);
         staticFileLineMapper.delete(lineRecord);
-        staticFileDealService.deleteBase(fileHeaderId);
+        if (staticFileHeaderMapper.deleteByPrimaryKey(fileHeaderId) != 1) {
+            throw new CommonException("error.staticFileHeader.delete");
+        }
     }
 
     @Override
@@ -315,6 +315,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         if (CollectionUtils.isEmpty(staticFileHeaders) || staticFileHeaders.size() < staticFileRelatedVO.getFileHeaderIds().size()) {
             throw new CommonException(HEADER_NULL_EXCEPTION_CODE);
         }
+
         List<StaticFileHeaderVO> staticFileHeaderVOList = new ArrayList<>();
         staticFileHeaders.forEach(staticFileHeaderDTO -> {
             StaticFileIssueRelDTO newRelDTO = new StaticFileIssueRelDTO();
@@ -328,7 +329,7 @@ public class StaticFileServiceImpl implements StaticFileService {
             //创建关联关系
             newRelDTO.setProjectId(projectId);
             newRelDTO.setOrganizationId(projectUtil.getOrganizationId(projectId));
-            staticFileIssueRelMapper.insert(newRelDTO);
+            staticFileDealService.updateStaticFileRelatedIssue(newRelDTO, staticFileHeaderDTO);
 
             StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeaderDTO, StaticFileHeaderVO.class);
             staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
@@ -490,14 +491,13 @@ public class StaticFileServiceImpl implements StaticFileService {
                 organizationId,
                 url,
                 originalFilename);
-        staticFileDealService.createBase(staticFileHeader);
         StaticFileIssueRelDTO staticFileIssueRelDTO = new StaticFileIssueRelDTO(
                 staticFileHeader.getId(),
                 issueId,
                 projectId,
                 organizationId
         );
-        staticFileIssueRelMapper.insert(staticFileIssueRelDTO);
+        staticFileDealService.createBase(staticFileHeader, staticFileIssueRelDTO);
         return staticFileHeader;
     }
 
