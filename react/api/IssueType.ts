@@ -78,10 +78,10 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
-  canDelete(typeId: string) {
+  getDeleteDisable(typeId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/issue_type/${typeId}/deleted`,
+      url: `${this.prefix}/issue_type/${typeId}/can_disable`,
       params: {
         organizationId: getOrganizationId(),
       },
@@ -141,13 +141,10 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
-  orgCanDelete(typeId: string) {
+  orgGetDeleteDisable(typeId: string) {
     return axios({
       method: 'get',
-      url: `${this.OrgPrefix}/issue_type/${typeId}/deleted`,
-      params: {
-        organizationId: getOrganizationId(),
-      },
+      url: `${this.OrgPrefix}/issue_type/${typeId}/can_disable`,
     });
   }
 

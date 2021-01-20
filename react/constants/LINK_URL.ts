@@ -30,6 +30,8 @@ const LINK_URL = {
   scrumboardSetting: '/agile/scrumboard/setting',
   iterationBoard: (sprintId: string) => `/agile/iterationBoard/${sprintId}`,
   stateMachine: '/agile/state-machine',
+  pageConfig: '/agile/page/config',
+  status: '/agile/state-machine',
 };
 
 const LINK_URL_TO: IRouterToList = {
