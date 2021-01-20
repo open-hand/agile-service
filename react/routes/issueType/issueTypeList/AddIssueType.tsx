@@ -29,11 +29,11 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
     if (typeId && value === initType?.name) {
       return true;
     }
-    const res = await isOrganization ? issueTypeApi.orgCheckName(value, typeId) : issueTypeApi.checkName(value, typeId);
+    const res = isOrganization ? await issueTypeApi.orgCheckName(value, typeId) : await issueTypeApi.checkName(value, typeId);
     if (res) {
-      return true;
+      return '名称重复';
     }
-    return '名称重复';
+    return true;
   }, [initType?.name, isOrganization, typeId]);
 
   const standardTypeDataSet = useMemo(() => new DataSet({
@@ -61,6 +61,7 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
   }), []);
 
   const addDataSet = useMemo(() => new DataSet({
+    autoCreate: true,
     fields: [
       {
         name: 'name',
@@ -81,16 +82,18 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
         textField: 'name',
         valueField: 'code',
         label: '标准类型',
-        required: true,
+        required: !(initType?.source === 'system'),
+        disabled: !!typeId,
         options: standardTypeDataSet,
       },
       {
         name: 'icon',
         type: 'string' as FieldType,
         label: '选择图标',
+        required: true,
       },
     ],
-  }), [checkName, standardTypeDataSet]);
+  }), [checkName, initType?.source, typeId]);
 
   const handleChangeColor = useCallback((newColor: any) => {
     setColor(newColor.hex);
@@ -119,7 +122,7 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
         issueTypeApi[isOrganization ? 'orgCreate' : 'create'](data as ICreate).then(() => {
           Choerodon.prompt('创建成功');
           typeTableDataSet.query();
-          modal.close();
+          modal?.close();
         }).catch(() => {
           Choerodon.prompt('创建失败');
         });
@@ -127,7 +130,7 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
         issueTypeApi[isOrganization ? 'orgUpdate' : 'update'](typeId, data as IUpdate).then(() => {
           Choerodon.prompt('编辑成功');
           typeTableDataSet.query(typeTableDataSet.currentPage);
-          modal.close();
+          modal?.close();
         }).catch(() => {
           Choerodon.prompt('编辑失败');
         });
@@ -142,17 +145,26 @@ const AddIssueType: React.FC<Props> = ({ modal, typeId, typeTableDataSet }) => {
 
   useEffect(() => {
     if (typeId) {
-      issueTypeApi.getType(typeId).then((res: any) => {
+      issueTypeApi[isOrganization ? 'orgGetType' : 'getType'](typeId).then((res: any) => {
         setInitType(res);
+        addDataSet.current?.set('name', res.name);
+        addDataSet.current?.set('description', res.description);
+        addDataSet.current?.set('icon', res.icon);
+        addDataSet.current?.set('typeCode', res.typeCode);
+        setColor(res.colour);
       });
     }
-  }, [typeId]);
+  }, [addDataSet, isOrganization, typeId]);
   return (
     <div className={styles.addIssueType}>
       <Form dataSet={addDataSet}>
         <TextField name="name" />
         <TextArea name="description" />
-        <Select name="typeCode" />
+        {
+          !(initType?.source === 'system') && (
+            <Select name="typeCode" />
+          )
+        }
         <IconPicker name="icon" />
       </Form>
       <div className={styles.colorPicker}>

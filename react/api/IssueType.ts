@@ -37,7 +37,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   create(data: ICreate) {
     return this.request({
       method: 'post',
-      url: `${this.prefix}/issue_type/issue_type`,
+      url: `${this.prefix}/issue_type`,
       params: {
         organization: getOrganizationId(),
       },
@@ -48,7 +48,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   getType(typeId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/issue_type/issue_type/${typeId}`,
+      url: `${this.prefix}/issue_type/${typeId}`,
       params: {
         organization: getOrganizationId(),
       },
@@ -58,7 +58,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   update(typeId: string, data: IUpdate) {
     return axios({
       method: 'put',
-      url: `${this.prefix}/issue_type/issue_type/${typeId}`,
+      url: `${this.prefix}/issue_type/${typeId}`,
       params: {
         organization: getOrganizationId(),
       },
@@ -110,7 +110,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   orgCreate(data: ICreate) {
     return this.request({
       method: 'post',
-      url: `${this.OrgPrefix}/issue_type/issue_type`,
+      url: `${this.OrgPrefix}/issue_type`,
       data,
     });
   }
@@ -118,14 +118,14 @@ class IssueTypeApi extends Api<IssueTypeApi> {
   orgGetType(typeId: string) {
     return axios({
       method: 'get',
-      url: `${this.OrgPrefix}/issue_type/issue_type/${typeId}`,
+      url: `${this.OrgPrefix}/issue_type/${typeId}`,
     });
   }
 
   orgUpdate(typeId: string, data: IUpdate) {
     return axios({
       method: 'put',
-      url: `${this.OrgPrefix}/issue_type/issue_type/${typeId}`,
+      url: `${this.OrgPrefix}/issue_type/${typeId}`,
       data,
     });
   }
@@ -203,6 +203,26 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       },
       // @ts-ignore
     }).then((res) => res.filter((type) => type.typeCode !== 'backlog'));
+  }
+
+  referenced(typeId: string) {
+    return axios({
+      method: 'post',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      params: {
+        typeId,
+      },
+    });
+  }
+
+  dontReferenced(typeId: string) {
+    return axios({
+      method: 'post',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      params: {
+        typeId,
+      },
+    });
   }
 
   start(typeId: string) {
