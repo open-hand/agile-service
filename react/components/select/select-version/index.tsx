@@ -1,5 +1,5 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Select } from 'choerodon-ui/pro';
+import { Select, Tooltip } from 'choerodon-ui/pro';
 import { versionApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
@@ -20,7 +20,7 @@ interface Props extends Partial<SelectProps> {
 const SelectVersion: React.FC<Props> = forwardRef(({
   request, projectId, valueField, dataRef = { current: null }, afterLoad, statusArr = [], flat, hasUnassign, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const config = useMemo((): SelectConfig => ({
+  const config = useMemo((): SelectConfig<IVersion> => ({
     name: 'version',
     textField: 'name',
     valueField: valueField || 'name',
@@ -45,6 +45,11 @@ const SelectVersion: React.FC<Props> = forwardRef(({
       }
       return newVersion;
     },
+    optionRenderer: !flat ? (c) => (
+      <Tooltip title={c.name} placement="left">
+        {c.name}
+      </Tooltip>
+    ) : undefined,
     paging: false,
   }), [projectId]);
   const props = useSelect(config);
