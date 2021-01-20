@@ -42,7 +42,8 @@ const mapper = (key: IIssueColumnName): string => ({
   label: 'label',
   component: 'component',
   storyPoints: 'storyPoints',
-  version: 'version',
+  fixVersion: 'fixVersion',
+  influenceVersion: 'influenceVersion',
   epic: 'epic',
   feature: 'feature',
 }[key] || key);
@@ -282,7 +283,8 @@ const IssueTable: React.FC<Props> = ({
         <Column hidden={columnHidden('label')} name="label" className="c7n-agile-table-cell" renderer={renderTag('labelIssueRelVOS', 'labelName')} />
         <Column hidden={columnHidden('component')} name="component" className="c7n-agile-table-cell" renderer={renderTag('issueComponentBriefVOS', 'name')} />
         <Column hidden={columnHidden('storyPoints')} name="storyPoints" className="c7n-agile-table-cell" renderer={({ text }) => text || '-'} />
-        <Column hidden={columnHidden('version')} name="version" className="c7n-agile-table-cell" renderer={renderTag('versionIssueRelVOS', 'name')} />
+        <Column hidden={columnHidden('fixVersion')} name="fixVersion" className="c7n-agile-table-cell" renderer={renderTag('fixVersionIssueRelVOS', 'name')} />
+        <Column hidden={columnHidden('influenceVersion')} name="influenceVersion" className="c7n-agile-table-cell" renderer={renderTag('influenceVersionIssueRelVOS', 'name')} />
         <Column hidden={columnHidden('epic')} name="epic" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />
         {isInProgram && <Column hidden={columnHidden('feature')} name="feature" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />}
         <Column hidden={columnHidden('issueSprintVOS')} name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />

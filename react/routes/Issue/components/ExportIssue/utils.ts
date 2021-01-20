@@ -25,7 +25,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     reporterIds,
     sprint,
     summary,
-    version,
+    fixVersion,
+    influenceVersion,
     testResponsibleIds,
     mainResponsibleIds,
     environment,
@@ -52,7 +53,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       label,
       sprint,
       summary,
-      version,
+      fixVersion,
+      influenceVersion,
       starBeacon,
       userId: starBeacon ? userId : undefined,
       testResponsibleIds,
@@ -94,7 +96,8 @@ const getExportFieldCodes = (data: Array<any>) => {
     priorityId: 'priorityName',
     //  "subTask":
     //  "remainingTime":
-    version: 'versionName',
+    fixVersion: 'fixVersionName',
+    influenceVersion: 'influenceVersionName',
     epic: 'epicName',
     label: 'labelName',
     storyPoints: 'storyPoints',
@@ -150,8 +153,13 @@ function getFilterFormSystemFields(): FieldProps[] {
     valueField: 'componentId',
     textField: 'name',
   }, {
-    name: 'version',
-    label: '版本',
+    name: 'fixVersion',
+    label: '修复的版本',
+    valueField: 'versionId',
+    textField: 'name',
+  }, {
+    name: 'influenceVersion',
+    label: '影响的版本',
     valueField: 'versionId',
     textField: 'name',
   }]);

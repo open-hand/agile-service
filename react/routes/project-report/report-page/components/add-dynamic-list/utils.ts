@@ -22,7 +22,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     reporterIds,
     sprint,
     summary,
-    version,
+    fixVersion,
+    influenceVersion,
   } = data;
   return {
     advancedSearchArgs: {
@@ -40,7 +41,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       label,
       sprint,
       summary,
-      version,
+      fixVersion,
+      influenceVersion,
     },
     searchArgs: {
       createStartDate: createDate[0],

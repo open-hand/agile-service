@@ -86,7 +86,8 @@ interface IExportSearch {
     label?: any,
     sprint?: any,
     summary?: string,
-    version?: any,
+    fixVersion?: any,
+    influenceVersion?: any,
     starBeacon?: boolean
     userId?: string
     testResponsibleIds?: string[]
