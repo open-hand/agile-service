@@ -9,6 +9,8 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
@@ -115,6 +117,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StatusFieldSettingMapper statusFieldSettingMapper;
     @Autowired
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -237,14 +241,30 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public List<StatusVO> queryStatusByProjectId(Long projectId, String applyType) {
-        Long organizationId = projectUtil.getOrganizationId(projectId);
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Long organizationId = projectVO.getOrganizationId();
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
         if (stateMachineSchemeId == null) {
             throw new CommonException(ERROR_STATEMACHINESCHEMEID_NULL);
         }
         //获取状态机ids
+        List<Long> issueTypeIds = new ArrayList<>();
+        issueTypeIds.add(0L);
+        List<String> categoryCodes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+        if (categoryCodes.contains(ProjectCategory.MODULE_AGILE)) {
+            IssueTypeDTO issueType = new IssueTypeDTO();
+            issueType.setOrganizationId(organizationId);
+            issueType.setTypeCode("feature");
+            List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.select(issueType);
+            if (!CollectionUtils.isEmpty(issueTypeDTOS)) {
+                IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Boolean.TRUE.equals(v.getInitialize())).findAny().orElse(new IssueTypeDTO());
+                issueTypeIds.add(issueTypeDTO.getId());
+            }
+        }
         List<Long> stateMachineIds = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId)
-                .stream().map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
+                .stream()
+                .filter(v -> !issueTypeIds.contains(v.getIssueTypeId()))
+                .map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
         return statusService.queryByStateMachineIds(organizationId, stateMachineIds);
     }
 
