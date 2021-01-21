@@ -202,51 +202,34 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     }).then((res) => res.filter((type) => type.typeCode !== 'backlog'));
   }
 
-  referenced(typeId: string) {
-    return axios({
-      method: 'post',
-      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      params: {
-        typeId,
-      },
-    });
-  }
-
-  dontReferenced(typeId: string) {
-    return axios({
-      method: 'post',
-      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      params: {
-        typeId,
-      },
-    });
-  }
-
-  start(typeId: string) {
-    return axios({
-      method: 'post',
-      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      params: {
-        typeId,
-      },
-    });
-  }
-
-  stop(typeId: string) {
-    return axios({
-      method: 'post',
-      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      params: {
-        typeId,
-      },
-    });
-  }
-
-  getUsage(page = 0, size = 15) {
+  orgReferenced(typeId: string, referenced: boolean) {
     return axios({
       method: 'get',
-      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
-      param: {
+      url: `${this.OrgPrefix}/issue_type/${typeId}/update_referenced`,
+      params: {
+        typeId,
+        referenced,
+      },
+    });
+  }
+
+  enabled(typeId: string, enabled: boolean) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/issue_type/${typeId}/update_enabled`,
+      params: {
+        typeId,
+        enabled,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  orgGetUsage(typeId: string, page = 0, size = 15) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/${typeId}/usage_detail`,
+      params: {
         page,
         size,
       },
