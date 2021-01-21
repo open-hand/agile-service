@@ -50,6 +50,7 @@ public class ProjectIssueTypeController {
     public ResponseEntity<IssueTypeVO> create(@PathVariable("project_id") Long projectId,
                                               @RequestParam Long organizationId,
                                               @RequestBody @Valid IssueTypeVO issueTypeVO) {
+        issueTypeVO.setSource(null);
         return ResponseEntity.ok(issueTypeService.create(organizationId, projectId, issueTypeVO));
     }
 
@@ -107,12 +108,34 @@ public class ProjectIssueTypeController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新问题类型启停用")
-    @GetMapping(value = "/{id}/update_enabled")
+    @PutMapping(value = "/{id}/update_enabled")
     public ResponseEntity updateEnabled(@PathVariable("project_id") Long projectId,
                                         @RequestParam Long organizationId,
                                         @PathVariable(value = "id") @Encrypt Long issueTypeId,
                                         @RequestParam Boolean enabled) {
         issueTypeService.updateEnabled(organizationId, projectId, issueTypeId, enabled);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "项目层分页查询可引用的问题类型列表")
+    @PostMapping("/list/reference")
+    public ResponseEntity<Page<IssueTypeVO>> pageQueryReference(@ApiIgnore
+                                                                @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                                @ApiParam(value = "项目id", required = true)
+                                                                @PathVariable("project_id") Long projectId,
+                                                                @RequestParam Long organizationId) {
+        return ResponseEntity.ok(issueTypeService.pageQueryReference(pageRequest, organizationId, projectId));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "项目层引用的问题类型列表")
+    @PostMapping("/reference/{reference_id}")
+    public ResponseEntity<Page<IssueTypeVO>> reference(@ApiParam(value = "项目id", required = true)
+                                                       @PathVariable("project_id") Long projectId,
+                                                       @PathVariable("reference_id") Long referenceId,
+                                                       @RequestParam Long organizationId) {
+        issueTypeService.reference(projectId, organizationId, referenceId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

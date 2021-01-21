@@ -13,6 +13,35 @@ public class IssueTypeSearchVO {
     private String description;
     @ApiModelProperty(value = "其他参数")
     private String param;
+    private Boolean enabled;
+
+    private Boolean referenced;
+
+    private String source;
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public Boolean getReferenced() {
+        return referenced;
+    }
+
+    public void setReferenced(Boolean referenced) {
+        this.referenced = referenced;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
 
     private Long organizationId;
 

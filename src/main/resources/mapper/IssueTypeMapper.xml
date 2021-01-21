@@ -160,9 +160,19 @@
             <if test="issueTypeSearchVO.description != null">
                 and t1.description like concat('%',#{issueTypeSearchVO.description},'%')
             </if>
+            <if test="issueTypeSearchVO.source != null">
+                and t1.source = #{issueTypeSearchVO.source}
+            </if>
+            <if test="issueTypeSearchVO.enabled != null">
+                and ifnull(t2.enabled, 1) = #{issueTypeSearchVO.enabled}
+            </if>
+            <if test="issueTypeSearchVO.referenced != null">
+                and t1.referenced = #{issueTypeSearchVO.referenced}
+            </if>
             <if test="issueTypeSearchVO.param != null">
                 and (t1.name like concat('%',#{issueTypeSearchVO.param},'%')
                 or t1.description like concat('%',#{issueTypeSearchVO.param},'%')
+                or t1.source = #{issueTypeSearchVO.source}
                 )
             </if>
         </if>
@@ -180,6 +190,23 @@
         <foreach collection="ids" item="item" open="(" close=")" separator=",">
             #{item}
         </foreach>
+    </select>
+
+    <select id="selectEnableReference" resultType="io.choerodon.agile.api.vo.IssueTypeVO">
+        select
+        t2.*
+        from fd_issue_type t2
+        where t2.organization_id = #{organizationId}
+        and t2.project_id = 0
+        and t2.source = 'organization'
+        and t2.id not in (
+            select
+            t1.reference_id
+            from fd_issue_type t1
+            where t1.organization_id = #{organizationId}
+            and t1.project_id = #{projectId}
+            and t1.reference_id is not null
+        )
     </select>
 
 </mapper>

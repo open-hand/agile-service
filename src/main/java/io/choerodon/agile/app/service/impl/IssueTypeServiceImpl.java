@@ -28,6 +28,7 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -84,6 +85,19 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                     IssueTypeCode.ISSUE_EPIC.value(),
                     IssueTypeCode.FEATURE.value());
 
+    private static final Map<String, List<String>> TYPE_CODE_CATEGORY_MAP;
+
+    static {
+        TYPE_CODE_CATEGORY_MAP = new HashMap<>();
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.BUG.value(), Arrays.asList(ProjectCategory.MODULE_AGILE));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.FEATURE.value(), Arrays.asList(ProjectCategory.MODULE_PROGRAM));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.ISSUE_EPIC.value(), Arrays.asList(ProjectCategory.MODULE_PROGRAM, ProjectCategory.MODULE_AGILE));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.STORY.value(), Arrays.asList(ProjectCategory.MODULE_AGILE));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.SUB_TASK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.TASK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.BACKLOG.value(), Arrays.asList(ProjectCategory.MODULE_BACKLOG));
+    }
+
 
     @Override
     public IssueTypeVO queryById(Long organizationId, Long issueTypeId) {
@@ -107,7 +121,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         issueTypeVO.setInitialize(false);
         issueTypeVO.setReferenced(ZERO.equals(projectId));
-        String source = ZERO.equals(projectId) ? ORGANIZATION : PROJECT;
+        String source = issueTypeVO.getSource();
+        if (!StringUtils.hasText(source)) {
+            source = ZERO.equals(projectId) ? ORGANIZATION : PROJECT;
+        }
         issueTypeVO.setSource(source);
         IssueTypeDTO issueType = modelMapper.map(issueTypeVO, IssueTypeDTO.class);
         IssueTypeVO result = modelMapper.map(createIssueType(issueType), IssueTypeVO.class);
@@ -372,8 +389,15 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         Page<ProjectIssueTypeVO> emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         if (Boolean.TRUE.equals(dto.getInitialize())) {
+            List<String> categories = TYPE_CODE_CATEGORY_MAP.get(dto.getTypeCode());
+            if (ObjectUtils.isEmpty(categories)) {
+                return emptyPage;
+            }
+            ProjectSearchVO projectSearchVO = new ProjectSearchVO();
+            projectSearchVO.setEnable(true);
+            projectSearchVO.setCategoryCodes(categories);
             Page<ProjectVO> page =
-                    baseFeignClient.listWithCategoryByOrganizationIds(organizationId, true, pageRequest.getPage(), pageRequest.getSize())
+                    baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, pageRequest.getPage(), pageRequest.getSize())
                             .getBody();
             List<ProjectVO> projects = page.getContent();
             Set<Long> ids = projects.stream().map(ProjectVO::getId).collect(Collectors.toSet());
@@ -407,6 +431,39 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             List<ProjectVO> projects = baseFeignClient.queryByIds(projectIds).getBody();
             List<ProjectIssueTypeVO> result = buildProjectIssueType(projects, projectEnableMap);
             return PageUtils.copyPropertiesAndResetContent(page, result);
+        }
+    }
+
+    @Override
+    public Page<IssueTypeVO> pageQueryReference(PageRequest pageRequest, Long organizationId, Long projectId) {
+        return PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectEnableReference(organizationId, projectId));
+    }
+
+    @Override
+    public void reference(Long projectId, Long organizationId, Long referenceId) {
+        IssueTypeDTO issueType = selectOne(organizationId, ZERO, referenceId);
+        if (issueType == null) {
+            throw new CommonException("error.issue.type.not.existed");
+        }
+        if (Boolean.TRUE.equals(issueType.getInitialize())) {
+            throw new CommonException("error.system.issue.type.can.not.be.referenced");
+        }
+        IssueTypeDTO dto = new IssueTypeDTO();
+        dto.setOrganizationId(organizationId);
+        dto.setProjectId(projectId);
+        dto.setReferenceId(referenceId);
+        dto.setSource(ORGANIZATION);
+        dto.setInitialize(false);
+        if (issueTypeMapper.select(dto).isEmpty()) {
+            issueType.setId(null);
+            issueType.setInitialize(false);
+            issueType.setProjectId(projectId);
+            issueType.setReferenced(false);
+            issueType.setReferenceId(referenceId);
+            IssueTypeVO vo = modelMapper.map(issueType, IssueTypeVO.class);
+            create(organizationId, projectId, vo);
+        } else {
+            throw new CommonException("error.issue.type.is.already.referenced");
         }
     }
 
@@ -499,7 +556,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     private Map<String, Set<Long>> listProjectIdsGroupByCategory(Long organizationId) {
-        Page<ProjectVO> page = baseFeignClient.listWithCategoryByOrganizationIds(organizationId, true, 1, 0).getBody();
+        ProjectSearchVO projectSearchVO = new ProjectSearchVO();
+        projectSearchVO.setEnable(true);
+        Page<ProjectVO> page = baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, 1, 0).getBody();
         List<ProjectVO> projects = page.getContent();
         Map<String, Set<Long>> map = new HashMap<>();
         projects.forEach(p -> {

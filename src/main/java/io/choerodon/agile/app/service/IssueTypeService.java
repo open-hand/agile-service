@@ -103,4 +103,23 @@ public interface IssueTypeService {
      */
     Page<ProjectIssueTypeVO> usageDetail(Long organizationId, Long issueTypeId,
                                          PageRequest pageRequest);
+
+    /**
+     * 查询组织可以引用的问题类型
+     *
+     * @param pageRequest
+     * @param organizationId
+     * @param projectId
+     * @return
+     */
+    Page<IssueTypeVO> pageQueryReference(PageRequest pageRequest, Long organizationId, Long projectId);
+
+    /**
+     * 将组织层问题类型引用到项目层
+     *
+     * @param projectId
+     * @param organizationId
+     * @param referenceId
+     */
+    void reference(Long projectId, Long organizationId, Long referenceId);
 }

@@ -54,6 +54,7 @@ public class IssueTypeController extends BaseController {
     @PostMapping
     public ResponseEntity<IssueTypeVO> create(@PathVariable("organization_id") Long organizationId,
                                               @RequestBody @Valid IssueTypeVO issueTypeVO) {
+        issueTypeVO.setSource(null);
         return ResponseEntity.ok(issueTypeService.create(organizationId, 0L, issueTypeVO));
     }
 
@@ -98,7 +99,7 @@ public class IssueTypeController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新组织问题类型是否可以被引用")
-    @GetMapping(value = "/{id}/update_referenced")
+    @PutMapping(value = "/{id}/update_referenced")
     public ResponseEntity updateReferenced(@PathVariable("organization_id") Long organizationId,
                                            @PathVariable(value = "id") @Encrypt Long issueTypeId,
                                            @RequestParam Boolean referenced) {

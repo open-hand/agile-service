@@ -56,10 +56,21 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
 
     /**
      * 根据reference_id查询
+     *
      * @param ids
      * @param organizationId
      * @return
      */
     List<IssueTypeDTO> selectByReferenceId(@Param("ids") Set<Long> ids,
                                            @Param("organizationId") Long organizationId);
+
+    /**
+     * 查该项目可以引用的问题类型
+     *
+     * @param organizationId
+     * @param projectId
+     * @return
+     */
+    List<IssueTypeVO> selectEnableReference(@Param("organizationId") Long organizationId,
+                                             @Param("projectId") Long projectId);
 }
