@@ -72,22 +72,21 @@ class SideIssueList extends Component {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{
-            fontWeight: 600, fontSize: '14px', marginRight: 20, marginLeft: 18,
-          }}
-          >
-            搜索:
-          </div>
           <Select
             {...configTheme({
-              list: issueStatus, primary: true,
+              list: issueStatus,
             })}
             allowClear
             mode="multiple"
-            style={{ width: 100 }}
             onChange={this.setFilter.bind(this, 'statusList')}
             getPopupContainer={(trigger) => trigger.parentNode}
             placeholder="状态"
+            style={{
+              marginLeft: 15,
+            }}
+            dropdownStyle={{
+              width: 180,
+            }}
           >
             {issueStatus.map(({ text, value }) => <Option value={value}>{text}</Option>)}
           </Select>
@@ -97,11 +96,9 @@ class SideIssueList extends Component {
                 value: '0',
                 text: '无版本',
               }),
-              primary: true,
             })}
             allowClear
             mode="multiple"
-            style={{ width: 100 }}
             onChange={this.setFilter.bind(this, 'versionList')}
             getPopupContainer={(trigger) => trigger.parentNode}
             placeholder="版本"
@@ -116,12 +113,9 @@ class SideIssueList extends Component {
           </Select>
 
         </div>
+        <div className="c7nagile-SideIssueList-line" />
         <div className="c7nagile-SideIssueList-content">
           {/* <Loading loading={issueListLoading} /> */}
-          <div className="c7nagile-SideIssueList-content-pi">
-            {/* <span>{activePi.piCode}</span> */}
-            {/* <Icon type={issueListCollapse ? 'expand_more' : 'expand_less'} onClick={this.handleCollapseClick} /> */}
-          </div>
           {issues.length > 0 ? (
             <div className="c7nagile-SideIssueList-content-list">
               {issues.map((issue) => <IssueItem issue={issue} />)}
