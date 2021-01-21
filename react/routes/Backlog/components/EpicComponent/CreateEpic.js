@@ -54,7 +54,7 @@ class CreateEpic extends Component {
         this.setState({
           loading: true,
         });
-        if (!await checkCanQuickCreate(epicType.typeCode)) {
+        if (!await checkCanQuickCreate(epicType.id)) {
           Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
           this.setState({
             loading: false,
@@ -64,7 +64,7 @@ class CreateEpic extends Component {
         issueApi.create(req).then((res) => {
           const dto = {
             schemeCode: 'agile_issue',
-            context: res.typeCode,
+            context: res.issueTypeId,
             pageCode: 'agile_issue_create',
           };
           fieldApi.quickCreateDefault(res.issueId, dto);

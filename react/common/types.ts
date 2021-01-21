@@ -220,6 +220,7 @@ export interface Issue {
   description: string
   creationDate: string
   typeCode?: string,
+  issueTypeId: string
   issueTypeVO: IIssueType,
   lastUpdateDate: string
   parentIssueId?: string
@@ -325,7 +326,7 @@ export type IIssueColumnName =
   'feature';
 
 export type IFieldType =
-  'text' | 'input' | 'member' |'multiMember'| 'single' | 'multiple' | 'radio' | 'checkbox' |
+  'text' | 'input' | 'member' | 'multiMember' | 'single' | 'multiple' | 'radio' | 'checkbox' |
   'number' | 'time' | 'date' | 'datetime'
 
 export type ISystemFieldCode =

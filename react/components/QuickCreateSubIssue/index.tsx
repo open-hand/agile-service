@@ -44,14 +44,14 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       if (currentType && summary && summary.trim()) {
         if (!err) {
           setLoading(true);
-          if (!await checkCanQuickCreate(currentType.typeCode)) {
+          if (!await checkCanQuickCreate(currentType.id)) {
             Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
             setLoading(false);
             return;
           }
           const param = {
             schemeCode: 'agile_issue',
-            context: currentType.typeCode,
+            context: currentType.id,
             pageCode: 'agile_issue_create',
           };
           const fields = await fieldApi.getFields(param);
