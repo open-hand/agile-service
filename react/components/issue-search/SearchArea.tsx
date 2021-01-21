@@ -249,7 +249,7 @@ const SearchArea: React.FC = () => {
         </div>
       </div>
       <div className={`${prefixCls}-search-right`}>
-        <Button onClick={reset} funcType={'flat' as FuncType} color={'blue' as ButtonColor}>重置</Button>
+        <Button style={{ marginTop: 10 }} onClick={reset} funcType={'flat' as FuncType} color={'blue' as ButtonColor}>重置</Button>
       </div>
     </>
   );
