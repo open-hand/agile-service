@@ -233,6 +233,7 @@ class CreateIssue extends Component {
     const { form } = this.props;
     const defaultScope = new Map([
       ['assignee', 'assigneedId'],
+      ['reporter', 'reporterId'],
       ['component', 'componentIssueRel'],
       ['summary', 'summary'],
       ['label', 'issueLabel'],
@@ -710,6 +711,37 @@ class CreateIssue extends Component {
                 )}
               </IsProjectMember>
             </div>
+          </FormItem>
+
+        );
+      case 'reporter':
+        return (
+          <FormItem label="报告人" key={`${newIssueTypeCode}-reporter`}>
+            {getFieldDecorator('reporterId', {
+              rules: [{ required: field.required, message: '请选择报告人' }],
+            })(
+              <SelectFocusLoad
+                type="user"
+                label="报告人"
+                style={{ flex: 1 }}
+                loadWhenMount
+                getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                allowClear
+              >
+                {field.defaultValueObj && (
+                  <Option key={field.defaultValueObj.id} value={field.defaultValueObj.id}>
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
+                    }}
+                    >
+                      <UserHead
+                        user={field.defaultValueObj}
+                      />
+                    </div>
+                  </Option>
+                )}
+              </SelectFocusLoad>,
+            )}
           </FormItem>
 
         );
