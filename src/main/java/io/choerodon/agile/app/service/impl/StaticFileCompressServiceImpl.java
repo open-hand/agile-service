@@ -132,7 +132,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     public void unCompress(List<StaticFileCompressDTO> staticFileCompressList, Long projectId, Long organizationId, List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         LOGGER.info("start uncompress");
-        sendProcess(staticFileCompressHistoryList, userId);
+        sendProcess(staticFileCompressHistoryList, userId, projectId);
         staticFileCompressList.forEach(staticFileCompress -> {
             String suffix = getSuffix(staticFileCompress.getFileName());
             //判断压缩类型，调用不同的解压方法
@@ -153,7 +153,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                 LOGGER.error(e.getMessage(), e);
                 staticFileCompress.setStatus(FAILED);
                 updateHistoryFailed(staticFileCompress.getStaticFileCompressHistory(), e.getMessage());
-                sendProcess(staticFileCompressHistoryList, userId);
+                sendProcess(staticFileCompressHistoryList, userId, projectId);
             }
         });
         LOGGER.info("end uncompress");
@@ -243,7 +243,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         staticFileLineMapper.batchInsert(lineList);
         updateHistoryStatus(staticFileCompress.getStaticFileCompressHistory(), SUCCESS);
         staticFileCompress.setStatus(SUCCESS);
-        sendProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory().getUserId());
+        sendProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory().getUserId(), projectId);
     }
 
     /**
@@ -307,14 +307,14 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
             staticFileLineMapper.batchInsert(lineList);
             updateHistoryStatus(staticFileCompress.getStaticFileCompressHistory(), SUCCESS);
             staticFileCompress.setStatus(SUCCESS);
-            sendProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory().getUserId());
+            sendProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory().getUserId(), projectId);
         }
     }
 
     private void updateProgress(List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, StaticFileOperationHistoryDTO staticFileCompressHistory, int toTalSize, long nowSize) {
         double nowProgress = new BigDecimal(nowSize).divide(new BigDecimal(toTalSize), 2, RoundingMode.HALF_UP).doubleValue();
         staticFileCompressHistory.setProcess(nowProgress);
-        sendProcess(staticFileCompressHistoryList, staticFileCompressHistory.getUserId());
+        sendProcess(staticFileCompressHistoryList, staticFileCompressHistory.getUserId(), staticFileCompressHistory.getProjectId());
     }
 
     private void setFileStatus(Long id, String status) {
@@ -489,7 +489,8 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         return notIndex;
     }
 
-    private void sendProcess(List<StaticFileOperationHistoryDTO> staticFileOperationHistoryList, Long userId) {
+    private void sendProcess(List<StaticFileOperationHistoryDTO> staticFileOperationHistoryList, Long userId, Long projectId) {
+        String messageCode = STATIC_FILE_WEBSOCKET_KEY + "-" + projectId;
         List<StaticFileOperationHistorySocketVO> staticFileOperationHistorySocketList = modelMapper.map(staticFileOperationHistoryList, new TypeToken<List<StaticFileOperationHistorySocketVO>>() {
         }.getType());
         String message = null;
@@ -498,7 +499,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         } catch (JsonProcessingException e) {
             LOGGER.error("object to json error", e);
         }
-        messageClient.sendByUserId(userId, STATIC_FILE_WEBSOCKET_KEY, message);
+        messageClient.sendByUserId(userId, messageCode, message);
     }
 
     private String getSuffix(String fileName) {
