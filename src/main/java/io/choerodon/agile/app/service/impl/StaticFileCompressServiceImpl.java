@@ -107,18 +107,19 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     public void validFileType(List<MultipartFile> files) {
         files.forEach(multipartFile -> {
             boolean notIndex;
-            String fileUpperName = getUpperName(multipartFile.getOriginalFilename());
             //判断压缩类型，调用不同的解压方法
-            if (fileUpperName.endsWith(ZIP)) {
-                notIndex = validIndexExistByApache(multipartFile, ZIP);
-            } else if (fileUpperName.endsWith(TAR)) {
-                notIndex = validIndexExistByApache(multipartFile, TAR);
-            } else if (fileUpperName.endsWith(TAR_GZ)) {
-                notIndex = validIndexExistByApache(multipartFile, TAR_GZ);
-            } else if (fileUpperName.endsWith(RAR)) {
-                notIndex = validIndexExistByRar(multipartFile);
-            } else {
-                throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
+            String suffix = getSuffix(multipartFile.getOriginalFilename());
+            switch (suffix) {
+                case ZIP:
+                case TAR:
+                case TAR_GZ:
+                    notIndex = validIndexExistByApache(multipartFile, suffix);
+                    break;
+                case RAR:
+                    notIndex = validIndexExistByRar(multipartFile);
+                    break;
+                default:
+                    throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
             }
             if (notIndex) {
                 throw new CommonException(INDEX_NULL_EXCEPTION_CODE);
@@ -133,19 +134,20 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         LOGGER.info("start uncompress");
         sendProcess(staticFileCompressHistoryList, userId);
         staticFileCompressList.forEach(staticFileCompress -> {
-            String fileUpperName = getUpperName(staticFileCompress.getFileName());
+            String suffix = getSuffix(staticFileCompress.getFileName());
             //判断压缩类型，调用不同的解压方法
             try {
-                if (fileUpperName.endsWith(ZIP)) {
-                    unCompressedByApache(staticFileCompress, projectId, organizationId, ZIP, staticFileCompressHistoryList);
-                } else if (fileUpperName.endsWith(TAR)) {
-                    unCompressedByApache(staticFileCompress, projectId, organizationId, TAR, staticFileCompressHistoryList);
-                } else if (fileUpperName.endsWith(TAR_GZ)) {
-                    unCompressedByApache(staticFileCompress, projectId, organizationId, TAR_GZ, staticFileCompressHistoryList);
-                } else if (fileUpperName.endsWith(RAR)) {
-                    unRar(staticFileCompress, projectId, organizationId, staticFileCompressHistoryList);
-                } else {
-                    throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
+                switch (suffix) {
+                    case ZIP:
+                    case TAR:
+                    case TAR_GZ:
+                        unCompressedByApache(staticFileCompress, projectId, organizationId, suffix, staticFileCompressHistoryList);
+                        break;
+                    case RAR:
+                        unRar(staticFileCompress, projectId, organizationId, staticFileCompressHistoryList);
+                        break;
+                    default:
+                        throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
                 }
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
@@ -175,17 +177,19 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     @Override
     public String getIndexPrefixPath(MultipartFile multipartFile) throws IOException {
         String result;
-        String fileUpperName = getUpperName(multipartFile.getOriginalFilename());
-        if (fileUpperName.endsWith(ZIP)) {
-            result = getIndexPrefixPathByApache(multipartFile, ZIP);
-        } else if (fileUpperName.endsWith(TAR)) {
-            result = getIndexPrefixPathByApache(multipartFile, TAR);
-        } else if (fileUpperName.endsWith(TAR_GZ)) {
-            result = getIndexPrefixPathByApache(multipartFile, TAR_GZ);
-        } else if (fileUpperName.endsWith(RAR)) {
-            result = getIndexPrefixPathByRar(multipartFile);
-        } else {
-            throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
+        String suffix = getSuffix(multipartFile.getOriginalFilename());
+        //判断压缩类型，调用不同的解压方法
+        switch (suffix) {
+            case ZIP:
+            case TAR:
+            case TAR_GZ:
+                result = getIndexPrefixPathByApache(multipartFile, suffix);
+                break;
+            case RAR:
+                result = getIndexPrefixPathByRar(multipartFile);
+                break;
+            default:
+                throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
         }
         return result;
     }
@@ -318,14 +322,15 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     }
 
     private ArchiveInputStream getArchiveInputStream(BufferedInputStream bufferedInputStream, String suffix) throws IOException {
-        if (TAR.equals(suffix)) {
-            return new TarArchiveInputStream(bufferedInputStream);
-        } else if (ZIP.equals(suffix)) {
-            return new ZipArchiveInputStream(bufferedInputStream);
-        } else if (TAR_GZ.equals(suffix)) {
-            return new TarArchiveInputStream(new GzipCompressorInputStream(bufferedInputStream));
-        } else {
-            throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
+        switch (suffix) {
+            case ZIP:
+                return new ZipArchiveInputStream(bufferedInputStream);
+            case TAR:
+                return new TarArchiveInputStream(bufferedInputStream);
+            case TAR_GZ:
+                return new TarArchiveInputStream(new GzipCompressorInputStream(bufferedInputStream));
+            default:
+                throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
         }
     }
 
@@ -494,5 +499,13 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
             LOGGER.error("object to json error", e);
         }
         messageClient.sendByUserId(userId, STATIC_FILE_WEBSOCKET_KEY, message);
+    }
+
+    private String getSuffix(String fileName) {
+        String upperFileName = getUpperName(fileName);
+        if (upperFileName.endsWith(TAR_GZ)) {
+            return TAR_GZ;
+        }
+        return upperFileName.substring(upperFileName.lastIndexOf("."));
     }
 }
