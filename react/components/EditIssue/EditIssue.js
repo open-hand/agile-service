@@ -104,13 +104,14 @@ function EditIssue() {
       // 2. 根据详情加载fields
       const param = {
         schemeCode: 'agile_issue',
-        context: issue.issueTypeId,
+        // context: issue.issueTypeId,
+        context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
       const fields = await fieldApi.project(projectId).org(organizationId).outside(outside).getFieldAndValue(id, param);
       const { description, issueTypeVO: { typeCode, id: typeId } } = issue;
       if (!disabled && (!description || description === JSON.stringify([{ insert: '\n' }]))) { // 加载默认模版
-        const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(typeId) || {};
+        const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(typeCode) || {};
         const { template } = issueTemplateInfo;
         issue.descriptionTemplate = template;
       }

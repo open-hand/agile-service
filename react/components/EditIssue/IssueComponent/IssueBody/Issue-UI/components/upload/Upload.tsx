@@ -48,22 +48,8 @@ const UploadUI: React.FC<Props> = (props) => {
     fileList.forEach((file: any) => {
       formData.append('file', file);
     });
-    uiApi.uploadUI(issueId, formData)
-      .then(() => {
-        Choerodon.prompt('上传成功');
-        store.getLinkedUI();
-        reloadIssue();
-      })
-      .catch(() => {
-        const temp = arr.slice();
-        temp.forEach((one: any) => {
-          if (!one.url) {
-            const tmp = one;
-            tmp.status = 'error';
-          }
-        });
-      });
-  }, [issueId, reloadIssue, store]);
+    uiApi.uploadUI(issueId, formData);
+  }, [issueId]);
 
   const handleUpdate = useCallback((arr) => {
     if (arr.length > 0 && arr.some((one: any) => !one.url)) {

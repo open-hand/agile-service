@@ -1,6 +1,9 @@
-import React, { useEffect, useContext, useCallback } from 'react';
+import React, {
+  useEffect, useContext, useCallback, useState,
+} from 'react';
 import { observer } from 'mobx-react-lite';
-import { Divider, Icon, Tooltip } from 'choerodon-ui';
+import { WSHandler, Choerodon } from '@choerodon/boot';
+import { Divider, Tooltip } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import LinkedItem from './components/linked-item';
 import UploadUI from './components/upload';
@@ -9,8 +12,10 @@ import './IssueUI.less';
 
 import EditIssueContext from '../../../stores';
 import { IUi } from './components/delete/DeleteUI';
+import { WSItem } from './components/linked-item/LinkedItem';
 
 const IssueUI = (props: any) => {
+  const [wsData, setWsData] = useState<WSItem[]>([]);
   const { store } = useContext(EditIssueContext);
 
   useEffect(() => {
@@ -20,6 +25,29 @@ const IssueUI = (props: any) => {
   const handleLinkUI = useCallback(() => {
     openLinkUI({ store, reloadIssue: props.reloadIssue });
   }, [props.reloadIssue, store]);
+
+  const handleMessage = useCallback((message) => {
+    if (!message || message === 'ok') {
+      return;
+    }
+    const data = JSON.parse(message);
+    if (data) {
+      setWsData(data);
+      if (data.every((item: WSItem) => item.status !== 'doing')) {
+        props.reloadIssue();
+        store.getLinkedUI();
+        if (data.every((item: WSItem) => item.status === 'success')) {
+          Choerodon.prompt('上传成功');
+        } else {
+          Choerodon.prompt('上传失败');
+        }
+      }
+    }
+  }, [props, store]);
+
+  const renderUploading = useCallback(() => wsData.map((item: WSItem) => (
+    <LinkedItem ui={item} reloadIssue={props.reloadIssue} uploading />
+  )), [props.reloadIssue, wsData]);
 
   const { linkedUI } = store;
   return (
@@ -41,6 +69,14 @@ const IssueUI = (props: any) => {
           <LinkedItem ui={ui} reloadIssue={props.reloadIssue} />
         ))
       }
+      <WSHandler
+        messageKey="agile-static-file"
+        onMessage={handleMessage}
+      >
+        {
+          renderUploading()
+        }
+      </WSHandler>
     </div>
   );
 };

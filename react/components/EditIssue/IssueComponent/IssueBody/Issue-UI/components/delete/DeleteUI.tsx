@@ -13,6 +13,8 @@ export interface IUi {
   issueId: string
   projectId: string
   url: string
+  status: 'success' | 'failed'
+  process: 1
 }
 
 interface Props {
