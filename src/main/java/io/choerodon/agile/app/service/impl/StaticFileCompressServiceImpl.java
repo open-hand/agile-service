@@ -485,7 +485,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     }
 
     private void sendProcess(List<StaticFileOperationHistoryDTO> staticFileOperationHistoryList, Long userId) {
-        List<StaticFileOperationHistorySocketVO> staticFileOperationHistorySocketList = modelMapper.map(staticFileOperationHistoryList, new TypeToken<List<StaticFileOperationHistoryDTO>>() {
+        List<StaticFileOperationHistorySocketVO> staticFileOperationHistorySocketList = modelMapper.map(staticFileOperationHistoryList, new TypeToken<List<StaticFileOperationHistorySocketVO>>() {
         }.getType());
         String message = null;
         try {
