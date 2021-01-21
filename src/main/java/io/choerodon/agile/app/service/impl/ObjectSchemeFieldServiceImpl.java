@@ -40,6 +40,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     protected static final String ERROR_FIELDTYPE_ILLEGAL = "error.fieldType.illegal";
     protected static final String ERROR_FIELD_NAMEEXIST = "error.field.nameExist";
     protected static final String ERROR_FIELD_CODEEXIST = "error.field.codeExist";
+    protected static final String CREATED_LEVEL_SYSTEM = "system";
+    protected static final String CREATED_LEVEL_ORGANIZATION = "organization";
     @Autowired
     protected ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
@@ -761,8 +763,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             });
             //增加扩展字段
             if (!CollectionUtils.isEmpty(insertSet)) {
-                String[] contents = issueTypes.toArray(new String[issueTypes.size()]);
-                List<IssueTypeVO> issueTypeVOList = getIssueTypeByContexts(contents, organizationId, projectId);
+                String[] contexts = issueTypes.toArray(new String[issueTypes.size()]);
+                List<IssueTypeVO> issueTypeVOList = getIssueTypeByContexts(contexts, organizationId, projectId);
                 Map<String, Long> issueTypeMap =
                         issueTypeVOList.stream().collect(Collectors.toMap(IssueTypeVO::getTypeCode, IssueTypeVO::getId));
                 insertSet.forEach(i ->
@@ -816,21 +818,41 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String syncDefaultValueIssueTypes, ObjectSchemeFieldUpdateVO updateDTO) {
 
         String defaultValue;
+        List<String> issueTypes = Arrays.asList(syncDefaultValueIssueTypes.split(","));
+        ObjectSchemeFieldDTO field ;
         //组织层下的组织字段，项目层下的自定义字段查询默认值
         if (Boolean.TRUE.equals(updateDTO.getCustom())) {
+            field = baseQueryById(organizationId, projectId, fieldId);
             defaultValue = getObjectSchemeFieldByFieldId(organizationId, projectId, fieldId).getDefaultValue();
         }
         //组织层下的系统字段，项目层下的系统字段和组织字段处理默认值
         else {
+            field = baseQueryById(organizationId, null, fieldId);
             defaultValue = updateDTO.getDefaultValue();
             String value = tryDecryptDefaultValue(updateDTO.getFieldType(), updateDTO.getDefaultValue());
-            if (defaultValue != null) {
+            if (value != null) {
                 defaultValue = value;
             }
         }
-
-        List<String> issueTypes = Arrays.asList(syncDefaultValueIssueTypes.split(","));
+        //检查类型是否合法
+        checkIssueTypeLegality(organizationId, projectId, field, issueTypes);
         updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue, issueTypes, updateDTO.getExtraConfig());
+    }
+
+    private void checkIssueTypeLegality(Long organizationId, Long projectId, ObjectSchemeFieldDTO field, List<String> issueTypes) {
+        List<String> legalIssueTypes;
+        if (Objects.equals(field.getCreatedLevel(), CREATED_LEVEL_SYSTEM)) {
+            legalIssueTypes = Arrays.asList(getFieldContext(field.getCode()).split(","));
+        } else if (!Objects.isNull(projectId) && Objects.equals(field.getCreatedLevel(), CREATED_LEVEL_ORGANIZATION)) {
+            legalIssueTypes = field.getExtendFields().stream().map(ObjectSchemeFieldExtendDTO::getIssueType).collect(Collectors.toList());
+        } else {
+            legalIssueTypes = issueTypeService.queryByOrgId(organizationId).stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toList());
+        }
+        issueTypes.forEach(issueType -> {
+            if (!legalIssueTypes.contains(issueType)) {
+                throw new CommonException("error.issue.type.illegal");
+            }
+        });
     }
 
     private ObjectSchemeFieldDTO getObjectSchemeFieldByFieldId(Long organizationId, Long projectId, Long fieldId) {
