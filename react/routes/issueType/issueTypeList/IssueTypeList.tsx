@@ -268,7 +268,7 @@ function IssueTypeList() {
         width: 480,
       },
       key: Modal.key(),
-      title: '引用问题类型',
+      title: '添加问题类型',
       // @ts-ignore
       children: <AddIssueType typeTableDataSet={issueTypeDataSet} addRef={addRef} isOrganization={isOrganization} />,
       okText: '保存',
