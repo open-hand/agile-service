@@ -5,12 +5,13 @@ import { observer } from 'mobx-react-lite';
 import {
   Form, Select, DataSet, TextField, TextArea, IconPicker, Modal,
 } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui';
 import { IModalProps } from '@/common/types';
 import { CompactPicker } from 'react-color';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Choerodon } from '@choerodon/boot';
 import { issueTypeApi, IUpdate, ICreate } from '@/api';
-import { getIsOrganization } from '@/utils/common';
+import { TypeTag } from '@/components';
 import styles from './AddIssueType.less';
 
 interface Props {
@@ -220,7 +221,30 @@ const AddIssueType: React.FC<Props> = ({
             <Select name="typeCode" />
           )
         }
-        <IconPicker name="icon" />
+        <div className={styles.icon}>
+          <IconPicker
+            name="icon"
+            style={{
+              width: '100%',
+            }}
+          />
+          {
+            addDataSet.current?.get('icon') && (
+            <div className={styles.icon_replace}>
+              <TypeTag
+              // @ts-ignore
+                data={{
+                  colour,
+                  icon: addDataSet.current?.get('icon'),
+                }}
+              />
+            </div>
+            )
+          }
+          <div className={styles.iconPicker}>
+            <Icon type="baseline-arrow_drop_down" />
+          </div>
+        </div>
       </Form>
       <div className={styles.colorPicker}>
         <div className={`${styles.swatch} ${styles[`swatch_${isSystemType}`]}`} onClick={handleClickSwatch} role="none">
