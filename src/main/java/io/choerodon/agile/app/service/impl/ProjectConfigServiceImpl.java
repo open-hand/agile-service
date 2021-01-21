@@ -249,16 +249,18 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         //获取状态机ids
         List<Long> issueTypeIds = new ArrayList<>();
-        issueTypeIds.add(0L);
-        List<String> categoryCodes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
-        if (categoryCodes.contains(ProjectCategory.MODULE_AGILE)) {
-            IssueTypeDTO issueType = new IssueTypeDTO();
-            issueType.setOrganizationId(organizationId);
-            issueType.setTypeCode("feature");
-            List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.select(issueType);
-            if (!CollectionUtils.isEmpty(issueTypeDTOS)) {
-                IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Boolean.TRUE.equals(v.getInitialize())).findAny().orElse(new IssueTypeDTO());
-                issueTypeIds.add(issueTypeDTO.getId());
+        if(Objects.equals(applyType,SchemeApplyType.AGILE) || Objects.equals(applyType,SchemeApplyType.PROGRAM)){
+            issueTypeIds.add(0L);
+            List<String> categoryCodes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+            if (categoryCodes.contains(ProjectCategory.MODULE_AGILE)) {
+                IssueTypeDTO issueType = new IssueTypeDTO();
+                issueType.setOrganizationId(organizationId);
+                issueType.setTypeCode("feature");
+                List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.select(issueType);
+                if (!CollectionUtils.isEmpty(issueTypeDTOS)) {
+                    IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Boolean.TRUE.equals(v.getInitialize())).findAny().orElse(new IssueTypeDTO());
+                    issueTypeIds.add(issueTypeDTO.getId());
+                }
             }
         }
         List<Long> stateMachineIds = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId)
