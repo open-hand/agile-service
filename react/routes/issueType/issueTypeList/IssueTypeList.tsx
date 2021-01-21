@@ -111,25 +111,25 @@ function IssueTypeList() {
     };
 
     const handleReferenced = () => {
-      issueTypeApi.referenced(record?.get('id')).then(() => {
-        Choerodon.prompt('启用成功');
+      issueTypeApi.orgReferenced(record?.get('id'), true).then(() => {
+        Choerodon.prompt('允许引用成功');
         dataSet?.query(dataSet?.currentPage);
       }).catch(() => {
-        Choerodon.prompt('启用失败');
+        Choerodon.prompt('允许引用失败');
       });
     };
 
     const handleDontReferenced = () => {
-      issueTypeApi.dontReferenced(record?.get('id')).then(() => {
-        Choerodon.prompt('启用成功');
+      issueTypeApi.orgReferenced(record?.get('id'), false).then(() => {
+        Choerodon.prompt('不允许引用成功');
         dataSet?.query(dataSet?.currentPage);
       }).catch(() => {
-        Choerodon.prompt('启用失败');
+        Choerodon.prompt('不允许引用失败');
       });
     };
 
     const handleStart = () => {
-      issueTypeApi.start(record?.get('id')).then(() => {
+      issueTypeApi.enabled(record?.get('id'), true).then(() => {
         Choerodon.prompt('启用成功');
         dataSet?.query(dataSet?.currentPage);
       }).catch(() => {
@@ -138,7 +138,7 @@ function IssueTypeList() {
     };
 
     const handleStop = () => {
-      issueTypeApi.stop(record?.get('id')).then(() => {
+      issueTypeApi.enabled(record?.get('id'), false).then(() => {
         Choerodon.prompt('停用成功');
         dataSet?.query(dataSet?.currentPage);
       }).catch(() => {
@@ -193,12 +193,12 @@ function IssueTypeList() {
         }
         {
           isOrganization && record?.get('referenced') && (
-            <Menu.Item key="referenced">不允许引用</Menu.Item>
+            <Menu.Item key="dontReferenced">不允许引用</Menu.Item>
           )
         }
         {
           isOrganization && !record?.get('referenced') && (
-            <Menu.Item key="dontReferenced">允许引用</Menu.Item>
+            <Menu.Item key="referenced">允许引用</Menu.Item>
           )
         }
         {

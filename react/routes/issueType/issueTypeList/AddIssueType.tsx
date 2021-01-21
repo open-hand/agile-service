@@ -124,7 +124,7 @@ const AddIssueType: React.FC<Props> = ({
     }).catch(() => {
       Choerodon.prompt('编辑失败');
     });
-  }, []);
+  }, [isOrganization, modal, typeId, typeTableDataSet]);
 
   const handleSubmit = useCallback(async (callback?: Function) => {
     const validate = await addDataSet.validate();
