@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TimeAgo from 'timeago-react';
 import {
   Button, Icon, Popover, Tooltip,
@@ -6,6 +6,7 @@ import {
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { FormattedMessage } from 'react-intl';
+import { devOpsApi } from '@/api';
 import Commits from '../../../Commits';
 import MergeRequest from '../../../MergeRequest';
 
@@ -15,11 +16,16 @@ const STATUS_SHOW = {
   closed: '关闭',
 };
 const IssueBranch = observer(({
-  store, disabled, projectId, reloadIssue,
+  store, disabled, projectId, reloadIssue, otherProject, outside, programId, applyType, issueId,
 }) => {
   const [commitShow, setCommitShow] = useState(false);
   const [mergeRequestShow, setMergeRequestShow] = useState(false);
-
+  useEffect(() => {
+    (async () => {
+      const res = await otherProject || outside || programId || applyType === 'program' ? null : devOpsApi.project(projectId).countBranches(issueId);
+      store.setBranch(res);
+    })();
+  }, [applyType, issueId, otherProject, outside, programId, projectId, store]);
   const branch = store.getBranch;
   const {
     totalCommit, commitUpdateTime, totalMergeRequest,
@@ -27,7 +33,7 @@ const IssueBranch = observer(({
   } = branch;
   const issue = store.getIssue;
   const {
-    issueId, issueNum,
+    issueNum,
   } = issue;
   const renderBranchs = () => (
     <div>
