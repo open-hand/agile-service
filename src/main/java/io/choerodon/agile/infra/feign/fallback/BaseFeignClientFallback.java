@@ -84,8 +84,10 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
-    public ResponseEntity<Page<ProjectVO>> listWithCategoryByOrganizationIds(Long organizationId, Boolean enabled,
-                                                                             Integer page, Integer size) {
+    public ResponseEntity<Page<ProjectVO>> listWithCategoryByOrganizationIds(Long organizationId,
+                                                                             ProjectSearchVO projectSearchVO,
+                                                                             Integer page,
+                                                                             Integer size) {
         throw new CommonException("error.iamServiceFeignFallback.listWithCategoryByOrganizationIds");
     }
 
