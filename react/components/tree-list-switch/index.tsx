@@ -11,12 +11,14 @@ const ListIcon = ({ className = '', onClick }: { className: string, onClick: () 
   </div>
 );
 interface Props {
-
+  className?: string
   data: 'tree' | 'list'
   onChange?: (mode: 'list' | 'tree') => void
   disabled?: boolean
 }
-const TreeListSwitch: React.FC<Props> = ({ data: propsData, onChange, disabled }) => {
+const TreeListSwitch: React.FC<Props> = ({
+  data: propsData, onChange, disabled, className,
+}) => {
   const [data, setData] = useState(() => propsData);
   useEffect(() => {
     if (typeof (propsData) === 'string') {
@@ -30,7 +32,7 @@ const TreeListSwitch: React.FC<Props> = ({ data: propsData, onChange, disabled }
     });
   };
   return (
-    <div className={styles.switch}>
+    <div className={classnames(styles.switch, className)}>
       <Tooltip title="列表视图">
         <div className={classnames(styles.icon, styles.icon_list, data === 'list' ? styles.selected : undefined, { [styles.disabled]: disabled })}>
           <ListIcon onClick={() => handleChange('list')} className={styles.icon_list_wrap} />
