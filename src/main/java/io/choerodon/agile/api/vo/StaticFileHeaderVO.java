@@ -21,6 +21,8 @@ public class StaticFileHeaderVO {
     private String fileName;
     @ApiModelProperty(value = "创建时间")
     private Date creationDate;
+    @ApiModelProperty(value = "解压状态")
+    private String status;
 
     public Long getId() {
         return id;
@@ -60,5 +62,13 @@ public class StaticFileHeaderVO {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

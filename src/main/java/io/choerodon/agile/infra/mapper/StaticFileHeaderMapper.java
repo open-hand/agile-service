@@ -4,7 +4,6 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-import io.choerodon.agile.api.vo.StaticFileHeaderVO;
 import io.choerodon.agile.infra.dto.StaticFileHeaderDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -31,4 +30,12 @@ public interface StaticFileHeaderMapper extends BaseMapper<StaticFileHeaderDTO> 
      * @return 静态文件头
      */
     List<StaticFileHeaderDTO> selectFileListByIssue(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
+
+    /**
+     * 更新静态文件状态
+     *
+     * @param id     静态文件头id
+     * @param status 状态
+     */
+    void updateFileStatus(@Param("id") Long id, @Param("status") String status);
 }
