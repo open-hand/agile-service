@@ -19,6 +19,7 @@ databaseChangeLog(logicalFilePath: 'agile_static_file_header.groovy') {
                 constraints(nullable: false)
             }
             column(name: "status", type:"VARCHAR(255)", remarks:"静态文件状态(failed、success、doing)")
+
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")
             column(name: "creation_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
