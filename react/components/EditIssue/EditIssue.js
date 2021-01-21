@@ -108,9 +108,9 @@ function EditIssue() {
         pageCode: 'agile_issue_edit',
       };
       const fields = await fieldApi.project(projectId).org(organizationId).outside(outside).getFieldAndValue(id, param);
-      const { description, issueTypeVO: { typeCode } } = issue;
+      const { description, issueTypeVO: { typeCode, id: typeId } } = issue;
       if (!disabled && (!description || description === JSON.stringify([{ insert: '\n' }]))) { // 加载默认模版
-        const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(typeCode) || {};
+        const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(typeId) || {};
         const { template } = issueTemplateInfo;
         issue.descriptionTemplate = template;
       }
