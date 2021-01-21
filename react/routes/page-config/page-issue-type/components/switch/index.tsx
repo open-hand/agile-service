@@ -40,9 +40,9 @@ function PageSwitch() {
   useEffect(() => {
     pageIssueTypeStore.setLoading(true);
     pageConfigApi.loadAvailableIssueType().then((res) => {
-      pageIssueTypeStore.init(res[0].id as PageConfigIssueType);
+      pageIssueTypeStore.init(res[0].typeCode as PageConfigIssueType);
       setSwitchOption(res.map((type) => ({
-        value: type.id,
+        value: type.typeCode,
         text: type.name,
         type: 'common',
       })));
