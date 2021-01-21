@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.choerodon.agile.api.vo.StaticFileHeaderVO;
 import io.choerodon.agile.api.vo.StaticFileRelatedVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.StaticFileService;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
@@ -56,6 +57,19 @@ public class StaticFileController {
         return Optional.ofNullable(staticFileService.selectFileListByProject(projectId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.attachment.select.project.list"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("获取静态文件信息")
+    @GetMapping("/detail/{fileHeaderId}")
+    public ResponseEntity<StaticFileHeaderVO> getFileHeaderDetail(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "静态文件头id", required = true)
+            @PathVariable(name = "fileHeaderId") @Encrypt Long fileHeaderId){
+        return Optional.ofNullable(staticFileService.selectFileHeaderById(fileHeaderId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.staticFile.select.file"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -120,5 +134,14 @@ public class StaticFileController {
             @PathVariable(name = "fileHeaderId") @Encrypt Long fileHeaderId){
         staticFileService.deleteStaticFile(projectId, fileHeaderId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("删除静态文件")
+    @GetMapping("/test")
+    public ResponseEntity<IssueVO> getentry(){
+        IssueVO issueVO = new IssueVO();
+        issueVO.setIssueId(78497555806457856L);
+        return ResponseEntity.ok(issueVO);
     }
 }

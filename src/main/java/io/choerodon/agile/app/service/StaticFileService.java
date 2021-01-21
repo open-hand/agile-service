@@ -81,4 +81,11 @@ public interface StaticFileService {
      * @return 静态文件头
      */
     List<StaticFileHeaderVO> selectFileListExcludeIssue(Long projectId, Long issueId);
+
+    /**
+     * 静态文件头信息
+     * @param fileHeaderId 静态文件头id
+     * @return 静态文件头
+     */
+    StaticFileHeaderVO selectFileHeaderById(Long fileHeaderId);
 }

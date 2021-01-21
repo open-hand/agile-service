@@ -23,15 +23,17 @@ public class StaticFileHeaderDTO extends AuditDomain {
     private Long organizationId;
     private String url;
     private String fileName;
+    private String status;
 
     public StaticFileHeaderDTO() {
     }
 
-    public StaticFileHeaderDTO(Long projectId, Long organizationId, String url, String fileName) {
+    public StaticFileHeaderDTO(Long projectId, Long organizationId, String url, String fileName, String status) {
         this.projectId = projectId;
         this.organizationId = organizationId;
         this.url = url;
         this.fileName = fileName;
+        this.status = status;
     }
 
     public Long getId() {
@@ -72,5 +74,13 @@ public class StaticFileHeaderDTO extends AuditDomain {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
