@@ -16,4 +16,9 @@ public class TestFeignClientFallback implements TestFeignClient {
     public ResponseEntity deleteTestRel(Long projectId, Long defectId) {
         throw new CommonException("error.delete.test.defect.rel");
     }
+
+    @Override
+    public ResponseEntity<String> queryProjectInfo(Long projectId) {
+        throw new CommonException("error.query.test.project.info");
+    }
 }

@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.feign.operator;
 
-import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.api.vo.ProjectInfoVO;
 import io.choerodon.agile.infra.feign.TestFeignClient;
 import io.choerodon.core.exception.ServiceUnavailableException;
 import io.choerodon.core.utils.FeignClientUtils;
@@ -21,6 +21,14 @@ public class TestServiceClientOperator {
              FeignClientUtils.doRequest(() -> testFeignClient.deleteTestRel(projectId, defectId), Void.class);
         } catch (ServiceUnavailableException e) {
             return;
+        }
+    }
+
+    public ProjectInfoVO queryProjectInfo(Long projectId) {
+        try {
+            return FeignClientUtils.doRequest(() -> testFeignClient.queryProjectInfo(projectId), ProjectInfoVO.class);
+        } catch (ServiceUnavailableException e) {
+            return null;
         }
     }
 }
