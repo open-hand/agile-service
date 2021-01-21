@@ -237,4 +237,19 @@ public interface ObjectSchemeFieldService {
      * @param fieldCode
      */
     void checkObjectSchemeFieldDefaultValueOfMultiple(Long projectId, Long id, String fieldCode);
+
+    /**
+     * 多选类型系统字段设置默认值对象
+     * @param defaultValue
+     * @param valueMap
+     * @param view
+     */
+    void setDefaultValueObjsOfMultiple(Object defaultValue, Map<Long, Object> valueMap, PageFieldViewVO view);
+
+    /**
+     * 单选类型系统字段设置默认值对象
+     * @param valueMap
+     * @param view
+     */
+    void setDefaultValueObjsOfSingle(Map<Long, Object> valueMap, PageFieldViewVO view);
 }
