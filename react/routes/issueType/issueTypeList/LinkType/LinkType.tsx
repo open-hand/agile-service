@@ -1,48 +1,92 @@
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, {
+  useMemo, useEffect, useCallback, useRef, useState,
+} from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Modal, DataSet, Form, Select,
+  Modal, DataSet, Form, Select, TextField,
 } from 'choerodon-ui/pro';
-import { IModalProps } from '@/common/types';
+import { Choerodon } from '@choerodon/boot';
+import { IModalProps, IIssueType } from '@/common/types';
+import { issueTypeApi } from '@/api';
+import Field from 'choerodon-ui/pro/lib/data-set/Field';
+import SelectLinkType from './SelectLinkType';
 
 interface Props {
   modal?: IModalProps,
+  issueTypeDataSet: DataSet,
 }
 
-const LinkType: React.FC<Props> = ({ modal }) => {
-  const optionDataSet: DataSet = useMemo(() => new DataSet({
-    fields: [{
-      name: 'typeIds',
-      textField: 'name',
-      valueField: 'id',
-    }],
-  }), []);
+const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
+  const linkedTypeRef = useRef<IIssueType[]>([]);
+  const [nameRepeat, setNameRepeat] = useState<boolean>(false);
+
+  const checkName = useCallback(async (id) => {
+    if (id) {
+      const typeName = (linkedTypeRef.current || []).find((item) => item.id === id)?.name;
+      if (typeName) {
+        const res = await issueTypeApi.checkName(typeName);
+        if (res) {
+          setNameRepeat(true);
+          return '该问题类型名称和当前项目已有的问题类型名称重复';
+        }
+        setNameRepeat(false);
+        return true;
+      }
+      setNameRepeat(false);
+      return true;
+    }
+    setNameRepeat(false);
+    return true;
+  }, []);
 
   const linkDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
-      name: 'typeIds',
+      name: 'id',
       textField: 'name',
       valueField: 'id',
       required: true,
-      multiple: true,
-      options: optionDataSet,
       label: '请选择引用的问题类型',
+      validator: checkName,
+    }, {
+      name: 'newName',
+      label: '请重新设置名称',
+      required: true,
+      dynamicProps: {
+        required: async ({ record }) => {
+          const typeIdsField = record.getField('id');
+          const fieldValidate = await typeIdsField.checkValidity();
+          if (record.get('id') && !fieldValidate) {
+            return true;
+          }
+          return false;
+        },
+      },
     }],
-  }), [optionDataSet]);
-
-  useEffect(() => {
-
-  }, []);
+  }), [checkName]);
 
   const handleSubmit = useCallback(async () => {
-    const validate = await linkDataSet.validate();
+    let validate = false;
+    if (nameRepeat) {
+      validate = await linkDataSet.validate();
+    } else {
+      const typeIdsField = linkDataSet.current?.getField('id') as Field;
+      validate = await typeIdsField.checkValidity();
+    }
     if (validate) {
-      console.log(linkDataSet.current?.data);
-      return true;
+      const newName = linkDataSet.current?.get('newName');
+      issueTypeApi.referenced(linkDataSet.current?.get('id'), newName ? { name: newName } : {}).then(() => {
+        Choerodon.prompt('引用成功');
+        issueTypeDataSet.query();
+        modal?.close();
+        return true;
+      }).catch(() => {
+        Choerodon.prompt('引用失败');
+        return false;
+      });
     }
     return false;
-  }, [linkDataSet]);
+  }, [issueTypeDataSet, linkDataSet, modal, nameRepeat]);
 
   useEffect(() => {
     modal?.handleOk(handleSubmit);
@@ -50,14 +94,19 @@ const LinkType: React.FC<Props> = ({ modal }) => {
 
   return (
     <Form dataSet={linkDataSet}>
-      <Select name="typeIds" />
+      <SelectLinkType name="id" dataRef={linkedTypeRef} />
+      {
+        nameRepeat && (
+          <TextField name="newName" />
+        )
+      }
     </Form>
   );
 };
 
 const ObserverLinkType = observer(LinkType);
 
-const openLink = () => {
+const openLink = (props: Props) => {
   Modal.open({
     drawer: true,
     style: {
@@ -65,7 +114,7 @@ const openLink = () => {
     },
     key: 'link',
     title: '引用问题类型',
-    children: <ObserverLinkType />,
+    children: <ObserverLinkType {...props} />,
   });
 };
 

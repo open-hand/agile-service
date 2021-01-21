@@ -96,17 +96,11 @@ function IssueTypeList() {
 
   const renderAction = useCallback(({ dataSet, record }: RenderProps) => {
     const handleDelete = () => {
-      issueTypeApi[isOrganization ? 'orgGetDeleteDisable' : 'getDeleteDisable'](record?.get('id')).then((disable: boolean) => {
-        if (disable) {
-          Choerodon.prompt(`至少启用一个${record?.get('typeCode') === 'sub_task' ? '子级' : '父级'}问题类型`);
-        } else {
-          issueTypeApi[isOrganization ? 'orgDelete' : 'delete'](record?.get('id')).then(() => {
-            Choerodon.prompt('删除成功');
-            dataSet?.query(dataSet?.toData().length === 1 ? dataSet?.currentPage - 1 : dataSet?.currentPage);
-          }).catch(() => {
-            Choerodon.prompt('删除失败');
-          });
-        }
+      issueTypeApi[isOrganization ? 'orgDelete' : 'delete'](record?.get('id')).then(() => {
+        Choerodon.prompt('删除成功');
+        dataSet?.query(dataSet?.toData().length === 1 ? dataSet?.currentPage - 1 : dataSet?.currentPage);
+      }).catch(() => {
+        Choerodon.prompt('删除失败');
       });
     };
 
@@ -138,11 +132,17 @@ function IssueTypeList() {
     };
 
     const handleStop = () => {
-      issueTypeApi.enabled(record?.get('id'), false).then(() => {
-        Choerodon.prompt('停用成功');
-        dataSet?.query(dataSet?.currentPage);
-      }).catch(() => {
-        Choerodon.prompt('停用失败');
+      issueTypeApi.getStopDisable(record?.get('id')).then((disable: boolean) => {
+        if (disable) {
+          Choerodon.prompt(`至少启用一个${record?.get('typeCode') === 'sub_task' ? '子级' : '父级'}问题类型`);
+        } else {
+          issueTypeApi.enabled(record?.get('id'), false).then(() => {
+            Choerodon.prompt('停用成功');
+            dataSet?.query(dataSet?.currentPage);
+          }).catch(() => {
+            Choerodon.prompt('停用失败');
+          });
+        }
       });
     };
 
@@ -287,6 +287,9 @@ function IssueTypeList() {
     });
   };
 
+  const handleOpenRefrenced = useCallback(() => {
+    openLink({ issueTypeDataSet });
+  }, [issueTypeDataSet]);
   return (
     <Page
       className={styles.issueType}
@@ -298,9 +301,8 @@ function IssueTypeList() {
         <Button icon="playlist_add" onClick={handleAdd}>添加问题类型</Button>
         {
           !isOrganization && (
-          <Button onClick={openLink} className={styles.linkBtn}>
-            <C7NIcon type="Quote" />
-            关联问题类型
+          <Button icon="relate" onClick={handleOpenRefrenced}>
+            引用问题类型
           </Button>
           )
         }

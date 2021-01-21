@@ -78,7 +78,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
-  getDeleteDisable(typeId: string) {
+  getStopDisable(typeId: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/issue_type/${typeId}/can_disable`,
@@ -141,13 +141,6 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
-  orgGetDeleteDisable(typeId: string) {
-    return axios({
-      method: 'get',
-      url: `${this.OrgPrefix}/issue_type/${typeId}/can_disable`,
-    });
-  }
-
   orgDelete(typeId: string) {
     return axios({
       method: 'delete',
@@ -204,7 +197,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
 
   orgReferenced(typeId: string, referenced: boolean) {
     return axios({
-      method: 'get',
+      method: 'put',
       url: `${this.OrgPrefix}/issue_type/${typeId}/update_referenced`,
       params: {
         typeId,
@@ -215,7 +208,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
 
   enabled(typeId: string, enabled: boolean) {
     return axios({
-      method: 'get',
+      method: 'put',
       url: `${this.prefix}/issue_type/${typeId}/update_enabled`,
       params: {
         typeId,
@@ -232,6 +225,29 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       params: {
         page,
         size,
+      },
+    });
+  }
+
+  getReferencedList(page = 1, size = 20) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_type/list/reference`,
+      params: {
+        page,
+        size,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  referenced(typeId: string, data: { name: string} | {}) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_type/reference/${typeId}`,
+      params: {
+        organizationId: getOrganizationId(),
+        data,
       },
     });
   }
