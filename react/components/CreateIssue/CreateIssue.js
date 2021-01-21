@@ -280,7 +280,7 @@ class CreateIssue extends Component {
           context: defaultType.id,
           pageCode: 'agile_issue_create',
         };
-        this.loadDefaultTemplate(defaultType.typeCode);
+        this.loadDefaultTemplate(defaultType.id);
         fieldApi.getFields(param).then((fields) => {
           this.setState({
             fields,
