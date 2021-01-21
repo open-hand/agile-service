@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.eventhandler;
 
 import com.alibaba.fastjson.JSON;
+import io.choerodon.agile.api.vo.ProjectInfoVO;
 import io.choerodon.agile.api.vo.event.OrganizationCreateEventPayload;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.ProjectEventCategory;
@@ -8,6 +9,7 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.enums.InitStatus;
 import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.asgard.saga.annotation.SagaTask;
@@ -53,6 +55,9 @@ public class AgileEventHandler {
     private InitService initService;
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
+
+    @Autowired
+    private TestServiceClientOperator testServiceClientOperator;
 
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
@@ -136,11 +141,22 @@ public class AgileEventHandler {
         if (projectInfoMapper.select(dto).isEmpty()) {
             List<ProjectEventCategory> projectEventCategories = projectEvent.getProjectCategoryVOS();
             if (!ObjectUtils.isEmpty(projectEventCategories)) {
+                syncProjectCode(projectId, projectEvent, projectEventCategories);
                 initIfAgileProject(projectEvent, projectEventCategories);
             }
         } else {
             LOGGER.info("项目{}已初始化，跳过项目初始化", projectEvent.getProjectCode());
         }
         return message;
+    }
+
+    private void syncProjectCode(Long projectId, ProjectEvent projectEvent, List<ProjectEventCategory> projectEventCategories) {
+        List<String> codes = projectEventCategories.stream().map(ProjectEventCategory::getCode).collect(Collectors.toList());
+        if (codes.contains("N_TEST")) {
+            ProjectInfoVO projectInfoVO = testServiceClientOperator.queryProjectInfo(projectId);
+            if (!ObjectUtils.isEmpty(projectInfoVO)) {
+                projectEvent.setProjectCode(projectInfoVO.getProjectCode());
+            }
+        }
     }
 }
