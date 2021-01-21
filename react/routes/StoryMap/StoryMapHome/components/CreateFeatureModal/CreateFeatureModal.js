@@ -64,7 +64,7 @@ class CreateFeatureModal extends Component {
         issueApi.create(req).then((res) => {
           const dto = {
             schemeCode: 'agile_issue',
-            context: res.typeCode,
+            context: res.issueTypeId,
             pageCode: 'agile_issue_create',
           };
           fieldApi.quickCreateDefault(res.issueId, dto);

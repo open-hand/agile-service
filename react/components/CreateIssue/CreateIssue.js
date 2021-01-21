@@ -277,7 +277,7 @@ class CreateIssue extends Component {
         const defaultType = this.getDefaultType(res);
         const param = {
           schemeCode: 'agile_issue',
-          context: defaultType.typeCode,
+          context: defaultType.id,
           pageCode: 'agile_issue_create',
         };
         this.loadDefaultTemplate(defaultType.typeCode);
@@ -561,12 +561,12 @@ class CreateIssue extends Component {
                           label="问题类型"
                           getPopupContainer={(triggerNode) => triggerNode.parentNode}
                           onChange={((value) => {
-                            const { typeCode } = originIssueTypes.find(
+                            const { typeCode, id } = originIssueTypes.find(
                               (item) => item.id === value,
                             );
                             const param = {
                               schemeCode: 'agile_issue',
-                              context: typeCode,
+                              context: id,
                               pageCode: 'agile_issue_create',
                             };
                             fieldApi.getFields(param).then((res) => {
@@ -681,16 +681,16 @@ class CreateIssue extends Component {
                   allowClear
                 >
                   {field.defaultValueObj && (
-                  <Option key={field.defaultValueObj.id} value={field.defaultValueObj.id}>
-                    <div style={{
-                      display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
-                    }}
-                    >
-                      <UserHead
-                        user={field.defaultValueObj}
-                      />
-                    </div>
-                  </Option>
+                    <Option key={field.defaultValueObj.id} value={field.defaultValueObj.id}>
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
+                      }}
+                      >
+                        <UserHead
+                          user={field.defaultValueObj}
+                        />
+                      </div>
+                    </Option>
                   )}
                 </SelectFocusLoad>,
               )}
