@@ -5,12 +5,13 @@ import { observer } from 'mobx-react-lite';
 import {
   Form, Select, DataSet, TextField, TextArea, IconPicker, Modal,
 } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui';
 import { IModalProps } from '@/common/types';
 import { CompactPicker } from 'react-color';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Choerodon } from '@choerodon/boot';
 import { issueTypeApi, IUpdate, ICreate } from '@/api';
-import { getIsOrganization } from '@/utils/common';
+import { TypeTag } from '@/components';
 import styles from './AddIssueType.less';
 
 interface Props {
@@ -18,15 +19,15 @@ interface Props {
   typeId?: string
   typeTableDataSet: DataSet
   addRef: React.MutableRefObject<{ addDataSet: DataSet, submit: (fn?: Function) => Promise<boolean> }>
+  isOrganization: boolean,
 }
 
 const AddIssueType: React.FC<Props> = ({
-  modal, typeId, typeTableDataSet, addRef,
+  modal, typeId, typeTableDataSet, addRef, isOrganization,
 }) => {
   const [colour, setColor] = useState<string>('#3F51B5');
   const [pickerDisplay, setPickerDisplay] = useState<boolean>(false);
   const [initType, setInitType] = useState<any>();
-  const isOrganization = getIsOrganization();
   const isSystemType = initType?.source === 'system';
 
   const checkName = useCallback(async (value) => {
@@ -124,7 +125,7 @@ const AddIssueType: React.FC<Props> = ({
     }).catch(() => {
       Choerodon.prompt('编辑失败');
     });
-  }, []);
+  }, [isOrganization, modal, typeId, typeTableDataSet]);
 
   const handleSubmit = useCallback(async (callback?: Function) => {
     const validate = await addDataSet.validate();
@@ -220,7 +221,30 @@ const AddIssueType: React.FC<Props> = ({
             <Select name="typeCode" />
           )
         }
-        <IconPicker name="icon" />
+        <div className={styles.icon}>
+          <IconPicker
+            name="icon"
+            style={{
+              width: '100%',
+            }}
+          />
+          {
+            addDataSet.current?.get('icon') && (
+            <div className={styles.icon_replace}>
+              <TypeTag
+              // @ts-ignore
+                data={{
+                  colour,
+                  icon: addDataSet.current?.get('icon'),
+                }}
+              />
+            </div>
+            )
+          }
+          <div className={styles.iconPicker}>
+            <Icon type="baseline-arrow_drop_down" />
+          </div>
+        </div>
       </Form>
       <div className={styles.colorPicker}>
         <div className={`${styles.swatch} ${styles[`swatch_${isSystemType}`]}`} onClick={handleClickSwatch} role="none">

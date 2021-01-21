@@ -124,8 +124,10 @@ public interface BaseFeignClient {
      * @return
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/all_with_category")
-    ResponseEntity<List<ProjectVO>> listWithCategoryByOrganizationIds(@PathVariable("organization_id") Long organizationId,
-                                                                      @RequestParam("enabled") Boolean enabled);
+    ResponseEntity<Page<ProjectVO>> listWithCategoryByOrganizationIds(@PathVariable("organization_id") Long organizationId,
+                                                                      @RequestParam("enabled") Boolean enabled,
+                                                                      @RequestParam Integer page,
+                                                                      @RequestParam Integer size);
 
 
     /**

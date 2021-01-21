@@ -83,12 +83,15 @@ class EditIssueStore {
     return this.branch;
   }
 
-  @action initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branch) {
+  setBranch(branch) {
+    this.branch = branch || {};
+  }
+
+  @action initIssueAttribute(doc, workLogs, dataLogs, linkIssues) {
     this.doc = doc;
     this.workLogs = workLogs || [];
     this.dataLogs = dataLogs || [];
     this.linkIssues = linkIssues || [];
-    this.branch = branch || {};
   }
 
   @observable createBranchShow = false;

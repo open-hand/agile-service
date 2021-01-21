@@ -7,13 +7,11 @@ import {
 import {
   Content, Page, Breadcrumb, Choerodon, Header,
 } from '@choerodon/boot';
+import { C7NIcon } from '@choerodon/master';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { IIssueType } from '@/common/types';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { issueTypeApi } from '@/api';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import { getIsOrganization } from '@/utils/common';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
@@ -22,17 +20,16 @@ import AddIssueType from './AddIssueType';
 import Store from '../stores';
 import styles from './IssueTypeList.less';
 import openUsage from './Usage';
+import openLink from './LinkType';
 
 const { Column } = Table;
-
 /**
  * 问题类型页面
  * 鼠标点击相关方案，出现弹窗是否进入关联的相关方案 待定
  */
 function IssueTypeList() {
   const context = useContext(Store);
-  const { issueTypeDataSet } = context;
-  const isOrganization = getIsOrganization();
+  const { issueTypeDataSet, isOrganization } = context;
   const addRef = useRef<{addDataSet: DataSet, submit:(fn?: Function) => Promise<boolean>}>();
 
   const handleLinkToPage = useCallback(() => {
@@ -57,7 +54,7 @@ function IssueTypeList() {
       key: Modal.key(),
       title: '编辑问题类型',
       // @ts-ignore
-      children: <AddIssueType typeId={record?.get('id')} typeTableDataSet={dataSet} addRef={addRef} />,
+      children: <AddIssueType typeId={record?.get('id')} typeTableDataSet={dataSet} addRef={addRef} isOrganization={isOrganization} />,
       okText: '保存',
       footer: (okBtn: Button, cancelBtn: Button) => (
         <div>
@@ -114,25 +111,25 @@ function IssueTypeList() {
     };
 
     const handleReferenced = () => {
-      issueTypeApi.referenced(record?.get('id')).then(() => {
-        Choerodon.prompt('启用成功');
+      issueTypeApi.orgReferenced(record?.get('id'), true).then(() => {
+        Choerodon.prompt('允许引用成功');
         dataSet?.query(dataSet?.currentPage);
       }).catch(() => {
-        Choerodon.prompt('启用失败');
+        Choerodon.prompt('允许引用失败');
       });
     };
 
     const handleDontReferenced = () => {
-      issueTypeApi.dontReferenced(record?.get('id')).then(() => {
-        Choerodon.prompt('启用成功');
+      issueTypeApi.orgReferenced(record?.get('id'), false).then(() => {
+        Choerodon.prompt('不允许引用成功');
         dataSet?.query(dataSet?.currentPage);
       }).catch(() => {
-        Choerodon.prompt('启用失败');
+        Choerodon.prompt('不允许引用失败');
       });
     };
 
     const handleStart = () => {
-      issueTypeApi.start(record?.get('id')).then(() => {
+      issueTypeApi.enabled(record?.get('id'), true).then(() => {
         Choerodon.prompt('启用成功');
         dataSet?.query(dataSet?.currentPage);
       }).catch(() => {
@@ -141,7 +138,7 @@ function IssueTypeList() {
     };
 
     const handleStop = () => {
-      issueTypeApi.stop(record?.get('id')).then(() => {
+      issueTypeApi.enabled(record?.get('id'), false).then(() => {
         Choerodon.prompt('停用成功');
         dataSet?.query(dataSet?.currentPage);
       }).catch(() => {
@@ -196,12 +193,12 @@ function IssueTypeList() {
         }
         {
           isOrganization && record?.get('referenced') && (
-            <Menu.Item key="referenced">不允许引用</Menu.Item>
+            <Menu.Item key="dontReferenced">不允许引用</Menu.Item>
           )
         }
         {
           isOrganization && !record?.get('referenced') && (
-            <Menu.Item key="dontReferenced">允许引用</Menu.Item>
+            <Menu.Item key="referenced">允许引用</Menu.Item>
           )
         }
         {
@@ -273,7 +270,7 @@ function IssueTypeList() {
       key: Modal.key(),
       title: '添加问题类型',
       // @ts-ignore
-      children: <AddIssueType typeTableDataSet={issueTypeDataSet} addRef={addRef} />,
+      children: <AddIssueType typeTableDataSet={issueTypeDataSet} addRef={addRef} isOrganization={isOrganization} />,
       okText: '保存',
       footer: (okBtn: Button, cancelBtn: Button) => (
         <div>
@@ -299,11 +296,19 @@ function IssueTypeList() {
     >
       <Header>
         <Button icon="playlist_add" onClick={handleAdd}>添加问题类型</Button>
+        {
+          !isOrganization && (
+          <Button onClick={openLink} className={styles.linkBtn}>
+            <C7NIcon type="Quote" />
+            关联问题类型
+          </Button>
+          )
+        }
       </Header>
       <Breadcrumb />
       <Content style={{ paddingTop: '0' }}>
         <Table dataSet={issueTypeDataSet} className={styles.issueTypeTable}>
-          <Column name="name" renderer={renderName} />
+          <Column name="name" width={150} renderer={renderName} />
           <Column name="action" width={50} renderer={renderAction} />
           <Column name="description" />
           {

@@ -19,8 +19,11 @@ interface Props {
   ui: IUi
   store: EditIssueStore
   modal?: IModalProps
+  reloadIssue: Function
 }
-const DeleteUI: React.FC<Props> = ({ ui, store, modal }) => {
+const DeleteUI: React.FC<Props> = ({
+  ui, store, modal, reloadIssue,
+}) => {
   const { issue } = store;
   const [deleteType, setDeleteType] = useState('deleteLinkOnly');
   const handleChange = useCallback((value) => {
@@ -35,14 +38,16 @@ const DeleteUI: React.FC<Props> = ({ ui, store, modal }) => {
     if (deleteType === 'deleteWithLink') {
       return uiApi.deleteUI(ui.id).then(() => {
         store.getLinkedUI();
+        reloadIssue();
       });
     }
     // @ts-ignore
     return uiApi.deleteLink(issue.issueId, ui.id).then(() => {
       store.getLinkedUI();
+      reloadIssue();
     });
     // @ts-ignore
-  }, [deleteType, issue.issueId, store, ui.id]);
+  }, [deleteType, issue.issueId, reloadIssue, store, ui.id]);
 
   useEffect(() => {
     modal?.handleOk(handleDelete);

@@ -10,9 +10,10 @@ import EditIssueContext from '../../../../../stores';
 
 interface Props {
   ui: IUi
+  reloadIssue: Function
 }
 
-const LinkItem: React.FC<Props> = ({ ui }) => {
+const LinkItem: React.FC<Props> = ({ ui, reloadIssue }) => {
   const { store } = useContext(EditIssueContext);
 
   const handleDownload = useCallback(() => {
@@ -56,7 +57,7 @@ const LinkItem: React.FC<Props> = ({ ui }) => {
         />
         <Icon
           type="delete_forever"
-          onClick={() => { openDeleteModal({ ui, store }); }}
+          onClick={() => { openDeleteModal({ ui, store, reloadIssue }); }}
         />
       </div>
     </div>

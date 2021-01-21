@@ -343,7 +343,7 @@ public class ExcelServiceImpl implements ExcelService {
                 List<String> optionValues = o.getFieldOptions().stream().map(FieldOptionVO::getValue).collect(Collectors.toList());
                 customFieldValueMap.put(fieldCode, optionValues);
             }
-            if ("member".equals(fieldType)) {
+            if ("member".equals(fieldType) || FieldType.MULTI_MEMBER.equals(fieldType)) {
                 customFieldValueMap.put(fieldCode, userNames);
             }
         });
@@ -2161,7 +2161,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<String, ObjectSchemeFieldDetailVO> fieldMap = new HashMap<>();
         objectSchemeFieldDetails.forEach(o -> fieldMap.put(o.getName(), o));
         String status = "error_custom_field_header_";
-        List<String> multiValueFieldType = Arrays.asList("checkbox", "multiple");
+        List<String> multiValueFieldType = Arrays.asList("checkbox", "multiple","multiMember");
         List<String> fieldTypes = Arrays.asList("multiple", "single", "checkbox", "radio");
         List<String> dateTypes = Arrays.asList("date", "datetime", "time");
         for (ExcelColumnVO excelColumn : customFields) {
@@ -2194,10 +2194,11 @@ public class ExcelServiceImpl implements ExcelService {
                     excelColumn.setPredefinedValues(values);
                     excelColumn.setValueIdMap(map);
                 }
-                if ("member".equals(fieldType)) {
+                if ("member".equals(fieldType) || FieldType.MULTI_MEMBER.equals(fieldType)) {
                     excelColumn.setValueIdMap(userMap);
                     excelColumn.setPredefinedValues(userNames);
                 }
+
                 boolean isDateType = dateTypes.contains(fieldType);
                 excelColumn.setDateType(isDateType);
                 if (isDateType) {

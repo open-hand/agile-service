@@ -56,78 +56,104 @@ const statusDataSet = new DataSet({
   ],
 });
 
-const IssueTypeDataSet = (
-): DataSetProps => ({
-  selection: false,
-  paging: true,
-  autoQuery: true,
-  queryFields: [
-    {
-      name: 'name',
-      type: 'string' as FieldType,
-      label: '名称',
-    },
-    {
-      name: 'source',
-      type: 'string' as FieldType,
-      label: '来源',
-      textField: 'label',
-      valueField: 'code',
-      options: sourceDataSet,
-    },
-    ...(getIsOrganization() ? [] : [
+const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataSetProps =>
+// console.log(isOrganization, [
+//   {
+//     name: 'name',
+//     type: 'string' as FieldType,
+//     label: '名称',
+//   },
+//   {
+//     name: 'source',
+//     type: 'string' as FieldType,
+//     label: '来源',
+//     textField: 'label',
+//     valueField: 'code',
+//     options: sourceDataSet,
+//   },
+//   ...(isOrganization ? [] : [
+//     {
+//       name: 'status',
+//       type: 'boolean' as FieldType,
+//       label: '状态',
+//       textField: 'label',
+//       valueField: 'enabled',
+//       options: statusDataSet,
+//     },
+//   ]),
+// ]);
+
+  ({
+    selection: false,
+    paging: true,
+    autoQuery: true,
+    queryFields: [
       {
-        name: 'status',
+        name: 'name',
         type: 'string' as FieldType,
-        label: '状态',
-        textField: 'label',
-        valueField: 'enabled',
-        options: statusDataSet,
+        label: '名称',
       },
-    ]),
-  ],
-  fields: [
-    {
-      name: 'name',
-      type: 'string' as FieldType,
-      label: '名称',
+      {
+        name: 'source',
+        type: 'string' as FieldType,
+        label: '来源',
+        textField: 'label',
+        valueField: 'code',
+        options: sourceDataSet,
+      },
+      ...(isOrganization ? [] : [
+        {
+          name: 'status',
+          type: 'boolean' as FieldType,
+          label: '状态',
+          textField: 'label',
+          valueField: 'enabled',
+          options: statusDataSet,
+        },
+      ]),
+    ],
+    fields: [
+      {
+        name: 'name',
+        type: 'string' as FieldType,
+        label: '名称',
+      },
+      {
+        name: 'action',
+      },
+      {
+        name: 'description',
+        type: 'string' as FieldType,
+        label: '描述',
+      },
+      {
+        name: 'usage',
+        type: 'string' as FieldType,
+        label: '使用情况',
+      },
+      {
+        label: '来源',
+        name: 'source',
+        type: 'string' as FieldType,
+      },
+      {
+        label: '状态',
+        name: 'enabled',
+        type: 'boolean' as FieldType,
+      },
+      {
+        label: '是否允许引用',
+        name: 'referenced',
+        type: 'boolean' as FieldType,
+      },
+    ],
+    transport: {
+      read: ({ params, data }: { params: { page: number, size: number}, data: any}) => {
+        if (getIsOrganization()) {
+          return issueTypeApiConfig.orgLoad({ params, data });
+        }
+        return issueTypeApiConfig.load({ params, data });
+      },
     },
-    {
-      name: 'action',
-    },
-    {
-      name: 'description',
-      type: 'string' as FieldType,
-      label: '描述',
-    },
-    {
-      name: 'usage',
-      type: 'string' as FieldType,
-      label: '使用情况',
-    },
-    {
-      label: '来源',
-      name: 'source',
-      type: 'string' as FieldType,
-    },
-    {
-      label: '状态',
-      name: 'enabled',
-      type: 'boolean' as FieldType,
-    },
-    {
-      label: '是否允许引用',
-      name: 'referenced',
-      type: 'boolean' as FieldType,
-    },
-  ],
-  transport: {
-    read: ({ params, data }: { params: { page: number, size: number}, data: any}) => {
-      if (getIsOrganization()) {
-        return issueTypeApiConfig.orgLoad({ params, data });
-      }
-      return issueTypeApiConfig.load({ params, data });
-    },
-  },
-});
+  });
 export default IssueTypeDataSet;

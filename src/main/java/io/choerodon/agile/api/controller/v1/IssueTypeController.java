@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 
+import io.choerodon.agile.api.vo.ProjectIssueTypeVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -60,8 +61,8 @@ public class IssueTypeController extends BaseController {
     @ApiOperation(value = "组织层查询问题类型详情")
     @GetMapping("/{id}")
     public ResponseEntity<IssueTypeVO> query(@ApiParam(value = "组织id", required = true)
-                                                   @PathVariable("organization_id") Long organizationId,
-                                                   @PathVariable("id") @Encrypt Long issueTypeId) {
+                                             @PathVariable("organization_id") Long organizationId,
+                                             @PathVariable("id") @Encrypt Long issueTypeId) {
         return ResponseEntity.ok(issueTypeService.query(organizationId, 0L, issueTypeId));
     }
 
@@ -90,10 +91,30 @@ public class IssueTypeController extends BaseController {
     @ApiOperation(value = "删除问题类型")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity delete(@PathVariable("organization_id") Long organizationId,
-                                          @PathVariable("id") @Encrypt Long issueTypeId) {
+                                 @PathVariable("id") @Encrypt Long issueTypeId) {
         issueTypeService.delete(organizationId, 0L, issueTypeId);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "更新组织问题类型是否可以被引用")
+    @GetMapping(value = "/{id}/update_referenced")
+    public ResponseEntity updateReferenced(@PathVariable("organization_id") Long organizationId,
+                                           @PathVariable(value = "id") @Encrypt Long issueTypeId,
+                                           @RequestParam Boolean referenced) {
+        issueTypeService.updateReferenced(organizationId, issueTypeId, referenced);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "组织问题类型查询使用详情")
+    @GetMapping(value = "/{id}/usage_detail")
+    public ResponseEntity<Page<ProjectIssueTypeVO>> usageDetail(@PathVariable("organization_id") Long organizationId,
+                                                                @PathVariable(value = "id") @Encrypt Long issueTypeId,
+                                                                PageRequest pageRequest) {
+        return ResponseEntity.ok(issueTypeService.usageDetail(organizationId, issueTypeId, pageRequest));
+    }
+
 
 //    @Permission(level = ResourceLevel.ORGANIZATION)
 //    @ApiOperation(value = "校验问题类型是否可以删除")
@@ -101,7 +122,6 @@ public class IssueTypeController extends BaseController {
 //    public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt Long issueTypeId) {
 //        return new ResponseEntity<>(issueTypeService.checkDelete(organizationId, issueTypeId), HttpStatus.OK);
 //    }
-
 
 
 //    @Permission(level = ResourceLevel.ORGANIZATION)

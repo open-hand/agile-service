@@ -233,6 +233,7 @@ class CreateIssue extends Component {
     const { form } = this.props;
     const defaultScope = new Map([
       ['assignee', 'assigneedId'],
+      ['reporter', 'reporterId'],
       ['component', 'componentIssueRel'],
       ['summary', 'summary'],
       ['label', 'issueLabel'],
@@ -265,6 +266,10 @@ class CreateIssue extends Component {
       }
       return result;
     }, {});
+    // 报告人特殊处理  如果没有报告人默认值，默认是当前用户
+    if (!setFields.reporter) {
+      Object.assign(setFields, { [defaultScope.get('reporter')]: AppState.userInfo.id });
+    }
     form.setFieldsValue(setFields);
   }
 
@@ -276,10 +281,10 @@ class CreateIssue extends Component {
         const defaultType = this.getDefaultType(res);
         const param = {
           schemeCode: 'agile_issue',
-          context: defaultType.typeCode,
+          context: defaultType.id,
           pageCode: 'agile_issue_create',
         };
-        this.loadDefaultTemplate(defaultType.typeCode);
+        this.loadDefaultTemplate(defaultType.id);
         fieldApi.getFields(param).then((fields) => {
           this.setState({
             fields,
@@ -560,12 +565,12 @@ class CreateIssue extends Component {
                           label="问题类型"
                           getPopupContainer={(triggerNode) => triggerNode.parentNode}
                           onChange={((value) => {
-                            const { typeCode } = originIssueTypes.find(
+                            const { typeCode, id } = originIssueTypes.find(
                               (item) => item.id === value,
                             );
                             const param = {
                               schemeCode: 'agile_issue',
-                              context: typeCode,
+                              context: id,
                               pageCode: 'agile_issue_create',
                             };
                             fieldApi.getFields(param).then((res) => {
@@ -680,16 +685,16 @@ class CreateIssue extends Component {
                   allowClear
                 >
                   {field.defaultValueObj && (
-                  <Option key={field.defaultValueObj.id} value={field.defaultValueObj.id}>
-                    <div style={{
-                      display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
-                    }}
-                    >
-                      <UserHead
-                        user={field.defaultValueObj}
-                      />
-                    </div>
-                  </Option>
+                    <Option key={field.defaultValueObj.id} value={field.defaultValueObj.id}>
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
+                      }}
+                      >
+                        <UserHead
+                          user={field.defaultValueObj}
+                        />
+                      </div>
+                    </Option>
                   )}
                 </SelectFocusLoad>,
               )}
@@ -710,6 +715,37 @@ class CreateIssue extends Component {
                 )}
               </IsProjectMember>
             </div>
+          </FormItem>
+
+        );
+      case 'reporter':
+        return (
+          <FormItem label="报告人" key={`${newIssueTypeCode}-reporter`}>
+            {getFieldDecorator('reporterId', {
+              rules: [{ required: field.required, message: '请选择报告人' }],
+            })(
+              <SelectFocusLoad
+                type="user"
+                label="报告人"
+                style={{ flex: 1 }}
+                loadWhenMount
+                getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                allowClear
+              >
+                {field.defaultValueObj && (
+                  <Option key={field.defaultValueObj.id} value={field.defaultValueObj.id}>
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
+                    }}
+                    >
+                      <UserHead
+                        user={field.defaultValueObj}
+                      />
+                    </div>
+                  </Option>
+                )}
+              </SelectFocusLoad>,
+            )}
           </FormItem>
 
         );

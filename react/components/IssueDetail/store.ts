@@ -127,13 +127,13 @@ class Store {
   }
 
   @action
-  async getCustomFields(backlogId?: number, typeCode?: string) {
+  async getCustomFields(backlogId?: number, typeId?: string) {
     const customFields = await fieldApi
       .project(this.projectId)
       .org(this.organizationId)
       .getFieldAndValue(backlogId || this.selected, {
         schemeCode: 'agile_issue',
-        context: typeCode || this.issue.typeCode as string,
+        context: typeId || this.issue.issueTypeId as string,
         pageCode: 'agile_issue_edit',
       });
     this.setCustomFields(customFields);

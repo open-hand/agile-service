@@ -43,7 +43,7 @@ function renderEditor({
         />
       );
     case 'label':
-      return <SelectLabel multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} style={style} {...otherProps} />;
+      return <SelectLabel dontCombo multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} style={style} {...otherProps} />;
     case 'influenceVersion':
     case 'fixVersion':
       return <SelectVersion valueField="versionId" multiple={['checkbox', 'multiple'].includes(fieldType)} dataRef={dataRef} style={style} {...otherProps} />;

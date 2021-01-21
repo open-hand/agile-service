@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
 import io.choerodon.agile.infra.dto.IssueTypeSchemeConfigDTO;
 import io.choerodon.agile.infra.dto.ProjectConfigDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
@@ -9,16 +10,19 @@ import io.choerodon.agile.infra.enums.SchemeType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.ProjectCategoryUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.agile.infra.enums.InitIssueType;
+import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
@@ -59,6 +63,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private IssueMapper issueMapper;
     @Autowired
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
+    @Autowired
+    private IssueTypeExtendMapper issueTypeExtendMapper;
 
     private static final String ORGANIZATION ="organization";
 
@@ -101,16 +107,35 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         issueTypeVO.setInitialize(false);
         issueTypeVO.setReferenced(ZERO.equals(projectId));
-        issueTypeVO.setEnabled(true);
         String source = ZERO.equals(projectId) ? ORGANIZATION : PROJECT;
         issueTypeVO.setSource(source);
         IssueTypeDTO issueType = modelMapper.map(issueTypeVO, IssueTypeDTO.class);
         IssueTypeVO result = modelMapper.map(createIssueType(issueType), IssueTypeVO.class);
         if (!ZERO.equals(projectId)) {
+            updateExtendEnabled(result.getId(), projectId, organizationId, true);
             //项目层创建问题类型,初始化默认状态机
             initDefaultStateMachine(organizationId, projectId, result, categoryCodes);
         }
         return result;
+    }
+
+    private void updateExtendEnabled(Long issueTypeId,
+                                     Long projectId,
+                                     Long organizationId,
+                                     Boolean enabled) {
+        IssueTypeExtendDTO dto = new IssueTypeExtendDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setIssueTypeId(issueTypeId);
+        List<IssueTypeExtendDTO> list = issueTypeExtendMapper.select(dto);
+        if (list.isEmpty()) {
+            dto.setEnabled(enabled);
+            issueTypeExtendMapper.insert(dto);
+        } else {
+            dto = list.get(0);
+            dto.setEnabled(enabled);
+            issueTypeExtendMapper.updateByPrimaryKey(dto);
+        }
     }
 
     private Set<String> validateTypeCode(String typeCode, Long projectId) {
@@ -220,11 +245,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         Long organizationId = issueTypeVO.getOrganizationId();
         Long issueTypeId = issueTypeVO.getId();
 
-        IssueTypeDTO dto = new IssueTypeDTO();
-        dto.setId(issueTypeId);
-        dto.setProjectId(projectId);
-        dto.setOrganizationId(organizationId);
-        IssueTypeDTO issueTypeDTO = issueTypeMapper.selectOne(dto);
+        IssueTypeDTO issueTypeDTO = selectOne(organizationId, projectId, issueTypeId);
         if (issueTypeDTO == null) {
             throw new CommonException("error.issue.type.not.existed");
         }
@@ -247,11 +268,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     public void delete(Long organizationId,
                        Long projectId,
                        Long issueTypeId) {
-        IssueTypeDTO dto = new IssueTypeDTO();
-        dto.setProjectId(projectId);
-        dto.setOrganizationId(organizationId);
-        dto.setId(issueTypeId);
-        IssueTypeDTO result = issueTypeMapper.selectOne(dto);
+        IssueTypeDTO result =selectOne(organizationId, projectId, issueTypeId);
         if (result == null) {
             return;
         }
@@ -260,7 +277,14 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (Boolean.FALSE.equals(vo.getDeleted())) {
             throw new CommonException("error.issue.type.not.deleted");
         }
-        issueTypeMapper.delete(dto);
+        issueTypeMapper.deleteByPrimaryKey(result.getId());
+        if (!ZERO.equals(projectId)) {
+            IssueTypeExtendDTO extend = new IssueTypeExtendDTO();
+            extend.setProjectId(projectId);
+            extend.setOrganizationId(organizationId);
+            extend.setIssueTypeId(issueTypeId);
+            issueTypeExtendMapper.delete(extend);
+        }
         //todo 删除关联数据
     }
 
@@ -337,6 +361,65 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             }
         });
         return issueTypeIds;
+    }
+
+    @Override
+    public Page<ProjectIssueTypeVO> usageDetail(Long organizationId, Long issueTypeId,
+                                                PageRequest pageRequest) {
+        IssueTypeDTO dto = selectOne(organizationId, ZERO, issueTypeId);
+        if (dto == null) {
+            throw new CommonException("error.issue.type.not.existed");
+        }
+        Page<ProjectIssueTypeVO> emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        if (Boolean.TRUE.equals(dto.getInitialize())) {
+            Page<ProjectVO> page =
+                    baseFeignClient.listWithCategoryByOrganizationIds(organizationId, true, pageRequest.getPage(), pageRequest.getSize())
+                            .getBody();
+            List<ProjectVO> projects = page.getContent();
+            Set<Long> ids = projects.stream().map(ProjectVO::getId).collect(Collectors.toSet());
+            if (ids.isEmpty()) {
+                return emptyPage;
+            }
+            IssueTypeExtendDTO issueTypeExtendDTO = new IssueTypeExtendDTO();
+            issueTypeExtendDTO.setOrganizationId(organizationId);
+            issueTypeExtendDTO.setIssueTypeId(issueTypeId);
+            Map<Long, Boolean> projectEnableMap =
+                    issueTypeExtendMapper.select(issueTypeExtendDTO)
+                            .stream()
+                            .collect(Collectors.toMap(IssueTypeExtendDTO::getProjectId, IssueTypeExtendDTO::getEnabled));
+            List<ProjectIssueTypeVO> result = buildProjectIssueType(projects, projectEnableMap);
+            return PageUtils.copyPropertiesAndResetContent(page, result);
+        } else {
+            IssueTypeExtendDTO issueTypeExtendDTO = new IssueTypeExtendDTO();
+            issueTypeExtendDTO.setOrganizationId(organizationId);
+            issueTypeExtendDTO.setIssueTypeId(issueTypeId);
+            Page<IssueTypeExtendDTO> page =
+                    PageHelper.doPageAndSort(pageRequest, () -> issueTypeExtendMapper.select(issueTypeExtendDTO));
+            List<IssueTypeExtendDTO> list = page.getContent();
+            if (list.isEmpty()) {
+                return emptyPage;
+            }
+            Map<Long, Boolean> projectEnableMap =
+                    list.stream()
+                            .collect(Collectors.toMap(IssueTypeExtendDTO::getProjectId, IssueTypeExtendDTO::getEnabled));
+            Set<Long> projectIds =
+                    list.stream().map(IssueTypeExtendDTO::getProjectId).collect(Collectors.toSet());
+            List<ProjectVO> projects = baseFeignClient.queryByIds(projectIds).getBody();
+            List<ProjectIssueTypeVO> result = buildProjectIssueType(projects, projectEnableMap);
+            return PageUtils.copyPropertiesAndResetContent(page, result);
+        }
+    }
+
+    private List<ProjectIssueTypeVO> buildProjectIssueType(List<ProjectVO> projects, Map<Long, Boolean> projectEnableMap) {
+        List<ProjectIssueTypeVO> result = new ArrayList<>();
+        projects.forEach(x -> {
+            ProjectIssueTypeVO projectIssueTypeVO = new ProjectIssueTypeVO();
+            BeanUtils.copyProperties(x, projectIssueTypeVO);
+            boolean enabled = Optional.ofNullable(projectEnableMap.get(x.getId())).orElse(true);
+            projectIssueTypeVO.setIssueTypeEnabled(enabled);
+            result.add(projectIssueTypeVO);
+        });
+        return result;
     }
 
     private void statisticsUsage(List<IssueTypeVO> result, Long organizationId) {
@@ -416,7 +499,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     private Map<String, Set<Long>> listProjectIdsGroupByCategory(Long organizationId) {
-        List<ProjectVO> projects = baseFeignClient.listWithCategoryByOrganizationIds(organizationId, true).getBody();
+        Page<ProjectVO> page = baseFeignClient.listWithCategoryByOrganizationIds(organizationId, true, 1, 0).getBody();
+        List<ProjectVO> projects = page.getContent();
         Map<String, Set<Long>> map = new HashMap<>();
         projects.forEach(p -> {
             Long projectId = p.getId();
@@ -478,7 +562,18 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 continue;
             }
             //创建默认问题类型
-            createIssueType(new IssueTypeDTO(initIssueType.getIcon(), initIssueType.getName(), initIssueType.getDescription(), organizationId, initIssueType.getColour(), initIssueType.getTypeCode(), true));
+            IssueTypeDTO dto = new IssueTypeDTO();
+            dto.setIcon(initIssueType.getIcon());
+            dto.setName(initIssueType.getName());
+            dto.setDescription(initIssueType.getDescription());
+            dto.setColour(initIssueType.getColour());
+            dto.setOrganizationId(organizationId);
+            dto.setTypeCode(initIssueType.getTypeCode());
+            dto.setInitialize(true);
+            dto.setProjectId(ZERO);
+            dto.setReferenced(true);
+            dto.setSource("system");
+            createIssueType(dto);
         }
     }
 
@@ -530,10 +625,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         IssueTypeDTO dto = issueTypeMapper.selectByPrimaryKey(issueTypeId);
         if (dto == null) {
-            throw new CommonException("error.issue.type.not.found");
+            throw new CommonException("error.issue.type.not.existed");
         }
         List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, null);
-        //子任务至少要有一个，故事和任务只要要有一个
+        //子任务至少要有一个，故事和任务至少要有一个
         Map<String, Integer> typeCodeCountMap = new HashMap<>();
         issueTypes.forEach(x -> {
             if (Boolean.TRUE.equals(x.getEnabled())) {
@@ -559,7 +654,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public void updateEnabled(Long organizationId, Long projectId, Long issueTypeId, Boolean enabled) {
+    public void updateEnabled(Long organizationId,
+                              Long projectId,
+                              Long issueTypeId,
+                              Boolean enabled) {
         //只有项目层问题类型可以被启停用
         if (ZERO.equals(projectId)) {
             return;
@@ -568,32 +666,30 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 && !canDisable(organizationId, projectId, issueTypeId)) {
             throw new CommonException("error.issue.type.can.not.disable");
         }
-        Long id = createIfSystemIssueType(organizationId, projectId, issueTypeId);
-        IssueTypeDTO dto = issueTypeMapper.selectByPrimaryKey(id);
-        dto.setEnabled(enabled);
-        issueTypeMapper.updateByPrimaryKey(dto);
+        updateExtendEnabled(issueTypeId, projectId, organizationId, enabled);
     }
 
-    private Long createIfSystemIssueType(Long organizationId, Long projectId, Long issueTypeId) {
-        IssueTypeDTO dto = new IssueTypeDTO();
-        dto.setProjectId(projectId);
-        dto.setOrganizationId(organizationId);
-        dto.setId(issueTypeId);
-        IssueTypeDTO issueType = issueTypeMapper.selectOne(dto);
+    @Override
+    public void updateReferenced(Long organizationId, Long issueTypeId, Boolean referenced) {
+        IssueTypeDTO issueType = selectOne(organizationId, ZERO, issueTypeId);
         if (issueType == null) {
-            dto.setProjectId(ZERO);
-            issueType = issueTypeMapper.selectOne(dto);
-            if (issueType == null) {
-                throw new CommonException("error.issue.type.not.found");
-            }
-            issueType.setId(null);
-            issueType.setProjectId(projectId);
-            issueTypeMapper.insert(issueType);
-            Set<String> categoryCodes = validateTypeCode(issueType.getTypeCode(), projectId);
-            IssueTypeVO vo = modelMapper.map(issueType, IssueTypeVO.class);
-            initDefaultStateMachine(organizationId, projectId, vo, categoryCodes);
+            throw new CommonException("error.issue.type.not.existed");
         }
-        return issueType.getId();
+        if (Boolean.TRUE.equals(issueType.getInitialize())) {
+            throw new CommonException("error.system.issue.type.can.not.edit");
+        }
+        issueType.setReferenced(referenced);
+        issueTypeMapper.updateByPrimaryKey(issueType);
+    }
+
+    private IssueTypeDTO selectOne(Long organizationId,
+                                   Long projectId,
+                                   Long issueTypeId) {
+        IssueTypeDTO dto = new IssueTypeDTO();
+        dto.setId(issueTypeId);
+        dto.setOrganizationId(organizationId);
+        dto.setProjectId(projectId);
+        return issueTypeMapper.selectOne(dto);
     }
 
     @Override

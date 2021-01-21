@@ -30,49 +30,29 @@ interface IRes {
 }
 
 const Usage: React.FC<Props> = ({ modal, record }) => {
-  const [page, setPage] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
   const [res, setRes] = useState<IRes>({
     totalElements: 0,
     number: 0,
     list: [],
     size: 15,
   });
-  const [list, setList] = useState<IUsage[]>([{
-    id: '1529',
-    imageUrl: 'https://minio.choerodon.com.cn/hzero-iam/7/9f3345bdadb34d77b4055840b417b67f@file_fa123f7e8bd34dd4992b5407c277a1df_apple-touch-icon-144.png',
-    name: 'Choerodon持续交付与测试',
-    enabled: true,
-  }, {
-    id: '1529',
-    imageUrl: 'https://minio.choerodon.com.cn/hzero-iam/7/9f3345bdadb34d77b4055840b417b67f@file_fa123f7e8bd34dd4992b5407c277a1df_apple-touch-icon-144.png',
-    name: 'Choerodon持续交付与测试',
-    enabled: false,
-  }, {
-    id: '1529',
-    imageUrl: 'https://minio.choerodon.com.cn/hzero-iam/7/9f3345bdadb34d77b4055840b417b67f@file_fa123f7e8bd34dd4992b5407c277a1df_apple-touch-icon-144.png',
-    name: 'Choerodon持续交付与测试',
-    enabled: true,
-  }, {
-    id: '1529',
-    imageUrl: 'https://minio.choerodon.com.cn/hzero-iam/7/9f3345bdadb34d77b4055840b417b67f@file_fa123f7e8bd34dd4992b5407c277a1df_apple-touch-icon-144.png',
-    name: 'Choerodon持续交付与测试',
-    enabled: true,
-  }]);
+  const [list, setList] = useState<IUsage[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const getUsage = useCallback((p = 0) => {
+  const getUsage = useCallback(() => {
     setLoading(true);
-    issueTypeApi.getUsage(p || page).then((data: IRes) => {
+    issueTypeApi.orgGetUsage(record?.get('id'), page).then((data: IRes) => {
       batchedUpdates(() => {
         setLoading(false);
         setRes(data);
-        setList([...list, ...(res.list || [])]);
+        setList((arr) => [...arr, ...(data.list || [])]);
       });
     }).catch(() => {
       setLoading(false);
       Choerodon.prompt('加载失败');
     });
-  }, [list, page, res.list]);
+  }, [page, record]);
 
   useEffect(() => {
     getUsage();
@@ -80,8 +60,7 @@ const Usage: React.FC<Props> = ({ modal, record }) => {
 
   const handleClickMore = useCallback(() => {
     setPage(page + 1);
-    getUsage(page + 1);
-  }, [getUsage, page]);
+  }, [page]);
 
   return (
     <div className={styles.usage}>
@@ -95,10 +74,11 @@ const Usage: React.FC<Props> = ({ modal, record }) => {
                 <div className={styles.usageItem}>
                   <ProjectTag
                     showText
-                    data={{
-                      id: 1529,
-                      imageUrl: 'https://minio.choerodon.com.cn/hzero-iam/7/9f3345bdadb34d77b4055840b417b67f@file_fa123f7e8bd34dd4992b5407c277a1df_apple-touch-icon-144.png',
-                      name: 'Choerodon持续交付与测试',
+                    data={item}
+                    size={30}
+                    textStyle={{
+                      color: 'rgba(0, 0, 0, 0.85)',
+                      fontSize: 14,
                     }}
                   />
                   <div className={`${styles.status} ${styles[`status_${!!(item.enabled)}`]}`}>
