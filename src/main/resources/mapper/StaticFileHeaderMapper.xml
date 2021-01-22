@@ -8,7 +8,8 @@
             asfh.organization_id,
             asfh.url,
             asfh.file_name,
-            asfh.creation_date
+            asfh.creation_date,
+            asfh.status
         FROM
             agile_static_file_header asfh
         LEFT JOIN agile_issue_static_file_rel asfir ON asfir.static_file_id = asfh.id AND asfir.issue_id = #{issueId}
@@ -24,11 +25,12 @@
         organization_id,
         url,
         file_name,
+        status,
         creation_date
         FROM agile_static_file_header asfh
         WHERE
         asfh.project_id = #{projectId}
-        AND asfh.status != 'doing'
+        AND asfh.status = 'success'
         AND asfh.id in (
         SELECT asfir.static_file_id FROM agile_issue_static_file_rel asfir
         WHERE asfir.issue_id = #{issueId}
