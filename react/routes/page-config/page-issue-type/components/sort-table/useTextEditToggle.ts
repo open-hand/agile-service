@@ -76,7 +76,8 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
         fieldOptions: record.get('fieldOptions'),
       },
       dataRef,
-      style: { minWidth: 165, maxWidth: 300 },
+      dropdownMatchSelectWidth: false,
+      dropdownMenuStyle: { minWidth: 165, maxWidth: 300 },
     });
     if (fieldType === 'member' || fieldType === 'multiMember') {
       const defaultValueObj = record.get('defaultValueObjs') || record.get('defaultValueObj') || record.get('localDefaultObj') || undefined;
@@ -85,7 +86,8 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
           fieldType, fieldCode: record.get('fieldCode'), defaultValue: defaultValueObj, extraConfig: record.get('extraConfig'), fieldOptions: record.get('fieldOptions'),
         },
         dataRef,
-        style: { minWidth: 165, maxWidth: 300 },
+        dropdownMatchSelectWidth: false,
+        dropdownMenuStyle: { minWidth: 165, maxWidth: 300 },
       });
     }
     return {
@@ -97,7 +99,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
     const key = `page-issue-type-default-edit-text-${record.id}`;
     // const submitTrigger = ['click', 'change'] as Action[]; // 'change', 'blur'
     const submitTrigger = ['blur'] as Action[];
-    const submitOnChange = ['member', 'single', 'radio'].includes(fieldType);
+    const submitOnChange = ['member', 'single', 'radio', 'date', 'datetime', 'time'].includes(fieldType);
     if (submitOnChange) {
       submitTrigger.push('change');
     }
@@ -113,9 +115,9 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
     };
   }, [fieldType, handleSubmit, record.id]);
   const disabled = useMemo(() => {
-    if (isProject && record.get('createdLevel') === 'organization') {
-      return true;
-    }
+    // if (isProject && record.get('createdLevel') === 'organization') {
+    //   return true;
+    // }
     if (record.get('createdLevel') === 'system') {
       return isProject ? disabledEditDefaultFields.includes(record.get('fieldCode')) : orgDisabledEditDefaultFields.includes(record.get('fieldCode'));
     }

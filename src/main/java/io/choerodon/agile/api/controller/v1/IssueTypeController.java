@@ -55,6 +55,7 @@ public class IssueTypeController extends BaseController {
     public ResponseEntity<IssueTypeVO> create(@PathVariable("organization_id") Long organizationId,
                                               @RequestBody @Valid IssueTypeVO issueTypeVO) {
         issueTypeVO.setSource(null);
+        issueTypeVO.setReferenceId(null);
         return ResponseEntity.ok(issueTypeService.create(organizationId, 0L, issueTypeVO));
     }
 

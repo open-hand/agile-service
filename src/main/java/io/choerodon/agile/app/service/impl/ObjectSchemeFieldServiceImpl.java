@@ -819,7 +819,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
         String defaultValue;
         List<String> issueTypes = Arrays.asList(syncDefaultValueIssueTypes.split(","));
-        ObjectSchemeFieldDTO field ;
+        ObjectSchemeFieldDTO field = new ObjectSchemeFieldDTO();
+        field.setId(fieldId);
         //组织层下的组织字段，项目层下的自定义字段查询默认值
         if (Boolean.TRUE.equals(updateDTO.getCustom())) {
             field = baseQueryById(organizationId, projectId, fieldId);
@@ -827,7 +828,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         //组织层下的系统字段，项目层下的系统字段和组织字段处理默认值
         else {
-            field = baseQueryById(organizationId, null, fieldId);
+            field = objectSchemeFieldMapper.selectOne(field);
+            if (Boolean.FALSE.equals(field.getSystem())) {
+                field = baseQueryById(organizationId, null, fieldId);
+            }
             defaultValue = updateDTO.getDefaultValue();
             String value = tryDecryptDefaultValue(updateDTO.getFieldType(), updateDTO.getDefaultValue());
             if (value != null) {
@@ -841,7 +845,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     private void checkIssueTypeLegality(Long organizationId, Long projectId, ObjectSchemeFieldDTO field, List<String> issueTypes) {
         List<String> legalIssueTypes;
-        if (Objects.equals(field.getCreatedLevel(), CREATED_LEVEL_SYSTEM)) {
+        if (Boolean.TRUE.equals(field.getSystem())) {
             legalIssueTypes = Arrays.asList(getFieldContext(field.getCode()).split(","));
         } else if (!Objects.isNull(projectId) && Objects.equals(field.getCreatedLevel(), CREATED_LEVEL_ORGANIZATION)) {
             legalIssueTypes = field.getExtendFields().stream().map(ObjectSchemeFieldExtendDTO::getIssueType).collect(Collectors.toList());

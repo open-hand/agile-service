@@ -70,6 +70,41 @@
         ) t
     </select>
 
+
+    <select id="selectMinRankByIssueTypeId" resultType="java.lang.String">
+        select min(t.rank)
+        from (
+        select
+        t1.rank
+        from fd_object_scheme_field_extend t1
+        where t1.organization_id = #{organizationId}
+        and t1.project_id is null
+        <if test="issueTypeId != null">
+            and t1.issue_type_id = #{issueTypeId}
+        </if>
+        <if test="projectId != null">
+            and t1.field_id not in (
+            select t3.field_id
+            from fd_object_scheme_field_extend t3
+            where t3.organization_id = #{organizationId}
+            and t3.project_id = #{projectId}
+            <if test="issueTypeId != null">
+                and t3.issue_type_id = #{issueTypeId}
+            </if>
+            )
+            union
+            select
+            t2.rank
+            from fd_object_scheme_field_extend t2
+            where t2.organization_id = #{organizationId}
+            and t2.project_id = #{projectId}
+            <if test="issueTypeId != null">
+                and t2.issue_type_id = #{issueTypeId}
+            </if>
+        </if>
+        ) t
+    </select>
+
     <select id="selectExtendField"
             resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
         select
@@ -105,6 +140,43 @@
             </otherwise>
         </choose>
     </select>
+
+    <select id="selectExtendFieldByOptions"
+            resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
+        select
+        id,
+        issue_type_id,
+        issue_type,
+        project_id,
+        organization_id,
+        field_id,
+        is_required as required,
+        is_created as created,
+        is_edited as edited,
+        rank,
+        object_version_number
+        from fd_object_scheme_field_extend
+        where 1=1
+        <if test="issueTypeIds != null and issueTypeIds.size > 0">
+            and issue_type_id in
+            <foreach collection="issueTypeIds" item="issueTypeId" index="index" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+        </if>
+        and organization_id = #{organizationId}
+        <if test="fieldId != null">
+            and field_id = #{fieldId}
+        </if>
+        <choose>
+            <when test="projectId != null">
+                and project_id = #{projectId}
+            </when>
+            <otherwise>
+                and project_id is null
+            </otherwise>
+        </choose>
+    </select>
+
 
     <select id="selectExtendFields" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
         select

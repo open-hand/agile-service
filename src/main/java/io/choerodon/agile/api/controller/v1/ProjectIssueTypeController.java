@@ -51,6 +51,7 @@ public class ProjectIssueTypeController {
                                               @RequestParam Long organizationId,
                                               @RequestBody @Valid IssueTypeVO issueTypeVO) {
         issueTypeVO.setSource(null);
+        issueTypeVO.setReferenceId(null);
         return ResponseEntity.ok(issueTypeService.create(organizationId, projectId, issueTypeVO));
     }
 
@@ -129,13 +130,14 @@ public class ProjectIssueTypeController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "项目层引用的问题类型列表")
+    @ApiOperation(value = "项目层引用的问题类型")
     @PostMapping("/reference/{reference_id}")
     public ResponseEntity<Page<IssueTypeVO>> reference(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable("project_id") Long projectId,
-                                                       @PathVariable("reference_id") Long referenceId,
-                                                       @RequestParam Long organizationId) {
-        issueTypeService.reference(projectId, organizationId, referenceId);
+                                                       @PathVariable("reference_id") @Encrypt Long referenceId,
+                                                       @RequestParam Long organizationId,
+                                                       @RequestBody IssueTypeVO issueTypeVO) {
+        issueTypeService.reference(projectId, organizationId, referenceId, issueTypeVO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

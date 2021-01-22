@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import { Divider, Tooltip } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
+import { getProjectId } from '@/utils/common';
 import LinkedItem from './components/linked-item';
 import UploadUI from './components/upload';
 import openLinkUI from './components/link';
@@ -70,7 +71,7 @@ const IssueUI = (props: any) => {
         ))
       }
       <WSHandler
-        messageKey="agile-static-file"
+        messageKey={`${`agile-static-file-${getProjectId()}`}`}
         onMessage={handleMessage}
       >
         {

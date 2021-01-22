@@ -22,7 +22,7 @@ const IssueBranch = observer(({
   const [mergeRequestShow, setMergeRequestShow] = useState(false);
   useEffect(() => {
     (async () => {
-      const res = await otherProject || outside || programId || applyType === 'program' ? null : devOpsApi.project(projectId).countBranches(issueId);
+      const res = await (otherProject || outside || programId || applyType === 'program' ? null : devOpsApi.project(projectId).countBranches(issueId));
       store.setBranch(res);
     })();
   }, [applyType, issueId, otherProject, outside, programId, projectId, store]);

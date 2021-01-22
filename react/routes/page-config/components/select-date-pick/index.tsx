@@ -1,18 +1,13 @@
 import React, {
-  forwardRef, useState, useMemo, useEffect, useRef, useCallback,
+  forwardRef, useState, useRef, useCallback,
 } from 'react';
-import { Select, DatePicker } from 'choerodon-ui/pro';
+import { Select } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import DaysView from 'choerodon-ui/pro/lib/date-picker/DaysView';
 import TimesView from 'choerodon-ui/pro/lib/date-picker/TimesView';
 import DateTimesView from 'choerodon-ui/pro/lib/date-picker/DateTimesView';
-import { set } from 'lodash';
 import moment, { Moment } from 'moment';
-import { Observer } from 'mobx-react-lite';
 import { observer } from 'mobx-react';
-import {
-  observable, action, computed, toJS,
-} from 'mobx';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import styles from './index.less';
 
@@ -50,9 +45,8 @@ const dateFormat = {
   time: 'HH:mm:ss',
 };
 const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
-  value: propsValue, defaultValue, dateType, onChange, onBlur, ...otherProps
+  value: propsValue, defaultValue, dateType, onBlur, ...otherProps
 }, ref) => {
-  console.log('otherProps.', otherProps);
   const innerRef = useRef<Select>();
   const [value, setValue] = useState<Moment | undefined>(() => {
     const momentValue = moment(propsValue || defaultValue, 'YYYY-MM-DD HH:mm:ss');
@@ -72,7 +66,6 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
     }]);
   const [optionValue, setOptionValue] = useState<string | undefined>(() => {
     if (propsValue || defaultValue) {
-      console.log('propsValue', propsValue);
       return moment(propsValue || defaultValue, 'YYYY-MM-DD HH:mm:ss').isValid() ? 'custom' : propsValue || defaultValue;
     }
     return undefined;
@@ -80,19 +73,18 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
   const [visible, setVisible] = useState<boolean>(false);
 
   function handleChange(code?: string) {
-    console.log('ref....', innerRef);
     setOptionValue(code);
     if (code === 'custom') {
       setVisible(true);
     } else {
-      onChange && onChange(code);
+      // onChange && onChange(code);
       innerRef.current?.choose(new Record({ meaning: 'custom', value: moment().format(dateFormat[dateType]) }));
     }
   }
   function handleChangeDate(date: Moment) {
     setValue(date);
     setVisible(false);
-    onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
+    // onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
     innerRef.current?.choose(new Record({ meaning: 'current', value: date.format(dateFormat[dateType]) }));
   }
   const DateView = DateViews[mode as DateViewsKey];
@@ -101,11 +93,11 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
       ref && Object.assign(ref, { current: newRef });
       Object.assign(innerRef, { current: newRef });
     }
-    console.log('ref...', newRef);
   }, [ref]);
   return (
     <Select
       ref={handleBindRef}
+      value={value?.format(dateFormat[dateType])}
       trigger={['click'] as any}
       {...otherProps}
       dropdownMatchSelectWidth={false}

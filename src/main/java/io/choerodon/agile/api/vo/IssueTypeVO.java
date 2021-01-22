@@ -55,6 +55,16 @@ public class IssueTypeVO {
      */
     private Boolean deleted;
 
+    private Long referenceId;
+
+    public Long getReferenceId() {
+        return referenceId;
+    }
+
+    public void setReferenceId(Long referenceId) {
+        this.referenceId = referenceId;
+    }
+
     public Boolean getDeleted() {
         return deleted;
     }

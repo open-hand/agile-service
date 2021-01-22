@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 import {
-  Input, Icon, Select, Tooltip,
+  Input, Icon, Tooltip,
 } from 'choerodon-ui';
+import { Select } from 'choerodon-ui/pro';
 import { observer, inject } from 'mobx-react';
 import { configTheme } from '@/utils/common';
+import FlatSelect from '@/components/flat-select';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import FiltersProvider from '../../../../../components/FiltersProvider';
 import ClickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
 import IssueItem from './IssueItem';
 import './SideIssueList.less';
 
-const { Option } = Select;
+const { Option } = FlatSelect;
 @inject('HeaderStore')
 @FiltersProvider(['issueStatus', 'version'])
 @observer
@@ -71,49 +73,51 @@ class SideIssueList extends Component {
             />
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Select
-            {...configTheme({
-              list: issueStatus,
-            })}
-            allowClear
-            mode="multiple"
-            onChange={this.setFilter.bind(this, 'statusList')}
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          padding: '0 10px',
+        }}
+        >
+          <FlatSelect
+            clearButton
+            multiple
+            value={StoryMapStore.sideSearchVO?.advancedSearchArgs?.statusList}
+            onChange={(value) => {
+              this.setFilter('statusList', value);
+            }}
             getPopupContainer={(trigger) => trigger.parentNode}
             placeholder="状态"
-            style={{
-              marginLeft: 15,
-            }}
             dropdownStyle={{
               width: 180,
             }}
+            maxTagCount={2}
+            maxTagTextLength={3}
           >
             {issueStatus.map(({ text, value }) => <Option value={value}>{text}</Option>)}
-          </Select>
-          <Select
-            {...configTheme({
-              list: versionList.concat({
-                value: '0',
-                text: '无版本',
-              }),
-            })}
-            allowClear
-            mode="multiple"
-            onChange={this.setFilter.bind(this, 'versionList')}
+          </FlatSelect>
+          <FlatSelect
+            clearButton
+            multiple
+            value={StoryMapStore.sideSearchVO?.advancedSearchArgs?.versionList}
+            onChange={(value) => {
+              this.setFilter('versionList', value);
+            }}
             getPopupContainer={(trigger) => trigger.parentNode}
             placeholder="版本"
             dropdownStyle={{
               width: 180,
             }}
+            maxTagCount={2}
+            maxTagTextLength={3}
           >
             {versionList.concat({
               value: '0',
               text: '无版本',
-            }).map(({ text, value }) => <Option value={value}><Tooltip title={text}>{text}</Tooltip></Option>)}
-          </Select>
-
+            }).map(({ text, value }) => <Option value={value}>{text}</Option>)}
+          </FlatSelect>
         </div>
-        <div className="c7nagile-SideIssueList-line" />
         <div className="c7nagile-SideIssueList-content">
           {/* <Loading loading={issueListLoading} /> */}
           {issues.length > 0 ? (

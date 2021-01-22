@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Modal, DataSet, Form, Select, TextField,
+  Modal, DataSet, Form, TextField,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import { IModalProps, IIssueType } from '@/common/types';
@@ -18,25 +18,36 @@ interface Props {
 
 const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
   const linkedTypeRef = useRef<IIssueType[]>([]);
-  const [nameRepeat, setNameRepeat] = useState<boolean>(false);
+  const [renameExist, setRenameExist] = useState<boolean>(false);
 
-  const checkName = useCallback(async (id) => {
+  const checkName = useCallback(async (id, name, record) => {
     if (id) {
       const typeName = (linkedTypeRef.current || []).find((item) => item.id === id)?.name;
       if (typeName) {
         const res = await issueTypeApi.checkName(typeName);
         if (res) {
-          setNameRepeat(true);
-          return '该问题类型名称和当前项目已有的问题类型名称重复';
+          setRenameExist(true);
+          return true;
         }
-        setNameRepeat(false);
+        setRenameExist(false);
         return true;
       }
-      setNameRepeat(false);
+      setRenameExist(false);
       return true;
     }
-    setNameRepeat(false);
+    setRenameExist(false);
     return true;
+  }, []);
+
+  const checkRename = useCallback(async (value, name, record) => {
+    if (value) {
+      const res = await issueTypeApi.checkName(value);
+      if (res) {
+        return '问题类型名称重复';
+      }
+      return true;
+    }
+    return '请重新设置名称';
   }, []);
 
   const linkDataSet = useMemo(() => new DataSet({
@@ -52,22 +63,25 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
       name: 'newName',
       label: '请重新设置名称',
       required: true,
-      dynamicProps: {
-        required: async ({ record }) => {
-          const typeIdsField = record.getField('id');
-          const fieldValidate = await typeIdsField.checkValidity();
-          if (record.get('id') && !fieldValidate) {
-            return true;
-          }
-          return false;
-        },
-      },
+      validator: checkRename,
     }],
-  }), [checkName]);
+    events: {
+      update: ({
+        // @ts-ignore
+        // eslint-disable-next-line no-shadow
+        dataSet, record, name, value, oldValue,
+      }) => {
+        if (name === 'id' && !value) {
+          dataSet.current.set('newName', undefined);
+          setRenameExist(false);
+        }
+      },
+    },
+  }), [checkName, checkRename]);
 
   const handleSubmit = useCallback(async () => {
     let validate = false;
-    if (nameRepeat) {
+    if (renameExist) {
       validate = await linkDataSet.validate();
     } else {
       const typeIdsField = linkDataSet.current?.getField('id') as Field;
@@ -86,7 +100,7 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
       });
     }
     return false;
-  }, [issueTypeDataSet, linkDataSet, modal, nameRepeat]);
+  }, [issueTypeDataSet, linkDataSet, modal, renameExist]);
 
   useEffect(() => {
     modal?.handleOk(handleSubmit);
@@ -96,8 +110,26 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
     <Form dataSet={linkDataSet}>
       <SelectLinkType name="id" dataRef={linkedTypeRef} />
       {
-        nameRepeat && (
-          <TextField name="newName" />
+        renameExist && (
+          <div style={{
+            width: '100%',
+            marginTop: -10,
+          }}
+          >
+            <div style={{
+              color: 'rgba(0, 0, 0, 0.64)',
+              marginBottom: 8,
+            }}
+            >
+              该问题类型名称和当前项目已有的问题类型名称重复
+            </div>
+            <TextField
+              name="newName"
+              style={{
+                width: '100%',
+              }}
+            />
+          </div>
         )
       }
     </Form>

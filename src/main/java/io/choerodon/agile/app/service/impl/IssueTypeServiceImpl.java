@@ -1,21 +1,16 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
-import io.choerodon.agile.infra.dto.IssueTypeSchemeConfigDTO;
-import io.choerodon.agile.infra.dto.ProjectConfigDTO;
-import io.choerodon.agile.infra.enums.IssueTypeCode;
-import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.enums.SchemeType;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.ProjectCategoryUtil;
+import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.infra.dto.IssueTypeDTO;
-import io.choerodon.agile.infra.enums.InitIssueType;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -66,6 +61,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
     @Autowired
     private IssueTypeExtendMapper issueTypeExtendMapper;
+    @Autowired
+    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+    @Autowired
+    private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
 
     private static final String ORGANIZATION ="organization";
 
@@ -105,7 +104,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (issueType != null) {
             return modelMapper.map(issueType, IssueTypeVO.class);
         }
-            return null;
+        return null;
     }
 
     @Override
@@ -132,8 +131,68 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             updateExtendEnabled(result.getId(), projectId, organizationId, true);
             //项目层创建问题类型,初始化默认状态机
             initDefaultStateMachine(organizationId, projectId, result, categoryCodes);
+            //初始化项目系统字段与问题类型关系
+            initIssueTypeAndFieldRel(organizationId, projectId, result);
+        } else {
+            //初始化组织系统字段与问题类型关系
+            initIssueTypeAndFieldRel(organizationId, null, result);
         }
         return result;
+    }
+
+    private void initIssueTypeAndFieldRel(Long organizationId,
+                                          Long projectId,
+                                          IssueTypeVO result) {
+        ObjectSchemeFieldDTO field = new ObjectSchemeFieldDTO();
+        field.setSystem(true);
+        String typeCode = result.getTypeCode();
+        List<ObjectSchemeFieldDTO> fields =
+                objectSchemeFieldMapper.select(field)
+                        .stream()
+                        .filter(x -> {
+                            String context = AgileSystemFieldContext.getContextByFieldCode(x.getCode());
+                            if (context != null) {
+                                for (String str : context.split(",")) {
+                                    if (str.trim().equals(typeCode)) {
+                                        return true;
+                                    }
+                                }
+                            }
+                            return false;
+                        }).collect(Collectors.toList());
+        Long issueTypeId = result.getId();
+        fields.forEach(x -> {
+            Boolean required  = x.getRequired();
+            SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(x.getCode());
+            Boolean created = false;
+            Boolean edited = false;
+            if (!ObjectUtils.isEmpty(commonField)) {
+                created = commonField.created();
+                edited = commonField.edited();
+            }
+            String rank = objectSchemeFieldExtendMapper.selectMinRankByIssueTypeId(organizationId, projectId, issueTypeId);
+            if (rank == null) {
+                rank = RankUtil.mid();
+            } else {
+                rank = RankUtil.genPre(rank);
+            }
+            Long fieldId = x.getId();
+            ObjectSchemeFieldExtendDTO extendDTO = new ObjectSchemeFieldExtendDTO();
+            if (objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Arrays.asList(issueTypeId), organizationId, fieldId, projectId).isEmpty()) {
+                extendDTO.setIssueTypeId(issueTypeId);
+                extendDTO.setIssueType(typeCode);
+                extendDTO.setOrganizationId(organizationId);
+                extendDTO.setProjectId(projectId);
+                extendDTO.setFieldId(fieldId);
+                extendDTO.setRequired(required);
+                extendDTO.setCreated(created);
+                extendDTO.setEdited(edited);
+                extendDTO.setRank(rank);
+                extendDTO.setDefaultValue(x.getDefaultValue());
+                extendDTO.setExtraConfig(x.getExtraConfig());
+                objectSchemeFieldExtendMapper.insertSelective(extendDTO);
+            }
+        });
     }
 
     private void updateExtendEnabled(Long issueTypeId,
@@ -440,7 +499,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public void reference(Long projectId, Long organizationId, Long referenceId) {
+    public void reference(Long projectId,
+                          Long organizationId,
+                          Long referenceId,
+                          IssueTypeVO issueTypeVO) {
         IssueTypeDTO issueType = selectOne(organizationId, ZERO, referenceId);
         if (issueType == null) {
             throw new CommonException("error.issue.type.not.existed");
@@ -455,6 +517,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         dto.setSource(ORGANIZATION);
         dto.setInitialize(false);
         if (issueTypeMapper.select(dto).isEmpty()) {
+            String name = issueTypeVO.getName();
+            if (StringUtils.hasText(name)) {
+                issueType.setName(name);
+            }
             issueType.setId(null);
             issueType.setInitialize(false);
             issueType.setProjectId(projectId);
@@ -528,7 +594,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         result.forEach(x -> {
             if (Boolean.TRUE.equals(x.getInitialize())) {
                 String typeCode = x.getTypeCode();
-                if (AGILE_ISSUE_TYPES.contains(typeCode)) {
+                if (AGILE_ISSUE_TYPES.contains(typeCode)
+                        || IssueTypeCode.BUG.value().equals(typeCode)) {
                     x.setUsageCount(agileProjectCount);
                 }
                 if (IssueTypeCode.ISSUE_EPIC.value().equals(typeCode)) {
