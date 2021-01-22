@@ -131,8 +131,15 @@ const DraggableItem: React.FC<Props> = ({
     <TextEditToggle
       {...textEditToggleProps}
     >
+
       <Observer>
-        {() => (!textEditToggleProps.disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? '--' : data.get('showDefaultValueText') || '')}
+        {() => (
+          <Tooltip title={data.get('showDefaultValueText') !== '' ? data.get('showDefaultValueText') : undefined}>
+            <span>
+              {(!textEditToggleProps.disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? '--' : data.get('showDefaultValueText') || '')}
+            </span>
+          </Tooltip>
+        )}
       </Observer>
     </TextEditToggle>
 
