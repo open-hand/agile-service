@@ -113,9 +113,9 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
     };
   }, [fieldType, handleSubmit, record.id]);
   const disabled = useMemo(() => {
-    if (isProject && record.get('createdLevel') === 'organization') {
-      return true;
-    }
+    // if (isProject && record.get('createdLevel') === 'organization') {
+    //   return true;
+    // }
     if (record.get('createdLevel') === 'system') {
       return isProject ? disabledEditDefaultFields.includes(record.get('fieldCode')) : orgDisabledEditDefaultFields.includes(record.get('fieldCode'));
     }

@@ -132,7 +132,7 @@ const DraggableItem: React.FC<Props> = ({
       {...textEditToggleProps}
     >
       <Observer>
-        {() => (!textEditToggleProps.disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? <span style={{ color: 'rgba(0,0,0,.65)' }}>-- </span> : data.get('showDefaultValueText') || '')}
+        {() => (!textEditToggleProps.disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? '--' : data.get('showDefaultValueText') || '')}
       </Observer>
     </TextEditToggle>
 
@@ -160,10 +160,10 @@ const DraggableItem: React.FC<Props> = ({
         {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, requiredFieldCanNotEdit)}
       </div>
       <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
-        {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, createdFieldCanNotEdit)}
+        {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, editedFieldCanNotEdit)}
       </div>
       <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
-        {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, editedFieldCanNotEdit)}
+        {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, createdFieldCanNotEdit)}
       </div>
     </div>
 
