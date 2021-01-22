@@ -33,11 +33,15 @@
       font-weight: 500;
       color: rgba(0, 0, 0, 0.87);
       line-height: 18px;
+
       &-icon {
         color: rgba(0, 0, 0, 0.65);
         margin-bottom: .03rem;
         transform: scale(0.9);
       }
+      // &:nth-child(n+3) {
+      //   width: 15%;
+      // }
     }
   }
 
@@ -91,8 +95,10 @@
 
     &-action {
       height: .32rem;
+
       &-button {
         opacity: 0;
+
         &:hover,
         &:active {
           opacity: 1;
@@ -113,6 +119,10 @@
       &:not(:first-child) {
         margin-left: .05rem;
       }
+      // &:nth-child(n+3) {
+      //   width: 15%;
+      //   margin-left: 0;
+      // }
 
       &-text {
         text-overflow: ellipsis;
@@ -122,10 +132,14 @@
       }
 
       &-defaultValue {
+
+        // line-height: 30px;
         & >div:last-child {
           // border-color: rgba(0, 0, 0, 0.2);
           // border-radius: 0.05rem;
+          height: .3rem;
           color: fade(#000, 87%);
+          min-height: .28rem;
         }
       }
     }

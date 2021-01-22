@@ -76,7 +76,8 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
         fieldOptions: record.get('fieldOptions'),
       },
       dataRef,
-      style: { minWidth: 165, maxWidth: 300 },
+      dropdownMatchSelectWidth: false,
+      dropdownMenuStyle: { minWidth: 165, maxWidth: 300 },
     });
     if (fieldType === 'member' || fieldType === 'multiMember') {
       const defaultValueObj = record.get('defaultValueObjs') || record.get('defaultValueObj') || record.get('localDefaultObj') || undefined;
@@ -85,7 +86,8 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
           fieldType, fieldCode: record.get('fieldCode'), defaultValue: defaultValueObj, extraConfig: record.get('extraConfig'), fieldOptions: record.get('fieldOptions'),
         },
         dataRef,
-        style: { minWidth: 165, maxWidth: 300 },
+        dropdownMatchSelectWidth: false,
+        dropdownMenuStyle: { minWidth: 165, maxWidth: 300 },
       });
     }
     return {
