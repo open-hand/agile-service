@@ -11,7 +11,6 @@ import java.util.Date;
  */
 public class StaticFileHeaderVO {
     @ApiModelProperty(value = "静态文件头id")
-    @Encrypt
     private Long id;
     @ApiModelProperty(value = "项目id")
     private Long projectId;

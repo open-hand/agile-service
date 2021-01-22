@@ -11,7 +11,6 @@ import java.util.List;
  */
 public class StaticFileRelatedVO {
     @ApiModelProperty(value = "静态文件头id")
-    @Encrypt
     private List<Long> fileHeaderIds;
     @ApiModelProperty(value = "问题id")
     @Encrypt
