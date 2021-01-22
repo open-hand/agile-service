@@ -83,7 +83,6 @@ function renderEditor({
 
   if (['checkbox', 'multiple', 'radio', 'single'].includes(fieldType)) {
     const fieldOptions = data.fieldOptions || [];
-    console.log('ssssss', data);
     return (
       <Select
         multiple={['checkbox', 'multiple'].includes(fieldType)}

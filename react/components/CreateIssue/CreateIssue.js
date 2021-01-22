@@ -281,15 +281,15 @@ class CreateIssue extends Component {
         const defaultType = this.getDefaultType(res);
         const param = {
           schemeCode: 'agile_issue',
-          context: defaultType.id,
+          context: defaultType.typeCode,
           pageCode: 'agile_issue_create',
         };
-        this.loadDefaultTemplate(defaultType.id);
+        this.loadDefaultTemplate(defaultType.typeCode);
         fieldApi.getFields(param).then((fields) => {
           this.setState({
             fields,
             originIssueTypes: res,
-            defaultTypeId: defaultType.id,
+            defaultTypeId: defaultType.typeCode,
             loading: false,
             newIssueTypeCode: defaultType.typeCode,
           }, () => {
@@ -370,7 +370,7 @@ class CreateIssue extends Component {
           mainResponsibleId,
           testResponsibleId,
         } = values;
-        const { typeCode } = originIssueTypes.find((t) => t.id === typeId);
+        const { typeCode, id: currentTypeId } = originIssueTypes.find((t) => t.typeCode === typeId);
         // 手动检验描述是否必输校验
         const descriptionField = fields.find((f) => f.fieldCode === 'description');
         if (descriptionField && descriptionField.required && this.checkSameDescription(undefined, description)) {
@@ -421,7 +421,7 @@ class CreateIssue extends Component {
             description: text,
             programId: getProjectId(),
             projectId: getProjectId(),
-            issueTypeId: typeId,
+            issueTypeId: currentTypeId,
             typeCode,
             summary: summary.trim(),
             priorityId: priorityId || 0,
@@ -566,11 +566,11 @@ class CreateIssue extends Component {
                           getPopupContainer={(triggerNode) => triggerNode.parentNode}
                           onChange={((value) => {
                             const { typeCode, id } = originIssueTypes.find(
-                              (item) => item.id === value,
+                              (item) => item.typeCode === value,
                             );
                             const param = {
                               schemeCode: 'agile_issue',
-                              context: id,
+                              context: typeCode,
                               pageCode: 'agile_issue_create',
                             };
                             fieldApi.getFields(param).then((res) => {
@@ -588,7 +588,7 @@ class CreateIssue extends Component {
                           })}
                         >
                           {this.getIssueTypes(isInProgram).map((type) => (
-                            <Option key={type.id} value={type.id}>
+                            <Option key={type.id} value={type.typeCode}>
                               <TypeTag
                                 data={type}
                                 showName

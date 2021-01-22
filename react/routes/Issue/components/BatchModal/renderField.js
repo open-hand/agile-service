@@ -47,7 +47,7 @@ export default function renderField({ code, fieldType, fieldOptions }) {
           <NumberField
             name={code}
             style={{ width: '100%' }}
-            // step={isCheck ? 0.1 : 1}
+          // step={isCheck ? 0.1 : 1}
           />
         </div>
       );
@@ -83,25 +83,27 @@ export default function renderField({ code, fieldType, fieldOptions }) {
           searchable
         >
           {fieldOptions
-              && fieldOptions.length > 0
-              && fieldOptions.map((item) => {
-                if (item.enabled) {
-                  return (
-                    <Option
-                      value={item.tempKey || item.id}
-                      key={item.tempKey || item.id}
-                    >
-                      {item.value}
-                    </Option>
-                  );
-                }
-                return [];
-              })}
+            && fieldOptions.length > 0
+            && fieldOptions.map((item) => {
+              if (item.enabled) {
+                return (
+                  <Option
+                    value={item.tempKey || item.id}
+                    key={item.tempKey || item.id}
+                  >
+                    {item.value}
+                  </Option>
+                );
+              }
+              return [];
+            })}
         </Select>
       );
+    case 'multiMember':
     case 'member':
       return (
         <SelectUser
+          multiple={fieldType === 'multiMember'}
           style={{ width: '100%' }}
           name={code}
         />
