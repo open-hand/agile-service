@@ -267,7 +267,7 @@ class CreateIssue extends Component {
       return result;
     }, {});
     // 报告人特殊处理  如果没有报告人默认值，默认是当前用户
-    if (!setFields.reporter) {
+    if (!setFields.reporterId) {
       Object.assign(setFields, { [defaultScope.get('reporter')]: AppState.userInfo.id });
     }
     form.setFieldsValue(setFields);
