@@ -79,10 +79,10 @@ const LinkItem: React.FC<Props> = ({ ui, reloadIssue, uploading = false }) => {
           )
         }
         {
-          ui.status === 'success' && uploading && (
+          ui.status === 'doing' && uploading && (
             <div className={styles.success}>
               <Progress
-                value={ui.process * 100}
+                value={(ui.process * 100).toFixed(2)}
                 className={styles.sucessProgress}
               />
             </div>
