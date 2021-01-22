@@ -200,6 +200,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         List<String> urls = new ArrayList<>();
         String prefixPath = staticFileCompress.getPrefixPath();
         long nowSize = 0;
+        double process = 0.0;
         int size = staticFileCompress.getSize();
 
         try {
@@ -224,7 +225,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                             dealUrl(url),
                             dealRelativePathSlash(fileHeader.getFileName(), prefixPath));
                     lineList.add(staticFileLine);
-                    updateProgress(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, nowSize);
+                    process = updateProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, nowSize, process);
                 }
             }
         } catch (RarException e) {
@@ -261,6 +262,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         StaticFileHeaderDTO update = new StaticFileHeaderDTO();
         update.setId(staticFileCompress.getId());
         int size = staticFileCompress.getSize();
+        double process = 0.0;
         List<StaticFileLineDTO> lineList = new ArrayList<>();
         List<String> urls = new ArrayList<>();
 
@@ -292,7 +294,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                             dealRelativePath(entry.getName(), prefixPath));
                     lineList.add(staticFileLine);
                 }
-                updateProgress(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, (size - availableSize));
+                process = updateProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, (size - availableSize), process);
             }
             //获取上传的文件信息
             List<FileDTO> files = fileClient.getFiles(organizationId, BUCKET_NAME, urls);
@@ -311,10 +313,14 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         }
     }
 
-    private void updateProgress(List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, StaticFileOperationHistoryDTO staticFileCompressHistory, int toTalSize, long nowSize) {
-        double nowProgress = new BigDecimal(nowSize).divide(new BigDecimal(toTalSize), 2, RoundingMode.HALF_UP).doubleValue();
-        staticFileCompressHistory.setProcess(nowProgress);
+    private double updateProcess(List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, StaticFileOperationHistoryDTO staticFileCompressHistory, int toTalSize, long nowSize, double process) {
+        double nowProcess = new BigDecimal(nowSize).divide(new BigDecimal(toTalSize), 2, RoundingMode.HALF_UP).doubleValue();
+        if (process - nowProcess < 0.05) {
+            return process;
+        }
+        staticFileCompressHistory.setProcess(nowProcess);
         sendProcess(staticFileCompressHistoryList, staticFileCompressHistory.getUserId(), staticFileCompressHistory.getProjectId());
+        return nowProcess;
     }
 
     private void setFileStatus(Long id, String status) {
