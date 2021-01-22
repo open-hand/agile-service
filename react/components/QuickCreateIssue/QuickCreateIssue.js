@@ -104,7 +104,9 @@ class QuickCreateIssue extends Component {
               estimatedEndTime: fieldsMap.get('estimatedEndTime')?.defaultValue,
               estimatedStartTime: fieldsMap.get('estimatedStartTime')?.defaultValue,
               storyPoints: fieldsMap.get('storyPoints')?.defaultValue,
-              estimatedTime: fieldsMap.get('estimatedTime')?.defaultValue,
+              remainingTime: fieldsMap.get('remainingTime')?.defaultValue,
+              mainResponsibleId: fieldsMap.get('mainResponsible')?.defaultValue,
+              testResponsibleId: fieldsMap.get('testResponsible')?.defaultValue,
             };
             issueApi.create(issue).then((res) => {
               this.setState({

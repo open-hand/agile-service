@@ -141,22 +141,11 @@ public class AgileEventHandler {
         if (projectInfoMapper.select(dto).isEmpty()) {
             List<ProjectEventCategory> projectEventCategories = projectEvent.getProjectCategoryVOS();
             if (!ObjectUtils.isEmpty(projectEventCategories)) {
-                syncProjectCode(projectId, projectEvent, projectEventCategories);
                 initIfAgileProject(projectEvent, projectEventCategories);
             }
         } else {
             LOGGER.info("项目{}已初始化，跳过项目初始化", projectEvent.getProjectCode());
         }
         return message;
-    }
-
-    private void syncProjectCode(Long projectId, ProjectEvent projectEvent, List<ProjectEventCategory> projectEventCategories) {
-        List<String> codes = projectEventCategories.stream().map(ProjectEventCategory::getCode).collect(Collectors.toList());
-        if (codes.contains("N_TEST")) {
-            ProjectInfoVO projectInfoVO = testServiceClientOperator.queryProjectInfo(projectId);
-            if (!ObjectUtils.isEmpty(projectInfoVO)) {
-                projectEvent.setProjectCode(projectInfoVO.getProjectCode());
-            }
-        }
     }
 }

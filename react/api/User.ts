@@ -33,6 +33,7 @@ class UserApi extends Api<UserApi> {
   getAllInProject(param?: string, page?: number, userId?: number, size?: number, projectId?: string): Promise<{
     list: User[]
     hasNextPage: boolean
+    number: number
   }> {
     return this.request({
       method: 'get',
@@ -43,7 +44,7 @@ class UserApi extends Api<UserApi> {
         page: page || 1,
         size: size || 20,
       },
-      cache: true,
+      // cache: true,
     });
   }
 

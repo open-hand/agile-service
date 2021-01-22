@@ -1,5 +1,5 @@
 import React, {
-  useMemo, useEffect, useRef, useImperativeHandle, useCallback,
+  useMemo, useRef, useCallback,
 } from 'react';
 import { omit, debounce } from 'lodash';
 import { Button, DataSet } from 'choerodon-ui/pro';
@@ -36,8 +36,8 @@ export interface LoadConfig {
 export interface SelectConfig<T = {}> {
   data: T[]
   hasNextPage?: boolean
-  page?: number
-  name: string
+  fetchNextPage?: () => void
+  onSearch?: (param: string) => void
   textField: string
   valueField: string
   optionRenderer?: (item: T) => JSX.Element
@@ -46,11 +46,7 @@ export interface SelectConfig<T = {}> {
   props?: object
 }
 
-export interface RefHandle {
-  refresh: (config?: LoadConfig) => void
-}
-export type UseSelectRef = React.MutableRefObject<RefHandle>
-export default function useSelect<T extends { [key: string]: any }>(config: SelectConfig<T>, ref?: React.MutableRefObject<RefHandle>) {
+export default function useSelect<T extends { [key: string]: any }>(config: SelectConfig<T>) {
   const textRef = useRef<string>('');
   const dataSetRef = useRef<DataSet>();
   const cacheRef = useRef<Map<any, T>>(new Map());
@@ -58,7 +54,8 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   const {
     data,
     hasNextPage,
-    page = 1,
+    fetchNextPage,
+    onSearch,
     textField = 'meaning',
     valueField = 'value',
     optionRenderer = defaultRender,
@@ -79,21 +76,10 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   }, [optionRenderer]);
   // 不分页时，本地搜索
   const localSearch = !paging;
-  const loadData = useCallback(async ({ filter = textRef.current, nextPage = 1 }: LoadConfig = {} as LoadConfig) => {
-
-  }, []);
   const searchData = useMemo(() => debounce((filter: string) => {
-    loadData({ filter });
-  }, 500), [loadData]);
-  useEffect(() => {
-    loadData({ filter: '' });
-  }, [loadData]);
-  useImperativeHandle<Object, RefHandle>(ref, () => ({
-    refresh: loadData,
-  }));
-  const handleLoadMore = useCallback(() => {
-    loadData({ nextPage: page + 1 });
-  }, [page, loadData]);
+    onSearch && onSearch(filter);
+  }, 500), [onSearch]);
+
   const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     textRef.current = value;
@@ -133,13 +119,13 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     <Button
       onClick={(e) => {
         e.stopPropagation();
-        handleLoadMore();
+        fetchNextPage && fetchNextPage();
       }}
       style={{ margin: '-4px -12px', width: 'calc(100% + 24px)' }}
     >
       加载更多
     </Button>
-  ), [handleLoadMore]);
+  ), [fetchNextPage]);
   const options = useMemo(() => {
     if (!dataSetRef.current) {
       dataSetRef.current = new DataSet({
@@ -184,15 +170,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     options,
     // @ts-ignore
     optionRenderer: renderOption,
-    // TODO: 考虑如何获取record，来渲染，例如用户
     renderer,
-    // renderer: renderer ? ({
-    //   // @ts-ignore
-    //   value, text, name, record, dataSet,
-    // }) => {
-
-    //   return (record ? renderer() : null);
-    // } : undefined,
     // @ts-ignore
     onOption: ({ record }) => {
       if (record.get('loadMoreButton') === true) {
