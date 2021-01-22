@@ -244,6 +244,9 @@ class CreateIssue extends Component {
       ['remainingTime', 'estimatedTime'],
       ['estimatedStartTime', 'estimatedStartTime'],
       ['estimatedEndTime', 'estimatedEndTime'],
+      ['mainResponsible', 'mainResponsibleId'],
+      ['testResponsible', 'testResponsibleId'],
+
     ]);
     const setFields = fields.reduce((result, field) => {
       const name = defaultScope.get(field.fieldCode);
