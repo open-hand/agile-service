@@ -22,7 +22,7 @@ public class SystemFieldPageConfig {
         COMPONENT(FieldCode.COMPONENT, true, true),
         LABEL(FieldCode.LABEL, true, true),
         STATUS(FieldCode.STATUS, false, true),
-        REPORTER(FieldCode.REPORTER, true, true),
+        REPORTER(FieldCode.REPORTER, false, true),
         INFLUENCE_VERSION(FieldCode.INFLUENCE_VERSION, false, true),
         TIME_TRACE(FieldCode.TIME_TRACE, false, true),
         CREATION_DATE(FieldCode.CREATION_DATE, false, true),
