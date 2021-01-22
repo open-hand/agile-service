@@ -173,7 +173,7 @@ const FormDataSet = ({
         label: formatMessage({ id: 'field.context' }),
         required: true,
         multiple: true,
-        valueField: 'typeCode',
+        valueField: 'id',
         textField: 'name',
         defaultValue: defaultContext,
         lookupAxiosConfig: ({
