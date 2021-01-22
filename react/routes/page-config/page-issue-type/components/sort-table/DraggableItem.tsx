@@ -132,7 +132,7 @@ const DraggableItem: React.FC<Props> = ({
       {...textEditToggleProps}
     >
       <Observer>
-        {() => data.get('showDefaultValueText') || ''}
+        {() => (!textEditToggleProps.disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? <span style={{ color: 'rgba(0,0,0,.65)' }}>-- </span> : data.get('showDefaultValueText') || '')}
       </Observer>
     </TextEditToggle>
 
