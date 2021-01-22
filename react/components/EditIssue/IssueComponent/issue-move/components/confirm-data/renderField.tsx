@@ -199,7 +199,6 @@ const renderField = ({
                 dataSet.current?.set(`${issueId}-label`, issueLabelNames.map((item: { labelName: string}) => item.labelName));
               }}
               extraOptions={issueLabelNames}
-              dontCombo
             />
           )}
         >

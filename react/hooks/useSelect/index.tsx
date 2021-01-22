@@ -68,7 +68,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   const dataSetRef = useRef<DataSet>();
   const cacheRef = useRef<Map<any, T>>(new Map());
   const defaultRender = useCallback((item: T, tooltip?: boolean) => {
-    const text = getValueByPath(item, config.textField);
+    const text = item?.meaning || getValueByPath(item, config.textField);
     return tooltip ? <Tooltip title={text} placement="bottomLeft">{text}</Tooltip> : text;
   }, [config.textField]);
   const firstRef = useRef(true);
@@ -85,7 +85,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   } = config;
   const request = usePersistFn(requestFn);
   const afterLoad = usePersistFn(afterLoadFn || noop);
-  const renderer = useCallback(({ value, maxTagTextLength }) => {
+  const renderer = useCallback(({ value, text: originText, maxTagTextLength }) => {
     const item = cacheRef.current?.get(value);
     if (item) {
       const result = optionRenderer(item);
@@ -95,6 +95,8 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
         ? `${(result as string).slice(0, maxTagTextLength)}...`
         : result;
       return text;
+    } if (value === originText) {
+      return originText;
     }
     return null;
   }, [optionRenderer]);
