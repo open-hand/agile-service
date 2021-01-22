@@ -247,8 +247,8 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       url: `${this.prefix}/issue_type/reference/${typeId}`,
       params: {
         organizationId: getOrganizationId(),
-        data,
       },
+      data,
     });
   }
 }
