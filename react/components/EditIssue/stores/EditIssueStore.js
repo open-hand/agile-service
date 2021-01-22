@@ -268,9 +268,11 @@ class EditIssueStore {
   }
 
   getLinkedUI = () => {
-    uiApi.getLinkedUI(this.issue.issueId).then((res) => {
-      this.setLinkedUI(res || []);
-    });
+    if (this.issue.issueId) {
+      uiApi.getLinkedUI(this.issue.issueId).then((res) => {
+        this.setLinkedUI(res || []);
+      });
+    }
   }
 }
 export default EditIssueStore;
