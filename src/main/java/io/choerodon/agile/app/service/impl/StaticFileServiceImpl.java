@@ -172,8 +172,8 @@ public class StaticFileServiceImpl implements StaticFileService {
     }
 
     @Override
-    public ResponseEntity<byte[]> selectStaticFileResult(String fileHeaderIdStr, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
-        Long fileHeaderId = EncryptionUtils.decrypt(fileHeaderIdStr, EncryptionUtils.BLANK_KEY);
+    public ResponseEntity<byte[]> selectStaticFileResult(Long fileHeaderId, WebRequest webRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+        String fileHeaderIdStr = fileHeaderId.toString();
         StaticFileLineDTO file;
 
         String path;
