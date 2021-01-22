@@ -54,6 +54,7 @@ public class StaticFileServiceImpl implements StaticFileService {
 
     private static final String DOING = "doing";
     private static final String DECOMPRESS = "decompress";
+    private static final String DELETE = "delete";
     private static final String INDEX_HTML = "index.html";
     private static final String START_HTML = "start_with_pages.html";
     private static final String HTML_CONTENT_TYPE = "text/html";
@@ -128,7 +129,7 @@ public class StaticFileServiceImpl implements StaticFileService {
                 staticFileHeader.getOrganizationId(),
                 staticFileHeader.getId(),
                 staticFileHeader.getCreatedBy(),
-                DECOMPRESS,
+                DELETE,
                 DOING);
         if (staticFileOperationHistoryMapper.insertSelective(staticFileCompressHistory) != 1) {
             throw new CommonException("error.staticFileOperationHistoryDTO.insert");
@@ -289,11 +290,15 @@ public class StaticFileServiceImpl implements StaticFileService {
     @Override
     public void deleteStaticFile(Long projectId, Long fileHeaderId) {
         List<String> fileUrls = new ArrayList<>();
-        Long organizationId = projectUtil.getOrganizationId(projectId);
-        StaticFileHeaderDTO staticFileHeader = staticFileHeaderMapper.selectByPrimaryKey(fileHeaderId);
+
+        StaticFileHeaderDTO headerRecord = new StaticFileHeaderDTO();
+        headerRecord.setId(fileHeaderId);
+        headerRecord.setProjectId(projectId);
+        StaticFileHeaderDTO staticFileHeader = staticFileHeaderMapper.selectOne(headerRecord);
         if (ObjectUtils.isEmpty(staticFileHeader)) {
             throw new CommonException(DELETE_NULL_EXCEPTION_CODE);
         }
+
         StaticFileLineDTO lineRecord = new StaticFileLineDTO();
         lineRecord.setHeaderId(fileHeaderId);
         List<StaticFileLineDTO> fileLineList = staticFileLineMapper.select(lineRecord);
@@ -303,18 +308,13 @@ public class StaticFileServiceImpl implements StaticFileService {
                     fileUrls.add(getRealUrl(staticFileLineDTO.getUrl()))
             );
         }
-        if (!CollectionUtils.isEmpty(fileUrls)) {
-            fileClient.deleteFileByUrl(organizationId, BUCKET_NAME, fileUrls);
-        }
+
         StaticFileOperationHistoryDTO staticFileDeleteHistory = createStaticFileDeleteHistory(staticFileHeader);
+
         StaticFileIssueRelDTO relRecord = new StaticFileIssueRelDTO();
         relRecord.setProjectId(projectId);
-
-        staticFileDealService.deleteRel(relRecord, staticFileHeader);
-        staticFileLineMapper.delete(lineRecord);
-        if (staticFileHeaderMapper.deleteByPrimaryKey(fileHeaderId) != 1) {
-            throw new CommonException("error.staticFileHeader.delete");
-        }
+        staticFileHeaderMapper.updateFileStatus(staticFileHeader.getId(), DOING);
+        staticFileDealService.deleteBase(relRecord, staticFileHeader, fileUrls, staticFileDeleteHistory);
     }
 
     @Override
