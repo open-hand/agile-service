@@ -43,6 +43,7 @@ const SelectLabel: React.FC<Props> = forwardRef(({
     <Component
       ref={ref}
       multiple
+      combo
       {...props}
       {...otherProps}
     />
