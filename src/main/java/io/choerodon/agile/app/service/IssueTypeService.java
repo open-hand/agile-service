@@ -120,6 +120,7 @@ public interface IssueTypeService {
      * @param projectId
      * @param organizationId
      * @param referenceId
+     * @param issueTypeVO
      */
-    void reference(Long projectId, Long organizationId, Long referenceId);
+    void reference(Long projectId, Long organizationId, Long referenceId, IssueTypeVO issueTypeVO);
 }
