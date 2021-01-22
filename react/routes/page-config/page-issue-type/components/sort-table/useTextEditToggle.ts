@@ -97,7 +97,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
     const key = `page-issue-type-default-edit-text-${record.id}`;
     // const submitTrigger = ['click', 'change'] as Action[]; // 'change', 'blur'
     const submitTrigger = ['blur'] as Action[];
-    const submitOnChange = ['member', 'single', 'radio'].includes(fieldType);
+    const submitOnChange = ['member', 'single', 'radio', 'date', 'datetime', 'time'].includes(fieldType);
     if (submitOnChange) {
       submitTrigger.push('change');
     }
