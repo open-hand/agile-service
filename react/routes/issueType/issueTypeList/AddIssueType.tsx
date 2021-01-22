@@ -115,12 +115,12 @@ const AddIssueType: React.FC<Props> = ({
   }, []);
 
   const saveEdit = useCallback((data: IUpdate, callback?: Function) => {
-    issueTypeApi[isOrganization ? 'orgUpdate' : 'update'](typeId as string, data).then(() => {
+    issueTypeApi[isOrganization ? 'orgUpdate' : 'update'](typeId as string, data).then((res: any) => {
       Choerodon.prompt('编辑成功');
       typeTableDataSet.query(typeTableDataSet.currentPage);
       modal?.close();
       if (callback) {
-        callback();
+        callback(res.id);
       }
     }).catch(() => {
       Choerodon.prompt('编辑失败');
@@ -144,12 +144,12 @@ const AddIssueType: React.FC<Props> = ({
         icon,
       };
       if (!typeId) {
-        issueTypeApi[isOrganization ? 'orgCreate' : 'create'](data as ICreate).then(() => {
+        issueTypeApi[isOrganization ? 'orgCreate' : 'create'](data as ICreate).then((res: any) => {
           Choerodon.prompt('创建成功');
           typeTableDataSet.query();
           modal?.close();
           if (callback) {
-            callback();
+            callback(res.id);
           }
         }).catch(() => {
           Choerodon.prompt('创建失败');
@@ -176,14 +176,14 @@ const AddIssueType: React.FC<Props> = ({
               },
               onCancel: () => {
                 modal?.close();
-                callback();
+                callback(data.id);
               },
             });
           } else {
             saveEdit(data as IUpdate);
           }
         } else if (callback) {
-          callback();
+          callback(data.id);
         }
       }
     }
