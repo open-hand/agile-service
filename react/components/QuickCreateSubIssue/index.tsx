@@ -71,6 +71,8 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
             estimatedEndTime: fieldsMap.get('estimatedEndTime').defaultValue,
             estimatedStartTime: fieldsMap.get('estimatedStartTime').defaultValue,
             remainingTime: fieldsMap.get('remainingTime')?.defaultValue,
+            mainResponsibleId: fieldsMap.get('mainResponsible')?.defaultValue,
+            testResponsibleId: fieldsMap.get('testResponsible')?.defaultValue,
           };
           const res = await issueApi.createSubtask(issue);
           fieldApi.quickCreateDefault(res.issueId, param);
