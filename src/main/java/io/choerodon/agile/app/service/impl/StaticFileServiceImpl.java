@@ -122,6 +122,22 @@ public class StaticFileServiceImpl implements StaticFileService {
         return result;
     }
 
+    private StaticFileOperationHistoryDTO createStaticFileDeleteHistory(StaticFileHeaderDTO staticFileHeader) {
+        StaticFileOperationHistoryDTO staticFileCompressHistory = new StaticFileOperationHistoryDTO(
+                staticFileHeader.getProjectId(),
+                staticFileHeader.getOrganizationId(),
+                staticFileHeader.getId(),
+                staticFileHeader.getCreatedBy(),
+                DECOMPRESS,
+                DOING);
+        if (staticFileOperationHistoryMapper.insertSelective(staticFileCompressHistory) != 1) {
+            throw new CommonException("error.staticFileOperationHistoryDTO.insert");
+        }
+        StaticFileOperationHistoryDTO res = staticFileOperationHistoryMapper.selectByPrimaryKey(staticFileCompressHistory.getId());
+        res.setFileName(staticFileHeader.getFileName());
+        return res;
+    }
+
     private StaticFileOperationHistoryDTO createStaticFileCompressHistory(StaticFileHeaderDTO staticFileHeader) {
         StaticFileOperationHistoryDTO staticFileCompressHistory = new StaticFileOperationHistoryDTO(
                 staticFileHeader.getProjectId(),
@@ -290,7 +306,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         if (!CollectionUtils.isEmpty(fileUrls)) {
             fileClient.deleteFileByUrl(organizationId, BUCKET_NAME, fileUrls);
         }
-
+        StaticFileOperationHistoryDTO staticFileDeleteHistory = createStaticFileDeleteHistory(staticFileHeader);
         StaticFileIssueRelDTO relRecord = new StaticFileIssueRelDTO();
         relRecord.setProjectId(projectId);
 
