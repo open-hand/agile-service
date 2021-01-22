@@ -35,7 +35,6 @@ const IssueBranch = observer(({
   const {
     issueNum,
   } = issue;
-  console.log(branch);
   const renderBranchs = () => (
     <div>
       {
