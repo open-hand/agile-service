@@ -34,9 +34,12 @@ const Link: React.FC<Props> = ({ modal, store, reloadIssue }) => {
 
   useEffect(() => {
     // @ts-ignore
-    uiApi.getUIUnLinked(issue.issueId).then((res: IUi[]) => {
-      optionDataSet.loadData(res);
-    });
+    if (issue.issueId) {
+      // @ts-ignore
+      uiApi.getUIUnLinked(issue.issueId).then((res: IUi[]) => {
+        optionDataSet.loadData(res);
+      });
+    }
     // @ts-ignore
   }, [issue.issueId, optionDataSet]);
 

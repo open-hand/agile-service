@@ -33,8 +33,13 @@ function IssueTypeList() {
   const addRef = useRef<{addDataSet: DataSet, submit:(fn?: Function) => Promise<boolean>}>();
 
   const handleLinkToPage = useCallback(() => {
-    addRef.current?.submit(() => {
-      to(LINK_URL.pageConfig, { type: isOrganization ? 'org' : 'project' });
+    addRef.current?.submit((id: string) => {
+      to(LINK_URL.pageConfig, {
+        type: isOrganization ? 'org' : 'project',
+        params: {
+          issueTypeId: id,
+        },
+      });
     });
   }, [isOrganization]);
 
