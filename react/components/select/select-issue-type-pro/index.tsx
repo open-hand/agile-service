@@ -21,7 +21,6 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
 }, ref: React.Ref<Select>) => {
   const { data: issueTypes } = useProjectIssueTypes();
   const [props] = useSelectPro<IIssueType>({
-    name: 'issueType',
     textField: 'name',
     valueField: valueField || 'id',
     data: issueTypes || [],

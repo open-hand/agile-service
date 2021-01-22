@@ -12,12 +12,11 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (sprints: ILabel[]) => void
   flat?:boolean
   projectId?: string
-  dontCombo?: boolean
   extraOptions?: any[]
 }
 
 const SelectLabel: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, projectId, dontCombo = false, extraOptions = [], ...otherProps
+  dataRef, valueField, afterLoad, flat, projectId, extraOptions = [], ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'label',
@@ -44,7 +43,6 @@ const SelectLabel: React.FC<Props> = forwardRef(({
     <Component
       ref={ref}
       multiple
-      combo={!dontCombo}
       {...props}
       {...otherProps}
     />
