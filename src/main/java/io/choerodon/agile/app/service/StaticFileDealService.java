@@ -1,7 +1,10 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+
 import io.choerodon.agile.infra.dto.StaticFileHeaderDTO;
 import io.choerodon.agile.infra.dto.StaticFileIssueRelDTO;
+import io.choerodon.agile.infra.dto.StaticFileOperationHistoryDTO;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -35,6 +38,8 @@ public interface StaticFileDealService {
      * 删除静态文件所有的关联关系
      * @param relRecord 查询条件
      * @param staticFileHeader 要删除的静态文件
+     * @param fileUrls 要删除的文件url
+     * @param staticFileDeleteHistory 操作历史记录
      */
-    void deleteRel(StaticFileIssueRelDTO relRecord, StaticFileHeaderDTO staticFileHeader);
+    void deleteBase(StaticFileIssueRelDTO relRecord, StaticFileHeaderDTO staticFileHeader, List<String> fileUrls, StaticFileOperationHistoryDTO staticFileDeleteHistory);
 }
