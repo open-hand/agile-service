@@ -313,10 +313,10 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         }
     }
 
-    private double updateProcess(List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, StaticFileOperationHistoryDTO staticFileCompressHistory, int toTalSize, long nowSize, double Process) {
+    private double updateProcess(List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, StaticFileOperationHistoryDTO staticFileCompressHistory, int toTalSize, long nowSize, double process) {
         double nowProcess = new BigDecimal(nowSize).divide(new BigDecimal(toTalSize), 2, RoundingMode.HALF_UP).doubleValue();
-        if (nowProcess <= Process) {
-            return Process;
+        if (nowProcess <= process) {
+            return process;
         }
         staticFileCompressHistory.setProcess(nowProcess);
         sendProcess(staticFileCompressHistoryList, staticFileCompressHistory.getUserId(), staticFileCompressHistory.getProjectId());
