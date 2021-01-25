@@ -198,6 +198,7 @@ public class IssueAssembler extends AbstractAssembler {
         List<IssueCompletedStatusVO> result = createdlist.stream()
                 .map(entry -> new IssueCompletedStatusVO(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         result.addAll(priority.stream()
+                .filter(userId -> !ObjectUtils.isEmpty(userMap.get(userId)))
                 .map(userId -> userMap.get(userId).getRealName())
                 .filter(realName -> !createdlist.stream().map(Map.Entry::getKey).collect(Collectors.toSet())
                         .contains(realName)).map(IssueCompletedStatusVO::new)
@@ -226,6 +227,7 @@ public class IssueAssembler extends AbstractAssembler {
                 .filter(issue -> BooleanUtils.isTrue(issue.getCompleted()) && Objects.nonNull(issue.getAssigneeId()))
                 .collect(Collectors.groupingBy(IssueOverviewVO::getAssigneeId)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
+                .filter(entry -> !ObjectUtils.isEmpty(userMap.get(entry.getKey())))
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
                 .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
     }
@@ -244,11 +246,13 @@ public class IssueAssembler extends AbstractAssembler {
         list.addAll(group.getOrDefault(Boolean.TRUE, Collections.emptyList())
                 .stream().collect(Collectors.groupingBy(IssueOverviewVO::getCreatedBy)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
+                .filter(entry -> !ObjectUtils.isEmpty(userMap.get(entry.getKey())))
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
                 .collect(Collectors.toList()));
         list.addAll(group.getOrDefault(Boolean.FALSE, Collections.emptyList())
                 .stream().collect(Collectors.groupingBy(IssueOverviewVO::getCreatedBy)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
+                .filter(entry -> !ObjectUtils.isEmpty(userMap.get(entry.getKey())))
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
                 .collect(Collectors.toList()));
         return list;
