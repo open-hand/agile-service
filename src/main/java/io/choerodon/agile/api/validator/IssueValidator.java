@@ -155,6 +155,21 @@ public class IssueValidator {
     }
 
     public void verifySubCreateData(IssueSubCreateVO issueSubCreateVO, Long projectId) {
+        if (issueSubCreateVO.getSummary() == null) {
+            throw new CommonException("error.IssueRule.Summary");
+        }
+        if (issueSubCreateVO.getPriorityCode() == null) {
+            throw new CommonException("error.IssueRule.PriorityCode");
+        }
+        if (issueSubCreateVO.getProjectId() == null) {
+            throw new CommonException("error.IssueRule.ProjectId");
+        }
+        if (issueSubCreateVO.getPriorityId() == null) {
+            throw new CommonException("error.priorityId.isNull");
+        }
+        if (issueSubCreateVO.getIssueTypeId() == null) {
+            throw new CommonException("error.issueTypeId.isNull");
+        }
         if (issueSubCreateVO.getParentIssueId() == null) {
             throw new CommonException("error.IssueRule.ParentIssueId");
         }
