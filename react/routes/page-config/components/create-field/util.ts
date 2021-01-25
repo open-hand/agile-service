@@ -15,6 +15,7 @@ interface IUpdateFieldPostData {
     fieldOptions?: Array<IFieldOption & { isDefault: boolean }>
     fieldType: IFieldType
     name: string
+    issueTypeIds: string[]
     objectVersionNumber?: number
     schemeCode: 'agile_issue' | string
 }
@@ -65,6 +66,7 @@ function beforeSubmitProcessData(record: Record, { fieldOptions: propsFieldOptio
   }
   const postData = {
     context,
+    issueTypeIds: context,
     code: `${prefix}${data.code}`,
     name,
     ...obj,
