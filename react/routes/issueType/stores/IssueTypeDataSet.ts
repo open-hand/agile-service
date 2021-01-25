@@ -1,5 +1,5 @@
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { getOrganizationId, getIsOrganization } from '@/utils/common';
+import { getIsOrganization } from '@/utils/common';
 import DataSet, { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 
 import { issueTypeApiConfig } from '@/api';
@@ -33,61 +33,9 @@ const sourceDataSet = new DataSet({
   ],
 });
 
-const statusDataSet = new DataSet({
-  fields: [
-    {
-      name: 'enabled',
-      type: 'boolean' as FieldType,
-    },
-    {
-      name: 'label',
-      type: 'string' as FieldType,
-    },
-  ],
-  data: [
-    {
-      enabled: true,
-      label: '启用',
-    },
-    {
-      enabled: false,
-      label: '停用',
-    },
-  ],
-});
-
-const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataSetProps =>
-// console.log(isOrganization, [
-//   {
-//     name: 'name',
-//     type: 'string' as FieldType,
-//     label: '名称',
-//   },
-//   {
-//     name: 'source',
-//     type: 'string' as FieldType,
-//     label: '来源',
-//     textField: 'label',
-//     valueField: 'code',
-//     options: sourceDataSet,
-//   },
-//   ...(isOrganization ? [] : [
-//     {
-//       name: 'status',
-//       type: 'boolean' as FieldType,
-//       label: '状态',
-//       textField: 'label',
-//       valueField: 'enabled',
-//       options: statusDataSet,
-//     },
-//   ]),
-// ]);
-
-  ({
-    selection: false,
-    paging: true,
-    autoQuery: true,
-    queryFields: [
+const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataSetProps => {
+  const getQueryFields = () => {
+    const queryFields = [
       {
         name: 'name',
         type: 'string' as FieldType,
@@ -101,17 +49,30 @@ const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataS
         valueField: 'code',
         options: sourceDataSet,
       },
-      ...(isOrganization ? [] : [
-        {
-          name: 'status',
-          type: 'boolean' as FieldType,
-          label: '状态',
-          textField: 'label',
-          valueField: 'enabled',
-          options: statusDataSet,
-        },
-      ]),
-    ],
+    ];
+    if (!isOrganization) {
+      queryFields.push({
+        name: 'enabled',
+        label: '状态',
+        type: 'string' as FieldType,
+        textField: 'label',
+        valueField: 'value',
+        options: new DataSet({
+          data: [
+            { label: '启用', value: 'true' },
+            { label: '停用', value: 'false' },
+          ],
+        }),
+      });
+    }
+    return queryFields;
+  };
+
+  return ({
+    selection: false,
+    paging: true,
+    autoQuery: true,
+    queryFields: getQueryFields(),
     fields: [
       {
         name: 'name',
@@ -156,4 +117,5 @@ const IssueTypeDataSet = ({ isOrganization }: { isOrganization: boolean}): DataS
       },
     },
   });
+};
 export default IssueTypeDataSet;

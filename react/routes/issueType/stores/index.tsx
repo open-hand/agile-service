@@ -17,8 +17,6 @@ export default Store;
 export const StoreProvider: React.FC<Context> = inject('AppState')(
   (props) => {
     const isOrganization = getIsOrganization();
-    console.log('isOrganization：');
-    console.log(isOrganization);
     const issueTypeDataSet = useMemo(() => new DataSet(IssueTypeDataSet({ isOrganization })), [isOrganization]);
     const value = {
       ...props,
