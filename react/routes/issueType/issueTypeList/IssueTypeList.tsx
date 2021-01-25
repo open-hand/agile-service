@@ -1,4 +1,6 @@
-import React, { useContext, useCallback, useRef } from 'react';
+import React, {
+  useContext, useCallback, useRef, useState,
+} from 'react';
 import { observer } from 'mobx-react-lite';
 import { withRouter } from 'react-router-dom';
 import {
@@ -7,14 +9,10 @@ import {
 import {
   Content, Page, Breadcrumb, Choerodon, Header,
 } from '@choerodon/boot';
-import { C7NIcon } from '@choerodon/master';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { IIssueType } from '@/common/types';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { issueTypeApi } from '@/api';
-import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
-import to from '@/utils/to';
-import LINK_URL from '@/constants/LINK_URL';
 import TypeTag from '../../../components/TypeTag/TypeTag';
 import AddIssueType from './AddIssueType';
 import Store from '../stores';
@@ -23,63 +21,25 @@ import openUsage from './Usage';
 import openLink from './LinkType';
 
 const { Column } = Table;
-/**
- * 问题类型页面
- * 鼠标点击相关方案，出现弹窗是否进入关联的相关方案 待定
- */
+
 function IssueTypeList() {
   const context = useContext(Store);
   const { issueTypeDataSet, isOrganization } = context;
-  const addRef = useRef<{addDataSet: DataSet, submit:(fn?: Function) => Promise<boolean>}>();
-
-  const handleLinkToPage = useCallback(() => {
-    addRef.current?.submit((id: string) => {
-      to(LINK_URL.pageConfig, {
-        type: isOrganization ? 'org' : 'project',
-        params: {
-          issueTypeId: id,
-        },
-      });
-    });
-  }, [isOrganization]);
-
-  const handleLinkToStatus = useCallback(() => {
-    addRef.current?.submit((id: string) => {
-      to(LINK_URL.status, {
-        type: isOrganization ? 'org' : 'project',
-        params: {
-          issueTypeId: id,
-        },
-      });
-    });
-  }, [isOrganization]);
 
   const handleEdit = useCallback(({ record, dataSet }) => {
     Modal.open({
-      className: styles.rule_modal,
+      className: styles.issueType_modal,
       drawer: true,
       style: {
         width: 480,
       },
       key: Modal.key(),
       title: '编辑问题类型',
-      // @ts-ignore
-      children: <AddIssueType typeId={record?.get('id')} typeTableDataSet={dataSet} addRef={addRef} isOrganization={isOrganization} />,
+      children: <AddIssueType typeId={record?.get('id')} typeTableDataSet={dataSet} isOrganization={isOrganization} />,
       okText: '保存',
-      footer: (okBtn: Button, cancelBtn: Button) => (
-        <div>
-          {okBtn}
-          <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage}>跳转配置页面</Button>
-          {
-            !isOrganization && (
-              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToStatus}>跳转状态机</Button>
-            )
-          }
-          {cancelBtn}
-        </div>
-      ),
+      footer: null,
     });
-  }, [handleLinkToPage, handleLinkToStatus, isOrganization]);
+  }, [isOrganization]);
   /**
    * render Name
    * @param {*} param0
@@ -272,28 +232,16 @@ function IssueTypeList() {
 
   const handleAdd = () => {
     Modal.open({
-      className: styles.rule_modal,
+      className: styles.issueType_modal,
       drawer: true,
       style: {
         width: 480,
       },
       key: Modal.key(),
       title: '添加问题类型',
-      // @ts-ignore
-      children: <AddIssueType typeTableDataSet={issueTypeDataSet} addRef={addRef} isOrganization={isOrganization} />,
+      children: <AddIssueType typeTableDataSet={issueTypeDataSet} isOrganization={isOrganization} />,
       okText: '保存',
-      footer: (okBtn: Button, cancelBtn: Button) => (
-        <div>
-          {okBtn}
-          <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage}>保存并配置页面</Button>
-          {
-            !isOrganization && (
-              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToStatus}>保存并配置状态机</Button>
-            )
-          }
-          {cancelBtn}
-        </div>
-      ),
+      footer: null,
     });
   };
 

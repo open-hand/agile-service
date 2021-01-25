@@ -3,28 +3,33 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Form, Select, DataSet, TextField, TextArea, IconPicker, Modal,
+  Form, Select, DataSet, TextField, TextArea, IconPicker, Modal, Button,
 } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
+import { debounce } from 'lodash';
 import { IModalProps } from '@/common/types';
 import { CompactPicker } from 'react-color';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Choerodon } from '@choerodon/boot';
 import { issueTypeApi, IUpdate, ICreate } from '@/api';
 import { TypeTag } from '@/components';
+import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import LINK_URL from '@/constants/LINK_URL';
+import to from '@/utils/to';
 import styles from './AddIssueType.less';
 
 interface Props {
-  modal: IModalProps,
+  modal?: IModalProps,
   typeId?: string
   typeTableDataSet: DataSet
-  addRef: React.MutableRefObject<{ addDataSet: DataSet, submit: (fn?: Function) => Promise<boolean> }>
   isOrganization: boolean,
 }
 
 const AddIssueType: React.FC<Props> = ({
-  modal, typeId, typeTableDataSet, addRef, isOrganization,
+  modal, typeId, typeTableDataSet, isOrganization,
 }) => {
+  const [addLoading, setAddLoading] = useState<boolean>(false);
+  const [editLoading, setEditLoading] = useState<boolean>(false);
   const [colour, setColor] = useState<string>('#3F51B5');
   const [pickerDisplay, setPickerDisplay] = useState<boolean>(false);
   const [initType, setInitType] = useState<any>();
@@ -115,17 +120,24 @@ const AddIssueType: React.FC<Props> = ({
   }, []);
 
   const saveEdit = useCallback((data: IUpdate, callback?: Function) => {
+    setEditLoading(true);
     issueTypeApi[isOrganization ? 'orgUpdate' : 'update'](typeId as string, data).then((res: any) => {
       Choerodon.prompt('编辑成功');
+      setEditLoading(false);
       typeTableDataSet.query(typeTableDataSet.currentPage);
       modal?.close();
       if (callback) {
         callback(res.id);
       }
     }).catch(() => {
+      setEditLoading(false);
       Choerodon.prompt('编辑失败');
     });
   }, [isOrganization, modal, typeId, typeTableDataSet]);
+
+  const debounceSaveEdit = debounce((data: IUpdate, callback?: Function) => {
+    saveEdit(data, callback);
+  }, 300);
 
   const handleSubmit = useCallback(async (callback?: Function) => {
     const validate = await addDataSet.validate();
@@ -144,14 +156,17 @@ const AddIssueType: React.FC<Props> = ({
         icon,
       };
       if (!typeId) {
+        setAddLoading(true);
         issueTypeApi[isOrganization ? 'orgCreate' : 'create'](data as ICreate).then((res: any) => {
           Choerodon.prompt('创建成功');
           typeTableDataSet.query();
+          setAddLoading(false);
           modal?.close();
           if (callback) {
             callback(res.id);
           }
         }).catch(() => {
+          setAddLoading(false);
           Choerodon.prompt('创建失败');
         });
       } else {
@@ -170,8 +185,11 @@ const AddIssueType: React.FC<Props> = ({
               ),
               okText: '保存',
               cancelText: '不保存',
+              okProps: {
+                loading: !!editLoading,
+              },
               onOk: () => {
-                saveEdit(data as IUpdate, callback);
+                debounceSaveEdit(data as IUpdate, callback);
                 confirmModal.close();
               },
               onCancel: () => {
@@ -180,24 +198,48 @@ const AddIssueType: React.FC<Props> = ({
               },
             });
           } else {
-            saveEdit(data as IUpdate);
+            debounceSaveEdit(data as IUpdate);
           }
         } else if (callback) {
           callback(data.id);
         }
       }
     }
-    return false;
-  }, [addDataSet, colour, initType?.colour, initType?.description, initType?.icon, initType?.name, isOrganization, modal, saveEdit, typeId, typeTableDataSet]);
+  }, [addDataSet, colour, debounceSaveEdit, editLoading, initType?.colour, initType?.description, initType?.icon, initType?.name, isOrganization, modal, typeId, typeTableDataSet]);
 
-  useImperativeHandle(addRef, () => ({
-    addDataSet,
-    submit: handleSubmit,
-  }));
+  const debouncedSubmit = debounce((callback?: Function) => {
+    handleSubmit(callback);
+  }, 500);
 
-  useEffect(() => {
-    modal?.handleOk(handleSubmit);
-  }, [handleSubmit, modal]);
+  const handleSave = useCallback(() => {
+    debouncedSubmit();
+  }, [debouncedSubmit]);
+
+  const handleLinkToPage = useCallback(() => {
+    debouncedSubmit((id: string) => {
+      to(LINK_URL.pageConfig, {
+        type: isOrganization ? 'org' : 'project',
+        params: {
+          issueTypeId: id,
+        },
+      });
+    });
+  }, [debouncedSubmit, isOrganization]);
+
+  const handleLinkToStatus = useCallback(() => {
+    debouncedSubmit((id: string) => {
+      to(LINK_URL.status, {
+        type: isOrganization ? 'org' : 'project',
+        params: {
+          issueTypeId: id,
+        },
+      });
+    });
+  }, [debouncedSubmit, isOrganization]);
+
+  const handleCancel = useCallback(() => {
+    modal?.close();
+  }, [modal]);
 
   useEffect(() => {
     if (typeId) {
@@ -213,22 +255,23 @@ const AddIssueType: React.FC<Props> = ({
   }, [addDataSet, isOrganization, typeId]);
   return (
     <div className={styles.addIssueType}>
-      <Form dataSet={addDataSet} disabled={isSystemType}>
-        <TextField name="name" />
-        <TextArea name="description" />
-        {
+      <div className={styles.addIssueType_content}>
+        <Form dataSet={addDataSet} disabled={isSystemType} className={styles.addIssueType_form}>
+          <TextField name="name" />
+          <TextArea name="description" />
+          {
           !isSystemType && (
             <Select name="typeCode" />
           )
         }
-        <div className={styles.icon}>
-          <IconPicker
-            name="icon"
-            style={{
-              width: '100%',
-            }}
-          />
-          {
+          <div className={styles.icon}>
+            <IconPicker
+              name="icon"
+              style={{
+                width: '100%',
+              }}
+            />
+            {
             addDataSet.current?.get('icon') && (
             <div className={styles.icon_replace}>
               <TypeTag
@@ -241,16 +284,16 @@ const AddIssueType: React.FC<Props> = ({
             </div>
             )
           }
-          <div className={styles.iconPicker}>
-            <Icon type="baseline-arrow_drop_down" />
+            <div className={styles.iconPicker}>
+              <Icon type="baseline-arrow_drop_down" />
+            </div>
           </div>
-        </div>
-      </Form>
-      <div className={styles.colorPicker}>
-        <div className={`${styles.swatch} ${styles[`swatch_${isSystemType}`]}`} onClick={handleClickSwatch} role="none">
-          <div className={styles.color} style={{ background: colour }} />
-        </div>
-        {
+        </Form>
+        <div className={styles.colorPicker}>
+          <div className={`${styles.swatch} ${styles[`swatch_${isSystemType}`]}`} onClick={handleClickSwatch} role="none">
+            <div className={styles.color} style={{ background: colour }} />
+          </div>
+          {
           pickerDisplay
             ? (
               <div className={styles.popover}>
@@ -260,9 +303,36 @@ const AddIssueType: React.FC<Props> = ({
             )
             : null
         }
+        </div>
+      </div>
+      <div className={styles.addIssueType_footer}>
+        {
+          !typeId ? (
+            <>
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={addLoading} onClick={handleSave}>保存</Button>
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} loading={addLoading}>保存并配置页面</Button>
+              {
+                !isOrganization && (
+                  <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToStatus} loading={addLoading}>保存并配置状态机</Button>
+                )
+              }
+              <Button funcType={'raised' as FuncType} onClick={handleCancel}>取消</Button>
+            </>
+          ) : (
+            <>
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={editLoading} onClick={handleSave}>保存</Button>
+              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} disabled={editLoading}>跳转配置页面</Button>
+              {
+                !isOrganization && (
+                <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToStatus} disabled={editLoading}>跳转状态机</Button>
+                )
+              }
+              <Button funcType={'raised' as FuncType} onClick={handleCancel}>取消</Button>
+            </>
+          )
+        }
       </div>
     </div>
-
   );
 };
 

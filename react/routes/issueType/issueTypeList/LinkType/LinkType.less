@@ -1,0 +1,30 @@
+.linkModal {
+  :global {
+    .c7n-pro-modal-body {
+      height: calc(100% - 55px);
+      max-height: unset;
+      padding: 0;
+      :local {
+        .linkType {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          &_content {
+            flex: 1;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            .linkType_form {
+              padding: 0.24rem;
+            }
+          }
+          &_footer {
+            border-top: 0.01rem solid #e0e0e0;
+            padding-top: 12px;
+            padding-bottom: 12px;
+            padding-left: 24px;
+          }
+        }
+      }
+    }
+  }
+}
