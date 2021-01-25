@@ -799,7 +799,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                           Long projectId,
                                           Long fieldId,
                                           String defaultValue,
-                                          String[] context,
                                           List<Long> issueTypeIds,
                                           Boolean extraConfig) {
         if (!CollectionUtils.isEmpty(issueTypeIds)) {
@@ -814,8 +813,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             });
             //增加扩展字段
             if (!CollectionUtils.isEmpty(insertSet)) {
-
-                List<IssueTypeVO> issueTypeVOList = getIssueTypeByContexts(context, organizationId, projectId, issueTypeIds);
+                List<String> context = issueTypeMapper.queryIssueTypeList(organizationId, new ArrayList<>(insertSet)).stream().map(IssueTypeWithInfoDTO::getTypeCode).collect(Collectors.toList());
+                List<IssueTypeVO> issueTypeVOList = getIssueTypeByContexts(context.toArray(new String[context.size()]), organizationId, projectId, new ArrayList<>(insertSet));
                 Map<Long, String> issueTypeMap =
                         issueTypeVOList.stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getTypeCode));
                 insertSet.forEach(i ->
@@ -866,11 +865,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
-    public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, String context, ObjectSchemeFieldUpdateVO updateDTO) {
+    public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, ObjectSchemeFieldUpdateVO updateDTO) {
 
         String defaultValue;
         List<Long> issueTypeIds = updateDTO.getIssueTypeIds();
-        String[] contexts = context.split(",");
         ObjectSchemeFieldDTO field = new ObjectSchemeFieldDTO();
         field.setId(fieldId);
         //组织层下的组织字段，项目层下的自定义字段查询默认值
@@ -892,7 +890,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         //检查类型是否合法
         checkIssueTypeLegality(organizationId, projectId, field, issueTypeIds);
-        updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue, contexts, issueTypeIds, updateDTO.getExtraConfig());
+        updateExtendDefaultValue(organizationId, projectId, fieldId, defaultValue, issueTypeIds, updateDTO.getExtraConfig());
     }
 
     private void checkIssueTypeLegality(Long organizationId, Long projectId, ObjectSchemeFieldDTO field, List<Long> issueTypeIds) {
