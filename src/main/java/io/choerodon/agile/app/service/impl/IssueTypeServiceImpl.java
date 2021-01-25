@@ -65,10 +65,12 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
+    @Autowired
+    private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
 
-    private static final String ORGANIZATION ="organization";
+    private static final String ORGANIZATION = "organization";
 
-    private static final String PROJECT ="project";
+    private static final String PROJECT = "project";
 
     private static final List<String> AGILE_ISSUE_TYPES =
             Arrays.asList(
@@ -77,7 +79,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                     IssueTypeCode.STORY.value(),
                     IssueTypeCode.SUB_TASK.value(),
                     IssueTypeCode.TASK.value()
-                    );
+            );
 
     private static final List<String> PROGRAM_ISSUE_TYPES =
             Arrays.asList(
@@ -162,7 +164,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                         }).collect(Collectors.toList());
         Long issueTypeId = result.getId();
         fields.forEach(x -> {
-            Boolean required  = x.getRequired();
+            Boolean required = x.getRequired();
             SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(x.getCode());
             Boolean created = false;
             Boolean edited = false;
@@ -221,11 +223,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (ZERO.equals(projectId)) {
             return new HashSet<>();
         }
-        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
-        if (project == null) {
-            throw new CommonException("error.project.not.existed");
-        }
-        Set<String> codes = ProjectCategoryUtil.getCategoryCodeAndValidate(project.getCategories());
+        Set<String> codes = getProjectCategoryCodes(projectId);
         List<String> issueTypes = new ArrayList<>(AGILE_ISSUE_TYPES);
 //        issueTypes.add(IssueTypeCode.BACKLOG.value());
         if (codes.contains(ProjectCategory.MODULE_AGILE)
@@ -249,12 +247,28 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         return codes;
     }
 
+    private Set<String> getProjectCategoryCodes(Long projectId) {
+        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        if (project == null) {
+            throw new CommonException("error.project.not.existed");
+        }
+        return ProjectCategoryUtil.getCategoryCodeAndValidate(project.getCategories());
+    }
+
     private void initDefaultStateMachine(Long organizationId,
                                          Long projectId,
                                          IssueTypeVO issueType,
                                          Set<String> categoryCodes) {
         Long issueTypeId = issueType.getId();
         String typeCode = issueType.getTypeCode();
+        String applyType = getApplyTypeByCategoryCodes(categoryCodes, typeCode);
+        Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
+        stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeId);
+        //初始化问题类型方案配置
+        initIssueTypeSchemeConfig(organizationId, projectId, issueTypeId, applyType);
+    }
+
+    private String getApplyTypeByCategoryCodes(Set<String> categoryCodes, String typeCode) {
         String applyType;
         if (categoryCodes.contains(ProjectCategory.MODULE_AGILE)) {
             applyType = "agile";
@@ -264,22 +278,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (IssueTypeCode.BACKLOG.value().equals(typeCode)) {
             applyType = "backlog";
         }
-        ProjectConfigDTO configDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType);
-        if (ObjectUtils.isEmpty(configDTO)) {
-            throw new CommonException("error.stateMachine.scheme.config.not.found");
-        }
-        Long stateMachineSchemeId = configDTO.getSchemeId();
-        stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeId);
-        //初始化问题类型方案配置
-        initIssueTypeSchemeConfig(organizationId, projectId, issueTypeId, applyType);
+        return applyType;
     }
 
     private void initIssueTypeSchemeConfig(Long organizationId, Long projectId, Long issueTypeId, String applyType) {
-        ProjectConfigDTO issueTypeConfig = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType);
-        if (ObjectUtils.isEmpty(issueTypeConfig)) {
-            throw new CommonException("error.issueType.scheme.config.not.found");
-        }
-        Long issueTypeSchemeId = issueTypeConfig.getSchemeId();
+        Long issueTypeSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.ISSUE_TYPE);
         IssueTypeSchemeConfigDTO issueTypeSchemeConfig = new IssueTypeSchemeConfigDTO();
         issueTypeSchemeConfig.setOrganizationId(organizationId);
         issueTypeSchemeConfig.setIssueTypeId(issueTypeId);
@@ -344,7 +347,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     public void delete(Long organizationId,
                        Long projectId,
                        Long issueTypeId) {
-        IssueTypeDTO result =selectOne(organizationId, projectId, issueTypeId);
+        IssueTypeDTO result = selectOne(organizationId, projectId, issueTypeId);
         if (result == null) {
             return;
         }
@@ -355,13 +358,60 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         issueTypeMapper.deleteByPrimaryKey(result.getId());
         if (!ZERO.equals(projectId)) {
-            IssueTypeExtendDTO extend = new IssueTypeExtendDTO();
-            extend.setProjectId(projectId);
-            extend.setOrganizationId(organizationId);
-            extend.setIssueTypeId(issueTypeId);
-            issueTypeExtendMapper.delete(extend);
+            deleteIssueTypeExtend(organizationId, projectId, issueTypeId);
+            deleteIssueTypeAndFieldRel(organizationId, projectId, issueTypeId);
+            deleteStateMachineAndIssueTypeConfig(organizationId, projectId, result);
+        } else {
+            deleteIssueTypeAndFieldRel(organizationId, null, issueTypeId);
         }
-        //todo 删除关联数据
+    }
+
+    private void deleteStateMachineAndIssueTypeConfig(Long organizationId,
+                                                      Long projectId,
+                                                      IssueTypeDTO issueTypeDTO) {
+        String typeCode = issueTypeDTO.getTypeCode();
+        Long issueTypeId = issueTypeDTO.getId();
+        Set<String> codes = getProjectCategoryCodes(projectId);
+        String applyType = getApplyTypeByCategoryCodes(codes, typeCode);
+        Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
+        StatusMachineSchemeConfigDTO statusMachineSchemeConfig = new StatusMachineSchemeConfigDTO();
+        statusMachineSchemeConfig.setIssueTypeId(issueTypeId);
+        statusMachineSchemeConfig.setOrganizationId(organizationId);
+        statusMachineSchemeConfig.setSchemeId(stateMachineSchemeId);
+        statusMachineSchemeConfigMapper.delete(statusMachineSchemeConfig);
+
+        Long issueTypeSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.ISSUE_TYPE);
+        IssueTypeSchemeConfigDTO issueTypeSchemeConfig = new IssueTypeSchemeConfigDTO();
+        issueTypeSchemeConfig.setOrganizationId(organizationId);
+        issueTypeSchemeConfig.setIssueTypeId(issueTypeId);
+        issueTypeSchemeConfig.setSchemeId(issueTypeSchemeId);
+        issueTypeSchemeConfigMapper.delete(issueTypeSchemeConfig);
+    }
+
+    private Long getSchemeIdByOption(Long projectId,
+                                     String applyType,
+                                     String schemeType) {
+        ProjectConfigDTO configDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, schemeType, applyType);
+        if (ObjectUtils.isEmpty(configDTO)) {
+            throw new CommonException("error.scheme.config.not.found." + schemeType);
+        }
+        return configDTO.getSchemeId();
+    }
+
+    private void deleteIssueTypeAndFieldRel(Long organizationId,
+                                            Long projectId,
+                                            Long issueTypeId) {
+        objectSchemeFieldExtendMapper
+                .selectExtendFieldByOptions(Arrays.asList(issueTypeId), organizationId, null, projectId)
+                .forEach(x -> objectSchemeFieldExtendMapper.deleteByPrimaryKey(x.getId()));
+    }
+
+    private void deleteIssueTypeExtend(Long organizationId, Long projectId, Long issueTypeId) {
+        IssueTypeExtendDTO extend = new IssueTypeExtendDTO();
+        extend.setProjectId(projectId);
+        extend.setOrganizationId(organizationId);
+        extend.setIssueTypeId(issueTypeId);
+        issueTypeExtendMapper.delete(extend);
     }
 
     @Override
@@ -495,7 +545,12 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Override
     public Page<IssueTypeVO> pageQueryReference(PageRequest pageRequest, Long organizationId, Long projectId) {
-        return PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectEnableReference(organizationId, projectId));
+        Set<String> codes = getProjectCategoryCodes(projectId);
+        if (codes.contains(ProjectCategory.MODULE_AGILE)) {
+            return PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectEnableReference(organizationId, projectId));
+        } else {
+            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        }
     }
 
     @Override
