@@ -79,7 +79,9 @@ const Usage: React.FC<Props> = ({ modal, record }) => {
                     textStyle={{
                       color: 'rgba(0, 0, 0, 0.85)',
                       fontSize: 14,
-                      marginLeft: 6,
+                      marginLeft: 1,
+                      height: 28,
+                      lineHeight: '28px',
                     }}
                   />
                   <div className={`${styles.status} ${styles[`status_${!!(item.enabled)}`]}`}>
