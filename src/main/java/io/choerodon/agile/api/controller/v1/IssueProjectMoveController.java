@@ -53,7 +53,7 @@ public class IssueProjectMoveController {
     @GetMapping(value = "/list_lost_field")
     public ResponseEntity<List<ObjectSchemeFieldVO>> listLostField(@ApiParam(value = "项目id", required = true)
                                                                    @PathVariable(name = "project_id") Long projectId,
-                                                                   @RequestParam @Encrypt Long targetProject,
+                                                                   @RequestParam Long targetProject,
                                                                    @RequestParam @Encrypt Long issueId,
                                                                    @RequestParam String typeCode) {
         return new ResponseEntity(issueProjectMoveService.listLostField(projectId, issueId, targetProject, typeCode), HttpStatus.OK);

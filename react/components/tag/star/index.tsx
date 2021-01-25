@@ -31,7 +31,7 @@ const Star: React.FC<Props> = ({
   const star = (
     <Icon
       className={className}
-      type="star_border"
+      type={active ? 'stars' : 'star_border'}
       {...omit(otherProps, 'onClick', 'style')}
       onClick={disabled ? undefined : otherProps.onClick}
       style={{

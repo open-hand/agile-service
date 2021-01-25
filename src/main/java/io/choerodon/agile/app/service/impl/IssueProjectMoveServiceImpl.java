@@ -248,10 +248,10 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException(ISSUE_NULL);
         }
-        String typeCode = jsonObject.getString(TYPE_CODE_FIELD);
-        jsonObject.remove(TYPE_CODE_FIELD);
+        Long issueTypeId = jsonObject.getLong(ISSUE_TYPE_ID);
+        jsonObject.remove(ISSUE_TYPE_ID);
         IssueTypeVO issueTypeVO = issueTypeService.queryByOrgId(projectVO.getOrganizationId()).stream()
-                .filter(issueTypeVO1 -> Objects.equals(ObjectUtils.isEmpty(typeCode) ? issueDTO.getTypeCode() : typeCode, issueTypeVO1.getTypeCode()))
+                .filter(issueTypeVO1 -> Objects.equals(ObjectUtils.isEmpty(issueTypeId) ? issueDTO.getIssueTypeId() : issueTypeId, issueTypeVO1.getId()))
                 .findAny().orElse(null);
         // 处理需要清空的值
         handlerNeedCleanValue(projectVO, issueDTO, issueTypeVO, targetProjectVO);
@@ -299,6 +299,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
         }
         issueConvertDTO.setIssueTypeId(issueTypeVO.getId());
+        issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
         issueAccessDataService.update(issueConvertDTO, new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, RANK_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID});
     }
 

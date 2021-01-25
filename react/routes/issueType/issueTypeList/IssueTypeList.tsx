@@ -44,8 +44,13 @@ function IssueTypeList() {
   }, [isOrganization]);
 
   const handleLinkToStatus = useCallback(() => {
-    addRef.current?.submit(() => {
-      to(LINK_URL.status, { type: isOrganization ? 'org' : 'project' });
+    addRef.current?.submit((id: string) => {
+      to(LINK_URL.status, {
+        type: isOrganization ? 'org' : 'project',
+        params: {
+          issueTypeId: id,
+        },
+      });
     });
   }, [isOrganization]);
 
@@ -138,7 +143,7 @@ function IssueTypeList() {
 
     const handleStop = () => {
       issueTypeApi.getStopDisable(record?.get('id')).then((disable: boolean) => {
-        if (disable) {
+        if (!disable) {
           Choerodon.prompt(`至少启用一个${record?.get('typeCode') === 'sub_task' ? '子级' : '父级'}问题类型`);
         } else {
           issueTypeApi.enabled(record?.get('id'), false).then(() => {
@@ -190,7 +195,7 @@ function IssueTypeList() {
 
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
-      <Menu onClick={handleMenuClick.bind(this)}>
+      <Menu onClick={handleMenuClick.bind(this)} className={styles.issueType_menu}>
         {
           record?.get('deleted') && (
             <Menu.Item key="delete">删除</Menu.Item>

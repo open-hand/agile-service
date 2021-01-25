@@ -75,10 +75,13 @@ const Usage: React.FC<Props> = ({ modal, record }) => {
                   <ProjectTag
                     showText
                     data={item}
-                    size={30}
+                    size={28}
                     textStyle={{
                       color: 'rgba(0, 0, 0, 0.85)',
                       fontSize: 14,
+                      marginLeft: 1,
+                      height: 28,
+                      lineHeight: '28px',
                     }}
                   />
                   <div className={`${styles.status} ${styles[`status_${!!(item.enabled)}`]}`}>
@@ -96,7 +99,13 @@ const Usage: React.FC<Props> = ({ modal, record }) => {
               )
             }
           </div>
-        ) : '没有项目使用该问题类型'
+        ) : (
+          <>
+            {
+              !loading ? '没有项目使用该问题类型' : ''
+            }
+          </>
+        )
       }
     </div>
   );
