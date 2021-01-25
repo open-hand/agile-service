@@ -72,7 +72,7 @@ public class IssueAttachmentController {
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @ApiParam(value = "分片合并参数", required = true)
-            @RequestBody @Encrypt IssueAttachmentCombineVO issueAttachmentCombineVO) {
+            @RequestBody IssueAttachmentCombineVO issueAttachmentCombineVO) {
         issueAttachmentService.validCombineUpload(issueAttachmentCombineVO);
         return Optional.ofNullable(issueAttachmentService.attachmentCombineUpload(projectId, issueAttachmentCombineVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
