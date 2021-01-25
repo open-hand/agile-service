@@ -207,10 +207,8 @@ public class ProjectObjectSchemeFieldController {
                                            @RequestParam Long organizationId,
                                            @ApiParam(value = "字段id", required = true)
                                            @RequestParam("field_id") @Encrypt Long fieldId,
-                                           @ApiParam(value = "问题类型", required = true)
-                                           @RequestParam("context") String context,
                                            @RequestBody @Valid  ObjectSchemeFieldUpdateVO updateDTO) {
-        objectSchemeFieldService.syncDefaultValue(organizationId, projectId, fieldId, context, updateDTO);
+        objectSchemeFieldService.syncDefaultValue(organizationId, projectId, fieldId, updateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }
