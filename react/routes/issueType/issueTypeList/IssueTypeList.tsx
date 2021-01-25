@@ -190,7 +190,7 @@ function IssueTypeList() {
 
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
-      <Menu onClick={handleMenuClick.bind(this)}>
+      <Menu onClick={handleMenuClick.bind(this)} className={styles.issueType_menu}>
         {
           record?.get('deleted') && (
             <Menu.Item key="delete">删除</Menu.Item>
