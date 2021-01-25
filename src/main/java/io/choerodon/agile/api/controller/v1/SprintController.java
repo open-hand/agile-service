@@ -245,7 +245,7 @@ public class SprintController {
     @GetMapping(value = "/check_default_value")
     public ResponseEntity<Boolean> checkDefaultValue(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
-                                                     @RequestParam Long sprintId) {
+                                                     @RequestParam @Encrypt Long sprintId) {
         return Optional.ofNullable(sprintService.checkDefaultValue(projectId, sprintId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.sprint.defaultValue.check"));
