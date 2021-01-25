@@ -298,8 +298,10 @@ function IssueTypeList() {
   return (
     <Page
       className={styles.issueType}
-      service={[
+      service={isOrganization ? [
         'choerodon.code.organization.setting.issue.issue-type.ps.default',
+      ] : [
+        'choerodon.code.project.setting.issueType.ps.default',
       ]}
     >
       <Header>
