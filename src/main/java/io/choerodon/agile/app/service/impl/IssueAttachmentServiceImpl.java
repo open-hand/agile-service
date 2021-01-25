@@ -1,15 +1,19 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.IssueAttachmentCombineVO;
 import io.choerodon.agile.app.service.IIssueAttachmentService;
 import io.choerodon.agile.infra.dto.IssueAttachmentDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.feign.CustomFileRemoteService;
+import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.IssueAttachmentService;
 import io.choerodon.agile.infra.mapper.IssueAttachmentMapper;
+
 import org.hzero.boot.file.FileClient;
 import org.hzero.core.util.ResponseUtils;
 import org.slf4j.Logger;
@@ -20,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -27,9 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/16.
@@ -49,7 +52,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
 
     @Autowired
     private IssueAttachmentMapper issueAttachmentMapper;
-
+    @Autowired
+    private IssueMapper issueMapper;
     @Autowired
     private IIssueAttachmentService iIssueAttachmentService;
 
@@ -66,15 +70,16 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     private ProjectUtil projectUtil;
 
     @Override
-    public void dealIssue(Long projectId, Long issueId, String fileName, String url) {
+    public IssueAttachmentDTO dealIssue(Long projectId, Long issueId, String fileName, String url) {
         IssueAttachmentDTO issueAttachmentDTO = new IssueAttachmentDTO();
         issueAttachmentDTO.setProjectId(projectId);
         issueAttachmentDTO.setIssueId(issueId);
         issueAttachmentDTO.setFileName(fileName);
         issueAttachmentDTO.setUrl(url);
         issueAttachmentDTO.setCommentId(1L);
-        iIssueAttachmentService.createBase(issueAttachmentDTO);
+        IssueAttachmentDTO result = iIssueAttachmentService.createBase(issueAttachmentDTO);
         BaseFieldUtil.updateIssueLastUpdateInfo(issueAttachmentDTO.getIssueId(), issueAttachmentDTO.getProjectId());
+        return result;
     }
 
     @Override
@@ -84,6 +89,47 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             return new ArrayList<>();
         }
         return list;
+    }
+
+    @Override
+    public void validCombineUpload(IssueAttachmentCombineVO issueAttachmentCombineVO) {
+        if (issueAttachmentCombineVO.getIssueId() == null) {
+            throw new CommonException("error.attachmentRule.issueId");
+        }
+        if (issueAttachmentCombineVO.getFileName() == null) {
+            throw new CommonException("error.attachmentRule.fileName");
+        }
+        if (issueAttachmentCombineVO.getGuid() == null) {
+            throw new CommonException("error.attachmentRule.guId");
+        }
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueAttachmentCombineVO.getIssueId());
+        if (ObjectUtils.isEmpty(issueDTO)) {
+            throw new CommonException("error.attachmentRule.issue");
+        }
+    }
+
+    @Override
+    public IssueAttachmentVO attachmentCombineUpload(Long projectId, IssueAttachmentCombineVO issueAttachmentCombineVO) {
+        Long organizationId = projectUtil.getOrganizationId(projectId);
+        Map<String, String> args = new HashMap<>(1);
+        args.put("bucketName", BACKETNAME);
+        String url = ResponseUtils.getResponse(customFileRemoteService.fragmentCombineBlock(
+                organizationId,
+                issueAttachmentCombineVO.getGuid(),
+                issueAttachmentCombineVO.getFileName(),
+                args),
+                String.class,
+                (httpStatus, response) -> {
+                }, exceptionResponse -> {
+                    LOGGER.error("combine fragment failed: {}", exceptionResponse.getMessage());
+                    throw new CommonException("error.attachment.combine.failed");
+                });
+        IssueAttachmentDTO result = dealIssue(projectId, issueAttachmentCombineVO.getIssueId(),
+                issueAttachmentCombineVO.getFileName(), dealUrl(url));
+        IssueAttachmentVO issueAttachmentVO = new IssueAttachmentVO();
+        BeanUtils.copyProperties(result, issueAttachmentVO);
+        issueAttachmentVO.setUrl(attachmentUrl + "/" + BACKETNAME + "/" + result.getUrl());
+        return issueAttachmentVO;
     }
 
     private String dealUrl(String url) {

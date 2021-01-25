@@ -1,6 +1,8 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.IssueAttachmentCombineVO;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
+import io.choerodon.agile.infra.dto.IssueAttachmentDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,8 +35,23 @@ public interface IssueAttachmentService {
      * @param issueId   issueId
      * @param fileName  fileName
      * @param url       url
+     * @return 创建的 issueAttachment
      */
-    void dealIssue(Long projectId, Long issueId, String fileName, String url);
+    IssueAttachmentDTO dealIssue(Long projectId, Long issueId, String fileName, String url);
 
     List<TestCaseAttachmentDTO> migrateIssueAttachment();
+
+    /**
+     * 校验分片上传合并参数
+     * @param issueAttachmentCombineVO 分片上传合并参数
+     */
+    void validCombineUpload(IssueAttachmentCombineVO issueAttachmentCombineVO);
+
+    /**
+     * 分片合并
+     * @param projectId 项目id
+     * @param issueAttachmentCombineVO 分片上传附件参数
+     * @return 上传的文件
+     */
+    IssueAttachmentVO attachmentCombineUpload(Long projectId, IssueAttachmentCombineVO issueAttachmentCombineVO);
 }

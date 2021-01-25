@@ -3,12 +3,11 @@ package io.choerodon.agile.infra.feign;
 import io.choerodon.agile.infra.feign.fallback.CustomFileRemoteServiceFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author superlee
@@ -24,4 +23,7 @@ public interface CustomFileRemoteService {
     ResponseEntity<String> deleteFileByUrl(@PathVariable("organizationId") Long organizationId,
                                            @RequestParam("bucketName") String bucketName,
                                            @RequestBody List<String> urls);
+
+    @PostMapping(value = {"/v1/{organizationId}/upload/fragment-combine"})
+    ResponseEntity<String> fragmentCombineBlock(@PathVariable Long organizationId, @RequestParam String guid, @RequestParam String fileName, @RequestBody(required = false) Map<String, String> args);
 }
