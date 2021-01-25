@@ -7,13 +7,13 @@ class MoveIssueApi extends Api<MoveIssueApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
-  getFieldsLosed(targetProject: string, issueId: string, typeCode: string) {
+  getFieldsLosed(targetProject: string, issueId: string, typeId: string) {
     return this.request({
       method: 'get',
       url: `${this.prefix}/project_move/list_lost_field`,
       params: {
         targetProject,
-        typeCode,
+        issueTypeId: typeId,
         issueId,
       },
     });

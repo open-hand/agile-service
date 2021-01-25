@@ -153,12 +153,12 @@ const Confirm: React.FC<Props> = ({
   }, [addField, filterFields, getFinalFields, issueId, issueType, subIssueVOList, targetProjectId, targetProjectType]);
 
   useEffect(() => {
-    if (targetProjectId && issueId && targetIssueType?.typeCode) {
-      moveIssueApi.getFieldsLosed(targetProjectId, issueId, targetIssueType?.typeCode).then((res: IField[]) => {
+    if (targetProjectId && issueId && targetIssueType?.id) {
+      moveIssueApi.getFieldsLosed(targetProjectId, issueId, targetIssueType?.id).then((res: IField[]) => {
         setFieldsLosed(res);
       });
     }
-  }, [issueId, targetIssueType?.typeCode, targetProjectId]);
+  }, [issueId, targetIssueType?.id, targetProjectId]);
 
   useEffect(() => {
     if (subTaskTypeId) {
