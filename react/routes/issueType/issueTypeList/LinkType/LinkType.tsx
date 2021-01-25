@@ -3,13 +3,16 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Modal, DataSet, Form, TextField,
+  Modal, DataSet, Form, TextField, Button,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import { IModalProps, IIssueType } from '@/common/types';
 import { issueTypeApi } from '@/api';
 import Field from 'choerodon-ui/pro/lib/data-set/Field';
+import { debounce } from 'lodash';
+import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import SelectLinkType from './SelectLinkType';
+import styles from './LinkType.less';
 
 interface Props {
   modal?: IModalProps,
@@ -19,6 +22,7 @@ interface Props {
 const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
   const linkedTypeRef = useRef<IIssueType[]>([]);
   const [renameExist, setRenameExist] = useState<boolean>(false);
+  const [refrencedLoading, setRerencedLoading] = useState<boolean>(false);
 
   const checkName = useCallback(async (id, name, record) => {
     if (id) {
@@ -88,51 +92,72 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
       validate = await typeIdsField.checkValidity();
     }
     if (validate) {
+      setRerencedLoading(true);
       const newName = linkDataSet.current?.get('newName');
       issueTypeApi.referenced(linkDataSet.current?.get('id'), newName ? { name: newName } : {}).then(() => {
         Choerodon.prompt('引用成功');
+        setRerencedLoading(false);
         issueTypeDataSet.query();
         modal?.close();
         return true;
       }).catch(() => {
         Choerodon.prompt('引用失败');
+        setRerencedLoading(false);
         return false;
       });
     }
     return false;
   }, [issueTypeDataSet, linkDataSet, modal, renameExist]);
 
-  useEffect(() => {
-    modal?.handleOk(handleSubmit);
-  }, [handleSubmit, modal]);
+  const debouncedSubmit = debounce(() => {
+    handleSubmit();
+  }, 500);
+
+  const handleSave = useCallback(() => {
+    debouncedSubmit();
+  }, [debouncedSubmit]);
+
+  const handleCancel = useCallback(() => {
+    modal?.close();
+  }, [modal]);
 
   return (
-    <Form dataSet={linkDataSet}>
-      <SelectLinkType name="id" dataRef={linkedTypeRef} />
-      {
-        renameExist && (
-          <div style={{
-            width: '100%',
-            marginTop: -10,
-          }}
-          >
-            <div style={{
-              color: 'rgba(0, 0, 0, 0.64)',
-              marginBottom: 8,
-            }}
-            >
-              该问题类型名称和当前项目已有的问题类型名称重复
-            </div>
-            <TextField
-              name="newName"
-              style={{
+    <div className={styles.linkType}>
+      <div className={styles.linkType_content}>
+        <Form dataSet={linkDataSet} className={styles.linkType_form}>
+          <SelectLinkType name="id" dataRef={linkedTypeRef} />
+          {
+            renameExist && (
+              <div style={{
                 width: '100%',
+                marginTop: -10,
               }}
-            />
-          </div>
-        )
-      }
-    </Form>
+              >
+                <div style={{
+                  color: 'rgba(0, 0, 0, 0.64)',
+                  marginBottom: 8,
+                }}
+                >
+                  该问题类型名称和当前项目已有的问题类型名称重复
+                </div>
+                <TextField
+                  name="newName"
+                  style={{
+                    width: '100%',
+                  }}
+                />
+              </div>
+            )
+          }
+        </Form>
+
+      </div>
+      <div className={styles.linkType_footer}>
+        <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={refrencedLoading} onClick={handleSave}>保存</Button>
+        <Button funcType={'raised' as FuncType} onClick={handleCancel}>取消</Button>
+      </div>
+    </div>
+
   );
 };
 
@@ -140,6 +165,7 @@ const ObserverLinkType = observer(LinkType);
 
 const openLink = (props: Props) => {
   Modal.open({
+    className: styles.linkModal,
     drawer: true,
     style: {
       width: 480,
@@ -147,6 +173,7 @@ const openLink = (props: Props) => {
     key: 'link',
     title: '引用问题类型',
     children: <ObserverLinkType {...props} />,
+    footer: null,
   });
 };
 

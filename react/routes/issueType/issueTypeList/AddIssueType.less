@@ -1,75 +1,92 @@
 .addIssueType {
-  .icon {
-    position: relative;
-    :global {
-      .c7n-pro-icon-picker-prefix {
-        opacity: 0;
-      }
-      .c7n-pro-field-label-wrapper {
-        left: 0.1rem;
-      }
-      .c7n-pro-icon-picker {
-        opacity: 0;
-      }
-      .c7n-pro-icon-picker-suffix {
-        opacity: 0 !important;
-      }
-    }
-    .icon_replace {
-      position: absolute;
-      top: 4px;
-      left: 4px;
-    }
-
-    .iconPicker {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-    }
-    &:focus-within {
-      .iconPicker {
-        transform:rotate(180deg);
-        -ms-transform:rotate(180deg); 	/* IE 9 */
-        -moz-transform:rotate(180deg); 	/* Firefox */
-        -webkit-transform:rotate(180deg); /* Safari 和 Chrome */
-        -o-transform:rotate(180deg); 	/* Opera */
-        transition:transform 0.3s, -webkit-transform 0.3s;
-        top: 8px;
-      }
-    }
-  }
-  .colorPicker {
-    margin-bottom: 0.18rem;
-    .swatch {
-      padding: 0.03rem;
-      background: #fff;
-      border-radius: 0.02rem;
-      box-shadow: 0 0 0 0.01rem rgba(0, 0, 0, 0.246);
-      display: inline-block;
-      cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  &_content {
+    flex: 1;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    .addIssueType_form {
+      padding: 0.24rem;
+      .icon {
+        position: relative;
+        :global {
+          .c7n-pro-icon-picker-prefix {
+            opacity: 0;
+          }
+          .c7n-pro-field-label-wrapper {
+            left: 0.1rem;
+          }
+          .c7n-pro-icon-picker {
+            opacity: 0;
+          }
+          .c7n-pro-icon-picker-suffix {
+            opacity: 0 !important;
+          }
+        }
+        .icon_replace {
+          position: absolute;
+          top: 4px;
+          left: 4px;
+        }
     
-      .color {
-        width: 1.12rem;
-        height: 0.18rem;
-        border-radius: 0.02rem;
+        .iconPicker {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+        }
+        &:focus-within {
+          .iconPicker {
+            transform:rotate(180deg);
+            -ms-transform:rotate(180deg); 	/* IE 9 */
+            -moz-transform:rotate(180deg); 	/* Firefox */
+            -webkit-transform:rotate(180deg); /* Safari 和 Chrome */
+            -o-transform:rotate(180deg); 	/* Opera */
+            transition:transform 0.3s, -webkit-transform 0.3s;
+            top: 8px;
+          }
+        }
+      }
+      .colorPicker {
+        margin-bottom: 0.18rem;
+        .swatch {
+          padding: 0.03rem;
+          background: #fff;
+          border-radius: 0.02rem;
+          box-shadow: 0 0 0 0.01rem rgba(0, 0, 0, 0.246);
+          display: inline-block;
+          cursor: pointer;
+        
+          .color {
+            width: 1.12rem;
+            height: 0.18rem;
+            border-radius: 0.02rem;
+          }
+        }
+        .swatch_true {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+        .popover {
+          position: relative;
+          .cover {
+            position: fixed;
+            top: 0rem;
+            right: 0rem;
+            bottom: 0rem;
+            left: 0rem;
+          }
+        } 
       }
     }
-    .swatch_true {
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-    .popover {
-      position: relative;
-      .cover {
-        position: fixed;
-        top: 0rem;
-        right: 0rem;
-        bottom: 0rem;
-        left: 0rem;
-      }
-    } 
+    
   }
-  
+  &_footer {
+    border-top: 0.01rem solid #e0e0e0;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 24px;
+  }
 }
 
 .confirm_modal {
