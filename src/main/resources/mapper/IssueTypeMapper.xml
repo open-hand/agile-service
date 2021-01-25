@@ -199,6 +199,7 @@
         where t2.organization_id = #{organizationId}
         and t2.project_id = 0
         and t2.source = 'organization'
+        and t2.referenced = 1
         and t2.id not in (
             select
             t1.reference_id
