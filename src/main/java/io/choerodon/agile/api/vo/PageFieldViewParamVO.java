@@ -18,6 +18,9 @@ public class PageFieldViewParamVO {
     @ApiModelProperty(value = "方案编码")
     @NotNull(message = "error.param.schemeCodeNotNull")
     private String schemeCode;
+    @ApiModelProperty(value = "问题类型id")
+    @NotNull(message = "error.param.issueTypeIdNotNull")
+    private Long issueTypeId;
 
     @NotNull
     public String getSchemeCode() {
@@ -42,5 +45,13 @@ public class PageFieldViewParamVO {
 
     public void setPageCode(String pageCode) {
         this.pageCode = pageCode;
+    }
+
+    public Long getIssueTypeId() {
+        return issueTypeId;
+    }
+
+    public void setIssueTypeId(Long issueTypeId) {
+        this.issueTypeId = issueTypeId;
     }
 }

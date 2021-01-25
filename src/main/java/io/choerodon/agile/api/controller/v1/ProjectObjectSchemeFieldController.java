@@ -123,8 +123,8 @@ public class ProjectObjectSchemeFieldController {
     @GetMapping(value = "/configs")
     public ResponseEntity<PageConfigVO> listConfigs(@PathVariable(name = "project_id") Long projectId,
                                                     @RequestParam Long organizationId,
-                                                    @RequestParam String issueType) {
-        return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, projectId, issueType), HttpStatus.OK);
+                                                    @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, projectId, issueTypeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -163,8 +163,8 @@ public class ProjectObjectSchemeFieldController {
     @GetMapping(value = "/unselected")
     public ResponseEntity<List<ObjectSchemeFieldVO>> unselected(@PathVariable("project_id") Long projectId,
                                                                 @RequestParam Long organizationId,
-                                                                @RequestParam String issueType) {
-        return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, projectId, issueType), HttpStatus.OK);
+                                                                @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, projectId, issueTypeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -207,10 +207,10 @@ public class ProjectObjectSchemeFieldController {
                                            @RequestParam Long organizationId,
                                            @ApiParam(value = "字段id", required = true)
                                            @RequestParam("field_id") @Encrypt Long fieldId,
-                                           @ApiParam(value = "需要同步默认值的问题类型", required = true)
-                                           @RequestParam("issue_types") String syncDefaultValueIssueTypes,
+                                           @ApiParam(value = "问题类型", required = true)
+                                           @RequestParam("context") String context,
                                            @RequestBody @Valid  ObjectSchemeFieldUpdateVO updateDTO) {
-        objectSchemeFieldService.syncDefaultValue(organizationId, projectId, fieldId, syncDefaultValueIssueTypes, updateDTO);
+        objectSchemeFieldService.syncDefaultValue(organizationId, projectId, fieldId, context, updateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

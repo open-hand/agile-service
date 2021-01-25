@@ -192,7 +192,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (!EnumUtil.contain(ObjectSchemeFieldContext.class, paramDTO.getContext())) {
             throw new CommonException(ERROR_CONTEXT_ILLEGAL);
         }
-        List<PageFieldDTO> pageFields = pageFieldService.queryPageField(organizationId, projectId, paramDTO.getPageCode(), paramDTO.getContext());
+        List<PageFieldDTO> pageFields = pageFieldService.queryPageField(organizationId, projectId, paramDTO.getPageCode(), paramDTO.getIssueTypeId());
         //过滤掉不显示字段和系统字段
         pageFields = pageFields.stream().filter(PageFieldDTO::getDisplay).filter(x -> !x.getSystem()).collect(Collectors.toList());
         List<FieldValueDTO> fieldValues = new ArrayList<>();

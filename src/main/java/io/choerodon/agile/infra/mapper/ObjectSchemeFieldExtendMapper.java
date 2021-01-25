@@ -93,12 +93,12 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      *
      * @param organizationId
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @return
      */
     List<PageConfigFieldVO> listConfigs(@Param("organizationId") Long organizationId,
                                         @Param("projectId") Long projectId,
-                                        @Param("issueType") String issueType);
+                                        @Param("issueTypeId") Long issueTypeId);
 
     /**
      * 批量更新组织下的required字段
@@ -138,12 +138,12 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
     /**
      * @param organizationId
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @return
      */
     List<ObjectSchemeFieldVO> unselected(@Param("organizationId") Long organizationId,
                                          @Param("projectId") Long projectId,
-                                         @Param("issueType") String issueType);
+                                         @Param("issueTypeId") Long issueTypeId);
 
     /**
      * 批量插入接口
@@ -157,14 +157,14 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      *
      * @param organizationId
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @param created
      * @param edited
      * @return
      */
     List<PageFieldDTO> selectFields(@Param("organizationId") Long organizationId,
                                     @Param("projectId") Long projectId,
-                                    @Param("issueType") String issueType,
+                                    @Param("issueTypeId") Long issueTypeId,
                                     @Param("created") Boolean created,
                                     @Param("edited") Boolean edited);
 

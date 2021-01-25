@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -33,6 +34,9 @@ public class ObjectSchemeFieldCreateVO {
     private String schemeCode;
     @ApiModelProperty(value = "字段选项列表")
     private List<FieldOptionUpdateVO> fieldOptions;
+    @ApiModelProperty(value = "问题类型id")
+    @Encrypt
+    private List<Long> issueTypeIds;
 
     private Boolean required;
 
@@ -144,5 +148,13 @@ public class ObjectSchemeFieldCreateVO {
 
     public void setEdited(Boolean edited) {
         this.edited = edited;
+    }
+
+    public List<Long> getIssueTypeIds() {
+        return issueTypeIds;
+    }
+
+    public void setIssueTypeIds(List<Long> issueTypeIds) {
+        this.issueTypeIds = issueTypeIds;
     }
 }

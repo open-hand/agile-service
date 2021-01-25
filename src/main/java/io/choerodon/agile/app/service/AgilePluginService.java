@@ -55,11 +55,11 @@ public interface AgilePluginService {
     /**
      * 过滤出项目群字段
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @param pageFields
      * @return
      */
-    List<PageFieldDTO> handlerProgramPageField(Long projectId, String issueType, List<PageFieldDTO> pageFields);
+    List<PageFieldDTO> handlerProgramPageField(Long projectId, Long issueTypeId, List<PageFieldDTO> pageFields);
 
     /**
      * 创建issue初始化特性相关的值
@@ -186,11 +186,11 @@ public interface AgilePluginService {
     /**
      * 项目群史诗查询pageConfig
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @param pageConfigFieldVOS
      * @return
      */
-    List<PageConfigFieldVO> queryProgramPageConfigFields(Long projectId, String issueType, List<PageConfigFieldVO> pageConfigFieldVOS);
+    List<PageConfigFieldVO> queryProgramPageConfigFields(Long projectId, Long issueTypeId, List<PageConfigFieldVO> pageConfigFieldVOS);
 
     /**
      * 添加项目群问题类型
@@ -338,9 +338,9 @@ public interface AgilePluginService {
     /**
      * 获取字段Code
      * @param fieldCodeS
-     * @param typeCode
+     * @param issueTypeId
      */
-    void getIssueTypeFieldCodes(List<String> fieldCodeS, String typeCode);
+    void getIssueTypeFieldCodes(List<String> fieldCodeS, Long issueTypeId);
 
     /**
      * 处理冲刺是否是规划中
