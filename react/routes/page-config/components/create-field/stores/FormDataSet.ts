@@ -157,17 +157,7 @@ const FormDataSet = ({
         required: false,
         // ignore: 'always',
       },
-      ...type === 'project' ? [{
-        name: 'context',
-        type: 'string' as FieldType,
-        label: formatMessage({ id: 'field.context' }),
-        required: true,
-        multiple: true,
-        valueField: 'valueCode',
-        textField: 'name',
-        defaultValue: defaultContext,
-        lookupAxiosConfig: getLookupConfig('object_scheme_field_context', filterContext, type, id),
-      }] : [{
+      {
         name: 'context',
         type: 'string' as FieldType,
         label: formatMessage({ id: 'field.context' }),
@@ -183,7 +173,7 @@ const FormDataSet = ({
             organizationId: getOrganizationId(),
           },
         }),
-      }],
+      },
       {
         name: 'defaultValue',
         label: formatMessage({ id: 'field.default' }),

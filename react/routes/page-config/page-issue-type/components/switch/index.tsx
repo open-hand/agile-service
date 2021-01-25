@@ -47,9 +47,9 @@ function PageSwitch() {
       if (issueTypeId) {
         currentType = res.find((t) => String(t.id) === issueTypeId);
       }
-      pageIssueTypeStore.init((currentType ?? res[0]).typeCode as PageConfigIssueType);
+      pageIssueTypeStore.init((currentType ?? res[0]).id as PageConfigIssueType);
       setSwitchOption(res.map((type) => ({
-        value: type.typeCode,
+        value: type.id,
         text: type.name,
         type: 'common',
       })));

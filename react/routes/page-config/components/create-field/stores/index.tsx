@@ -89,9 +89,8 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
           if (data.fieldType === 'number') {
             formDataSet.current?.set('check', data.extraConfig);
           }
-          if (data.context && data.context[0] === 'global') {
-            const arr = formDataSet.current?.getField('context')?.options?.map((item) => item.get('valueCode'));
-            formDataSet.current?.set('context', arr);
+          if (data.issueTypeVOList && Array.isArray(data.issueTypeVOList)) {
+            formDataSet.current?.set('context', data.issueTypeVOList.map((item:any) => item.id));
           }
           if (multipleList.indexOf(data.fieldType) !== -1) {
             formDataSet.current?.set('defaultValue', data.defaultValue && data.defaultValue.split && data.defaultValue.split(','));

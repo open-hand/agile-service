@@ -37,6 +37,7 @@ interface IFieldPostData extends FiledOptions {
   schemeCode: string,
   check?: boolean,
   objectVersionNumber?: number,
+  issueTypeIds: string[] // 问题类型id
   extraConfig: any,
   syncIssueType?: string[] // 同步主默认值的问题类型
 }
@@ -104,7 +105,7 @@ function CreateField() {
         const userIds = Array.isArray(originDefaultValue) ? originDefaultValue : [originDefaultValue];
         set(postData, 'localDefaultObj', userDataRef.current?.filter((item) => userIds.includes(item.id)) || {});
       }
-      return validResult && onSubmitLocal({ ...postData, defaultValue: originDefaultValue });
+      return validResult && onSubmitLocal({ ...postData, defaultValue: originDefaultValue, issueTypeIds: postData.context });
     }
     const fieldId = formDataSet.current?.get('id');
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${fieldId}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;

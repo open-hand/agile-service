@@ -149,7 +149,7 @@ function PageIssueType() {
     !oldField && pageIssueTypeStore.addCreatedField(newData);
     // 当是增添的已有字段 或是当前类型字段时 增添数据至表格
     if (oldField
-      || (newData.context.some((item: any) => item === 'global' || item === pageIssueTypeStore.currentIssueType))) {
+      || (newData.issueTypeIds.some((item: any) => item === pageIssueTypeStore.currentIssueType))) {
       const newRank = await pageConfigApi.loadRankValue({
         previousRank: null,
         nextRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
