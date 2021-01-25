@@ -92,7 +92,7 @@ const IssueMove: React.FC<Props> = ({
       {
         name: 'issueType',
         textField: 'name',
-        valueField: 'typeCode',
+        valueField: 'id',
         label: '选择目标类型',
         options: issueTypeDataSet,
         required: true,
@@ -180,14 +180,14 @@ const IssueMove: React.FC<Props> = ({
   }, [fieldsWithValue, issue.assigneeId, issue.mainResponsible?.id, issue.reporterId]);
 
   const { selfFields, subTaskFields } = store;
-  const targetTypeCode = dataSet.current?.get('issueType');
+  const targetTypeId = dataSet.current?.get('issueType');
   const targetProjectId = dataSet.current?.get('targetProjectId');
 
   const handleSubmit = useCallback(() => {
     setBtnLoading(true);
     let submitData: any = {
       issueId: issue.issueId,
-      typeCode: targetTypeCode,
+      issueTypeId: targetTypeId,
       subIssues: [],
     };
     for (const [k, v] of Object.entries(dataSet.current?.data || {})) {
@@ -295,9 +295,9 @@ const IssueMove: React.FC<Props> = ({
       Choerodon.prompt('移动失败');
     });
     return false;
-  }, [dataMap, dataSet, issue.issueId, modal, onMoveIssue, selfFields, subTaskFields, targetProjectId, targetTypeCode]);
+  }, [dataMap, dataSet, issue.issueId, modal, onMoveIssue, selfFields, subTaskFields, targetProjectId, targetTypeId]);
 
-  const targetIssueType = issueTypeDataSet.toData().find((item: IIssueType) => item.typeCode === targetTypeCode) as IIssueType;
+  const targetIssueType = issueTypeDataSet.toData().find((item: IIssueType) => item.id === targetTypeId) as IIssueType;
   return (
     <div className={styles.issueMove}>
       <Steps current={currentStep - 1}>

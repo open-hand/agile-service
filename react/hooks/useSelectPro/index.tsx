@@ -1,11 +1,10 @@
 import React, {
   useMemo, useRef, useCallback,
 } from 'react';
-import { omit, debounce } from 'lodash';
+import { debounce } from 'lodash';
 import { Button, DataSet } from 'choerodon-ui/pro';
-import { SearchMatcher } from 'choerodon-ui/pro/lib/select/Select';
+import { SearchMatcher, SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { Renderer } from 'choerodon-ui/pro/lib/field/FormField';
-
 import FragmentForSearch from './FragmentForSearch';
 import styles from './index.less';
 
@@ -43,10 +42,9 @@ export interface SelectConfig<T = {}> {
   optionRenderer?: (item: T) => JSX.Element
   renderer?: (item: T) => JSX.Element
   paging?: boolean
-  props?: object
 }
 
-export default function useSelect<T extends { [key: string]: any }>(config: SelectConfig<T>) {
+export default function useSelect<T extends { [key: string]: any }>(config: SelectConfig<T>): [SelectProps] {
   const textRef = useRef<string>('');
   const dataSetRef = useRef<DataSet>();
   const cacheRef = useRef<Map<any, T>>(new Map());
@@ -60,7 +58,6 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     valueField = 'value',
     optionRenderer = defaultRender,
     paging = true,
-    props,
   } = config;
   const renderer = useCallback(({ value, maxTagTextLength }) => {
     const item = cacheRef.current?.get(value);
@@ -149,7 +146,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     }
     return optionRenderer(record.toData());
   };
-  const selectProps = {
+  const selectProps: SelectProps = {
     searchable: true,
     onInput: handleInput,
     onClear: () => {
@@ -164,14 +161,9 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
       }
     },
     searchMatcher: paging ? () => true : filterOptions,
-    valueField,
-    // 这里不传递textField，因为由useSelect来渲染
-    textField,
     options,
-    // @ts-ignore
     optionRenderer: renderOption,
     renderer,
-    // @ts-ignore
     onOption: ({ record }) => {
       if (record.get('loadMoreButton') === true) {
         return {
@@ -181,7 +173,6 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
       }
       return {};
     },
-    ...omit(props, 'renderer', 'optionRenderer'),
   };
   return [selectProps];
 }
