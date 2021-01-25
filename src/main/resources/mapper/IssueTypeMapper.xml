@@ -224,9 +224,14 @@
         select id
         from fd_issue_type
         where organization_id = #{organizationId}
-        <if test="projectId != null">
-            AND project_id = #{projectId}
-        </if>
+        <choose>
+            <when test="projectId != null">
+                AND project_id IN (0, #{projectId})
+            </when>
+            <otherwise>
+                AND project_id = 0
+            </otherwise>
+        </choose>
         <if test="issueTypeCodes != null and issueTypeCodes.size > 0">
             AND type_code IN
               <foreach collection="issueTypeCodes" item="issueType" open="(" separator="," close=")">
