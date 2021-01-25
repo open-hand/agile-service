@@ -1,6 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.List;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/11/29.
@@ -18,6 +21,16 @@ public class IssueTypeSearchVO {
     private Boolean referenced;
 
     private String source;
+    @JsonIgnore
+    private List<String> typeCodes;
+
+    public List<String> getTypeCodes() {
+        return typeCodes;
+    }
+
+    public void setTypeCodes(List<String> typeCodes) {
+        this.typeCodes = typeCodes;
+    }
 
     public Boolean getEnabled() {
         return enabled;

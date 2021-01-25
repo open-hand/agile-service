@@ -318,7 +318,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public void createSystemFieldIfNotExisted(Long organizationId) {
-        List<Long> issueTypeIds = issueTypeMapper.selectIssueTypeIdsByOptions(ObjectSchemeFieldContext.fixDataIssueType(), organizationId, null, ISSUE_TYPE_SOURCE_SYSTEM);
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        issueTypeSearchVO.setTypeCodes(ObjectSchemeFieldContext.fixDataIssueType());
+        issueTypeSearchVO.setSource("system");
+        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, 0L, issueTypeSearchVO);
+        List<Long> issueTypeIds = issueTypes.stream().map(IssueTypeVO::getId).collect(Collectors.toList());
         List<ObjectSchemeFieldExtendDTO> result =
                 objectSchemeFieldExtendMapper
                         .selectExtendFieldByOptions(
@@ -332,7 +336,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             List<ObjectSchemeFieldDTO> systemFields = objectSchemeFieldMapper.select(dto);
             systemFields.forEach(field -> {
 //                String context = getFieldContext(field.getCode());
-                List<IssueTypeDTO> issueTypes = convertContextToIssueTypes(issueTypeIds, organizationId);
                 String code = field.getCode();
                 Boolean required = field.getRequired();
                 SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(code);
@@ -396,37 +399,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             }
         }
         return filterBacklog(projectId, result);
-    }
-
-    private List<IssueTypeDTO> convertContextToIssueTypes(List<Long> issueTypeIds, Long organizationId) {
-        List<IssueTypeDTO> result = new ArrayList<>();
-        Map<Long, String> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
-        List<String> fixDataIssueTypes = ObjectSchemeFieldContext.fixDataIssueType();
-//        String[] contextArray = context.split(",");
-//        if (ObjectSchemeFieldContext.isGlobal(contextArray)) {
-//            for (Map.Entry<Long, String> entry : issueTypeMap.entrySet()) {
-//                Long issueTypeId = entry.getKey();
-//                if (fixDataIssueTypes.contains(issueTypeId)) {
-//                    IssueTypeDTO dto = new IssueTypeDTO();
-//                    dto.setId(entry.getKey());
-//                    dto.setTypeCode(entry.getValue());
-//                    result.add(dto);
-//                }
-//            }
-//        } else {
-        for (Long issueTypeId : issueTypeIds) {
-            String issueType = issueTypeMap.get(issueTypeId);
-            if (ObjectUtils.isEmpty(issueType)
-                    || !fixDataIssueTypes.contains(issueTypeId)) {
-                continue;
-            }
-            IssueTypeDTO dto = new IssueTypeDTO();
-            dto.setId(issueTypeId);
-            dto.setTypeCode(issueType);
-            result.add(dto);
-        }
-//        }
-        return result;
     }
 
     private String processIssueTyeAndRequiredScope(ObjectSchemeFieldDTO fieldDTO,
