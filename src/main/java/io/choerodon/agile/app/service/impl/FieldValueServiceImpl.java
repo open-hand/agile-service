@@ -76,6 +76,8 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     private AgilePluginService agilePluginService;
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+    @Autowired
+    private IssueTypeMapper issueTypeMapper;
 
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
@@ -183,16 +185,27 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
 
     @Override
     public void createFieldValuesWithQuickCreate(Long organizationId, Long projectId, Long instanceId, PageFieldViewParamVO paramDTO) {
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        issueTypeSearchVO.setIssueTypeIds(Arrays.asList(paramDTO.getIssueTypeId()));
+        issueTypeSearchVO.setEnabled(true);
+        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
+        if (issueTypes.isEmpty()) {
+            throw new CommonException("error.issue.type.not.existed");
+        }
+        IssueTypeVO issueType = issueTypes.get(0);
+        String typeCode = issueType.getTypeCode();
+        Long issueTypeId = issueType.getId();
+
         if (!EnumUtil.contain(PageCode.class, paramDTO.getPageCode())) {
             throw new CommonException(ERROR_PAGECODE_ILLEGAL);
         }
         if (!EnumUtil.contain(ObjectSchemeCode.class, paramDTO.getSchemeCode())) {
             throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
         }
-        if (!EnumUtil.contain(ObjectSchemeFieldContext.class, paramDTO.getContext())) {
+        if (!EnumUtil.contain(ObjectSchemeFieldContext.class, typeCode)) {
             throw new CommonException(ERROR_CONTEXT_ILLEGAL);
         }
-        List<PageFieldDTO> pageFields = pageFieldService.queryPageField(organizationId, projectId, paramDTO.getPageCode(), paramDTO.getIssueTypeId());
+        List<PageFieldDTO> pageFields = pageFieldService.queryPageField(organizationId, projectId, paramDTO.getPageCode(), issueTypeId);
         //过滤掉不显示字段和系统字段
         pageFields = pageFields.stream().filter(PageFieldDTO::getDisplay).filter(x -> !x.getSystem()).collect(Collectors.toList());
         List<FieldValueDTO> fieldValues = new ArrayList<>();

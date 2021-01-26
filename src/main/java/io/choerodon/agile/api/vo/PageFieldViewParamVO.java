@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 
@@ -20,6 +21,7 @@ public class PageFieldViewParamVO {
     private String schemeCode;
     @ApiModelProperty(value = "问题类型id")
     @NotNull(message = "error.param.issueTypeIdNotNull")
+    @Encrypt
     private Long issueTypeId;
 
     @NotNull

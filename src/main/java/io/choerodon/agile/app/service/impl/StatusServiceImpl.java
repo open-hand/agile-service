@@ -364,12 +364,16 @@ public class StatusServiceImpl implements StatusService {
         List<Long> filterIssueType = new ArrayList<>();
         filterIssueType.add(0L);
         if (!Objects.equals(applyType, SchemeApplyType.PROGRAM)) {
-            List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.queryByOrgId(ConvertUtil.getOrganizationId(projectId), projectId);
-            issueTypeDTOS.forEach(v -> {
-                if (Objects.equals(v.getTypeCode(), "feature")) {
-                    filterIssueType.add(v.getId());
-                }
-            });
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            Long newProjectId = projectId == null ? 0L : projectId;
+            IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+            issueTypeSearchVO.setEnabled(true);
+            issueTypeMapper.selectByOptions(organizationId, newProjectId, issueTypeSearchVO)
+                    .forEach(x -> {
+                        if (Objects.equals(x.getTypeCode(), "feature")) {
+                            filterIssueType.add(x.getId());
+                        }
+                    });
         }
         return filterIssueType;
     }

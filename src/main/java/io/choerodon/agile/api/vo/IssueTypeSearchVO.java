@@ -23,6 +23,16 @@ public class IssueTypeSearchVO {
     private String source;
     @JsonIgnore
     private List<String> typeCodes;
+    @JsonIgnore
+    private List<Long> issueTypeIds;
+
+    public List<Long> getIssueTypeIds() {
+        return issueTypeIds;
+    }
+
+    public void setIssueTypeIds(List<Long> issueTypeIds) {
+        this.issueTypeIds = issueTypeIds;
+    }
 
     public List<String> getTypeCodes() {
         return typeCodes;
