@@ -288,22 +288,22 @@ const AddIssueType: React.FC<Props> = ({
               <Icon type="baseline-arrow_drop_down" />
             </div>
           </div>
-        </Form>
-        <div className={styles.colorPicker}>
-          <div className={`${styles.swatch} ${styles[`swatch_${isSystemType}`]}`} onClick={handleClickSwatch} role="none">
-            <div className={styles.color} style={{ background: colour }} />
+          <div className={styles.colorPicker}>
+            <div className={`${styles.swatch} ${styles[`swatch_${isSystemType}`]}`} onClick={handleClickSwatch} role="none">
+              <div className={styles.color} style={{ background: colour }} />
+            </div>
+            {
+              pickerDisplay
+                ? (
+                  <div className={styles.popover}>
+                    <div className={styles.cover} onClick={handlePickerHidden} role="none" />
+                    <CompactPicker color={colour} onChange={handleChangeColor} />
+                  </div>
+                )
+                : null
+            }
           </div>
-          {
-          pickerDisplay
-            ? (
-              <div className={styles.popover}>
-                <div className={styles.cover} onClick={handlePickerHidden} role="none" />
-                <CompactPicker color={colour} onChange={handleChangeColor} />
-              </div>
-            )
-            : null
-        }
-        </div>
+        </Form>
       </div>
       <div className={styles.addIssueType_footer}>
         {
