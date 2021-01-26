@@ -1,6 +1,7 @@
 import { pageConfigApi, pageConfigApiConfig } from '@/api';
 import { IIssueType, IModalProps } from '@/common/types';
 import TextEditToggle from '@/components/TextEditTogglePro';
+import { toJS } from 'mobx';
 import beforeSubmitProcessData from '@/routes/page-config/components/create-field/util';
 import renderEditor from '@/routes/page-config/components/renderEditor';
 import { getMenuType } from '@/utils/common';
@@ -61,7 +62,8 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
 
   const handleOk = useCallback(async () => {
     if (await ds.validate()) {
-      const syncIssueType = ds.current!.get('syncIssueType');
+      const syncIssueType = toJS(ds.current!.get('syncIssueType'));
+      console.log(syncIssueType);
       const defaultValue = ds.current!.get('defaultValue');
       // const originFieldOptions: any[] | undefined = record.get('fieldOptions');
       // const extraConfig = record.get('extraConfig');
