@@ -162,10 +162,7 @@ public class PageFieldServiceImpl implements PageFieldService {
     }
 
     protected List<PageFieldDTO> selectPageField(Long organizationId, Long projectId, Long issueTypeId, Boolean created, Boolean edited) {
-        String issueType = null;
-        if (Objects.isNull(issueTypeId)) {
-            issueTypeService.getIssueTypeById(issueTypeId);
-        }
+        String issueType = issueTypeService.getIssueTypeById(issueTypeId);
         List<PageFieldDTO> pageFields =
                 objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueTypeId, created, edited);
         if (pageFields.isEmpty()) {

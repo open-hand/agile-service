@@ -164,6 +164,12 @@
             </otherwise>
         </choose>
         <if test="issueTypeSearchVO != null">
+            <if test="issueTypeSearchVO.typeCodes != null and issueTypeSearchVO.typeCodes.size > 0">
+                and t1.type_code in
+                <foreach collection="issueTypeSearchVO.typeCodes" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
             <if test="issueTypeSearchVO.name != null">
                 and t1.name like concat('%',#{issueTypeSearchVO.name},'%')
             </if>
