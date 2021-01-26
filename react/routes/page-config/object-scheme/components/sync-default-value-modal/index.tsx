@@ -9,7 +9,7 @@ import {
   Form, DataSet, Modal, Select,
 } from 'choerodon-ui/pro/lib';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { observer } from 'mobx-react-lite';
+import moment from 'moment';
 import React, {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
@@ -94,6 +94,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
   }, [handleOk, modal]);
   const handleChangeDate = useCallback((value) => {
     if (value === 'current') {
+      record.set('defaultValue', moment().format('YYYY-MM-DD HH:mm:ss'));
       record.set('check', true);
     } else {
       record.set('check', false);

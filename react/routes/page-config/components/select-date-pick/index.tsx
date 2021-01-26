@@ -78,14 +78,14 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
       setVisible(true);
     } else {
       // onChange && onChange(code);
-      innerRef.current?.choose(new Record({ meaning: 'custom', value: moment().format(dateFormat[dateType]) }));
+      innerRef.current?.choose(new Record({ meaning: moment().format(dateFormat[dateType]), value: 'current' }));
     }
   }
   function handleChangeDate(date: Moment) {
     setValue(date);
     setVisible(false);
     // onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
-    innerRef.current?.choose(new Record({ meaning: 'current', value: date.format(dateFormat[dateType]) }));
+    innerRef.current?.choose(new Record({ meaning: date.format(dateFormat[dateType]), value: date.format(dateFormat[dateType]) }));
   }
   const DateView = DateViews[mode as DateViewsKey];
   const handleBindRef = useCallback((newRef) => {
@@ -99,6 +99,11 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
       ref={handleBindRef}
       value={value?.format(dateFormat[dateType])}
       trigger={['click'] as any}
+      primitiveValue={false}
+      // @ts-ignore
+      valueField="value"
+      // @ts-ignore
+      textField="meaning"
       {...otherProps}
       dropdownMatchSelectWidth={false}
       onPopupHiddenChange={(hidden) => {
