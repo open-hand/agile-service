@@ -22,7 +22,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     return `/agile/v1/organizations/${getOrganizationId()}`;
   }
 
-  load({ params, data }: { params: { page: number, size: number}, data: any}) {
+  load({ params, data }: { params: { page: number, size: number }, data: any }) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/issue_type/list`,
@@ -98,7 +98,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
-  orgLoad({ params, data }: { params: { page: number, size: number}, data: any}) {
+  orgLoad({ params, data }: { params: { page: number, size: number }, data: any }) {
     return this.request({
       method: 'post',
       url: `${this.OrgPrefix}/issue_type/list`,
@@ -155,12 +155,13 @@ class IssueTypeApi extends Api<IssueTypeApi> {
    * 加载全部问题类型（带关联的状态机id)
    * @param applyType
    */
-  loadAllWithStateMachineId(applyType: string = 'agile', projectId?: string): Promise<IIssueType[]> {
+  loadAllWithStateMachineId(applyType: string = 'agile', projectId?: string, onlyEnabled?: boolean): Promise<IIssueType[]> {
     return this.request({
       method: 'get',
       url: `/agile/v1/projects/${projectId || getProjectId()}/schemes/query_issue_types_with_sm_id`,
       params: {
         apply_type: applyType,
+        only_enabled: onlyEnabled,
       },
       // cache: true,
     });
@@ -241,7 +242,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
-  referenced(typeId: string, data: { name: string} | {}) {
+  referenced(typeId: string, data: { name: string } | {}) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/issue_type/reference/${typeId}`,
