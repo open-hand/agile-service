@@ -33,8 +33,8 @@ public interface IssueProjectMoveService {
      * @param projectId
      * @param issueId
      * @param targetProject
-     * @param typeCode
+     * @param issueTypeId
      * @return
      */
-    List<ObjectSchemeFieldVO> listLostField(Long projectId, Long issueId, Long targetProject, String typeCode);
+    List<ObjectSchemeFieldVO> listLostField(Long projectId, Long issueId, Long targetProject, Long issueTypeId);
 }

@@ -118,8 +118,8 @@ public class ObjectSchemeFieldController {
     @ApiOperation(value = "查询字段的页面配置数据")
     @GetMapping(value = "/configs")
     public ResponseEntity<PageConfigVO> listConfigs(@PathVariable("organization_id") Long organizationId,
-                                                          @RequestParam String issueType) {
-        return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, null, issueType), HttpStatus.OK);
+                                                    @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, null, issueTypeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -144,8 +144,8 @@ public class ObjectSchemeFieldController {
     @ApiOperation(value = "页面配置根据问题类型查询未选择的字段")
     @GetMapping(value = "/unselected")
     public ResponseEntity<List<ObjectSchemeFieldVO>> unselected(@PathVariable("organization_id") Long organizationId,
-                                                                @RequestParam String issueType) {
-        return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, null, issueType), HttpStatus.OK);
+                                                                @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, null, issueTypeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -162,10 +162,8 @@ public class ObjectSchemeFieldController {
                                            @PathVariable("organization_id") Long organizationId,
                                            @ApiParam(value = "字段id", required = true)
                                            @RequestParam("field_id") @Encrypt Long fieldId,
-                                           @ApiParam(value = "需要同步默认值的问题类型", required = true)
-                                           @RequestParam("issue_types") String syncDefaultValueIssueTypes,
                                            @RequestBody @Valid  ObjectSchemeFieldUpdateVO updateDTO) {
-        objectSchemeFieldService.syncDefaultValue(organizationId, null, fieldId, syncDefaultValueIssueTypes, updateDTO);
+        objectSchemeFieldService.syncDefaultValue(organizationId, null, fieldId, updateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

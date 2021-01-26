@@ -55,7 +55,7 @@ public class IssueProjectMoveController {
                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                    @RequestParam Long targetProject,
                                                                    @RequestParam @Encrypt Long issueId,
-                                                                   @RequestParam String typeCode) {
-        return new ResponseEntity(issueProjectMoveService.listLostField(projectId, issueId, targetProject, typeCode), HttpStatus.OK);
+                                                                   @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity(issueProjectMoveService.listLostField(projectId, issueId, targetProject, issueTypeId), HttpStatus.OK);
     }
 }

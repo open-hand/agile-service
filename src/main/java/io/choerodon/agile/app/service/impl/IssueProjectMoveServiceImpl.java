@@ -202,11 +202,11 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     }
 
     @Override
-    public List<ObjectSchemeFieldVO> listLostField(Long projectId, Long issueId, Long targetProject, String typeCode) {
+    public List<ObjectSchemeFieldVO> listLostField(Long projectId, Long issueId, Long targetProject, Long issueTypeId) {
         List<FieldValueDTO> fieldValueDTOS = fieldValueMapper.queryList(projectId, issueId, AGILE_SCHEME_CODE, null);
         if (!CollectionUtils.isEmpty(fieldValueDTOS)) {
             // 查询目标项目指定问题类型的字段
-            PageConfigVO pageConfigVO = objectSchemeFieldService.listConfigs(ConvertUtil.getOrganizationId(targetProject), targetProject, typeCode);
+            PageConfigVO pageConfigVO = objectSchemeFieldService.listConfigs(ConvertUtil.getOrganizationId(targetProject), targetProject, issueTypeId);
             List<PageConfigFieldVO> fields = pageConfigVO.getFields();
             if (CollectionUtils.isEmpty(fields)) {
                 return new ArrayList<>();
@@ -250,7 +250,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         }
         Long issueTypeId = jsonObject.getLong(ISSUE_TYPE_ID);
         jsonObject.remove(ISSUE_TYPE_ID);
-        IssueTypeVO issueTypeVO = issueTypeService.queryByOrgId(projectVO.getOrganizationId()).stream()
+        IssueTypeVO issueTypeVO = issueTypeService.queryByOrgId(projectVO.getOrganizationId(), projectVO.getId()).stream()
                 .filter(issueTypeVO1 -> Objects.equals(ObjectUtils.isEmpty(issueTypeId) ? issueDTO.getIssueTypeId() : issueTypeId, issueTypeVO1.getId()))
                 .findAny().orElse(null);
         // 处理需要清空的值
@@ -500,8 +500,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         List<FieldValueDTO> fieldValueDTOS = fieldValueMapper.queryList(projectVO.getId(), issueDTO.getIssueId(), AGILE_SCHEME_CODE, null);
         if(!CollectionUtils.isEmpty(fieldValueDTOS)){
             // 查询目标项目指定问题类型的字段
-            String typeCode = ObjectUtils.isEmpty(issueTypeVO) ? issueDTO.getTypeCode() : issueTypeVO.getTypeCode();
-            PageConfigVO pageConfigVO = objectSchemeFieldService.listConfigs(targetProjectVO.getOrganizationId(), targetProjectVO.getId(), typeCode);
+            Long issueTypeId = ObjectUtils.isEmpty(issueTypeVO) ? issueDTO.getIssueTypeId() : issueTypeVO.getId();
+            PageConfigVO pageConfigVO = objectSchemeFieldService.listConfigs(targetProjectVO.getOrganizationId(), targetProjectVO.getId(), issueTypeId);
             List<PageConfigFieldVO> fields = pageConfigVO.getFields();
             if (CollectionUtils.isEmpty(fields)) {
                 fieldValueMapper.deleteList(projectVO.getId(), issueDTO.getIssueId(), AGILE_SCHEME_CODE, null);

@@ -1,6 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.app.service.*;
+import  io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
@@ -72,13 +72,21 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private static final String PROJECT = "project";
 
-    private static final List<String> AGILE_ISSUE_TYPES =
+    private static final List<String> AGILE_CREATE_ISSUE_TYPES =
             Arrays.asList(
-//                    IssueTypeCode.BUG.value(),
-//                    IssueTypeCode.ISSUE_EPIC.value(),
                     IssueTypeCode.STORY.value(),
                     IssueTypeCode.SUB_TASK.value(),
-                    IssueTypeCode.TASK.value()
+                    IssueTypeCode.TASK.value(),
+                    IssueTypeCode.BUG.value()
+            );
+
+    private static final List<String> AGILE_ISSUE_TYPES =
+            Arrays.asList(
+                    IssueTypeCode.STORY.value(),
+                    IssueTypeCode.SUB_TASK.value(),
+                    IssueTypeCode.TASK.value(),
+                    IssueTypeCode.BUG.value(),
+                    IssueTypeCode.ISSUE_EPIC.value()
             );
 
     private static final List<String> PROGRAM_ISSUE_TYPES =
@@ -224,7 +232,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             return new HashSet<>();
         }
         Set<String> codes = getProjectCategoryCodes(projectId);
-        List<String> issueTypes = new ArrayList<>(AGILE_ISSUE_TYPES);
+        List<String> issueTypes = new ArrayList<>(AGILE_CREATE_ISSUE_TYPES);
 //        issueTypes.add(IssueTypeCode.BACKLOG.value());
         if (codes.contains(ProjectCategory.MODULE_AGILE)
                 && !issueTypes.contains(typeCode)) {
@@ -421,6 +429,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                         IssueTypeSearchVO issueTypeSearchVO) {
         issueTypeSearchVO.setOrganizationId(organizationId);
         issueTypeSearchVO.setProjectId(projectId);
+        if (!ZERO.equals(projectId)) {
+            //项目群暂时不可以配置问题类型，过滤掉测试/自动化测试/特性
+            issueTypeSearchVO.setTypeCodes(AGILE_ISSUE_TYPES);
+        }
         Page<IssueTypeVO> result =
                 PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO));
         if (ZERO.equals(projectId)) {
@@ -649,8 +661,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         result.forEach(x -> {
             if (Boolean.TRUE.equals(x.getInitialize())) {
                 String typeCode = x.getTypeCode();
-                if (AGILE_ISSUE_TYPES.contains(typeCode)
-                        || IssueTypeCode.BUG.value().equals(typeCode)) {
+                if (AGILE_ISSUE_TYPES.contains(typeCode)) {
                     x.setUsageCount(agileProjectCount);
                 }
                 if (IssueTypeCode.ISSUE_EPIC.value().equals(typeCode)) {
@@ -714,15 +725,15 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public List<IssueTypeVO> queryByOrgId(Long organizationId) {
-        List<IssueTypeDTO> issueTypes = issueTypeMapper.queryByOrgId(organizationId);
+    public List<IssueTypeVO> queryByOrgId(Long organizationId, Long projectId) {
+        List<IssueTypeDTO> issueTypes = issueTypeMapper.queryByOrgId(organizationId, projectId);
         return modelMapper.map(issueTypes, new TypeToken<List<IssueTypeVO>>() {
         }.getType());
     }
 
     @Override
     public List<IssueTypeVO> queryIssueTypeByStateMachineSchemeId(Long organizationId, Long schemeId) {
-        List<IssueTypeVO> issueTypeVOS = queryByOrgId(organizationId);
+        List<IssueTypeVO> issueTypeVOS = queryByOrgId(organizationId, null);
         List<StatusMachineSchemeConfigVO> configVOS = stateMachineSchemeConfigService.queryBySchemeId(true, organizationId, schemeId);
         Map<Long, StatusMachineSchemeConfigVO> configMap = configVOS.stream().collect(Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, x -> x));
         for (IssueTypeVO issueTypeVO : issueTypeVOS) {
@@ -774,10 +785,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public Map<String, Long> queryIssueTypeMap(Long organizationId) {
+    public Map<Long, String> queryIssueTypeMap(Long organizationId) {
         IssueTypeDTO dto = new IssueTypeDTO();
         dto.setOrganizationId(organizationId);
-        return issueTypeMapper.select(dto).stream().collect(Collectors.toMap(IssueTypeDTO::getTypeCode, IssueTypeDTO::getId));
+        return issueTypeMapper.select(dto).stream().collect(Collectors.toMap(IssueTypeDTO::getId, IssueTypeDTO::getTypeCode));
     }
 
     @Override
@@ -901,5 +912,14 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             result.put(orgId, temp);
         }
         return result;
+    }
+
+    @Override
+    public String getIssueTypeById(Long issueTypeId) {
+        IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
+        if (Objects.isNull(issueTypeDTO)) {
+            throw new CommonException("error.issue.type.not.exist");
+        }
+        return issueTypeDTO.getTypeCode();
     }
 }

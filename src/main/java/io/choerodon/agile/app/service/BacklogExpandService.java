@@ -99,9 +99,9 @@ public interface BacklogExpandService {
     /**
      * 获取需求的字段code集合
      * @param fieldCodeS
-     * @param typeCode
+     * @param issueTypeId
      */
-    void getBacklogFieldCodes(List<String> fieldCodeS, String typeCode);
+    void getBacklogFieldCodes(List<String> fieldCodeS, Long issueTypeId);
 
     Boolean checkFieldPageConfig(String issueType, String code, Boolean created, Boolean edited);
 

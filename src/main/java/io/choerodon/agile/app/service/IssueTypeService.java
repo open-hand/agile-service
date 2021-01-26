@@ -33,7 +33,7 @@ public interface IssueTypeService {
 
     Boolean checkName(Long organizationId, Long projectId, String name, Long id);
 
-    List<IssueTypeVO> queryByOrgId(Long organizationId);
+    List<IssueTypeVO> queryByOrgId(Long organizationId, Long projectId);
 
     /**
      * 通过状态机方案id查询当前组织下的问题类型（包含对应的状态机）
@@ -62,7 +62,7 @@ public interface IssueTypeService {
      * @param organizationId
      * @return
      */
-    Map<String, Long> queryIssueTypeMap(Long organizationId);
+    Map<Long, String> queryIssueTypeMap(Long organizationId);
 
     /**
      * @param organizationId
@@ -123,4 +123,6 @@ public interface IssueTypeService {
      * @param issueTypeVO
      */
     void reference(Long projectId, Long organizationId, Long referenceId, IssueTypeVO issueTypeVO);
+
+    String getIssueTypeById(Long issueTypeId);
 }
