@@ -25,7 +25,7 @@ interface QuickCreateSubIssueProps extends FormProps {
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   form, priorityId, parentIssueId, sprintId, onCreate,
 }) => {
-  const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: 'sub_task' });
+  const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: 'sub_task', onlyEnabled: true });
   const [expand, setExpand] = useState(false);
   const [id, setId] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
