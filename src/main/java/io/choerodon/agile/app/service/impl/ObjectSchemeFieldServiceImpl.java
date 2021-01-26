@@ -603,18 +603,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                             && issueTypeIds.contains(i.getId()))
                     .collect(Collectors.toList());
         } else {
-            Long newProjectId = projectId == null ? 0L : projectId;
-            IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
-            issueTypeSearchVO.setEnabled(true);
-            issueTypeSearchVO.setTypeCodes(Arrays.asList(ObjectSchemeFieldContext.BACKLOG));
-            List<IssueTypeVO> backlogs =
-                    issueTypeMapper.selectByOptions(organizationId, newProjectId, issueTypeSearchVO);
-            issueTypeSearchVO.setTypeCodes(Arrays.asList("feature"));
-            List<IssueTypeVO> issueTypeList =
-                    issueTypeMapper.selectByOptions(orgId, issueTypeSearchVO);
             List<IssueTypeVO> backlogs = queryBacklogIssueType(projectId, issueTypes, issueTypeIds);
             List<IssueTypeVO> issueTypeList = queryProjectIssueType(projectId, issueTypes, issueTypeIds);
-
             issueTypeList.addAll(backlogs);
             return issueTypeList;
         }
