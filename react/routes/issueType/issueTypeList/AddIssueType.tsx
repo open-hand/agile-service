@@ -57,6 +57,10 @@ const AddIssueType: React.FC<Props> = ({
         code: 'task',
       },
       {
+        name: '缺陷',
+        code: 'bug',
+      },
+      {
         name: '子任务',
         code: 'sub_task',
       },
