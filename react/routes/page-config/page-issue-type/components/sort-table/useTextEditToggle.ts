@@ -49,8 +49,9 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
       }
     }
     if (['date', 'datetime', 'time'].includes(fieldType)) {
-      newValue = value === 'current' ? currentData.defaultValue : value;
-      record.set('extraConfig', value === 'current');
+      const { meaning, value: dateValue } = newValue || {};
+      newValue = dateValue === 'current' ? currentData.defaultValue || meaning : value;
+      record.set('extraConfig', dateValue === 'current');
     }
 
     record.set('defaultValue', newValue);
