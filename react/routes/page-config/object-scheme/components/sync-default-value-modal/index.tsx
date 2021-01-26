@@ -116,7 +116,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
 };
 
 const openSyncDefaultValueEditForm = async (record: Record, prefixCls: string) => {
-  const issueTypes: IIssueType[] = record?.get('IssueTypeVOList');
+  const issueTypes: IIssueType[] = record?.get('issueTypeVOList');
   const issueTypesArr: string[] = issueTypes.map((t) => t.id);
   const contextName: string = record?.get('contextName');
   const contextNameArr = contextName.split(',');

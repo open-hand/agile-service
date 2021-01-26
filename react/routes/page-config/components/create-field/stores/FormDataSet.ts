@@ -202,15 +202,15 @@ const FormDataSet = ({
         multiple: true,
         dynamicProps: {
           options: ({ record, name }: { record: Record, name: string }) => {
-            const IssueTypeVOList = record.get('IssueTypeVOList');
+            const issueTypeVOList = record.get('issueTypeVOList');
 
-            if (IssueTypeVOList && IssueTypeVOList.length > 0) {
+            if (issueTypeVOList && issueTypeVOList.length > 0) {
               const optionDataSet = new DataSet({
                 autoCreate: false,
                 autoQuery: false,
               });
               const searchKey = type === 'project' ? 'valueCode' : 'typeCode';
-              const records: Record[] = record.getField('context')?.options?.filter((item: Record) => IssueTypeVOList.includes(item.get('id'))) || [];
+              const records: Record[] = record.getField('context')?.options?.filter((item: Record) => issueTypeVOList.includes(item.get('id'))) || [];
               const dataArr = records.map((item) => item.toData());
               optionDataSet.loadData(dataArr);
               return optionDataSet;
