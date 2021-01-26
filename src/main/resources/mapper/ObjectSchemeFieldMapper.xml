@@ -248,6 +248,7 @@
             <result property="issueType" column="extend_issue_type"/>
             <result property="issueTypeName" column="extend_issue_type_name"/>
             <result property="required" column="extend_field_required"/>
+            <result property="issueTypeId" column="extend_issue_type_id"/>
         </collection>
     </resultMap>
 
@@ -274,7 +275,8 @@
             t5.id as extend_id,
             fit.type_code as extend_issue_type,
             fit.name as extend_issue_type_name,
-            t5.is_required as extend_field_required
+            t5.is_required as extend_field_required,
+            t5.issue_type_id as extend_issue_type_id
         from fd_object_scheme_field t4
         join (
             <include refid="selectExtendField"/>

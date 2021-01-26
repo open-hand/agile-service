@@ -714,15 +714,15 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public List<IssueTypeVO> queryByOrgId(Long organizationId) {
-        List<IssueTypeDTO> issueTypes = issueTypeMapper.queryByOrgId(organizationId);
+    public List<IssueTypeVO> queryByOrgId(Long organizationId, Long projectId) {
+        List<IssueTypeDTO> issueTypes = issueTypeMapper.queryByOrgId(organizationId, projectId);
         return modelMapper.map(issueTypes, new TypeToken<List<IssueTypeVO>>() {
         }.getType());
     }
 
     @Override
     public List<IssueTypeVO> queryIssueTypeByStateMachineSchemeId(Long organizationId, Long schemeId) {
-        List<IssueTypeVO> issueTypeVOS = queryByOrgId(organizationId);
+        List<IssueTypeVO> issueTypeVOS = queryByOrgId(organizationId, null);
         List<StatusMachineSchemeConfigVO> configVOS = stateMachineSchemeConfigService.queryBySchemeId(true, organizationId, schemeId);
         Map<Long, StatusMachineSchemeConfigVO> configMap = configVOS.stream().collect(Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, x -> x));
         for (IssueTypeVO issueTypeVO : issueTypeVOS) {
@@ -774,10 +774,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public Map<String, Long> queryIssueTypeMap(Long organizationId) {
+    public Map<Long, String> queryIssueTypeMap(Long organizationId) {
         IssueTypeDTO dto = new IssueTypeDTO();
         dto.setOrganizationId(organizationId);
-        return issueTypeMapper.select(dto).stream().collect(Collectors.toMap(IssueTypeDTO::getTypeCode, IssueTypeDTO::getId));
+        return issueTypeMapper.select(dto).stream().collect(Collectors.toMap(IssueTypeDTO::getId, IssueTypeDTO::getTypeCode));
     }
 
     @Override
@@ -901,5 +901,14 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             result.put(orgId, temp);
         }
         return result;
+    }
+
+    @Override
+    public String getIssueTypeById(Long issueTypeId) {
+        IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
+        if (Objects.isNull(issueTypeDTO)) {
+            throw new CommonException("error.issue.type.not.exist");
+        }
+        return issueTypeDTO.getTypeCode();
     }
 }

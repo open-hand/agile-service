@@ -248,14 +248,14 @@
             t1.id
             from fd_object_scheme_field_extend t1
             where t1.organization_id = #{organizationId}
-            and t1.issue_type = #{issueType}
+            and t1.issue_type_id = #{issueTypeId}
             and t1.project_id is null
             <if test="projectId != null">
                 and t1.field_id not in (
                     select t3.field_id
                     from fd_object_scheme_field_extend t3
                     where t3.organization_id = #{organizationId}
-                    and t3.issue_type = #{issueType}
+                    and t3.issue_type_id = #{issueTypeId}
                     and t3.project_id = #{projectId}
                 )
                 union
@@ -263,7 +263,7 @@
                     t2.id
                 from fd_object_scheme_field_extend t2
                 where t2.organization_id = #{organizationId}
-                and t2.issue_type = #{issueType}
+                and t2.issue_type_id = #{issueTypeId}
                 and t2.project_id = #{projectId}
             </if>
         ) t5 on t4.id = t5.id
@@ -341,7 +341,7 @@
             distinct field_id
             from fd_object_scheme_field_extend
             where organization_id = #{organizationId}
-            and issue_type = #{issueType}
+            and issue_type_id = #{issueTypeId}
             and project_id is null
             <if test="projectId != null">
                 union
@@ -350,7 +350,7 @@
                 from fd_object_scheme_field_extend
                 where organization_id = #{organizationId}
                 and project_id = #{projectId}
-                and issue_type = #{issueType}
+                and issue_type_id = #{issueTypeId}
             </if>
         )
         AND t2.id = t1.id
@@ -397,8 +397,8 @@
             from fd_object_scheme_field_extend t1
             where t1.organization_id = #{organizationId}
             and t1.project_id is null
-            <if test="issueType != null">
-                and t1.issue_type = #{issueType}
+            <if test="issueTypeId != null">
+                and t1.issue_type_id = #{issueTypeId}
             </if>
             <if test="projectId != null">
                 and t1.field_id not in (
@@ -406,8 +406,8 @@
                     from fd_object_scheme_field_extend t3
                     where t3.organization_id = #{organizationId}
                     and t3.project_id = #{projectId}
-                    <if test="issueType != null">
-                        and t3.issue_type = #{issueType}
+                    <if test="issueTypeId != null">
+                        and t3.issue_type_id = #{issueTypeId}
                     </if>
                 )
                 union
@@ -426,8 +426,8 @@
                 from fd_object_scheme_field_extend t2
                 where t2.organization_id = #{organizationId}
                 and t2.project_id = #{projectId}
-                <if test="issueType != null">
-                    and t2.issue_type = #{issueType}
+                <if test="issueTypeId != null">
+                    and t2.issue_type_id = #{issueTypeId}
                 </if>
             </if>
         ) t6

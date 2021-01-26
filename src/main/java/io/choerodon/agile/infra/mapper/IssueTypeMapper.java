@@ -20,7 +20,8 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
 
     List<IssueTypeDTO> queryBySchemeId(@Param("organizationId") Long organizationId, @Param("schemeId") Long schemeId);
 
-    List<IssueTypeDTO> queryByOrgId(@Param("organizationId") Long organizationId);
+    List<IssueTypeDTO> queryByOrgId(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId);
+
 
     List<Long> selectIssueTypeIds(@Param("organizationId") Long organizationId, @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO);
 
@@ -73,4 +74,17 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      */
     List<IssueTypeVO> selectEnableReference(@Param("organizationId") Long organizationId,
                                              @Param("projectId") Long projectId);
+
+    /**
+     * 根据条件查询问题类型id
+     * @param issueTypeCodes
+     * @param organizationId
+     * @param projectId
+     * @param source
+     * @return
+     */
+    List<Long> selectIssueTypeIdsByOptions(@Param("issueTypeCodes") List<String> issueTypeCodes,
+                                           @Param("organizationId") Long organizationId,
+                                           @Param("projectId") Long projectId,
+                                           @Param("source") String source);
 }

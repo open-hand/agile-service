@@ -443,7 +443,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         List<StateMachineWithStatusVO> stateMachineWithStatusVOS = stateMachineService.queryAllWithStatus(organizationId);
         Map<Long, StateMachineWithStatusVO> stateMachineMap = stateMachineWithStatusVOS.stream().collect(Collectors.toMap(StateMachineWithStatusVO::getId, x -> x));
         //获取所有问题类型
-        List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId);
+        List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, null);
         Map<Long, IssueTypeVO> issueTypeMap = issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, x -> x));
         //获取当前方案配置的项目列表
         List<ProjectConfigDTO> projectConfigs = projectConfigMapper.queryConfigsBySchemeId(SchemeType.STATE_MACHINE, schemeId);
