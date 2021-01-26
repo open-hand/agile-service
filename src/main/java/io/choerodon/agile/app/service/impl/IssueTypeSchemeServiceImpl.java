@@ -70,12 +70,12 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
     }
 
     @Override
-    public IssueTypeSchemeVO queryById(Long organizationId, Long issueTypeSchemeId) {
+    public IssueTypeSchemeVO queryById(Long organizationId, Long projectId, Long issueTypeSchemeId) {
         IssueTypeSchemeDTO issueTypeScheme = issueTypeSchemeMapper.selectByPrimaryKey(issueTypeSchemeId);
         if (issueTypeScheme != null) {
             IssueTypeSchemeVO issueTypeSchemeVO = modelMapper.map(issueTypeScheme, IssueTypeSchemeVO.class);
             //根据方案配置表获取 问题类型
-            List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, issueTypeSchemeId);
+            List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, projectId, issueTypeSchemeId, false);
             issueTypeSchemeVO.setIssueTypes(modelMapper.map(issueTypes, new TypeToken<List<IssueTypeVO>>() {
             }.getType()));
             return issueTypeSchemeVO;
@@ -99,7 +99,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
         //创建方案配置
         createConfig(organizationId, issueTypeScheme.getId(), issueTypeSchemeVO.getIssueTypes());
 
-        return queryById(organizationId, issueTypeScheme.getId());
+        return queryById(organizationId, 0L, issueTypeScheme.getId());
     }
 
     @Override
@@ -119,7 +119,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
         issueTypeSchemeConfigMapper.deleteBySchemeId(organizationId, issueTypeSchemeVO.getId());
         createConfig(organizationId, issueTypeScheme.getId(), issueTypeSchemeVO.getIssueTypes());
 
-        return queryById(organizationId, issueTypeScheme.getId());
+        return queryById(organizationId, 0L, issueTypeScheme.getId());
     }
 
     @Override

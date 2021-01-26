@@ -34,7 +34,7 @@ public class ConvertUtil {
      * @return IssueTypeMap
      */
     public static Map<Long, IssueTypeVO> getIssueTypeMap(Long projectId, String applyType) {
-        List<IssueTypeVO> issueTypeVOS = SpringBeanUtil.getBean(ProjectConfigService.class).queryIssueTypesByProjectId(projectId, applyType);
+        List<IssueTypeVO> issueTypeVOS = SpringBeanUtil.getBean(ProjectConfigService.class).queryIssueTypesByProjectId(projectId, applyType, false);
         return issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
     }
 
@@ -103,7 +103,7 @@ public class ConvertUtil {
     }
 
     public static Map<Long, IssueTypeWithStateMachineIdVO> queryIssueTypesWithStateMachineIdByProjectId(Long projectId, String applyType) {
-        List<IssueTypeWithStateMachineIdVO> issueTypeWithStateMachineIdVOS = SpringBeanUtil.getBean(ProjectConfigService.class).queryIssueTypesWithStateMachineIdByProjectId(projectId, applyType);
+        List<IssueTypeWithStateMachineIdVO> issueTypeWithStateMachineIdVOS = SpringBeanUtil.getBean(ProjectConfigService.class).queryIssueTypesWithStateMachineIdByProjectId(projectId, applyType, false);
         Map<Long, Long> statusIdMap = SpringBeanUtil.getBean(InstanceService.class).queryInitStatusIds(getOrganizationId(projectId), issueTypeWithStateMachineIdVOS
                 .stream().map(IssueTypeWithStateMachineIdVO::getStateMachineId).collect(Collectors.toList()));
         issueTypeWithStateMachineIdVOS.forEach(issueTypeWithStateMachineIdDTO -> issueTypeWithStateMachineIdDTO.setInitStatusId(statusIdMap.get(issueTypeWithStateMachineIdDTO.getStateMachineId())));

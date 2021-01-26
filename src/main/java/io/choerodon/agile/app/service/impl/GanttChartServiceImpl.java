@@ -92,7 +92,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         String key = "issueTypeId";
         List<Long> allowedIssueTypeIds =
                 projectConfigService
-                        .queryIssueTypesWithStateMachineIdByProjectId(projectId, "agile")
+                        .queryIssueTypesWithStateMachineIdByProjectId(projectId, "agile", false)
                         .stream()
                         .filter(x -> issueTypes.contains(x.getTypeCode()))
                         .map(IssueTypeWithStateMachineIdVO::getId)

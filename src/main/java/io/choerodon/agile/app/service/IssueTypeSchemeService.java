@@ -26,9 +26,12 @@ public interface IssueTypeSchemeService {
      *
      * @param organizationId
      * @param issueTypeSchemeId
+     * @param projectId
      * @return
      */
-    IssueTypeSchemeVO queryById(Long organizationId, Long issueTypeSchemeId);
+    IssueTypeSchemeVO queryById(Long organizationId,
+                                Long projectId,
+                                Long issueTypeSchemeId);
 
     /**
      * 创建方案

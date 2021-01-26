@@ -52,19 +52,41 @@
     </select>
 
     <select id="queryBySchemeId" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
-        SELECT
-        t.*,
-        c.sequence
-        FROM fd_issue_type t
-        LEFT JOIN fd_issue_type_scheme_config c on c.issue_type_id = t.id
+        select
+        t1.*,
+        t2.sequence,
+        ifnull(t3.enabled, 1) as enabled
+        from fd_issue_type t1
+        left join fd_issue_type_scheme_config t2 on t2.issue_type_id = t1.id
+        left join fd_issue_type_extend t3 on t1.id = t3.issue_type_id
         WHERE 1=1
-        <if test="organizationId != null">
-            AND t.organization_id = #{organizationId}
-        </if>
+        <choose>
+            <when test="projectId == 0">
+                and t1.organization_id = #{organizationId}
+                and t1.project_id = #{projectId}
+            </when>
+            <otherwise>
+                and t1.id in (
+                select t4.id
+                from fd_issue_type t4
+                where t4.organization_id = #{organizationId}
+                and t4.project_id = #{projectId}
+                union
+                select t5.id
+                from fd_issue_type t5
+                where t3.organization_id = #{organizationId}
+                and t5.project_id = 0
+                and t5.source = 'system'
+                )
+            </otherwise>
+        </choose>
         <if test="schemeId != null">
-            AND c.scheme_id = #{schemeId}
+            AND t2.scheme_id = #{schemeId}
         </if>
-        order by c.sequence
+        <if test="onlyEnabled">
+            and ifnull(t3.enabled, 1) = 1
+        </if>
+        order by t2.sequence
     </select>
 
     <select id="selectIssueTypeIds" resultType="java.lang.Long">

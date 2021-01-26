@@ -121,7 +121,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             statusMap.putAll(statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, Function.identity())));
         }
         // 获取项目的问题类型
-        List<IssueTypeVO> issueTypeVOS = projectConfigService.queryIssueTypesByProjectId(projectId, applyType);
+        List<IssueTypeVO> issueTypeVOS = projectConfigService.queryIssueTypesByProjectId(projectId, applyType, false);
         Map<String, IssueTypeVO> typeVOMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(statusVOS)) {
             typeVOMap.putAll(issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getTypeCode, Function.identity())));
