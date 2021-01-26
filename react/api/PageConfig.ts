@@ -146,7 +146,7 @@ class PageConfigApi extends Api<PageConfigApi> {
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/description_template`,
       params: {
-        issueType,
+        issueTypeId: issueType,
         organizationId: getOrganizationId(),
       },
     });
