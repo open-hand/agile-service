@@ -74,7 +74,7 @@
                 union
                 select t5.id
                 from fd_issue_type t5
-                where t3.organization_id = #{organizationId}
+                where t5.organization_id = #{organizationId}
                 and t5.project_id = 0
                 and t5.source = 'system'
                 )
