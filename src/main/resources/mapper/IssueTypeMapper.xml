@@ -170,6 +170,12 @@
                     #{item}
                 </foreach>
             </if>
+            <if test="issueTypeSearchVO.issueTypeIds != null and issueTypeSearchVO.issueTypeIds.size > 0">
+                and t1.id in
+                <foreach collection="issueTypeSearchVO.issueTypeIds" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
             <if test="issueTypeSearchVO.name != null">
                 and t1.name like concat('%',#{issueTypeSearchVO.name},'%')
             </if>
