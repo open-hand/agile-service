@@ -4,7 +4,7 @@ import useDefaultPriority from '@/hooks/useDefaultPriority';
 import QuickCreateIssue from './QuickCreateIssue';
 
 const QuickCreateIssueWithProvider = (props) => {
-  const { data: issueTypes } = useProjectIssueTypes();
+  const { data: issueTypes } = useProjectIssueTypes({ onlyEnabled: true });
   const [defaultPriority] = useDefaultPriority();
   return (
     <QuickCreateIssue

@@ -279,7 +279,7 @@ class CreateIssue extends Component {
   loadIssueTypes = () => {
     const { applyType, form } = this.props;
 
-    issueTypeApi.loadAllWithStateMachineId(applyType).then((res) => {
+    issueTypeApi.loadAllWithStateMachineId(applyType, undefined, true).then((res) => {
       if (res && res.length) {
         const defaultType = this.getDefaultType(res);
         const param = {
@@ -584,7 +584,6 @@ class CreateIssue extends Component {
                               this.setState({
                                 fields: res,
                                 newIssueTypeCode: typeCode,
-                                newIssueTypeId: id,
                               });
                               this.loadDefaultTemplate(id);
                               this.setDefaultValue(res);
