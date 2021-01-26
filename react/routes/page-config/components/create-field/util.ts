@@ -8,16 +8,16 @@ const singleList = ['radio', 'single'];
 const multipleList = ['checkbox', 'multiple'];
 
 interface IUpdateFieldPostData {
-    code: string
-    context: string[]
-    defaultValue: string
-    extraConfig: boolean
-    fieldOptions?: Array<IFieldOption & { isDefault: boolean }>
-    fieldType: IFieldType
-    name: string
-    issueTypeIds: string[]
-    objectVersionNumber?: number
-    schemeCode: 'agile_issue' | string
+  code: string
+  context: string[]
+  defaultValue: string
+  extraConfig: boolean
+  fieldOptions?: Array<IFieldOption & { isDefault: boolean }>
+  fieldType: IFieldType
+  name: string
+  issueTypeIds: string[]
+  objectVersionNumber?: number
+  schemeCode: 'agile_issue' | string
 }
 function beforeSubmitProcessData(record: Record, { fieldOptions: propsFieldOptions, schemeCode = 'agile_issue' }: { fieldOptions?: Array<any>, schemeCode?: string } = {}): IUpdateFieldPostData {
   const originDefaultValue = record.get('defaultValue');
@@ -32,8 +32,8 @@ function beforeSubmitProcessData(record: Record, { fieldOptions: propsFieldOptio
   if (singleList.indexOf(obj.fieldType) !== -1) {
     obj.fieldOptions = fieldOptions?.map((o: any) => {
       if (obj.defaultValue
-                && (o.id === obj.defaultValue || o.code === obj.defaultValue
-                    || o.tempKey === obj.defaultValue)) {
+        && (o.id === obj.defaultValue || o.code === obj.defaultValue
+          || o.tempKey === obj.defaultValue)) {
         return { ...o, isDefault: true };
       }
       return { ...o, isDefault: false };
@@ -53,7 +53,7 @@ function beforeSubmitProcessData(record: Record, { fieldOptions: propsFieldOptio
   const dateList = ['date', 'datetime', 'time'];
   const prefix = getMenuType() === 'project' ? 'pro_' : 'org_';
   const { name, check } = data;
-  const { context } = data;
+  const { issueTypeVOList } = data;
   // if (context && context.length === formDataSet.getField('context')?.options?.length) {
   //   context = ['global'];
   // }
@@ -65,8 +65,8 @@ function beforeSubmitProcessData(record: Record, { fieldOptions: propsFieldOptio
     transformTime.defaultValue = dateFormatVal.isValid() ? dateFormatVal.format(dateFormat[1]) : moment(obj.defaultValue, dateFormat).format(dateFormat[1]);
   }
   const postData = {
-    context,
-    issueTypeIds: context,
+    context: issueTypeVOList.map((t: any) => t.id),
+    issueTypeIds: issueTypeVOList.map((t: any) => t.id),
     code: `${prefix}${data.code}`,
     name,
     ...obj,
