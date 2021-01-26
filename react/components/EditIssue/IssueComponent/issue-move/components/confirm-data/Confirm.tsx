@@ -132,7 +132,7 @@ const Confirm: React.FC<Props> = ({
       });
       if (subIssueVOList && subIssueVOList.length) {
         fieldApi.getFields({
-          context: 'sub_task',
+          context: subTaskTypeId as string,
           pageCode: 'agile_issue_create',
           schemeCode: 'agile_issue',
         }, targetProjectId).then((res: IField[]) => {
@@ -150,7 +150,7 @@ const Confirm: React.FC<Props> = ({
         });
       }
     }
-  }, [addField, filterFields, getFinalFields, issueId, issueType, subIssueVOList, targetProjectId, targetProjectType]);
+  }, [addField, filterFields, getFinalFields, issueId, issueType, subIssueVOList, subTaskTypeId, targetProjectId, targetProjectType]);
 
   useEffect(() => {
     if (targetProjectId && issueId && targetIssueType?.id) {
@@ -168,7 +168,7 @@ const Confirm: React.FC<Props> = ({
         detailRequestArr.push(issueApi.load(subTask.issueId));
         customFieldsRequestArr.push(fieldApi.getFieldAndValue(subTask.issueId, {
           schemeCode: 'agile_issue',
-          context: 'sub_task',
+          context: subTaskTypeId as string,
           pageCode: 'agile_issue_edit',
         }));
       });
