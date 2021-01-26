@@ -48,7 +48,7 @@ class FieldApi extends Api<FieldApi> {
     return axios({
       method: 'post',
       url: `${this.prefix}/field_value/quick_create/${issueId}`,
-      data: dto,
+      data: { ...dto, context: 'story' },
       params: {
         organizationId,
       },
