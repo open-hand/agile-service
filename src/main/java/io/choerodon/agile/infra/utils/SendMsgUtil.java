@@ -346,7 +346,8 @@ public class SendMsgUtil {
             url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId());
         }
         //设置动作与发送人
-        setIssueCommentMessageActionAndUser(actionMap, issueCommentVO.getUserId(), issueVO);
+        List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUE_COMMENT", issueVO);
+        setIssueCommentMessageActionAndUser(actionMap, issueCommentVO.getUserId(), issueVO, projectVO, userIds);
         String summary = String.join("-", issueVO.getIssueNum(), issueVO.getSummary());
         String comment = Optional.ofNullable(issueCommentVO.getCommentText()).map(SendMsgUtil::getText).orElse("无");
 
@@ -355,21 +356,16 @@ public class SendMsgUtil {
         }
     }
 
-    private void setIssueCommentMessageActionAndUser(Map<Long, String> actionMap, Long userId, IssueVO issueVO) {
-        if (issueVO.getCreatedBy() != null &&
-                !issueVO.getCreatedBy().equals(userId)) {
-            actionMap.put(issueVO.getCreatedBy(), "创建的");
-        }
-        if (issueVO.getReporterId() != null &&
-                actionMap.get(issueVO.getReporterId()) == null &&
-                !issueVO.getReporterId().equals(userId)) {
-            actionMap.put(issueVO.getReporterId(), "负责的");
-        }
-        if (issueVO.getAssigneeId() != null &&
-                actionMap.get(issueVO.getAssigneeId()) == null &&
-                !issueVO.getAssigneeId().equals(userId)) {
-            actionMap.put(issueVO.getAssigneeId(), "处理的");
-        }
+    private void setIssueCommentMessageActionAndUser(Map<Long, String> actionMap, Long userId, IssueVO issueVO, ProjectVO projectVO, List<Long> userIds) {
+        Map<Long, String> map = new HashMap<>(2);
+        map.put(issueVO.getAssigneeId(), "处理的");
+        map.put(issueVO.getReporterId(), "负责的");
+        userIds.forEach(sendUserId -> {
+            if(sendUserId.equals(userId)){
+                return;
+            }
+            actionMap.put(userId, map.getOrDefault(userId, "管理的"));
+        });
     }
 
     @Async
