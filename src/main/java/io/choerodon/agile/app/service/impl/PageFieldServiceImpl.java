@@ -369,7 +369,6 @@ public class PageFieldServiceImpl implements PageFieldService {
 
     @Override
     public List<PageFieldViewVO> queryPageFieldViewList(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO) {
-        String issueType = paramDTO.getContext();
         Long issueTypeId = paramDTO.getIssueTypeId();
         String pageCode = paramDTO.getPageCode();
         if (!EnumUtil.contain(PageCode.class, pageCode)) {
@@ -377,9 +376,6 @@ public class PageFieldServiceImpl implements PageFieldService {
         }
         if (!EnumUtil.contain(ObjectSchemeCode.class, paramDTO.getSchemeCode())) {
             throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
-        }
-        if (!EnumUtil.contain(ObjectSchemeFieldContext.class, issueType)) {
-            throw new CommonException(ERROR_CONTEXT_ILLEGAL);
         }
         List<PageFieldDTO> pageFields = queryPageField(organizationId, projectId, pageCode, issueTypeId);
         List<PageFieldViewVO> pageFieldViews = modelMapper.map(pageFields, new TypeToken<List<PageFieldViewVO>>() {
