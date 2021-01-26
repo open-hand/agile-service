@@ -194,8 +194,8 @@ public class ProjectObjectSchemeFieldController {
     @GetMapping(value = "/description_template")
     public ResponseEntity<IssueTypeFieldVO> queryDescriptionTemplate(@PathVariable("project_id") Long projectId,
                                                                      @RequestParam Long organizationId,
-                                                                     @RequestParam String issueType) {
-        return new ResponseEntity<>(objectSchemeFieldService.queryDescriptionTemplate(projectId, issueType, organizationId), HttpStatus.OK);
+                                                                     @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(objectSchemeFieldService.queryDescriptionTemplate(projectId, issueTypeId, organizationId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

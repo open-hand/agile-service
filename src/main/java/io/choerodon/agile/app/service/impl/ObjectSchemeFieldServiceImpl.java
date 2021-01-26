@@ -482,17 +482,15 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public IssueTypeFieldVO queryDescriptionTemplate(Long projectId,
-                                                     String issueType,
+                                                     Long issueTypeId,
                                                      Long organizationId) {
-        List<IssueTypeVO> issueTypes =
-                issueTypeService.queryByOrgId(organizationId, projectId)
-                        .stream()
-                        .filter(i -> i.getTypeCode().equals(issueType))
-                        .collect(Collectors.toList());
+        Long newProjectId = projectId == null ? 0L : projectId;
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        issueTypeSearchVO.setIssueTypeIds(Arrays.asList(issueTypeId));
+        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, newProjectId, issueTypeSearchVO);
         if (ObjectUtils.isEmpty(issueTypes)) {
             throw new CommonException("error.illegal.issueType");
         }
-        Long issueTypeId = issueTypes.get(0).getId();
         IssueTypeFieldDTO dto = new IssueTypeFieldDTO();
         dto.setIssueTypeId(issueTypeId);
         dto.setProjectId(projectId);

@@ -195,11 +195,11 @@ public interface ObjectSchemeFieldService {
      * 查询项目下某个类型的描述模版
      *
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @param organizationId
      * @return
      */
-    IssueTypeFieldVO queryDescriptionTemplate(Long projectId, String issueType, Long organizationId);
+    IssueTypeFieldVO queryDescriptionTemplate(Long projectId, Long issueTypeId, Long organizationId);
 
     String getFieldContext(String code);
 
