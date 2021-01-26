@@ -66,7 +66,7 @@ class FieldApi extends Api<FieldApi> {
       params: {
         organizationId: this.orgId,
       },
-      data: dto,
+      data: { ...dto, context: 'story' },
     });
   }
 
@@ -82,7 +82,7 @@ class FieldApi extends Api<FieldApi> {
         projectId: this.projectId,
         organizationId: this.orgId,
       },
-      data: dto,
+      data: { ...dto, context: 'story' },
     }) : this.request({
       method: 'post',
       url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}field_value/list/${issueId}`,
@@ -90,7 +90,7 @@ class FieldApi extends Api<FieldApi> {
         organizationId: this.orgId,
         instanceProjectId: this.projectId,
       },
-      data: dto,
+      data: { ...dto, context: 'story' },
     });
   }
 

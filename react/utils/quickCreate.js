@@ -3,7 +3,7 @@ import { fieldApi } from '@/api';
 export async function checkCanQuickCreate(typeId) {
   const param = {
     schemeCode: 'agile_issue',
-    context: typeId,
+    issueTypeId: typeId,
     pageCode: 'agile_issue_create',
   };
   const whiteList = ['summary', 'status', 'reporter', 'issueType', 'priority', 'epicName'];

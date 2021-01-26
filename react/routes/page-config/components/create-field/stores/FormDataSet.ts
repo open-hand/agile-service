@@ -202,7 +202,7 @@ const FormDataSet = ({
         multiple: true,
         dynamicProps: {
           options: ({ record, name }: { record: Record, name: string }) => {
-            const IssueTypeVOList = [...record.get('IssueTypeVOList')];
+            const IssueTypeVOList = record.get('IssueTypeVOList');
 
             if (IssueTypeVOList && IssueTypeVOList.length > 0) {
               const optionDataSet = new DataSet({
