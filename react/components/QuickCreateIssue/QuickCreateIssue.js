@@ -73,7 +73,7 @@ class QuickCreateIssue extends Component {
           if (summary.trim() !== '') {
             const param = {
               schemeCode: 'agile_issue',
-              issueTypeId: currentType.id, //
+              issueTypeId: currentType.id,
               pageCode: 'agile_issue_create',
             };
             const fields = await fieldApi.getFields(param);
