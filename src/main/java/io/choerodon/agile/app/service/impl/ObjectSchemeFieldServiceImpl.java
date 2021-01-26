@@ -212,7 +212,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     protected List<ObjectSchemeFieldVO> generateFieldViews(Long organizationId, Long projectId, String schemeCode) {
         List<ObjectSchemeFieldDTO> fields = selectFieldsByOptions(organizationId, projectId, schemeCode, null, null);
         List<ObjectSchemeFieldVO> fieldViews = new ArrayList<>();
-        //不包含已禁用的自定义问题类型
         List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, projectId);
         List<IssueTypeVO> filterIssueTypeVO = filterIssueType(projectId, issueTypeVOS, issueTypeVOS.stream().map(IssueTypeVO::getId).collect(Collectors.toList()));
         Map<Long, IssueTypeVO> issueTypeVOMap = filterIssueTypeVO.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
@@ -421,7 +420,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (Objects.equals(fieldDTO.getCreatedLevel(), CREATED_LEVEL_SYSTEM) ||
                 (!Objects.isNull(projectId) && Objects.equals(fieldDTO.getCreatedLevel(), CREATED_LEVEL_ORGANIZATION))) {
             String fieldContext = getFieldContext(fieldDTO.getCode());
-            List<Long> ids = issueTypeMapper.selectIssueTypeIdsByOptions(Arrays.asList(fieldContext.split(",")), organizationId, null, ISSUE_TYPE_SOURCE_SYSTEM);
+            IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+            issueTypeSearchVO.setTypeCodes(Arrays.asList(fieldContext.split(",")));
+            List<Long> ids = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO).stream().map(IssueTypeVO::getId).collect(Collectors.toList());
             //项目层的组织字段获取组织层下配置的问题类型
             if (Boolean.FALSE.equals(fieldDTO.getSystem())) {
                 fieldDTO = baseQueryById(organizationId, null, fieldDTO.getId());
@@ -592,7 +593,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         String[] contexts = new String[typeCodes.size()];
         new ArrayList(typeCodes).toArray(contexts);
         ObjectSchemeFieldContext.isIllegalContexts(contexts);
-        List<IssueTypeVO> issueTypes = issueTypeService.queryByOrgId(organizationId, projectId);
+
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        issueTypeSearchVO.setEnabled(true);
+        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
         List<IssueTypeVO> result = filterIssueType(projectId, issueTypes, issueTypeIds);
         return result;
     }
@@ -880,13 +884,18 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     private void checkIssueTypeLegality(Long organizationId, Long projectId, ObjectSchemeFieldDTO field, List<Long> issueTypeIds) {
         List<Long> legalIssueTypeIds;
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
         if (Boolean.TRUE.equals(field.getSystem())) {
             List<String> legalIssueTypes = Arrays.asList(getFieldContext(field.getCode()).split(","));
-            legalIssueTypeIds = issueTypeMapper.selectIssueTypeIdsByOptions(legalIssueTypes, organizationId, null, ISSUE_TYPE_SOURCE_SYSTEM);
+            issueTypeSearchVO.setTypeCodes(legalIssueTypes);
+            issueTypeSearchVO.setEnabled(true);
+            legalIssueTypeIds = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO).stream().map(IssueTypeVO::getId).collect(Collectors.toList());
         } else if (!Objects.isNull(projectId) && Objects.equals(field.getCreatedLevel(), CREATED_LEVEL_ORGANIZATION)) {
             legalIssueTypeIds = field.getExtendFields().stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toList());
         } else {
-            legalIssueTypeIds = issueTypeService.queryByOrgId(organizationId, projectId).stream().map(IssueTypeVO::getId).collect(Collectors.toList());
+            issueTypeSearchVO.setEnabled(true);
+            List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
+            legalIssueTypeIds = issueTypes.stream().map(IssueTypeVO::getId).collect(Collectors.toList());
         }
         issueTypeIds.forEach(issueTypeId -> {
             if (!legalIssueTypeIds.contains(issueTypeId)) {

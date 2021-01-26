@@ -267,37 +267,4 @@
         )
     </select>
 
-    <select id="selectIssueTypeIdsByOptions" resultType="java.lang.Long">
-        SELECT t1.id
-        FROM fd_issue_type t1
-        WHERE 1=1
-        <choose>
-            <when test="projectId == 0">
-                AND t1.organization_id = #{organizationId}
-                AND t1.project_id = #{projectId}
-            </when>
-            <otherwise>
-                AND t1.id IN (
-                    SELECT t2.id
-                    FROM fd_issue_type t2
-                    WHERE t2.organization_id = #{organizationId}
-                    AND t2.project_id = #{projectId}
-                    UNION
-                    SELECT t3.id
-                    FROM fd_issue_type t3
-                    WHERE t3.organization_id = #{organizationId}
-                    AND t3.project_id = 0
-                    AND t3.source = 'system'
-                )
-            </otherwise>
-        </choose>
-        <if test="issueTypeCodes != null and issueTypeCodes.size > 0">
-            AND t1.type_code IN
-              <foreach collection="issueTypeCodes" item="issueType" open="(" separator="," close=")">
-                    #{issueType}
-              </foreach>
-        </if>
-        AND t1.source = #{source}
-    </select>
-
 </mapper>

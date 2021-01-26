@@ -726,9 +726,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Override
     public List<IssueTypeVO> queryByOrgId(Long organizationId, Long projectId) {
-        List<IssueTypeDTO> issueTypes = issueTypeMapper.queryByOrgId(organizationId, projectId);
-        return modelMapper.map(issueTypes, new TypeToken<List<IssueTypeVO>>() {
-        }.getType());
+        return issueTypeMapper.selectByOptions(organizationId, projectId, null);
     }
 
     @Override
