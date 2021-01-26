@@ -70,7 +70,7 @@ class CreateStory extends Component {
       issueApi.create(req).then((res) => {
         const dto = {
           schemeCode: 'agile_issue',
-          context: res.issueTypeId,
+          issueTypeId: res.issueTypeId,
           pageCode: 'agile_issue_create',
         };
         this.setState({

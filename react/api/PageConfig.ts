@@ -14,12 +14,13 @@ export enum PageConfigIssueType {
   demand = 'demand',
   null = '',
 }
-interface ISyncDefaultPostData{
+interface ISyncDefaultPostData {
   defaultValue?: any
   extraConfig?: boolean
   fieldOptions?: Array<IFieldOption & { isDefault: boolean }>
   custom: boolean
   fieldType?: IFieldType
+  issueTypeIds: string[]
 }
 export interface IFieldOption {
   id: string,
@@ -76,7 +77,7 @@ interface PageIssueType {
 }
 type FiledUpdate = Required<Pick<IFiled, 'fieldId' | 'required' | 'created' | 'edited' | 'objectVersionNumber'>>;
 export interface UIssueTypeConfig {
-  issueType: PageConfigIssueType,
+  issueTypeId: PageConfigIssueType,
   fields: Array<FiledUpdate>,
   issueTypeFieldVO?: Partial<IssueTypeFieldVO>,
   deleteIds?: string[],
@@ -174,7 +175,7 @@ class PageConfigApi extends Api<PageConfigApi> {
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/configs`,
       params: {
-        issueType,
+        issueTypeId: issueType,
         organizationId: getOrganizationId(),
       },
     });
@@ -228,13 +229,12 @@ class PageConfigApi extends Api<PageConfigApi> {
    * @param fieldId
    * @param issueTypeStr
    */
-  syncDefaultValue(fieldId: string, issueTypeStr: string, data: ISyncDefaultPostData) {
+  syncDefaultValue(fieldId: string, data: ISyncDefaultPostData) {
     return axios({
       method: 'post',
       url: `${this.prefixOrgOrPro}/object_scheme_field/sync_default_value`,
       params: {
         field_id: fieldId,
-        issue_types: issueTypeStr,
         organizationId: getOrganizationId(),
       },
       data,
@@ -264,7 +264,7 @@ class PageConfigApi extends Api<PageConfigApi> {
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/unselected`,
       params: {
-        issueType,
+        issueTypeId: issueType,
         organizationId: getOrganizationId(),
       },
     });

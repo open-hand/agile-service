@@ -104,8 +104,8 @@ function EditIssue() {
       // 2. 根据详情加载fields
       const param = {
         schemeCode: 'agile_issue',
-        // context: issue.issueTypeId,
-        context: issue.typeCode,
+        issueTypeId: issue.issueTypeId,
+        // context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
       const fields = await fieldApi.project(projectId).org(organizationId).outside(outside).getFieldAndValue(id, param);

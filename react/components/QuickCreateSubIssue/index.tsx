@@ -51,7 +51,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           }
           const param = {
             schemeCode: 'agile_issue',
-            context: currentType.id,
+            issueTypeId: currentType.id,
             pageCode: 'agile_issue_create',
           };
           const fields = await fieldApi.getFields(param);
@@ -75,7 +75,11 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
             testResponsibleId: fieldsMap.get('testResponsible')?.defaultValue,
           };
           const res = await issueApi.createSubtask(issue);
-          fieldApi.quickCreateDefault(res.issueId, param);
+          fieldApi.quickCreateDefault(res.issueId, {
+            schemeCode: 'agile_issue',
+            issueTypeId: currentType.id,
+            pageCode: 'agile_issue_create',
+          });
           setLoading(false);
           handleCancel();
           onCreate && onCreate();

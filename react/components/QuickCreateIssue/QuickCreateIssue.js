@@ -60,7 +60,7 @@ class QuickCreateIssue extends Component {
             loading: true,
           });
           const currentType = issueTypes.find((t) => t.id === currentTypeId);
-          if (!await checkCanQuickCreate(currentType.typeCode)) { //
+          if (!await checkCanQuickCreate(currentType.id)) { //
             Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
             this.setState({
               loading: false,
@@ -73,7 +73,7 @@ class QuickCreateIssue extends Component {
           if (summary.trim() !== '') {
             const param = {
               schemeCode: 'agile_issue',
-              context: currentType.typeCode, //
+              issueTypeId: currentType.id, //
               pageCode: 'agile_issue_create',
             };
             const fields = await fieldApi.getFields(param);
@@ -115,7 +115,7 @@ class QuickCreateIssue extends Component {
               });
               const dto = {
                 schemeCode: 'agile_issue',
-                context: currentType.typeCode, // res.issueTypeId,
+                issueTypeId: currentType.id, // res.issueTypeId,
                 pageCode: 'agile_issue_create',
               };
               fieldApi.quickCreateDefault(res.issueId, dto);

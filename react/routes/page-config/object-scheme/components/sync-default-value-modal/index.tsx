@@ -1,5 +1,5 @@
 import { pageConfigApi, pageConfigApiConfig } from '@/api';
-import { IModalProps } from '@/common/types';
+import { IIssueType, IModalProps } from '@/common/types';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import beforeSubmitProcessData from '@/routes/page-config/components/create-field/util';
 import renderEditor from '@/routes/page-config/components/renderEditor';
@@ -18,7 +18,7 @@ interface Props {
   record: Record
   defaultTypes: Array<string>
   text: string
-  options: Array<{ name: string, code: string }>
+  options: IIssueType[]
   modal?: IModalProps
 }
 const dateList = ['datetime', 'time', 'date'];
@@ -75,7 +75,8 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
       if (!(record.get('system') || (getMenuType() === 'project' && record.get('projectId') === null))) {
         await pageConfigApi.updateField(record.get('id'), newData);
       }
-      await pageConfigApi.syncDefaultValue(record.get('id'), String(syncIssueType), {
+      await pageConfigApi.syncDefaultValue(record.get('id'), {
+        issueTypeIds: syncIssueType,
         extraConfig: newData.extraConfig,
         fieldType: newData.fieldType,
         fieldOptions: newData.fieldOptions,
@@ -107,7 +108,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
         name: 'defaultValue',
       })}
       <Select name="syncIssueType" required style={{ minWidth: 280 }} multiple>
-        {options.map((option) => <Select.Option value={option.code}>{option.name}</Select.Option>)}
+        {options.map((option) => <Select.Option value={option.id}>{option.name}</Select.Option>)}
       </Select>
     </Form>
 
@@ -115,8 +116,8 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
 };
 
 const openSyncDefaultValueEditForm = async (record: Record, prefixCls: string) => {
-  const issueTypes: string = record?.get('context');
-  const issueTypesArr: string[] = issueTypes.split(',');
+  const issueTypes: IIssueType[] = record?.get('IssueTypeVOList');
+  const issueTypesArr: string[] = issueTypes.map((t) => t.id);
   const contextName: string = record?.get('contextName');
   const contextNameArr = contextName.split(',');
   record.set('fieldCode', record.get('code'));
@@ -135,7 +136,7 @@ const openSyncDefaultValueEditForm = async (record: Record, prefixCls: string) =
       record={newRecord}
       text={contextName}
       defaultTypes={issueTypesArr}
-      options={issueTypesArr.map((item: any, index) => ({ code: item, name: contextNameArr[index] }))}
+      options={issueTypes}
     />,
     className: `${prefixCls}-detail-sync`,
     okText: '确定',
