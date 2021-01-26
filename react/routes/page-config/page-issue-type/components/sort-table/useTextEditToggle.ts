@@ -31,7 +31,6 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
   const dataRef = useRef<Array<any> | undefined>();
   const handleSubmit = useCallback((value: any) => {
     const currentData = record.toData();
-
     let newValue = value;
     let currentDefaultValueObj = currentData.localDefaultObj || currentData.defaultValueObj;
     if (fieldType === 'member') {
@@ -43,6 +42,10 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
       } else if (newLocalDefaultObj) {
         record.set('localDefaultObj', newLocalDefaultObj);
         currentDefaultValueObj = newLocalDefaultObj;
+      }
+      if (!value && value === null) {
+        record.set('localDefaultObj', undefined);
+        currentDefaultValueObj = undefined;
       }
     }
     if (['date', 'datetime', 'time'].includes(fieldType)) {
