@@ -33,16 +33,10 @@ const TreeListSwitch: React.FC<Props> = ({
   };
   return (
     <div className={classnames(styles.switch, className)}>
-      <Tooltip title="列表视图">
-        <div className={classnames(styles.icon, styles.icon_list, data === 'list' ? styles.selected : undefined, { [styles.disabled]: disabled })}>
-          <ListIcon onClick={() => handleChange('list')} className={styles.icon_list_wrap} />
-          {/* <Icon type="view_list" onClick={() => handleChange('list')} className={classnames(styles.icon, styles.icon_list, data === 'list' ? styles.selected : undefined, { [styles.disabled]: disabled })} /> */}
-        </div>
-      </Tooltip>
-
-      <Tooltip title="树形视图">
-        <Icon type="frame" onClick={() => handleChange('tree')} className={classnames(styles.icon, styles.icon_tree, data === 'tree' ? styles.selected : undefined, { [styles.disabled]: disabled })} />
-      </Tooltip>
+      <span role="none" onClick={() => handleChange('list')} className={classnames(styles.span, styles.span_list, data === 'list' ? styles.selected : undefined, { [styles.disabled]: disabled })}>
+        列表视图
+      </span>
+      <span role="none" onClick={() => handleChange('tree')} className={classnames(styles.span, styles.span_tree, data === 'tree' ? styles.selected : undefined, { [styles.disabled]: disabled })}>树形视图</span>
     </div>
   );
 };

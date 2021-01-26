@@ -5,56 +5,24 @@
   right: 20px;
   display: flex;
   align-items: center;
-}
-
-.icon {
-  cursor: pointer;
-
   border-radius: 2px;
   border: 1px solid #415BC9;
-  color: #415BC9;
-
-  path {
-    fill: #415BC9;
+  .span {
+    width: 68px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    color: #415BC9;
+    background: #FFFFFF;
+    cursor: pointer;
   }
-
-  &_list {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    margin-right: .1rem;
-    width: .2rem;
-    height: .2rem;
-
-    &_wrap {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    svg {
-      width: .16rem;
-      height: .16rem;
-    }
+  .selected {
+    background-color: #415BC9;
+    color: #fff;
   }
-
-  &_tree {
-
-    font-size: 10px;
-    padding: .03rem;
-  }
+  .disabled {
+    color: @disabled-color;
+  }  
 }
 
-.selected {
-  background-color: #415BC9;
-  color: #fff;
 
-  path {
-    fill: #fff;
-  }
-}
-
-.disabled {
-  color: @disabled-color;
-}
