@@ -208,11 +208,13 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             userIds.add(issueCommentVO.getReplyToUserId());
         }
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(userIds, true);
-        UserMessageDTO user = userMap.get(issueCommentDTO.getUserId());
-        UserMessageDTO replyToUser = userMap.get(issueCommentDTO.getReplyToUserId());
-        issueCommentVO.setUserName(user != null ? user.getName() : null);
+        UserMessageDTO user = userMap.get(issueCommentVO.getUserId());
+        UserMessageDTO replyToUser = userMap.get(issueCommentVO.getReplyToUserId());
+        issueCommentVO.setUserName(user != null ? user.getName() : null);        issueCommentVO.setUserName(user != null ? user.getName() : null);
+        issueCommentVO.setUserRealName(user != null ? user.getRealName() : null);
         issueCommentVO.setUserImageUrl(user != null ? user.getImageUrl() : null);
         issueCommentVO.setReplyToUserName(replyToUser != null ? replyToUser.getName() : null);
+        issueCommentVO.setReplyToUserRealName(replyToUser != null ? replyToUser.getRealName() : null);
         issueCommentVO.setReplyToUserImageUrl(replyToUser != null ? replyToUser.getImageUrl() : null);
         return issueCommentVO;
     }
