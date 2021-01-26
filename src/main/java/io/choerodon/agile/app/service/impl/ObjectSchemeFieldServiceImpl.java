@@ -710,8 +710,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         ObjectSchemeFieldDTO update = modelMapper.map(updateDTO, ObjectSchemeFieldDTO.class);
         //处理context
-        String context = issueTypeMapper.queryIssueTypeList(organizationId, updateDTO.getIssueTypeIds()).stream().map(IssueTypeWithInfoDTO::getTypeCode).collect(Collectors.joining(","));
-        update.setContext(context.length() < 100 ? context : context.substring(0, 100));
+        Set<String> typeCodes = issueTypeMapper.queryIssueTypeList(organizationId, updateDTO.getIssueTypeIds()).stream().map(IssueTypeWithInfoDTO::getTypeCode).collect(Collectors.toSet());
+        update.setContext(String.join(",", typeCodes));
         String defaultValue = tryDecryptDefaultValue(update.getFieldType(), update.getDefaultValue());
         updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, defaultValue, update.getExtraConfig(), updateDTO.getIssueTypeIds());
         if (defaultValue != null) {
