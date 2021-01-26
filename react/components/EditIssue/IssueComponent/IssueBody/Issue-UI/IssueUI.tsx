@@ -18,6 +18,7 @@ import { WSItem } from './components/linked-item/LinkedItem';
 const IssueUI = (props: any) => {
   const [wsData, setWsData] = useState<WSItem[]>([]);
   const { store } = useContext(EditIssueContext);
+  const { issueId } = store.getIssue;
 
   useEffect(() => {
     store.getLinkedUI();
@@ -70,14 +71,18 @@ const IssueUI = (props: any) => {
           <LinkedItem ui={ui} reloadIssue={props.reloadIssue} />
         ))
       }
-      <WSHandler
-        messageKey={`${`agile-static-file-${getProjectId()}`}`}
-        onMessage={handleMessage}
-      >
-        {
-          renderUploading()
-        }
-      </WSHandler>
+      {
+        issueId && (
+          <WSHandler
+            messageKey={`${`agile-static-file-${getProjectId()}-${issueId}`}`}
+            onMessage={handleMessage}
+          >
+            {
+            renderUploading()
+          }
+          </WSHandler>
+        )
+      }
     </div>
   );
 };
