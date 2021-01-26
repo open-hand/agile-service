@@ -10,10 +10,11 @@ import EditIssueContext from '../../../../../stores';
 interface Props {
   reloadIssue: Function,
   hasPermission?: boolean,
+  uploading: boolean
 }
 
 const UploadUI: React.FC<Props> = (props) => {
-  const { reloadIssue, hasPermission = true } = props;
+  const { reloadIssue, hasPermission = true, uploading } = props;
   const { store, disabled } = useContext(EditIssueContext);
   const { issueId } = store.getIssue;
   const { linkedUI } = store;
@@ -61,16 +62,28 @@ const UploadUI: React.FC<Props> = (props) => {
     <div className={styles.uploadUi}>
       {
         (hasPermission && !disabled) ? (
-          // @ts-ignore
-          <Upload
-            {...config}
-          >
-            <Tooltip title="上传UI/UX文件" placement="topRight" autoAdjustOverflow={false} getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}>
-              <Button style={{ padding: '0 6px' }}>
-                <Icon type="file_upload" />
-              </Button>
-            </Tooltip>
-          </Upload>
+          <>
+            {
+            uploading ? (
+              <Tooltip title="正在上传，请稍后" placement="topRight" autoAdjustOverflow={false} getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}>
+                <Button style={{ padding: '0 6px' }} disabled>
+                  <Icon type="file_upload" />
+                </Button>
+              </Tooltip>
+            ) : (
+              // @ts-ignore
+              <Upload
+                {...config}
+              >
+                <Tooltip title="上传UI/UX文件" placement="topRight" autoAdjustOverflow={false} getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}>
+                  <Button style={{ padding: '0 6px' }}>
+                    <Icon type="file_upload" />
+                  </Button>
+                </Tooltip>
+              </Upload>
+            )
+          }
+          </>
         ) : (
           <div style={{ height: 32 }} />
         )
