@@ -96,6 +96,7 @@ public class StaticFileServiceImpl implements StaticFileService {
 
     @Override
     public List<StaticFileHeaderVO> uploadStaticFile(Long projectId, Long issueId, HttpServletRequest request) {
+        String issueIdStr = EncryptionUtils.encrypt(issueId);
         List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList = new ArrayList<>();
         List<StaticFileCompressDTO> staticFileCompress = new ArrayList<>();
         List<StaticFileHeaderVO> result = new ArrayList<>();
@@ -115,10 +116,10 @@ public class StaticFileServiceImpl implements StaticFileService {
                     StaticFileOperationHistoryDTO staticFileCompressHistory = createStaticFileCompressHistory(staticFileHeader);
                     staticFileCompressHistoryList.add(staticFileCompressHistory);
 
-                    staticFileCompress.add(getStaticFileCompressParams(staticFileHeader, multipartFile, staticFileCompressHistory));
+                    staticFileCompress.add(getStaticFileCompressParams(staticFileHeader, multipartFile, staticFileCompressHistory, issueIdStr));
                 }
             }
-            staticFileCompressService.unCompress(staticFileCompress, projectId, organizationId, staticFileCompressHistoryList);
+            staticFileCompressService.unCompress(staticFileCompress, projectId, organizationId, staticFileCompressHistoryList, issueIdStr);
         }
         return result;
     }
@@ -156,11 +157,12 @@ public class StaticFileServiceImpl implements StaticFileService {
         return res;
     }
 
-    private StaticFileCompressDTO getStaticFileCompressParams(StaticFileHeaderDTO staticFileHeader, MultipartFile multipartFile, StaticFileOperationHistoryDTO staticFileCompressHistory) {
+    private StaticFileCompressDTO getStaticFileCompressParams(StaticFileHeaderDTO staticFileHeader, MultipartFile multipartFile, StaticFileOperationHistoryDTO staticFileCompressHistory, String issueId) {
         StaticFileCompressDTO staticFileCompressDTO = new StaticFileCompressDTO();
         staticFileCompressDTO.setId(staticFileHeader.getId());
         staticFileCompressDTO.setFileName(multipartFile.getOriginalFilename());
         staticFileCompressDTO.setStaticFileCompressHistory(staticFileCompressHistory);
+        staticFileCompressDTO.setIssueId(issueId);
         try {
             staticFileCompressDTO.setIn(multipartFile.getInputStream());
             staticFileCompressDTO.setSize(multipartFile.getBytes().length);
