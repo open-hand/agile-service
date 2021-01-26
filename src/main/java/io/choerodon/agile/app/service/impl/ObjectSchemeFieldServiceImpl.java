@@ -214,7 +214,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<ObjectSchemeFieldVO> fieldViews = new ArrayList<>();
         //不包含已禁用的自定义问题类型
         List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, projectId);
-        Map<Long, IssueTypeVO> issueTypeVOMap = issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
+        List<IssueTypeVO> filterIssueTypeVO = filterIssueType(projectId, issueTypeVOS, issueTypeVOS.stream().map(IssueTypeVO::getId).collect(Collectors.toList()));
+        Map<Long, IssueTypeVO> issueTypeVOMap = filterIssueTypeVO.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
         fields.forEach(f -> {
             ObjectSchemeFieldVO vo = modelMapper.map(f, ObjectSchemeFieldVO.class);
             List<ObjectSchemeFieldExtendDTO> extendList = f.getExtendFields();
@@ -710,11 +711,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         ObjectSchemeFieldDTO update = modelMapper.map(updateDTO, ObjectSchemeFieldDTO.class);
         //处理context
-        String[] contexts = updateDTO.getContext();
-        String context = Arrays.asList(contexts).stream().filter(string -> !string.isEmpty()).collect(Collectors.joining(","));
-        update.setContext(context);
+        Set<String> typeCodes = issueTypeMapper.queryIssueTypeList(organizationId, updateDTO.getIssueTypeIds()).stream().map(IssueTypeWithInfoDTO::getTypeCode).collect(Collectors.toSet());
+        update.setContext(String.join(",", typeCodes));
         String defaultValue = tryDecryptDefaultValue(update.getFieldType(), update.getDefaultValue());
-        updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, contexts, defaultValue, update.getExtraConfig(), updateDTO.getIssueTypeIds());
+        updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, defaultValue, update.getExtraConfig(), updateDTO.getIssueTypeIds());
         if (defaultValue != null) {
             update.setDefaultValue(defaultValue);
         }
@@ -726,12 +726,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private void updateFieldIssueTypeAndDefaultValue(Long organizationId,
                                                      Long projectId,
                                                      Long fieldId,
-                                                     String[] contexts,
                                                      String defaultValue,
                                                      Boolean extraConfig,
                                                      List<Long> issueTypeIds) {
-        if (ObjectUtils.isEmpty(contexts)) {
-            throw new CommonException("error.field.context.empty");
+        if (ObjectUtils.isEmpty(issueTypeIds)) {
+            throw new CommonException("error.field.issueTypeIds.empty");
         }
 
         List<IssueTypeVO> issueTypes = getIssueTypeByIds(organizationId, projectId, issueTypeIds);
