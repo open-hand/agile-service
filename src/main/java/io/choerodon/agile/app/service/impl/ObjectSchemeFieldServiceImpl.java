@@ -225,15 +225,18 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             String requiredScope =
                     processIssueTyeAndRequiredScope(f,issueTypeIds, issueTypeNames, true, extendList, containsAllIssueTypes, organizationId, projectId);
             vo.setContext(StringUtils.join(issueTypeIds.toArray(), ","));
-//            vo.setContexts(issueTypeIds);
+
             if (!CollectionUtils.isEmpty(issueTypeIds)) {
+                List<String> contexts = new ArrayList<>();
                 issueTypeIds.forEach(issueTypeId -> {
                     IssueTypeVO issueTypeVO = issueTypeVOMap.get(issueTypeId);
                     if (!ObjectUtils.isEmpty(issueTypeVO)) {
                         issueTypeNames.add(issueTypeVO.getName());
                         issueTypeVOList.add(issueTypeVO);
+                        contexts.add(issueTypeVO.getTypeCode());
                     }
                 });
+                vo.setContexts(contexts);
                 vo.setIssueTypeVOList(issueTypeVOList);
             }
             vo.setContextName(String.join(",", issueTypeNames));
