@@ -26,8 +26,9 @@ public interface StaticFileCompressService {
      * @param projectId 项目id
      * @param organizationId 租户id
      * @param staticFileCompressHistoryList 解压操作信息
+     * @param issueId 问题id
      */
-    void unCompress(List<StaticFileCompressDTO> staticFileCompressList, Long projectId, Long organizationId, List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList);
+    void unCompress(List<StaticFileCompressDTO> staticFileCompressList, Long projectId, Long organizationId, List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, Long issueId);
 
     /**
      * 获取index文件相对路径

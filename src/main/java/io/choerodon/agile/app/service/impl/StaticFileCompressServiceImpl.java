@@ -45,6 +45,8 @@ import io.choerodon.agile.infra.dto.StaticFileHeaderDTO;
 import io.choerodon.agile.infra.dto.StaticFileLineDTO;
 import io.choerodon.agile.infra.dto.StaticFileOperationHistoryDTO;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.EncodeUtil;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.helper.snowflake.SnowflakeHelper;
@@ -129,10 +131,10 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
 
     @Async
     @Override
-    public void unCompress(List<StaticFileCompressDTO> staticFileCompressList, Long projectId, Long organizationId, List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList) {
+    public void unCompress(List<StaticFileCompressDTO> staticFileCompressList, Long projectId, Long organizationId, List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, Long issueId) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         LOGGER.info("start uncompress");
-        sendProcess(staticFileCompressHistoryList, userId, projectId);
+        sendProcess(staticFileCompressHistoryList, userId, projectId, issueId);
         staticFileCompressList.forEach(staticFileCompress -> {
             String suffix = getSuffix(staticFileCompress.getFileName());
             //判断压缩类型，调用不同的解压方法
@@ -153,7 +155,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                 LOGGER.error(e.getMessage(), e);
                 staticFileCompress.setStatus(FAILED);
                 updateHistoryFailed(staticFileCompress.getStaticFileCompressHistory(), e.getMessage());
-                sendProcess(staticFileCompressHistoryList, userId, projectId);
+                sendProcess(staticFileCompressHistoryList, userId, projectId, issueId);
             }
         });
         LOGGER.info("end uncompress");
@@ -225,7 +227,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                             dealUrl(url),
                             dealRelativePathSlash(fileHeader.getFileName(), prefixPath));
                     lineList.add(staticFileLine);
-                    process = updateProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, nowSize, process);
+                    process = updateProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, nowSize, process, staticFileCompress.getIssueId());
                 }
             }
         } catch (RarException e) {
@@ -244,7 +246,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         staticFileLineMapper.batchInsert(lineList);
         updateHistoryStatus(staticFileCompress.getStaticFileCompressHistory(), SUCCESS);
         staticFileCompress.setStatus(SUCCESS);
-        sendProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory().getUserId(), projectId);
+        sendProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory().getUserId(), projectId, staticFileCompress.getIssueId());
     }
 
     /**
@@ -294,7 +296,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                             dealRelativePath(entry.getName(), prefixPath));
                     lineList.add(staticFileLine);
                 }
-                process = updateProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, (size - availableSize), process);
+                process = updateProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, (size - availableSize), process, staticFileCompress.getIssueId());
             }
             //获取上传的文件信息
             List<FileDTO> files = fileClient.getFiles(organizationId, BUCKET_NAME, urls);
@@ -309,17 +311,17 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
             staticFileLineMapper.batchInsert(lineList);
             updateHistoryStatus(staticFileCompress.getStaticFileCompressHistory(), SUCCESS);
             staticFileCompress.setStatus(SUCCESS);
-            sendProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory().getUserId(), projectId);
+            sendProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory().getUserId(), projectId, staticFileCompress.getIssueId());
         }
     }
 
-    private double updateProcess(List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, StaticFileOperationHistoryDTO staticFileCompressHistory, int toTalSize, long nowSize, double process) {
+    private double updateProcess(List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, StaticFileOperationHistoryDTO staticFileCompressHistory, int toTalSize, long nowSize, double process, long issueId) {
         double nowProcess = new BigDecimal(nowSize).divide(new BigDecimal(toTalSize), 2, RoundingMode.HALF_UP).doubleValue();
         if (nowProcess - process < 0.05) {
             return process;
         }
         staticFileCompressHistory.setProcess(nowProcess);
-        sendProcess(staticFileCompressHistoryList, staticFileCompressHistory.getUserId(), staticFileCompressHistory.getProjectId());
+        sendProcess(staticFileCompressHistoryList, staticFileCompressHistory.getUserId(), staticFileCompressHistory.getProjectId(), issueId);
         return nowProcess;
     }
 
@@ -495,8 +497,8 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         return notIndex;
     }
 
-    private void sendProcess(List<StaticFileOperationHistoryDTO> staticFileOperationHistoryList, Long userId, Long projectId) {
-        String messageCode = STATIC_FILE_WEBSOCKET_KEY + "-" + projectId;
+    private void sendProcess(List<StaticFileOperationHistoryDTO> staticFileOperationHistoryList, Long userId, Long projectId, Long issueId) {
+        String messageCode = STATIC_FILE_WEBSOCKET_KEY + "-" + projectId + "-" + EncryptionUtils.encrypt(issueId);
         List<StaticFileOperationHistorySocketVO> staticFileOperationHistorySocketList = modelMapper.map(staticFileOperationHistoryList, new TypeToken<List<StaticFileOperationHistorySocketVO>>() {
         }.getType());
         String message = null;

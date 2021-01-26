@@ -115,10 +115,10 @@ public class StaticFileServiceImpl implements StaticFileService {
                     StaticFileOperationHistoryDTO staticFileCompressHistory = createStaticFileCompressHistory(staticFileHeader);
                     staticFileCompressHistoryList.add(staticFileCompressHistory);
 
-                    staticFileCompress.add(getStaticFileCompressParams(staticFileHeader, multipartFile, staticFileCompressHistory));
+                    staticFileCompress.add(getStaticFileCompressParams(staticFileHeader, multipartFile, staticFileCompressHistory, issueId));
                 }
             }
-            staticFileCompressService.unCompress(staticFileCompress, projectId, organizationId, staticFileCompressHistoryList);
+            staticFileCompressService.unCompress(staticFileCompress, projectId, organizationId, staticFileCompressHistoryList, issueId);
         }
         return result;
     }
@@ -156,11 +156,12 @@ public class StaticFileServiceImpl implements StaticFileService {
         return res;
     }
 
-    private StaticFileCompressDTO getStaticFileCompressParams(StaticFileHeaderDTO staticFileHeader, MultipartFile multipartFile, StaticFileOperationHistoryDTO staticFileCompressHistory) {
+    private StaticFileCompressDTO getStaticFileCompressParams(StaticFileHeaderDTO staticFileHeader, MultipartFile multipartFile, StaticFileOperationHistoryDTO staticFileCompressHistory, Long issueId) {
         StaticFileCompressDTO staticFileCompressDTO = new StaticFileCompressDTO();
         staticFileCompressDTO.setId(staticFileHeader.getId());
         staticFileCompressDTO.setFileName(multipartFile.getOriginalFilename());
         staticFileCompressDTO.setStaticFileCompressHistory(staticFileCompressHistory);
+        staticFileCompressDTO.setIssueId(issueId);
         try {
             staticFileCompressDTO.setIn(multipartFile.getInputStream());
             staticFileCompressDTO.setSize(multipartFile.getBytes().length);
