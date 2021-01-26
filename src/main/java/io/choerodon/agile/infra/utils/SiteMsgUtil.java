@@ -289,6 +289,10 @@ public class SiteMsgUtil {
             messageSender.setMessageCode("ISSUE_COMMENT");
             messageSender.setReceiverAddressList(Collections.singletonList(usersMap.get(userId)));
             messageSender.setArgs(argsMap);
+            // 设置额外参数
+            Map<String, Object> objectMap = new HashMap<>(1);
+            objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(), projectVO.getId());
+            messageSender.setAdditionalInformation(objectMap);
             senderList.add(messageSender);
         });
         senderList.forEach(sender -> messageClient.async().sendMessage(sender));
