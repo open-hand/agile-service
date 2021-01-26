@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Choerodon } from '@choerodon/boot';
 import {
-  Button, Icon, Dropdown, Input, Menu, Form,
+  Button, Icon, Dropdown, Input, Menu, Form, Tooltip,
 } from 'choerodon-ui';
 import { debounce } from 'lodash';
 import { getProjectId } from '@/utils/common';
@@ -209,6 +209,7 @@ class QuickCreateIssue extends Component {
                   <Button
                     funcType="raised"
                     type="primary"
+                    disabled={this.props.issueTypes.length === 0}
                     // htmlType="submit"
                     onClick={this.handleCreate}
                     style={{ margin: '0 10px' }}
@@ -233,6 +234,7 @@ class QuickCreateIssue extends Component {
             <Button
               type="primary"
               icon="playlist_add"
+              disabled={this.props.issueTypes.length === 0}
               onClick={() => {
                 this.setState({
                   create: true,

@@ -146,7 +146,7 @@ class CreateIssue extends Component {
   // eslint-disable-next-line react/destructuring-assignment
   getDefaultType = (issueTypes = this.state.originIssueTypes) => {
     const { defaultTypeCode } = this.props;
-    return find(issueTypes, { typeCode: defaultTypeCode });
+    return find(issueTypes, { typeCode: defaultTypeCode }) || issueTypes[0];
   }
 
   handleSave = (data, fileList) => {
