@@ -292,7 +292,7 @@ class CreateIssue extends Component {
           this.setState({
             fields,
             originIssueTypes: res,
-            defaultTypeId: defaultType.typeCode,
+            defaultTypeId: defaultType.id,
             loading: false,
             newIssueTypeCode: defaultType.typeCode,
           }, () => {
@@ -373,7 +373,7 @@ class CreateIssue extends Component {
           mainResponsibleId,
           testResponsibleId,
         } = values;
-        const { typeCode, id: currentTypeId } = originIssueTypes.find((t) => t.typeCode === typeId);
+        const { typeCode, id: currentTypeId } = originIssueTypes.find((t) => t.id === typeId);
         // 手动检验描述是否必输校验
         const descriptionField = fields.find((f) => f.fieldCode === 'description');
         if (descriptionField && descriptionField.required && this.checkSameDescription(undefined, description)) {
@@ -569,7 +569,7 @@ class CreateIssue extends Component {
                           getPopupContainer={(triggerNode) => triggerNode.parentNode}
                           onChange={((value) => {
                             const { typeCode, id } = originIssueTypes.find(
-                              (item) => item.typeCode === value,
+                              (item) => item.id === value,
                             );
                             const param = {
                               schemeCode: 'agile_issue',
@@ -584,6 +584,7 @@ class CreateIssue extends Component {
                               this.setState({
                                 fields: res,
                                 newIssueTypeCode: typeCode,
+                                newIssueTypeId: id,
                               });
                               this.loadDefaultTemplate(id);
                               this.setDefaultValue(res);
@@ -591,7 +592,7 @@ class CreateIssue extends Component {
                           })}
                         >
                           {this.getIssueTypes(isInProgram).map((type) => (
-                            <Option key={type.id} value={type.typeCode}>
+                            <Option key={type.id} value={type.id}>
                               <TypeTag
                                 data={type}
                                 showName
