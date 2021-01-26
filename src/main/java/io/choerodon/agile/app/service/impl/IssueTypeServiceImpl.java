@@ -76,7 +76,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             Arrays.asList(
                     IssueTypeCode.STORY.value(),
                     IssueTypeCode.SUB_TASK.value(),
-                    IssueTypeCode.TASK.value()
+                    IssueTypeCode.TASK.value(),
+                    IssueTypeCode.BUG.value()
             );
 
     private static final List<String> AGILE_ISSUE_TYPES =
