@@ -577,7 +577,7 @@ public class ExcelServiceImpl implements ExcelService {
                                                      Long projectId,
                                                      ExcelImportTemplate.Cursor cursor,
                                                      List<String> fieldCodes) {
-        List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
+        List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE, true);
         List<String> values = new ArrayList<>();
         issueTypes.forEach(i -> {
             String typeCode = i.getTypeCode();
@@ -2353,7 +2353,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private void processIssueType(boolean withFeature, Long projectId, ExcelColumnVO excelColumnVO) {
-        List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
+        List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE, true);
         List<String> values = new ArrayList<>();
         Map<String, IssueTypeVO> issueTypeMap = new HashMap<>();
         issueTypes.forEach(i -> {

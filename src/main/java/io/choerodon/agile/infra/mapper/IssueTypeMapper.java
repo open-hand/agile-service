@@ -18,7 +18,10 @@ import java.util.Set;
 @Component
 public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
 
-    List<IssueTypeDTO> queryBySchemeId(@Param("organizationId") Long organizationId, @Param("schemeId") Long schemeId);
+    List<IssueTypeDTO> queryBySchemeId(@Param("organizationId") Long organizationId,
+                                       @Param("projectId") Long projectId,
+                                       @Param("schemeId") Long schemeId,
+                                       @Param("onlyEnabled") boolean onlyEnabled);
 
     List<IssueTypeDTO> queryByOrgId(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId);
 

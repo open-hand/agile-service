@@ -158,7 +158,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (issueTypeSchemeConfigs != null && !issueTypeSchemeConfigs.isEmpty()) {
             Map<String, IssueTypeSchemeVO> issueTypeSchemeMap = new HashMap<>(issueTypeSchemeConfigs.size());
             for (ProjectConfigDTO projectConfig : issueTypeSchemeConfigs) {
-                IssueTypeSchemeVO issueTypeSchemeVO = issueTypeSchemeService.queryById(organizationId, projectConfig.getSchemeId());
+                IssueTypeSchemeVO issueTypeSchemeVO = issueTypeSchemeService.queryById(organizationId, projectId, projectConfig.getSchemeId());
                 issueTypeSchemeMap.put(projectConfig.getApplyType(), issueTypeSchemeVO);
             }
             projectConfigDetailVO.setIssueTypeSchemeMap(issueTypeSchemeMap);
@@ -177,7 +177,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public List<IssueTypeVO> queryIssueTypesByProjectId(Long projectId, String applyType) {
+    public List<IssueTypeVO> queryIssueTypesByProjectId(Long projectId,
+                                                        String applyType,
+                                                        boolean onlyEnabled) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
@@ -186,7 +188,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         //获取问题类型方案
         if (projectConfig.getSchemeId() != null) {
             //根据方案配置表获取 问题类型
-            List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, projectConfig.getSchemeId());
+            List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, projectId, projectConfig.getSchemeId(), onlyEnabled);
             return modelMapper.map(issueTypes, new TypeToken<List<IssueTypeVO>>() {
             }.getType());
         } else {
@@ -195,7 +197,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public List<IssueTypeWithStateMachineIdVO> queryIssueTypesWithStateMachineIdByProjectId(Long projectId, String applyType) {
+    public List<IssueTypeWithStateMachineIdVO> queryIssueTypesWithStateMachineIdByProjectId(Long projectId,
+                                                                                            String applyType,
+                                                                                            Boolean onlyEnabled) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
@@ -209,7 +213,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             throw new CommonException(ERROR_STATEMACHINESCHEMEID_NULL);
         }
         //根据方案配置表获取 问题类型
-        List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, issueTypeSchemeId);
+        List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, projectId, issueTypeSchemeId, onlyEnabled);
         //根据方案配置表获取 状态机与问题类型的对应关系
         List<StatusMachineSchemeConfigVO> configs = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
         Map<Long, Long> map = configs.stream().collect(Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, StatusMachineSchemeConfigVO::getStateMachineId));
@@ -326,7 +330,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (itProjectConfig.getSchemeId() == null) {
             throw new CommonException("error.queryTransformsMapByProjectId.issueTypeSchemeId.null");
         }
-        List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, itProjectConfig.getSchemeId());
+        List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, projectId, itProjectConfig.getSchemeId(), false);
         // 史诗和普通项目群的特性类型没必要在查询转换
         List<Long> skipIssueTypeId = new ArrayList<>();
         skipIssueTypeId.add(0L);
