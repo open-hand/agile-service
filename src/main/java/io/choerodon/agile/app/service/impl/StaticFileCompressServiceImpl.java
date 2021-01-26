@@ -131,7 +131,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
 
     @Async
     @Override
-    public void unCompress(List<StaticFileCompressDTO> staticFileCompressList, Long projectId, Long organizationId, List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, Long issueId) {
+    public void unCompress(List<StaticFileCompressDTO> staticFileCompressList, Long projectId, Long organizationId, List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, String issueId) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         LOGGER.info("start uncompress");
         sendProcess(staticFileCompressHistoryList, userId, projectId, issueId);
@@ -315,7 +315,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         }
     }
 
-    private double updateProcess(List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, StaticFileOperationHistoryDTO staticFileCompressHistory, int toTalSize, long nowSize, double process, long issueId) {
+    private double updateProcess(List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, StaticFileOperationHistoryDTO staticFileCompressHistory, int toTalSize, long nowSize, double process, String issueId) {
         double nowProcess = new BigDecimal(nowSize).divide(new BigDecimal(toTalSize), 2, RoundingMode.HALF_UP).doubleValue();
         if (nowProcess - process < 0.05) {
             return process;
@@ -497,8 +497,8 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         return notIndex;
     }
 
-    private void sendProcess(List<StaticFileOperationHistoryDTO> staticFileOperationHistoryList, Long userId, Long projectId, Long issueId) {
-        String messageCode = STATIC_FILE_WEBSOCKET_KEY + "-" + projectId + "-" + EncryptionUtils.encrypt(issueId);
+    private void sendProcess(List<StaticFileOperationHistoryDTO> staticFileOperationHistoryList, Long userId, Long projectId, String issueId) {
+        String messageCode = STATIC_FILE_WEBSOCKET_KEY + "-" + projectId + "-" + issueId;
         List<StaticFileOperationHistorySocketVO> staticFileOperationHistorySocketList = modelMapper.map(staticFileOperationHistoryList, new TypeToken<List<StaticFileOperationHistorySocketVO>>() {
         }.getType());
         String message = null;

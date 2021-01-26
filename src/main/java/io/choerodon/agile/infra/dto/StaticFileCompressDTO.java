@@ -13,7 +13,7 @@ public class StaticFileCompressDTO {
     private String prefixPath;
     private String fileName;
     private String status;
-    private Long issueId;
+    private String issueId;
     private StaticFileOperationHistoryDTO staticFileCompressHistory;
 
     public Long getId() {
@@ -72,11 +72,11 @@ public class StaticFileCompressDTO {
         this.status = status;
     }
 
-    public Long getIssueId() {
+    public String getIssueId() {
         return issueId;
     }
 
-    public void setIssueId(Long issueId) {
+    public void setIssueId(String issueId) {
         this.issueId = issueId;
     }
 }
