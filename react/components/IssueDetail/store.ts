@@ -133,7 +133,7 @@ class Store {
       .org(this.organizationId)
       .getFieldAndValue(backlogId || this.selected, {
         schemeCode: 'agile_issue',
-        context: typeId || this.issue.issueTypeId as string,
+        issueTypeId: typeId || this.issue.issueTypeId as string,
         pageCode: 'agile_issue_edit',
       });
     this.setCustomFields(customFields);

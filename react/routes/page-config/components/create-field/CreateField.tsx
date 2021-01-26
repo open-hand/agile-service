@@ -124,8 +124,9 @@ function CreateField() {
     const extraConfig = isEdit ? current?.get('extraConfig') : undefined;
     try {
       if ((await formDataSet.submit()) !== false) {
-        syncIssueTypeArr.length > 0 && await pageConfigApi.syncDefaultValue(fieldId, String(syncIssueTypeArr),
+        syncIssueTypeArr.length > 0 && await pageConfigApi.syncDefaultValue(fieldId,
           {
+            issueTypeIds: syncIssueTypeArr,
             extraConfig,
             custom: true,
           });

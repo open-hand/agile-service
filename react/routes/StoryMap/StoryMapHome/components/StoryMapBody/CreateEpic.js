@@ -67,7 +67,7 @@ class CreateEpic extends Component {
         }
         const dto = {
           schemeCode: 'agile_issue',
-          context: res.issueTypeId,
+          issueTypeId: res.issueTypeId,
           pageCode: 'agile_issue_create',
         };
         onCreate({ ...res, epicName: value });

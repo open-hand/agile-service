@@ -284,10 +284,10 @@ class CreateIssue extends Component {
         const defaultType = this.getDefaultType(res);
         const param = {
           schemeCode: 'agile_issue',
-          context: defaultType.typeCode,
+          issueTypeId: defaultType.id,
           pageCode: 'agile_issue_create',
         };
-        this.loadDefaultTemplate(defaultType.typeCode);
+        this.loadDefaultTemplate(defaultType.id);
         fieldApi.getFields(param).then((fields) => {
           this.setState({
             fields,
@@ -573,7 +573,7 @@ class CreateIssue extends Component {
                             );
                             const param = {
                               schemeCode: 'agile_issue',
-                              context: typeCode,
+                              issueTypeId: id,
                               pageCode: 'agile_issue_create',
                             };
                             fieldApi.getFields(param).then((res) => {
@@ -585,7 +585,7 @@ class CreateIssue extends Component {
                                 fields: res,
                                 newIssueTypeCode: typeCode,
                               });
-                              this.loadDefaultTemplate(typeCode);
+                              this.loadDefaultTemplate(id);
                               this.setDefaultValue(res);
                             });
                           })}

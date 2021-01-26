@@ -60,7 +60,7 @@ class CreateEpicModal extends Component {
           .then((res) => {
             const dto = {
               schemeCode: 'agile_issue',
-              context: res.issueTypeId,
+              issueTypeId: res.issueTypeId,
               pageCode: 'agile_issue_create',
             };
             fieldApi.quickCreateDefault(res.issueId, dto);

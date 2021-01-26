@@ -4,7 +4,7 @@ import { sameProject } from '@/utils/detail';
 import Api from './Api';
 
 interface IFiled {
-  context: string, // "task"
+  issueTypeId: string, // "task"
   pageCode: string, // "agile_issue_create"
   schemeCode: string, // "agile_issue"
 }
