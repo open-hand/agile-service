@@ -6,6 +6,7 @@ import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { getOrganizationId } from '@/utils/common';
+import { pageConfigApiConfig } from '@/api';
 import { Store } from './useStore';
 
 interface Props {
@@ -166,13 +167,7 @@ const FormDataSet = ({
         valueField: 'id',
         textField: 'name',
         defaultValue: defaultContext,
-        lookupAxiosConfig: ({
-          method: 'get',
-          url: `/agile/v1/organizations/${getOrganizationId()}/object_scheme_field/configs/issue_types`,
-          params: {
-            organizationId: getOrganizationId(),
-          },
-        }),
+        lookupAxiosConfig: pageConfigApiConfig.loadTypesOnCreate(),
       },
       {
         name: 'defaultValue',

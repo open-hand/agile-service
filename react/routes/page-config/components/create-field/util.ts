@@ -53,10 +53,8 @@ function beforeSubmitProcessData(record: Record, { fieldOptions: propsFieldOptio
   const dateList = ['date', 'datetime', 'time'];
   const prefix = getMenuType() === 'project' ? 'pro_' : 'org_';
   const { name, check } = data;
-  const { issueTypeVOList } = data;
-  // if (context && context.length === formDataSet.getField('context')?.options?.length) {
-  //   context = ['global'];
-  // }
+  const { issueTypeVOList, context } = data;
+
   const transformTime = {} as { defaultValue: string };
   const dateFormat = ['YYYY-MM-DD', 'YYYY-MM-DD HH:mm:ss', 'HH:mm:ss'];
   const dateIndex = dateList.indexOf(data.fieldType);
@@ -65,8 +63,8 @@ function beforeSubmitProcessData(record: Record, { fieldOptions: propsFieldOptio
     transformTime.defaultValue = dateFormatVal.isValid() ? dateFormatVal.format(dateFormat[1]) : moment(obj.defaultValue, dateFormat).format(dateFormat[1]);
   }
   const postData = {
-    context: issueTypeVOList.map((t: any) => t.id),
-    issueTypeIds: issueTypeVOList.map((t: any) => t.id),
+    context: context || issueTypeVOList.map((t: any) => t.id),
+    issueTypeIds: context || issueTypeVOList.map((t: any) => t.id),
     code: `${prefix}${data.code}`,
     name,
     ...obj,

@@ -246,8 +246,8 @@
     </select>
 
     <select id="selectIssueTypeIdsByOptions" resultType="java.lang.Long">
-        SELECT id
-        FROM fd_issue_type
+        SELECT t1.id
+        FROM fd_issue_type t1
         WHERE 1=1
         <choose>
             <when test="projectId == 0">
@@ -270,12 +270,12 @@
             </otherwise>
         </choose>
         <if test="issueTypeCodes != null and issueTypeCodes.size > 0">
-            AND type_code IN
+            AND t1.type_code IN
               <foreach collection="issueTypeCodes" item="issueType" open="(" separator="," close=")">
                     #{issueType}
               </foreach>
         </if>
-        AND source = #{source}
+        AND t1.source = #{source}
     </select>
 
 </mapper>
