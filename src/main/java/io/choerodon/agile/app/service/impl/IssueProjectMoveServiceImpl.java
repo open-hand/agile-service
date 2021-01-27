@@ -266,37 +266,39 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             return;
         }
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
-        if (Objects.equals(issueDTO.getTypeCode(), issueTypeVO.getTypeCode())) {
+        if (Objects.equals(issueDTO.getIssueTypeId(), issueTypeVO.getId())) {
             return;
         }
         IssueConvertDTO issueConvertDTO = modelMapper.map(issueDTO, IssueConvertDTO.class);
         issueConvertDTO.setProjectId(issueDTO.getProjectId());
-        if ((Objects.equals(issueDTO.getTypeCode(), STORY_TYPE) || Objects.equals(issueDTO.getTypeCode(), TASK_TYPE))
-                && (!Objects.equals(issueTypeVO.getTypeCode(), STORY_TYPE) && !Objects.equals(issueTypeVO.getTypeCode(), TASK_TYPE))) {
-            issueMapper.updateSubBugRelateIssueId(issueDTO.getProjectId(), issueDTO.getIssueId());
-        }
-        if (issueTypeVO.getTypeCode().equals(ISSUE_EPIC)) {
-            issueConvertDTO.setRank(null);
-            issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
-            issueConvertDTO.setEpicName(jsonObject.getString(EPIC_NAME_FIELD));
-            List<LookupValueDTO> colorList = lookupValueMapper.queryLookupValueByCode(EPIC_COLOR_TYPE).getLookupValues();
-            issueConvertDTO.initializationColor(colorList);
-            issueConvertDTO.setRemainingTime(null);
-            issueConvertDTO.setEpicId(0L);
-            //排序编号
-            Integer sequence = issueMapper.queryMaxEpicSequenceByProject(issueConvertDTO.getProjectId());
-            issueConvertDTO.setEpicSequence(sequence == null ? 0 : sequence + 1);
-        } else if (issueDTO.getTypeCode().equals(ISSUE_EPIC)) {
-            // 如果之前类型是epic，会把该epic下的issue的epicId置为0
-            issueAccessDataService.batchUpdateIssueEpicId(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId());
-            issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
-            issueConvertDTO.setColorCode(null);
-            issueConvertDTO.setEpicName(null);
-            issueConvertDTO.setEpicSequence(null);
-            //rank值重置
-            calculationRank(issueConvertDTO.getProjectId(), issueConvertDTO);
-        } else {
-            issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
+        if (!Objects.equals(issueDTO.getTypeCode(), issueTypeVO.getTypeCode())) {
+            if ((Objects.equals(issueDTO.getTypeCode(), STORY_TYPE) || Objects.equals(issueDTO.getTypeCode(), TASK_TYPE))
+                    && (!Objects.equals(issueTypeVO.getTypeCode(), STORY_TYPE) && !Objects.equals(issueTypeVO.getTypeCode(), TASK_TYPE))) {
+                issueMapper.updateSubBugRelateIssueId(issueDTO.getProjectId(), issueDTO.getIssueId());
+            }
+            if (issueTypeVO.getTypeCode().equals(ISSUE_EPIC)) {
+                issueConvertDTO.setRank(null);
+                issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
+                issueConvertDTO.setEpicName(jsonObject.getString(EPIC_NAME_FIELD));
+                List<LookupValueDTO> colorList = lookupValueMapper.queryLookupValueByCode(EPIC_COLOR_TYPE).getLookupValues();
+                issueConvertDTO.initializationColor(colorList);
+                issueConvertDTO.setRemainingTime(null);
+                issueConvertDTO.setEpicId(0L);
+                //排序编号
+                Integer sequence = issueMapper.queryMaxEpicSequenceByProject(issueConvertDTO.getProjectId());
+                issueConvertDTO.setEpicSequence(sequence == null ? 0 : sequence + 1);
+            } else if (issueDTO.getTypeCode().equals(ISSUE_EPIC)) {
+                // 如果之前类型是epic，会把该epic下的issue的epicId置为0
+                issueAccessDataService.batchUpdateIssueEpicId(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId());
+                issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
+                issueConvertDTO.setColorCode(null);
+                issueConvertDTO.setEpicName(null);
+                issueConvertDTO.setEpicSequence(null);
+                //rank值重置
+                calculationRank(issueConvertDTO.getProjectId(), issueConvertDTO);
+            } else {
+                issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
+            }
         }
         issueConvertDTO.setIssueTypeId(issueTypeVO.getId());
         issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
@@ -343,7 +345,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         // 修改issue项目并指定合适的状态
         issueDTO.setApplyType(applyType);
         IssueDTO issue = buildIssue(projectVO.getId(), issueDTO, issueUpdateVO.getStatusId(), targetProjectVO.getId());
-        IssueDTO dto = issueAccessDataService.transferProject(issue);
+        issueAccessDataService.transferProject(issue);
         // 处理移动的时候同时改变issue的问题类型
         handlerChangeIssueType(issueId, jsonObject, issueTypeVO);
         // 更新issue的值
