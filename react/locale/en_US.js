@@ -1,6 +1,4 @@
 /*eslint-disable*/
-const pageDetail = {
-};
 
 const en_US = {
   refresh: 'Refresh',
@@ -243,7 +241,5 @@ const en_US = {
   'dragList.active': 'active',
   'dragList.placeholder': 'Please enter an option value',
   'dragList.placeholder.code': 'Please enter an option code',
-
-  ...pageDetail,
 };
 export default en_US;
