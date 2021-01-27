@@ -306,6 +306,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             BigDecimal sequence = issueTypeSchemeConfigMapper.selectMaxSequence(issueTypeSchemeId, organizationId);
             if (sequence == null) {
                 sequence = new BigDecimal(0);
+            } else {
+                sequence.add(new BigDecimal(1));
             }
             issueTypeSchemeConfig.setSequence(sequence);
             issueTypeSchemeConfigMapper.insert(issueTypeSchemeConfig);

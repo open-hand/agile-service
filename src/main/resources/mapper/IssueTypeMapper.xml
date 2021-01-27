@@ -22,7 +22,7 @@
         ifnull(t3.name, t1.name) as name,
         ifnull(t3.description, t1.description) as description,
         ifnull(t3.icon, t1.icon) as icon,
-        ifnull(t3.colour, t1.colour) as colour
+        ifnull(t3.colour, t1.colour) as colour,
         t2.sequence
         from fd_issue_type t1
         left join fd_issue_type_scheme_config t2 on t2.issue_type_id = t1.id
