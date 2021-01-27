@@ -4,10 +4,6 @@ import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueComponentValidator;
 import io.choerodon.agile.api.vo.business.IssueVO;
-import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.FieldCode;
-import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.ComponentForListDTO;
 import io.choerodon.agile.infra.dto.ComponentIssueRelDTO;
@@ -32,8 +28,6 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,9 +66,6 @@ public class IssueComponentServiceImpl implements IssueComponentService {
     private static final String MANAGER = "manager";
     @Autowired
     private ModelMapper modelMapper;
-
-    @Autowired
-    private ObjectSchemeFieldService objectSchemeFieldService;
 
     @Override
     public IssueComponentVO create(Long projectId, IssueComponentVO issueComponentVO) {
@@ -132,8 +123,8 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
     @Override
     public void delete(Long projectId, Long id, Long relateComponentId) {
-        //默认值校验
-        objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfMultiple(projectId, id, FieldCode.COMPONENT);
+//        //默认值校验
+//        objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfMultiple(projectId, id, FieldCode.COMPONENT);
         if (relateComponentId == null) {
             unRelateIssueWithComponent(projectId, id);
         } else {
