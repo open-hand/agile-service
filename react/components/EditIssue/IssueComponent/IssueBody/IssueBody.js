@@ -148,9 +148,7 @@ function IssueBody(props) {
             issueNum={issueNum}
             onOk={() => {
               store.setCreateBranchShow(false);
-              if (reloadIssue) {
-                reloadIssue(issueId);
-              }
+              store.refreshBranch();
             }}
             onCancel={() => store.setCreateBranchShow(false)}
             visible={createBranchShow}
@@ -165,9 +163,7 @@ function IssueBody(props) {
             issueNum={issueNum}
             onOk={() => {
               store.setLinkBranchShow(false);
-              if (reloadIssue) {
-                reloadIssue(issueId);
-              }
+              store.refreshBranch();
             }}
             onCancel={() => store.setLinkBranchShow(false)}
             visible={linkBranchShow}
