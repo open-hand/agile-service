@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import ResizeAble from '@/components/ResizeAble';
 import { find } from 'lodash';
-import { Tooltip } from 'choerodon-ui/pro';
+import { Tooltip, Icon } from 'choerodon-ui/pro';
 import EditIssue from '@/components/EditIssue';
 import './Container.less';
 import { useDetailContainerContext } from './context';
@@ -77,17 +77,22 @@ const Container: React.FC = () => {
         onResizeEnd={handleResizeEnd}
         onResize={handleResize}
       >
-        <div className={`${prefixCls}-resize`} ref={container}>
+        <div
+          className={`${prefixCls}-resize`}
+          ref={container}
+          style={{
+            paddingTop: routes.length > 1 ? 34 : 0,
+          }}
+        >
           {routes.length > 1 && (
-            <Tooltip title="返回" placement="top">
-              <div
-                role="none"
-                className={`${prefixCls}-back`}
-                onClick={pop}
-              >
-                <img src={Back} alt="" />
-              </div>
-            </Tooltip>
+            <div
+              role="none"
+              className={`${prefixCls}-back`}
+              onClick={pop}
+            >
+              <Icon type="navigate_before" />
+              返回上一层
+            </div>
           )}
           {match ? render() : null}
         </div>
