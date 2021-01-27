@@ -64,8 +64,12 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         List<ProjectVO> projectVOS = baseFeignClient.listProjectsByOrgId(organizationId).getBody();
         Map<Long, ProjectVO> projectMap = projectVOS.stream().collect(Collectors.toMap(ProjectVO::getId, x -> x));
         //查询组织下的所有问题类型
-        List<IssueTypeDTO> issueTypes = issueTypeMapper.queryByOrgId(organizationId, null);
-        Map<Long, IssueTypeDTO> issueTypeMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeDTO::getId, x -> x));
+        Map<Long, IssueTypeDTO> issueTypeMap = new HashMap<>();
+        issueTypeMapper.selectByOptions(organizationId, 0L, null)
+                .forEach(x -> {
+                    IssueTypeDTO dto = modelMapper.map(x, IssueTypeDTO.class);
+                    issueTypeMap.put(x.getId(), dto);
+                });
         //查询组织下的所有状态机
         List<StatusMachineVO> statusMachineVOS = stateMachineService.queryByOrgId(organizationId);
         Map<Long, StatusMachineVO> stateMachineVOMap = statusMachineVOS.stream().collect(Collectors.toMap(StatusMachineVO::getId, x -> x));

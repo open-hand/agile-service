@@ -3,7 +3,6 @@ package io.choerodon.agile.infra.mapper;
 import io.choerodon.agile.api.vo.IssueTypeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.infra.dto.IssueTypeDTO;
-import io.choerodon.agile.infra.dto.IssueTypeWithInfoDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -23,13 +22,6 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
                                        @Param("schemeId") Long schemeId,
                                        @Param("onlyEnabled") boolean onlyEnabled);
 
-    List<IssueTypeDTO> queryByOrgId(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId);
-
-
-    List<Long> selectIssueTypeIds(@Param("organizationId") Long organizationId, @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO);
-
-    List<IssueTypeWithInfoDTO> queryIssueTypeList(@Param("organizationId") Long organizationId, @Param("issueTypeIds") List<Long> issueTypeIds);
-
     /**
      * 根据id查询issue type
      *
@@ -37,14 +29,6 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      * @return
      */
     List<IssueTypeDTO> selectByOrganizationIds(@Param("organizationIds") Set<Long> organizationIds);
-
-    /**
-     * 根据typeCode查询issue type
-     *
-     * @param typeCode
-     * @return
-     */
-    List<IssueTypeDTO> selectByTypeCode(@Param("typeCode") String typeCode);
 
     /**
      * 根据条件查询issueType

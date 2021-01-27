@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.IssueTypeSearchVO;
+import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.StatusMachineNodeVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -762,9 +764,14 @@ public class FixDataServiceImpl implements FixDataService {
         }
         List<Long> issueTypeIds = issueTypeSchemeConfigDTOS.stream().map(IssueTypeSchemeConfigDTO::getIssueTypeId).collect(Collectors.toList());
         if ("agile".equals(applyType)) {
-            List<IssueTypeWithInfoDTO> issueTypeWithInfoDTOS = issueTypeMapper.queryIssueTypeList(projectVO.getOrganizationId(), issueTypeIds);
+            Long projectId = projectVO.getId();
+            Long organizationId = projectVO.getOrganizationId();
+            IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+            issueTypeSearchVO.setIssueTypeIds(issueTypeIds);
+            issueTypeSearchVO.setSource("system");
+            List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
             if (!CollectionUtils.isEmpty(issueTypeSchemeConfigDTOS)) {
-                issueTypeIds = issueTypeWithInfoDTOS.stream().filter(v -> !"feature".equals(v.getTypeCode())).map(IssueTypeWithInfoDTO::getId).collect(Collectors.toList());
+                issueTypeIds = issueTypes.stream().filter(v -> !"feature".equals(v.getTypeCode())).map(IssueTypeVO::getId).collect(Collectors.toList());
             }
         }
         for (Long issueTypeId : issueTypeIds) {

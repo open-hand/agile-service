@@ -645,7 +645,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if(CollectionUtils.isEmpty(issueTypeIds)){
             return new ArrayList<>();
         }
-        return modelMapper.map(issueTypeMapper.queryIssueTypeList(organizationId, issueTypeIds),new TypeToken<List<IssueTypeVO>>(){}.getType());
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        issueTypeSearchVO.setIssueTypeIds(issueTypeIds);
+        return issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
     }
 
     private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {
