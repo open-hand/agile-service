@@ -23,7 +23,7 @@ export default function useProjectIssueTypes(config?: ProjectIssueTypesConfig, o
       const typeCodes = Array.isArray(config?.typeCode) ? config?.typeCode : (config?.typeCode ? [config?.typeCode] : null);
       return typeCodes ? issueTypes.filter((type) => typeCodes.includes(type.typeCode)) : issueTypes;
     },
-    placeholderData: [] as IIssueType[],
+    initialData: [] as IIssueType[],
     ...options,
   });
 }
