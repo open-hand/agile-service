@@ -274,7 +274,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         Boolean isProgram = false;
         if (!ObjectUtils.isEmpty(projectId)) {
             ProjectVO body = ConvertUtil.queryProjectWithoutAgile(projectId);
-            if (!ObjectUtils.isEmpty(body) && Objects.equals(body.getCategory(),"PROGRAM")) {
+            if (!ObjectUtils.isEmpty(body) && ProjectCategory.checkContainProjectCategory(body.getCategories(),ProjectCategory.MODULE_PROGRAM)) {
                 isProgram = true;
                 if(agilePluginService != null){
                     issueTypes = agilePluginService.addProgramIssueType();

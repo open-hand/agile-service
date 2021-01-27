@@ -2772,7 +2772,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         .stream()
                         .filter(v -> ((!Objects.isNull(type) && Objects.equals(type, "myStarBeacon"))
                                 ? (Boolean.TRUE.equals(v.getEnabled()))
-                                : (!Objects.equals(v.getCategory(),"PROGRAM") && Boolean.TRUE.equals(v.getEnabled()))))
+                                : (!ProjectCategory.checkContainProjectCategory(v.getCategories(),ProjectCategory.MODULE_PROGRAM) && Boolean.TRUE.equals(v.getEnabled()))))
                         .forEach(obj -> {
                             projectIds.add(obj.getId());
                             projects.add(obj);

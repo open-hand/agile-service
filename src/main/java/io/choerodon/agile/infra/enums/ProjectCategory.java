@@ -1,9 +1,13 @@
 package io.choerodon.agile.infra.enums;
 
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.core.exception.CommonException;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 项目类别
@@ -63,6 +67,13 @@ public class ProjectCategory {
         } else {
             return null;
         }
+    }
+    public static Boolean checkContainProjectCategory(List<ProjectCategoryDTO> categories, String category){
+        if (CollectionUtils.isEmpty(categories)) {
+            throw new CommonException("error.categories.is.null");
+        }
+        Set<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
+        return codes.contains(category);
     }
 
     public static Boolean consumeProjectCreatEvent(Set<String> codes) {

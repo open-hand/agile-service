@@ -39,6 +39,4 @@ public interface IssueComponentService {
     IssueComponentDTO updateBase(IssueComponentDTO issueComponentDTO);
 
     void deleteBase(Long id);
-
-    void moveComponent(Long projectId, MoveComponentVO moveComponentVO);
 }
