@@ -1640,4 +1640,23 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         });
     }
 
+    @Override
+    public String getIssueSummaryDefaultValue(Long organizationId, Long projectId, Long issueTypeId) {
+        ObjectSchemeFieldDTO summaryFieldDTO = new ObjectSchemeFieldDTO();
+        summaryFieldDTO.setCode("summary");
+        summaryFieldDTO.setSystem(true);
+        summaryFieldDTO.setSchemeCode("agile_issue");
+        summaryFieldDTO = objectSchemeFieldMapper.selectOne(summaryFieldDTO);
+        if (Objects.isNull(summaryFieldDTO)) {
+            throw new CommonException("error.summary.field.not.exist");
+        }
+
+        List<ObjectSchemeFieldExtendDTO> extendDTO =
+                objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Collections.singletonList(issueTypeId), organizationId, summaryFieldDTO.getId(), projectId);
+        if (!CollectionUtils.isEmpty(extendDTO)) {
+            return extendDTO.get(0).getDefaultValue();
+        }
+        return null;
+    }
+
 }
