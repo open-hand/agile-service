@@ -37,7 +37,8 @@ public class IssueComponentVO {
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
 
-    private String rank;
+    @ApiModelProperty(value = "模块排序")
+    private Integer sequence;
 
     public void setComponentId(Long componentId) {
         this.componentId = componentId;
@@ -95,16 +96,17 @@ public class IssueComponentVO {
         return objectVersionNumber;
     }
 
+    public Integer getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
+    }
+
     @Override
     public String toString() {
         return StringUtil.getToString(this);
     }
 
-    public String getRank() {
-        return rank;
-    }
-
-    public void setRank(String rank) {
-        this.rank = rank;
-    }
 }
