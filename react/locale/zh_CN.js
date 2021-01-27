@@ -1,21 +1,4 @@
-const docServer = 'http://v0-16.choerodon.io/zh/docs';
-/*eslint-disable*/
-const pageDetail = {
-  'branch.head': '项目\"{name}\"的分支管理',
-  'branch.createHead': '在应用\"{name}\"中创建分支',
-  'branch.createDes': '采用Gitflow工作流模式，请在下面选择分支类型，并填写issue号或版本号，即可创建分支。',
-  'branch.mergeDev': '是否将分支\"{name}\"合并到develop分支？',
-  'branch.noCommitDev': '是否将分支\"{name}\"分支无提交，是否删除？',
-  'branch.noCommit': '是否将分支\"{name}\"分支无提交，不生成版本号，是否删除？',
-  'branch.mergeDevMas': '是否将分支\"{name}\"合并到master，develop分支，并以为\"{version}\"版本号？',
-  'branch.description': '分支是将您的工作从开发主线上分离开来，以免影响开发主线。平台采用gitflow分支模型，您可以在此创建分支，然后将代码拉至本地开发后提交代码，再结束分支，平台会为您合并代码并触发相应的持续集成流水线。',
-  'branch.createTip': '采用gitflow分支模型，可创建feature、release、hotfix等分支，结束分支时自动触发分支合并和特有的持续集成流水线。',
-  'branch.link': `${docServer}/user-guide/development-pipeline/branch-management/`,
-  'branch.editDes': '采用Git flow工作流模式，自动创建分支模式所特有的流水线，持续交付过程中对feature、release、hotfix等分支进行管理。',
-  'branch.editHead': '修改分支\"{name}\"完成的问题',
-  'branch.detailHead': '分支\"{name}\"完成的问题',
-};
-
+/* eslint-disable camelcase */
 const zh_CN = {
   save: '保存',
   cancel: '取消',
@@ -40,37 +23,37 @@ const zh_CN = {
   deleteFailed: '删除失败',
   disable: '停用',
   enable: '启用',
-  system:'系统',
-  project:'项目',
-  organization:'组织',
+  system: '系统',
+  project: '项目',
+  organization: '组织',
 
-  "issue.detail": '详情',
-  "issue.des": '描述',
-  "issue.attachment": '附件',
-  "issue.doc": '知识',
-  "issue.commit": '评论',
-  "issue.log": '工作日志',
-  "issue.data_log": '操作历史',
-  "issue.sub_task": '子任务',
-  "issue.bug": '缺陷',
-  "issue.link_task": '问题链接',
-  "issue.link_test": '测试用例',
-  "issue.branch": '开发',
-  "issue.branch.create": '创建分支',
-  "issue.commit.create": '添加评论',
-  "issue.log.create": '登记工作',
+  'issue.detail': '详情',
+  'issue.des': '描述',
+  'issue.attachment': '附件',
+  'issue.doc': '知识',
+  'issue.commit': '评论',
+  'issue.log': '工作日志',
+  'issue.data_log': '操作历史',
+  'issue.sub_task': '子任务',
+  'issue.bug': '缺陷',
+  'issue.link_task': '问题链接',
+  'issue.link_test': '测试用例',
+  'issue.branch': '开发',
+  'issue.branch.create': '创建分支',
+  'issue.commit.create': '添加评论',
+  'issue.log.create': '登记工作',
 
-  "issue_link.create": '创建链接',
-  "issue_link.create.issue_link": '创建问题链接',
-  "issue_link.edit.issue_link": '修改问题链接',
-  "issue_link.name": '名称',
-  "issue_link.outWard": '链出描述',
-  "issue_link.inWard": '链入描述',
-  "issue_link.checkName.repet":'问题链接名称重复',
-  "issue_link.delete.only":'删除链接{name}',
-  "issue_link.delete.link.other":'删除链接，相关问题关联到其他链接',
-  "issue_link.other":'其他链接',
-  "issue_link.msg":'将会从所有相关的任务中删除此链接，相关的问题可以选择关联到其他链接，或者不关联。',
+  'issue_link.create': '创建链接',
+  'issue_link.create.issue_link': '创建问题链接',
+  'issue_link.edit.issue_link': '修改问题链接',
+  'issue_link.name': '名称',
+  'issue_link.outWard': '链出描述',
+  'issue_link.inWard': '链入描述',
+  'issue_link.checkName.repet': '问题链接名称重复',
+  'issue_link.delete.only': '删除链接{name}',
+  'issue_link.delete.link.other': '删除链接，相关问题关联到其他链接',
+  'issue_link.other': '其他链接',
+  'issue_link.msg': '将会从所有相关的任务中删除此链接，相关的问题可以选择关联到其他链接，或者不关联。',
 
   'field.create': '创建字段',
   'field.edit': '编辑自定义字段',
@@ -95,28 +78,28 @@ const zh_CN = {
   'field.member': '成员选择',
   'field.default': '默认值',
   'field.default.sync': '将默认值同步到',
-  'defaultValue.sync':'同步默认值',
+  'defaultValue.sync': '同步默认值',
   'field.decimal': '小数输入',
   'field.urlError': 'URL格式错误',
   'field.useCurrentDate': '使用当前日期和时间为默认值',
   'field.useCurrentTime': '使用当前时间为默认值',
   'field.dragList.tips': '请为该字段添加值，你可以通过上下 拖拽 改变显示顺序。',
   'field.value.null': '请先设置字段值列表',
-  'field': '字段',
+  field: '字段',
   'field.origin': '字段来源',
   'field.range': '字段范围',
   'field.type': '字段类型',
   'field.required': '必填项',
-  'field.delete.title':'删除自定义字段：{name}',
-  'field.delete.msg':'注意：将会从所有使用的问题中删除此字段，并且字段数据会清空。你确定要删除此字段吗？',
-  'field.required.msg':'必填字段请设置默认值！',
+  'field.delete.title': '删除自定义字段：{name}',
+  'field.delete.msg': '注意：将会从所有使用的问题中删除此字段，并且字段数据会清空。你确定要删除此字段吗？',
+  'field.required.msg': '必填字段请设置默认值！',
 
   'dragList.invalid': '禁用',
   'dragList.active': '启用',
   'dragList.placeholder': '选项值',
   'dragList.placeholder.code': '选项编码',
 
-  "learnmore": "了解更多",
+  learnmore: '了解更多',
   'branch.branch': '分支',
   'branch.tag': '标记',
   'branch.create': '创建分支',
@@ -188,7 +171,6 @@ const zh_CN = {
   'issueType.name.check.exist': '问题类型名称已存在。',
   'error.issueType.update': '更新失败，请刷新后重试。',
 
-
   // 问题类型合并
   'relateMerge.title': '问题类型合并',
   'relateMerge.project': '项目',
@@ -206,7 +188,7 @@ const zh_CN = {
   'relateMergeUnMatch.subTitle': '步骤3-合并问题类型的状态',
   'relateMergeUnMatch.des': '你需要合并的问题类型中部分状态无法适用于目标问题类型，所以你必须选择一个目标问题类型中可用的状态进行过度。',
 
-  //状态机方案
+  // 状态机方案
   'stateMachineScheme.title': '状态机方案',
   'stateMachineScheme.create': '添加状态机方案',
   'stateMachineScheme.name': '名称',
@@ -273,7 +255,7 @@ const zh_CN = {
   'priority.disable.title': '停用优先级',
   'priority.disable.notice': '注意：停用后你的问题将无法选择到此优先级。',
 
-  //状态
+  // 状态
   'state.name': '名称',
   'state.des': '描述',
   'state.stage': '阶段',
@@ -287,7 +269,7 @@ const zh_CN = {
   'state.tips': '帮助识别问题所处的生命周期的某个阶段',
   'state.tips2': '开始处理问题时，从 #待处理# 到 #处理中# ，随后，当完成所有工作时，进入到 #完成# 阶段。',
 
-  //状态机
+  // 状态机
   'stateMachine.name': '名称',
   'stateMachine.related': '关联方案',
   'stateMachine.title': '状态机',
@@ -349,6 +331,5 @@ const zh_CN = {
   'stateMachineScheme.tip': '状态机方案指的是，将状态机和问题类型组合形成并关联项目的方案。',
   'stateMachine.publish.des': '当前状态机草案无法删除，因为您的修改中移除了关联问题的状态，需要将问题转换到其他状态才能继续发布。',
 
-  ...pageDetail,
 };
-export default zh_CN;  
+export default zh_CN;

@@ -252,4 +252,13 @@ public interface ObjectSchemeFieldService {
      * @param view
      */
     void setDefaultValueObjsOfSingle(Map<Long, Object> valueMap, PageFieldViewVO view);
+
+    /**
+     * 快速创建issue根据issueTypeId获取概要字段默认值
+     * @param organizationId
+     * @param projectId
+     * @param issueTypeId
+     * @return
+     */
+    String getIssueSummaryDefaultValue(Long organizationId, Long projectId, Long issueTypeId);
 }

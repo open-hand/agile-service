@@ -146,7 +146,7 @@ class CreateIssue extends Component {
   // eslint-disable-next-line react/destructuring-assignment
   getDefaultType = (issueTypes = this.state.originIssueTypes) => {
     const { defaultTypeCode } = this.props;
-    return find(issueTypes, { typeCode: defaultTypeCode });
+    return find(issueTypes, { typeCode: defaultTypeCode }) || issueTypes[0];
   }
 
   handleSave = (data, fileList) => {
@@ -912,7 +912,7 @@ class CreateIssue extends Component {
       case 'component':
         return (
           ['sub_task'].includes(newIssueTypeCode) ? null : (
-            <FormItem label="模块">
+            <FormItem label="模块" className="c7nagile-line">
               {getFieldDecorator('componentIssueRel', {
                 rules: [{ transform: (value) => (value ? value.toString() : value) },
                   { required: field.required, message: '请选择模块' },

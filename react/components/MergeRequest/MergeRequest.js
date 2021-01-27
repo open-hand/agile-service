@@ -1,17 +1,14 @@
 import React, { Component } from 'react';
 import {
-  Modal, Table, Tooltip, Popover, Button, Icon,
+  Table, Tooltip, Popover, Button, Icon,
 } from 'choerodon-ui';
 import {
-  stores, Content, Choerodon,
+  Choerodon,
 } from '@choerodon/boot';
 import TimeAgo from 'timeago-react';
 import { devOpsApi } from '@/api';
-import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import UserHead from '../UserHead';
 
-const { AppState } = stores;
-const { Sidebar } = Modal;
 const STATUS_SHOW = {
   opened: '开放',
   merged: '已合并',
@@ -54,20 +51,22 @@ class MergeRequest extends Component {
   }
 
   render() {
-    const {
-      issueId, issueNum, num, visible, onCancel,
-    } = this.props;
     const column = [
       {
         title: '编码',
         dataIndex: 'viewId',
-        width: '10%',
-        render: (id) => (
+        width: 200,
+        fixed: 'left',
+        render: (id, record) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={id}>
-              <p style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
-              }}
+              <p
+                role="none"
+                className="c7n-agile-table-cell-click"
+                style={{
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
+                }}
+                onClick={this.createMergeRequest.bind(this, record)}
               >
                 #
                 {' '}
@@ -80,7 +79,7 @@ class MergeRequest extends Component {
       {
         title: '名称',
         dataIndex: 'title',
-        width: '35%',
+        width: 200,
         render: (title) => (
           <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={title}>
@@ -97,7 +96,7 @@ class MergeRequest extends Component {
       {
         title: '状态',
         dataIndex: 'state',
-        width: '10%',
+        width: 100,
         render: (state) => (
           <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
             {['opened', 'merged', 'closed'].includes(state) ? STATUS_SHOW[state] : ''}
@@ -107,7 +106,7 @@ class MergeRequest extends Component {
       {
         title: '审查人',
         dataIndex: 'authorId',
-        width: '20%',
+        width: 200,
         render: (authorId, record) => (
           <div style={{
             width: '100%', overflow: 'hidden', flexShrink: 0, justifyContent: 'flex-start',
@@ -126,7 +125,7 @@ class MergeRequest extends Component {
       {
         title: '更新时间',
         dataIndex: 'updatedAt',
-        width: '15%',
+        width: 100,
         render: (updatedAt) => (
           <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
             <Popover
@@ -142,49 +141,17 @@ class MergeRequest extends Component {
           </div>
         ),
       },
-      {
-        title: '',
-        dataIndex: 'gitlabMergeRequestId',
-        width: '10%',
-        render: (gitlabMergeRequestId, record) => (
-          <div style={{ flexShrink: 0 }}>
-            <Popover placement="bottom" mouseEnterDelay={0.5} content={<div><span>合并请求</span></div>}>
-              <Button shape="circle" onClick={this.createMergeRequest.bind(this, record)}>
-                <Icon type="device_hub" />
-              </Button>
-            </Popover>
-          </div>
-        ),
-      },
     ];
     return (
-      <Sidebar
-        maskClosable
-        className="c7n-commits"
-        title="关联合并请求"
-        visible={visible || false}
-        okText="关闭"
-        okCancel={false}
-        onOk={onCancel}
-        width={MODAL_WIDTH.middle}
-      >
-        <Content
-          style={{
-            paddingLeft: 0,
-            paddingRight: 0,
-            paddingTop: 0,
-          }}
-        >
-          <Table
-            filterBar={false}
-            rowKey={(record) => record.id}
-            columns={column}
-            dataSource={this.state.mergeRequests}
-            loading={this.state.loading}
-            scroll={{ x: true }}
-          />
-        </Content>
-      </Sidebar>
+      <Table
+        pagination={false}
+        filterBar={false}
+        rowKey={(record) => record.id}
+        columns={column}
+        dataSource={this.state.mergeRequests}
+        loading={this.state.loading}
+        scroll={{ x: true }}
+      />
     );
   }
 }

@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.StatusMachineSchemeConfigVO;
 import io.choerodon.agile.api.vo.StateMachineSchemeVO;
 import io.choerodon.agile.api.vo.event.StateMachineSchemeChangeItem;
@@ -149,4 +150,6 @@ public interface StateMachineSchemeConfigService {
     void copyDraftToDeploy(Boolean isDeleteOldDeploy, Long organizationId, Long schemeId);
 
     Long queryStatusMachineBySchemeIdAndIssueType(Long organizationId, Long stateMachineSchemeId, Long issueTypeId);
+
+    Long initStatusMachineAndSchemeConfig(Long organizationId, String name, Long schemeId, Long issueTypeId, ProjectVO projectVO, String applyType);
 }

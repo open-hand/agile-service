@@ -26,9 +26,9 @@ databaseChangeLog(logicalFilePath:'agile_issue_component.groovyoovy') {
         }
     }
 
-    changeSet(id:  '2021-01-18-agile-issue-component-add-column', author: 'ztxemail@163.com') {
+    changeSet(id:  '2021-01-27-agile-issue-component-add-column', author: 'ztxemail@163.com') {
         addColumn(tableName: 'agile_issue_component') {
-            column(name: 'rank', type: 'VARCHAR(255)', remarks: '模块排序')
+            column(name: 'sequence', type: 'INTEGER UNSIGNED',  remarks: '模块排序')
         }
     }
 }

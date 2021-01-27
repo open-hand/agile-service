@@ -103,7 +103,7 @@ public class IssueComponentController {
                                                                     @ApiParam(value = "查询参数")
                                                                      @RequestBody(required = false) SearchVO searchVO,
                                                                     @ApiParam(value = "分页信息", required = true)
-                                                                     @SortDefault(sort = {"rank","component_id"}, direction = Sort.Direction.DESC)
+                                                                     @SortDefault(sort = {"sequence","component_id"}, direction = Sort.Direction.DESC)
                                                                      @ApiIgnore PageRequest pageRequest) {
         return Optional.ofNullable(issueComponentService.queryComponentByProjectId(projectId, componentId, noIssueTest, searchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -147,15 +147,5 @@ public class IssueComponentController {
         return Optional.ofNullable(issueComponentService.checkComponentName(projectId, componentName))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.checkName.get"));
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("排序")
-    @PostMapping(value = "/move")
-    public ResponseEntity moveComponent(@ApiParam(value = "项目id", required = true)
-                                                      @PathVariable(name = "project_id") Long projectId,
-                                                 @RequestBody MoveComponentVO moveComponentVO) {
-        issueComponentService.moveComponent(projectId, moveComponentVO);
-        return new ResponseEntity(HttpStatus.OK);
     }
 }
