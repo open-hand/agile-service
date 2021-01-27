@@ -152,10 +152,10 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (CollectionUtils.isEmpty(statusLinkageDTOS)) {
             return true;
         }
-        Map<String, StatusLinkageDTO> statusLinkageDTOMap = statusLinkageDTOS.stream().collect(Collectors.toMap(StatusLinkageDTO::getParentIssueTypeCode, Function.identity()));
+        Map<Long, StatusLinkageDTO> statusLinkageDTOMap = statusLinkageDTOS.stream().collect(Collectors.toMap(StatusLinkageDTO::getParentIssueTypeId, Function.identity()));
         Long parentIssueId = getParentIssueId(issueDTO);
         IssueDTO parentIssue = issueMapper.selectByPrimaryKey(parentIssueId);
-        StatusLinkageDTO statusLinkageDTO = statusLinkageDTOMap.get(parentIssue.getTypeCode());
+        StatusLinkageDTO statusLinkageDTO = statusLinkageDTOMap.get(parentIssue.getIssueId());
         if (ObjectUtils.isEmpty(statusLinkageDTO)) {
             return true;
         }

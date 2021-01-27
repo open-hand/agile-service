@@ -28,7 +28,7 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      * @param organizationIds
      * @return
      */
-    List<IssueTypeDTO> selectByOrganizationIds(@Param("organizationIds") Set<Long> organizationIds);
+    List<IssueTypeDTO> selectSystemIssueTypeByOrganizationIds(@Param("organizationIds") Set<Long> organizationIds);
 
     /**
      * 根据条件查询issueType

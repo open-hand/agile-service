@@ -57,12 +57,14 @@
         order by t2.sequence
     </select>
 
-    <select id="selectByOrganizationIds" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+    <select id="selectSystemIssueTypeByOrganizationIds" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
         select * from fd_issue_type
         where organization_id in
         <foreach collection="organizationIds" item="organizationId" open="(" close=")" separator=",">
             #{organizationId}
         </foreach>
+        and source = 'system'
+        and project_id = 0
     </select>
 
     <select id="selectByOptions" resultType="io.choerodon.agile.api.vo.IssueTypeVO">
