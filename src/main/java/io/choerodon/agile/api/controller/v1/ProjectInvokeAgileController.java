@@ -3,12 +3,10 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.IssueLinkVO;
 import io.choerodon.agile.api.vo.PageFieldViewParamVO;
 import io.choerodon.agile.api.vo.PageFieldViewVO;
+import io.choerodon.agile.api.vo.StaticFileHeaderVO;
 import io.choerodon.agile.api.vo.business.DataLogVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
-import io.choerodon.agile.app.service.DataLogService;
-import io.choerodon.agile.app.service.IssueLinkService;
-import io.choerodon.agile.app.service.IssueService;
-import io.choerodon.agile.app.service.PageFieldService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -42,6 +40,9 @@ public class ProjectInvokeAgileController {
 
     @Autowired
     private IssueLinkService issueLinkService;
+
+    @Autowired
+    private StaticFileService staticFileService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询单个issue")
@@ -105,5 +106,19 @@ public class ProjectInvokeAgileController {
         return Optional.ofNullable(issueLinkService.listIssueLinkByIssueId(issueId, instanceProjectId, noIssueTest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLink.listIssueLinkByIssueId"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("获取问题下关联的静态文件列表")
+    @GetMapping(value = "/related_static_file/{issueId}")
+    public ResponseEntity<List<StaticFileHeaderVO>> getFileListByIssue(@ApiParam(value = "项目id", required = true)
+                                                                       @PathVariable(name = "project_id") Long projectId,
+                                                                       @ApiParam(value = "问题id", required = true)
+                                                                       @PathVariable @Encrypt Long issueId,
+                                                                       @ApiParam(value = "所属项目id", required = true)
+                                                                       @RequestParam Long instanceProjectId) {
+        return Optional.ofNullable(staticFileService.selectFileListByIssue(instanceProjectId, issueId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.attachment.select.issue.list"));
     }
 }
