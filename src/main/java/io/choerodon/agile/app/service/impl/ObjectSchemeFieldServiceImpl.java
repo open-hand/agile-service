@@ -746,7 +746,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<ObjectSchemeFieldExtendDTO> intersection = new ArrayList<>();
         List<ObjectSchemeFieldExtendDTO> deleteList = new ArrayList<>();
         Set<Long> insertSet = new HashSet<>();
-        filterByIssueType(intersection, deleteList, insertSet, issueTypeIdList, field);
+        filterByIssueTypeId(intersection, deleteList, insertSet, issueTypeIdList, field);
 
         dealWithExtendFields(organizationId, projectId, fieldId, deleteList, insertSet, issueTypeMap, defaultValue, extraConfig);
     }
@@ -913,7 +913,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return objectSchemeFieldMapper.selectOne(search);
     }
 
-    private void filterByIssueType(List<ObjectSchemeFieldExtendDTO> intersection,
+    private void filterByIssueTypeId(List<ObjectSchemeFieldExtendDTO> intersection,
                                    List<ObjectSchemeFieldExtendDTO> deleteList,
                                    Set<Long> insertSet,
                                    List<Long> issueTypeIdList,
@@ -925,17 +925,17 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 intersection.add(e);
             }
         });
-        Set<Long> intersectionIssueTypes =
+        Set<Long> intersectionIssueTypeIds =
                 intersection.stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toSet());
         //删除的类型
         extendList.forEach(e -> {
-            if (!intersectionIssueTypes.contains(e.getIssueType())) {
+            if (!intersectionIssueTypeIds.contains(e.getIssueTypeId())) {
                 deleteList.add(e);
             }
         });
         //插入的类型
         issueTypeIdList.forEach(c -> {
-            if (!intersectionIssueTypes.contains(c)) {
+            if (!intersectionIssueTypeIds.contains(c)) {
                 insertSet.add(c);
             }
         });
@@ -1611,34 +1611,34 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return objectSchemeFieldMapper.selectOne(search);
     }
 
-    @Override
-    public void checkObjectSchemeFieldDefaultValueOfSingle(Long projectId, Long id, String fieldCode) {
-        ObjectSchemeFieldDTO fieldDTO = getObjectSchemeFieldDTO(fieldCode);
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
-        objectSchemeFieldExtendList.forEach(f -> {
-            String defaultValue = f.getDefaultValue();
-            if (!Objects.isNull(defaultValue) && Objects.equals(defaultValue, id.toString())) {
-                throw new CommonException("this.is.default.value");
-            }
-        });
-    }
-
-    @Override
-    public void checkObjectSchemeFieldDefaultValueOfMultiple(Long projectId, Long id, String fieldCode) {
-        ObjectSchemeFieldDTO fieldDTO = getObjectSchemeFieldDTO(fieldCode);
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
-        objectSchemeFieldExtendList.forEach(f -> {
-            String defaultValue = f.getDefaultValue();
-            if (!Objects.isNull(defaultValue) && !Objects.equals(defaultValue, "")) {
-                List<String> componentIds = new ArrayList<>(Arrays.asList(defaultValue.split(",")));
-                if (componentIds.contains(id.toString())) {
-                    throw new CommonException("this.is.default.value");
-                }
-            }
-        });
-    }
+//    @Override
+//    public void checkObjectSchemeFieldDefaultValueOfSingle(Long projectId, Long id, String fieldCode) {
+//        ObjectSchemeFieldDTO fieldDTO = getObjectSchemeFieldDTO(fieldCode);
+//        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+//        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
+//        objectSchemeFieldExtendList.forEach(f -> {
+//            String defaultValue = f.getDefaultValue();
+//            if (!Objects.isNull(defaultValue) && Objects.equals(defaultValue, id.toString())) {
+//                throw new CommonException("this.is.default.value");
+//            }
+//        });
+//    }
+//
+//    @Override
+//    public void checkObjectSchemeFieldDefaultValueOfMultiple(Long projectId, Long id, String fieldCode) {
+//        ObjectSchemeFieldDTO fieldDTO = getObjectSchemeFieldDTO(fieldCode);
+//        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+//        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
+//        objectSchemeFieldExtendList.forEach(f -> {
+//            String defaultValue = f.getDefaultValue();
+//            if (!Objects.isNull(defaultValue) && !Objects.equals(defaultValue, "")) {
+//                List<String> componentIds = new ArrayList<>(Arrays.asList(defaultValue.split(",")));
+//                if (componentIds.contains(id.toString())) {
+//                    throw new CommonException("this.is.default.value");
+//                }
+//            }
+//        });
+//    }
 
     @Override
     public String getIssueSummaryDefaultValue(Long organizationId, Long projectId, Long issueTypeId) {

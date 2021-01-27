@@ -222,21 +222,21 @@ public interface ObjectSchemeFieldService {
      */
     ObjectSchemeFieldDTO getObjectSchemeFieldDTO(String fieldCode);
 
-    /**
-     * 单选类型系统字段的默认值校验
-     * @param projectId
-     * @param id
-     * @param fieldCode
-     */
-    void checkObjectSchemeFieldDefaultValueOfSingle(Long projectId, Long id, String fieldCode);
-
-    /**
-     * 多选类型系统字段的默认值校验
-     * @param projectId
-     * @param id
-     * @param fieldCode
-     */
-    void checkObjectSchemeFieldDefaultValueOfMultiple(Long projectId, Long id, String fieldCode);
+//    /**
+//     * 单选类型系统字段的默认值校验
+//     * @param projectId
+//     * @param id
+//     * @param fieldCode
+//     */
+//    void checkObjectSchemeFieldDefaultValueOfSingle(Long projectId, Long id, String fieldCode);
+//
+//    /**
+//     * 多选类型系统字段的默认值校验
+//     * @param projectId
+//     * @param id
+//     * @param fieldCode
+//     */
+//    void checkObjectSchemeFieldDefaultValueOfMultiple(Long projectId, Long id, String fieldCode);
 
     /**
      * 多选类型系统字段设置默认值对象
