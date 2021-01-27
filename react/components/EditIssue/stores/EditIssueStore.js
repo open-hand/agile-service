@@ -274,5 +274,11 @@ class EditIssueStore {
       });
     }
   }
+
+  refreshBranch=() => {}
+
+  setRefreshBranch(refreshBranch) {
+    this.refreshBranch = refreshBranch;
+  }
 }
 export default EditIssueStore;
