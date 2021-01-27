@@ -117,44 +117,20 @@ public class IssueTypeController extends BaseController {
         return ResponseEntity.ok(issueTypeService.usageDetail(organizationId, issueTypeId, pageRequest));
     }
 
-
-//    @Permission(level = ResourceLevel.ORGANIZATION)
-//    @ApiOperation(value = "校验问题类型是否可以删除")
-//    @GetMapping(value = "/check_delete/{id}")
-//    public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt Long issueTypeId) {
-//        return new ResponseEntity<>(issueTypeService.checkDelete(organizationId, issueTypeId), HttpStatus.OK);
-//    }
-
-
-//    @Permission(level = ResourceLevel.ORGANIZATION)
-//    @ApiOperation("获取问题类型列表")
-//    @GetMapping(value = "/types")
-//    public ResponseEntity<List<IssueTypeVO>> queryByOrgId(@PathVariable("organization_id") Long organizationId) {
-//        return Optional.ofNullable(issueTypeService.queryByOrgId(organizationId))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException("error.issue.queryByOrgId"));
-//    }
-
-//    @Permission(level = ResourceLevel.ORGANIZATION)
-//    @ApiOperation(value = "查询所有问题类型及关联的方案")
-//    @GetMapping(value = "/query_issue_type_with_state_machine")
-//    public ResponseEntity<List<IssueTypeVO>> queryIssueTypeByStateMachineSchemeId(@PathVariable("organization_id") Long organizationId,
-//                                                                                  @RequestParam("schemeId") @Encrypt Long schemeId) {
-//        return new ResponseEntity<>(issueTypeService.queryIssueTypeByStateMachineSchemeId(organizationId, schemeId), HttpStatus.OK);
-//    }
-
-//    @Permission(level = ResourceLevel.ORGANIZATION)
-//    @ApiOperation(value = "根据组织id查询类型，map")
-//    @GetMapping(value = "/type_map")
-//    public ResponseEntity<Map<Long, IssueTypeVO>> listIssueTypeMap(@PathVariable("organization_id") Long organizationId) {
-//        return new ResponseEntity<>(issueTypeService.listIssueTypeMap(organizationId), HttpStatus.OK);
-//    }
-
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "迁移组织层问题类型数据")
     @PostMapping(value = "/init_data")
     public ResponseEntity<Map<Long, Map<String, Long>>> initIssueTypeData(@PathVariable("organization_id") Long organizationId,
                                                                           @RequestBody List<Long> orgIds) {
         return new ResponseEntity<>(issueTypeService.initIssueTypeData(organizationId, orgIds), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "校验问题类型名字是否未被使用")
+    @GetMapping(value = "/check_icon")
+    public ResponseEntity<Boolean> checkIcon(@PathVariable("organization_id") Long organizationId,
+                                             @RequestParam("icon") String icon,
+                                             @RequestParam(value = "id", required = false) @Encrypt Long id) {
+        return new ResponseEntity<>(issueTypeService.checkIcon(organizationId, 0L, icon, id), HttpStatus.OK);
     }
 }

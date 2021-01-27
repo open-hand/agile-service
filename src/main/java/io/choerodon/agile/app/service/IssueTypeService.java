@@ -125,4 +125,28 @@ public interface IssueTypeService {
     void reference(Long projectId, Long organizationId, Long referenceId, IssueTypeVO issueTypeVO);
 
     String getIssueTypeById(Long issueTypeId);
+
+    /**
+     * 项目层更新系统问题类型
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueTypeId
+     * @param issueTypeVO
+     */
+    void updateSystemIssueType(Long organizationId,
+                               Long projectId,
+                               Long issueTypeId,
+                               IssueTypeVO issueTypeVO);
+
+    /**
+     * 判断icon是否重复
+     *
+     * @param organizationId
+     * @param projectId
+     * @param icon
+     * @param id
+     * @return
+     */
+    Boolean checkIcon(Long organizationId, Long projectId, String icon, Long id);
 }

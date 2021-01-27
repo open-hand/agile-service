@@ -1,6 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import  io.choerodon.agile.app.service.*;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
@@ -72,6 +72,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private static final String PROJECT = "project";
 
+    private static final String SYSTEM = "system";
+
     private static final List<String> AGILE_CREATE_ISSUE_TYPES =
             Arrays.asList(
                     IssueTypeCode.STORY.value(),
@@ -127,6 +129,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         Set<String> categoryCodes = validateTypeCode(typeCode, projectId);
         if (nameExisted(organizationId, projectId, issueTypeVO.getName(), null)) {
             throw new CommonException("error.issue.type.name.existed");
+        }
+        if (iconExisted(organizationId, projectId, issueTypeVO.getIcon(), null)) {
+            throw new CommonException("error.issue.type.icon.existed");
         }
         issueTypeVO.setInitialize(false);
         issueTypeVO.setReferenced(ZERO.equals(projectId));
@@ -315,17 +320,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         Map<String, Long> nameMap =
                 issueTypes.stream().collect(Collectors.toMap(IssueTypeVO::getName, IssueTypeVO::getId));
         Long id = nameMap.get(name);
-        if (issueTypeId == null) {
-            //新增
-            return (id != null);
-        } else {
-            //编辑
-            if (id == null) {
-                return false;
-            } else {
-                return !id.equals(issueTypeId);
-            }
-        }
+        return existed(issueTypeId, id);
     }
 
     @Override
@@ -338,9 +333,16 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (issueTypeDTO == null) {
             throw new CommonException("error.issue.type.not.existed");
         }
+        if (SYSTEM.equals(issueTypeDTO.getSource())
+                && !ZERO.equals(projectId)) {
+            throw new CommonException("error.project.can.not.edit.system.issue.type");
+        }
         String name = issueTypeVO.getName();
         if (nameExisted(organizationId, projectId, name, issueTypeId)) {
             throw new CommonException("error.issue.type.name.existed");
+        }
+        if (iconExisted(organizationId, projectId, issueTypeVO.getIcon(), issueTypeId)) {
+            throw new CommonException("error.issue.type.icon.existed");
         }
         issueTypeDTO.setColour(issueTypeVO.getColour());
         issueTypeDTO.setDescription(issueTypeVO.getDescription());
@@ -590,6 +592,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             if (StringUtils.hasText(name)) {
                 issueType.setName(name);
             }
+            String icon = issueTypeVO.getIcon();
+            if (StringUtils.hasText(icon)) {
+                issueType.setIcon(icon);
+            }
             issueType.setId(null);
             issueType.setInitialize(false);
             issueType.setProjectId(projectId);
@@ -639,12 +645,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectByReferenceId(ids, organizationId);
         Map<Long, Set<Long>> referenceMap = new HashMap<>();
         issueTypeList.forEach(x -> {
-            if (Boolean.TRUE.equals(x.getInitialize())) {
-                Long referenceId = x.getReferenceId();
-                Long projectId = x.getProjectId();
-                Set<Long> projectIds = referenceMap.computeIfAbsent(referenceId, k -> new HashSet<>());
-                projectIds.add(projectId);
-            }
+            Long referenceId = x.getReferenceId();
+            Long projectId = x.getProjectId();
+            Set<Long> projectIds = referenceMap.computeIfAbsent(referenceId, k -> new HashSet<>());
+            projectIds.add(projectId);
         });
         result.forEach(x -> {
             if (Boolean.FALSE.equals(x.getInitialize())) {
@@ -764,7 +768,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             dto.setInitialize(true);
             dto.setProjectId(ZERO);
             dto.setReferenced(true);
-            dto.setSource("system");
+            dto.setSource(SYSTEM);
             createIssueType(dto);
         }
     }
@@ -921,5 +925,104 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             throw new CommonException("error.issue.type.not.exist");
         }
         return issueTypeDTO.getTypeCode();
+    }
+
+    @Override
+    public void updateSystemIssueType(Long organizationId,
+                                      Long projectId,
+                                      Long issueTypeId,
+                                      IssueTypeVO issueTypeVO) {
+        //只有项目层问题类型可以被通过改接口重命名
+        if (ZERO.equals(projectId)) {
+            return;
+        }
+        IssueTypeDTO dto = issueTypeMapper.selectByPrimaryKey(issueTypeId);
+        if (dto == null) {
+            throw new CommonException("error.issue.type.not.existed");
+        }
+        String name = issueTypeVO.getName();
+        String icon = issueTypeVO.getIcon();
+        String description = issueTypeVO.getDescription();
+        String colour = issueTypeVO.getColour();
+        updateSystemIssueTypeValidator(organizationId, projectId, issueTypeId, dto, issueTypeVO);
+        IssueTypeExtendDTO extend = new IssueTypeExtendDTO();
+        extend.setIssueTypeId(issueTypeId);
+        extend.setProjectId(projectId);
+        extend.setOrganizationId(organizationId);
+        List<IssueTypeExtendDTO> list = issueTypeExtendMapper.select(extend);
+        if (list.isEmpty()) {
+            extend.setEnabled(true);
+            extend.setName(name);
+            extend.setIcon(icon);
+            extend.setDescription(description);
+            extend.setColour(colour);
+            issueTypeExtendMapper.insert(extend);
+        } else {
+            extend = list.get(0);
+            extend.setName(name);
+            extend.setIcon(icon);
+            extend.setDescription(description);
+            extend.setColour(colour);
+            issueTypeExtendMapper.updateByPrimaryKey(extend);
+        }
+    }
+
+    private void updateSystemIssueTypeValidator(Long organizationId,
+                                                Long projectId,
+                                                Long issueTypeId,
+                                                IssueTypeDTO issueTypeDTO,
+                                                IssueTypeVO issueTypeVO) {
+        String name = issueTypeVO.getName();
+        String icon = issueTypeVO.getIcon();
+        String colour = issueTypeVO.getColour();
+        //非系统问题类型不可用这个接口重命名
+        if (!SYSTEM.equals(issueTypeDTO.getSource())) {
+            throw new CommonException("error.can.not.edit");
+        }
+        if (!StringUtils.hasText(name)) {
+            throw new CommonException("error.issue.type.name.empty");
+        }
+        if (!StringUtils.hasText(icon)) {
+            throw new CommonException("error.issue.type.icon.empty");
+        }
+        if (!StringUtils.hasText(colour)) {
+            throw new CommonException("error.issue.type.colour.empty");
+        }
+        if (nameExisted(organizationId, projectId, name, issueTypeId)) {
+            throw new CommonException("error.issue.type.name.existed");
+        }
+        if (iconExisted(organizationId, projectId, icon, issueTypeId)) {
+            throw new CommonException("error.issue.type.icon.existed");
+        }
+    }
+
+    @Override
+    public Boolean checkIcon(Long organizationId,
+                             Long projectId,
+                             String icon,
+                             Long issueTypeId) {
+        return iconExisted(organizationId, projectId, icon, issueTypeId);
+    }
+
+    private Boolean iconExisted(Long organizationId, Long projectId, String icon, Long issueTypeId) {
+        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, null);
+        Map<String, Long> iconMap =
+                issueTypes.stream().collect(Collectors.toMap(IssueTypeVO::getIcon, IssueTypeVO::getId));
+        Long id = iconMap.get(icon);
+        return existed(issueTypeId, id);
+    }
+
+    private Boolean existed(Long issueTypeId, Long id) {
+        if (issueTypeId == null) {
+            //新增
+            return (id != null);
+        } else {
+            //编辑
+            if (id == null) {
+                return false;
+            } else {
+                return !id.equals(issueTypeId);
+            }
+        }
     }
 }
