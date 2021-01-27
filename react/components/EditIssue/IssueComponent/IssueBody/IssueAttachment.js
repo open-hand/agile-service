@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { handleFileUpload } from '@/utils/richText';
 import { getProjectId } from '@/utils/common';
+import ChunkUploader from '@/components/chunk-uploader';
 import { UploadButtonNow } from '../../../CommonComponent';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
@@ -51,12 +52,12 @@ const IssueAttachment = observer((props) => {
       </div>
       <div className="c7n-content-wrapper" style={{ marginTop: '-47px', justifyContent: 'flex-end' }}>
         <UploadButtonNow
-          onRemove={setFileList}
-          onBeforeUpload={setFileList}
-          updateNow={onChangeFileList}
           fileList={fileList}
+          setFileList={setFileList}
           hasPermission={hasPermission}
           disabled={disabled}
+          refresh={refresh}
+          issueId={issueId}
         />
       </div>
     </div>
