@@ -4,9 +4,8 @@ import {
   Select, Input, InputNumber,
   Checkbox, TimePicker, Row, Col, Radio, DatePicker,
 } from 'choerodon-ui';
-import { findIndex } from 'lodash';
 import moment from 'moment';
-import SelectFocusLoad from '../SelectFocusLoad';
+import SelectUser from '@/components/select/select-user-old';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -164,21 +163,11 @@ export default function renderField(field) {
     );
   } if (['member', 'multiMember'].includes(field.fieldType)) {
     return (
-      <SelectFocusLoad
+      <SelectUser
         label={fieldName}
         allowClear
-        type="user"
         mode={field.fieldType === 'multiMember' ? 'multiple' : undefined}
-        saveList={(v) => {
-          // 假如本项目无此人，则将默认值手动增添进去
-          if (field.defaultValue && field.defaultValueObj) {
-            const index = findIndex(v, { id: field.defaultValue });
-            if (index === -1) {
-              v.push(field.defaultValueObj);
-            }
-          }
-        }}
-        loadWhenMount
+        extraOption={field.fieldType === 'multiMember' ? field.defaultValueObjs : field.defaultValueObj}
       />
     );
   }

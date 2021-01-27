@@ -24,7 +24,7 @@ import { observer } from 'mobx-react';
 import { IsProjectMember } from '@/hooks/useIsProjectMember';
 import { IsInProgram } from '@/hooks/useIsInProgram';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import UserHead from '@/components/UserHead';
+import SelectUser from '@/components/select/select-user-old';
 import { UploadButton } from '../CommonComponent';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
@@ -679,27 +679,12 @@ class CreateIssue extends Component {
                 rules: [{ required: field.required, message: '请选择经办人' }],
                 initialValue: this.props.chosenAssignee,
               })(
-                <SelectFocusLoad
-                  type="user"
+                <SelectUser
                   label="经办人"
                   style={{ flex: 1 }}
-                  loadWhenMount
-                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                   allowClear
-                >
-                  {field.defaultValueObj && (
-                    <Option key={field.defaultValueObj.id} value={field.defaultValueObj.id}>
-                      <div style={{
-                        display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
-                      }}
-                      >
-                        <UserHead
-                          user={field.defaultValueObj}
-                        />
-                      </div>
-                    </Option>
-                  )}
-                </SelectFocusLoad>,
+                  extraOption={form.getFieldValue('assigneedId') === AppState.userInfo.id ? [AppState.userInfo, field.defaultValueObj] : field.defaultValueObj}
+                />,
               )}
               <IsProjectMember>
                 {(isProjectMember) => isProjectMember && (
@@ -727,27 +712,12 @@ class CreateIssue extends Component {
             {getFieldDecorator('reporterId', {
               rules: [{ required: field.required, message: '请选择报告人' }],
             })(
-              <SelectFocusLoad
-                type="user"
+              <SelectUser
                 label="报告人"
                 style={{ flex: 1 }}
-                loadWhenMount
-                getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 allowClear
-              >
-                {field.defaultValueObj && (
-                  <Option key={field.defaultValueObj.id} value={field.defaultValueObj.id}>
-                    <div style={{
-                      display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
-                    }}
-                    >
-                      <UserHead
-                        user={field.defaultValueObj}
-                      />
-                    </div>
-                  </Option>
-                )}
-              </SelectFocusLoad>,
+                extraOption={field.defaultValueObj}
+              />,
             )}
           </FormItem>
 
@@ -1140,13 +1110,11 @@ class CreateIssue extends Component {
               {getFieldDecorator(`${field.fieldCode}Id`, {
                 rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
               })(
-                <SelectFocusLoad
-                  type="user"
+                <SelectUser
                   label={field.fieldName}
                   style={{ flex: 1 }}
-                  loadWhenMount
-                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                   allowClear
+                  extraOption={field.defaultValueObj}
                 />,
               )}
             </div>
