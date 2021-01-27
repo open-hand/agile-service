@@ -271,7 +271,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         String typeCode = issueType.getTypeCode();
         String applyType = getApplyTypeByCategoryCodes(categoryCodes, typeCode);
         Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
-        stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeId);
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        String stateMachineName = projectVO.getCode() + "-状态机-" + issueType.getName();
+        stateMachineSchemeConfigService.initStatusMachineAndSchemeConfig(organizationId, stateMachineName, stateMachineSchemeId, issueTypeId, projectVO, applyType);
         //初始化问题类型方案配置
         initIssueTypeSchemeConfig(organizationId, projectId, issueTypeId, applyType);
     }
