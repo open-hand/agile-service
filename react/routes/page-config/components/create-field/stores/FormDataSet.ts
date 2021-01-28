@@ -181,7 +181,6 @@ const FormDataSet = ({
                   issueTypeVOList.length > 0 && store.eternalContext.push(...issueTypeVOList.map((item:any) => item.id));
                   data.unshift(...issueTypeVOList);
                 }
-                console.log('data...', data);
                 return data;
               },
             }),

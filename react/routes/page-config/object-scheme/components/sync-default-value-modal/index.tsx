@@ -73,8 +73,10 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
       //     : originFieldOptions?.map((item) => ({ ...item, isDefault: defaultValue.includes(item.id) }));
       // }
       // if()
+      let updateFiledFlag = false;
       if (!(record.get('system') || (getMenuType() === 'project' && record.get('projectId') === null))) {
         await pageConfigApi.updateField(record.get('id'), newData);
+        updateFiledFlag = true;
       }
       await pageConfigApi.syncDefaultValue(record.get('id'), {
         issueTypeIds: syncIssueType,
@@ -82,7 +84,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
         fieldType: newData.fieldType,
         fieldOptions: newData.fieldOptions,
         defaultValue: newData.defaultValue,
-        custom: false,
+        custom: updateFiledFlag,
       });
       return true;
     }
@@ -118,7 +120,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
 };
 
 const openSyncDefaultValueEditForm = async (record: Record, prefixCls: string) => {
-  const issueTypes: IIssueType[] = record?.get('issueTypeVOList')?.filter((t:IIssueType) => t.enabled);
+  const issueTypes: IIssueType[] = record?.get('issueTypeVOList')?.filter((t: IIssueType) => t.enabled);
   const issueTypesArr: string[] = issueTypes.map((t) => t.id);
   record.set('fieldCode', record.get('code'));
   let newRecord = record;
