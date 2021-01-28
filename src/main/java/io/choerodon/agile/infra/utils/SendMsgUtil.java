@@ -364,7 +364,7 @@ public class SendMsgUtil {
             if(sendUserId.equals(userId)){
                 return;
             }
-            actionMap.put(userId, map.getOrDefault(userId, "管理的"));
+            actionMap.put(sendUserId, map.getOrDefault(userId, "管理的"));
         });
     }
 
