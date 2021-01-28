@@ -260,7 +260,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         if (condition) {
             Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
             Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
-            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
             List<Long> filterStatusIds = new ArrayList<>();
             if (statusCode != null) {
                 for (Long key : statusMapDTOMap.keySet()) {

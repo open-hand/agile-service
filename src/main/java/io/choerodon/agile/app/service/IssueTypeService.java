@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public interface IssueTypeService {
 
-    IssueTypeVO queryById(Long organizationId, Long issueTypeId);
+    IssueTypeVO queryById(Long issueTypeId);
 
     IssueTypeVO create(Long organizationId,
                        Long projectId,
@@ -42,7 +42,7 @@ public interface IssueTypeService {
      */
     void initIssueTypeByConsumeCreateOrganization(Long organizationId);
 
-    Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId);
+    Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId, Long projectId);
 
     Map<Long, Map<String, Long>> initIssueTypeData(Long organizationId, List<Long> orgIds);
 

@@ -533,7 +533,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 }
                 List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, isTreeView);
                 Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-                Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+                Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
                 List<Long> allIssueIds = issueDTOList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, allIssueIds, false);
@@ -1132,7 +1132,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public IssueSubVO queryIssueSub(Long projectId, Long organizationId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         issue.setPriorityVO(priorityService.queryById(organizationId, issue.getPriorityId()));
-        issue.setIssueTypeVO(issueTypeService.queryById(organizationId, issue.getIssueTypeId()));
+        issue.setIssueTypeVO(issueTypeService.queryById(issue.getIssueTypeId()));
         issue.setStatusVO(statusService.queryStatusById(organizationId, issue.getStatusId()));
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
@@ -1882,7 +1882,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Long newIssueId;
             Long objectVersionNumber;
             issueDetailDTO.setSummary(copyConditionVO.getSummary());
-            IssueTypeVO issueTypeVO = issueTypeService.queryById(ConvertUtil.getOrganizationId(projectId), issueDetailDTO.getIssueTypeId());
+            IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId());
             if (issueTypeVO.getTypeCode().equals(SUB_TASK)) {
                 IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToIssueSubCreateDto(issueDetailDTO);
                 IssueSubVO newIssue = stateMachineClientService.createSubIssue(issueSubCreateVO);
@@ -2621,7 +2621,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (!CollectionUtils.isEmpty(list)) {
             Long organizationId = projectUtil.getOrganizationId(projectId);
             Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
             Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
             List<IssueListFieldKVVO> listFieldKVVOS = new ArrayList<>();
             list.forEach(v -> {
@@ -2690,7 +2690,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
         }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, ProjectVO> projectVOMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
         List<IssueListFieldKVVO> list = new ArrayList<>();

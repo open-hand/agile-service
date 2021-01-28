@@ -1078,7 +1078,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     public List<ObjectSchemeFieldDetailVO> listFieldsWithOptionals(Long projectId, Long issueTypeId, Long organizationId) {
         List<ObjectSchemeFieldDetailVO> list = objectSchemeFieldMapper.selectFieldsWithOptionals(organizationId, projectId, issueTypeId, null);
         // 增加在扩展表中未同步的系统字段
-        IssueTypeVO issueTypeVO = issueTypeService.queryById(ConvertUtil.getOrganizationId(organizationId), issueTypeId);
+        IssueTypeVO issueTypeVO = issueTypeService.queryById(issueTypeId);
         List<String> fieldCodes = getIssueTypeFieldCodes(issueTypeVO.getId(), organizationId, projectId);
         List<String> existFieldCodes = list.stream().filter(v -> Boolean.TRUE.equals(v.getSystem())).map(ObjectSchemeFieldDetailVO::getCode).collect(Collectors.toList());
         fieldCodes.removeAll(existFieldCodes);

@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -111,7 +112,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
 
     @Override
-    public IssueTypeVO queryById(Long organizationId, Long issueTypeId) {
+    public IssueTypeVO queryById(Long issueTypeId) {
         IssueTypeDTO issueType = issueTypeMapper.selectByPrimaryKey(issueTypeId);
         if (issueType != null) {
             return modelMapper.map(issueType, IssueTypeVO.class);
@@ -734,6 +735,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Override
     public List<IssueTypeVO> queryByOrgId(Long organizationId, Long projectId) {
+        if (projectId == null) {
+            projectId = ZERO;
+        }
         return issueTypeMapper.selectByOptions(organizationId, projectId, null);
     }
 
@@ -744,19 +748,25 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 continue;
             }
             //创建默认问题类型
-            IssueTypeDTO dto = new IssueTypeDTO();
-            dto.setIcon(initIssueType.getIcon());
-            dto.setName(initIssueType.getName());
-            dto.setDescription(initIssueType.getDescription());
-            dto.setColour(initIssueType.getColour());
-            dto.setOrganizationId(organizationId);
-            dto.setTypeCode(initIssueType.getTypeCode());
-            dto.setInitialize(true);
-            dto.setProjectId(ZERO);
-            dto.setReferenced(true);
-            dto.setSource(SYSTEM);
+            IssueTypeDTO dto = buildIssueTypeFromInitIssueType(initIssueType, organizationId);
             createIssueType(dto);
         }
+    }
+
+    private IssueTypeDTO buildIssueTypeFromInitIssueType(InitIssueType initIssueType,
+                                                         Long organizationId) {
+        IssueTypeDTO dto = new IssueTypeDTO();
+        dto.setIcon(initIssueType.getIcon());
+        dto.setName(initIssueType.getName());
+        dto.setDescription(initIssueType.getDescription());
+        dto.setColour(initIssueType.getColour());
+        dto.setOrganizationId(organizationId);
+        dto.setTypeCode(initIssueType.getTypeCode());
+        dto.setInitialize(true);
+        dto.setProjectId(ZERO);
+        dto.setReferenced(true);
+        dto.setSource(SYSTEM);
+        return dto;
     }
 
 
@@ -868,16 +878,13 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId) {
-        IssueTypeDTO issueType = new IssueTypeDTO();
-        issueType.setOrganizationId(organizationId);
-        List<IssueTypeDTO> issueTypes = issueTypeMapper.select(issueType);
-        Map<Long, IssueTypeVO> issueTypeVOMap = new HashMap<>();
-        for (IssueTypeDTO iType : issueTypes) {
-            issueTypeVOMap.put(iType.getId(), modelMapper.map(iType, new TypeToken<IssueTypeVO>() {
-            }.getType()));
+    public Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId,
+                                                   Long projectId) {
+        if (projectId == null) {
+            projectId = ZERO;
         }
-        return issueTypeVOMap;
+        return issueTypeMapper.selectByOptions(organizationId, projectId, null)
+                .stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
     }
 
     @Override
@@ -889,7 +896,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 if (agilePluginService == null && Objects.equals("feature", initIssueType.getTypeCode())) {
                     continue;
                 }
-                IssueTypeDTO issueType = createIssueType(new IssueTypeDTO(initIssueType.getIcon(), initIssueType.getName(), initIssueType.getDescription(), orgId, initIssueType.getColour(), initIssueType.getTypeCode(), true));
+                IssueTypeDTO dto = buildIssueTypeFromInitIssueType(initIssueType, organizationId);
+                IssueTypeDTO issueType = createIssueType(dto);
                 temp.put(initIssueType.getTypeCode(), issueType.getId());
             }
             result.put(orgId, temp);
