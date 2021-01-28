@@ -1,25 +1,27 @@
-/*eslint-disable */
 import React, { useEffect, useRef, useState } from 'react';
-import { Upload } from 'choerodon-ui';
+import { Upload, Icon } from 'choerodon-ui';
 import { inject } from 'mobx-react';
-import { Icon } from 'choerodon-ui';
-import { Button, message } from "choerodon-ui/pro";
+
+import { observer } from 'mobx-react-lite';
+import { Button, message } from 'choerodon-ui/pro';
 
 import Cookies from 'universal-cookie';
 
+import validateFile from '@/utils/File';
 import webUploader from './webUploader';
 
-const cookies = new Cookies();
-
 import './index.less';
+
+const cookies = new Cookies();
 
 const getAccessToken = () => cookies.get('access_token');
 
 // api hfle
+// eslint-disable-next-line no-underscore-dangle
 const { API_HOST } = window._env_;
 const HZERO_HFLE = 'hfle';
 
-const FragmentUpload = inject('AppState')((props) => {
+const FragmentUpload = inject('AppState')(observer((props) => {
   const {
     callback = () => {},
     action = `${API_HOST}/hfle/v1/files/multipart`,
@@ -27,7 +29,7 @@ const FragmentUpload = inject('AppState')((props) => {
     headers = {
       Authorization: `bearer ${getAccessToken()}`,
     },
-    fileSize = 1000 * 1024 * 1024,
+    fileSize = 30 * 1024 * 1024,
     paramsData = {},
     text = '上传',
     doneText = '已上传',
@@ -40,21 +42,22 @@ const FragmentUpload = inject('AppState')((props) => {
     cRef,
     ...others
   } = props;
- 
-  const { issueId, fileList, setFileList, combine } = others;
+
+  const { fileList, setFileList, combine } = others;
   const [dealUploadList, setDealUploadList] = useState();
   const webUploaderRef = useRef(null);
   const fileMap = useRef(new Map());
 
   useEffect(() => {
     webUploaderRef.current = webUploader;
-    webUploaderRef.current.init({prefixPatch, organizationId, projectId: id, combine});
-  }, []); // eslint-disable-line
+    webUploaderRef.current.init({
+      prefixPatch, organizationId, projectId: id, combine,
+    });
+  }, [combine, id, organizationId, prefixPatch]);
 
   useEffect(() => {
     webUploaderRef.current.setParams(paramsData);
   }, [paramsData]);
-
 
   useEffect(() => {
     if (typeof showUploadList === 'boolean') {
@@ -77,14 +80,8 @@ const FragmentUpload = inject('AppState')((props) => {
   }, [showUploadList]);
 
   const beforeUpload = (file) => {
-    let isLimit = file.size < fileSize;
     const { accept } = others;
-    if (!isLimit) {
-      message.error(`只支持小于${fileSize / 1024 / 1024}MB的文件！`);
-    } else if (accept && !file.name.includes(accept)) {
-      message.error('上传文件类型错误');
-      isLimit = false;
-    } else {
+    if (validateFile(file, accept)) {
       setFileList((list) => [...list, {
         uid: file.uid,
         name: file.name,
@@ -94,60 +91,57 @@ const FragmentUpload = inject('AppState')((props) => {
         name: file.name,
       }]);
     }
-    return isLimit;
+    return true;
   };
 
   const onThisChange = async (info) => {
     const { file, event } = info;
     console.log(file);
     if (event) {
-      message.error(`上传失败`);
+      message.error('上传失败');
       setFileList((list) => list.map((item) => {
-        if(!item.url && item.uid === file.uid) {
+        if (!item.url && item.uid === file.uid) {
           return {
             ...item,
             status: 'error',
-          }
+          };
         }
         return item;
       }));
       return;
     }
     if (file.status === 'error') {
-      message.error(`上传失败`);
+      message.error('上传失败');
       setFileList((list) => list.map((item) => {
-        if(!item.url && item.uid === file.uid) {
+        if (!item.url && item.uid === file.uid) {
           return {
             ...item,
             status: 'error',
-          }
+          };
         }
         return item;
       }));
-      return;
     }
   };
 
-  const webUploaderUpload = async ({
+  const webUploaderUpload = ({
     file,
-  }) => {
-    return await webUploaderRef.current.upload(file, (percentage) => {
-      setFileList((list) => list.map((item) => {
-        if(!item.url && item.uid === file.uid) {
-          return {
-            ...item,
-            percent: percentage * 100,
-          }
-        }
-        return item;
-      }));
-    })
-  }
+  }) => webUploaderRef.current.upload(file, (percentage) => {
+    setFileList((list) => list.map((item) => {
+      if (!item.url && item.uid === file.uid) {
+        return {
+          ...item,
+          percent: percentage * 100,
+        };
+      }
+      return item;
+    }));
+  });
 
-  const whileUpload = async({
+  const whileUpload = async ({
     onError, file,
   }) => {
-    if(!file) {
+    if (!file) {
       return;
     }
     const { success, data, msg } = await webUploaderUpload({
@@ -156,24 +150,24 @@ const FragmentUpload = inject('AppState')((props) => {
     fileMap.current.delete(file.uid);
     if (success) {
       setFileList((list) => list.map((item) => {
-        if(!item.url && item.uid === file.uid) {
+        if (!item.url && item.uid === file.uid) {
           return {
             ...item,
             url: data.url,
-            uid: data.attachmentId,
+            uid: data.attachmentId || data.id,
+            userId: data.createdBy,
             percent: 0,
-          }
+          };
         }
         return item;
       }));
     } else {
-      console.log('offline', msg);
       onError(new Error(msg));
     }
     whileUpload({
-     file: [...(fileMap.current.values())][0],
-    })
-  }
+      file: [...(fileMap.current.values())][0],
+    });
+  };
 
   const customRequest = async ({
     onProgress, onError, onSuccess, file,
@@ -183,7 +177,7 @@ const FragmentUpload = inject('AppState')((props) => {
       onError(new Error('上传失败'));
     } else {
       fileMap.current.set(file.uid, file);
-      if(fileMap.current.size === 1) {
+      if (fileMap.current.size === 1) {
         whileUpload({
           onProgress, onError, onSuccess, file,
         });
@@ -207,16 +201,16 @@ const FragmentUpload = inject('AppState')((props) => {
 
   return (
     <>
-      <Upload 
+      <Upload
         {...uploadProps}
         className="c7n-chunk-upload"
       >
-       <Button style={{ padding: '0 6px' }}>
+        <Button style={{ padding: '0 6px' }}>
           <Icon type="file_upload" />
         </Button>
       </Upload>
     </>
   );
-});
+}));
 
 export default FragmentUpload;

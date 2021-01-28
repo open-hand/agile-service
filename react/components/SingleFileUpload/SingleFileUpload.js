@@ -19,6 +19,8 @@ function SingleFileUplaod(props) {
     url, fileService, fileName, hasDeletePermission, onDeleteFile, percent, error,
   } = props;
 
+  console.log(hasDeletePermission, onDeleteFile, (url || error));
+
   const handleDownLoadFile = () => {
     FileSaver.saveAs(`${fileService || ''}${url}`, fileName);
   };
