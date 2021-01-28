@@ -162,8 +162,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private PageFieldService pageFieldService;
     @Autowired
-    private ObjectSchemeFieldService objectSchemeFieldService;
-    @Autowired
     private StatusService statusService;
     @Autowired
     private InstanceService instanceService;
@@ -810,10 +808,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueConvertDTO == null) {
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
-        //史诗删除默认值校验
-        if(Objects.equals(issueConvertDTO.getTypeCode(), IssueTypeCode.ISSUE_EPIC.value())) {
-            objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfSingle(projectId, issueId, FieldCode.EPIC);
-        }
+//        //史诗删除默认值校验
+//        if(Objects.equals(issueConvertDTO.getTypeCode(), IssueTypeCode.ISSUE_EPIC.value())) {
+//            objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfSingle(projectId, issueId, FieldCode.EPIC);
+//        }
         //删除issueLink
         issueLinkService.deleteByIssueId(issueConvertDTO.getIssueId());
         //删除标签关联

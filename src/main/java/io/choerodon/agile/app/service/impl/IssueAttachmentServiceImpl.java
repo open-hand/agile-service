@@ -13,6 +13,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.IssueAttachmentService;
 import io.choerodon.agile.infra.mapper.IssueAttachmentMapper;
+import io.choerodon.core.oauth.DetailsHelper;
 
 import org.hzero.boot.file.FileClient;
 import org.hzero.core.util.ResponseUtils;
@@ -78,7 +79,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         issueAttachmentDTO.setUrl(url);
         issueAttachmentDTO.setCommentId(1L);
         IssueAttachmentDTO result = iIssueAttachmentService.createBase(issueAttachmentDTO);
-        BaseFieldUtil.updateIssueLastUpdateInfo(issueAttachmentDTO.getIssueId(), issueAttachmentDTO.getProjectId());
+        issueMapper.updateIssueLastUpdateInfo(issueAttachmentDTO.getIssueId(), issueAttachmentDTO.getProjectId(), DetailsHelper.getUserDetails().getUserId());
         return result;
     }
 

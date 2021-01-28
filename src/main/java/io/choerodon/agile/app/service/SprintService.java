@@ -66,11 +66,11 @@ public interface SprintService {
 
     Boolean delete(SprintConvertDTO sprintConvertDTO);
 
-    /**
-     * 校验冲刺是否设为默认值
-     * @param projectId
-     * @param sprintId
-     * @return
-     */
-    Boolean checkDefaultValue(Long projectId, Long sprintId);
+//    /**
+//     * 校验冲刺是否设为默认值
+//     * @param projectId
+//     * @param sprintId
+//     * @return
+//     */
+//    Boolean checkDefaultValue(Long projectId, Long sprintId);
 }

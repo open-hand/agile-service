@@ -1,9 +1,9 @@
 import React, {
-  useState, useContext, useEffect, useRef,
+  useState, useContext, useEffect, useRef, useLayoutEffect,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Form, TextField, Select, DatePicker, TimePicker, DateTimePicker,
+  Form, TextField, Select as S1, DatePicker, TimePicker, DateTimePicker,
   CheckBox, NumberField, TextArea, UrlField,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
@@ -11,7 +11,7 @@ import SelectUser from '@/components/select/select-user';
 import moment from 'moment';
 import { User } from '@/common/types';
 import { toJS } from 'mobx';
-import { set } from 'lodash';
+import { set, uniq } from 'lodash';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { pageConfigApi, userApi } from '@/api';
@@ -20,6 +20,7 @@ import DragList from '../drag-list';
 import './index.less';
 import * as images from '../../images';
 import beforeSubmitProcessData from './util';
+import Select from './SelectU';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
@@ -46,7 +47,7 @@ function CreateField() {
   const ctx = useContext(Store);
   const {
     formDataSet, formatMessage, modal, onSubmitLocal,
-    AppState: { currentMenuType: { type, id, organizationId } },
+    AppState: { currentMenuType: { type, id, organizationId } }, store,
     schemeCode, isEdit, handleRefresh,
   } = ctx;
   const [fieldOptions, setFieldOptions] = useState<Array<any>>([]);
@@ -74,6 +75,7 @@ function CreateField() {
   const contextOptionSetter = ({ record }: RenderProps) => {
     const contextValue = formDataSet.current?.get('context');
     const currentValue = record?.get('valueCode');
+    return { disabled: !record?.get('enabled') };
     return {
       disabled: currentValue === 'global' ? contextValue.length > 0 && contextValue.indexOf('global') < 0 : contextValue.indexOf('global') >= 0,
     };
@@ -320,6 +322,10 @@ function CreateField() {
         return null;
     }
   }
+  useLayoutEffect(() => {
+    const doms = document.getElementsByClassName('c7n-agile-page-create-field-disabled');
+    console.log('doms', doms);
+  }, []);
   return (
     <div className="create-field-form-wrap">
       <Form
@@ -341,6 +347,9 @@ function CreateField() {
         />
         <Select
           name="context"
+          onChange={(val) => {
+            formDataSet.current?.set('context', uniq([...store.eternalContext, ...(val || [])]));
+          }}
           onOption={contextOptionSetter}
         />
         {getAttachFields()}

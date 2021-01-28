@@ -53,13 +53,13 @@ class MergeRequest extends Component {
   render() {
     const column = [
       {
-        title: '编码',
-        dataIndex: 'viewId',
+        title: '名称',
+        dataIndex: 'title',
         width: 200,
         fixed: 'left',
-        render: (id, record) => (
-          <div style={{ width: '100%', overflow: 'hidden' }}>
-            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={id}>
+        render: (title, record) => (
+          <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
+            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={title}>
               <p
                 role="none"
                 className="c7n-agile-table-cell-click"
@@ -67,6 +67,25 @@ class MergeRequest extends Component {
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
                 }}
                 onClick={this.createMergeRequest.bind(this, record)}
+              >
+                {title}
+              </p>
+            </Tooltip>
+          </div>
+        ),
+      },
+      {
+        title: '编码',
+        dataIndex: 'viewId',
+        width: 100,
+        render: (id, record) => (
+          <div style={{ width: '100%', overflow: 'hidden' }}>
+            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={id}>
+              <p
+                role="none"
+                style={{
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
+                }}
               >
                 #
                 {' '}
@@ -76,27 +95,32 @@ class MergeRequest extends Component {
           </div>
         ),
       },
+
       {
-        title: '名称',
-        dataIndex: 'title',
-        width: 200,
-        render: (title) => (
-          <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
-            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={title}>
-              <p style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
-              }}
-              >
-                {title}
-              </p>
-            </Tooltip>
+        title: '分支',
+        dataIndex: 'sourceBranch',
+        width: 350,
+        render: (sourceBranch, record) => (
+          <div style={{
+            display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', justifyContent: 'space-around',
+          }}
+          >
+            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Icon type="branch" />
+              {sourceBranch}
+            </div>
+            <Icon type="trending_flat" />
+            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Icon type="branch" />
+              {record.sourceBranch}
+            </div>
           </div>
         ),
       },
       {
         title: '状态',
         dataIndex: 'state',
-        width: 100,
+        width: 70,
         render: (state) => (
           <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
             {['opened', 'merged', 'closed'].includes(state) ? STATUS_SHOW[state] : ''}
@@ -106,7 +130,7 @@ class MergeRequest extends Component {
       {
         title: '审查人',
         dataIndex: 'authorId',
-        width: 200,
+        width: 100,
         render: (authorId, record) => (
           <div style={{
             width: '100%', overflow: 'hidden', flexShrink: 0, justifyContent: 'flex-start',
@@ -115,7 +139,7 @@ class MergeRequest extends Component {
             <UserHead
               user={{
                 id: record.assigneeId,
-                realName: record.assigneeName,
+                realName: record.assigneeImageUrl,
                 avatar: record.imageUrl,
               }}
             />

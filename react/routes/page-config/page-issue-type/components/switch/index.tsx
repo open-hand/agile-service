@@ -3,11 +3,13 @@ import { pageConfigApi, PageConfigIssueType } from '@/api';
 import { Modal } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import useQuery from '@/hooks/useQuery';
+import { IIssueType } from '@/common/types';
 import { usePageIssueTypeStore } from '../../stores';
 import Switch from './Switch';
 
 interface IssueOption {
   value: string,
+  valueObj: any,
   text: string,
   type: 'organization' | 'common',
 }
@@ -16,7 +18,7 @@ function PageSwitch() {
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
   const params = useQuery();
   const { pageIssueTypeStore } = usePageIssueTypeStore();
-  const handleSelectBox = (val: any) => {
+  const handleSelectBox = (val: any, { valueObj }: { valueObj: any }) => {
     if (pageIssueTypeStore.getDirty) {
       Modal.confirm({
         title: '是否放弃更改',
@@ -26,15 +28,15 @@ function PageSwitch() {
             页面有未保存的内容,是否放弃更改？
           </div>
         ),
-        onOk: () => pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType),
+        onOk: () => pageIssueTypeStore.setCurrentIssueType(valueObj as IIssueType),
       });
       return false;
     }
-    pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType);
+    pageIssueTypeStore.setCurrentIssueType(valueObj as IIssueType);
     return true;
   };
   useEffect(() => {
-    if (pageIssueTypeStore.currentIssueType !== '') {
+    if (pageIssueTypeStore.currentIssueType.id) {
       pageIssueTypeStore.loadData();
     }
   }, [pageIssueTypeStore.currentIssueType]);
@@ -47,9 +49,10 @@ function PageSwitch() {
       if (issueTypeId) {
         currentType = res.find((t) => String(t.id) === issueTypeId);
       }
-      pageIssueTypeStore.init((currentType ?? res[0]).id as PageConfigIssueType);
+      pageIssueTypeStore.init((currentType ?? res[0]) as IIssueType);
       setSwitchOption(res.map((type) => ({
         value: type.id,
+        valueObj: type,
         text: type.name,
         type: 'common',
       })));
@@ -57,7 +60,7 @@ function PageSwitch() {
   }, []);
   return (
     <Switch
-      value={pageIssueTypeStore.currentIssueType}
+      value={pageIssueTypeStore.currentIssueType.id}
       options={switchOptions || []}
       onChange={handleSelectBox}
     />

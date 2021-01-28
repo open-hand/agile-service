@@ -53,8 +53,11 @@ function beforeSubmitProcessData(record: Record, { fieldOptions: propsFieldOptio
   const dateList = ['date', 'datetime', 'time'];
   const prefix = getMenuType() === 'project' ? 'pro_' : 'org_';
   const { name, check } = data;
-  const { issueTypeVOList, context } = data;
-
+  const { issueTypeVOList, context: originContext } = data;
+  const eternalDisabledOptions = issueTypeVOList?.filter((item: any) => !item.enabled).map((item:any) => item.id);
+  console.log('eternalDisabledOptions', eternalDisabledOptions);
+  const context = eternalDisabledOptions && eternalDisabledOptions.length > 0 ? originContext
+    .filter((item:any) => !eternalDisabledOptions.includes(item)) : originContext;
   const transformTime = {} as { defaultValue: string };
   const dateFormat = ['YYYY-MM-DD', 'YYYY-MM-DD HH:mm:ss', 'HH:mm:ss'];
   const dateIndex = dateList.indexOf(data.fieldType);
