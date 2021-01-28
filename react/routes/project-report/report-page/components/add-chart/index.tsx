@@ -4,10 +4,8 @@ import React, {
 import {
   Form, Select, DataSet, TextField,
 } from 'choerodon-ui/pro';
-import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import SelectTeam from '@/components/select/select-team';
-import { FieldIgnore } from 'choerodon-ui/pro/lib/data-set/enum';
 import useIsProgram from '@/hooks/useIsProgram';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
@@ -20,8 +18,8 @@ import { IReportChartBlock, ChartSearchVO } from '../../store';
 import IterationSpeedComponent from './components/iteration-speed';
 import VersionReportComponent from './components/version-report';
 import EpicReportComponent from './components/epic-report';
+import CodeQualityReportComponent from './components/code-quality';
 
-const { AppState } = stores;
 const { Option } = Select;
 export const defaultCharts = new Map([
   ['burn_down_report', { component: BurnDownComponent, name: '燃尽图' }],
@@ -33,6 +31,7 @@ export const defaultCharts = new Map([
   ['velocity_chart', { component: IterationSpeedComponent, name: '迭代速度图' }],
   ['version_chart', { component: VersionReportComponent, name: '版本报告图' }],
   ['epic_chart', { component: EpicReportComponent, name: '史诗报告图' }],
+  ['code_quality', { component: CodeQualityReportComponent, name: '代码质量图' }],
 ]);
 type GetOptionalCharts = () => Map<string, { component: React.FC<any>, name: string }>
 

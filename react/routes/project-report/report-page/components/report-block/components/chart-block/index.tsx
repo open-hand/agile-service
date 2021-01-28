@@ -11,6 +11,7 @@ import EpicBlock from './components/epic-report';
 import VersionBurndownBlock from './components/version-burndown';
 import EpicBurndownBlock from './components/epic-burndown';
 import IterationSpeedBlock from './components/iteration-speed';
+import CodeQualityBlock from './components/code-quality';
 
 export const defaultChartBlockMap = new Map<IChartCode, React.FC<any>>([
   ['burn_down_report', BurnDownBlock],
@@ -22,6 +23,7 @@ export const defaultChartBlockMap = new Map<IChartCode, React.FC<any>>([
   ['version_burn_down_report', VersionBurndownBlock],
   ['epic_burn_down_report', EpicBurndownBlock],
   ['velocity_chart', IterationSpeedBlock],
+  ['code_quality', CodeQualityBlock],
 ]);
 let chartBlockMap = defaultChartBlockMap;
 
