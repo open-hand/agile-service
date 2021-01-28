@@ -361,9 +361,6 @@ public class SendMsgUtil {
         map.put(issueVO.getAssigneeId(), "处理的");
         map.put(issueVO.getReporterId(), "负责的");
         userIds.forEach(sendUserId -> {
-            if(sendUserId.equals(userId)){
-                return;
-            }
             actionMap.put(sendUserId, map.getOrDefault(userId, "管理的"));
         });
     }
