@@ -7,9 +7,8 @@ import { observer } from 'mobx-react-lite';
 import { stores, Choerodon } from '@choerodon/boot';
 import { Spin } from 'choerodon-ui';
 import './EditIssue.less';
-import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import {
-  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, pageConfigApi,
+  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, pageConfigApi,
 } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
@@ -52,7 +51,6 @@ function EditIssue() {
     descriptionEditRef,
   } = useContext(EditIssueContext);
   const otherProject = !sameProject(projectId);
-  const { data: issueTypes } = useProjectIssueTypes(undefined, { enabled: !disabled });
   const container = useRef();
   const idRef = useRef();
   const { push, close, eventsMap } = useDetailContainerContext();
@@ -309,7 +307,6 @@ function EditIssue() {
             ovn={objectVersionNumber}
             onCancel={() => store.setTransformSubIssueShow(false)}
             onOk={handleTransformSubIssue.bind(this)}
-            issueTypes={issueTypes || []}
           />
         ) : null
       }
