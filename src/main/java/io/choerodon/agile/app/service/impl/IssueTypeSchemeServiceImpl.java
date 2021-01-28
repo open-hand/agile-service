@@ -197,6 +197,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
         IssueTypeDTO query = new IssueTypeDTO();
         query.setOrganizationId(organizationId);
         query.setInitialize(true);
+        //查询系统问题类型，typeCode不重复
         List<IssueTypeDTO> issueTypes = issueTypeMapper.select(query);
         //处理老的组织没有创建的数据
         issueTypes = initOrganizationIssueType(organizationId, issueTypes);

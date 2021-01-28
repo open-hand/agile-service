@@ -1287,8 +1287,8 @@ public class DataLogAspect {
 
     private void handleType(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         if (field.contains(TYPE_CODE) && !Objects.equals(originIssueDTO.getTypeCode(), issueConvertDTO.getTypeCode())) {
-            String originTypeName = issueTypeService.queryById(ConvertUtil.getOrganizationId(originIssueDTO.getProjectId()), originIssueDTO.getIssueTypeId()).getName();
-            String currentTypeName = issueTypeService.queryById(ConvertUtil.getOrganizationId(originIssueDTO.getProjectId()), issueConvertDTO.getIssueTypeId()).getName();
+            String originTypeName = issueTypeService.queryById(originIssueDTO.getIssueTypeId()).getName();
+            String currentTypeName = issueTypeService.queryById(issueConvertDTO.getIssueTypeId()).getName();
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_ISSUETYPE, originTypeName, currentTypeName,
                     originIssueDTO.getIssueTypeId().toString(), issueConvertDTO.getIssueTypeId().toString());
             dataLogRedisUtil.deleteByHandleType(issueConvertDTO, originIssueDTO);

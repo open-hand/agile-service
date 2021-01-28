@@ -390,7 +390,7 @@ public class BoardServiceImpl implements BoardService {
         Boolean condition = boardQuery.getAssigneeId() != null && boardQuery.getOnlyStory();
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         putDatasAndSort(columns, parentIds, assigneeIds, boardId, epicIds, condition, organizationId, parentWithSubs, statusMap, issueTypeDTOMap);
         jsonObject.put("parentIds", EncryptionUtils.encryptList(parentIds));
         jsonObject.put("parentIssues", getParentIssues(projectId, parentIds, statusMap, issueTypeDTOMap));

@@ -194,7 +194,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                  Long projectId,
                                                  Map<Long, Date> completedDateMap) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
         Set<Long> userIds = new HashSet<>();
         for (IssueDTO dto : issueList) {

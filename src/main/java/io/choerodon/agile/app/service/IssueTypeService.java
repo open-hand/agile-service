@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public interface IssueTypeService {
 
-    IssueTypeVO queryById(Long organizationId, Long issueTypeId);
+    IssueTypeVO queryById(Long issueTypeId);
 
     IssueTypeVO create(Long organizationId,
                        Long projectId,
@@ -36,33 +36,17 @@ public interface IssueTypeService {
     List<IssueTypeVO> queryByOrgId(Long organizationId, Long projectId);
 
     /**
-     * 通过状态机方案id查询当前组织下的问题类型（包含对应的状态机）
-     *
-     * @param organizationId 组织id
-     * @return 问题类型列表
-     */
-    List<IssueTypeVO> queryIssueTypeByStateMachineSchemeId(Long organizationId, Long schemeId);
-
-    /**
      * 消费组织创建事件生成组织初始化的五种issue类型
      *
      * @param organizationId organizationId
      */
     void initIssueTypeByConsumeCreateOrganization(Long organizationId);
 
-    Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId);
+    Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId, Long projectId);
 
     Map<Long, Map<String, Long>> initIssueTypeData(Long organizationId, List<Long> orgIds);
 
     IssueTypeDTO createIssueType(IssueTypeDTO issueType);
-
-    /**
-     * 查询issueType map, key为typeCode, value为id
-     *
-     * @param organizationId
-     * @return
-     */
-    Map<Long, String> queryIssueTypeMap(Long organizationId);
 
     /**
      * @param organizationId
@@ -125,4 +109,28 @@ public interface IssueTypeService {
     void reference(Long projectId, Long organizationId, Long referenceId, IssueTypeVO issueTypeVO);
 
     String getIssueTypeById(Long issueTypeId);
+
+    /**
+     * 项目层更新系统问题类型
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueTypeId
+     * @param issueTypeVO
+     */
+    void updateSystemIssueType(Long organizationId,
+                               Long projectId,
+                               Long issueTypeId,
+                               IssueTypeVO issueTypeVO);
+
+    /**
+     * 判断icon是否重复
+     *
+     * @param organizationId
+     * @param projectId
+     * @param icon
+     * @param id
+     * @return
+     */
+    Boolean checkIcon(Long organizationId, Long projectId, String icon, Long id);
 }

@@ -277,7 +277,7 @@ public class SprintServiceImpl implements SprintService {
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         setStatusIsCompleted(projectId, statusMapDTOMap);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         handleSprintIssueData(issueIdSprintIdVOS, issueIds, sprintSearches, backLogIssueVO, projectId, priorityMap, statusMapDTOMap, issueTypeDTOMap,allIssueIds);
         backlog.put(SPRINT_DATA, sprintSearches);
         backlog.put(BACKLOG_DATA, backLogIssueVO);
@@ -578,7 +578,7 @@ public class SprintServiceImpl implements SprintService {
             return reportIssue;
         }).collect(Collectors.toList());
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         return PageUtil.buildPageInfoWithPageInfoList(reportIssuePage, issueAssembler.issueDoToIssueListDto(reportIssues, priorityMap, statusMapDTOMap, issueTypeDTOMap));
     }
 

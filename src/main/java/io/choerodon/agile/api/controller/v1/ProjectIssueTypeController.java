@@ -15,6 +15,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -139,5 +140,26 @@ public class ProjectIssueTypeController {
                                                        @RequestBody IssueTypeVO issueTypeVO) {
         issueTypeService.reference(projectId, organizationId, referenceId, issueTypeVO);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "项目更新系统问题类型名称")
+    @PutMapping(value = "/{id}/update_system_issue_type")
+    public ResponseEntity updateSystemIssueType(@PathVariable("project_id") Long projectId,
+                                                @RequestParam Long organizationId,
+                                                @PathVariable(value = "id") @Encrypt Long issueTypeId,
+                                                @RequestBody @Validated IssueTypeVO issueTypeVO) {
+        issueTypeService.updateSystemIssueType(organizationId, projectId, issueTypeId, issueTypeVO);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "校验图标是否被使用")
+    @GetMapping(value = "/check_icon")
+    public ResponseEntity<Boolean> checkIcon(@PathVariable("project_id") Long projectId,
+                                             @RequestParam("icon") String icon,
+                                             @RequestParam(value = "id", required = false) @Encrypt Long id,
+                                             @RequestParam Long organizationId) {
+        return new ResponseEntity<>(issueTypeService.checkIcon(organizationId, projectId, icon, id), HttpStatus.OK);
     }
 }

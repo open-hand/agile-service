@@ -429,7 +429,7 @@ public class ReportServiceImpl implements ReportService {
         Page<IssueDTO> reportIssuePage = PageHelper.doPageAndSort(pageRequest, () -> reportMapper.
                 queryReportIssues(projectId, versionId, status, type));
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         return PageUtil.buildPageInfoWithPageInfoList(reportIssuePage, issueAssembler.issueDoToIssueListDto(reportIssuePage.getContent(), priorityMap, statusMapDTOMap, issueTypeDTOMap));
     }
@@ -1415,7 +1415,7 @@ public class ReportServiceImpl implements ReportService {
     public List<GroupDataChartListDTO> queryEpicChartList(Long projectId, Long epicId, Long organizationId) {
         List<GroupDataChartListDTO> groupDataChartListDOList = reportMapper.selectEpicIssueList(projectId, epicId);
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         for (GroupDataChartListDTO groupDataChartListDTO : groupDataChartListDOList) {
             groupDataChartListDTO.setPriorityVO(priorityMap.get(groupDataChartListDTO.getPriorityId()));
@@ -1771,7 +1771,7 @@ public class ReportServiceImpl implements ReportService {
     public List<GroupDataChartListDTO> queryVersionChartList(Long projectId, Long versionId, Long organizationId) {
         List<GroupDataChartListDTO> groupDataChartListDOList = reportMapper.selectVersionIssueList(projectId, versionId);
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         for (GroupDataChartListDTO groupDataChartListDTO : groupDataChartListDOList) {
             groupDataChartListDTO.setPriorityVO(priorityMap.get(groupDataChartListDTO.getPriorityId()));

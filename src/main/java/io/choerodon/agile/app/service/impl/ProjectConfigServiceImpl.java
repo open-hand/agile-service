@@ -262,8 +262,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 issueType.setTypeCode("feature");
                 List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.select(issueType);
                 if (!CollectionUtils.isEmpty(issueTypeDTOS)) {
-                    IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Boolean.TRUE.equals(v.getInitialize())).findAny().orElse(new IssueTypeDTO());
-                    issueTypeIds.add(issueTypeDTO.getId());
+                    issueTypeDTOS.forEach(x -> issueTypeIds.add(x.getId()));
                 }
             }
         }
@@ -645,7 +644,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if(CollectionUtils.isEmpty(issueTypeIds)){
             return new ArrayList<>();
         }
-        return modelMapper.map(issueTypeMapper.queryIssueTypeList(organizationId, issueTypeIds),new TypeToken<List<IssueTypeVO>>(){}.getType());
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        issueTypeSearchVO.setIssueTypeIds(issueTypeIds);
+        return issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
     }
 
     private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {
