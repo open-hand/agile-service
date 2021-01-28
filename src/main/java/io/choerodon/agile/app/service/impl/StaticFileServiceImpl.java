@@ -42,6 +42,7 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -107,7 +108,7 @@ public class StaticFileServiceImpl implements StaticFileService {
             for (MultipartFile multipartFile : files) {
                 String headerUrl = fileClient.uploadFile(organizationId, BUCKET_NAME, null, multipartFile.getOriginalFilename(), multipartFile);
                 StaticFileHeaderDTO staticFileHeader = createStaticFileHeader(projectId, organizationId, issueId, dealUrl(headerUrl), multipartFile.getOriginalFilename());
-
+                issueMapper.updateIssueLastUpdateInfo(issueId, projectId, DetailsHelper.getUserDetails().getUserId());
                 if (!ObjectUtils.isEmpty(staticFileHeader)) {
                     StaticFileHeaderVO staticFileHeaderVO = modelMapper.map(staticFileHeader, StaticFileHeaderVO.class);
                     staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
@@ -287,6 +288,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         record.setProjectId(projectId);
         record.setIssueId(issueId);
         staticFileDealService.deleteStaticFileRelated(staticFileHeader, record);
+        issueMapper.updateIssueLastUpdateInfo(issueId, projectId, DetailsHelper.getUserDetails().getUserId());
     }
 
     @Override
@@ -316,6 +318,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         StaticFileIssueRelDTO relRecord = new StaticFileIssueRelDTO();
         relRecord.setProjectId(projectId);
         staticFileHeaderMapper.updateFileStatus(staticFileHeader.getId(), DOING);
+        issueMapper.updateIssueLastUpdateInfoByStaticFile(staticFileHeader.getId(), projectId, DetailsHelper.getUserDetails().getUserId());
         staticFileDealService.deleteBase(relRecord, staticFileHeader, fileUrls, staticFileDeleteHistory);
     }
 
@@ -360,6 +363,7 @@ public class StaticFileServiceImpl implements StaticFileService {
             staticFileHeaderVO.setUrl(getRealUrl(staticFileHeaderVO.getUrl()));
             staticFileHeaderVOList.add(staticFileHeaderVO);
         });
+        issueMapper.updateIssueLastUpdateInfo(staticFileRelatedVO.getIssueId(), projectId, DetailsHelper.getUserDetails().getUserId());
         return staticFileHeaderVOList;
     }
 
