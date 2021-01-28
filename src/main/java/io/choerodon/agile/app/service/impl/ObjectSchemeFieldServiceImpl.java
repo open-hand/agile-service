@@ -722,10 +722,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 .stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toSet());
         update.setContext(String.join(",", typeCodes));
         String defaultValue = tryDecryptDefaultValue(update.getFieldType(), update.getDefaultValue());
-        updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, defaultValue, updateDTO);
         if (defaultValue != null) {
             update.setDefaultValue(defaultValue);
         }
+        updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, update.getDefaultValue(), updateDTO);
         update.setId(fieldId);
         baseUpdate(update);
         return queryById(organizationId, projectId, fieldId);
