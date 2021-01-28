@@ -164,6 +164,7 @@ export interface IIssueType {
   name: string,
   stateMachineId: string,
   typeCode: string,
+  enabled: boolean
 }
 export type IFeatureType = 'business' | 'enabler'
 

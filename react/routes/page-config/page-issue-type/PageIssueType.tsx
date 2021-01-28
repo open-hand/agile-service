@@ -79,7 +79,7 @@ function PageIssueType() {
       }
       const issueTypeFieldVO = pageIssueTypeStore.getDescriptionObj;
       const data = {
-        issueTypeId: pageIssueTypeStore.currentIssueType,
+        issueTypeId: pageIssueTypeStore.currentIssueType.id,
         fields: submitData.map((item) => ({
           fieldId: item.get('fieldId'),
           required: item.get('required'),

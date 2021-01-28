@@ -11,7 +11,7 @@ interface Props {
     [propsName: string]: any,
   }>,
   defaultValue: any,
-  onChange: (value: any) => Promise<boolean> | boolean,
+  onChange: (value: any, otherProps: any) => Promise<boolean> | boolean,
   value: any,
 }
 type SwitchProps = Required<Pick<Props, 'options'>> & Partial<Pick<Props, 'defaultValue' | 'onChange' | 'value'>>
@@ -20,15 +20,15 @@ function Switch({
 }: SwitchProps) {
   const [value, setValue] = useState<Props['defaultValue']>(defaultValue || 0);
   const [options, setOptions] = useState<Props['options']>([]);
-  const onClick = (v: any) => {
-    if (onChange && typeof onChange === 'function' && onChange(v)) {
+  const onClick = (v: any, other: any) => {
+    if (onChange && typeof onChange === 'function' && onChange(v, other)) {
       setValue(v);
     } else if (!onChange) {
       setValue(v);
     }
   };
   const initOptions = useCallback(() => {
-    let newOptions:Props['options'] = propsOption;
+    let newOptions: Props['options'] = propsOption;
     if (!Array.isArray(newOptions)) {
       setOptions([]);
     } else if (!newOptions.some((v) => v.value)) {
@@ -60,7 +60,8 @@ function Switch({
           }}
           onClick={(e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
             e.preventDefault();
-            onClick(option.value);
+            const { value: currentValue, ...otherProps } = option;
+            onClick(currentValue, otherProps);
           }}
           className={value === option.value ? styles.active : ''}
         >

@@ -19,7 +19,7 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
   const renderRowItem = useCallback((rowProps: ListRowProps) => {
     const record = rows[rowProps.index];
     return (
-      <Draggable draggableId={String(record.key)} index={rowProps.index} key={record.key}>
+      <Draggable draggableId={String(record.key)} index={rowProps.index} key={record.key} isDragDisabled={isDropDisabled}>
         {(provided, snapshot) => (
           <DraggableItem
             provided={provided}

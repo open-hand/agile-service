@@ -27,7 +27,13 @@ interface Props {
   draggingClassName?: string,
   isDragDisabled?: boolean,
 }
-
+function SpanPlaceholder({ fieldType }: { fieldType: string }) {
+  let placeholder = '请选择';
+  if (['input', 'number', 'text'].includes(fieldType)) {
+    placeholder = '请输入';
+  }
+  return <span style={{ color: 'rgba(0,0,0,0.6)', fontStyle: 'italic' }}>{placeholder}</span>;
+}
 const DraggableItem: React.FC<Props> = ({
   data, isDragDisabled, virtualizedStyle, provided, draggingClassName,
 }) => {
@@ -40,9 +46,9 @@ const DraggableItem: React.FC<Props> = ({
     createdFieldCanNotEdit = false,
     editedFieldCanNotEdit = false,
   } = pageConfigFieldEdited;
-  // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除
-  const disabledDel = !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
-  const textEditToggleProps = useTextEditTogglePropsWithPage(data, !showSplitLine, { className: `${prefixCls}-item-defaultValue` });
+  // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除 禁用问题类型字段不可操作
+  const disabledDel = !pageIssueTypeStore.currentIssueType.enabled && !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
+  const textEditToggleProps = useTextEditTogglePropsWithPage(data, !showSplitLine, { className: `${prefixCls}-item-defaultValue`, disabled: !pageIssueTypeStore.currentIssueType.enabled });
 
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={classnames(`${prefixCls}-text`, { [`${prefixCls}-text-edit`]: !textEditToggleProps.disabled })}>
@@ -124,7 +130,7 @@ const DraggableItem: React.FC<Props> = ({
   const getStyle = (draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => ({
     ...draggableStyle,
     ...virtualizedStyle,
-    cursor: 'all-scroll',
+    cursor: isDragDisabled ? 'auto' : 'all-scroll',
   });
 
   const renderDefaultValue = useCallback(() => (
@@ -136,7 +142,7 @@ const DraggableItem: React.FC<Props> = ({
         {() => (
           <Tooltip title={data.get('showDefaultValueText') !== '' ? data.get('showDefaultValueText') : undefined}>
             <span>
-              {(!textEditToggleProps.disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? '--' : data.get('showDefaultValueText') || '')}
+              {(!textEditToggleProps.disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? <SpanPlaceholder fieldType={data.get('fieldType')} /> : data.get('showDefaultValueText') || '')}
             </span>
           </Tooltip>
         )}
@@ -144,7 +150,7 @@ const DraggableItem: React.FC<Props> = ({
     </TextEditToggle>
 
   ), [data, textEditToggleProps]);
-
+  console.log('isDragDisabled', isDragDisabled);
   return (
 
     <div
@@ -164,13 +170,13 @@ const DraggableItem: React.FC<Props> = ({
         {renderDefaultValue()}
       </div>
       <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
-        {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, requiredFieldCanNotEdit)}
+        {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, !pageIssueTypeStore.currentIssueType.enabled || requiredFieldCanNotEdit)}
       </div>
       <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
-        {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, editedFieldCanNotEdit)}
+        {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, !pageIssueTypeStore.currentIssueType.enabled || editedFieldCanNotEdit)}
       </div>
       <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
-        {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, createdFieldCanNotEdit)}
+        {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, !pageIssueTypeStore.currentIssueType.enabled || createdFieldCanNotEdit)}
       </div>
     </div>
 
