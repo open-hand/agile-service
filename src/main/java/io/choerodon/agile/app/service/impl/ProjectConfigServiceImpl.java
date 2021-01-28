@@ -262,8 +262,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 issueType.setTypeCode("feature");
                 List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.select(issueType);
                 if (!CollectionUtils.isEmpty(issueTypeDTOS)) {
-                    IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Boolean.TRUE.equals(v.getInitialize())).findAny().orElse(new IssueTypeDTO());
-                    issueTypeIds.add(issueTypeDTO.getId());
+                    issueTypeDTOS.forEach(x -> issueTypeIds.add(x.getId()));
                 }
             }
         }

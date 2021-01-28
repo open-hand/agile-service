@@ -738,22 +738,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public List<IssueTypeVO> queryIssueTypeByStateMachineSchemeId(Long organizationId, Long schemeId) {
-        List<IssueTypeVO> issueTypeVOS = queryByOrgId(organizationId, null);
-        List<StatusMachineSchemeConfigVO> configVOS = stateMachineSchemeConfigService.queryBySchemeId(true, organizationId, schemeId);
-        Map<Long, StatusMachineSchemeConfigVO> configMap = configVOS.stream().collect(Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, x -> x));
-        for (IssueTypeVO issueTypeVO : issueTypeVOS) {
-            StatusMachineSchemeConfigVO configVO = configMap.get(issueTypeVO.getId());
-            if (configVO != null) {
-                StatusMachineVO statusMachineVO = stateMachineService.queryStateMachineById(organizationId, configVO.getStateMachineId());
-                issueTypeVO.setStateMachineName(statusMachineVO.getName());
-                issueTypeVO.setStateMachineId(statusMachineVO.getId());
-            }
-        }
-        return issueTypeVOS;
-    }
-
-    @Override
     public void initIssueTypeByConsumeCreateOrganization(Long organizationId) {
         for (InitIssueType initIssueType : InitIssueType.values()) {
             if (agilePluginService == null && Objects.equals("feature", initIssueType.getTypeCode())) {
@@ -788,13 +772,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             throw new CommonException("error.issueType.create");
         }
         return issueTypeMapper.selectByPrimaryKey(issueType);
-    }
-
-    @Override
-    public Map<Long, String> queryIssueTypeMap(Long organizationId) {
-        IssueTypeDTO dto = new IssueTypeDTO();
-        dto.setOrganizationId(organizationId);
-        return issueTypeMapper.select(dto).stream().collect(Collectors.toMap(IssueTypeDTO::getId, IssueTypeDTO::getTypeCode));
     }
 
     @Override

@@ -122,13 +122,13 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         }
         // 获取项目的问题类型
         List<IssueTypeVO> issueTypeVOS = projectConfigService.queryIssueTypesByProjectId(projectId, applyType, false);
-        Map<String, IssueTypeVO> typeVOMap = new HashMap<>();
+        Map<Long, IssueTypeVO> typeVOMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(statusVOS)) {
-            typeVOMap.putAll(issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getTypeCode, Function.identity())));
+            typeVOMap.putAll(issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity())));
         }
         for (StatusLinkageVO statusLinkageVO : linkageVOS) {
             statusLinkageVO.setStatusVO(statusMap.get(statusLinkageVO.getParentIssueStatusSetting()));
-            statusLinkageVO.setIssueTypeVO(typeVOMap.get(statusLinkageVO.getParentIssueTypeCode()));
+            statusLinkageVO.setIssueTypeVO(typeVOMap.get(statusLinkageVO.getParentIssueTypeId()));
         }
         return linkageVOS;
     }
@@ -165,7 +165,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         // 查询父任务的子任务
         List<IssueDTO> issueDTOS = issueMapper.querySubIssueByParentIssueId(projectId, parentIssueId);
         List<Long> issueTypeIds = issueDTOS.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
-        List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeCode(projectId,parentIssue.getTypeCode(),issueTypeIds,statusLinkageDTO.getParentIssueStatusSetting());
+        List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeId(projectId,parentIssue.getIssueId(),issueTypeIds,statusLinkageDTO.getParentIssueStatusSetting());
         Map<Long, List<StatusLinkageDTO>> linkageDTOMap = select.stream().collect(Collectors.groupingBy(StatusLinkageDTO::getIssueTypeId));
         Map<String, List<IssueDTO>> issueMap = issueDTOS.stream().collect(Collectors.groupingBy(IssueDTO::getTypeCode));
         if (select.size() == 1 && statusLinkageDTO.getIssueTypeId().equals(issueDTO.getIssueTypeId())) {
