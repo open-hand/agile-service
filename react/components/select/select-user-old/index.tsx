@@ -23,7 +23,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     if (!extraOption) {
       return data;
     }
-    return Array.isArray(extraOption) ? [...extraOption, ...data] : [extraOption, ...data];
+    return Array.isArray(extraOption) ? [...extraOption.filter((o) => !!o), ...data] : [extraOption, ...data];
   }, [data, extraOption]);
   const [props] = useSelect({
     data: options,
