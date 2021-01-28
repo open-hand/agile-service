@@ -7,6 +7,7 @@ import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.mybatis.common.BaseMapper;
+
 import org.apache.ibatis.annotations.Param;
 
 import java.util.*;
@@ -456,7 +457,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     void updateSubBugRelateIssueId(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 
-    List<TestCaseDTO> migrateTestCase(@Param("projectId")Long projectId);
+    List<TestCaseDTO> migrateTestCase(@Param("projectId") Long projectId);
 
     List<Long> queryProjectIds();
 
@@ -470,9 +471,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                         @Param("filterSql") String filterSql,
                                         @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
 
-    List<IssueDTO> queryStoryAndTaskByProjectId(@Param("projectId") Long projectId,@Param("searchVO") SearchVO searchVO);
+    List<IssueDTO> queryStoryAndTaskByProjectId(@Param("projectId") Long projectId, @Param("searchVO") SearchVO searchVO);
 
-    List<Long> selectIssueSubTaskAndSubBugIds(@Param("projectId") Long projectId,@Param("issueIds")  List<Long> issueIds);
+    List<Long> selectIssueSubTaskAndSubBugIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
     /**
      * 查项目下issue的assignee_id
@@ -492,6 +493,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     /**
      * 查询个人未完成故事，任务和bug
+     *
      * @param projectIds
      * @param userId
      * @param searchType
@@ -503,6 +505,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     /**
      * 查询个人在所有子项目中未完成的问题
+     *
      * @param projectIds
      * @param parentIssues
      * @param userId
@@ -518,11 +521,11 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                               @Param("sprintId") Long sprintId,
                                               @Param("statusSet") Set<String> statusSet);
 
-    void updateStatusByStatusId(@Param("projectId")Long projectId,@Param("currentStatusId") Long currentStatusId,@Param("statusId") Long statusId);
+    void updateStatusByStatusId(@Param("projectId") Long projectId, @Param("currentStatusId") Long currentStatusId, @Param("statusId") Long statusId);
 
-    List<Long> selectStatusIdByIssueType(@Param("projectId") Long projectId,@Param("issueTypeId") Long issueTypeId);
+    List<Long> selectStatusIdByIssueType(@Param("projectId") Long projectId, @Param("issueTypeId") Long issueTypeId);
 
-    List<IssueCountDTO> countIssueTypeByStatusIds(@Param("projectId") Long projectId,@Param("statusIds") List<Long> statusIds);
+    List<IssueCountDTO> countIssueTypeByStatusIds(@Param("projectId") Long projectId, @Param("statusIds") List<Long> statusIds);
 
     List<Long> selectIssueTypeIdsByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
 
@@ -534,6 +537,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     /**
      * 根据projectId和
+     *
      * @param projectId
      * @param issueType
      * @param param
@@ -547,6 +551,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     /**
      * 查询项目下未完成的issue，包含story, task和bug(不包含子缺陷)
+     *
      * @param projectId
      * @return
      */
@@ -555,13 +560,31 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     IssueVO selectByIssueNum(@Param("projectId") Long projectId,
                              @Param("issueNum") String issueNum);
 
-    List<Long> selectSubListByIssueIds(@Param("projectId") Long projectId, @Param("issueIds")  List<Long> issueIds);
+    List<Long> selectSubListByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
     List<GanttChartVO> selectActuatorCompletedDateByIssueIds(@Param("issueIds") List<Long> issueIds,
-                                                                  @Param("projectId") Long projectId);
+                                                             @Param("projectId") Long projectId);
 
     List<Long> selectSubIssueIds(@Param("issueId") Long issueId);
 
     List<IssueTypeCountVO> selectCountGroupByIssueTypeId(@Param("projectId") Long projectId,
                                                          @Param("issueTypeIds") Set<Long> issueTypeIds);
+
+    /**
+     * 更新问题最后更新信息（不含版本号更新
+     *
+     * @param issueId   问题id
+     * @param projectId 项目id
+     * @param userId    当前用户id
+     */
+    void updateIssueLastUpdateInfo(@Param("issueId") Long issueId, @Param("projectId") Long projectId, @Param("userId") Long userId);
+
+    /**
+     * 更新被删除静态文件相关联的问题最后更新信息（不含版本号更新
+     *
+     * @param fileId    文件id
+     * @param projectId 项目id
+     * @param userId    当前用户id
+     */
+    void updateIssueLastUpdateInfoByStaticFile(@Param("fileId") Long fileId, @Param("projectId") Long projectId, @Param("userId") Long userId);
 }

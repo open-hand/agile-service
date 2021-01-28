@@ -3512,5 +3512,24 @@
         group by t1.issue_type_id
     </select>
 
+    <update id="updateIssueLastUpdateInfo">
+        update agile_issue
+        set last_update_date = current_timestamp,
+            last_updated_by = #{userId}
+        where
+            issue_id = #{issueId}
+        and project_id = #{projectId}
+    </update>
 
+    <update id="updateIssueLastUpdateInfoByStaticFile">
+        update agile_issue
+        set last_update_date = current_timestamp,
+        last_updated_by = #{userId}
+        where
+        issue_id in (
+            select issue_id
+            from agile_issue_static_file_rel aisfr
+            where aisfr.project_id = #{projectId}
+            and aisfr.static_file_id = #{fileId})
+    </update>
 </mapper>
