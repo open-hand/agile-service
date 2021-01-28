@@ -5,7 +5,7 @@ import TypeTag from '@/components/TypeTag';
 
 const { Option } = Select;
 const SelectSubTask = (props) => {
-  const { data: issueTypes = [] } = useProjectIssueTypes({ typeCode: 'sub_task' });
+  const { data: issueTypes } = useProjectIssueTypes({ typeCode: 'sub_task' });
   return (
     <Select {...props}>
       {issueTypes.map((type) => (
