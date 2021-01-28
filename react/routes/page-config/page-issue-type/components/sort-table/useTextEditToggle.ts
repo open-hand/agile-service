@@ -26,7 +26,7 @@ interface ITextEditToggleConfigProps {
  *
  * @param record
  */
-function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { className }: { className?: string }): ITextEditToggleConfigProps {
+function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { className, disabled: propsDisabled }: { className?: string, disabled?: boolean }): ITextEditToggleConfigProps {
   const fieldType = record.get('fieldType');
   const dataRef = useRef<Array<any> | undefined>();
   const handleSubmit = useCallback((value: any) => {
@@ -119,6 +119,9 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
     };
   }, [fieldType, handleSubmit, record.id]);
   const disabled = useMemo(() => {
+    if (typeof (propsDisabled) !== 'undefined' && propsDisabled) {
+      return true;
+    }
     // if (isProject && record.get('createdLevel') === 'organization') {
     //   return true;
     // }
@@ -126,7 +129,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
       return isProject ? disabledEditDefaultFields.includes(record.get('fieldCode')) : orgDisabledEditDefaultFields.includes(record.get('fieldCode'));
     }
     return false;
-  }, [isProject, record]);
+  }, [isProject, propsDisabled, record]);
   return {
     ...variableProps,
     ...constantProps,

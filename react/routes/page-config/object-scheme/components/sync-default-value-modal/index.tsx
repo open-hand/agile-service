@@ -18,13 +18,12 @@ interface Props {
   prefixCls: string
   record: Record
   defaultTypes: Array<string>
-  text: string
   options: IIssueType[]
   modal?: IModalProps
 }
 const dateList = ['datetime', 'time', 'date'];
 const SyncDefaultValueEditForm: React.FC<Props> = ({
-  text, record, options, modal, prefixCls, defaultTypes,
+  record, options, modal, prefixCls, defaultTypes,
 }) => {
   const initValue = useMemo(() => {
     let defaultValue = record.get('defaultValue');
@@ -119,10 +118,8 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
 };
 
 const openSyncDefaultValueEditForm = async (record: Record, prefixCls: string) => {
-  const issueTypes: IIssueType[] = record?.get('issueTypeVOList');
+  const issueTypes: IIssueType[] = record?.get('issueTypeVOList')?.filter((t:IIssueType) => t.enabled);
   const issueTypesArr: string[] = issueTypes.map((t) => t.id);
-  const contextName: string = record?.get('contextName');
-  const contextNameArr = contextName.split(',');
   record.set('fieldCode', record.get('code'));
   let newRecord = record;
   if (!record.get('system')) { // && ['checkbox', 'multiple', 'radio', 'single'].includes(record.get('fieldType'))
@@ -137,7 +134,6 @@ const openSyncDefaultValueEditForm = async (record: Record, prefixCls: string) =
     children: <SyncDefaultValueEditForm
       prefixCls={prefixCls}
       record={newRecord}
-      text={contextName}
       defaultTypes={issueTypesArr}
       options={issueTypes}
     />,

@@ -77,7 +77,7 @@ interface PageIssueType {
 }
 type FiledUpdate = Required<Pick<IFiled, 'fieldId' | 'required' | 'created' | 'edited' | 'objectVersionNumber'>>;
 export interface UIssueTypeConfig {
-  issueTypeId: PageConfigIssueType,
+  issueTypeId: string,
   fields: Array<FiledUpdate>,
   issueTypeFieldVO?: Partial<IssueTypeFieldVO>,
   deleteIds?: string[],
@@ -168,14 +168,14 @@ class PageConfigApi extends Api<PageConfigApi> {
 
   /**
    * 根据问题类型加载页面配置
-   * @param issueType
+   * @param issueTypeId
    */
-  loadByIssueType(issueType: PageConfigIssueType): Promise<PageIssueType> {
+  loadByIssueType(issueTypeId: string): Promise<PageIssueType> {
     return axios({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/configs`,
       params: {
-        issueTypeId: issueType,
+        issueTypeId,
         organizationId: getOrganizationId(),
       },
     });
@@ -259,12 +259,12 @@ class PageConfigApi extends Api<PageConfigApi> {
    * 查询当前类型未选择的字段列表
    * @param issueType
    */
-  loadUnSelected(issueType: PageConfigIssueType): Promise<IFiledListItemProps[]> {
+  loadUnSelected(issueTypeId: string): Promise<IFiledListItemProps[]> {
     return axios({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/unselected`,
       params: {
-        issueTypeId: issueType,
+        issueTypeId,
         organizationId: getOrganizationId(),
       },
     });

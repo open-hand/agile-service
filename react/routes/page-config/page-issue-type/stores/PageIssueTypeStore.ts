@@ -38,6 +38,11 @@ interface IAddPostData {
   required: boolean,
   localRecordIndexId: number,
 }
+interface IPageIssueTypeStoreIssueType{
+  id: string,
+  enabled: boolean,
+   [x: string]: any
+}
 class PageIssueTypeStore {
   constructor(props: { addUnselectedDataSet: DataSet, sortTableDataSet: DataSet }) {
     this.addUnselectedDataSet = props.addUnselectedDataSet;
@@ -52,7 +57,7 @@ class PageIssueTypeStore {
 
   @observable currentTypeAllFieldData: ObservableMap<any, IFiledListItemProps> = observable.map();
 
-  @observable currentIssueType: PageConfigIssueType = PageConfigIssueType.null;
+  @observable currentIssueType: IPageIssueTypeStoreIssueType = {} as IPageIssueTypeStoreIssueType;
 
   @observable dataStatusCode: PageIssueTypeStoreStatusCode = PageIssueTypeStoreStatusCode.null;
 
@@ -72,13 +77,13 @@ class PageIssueTypeStore {
     dirty: false,
   };
 
-  @action init(issueType: PageConfigIssueType) {
+  @action init(issueType: IPageIssueTypeStoreIssueType) {
     this.currentIssueType = issueType;
   }
 
   @action('清空全部数据') destroy() {
     this.clear();
-    this.currentIssueType = PageConfigIssueType.null;
+    this.currentIssueType = {} as IPageIssueTypeStoreIssueType;
   }
 
   @action('清空编辑数据') clear() {
@@ -204,12 +209,12 @@ class PageIssueTypeStore {
     return this.dataStatusCode;
   }
 
-  @action setCurrentIssueType(issueType: PageConfigIssueType) {
+  @action setCurrentIssueType(issueType: IPageIssueTypeStoreIssueType) {
     this.currentIssueType = issueType;
   }
 
   @computed get getCurrentIssueType() {
-    return this.currentIssueType;
+    return this.currentIssueType?.id;
   }
 
   @action loadCurrentTypeAllField = (data: Array<IFiledListItemProps>) => {
