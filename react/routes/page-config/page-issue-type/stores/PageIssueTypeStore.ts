@@ -228,7 +228,10 @@ class PageIssueTypeStore {
     this.addUnselectedDataSet.clear();
     this.setLoading(true);
     pageConfigApi.loadByIssueType(this.getCurrentIssueType).then((res) => {
-      this.sortTableDataSet.loadData(res.fields.map((field) => ({ ...field, showDefaultValueText: transformDefaultValue({ ...field, fieldOptions: field.fieldOptions || field.defaultValueObjs || [field.defaultValueObj].filter((item) => item) }) })));
+      this.sortTableDataSet.loadData(res.fields.map((field) => ({
+        ...field,
+        showDefaultValueText: transformDefaultValue({ ...field, fieldOptions: field.fieldOptions || field.defaultValueObjs || [field.defaultValueObj].filter((item) => item) }),
+      })));
       if (res.issueTypeFieldVO) {
         this.setDescriptionObj({
           ...res.issueTypeFieldVO,
