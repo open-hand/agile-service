@@ -15,6 +15,45 @@
             overflow-x: hidden;
             .linkType_form {
               padding: 0.24rem;
+              .icon {
+                position: relative;
+                :global {
+                  .c7n-pro-icon-picker-prefix {
+                    opacity: 0;
+                  }
+                  .c7n-pro-field-label-wrapper {
+                    left: 0.1rem;
+                  }
+                  .c7n-pro-icon-picker {
+                    opacity: 0;
+                  }
+                  .c7n-pro-icon-picker-suffix {
+                    opacity: 0 !important;
+                  }
+                }
+                .icon_replace {
+                  position: absolute;
+                  top: 4px;
+                  left: 4px;
+                }
+            
+                .iconPicker {
+                  position: absolute;
+                  top: 4px;
+                  right: 4px;
+                }
+                &:focus-within {
+                  .iconPicker {
+                    transform:rotate(180deg);
+                    -ms-transform:rotate(180deg); 	/* IE 9 */
+                    -moz-transform:rotate(180deg); 	/* Firefox */
+                    -webkit-transform:rotate(180deg); /* Safari 和 Chrome */
+                    -o-transform:rotate(180deg); 	/* Opera */
+                    transition:transform 0.3s, -webkit-transform 0.3s;
+                    top: 8px;
+                  }
+                }
+              }
             }
           }
           &_footer {
