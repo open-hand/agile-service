@@ -150,7 +150,6 @@ const DraggableItem: React.FC<Props> = ({
     </TextEditToggle>
 
   ), [data, textEditToggleProps]);
-  console.log('isDragDisabled', isDragDisabled);
   return (
 
     <div
