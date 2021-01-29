@@ -75,7 +75,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         if (isDelete < 1) {
             throw new CommonException("error.stateMachineSchemeConfig.delete");
         }
-        return stateMachineSchemeService.querySchemeWithConfigById(true, organizationId, schemeId);
+        return stateMachineSchemeService.querySchemeWithConfigById(true, organizationId, schemeId, null);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
             config.setDefault(false);
         }
         configs.forEach(c -> configDraftMapper.insert(c));
-        return stateMachineSchemeService.querySchemeWithConfigById(true, organizationId, schemeId);
+        return stateMachineSchemeService.querySchemeWithConfigById(true, organizationId, schemeId, null);
     }
 
     @Override
@@ -490,7 +490,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
 //        Criteria criteria = new Criteria();
 //        criteria.update("status");
         schemeMapper.updateOptional(scheme, "status");
-        return stateMachineSchemeService.querySchemeWithConfigById(false, organizationId, schemeId);
+        return stateMachineSchemeService.querySchemeWithConfigById(false, organizationId, schemeId, null);
     }
 
     @Override
