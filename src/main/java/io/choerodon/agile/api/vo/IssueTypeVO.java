@@ -59,6 +59,10 @@ public class IssueTypeVO {
 
     private Long referenceId;
 
+    private Boolean copyStatusMachine;
+
+    private Boolean copyCustomField;
+
     public IssueTypeVO getReferenceIssueType() {
         return referenceIssueType;
     }
@@ -209,6 +213,22 @@ public class IssueTypeVO {
 
     public void setStateMachineId(Long stateMachineId) {
         this.stateMachineId = stateMachineId;
+    }
+
+    public Boolean getCopyStatusMachine() {
+        return copyStatusMachine;
+    }
+
+    public void setCopyStatusMachine(Boolean copyStatusMachine) {
+        this.copyStatusMachine = copyStatusMachine;
+    }
+
+    public Boolean getCopyCustomField() {
+        return copyCustomField;
+    }
+
+    public void setCopyCustomField(Boolean copyCustomField) {
+        this.copyCustomField = copyCustomField;
     }
 
     @Override
