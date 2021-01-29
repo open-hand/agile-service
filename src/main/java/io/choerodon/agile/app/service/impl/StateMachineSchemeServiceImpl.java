@@ -155,7 +155,10 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
     }
 
     @Override
-    public StateMachineSchemeVO querySchemeWithConfigById(Boolean isDraft, Long organizationId, Long schemeId) {
+    public StateMachineSchemeVO querySchemeWithConfigById(Boolean isDraft,
+                                                          Long organizationId,
+                                                          Long schemeId,
+                                                          Long projectId) {
         StateMachineSchemeDTO scheme = schemeMapper.selectByPrimaryKey(schemeId);
         if (scheme == null) {
             throw new CommonException("error.stateMachineScheme.notFound");
@@ -173,7 +176,7 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
             }
             IssueTypeDTO issueType;
             if (!config.getDefault()) {
-                issueType = issueTypeMapper.selectByPrimaryKey(config.getIssueTypeId());
+                issueType = issueTypeMapper.selectWithAlias(config.getIssueTypeId(), projectId);
             } else {
                 //若为默认配置，则匹配的是所有为分配的问题类型
                 issueType = new IssueTypeDTO();

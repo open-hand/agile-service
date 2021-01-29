@@ -168,7 +168,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (stateMachineSchemeConfigs != null && !stateMachineSchemeConfigs.isEmpty()) {
             Map<String, StateMachineSchemeVO> stateMachineSchemeMap = new HashMap<>(stateMachineSchemeConfigs.size());
             for (ProjectConfigDTO projectConfig : stateMachineSchemeConfigs) {
-                StateMachineSchemeVO stateMachineSchemeVO = stateMachineSchemeService.querySchemeWithConfigById(false, organizationId, projectConfig.getSchemeId());
+                StateMachineSchemeVO stateMachineSchemeVO = stateMachineSchemeService.querySchemeWithConfigById(false, organizationId, projectConfig.getSchemeId(), projectId);
                 stateMachineSchemeMap.put(projectConfig.getApplyType(), stateMachineSchemeVO);
             }
             projectConfigDetailVO.setStateMachineSchemeMap(stateMachineSchemeMap);
@@ -667,7 +667,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             throw new CommonException("error.status.status_issue_used");
         }
         // 校验当前node的状态是否与其他状态有联动
-        IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
+        IssueTypeDTO issueTypeDTO = issueTypeMapper.selectWithAlias(issueTypeId, projectId);
         List<StatusLinkageDTO> linkExistList = statusLinkageMapper.selectByCondition(Condition.builder(StatusLinkageDTO.class)
                 .andWhere(Sqls.custom().andEqualTo("projectId", projectId))
                 .andWhere(Sqls.custom().andEqualTo("statusId", currentStatusId).andEqualTo("issueTypeId", issueTypeId))

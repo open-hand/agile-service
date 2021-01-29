@@ -31,6 +31,8 @@ public class IssueTypeVO {
     @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
+    private IssueTypeVO referenceIssueType;
+
     /**
      * 用于做状态机方案的配置时
      */
@@ -56,6 +58,14 @@ public class IssueTypeVO {
     private Boolean deleted;
 
     private Long referenceId;
+
+    public IssueTypeVO getReferenceIssueType() {
+        return referenceIssueType;
+    }
+
+    public void setReferenceIssueType(IssueTypeVO referenceIssueType) {
+        this.referenceIssueType = referenceIssueType;
+    }
 
     public Long getReferenceId() {
         return referenceId;

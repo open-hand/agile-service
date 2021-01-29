@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public interface IssueTypeService {
 
-    IssueTypeVO queryById(Long issueTypeId);
+    IssueTypeVO queryById(Long issueTypeId, Long projectId);
 
     IssueTypeVO create(Long organizationId,
                        Long projectId,
