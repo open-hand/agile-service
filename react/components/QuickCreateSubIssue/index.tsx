@@ -87,13 +87,21 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
       }
     });
   });
+  useEffect(() => {
+    if (expand && id) {
+      fieldApi.getSummaryDefaultValue(id).then((res) => {
+        form?.setFieldsValue({
+          summary: res,
+        });
+      });
+    }
+  }, [expand, id]);
   const handleCancel = useCallback(() => {
     setExpand(false);
   }, []);
   if (isLoading) {
     return null;
   }
-
   const { getFieldDecorator } = form as WrappedFormUtils;
   return issueTypes ? (
     <div className="c7n-subTask-quickCreate">

@@ -178,6 +178,19 @@ class FieldApi extends Api<FieldApi> {
       },
     });
   }
+
+  /**
+   *获取概要默认值
+   * @param issueTypeId
+   */
+  getSummaryDefaultValue(issueTypeId: string): Promise<string | undefined> {
+    return axios.get(`${this.prefix}/field_value/summary_default_value`, {
+      params: {
+        issueTypeId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
 }
 
 const fieldApi = new FieldApi();

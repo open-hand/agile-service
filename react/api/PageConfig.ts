@@ -285,17 +285,6 @@ class PageConfigApi extends Api<PageConfigApi> {
       data,
     });
   }
-
-  loadTypesOnCreate() {
-    return this.request({
-      method: 'get',
-      url: `${this.prefixOrgOrPro}/object_scheme_field/configs/issue_types`,
-      params: {
-        organizationId: getOrganizationId(),
-
-      },
-    });
-  }
 }
 
 const pageConfigApi = new PageConfigApi();
