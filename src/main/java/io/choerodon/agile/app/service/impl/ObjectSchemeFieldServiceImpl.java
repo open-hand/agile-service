@@ -527,7 +527,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         List<IssueTypeVO> issueTypes = getIssueTypeByIds(organizationId, projectId, issueTypeIds, true);
         ObjectSchemeFieldDTO field = modelMapper.map(fieldCreateDTO, ObjectSchemeFieldDTO.class);
-        field.setContext(Arrays.asList(fieldCreateDTO.getContext()).stream().collect(Collectors.joining(",")));
+        Set<String> typeCodes = issueTypes.stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toSet());
+        field.setContext(String.join(",", typeCodes));
         field.setOrganizationId(organizationId);
         field.setProjectId(projectId);
 
