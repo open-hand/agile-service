@@ -17,7 +17,7 @@ import { WSItem } from './components/linked-item/LinkedItem';
 
 const IssueUI = (props: any) => {
   const [wsData, setWsData] = useState<WSItem[]>([]);
-  const { store } = useContext(EditIssueContext);
+  const { store, disabled } = useContext(EditIssueContext);
   const { issueId } = store.getIssue;
 
   useEffect(() => {
@@ -59,12 +59,17 @@ const IssueUI = (props: any) => {
         <div className="c7n-title-left">
           <span>UI&UX文件</span>
         </div>
-        <div className="c7n-title-right">
-          <Tooltip title="关联UI/UX文件">
-            <Button icon="device_hub" onClick={handleLinkUI} />
-          </Tooltip>
-          <UploadUI {...props} uploading={wsData && !!wsData.length && wsData.some((item) => item.status === 'doing')} />
-        </div>
+        {
+          !disabled && (
+          <div className="c7n-title-right">
+            <Tooltip title="关联UI/UX文件">
+              <Button icon="device_hub" onClick={handleLinkUI} />
+            </Tooltip>
+            <UploadUI {...props} uploading={wsData && !!wsData.length && wsData.some((item) => item.status === 'doing')} />
+          </div>
+          )
+        }
+
       </div>
       {
         linkedUI.map((ui: IUi) => (
