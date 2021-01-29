@@ -166,7 +166,7 @@ const FeatureLinkage = ({
                     marginBottom: 27,
                   }}
                 >
-                  <Col span={22}>
+                  <Col span={20}>
                     <Select
                       name={`${key}-project`}
                       placeholder="选择项目"
@@ -198,7 +198,7 @@ const FeatureLinkage = ({
                   </Col>
                 </Row>
                 <Row key={`${key}-status`} gutter={20}>
-                  <Col span={22}>
+                  <Col span={20}>
                     {
                       !modalDataSet?.current?.get(`${key}-project`) ? (
                         <Select name={`${key}-status`} placeholder="指定状态" disabled />
