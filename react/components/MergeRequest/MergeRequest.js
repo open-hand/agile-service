@@ -8,6 +8,7 @@ import {
 import TimeAgo from 'timeago-react';
 import { devOpsApi } from '@/api';
 import UserHead from '../UserHead';
+import './MergeRequest.less';
 
 const STATUS_SHOW = {
   opened: '开放',
@@ -168,6 +169,7 @@ class MergeRequest extends Component {
     ];
     return (
       <Table
+        className="c7nagile-MergeRequest"
         pagination={false}
         filterBar={false}
         rowKey={(record) => record.id}
