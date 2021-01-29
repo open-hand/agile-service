@@ -38,10 +38,10 @@ interface IAddPostData {
   required: boolean,
   localRecordIndexId: number,
 }
-interface IPageIssueTypeStoreIssueType{
+interface IPageIssueTypeStoreIssueType {
   id: string,
   enabled: boolean,
-   [x: string]: any
+  [x: string]: any
 }
 class PageIssueTypeStore {
   constructor(props: { addUnselectedDataSet: DataSet, sortTableDataSet: DataSet }) {
@@ -230,7 +230,7 @@ class PageIssueTypeStore {
     pageConfigApi.loadByIssueType(this.getCurrentIssueType).then((res) => {
       this.sortTableDataSet.loadData(res.fields.map((field) => ({
         ...field,
-        showDefaultValueText: transformDefaultValue({ ...field, fieldOptions: field.fieldOptions || field.defaultValueObjs || [field.defaultValueObj].filter((item) => item) }),
+        showDefaultValueText: transformDefaultValue({ ...field, defaultValue: !field.defaultValueObjs || (field.defaultValueObjs && field.defaultValueObjs.length > 0) ? field.defaultValue : undefined, fieldOptions: field.fieldOptions || field.defaultValueObjs || [field.defaultValueObj].filter((item) => item) }),
       })));
       if (res.issueTypeFieldVO) {
         this.setDescriptionObj({

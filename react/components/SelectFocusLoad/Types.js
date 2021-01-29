@@ -442,15 +442,9 @@ export default {
         value={component.name}
         name={component.name}
       >
-        {[...component.name].length > 10 ? (
-          <Tooltip title={component.name} placement="top" arrowPointAtCenter>
-            <span style={{ whiteSpace: 'nowrap' }}>
-              {component.name.substring(0, 10)}
-              ...
-            </span>
-          </Tooltip>
-        ) : <span>{component.name}</span>}
-
+        <Tooltip title={component.name} placement="top" arrowPointAtCenter>
+          <span>{component.name}</span>
+        </Tooltip>
       </Option>
     ),
   },

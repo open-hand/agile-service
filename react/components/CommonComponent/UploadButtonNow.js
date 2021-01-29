@@ -54,7 +54,6 @@ function UploadButtonNow(props) {
           <ChunkUploader
             prefixPatch="/hfle"
             showUploadList={false}
-            issueId={issueId}
             fileList={fileList}
             setFileList={setFileList}
             combine={{

@@ -172,7 +172,7 @@ const FormDataSet = ({
           paging: false,
           transport: {
             read: ({
-              ...pageConfigApiConfig.loadTypesOnCreate(),
+              ...pageConfigApiConfig.loadAvailableIssueType(),
               transformResponse: (res: any) => {
                 const data = JSON.parse(res).filter((item: any) => item.enabled);
                 if (isEdit) {

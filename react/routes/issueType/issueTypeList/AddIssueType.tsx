@@ -1,9 +1,9 @@
 import React, {
-  useMemo, useCallback, useState, useEffect, useImperativeHandle,
+  useMemo, useCallback, useState, useEffect,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Form, Select, DataSet, TextField, TextArea, IconPicker, Modal, Button,
+  Form, Select, DataSet, TextField, TextArea, IconPicker, Modal, Button, CheckBox,
 } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
 import { debounce } from 'lodash';
@@ -45,6 +45,17 @@ const AddIssueType: React.FC<Props> = ({
     }
     return true;
   }, [initType?.name, isOrganization, typeId]);
+
+  const checkIcon = useCallback(async (value) => {
+    if (typeId && value === initType?.icon) {
+      return true;
+    }
+    const res = isOrganization ? await issueTypeApi.orgCheckIcon(value, typeId) : await issueTypeApi.checkIcon(value, typeId);
+    if (res) {
+      return '图标重复';
+    }
+    return true;
+  }, [initType?.icon, isOrganization, typeId]);
 
   const standardTypeDataSet = useMemo(() => new DataSet({
     data: [
@@ -105,19 +116,28 @@ const AddIssueType: React.FC<Props> = ({
         type: 'string' as FieldType,
         label: '选择图标',
         required: true,
+        validator: checkIcon,
+      },
+      {
+        name: 'copyStatusMachine',
+        label: '是否复制状态机',
+      },
+      {
+        name: 'copyCustomField',
+        label: '是否复制自定义字段',
       },
     ],
-  }), [checkName, isSystemType, standardTypeDataSet, typeId]);
+  }), [checkIcon, checkName, isSystemType, standardTypeDataSet, typeId]);
 
   const handleChangeColor = useCallback((newColor: any) => {
     setColor(newColor.hex);
   }, []);
 
   const handleClickSwatch = useCallback(() => {
-    if (!isSystemType) {
+    if (!(isSystemType && isOrganization)) {
       setPickerDisplay(!pickerDisplay);
     }
-  }, [isSystemType, pickerDisplay]);
+  }, [isOrganization, isSystemType, pickerDisplay]);
 
   const handlePickerHidden = useCallback(() => {
     setPickerDisplay(false);
@@ -125,19 +145,20 @@ const AddIssueType: React.FC<Props> = ({
 
   const saveEdit = useCallback((data: IUpdate, callback?: Function) => {
     setEditLoading(true);
-    issueTypeApi[isOrganization ? 'orgUpdate' : 'update'](typeId as string, data).then((res: any) => {
+    // eslint-disable-next-line no-nested-ternary
+    issueTypeApi[isOrganization ? 'orgUpdate' : (isSystemType ? 'systemUpdate' : 'update')](typeId as string, data).then((res: any) => {
       Choerodon.prompt('编辑成功');
       setEditLoading(false);
       typeTableDataSet.query(typeTableDataSet.currentPage);
       modal?.close();
       if (callback) {
-        callback(res.id);
+        callback(res.id || typeId);
       }
     }).catch(() => {
       setEditLoading(false);
       Choerodon.prompt('编辑失败');
     });
-  }, [isOrganization, modal, typeId, typeTableDataSet]);
+  }, [isOrganization, isSystemType, modal, typeId, typeTableDataSet]);
 
   const debounceSaveEdit = debounce((data: IUpdate, callback?: Function) => {
     saveEdit(data, callback);
@@ -150,6 +171,8 @@ const AddIssueType: React.FC<Props> = ({
       const description = addDataSet.current?.get('description');
       const typeCode = addDataSet.current?.get('typeCode');
       const icon = addDataSet.current?.get('icon');
+      const copyStatusMachine = !typeId ? addDataSet.current?.get('copyStatusMachine') : undefined;
+      const copyCustomField = !typeId ? addDataSet.current?.get('copyCustomField') : undefined;
 
       const data = {
         id: typeId,
@@ -158,6 +181,8 @@ const AddIssueType: React.FC<Props> = ({
         description,
         typeCode,
         icon,
+        copyStatusMachine,
+        copyCustomField,
       };
       if (!typeId) {
         setAddLoading(true);
@@ -198,7 +223,7 @@ const AddIssueType: React.FC<Props> = ({
               },
               onCancel: () => {
                 modal?.close();
-                callback(data.id);
+                callback(data.id || typeId);
               },
             });
           } else {
@@ -260,14 +285,14 @@ const AddIssueType: React.FC<Props> = ({
   return (
     <div className={styles.addIssueType}>
       <div className={styles.addIssueType_content}>
-        <Form dataSet={addDataSet} disabled={isSystemType} className={styles.addIssueType_form}>
+        <Form dataSet={addDataSet} disabled={isOrganization && isSystemType} className={styles.addIssueType_form}>
           <TextField name="name" />
           <TextArea name="description" />
           {
-          !isSystemType && (
-            <Select name="typeCode" />
-          )
-        }
+            !isSystemType && (
+              <Select name="typeCode" />
+            )
+          }
           <div className={styles.icon}>
             <IconPicker
               name="icon"
@@ -276,24 +301,24 @@ const AddIssueType: React.FC<Props> = ({
               }}
             />
             {
-            addDataSet.current?.get('icon') && (
-            <div className={styles.icon_replace}>
-              <TypeTag
-              // @ts-ignore
-                data={{
-                  colour,
-                  icon: addDataSet.current?.get('icon'),
-                }}
-              />
-            </div>
-            )
-          }
+              addDataSet.current?.get('icon') && (
+              <div className={styles.icon_replace}>
+                <TypeTag
+                // @ts-ignore
+                  data={{
+                    colour,
+                    icon: addDataSet.current?.get('icon'),
+                  }}
+                />
+              </div>
+              )
+            }
             <div className={styles.iconPicker}>
               <Icon type="baseline-arrow_drop_down" />
             </div>
           </div>
           <div className={styles.colorPicker}>
-            <div className={`${styles.swatch} ${styles[`swatch_${isSystemType}`]}`} onClick={handleClickSwatch} role="none">
+            <div className={`${styles.swatch} ${styles[`swatch_${isOrganization && isSystemType}`]}`} onClick={handleClickSwatch} role="none">
               <div className={styles.color} style={{ background: colour }} />
             </div>
             {
@@ -307,6 +332,26 @@ const AddIssueType: React.FC<Props> = ({
                 : null
             }
           </div>
+          {
+            !typeId && (
+            <CheckBox
+              name="copyStatusMachine"
+              style={{
+                marginTop: -60,
+              }}
+            />
+            )
+          }
+          {
+            !typeId && (
+            <CheckBox
+              name="copyCustomField"
+              style={{
+                marginTop: -80,
+              }}
+            />
+            )
+          }
         </Form>
       </div>
       <div className={styles.addIssueType_footer}>
@@ -324,7 +369,11 @@ const AddIssueType: React.FC<Props> = ({
             </>
           ) : (
             <>
-              <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={editLoading} onClick={handleSave}>保存</Button>
+              {
+                !(isOrganization && isSystemType) && (
+                  <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={editLoading} onClick={handleSave}>保存</Button>
+                )
+              }
               <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleLinkToPage} disabled={editLoading}>跳转配置页面</Button>
               {
                 !isOrganization && (

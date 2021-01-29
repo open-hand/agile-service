@@ -41,10 +41,19 @@ class QuickCreateIssue extends Component {
     return null;
   }
 
+  loadInitValue = async (currentIssueTypeId) => {
+    const { form } = this.props;
+    const defaultSummary = await fieldApi.getSummaryDefaultValue(currentIssueTypeId);
+    form.setFieldsValue({
+      summary: defaultSummary,
+    });
+  };
+
   handleChangeType = ({ key }) => {
     this.setState({
       currentTypeId: key,
     });
+    this.loadInitValue(key);
   };
 
   handleCreate = debounce(() => {
@@ -238,6 +247,8 @@ class QuickCreateIssue extends Component {
               onClick={() => {
                 this.setState({
                   create: true,
+                }, () => {
+                  this.loadInitValue(currentType.id);
                 });
               }}
             >

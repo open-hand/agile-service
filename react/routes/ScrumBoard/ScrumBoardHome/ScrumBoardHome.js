@@ -181,7 +181,7 @@ class ScrumBoardHome extends Component {
     const sprintId = ScrumBoardStore.getSprintId;
     const completeMessage = await sprintApi.loadSprintAndCountIssue(sprintId);
     const sprintInfo = completeMessage.sprintNames[0];
-    const defaultValuePrompt = await sprintApi.beforeChangeCheck(sprintId) ? `提示：冲刺${sprintInfo.sprintName}是默认选项，完成后冲刺字段默认值将清空` : undefined;
+    const defaultValuePrompt = undefined; // (sprintId) ? `提示：冲刺${sprintInfo.sprintName}是默认选项，完成后冲刺字段默认值将清空` : undefined;
     CloseSprint({
       completeMessage,
       defaultValuePrompt,

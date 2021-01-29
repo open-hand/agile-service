@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import SelectFeature from '@/components/select/select-feature';
 import { featureApi } from '@/api';

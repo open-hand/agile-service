@@ -66,12 +66,35 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
+  systemUpdate(typeId: string, data: IUpdate) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/issue_type/${typeId}/update_system_issue_type`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
   checkName(name: string, typeId?: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/issue_type/check_name`,
       params: {
         name,
+        organizationId: getOrganizationId(),
+        id: typeId,
+      },
+    });
+  }
+
+  checkIcon(icon: string, typeId?: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/issue_type/check_icon`,
+      params: {
+        icon,
         organizationId: getOrganizationId(),
         id: typeId,
       },
@@ -136,6 +159,17 @@ class IssueTypeApi extends Api<IssueTypeApi> {
       url: `${this.OrgPrefix}/issue_type/check_name`,
       params: {
         name,
+        id: typeId,
+      },
+    });
+  }
+
+  orgCheckIcon(icon: string, typeId?: string) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/check_icon`,
+      params: {
+        icon,
         id: typeId,
       },
     });
