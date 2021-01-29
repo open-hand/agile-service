@@ -915,7 +915,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Override
     public String getIssueTypeById(Long issueTypeId) {
         IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
-        if (issueTypeDTO != null) {
+        if (issueTypeDTO == null) {
             throw new CommonException("error.issue.type.not.existed");
         }
         return issueTypeDTO.getTypeCode();
