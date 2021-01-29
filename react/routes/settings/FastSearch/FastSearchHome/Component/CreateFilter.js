@@ -591,7 +591,7 @@ const CreateFilter = (props) => {
       issue_type: {
         url: '',
         prop: '',
-        id: 'typeCode',
+        id: 'id',
         name: 'name',
       },
       feature: {

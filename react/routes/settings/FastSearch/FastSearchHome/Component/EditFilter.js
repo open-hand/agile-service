@@ -113,7 +113,7 @@ const OPTION_FILTER = {
   issue_type: {
     url: '',
     prop: '',
-    id: 'typeCode',
+    id: 'id',
     name: 'name',
     state: 'originTypes',
   },
