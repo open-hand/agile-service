@@ -261,4 +261,6 @@ public interface ObjectSchemeFieldService {
      * @return
      */
     String getIssueSummaryDefaultValue(Long organizationId, Long projectId, Long issueTypeId);
+
+    List<PageConfigFieldVO> queryPageConfigFields(Long organizationId, Long projectId, Long issueTypeId);
 }

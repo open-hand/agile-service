@@ -1329,7 +1329,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return result;
     }
 
-    protected List<PageConfigFieldVO> queryPageConfigFields(Long organizationId, Long projectId, Long issueTypeId) {
+    @Override
+    public List<PageConfigFieldVO> queryPageConfigFields(Long organizationId, Long projectId, Long issueTypeId) {
         List<PageConfigFieldVO> pageConfigFieldVOS = objectSchemeFieldExtendMapper.listConfigs(organizationId, projectId, issueTypeId);
         // 有新增系统字段未配置到字段扩展表直接添加字段到pageConfigFieldVOS
         addPageFieldVOS(pageConfigFieldVOS,organizationId,projectId,issueTypeId);

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -575,28 +576,33 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     }
 
     @Override
-    public Long initStatusMachineAndSchemeConfig(Long organizationId, String name, Long schemeId, Long issueTypeId, ProjectVO projectVO, String applyType) {
-        //初始化状态机
-        StatusMachineDTO statusMachine = new StatusMachineDTO();
-        statusMachine.setOrganizationId(organizationId);
-        statusMachine.setName(name);
-        statusMachine.setDescription(name);
-        statusMachine.setStatus(StateMachineStatus.ACTIVE);
-        statusMachine.setDefault(false);
-        if (statusMachineMapper.insert(statusMachine) != 1) {
-            throw new CommonException("error.insert.status.machine");
-        }
-        //创建状态机节点和转换
-        initService.createStateMachineDetail(organizationId, statusMachine.getId(), applyType);
+    public Long initStatusMachineAndSchemeConfig(Long organizationId, String name, Long schemeId, Long issueTypeId, ProjectVO projectVO, String applyType, Long statusMachineId) {
         //发布状态机
-        Long stateMachineId = statusMachine.getId();
-        //敏捷创建完状态机
-        List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectVO.getId(), stateMachineId);
-        // 校验状态和项目是否关联
-        createIssueStatus(statusPayloads, projectVO);
+        Long currentStatusMachineId = null;
+        if (!ObjectUtils.isEmpty(statusMachineId)) {
+            currentStatusMachineId = stateMachineService.copyStateMachine(organizationId, statusMachineId, issueTypeId);
+        } else {
+            //初始化状态机
+            StatusMachineDTO statusMachine = new StatusMachineDTO();
+            statusMachine.setOrganizationId(organizationId);
+            statusMachine.setName(name);
+            statusMachine.setDescription(name);
+            statusMachine.setStatus(StateMachineStatus.ACTIVE);
+            statusMachine.setDefault(false);
+            if (statusMachineMapper.insert(statusMachine) != 1) {
+                throw new CommonException("error.insert.status.machine");
+            }
+            //创建状态机节点和转换
+            initService.createStateMachineDetail(organizationId, statusMachine.getId(), applyType);
+            currentStatusMachineId = statusMachine.getId();
+            //敏捷创建完状态机
+            List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectVO.getId(), currentStatusMachineId);
+            // 校验状态和项目是否关联
+            createIssueStatus(statusPayloads, projectVO);
+        }
         // 创建状态机方案配置
-        insert(organizationId, stateMachineId, schemeId, issueTypeId, false);
-        return stateMachineId;
+        insert(organizationId, currentStatusMachineId, schemeId, issueTypeId, false);
+        return currentStatusMachineId;
     }
 
     private void createIssueStatus(List<StatusPayload> statusPayloads, ProjectVO projectVO) {

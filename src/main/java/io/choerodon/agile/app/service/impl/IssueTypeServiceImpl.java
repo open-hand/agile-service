@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -65,6 +66,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired
     private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
+    @Autowired
+    private ObjectSchemeFieldService objectSchemeFieldService;
 
     private static final String ORGANIZATION = "organization";
 
@@ -143,19 +146,58 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (!ZERO.equals(projectId)) {
             updateExtendEnabled(result.getId(), projectId, organizationId, true);
             //项目层创建问题类型,初始化默认状态机
-            initDefaultStateMachine(organizationId, projectId, result, categoryCodes);
+            initDefaultStateMachine(organizationId, projectId, result, categoryCodes, issueTypeVO.getCopyStatusMachine());
             //初始化项目系统字段与问题类型关系
-            initIssueTypeAndFieldRel(organizationId, projectId, result);
+            initIssueTypeAndFieldRel(organizationId, projectId, result, issueTypeVO.getCopyCustomField());
         } else {
             //初始化组织系统字段与问题类型关系
-            initIssueTypeAndFieldRel(organizationId, null, result);
+            initIssueTypeAndFieldRel(organizationId, null, result, false);
         }
         return result;
     }
 
     private void initIssueTypeAndFieldRel(Long organizationId,
                                           Long projectId,
-                                          IssueTypeVO result) {
+                                          IssueTypeVO result,
+                                          Boolean copyField) {
+        if(Boolean.TRUE.equals(copyField) && !ObjectUtils.isEmpty(projectId)){
+            copyFieldRel(organizationId, projectId, result);
+        }else {
+            initFieldRel(organizationId, projectId, result);
+        }
+    }
+
+    private void copyFieldRel(Long organizationId, Long projectId, IssueTypeVO result) {
+        // 查询要复制的系统问题类型
+        IssueTypeDTO issueTypeDTO = querySystemIssueTypeByCode(organizationId, result.getTypeCode());
+        // 查询问题类型的所有字段
+        List<PageConfigFieldVO> fields  = objectSchemeFieldService.queryPageConfigFields(organizationId, projectId, issueTypeDTO.getId());
+        if (!CollectionUtils.isEmpty(fields)) {
+            String rank = RankUtil.mid();
+            for (PageConfigFieldVO field : fields) {
+                ObjectSchemeFieldExtendDTO extendDTO = new ObjectSchemeFieldExtendDTO();
+                if (objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Arrays.asList(result.getId()), organizationId, field.getFieldId(), projectId).isEmpty()) {
+                    extendDTO.setIssueTypeId(result.getId());
+                    extendDTO.setIssueType(result.getTypeCode());
+                    extendDTO.setOrganizationId(organizationId);
+                    extendDTO.setProjectId(projectId);
+                    extendDTO.setFieldId(field.getFieldId());
+                    extendDTO.setRequired(field.getRequired());
+                    extendDTO.setCreated(field.getCreated());
+                    extendDTO.setEdited(field.getEdited());
+                    extendDTO.setRank(rank);
+                    extendDTO.setDefaultValue(!ObjectUtils.isEmpty(field.getDefaultValue()) ? field.getDefaultValue().toString() : "");
+                    extendDTO.setExtraConfig(field.getExtraConfig());
+                    objectSchemeFieldExtendMapper.insertSelective(extendDTO);
+                    rank = RankUtil.genPre(rank);
+                }
+            }
+        }
+    }
+
+    private void initFieldRel(Long organizationId,
+                              Long projectId,
+                              IssueTypeVO result){
         ObjectSchemeFieldDTO field = new ObjectSchemeFieldDTO();
         field.setSystem(true);
         String typeCode = result.getTypeCode();
@@ -206,6 +248,16 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 objectSchemeFieldExtendMapper.insertSelective(extendDTO);
             }
         });
+    }
+
+    private IssueTypeDTO querySystemIssueTypeByCode(Long organizationId, String typeCode){
+        // 查询系统问题类型的状态机id
+        List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectSystemIssueTypeByOrganizationIds(new HashSet<>(Arrays.asList(organizationId)));
+        IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Objects.equals(typeCode, v.getTypeCode())).findAny().get();
+        if(ObjectUtils.isEmpty(issueTypeDTO)){
+            throw new CommonException("error.system.issueType.not.found");
+        }
+        return issueTypeDTO;
     }
 
     private void updateExtendEnabled(Long issueTypeId,
@@ -269,14 +321,22 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private void initDefaultStateMachine(Long organizationId,
                                          Long projectId,
                                          IssueTypeVO issueType,
-                                         Set<String> categoryCodes) {
+                                         Set<String> categoryCodes,
+                                         Boolean copyStatusMachine) {
         Long issueTypeId = issueType.getId();
         String typeCode = issueType.getTypeCode();
         String applyType = getApplyTypeByCategoryCodes(categoryCodes, typeCode);
         Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         String stateMachineName = projectVO.getCode() + "-状态机-" + issueType.getName();
-        stateMachineSchemeConfigService.initStatusMachineAndSchemeConfig(organizationId, stateMachineName, stateMachineSchemeId, issueTypeId, projectVO, applyType);
+        Long statusMachineId = null;
+        if (Boolean.TRUE.equals(copyStatusMachine)) {
+            // 查询系统问题类型的状态机id
+            IssueTypeDTO issueTypeDTO = querySystemIssueTypeByCode(organizationId, typeCode);
+            // 查询系统问题类型的状态机
+            statusMachineId = stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeDTO.getId());
+        }
+        stateMachineSchemeConfigService.initStatusMachineAndSchemeConfig(organizationId, stateMachineName, stateMachineSchemeId, issueTypeId, projectVO, applyType, statusMachineId);
         //初始化问题类型方案配置
         initIssueTypeSchemeConfig(organizationId, projectId, issueTypeId, applyType);
     }
