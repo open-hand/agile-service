@@ -96,7 +96,6 @@ const FragmentUpload = inject('AppState')(observer((props) => {
 
   const onThisChange = async (info) => {
     const { file, event } = info;
-    console.log(file);
     if (event) {
       message.error('上传失败');
       setFileList((list) => list.map((item) => {
