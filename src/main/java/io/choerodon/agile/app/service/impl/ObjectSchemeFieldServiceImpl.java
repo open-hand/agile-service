@@ -119,6 +119,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             Long typeId = issueType.getId();
             ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
             dto.setIssueType(type);
+            dto.setIssueTypeId(typeId);
             dto.setProjectId(projectId);
             dto.setOrganizationId(organizationId);
             dto.setFieldId(fieldId);
