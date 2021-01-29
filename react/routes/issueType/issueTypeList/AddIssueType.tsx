@@ -1,9 +1,9 @@
 import React, {
-  useMemo, useCallback, useState, useEffect, useImperativeHandle,
+  useMemo, useCallback, useState, useEffect,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Form, Select, DataSet, TextField, TextArea, IconPicker, Modal, Button,
+  Form, Select, DataSet, TextField, TextArea, IconPicker, Modal, Button, CheckBox,
 } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
 import { debounce } from 'lodash';
@@ -118,6 +118,14 @@ const AddIssueType: React.FC<Props> = ({
         required: true,
         validator: checkIcon,
       },
+      {
+        name: 'copyStatusMachine',
+        label: '是否复制状态机',
+      },
+      {
+        name: 'copyCustomField',
+        label: '是否复制自定义字段',
+      },
     ],
   }), [checkIcon, checkName, isSystemType, standardTypeDataSet, typeId]);
 
@@ -163,6 +171,8 @@ const AddIssueType: React.FC<Props> = ({
       const description = addDataSet.current?.get('description');
       const typeCode = addDataSet.current?.get('typeCode');
       const icon = addDataSet.current?.get('icon');
+      const copyStatusMachine = !typeId ? addDataSet.current?.get('copyStatusMachine') : undefined;
+      const copyCustomField = !typeId ? addDataSet.current?.get('copyCustomField') : undefined;
 
       const data = {
         id: typeId,
@@ -171,6 +181,8 @@ const AddIssueType: React.FC<Props> = ({
         description,
         typeCode,
         icon,
+        copyStatusMachine,
+        copyCustomField,
       };
       if (!typeId) {
         setAddLoading(true);
@@ -320,6 +332,26 @@ const AddIssueType: React.FC<Props> = ({
                 : null
             }
           </div>
+          {
+            !typeId && (
+            <CheckBox
+              name="copyStatusMachine"
+              style={{
+                marginTop: -60,
+              }}
+            />
+            )
+          }
+          {
+            !typeId && (
+            <CheckBox
+              name="copyCustomField"
+              style={{
+                marginTop: -80,
+              }}
+            />
+            )
+          }
         </Form>
       </div>
       <div className={styles.addIssueType_footer}>
