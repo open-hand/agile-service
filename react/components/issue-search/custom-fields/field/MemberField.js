@@ -1,15 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Select } from 'choerodon-ui';
 import SelectMember from '@/components/select/select-user';
 
 function MemberField({
   field, value, onChange, request,
 }) {
   const { code, name } = field;
-  const [, setValue] = useState(0);
-  useEffect(() => {
-  }, [value]);
   const defaultValue = useMemo(() => value, []);
   return (
     <SelectMember
