@@ -277,10 +277,10 @@ const AddIssueType: React.FC<Props> = ({
           <TextField name="name" />
           <TextArea name="description" />
           {
-          !isSystemType && (
-            <Select name="typeCode" />
-          )
-        }
+            !isSystemType && (
+              <Select name="typeCode" />
+            )
+          }
           <div className={styles.icon}>
             <IconPicker
               name="icon"
@@ -289,18 +289,18 @@ const AddIssueType: React.FC<Props> = ({
               }}
             />
             {
-            addDataSet.current?.get('icon') && (
-            <div className={styles.icon_replace}>
-              <TypeTag
-              // @ts-ignore
-                data={{
-                  colour,
-                  icon: addDataSet.current?.get('icon'),
-                }}
-              />
-            </div>
-            )
-          }
+              addDataSet.current?.get('icon') && (
+              <div className={styles.icon_replace}>
+                <TypeTag
+                // @ts-ignore
+                  data={{
+                    colour,
+                    icon: addDataSet.current?.get('icon'),
+                  }}
+                />
+              </div>
+              )
+            }
             <div className={styles.iconPicker}>
               <Icon type="baseline-arrow_drop_down" />
             </div>
