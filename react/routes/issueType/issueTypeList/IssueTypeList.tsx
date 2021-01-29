@@ -199,6 +199,16 @@ function IssueTypeList() {
     );
   }, [isOrganization]);
 
+  const renderTypeCode = useCallback(({ record }: RenderProps) => {
+    const standardTypeMap = new Map([
+      ['story', '故事'],
+      ['task', '任务'],
+      ['bug', '缺陷'],
+      ['sub_task', '子任务'],
+    ]);
+    return record?.get('source') !== 'system' ? standardTypeMap.get(record?.get('typeCode')) : '-';
+  }, []);
+
   const renderUsage = useCallback(({ record }: RenderProps) => (
     <div className={styles.usage} role="none" onClick={() => openUsage({ record })}>
       {record?.get('usageCount') ? `${record?.get('usageCount')}个关联项目` : '无'}
@@ -273,6 +283,7 @@ function IssueTypeList() {
           <Column name="name" width={150} renderer={renderName} />
           <Column name="action" width={50} renderer={renderAction} />
           <Column name="description" />
+          <Column name="typeCode" renderer={renderTypeCode} />
           {
             isOrganization && (
               <Column name="usage" renderer={renderUsage} />
@@ -281,6 +292,7 @@ function IssueTypeList() {
           <Column
             name="source"
             renderer={renderSource}
+            width={100}
           />
           {
             isOrganization && (
