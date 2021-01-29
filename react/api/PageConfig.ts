@@ -157,7 +157,7 @@ class PageConfigApi extends Api<PageConfigApi> {
    *
    */
   loadAvailableIssueType(): Promise<{ id: string, name: string, typeCode: string }[]> {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/configs/issue_types`,
       params: {

@@ -322,10 +322,7 @@ function CreateField() {
         return null;
     }
   }
-  useLayoutEffect(() => {
-    const doms = document.getElementsByClassName('c7n-agile-page-create-field-disabled');
-    console.log('doms', doms);
-  }, []);
+
   return (
     <div className="create-field-form-wrap">
       <Form
