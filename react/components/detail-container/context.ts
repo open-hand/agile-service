@@ -7,7 +7,7 @@ export interface IRoute {
   events?: DetailEvents
 }
 export interface IRouteWithKey extends IRoute {
-  key:React.Key
+  key: React.Key
 }
 interface DetailContainerContext {
   outside: boolean
@@ -19,6 +19,7 @@ interface DetailContainerContext {
   pop: () => void
   close: () => void
   eventsMap: Map<string, DetailEvents>
+  fullPage?: boolean
 }
 const DetailContainerContext = createContext({} as DetailContainerContext);
 

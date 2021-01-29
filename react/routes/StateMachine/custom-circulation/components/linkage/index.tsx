@@ -68,7 +68,7 @@ const Linkage = ({
   useEffect(() => {
     setLoading(true);
     statusTransformApi.getLinkage(selectedType, record.get('id')).then((res: IParentIssueStatusSetting[]) => {
-      const initFields = Field.init(new Array(res.length).fill({}));
+      const initFields = Field.init(new Array(Math.max(res.length, 1)).fill({}));
       initFields.forEach((item: { key: number }, i: number) => {
         addFieldRule(item.key);
         setFieldValue(`${item.key}-type`, res[i].issueTypeId);
@@ -158,18 +158,17 @@ const Linkage = ({
             </Row>
           );
         })}
+        <div>
+          <Button
+            icon="playlist_add"
+            color={'blue' as ButtonColor}
+            onClick={() => {
+              const newKey = Field.add();
+              addFieldRule(newKey);
+            }}
+          />
+        </div>
       </Form>
-      <Button
-        style={{ marginLeft: 24 }}
-        icon="playlist_add"
-        color={'blue' as ButtonColor}
-        onClick={() => {
-          const newKey = Field.add();
-          addFieldRule(newKey);
-        }}
-      >
-        添加状态联动
-      </Button>
     </div>
   );
 };
