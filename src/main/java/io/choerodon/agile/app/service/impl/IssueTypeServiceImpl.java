@@ -456,12 +456,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (ZERO.equals(projectId)) {
             setOrganizationLevelDeleted(result, organizationId);
         } else {
-            setProjectLevelDeletedAndReference(result, organizationId, projectId);
+            setProjectLevelDeletedAndReference(result, projectId);
         }
     }
 
     private void setProjectLevelDeletedAndReference(List<IssueTypeVO> result,
-                                                    Long organizationId,
                                                     Long projectId) {
         Set<Long> referenceIds =
                 result.stream()
@@ -474,14 +473,13 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                     issueMapper.selectCountGroupByIssueTypeId(projectId, issueTypeIds)
                             .stream()
                             .collect(Collectors.toMap(IssueTypeCountVO::getIssueTypeId, IssueTypeCountVO::getCount));
-            Map<Long, IssueTypeVO> issueTypeMap = new HashMap<>();
+            Map<Long, IssueTypeDTO> issueTypeMap = new HashMap<>();
             if (!referenceIds.isEmpty()) {
-                IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
-                issueTypeSearchVO.setIssueTypeIds(new ArrayList<>(referenceIds));
-                Map<Long, IssueTypeVO> map =
-                        issueTypeMapper.selectByOptions(organizationId, organizationId, issueTypeSearchVO)
+                List<Long> list = new ArrayList<>(referenceIds);
+                Map<Long, IssueTypeDTO> map =
+                        issueTypeMapper.selectByIds(StringUtils.collectionToDelimitedString(list, ","))
                                 .stream()
-                                .collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
+                                .collect(Collectors.toMap(IssueTypeDTO::getId, Function.identity()));
                 issueTypeMap.putAll(map);
             }
             result.forEach(x -> {
@@ -491,7 +489,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                     x.setDeleted(deleted);
                     Long referenceId = x.getReferenceId();
                     if (referenceId != null) {
-                        x.setReferenceIssueType(issueTypeMap.get(referenceId));
+                        IssueTypeDTO dto = issueTypeMap.get(referenceId);
+                        if (dto != null) {
+                            x.setReferenceIssueType(modelMapper.map(dto, IssueTypeVO.class));
+                        }
                     }
                 }
             });
@@ -561,11 +562,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             List<ProjectIssueTypeVO> result = buildProjectIssueType(projects, projectEnableMap);
             return PageUtils.copyPropertiesAndResetContent(page, result);
         } else {
-            IssueTypeExtendDTO issueTypeExtendDTO = new IssueTypeExtendDTO();
-            issueTypeExtendDTO.setOrganizationId(organizationId);
-            issueTypeExtendDTO.setIssueTypeId(issueTypeId);
+            Set<Long> issueTypeIds =
+                    issueTypeMapper.selectByReferenceId(new HashSet<>(Arrays.asList(issueTypeId)), organizationId)
+                            .stream().map(IssueTypeDTO::getId).collect(Collectors.toSet());
             Page<IssueTypeExtendDTO> page =
-                    PageHelper.doPageAndSort(pageRequest, () -> issueTypeExtendMapper.select(issueTypeExtendDTO));
+                    PageHelper.doPageAndSort(pageRequest, () -> issueTypeExtendMapper.selectByIssueTypeIds(issueTypeIds, organizationId));
             List<IssueTypeExtendDTO> list = page.getContent();
             if (list.isEmpty()) {
                 return emptyPage;
