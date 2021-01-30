@@ -150,7 +150,7 @@ public class FixDataController {
     }
 
     @Permission(level = ResourceLevel.SITE)
-    @ApiOperation("【0.24】修复页面数据")
+    @ApiOperation("【0.25】修复问题类型数据")
     @GetMapping("/fix_issue_type")
     public ResponseEntity fixIssueType() {
         fixDataService.fixIssueTypeData();

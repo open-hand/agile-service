@@ -31,6 +31,7 @@ public class StatusLinkageVO {
 
     private ProjectVO projectVO;
 
+    @Encrypt
     private Long parentIssueTypeId;
 
     public Long getParentIssueTypeId() {

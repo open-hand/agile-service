@@ -203,7 +203,7 @@ public interface ObjectSchemeFieldService {
 
     String getFieldContext(String code);
 
-    List<ObjectSchemeFieldVO> listPageFieldWithOption(Long organizationId, Long projectId, String schemeCode, List<String> issueTypeList);
+    List<ObjectSchemeFieldVO> listPageFieldWithOption(Long organizationId, Long projectId, String schemeCode, List<Long> issueTypeIds);
 
     void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, ObjectSchemeFieldUpdateVO updateDTO);
 
