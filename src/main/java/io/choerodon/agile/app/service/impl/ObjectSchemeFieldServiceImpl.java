@@ -247,21 +247,35 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
-    public List<ObjectSchemeFieldVO> listPageFieldWithOption(Long organizationId, Long projectId, String schemeCode,
-                                                         List<String> issueTypeList) {
+    public List<ObjectSchemeFieldVO> listPageFieldWithOption(Long organizationId,
+                                                             Long projectId,
+                                                             String schemeCode,
+                                                             List<Long> issueTypeIds) {
         List<ObjectSchemeFieldVO> fieldVOS = generateFieldViews(organizationId, projectId, schemeCode);
         List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetailVOList = objectSchemeFieldMapper.selectCustomFieldList(ConvertUtil.getOrganizationId(projectId), projectId, null);
-        if (CollectionUtils.isEmpty(objectSchemeFieldDetailVOList)){
+        if (CollectionUtils.isEmpty(objectSchemeFieldDetailVOList)) {
             return fieldVOS.stream()
-                    .filter(vo -> CollectionUtils.isEmpty(issueTypeList) || issueTypeList.stream().anyMatch(item -> vo.getContexts().contains(item)))
+                    .filter(vo -> CollectionUtils.isEmpty(issueTypeIds)
+                            || issueTypeIds.stream().anyMatch(
+                                    item -> vo.getIssueTypeVOList()
+                                            .stream()
+                                            .map(IssueTypeVO::getId)
+                                            .collect(Collectors.toList())
+                                            .contains(item)))
                     .collect(Collectors.toList());
         }
         Map<Long, ObjectSchemeFieldDetailVO> map =
                 objectSchemeFieldDetailVOList.stream().collect(Collectors.toMap(ObjectSchemeFieldDetailVO::getId,
                         Function.identity()));
         return fieldVOS.stream()
-                .filter(vo -> CollectionUtils.isEmpty(issueTypeList) || issueTypeList.stream().anyMatch(item -> vo.getContexts().contains(item)))
-                .peek(vo ->vo.setFieldOptions(map.getOrDefault(vo.getId(), new ObjectSchemeFieldDetailVO()).getFieldOptions()))
+                .filter(vo -> CollectionUtils.isEmpty(issueTypeIds)
+                        || issueTypeIds.stream().anyMatch(
+                                item -> vo.getIssueTypeVOList()
+                                        .stream()
+                                        .map(IssueTypeVO::getId)
+                                        .collect(Collectors.toList())
+                                        .contains(item)))
+                .peek(vo -> vo.setFieldOptions(map.getOrDefault(vo.getId(), new ObjectSchemeFieldDetailVO()).getFieldOptions()))
                 .collect(Collectors.toList());
     }
 
