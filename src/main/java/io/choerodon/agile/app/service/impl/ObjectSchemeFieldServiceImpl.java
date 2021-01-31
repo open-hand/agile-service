@@ -353,7 +353,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             dto.setSystem(true);
             List<ObjectSchemeFieldDTO> systemFields = objectSchemeFieldMapper.select(dto);
             systemFields.forEach(field -> {
-//                String context = getFieldContext(field.getCode());
+                String context = getFieldContext(field.getCode());
+                // 过滤当前字段的问题类型
+                String[] contexts = context.split(",");
+                List<IssueTypeVO> issueTypeVOS = issueTypes.stream().filter(v -> Arrays.asList(contexts).contains(v.getTypeCode())).collect(Collectors.toList());
                 String code = field.getCode();
                 Boolean required = field.getRequired();
                 SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(code);
@@ -366,7 +369,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     created = commonField.created();
                     edited = commonField.edited();
                 }
-                issueTypes.forEach(issueType -> {
+                issueTypeVOS.forEach(issueType -> {
                     ObjectSchemeFieldExtendDTO extendField = new ObjectSchemeFieldExtendDTO();
                     extendField.setFieldId(field.getId());
                     extendField.setOrganizationId(organizationId);
