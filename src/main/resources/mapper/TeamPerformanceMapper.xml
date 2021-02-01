@@ -14,7 +14,7 @@
             'story'
             WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
             <if test="isPlugin">
-                AND asp.type != 'ip'
+                AND (asp.type = 'pi' OR asp.type IS NULL)
             </if>
 
             UNION ALL
@@ -28,7 +28,7 @@
             ai.project_id
             WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
             <if test="isPlugin">
-                AND asp.type != 'ip'
+                AND (asp.type = 'pi' OR asp.type IS NULL)
             </if>
         ) ai
         GROUP BY ai.main_responsible_id
@@ -52,7 +52,7 @@
             ) adlm ON adlm.issue_id = ai.issue_id
             WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
             <if test="isPlugin">
-                AND asp.type != 'ip'
+                AND (asp.type = 'pi' OR asp.type IS NULL)
             </if>
 
             UNION ALL
@@ -71,7 +71,7 @@
             ) adlm ON adlm.issue_id = ai.issue_id
             WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
             <if test="isPlugin">
-                AND asp.type != 'ip'
+                AND (asp.type = 'pi' OR asp.type IS NULL)
             </if>
         ) ai
         GROUP BY ai.main_responsible_id
@@ -92,7 +92,7 @@
         'bug' AND ai.environment = #{environment}
         WHERE asp.project_id = #{projectId} AND asp.status_code = 'started'
         <if test="isPlugin">
-            AND asp.type != 'ip'
+            AND (asp.type = 'pi' OR asp.type IS NULL)
         </if>
         <if test="type != null and type == 'dev'">
             GROUP BY ai.main_responsible_id
@@ -116,7 +116,7 @@
             'story'
             WHERE asp.project_id = #{projectId}
             <if test="isPlugin">
-                AND asp.type != 'ip'
+                AND (asp.type = 'pi' OR asp.type IS NULL)
             </if>
 
             UNION ALL
@@ -131,7 +131,7 @@
             ai.project_id
             WHERE asp.project_id = #{projectId}
             <if test="isPlugin">
-                AND asp.type != 'ip'
+                AND (asp.type = 'pi' OR asp.type IS NULL)
             </if>
         ) ai
         GROUP BY ai.sprint_id, ai.sprint_name
@@ -159,7 +159,7 @@
             ) adlm ON adlm.issue_id = ai.issue_id
             WHERE asp.project_id = #{projectId}
             <if test="isPlugin">
-                AND asp.type != 'ip'
+                AND (asp.type = 'pi' OR asp.type IS NULL)
             </if>
 
             UNION ALL
@@ -180,7 +180,7 @@
             ) adlm ON adlm.issue_id = ai.issue_id
 			WHERE asp.project_id = #{projectId}
             <if test="isPlugin">
-                AND asp.type != 'ip'
+                AND (asp.type = 'pi' OR asp.type IS NULL)
             </if>
         ) ai
         GROUP BY ai.sprint_id, ai.sprint_name
@@ -206,7 +206,7 @@
             ('story', 'task', 'sub_task', 'bug')
             WHERE asp.project_id = #{projectId}
             <if test="isPlugin">
-                AND asp.type != 'ip'
+                AND (asp.type = 'pi' OR asp.type IS NULL)
             </if>
         ) aspi
         LEFT JOIN agile_issue ai ON ai.issue_id = aspi.issue_id AND ai.project_id = aspi.project_id AND ai.type_code =
@@ -255,7 +255,7 @@
                 ('story', 'task', 'sub_task', 'bug')
                 WHERE asp.project_id = #{projectId}
                 <if test="isPlugin">
-                    AND asp.type != 'ip'
+                    AND (asp.type = 'pi' OR asp.type IS NULL)
                 </if>
 
                 UNION ALL
@@ -267,7 +267,7 @@
                 ('story', 'task', 'sub_task', 'bug')
                 WHERE asp.project_id = #{projectId}
                 <if test="isPlugin">
-                    AND asp.type != 'ip'
+                    AND (asp.type = 'pi' OR asp.type IS NULL)
                 </if>
 		) aspi
 		GROUP BY aspi.responsible_id
