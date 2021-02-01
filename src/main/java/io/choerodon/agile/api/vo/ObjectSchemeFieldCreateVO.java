@@ -27,7 +27,6 @@ public class ObjectSchemeFieldCreateVO {
     @NotNull(message = "error.field.typeNotNull")
     private String fieldType;
     @ApiModelProperty(value = "上下文")
-    @NotNull(message = "error.field.contextNotNull")
     private String[] context;
     @ApiModelProperty(value = "对象方案编码")
     @NotNull(message = "error.field.schemeCodeNotNull")
@@ -35,6 +34,7 @@ public class ObjectSchemeFieldCreateVO {
     @ApiModelProperty(value = "字段选项列表")
     private List<FieldOptionUpdateVO> fieldOptions;
     @ApiModelProperty(value = "问题类型id")
+    @NotNull(message = "error.field.issueTypeIdNotNull")
     @Encrypt
     private List<Long> issueTypeIds;
 

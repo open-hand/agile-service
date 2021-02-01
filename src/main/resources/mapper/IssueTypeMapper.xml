@@ -54,7 +54,7 @@
         <if test="onlyEnabled">
             and ifnull(t3.enabled, 1) = 1
         </if>
-        order by t2.sequence
+        order by t2.sequence desc
     </select>
 
     <select id="selectSystemIssueTypeByOrganizationIds" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
