@@ -14,6 +14,7 @@ import { IField, IIssueColumnName } from '@/common/types';
 import { TableMode, ColumnAlign, ColumnLock } from 'choerodon-ui/pro/lib/table/enum';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
+import UserTag from '../tag/user-tag';
 
 const { Column } = Table;
 interface Props extends Partial<TableProps> {
@@ -41,7 +42,8 @@ const mapper = (key: IIssueColumnName): string => ({
   label: 'label',
   component: 'component',
   storyPoints: 'storyPoints',
-  version: 'version',
+  fixVersion: 'fixVersion',
+  influenceVersion: 'influenceVersion',
   epic: 'epic',
   feature: 'feature',
 }[key] || key);
@@ -139,7 +141,7 @@ const IssueTable: React.FC<Props> = ({
           lock={'left' as ColumnLock}
           name="issueId"
           hidden={columnHidden('issueId')}
-          width={320}
+          width={400}
           header={() => (
             <div className="c7nagile-issue-table-summary">
               概要
@@ -281,7 +283,8 @@ const IssueTable: React.FC<Props> = ({
         <Column hidden={columnHidden('label')} name="label" className="c7n-agile-table-cell" renderer={renderTag('labelIssueRelVOS', 'labelName')} />
         <Column hidden={columnHidden('component')} name="component" className="c7n-agile-table-cell" renderer={renderTag('issueComponentBriefVOS', 'name')} />
         <Column hidden={columnHidden('storyPoints')} name="storyPoints" className="c7n-agile-table-cell" renderer={({ text }) => text || '-'} />
-        <Column hidden={columnHidden('version')} name="version" className="c7n-agile-table-cell" renderer={renderTag('versionIssueRelVOS', 'name')} />
+        <Column hidden={columnHidden('fixVersion')} name="fixVersion" className="c7n-agile-table-cell" renderer={renderTag('fixVersionIssueRelVOS', 'name')} />
+        <Column hidden={columnHidden('influenceVersion')} name="influenceVersion" className="c7n-agile-table-cell" renderer={renderTag('influenceVersionIssueRelVOS', 'name')} />
         <Column hidden={columnHidden('epic')} name="epic" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />
         {isInProgram && <Column hidden={columnHidden('feature')} name="feature" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />}
         <Column hidden={columnHidden('issueSprintVOS')} name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />
@@ -294,11 +297,11 @@ const IssueTable: React.FC<Props> = ({
             renderer={({ record }) => {
               const { fieldType, code } = field;
               const value = record?.get('foundationFieldValue')[code];
-              if (fieldType === 'member') {
+              if (['member', 'multiMember'].includes(fieldType)) {
                 return value && (
                   <div style={{ display: 'inline-flex' }}>
-                    <UserHead
-                      user={value}
+                    <UserTag
+                      data={value}
                     />
                   </div>
                 );

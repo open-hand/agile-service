@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.ComponentForListVO;
+import io.choerodon.agile.api.vo.MoveComponentVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.SearchVO;
 
@@ -102,7 +103,7 @@ public class IssueComponentController {
                                                                     @ApiParam(value = "查询参数")
                                                                      @RequestBody(required = false) SearchVO searchVO,
                                                                     @ApiParam(value = "分页信息", required = true)
-                                                                     @SortDefault(value = "component_id", direction = Sort.Direction.DESC)
+                                                                     @SortDefault(sort = {"sequence","component_id"}, direction = Sort.Direction.DESC)
                                                                      @ApiIgnore PageRequest pageRequest) {
         return Optional.ofNullable(issueComponentService.queryComponentByProjectId(projectId, componentId, noIssueTest, searchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -147,5 +148,4 @@ public class IssueComponentController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.checkName.get"));
     }
-
 }

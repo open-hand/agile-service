@@ -7,6 +7,9 @@ import { fileApi } from '@/api';
 const { AppState } = stores;
 const QuillDeltaToHtmlConverter = require('quill-delta-to-html');
 
+function validateRichText(text) {
+  return !text ? true : text.length < 4000;
+}
 /**
  * 将以base64的图片url数据转换为Blob
  * @param {string} urlData 用url方式表示的base64图片数据
@@ -60,75 +63,30 @@ export function replaceBase64ToUrl(imgUrlList, imgBase, text) {
   });
 }
 
-/**
- * 适用于各个issue的模态框编辑界面富文本上传
- * 富文本内容上传前的图片的检测与上传
- * @param {object} text 富文本的文本结构
- * @param {object} data 要发送的数据
- * @param {function} func 回调
- */
-export function beforeTextUpload(text, data, func, pro = 'description') {
-  const deltaOps = text;
-  const send = data;
-  const { imgBase, formData } = getImgInDelta(deltaOps);
-  if (imgBase.length) {
-    fileApi.uploadImage(formData).then((imgUrlList) => {
-      replaceBase64ToUrl(imgUrlList, imgBase, deltaOps);
-      const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
-      const html = converter.convert();
-      // send.gitlabDescription = html;
-      send[pro] = JSON.stringify(deltaOps);
-      func(send);
-    });
-  } else {
-    const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
-    const html = converter.convert();
-    // send.gitlabDescription = html;
-    send[pro] = JSON.stringify(deltaOps);
-    func(send);
+export async function uploadAndReplaceImg(delta) {
+  if (!delta) {
+    return '';
   }
-}
-
-export function returnBeforeTextUpload(text, data, func, pro = 'description') {
-  const deltaOps = text;
-  const send = data;
+  const deltaOps = delta;
   const { imgBase, formData } = getImgInDelta(deltaOps);
   if (imgBase.length) {
-    return fileApi.uploadImage(formData).then((imgUrlList) => {
-      replaceBase64ToUrl(imgUrlList, imgBase, deltaOps);
-      const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
-      const html = converter.convert();
-      // send.gitlabDescription = html;
-      send[pro] = JSON.stringify(deltaOps);
-      return func(send);
-    });
+    const imgUrlList = await fileApi.uploadImage(formData);
+    replaceBase64ToUrl(imgUrlList, imgBase, deltaOps);
   }
   const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
   const html = converter.convert();
-  // send.gitlabDescription = html;
-  send[pro] = JSON.stringify(deltaOps);
-  return func(send);
-}
-export async function uploadAndReplaceImg(text) {
-  const deltaOps = text;
-  const { imgBase, formData } = getImgInDelta(deltaOps);
-  if (imgBase.length) {
-    await fileApi.uploadImage(formData).then((imgUrlList) => {
-      replaceBase64ToUrl(imgUrlList, imgBase, deltaOps);
-      const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
-      const html = converter.convert();
-      return JSON.stringify(deltaOps);
-    });
+  const text = JSON.stringify(deltaOps);
+  if (!validateRichText(text)) {
+    Choerodon.prompt('文字过长', 'error');
+    throw new Error('文字过长');
   }
-  const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
-  const html = converter.convert();
-  return JSON.stringify(deltaOps);
+  return text;
 }
 /**
  * 适用于富文本附件上传以及回调
  * @param {any []} propFileList 文件列表
  * @param {function} func 回调
- * @param {{issueType:string,issueId:number,fileName:string}} config 附件上传的额外信息
+ * @param {{issueType?:string,issueId:number,fileName:string}} config 附件上传的额外信息
  */
 export function handleFileUpload(propFileList, func, config, projectId) {
   const fileList = propFileList.filter((i) => !i.url);

@@ -1,11 +1,83 @@
-.agile-issue-type {
-  &-table {
-    table {
-      tbody {
-        td {
-          color: fade(#000, 65%);
+.issueType {
+  .issueTypeTable {
+    .name {
+      :global {
+        .name {
+          color: #000;
+          cursor: pointer;
+          &:hover{
+              text-decoration: underline;
+              color: #3F51B5;
+          }
         }
       }
+    }
+
+    .usage {
+      cursor: pointer;
+      color: #000;
+    }
+  
+  .status {
+    display: inline-block;
+    color: #FFFFFF;
+    font-size: 12px;
+    padding: 0 7px;
+    height: 18px;
+    line-height: 18px;
+    border-radius: 2px;
+    margin-top: -4px;
+  }
+  .status_true {
+    background-color: #00BFA5;
+  }
+  .status_false {
+    background-color: #C6C6C6;
+  }
+  
+    :global {
+      table {
+        tbody {
+          td {
+            color: fade(#000, 65%);
+          }
+        }
+      }
+    }
+  }
+  
+}
+.issueType_menu {
+  :global {
+    .c7n-menu-item {
+      height: 0.32rem;
+      line-height: 0.32rem;
+    }
+  }
+}
+.delete_modal {
+  :global {
+    .c7n-pro-modal-header {
+      padding-top: 20px;
+    }
+    .c7n-pro-modal-body {
+      padding-top: 5px;
+      padding-left: 0.24rem;
+    }
+    .c7n-pro-modal-footer {
+      .c7n-pro-btn-default {
+        color: #000000;
+      }
+    }
+  }
+}
+
+.issueType_modal {
+  :global {
+    .c7n-pro-modal-body {
+      height: calc(100% - 55px);
+      max-height: unset;
+      padding: 0;
     }
   }
 }

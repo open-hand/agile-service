@@ -6,12 +6,13 @@ import humanize from './humanizeDuration';
 
 const { AppState } = stores;
 
+export const getIsOrganization = () => AppState.currentMenuType.type === 'organization';
 export const getProjectId = () => (AppState.currentMenuType ? AppState.currentMenuType.id : 0);
 export const getProjectName = () => (AppState.currentMenuType ? AppState.currentMenuType.name : '');
 export const getOrganizationId = () => (AppState.currentMenuType
   ? AppState.currentMenuType.organizationId
   : 0);
-export const getApplyType = () => (AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile');
+export const getApplyType = () => ((AppState.currentMenuType.categories || []).map((c) => c.code).includes('N_PROGRAM') ? 'program' : 'agile');
 export const getMenuType = () => (AppState.currentMenuType ? AppState.currentMenuType.type : '');
 export const getIsProjectMember = () => {
   if (AppState.userInfo.currentRoleLabels && Array.isArray(AppState.userInfo.currentRoleLabels)) {

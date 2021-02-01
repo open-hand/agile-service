@@ -81,6 +81,17 @@ class ComponentApi {
     );
   }
 
+  move(obj: {
+    before: boolean,
+    componentIds: string[]
+    outsetId: string
+  }) {
+    return axios.post(
+      `${this.prefix}/component/move`,
+      obj,
+    );
+  }
+
   /**
    * 根据模块id加载模块
    * @param componentId

@@ -176,7 +176,7 @@ public class SprintController {
                                                                  @ApiParam(value = "组织id", required = true)
                                                                      @RequestParam Long organizationId,
                                                                  @ApiParam(value = "分页信息", required = true)
-                                                                     @SortDefault(value = "issue_id", direction = Sort.Direction.DESC)
+                                                                     @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                                                      @ApiIgnore PageRequest pageRequest) {
         return Optional.ofNullable(sprintService.queryIssueByOptions(projectId, sprintId, status, pageRequest, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -240,5 +240,15 @@ public class SprintController {
                 .orElseThrow(() -> new CommonException("error.sprintName.check"));
     }
 
+//    @Permission(level = ResourceLevel.ORGANIZATION)
+//    @ApiOperation("冲刺默认值校验")
+//    @GetMapping(value = "/check_default_value")
+//    public ResponseEntity<Boolean> checkDefaultValue(@ApiParam(value = "项目id", required = true)
+//                                                     @PathVariable(name = "project_id") Long projectId,
+//                                                     @RequestParam @Encrypt Long sprintId) {
+//        return Optional.ofNullable(sprintService.checkDefaultValue(projectId, sprintId))
+//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+//                .orElseThrow(() -> new CommonException("error.sprint.defaultValue.check"));
+//    }
 
 }

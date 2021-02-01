@@ -3,18 +3,19 @@ import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import {
-  Button, Modal, Spin, message,
+  Button, Modal, Spin, message, Select,
 } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
+import { toJS } from 'mobx';
 import { Prompt } from 'react-router-dom';
 import {
   pageConfigApi, UIssueTypeConfig,
 } from '@/api/PageConfig';
-import { beforeTextUpload, text2Delta } from '@/utils/richText';
+import { uploadAndReplaceImg, text2Delta } from '@/utils/richText';
 import { validKeyReturnValue } from '@/common/commonValid';
-import { omit } from 'lodash';
+import { omit, set } from 'lodash';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -26,6 +27,7 @@ import CreateField from '../components/create-field';
 import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
+import { transformDefaultValue, beforeSubmitTransform } from './utils';
 
 type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: number, localDefaultObj: any, defaultValueObj: any, };
 function PageIssueType() {
@@ -54,15 +56,17 @@ function PageIssueType() {
         let { created } = item;
         let { edited } = item;
         let { required } = item;
-
+        let extraProps = {};
         if (item.dataSetRecord) {
           newRank = item.dataSetRecord.get('rank');
           created = item.dataSetRecord.get('created');
           edited = item.dataSetRecord.get('edited');
           required = item.dataSetRecord.get('required');
+          extraProps = beforeSubmitTransform(item.dataSetRecord, 'tempKey');
         }
         return {
-          ...omit(item, 'dataSetRecord', 'local', 'localDefaultValue', 'localSource'),
+          ...omit(item, 'dataSetRecord', 'local', 'showDefaultValueText', 'localSource'),
+          ...extraProps,
           rank: newRank,
           created,
           edited,
@@ -75,14 +79,17 @@ function PageIssueType() {
       }
       const issueTypeFieldVO = pageIssueTypeStore.getDescriptionObj;
       const data = {
-        issueType: pageIssueTypeStore.currentIssueType,
+        issueTypeId: pageIssueTypeStore.currentIssueType.id,
         fields: submitData.map((item) => ({
           fieldId: item.get('fieldId'),
           required: item.get('required'),
           created: item.get('created'),
           edited: item.get('edited'),
           rank: item.get('rank'),
+          fieldCode: item.get('fieldCode'),
+          fieldType: item.get('fieldType'),
           objectVersionNumber: item.get('objectVersionNumber'),
+          ...beforeSubmitTransform(item),
         })),
         issueTypeFieldVO: issueTypeFieldVO.dirty ? {
           id: issueTypeFieldVO.id,
@@ -95,14 +102,23 @@ function PageIssueType() {
           created: item.get('created'),
           edited: item.get('edited'),
           rank: item.get('rank'),
+          fieldType: item.get('fieldType'),
+          fieldCode: item.get('fieldCode'),
+          ...beforeSubmitTransform(item),
         })),
         createdFields: CreatedFields,
         deleteIds: pageIssueTypeStore.getDeleteIds,
       };
       if (issueTypeFieldVO.dirty) {
-        beforeTextUpload(text2Delta(issueTypeFieldVO.template), data.issueTypeFieldVO!, () => {
+        uploadAndReplaceImg(text2Delta(issueTypeFieldVO.template)).then((text) => {
+          if (data.issueTypeFieldVO) {
+            data.issueTypeFieldVO.template = text;
+          }
           handleRequest(data);
-        }, 'template');
+        }).catch(() => {
+          setBtnLoading(false);
+          pageIssueTypeStore.setLoading(false);
+        });
       } else {
         handleRequest(data);
       }
@@ -118,8 +134,10 @@ function PageIssueType() {
   const onSubmitLocal = async (data: ILocalFieldPostDataProps, oldField: boolean = false) => {
     const newData = Object.assign(data, {
       local: true,
-      localDefaultValue: oldField ? pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.defaultValueObj, data.fieldOptions)
-        : pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.localDefaultObj, data.fieldOptions, 'tempKey'),
+      showDefaultValueText: oldField ? transformDefaultValue(data)
+        : transformDefaultValue({
+          ...data, defaultValueObj: data.localDefaultObj, fieldOptions: data.fieldOptions || data.localDefaultObj, optionKey: 'tempKey',
+        }),
       localSource: oldField ? 'add' : 'created',
       fieldName: data.name,
       edited: true,
@@ -131,7 +149,7 @@ function PageIssueType() {
     !oldField && pageIssueTypeStore.addCreatedField(newData);
     // 当是增添的已有字段 或是当前类型字段时 增添数据至表格
     if (oldField
-      || (newData.context.some((item: any) => item === 'global' || item === pageIssueTypeStore.currentIssueType))) {
+      || (newData.issueTypeIds.some((item: any) => item === pageIssueTypeStore.currentIssueType))) {
       const newRank = await pageConfigApi.loadRankValue({
         previousRank: null,
         nextRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),

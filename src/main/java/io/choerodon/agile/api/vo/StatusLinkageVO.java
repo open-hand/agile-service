@@ -31,6 +31,16 @@ public class StatusLinkageVO {
 
     private ProjectVO projectVO;
 
+    @Encrypt
+    private Long parentIssueTypeId;
+
+    public Long getParentIssueTypeId() {
+        return parentIssueTypeId;
+    }
+
+    public void setParentIssueTypeId(Long parentIssueTypeId) {
+        this.parentIssueTypeId = parentIssueTypeId;
+    }
 
     public Long getId() {
         return id;

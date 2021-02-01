@@ -2,12 +2,14 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.api.vo.PageConfigFieldEditedVO;
+import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 import org.apache.commons.collections.map.MultiKeyMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -97,9 +99,24 @@ public interface BacklogExpandService {
     /**
      * 获取需求的字段code集合
      * @param fieldCodeS
-     * @param typeCode
+     * @param issueTypeId
      */
-    void getBacklogFieldCodes(List<String> fieldCodeS, String typeCode);
+    void getBacklogFieldCodes(List<String> fieldCodeS, Long issueTypeId);
 
     Boolean checkFieldPageConfig(String issueType, String code, Boolean created, Boolean edited);
+
+    /**
+     * 设置需求预定义字段的默认值对象
+     * @param pageFieldViews
+     * @param projectId
+     * @param organizationId
+     */
+    void setBacklogDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
+
+    /**
+     * 根据传入项目id判断是否开启了需求池
+     *
+     * @return 开启了需求池的项目id
+     */
+    Set<Long> listProjectIdsWhichEnableBacklog(Set<Long> projectIds);
 }

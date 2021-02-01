@@ -23,8 +23,6 @@ public class ConfigurationRuleVO extends AuditDomain {
     private String name;
     private Boolean enabled;
     private String source;
-    @ApiModelProperty("问题类型")
-    private List<String> issueTypes;
     @ApiModelProperty("用户类型")
     private List<String> userTypes;
     @ApiModelProperty("快速搜索创建传值")
@@ -35,8 +33,37 @@ public class ConfigurationRuleVO extends AuditDomain {
     private List<UserDTO> ccList;
     @ApiModelProperty("经办人")
     private List<UserDTO> processerList;
-    private String typeCode;
     private Integer sequence;
+    @Encrypt
+    private List<Long> issueTypeIds;
+    @Encrypt
+    private Long issueTypeId;
+
+    private String issueTypeNames;
+
+    public Long getIssueTypeId() {
+        return issueTypeId;
+    }
+
+    public void setIssueTypeId(Long issueTypeId) {
+        this.issueTypeId = issueTypeId;
+    }
+
+    public String getIssueTypeNames() {
+        return issueTypeNames;
+    }
+
+    public void setIssueTypeNames(String issueTypeNames) {
+        this.issueTypeNames = issueTypeNames;
+    }
+
+    public List<Long> getIssueTypeIds() {
+        return issueTypeIds;
+    }
+
+    public void setIssueTypeIds(List<Long> issueTypeIds) {
+        this.issueTypeIds = issueTypeIds;
+    }
 
     public Integer getSequence() {
         return sequence;
@@ -52,22 +79,6 @@ public class ConfigurationRuleVO extends AuditDomain {
 
     public void setSource(String source) {
         this.source = source;
-    }
-
-    public String getTypeCode() {
-        return typeCode;
-    }
-
-    public void setTypeCode(String typeCode) {
-        this.typeCode = typeCode;
-    }
-
-    public List<String> getIssueTypes() {
-        return issueTypes;
-    }
-
-    public void setIssueTypes(List<String> issueTypes) {
-        this.issueTypes = issueTypes;
     }
 
     public List<String> getUserTypes() {

@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.IssueTypeSearchVO;
+import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.StatusMachineNodeVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -8,6 +10,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections.MapIterator;
@@ -86,6 +89,10 @@ public class FixDataServiceImpl implements FixDataService {
     protected ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired
+    private StatusLinkageMapper statusLinkageMapper;
+    @Autowired(required = false)
+    private AgileTriggerService agileTriggerService;
 
     @Override
     public void fixCreateProject() {
@@ -279,6 +286,56 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("迁移页面数据完成");
     }
 
+    @Override
+    public void fixIssueTypeData() {
+        fixStatusLinkage();
+        if (agileTriggerService != null) {
+            agileTriggerService.fixRuleIssueTypeRel();
+        }
+    }
+
+    private void fixStatusLinkage() {
+        LOGGER.info("===>开始修复fd_status_linkage数据");
+        Long zero = 0L;
+        StatusLinkageDTO statusLinkageDTO = new StatusLinkageDTO();
+        statusLinkageDTO.setParentIssueTypeId(zero);
+        List<StatusLinkageDTO> statusLinkageList = statusLinkageMapper.select(statusLinkageDTO);
+        if (statusLinkageList.isEmpty()) {
+            LOGGER.info("fd_status_linkage数据为空，跳过该步骤");
+            return;
+        }
+        Set<Long> projectIds = statusLinkageList.stream().map(StatusLinkageDTO::getProjectId).collect(Collectors.toSet());
+        Map<Long, Set<Long>> organizationProjectMap = new HashMap<>();
+        projectIds.forEach(x -> {
+            Long organizationId = ConvertUtil.getOrganizationId(x);
+            Set<Long> projectIdSet = organizationProjectMap.computeIfAbsent(organizationId, y -> new HashSet<>());
+            projectIdSet.add(x);
+        });
+        Set<Long> organizationIds = organizationProjectMap.keySet();
+        List<IssueTypeDTO> issueTypes = issueTypeMapper.selectSystemIssueTypeByOrganizationIds(organizationIds);
+        //key1为projectId, key2为typeCode, value为issueTypeId
+        MultiKeyMap multiKeyMap = new MultiKeyMap();
+        issueTypes.forEach(x -> {
+            Long organizationId = x.getOrganizationId();
+            Set<Long> projectIdSet = organizationProjectMap.get(organizationId);
+            if (!ObjectUtils.isEmpty(projectIdSet)) {
+                projectIdSet.forEach(y -> multiKeyMap.put(y, x.getTypeCode(), x.getId()));
+            }
+        });
+        statusLinkageList.forEach(x -> {
+            if (zero.equals(x.getParentIssueTypeId())) {
+                Long projectId = x.getProjectId();
+                String parentTypeCode = x.getParentIssueTypeCode();
+                Long issueTypeId = (Long) multiKeyMap.get(projectId, parentTypeCode);
+                if (issueTypeId != null) {
+                    x.setParentIssueTypeId(issueTypeId);
+                    statusLinkageMapper.updateByPrimaryKeySelective(x);
+                }
+            }
+        });
+        LOGGER.info("===>修复fd_status_linkage数据完成");
+    }
+
     private void resetSameRank(List<ObjectSchemeFieldExtendDTO> insertList) {
         List<ObjectSchemeFieldExtendDTO> organizationLevels =
                 insertList.stream().filter(i -> ObjectUtils.isEmpty(i.getProjectId())).collect(Collectors.toList());
@@ -362,7 +419,7 @@ public class FixDataServiceImpl implements FixDataService {
             if (CollectionUtils.isEmpty(organizationIds)) {
                return;
             }
-            List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectByOrganizationIds(organizationIds);
+            List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectSystemIssueTypeByOrganizationIds(organizationIds);
             Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));
             //获取某个组织下的某个类型的最小rank值
             Map<Long, String> minRankMap = getMinRankMap(rankMap);
@@ -501,7 +558,7 @@ public class FixDataServiceImpl implements FixDataService {
             return;
         }
         Set<Long> organizationIds = pages.stream().map(PageFieldDTO::getOrganizationId).collect(Collectors.toSet());
-        List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectByOrganizationIds(organizationIds);
+        List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectSystemIssueTypeByOrganizationIds(organizationIds);
         Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));
 
         processFields(createPageId, editPageId, dataMap, rankMap, fields, issueTypeMap);
@@ -762,9 +819,14 @@ public class FixDataServiceImpl implements FixDataService {
         }
         List<Long> issueTypeIds = issueTypeSchemeConfigDTOS.stream().map(IssueTypeSchemeConfigDTO::getIssueTypeId).collect(Collectors.toList());
         if ("agile".equals(applyType)) {
-            List<IssueTypeWithInfoDTO> issueTypeWithInfoDTOS = issueTypeMapper.queryIssueTypeList(projectVO.getOrganizationId(), issueTypeIds);
+            Long projectId = projectVO.getId();
+            Long organizationId = projectVO.getOrganizationId();
+            IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+            issueTypeSearchVO.setIssueTypeIds(issueTypeIds);
+            issueTypeSearchVO.setSource("system");
+            List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
             if (!CollectionUtils.isEmpty(issueTypeSchemeConfigDTOS)) {
-                issueTypeIds = issueTypeWithInfoDTOS.stream().filter(v -> !"feature".equals(v.getTypeCode())).map(IssueTypeWithInfoDTO::getId).collect(Collectors.toList());
+                issueTypeIds = issueTypes.stream().filter(v -> !"feature".equals(v.getTypeCode())).map(IssueTypeVO::getId).collect(Collectors.toList());
             }
         }
         for (Long issueTypeId : issueTypeIds) {

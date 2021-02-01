@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>agile-service</artifactId>
-    <version>0.24.3-SNAPSHOT</version>
+    <version>0.25.0-SNAPSHOT</version>
 
     <!--加parent-->
     <parent>
         <groupId>io.choerodon</groupId>
         <artifactId>choerodon-framework-parent</artifactId>
-        <version>0.18.0.RELEASE</version>
+        <version>0.19.0-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -217,6 +217,16 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.20</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.junrar</groupId>
+            <artifactId>junrar</artifactId>
+            <version>7.4.0</version>
         </dependency>
     </dependencies>
 

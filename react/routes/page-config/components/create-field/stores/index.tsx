@@ -1,19 +1,21 @@
-import React, { createContext, useEffect } from 'react';
+import React, { createContext, useEffect, useMemo } from 'react';
 import { inject } from 'mobx-react';
 import { DataSet } from 'choerodon-ui/pro';
 import moment from 'moment';
+import { sortBy } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { InjectedIntl } from 'react-intl';
 import { AppStateProps, IModalProps } from '@/common/types';
 import { getApplyType } from '@/utils/common';
 import FormDataSet from './FormDataSet';
-import useStore from './useStore';
+import useStore, { Store as HookStore } from './useStore';
 import { IFieldPostDataProps } from '../CreateField';
 
 interface Context {
   formatMessage: InjectedIntl['formatMessage'],
   AppState: AppStateProps,
   isEdit?: boolean,
+  store: HookStore,
   defaultContext?: string[],
   onSubmitLocal?: (data: IFieldPostDataProps) => Promise<boolean> | boolean,
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
@@ -36,16 +38,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
     } = props;
     const isEdit = !!record;
     const store = useStore(type, id, organizationId);
-    const defaultUserId = isEdit && record?.get('defaultValue');
-    const filterContext = ['global'];
-    if (type === 'project') {
-      filterContext.push('feature');
-    }
-    if (getApplyType() === 'program') { // 临时增加项目群限制
-      filterContext.pop();
-      filterContext.push(...['story', 'task', 'sub_task', 'bug']);
-    }
-    const formDataSet = new DataSet(FormDataSet({
+    const formDataSet = useMemo(() => new DataSet(FormDataSet({
       formatMessage,
       type,
       store,
@@ -56,8 +49,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
       localCheckCode,
       localCheckName,
       defaultContext,
-      filterContext,
-    }));
+    })), [defaultContext, formatMessage, id, isEdit, localCheckCode, localCheckName, record, schemeCode, store, type]);
 
     useEffect(() => {
       if (isEdit) {
@@ -70,6 +62,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
               if (data.defaultValue === '') {
                 data.defaultValue = undefined;
               }
+              data.issueTypeVOList = sortBy(data.issueTypeVOList, (i) => (i.enabled ? 1 : -1));
               return data;
             } catch (error) {
               return response;
@@ -78,7 +71,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
         });
         formDataSet.query().then((data) => {
           const dateList = ['date', 'datetime', 'time'];
-          const multipleList = ['checkbox', 'multiple'];
+          const multipleList = ['checkbox', 'multiple', 'multiMember'];
           const dateFormat = ['YYYY-MM-DD', 'YYYY-MM-DD HH:mm:ss', 'HH:mm:ss'];
           const dateIndex = dateList.indexOf(data.fieldType);
           if (dateIndex !== -1) {
@@ -90,20 +83,20 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
           if (data.fieldType === 'number') {
             formDataSet.current?.set('check', data.extraConfig);
           }
-          if (data.context && data.context[0] === 'global') {
-            const arr = formDataSet.current?.getField('context')?.options?.map((item) => item.get('valueCode'));
-            formDataSet.current?.set('context', arr);
+          if (data.issueTypeVOList && Array.isArray(data.issueTypeVOList)) {
+            formDataSet.current?.set('context', data.issueTypeVOList.map((item: any) => item.id));
           }
           if (multipleList.indexOf(data.fieldType) !== -1) {
             formDataSet.current?.set('defaultValue', data.defaultValue && data.defaultValue.split && data.defaultValue.split(','));
           }
         });
       }
-    }, []);
+    }, [formDataSet]);
 
     const value = {
       ...props,
       isEdit,
+      store,
       formDataSet,
     };
 

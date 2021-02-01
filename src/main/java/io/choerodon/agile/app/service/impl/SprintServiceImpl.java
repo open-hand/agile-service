@@ -191,8 +191,30 @@ public class SprintServiceImpl implements SprintService {
         moveIssueToBacklog(projectId, sprintId);
         issueAccessDataService.batchRemoveFromSprint(projectId, sprintId);
         delete(sprintConvertDTO);
+//        //删除冲刺时清空默认值
+//        deleteDefaultValueOfSprint(projectId, sprintId);
         return true;
     }
+
+//    /**
+//     * 完成或删除冲刺时，清空该冲刺的默认值设置
+//     * @param projectId
+//     * @param sprintId
+//     */
+//    private void deleteDefaultValueOfSprint(Long projectId, Long sprintId) {
+//        ObjectSchemeFieldDTO fieldDTO = objectSchemeFieldService.getObjectSchemeFieldDTO(FieldCode.SPRINT);
+//        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+//        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
+//        for (ObjectSchemeFieldExtendDTO objectSchemeFieldExtendDTO : objectSchemeFieldExtendList) {
+//            String defaultValue = objectSchemeFieldExtendDTO.getDefaultValue();
+//            if (!Objects.isNull(defaultValue) && Objects.equals(defaultValue, sprintId.toString())) {
+//                objectSchemeFieldExtendDTO.setDefaultValue("");
+//                if (objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(objectSchemeFieldExtendDTO) != 1) {
+//                    throw new CommonException("error.extend.field.update");
+//                }
+//            }
+//        }
+//    }
 
     private void moveIssueToBacklog(Long projectId, Long sprintId) {
         List<MoveIssueDTO> moveIssueDTOS = new ArrayList<>();
@@ -255,7 +277,7 @@ public class SprintServiceImpl implements SprintService {
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         setStatusIsCompleted(projectId, statusMapDTOMap);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         handleSprintIssueData(issueIdSprintIdVOS, issueIds, sprintSearches, backLogIssueVO, projectId, priorityMap, statusMapDTOMap, issueTypeDTOMap,allIssueIds);
         backlog.put(SPRINT_DATA, sprintSearches);
         backlog.put(BACKLOG_DATA, backLogIssueVO);
@@ -416,6 +438,8 @@ public class SprintServiceImpl implements SprintService {
         sprintConvertDTO.completeSprint();
         update(sprintConvertDTO);
         moveNotDoneIssueToTargetSprint(projectId, sprintCompleteVO);
+//        //完成冲刺时清空默认值
+//        deleteDefaultValueOfSprint(projectId, sprintCompleteVO.getSprintId());
         return true;
     }
 
@@ -500,8 +524,10 @@ public class SprintServiceImpl implements SprintService {
         sprint.setActualEndDate(actualEndDate);
         Date startDate = sprint.getStartDate();
         Page<Long> reportIssuePage = new Page<>();
-        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", new HashMap<>());
-        //pageable.resetOrder("ai", new HashMap<>());
+        Map<String, String> maps = new HashMap<>();
+        maps.put("issueNum","issue_num_convert");
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", maps);
+        pageRequest.setSort(sort);
         switch (status) {
             case DONE:
                 reportIssuePage = PageHelper.doPageAndSort(pageRequest, () -> reportMapper.queryReportIssueIds(projectId, sprintId, actualEndDate, true));
@@ -552,7 +578,7 @@ public class SprintServiceImpl implements SprintService {
             return reportIssue;
         }).collect(Collectors.toList());
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         return PageUtil.buildPageInfoWithPageInfoList(reportIssuePage, issueAssembler.issueDoToIssueListDto(reportIssues, priorityMap, statusMapDTOMap, issueTypeDTOMap));
     }
 
@@ -697,5 +723,19 @@ public class SprintServiceImpl implements SprintService {
         dataLogRedisUtil.deleteByUpdateSprint(sprintConvertDTO);
         return true;
     }
+
+//    @Override
+//    public Boolean checkDefaultValue(Long projectId, Long sprintId) {
+//        ObjectSchemeFieldDTO fieldDTO = objectSchemeFieldService.getObjectSchemeFieldDTO(FieldCode.SPRINT);
+//        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+//        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
+//        for (ObjectSchemeFieldExtendDTO objectSchemeFieldExtendDTO : objectSchemeFieldExtendList) {
+//            String defaultValue = objectSchemeFieldExtendDTO.getDefaultValue();
+//            if (!Objects.isNull(defaultValue) && Objects.equals(defaultValue, sprintId.toString())) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
 }

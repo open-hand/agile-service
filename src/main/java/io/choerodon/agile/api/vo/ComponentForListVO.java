@@ -47,6 +47,9 @@ public class ComponentForListVO {
     @ApiModelProperty(value = "图标")
     private String imageUrl;
 
+    @ApiModelProperty(value = "模块排序")
+    private Integer sequence;
+
     public Long getComponentId() {
         return componentId;
     }
@@ -133,6 +136,14 @@ public class ComponentForListVO {
 
     public void setManagerRealName(String managerRealName) {
         this.managerRealName = managerRealName;
+    }
+
+    public Integer getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
     }
 
     @Override

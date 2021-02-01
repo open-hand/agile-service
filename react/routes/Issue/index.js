@@ -20,23 +20,25 @@ import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import ImportIssue from '@/components/ImportIssue';
 import FilterManage from '@/components/FilterManage';
+import DetailContainer, { useDetail } from '@/components/detail-container';
+import TableModeSwitch from '@/components/tree-list-switch';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
-import IssueDetail from './components/issue-detail';
 import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
 
 const Issue = observer(() => {
   const {
-    dataSet, projectId, issueSearchStore, fields,
+    dataSet, projectId, issueSearchStore, fields, changeTableListMode, tableListMode,
   } = useContext(Store);
   const history = useHistory();
   const location = useLocation();
   const [urlFilter, setUrlFilter] = useState(null);
   const importRef = useRef();
   const tableRef = useRef();
+  const [props] = useDetail();
   IssueStore.setTableRef(tableRef);
   const visibleColumns = useMemo(() => {
     if (localPageCacheStore.getItem('issues.table')) {
@@ -127,6 +129,7 @@ const Issue = observer(() => {
       await IssueStore.query();
     } else {
       const { pageInfo = {} } = localPageCacheStore.getItem('issues.table') || {};
+
       await IssueStore.query(pageInfo.currentPage);
     }
   };
@@ -173,7 +176,6 @@ const Issue = observer(() => {
   const handleClickSaveFilter = () => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
-
   return (
     <Page
       className="c7nagile-issue"
@@ -204,13 +206,19 @@ const Issue = observer(() => {
           onClick={() => openExportIssueModal(
             issueSearchStore.getAllFields,
             issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
-            dataSet, tableRef,
+            dataSet, tableRef, tableListMode,
           )}
         >
           导出问题
         </Button>
-        <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button>
+        <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
         <CollapseAll dataSet={dataSet} tableRef={tableRef} />
+        <TableModeSwitch
+          data={tableListMode ? 'list' : 'tree'}
+          onChange={(mode) => {
+            changeTableListMode(mode === 'list');
+          }}
+        />
       </Header>
       <Breadcrumb />
       <Content style={{ paddingTop: 0 }} className="c7nagile-issue-content">
@@ -231,16 +239,28 @@ const Issue = observer(() => {
           visibleColumns={visibleColumns}
           onCreateIssue={handleCreateIssue}
           onRowClick={(record) => {
-            // dataSet.select(record);
-            const editFilterInfo = IssueStore.getEditFilterInfo;
-            IssueStore.setClickedRow({
-              selectedIssue: {
+            props.open({
+              path: 'issue',
+              props: {
                 issueId: record.get('issueId'),
+                // store: detailStore,
               },
-              expand: true,
+              events: {
+                update: () => {
+                  refresh();
+                },
+              },
             });
-            IssueStore.setFilterListVisible(false);
-            IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
+            // dataSet.select(record);
+            // const editFilterInfo = IssueStore.getEditFilterInfo;
+            // IssueStore.setClickedRow({
+            //   selectedIssue: {
+            //     issueId: record.get('issueId'),
+            //   },
+            //   expand: true,
+            // });
+            // IssueStore.setFilterListVisible(false);
+            // IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
           }}
           selectedIssue={IssueStore.selectedIssue?.issueId}
         />
@@ -257,10 +277,7 @@ const Issue = observer(() => {
             onOk={handleCreateIssue}
           />
         )}
-        <IssueDetail
-          issueRefresh={refresh}
-          dataSet={dataSet}
-        />
+        <DetailContainer {...props} />
         <ImportIssue ref={importRef} onFinish={refresh} />
       </Content>
     </Page>

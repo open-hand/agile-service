@@ -1,11 +1,12 @@
+import { set } from 'lodash';
 /* eslint-disable import/no-anonymous-default-export */
 export default ({
-  projectId, organizationId, issueSearchStore, events, searchDTO,
+  projectId, organizationId, issueSearchStore, events, searchDTO, tableListMode,
 }) => ({
   primaryKey: 'issueId',
   autoQuery: false,
   modifiedCheck: false,
-  parentField: 'parentId',
+  parentField: tableListMode ? undefined : 'parentId',
   expandField: 'expand',
   idField: 'issueId',
   paging: 'server',
@@ -20,6 +21,7 @@ export default ({
       },
       transformRequest: () => {
         const search = searchDTO || issueSearchStore.getCustomFieldFilters();
+        set(search, 'searchArgs.tree', !tableListMode);
         return JSON.stringify(search);
       },
     }),
@@ -35,7 +37,8 @@ export default ({
     { name: 'label', type: 'string', label: '标签' },
     { name: 'component', type: 'string', label: '模块' },
     { name: 'storyPoints', type: 'string', label: '故事点' },
-    { name: 'version', type: 'string', label: '版本' },
+    { name: 'fixVersion', type: 'string', label: '修复的版本' },
+    { name: 'influenceVersion', type: 'string', label: '影响的版本' },
     { name: 'epic', type: 'string', label: '史诗' },
     { name: 'feature', type: 'string', label: '特性' },
     { name: 'lastUpdateDate', type: 'string', label: '最后更新时间' },

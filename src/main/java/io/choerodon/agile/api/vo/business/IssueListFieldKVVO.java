@@ -152,6 +152,12 @@ public class IssueListFieldKVVO {
 
     private String environment;
 
+    @ApiModelProperty(value = "修复的版本")
+    private List<VersionIssueRelVO> fixVersionIssueRelVOS;
+
+    @ApiModelProperty(value = "影响的版本")
+    private List<VersionIssueRelVO> influenceVersionIssueRelVOS;
+
     public Boolean getStarBeacon() {
         return starBeacon;
     }
@@ -516,5 +522,21 @@ public class IssueListFieldKVVO {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public List<VersionIssueRelVO> getFixVersionIssueRelVOS() {
+        return fixVersionIssueRelVOS;
+    }
+
+    public void setFixVersionIssueRelVOS(List<VersionIssueRelVO> fixVersionIssueRelVOS) {
+        this.fixVersionIssueRelVOS = fixVersionIssueRelVOS;
+    }
+
+    public List<VersionIssueRelVO> getInfluenceVersionIssueRelVOS() {
+        return influenceVersionIssueRelVOS;
+    }
+
+    public void setInfluenceVersionIssueRelVOS(List<VersionIssueRelVO> influenceVersionIssueRelVOS) {
+        this.influenceVersionIssueRelVOS = influenceVersionIssueRelVOS;
     }
 }

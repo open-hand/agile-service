@@ -1,9 +1,10 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
+import { sameProject } from '@/utils/detail';
 import Api from './Api';
 
 interface IFiled {
-  context: string, // "task"
+  issueTypeId: string, // "task"
   pageCode: string, // "agile_issue_create"
   schemeCode: string, // "agile_issue"
 }
@@ -24,6 +25,18 @@ class FieldApi extends Api<FieldApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
+  get outPrefix() {
+    return '/agile/v1/backlog_external';
+  }
+
+  get isOutside() {
+    return false;
+  }
+
+  outside(outside: boolean) {
+    return this.overwrite('isOutside', outside);
+  }
+
   /**
      * 快速创建字段默认值
      * @param issueId
@@ -35,7 +48,7 @@ class FieldApi extends Api<FieldApi> {
     return axios({
       method: 'post',
       url: `${this.prefix}/field_value/quick_create/${issueId}`,
-      data: dto,
+      data: { ...dto, context: 'story' },
       params: {
         organizationId,
       },
@@ -46,15 +59,14 @@ class FieldApi extends Api<FieldApi> {
  * 加载字段配置
  * @returns {V|*}
  */
-  getFields(dto: IFiled, projectId?: number) {
-    const organizationId = getOrganizationId();
+  getFields(dto: IFiled, projectId?: string) {
     return axios({
       method: 'post',
       url: `/agile/v1/projects/${projectId || getProjectId()}/field_value/list`,
       params: {
-        organizationId,
+        organizationId: this.orgId,
       },
-      data: dto,
+      data: { ...dto, context: 'story' },
     });
   }
 
@@ -62,15 +74,23 @@ class FieldApi extends Api<FieldApi> {
  * 加载字段配置（包含值）
  * @returns {V|*}
  */
-  getFieldAndValue(issueId: number, dto: IFiled) {
-    const organizationId = getOrganizationId();
-    return this.request({
+  getFieldAndValue(issueId: string, dto: IFiled) {
+    return this.isOutside ? this.request({
       method: 'post',
-      url: `${this.prefix}/field_value/list/${issueId}`,
+      url: `${this.outPrefix}/field_value/list/${issueId}`,
       params: {
-        organizationId,
+        projectId: this.projectId,
+        organizationId: this.orgId,
       },
-      data: dto,
+      data: { ...dto, context: 'story' },
+    }) : this.request({
+      method: 'post',
+      url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}field_value/list/${issueId}`,
+      params: {
+        organizationId: this.orgId,
+        instanceProjectId: this.projectId,
+      },
+      data: { ...dto, context: 'story' },
     });
   }
 
@@ -155,6 +175,19 @@ class FieldApi extends Api<FieldApi> {
         organizationId: getOrganizationId(),
         schemeCode: 'agile_issue',
         issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
+      },
+    });
+  }
+
+  /**
+   *获取概要默认值
+   * @param issueTypeId
+   */
+  getSummaryDefaultValue(issueTypeId: string): Promise<string | undefined> {
+    return axios.get(`${this.prefix}/field_value/summary_default_value`, {
+      params: {
+        issueTypeId,
+        organizationId: getOrganizationId(),
       },
     });
   }

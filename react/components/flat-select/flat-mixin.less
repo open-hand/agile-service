@@ -45,11 +45,11 @@
     }
 
     .c7n-pro-@{type}::placeholder {
-      color: rgba(0, 0, 0, 0.6);
+      color: rgba(0, 0, 0, 0.87);
     }
 
     .c7n-pro-@{type}-placeholder {
-      color: rgba(0, 0, 0, 0.6);
+      color: rgba(0, 0, 0, 0.87);
     }
 
     .c7n-pro-@{type}-multiple-block {
@@ -59,10 +59,17 @@
     .c7n-pro-@{type}-multiple-value {
       width: 0;
     }
+
     .c7n-pro-@{type}-suffix {
       top: 4px;
     }
+
     
+
+    .c7n-pro-@{type}-trigger {
+      transform: none;
+    }
+
     .@{type}-text {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -79,7 +86,11 @@
       max-width: 100%;
     }
   }
-
+  .flat-@{type}.c7n-pro-@{type}-expand {
+    .c7n-pro-@{type}-placeholder {
+      color: rgba(0, 0, 0, 0.3);
+    }
+  }
   // 没有值间距小一点
   .flat-@{type}.c7n-pro-@{type}-empty {
     .c7n-pro-@{type} {

@@ -41,6 +41,8 @@ public class IssueComponentDTO extends AuditDomain {
 
     private String defaultAssigneeRole;
 
+    private Integer sequence;
+
     public void setComponentId(Long componentId) {
         this.componentId = componentId;
     }
@@ -87,5 +89,13 @@ public class IssueComponentDTO extends AuditDomain {
 
     public String getDefaultAssigneeRole() {
         return defaultAssigneeRole;
+    }
+
+    public Integer getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
     }
 }

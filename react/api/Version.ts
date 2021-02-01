@@ -76,7 +76,7 @@ class VersionApi extends Api<VersionApi> {
   loadProgramVersion(selectAll: boolean = false, teamProjectIds?: string[]) {
     return this.request({
       method: 'get',
-      url: `/agile/v1/projects/${getProjectId()}/program_version/list_program_version`,
+      url: `${this.prefix}/program_version/list_program_version`,
       params: {
         organizationId: getOrganizationId(),
         teamProjectIds: teamProjectIds ? String(teamProjectIds) : undefined,

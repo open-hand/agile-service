@@ -148,4 +148,12 @@ public class FixDataController {
         fixDataService.fixPage();
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation("【0.25】修复问题类型数据")
+    @GetMapping("/fix_issue_type")
+    public ResponseEntity fixIssueType() {
+        fixDataService.fixIssueTypeData();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

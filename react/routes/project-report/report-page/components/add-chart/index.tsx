@@ -8,6 +8,7 @@ import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import SelectTeam from '@/components/select/select-team';
 import { FieldIgnore } from 'choerodon-ui/pro/lib/data-set/enum';
+import useIsProgram from '@/hooks/useIsProgram';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';
@@ -50,8 +51,7 @@ export interface ChartRefProps {
 }
 const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
-  const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
-  const isProgram = type === 'program';
+  const { isProgram } = useIsProgram();
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     data: editData ? [{ title: editData.title, chart: editData.chartCode, subProjectId: editData.chartSearchVO.projectId }] : undefined,

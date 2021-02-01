@@ -28,7 +28,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
     valueField: valueField || 'id',
     request: () => issueTypeApi.loadAllWithStateMachineId(isProgram ? 'program' : undefined).then((issueTypes) => {
       if (isProgram) {
-        const featureTypes = [{
+        const featureTypes:any = [{
           id: 'business',
           name: '特性',
           colour: '',

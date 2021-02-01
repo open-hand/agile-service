@@ -1,35 +1,50 @@
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import EditIssue from '@/components/EditIssue';
+import DetailContainer, { useDetail } from '@/components/detail-container';
 import Context from '../../context';
 
 interface Props {
   refresh: () => void
 }
-const IssueDetail:React.FC<Props> = ({ refresh }) => {
+const IssueDetail: React.FC<Props> = ({ refresh }) => {
   const { store } = useContext(Context);
   const { issueId } = store;
   const handleResetIssue = useCallback((newIssueId) => {
     store.setIssueId(newIssueId);
   }, [store]);
+  const [detailProps] = useDetail();
+  const { open, close } = detailProps;
+
+  const visible = issueId;
+  useEffect(() => {
+    if (visible) {
+      open({
+        path: 'issue',
+        props: {
+          issueId,
+        },
+        events: {
+          update: () => {
+            refresh();
+          },
+          delete: () => {
+            handleResetIssue(null);
+            refresh();
+          },
+          close: () => {
+            handleResetIssue(null);
+          },
+          copy: () => {
+            refresh();
+          },
+        },
+      });
+    } else {
+      close();
+    }
+  }, [visible, issueId, open, refresh, handleResetIssue, close]);
   return (
-    <EditIssue
-      visible={issueId}
-      issueId={issueId}
-      onCancel={() => {
-        handleResetIssue(null);
-      }}
-      onDeleteIssue={() => {
-        handleResetIssue(null);
-        refresh();
-      }}
-      onUpdate={() => {
-        refresh();
-      }}
-      // resetIssue={(parentIssueId) => {
-      //   handleResetIssue(parentIssueId);
-      // }}
-    />
+    <DetailContainer {...detailProps} />
   );
 };
 

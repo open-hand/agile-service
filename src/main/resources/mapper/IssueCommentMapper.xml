@@ -16,7 +16,7 @@
     <select id="queryIssueCommentList" resultMap="issueCommentDetail">
         SELECT *
         FROM agile_issue_comment
-        WHERE issue_id = #{issueId} AND project_id = #{projectId}
+        WHERE issue_id = #{issueId} AND project_id = #{projectId} AND parent_id = 0
     </select>
 
     <select id="queryIssueAttachmentByCommentId" resultType="io.choerodon.agile.infra.dto.IssueAttachmentDTO">
@@ -25,4 +25,41 @@
         WHERE comment_id = #{commentId}
     </select>
 
+    <update id="updateTransferProject">
+        update agile_issue_comment set project_id = #{targetProjectId}
+        where project_id = #{projectId} and issue_id = #{issueId}
+    </update>
+
+    <update id="updateChildRecordParentNull">
+        update
+        agile_issue_comment set parent_id = 0
+        where project_id = #{projectId}
+        and parent_id = #{commentId}
+    </update>
+
+    <select id="selectIssueCommentDesByParentId" resultType="io.choerodon.agile.infra.dto.IssueCommentDTO">
+        select
+        comment_id,
+        user_id,
+        issue_id,
+        comment_text,
+        project_id,
+        parent_id,
+        reply_to_user_id,
+        object_version_number,
+        created_by,
+        creation_date,
+        last_updated_by,
+        last_update_date
+        from agile_issue_comment
+        where project_id = #{projectId}
+        and parent_id = #{parentId}
+    </select>
+
+    <update id="updateChildNewParent">
+        update
+        agile_issue_comment set parent_id = #{newCommentId}
+        where project_id = #{projectId}
+        and parent_id = #{oldCommentId}
+    </update>
 </mapper>

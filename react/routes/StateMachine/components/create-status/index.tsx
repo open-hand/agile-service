@@ -4,20 +4,19 @@ import React, {
 import {
   Modal, Form, DataSet, TextField, Select, SelectBox,
 } from 'choerodon-ui/pro';
-import { stores, axios } from '@choerodon/boot';
+import { axios } from '@choerodon/boot';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { IStatus, IIssueType } from '@/common/types';
 import StatusTypeTag from '@/components/tag/status-type-tag';
-import { find } from 'lodash';
 import './index.less';
-import { useIssueTypes } from '@/hooks';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { statusTransformApiConfig } from '@/api';
 import { observer } from 'mobx-react-lite';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
+import useIsProgram from '@/hooks/useIsProgram';
 
-const { AppState } = stores;
 const { Option } = SelectBox;
 const key = Modal.key();
 interface Props {
@@ -31,12 +30,12 @@ const CreateStatus: React.FC<Props> = ({
   const modalRef = useRef(modal);
   modalRef.current = modal;
   const [type, setType] = useState<IStatus['valueCode'] | null>(null);
-  const [issueTypes] = useIssueTypes();
+  const { data: issueTypes } = useProjectIssueTypes();
   // 记录哪些类型下已经有同名状态
   const [hasStatusIssueTypes, setHasStatusIssueTypes] = useState<IIssueType[]>([]);
   const hasStatusIssueTypesRef = useRef<IIssueType[]>([]);
   hasStatusIssueTypesRef.current = hasStatusIssueTypes;
-  const isProgram = AppState.currentMenuType.category === 'PROGRAM';
+  const { isProgram } = useIsProgram();
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     transport: {
@@ -182,7 +181,7 @@ const CreateStatus: React.FC<Props> = ({
           disabled={type !== null}
         />
         <Select name="issueTypeIds" multiple>
-          {issueTypes.map((issueType) => (
+          {(issueTypes || []).map((issueType) => (
             <Option value={issueType.id}>
               {issueType.name}
             </Option>

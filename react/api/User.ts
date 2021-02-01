@@ -6,7 +6,7 @@ import Api from './Api';
 
 class UserApi extends Api<UserApi> {
   get prefix() {
-    return `/iam/choerodon/v1/projects/${getProjectId()}`;
+    return `/iam/choerodon/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -20,7 +20,7 @@ class UserApi extends Api<UserApi> {
  * 根据用户id查询用户信息
  * @param userId
  */
-  getById(userId: number | string) {
+  getById(userId: string | string) {
     return axios.get(`${this.prefix}/users?id=${userId}`);
   }
 
@@ -30,9 +30,10 @@ class UserApi extends Api<UserApi> {
    * @param page
    * @param id 根据id查询
    */
-  getAllInProject(param?: string, page?: number, userId?: number, size?: number, projectId?: number): Promise<{
+  getAllInProject(param?: string, page?: number, userId?: number, size?: number, projectId?: string): Promise<{
     list: User[]
     hasNextPage: boolean
+    number: number
   }> {
     return this.request({
       method: 'get',
@@ -43,7 +44,7 @@ class UserApi extends Api<UserApi> {
         page: page || 1,
         size: size || 20,
       },
-      cache: true,
+      // cache: true,
     });
   }
 

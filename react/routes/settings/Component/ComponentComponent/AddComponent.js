@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React, { Component, Fragment, useState, useImperativeHandle, forwardRef } from 'react';
 import {
-  Form, Input, Select, message, Button,
+  Form, Input, Select, message, Button, InputNumber
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import { Content, stores, Choerodon } from '@choerodon/boot';
@@ -31,13 +31,14 @@ function AddComponent(props) {
     props.form.validateFields((err, values) => {
       if (!err) {
         const {
-          defaultAssigneeRole, description, managerId, name,
+          defaultAssigneeRole, description, managerId, name, sequence
         } = values;
         const component = {
           defaultAssigneeRole,
           description,
           managerId: managerId ? JSON.parse(managerId).id || 0 : 0,
           name: name.trim(),
+          sequence
         };
         componentApi.create(component)
           .then((res) => {
@@ -97,12 +98,12 @@ function AddComponent(props) {
   const checkComponentNameRepeat = (rule, value, callback) => {
     if (value && value.trim()) {
       componentApi.checkName(value.trim()).then((res) => {
-          if (res) {
-            callback('模块名称重复');
-          } else {
-            callback();
-          }
-        });
+        if (res) {
+          callback('模块名称重复');
+        } else {
+          callback();
+        }
+      });
     } else {
       callback();
     }
@@ -137,6 +138,11 @@ function AddComponent(props) {
       <FormItem style={{ marginBottom: 20 }}>
         {getFieldDecorator('description', {})(
           <Input label="模块描述" maxLength={30} />,
+        )}
+      </FormItem>
+      <FormItem style={{ marginBottom: 20 }}>
+        {getFieldDecorator('sequence', {})(
+          <InputNumber label="模块顺序" min={1} max={100000} />,
         )}
       </FormItem>
       <FormItem style={{ marginBottom: 20 }}>

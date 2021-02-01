@@ -94,6 +94,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
         if (checkNameUpdate(projectId, id, issueComponentVO.getName())) {
             throw new CommonException("error.componentName.exist");
         }
+        IssueComponentValidator.checkUpdateComponent(projectId, issueComponentVO);
         issueComponentVO.setComponentId(id);
         IssueComponentDTO issueComponentDTO = modelMapper.map(issueComponentVO, IssueComponentDTO.class);
         return modelMapper.map(updateBase(issueComponentDTO), IssueComponentVO.class);
@@ -122,6 +123,8 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
     @Override
     public void delete(Long projectId, Long id, Long relateComponentId) {
+//        //默认值校验
+//        objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfMultiple(projectId, id, FieldCode.COMPONENT);
         if (relateComponentId == null) {
             unRelateIssueWithComponent(projectId, id);
         } else {

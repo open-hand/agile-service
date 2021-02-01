@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.choerodon.agile.api.vo.FieldDataLogCreateVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
@@ -21,6 +22,7 @@ import io.choerodon.agile.infra.mapper.FieldOptionMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author shinan.chen
@@ -131,6 +133,32 @@ public class FieldValueUtil {
                     // 用户id加密
                     value = EncryptionUtils.encrypt(values.get(0).getOptionId());
                     break;
+                case FieldType.MULTI_MEMBER:
+                    List<Long> optionIds = values.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList());
+                    if(!CollectionUtils.isEmpty(optionIds)){
+                        //是否仅需要字符串，用于导出
+                        if (isJustStr) {
+                            List<String> userStr = new ArrayList<>();
+                            optionIds.forEach(v -> {
+                                UserDTO userVO = userMap.get(v);
+                                if (userVO != null) {
+                                    userStr.add(userVO.getRealName() + "（"+ userVO.getEmail() + "）");
+                                }
+                            });
+                            valueStr =  userStr.stream().collect(Collectors.joining(","));
+                        } else {
+                           List<UserDTO> userDTOList = new ArrayList<>();
+                           optionIds.forEach(v -> {
+                               UserDTO userDTO = userMap.get(v);
+                               if (!ObjectUtils.isEmpty(userDTO)) {
+                                   userDTOList.add(userDTO);
+                               }
+                           });
+                           valueStr = userDTOList;
+                        }
+                        // 用户id加密
+                        value = EncryptionUtils.encryptList(optionIds);
+                    }
                 default:
                     break;
             }
@@ -145,8 +173,8 @@ public class FieldValueUtil {
      * @param pageFieldViews
      */
     public static void handleDefaultValue(List<PageFieldViewVO> pageFieldViews) {
-        Map<Long, UserDTO> userMap = handleUserMap(pageFieldViews.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER) && x.getDefaultValue() != null && !"".equals(String.valueOf(x.getDefaultValue()).trim()))
-                .map(x -> Long.parseLong(String.valueOf(x.getDefaultValue()))).collect(Collectors.toList()));
+        List<Long> userIds = getUserIds(pageFieldViews);
+        Map<Long, UserDTO> userMap = handleUserMap(userIds);
         for (PageFieldViewVO view : pageFieldViews) {
             switch (view.getFieldType()) {
                 case FieldType.CHECKBOX:
@@ -180,6 +208,9 @@ public class FieldValueUtil {
                         view.setDefaultValueObj(userMap.getOrDefault(defaultValue, new UserDTO()));
                     }
                     break;
+                case FieldType.MULTI_MEMBER:
+                     handlerMultiMember(view, userMap);
+                    break;
                 case FieldType.INPUT:
                 case FieldType.TEXT:
                     break;
@@ -187,6 +218,41 @@ public class FieldValueUtil {
                     break;
             }
         }
+    }
+
+    private static void handlerMultiMember(PageFieldViewVO view, Map<Long, UserDTO> userMap) {
+        Object defaultValue = view.getDefaultValue();
+        if (defaultValue != null && !"".equals(defaultValue)) {
+            String[] defaultIdStrs = String.valueOf(defaultValue).split(",");
+            if (defaultIdStrs != null) {
+                String[] defaultIds = new String[defaultIdStrs.length];
+                List<Object> userDTOS = new ArrayList<>();
+                for (int i = 0; i < defaultIdStrs.length; i++) {
+                    defaultIds[i] = EncryptionUtils.encrypt(Long.valueOf(defaultIdStrs[i]));
+                    UserDTO userDTO = userMap.get(Long.valueOf(defaultIdStrs[i]));
+                    if (!ObjectUtils.isEmpty(userDTO)) {
+                        userDTOS.add(userDTO);
+                    }
+                }
+                view.setDefaultValue(defaultIds);
+                view.setDefaultValueObjs(userDTOS);
+            }
+        }
+    }
+
+    private static List<Long> getUserIds(List<PageFieldViewVO> pageFieldViews) {
+        List<Long> userIds = new ArrayList<>();
+        pageFieldViews.stream().filter(x -> (x.getFieldType().equals(FieldType.MEMBER) || x.getFieldType().equals(FieldType.MULTI_MEMBER)) && x.getDefaultValue() != null && !"".equals(String.valueOf(x.getDefaultValue()).trim()))
+                .forEach(v -> {
+                    if (Objects.equals(FieldType.MEMBER, v.getFieldType())) {
+                        userIds.add(Long.valueOf(v.getDefaultValue().toString()));
+                    } else {
+                        String[] split = v.getDefaultValue().toString().split(",");
+                        List<Long> ids = Stream.of(split).map(id -> Long.valueOf(id)).collect(Collectors.toList());
+                        userIds.addAll(ids);
+                    }
+                });
+        return userIds;
     }
 
     /**
@@ -237,6 +303,24 @@ public class FieldValueUtil {
                     }
                 }
                 break;
+            case FieldType.MULTI_MEMBER:
+                BaseFeignClient baseFeignClient1 = SpringBeanUtil.getBean(BaseFeignClient.class);
+                if (fieldDetail.getDefaultValue() != null && !"".equals(fieldDetail.getDefaultValue())) {
+                    String[] split = fieldDetail.getDefaultValue().split(",");
+                    List<UserDTO> defaultValueObjects = new ArrayList<>();
+                    List<Long> defaultValues = new ArrayList<>();
+                    for (String userId : split) {
+                        Long defaultValue = Long.valueOf(userId);
+                        defaultValues.add(defaultValue);
+                        List<UserDTO> list = baseFeignClient1.listUsersByIds(Arrays.asList(defaultValue).toArray(new Long[1]), false).getBody();
+                        if (!list.isEmpty()) {
+                            defaultValueObjects.addAll(list);
+                        }
+                    }
+                    fieldDetail.setDefaultValue(EncryptionUtils.encryptList(defaultValues).stream().collect(Collectors.joining(",")));
+                    fieldDetail.setDefaultValueObj(defaultValueObjects);
+                }
+                break;
             default:
                 break;
         }
@@ -263,6 +347,7 @@ public class FieldValueUtil {
             try {
                 switch (fieldType) {
                     case FieldType.CHECKBOX:
+                    case FieldType.MULTI_MEMBER:
                     case FieldType.MULTIPLE:
                         String[] optionIds = defaultValue.split(",");
                         for (String optionId : optionIds) {
@@ -332,6 +417,7 @@ public class FieldValueUtil {
             try {
                 switch (fieldType) {
                     case FieldType.CHECKBOX:
+                    case FieldType.MULTI_MEMBER:
                     case FieldType.MULTIPLE:
                         List<String> optionIds = (List<String>) value;
                         for (String optionId : optionIds) {
@@ -497,18 +583,19 @@ public class FieldValueUtil {
                         create.setNewString(newFieldValues.get(0).getTextValue());
                     }
                     break;
+                case FieldType.MULTI_MEMBER:
                 case FieldType.MEMBER:
                     //查询用户
                     List<Long> userIds = oldFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList());
                     userIds.addAll(newFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
                     Map<Long, UserDTO> userMap = handleUserMap(userIds);
                     if (!oldFieldValues.isEmpty()) {
-                        create.setOldValue(String.valueOf(oldFieldValues.get(0).getOptionId()));
-                        create.setOldString(userMap.getOrDefault(oldFieldValues.get(0).getOptionId(), new UserDTO()).getRealName());
+                        create.setOldValue(userIds.stream().map(oldFieldValue -> String.valueOf(oldFieldValue)).collect(Collectors.joining(",")));
+                        create.setOldString(handlerStringValue(userIds,userMap));
                     }
                     if (!newFieldValues.isEmpty()) {
-                        create.setNewValue(String.valueOf(newFieldValues.get(0).getOptionId()));
-                        create.setNewString(userMap.getOrDefault(newFieldValues.get(0).getOptionId(), new UserDTO()).getRealName());
+                        create.setNewValue(newFieldValues.stream().map(newFieldValue -> String.valueOf(newFieldValue)).collect(Collectors.joining(",")));
+                        create.setNewString(handlerStringValue(newFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList()),userMap));
                     }
                     break;
                 default:
@@ -518,6 +605,12 @@ public class FieldValueUtil {
             throw new CommonException("error", e);
         }
         fieldDataLogService.createDataLog(projectId, schemeCode, create);
+    }
+
+    private static String handlerStringValue(List<Long> userIds, Map<Long, UserDTO> userMap) {
+        List<String> stringList = new ArrayList<>();
+        userIds.forEach(userId -> stringList.add(userMap.getOrDefault(userMap,new UserDTO()).getRealName()));
+        return  stringList.stream().collect(Collectors.joining(","));
     }
 
     public static void handleAgileSortPageRequest(String fieldCode, String fieldType, PageRequest pageRequest) {

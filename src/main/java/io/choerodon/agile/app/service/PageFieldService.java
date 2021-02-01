@@ -27,10 +27,10 @@ public interface PageFieldService {
      * @param organizationId
      * @param projectId
      * @param pageCode
-     * @param context
+     * @param issueTypeId
      * @return
      */
-    List<PageFieldDTO> queryPageField(Long organizationId, Long projectId, String pageCode, String context);
+    List<PageFieldDTO> queryPageField(Long organizationId, Long projectId, String pageCode, Long issueTypeId);
 
     /**
      * 组织层/项目层 根据页面编码获取字段列表
@@ -41,7 +41,7 @@ public interface PageFieldService {
      * @param context
      * @return
      */
-    Map<String, Object> listQuery(Long organizationId, Long projectId, String pageCode, String context);
+    Map<String, Object> listQuery(Long organizationId, Long projectId, String pageCode, String context, Long issueTypeId);
 
     /**
      * 组织层/项目层 调整字段顺序

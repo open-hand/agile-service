@@ -8,11 +8,9 @@ import {
 import {
   Dropdown,
 } from 'choerodon-ui/pro';
-import { Content } from '@choerodon/boot';
-import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { devOpsApi } from '@/api';
+import './Commits.less';
 
-const { Sidebar } = Modal;
 const STATUS_SHOW = {
   opened: '开放',
   merged: '已合并',
@@ -22,7 +20,6 @@ const STATUS_SHOW = {
 class Commits extends Component {
   constructor(props) {
     super(props);
-    this.dirty = false;
     this.state = {
       commits: [],
       loading: false,
@@ -71,7 +68,7 @@ class Commits extends Component {
       });
   }
 
-  handleMenuClick=(record, { key }) => {
+  handleMenuClick = (record, { key }) => {
     const { issueId } = this.props;
     switch (key) {
       case 'delete': {
@@ -81,10 +78,13 @@ class Commits extends Component {
           okText: '移除',
           onOk: async () => {
             await devOpsApi.project(record.projectId).removeLinkBranch(record.appServiceId, record.branchName, issueId);
-            this.dirty = true;
             this.loadCommits();
           },
         });
+        break;
+      }
+      case 'merge': {
+        this.createMergeRequest(record);
         break;
       }
       default: break;
@@ -92,14 +92,12 @@ class Commits extends Component {
   }
 
   render() {
-    const {
-      issueId, issueNum, time, visible, onCancel,
-    } = this.props;
     const column = [
       {
         title: '分支',
         dataIndex: 'branchName',
-        width: '30%',
+        width: 200,
+        fixed: 'left',
         render: (branchName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={branchName}>
@@ -116,7 +114,7 @@ class Commits extends Component {
       {
         title: '',
         dataIndex: 'id',
-        width: '10%',
+        width: 50,
         render: (id, record) => (
           <Dropdown
             overlay={(
@@ -124,6 +122,9 @@ class Commits extends Component {
               <Menu onClick={this.handleMenuClick.bind(this, record)}>
                 <Menu.Item key="delete">
                   移除关联分支
+                </Menu.Item>
+                <Menu.Item key="merge">
+                  创建合并请求
                 </Menu.Item>
               </Menu>
             )}
@@ -136,7 +137,7 @@ class Commits extends Component {
       {
         title: '应用名称',
         dataIndex: 'appServiceName',
-        width: '25%',
+        width: 200,
         render: (appName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={appName}>
@@ -153,7 +154,7 @@ class Commits extends Component {
       {
         title: '所属项目',
         dataIndex: 'projectName',
-        width: '25%',
+        width: 200,
         render: (projectName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={projectName}>
@@ -168,9 +169,26 @@ class Commits extends Component {
         ),
       },
       {
+        title: '来源分支',
+        dataIndex: 'originBranch',
+        width: 200,
+        render: (originBranch) => (
+          <div style={{ width: '100%', overflow: 'hidden' }}>
+            <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={originBranch}>
+              <p style={{
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
+              }}
+              >
+                {originBranch}
+              </p>
+            </Tooltip>
+          </div>
+        ),
+      },
+      {
         title: '提交数',
         dataIndex: 'appId',
-        width: '15%',
+        width: 200,
         render: (appId, record) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={status}>
@@ -187,7 +205,7 @@ class Commits extends Component {
       {
         title: '状态',
         dataIndex: 'status',
-        width: '20%',
+        width: 200,
         render: (status, record) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Popover
@@ -223,49 +241,18 @@ class Commits extends Component {
           </div>
         ),
       },
-      {
-        title: '',
-        dataIndex: 'id',
-        width: '10%',
-        render: (id, record) => (
-          <div>
-            <Popover placement="bottom" mouseEnterDelay={0.5} content={<div><span>创建合并请求</span></div>}>
-              <Button shape="circle" onClick={this.createMergeRequest.bind(this, record)}>
-                <Icon type="merge_request" />
-              </Button>
-            </Popover>
-          </div>
-        ),
-      },
     ];
     return (
-      <Sidebar
-        maskClosable
-        className="c7n-commits"
-        title="关联分支"
-        visible={visible || false}
-        okText="关闭"
-        okCancel={false}
-        width={MODAL_WIDTH.middle}
-        onOk={() => onCancel(this.dirty)}
-      >
-        <Content
-          style={{
-            paddingLeft: 0,
-            paddingRight: 0,
-            paddingTop: 0,
-          }}
-        >
-          <Table
-            filterBar={false}
-            rowKey={(record) => record.id}
-            columns={column}
-            dataSource={this.state.commits}
-            loading={this.state.loading}
-            scroll={{ x: true }}
-          />
-        </Content>
-      </Sidebar>
+      <Table
+        className="c7nagile-commits"
+        pagination={false}
+        filterBar={false}
+        rowKey={(record) => record.id}
+        columns={column}
+        dataSource={this.state.commits}
+        loading={this.state.loading}
+        scroll={{ x: true }}
+      />
     );
   }
 }

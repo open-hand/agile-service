@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import SelectVersion from '@/components/select/select-version';
 
-function VersionField({ field, value, onChange }) {
-  const [, setValue] = useState(0);
+function VersionField({
+  field, value, onChange, ...props
+}) {
   return (
     <SelectVersion
       hasUnassign
@@ -17,9 +18,7 @@ function VersionField({ field, value, onChange }) {
       clearButton
       onChange={onChange}
       valueField="versionId"
-      onBlur={() => {
-        console.log('blur');
-      }}
+      {...props}
     />
   );
 }

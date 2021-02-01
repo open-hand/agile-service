@@ -13,7 +13,7 @@ function FieldList() {
     fields, chosenFields, handleChosenFieldChange,
   } = store;
   const systemFields = store.getSystemFields();
-  const selectableSystemFields = systemFields.filter((field) => !field.defaultShow);
+  const selectableSystemFields = systemFields.filter((field) => !field.defaultShow && !field.archive);
   const defaultShowSystemFields = systemFields.filter((field) => field.defaultShow);
   const checked = chosenFields.size - defaultShowSystemFields.length > 0;
   const indeterminate = checked && chosenFields.size - defaultShowSystemFields.length < fields.length + selectableSystemFields.length;

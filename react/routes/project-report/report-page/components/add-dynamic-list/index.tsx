@@ -126,7 +126,8 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           <Option value="label">标签</Option>
           <Option value="component">模块</Option>
           <Option value="storyPoints">故事点</Option>
-          <Option value="version">版本</Option>
+          <Option value="fixVersion">修复的版本</Option>
+          <Option value="influenceVersion">影响的版本</Option>
           <Option value="epic">史诗</Option>
           <Option value="feature">特性</Option>
           {fields.map((field) => (

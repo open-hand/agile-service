@@ -53,4 +53,16 @@ public interface IssueComponentMapper extends BaseMapper<IssueComponentDTO> {
                                                          @Param("noIssueTest") Boolean noIssueTest);
 
     List<IssueComponentDTO> selectByProjectId(@Param("projectId") Long projectId);
+
+    String queryMaxRank(@Param("projectId") Long projectId);
+
+    List<IssueComponentDTO> querNoRankList(@Param("projectId") Long projectId);
+
+    String queryRank(@Param("projectId") Long projectId, @Param("outsetId") Long outsetId);
+
+    String queryLeftRank(@Param("projectId") Long projectId, @Param("rightRank") String rightRank);
+
+    String queryRightRank(@Param("projectId") Long projectId, @Param("leftRank") String leftRank);
+
+    void updateRank(@Param("projectId") Long projectId, @Param("issueComponentDTO") IssueComponentDTO issueComponentDTO);
 }

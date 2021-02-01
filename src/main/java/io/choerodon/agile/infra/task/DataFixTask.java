@@ -19,19 +19,18 @@ public class DataFixTask {
     @Autowired
     private FixDataService fixDataService;
 
-
-    @JobTask(maxRetryCount = 3,
-            code = "fixStatusMachineAndPage",
-            description = "升级到0.24.0,修复状态机与页面数据")
-    @TimedTask(name = "fixStatusMachineAndPage",
-            description = "升级到0.24.0,修复状态机与页面数据",
-            oneExecution = true,
-            repeatCount = 0,
-            repeatInterval = 1,
-            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
-            params = {})
-    public void fixStatusMachineAndPage(Map<String, Object> map) {
-        LOGGER.info("==============================>>>>>>>> AGILE Data Fix Start <<<<<<<<=================================");
-        fixDataService.fixDateStateMachineAndPage();
-    }
+//    @JobTask(maxRetryCount = 3,
+//            code = "fixIssueTypeData",
+//            description = "升级到0.25.0,修复问题类型数据")
+//    @TimedTask(name = "fixIssueTypeData",
+//            description = "升级到0.25.0,修复问题类型数据",
+//            oneExecution = true,
+//            repeatCount = 0,
+//            repeatInterval = 1,
+//            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
+//            params = {})
+//    public void fixIssueTypeData(Map<String, Object> map) {
+//        LOGGER.info("==============================>>>>>>>> AGILE Data Fix Start <<<<<<<<=================================");
+//        fixDataService.fixIssueTypeData();
+//    }
 }

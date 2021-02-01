@@ -1,54 +1,71 @@
 import React, {
-  useMemo, useRef, useEffect,
+  useCallback, useEffect, useMemo,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Animate } from 'choerodon-ui';
-import CloseButton from './components/close-button';
-import IssueNum from './components/issue-num';
+import { stores } from '@choerodon/boot';
+import DetailContainer from '@/components/detail-container';
 import Container from './Container';
-import store from './store';
+import Store from './store';
 import IssueDetailContext from './context';
+import { useDetailContainerContext } from '../detail-container/context';
 
-export function useIssueDetailStore() {
-  return store;
+export type DemandEvents = 'update' | 'delete' | 'transfer' | 'close'
+const { HeaderStore, AppState } = stores;
+export type Events = { [key in DemandEvents]?: Function };
+export function useDetailStore() {
+  return useMemo(() => new Store(), []);
 }
-enum FieldKey {
-  summary = 'summary'
-}
-interface Issue {
-  issueId: number
-}
-
-export type Events = { [key: string]: Function };
 interface Props {
-  events: Events
-  projectId?: number
+  store: Store
+  projectId?: number,
+  organizationId?: string,
+  outside?: boolean
 }
 
-const IssueDetail: React.FC<Props> = ({ events, projectId }) => {
+const IssueDetail: React.FC<Props> = ({
+  projectId, organizationId, store, outside = false,
+}) => {
   const { visible, selected } = store;
+  console.log(visible);
   useEffect(() => {
-    store.initEvents(events);
-  }, [events]);
+    store.load(outside, organizationId);
+  }, [organizationId, outside, selected, store]);
+  // const { setVisible } = useDetailContainerContext();
+  // useEffect(() => {
+  //   setVisible(visible);
+  // }, [setVisible, visible]);
+  // 离开一个页面时，清空数据
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    store.load();
-  }, [selected]);
+    store.initApi(outside, organizationId);
+    return () => {
+      store.destroy();
+    };
+  }, [organizationId, outside, store]);
+  // 编辑的限制
+  const checkEnableEditDetail = useCallback((hasPermission: boolean) => false, []);
+
   return (
-    <Animate
-      component="div"
-      transitionAppear
-      transitionName="slide-right"
+    <IssueDetailContext.Provider value={{
+      id: selected,
+      store,
+      projectId,
+      hasAdminPermission: false,
+      disabledDetailEdit: !checkEnableEditDetail(false),
+      outside: false,
+      organizationId,
+      topAnnouncementHeight: HeaderStore.announcementClosed ? 0 : 50,
+      applyType: 'agile',
+    }}
     >
-      {
-        visible ? (
-          <IssueDetailContext.Provider value={{ store, projectId }}>
-            <Container />
-          </IssueDetailContext.Provider>
-        ) : null
-      }
-    </Animate>
+      <Container />
+    </IssueDetailContext.Provider>
   );
 };
-
-export default observer(IssueDetail);
+const ObserverIssueDetail = observer(IssueDetail);
+export default ObserverIssueDetail;
+// export default (props:Props) => (
+//   <DetailContainer>
+//     <ObserverIssueDetail {...props} />
+//   </DetailContainer>
+// );

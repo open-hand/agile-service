@@ -13,6 +13,7 @@ import { getProjectId } from '@/utils/common';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { User } from '@/common/types';
 import Loading from '@/components/Loading';
+import useIsProgram from '@/hooks/useIsProgram';
 import styles from './index.less';
 
 const { AppState } = stores;
@@ -89,7 +90,7 @@ const NotifySetting = ({
     setHidden(true);
   }, []);
   const ref = useClickOut(handleClickOut);
-
+  const { isProgram } = useIsProgram();
   const userDs = useMemo(() => new DataSet({
     autoQuery: true,
     selection: false,
@@ -327,7 +328,7 @@ const NotifySetting = ({
           </div>
         </Dropdown>
         {
-          AppState.currentMenuType.category !== 'PROGRAM' && (
+          !isProgram && (
             <>
               <div style={{ borderTop: '1px solid #e8e8e8', width: 'calc(100% + .4rem)', marginLeft: '-0.2rem' }} />
               <CheckBox

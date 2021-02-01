@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
 import {
-  text2Delta, beforeTextUpload,
+  text2Delta, uploadAndReplaceImg,
 } from '@/utils/richText';
 import { workLogApi } from '@/api';
 import UserHead from '../../UserHead';
@@ -39,19 +39,18 @@ class Log extends Component {
       });
   }
 
-  handleUpdateLog(log) {
+  async handleUpdateLog(log) {
     const { logId, objectVersionNumber } = log;
     const { editLog } = this.state;
-    const extra = {
-      logId,
-      objectVersionNumber,
-    };
-    const updateLogDes = editLog;
-    if (updateLogDes) {
-      beforeTextUpload(updateLogDes, extra, this.updateLog, 'description');
-    } else {
-      extra.description = '';
-      this.updateLog(extra);
+    try {
+      const text = await uploadAndReplaceImg(editLog);
+      this.updateLog({
+        logId,
+        objectVersionNumber,
+        description: text,
+      });
+    } catch (error) {
+      //
     }
   }
 

@@ -1,13 +1,16 @@
 /* eslint-disable no-nested-ternary */
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useRef } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
+import { useDetailContainerContext } from '@/components/detail-container/context';
+import useHasDevops from '@/hooks/useHasDevops';
+import useHasTest from '@/hooks/useHasTest';
 import FieldStar from './Field/FieldStar';
 import IssueDetail from './IssueDetail';
 import IssueDes from './IssueDes';
 import IssueAttachment from './IssueAttachment';
 import IssueDoc from './IssueDoc';
-import IssueCommit from './IssueCommit';
+import Comments from '../commentsWithReply';
 import SplitStory from './SplitStory';
 import IssueWorkLog from './IssueWorkLog';
 import IssueLog from './IssueLog';
@@ -25,6 +28,7 @@ import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
 import { InjectedComponent } from '../../injectComponent';
 import './IssueBody.less';
+import IssueUI from './Issue-UI';
 
 const { TabPane } = Tabs;
 // eslint-disable-next-line no-undef
@@ -32,16 +36,20 @@ const TestLink = C7NTryImport('@choerodon/testmanager/lib/components/test-case-l
 
 function IssueBody(props) {
   const {
-    prefixCls, disabled, store, isOnlyAgileProject, applyType,
+    prefixCls, disabled, store, applyType,
   } = useContext(EditIssueContext);
+  const { match } = useDetailContainerContext();
   const issue = store.getIssue;
   const {
     issueId, issueNum, typeCode, issueTypeVO = {},
   } = issue;
-  const { reloadIssue } = props;
+  const { reloadIssue, otherProject, outside } = props;
+  const hasDevops = useHasDevops();
   const createBranchShow = store.getCreateBranchShow;
   const { linkBranchShow } = store;
   const workLogShow = store.getWorkLogShow;
+  const hasTest = useHasTest();
+  const testLinkStoreRef = useRef();
 
   return (
     <section className={`${prefixCls}-body`} id="scroll-area" style={{ position: 'relative' }}>
@@ -55,7 +63,7 @@ function IssueBody(props) {
           <FieldStar {...props} />
           <div style={{ flexShrink: 0, marginLeft: 'auto', color: 'rgba(0, 0, 0, 0.65)' }}>
             {!disabled && (
-              <IssueDropDown {...props} />
+              <IssueDropDown {...props} testLinkStoreRef={testLinkStoreRef} />
             )}
           </div>
         </div>
@@ -77,20 +85,28 @@ function IssueBody(props) {
           }
         </div>
       </div>
-      <Tabs defaultActiveKey="1">
-        <TabPane tab="详情" key="1">
+      <Tabs
+        activeKey={store.tab}
+        onChange={(activeKey) => {
+          store.setTab(activeKey);
+          match.props.tab = activeKey;
+        }}
+      >
+        <TabPane tab="详情" key="detail">
           <IssueDetail {...props} />
           <IssueDes {...props} />
           <IssueAttachment {...props} />
+          {issueTypeVO.typeCode && ['issue_epic', 'feature'].indexOf(issueTypeVO.typeCode) === -1
+            ? <IssueUI {...props} /> : ''}
           {
-            issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
+            !outside && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
               <>
                 <IssueWSJF {...props} />
                 <InjectedComponent.PIAim {...props} />
               </>
             )
           }
-          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
+          {!outside && !otherProject && issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueDoc {...props} /> : ''}
 
           {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
@@ -98,31 +114,31 @@ function IssueBody(props) {
 
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
             ? <SubBug {...props} /> : ''}
-          {issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
-            ? <TestLink {...props} /> : '' }
+          {hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
+            ? <TestLink {...props} testLinkStoreRef={testLinkStoreRef} /> : ''}
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
-          {['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
+          {!outside && !otherProject && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
         </TabPane>
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
-              <TabPane tab="拆分的Story" key="5">
+              <TabPane tab="拆分的Story" key="split_story">
                 <SplitStory {...props} />
               </TabPane>
             ) : ''
         }
-        <TabPane tab="评论" key="2">
-          <IssueCommit {...props} />
+        <TabPane tab="评论" key="comment">
+          <Comments {...props} />
         </TabPane>
-        <TabPane tab="记录" key="3">
+        <TabPane tab="记录" key="record">
           {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
           {issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueWorkLog {...props} /> : ''}
           <IssueLog {...props} />
         </TabPane>
-        {applyType !== 'program' && !isOnlyAgileProject
-          ? <TabPane tab="开发" key="4"><IssueBranch {...props} /></TabPane> : ''}
+        {applyType !== 'program' && hasDevops
+          ? <TabPane tab="开发" key="development"><IssueBranch {...props} /></TabPane> : ''}
       </Tabs>
       {
         createBranchShow ? (
@@ -132,9 +148,7 @@ function IssueBody(props) {
             issueNum={issueNum}
             onOk={() => {
               store.setCreateBranchShow(false);
-              if (reloadIssue) {
-                reloadIssue(issueId);
-              }
+              store.refreshBranch();
             }}
             onCancel={() => store.setCreateBranchShow(false)}
             visible={createBranchShow}
@@ -149,9 +163,7 @@ function IssueBody(props) {
             issueNum={issueNum}
             onOk={() => {
               store.setLinkBranchShow(false);
-              if (reloadIssue) {
-                reloadIssue(issueId);
-              }
+              store.refreshBranch();
             }}
             onCancel={() => store.setLinkBranchShow(false)}
             visible={linkBranchShow}

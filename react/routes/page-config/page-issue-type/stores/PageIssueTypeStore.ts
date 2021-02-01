@@ -9,6 +9,7 @@ import {
 import { DataSet } from 'choerodon-ui/pro/lib';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { IFieldPostDataProps } from '../../components/create-field/CreateField';
+import { transformDefaultValue } from '../utils';
 
 export enum PageIssueTypeStoreStatusCode {
   del = 'delete',
@@ -25,7 +26,7 @@ interface IDescriptionTempleProps {
 }
 export type PageIFieldPostDataProps = IFieldPostDataProps & {
   local?: boolean, fieldName: string, localSource: string, // 'add' | 'created'
-  localDefaultValue?: any,
+  showDefaultValueText?: any, // 默认值展示字段
   edited: boolean, created: boolean, required: boolean, rank?: string,
   dataSetRecord?: Record,
 };
@@ -36,6 +37,11 @@ interface IAddPostData {
   edited: boolean,
   required: boolean,
   localRecordIndexId: number,
+}
+interface IPageIssueTypeStoreIssueType {
+  id: string,
+  enabled: boolean,
+  [x: string]: any
 }
 class PageIssueTypeStore {
   constructor(props: { addUnselectedDataSet: DataSet, sortTableDataSet: DataSet }) {
@@ -51,7 +57,7 @@ class PageIssueTypeStore {
 
   @observable currentTypeAllFieldData: ObservableMap<any, IFiledListItemProps> = observable.map();
 
-  @observable currentIssueType: PageConfigIssueType = PageConfigIssueType.null;
+  @observable currentIssueType: IPageIssueTypeStoreIssueType = {} as IPageIssueTypeStoreIssueType;
 
   @observable dataStatusCode: PageIssueTypeStoreStatusCode = PageIssueTypeStoreStatusCode.null;
 
@@ -71,13 +77,13 @@ class PageIssueTypeStore {
     dirty: false,
   };
 
-  @action init(issueType: PageConfigIssueType) {
+  @action init(issueType: IPageIssueTypeStoreIssueType) {
     this.currentIssueType = issueType;
   }
 
   @action('清空全部数据') destroy() {
     this.clear();
-    this.currentIssueType = PageConfigIssueType.null;
+    this.currentIssueType = {} as IPageIssueTypeStoreIssueType;
   }
 
   @action('清空编辑数据') clear() {
@@ -203,12 +209,12 @@ class PageIssueTypeStore {
     return this.dataStatusCode;
   }
 
-  @action setCurrentIssueType(issueType: PageConfigIssueType) {
+  @action setCurrentIssueType(issueType: IPageIssueTypeStoreIssueType) {
     this.currentIssueType = issueType;
   }
 
   @computed get getCurrentIssueType() {
-    return this.currentIssueType;
+    return this.currentIssueType?.id;
   }
 
   @action loadCurrentTypeAllField = (data: Array<IFiledListItemProps>) => {
@@ -217,39 +223,15 @@ class PageIssueTypeStore {
     });
   }
 
-  transformDefaultValue = (fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey: 'tempKey' | 'id' = 'id') => {
-    if (!defaultValue && !defaultValueObj) {
-      return defaultValue;
-    }
-    switch (fieldType) {
-      case 'datetime':
-        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
-      case 'time':
-        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
-      case 'date':
-        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
-      case 'multiple':
-      case 'checkbox':
-      case 'single':
-      case 'radio': {
-        const valueArr = String(defaultValue).split(',');
-        return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey])).map((item) => item.value).join(',') || defaultValue;
-      }
-      case 'member': {
-        const { realName } = defaultValueObj || {};
-        return realName || defaultValue;
-      }
-      default:
-        return defaultValue;
-    }
-  };
-
   loadData = () => {
     this.clear();
     this.addUnselectedDataSet.clear();
     this.setLoading(true);
     pageConfigApi.loadByIssueType(this.getCurrentIssueType).then((res) => {
-      this.sortTableDataSet.loadData(res.fields.map((field) => ({ ...field, defaultValue: this.transformDefaultValue(field.fieldType, field.defaultValue, field.defaultValueObj, field.fieldOptions) })));
+      this.sortTableDataSet.loadData(res.fields.map((field) => ({
+        ...field,
+        showDefaultValueText: transformDefaultValue({ ...field, defaultValue: !field.defaultValueObjs || (field.defaultValueObjs && field.defaultValueObjs.length > 0) ? field.defaultValue : undefined, fieldOptions: field.fieldOptions || field.defaultValueObjs || [field.defaultValueObj].filter((item) => item) }),
+      })));
       if (res.issueTypeFieldVO) {
         this.setDescriptionObj({
           ...res.issueTypeFieldVO,

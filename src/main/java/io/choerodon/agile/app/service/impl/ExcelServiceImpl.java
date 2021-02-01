@@ -199,6 +199,8 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put("storyPoints", "故事点");
         FIELD_MAP.put("remainingTime", "剩余预估时间");
         FIELD_MAP.put("versionName", "版本");
+        FIELD_MAP.put("fixVersionName", "修复的版本");
+        FIELD_MAP.put("influenceVersionName", "影响的版本");
         FIELD_MAP.put("epicName", "所属史诗");
         FIELD_MAP.put("labelName", "标签");
         FIELD_MAP.put("componentName", "模块");
@@ -341,7 +343,7 @@ public class ExcelServiceImpl implements ExcelService {
                 List<String> optionValues = o.getFieldOptions().stream().map(FieldOptionVO::getValue).collect(Collectors.toList());
                 customFieldValueMap.put(fieldCode, optionValues);
             }
-            if ("member".equals(fieldType)) {
+            if ("member".equals(fieldType) || FieldType.MULTI_MEMBER.equals(fieldType)) {
                 customFieldValueMap.put(fieldCode, userNames);
             }
         });
@@ -375,6 +377,9 @@ public class ExcelServiceImpl implements ExcelService {
         result.add(processParentIssuePredefined(projectId, cursor, systemFields));
         Optional
                 .ofNullable(processVersionPredefined(projectId, cursor, systemFields))
+                .ifPresent(x -> result.add(x));
+        Optional
+                .ofNullable(processInfluenceVersionPredefined(projectId, cursor, systemFields))
                 .ifPresent(x -> result.add(x));
         Optional
                 .ofNullable(processComponentPredefined(projectId, cursor, systemFields))
@@ -544,11 +549,35 @@ public class ExcelServiceImpl implements ExcelService {
                 cursor.getAndIncreaseSheetNum());
     }
 
+    private PredefinedDTO processInfluenceVersionPredefined(Long projectId,
+                                                   ExcelImportTemplate.Cursor cursor,
+                                                   List<String> fieldCodes) {
+        int col = fieldCodes.indexOf(FieldCode.INFLUENCE_VERSION);
+        if (col == -1) {
+            return null;
+        }
+        List<ProductVersionCommonDTO> productVersionCommons = productVersionMapper.listByProjectId(projectId);
+        List<String> versionList = new ArrayList<>();
+        productVersionCommons.forEach(p -> {
+            String statusCode = p.getStatusCode();
+            if (VERSION_PLANNING.equals(statusCode)) {
+                versionList.add(p.getName());
+            }
+        });
+        return new PredefinedDTO(versionList,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.INFLUENCE_VERSION,
+                cursor.getAndIncreaseSheetNum());
+    }
+
     private PredefinedDTO processIssueTypePredefined(boolean withFeature,
                                                      Long projectId,
                                                      ExcelImportTemplate.Cursor cursor,
                                                      List<String> fieldCodes) {
-        List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
+        List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE, true);
         List<String> values = new ArrayList<>();
         issueTypes.forEach(i -> {
             String typeCode = i.getTypeCode();
@@ -1367,6 +1396,9 @@ public class ExcelServiceImpl implements ExcelService {
         int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
         String issueType = row.getCell(issueTypeCol).toString();
         switch (fieldCode) {
+            case FieldCode.ISSUE_TYPE:
+                validateAndSetIssueType(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                break;
             case FieldCode.ASSIGNEE:
                 validateAndSetAssignee(row, col, excelColumn, errorRowColMap, issueCreateVO);
                 break;
@@ -1382,11 +1414,11 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.FIX_VERSION:
                 validateAndSetFixVersion(row, col, excelColumn, errorRowColMap, issueCreateVO);
                 break;
+            case FieldCode.INFLUENCE_VERSION:
+                validateAndSetInfluenceVersion(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                break;
             case FieldCode.STORY_POINTS:
                 validateAndSetStoryPoint(row, col, errorRowColMap, issueCreateVO, issueType);
-                break;
-            case FieldCode.ISSUE_TYPE:
-                validateAndSetIssueType(row, col, excelColumn, errorRowColMap, issueCreateVO);
                 break;
             case FieldCode.EPIC_NAME:
                 validateAndSetEpicName(row, col, errorRowColMap, issueCreateVO, issueType, projectId, headerMap);
@@ -1858,6 +1890,36 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
+    private void validateAndSetInfluenceVersion(Row row,
+                                          Integer col,
+                                          ExcelColumnVO excelColumn,
+                                          Map<Integer, List<Integer>> errorRowColMap,
+                                          IssueCreateVO issueCreateVO) {
+        Cell cell = row.getCell(col);
+        if (!Objects.equals("bug", issueCreateVO.getTypeCode())) {
+            return;
+        }
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString();
+            List<String> values = excelColumn.getPredefinedValues();
+            Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
+            if (!values.contains(value)) {
+                cell.setCellValue(buildWithErrorMsg(value, "请输入正确的影响版本"));
+                addErrorColumn(row.getRowNum(), col, errorRowColMap);
+            } else {
+                List<VersionIssueRelVO> versionIssueRelList = issueCreateVO.getVersionIssueRelVOList();
+                if (CollectionUtils.isEmpty(versionIssueRelList)) {
+                    versionIssueRelList = new ArrayList<>();
+                }
+                VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
+                versionIssueRelVO.setVersionId(valueIdMap.get(value));
+                versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
+                versionIssueRelList.add(versionIssueRelVO);
+                issueCreateVO.setVersionIssueRelVOList(versionIssueRelList);
+            }
+        }
+    }
+
     private void validateAndSetRemainingTime(Row row,
                                              Integer col,
                                              Map<Integer, List<Integer>> errorRowColMap,
@@ -2099,7 +2161,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<String, ObjectSchemeFieldDetailVO> fieldMap = new HashMap<>();
         objectSchemeFieldDetails.forEach(o -> fieldMap.put(o.getName(), o));
         String status = "error_custom_field_header_";
-        List<String> multiValueFieldType = Arrays.asList("checkbox", "multiple");
+        List<String> multiValueFieldType = Arrays.asList("checkbox", "multiple","multiMember");
         List<String> fieldTypes = Arrays.asList("multiple", "single", "checkbox", "radio");
         List<String> dateTypes = Arrays.asList("date", "datetime", "time");
         for (ExcelColumnVO excelColumn : customFields) {
@@ -2132,10 +2194,11 @@ public class ExcelServiceImpl implements ExcelService {
                     excelColumn.setPredefinedValues(values);
                     excelColumn.setValueIdMap(map);
                 }
-                if ("member".equals(fieldType)) {
+                if ("member".equals(fieldType) || FieldType.MULTI_MEMBER.equals(fieldType)) {
                     excelColumn.setValueIdMap(userMap);
                     excelColumn.setPredefinedValues(userNames);
                 }
+
                 boolean isDateType = dateTypes.contains(fieldType);
                 excelColumn.setDateType(isDateType);
                 if (isDateType) {
@@ -2161,6 +2224,9 @@ public class ExcelServiceImpl implements ExcelService {
                 processParentIssue(projectId, excelColumnVO);
                 break;
             case FieldCode.FIX_VERSION:
+                processVersion(projectId, excelColumnVO);
+                break;
+            case FieldCode.INFLUENCE_VERSION:
                 processVersion(projectId, excelColumnVO);
                 break;
             case FieldCode.COMPONENT:
@@ -2287,7 +2353,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private void processIssueType(boolean withFeature, Long projectId, ExcelColumnVO excelColumnVO) {
-        List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
+        List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE, true);
         List<String> values = new ArrayList<>();
         Map<String, IssueTypeVO> issueTypeMap = new HashMap<>();
         issueTypes.forEach(i -> {
@@ -2486,6 +2552,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
         project.setCode(projectInfoDTO.getProjectCode());
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
+        boolean isTreeView = !Boolean.FALSE.equals(searchVO.getSearchArgs().get("tree"));
 
         String sheetName = project.getName();
         Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);
@@ -2500,7 +2567,7 @@ public class ExcelServiceImpl implements ExcelService {
             while (true) {
                 //查询所有父节点问题
                 Page<IssueDTO> page =
-                        PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                        PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
                 if (CollectionUtils.isEmpty(page.getContent())) {
                     break;
                 }
@@ -2509,9 +2576,12 @@ public class ExcelServiceImpl implements ExcelService {
                 Map<Long, Set<Long>> parentSonMap = new HashMap<>();
                 List<IssueDTO> issues = new ArrayList<>();
                 if (!parentIds.isEmpty()) {
-                    Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                    Set<Long> childrenIds = new HashSet<>();
+                    if (isTreeView) {
+                        childrenIds = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                    }
                     cursor.addCollections(childrenIds);
-                    issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true);
+                    issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true, isTreeView);
                 }
                 Map<Long, ExportIssuesVO> issueMap = new LinkedHashMap<>();
                 cursor
@@ -2572,6 +2642,9 @@ public class ExcelServiceImpl implements ExcelService {
                                     componentMap,
                                     foundationCodeValue,
                                     issue));
+                }
+                if (!isTreeView) {
+                    parentSonMap.clear();
                 }
                 ExcelUtil.writeIssue(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, sheetName, Arrays.asList(AUTO_SIZE_WIDTH), workbook, cursor);
                 boolean hasNextPage = (cursor.getPage() + 1) < page.getTotalPages();

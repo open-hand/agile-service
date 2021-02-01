@@ -169,7 +169,7 @@ public class IssueController {
     @PostMapping(value = "/include_sub")
     public ResponseEntity<Page<IssueListFieldKVVO>> listIssueWithSub(@ApiIgnore
                                                                @ApiParam(value = "分页信息", required = true)
-                                                               @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+                                                               @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                                                        PageRequest pageRequest,
                                                                      @ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
@@ -189,7 +189,7 @@ public class IssueController {
     @GetMapping(value = "/summary")
     public ResponseEntity<Page<IssueNumVO>> queryIssueByOption(@ApiIgnore
                                                                 @ApiParam(value = "分页信息", required = true)
-                                                                @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+                                                                @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                                                         PageRequest pageRequest,
                                                                @ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
@@ -214,7 +214,7 @@ public class IssueController {
     @GetMapping(value = "/agile/summary")
     public ResponseEntity<Page<IssueNumVO>> queryIssueByOptionForAgile(@ApiIgnore
                                                                         @ApiParam(value = "分页信息", required = true)
-                                                                        @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+                                                                        @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                                                                 PageRequest pageRequest,
                                                                            @ApiParam(value = "项目id", required = true)
                                                                         @PathVariable(name = "project_id") Long projectId,
@@ -443,7 +443,7 @@ public class IssueController {
     @PostMapping(value = "/test_component/no_sub")
     public ResponseEntity<Page<IssueListTestVO>> listIssueWithoutSubToTestComponent(@ApiIgnore
                                                                                      @ApiParam(value = "分页信息", required = true)
-                                                                                     @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+                                                                                     @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                                                                      PageRequest pageRequest,
                                                                                      @ApiParam(value = "项目id", required = true)
                                                                                      @PathVariable(name = "project_id") Long projectId,
@@ -464,7 +464,7 @@ public class IssueController {
     @PostMapping(value = "/test_component/filter_linked")
     public ResponseEntity<Page<IssueListTestWithSprintVersionVO>> listIssueWithLinkedIssues(@ApiIgnore
                                                                                              @ApiParam(value = "分页信息", required = true)
-                                                                                             @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+                                                                                             @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                                                                                      PageRequest pageable,
                                                                                                 @ApiParam(value = "项目id", required = true)
                                                                                              @PathVariable(name = "project_id") Long projectId,
@@ -612,8 +612,9 @@ public class IssueController {
     @PostMapping(value = "/query_story_task")
     public ResponseEntity<Page<IssueListFieldKVVO>> queryStoryAndTask(@ApiParam(value = "项目id", required = true)
                                                          @PathVariable(name = "project_id") Long projectId,
-                                                         @SortDefault PageRequest pageRequest,
-                                                          @RequestBody(required = false) SearchVO searchVO) {
+                                                         @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
+                                                         PageRequest pageRequest,
+                                                         @RequestBody(required = false) SearchVO searchVO) {
         return Optional.ofNullable(issueService.queryStoryAndTask(projectId, pageRequest, searchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));

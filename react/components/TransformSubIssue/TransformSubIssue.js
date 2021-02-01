@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { stores } from '@choerodon/boot';
 import _ from 'lodash';
 import {
   Modal, Form, Select, Tooltip,
@@ -7,10 +6,9 @@ import {
 import { issueApi, statusApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import TypeTag from '../TypeTag';
-
+import SelectSubTask from './SelectSubTask';
 import './TransformSubIssue.less';
 
-const { AppState } = stores;
 const { Sidebar } = Modal;
 const FormItem = Form.Item;
 const { Option } = Select;
@@ -46,14 +44,10 @@ class TransformSubIssue extends Component {
   }
 
   componentDidMount() {
-    this.getStatus();
     this.onFilterChange('');
-    setTimeout(() => {
-      this.Select.focus();
-    });
   }
 
-  onFilterChange=(input) => {
+  onFilterChange = (input) => {
     const { issueId } = this.props;
     if (!sign) {
       this.setState({
@@ -71,21 +65,18 @@ class TransformSubIssue extends Component {
     }
   }
 
-  getStatus() {
+  getStatus(issueTypeId) {
     this.setState({
       selectLoading: true,
     });
-    const { issueTypes } = this.props;
-    const issueTypeData = issueTypes;
-    const subTask = issueTypeData.find((t) => t.typeCode === 'sub_task');
-    if (subTask) {
-      statusApi.loadAllForIssueType(subTask.id).then((res) => {
+    if (issueTypeId) {
+      statusApi.loadAllForIssueType(issueTypeId).then((res) => {
         this.setState({
           selectLoading: false,
           originStatus: res,
         });
       });
-      statusApi.loadFirstInWorkFlow(subTask.id).then((res) => {
+      statusApi.loadFirstInWorkFlow(issueTypeId).then((res) => {
         this.setState({
           selectDefaultValue: String(res),
         });
@@ -100,19 +91,17 @@ class TransformSubIssue extends Component {
 
   handleTransformSubIssue = () => {
     const {
-      form, onOk, issueTypes, issueId, ovn,
+      form, onOk, issueId, ovn,
     } = this.props;
     form.validateFields((err, values) => {
       if (!err) {
-        const issueTypeData = issueTypes;
-        const subTask = issueTypeData.find((t) => t.typeCode === 'sub_task');
         const issueTransformSubTask = {
           issueId,
           parentIssueId: values.issuesId,
           statusId: values.statusId,
           objectVersionNumber: ovn,
-          issueTypeId: subTask && subTask.id,
-          typeCode: subTask && subTask.typeCode,
+          issueTypeId: values.issueTypeId,
+          typeCode: 'sub_task',
         };
         this.setState({
           loading: true,
@@ -133,7 +122,6 @@ class TransformSubIssue extends Component {
       form,
       visible,
       onCancel,
-      issueNum,
     } = this.props;
     const {
       loading,
@@ -158,13 +146,24 @@ class TransformSubIssue extends Component {
         width={MODAL_WIDTH.small}
       >
         <Form layout="vertical">
+          <FormItem label="问题类型">
+            {getFieldDecorator('issueTypeId', {
+              rules: [{ required: true, message: '请选择问题类型' }],
+            })(
+              <SelectSubTask
+                label="问题类型"
+                onChange={(value) => {
+                  form.resetFields(['statusId']);
+                  this.getStatus(value);
+                }}
+              />,
+            )}
+          </FormItem>
           <FormItem label="父任务">
             {getFieldDecorator('issuesId', {
               rules: [{ required: true, message: '请选择父任务' }],
             })(
               <Select
-                ref={(select) => { this.Select = select; }}
-                defaultOpen
                 label="父任务"
                 loading={selectLoading}
                 filter

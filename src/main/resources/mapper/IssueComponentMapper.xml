@@ -29,6 +29,7 @@
         aic.manager_id,
         aic.default_assignee_role,
         aic.object_version_number,
+        aic.sequence,
         case when aa.issue_count is null then 0 else aa.issue_count end as issue_count
         from agile_issue_component aic left join (
         select acir.component_id,count(*) as issue_count from agile_component_issue_rel acir
@@ -125,5 +126,41 @@
         where aic.project_id = #{projectId}
         order by aic.component_id desc
     </select>
+
+    <select id="queryMaxRank" resultType="java.lang.String">
+        select Max(rank) from agile_issue_component
+        where project_id = #{projectId}
+        order by rank desc
+    </select>
+
+    <select id="querNoRankList" resultType="io.choerodon.agile.infra.dto.IssueComponentDTO">
+        select * from agile_issue_component
+        where project_id = #{projectId}
+        and rank is null
+    </select>
+
+    <select id="queryRank" resultType="java.lang.String">
+        select rank from agile_issue_component
+        where project_id = #{projectId}
+        and component_id = #{outsetId}
+    </select>
+
+    <select id="queryLeftRank" resultType="java.lang.String">
+        select MIN(rank) from agile_issue_component
+        where project_id = #{projectId}
+        and rank > #{rightRank}
+    </select>
+
+    <select id="queryRightRank" resultType="java.lang.String">
+        select MAX(rank) from agile_issue_component
+        where project_id = #{projectId}
+        and rank &lt; #{leftRank}
+    </select>
+
+    <update id="updateRank">
+        update agile_issue_component set rank = #{issueComponentDTO.rank}
+        where project_id = #{projectId}
+        and component_id = #{issueComponentDTO.componentId}
+    </update>
 
 </mapper>

@@ -21,7 +21,7 @@ const propTypes = {
 };
 const SelectFocusLoad = (props) => {
   const SelectRef = React.createRef();
-  const { type } = props;
+  const { type, optionArgs } = props;
   const getType = () => {
     const Type = { ...Types[type], ...props };
     return Type;
@@ -111,8 +111,7 @@ const SelectFocusLoad = (props) => {
     totalList = totalList.filter(optionFilter);
   }
   // 渲染去掉重复项
-  const Options = uniqBy(totalList.map(render).concat(React.Children.toArray(children)), (option) => option.props.value);
-
+  const Options = uniqBy(totalList.map((item) => render(item, optionArgs)).concat(React.Children.toArray(children)), (option) => option.props.value);
   return (
     <Select
       filter

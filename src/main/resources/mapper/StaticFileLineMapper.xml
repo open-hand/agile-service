@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.StaticFileLineMapper">
+
+    <insert id="batchInsert">
+        insert into agile_static_file_line(
+            id, header_id, project_id, organization_id,
+            url, relative_path, file_type, created_by, last_updated_by)
+        values
+        <foreach collection="lineList" item="item" separator=",">
+            (#{item.id},#{item.headerId},#{item.projectId},#{item.organizationId}
+            ,#{item.url},#{item.relativePath}
+            ,#{item.fileType},#{item.createdBy},#{item.lastUpdatedBy})
+        </foreach>
+    </insert>
+</mapper>

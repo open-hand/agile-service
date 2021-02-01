@@ -322,23 +322,26 @@
     </delete>
 
     <select id="sortAndJudgeCompleted" resultType="java.lang.Long">
-        select ai.issue_id
-        from agile_issue ai, agile_issue_status ais
-        where ai.project_id = #{projectId}
-        and ai.status_id = ais.status_id and ais.project_id = #{projectId} and ais.is_completed = 1
-        and (
-        select count(ai2.issue_id)
-        from agile_issue ai2, agile_issue_status ais2
-        where ai2.project_id = #{projectId}
-        and ai2.parent_issue_id = ai.issue_id
-        and ai2.status_id = ais2.status_id and ais2.project_id = #{projectId} and ais2.is_completed = 0
-        ) = 0
-        and ai.issue_id in
-        <foreach collection="parentIds" item="parentId"
-                 open="(" close=")" separator=",">
-            #{parentId}
-        </foreach>
-        order by ai.issue_id
+        select ai1.issue_id from (
+            select ai.issue_id,
+            CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert
+            from agile_issue ai, agile_issue_status ais
+            where ai.project_id = #{projectId}
+            and ai.status_id = ais.status_id and ais.project_id = #{projectId} and ais.is_completed = 1
+            and (
+            select count(ai2.issue_id)
+            from agile_issue ai2, agile_issue_status ais2
+            where ai2.project_id = #{projectId}
+            and ai2.parent_issue_id = ai.issue_id
+            and ai2.status_id = ais2.status_id and ais2.project_id = #{projectId} and ais2.is_completed = 0
+            ) = 0
+            and ai.issue_id in
+            <foreach collection="parentIds" item="parentId"
+                     open="(" close=")" separator=",">
+                #{parentId}
+            </foreach>
+        ) ai1
+        order by ai1.issue_num_convert
     </select>
 
     <select id="getAllColumnNum" resultType="io.choerodon.agile.infra.dto.ColumnIssueNumDTO">

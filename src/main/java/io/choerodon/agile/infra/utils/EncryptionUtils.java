@@ -46,9 +46,9 @@ public class EncryptionUtils {
 
     private static ObjectMapper encryptMapper;
 
-    public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","type_code","last_update_date"};
+    public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","last_update_date"};
 
-    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds"};
+    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds","fixVersion","influenceVersion"};
 
     public static final String[] IGNORE_VALUES = {"0","none"};
     public static final String BLANK_KEY = "";
@@ -232,6 +232,8 @@ public class EncryptionUtils {
                         Class<?> aClass = Class.forName(className);
                         List list = jsonToList(valueNode, aClass);
                         field.set(object, list);
+                    } else if (field.getType() == Object.class){
+                        field.set(object, valueNode.textValue());
                     }
                 } catch (Exception e) {
                     LOGGER.error("reflect error: {}", e);
@@ -367,7 +369,18 @@ public class EncryptionUtils {
             search.getOtherArgs().put("version",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
-
+        // influenceVersion
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("influenceVersion"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("influenceVersion",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+        // fixVersion
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("fixVersion"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("fixVersion",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
         // sprint
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("sprint"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {

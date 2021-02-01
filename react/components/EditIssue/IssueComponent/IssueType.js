@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Dropdown, Menu, Icon } from 'choerodon-ui';
 import { find } from 'lodash';
-import { useIssueTypes } from '@/hooks';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { issueApi } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import TypeTag from '../../TypeTag';
@@ -13,7 +13,7 @@ const IssueType = observer(({
   reloadIssue, onUpdate,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
-  let [issueTypeData] = useIssueTypes();
+  let { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true }, { enabled: !disabled });
   const handleChangeType = (type) => {
     const issue = store.getIssue;
     const {
@@ -87,7 +87,7 @@ const IssueType = observer(({
     ];
     currentIssueType = featureType === 'business' ? issueTypeData[0] : issueTypeData[1];
   } else {
-    issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => ![typeCode, 'feature', 'sub_task'].includes(item.typeCode));
+    issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => !['feature', 'sub_task'].includes(item.typeCode));
     if (isInProgram) {
       issueTypeData = issueTypeData.filter((item) => item.typeCode !== 'issue_epic');
     }
@@ -107,7 +107,7 @@ const IssueType = observer(({
     >
       {
         issueTypeData.map((t) => (
-          <Menu.Item key={t.typeCode} value={t.id} featureType={t.featureType}>
+          <Menu.Item key={t.id} value={t.id} featureType={t.featureType}>
             <TypeTag
               style={{ margin: 0 }}
               data={t}

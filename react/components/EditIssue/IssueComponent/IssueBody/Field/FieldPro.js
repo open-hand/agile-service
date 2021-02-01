@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import moment from 'moment';
 import SelectUser from '@/components/select/select-user';
+import { toJS } from 'mobx';
 import {
   TextField, TextArea, Select, NumberField, DatePicker, DateTimePicker, TimePicker, SelectBox,
 } from 'choerodon-ui/pro';
 import { fieldApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import UserHead from '@/components/UserHead';
+import UserTag from '@/components/tag/user-tag';
 
 const EditorMap = new Map([
   ['text', TextArea],
@@ -21,6 +23,8 @@ const EditorMap = new Map([
   ['time', TimePicker],
   ['date', DatePicker],
   ['datetime', DateTimePicker],
+  ['multiMember', SelectUser],
+
 ]);
 @observer class FieldPro extends Component {
   updateIssueField = (value) => {
@@ -74,22 +78,25 @@ const EditorMap = new Map([
         {
           const options = field.fieldOptions && field.fieldOptions.length > 0
               && field.fieldOptions.filter((option) => option.enabled
-              || (value && value.indexOf(option.id) !== -1)).map((item) => (
-                <Editor.Option
-                  value={item.id}
-                  key={item.id}
-                >
-                  {item.value}
-                </Editor.Option>
+                || (value && value.indexOf(option.id) !== -1)).map((item) => (
+                  <Editor.Option
+                    value={item.id}
+                    key={item.id}
+                  >
+                    {item.value}
+                  </Editor.Option>
               ));
           return (
-            <Editor vertical required={required} multiple={fieldType === 'multiple' || fieldType === 'checkbox'}>
+            <Editor vertical searchable required={required} multiple={fieldType === 'multiple' || fieldType === 'checkbox'}>
               {options}
             </Editor>
           );
         }
         case 'text': {
           return <Editor required={required} autoSize />;
+        }
+        case 'multiMember': {
+          return <Editor required={required} multiple />;
         }
         default: return <Editor required={required} />;
       }
@@ -128,12 +135,8 @@ const EditorMap = new Map([
             submitTrigger={submitTrigger}
           >
             <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
-              {fieldType === 'member' && valueStr
-                ? (
-                  <UserHead
-                    user={valueStr}
-                  />
-                ) : (valueStr || '无')}
+              {['member', 'multiMember'].includes(fieldType) && valueStr
+                ? <UserTag data={valueStr} /> : (valueStr || '无')}
             </div>
           </TextEditToggle>
         </div>

@@ -380,6 +380,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
         switch (v.getFieldType()) {
             case FieldType.CHECKBOX:
+            case FieldType.MULTI_MEMBER:
             case FieldType.MULTIPLE:
                 pageFieldViewUpdateVO.setValue(statusFieldValueSettingDTOS.stream().map(settingDTO -> settingDTO.getOptionId().toString()).collect(Collectors.toList()));
                 break;
@@ -540,14 +541,14 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     }
 
     private void handlerDTO(List<StatusFieldValueSettingDTO> statusFieldValueSetting) {
-        List<Long> userIds = statusFieldValueSetting.stream().filter(v -> FieldType.MEMBER.equals(v.getFieldType()) && !ObjectUtils.isEmpty(v.getUserId())).map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
+        List<Long> userIds = statusFieldValueSetting.stream().filter(v -> (FieldType.MEMBER.equals(v.getFieldType()) || FieldType.MULTI_MEMBER.equals(v.getFieldType())) && !ObjectUtils.isEmpty(v.getUserId())).map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
         Map<Long, String> userMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(userIds)) {
             List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true).getBody();
             userMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getRealName)));
         }
         statusFieldValueSetting.forEach(v -> {
-            if (FieldType.MEMBER.equals(v.getFieldType()) && !ObjectUtils.isEmpty(v.getUserId())) {
+            if ((FieldType.MEMBER.equals(v.getFieldType()) || FieldType.MULTI_MEMBER.equals(v.getFieldType())) && !ObjectUtils.isEmpty(v.getUserId())) {
                 v.setName(userMap.get(v.getUserId()));
             }
         });

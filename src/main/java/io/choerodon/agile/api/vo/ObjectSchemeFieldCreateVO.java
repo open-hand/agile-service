@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -26,13 +27,16 @@ public class ObjectSchemeFieldCreateVO {
     @NotNull(message = "error.field.typeNotNull")
     private String fieldType;
     @ApiModelProperty(value = "上下文")
-    @NotNull(message = "error.field.contextNotNull")
     private String[] context;
     @ApiModelProperty(value = "对象方案编码")
     @NotNull(message = "error.field.schemeCodeNotNull")
     private String schemeCode;
     @ApiModelProperty(value = "字段选项列表")
     private List<FieldOptionUpdateVO> fieldOptions;
+    @ApiModelProperty(value = "问题类型id")
+    @NotNull(message = "error.field.issueTypeIdNotNull")
+    @Encrypt
+    private List<Long> issueTypeIds;
 
     private Boolean required;
 
@@ -144,5 +148,13 @@ public class ObjectSchemeFieldCreateVO {
 
     public void setEdited(Boolean edited) {
         this.edited = edited;
+    }
+
+    public List<Long> getIssueTypeIds() {
+        return issueTypeIds;
+    }
+
+    public void setIssueTypeIds(List<Long> issueTypeIds) {
+        this.issueTypeIds = issueTypeIds;
     }
 }

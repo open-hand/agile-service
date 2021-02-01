@@ -14,16 +14,17 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (epics: (Issue | { issueId: string, summary: string })[]) => void
   flat?: boolean
   request?: SelectConfig<Issue>['request']
+  projectId?: string
 }
 
 const SelectFeature: React.FC<Props> = forwardRef(({
-  dataRef, featureId, featureName, afterLoad, request, flat, ...otherProps
+  dataRef, featureId, featureName, afterLoad, request, flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<Issue> => ({
     name: 'feature',
     textField: 'summary',
     valueField: 'issueId',
-    request: request || (({ filter, page }) => featureApi.getByEpicId(undefined, filter, page)),
+    request: request || (({ filter, page }) => featureApi.getByEpicId(undefined, filter, page, undefined, projectId)),
     // @ts-ignore
     middleWare: (features) => {
       if (featureId && featureName) {

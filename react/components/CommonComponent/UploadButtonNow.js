@@ -5,8 +5,13 @@ import {
 } from 'choerodon-ui';
 import { stores, Choerodon } from '@choerodon/boot';
 import { fileApi } from '@/api';
+import ChunkUploader from '@/components/chunk-uploader';
 import SingleFileUpload from '../SingleFileUpload';
 import './UploadButtonNow.less';
+import { getProjectId } from '@/utils/common';
+
+// eslint-disable-next-line no-underscore-dangle
+const { API_HOST } = window._env_;
 
 const { AppState } = stores;
 const propTypes = {
@@ -19,71 +24,45 @@ const propTypes = {
  */
 function UploadButtonNow(props) {
   const {
-    fileList, updateNow, onRemove, onBeforeUpload, hasPermission = true, disabled = false,
+    issueId, fileList, setFileList, hasPermission = true, disabled = false, refresh,
   } = props;
   const handleRemove = (file) => {
     const index = fileList.indexOf(file);
     const newFileList = fileList.slice();
-    if (onRemove) {
+    if (file.url) {
       fileApi.deleteFile(file.uid)
         .then((response) => {
           if (response) {
             newFileList.splice(index, 1);
-            onRemove(newFileList.reverse());
+            setFileList(newFileList);
             Choerodon.prompt('删除成功');
           }
         })
         .catch(() => {
           Choerodon.prompt('删除失败，请稍后重试');
         });
+    } else {
+      newFileList.splice(index, 1);
+      setFileList(newFileList);
     }
   };
 
-  const config = {
-    multiple: true,
-    beforeUpload: (file) => {
-      if (file.size > 1024 * 1024 * 30) {
-        Choerodon.prompt('文件不能超过30M');
-        return false;
-      } if (file.name && encodeURI(file.name).length > 210) {
-        // check name length, the name in the database will
-        // like `file_uuid_encodeURI(file.name)`,
-        // uuid's length is 32
-        // the total could save is 255
-        // so select length of encodeURI(file.name)
-        // 255 - 32 - 6 = 217 -> 210
-
-        Choerodon.prompt('文件名过长，建议不超过20个字');
-        return false;
-      }
-      const tmp = file;
-      tmp.status = 'done';
-      if (onBeforeUpload) {
-        if (fileList.length > 0) {
-          updateNow(fileList.slice().concat(file));
-        } else {
-          updateNow([file]);
-        }
-      }
-
-      return false;
-    },
-
-  };
   return (
     <div className="c7n-agile-uploadButtonNow">
       {
         (hasPermission && !disabled) ? (
-          <Upload
-            {...config}
-            className="upload-button"
-          >
-            <Tooltip title="上传附件" placement="topRight" autoAdjustOverflow={false} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }}>
-                <Icon type="file_upload" />
-              </Button>
-            </Tooltip>
-          </Upload>
+          <ChunkUploader
+            prefixPatch="/hfle"
+            showUploadList={false}
+            fileList={fileList}
+            setFileList={setFileList}
+            combine={{
+              url: `${API_HOST}/agile/v1/projects/${getProjectId()}/issue_attachment/combine`,
+              requestData: {
+                issueId,
+              },
+            }}
+          />
         ) : (
           <div style={{ height: 32 }} />
         )
@@ -97,6 +76,8 @@ function UploadButtonNow(props) {
               fileName={item.name}
               onDeleteFile={() => { handleRemove(item); }}
               hasDeletePermission={(hasPermission || AppState.userInfo.id === item.userId) && !disabled}
+              percent={!item.url && (item.percent || 0)}
+              error={!item.url && item.status === 'error'}
             />
           ))
         }

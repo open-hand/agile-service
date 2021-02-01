@@ -1,9 +1,23 @@
-import { createContext } from 'react';
-import { IssueDetailStore } from './store';
+import { createContext, useContext } from 'react';
+import Store from './store';
 
 interface Context {
-  store: IssueDetailStore
+  id: number
+  store: Store
+  topAnnouncementHeight: number
   projectId?: number
+  hasAdminPermission: boolean
+  disabledDetailEdit: boolean
+  outside?: boolean
+  organizationId?: string
+  closeButton?: boolean
+  applyType: string
 }
-const IssueDetailContext = createContext({} as Context);
-export default IssueDetailContext;
+const DetailContext = createContext({} as Context);
+
+function useDetailContext() {
+  const context = useContext(DetailContext);
+  return context;
+}
+export { useDetailContext };
+export default DetailContext;

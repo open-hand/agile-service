@@ -43,7 +43,7 @@ public class IssueTypeSchemeController extends BaseController {
     @ApiOperation(value = "根据id查询问题类型方案")
     @GetMapping(value = "/{id}")
     public ResponseEntity<IssueTypeSchemeVO> queryById(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt Long issueTypeSchemeId) {
-        return new ResponseEntity<>(issueTypeSchemeService.queryById(organizationId, issueTypeSchemeId), HttpStatus.OK);
+        return new ResponseEntity<>(issueTypeSchemeService.queryById(organizationId, 0L, issueTypeSchemeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

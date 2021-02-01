@@ -50,7 +50,7 @@ class CreateEpic extends Component {
           referenceIssueId: preEpic ? preEpic.issueId : 0,
         },
       };
-      if (!await checkCanQuickCreate(epicType.typeCode)) {
+      if (!await checkCanQuickCreate(epicType.id)) {
         Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
         this.canAdd = true;
         StoryMapStore.removeAddingEpic();
@@ -67,7 +67,7 @@ class CreateEpic extends Component {
         }
         const dto = {
           schemeCode: 'agile_issue',
-          context: res.typeCode,
+          issueTypeId: res.issueTypeId,
           pageCode: 'agile_issue_create',
         };
         onCreate({ ...res, epicName: value });

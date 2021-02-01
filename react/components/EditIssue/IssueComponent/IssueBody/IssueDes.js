@@ -7,13 +7,13 @@ import {
 
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-import { text2Delta, returnBeforeTextUpload } from '@/utils/richText';
+import { text2Delta, uploadAndReplaceImg } from '@/utils/richText';
 import { issueApi } from '@/api';
 import FullEditor from '../../../FullEditor';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
-const IssueDes = ({ reloadIssue }) => {
+const IssueDes = ({ reloadIssue, setIssueLoading }) => {
   const [editDesShow, setEditDesShow] = useState(false);
   const [fullEdit, setFullEdit] = useState(false);
   const [editDes, setEditDes] = useState('');
@@ -26,16 +26,24 @@ const IssueDes = ({ reloadIssue }) => {
 
   const updateIssueDes = async (value) => {
     const { issueId, objectVersionNumber } = store.getIssue;
-    const obj = {
-      issueId,
-      objectVersionNumber,
-    };
+
     const newValue = value || editDes;
-    await returnBeforeTextUpload(newValue, obj, issueApi.update, 'description');
-    setEditDesShow(false);
-    setFullEdit(false);
-    if (reloadIssue) {
-      reloadIssue(issueId);
+    try {
+      setIssueLoading(true);
+      const text = await uploadAndReplaceImg(newValue);
+      const obj = {
+        issueId,
+        objectVersionNumber,
+        description: text,
+      };
+      await issueApi.update(obj);
+      setEditDesShow(false);
+      setFullEdit(false);
+      if (reloadIssue) {
+        reloadIssue(issueId);
+      }
+    } catch (error) {
+      setIssueLoading(false);
     }
   };
   useEffect(() => {

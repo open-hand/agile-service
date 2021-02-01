@@ -44,7 +44,7 @@ const AddFiled: React.FC<Props> = observer(({
     modal?.handleOk(handleSubmit);
   }, []);
   useEffect(() => {
-    pageConfigApi.loadUnSelected(store.currentIssueType).then((res) => {
+    pageConfigApi.loadUnSelected(store.getCurrentIssueType).then((res) => {
       store.loadCurrentTypeAllField(res);
       const currentDataArr = dataSet.toData();
       const deleteRecords = store.getDeleteRecords.map((record) => {

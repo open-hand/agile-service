@@ -2,6 +2,7 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import { find } from 'lodash';
+import { uiApi } from '@/api';
 
 const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
 class EditIssueStore {
@@ -82,12 +83,15 @@ class EditIssueStore {
     return this.branch;
   }
 
-  @action initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branch) {
+  setBranch(branch) {
+    this.branch = branch || {};
+  }
+
+  @action initIssueAttribute(doc, workLogs, dataLogs, linkIssues) {
     this.doc = doc;
     this.workLogs = workLogs || [];
     this.dataLogs = dataLogs || [];
     this.linkIssues = linkIssues || [];
-    this.branch = branch || {};
   }
 
   @observable createBranchShow = false;
@@ -119,6 +123,17 @@ class EditIssueStore {
   @observable detailShow = false;
 
   @observable wsjfDTOShow = true;
+
+  @observable tab = 'detail';
+
+  @action
+  setTab(tab) {
+    if (tab) {
+      this.tab = tab;
+    } else {
+      this.tab = 'detail';
+    }
+  }
 
   @action setCreateBranchShow(data) {
     this.createBranchShow = data;
@@ -234,6 +249,62 @@ class EditIssueStore {
 
   @computed get getWSJFDTOShow() {
     return this.wsjfDTOShow;
+  }
+
+  @observable backlogLinks = [];
+
+  @action setBacklogLinks = (data) => {
+    this.backlogLinks = data;
+  }
+
+  commentExpandMap = observable.map();
+
+  commentReplysMap = observable.map();
+
+  @observable linkedUI = [];
+
+  @action setLinkedUI = (data) => {
+    this.linkedUI = data;
+  }
+
+  @observable outside = false;
+
+  @observable organizationId;
+
+  @observable projectId;
+
+  /**
+   * api初始化， 外部与内部调用的接口在此进行判断
+   * @param source
+   */
+  initApi(outside, organizationId, projectId) {
+    this.outside = outside;
+    if (this.outside) {
+      this.organizationId = organizationId;
+    }
+    this.projectId = projectId;
+  }
+
+  @action
+  destroy() {
+    this.outside = false;
+    this.projectId = undefined;
+    this.organizationId = undefined;
+  }
+
+  getLinkedUI = () => {
+    if (this.issue.issueId) {
+      uiApi.project(this.projectId).org(this.organizationId).outside(this.outside).getLinkedUI(this.issue.issueId)
+        .then((res) => {
+          this.setLinkedUI(res || []);
+        });
+    }
+  }
+
+  refreshBranch=() => {}
+
+  setRefreshBranch(refreshBranch) {
+    this.refreshBranch = refreshBranch;
   }
 }
 export default EditIssueStore;

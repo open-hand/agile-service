@@ -47,6 +47,11 @@ public class ObjectSchemeFieldDetailVO {
     private Long objectVersionNumber;
     @ApiModelProperty(value = "字段选项列表")
     private List<FieldOptionVO> fieldOptions;
+    @ApiModelProperty(value = "问题类型范围")
+    private List<IssueTypeVO> issueTypeVOList;
+    @ApiModelProperty(value = "问题类型id")
+    @Encrypt
+    private List<Long> issueTypeIds;
 
     public String getRequiredScope() {
         return requiredScope;
@@ -190,5 +195,21 @@ public class ObjectSchemeFieldDetailVO {
 
     public void setFieldOptions(List<FieldOptionVO> fieldOptions) {
         this.fieldOptions = fieldOptions;
+    }
+
+    public List<IssueTypeVO> getIssueTypeVOList() {
+        return issueTypeVOList;
+    }
+
+    public void setIssueTypeVOList(List<IssueTypeVO> issueTypeVOList) {
+        this.issueTypeVOList = issueTypeVOList;
+    }
+
+    public List<Long> getIssueTypeIds() {
+        return issueTypeIds;
+    }
+
+    public void setIssueTypeIds(List<Long> issueTypeIds) {
+        this.issueTypeIds = issueTypeIds;
     }
 }

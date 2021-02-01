@@ -23,11 +23,27 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      * @param organizationId
      * @param projectId
      * @param issueType
+     * {@link ObjectSchemeFieldExtendMapper#selectMinRankByIssueTypeId(Long, Long, Long)}}
      * @return
      */
+    @Deprecated
     String selectMinRank(@Param("organizationId") Long organizationId,
                          @Param("projectId") Long projectId,
                          @Param("issueType") String issueType);
+
+    /**
+     * 查询最小的排序值
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueTypeId
+     * @return
+     */
+    String selectMinRankByIssueTypeId(@Param("organizationId") Long organizationId,
+                                      @Param("projectId") Long projectId,
+                                      @Param("issueTypeId") Long issueTypeId);
+
+
 
     /**
      * 查询组织层的扩展字段
@@ -35,13 +51,29 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      * @param issueTypes
      * @param organizationId
      * @param fieldId
+     * {@link ObjectSchemeFieldExtendMapper#selectExtendFieldByOptions(List, Long, Long, Long)}}
      * @return
      */
+    @Deprecated
     List<ObjectSchemeFieldExtendDTO> selectExtendField(@Param("issueTypes") List<String> issueTypes,
                                                        @Param("organizationId") Long organizationId,
                                                        @Param("fieldId") Long fieldId,
                                                        @Param("projectId") Long projectId);
 
+
+    /**
+     * 查询组织层的扩展字段
+     *
+     * @param issueTypeIds
+     * @param organizationId
+     * @param fieldId
+     * @param projectId
+     * @return
+     */
+    List<ObjectSchemeFieldExtendDTO> selectExtendFieldByOptions(@Param("issueTypeIds") List<Long> issueTypeIds,
+                                                                @Param("organizationId") Long organizationId,
+                                                                @Param("fieldId") Long fieldId,
+                                                                @Param("projectId") Long projectId);
     /**
      * 查询数量
      *
@@ -61,12 +93,12 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      *
      * @param organizationId
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @return
      */
     List<PageConfigFieldVO> listConfigs(@Param("organizationId") Long organizationId,
                                         @Param("projectId") Long projectId,
-                                        @Param("issueType") String issueType);
+                                        @Param("issueTypeId") Long issueTypeId);
 
     /**
      * 批量更新组织下的required字段
@@ -106,12 +138,12 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
     /**
      * @param organizationId
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @return
      */
     List<ObjectSchemeFieldVO> unselected(@Param("organizationId") Long organizationId,
                                          @Param("projectId") Long projectId,
-                                         @Param("issueType") String issueType);
+                                         @Param("issueTypeId") Long issueTypeId);
 
     /**
      * 批量插入接口
@@ -125,14 +157,14 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      *
      * @param organizationId
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @param created
      * @param edited
      * @return
      */
     List<PageFieldDTO> selectFields(@Param("organizationId") Long organizationId,
                                     @Param("projectId") Long projectId,
-                                    @Param("issueType") String issueType,
+                                    @Param("issueTypeId") Long issueTypeId,
                                     @Param("created") Boolean created,
                                     @Param("edited") Boolean edited);
 

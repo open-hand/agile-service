@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.aspect;
 
 import io.choerodon.agile.api.vo.PriorityVO;
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.api.vo.StaticFileRelatedVO;
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.*;
@@ -8,6 +10,7 @@ import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
@@ -23,6 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
@@ -74,6 +78,7 @@ public class DataLogAspect {
     private static final String CREATE_COMMENT = "createComment";
     private static final String UPDATE_COMMENT = "updateComment";
     private static final String DELETE_COMMENT = "deleteComment";
+    private static final String DELETE_COMMENT_REPLY = "deleteCommentReply";
     private static final String CREATE_WORKLOG = "createWorkLog";
     private static final String DELETE_WORKLOG = "deleteWorkLog";
     private static final String EPIC_NAME_FIELD = "epicName";
@@ -136,6 +141,14 @@ public class DataLogAspect {
     private static final String FIELD_ESTIMATED_START_TIME = "Estimated Start Time";
     private static final String ESTIMATED_END_TIME = "estimatedEndTime";
     private static final String FIELD_ESTIMATED_END_TIME = "Estimated End Time";
+    private static final String PROJECT_MOVE = "projectMove";
+    private static final String FIELD_PROJECT_MOVE = "Project Move";
+    private static final String STATIC_FILE_CREATE = "createStaticFile";
+    private static final String STATIC_FILE_DELETE = "deleteStaticFile";
+    private static final String STATIC_FILE_REL_CREATE = "createStaticFileRelated";
+    private static final String STATIC_FILE_REL_DELETE = "deleteStaticFileRelated";
+    private static final String FIELD_STATIC_FILE = "Static File";
+    private static final String FIELD_STATIC_FILE_REL = "Static File Rel";
 
 
     @Autowired
@@ -180,6 +193,12 @@ public class DataLogAspect {
     private ModelMapper modelMapper;
     @Autowired(required = false)
     private AgileTriggerService agileTriggerService;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
+    @Autowired
+    private StaticFileHeaderMapper staticFileHeaderMapper;
+    @Autowired
+    private StaticFileIssueRelMapper staticFileIssueRelMapper;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -243,6 +262,9 @@ public class DataLogAspect {
                     case DELETE_COMMENT:
                         handleDeleteCommentDataLog(args);
                         break;
+                    case DELETE_COMMENT_REPLY:
+                        handleDeleteCommentReplyDataLog(args);
+                        break;
                     case CREATE_WORKLOG:
                         result = handleCreateWorkLogDataLog(args, pjp);
                         break;
@@ -254,6 +276,21 @@ public class DataLogAspect {
                         break;
                     case KNOWLEDGE_RELATION_DELETE:
                         handleKnowledgeRelationDelete(args);
+                        break;
+                    case PROJECT_MOVE:
+                        handlerProjectMove(args);
+                        break;
+                    case STATIC_FILE_CREATE:
+                        result = handleStaticFileCreate(args, pjp);
+                        break;
+                    case STATIC_FILE_DELETE:
+                        handleStaticFileDelete(args);
+                        break;
+                    case STATIC_FILE_REL_CREATE:
+                        handleStaticFileRelCreate(args, pjp);
+                        break;
+                    case STATIC_FILE_REL_DELETE:
+                        handleStaticFileRelDelete(args);
                         break;
                     default:
                         break;
@@ -333,6 +370,148 @@ public class DataLogAspect {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
         }
         return result;
+    }
+
+    private void handleStaticFileRelDelete(Object[] args) {
+        StaticFileHeaderDTO staticFileHeaderDTO = null;
+        StaticFileIssueRelDTO staticFileIssueRelDTO = null;
+
+        for (Object arg : args) {
+            if (arg instanceof StaticFileHeaderDTO) {
+                staticFileHeaderDTO = (StaticFileHeaderDTO) arg;
+            }else if (arg instanceof StaticFileIssueRelDTO) {
+                staticFileIssueRelDTO = (StaticFileIssueRelDTO) arg;
+            }
+        }
+        if (!ObjectUtils.isEmpty(staticFileHeaderDTO) && !ObjectUtils.isEmpty(staticFileIssueRelDTO)) {
+            createDataLog(staticFileHeaderDTO.getProjectId(), staticFileIssueRelDTO.getIssueId(), FIELD_STATIC_FILE_REL,
+                    staticFileHeaderDTO.getUrl(), null, staticFileHeaderDTO.getId().toString(), null);
+        }
+    }
+
+    private void handleStaticFileRelCreate(Object[] args, ProceedingJoinPoint pjp) {
+        StaticFileHeaderDTO staticFileHeaderDTO = null;
+        StaticFileIssueRelDTO staticFileIssueRelDTO = null;
+        for (Object arg : args) {
+            if (arg instanceof StaticFileHeaderDTO) {
+                staticFileHeaderDTO = (StaticFileHeaderDTO) arg;
+            }else if (arg instanceof StaticFileIssueRelDTO) {
+                staticFileIssueRelDTO = (StaticFileIssueRelDTO) arg;
+            }
+        }
+        if (!ObjectUtils.isEmpty(staticFileHeaderDTO) && !ObjectUtils.isEmpty(staticFileIssueRelDTO)) {
+            try {
+                createDataLog(staticFileHeaderDTO.getProjectId(), staticFileIssueRelDTO.getIssueId(), FIELD_STATIC_FILE_REL,
+                        null, staticFileHeaderDTO.getUrl(), null, staticFileHeaderDTO.getId().toString());
+            } catch (Throwable e) {
+                throw new CommonException(ERROR_METHOD_EXECUTE, e);
+            }
+        }
+    }
+
+    private void handleStaticFileDelete(Object[] args) {
+        StaticFileHeaderDTO staticFileHeaderDTO = null;
+        StaticFileIssueRelDTO staticFileIssueRelDTO = null;
+        for (Object arg : args) {
+            if (arg instanceof StaticFileHeaderDTO) {
+                staticFileHeaderDTO = (StaticFileHeaderDTO) arg;
+            } else if (arg instanceof StaticFileIssueRelDTO) {
+                staticFileIssueRelDTO = (StaticFileIssueRelDTO) arg;
+            }
+        }
+        if (!ObjectUtils.isEmpty(staticFileHeaderDTO) && !ObjectUtils.isEmpty(staticFileIssueRelDTO)) {
+            Long fileId = staticFileHeaderDTO.getId();
+            Long projectId = staticFileHeaderDTO.getProjectId();
+            String url = staticFileHeaderDTO.getUrl();
+
+            staticFileIssueRelDTO.setStaticFileId(fileId);
+            List<StaticFileIssueRelDTO> staticFileIssueRelList = staticFileIssueRelMapper.select(staticFileIssueRelDTO);
+            if (!CollectionUtils.isEmpty(staticFileIssueRelList)) {
+                staticFileIssueRelList.forEach(staticFileIssueRel -> createDataLog(projectId, staticFileIssueRel.getIssueId(), FIELD_STATIC_FILE,
+                        url, null, fileId.toString(), null));
+            }
+        }
+    }
+
+    private Object handleStaticFileCreate(Object[] args, ProceedingJoinPoint pjp) {
+        StaticFileHeaderDTO staticFileHeaderDTO = null;
+        StaticFileIssueRelDTO staticFileIssueRelDTO = null;
+
+        Object result = null;
+        for (Object arg : args) {
+            if (arg instanceof StaticFileHeaderDTO) {
+                staticFileHeaderDTO = (StaticFileHeaderDTO) arg;
+            }else if (arg instanceof StaticFileIssueRelDTO) {
+                staticFileIssueRelDTO = (StaticFileIssueRelDTO) arg;
+            }
+        }
+        if (!ObjectUtils.isEmpty(staticFileHeaderDTO) && !ObjectUtils.isEmpty(staticFileIssueRelDTO)) {
+            try {
+                result = pjp.proceed();
+                staticFileHeaderDTO = (StaticFileHeaderDTO) result;
+                createDataLog(staticFileHeaderDTO.getProjectId(), staticFileIssueRelDTO.getIssueId(), FIELD_STATIC_FILE,
+                        null, staticFileHeaderDTO.getUrl(), null, staticFileHeaderDTO.getId().toString());
+            } catch (Throwable e) {
+                throw new CommonException(ERROR_METHOD_EXECUTE, e);
+            }
+        }
+        return result;
+    }
+
+    private void handleDeleteCommentReplyDataLog(Object[] args) {
+        IssueCommentDTO issueCommentDTO = null;
+        for (Object arg : args) {
+            if (arg instanceof IssueCommentDTO) {
+                issueCommentDTO = (IssueCommentDTO) arg;
+            }
+        }
+        if (issueCommentDTO != null) {
+            createDataLog(issueCommentDTO.getProjectId(), issueCommentDTO.getIssueId(), FIELD_COMMENT,
+                    issueCommentDTO.getCommentText(), null, issueCommentDTO.getCommentId().toString(), null);
+            IssueCommentDTO childRecord = new IssueCommentDTO();
+            childRecord.setProjectId(issueCommentDTO.getProjectId());
+            childRecord.setParentId(issueCommentDTO.getCommentId());
+            List<IssueCommentDTO> childCommentList = issueCommentMapper.select(childRecord);
+            if (!CollectionUtils.isEmpty(childCommentList)) {
+                childCommentList.forEach(childComment -> createDataLog(childComment.getProjectId(), childComment.getIssueId(), FIELD_COMMENT,
+                        childComment.getCommentText(), null, childComment.getCommentId().toString(), null));
+            }
+        }
+    }
+
+    private void handlerProjectMove(Object[] args) {
+        IssueDTO issueDTO = (IssueDTO) args[0];
+        if (!ObjectUtils.isEmpty(issueDTO)) {
+            IssueDTO olderIssue = issueMapper.selectByPrimaryKey(issueDTO.getIssueId());
+            Long projectId = olderIssue.getProjectId();
+            Long targetProjectId = issueDTO.getProjectId();
+            if (Objects.equals(projectId, targetProjectId)) {
+                return;
+            }
+            String olderValue = null;
+            String newValue = null;
+            String olderString = null;
+            String newString = null;
+            Set<Long> projectIds = new HashSet<>();
+            projectIds.add(projectId);
+            projectIds.add(targetProjectId);
+            List<ProjectVO> projectVOS = baseFeignClient.queryByIds(projectIds).getBody();
+            if (CollectionUtils.isEmpty(projectVOS) || !Objects.equals(projectVOS.size(),projectIds.size())) {
+                throw new CommonException("error.project.not.found");
+            }
+            Map<Long, ProjectVO> projectVOMap = projectVOS.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
+            ProjectVO olderProject = projectVOMap.get(projectId);
+            ProjectVO targetProject = projectVOMap.get(targetProjectId);
+            if (!ObjectUtils.isEmpty(olderProject)) {
+                olderString = olderProject.getName();
+                olderValue = projectId.toString();
+            }
+            if (!ObjectUtils.isEmpty(targetProject)) {
+                newString = targetProject.getName();
+                newValue = targetProjectId.toString();
+            }
+            createDataLog(targetProjectId, issueDTO.getIssueId(), FIELD_PROJECT_MOVE, olderString, newString, olderValue, newValue);
+        }
     }
 
     private Object handleDeleteWorkLogDataLog(Object[] args) {
@@ -1107,9 +1286,10 @@ public class DataLogAspect {
     }
 
     private void handleType(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
+        Long projectId = originIssueDTO.getProjectId();
         if (field.contains(TYPE_CODE) && !Objects.equals(originIssueDTO.getTypeCode(), issueConvertDTO.getTypeCode())) {
-            String originTypeName = issueTypeService.queryById(ConvertUtil.getOrganizationId(originIssueDTO.getProjectId()), originIssueDTO.getIssueTypeId()).getName();
-            String currentTypeName = issueTypeService.queryById(ConvertUtil.getOrganizationId(originIssueDTO.getProjectId()), issueConvertDTO.getIssueTypeId()).getName();
+            String originTypeName = issueTypeService.queryById(originIssueDTO.getIssueTypeId(), projectId).getName();
+            String currentTypeName = issueTypeService.queryById(issueConvertDTO.getIssueTypeId(), projectId).getName();
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_ISSUETYPE, originTypeName, currentTypeName,
                     originIssueDTO.getIssueTypeId().toString(), issueConvertDTO.getIssueTypeId().toString());
             dataLogRedisUtil.deleteByHandleType(issueConvertDTO, originIssueDTO);

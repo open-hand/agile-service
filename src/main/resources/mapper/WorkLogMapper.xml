@@ -23,4 +23,10 @@
         AND awl.start_date &lt;= #{endDate}
     </select>
 
+    <update id="updateProject">
+        update agile_work_log set project_id = #{targetProjectId}
+        where project_id = #{projectId}
+        AND issue_id = #{issueId}
+    </update>
+
 </mapper>

@@ -33,11 +33,7 @@ public class GanttChartController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询甘特图列表数据")
     @PostMapping(value = "/list/by_task")
-    public ResponseEntity<List<GanttChartVO>> listByTask(@ApiIgnore
-                                                         @ApiParam(value = "分页信息", required = true)
-                                                         @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                                                                 PageRequest pageRequest,
-                                                         @ApiParam(value = "项目id", required = true)
+    public ResponseEntity<List<GanttChartVO>> listByTask(@ApiParam(value = "项目id", required = true)
                                                          @PathVariable(name = "project_id") Long projectId,
                                                          @ApiParam(value = "查询参数", required = true)
                                                          @RequestBody(required = false) SearchVO searchVO) {
@@ -48,12 +44,8 @@ public class GanttChartController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询甘特图列表数据")
     @PostMapping(value = "/list/by_user")
-    public ResponseEntity<List<GanttChartTreeVO>> listByUser(@ApiIgnore
-                                                                 @ApiParam(value = "分页信息", required = true)
-                                                                 @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                                                                         PageRequest pageRequest,
-                                                             @ApiParam(value = "项目id", required = true)
-                                                                 @PathVariable(name = "project_id") Long projectId,
+    public ResponseEntity<List<GanttChartTreeVO>> listByUser(@ApiParam(value = "项目id", required = true)
+                                                             @PathVariable(name = "project_id") Long projectId,
                                                              @ApiParam(value = "查询参数", required = true)
                                                                  @RequestBody(required = false) SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);

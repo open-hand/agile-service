@@ -70,6 +70,41 @@
         ) t
     </select>
 
+
+    <select id="selectMinRankByIssueTypeId" resultType="java.lang.String">
+        select min(t.rank)
+        from (
+        select
+        t1.rank
+        from fd_object_scheme_field_extend t1
+        where t1.organization_id = #{organizationId}
+        and t1.project_id is null
+        <if test="issueTypeId != null">
+            and t1.issue_type_id = #{issueTypeId}
+        </if>
+        <if test="projectId != null">
+            and t1.field_id not in (
+            select t3.field_id
+            from fd_object_scheme_field_extend t3
+            where t3.organization_id = #{organizationId}
+            and t3.project_id = #{projectId}
+            <if test="issueTypeId != null">
+                and t3.issue_type_id = #{issueTypeId}
+            </if>
+            )
+            union
+            select
+            t2.rank
+            from fd_object_scheme_field_extend t2
+            where t2.organization_id = #{organizationId}
+            and t2.project_id = #{projectId}
+            <if test="issueTypeId != null">
+                and t2.issue_type_id = #{issueTypeId}
+            </if>
+        </if>
+        ) t
+    </select>
+
     <select id="selectExtendField"
             resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
         select
@@ -106,6 +141,44 @@
         </choose>
     </select>
 
+    <select id="selectExtendFieldByOptions"
+            resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
+        select
+        id,
+        issue_type_id,
+        issue_type,
+        project_id,
+        organization_id,
+        field_id,
+        is_required as required,
+        is_created as created,
+        is_edited as edited,
+        rank,
+        object_version_number,
+        default_value
+        from fd_object_scheme_field_extend
+        where 1=1
+        <if test="issueTypeIds != null and issueTypeIds.size > 0">
+            and issue_type_id in
+            <foreach collection="issueTypeIds" item="issueTypeId" index="index" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+        </if>
+        and organization_id = #{organizationId}
+        <if test="fieldId != null">
+            and field_id = #{fieldId}
+        </if>
+        <choose>
+            <when test="projectId != null">
+                and project_id = #{projectId}
+            </when>
+            <otherwise>
+                and project_id is null
+            </otherwise>
+        </choose>
+    </select>
+
+
     <select id="selectExtendFields" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
         select
         id,
@@ -118,7 +191,8 @@
         is_created as created,
         is_edited as edited,
         rank,
-        object_version_number
+        object_version_number,
+        default_value
         from fd_object_scheme_field_extend
         where 1=1
         AND organization_id = #{organizationId}
@@ -154,7 +228,7 @@
         t4.id,
         t4.field_id,
         t6.name as field_name,
-        t6.default_value,
+        t4.default_value,
         t6.field_type,
         t6.code as field_code,
         t4.is_required as required,
@@ -168,21 +242,21 @@
             when t6.organization_id != 0 and t6.project_id is null then 'organization'
             else 'project'
         end as created_level,
-        t6.extra_config
+        t4.extra_config
         from fd_object_scheme_field_extend t4
         join (
             select
             t1.id
             from fd_object_scheme_field_extend t1
             where t1.organization_id = #{organizationId}
-            and t1.issue_type = #{issueType}
+            and t1.issue_type_id = #{issueTypeId}
             and t1.project_id is null
             <if test="projectId != null">
                 and t1.field_id not in (
                     select t3.field_id
                     from fd_object_scheme_field_extend t3
                     where t3.organization_id = #{organizationId}
-                    and t3.issue_type = #{issueType}
+                    and t3.issue_type_id = #{issueTypeId}
                     and t3.project_id = #{projectId}
                 )
                 union
@@ -190,7 +264,7 @@
                     t2.id
                 from fd_object_scheme_field_extend t2
                 where t2.organization_id = #{organizationId}
-                and t2.issue_type = #{issueType}
+                and t2.issue_type_id = #{issueTypeId}
                 and t2.project_id = #{projectId}
             </if>
         ) t5 on t4.id = t5.id
@@ -268,7 +342,7 @@
             distinct field_id
             from fd_object_scheme_field_extend
             where organization_id = #{organizationId}
-            and issue_type = #{issueType}
+            and issue_type_id = #{issueTypeId}
             and project_id is null
             <if test="projectId != null">
                 union
@@ -277,7 +351,7 @@
                 from fd_object_scheme_field_extend
                 where organization_id = #{organizationId}
                 and project_id = #{projectId}
-                and issue_type = #{issueType}
+                and issue_type_id = #{issueTypeId}
             </if>
         )
         AND t2.id = t1.id
@@ -291,8 +365,8 @@
         t5.name as field_name,
         t5.field_type,
         t5.is_system as system,
-        t5.default_value,
-        t5.extra_config,
+        t4.default_value,
+        t4.extra_config,
         t5.code as field_code,
         t4.is_required as required,
         case
@@ -318,12 +392,14 @@
             t1.organization_id,
             t1.is_created,
             t1.is_edited,
-            t1.rank
+            t1.rank,
+            t1.default_value,
+            t1.extra_config
             from fd_object_scheme_field_extend t1
             where t1.organization_id = #{organizationId}
             and t1.project_id is null
-            <if test="issueType != null">
-                and t1.issue_type = #{issueType}
+            <if test="issueTypeId != null">
+                and t1.issue_type_id = #{issueTypeId}
             </if>
             <if test="projectId != null">
                 and t1.field_id not in (
@@ -331,8 +407,8 @@
                     from fd_object_scheme_field_extend t3
                     where t3.organization_id = #{organizationId}
                     and t3.project_id = #{projectId}
-                    <if test="issueType != null">
-                        and t3.issue_type = #{issueType}
+                    <if test="issueTypeId != null">
+                        and t3.issue_type_id = #{issueTypeId}
                     </if>
                 )
                 union
@@ -345,12 +421,14 @@
                     t2.organization_id,
                     t2.is_created,
                     t2.is_edited,
-                    t2.rank
+                    t2.rank,
+                    t2.default_value,
+                    t2.extra_config
                 from fd_object_scheme_field_extend t2
                 where t2.organization_id = #{organizationId}
                 and t2.project_id = #{projectId}
-                <if test="issueType != null">
-                    and t2.issue_type = #{issueType}
+                <if test="issueTypeId != null">
+                    and t2.issue_type_id = #{issueTypeId}
                 </if>
             </if>
         ) t6

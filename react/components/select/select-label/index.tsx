@@ -11,26 +11,28 @@ interface Props extends Partial<SelectProps> {
   valueField?: string
   afterLoad?: (sprints: ILabel[]) => void
   flat?:boolean
+  projectId?: string
+  extraOptions?: any[]
 }
 
 const SelectLabel: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, ...otherProps
+  dataRef, valueField, afterLoad, flat, projectId, extraOptions = [], ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'label',
     textField: 'labelName',
     valueField: valueField || 'labelId',
-    request: () => issueLabelApi.loads(),
+    request: () => issueLabelApi.loads(projectId),
     middleWare: (data: ILabel[]) => {
       if (dataRef) {
         Object.assign(dataRef, {
-          current: data,
+          current: [...extraOptions, ...data],
         });
       }
       if (afterLoad) {
-        afterLoad(data);
+        afterLoad([...extraOptions, ...data]);
       }
-      return data;
+      return [...extraOptions, ...data];
     },
     paging: false,
   }), []);

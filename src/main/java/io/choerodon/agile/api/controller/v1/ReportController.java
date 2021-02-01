@@ -107,7 +107,7 @@ public class ReportController {
                                                                  @ApiParam(value = "类型", required = true)
                                                                   @RequestParam String type,
                                                                  @ApiParam(value = "分页信息", required = true)
-                                                                  @SortDefault(value = "issue_id", direction = Sort.Direction.DESC)
+                                                                  @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                                                   @ApiIgnore PageRequest pageRequest) {
         return Optional.ofNullable(reportService.queryIssueByOptions(projectId, versionId, status, type, pageRequest, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -161,13 +162,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private PageFieldService pageFieldService;
     @Autowired
-    private ObjectSchemeFieldService objectSchemeFieldService;
-    @Autowired
     private StatusService statusService;
     @Autowired
     private InstanceService instanceService;
     @Autowired
-    private TestFeignClient testFeignClient;
+    private TestServiceClientOperator testServiceClientOperator;
     @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
@@ -486,6 +485,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         //处理用户搜索
         Boolean condition = handleSearchUser(searchVO, projectId);
+        boolean isTreeView = !Boolean.FALSE.equals(searchVO.getSearchArgs().get("tree"));
         if (condition) {
             Page<Long> issueIdPage;
             String filterSql = null;
@@ -501,9 +501,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Map<String, String> order = new HashMap<>(1);
                 String sortCode = fieldCode.split("\\.")[1];
                 order.put(fieldCode, sortCode);
+                order.put("issueNum", "issue_num_convert");
                 PageUtil.sortResetOrder(pageRequest.getSort(), null, order);
                 List<Long> issueIdsWithSub =
-                        issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null)
+                        issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null, isTreeView)
                                 .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageRequest);
 
@@ -518,7 +519,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         .subList((pageRequest.getPage() - 1) * pageRequest.getSize(), pageRequest.getPage() * pageRequest.getSize()));
             } else {
                 String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
-                Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
                 List<Long> issueIds = issues.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
             }
@@ -526,10 +527,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Page<IssueListFieldKVVO> issueListDTOPage;
             if (issueIdPage.getContent() != null && !issueIdPage.getContent().isEmpty()) {
                 List<Long> issueIds = issueIdPage.getContent();
-                Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
-                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false);
+                Set<Long> childrenIds = new HashSet<>();
+                if (isTreeView) {
+                    childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                }
+                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, isTreeView);
                 Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-                Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+                Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
                 List<Long> allIssueIds = issueDTOList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, allIssueIds, false);
@@ -551,6 +555,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
         Map<String, String> order = new HashMap<>(1);
         order.put("issueId", "issue_issue_id");
+        order.put("issueNum", "issue_num_convert");
         return PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, order));
     }
 
@@ -803,11 +808,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueConvertDTO == null) {
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
+//        //史诗删除默认值校验
+//        if(Objects.equals(issueConvertDTO.getTypeCode(), IssueTypeCode.ISSUE_EPIC.value())) {
+//            objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfSingle(projectId, issueId, FieldCode.EPIC);
+//        }
         //删除issueLink
         issueLinkService.deleteByIssueId(issueConvertDTO.getIssueId());
         //删除标签关联
         labelIssueRelService.deleteByIssueId(issueConvertDTO.getIssueId());
-        //没有issue使用的标签进行垃圾回收
+        //没有issue使用且没有设为默认值的标签进行垃圾回收
         issueLabelService.labelGarbageCollection(projectId);
         //删除模块关联
         componentIssueRelService.deleteByIssueId(issueConvertDTO.getIssueId());
@@ -861,7 +870,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 //        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
         //delete cache
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
-        testFeignClient.deleteTestRel(projectId, issueId);
+        testServiceClientOperator.deleteTestRel(projectId, issueId);
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
@@ -1123,7 +1132,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public IssueSubVO queryIssueSub(Long projectId, Long organizationId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         issue.setPriorityVO(priorityService.queryById(organizationId, issue.getPriorityId()));
-        issue.setIssueTypeVO(issueTypeService.queryById(organizationId, issue.getIssueTypeId()));
+        issue.setIssueTypeVO(issueTypeService.queryById(issue.getIssueTypeId(), projectId));
         issue.setStatusVO(statusService.queryStatusById(organizationId, issue.getStatusId()));
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
@@ -1371,7 +1380,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             } else {
                 labelIssueRelService.batchDeleteByIssueId(issueId);
             }
-            //没有issue使用的标签进行垃圾回收
+            //没有issue使用且没有设为默认值的标签进行垃圾回收
             issueLabelService.labelGarbageCollection(projectId);
         }
 
@@ -1471,7 +1480,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public Page<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, PageRequest pageRequest) {
         //连表查询需要设置主表别名
-        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", new HashMap<>());
+        Map<String,String> orders = new HashMap<>();
+        orders.put("issueNum","issue_num_convert");
+        Sort sort = PageUtil.sortResetOrder( pageRequest.getSort(), "ai", orders);
         pageRequest.setSort(sort);
         //pageable.resetOrder("ai", new HashMap<>());
         IssueNumDTO issueNumDTO = null;
@@ -1871,7 +1882,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Long newIssueId;
             Long objectVersionNumber;
             issueDetailDTO.setSummary(copyConditionVO.getSummary());
-            IssueTypeVO issueTypeVO = issueTypeService.queryById(ConvertUtil.getOrganizationId(projectId), issueDetailDTO.getIssueTypeId());
+            IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId(), projectId);
             if (issueTypeVO.getTypeCode().equals(SUB_TASK)) {
                 IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToIssueSubCreateDto(issueDetailDTO);
                 IssueSubVO newIssue = stateMachineClientService.createSubIssue(issueSubCreateVO);
@@ -2153,7 +2164,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public Page<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
         //连表查询需要设置主表别名
-        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>());
+        HashMap<String, String> orders = new HashMap<>();
+        orders.put("issueNum","issue_num_convert");
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, orders);
         //pageable.resetOrder(SEARCH, new HashMap<>());
         pageRequest.setSort(sort);
         Page<IssueDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest,
@@ -2171,7 +2184,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public Page<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
-        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>());
+        Map<String, String> orders = new HashMap<>();
+        orders.put("issueNum","issue_num_convert");
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, orders);
         //pageable.resetOrder(SEARCH, new HashMap<>());
         Page<IssueDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest, () ->
                 issueMapper.listIssueWithLinkedIssues(projectId, searchVO.getSearchArgs(),
@@ -2233,7 +2248,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public Page<IssueNumVO> queryIssueByOptionForAgile(Long projectId, Long issueId, String issueNum, Boolean self, String content, PageRequest pageRequest) {
-        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>());
+        Map<String, String> orders = new HashMap<>();
+        orders.put("issueNum", "issue_num_convert");
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, orders);
         pageRequest.setSort(sort);
         //pageable.resetOrder("search", new HashMap<>());
         IssueNumDTO issueNumDTO = null;
@@ -2594,12 +2611,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public Page<IssueListFieldKVVO> queryStoryAndTask(Long projectId, PageRequest pageRequest, SearchVO searchVO) {
+        //连表查询需要设置主表别名
+        Map<String, String> orders = new HashMap<>();
+        orders.put("issueNum","issue_num_convert");
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", orders);
+        pageRequest.setSort(sort);
         Page<IssueDTO> pageInfo = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryStoryAndTaskByProjectId(projectId, searchVO));
         List<IssueDTO> list = pageInfo.getContent();
         if (!CollectionUtils.isEmpty(list)) {
             Long organizationId = projectUtil.getOrganizationId(projectId);
             Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
             Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
             List<IssueListFieldKVVO> listFieldKVVOS = new ArrayList<>();
             list.forEach(v -> {
@@ -2668,7 +2690,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
         }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, ProjectVO> projectVOMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
         List<IssueListFieldKVVO> list = new ArrayList<>();
@@ -2748,7 +2770,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         .stream()
                         .filter(v -> ((!Objects.isNull(type) && Objects.equals(type, "myStarBeacon"))
                                 ? (Boolean.TRUE.equals(v.getEnabled()))
-                                : (!Objects.equals(v.getCategory(),"PROGRAM") && Boolean.TRUE.equals(v.getEnabled()))))
+                                : (!ProjectCategory.checkContainProjectCategory(v.getCategories(),ProjectCategory.MODULE_PROGRAM) && Boolean.TRUE.equals(v.getEnabled()))))
                         .forEach(obj -> {
                             projectIds.add(obj.getId());
                             projects.add(obj);

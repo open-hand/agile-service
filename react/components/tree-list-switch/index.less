@@ -1,0 +1,28 @@
+@import '~choerodon-ui/lib/style/themes/default';
+
+.switch {
+  position: absolute;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  border-radius: 2px;
+  border: 1px solid #415BC9;
+  .span {
+    width: 68px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    color: #415BC9;
+    background: #FFFFFF;
+    cursor: pointer;
+  }
+  .selected {
+    background-color: #415BC9;
+    color: #fff;
+  }
+  .disabled {
+    color: @disabled-color;
+  }  
+}
+
+

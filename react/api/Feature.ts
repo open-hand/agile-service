@@ -77,7 +77,7 @@ class FeatureApi extends Api<FeatureApi> {
    * 根据史诗ID查询项目群的特性
    * @param epicId 可以不传
    */
-  getByEpicId(epicId?: number, searchName?: string, page: number = 1, size: number = 10, projectId?: number) {
+  getByEpicId(epicId?: number, searchName?: string, page: number = 1, size: number = 10, projectId?: string) {
     return axios({
       method: 'post',
       url: `/agile/v1/projects/${projectId || getProjectId()}/issues/feature/select_data`,
@@ -200,6 +200,17 @@ class FeatureApi extends Api<FeatureApi> {
       params: {
         featureId,
         programId,
+      },
+    });
+  }
+
+  getSplitStoryOutside(featureId: number, projectId: string) {
+    return axios({
+      method: 'post',
+      url: 'agile/v1/program_external/list_story_by_feature_id',
+      params: {
+        featureId,
+        project_id: projectId,
       },
     });
   }

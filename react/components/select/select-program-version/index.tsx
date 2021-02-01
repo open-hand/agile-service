@@ -17,6 +17,7 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (versions: any[]) => void
   flat?: boolean
   filterSelected?: boolean
+  projectId?: string
 }
 interface OldProps extends Partial<OldSelectProps> {
   teamProjectIds?: string[],
@@ -33,8 +34,11 @@ interface VersionDataConfigProps {
   dataRef?: React.MutableRefObject<any>
   teamProjectIds?: string[]
   afterLoad?: (versions: any[]) => void
+  projectId?: string
 }
-function useGetVersionData({ dataRef, afterLoad, teamProjectIds }: VersionDataConfigProps): [StateProps, any] {
+function useGetVersionData({
+  dataRef, afterLoad, teamProjectIds, projectId,
+}: VersionDataConfigProps): [StateProps, any] {
   const [versionData, dispatch] = useReducer<(state: StateProps, action: ActionProps) => StateProps>((state, action) => {
     const { type } = action;
     switch (type) {
@@ -77,18 +81,20 @@ function useGetVersionData({ dataRef, afterLoad, teamProjectIds }: VersionDataCo
   }, { data: [], option: new Map(), headOptions: [] });
 
   const loadData = useCallback(async () => {
-    versionApi.loadProgramVersion(false, teamProjectIds).then((res: any) => {
+    versionApi.project(projectId).loadProgramVersion(false, teamProjectIds).then((res: any) => {
       dispatch({ type: 'change', data: res });
     });
-  }, [teamProjectIds]);
+  }, [projectId, teamProjectIds]);
   useEffect(() => { loadData(); }, [loadData]);
   return [versionData, { loadData, dispatch }];
 }
 const SelectProgramVersion: React.FC<Props> = forwardRef(({
-  teamProjectIds, dataRef, afterLoad, flat, ...otherProps
+  teamProjectIds, dataRef, afterLoad, flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const Component = flat ? FlatSelect : Select;
-  const [versionData, method] = useGetVersionData({ teamProjectIds, dataRef, afterLoad });
+  const [versionData, method] = useGetVersionData({
+    teamProjectIds, dataRef, afterLoad, projectId,
+  });
   const OptionComponent = versionData.headOptions.map((item) => {
     const options = (versionData.option.get(item.id) || []);
 

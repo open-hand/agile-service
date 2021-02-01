@@ -42,7 +42,7 @@ const columns = [
 ];
 
 const SortTable: React.FC = () => {
-  const { sortTableDataSet } = usePageIssueTypeStore();
+  const { sortTableDataSet, pageIssueTypeStore } = usePageIssueTypeStore();
   const { showSplitLine, prefixCls } = useSortTableContext();
   const type = showSplitLine ? 'organization' : 'project';
   const onDragStart = (initial: DragStart, provided: ResponderProvided) => {
@@ -88,7 +88,7 @@ const SortTable: React.FC = () => {
           onDragStart={onDragStart}
         >
           <div className={`${prefixCls}-drop-wrap`}>
-            <DropContent rows={sortTableDataSet.data} isDropDisabled={false} />
+            <DropContent rows={sortTableDataSet.data} isDropDisabled={!pageIssueTypeStore.currentIssueType.enabled} />
           </div>
         </DragDropContext>
       </div>

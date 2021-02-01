@@ -989,7 +989,9 @@ class BacklogStore {
     }
   };
 
-  handleDeleteSprint = (data, isCurrentPi) => {
+  handleDeleteSprint = async (data, isCurrentPi) => {
+    // const defaultValueIsCurrent = await sprintApi.beforeChangeCheck(data.sprintId);
+    const defaultValuePrompt = undefined;// defaultValueIsCurrent ? `冲刺${data.sprintName}是默认选项，删除后冲刺字段默认值将清空` : undefined;
     const hasIssue = data.issueSearchVOList && data.issueSearchVOList.length > 0;
     Modal.confirm({
       width: 560,
@@ -998,10 +1000,12 @@ class BacklogStore {
       content: hasIssue ? (
         <div>
           <p style={{ marginBottom: 10 }}>{`确认要删除冲刺${data.sprintName}吗？删除冲刺后当前规划的问题将移动到待办事项`}</p>
+          {defaultValuePrompt && <p style={{ marginBottom: 10 }}>{defaultValuePrompt}</p>}
         </div>
       ) : (
         <div>
           <p style={{ marginBottom: 10 }}>{`确认要删除冲刺${data.sprintName}吗？`}</p>
+          {defaultValuePrompt && <p style={{ marginBottom: 10 }}>{defaultValuePrompt}</p>}
         </div>
       ),
       onOk: async () => {

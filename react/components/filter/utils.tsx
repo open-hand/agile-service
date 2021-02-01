@@ -94,7 +94,7 @@ export const renderGroupedFields: IRenderFields = ({
       contentField = field;
       return;
     }
-    if (['single', 'multiple', 'radio', 'checkbox', 'member'].includes(field.fieldType)) {
+    if (['single', 'multiple', 'radio', 'checkbox', 'member', 'multiMember'].includes(field.fieldType)) {
       selectTypes.push(field);
     } else if (['time', 'datetime', 'date'].includes(field.fieldType)) {
       dateTypes.push(field);
@@ -201,6 +201,7 @@ export function departFilter(filter: IFilter, fields: IFilterField[]) {
         case 'multiple':
         case 'radio':
         case 'checkbox':
+        case 'multiMember':
         case 'member': {
           const v = Array.isArray(value) ? value : [value];
           if (v.length > 0) {
