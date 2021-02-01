@@ -130,6 +130,9 @@ public class IssueCreateVO {
     @Encrypt
     private List<Long> programVersionIds;
 
+    @Encrypt
+    private Long statusId;
+
     public List<Long> getProgramVersionIds() {
         return programVersionIds;
     }
@@ -446,5 +449,13 @@ public class IssueCreateVO {
 
     public void setTeamProjectIds(List<Long> teamProjectIds) {
         this.teamProjectIds = teamProjectIds;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 }
