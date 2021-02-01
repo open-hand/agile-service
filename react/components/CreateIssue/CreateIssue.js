@@ -93,6 +93,7 @@ class CreateIssue extends Component {
       originIssueTypes: [],
       defaultTypeId: false,
       newIssueTypeCode: '',
+      newIssueTypeId: '',
       fields: [],
     };
     this.originDescription = true;
@@ -344,6 +345,7 @@ class CreateIssue extends Component {
           storyPoints,
           estimatedTime,
           sprintId,
+          statusId,
           epicId,
           pi,
           epicName,
@@ -423,6 +425,7 @@ class CreateIssue extends Component {
           const text = await uploadAndReplaceImg(deltaOps);
           const extra = {
             description: text,
+            statusId,
             programId: getProjectId(),
             projectId: getProjectId(),
             issueTypeId: currentTypeId,
@@ -545,7 +548,7 @@ class CreateIssue extends Component {
     } = field;
     const {
       originIssueTypes,
-      newIssueTypeCode, defaultTypeId,
+      newIssueTypeCode, defaultTypeId, newIssueTypeId,
     } = this.state;
 
     switch (field.fieldCode) {
@@ -580,10 +583,11 @@ class CreateIssue extends Component {
                             fieldApi.getFields(param).then((res) => {
                               const { fields } = this.state;
                               form.resetFields(['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
-                                'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel',
+                                'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel', 'status',
                                 ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary', 'description'].some((i) => i === code))]);
                               this.setState({
                                 fields: res,
+                                newIssueTypeId: id,
                                 newIssueTypeCode: typeCode,
                               });
                               this.loadDefaultTemplate(id);
@@ -1124,7 +1128,7 @@ class CreateIssue extends Component {
                 rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
               })(
                 <SelectFocusLoad
-                  request={() => statusApi.loadAllForIssueType(newIssueTypeCode.id)}
+                  request={() => statusApi.loadAllForIssueType(newIssueTypeId)}
                   label={field.fieldName}
                   type="issue_status"
                 />,
