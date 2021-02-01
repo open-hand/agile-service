@@ -245,6 +245,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
         redisUtil.deleteRedisCache(new String[]{PIECHART + issueComponentDTO.getProjectId() + ':' + CPMPONENT + "*"});
         return modelMapper.map(issueComponentMapper.selectByPrimaryKey(issueComponentDTO.getComponentId()), IssueComponentDTO.class);
     }
+
     @Override
     public IssueComponentDTO updateBase(IssueComponentDTO issueComponentDTO) {
         if (issueComponentMapper.updateByPrimaryKeySelective(issueComponentDTO) != 1) {
