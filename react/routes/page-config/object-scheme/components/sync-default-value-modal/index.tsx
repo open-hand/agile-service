@@ -30,14 +30,27 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
     if (defaultValue === '') {
       defaultValue = undefined;
     }
-    if (defaultValue && ['checkbox', 'multiple', 'radio', 'single', 'multiMember'].includes(record.get('fieldType'))) {
+    if (defaultValue && ['checkbox', 'multiple', 'radio', 'single'].includes(record.get('fieldType'))) {
       defaultValue = String(defaultValue).split(',');
     }
+    if (['datetime', 'time', 'date'].includes(record.get('fieldType')) && record.get('extraConfig')) {
+      defaultValue = 'current';
+    }
+    if (record.get('fieldType') === 'multiMember') {
+      defaultValue = record.get('defaultValueObj');
+    }
+
     return defaultValue;
   }, [record]);
   const ds = useMemo(() => {
     const defaultValueFieldProps = dateList.includes(record.get('fieldType')); // valueField
-
+    let defaultValue = record.get('defaultValue');
+    if (defaultValue === '') {
+      defaultValue = undefined;
+    }
+    if (defaultValue && ['checkbox', 'multiple', 'radio', 'single', 'multiMember'].includes(record.get('fieldType'))) {
+      defaultValue = String(defaultValue).split(',');
+    }
     return new DataSet({
       autoCreate: true,
       autoQuery: false,
@@ -45,7 +58,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
         {
           name: 'defaultValue',
           label: '默认值',
-          defaultValue: initValue,
+          defaultValue,
         },
         {
           name: 'syncIssueType',
@@ -57,7 +70,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
         },
       ],
     });
-  }, [defaultTypes, initValue]);
+  }, [defaultTypes, record]);
 
   const handleOk = useCallback(async () => {
     if (await ds.validate()) {
@@ -106,7 +119,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
       {renderEditor({
         data: {
           ...record.toData(),
-          defaultValue: ['datetime', 'time', 'date'].includes(record.get('fieldType')) && record.get('extraConfig') ? 'current' : initValue,
+          defaultValue: initValue,
         },
         onChange: ['datetime', 'time', 'date'].includes(record.get('fieldType')) ? handleChangeDate : undefined,
         name: 'defaultValue',

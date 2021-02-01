@@ -138,6 +138,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
                 onViewModeChange={(newMode) => {
                   setMode(newMode);
                 }}
+                onSelectedDateChange={(date) => { setValue(date); }}
                 mode={dateType === 'datetime' ? 'dateTime' : dateType as any}
                 step={{}}
               />
