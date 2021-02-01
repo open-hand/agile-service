@@ -1,5 +1,6 @@
 import { IFieldOption } from '@/api';
 import moment from 'moment';
+import { toJS } from 'mobx';
 import { IFieldType } from '@/common/types';
 import { getMenuType } from '@/utils/common';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -9,7 +10,7 @@ const multipleList = ['checkbox', 'multiple'];
 
 interface IUpdateFieldPostData {
   code: string
-  context: string[]
+  // context: string[]
   defaultValue: string
   extraConfig: boolean
   fieldOptions?: Array<IFieldOption & { isDefault: boolean }>
@@ -20,7 +21,7 @@ interface IUpdateFieldPostData {
   schemeCode: 'agile_issue' | string
 }
 function beforeSubmitProcessData(record: Record, { fieldOptions: propsFieldOptions, schemeCode = 'agile_issue' }: { fieldOptions?: Array<any>, schemeCode?: string } = {}): IUpdateFieldPostData {
-  const originDefaultValue = record.get('defaultValue');
+  const originDefaultValue = toJS(record.get('defaultValue'));
   const fieldOptions: IFieldOption & { [propsName: string]: any }[] | undefined = propsFieldOptions || record.get('fieldOptions');
   const objectVersionNumber = record.get('objectVersionNumber');
   const obj = {
@@ -65,7 +66,7 @@ function beforeSubmitProcessData(record: Record, { fieldOptions: propsFieldOptio
     transformTime.defaultValue = dateFormatVal.isValid() ? dateFormatVal.format(dateFormat[1]) : moment(obj.defaultValue, dateFormat).format(dateFormat[1]);
   }
   const postData = {
-    context: originContext || issueTypeVOList.map((t: any) => t.id),
+    // context: originContext || issueTypeVOList.map((t: any) => t.id),
     issueTypeIds: originContext || issueTypeVOList.map((t: any) => t.id),
     code: `${prefix}${data.code}`,
     name,

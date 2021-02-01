@@ -32,7 +32,7 @@ interface FiledOptions {
 }
 interface IFieldPostData extends FiledOptions {
   id?: string,
-  context: any
+  // context: any
   code: string,
   name: string,
   schemeCode: string,
@@ -107,7 +107,7 @@ function CreateField() {
         const userIds = Array.isArray(originDefaultValue) ? originDefaultValue : [originDefaultValue];
         set(postData, 'localDefaultObj', userDataRef.current?.filter((item) => userIds.includes(item.id)) || {});
       }
-      return validResult && onSubmitLocal({ ...postData, defaultValue: originDefaultValue, issueTypeIds: postData.context });
+      return validResult && onSubmitLocal({ ...postData, defaultValue: originDefaultValue });
     }
     const fieldId = formDataSet.current?.get('id');
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${fieldId}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
@@ -307,7 +307,7 @@ function CreateField() {
           <SelectUser
             key={`page-config-create-or-edit-member-${fieldType}`}
             name="defaultValue"
-            selectedUser={current?.get('defaultValueObj')}
+            selectedUser={toJS(current?.get('defaultValueObj'))}
             // autoQueryConfig={{
             //   selectedUserIds: current?.get('defaultValue'),
             //   // @ts-ignore
