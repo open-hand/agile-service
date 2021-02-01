@@ -20,7 +20,7 @@ public interface IssueComponentService {
 
     IssueComponentVO create(Long projectId, IssueComponentVO issueComponentVO);
 
-    IssueComponentVO update(Long projectId, Long id, IssueComponentVO issueComponentVO);
+    IssueComponentVO update(Long projectId, Long id, IssueComponentVO issueComponentVO, List<String> fieldList);
 
     void delete(Long projectId, Long id, Long relateComponentId);
 
