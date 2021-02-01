@@ -13,6 +13,7 @@ import {
   featureApi, epicApi, fieldApi, issueTypeApi,
   issueApi,
   pageConfigApi,
+  statusApi,
 } from '@/api';
 import {
   uploadAndReplaceImg, handleFileUpload, validateFile, normFile, text2Delta,
@@ -1115,7 +1116,22 @@ class CreateIssue extends Component {
           </FormItem>
 
         );
-
+      case 'status':
+        return (
+          <FormItem label={field.fieldName} key={`${newIssueTypeCode}-${field.id}`}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {getFieldDecorator(`${field.fieldCode}Id`, {
+                rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
+              })(
+                <SelectFocusLoad
+                  request={() => statusApi.loadAllForIssueType(newIssueTypeCode.id)}
+                  label={field.fieldName}
+                  type="issue_status"
+                />,
+              )}
+            </div>
+          </FormItem>
+        );
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>
