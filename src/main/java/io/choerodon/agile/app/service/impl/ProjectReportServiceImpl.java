@@ -124,6 +124,11 @@ public class ProjectReportServiceImpl implements ProjectReportService {
                         ((DynamicListUnitVO) reportUnitVO).setSearchVO(
                                 objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(
                                         objectMapper.writeValueAsString(searchVO), true), SearchVO.class));
+                    } else if (reportUnitVO instanceof ChartUnitVO) {
+                        SearchVO searchVO = ((ChartUnitVO) reportUnitVO).getChartSearchVO().getCurrentSearchVO();
+                        ((ChartUnitVO) reportUnitVO).getChartSearchVO().setCurrentSearchVO(
+                                objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(
+                                        objectMapper.writeValueAsString(searchVO), true), SearchVO.class));
                     }
                 }
             } catch (IOException e) {
