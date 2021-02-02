@@ -15,7 +15,7 @@ export interface SelectUserProps extends Partial<SelectProps> {
   // 由于用户是分页的，有时候已选的用户不在第一页，这时候传id过来，会直接显示id，这里多传一个用户过来，放到options里
   selectedUser?: User | User[],
   autoQueryConfig?: {
-    selectedUserIds: string | string[], /** 需要加载的用户id列表 */
+    selectedUserIds?: string | string[], /** 需要加载的用户id列表 */
     userMaps?: Map<string, User>, /** 已加载的用户缓存，当存在多次使用此组件时， 可传入一个userMaps做全局缓存 */
     taskStacks?: string[], /** 任务队列，组件将要加载的用户id 队列 */
     finishStack?: string[], /** 完成任务队列 ，当任务队列>=任务队列时将触发通知加载完成事件 */
