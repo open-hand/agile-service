@@ -485,7 +485,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         //处理用户搜索
         Boolean condition = handleSearchUser(searchVO, projectId);
-        boolean isTreeView = !Boolean.FALSE.equals(searchVO.getSearchArgs().get("tree"));
+        boolean isTreeView =
+                !Boolean.FALSE.equals(
+                        Optional.ofNullable(searchVO.getSearchArgs())
+                                .map(x -> x.get("tree"))
+                                .orElse(false));
         if (condition) {
             Page<Long> issueIdPage;
             String filterSql = null;
