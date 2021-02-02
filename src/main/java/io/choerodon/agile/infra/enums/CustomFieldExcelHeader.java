@@ -9,17 +9,19 @@ public enum CustomFieldExcelHeader {
     //编码
     CODE("编码*", 4000),
     //名称
-    NAME("名称*", 4000),
+    NAME("名称*", 5000),
     //字段类型
     FIELD_TYPE("字段类型*", 4000),
     //问题类型
-    ISSUE_TYPE("问题类型*", 4000),
+    ISSUE_TYPE("问题类型*", 5000),
     //字段默认值
-    DEFAULT_VALUE("默认值", 4000),
+    DEFAULT_VALUE("默认值", 6000),
     //字段实际值
-    KEY("值", 4000),
+    KEY("值", 6000),
     //字段显示值
-    VALUE("显示值", 4000),
+    VALUE("显示值", 6000),
+    //是否启用
+    ENABLED("是否启用", 3000),
     ;
     String headerName;
     Integer width;

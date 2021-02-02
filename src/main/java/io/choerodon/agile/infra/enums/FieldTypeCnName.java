@@ -7,18 +7,19 @@ package io.choerodon.agile.infra.enums;
  * @since 2020-05-07
  */
 public enum FieldTypeCnName {
-    //文本框（单行）
-    TEXT("文本框（单行）"),
+
     //单选框
     RADIO("单选框"),
     //复选框
-    CHECKBOX("复选框"),
+    CHECKBOX("多选框"),
     //时间选择器
     TIME("时间选择器"),
     //日期时间选择器
     DATETIME("日期时间选择器"),
     //数字输入框
     NUMBER("数字输入框"),
+    //文本框（单行）
+    TEXT("文本框（单行）"),
     //文本框（多行）
     INPUT("文本框（多行）"),
     //选择器（单选）

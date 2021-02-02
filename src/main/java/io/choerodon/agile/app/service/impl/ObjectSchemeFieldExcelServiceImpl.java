@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,7 +36,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     private static final Logger LOGGER = LoggerFactory.getLogger(ObjectSchemeFieldExcelServiceImpl.class);
 
     private static final String TEMPLATE_PATH = "templates";
-    private static final String TEMPLATE_NAME = "IssueImportGuideTemplate.xlsx";
+    private static final String TEMPLATE_NAME = "ObjectSchemeFieldImportGuideTemplate.xlsx";
     private static final String IMPORT_TEMPLATE_NAME = "导入模板";
 
     @Autowired
@@ -88,13 +87,19 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
                 getFieldTypePredefined(),
                 1, 500,
                 2, 2,
-                "fieldType", 3);
+                "fieldType", 2);
         ExcelUtil.dropDownList2007(wb,
                 sheet,
                 getIssueTypePredefined(projectId, organizationId),
                 1, 500,
                 3, 3,
-                "issueType", 4);
+                "issueType", 3);
+        ExcelUtil.dropDownList2007(wb,
+                sheet,
+                Arrays.asList("是", "否"),
+                1, 500,
+                7, 7,
+                "enabled", 4);
     }
 
     private List<String> getIssueTypePredefined(Long projectId, Long organizationId) {
