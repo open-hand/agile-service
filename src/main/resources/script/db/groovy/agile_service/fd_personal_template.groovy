@@ -33,8 +33,5 @@ databaseChangeLog(logicalFilePath:'script/db/fd_personal_template.groovy') {
             column(name: "last_updated_by", type: "BIGINT UNSIGNED", defaultValue: "0")
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
-        createIndex(tableName: "fd_personal_template", indexName: "idx_project_id") {
-            column(name: "project_id", type: "BIGINT UNSIGNED")
-        }
     }
 }
