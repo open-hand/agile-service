@@ -93,6 +93,7 @@ interface IStatusFieldSettingVOS {
 interface IStatusLinkageVOS {
   id: null | string
   issueTypeId: string
+  issueTypeName: string
   issueTypeVO: IIssueType
   parentIssueStatusSetting: string
   parentIssueTypeCode: 'story' | 'bug' | 'task'
@@ -280,7 +281,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             customCirculationDataSet={customCirculationDataSet}
           />
         ) : (
-        // @ts-ignore
+          // @ts-ignore
           <Linkage
             record={record}
             selectedType={selectedType}
@@ -425,9 +426,9 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       const prefixStr = '当项目';
       const linkageStr = (
         statusLinkageVOS.map((linkageSetting) => {
-          const { statusVO, projectVO } = linkageSetting;
+          const { statusVO, projectVO, issueTypeName } = linkageSetting;
           const toStatusName = statusVO?.name;
-          return `【${projectVO?.name}】的故事状态全为【${toStatusName}】`;
+          return `【${projectVO?.name}】的${issueTypeName}状态全为【${toStatusName}】`;
         })).join('，');
       const suffixStr = `，则关联的特性自动流转到【${record.get('name')}】状态。`;
       return `${prefixStr}${linkageStr}${suffixStr}`;
