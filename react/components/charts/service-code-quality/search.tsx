@@ -20,6 +20,7 @@ export interface ServiceCodeQualitySearchProps {
   onEmpty: () => void
 }
 const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
+  projectId,
   days,
   setDays,
   range,
@@ -34,6 +35,7 @@ const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
     <SelectService
       label="选择应用服务"
       labelLayout={'float' as LabelLayout}
+      projectId={projectId}
       value={serviceId}
       onChange={setServiceId}
       afterLoad={(data) => {
