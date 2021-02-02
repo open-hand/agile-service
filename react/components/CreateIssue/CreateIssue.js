@@ -541,7 +541,7 @@ class CreateIssue extends Component {
 
   getFieldComponent = (field) => {
     const {
-      form, mode, hiddenIssueType, teamProjectIds,
+      form, mode, hiddenIssueType, teamProjectIds, applyType,
     } = this.props;
     const { getFieldDecorator } = form;
     const {
@@ -1129,7 +1129,7 @@ class CreateIssue extends Component {
                 rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
               })(
                 <SelectFocusLoad
-                  request={() => statusApi.loadAllForIssueType(newIssueTypeId, newIssueTypeCode === 'feature' ? 'program' : undefined)}
+                  request={() => statusApi.loadAllForIssueType(newIssueTypeId, applyType)}
                   label={field.fieldName}
                   type="issue_status"
                 />,
