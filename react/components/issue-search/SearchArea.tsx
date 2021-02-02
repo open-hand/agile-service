@@ -101,7 +101,13 @@ const SearchArea: React.FC = () => {
   };
   const handlePersonalFilterChange = (values: string[] | null) => {
     if (!values) {
-      reset();
+      let content: string[] = [];
+      if (hasSummaryField) {
+        content = store.getFilterValueByCode('contents');
+      }
+      onClear();
+      store.clearAllFilter();
+      content[0] && content[0] !== '' ? handleInputChange(content[0]) : store.query();
       return;
     }
     // 取消选择
