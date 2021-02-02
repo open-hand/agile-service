@@ -132,6 +132,7 @@ public class StoryMapServiceImpl implements StoryMapService {
     @Override
     public StoryMapVO queryStoryMapDemand(Long projectId, SearchVO searchVO) {
         StoryMapVO storyMap = new StoryMapVO();
+        boardAssembler.handleAdvanceSearch(searchVO);
         List<StoryMapStoryDTO> storyMapStoryDTOList = storyMapMapper.selectDemandStoryList(projectId, searchVO);
         storyMap.setDemandStoryList(storyMapAssembler.storyMapStoryDTOToVO(projectId, storyMapStoryDTOList));
         return storyMap;
