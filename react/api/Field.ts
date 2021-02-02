@@ -192,6 +192,6 @@ class FieldApi extends Api<FieldApi> {
     });
   }
 }
-
 const fieldApi = new FieldApi();
+export default FieldApi;
 export { fieldApi };
