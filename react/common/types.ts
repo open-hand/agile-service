@@ -78,10 +78,11 @@ export interface IProgramVersion {
   name: string,
   programId: string,
   statusCode: string,
-  versionBase: {
+  versionBase?: {
     id: string,
     name: string,
   }
+  versionBaseId: string,
 }
 
 export interface IModalProps extends ModalProps {
