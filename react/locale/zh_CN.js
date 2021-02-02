@@ -330,6 +330,18 @@ const zh_CN = {
   'stateMachineScheme.publish.warn': '当前方案已经被修改，请刷新后重试。',
   'stateMachineScheme.tip': '状态机方案指的是，将状态机和问题类型组合形成并关联项目的方案。',
   'stateMachine.publish.des': '当前状态机草案无法删除，因为您的修改中移除了关联问题的状态，需要将问题转换到其他状态才能继续发布。',
-
+  'report.code-quality.type': '对象类型',
+  'report.code-quality.type.issue': '问题',
+  'report.code-quality.type.coverage': '覆盖率',
+  'report.code-quality.type.duplicate': '重复度',
+  'report.code-quality.number': '个数',
+  'report.code-quality.rows': '行数',
+  'report.code-quality.bugs': 'Bugs',
+  'report.code-quality.vulnerabilities': '安全漏洞',
+  'report.code-quality.codeSmells': '代码异味',
+  'report.code-quality.linesToCover': '代码行',
+  'report.code-quality.coverLines': '覆盖行',
+  'report.code-quality.nclocs': '代码行',
+  'report.code-quality.duplicatedLines': '重复行',
 };
 export default zh_CN;

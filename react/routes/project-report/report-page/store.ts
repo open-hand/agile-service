@@ -7,8 +7,12 @@ import {
 import { IBurndownChartType } from '@/components/charts/burn-down';
 import { IPieChartType } from '@/components/charts/pie-chart';
 import { IUnit } from '@/components/charts/version-report/search';
+import { ServiceCodeQualityType } from '@/components/charts/service-code-quality/search';
 
-export type IChartCode = 'burn_down_report' | 'sprint_report' | 'cumulative_flow_diagram' | 'pie_chart' | 'version_chart' | 'epic_chart' | 'version_burn_down_report' | 'epic_burn_down_report' | 'velocity_chart' | 'code_quality'
+export type IChartCode = 'burn_down_report' | 'sprint_report' | 'cumulative_flow_diagram'
+  | 'pie_chart' | 'version_chart' | 'epic_chart' | 'version_burn_down_report'
+  | 'epic_burn_down_report' | 'velocity_chart' | 'code_quality' | 'code_quality_vary'
+  | 'service_code_quality'
 
 const reorder = <T>(list: T[], startIndex: number, endIndex: number): T[] => {
   const result = Array.from(list);
@@ -90,8 +94,22 @@ export type IterationSpeedSearchVO = {
 export type CodeQualitySearchVO = {
   projectId: string,
 }
+export type CodeQualityVarySearchVO = {
+  projectId: string,
+  days: number
+}
+export type ServiceCodeQualitySearchVO = {
+  projectId: string,
+  days: number
+  type: ServiceCodeQualityType
+  serviceId: string
+}
 
-export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO | AccumulationSearchVO | PieSearchVO | VersionReportSearchVO | EpicReportSearchVO | VersionBurndownSearchVO | EpicBurndownSearchVO | IterationSpeedSearchVO | CodeQualitySearchVO
+export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO
+  | AccumulationSearchVO | PieSearchVO | VersionReportSearchVO
+  | EpicReportSearchVO | VersionBurndownSearchVO | EpicBurndownSearchVO
+  | IterationSpeedSearchVO | CodeQualitySearchVO | CodeQualityVarySearchVO
+  | ServiceCodeQualitySearchVO
 
 export interface IReportChartBlock extends IBaseReportBlock {
   type: 'chart'
