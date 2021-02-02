@@ -100,9 +100,11 @@ export type CodeQualityVarySearchVO = {
 }
 export type ServiceCodeQualitySearchVO = {
   projectId: string,
-  days: number
+  days: number | null
   type: ServiceCodeQualityType
   serviceId: string
+  startDate?: string
+  endDate?: string
 }
 
 export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO

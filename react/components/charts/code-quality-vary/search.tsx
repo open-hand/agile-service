@@ -13,7 +13,13 @@ const CodeQualityVarySearch: React.FC<CodeQualityVarySearchProps> = ({
   setDays,
 }) => (
   <div>
-    <Select value={days} onChange={setDays} labelLayout={'float' as LabelLayout}>
+    <Select
+      style={{ marginBottom: 15 }}
+      value={days}
+      onChange={setDays}
+      labelLayout={'float' as LabelLayout}
+      clearButton={false}
+    >
       <Option value={7}>
         近7天
       </Option>

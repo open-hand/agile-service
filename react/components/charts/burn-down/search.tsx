@@ -8,7 +8,6 @@ import { transformFilter } from '@/routes/Issue/stores/utils';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { ISearchVO, ISprint } from '@/common/types';
-import { flattenObject } from '@/components/issue-search/utils';
 import { IBurndownChartType } from '.';
 
 const { Option } = Select;

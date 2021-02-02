@@ -5,6 +5,7 @@ import ServiceCodeQualitySearch from '@/components/charts/service-code-quality/s
 import { getProjectId } from '@/utils/common';
 import { ServiceCodeQualitySearchVO, IReportChartBlock } from '@/routes/project-report/report-page/store';
 import useServiceCodeQualityReport, { ServiceCodeQualityConfig } from '@/components/charts/service-code-quality/useServiceCodeQualityReport';
+import moment from 'moment';
 import { ChartRefProps } from '../..';
 
 export const transformServiceCodeQualitySearch = (searchVO: ServiceCodeQualitySearchVO | undefined): ServiceCodeQualityConfig | undefined => {
@@ -13,9 +14,10 @@ export const transformServiceCodeQualitySearch = (searchVO: ServiceCodeQualitySe
   }
   return {
     projectId: searchVO.projectId,
-    days: searchVO.days,
+    days: searchVO.days as number,
     type: searchVO.type,
     serviceId: searchVO.serviceId,
+    range: searchVO.startDate && searchVO.endDate ? [moment(searchVO.startDate), moment(searchVO.endDate)] : undefined,
   };
 };
 interface Props {
@@ -34,8 +36,10 @@ const ServiceCodeQualityReportComponent:React.FC<Props> = ({ innerRef, projectId
     days: searchProps.days,
     type: searchProps.type,
     serviceId: searchProps.serviceId,
+    startDate: searchProps?.range ? searchProps?.range[0].format('YYYY-MM-DD 00:00:00') : undefined,
+    endDate: searchProps?.range ? searchProps?.range[1].format('YYYY-MM-DD 00:00:00') : undefined,
   }),
-  [searchProps.days, searchProps.projectId, searchProps.serviceId, searchProps.type]);
+  [searchProps.days, searchProps.projectId, searchProps?.range, searchProps.serviceId, searchProps.type]);
 
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
