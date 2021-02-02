@@ -87,8 +87,8 @@ class Agile extends React.Component {
               <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />
               <Route path="*" component={nomatch} />
             </Switch>
+            <ModalContainer />
           </IntlProviderAsync>
-          <ModalContainer />
         </AgileProvider>
       </div>
     );
