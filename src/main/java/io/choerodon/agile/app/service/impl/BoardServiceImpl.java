@@ -505,6 +505,8 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public IssueMoveVO move(Long projectId, Long issueId, Long transformId, IssueMoveVO issueMoveVO, Boolean isDemo) {
         //执行状态机转换
+        Long preStatusId = issueMapper.selectByPrimaryKey(issueId).getStatusId();
+        Long nowStatusId = issueMoveVO.getStatusId();
         if (Boolean.TRUE.equals(isDemo)) {
             stateMachineClientService.executeTransformForDemo(projectId, issueId, transformId, issueMoveVO.getObjectVersionNumber(),
                     SchemeApplyType.AGILE, new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO))));
@@ -535,7 +537,9 @@ public class BoardServiceImpl implements BoardService {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
         IssueMoveVO result = modelMapper.map(issueDTO, IssueMoveVO.class);
-        sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
+        if (!preStatusId.equals(nowStatusId)) {
+            sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
+        }
         return result;
     }
 
