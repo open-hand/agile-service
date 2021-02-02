@@ -1,16 +1,20 @@
 import React from 'react';
-import { Select } from 'choerodon-ui/pro';
+import { SelectBox, Select, DatePicker } from 'choerodon-ui/pro';
+import moment, { Moment } from 'moment';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
+import { ViewMode } from 'choerodon-ui/pro/lib/radio/enum';
 import SelectService from './SelectService';
 
-const { Option } = Select;
+const { Option } = SelectBox;
 export type ServiceCodeQualityType = 'issue' | 'coverage' | 'duplicate'
 export interface ServiceCodeQualitySearchProps {
   projectId: string
   serviceId: string
   setServiceId: (serviceId: string) => void
-  days: number
+  days: number | null
   setDays: (days: number) => void
+  range?: [Moment, Moment] | null
+  onRangeChange: (value: [Moment, Moment]) => void
   type: ServiceCodeQualityType
   setType: (type: ServiceCodeQualityType) => void
   onEmpty: () => void
@@ -18,6 +22,8 @@ export interface ServiceCodeQualitySearchProps {
 const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
   days,
   setDays,
+  range,
+  onRangeChange,
   serviceId,
   setServiceId,
   type,
@@ -26,6 +32,7 @@ const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
 }) => (
   <div>
     <SelectService
+      label="选择应用服务"
       labelLayout={'float' as LabelLayout}
       value={serviceId}
       onChange={setServiceId}
@@ -38,8 +45,16 @@ const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
           }
         }
       }}
+      clearButton={false}
     />
-    <Select value={type} onChange={setType} labelLayout={'float' as LabelLayout}>
+    <Select
+      label="对象类型"
+      style={{ marginLeft: 24 }}
+      value={type}
+      onChange={setType}
+      labelLayout={'float' as LabelLayout}
+      clearButton={false}
+    >
       <Option value="issue">
         问题
       </Option>
@@ -50,17 +65,35 @@ const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
         重复度
       </Option>
     </Select>
-    <Select value={days} onChange={setDays} labelLayout={'float' as LabelLayout}>
+    <SelectBox
+      mode={'button' as ViewMode}
+      style={{ marginLeft: 24 }}
+      value={days}
+      onChange={setDays}
+      labelLayout={'float' as LabelLayout}
+      clearButton={false}
+    >
+      <Option value={0}>
+        今天
+      </Option>
       <Option value={7}>
         近7天
-      </Option>
-      <Option value={15}>
-        近15天
       </Option>
       <Option value={30}>
         近30天
       </Option>
-    </Select>
+    </SelectBox>
+    <DatePicker
+      style={{ marginLeft: 24 }}
+      range
+      placeholder={['开始时间', '结束时间']}
+      label=" "
+      value={range}
+      onChange={onRangeChange}
+      clearButton={false}
+      labelLayout={'float' as LabelLayout}
+      max={moment()}
+    />
   </div>
 );
 export default ServiceCodeQualityVarySearch;
