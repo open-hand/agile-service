@@ -188,7 +188,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       const temp: User[] = [];
       if (selectedUser) {
         (toArray(selectedUser).forEach((user) => {
-          temp.push({ ...user, id: String(user.id) });
+          temp.push({ ...user, id: user?.id && String(user.id) });
         }));
       }
       // 存在待加载的id，第一页有数据，finish未准备状态（即值不boolean类型 false）则开始自动加载
