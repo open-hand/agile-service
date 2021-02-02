@@ -174,7 +174,7 @@ const Filter: React.FC<FilterProps> = ({
   const renderField = useCallback((field: IFilterField) => {
     const isSelect = ['single', 'multiple', 'radio', 'checkbox', 'member'].includes(field.fieldType);
     const isText = ['input', 'text'].includes(field.fieldType);
-    const isUser = ['member'].includes(field.fieldType);
+    const isUser = ['member', 'multiMember'].includes(field.fieldType);
     const isTime = ['time', 'datetime', 'date'].includes(field.fieldType);
     const className = flat ? classNames({
       'c7n-pro-select-flat': isSelect,

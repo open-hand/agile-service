@@ -69,7 +69,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
         ? `${(result as string).slice(0, maxTagTextLength)}...`
         : result;
     }
-    return null;
+    return '';
   }, [optionRenderer]);
   // 不分页时，本地搜索
   const localSearch = !paging;

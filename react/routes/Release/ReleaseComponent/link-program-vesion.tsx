@@ -1,15 +1,13 @@
 import { IModalProps } from '@/common/types';
 import {
-  DataSet, Form, Select, Modal,
+  DataSet, Form, Modal,
 } from 'choerodon-ui/pro';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import { versionApi, versionApiConfig } from '@/api';
-import { IsInProgram } from '@/hooks/useIsInProgram';
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { versionApiConfig } from '@/api';
 import { getProjectId } from '@/utils/common';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import SelectProgramVersion from '@/components/select/select-program-version';
 
 interface Props {
   modal?: IModalProps,
@@ -33,17 +31,7 @@ const LinkProgramVersion: React.FC<Props> = (props) => {
       }),
     },
   }), [props.defaultValue, props.versionId]);
-  const config = useMemo((): SelectConfig<any> => ({
-    name: 'programVersion',
-    textField: 'name',
-    valueField: 'id',
-    paging: false,
-    afterLoad: () => {
-      props.defaultValue && ds.current?.init('programVersion', props.defaultValue);
-    },
-    request: () => versionApi.loadProgramVersion(false, [getProjectId()]),
-  }), [ds, props.defaultValue]);
-  const selectProps = useSelect(config);
+
   const handleOnOk = useCallback(async () => {
     if (!ds.current?.dirty) {
       return true;
@@ -60,7 +48,14 @@ const LinkProgramVersion: React.FC<Props> = (props) => {
   }, []);
   return (
     <Form dataSet={ds}>
-      <Select name="programVersion" {...selectProps} />
+      <SelectProgramVersion
+        name="programVersion"
+        teamProjectIds={[getProjectId()]}
+        optionFlat
+        afterLoad={() => {
+          props.defaultValue && ds.current?.init('programVersion', props.defaultValue);
+        }}
+      />
     </Form>
   );
 };
