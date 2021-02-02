@@ -18,7 +18,7 @@ import { Divider, Tooltip } from 'choerodon-ui';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
-import FeatureLinkage from './components/linkage/FeatureLinkage';
+import FeatureLinkage from './components/linkage/feature-linkage';
 import NotifySetting from './components/notify-setting';
 import UpdateField from './components/update-field';
 import IssueTypeTab from '../components/issue-type-tab';
