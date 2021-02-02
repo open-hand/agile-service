@@ -22,7 +22,7 @@ interface IDownLoadInfo {
   lastUpdateDate: string | null,
 }
 
-interface Props {
+interface IssueExportStoreProps {
   dataSetSystemFields?: FieldProps[], /** dataSet 数据管理 系统字段配置 */
   defaultCheckedExportFields?: string[], /** 默认选中导出字段 */
   defaultInitOptions?: (data: { options: Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps }>, checkedOptions: string[], dataSet: DataSet }) => Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps }> | void /** 初始化选择字段的字段选项时调用 当返回空时则不进行选项覆盖 */
@@ -40,6 +40,7 @@ interface Props {
   }
   checkboxOptionsExtraConfig?: Map<string, { checkBoxProps: CheckBoxProps }>
 }
+export { IssueExportStoreProps };
 class IssueExportStore {
   dataSetSystemFields: FieldProps[] = [];
 
@@ -61,7 +62,7 @@ class IssueExportStore {
 
   renderField: any;
 
-  exportButtonConfig: Props['exportButtonConfig'];
+  exportButtonConfig: IssueExportStoreProps['exportButtonConfig'];
 
   checkboxOptionsExtraConfig: Map<string, { checkBoxProps: CheckBoxProps }>;
 
@@ -73,7 +74,7 @@ class IssueExportStore {
     this.defaultCheckedExportFields = data;
   }
 
-  constructor(props?: Props) {
+  constructor(props?: IssueExportStoreProps) {
     this.events = props?.events || {};
     this.dataSetSystemFields = props?.dataSetSystemFields || [];
     this.transformSystemFilter = props?.transformSystemFilter || ((data) => data);
