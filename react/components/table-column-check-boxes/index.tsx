@@ -99,6 +99,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
     handleChange,
     formProps: form,
     otherCheckBoxProps: config?.checkBoxProps,
+    name: config?.name || 'exportCodes',
   };
   return [dataProps, componentProps];
 }

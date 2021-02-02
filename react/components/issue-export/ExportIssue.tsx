@@ -12,9 +12,12 @@ import ChooseField, { useChoseField } from '@/components/chose-field';
 import TableColumnCheckBoxes, { useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
 import WsProgress from '@/components/ws-progress';
 import { getProjectName } from '@/utils/common';
+import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
+import TemplateSelect from '../template-select/TemplateSelect';
+import openSaveTemplate from '../template-select/components/save/SaveTemplate';
 
 interface FormPartProps {
   title: string | ReactElement,
@@ -129,12 +132,17 @@ const ExportIssue: React.FC = () => {
     }
     search = store.exportBefore(search);
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
+    if (store.exportButtonConfig?.buttonProps) {
+      store.exportButtonConfig.buttonProps.loading = true;
+    } else if (store.exportButtonConfig && !store.exportButtonConfig.buttonProps) {
+      store.exportButtonConfig.buttonProps = {
+        loading: true,
+      };
+    }
     store.exportAxios(search, field ? `${field.value},${field.order}` : undefined);
     return false;
-  }, [checkBoxDataProps.checkedOptions, checkOptions, choseFieldStore.getAllChosenField, filterData.dataSet, store]);
-  useEffect(() => {
-    modal?.handleOk(exportExcel);
-  }, [exportExcel, modal]);
+  }, [checkBoxDataProps, checkOptions, choseFieldStore.getAllChosenField, filterData.dataSet, store]);
+
   const handleChangeFieldStatus = (status: 'ALL' | 'NONE') => {
     if (status !== 'ALL') {
       checkBoxDataProps.actions.checkAll();
@@ -145,7 +153,9 @@ const ExportIssue: React.FC = () => {
   };
   const handleFinish = (messageData: any) => {
     store.setExportBtnHidden(false);
-    modal?.update({ okProps: { loading: false } });
+    // @ts-ignore
+    store.exportButtonConfig.buttonProps.loading = false;
+    // modal?.update({ okProps: { loading: false } });
     store.setDownloadInfo(messageData);
   };
   const renderExport = () => {
@@ -154,6 +164,7 @@ const ExportIssue: React.FC = () => {
     }
     return null;
   };
+
   return (
     <div>
       <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
@@ -164,7 +175,15 @@ const ExportIssue: React.FC = () => {
         </IssueFilterForm>
       </FormPart>
       <Divider className={`${prefixCls}-horizontal`} />
-      <FormPart title="选择字段" btnOnClick={handleChangeFieldStatus}>
+      <FormPart title="选择常用模板" className={`${prefixCls}-form-template`}>
+        <TemplateSelect
+          action="agile_export_issue"
+          // @ts-ignore
+          checkOptions={checkOptions}
+        />
+      </FormPart>
+      <Divider className={`${prefixCls}-horizontal`} />
+      <FormPart title="选择模板字段" btnOnClick={handleChangeFieldStatus}>
         <TableColumnCheckBoxes {...checkBoxComponentProps} />
         {renderExport()}
       </FormPart>
@@ -182,6 +201,25 @@ const ExportIssue: React.FC = () => {
           createDate: store.downloadInfo.creationDate!,
         } : undefined}
       />
+      <div className={`${prefixCls}-btns`}>
+        <Button
+          icon="unarchive"
+          funcType={'flat' as FuncType}
+          onClick={exportExcel}
+          color={'primary' as ButtonColor}
+          loading={store.exportButtonConfig?.buttonProps?.loading}
+        >
+          导出问题
+        </Button>
+        {/* <Button
+          icon="unarchive"
+          funcType={'flat' as FuncType}
+          onClick={openSaveTemplate}
+          color="primary"
+        >
+          保存为常用模板
+        </Button> */}
+      </div>
     </div>
   );
 };
