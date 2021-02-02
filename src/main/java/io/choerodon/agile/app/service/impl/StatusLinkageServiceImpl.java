@@ -7,10 +7,12 @@ import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusLinkageService;
+import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusLinkageDTO;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.mapper.StatusLinkageMapper;
 import io.choerodon.agile.infra.mapper.StatusMachineTransformMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -54,6 +56,8 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
 
     @Autowired
     private StatusMachineTransformMapper statusMachineTransformMapper;
+    @Autowired
+    private IssueTypeMapper issueTypeMapper;
 
     @Override
     public List<StatusLinkageVO> createOrUpdate(Long projectId, Long issueTypeId, Long statusId, Long objectVersionNumber, String applyType, List<StatusLinkageVO> linkageVOS) {
@@ -109,6 +113,10 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
 
     @Override
     public List<StatusLinkageVO> listByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds, String applyType) {
+        IssueTypeDTO issueTypeDTO = issueTypeMapper.selectWithAlias(issueTypeId, projectId);
+        if (issueTypeDTO == null) {
+            throw new CommonException("error.issue.type.not.existed");
+        }
         List<StatusLinkageDTO> statusLinkageDTOS = statusLinkageMapper.selectByStatusIds(projectId, issueTypeId, statusIds);
         if (CollectionUtils.isEmpty(statusLinkageDTOS)) {
             return new ArrayList<>();
@@ -130,6 +138,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         for (StatusLinkageVO statusLinkageVO : linkageVOS) {
             statusLinkageVO.setStatusVO(statusMap.get(statusLinkageVO.getParentIssueStatusSetting()));
             statusLinkageVO.setIssueTypeVO(typeVOMap.get(statusLinkageVO.getParentIssueTypeId()));
+            statusLinkageVO.setIssueTypeName(issueTypeDTO.getName());
         }
         return linkageVOS;
     }
