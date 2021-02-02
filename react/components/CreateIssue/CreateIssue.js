@@ -296,6 +296,7 @@ class CreateIssue extends Component {
             originIssueTypes: res,
             defaultTypeId: defaultType.id,
             loading: false,
+            newIssueTypeId: defaultType.id,
             newIssueTypeCode: defaultType.typeCode,
           }, () => {
             this.setDefaultSprint();
@@ -1128,7 +1129,7 @@ class CreateIssue extends Component {
                 rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
               })(
                 <SelectFocusLoad
-                  request={() => statusApi.loadAllForIssueType(newIssueTypeId)}
+                  request={() => statusApi.loadAllForIssueType(newIssueTypeId, newIssueTypeCode === 'feature' ? 'program' : undefined)}
                   label={field.fieldName}
                   type="issue_status"
                 />,
