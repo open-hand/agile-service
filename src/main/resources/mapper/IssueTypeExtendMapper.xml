@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="io.choerodon.agile.infra.mapper.IssueTypeExtendMapper">
+
+
+    <select id="selectByIssueTypeIds" resultType="io.choerodon.agile.infra.dto.IssueTypeExtendDTO">
+        select *
+        from fd_issue_type_extend t1
+        where t1.organization_id = #{organizationId}
+        and t1.issue_type_id in
+        <foreach collection="issueTypeIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

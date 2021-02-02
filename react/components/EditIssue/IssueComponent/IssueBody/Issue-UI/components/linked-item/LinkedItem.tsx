@@ -27,7 +27,7 @@ interface Props {
 }
 
 const LinkItem: React.FC<Props> = ({ ui, reloadIssue, uploading = false }) => {
-  const { store } = useContext(EditIssueContext);
+  const { store, disabled } = useContext(EditIssueContext);
 
   const handleDownload = useCallback(() => {
     if (ui.url) {
@@ -100,7 +100,7 @@ const LinkItem: React.FC<Props> = ({ ui, reloadIssue, uploading = false }) => {
           )
         }
         {
-          !uploading && (
+          !uploading && !disabled && (
           <Icon
             type="delete_forever"
             onClick={() => { openDeleteModal({ ui: ui as IUi, store, reloadIssue }); }}

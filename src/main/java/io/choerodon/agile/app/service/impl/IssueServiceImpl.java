@@ -1132,7 +1132,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public IssueSubVO queryIssueSub(Long projectId, Long organizationId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         issue.setPriorityVO(priorityService.queryById(organizationId, issue.getPriorityId()));
-        issue.setIssueTypeVO(issueTypeService.queryById(issue.getIssueTypeId()));
+        issue.setIssueTypeVO(issueTypeService.queryById(issue.getIssueTypeId(), projectId));
         issue.setStatusVO(statusService.queryStatusById(organizationId, issue.getStatusId()));
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
@@ -1882,7 +1882,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Long newIssueId;
             Long objectVersionNumber;
             issueDetailDTO.setSummary(copyConditionVO.getSummary());
-            IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId());
+            IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId(), projectId);
             if (issueTypeVO.getTypeCode().equals(SUB_TASK)) {
                 IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToIssueSubCreateDto(issueDetailDTO);
                 IssueSubVO newIssue = stateMachineClientService.createSubIssue(issueSubCreateVO);

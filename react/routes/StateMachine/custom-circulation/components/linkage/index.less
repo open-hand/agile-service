@@ -1,45 +1,51 @@
 .linkage {
-    .tip {
-        padding: 15px 24px;
-        color: rgba(0, 0, 0, 0.65);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    }
-    
-    :global {
-        .c7n-pro-form {
-            padding: 20px;
-            margin: 0;
-            .c7n-pro-field-wrapper {
-                margin-top: 0;
-                padding-left: 4px;
-                padding-right: 4px;
-                :local {
-                    .label {
-                        margin-bottom: 17px;
-                        color: rgba(0, 0, 0, 0.65);
-                        font-weight: 500;
-                    }
-                }
-                .c7n-pro-select-wrapper {
-                    width: 100%;
-                }
-                .c7n-pro-validation-message {
-                  position: absolute;
-                }
-            }
+  .tip {
+    padding: 15px 24px;
+    color: rgba(0, 0, 0, 0.65);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  :global {
+    .c7n-pro-form {
+      padding: 20px;
+      padding-bottom: 0;
+      margin: 0;
+
+      .c7n-pro-field-wrapper {
+        margin-top: 0;
+        padding-left: 4px;
+        padding-right: 4px;
+        margin-bottom: 16px;
+
+        :local {
+          .label {
+            margin-bottom: 17px;
+            color: rgba(0, 0, 0, 0.65);
+            font-weight: 500;
+          }
         }
+
+        .c7n-pro-select-wrapper {
+          width: 100%;
+        }
+
+        .c7n-pro-validation-message {
+          position: absolute;
+        }
+      }
     }
+  }
 }
 
 .featureLinkage {
   height: 100%;
+
   :global {
     .c7n-pro-form {
-      height: calc(~"100% - 50px");
-      overflow-y: scroll;
-        .c7n-pro-field-wrapper {
-            margin-bottom: 30px;
-        }
+
+      .c7n-pro-field-wrapper {
+        margin-bottom: 30px;
+      }
     }
-}
+  }
 }

@@ -30,9 +30,15 @@ public interface AgileTriggerService {
 
     /**
      * 修改issue相关的触发器日志的projectId
+     *
      * @param projectId
      * @param targetProjectId
      * @param issueId
      */
     void updateRuleLogProjectId(Long projectId, Long targetProjectId, Long issueId);
+
+    /**
+     * 修数据，将issueTypeCode改为issueTypeId
+     */
+    void fixRuleIssueTypeRel();
 }

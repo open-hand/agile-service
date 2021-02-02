@@ -175,10 +175,12 @@ const FormDataSet = ({
               ...pageConfigApiConfig.loadAvailableIssueType(),
               transformResponse: (res: any) => {
                 const data = JSON.parse(res).filter((item: any) => item.enabled);
-                if (isEdit) {
-                  const issueTypeVOList = oldRecord?.get('issueTypeVOList')?.filter((item: any) => !item.enabled) || [];
 
-                  issueTypeVOList.length > 0 && store.eternalContext.push(...issueTypeVOList.map((item:any) => item.id));
+                if (isEdit) {
+                  const disabledData = JSON.parse(res).filter((item: any) => !item.enabled);
+                  let issueTypeVOList = oldRecord?.get('issueTypeVOList') || [];
+                  issueTypeVOList = intersectionBy<any>(disabledData, issueTypeVOList, (i:any) => i.id);
+                  issueTypeVOList.length > 0 && store.eternalContext.push(...issueTypeVOList.map((item: any) => item.id));
                   data.unshift(...issueTypeVOList);
                 }
                 return data;

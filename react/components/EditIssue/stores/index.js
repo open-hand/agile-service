@@ -31,6 +31,14 @@ export const EditIssueContextProvider = injectIntl(inject('AppState', 'HeaderSto
       FieldFixVersionRef.current = ref;
     },
   };
+
+  useEffect(() => {
+    value.store.initApi(props.outside, props.organizationId, props.projectId);
+    return () => {
+      value.store.destroy();
+    };
+  }, [props.organizationId, props.outside, props.projectId, value.store]);
+
   useEffect(() => {
     value.store.setTab(props.tab);
   }, [props.tab, value.store]);

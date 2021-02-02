@@ -91,6 +91,8 @@ public class FixDataServiceImpl implements FixDataService {
     private BacklogExpandService backlogExpandService;
     @Autowired
     private StatusLinkageMapper statusLinkageMapper;
+    @Autowired(required = false)
+    private AgileTriggerService agileTriggerService;
 
     @Override
     public void fixCreateProject() {
@@ -287,11 +289,17 @@ public class FixDataServiceImpl implements FixDataService {
     @Override
     public void fixIssueTypeData() {
         fixStatusLinkage();
+        if (agileTriggerService != null) {
+            agileTriggerService.fixRuleIssueTypeRel();
+        }
     }
 
     private void fixStatusLinkage() {
+        LOGGER.info("===>开始修复fd_status_linkage数据");
         Long zero = 0L;
-        List<StatusLinkageDTO> statusLinkageList = statusLinkageMapper.selectAll();
+        StatusLinkageDTO statusLinkageDTO = new StatusLinkageDTO();
+        statusLinkageDTO.setParentIssueTypeId(zero);
+        List<StatusLinkageDTO> statusLinkageList = statusLinkageMapper.select(statusLinkageDTO);
         if (statusLinkageList.isEmpty()) {
             LOGGER.info("fd_status_linkage数据为空，跳过该步骤");
             return;
@@ -325,6 +333,7 @@ public class FixDataServiceImpl implements FixDataService {
                 }
             }
         });
+        LOGGER.info("===>修复fd_status_linkage数据完成");
     }
 
     private void resetSameRank(List<ObjectSchemeFieldExtendDTO> insertList) {

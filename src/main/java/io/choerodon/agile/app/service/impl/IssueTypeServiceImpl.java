@@ -16,12 +16,12 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -43,8 +43,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private IssueTypeMapper issueTypeMapper;
     @Autowired
     private StateMachineSchemeConfigService stateMachineSchemeConfigService;
-    @Autowired
-    private StateMachineService stateMachineService;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired(required = false)
@@ -68,6 +66,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired
     private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
+    @Autowired
+    private ObjectSchemeFieldService objectSchemeFieldService;
 
     private static final String ORGANIZATION = "organization";
 
@@ -112,8 +112,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
 
     @Override
-    public IssueTypeVO queryById(Long issueTypeId) {
-        IssueTypeDTO issueType = issueTypeMapper.selectByPrimaryKey(issueTypeId);
+    public IssueTypeVO queryById(Long issueTypeId, Long projectId) {
+        IssueTypeDTO issueType = issueTypeMapper.selectWithAlias(issueTypeId, projectId);
         if (issueType != null) {
             return modelMapper.map(issueType, IssueTypeVO.class);
         }
@@ -146,19 +146,58 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (!ZERO.equals(projectId)) {
             updateExtendEnabled(result.getId(), projectId, organizationId, true);
             //项目层创建问题类型,初始化默认状态机
-            initDefaultStateMachine(organizationId, projectId, result, categoryCodes);
+            initDefaultStateMachine(organizationId, projectId, result, categoryCodes, issueTypeVO.getCopyStatusMachine());
             //初始化项目系统字段与问题类型关系
-            initIssueTypeAndFieldRel(organizationId, projectId, result);
+            initIssueTypeAndFieldRel(organizationId, projectId, result, issueTypeVO.getCopyCustomField());
         } else {
             //初始化组织系统字段与问题类型关系
-            initIssueTypeAndFieldRel(organizationId, null, result);
+            initIssueTypeAndFieldRel(organizationId, null, result, false);
         }
         return result;
     }
 
     private void initIssueTypeAndFieldRel(Long organizationId,
                                           Long projectId,
-                                          IssueTypeVO result) {
+                                          IssueTypeVO result,
+                                          Boolean copyField) {
+        if(Boolean.TRUE.equals(copyField) && !ObjectUtils.isEmpty(projectId)){
+            copyFieldRel(organizationId, projectId, result);
+        }else {
+            initFieldRel(organizationId, projectId, result);
+        }
+    }
+
+    private void copyFieldRel(Long organizationId, Long projectId, IssueTypeVO result) {
+        // 查询要复制的系统问题类型
+        IssueTypeDTO issueTypeDTO = querySystemIssueTypeByCode(organizationId, result.getTypeCode());
+        // 查询问题类型的所有字段
+        List<PageConfigFieldVO> fields  = objectSchemeFieldService.queryPageConfigFields(organizationId, projectId, issueTypeDTO.getId());
+        if (!CollectionUtils.isEmpty(fields)) {
+            String rank = RankUtil.mid();
+            for (PageConfigFieldVO field : fields) {
+                ObjectSchemeFieldExtendDTO extendDTO = new ObjectSchemeFieldExtendDTO();
+                if (objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Arrays.asList(result.getId()), organizationId, field.getFieldId(), projectId).isEmpty()) {
+                    extendDTO.setIssueTypeId(result.getId());
+                    extendDTO.setIssueType(result.getTypeCode());
+                    extendDTO.setOrganizationId(organizationId);
+                    extendDTO.setProjectId(projectId);
+                    extendDTO.setFieldId(field.getFieldId());
+                    extendDTO.setRequired(field.getRequired());
+                    extendDTO.setCreated(field.getCreated());
+                    extendDTO.setEdited(field.getEdited());
+                    extendDTO.setRank(rank);
+                    extendDTO.setDefaultValue(!ObjectUtils.isEmpty(field.getDefaultValue()) ? field.getDefaultValue().toString() : "");
+                    extendDTO.setExtraConfig(field.getExtraConfig());
+                    objectSchemeFieldExtendMapper.insertSelective(extendDTO);
+                    rank = RankUtil.genPre(rank);
+                }
+            }
+        }
+    }
+
+    private void initFieldRel(Long organizationId,
+                              Long projectId,
+                              IssueTypeVO result){
         ObjectSchemeFieldDTO field = new ObjectSchemeFieldDTO();
         field.setSystem(true);
         String typeCode = result.getTypeCode();
@@ -209,6 +248,16 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 objectSchemeFieldExtendMapper.insertSelective(extendDTO);
             }
         });
+    }
+
+    private IssueTypeDTO querySystemIssueTypeByCode(Long organizationId, String typeCode){
+        // 查询系统问题类型的状态机id
+        List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectSystemIssueTypeByOrganizationIds(new HashSet<>(Arrays.asList(organizationId)));
+        IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Objects.equals(typeCode, v.getTypeCode())).findAny().get();
+        if(ObjectUtils.isEmpty(issueTypeDTO)){
+            throw new CommonException("error.system.issueType.not.found");
+        }
+        return issueTypeDTO;
     }
 
     private void updateExtendEnabled(Long issueTypeId,
@@ -272,14 +321,22 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private void initDefaultStateMachine(Long organizationId,
                                          Long projectId,
                                          IssueTypeVO issueType,
-                                         Set<String> categoryCodes) {
+                                         Set<String> categoryCodes,
+                                         Boolean copyStatusMachine) {
         Long issueTypeId = issueType.getId();
         String typeCode = issueType.getTypeCode();
         String applyType = getApplyTypeByCategoryCodes(categoryCodes, typeCode);
         Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         String stateMachineName = projectVO.getCode() + "-状态机-" + issueType.getName();
-        stateMachineSchemeConfigService.initStatusMachineAndSchemeConfig(organizationId, stateMachineName, stateMachineSchemeId, issueTypeId, projectVO, applyType);
+        Long statusMachineId = null;
+        if (Boolean.TRUE.equals(copyStatusMachine)) {
+            // 查询系统问题类型的状态机id
+            IssueTypeDTO issueTypeDTO = querySystemIssueTypeByCode(organizationId, typeCode);
+            // 查询系统问题类型的状态机
+            statusMachineId = stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeDTO.getId());
+        }
+        stateMachineSchemeConfigService.initStatusMachineAndSchemeConfig(organizationId, stateMachineName, stateMachineSchemeId, issueTypeId, projectVO, applyType, statusMachineId);
         //初始化问题类型方案配置
         initIssueTypeSchemeConfig(organizationId, projectId, issueTypeId, applyType);
     }
@@ -308,7 +365,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             if (sequence == null) {
                 sequence = new BigDecimal(0);
             } else {
-                sequence.add(new BigDecimal(1));
+                sequence = sequence.add(new BigDecimal(1));
             }
             issueTypeSchemeConfig.setSequence(sequence);
             issueTypeSchemeConfigMapper.insert(issueTypeSchemeConfig);
@@ -355,7 +412,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (issueTypeMapper.updateByPrimaryKeySelective(issueTypeDTO) != 1) {
             throw new CommonException("error.issue.type.update");
         }
-        return modelMapper.map(issueTypeMapper.selectByPrimaryKey(issueTypeId), IssueTypeVO.class);
+        return modelMapper.map(issueTypeMapper.selectWithAlias(issueTypeId, projectId), IssueTypeVO.class);
     }
 
     @Override
@@ -367,7 +424,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             return;
         }
         IssueTypeVO vo = modelMapper.map(result, IssueTypeVO.class);
-        setDeleted(Arrays.asList(vo), organizationId, projectId);
+        setDeletedAndReference(Arrays.asList(vo), organizationId, projectId);
         if (Boolean.FALSE.equals(vo.getDeleted())) {
             throw new CommonException("error.issue.type.not.deleted");
         }
@@ -446,34 +503,57 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             //组织层统计使用情况
             statisticsUsage(result.getContent(), organizationId);
         }
-        setDeleted(result.getContent(), organizationId, projectId);
+        setDeletedAndReference(result.getContent(), organizationId, projectId);
         return result;
     }
 
-    private void setDeleted(List<IssueTypeVO> result, Long organizationId, Long projectId) {
+    private void setDeletedAndReference(List<IssueTypeVO> result,
+                                        Long organizationId,
+                                        Long projectId) {
         if (ObjectUtils.isEmpty(result)) {
             return;
         }
         if (ZERO.equals(projectId)) {
             setOrganizationLevelDeleted(result, organizationId);
         } else {
-            setProjectLevelDeleted(result, projectId);
+            setProjectLevelDeletedAndReference(result, projectId);
         }
     }
 
-    private void setProjectLevelDeleted(List<IssueTypeVO> result,
-                                        Long projectId) {
+    private void setProjectLevelDeletedAndReference(List<IssueTypeVO> result,
+                                                    Long projectId) {
+        Set<Long> referenceIds =
+                result.stream()
+                        .filter(x -> x.getReferenceId() != null)
+                        .map(IssueTypeVO::getReferenceId)
+                        .collect(Collectors.toSet());
         Set<Long> issueTypeIds = setSystemIssueTypeDeletedFalse(result);
         if (!issueTypeIds.isEmpty()) {
             Map<Long, Integer> countMap =
                     issueMapper.selectCountGroupByIssueTypeId(projectId, issueTypeIds)
                             .stream()
                             .collect(Collectors.toMap(IssueTypeCountVO::getIssueTypeId, IssueTypeCountVO::getCount));
+            Map<Long, IssueTypeDTO> issueTypeMap = new HashMap<>();
+            if (!referenceIds.isEmpty()) {
+                List<Long> list = new ArrayList<>(referenceIds);
+                Map<Long, IssueTypeDTO> map =
+                        issueTypeMapper.selectByIds(StringUtils.collectionToDelimitedString(list, ","))
+                                .stream()
+                                .collect(Collectors.toMap(IssueTypeDTO::getId, Function.identity()));
+                issueTypeMap.putAll(map);
+            }
             result.forEach(x -> {
                 if (Boolean.FALSE.equals(x.getInitialize())) {
                     Integer count = countMap.get(x.getId());
                     boolean deleted = (count == null || count == 0);
                     x.setDeleted(deleted);
+                    Long referenceId = x.getReferenceId();
+                    if (referenceId != null) {
+                        IssueTypeDTO dto = issueTypeMap.get(referenceId);
+                        if (dto != null) {
+                            x.setReferenceIssueType(modelMapper.map(dto, IssueTypeVO.class));
+                        }
+                    }
                 }
             });
         }
@@ -542,11 +622,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             List<ProjectIssueTypeVO> result = buildProjectIssueType(projects, projectEnableMap);
             return PageUtils.copyPropertiesAndResetContent(page, result);
         } else {
-            IssueTypeExtendDTO issueTypeExtendDTO = new IssueTypeExtendDTO();
-            issueTypeExtendDTO.setOrganizationId(organizationId);
-            issueTypeExtendDTO.setIssueTypeId(issueTypeId);
+            Set<Long> issueTypeIds =
+                    issueTypeMapper.selectByReferenceId(new HashSet<>(Arrays.asList(issueTypeId)), organizationId)
+                            .stream().map(IssueTypeDTO::getId).collect(Collectors.toSet());
             Page<IssueTypeExtendDTO> page =
-                    PageHelper.doPageAndSort(pageRequest, () -> issueTypeExtendMapper.select(issueTypeExtendDTO));
+                    PageHelper.doPageAndSort(pageRequest, () -> issueTypeExtendMapper.selectByIssueTypeIds(issueTypeIds, organizationId));
             List<IssueTypeExtendDTO> list = page.getContent();
             if (list.isEmpty()) {
                 return emptyPage;
@@ -772,6 +852,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Override
     public IssueTypeDTO createIssueType(IssueTypeDTO issueType) {
+        Long projectId = issueType.getProjectId();
         //保证幂等性
         List<IssueTypeDTO> issueTypes = issueTypeMapper.select(issueType);
         if (!issueTypes.isEmpty()) {
@@ -781,21 +862,12 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (issueTypeMapper.insert(issueType) != 1) {
             throw new CommonException("error.issueType.create");
         }
-        return issueTypeMapper.selectByPrimaryKey(issueType);
+        return issueTypeMapper.selectWithAlias(issueType.getId(), projectId);
     }
 
     @Override
     public IssueTypeVO query(Long organizationId, Long projectId, Long issueTypeId) {
-        IssueTypeDTO dto = new IssueTypeDTO();
-        dto.setId(issueTypeId);
-        dto.setOrganizationId(organizationId);
-        dto.setProjectId(projectId);
-        IssueTypeDTO result = issueTypeMapper.selectOne(dto);
-        if (!ZERO.equals(projectId) && result == null) {
-            //查组织层
-            dto.setProjectId(ZERO);
-            result = issueTypeMapper.selectOne(dto);
-        }
+        IssueTypeDTO result =  issueTypeMapper.selectWithAlias(issueTypeId, projectId);
         if (result != null) {
             return modelMapper.map(result, IssueTypeVO.class);
         } else {
@@ -808,7 +880,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (ZERO.equals(projectId)) {
             return false;
         }
-        IssueTypeDTO dto = issueTypeMapper.selectByPrimaryKey(issueTypeId);
+        IssueTypeDTO dto = issueTypeMapper.selectWithAlias(issueTypeId, projectId);
         if (dto == null) {
             throw new CommonException("error.issue.type.not.existed");
         }
@@ -870,11 +942,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private IssueTypeDTO selectOne(Long organizationId,
                                    Long projectId,
                                    Long issueTypeId) {
-        IssueTypeDTO dto = new IssueTypeDTO();
-        dto.setId(issueTypeId);
-        dto.setOrganizationId(organizationId);
-        dto.setProjectId(projectId);
-        return issueTypeMapper.selectOne(dto);
+        return issueTypeMapper.selectWithAlias(issueTypeId, projectId);
     }
 
     @Override
@@ -908,8 +976,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Override
     public String getIssueTypeById(Long issueTypeId) {
         IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
-        if (Objects.isNull(issueTypeDTO)) {
-            throw new CommonException("error.issue.type.not.exist");
+        if (issueTypeDTO == null) {
+            throw new CommonException("error.issue.type.not.existed");
         }
         return issueTypeDTO.getTypeCode();
     }
@@ -923,7 +991,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (ZERO.equals(projectId)) {
             return;
         }
-        IssueTypeDTO dto = issueTypeMapper.selectByPrimaryKey(issueTypeId);
+        IssueTypeDTO dto = issueTypeMapper.selectWithAlias(issueTypeId, projectId);
         if (dto == null) {
             throw new CommonException("error.issue.type.not.existed");
         }

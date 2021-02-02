@@ -67,6 +67,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
                 statusLinkageDTO.setProjectId(projectId);
                 statusLinkageDTO.setIssueTypeId(issueTypeId);
                 statusLinkageDTO.setStatusId(statusId);
+                statusLinkageDTO.setParentIssueTypeCode("");
                 baseInsert(statusLinkageDTO);
             }
         }

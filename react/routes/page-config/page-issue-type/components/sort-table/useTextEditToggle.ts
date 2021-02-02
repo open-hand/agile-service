@@ -50,7 +50,8 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
     }
     if (['date', 'datetime', 'time'].includes(fieldType)) {
       const { meaning, value: dateValue } = newValue || {};
-      newValue = dateValue === 'current' ? currentData.defaultValue || meaning : value;
+      console.log('newValue...', newValue);
+      newValue = dateValue === 'current' ? currentData.defaultValue || meaning : dateValue;
       record.set('extraConfig', dateValue === 'current');
     }
 
@@ -68,7 +69,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
     if (['date', 'datetime', 'time'].includes(fieldType) && record.get('extraConfig')) {
       return 'current';
     }
-    return typeof (record.get('defaultValue')) === 'undefined' || record.get('defaultValue') === '' ? undefined : record.get('defaultValue');
+    return typeof (record.get('defaultValue')) === 'undefined' || record.get('defaultValue') === '' || record.get('defaultValue') === null ? undefined : record.get('defaultValue');
   }, [fieldType, record, record.get('defaultValue'), record.get('extraConfig')]);
   const variableProps = useMemo(() => {
     let editor = () => renderEditor({

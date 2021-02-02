@@ -18,7 +18,7 @@ interface IParentIssueStatusSetting {
   id: string
   issueTypeId: string
   parentIssueStatusSetting: string
-  parentIssueTypeCode: 'story' | 'task' | 'bug'
+  parentIssueTypeId: string
   projectId: number
   statusId: string
 }
@@ -63,15 +63,16 @@ const Linkage = ({
     }
   }, [linkageDataSet]);
   const removeField = useCallback((name) => {
-    linkageDataSet.current?.fields?.delete(name);
+    linkageDataSet.fields.delete(name);
+    linkageDataSet.current?.fields.delete(name);
   }, [linkageDataSet]);
   useEffect(() => {
     setLoading(true);
     statusTransformApi.getLinkage(selectedType, record.get('id')).then((res: IParentIssueStatusSetting[]) => {
-      const initFields = Field.init(new Array(res.length).fill({}));
+      const initFields = Field.init(new Array(Math.max(res.length, 1)).fill({}));
       initFields.forEach((item: { key: number }, i: number) => {
         addFieldRule(item.key);
-        setFieldValue(`${item.key}-type`, res[i].issueTypeId);
+        setFieldValue(`${item.key}-type`, res[i].parentIssueTypeId);
         setFieldValue(`${item.key}-status`, res[i].parentIssueStatusSetting);
       });
       setLoading(false);
@@ -82,16 +83,14 @@ const Linkage = ({
   useEffect(() => {
     const handleOk = async () => {
       if (await linkageDataSet.validate()) {
-        const data: any = linkageDataSet.toData()[0];
+        const data: any = linkageDataSet.current?.toData();
         const updateData: any[] = [];
-        Object.keys(data).forEach((key) => {
-          const [k, code] = key.split('-');
-          if (code === 'type') {
-            updateData.push({
-              parentIssueTypeId: data[key],
-              parentIssueStatusSetting: data[`${k}-status`],
-            });
-          }
+        fields.forEach((f: any) => {
+          const { key } = f;
+          updateData.push({
+            parentIssueTypeId: data[`${key}-type`],
+            parentIssueStatusSetting: data[`${key}-status`],
+          });
         });
         // @ts-ignore
         await statusTransformApi.updateLinkage(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
@@ -103,7 +102,7 @@ const Linkage = ({
     if (modal) {
       modal.handleOk(handleOk);
     }
-  }, [customCirculationDataSet, linkageDataSet, modal, record, selectedType]);
+  }, [customCirculationDataSet, fields, linkageDataSet, modal, record, selectedType]);
   const selectedIssueTypes = (() => {
     const data: any = linkageDataSet.toData()[0];
     return Object.keys(data).reduce((result: string[], key) => {
@@ -158,18 +157,17 @@ const Linkage = ({
             </Row>
           );
         })}
+        <div>
+          <Button
+            icon="playlist_add"
+            color={'blue' as ButtonColor}
+            onClick={() => {
+              const newKey = Field.add();
+              addFieldRule(newKey);
+            }}
+          />
+        </div>
       </Form>
-      <Button
-        style={{ marginLeft: 24 }}
-        icon="playlist_add"
-        color={'blue' as ButtonColor}
-        onClick={() => {
-          const newKey = Field.add();
-          addFieldRule(newKey);
-        }}
-      >
-        添加状态联动
-      </Button>
     </div>
   );
 };

@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 
@@ -158,10 +159,13 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (stateMachineId == null) {
             throw new CommonException(ERROR_ISSUE_STATE_MACHINE_NOT_FOUND);
         }
-        //获取初始状态
-        Long initStatusId = instanceService.queryInitStatusId(organizationId, stateMachineId);
-        if (initStatusId == null) {
-            throw new CommonException(ERROR_ISSUE_STATUS_NOT_FOUND);
+        Long initStatusId = issueCreateVO.getStatusId();
+        if (ObjectUtils.isEmpty(initStatusId)) {
+            //获取初始状态
+            initStatusId = instanceService.queryInitStatusId(organizationId, stateMachineId);
+            if (initStatusId == null) {
+                throw new CommonException(ERROR_ISSUE_STATUS_NOT_FOUND);
+            }
         }
         //获取项目信息
         ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();

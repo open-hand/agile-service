@@ -9,6 +9,7 @@ import {
   Dropdown,
 } from 'choerodon-ui/pro';
 import { devOpsApi } from '@/api';
+import './Commits.less';
 
 const STATUS_SHOW = {
   opened: '开放',
@@ -243,6 +244,7 @@ class Commits extends Component {
     ];
     return (
       <Table
+        className="c7nagile-commits"
         pagination={false}
         filterBar={false}
         rowKey={(record) => record.id}

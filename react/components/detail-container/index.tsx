@@ -75,26 +75,31 @@ interface DetailContainerProps {
   close: () => void
   clear: () => void
   eventsMap: Map<string, DetailEvents>
-  // setVisible: (visible: boolean) => void
+  fullPage?: boolean
 }
-const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ...props }) => (
-  <DetailContainerContext.Provider value={{
-    topAnnouncementHeight: HeaderStore.announcementClosed ? 0 : 50,
-    outside: false,
-    ...props,
-  }}
-  >
-    <Animate
-      component="div"
-      transitionAppear
-      transitionName="slide-right"
-      onLeave={props.clear}
+const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ...props }) => {
+  const element = visible ? (
+    <Container>{children}</Container>
+  ) : null;
+  return (
+    <DetailContainerContext.Provider value={{
+      topAnnouncementHeight: HeaderStore.announcementClosed ? 0 : 50,
+      outside: false,
+      ...props,
+    }}
     >
-      {visible ? (
-        <Container>{children}</Container>
-      ) : null}
-    </Animate>
-  </DetailContainerContext.Provider>
-);
+      {props.fullPage ? element : (
+        <Animate
+          component="div"
+          transitionAppear
+          transitionName="slide-right"
+          onLeave={props.clear}
+        >
+          {element}
+        </Animate>
+      )}
+    </DetailContainerContext.Provider>
+  );
+};
 
 export default DetailContainer;

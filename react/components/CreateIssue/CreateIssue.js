@@ -13,6 +13,7 @@ import {
   featureApi, epicApi, fieldApi, issueTypeApi,
   issueApi,
   pageConfigApi,
+  statusApi,
 } from '@/api';
 import {
   uploadAndReplaceImg, handleFileUpload, validateFile, normFile, text2Delta,
@@ -92,6 +93,7 @@ class CreateIssue extends Component {
       originIssueTypes: [],
       defaultTypeId: false,
       newIssueTypeCode: '',
+      newIssueTypeId: '',
       fields: [],
     };
     this.originDescription = true;
@@ -343,6 +345,7 @@ class CreateIssue extends Component {
           storyPoints,
           estimatedTime,
           sprintId,
+          statusId,
           epicId,
           pi,
           epicName,
@@ -422,6 +425,7 @@ class CreateIssue extends Component {
           const text = await uploadAndReplaceImg(deltaOps);
           const extra = {
             description: text,
+            statusId,
             programId: getProjectId(),
             projectId: getProjectId(),
             issueTypeId: currentTypeId,
@@ -544,7 +548,7 @@ class CreateIssue extends Component {
     } = field;
     const {
       originIssueTypes,
-      newIssueTypeCode, defaultTypeId,
+      newIssueTypeCode, defaultTypeId, newIssueTypeId,
     } = this.state;
 
     switch (field.fieldCode) {
@@ -579,10 +583,11 @@ class CreateIssue extends Component {
                             fieldApi.getFields(param).then((res) => {
                               const { fields } = this.state;
                               form.resetFields(['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
-                                'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel',
+                                'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel', 'status',
                                 ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary', 'description'].some((i) => i === code))]);
                               this.setState({
                                 fields: res,
+                                newIssueTypeId: id,
                                 newIssueTypeCode: typeCode,
                               });
                               this.loadDefaultTemplate(id);
@@ -1115,7 +1120,22 @@ class CreateIssue extends Component {
           </FormItem>
 
         );
-
+      case 'status':
+        return (
+          <FormItem label={field.fieldName} key={`${newIssueTypeCode}-${field.id}`}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {getFieldDecorator(`${field.fieldCode}Id`, {
+                rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
+              })(
+                <SelectFocusLoad
+                  request={() => statusApi.loadAllForIssueType(newIssueTypeId)}
+                  label={field.fieldName}
+                  type="issue_status"
+                />,
+              )}
+            </div>
+          </FormItem>
+        );
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>
