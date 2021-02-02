@@ -23,7 +23,6 @@ const HZERO_HFLE = 'hfle';
 
 const FragmentUpload = inject('AppState')(observer((props) => {
   const {
-    callback = () => {},
     action = `${API_HOST}/hfle/v1/files/multipart`,
     method = 'post',
     headers = {
@@ -31,15 +30,13 @@ const FragmentUpload = inject('AppState')(observer((props) => {
     },
     fileSize = 30 * 1024 * 1024,
     paramsData = {},
-    text = '上传',
-    doneText = '已上传',
-    type = '',
     prefixPatch = HZERO_HFLE,
     showUploadList,
     disabled = false,
     beforeUploadCallback = () => {},
     AppState: { currentMenuType: { organizationId, id } },
     cRef,
+    children,
     ...others
   } = props;
 
@@ -81,7 +78,7 @@ const FragmentUpload = inject('AppState')(observer((props) => {
 
   const beforeUpload = (file) => {
     const { accept } = others;
-    if (validateFile(file, accept)) {
+    if (validateFile(file, accept, fileSize)) {
       setFileList((list) => [...list, {
         uid: file.uid,
         name: file.name,
@@ -138,7 +135,7 @@ const FragmentUpload = inject('AppState')(observer((props) => {
   });
 
   const whileUpload = async ({
-    onError, file,
+    onError, onSuccess, file,
   }) => {
     if (!file) {
       return;
@@ -148,6 +145,7 @@ const FragmentUpload = inject('AppState')(observer((props) => {
     });
     fileMap.current.delete(file.uid);
     if (success) {
+      onSuccess(data);
       setFileList((list) => list.map((item) => {
         if (!item.url && item.uid === file.uid) {
           return {
@@ -204,9 +202,13 @@ const FragmentUpload = inject('AppState')(observer((props) => {
         {...uploadProps}
         className="c7n-chunk-upload"
       >
-        <Button style={{ padding: '0 6px' }}>
-          <Icon type="file_upload" />
-        </Button>
+        {
+          children || (
+            <Button style={{ padding: '0 6px' }} disabled={disabled}>
+              <Icon type="file_upload" />
+            </Button>
+          )
+        }
       </Upload>
     </>
   );
