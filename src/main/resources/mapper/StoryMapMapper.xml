@@ -278,7 +278,7 @@
                      close=")">
                 #{versionId}
             </foreach>
-            )  <if test="searchVO.advancedSearchArgs.versionList.contains(0)">
+            )  <if test="searchVO.advancedSearchArgs.versionListNull != null and searchVO.advancedSearchArgs.versionListNull == true">
             or version_info.version_id is null
              </if>)
         </if>

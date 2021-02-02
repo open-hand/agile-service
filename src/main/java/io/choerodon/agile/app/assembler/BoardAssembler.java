@@ -27,6 +27,13 @@ public class BoardAssembler extends AbstractAssembler {
         }
     }
 
+    public void handleAdvanceSearch(SearchVO searchVO) {
+        Map<String, Object> args = searchVO.getAdvancedSearchArgs();
+        if (args != null) {
+            assertNull(args, "versionList");
+        }
+    }
+
     private void assertNull(Map<String, Object> args, String key) {
         List<String> list = (List<String>) args.get(key);
         String zero = "0";
