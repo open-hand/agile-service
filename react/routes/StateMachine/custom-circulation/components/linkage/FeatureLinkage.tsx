@@ -1,24 +1,22 @@
 import React, {
-  useMemo, useEffect, useState, useCallback, useRef,
+  useEffect, useState, useCallback, useRef, useMemo,
 } from 'react';
 import {
-  Form, DataSet, Select, Button, Col, Row,
+  DataSet, Col, Row,
 } from 'choerodon-ui/pro';
-import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import { observer } from 'mobx-react-lite';
-import { includes } from 'lodash';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-import SelectStatus from '@/components/select/select-status';
 import {
-  statusTransformApi, commonApi, issueTypeApi, IFeatureLinkage,
+  statusTransformApi, IFeatureLinkage,
 } from '@/api';
 import Loading from '@/components/Loading';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
-
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import useSubProjects from '@/hooks/data/useSubProjects';
+import ProjectList from './feature-linkage/ProjectList';
+import ProjectConfig from './feature-linkage/ProjectConfig';
 import styles from './index.less';
 
-interface IFeatureLinkageSetting {
+export interface IFeatureLinkageSetting {
   id: string
   issueTypeId: string
   projectId: string
@@ -29,96 +27,70 @@ interface IFieldK {
   key: number,
 }
 
-interface ISubProject {
-  projectId: string,
-  projName: string
-}
-
-const { Option } = Select;
-
 const FeatureLinkage = ({
-// @ts-ignore
-  modal, record, selectedType, customCirculationDataSet,
+  // @ts-ignore
+  modal, record, issueTypeId, customCirculationDataSet,
 }) => {
   const [loading, setLoading] = useState(false);
+  const { data: subProjects } = useSubProjects({ onlySelectEnable: true });
   const [fields, Field] = useFields();
-  const [subProjects, setSubProjects] = useState<ISubProject[]>([]);
-  const modalDataSetRef = useRef<DataSet>();
-
-  useEffect(() => {
-    commonApi.getSubProjects(true).then((projects: ISubProject[]) => {
-      setSubProjects(projects);
-    });
-  }, []);
-
-  const modalDataSet = useMemo(() => new DataSet({
-    autoCreate: true,
-    events: {
-      // @ts-ignore
-      update: ({ dataSet, name }) => {
-        const [key, selectName] = name.split('-');
-        if (selectName === 'project') {
-          dataSet.current?.set(`${key}-status`, undefined);
-        }
+  const [currentProject, setCurrentProject] = useState<string | null>(null);
+  const [linkages, setLinkages] = useState<IFeatureLinkageSetting[]>([]);
+  const switchProject = useCallback((id: string) => {
+    setCurrentProject(id);
+    setDataSet(new DataSet({
+      autoCreate: true,
+      events: {
+        // @ts-ignore
+        update: ({ name }) => {
+          // const [key, selectName] = name.split('-');
+          // if (selectName === 'project') {
+          //   dataSet.current?.set(`${key}-status`, undefined);
+          // }
+        },
       },
-    },
-  }), []);
-
-  modalDataSetRef.current = modalDataSet;
-
-  const removeField = useCallback((name) => {
-    modalDataSetRef.current?.fields?.delete(name);
-    modalDataSetRef.current?.current?.fields.delete(name);
+    }));
   }, []);
-
-  const addField = useCallback((name, props) => {
-    const field = new DataSetField({ ...props, name }, modalDataSet, modalDataSet.current);
-    modalDataSet?.current?.fields.set(name, field);
-  }, [modalDataSet]);
-
-  const addFieldLinkage = useCallback((key, i) => {
-    addField(`${key}-project`, {
-      required: true,
-    });
-    addField(`${key}-status`, {
-      required: true,
-    });
-    addField(`${key}-storyId`, {});
-  }, [addField]);
-
   useEffect(() => {
-    const { current } = modalDataSet;
+    if (!currentProject && subProjects && subProjects?.length > 0) {
+      switchProject(subProjects[0].projectId);
+    }
+  }, [currentProject, subProjects, switchProject]);
+  const projectLinkages = useMemo(() => linkages.filter((link) => link.projectId === currentProject), [currentProject, linkages]);
+  const [dataSet, setDataSet] = useState<DataSet>();
+  useEffect(() => {
     setLoading(true);
-    statusTransformApi.getFeatureLinkage(record.get('id'), 'feature').then((linkages: IFeatureLinkageSetting[]) => {
+    statusTransformApi.getFeatureLinkage(record.get('id'), issueTypeId).then((res: IFeatureLinkageSetting[]) => {
       batchedUpdates(() => {
-        if (linkages?.length) {
-          const initFields = Field.init(new Array(linkages.length).fill({}));
-          initFields.forEach((item: { key: number }, i: number) => {
-            addFieldLinkage(item.key, i);
-          });
-          linkages.forEach((item, i: number) => {
-            const {
-              projectId, statusId,
-            } = item;
-            const { key } = initFields[i];
-              current?.set(`${key}-project`, projectId);
-              current?.set(`${key}-status`, statusId);
-          });
-        } else {
-          const newKey = Field.add();
-          addFieldLinkage(newKey, 0);
-        }
+        setLinkages(res);
+        // if (linkages?.length) {
+        //   const initFields = Field.init(new Array(linkages.length).fill({}));
+        //   initFields.forEach((item: { key: number }, i: number) => {
+        //     addFieldLinkage(item.key, i);
+        //   });
+        //   linkages.forEach((item, i: number) => {
+        //     const {
+        //       projectId, statusId,
+        //     } = item;
+        //     const { key } = initFields[i];
+        //       current?.set(`${key}-project`, projectId);
+        //       current?.set(`${key}-status`, statusId);
+        //   });
+        // } else {
+        //   const newKey = Field.add();
+        //   addFieldLinkage(newKey, 0);
+        // }
         setLoading(false);
       });
     }).catch(() => {
       setLoading(false);
     });
-  }, [Field, addFieldLinkage, modalDataSet, record, selectedType]);
+  }, [Field, record, issueTypeId]);
 
   useEffect(() => {
     const handleOk = async () => {
-      if (await modalDataSet.validate()) {
-        const current = modalDataSet?.current;
+      if (await dataSet?.validate()) {
+        const current = dataSet?.current;
         const updateData: IFeatureLinkage[] = [];
         fields.forEach((f: IFieldK) => {
           const { key } = f;
@@ -137,109 +109,36 @@ const FeatureLinkage = ({
     if (modal) {
       modal.handleOk(handleOk);
     }
-  }, [customCirculationDataSet, modalDataSet, modal, record, selectedType, fields]);
-
-  const existProjects: string[] = [];
-  fields.forEach((field: IFieldK) => {
-    const { key } = field;
-    const keyProject = modalDataSet?.current?.get(`${key}-project`);
-    const project = subProjects.find((item: ISubProject) => item.projectId === keyProject);
-    if (project) {
-      existProjects.push(project.projectId);
+  }, [customCirculationDataSet, modal, record, fields, dataSet]);
+  const handleProjectChange = useCallback(async (id: string) => {
+    const data: any = dataSet?.current?.toData();
+    // eslint-disable-next-line no-underscore-dangle
+    delete data.__dirty;
+    const hasValue = Object.keys(data).find((key) => !!data[key]);
+    if (hasValue && !await dataSet?.validate()) {
+      return;
     }
-  });
-
+    switchProject(id);
+  }, [dataSet, switchProject]);
   return (
     <div className={`${styles.linkage} ${styles.featureLinkage}`}>
       <Loading loading={loading} />
       <div className={styles.tip}>{`当子项目的故事全部流转到指定状态时，关联的特性自动流转到${record.get('name')}状态。`}</div>
-      <Form dataSet={modalDataSet}>
-        {
-          fields.map(((f: IFieldK, i: number) => {
-            const { key } = f;
-            return (
-              <div>
-                <Row
-                  key={`${key}-project`}
-                  gutter={20}
-                  style={{
-                    marginBottom: 27,
-                  }}
-                >
-                  <Col span={20}>
-                    <Select
-                      name={`${key}-project`}
-                      placeholder="选择项目"
-                      clearButton={false}
-                    >
-                      {
-                        subProjects.filter((project: ISubProject) => (
-                          modalDataSet?.current?.get(`${key}-project`) === project.projectId
-                        ) || !includes(existProjects, project.projectId)).map((project) => (
-                          <Option key={project.projectId} value={project.projectId}>
-                            {project.projName}
-                          </Option>
-                        ))
-                      }
-                    </Select>
-                  </Col>
-                  <Col span={2}>
-                    <Button
-                      onClick={() => {
-                        batchedUpdates(() => {
-                          // @ts-ignore
-                          Field.remove(key);
-                          removeField(`${key}-project`);
-                          removeField(`${key}-status`);
-                        });
-                      }}
-                      icon="delete"
-                    />
-                  </Col>
-                </Row>
-                <Row key={`${key}-status`} gutter={20}>
-                  <Col span={20}>
-                    {
-                      !modalDataSet?.current?.get(`${key}-project`) ? (
-                        <Select name={`${key}-status`} placeholder="指定状态" disabled />
-                      ) : (
-                        <SelectStatus
-                          name={`${key}-status`}
-                          placeholder="指定状态"
-                          clearButton={false}
-                          key={`${modalDataSet?.current?.get(`${key}-project`)}`}
-                          request={async () => {
-                            const projectIssueTypes = await issueTypeApi.loadAllWithStateMachineId('agile', modalDataSet?.current?.get(`${key}-project`));
-                            const issueTypeId = (projectIssueTypes || []).find((item) => item.typeCode === 'story')?.id;
-                            if (issueTypeId) {
-                              modalDataSet.current?.set(`${key}-storyId`, issueTypeId);
-                              return statusTransformApi.getFeatureLinkageStatus({ issueTypeId, projectId: modalDataSet?.current?.get(`${key}-project`), parentIssueStatusSetting: record.get('id') });
-                            }
-                            return Promise.resolve([]);
-                          }}
-                        />
-                      )
-                    }
-                  </Col>
-                </Row>
-              </div>
-            );
-          }))
-        }
-        <div>
-          <Button
-            // @ts-ignore
-            onClick={() => {
-              const newKey = Field.add();
-              addFieldLinkage(newKey, fields.length);
-            }}
-            icon="add"
-            color={'blue' as ButtonColor}
-          >
-            添加联动
-          </Button>
-        </div>
-      </Form>
+      <Row>
+        <Col span={8}>
+          <ProjectList value={currentProject} onChange={handleProjectChange} />
+        </Col>
+        <Col span={16}>
+          {currentProject && dataSet && (
+            <ProjectConfig
+              key={currentProject}
+              projectId={currentProject}
+              dataSet={dataSet}
+              linkages={projectLinkages}
+            />
+          )}
+        </Col>
+      </Row>
     </div>
   );
 };
