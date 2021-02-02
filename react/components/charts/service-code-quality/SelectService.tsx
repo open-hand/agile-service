@@ -10,22 +10,22 @@ export interface IService {
   name: string
 }
 interface Props extends Partial<SelectProps> {
+  projectId: string
   afterLoad?: (data: IService[]) => void
   flat?: boolean
-
 }
 
 const SelectService: React.FC<Props> = forwardRef(({
-  flat, afterLoad, ...otherProps
+  flat, afterLoad, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IService> => ({
     name: 'SelectService',
     textField: 'name',
     valueField: 'id',
-    request: () => devOpsApi.loadActiveService(),
+    request: () => devOpsApi.project(projectId).loadActiveService(),
     afterLoad,
     paging: false,
-  }), [afterLoad]);
+  }), [afterLoad, projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
