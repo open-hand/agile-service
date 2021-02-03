@@ -2,9 +2,12 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import SelectSprint from '@/components/select/select-sprint';
 
-function SprintField({ field, value, onChange }) {
+function SprintField({
+  field, value, onChange, projectId,
+}) {
   return (
     <SelectSprint
+      projectId={projectId}
       key={field.code}
       flat
       hasUnassign

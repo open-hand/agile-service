@@ -3,10 +3,13 @@ import { observer } from 'mobx-react-lite';
 import SelectFeature from '@/components/select/select-feature';
 import { featureApi } from '@/api';
 
-function FeatureField({ field, value, onChange }) {
+function FeatureField({
+  field, value, onChange, projectId,
+}) {
   const defaultValue = useMemo(() => value, []);
   return (
     <SelectFeature
+      projectId={projectId}
       key={field.code}
       flat
       value={value || []}

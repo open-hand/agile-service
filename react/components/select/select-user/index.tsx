@@ -179,7 +179,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     textField: 'realName',
     valueField: 'id',
     request: request || (async ({ filter, page }) => {
-      const res = await userApi.getAllInProject(filter, page, undefined, undefined, projectId);
+      const res = await userApi.project(projectId).getAllInProject(filter, page, undefined, undefined, projectId);
       res.list = res.list.filter((user: User) => user.enabled);
       return res;
     }),
@@ -215,7 +215,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       }
       return newData;
     },
-  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish, JSON.stringify(selectedUserIds), extraOptions]);
+  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish, JSON.stringify(selectedUserIds), extraOptions, projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (

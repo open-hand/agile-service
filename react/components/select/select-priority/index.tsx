@@ -11,17 +11,19 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (prioritys: Priority[]) => void
   flat?: boolean
+  projectId?: string
 }
 
 const SelectPriority: React.FC<Props> = forwardRef(({
-  priorityId, dataRef, afterLoad, flat, ...otherProps
+  priorityId, dataRef, afterLoad, flat, projectId, ...otherProps
 },
 ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'priority',
     textField: 'name',
     valueField: 'id',
-    request: () => priorityApi.loadByProject(undefined, [String(priorityId)]),
+    // @ts-ignore
+    request: () => priorityApi.loadByProject(projectId, [String(priorityId)]),
     middleWare: (data: Priority[]) => {
       if (dataRef) {
         Object.assign(dataRef, {

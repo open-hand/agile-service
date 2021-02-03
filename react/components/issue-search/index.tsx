@@ -13,6 +13,8 @@ export interface IssueSearchProps {
   onClickSaveFilter?: () => void
   urlFilter?: string
   onChange: () => void
+  projectId?: string
+  applyType?: string
 }
 export function useIssueSearchStore(props: IssueSearchStoreProps) {
   const store = useMemo(() => new IssueSearchStore(props), []);
@@ -20,7 +22,7 @@ export function useIssueSearchStore(props: IssueSearchStoreProps) {
 }
 export { IssueSearchStore };
 const IssueSearch: React.FC<IssueSearchProps> = ({
-  urlFilter, onClear, onClickSaveFilter, store, onChange,
+  urlFilter, onClear, onClickSaveFilter, store, onChange, projectId, applyType,
 }) => {
   store.setQuery(onChange);
   useEffect(() => {
@@ -36,6 +38,8 @@ const IssueSearch: React.FC<IssueSearchProps> = ({
         urlFilter,
         onClear,
         onClickSaveFilter,
+        projectId,
+        applyType,
       }}
     >
       <SearchArea />
