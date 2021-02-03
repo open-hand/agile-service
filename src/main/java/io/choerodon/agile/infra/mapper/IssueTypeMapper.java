@@ -72,4 +72,13 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
     IssueTypeDTO selectWithAlias(@Param("issueTypeId") Long issueTypeId,
                                  @Param("projectId") Long projectId);
 
+    /**
+     * 根据问题类型id和项目id查询问题类型
+     *
+     * @param issueTypeIds
+     * @param projectIds
+     * @return
+     */
+    List<IssueTypeDTO> selectWithAliasByIds(@Param("issueTypeIds") Set<Long> issueTypeIds,
+                                            @Param("projectIds") Set<Long> projectIds);
 }
