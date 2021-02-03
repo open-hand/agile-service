@@ -53,12 +53,14 @@
                     LEFT JOIN agile_issue_link_type ailt1 ON ailt1.link_type_id = ail1.link_type_id
                     LEFT JOIN agile_issue ai1 ON ail1.issue_id = ai1.issue_id
                     LEFT JOIN agile_project_info api1 ON api1.project_id = ai1.project_id
+                    LEFT JOIN agile_issue_link ail2 ON ail1.issue_id = ail2.linked_issue_id AND ail1.linked_issue_id = ail2.issue_id AND ail1.link_type_id = ail2.link_type_id
                 WHERE
                     ail1.linked_issue_id = #{issueId}
                     AND ai1.project_id = #{projectId}
                     <if test="noIssueTest">
                         AND ai1.apply_type = 'agile'
                     </if>
+                    AND ail2.linked_issue_id IS NULL
             ) a
         ORDER BY
             a.issue_num1 desc
