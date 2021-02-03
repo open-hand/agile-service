@@ -38,3 +38,4 @@ export * from './Gantt';
 export * from './MoveIssue';
 export * from './UI';
 export * from './RdqamApi';
+export * from './ExportImportTemplate';
