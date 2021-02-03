@@ -7,7 +7,7 @@ export default function useQuickFilters({ projectId }: { projectId?: string }) {
   const [loading, setLoading] = useState(false);
   const refresh = useCallback(async () => {
     setLoading(true);
-    const res = await quickFilterApi.projectId(projectId).loadAll();
+    const res = await quickFilterApi.project(projectId).loadAll();
     setData(res);
     setLoading(false);
   }, [projectId]);
