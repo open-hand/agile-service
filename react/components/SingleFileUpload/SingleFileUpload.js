@@ -6,6 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Tooltip } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
+import FileSaver from 'file-saver';
 import { getFileSuffix } from '@/utils/common';
 import Preview from '@/components/Preview';
 import './SingleFileUpload.less';
@@ -16,7 +17,9 @@ function SingleFileUplaod(props) {
   const {
     url, fileService, fileName, hasDeletePermission, onDeleteFile,
   } = props;
-
+  const handleDownLoadFile = () => {
+    FileSaver.saveAs(`${fileService || ''}${url}`, fileName);
+  };
   const handlePreviewClick = (service, name, fileUrl) => {
     Modal.open({
       key: modalKey,
@@ -28,7 +31,7 @@ function SingleFileUplaod(props) {
       className: 'c7n-agile-preview-Modal',
       cancelText: '关闭',
       fullScreen: true,
-      children: <Preview service={service} fileName={name} fileUrl={fileUrl} />,
+      children: <Preview service={service} fileName={name} fileUrl={fileUrl} handleDownLoadFile={handleDownLoadFile} />,
     });
   };
   const previewAble = previewSuffix.includes(getFileSuffix(url));
@@ -45,7 +48,7 @@ function SingleFileUplaod(props) {
           </Tooltip>
         )}
       </span>
-      <a className="c7n-agile-singleFileUpload-download" href={fileService ? `${fileService}${url}` : `${url}`}>
+      <a className="c7n-agile-singleFileUpload-download" onClick={handleDownLoadFile}>
         <span className="c7n-agile-singleFileUpload-icon">
           <Tooltip title="下载">
             <Icon type="get_app" style={{ color: '#000' }} />
