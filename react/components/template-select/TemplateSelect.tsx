@@ -45,10 +45,14 @@ function useClickOut(onClickOut) {
 interface Props {
   action: TemplateAction
   checkOptions: IFieldOption[]
-  templateSelectRef: React.MutableRefObject<{onOk: (template: ITemplate) => void} | undefined>
+  templateSelectRef: React.MutableRefObject<{
+    onOk: (template: ITemplate) => Promise<void>,
+    templateList: ITemplate[]
+  } | undefined>
+  selectTemplateOk: (codes: string[]) => void
 }
 const TemplateSelect: React.FC<Props> = (props) => {
-  const { action, templateSelectRef } = props;
+  const { action, templateSelectRef, selectTemplateOk } = props;
   const [templateList, setTemplateList] = useState<ITemplate[]>([]);
   const [selected, setSelected] = useState<ITemplate | undefined>();
 
@@ -74,14 +78,16 @@ const TemplateSelect: React.FC<Props> = (props) => {
 
   useImperativeHandle(templateSelectRef, () => ({
     onOk: handleCreateOk,
+    templateList,
   }));
 
   const handleEditOk = useCallback((template) => {
     if (selected?.id === template.id) {
       setSelected(template);
+      selectTemplateOk(JSON.parse(template.templateJson));
     }
     getTemplates();
-  }, [getTemplates, selected?.id]);
+  }, [getTemplates, selectTemplateOk, selected?.id]);
 
   const handleDeleteOk = useCallback((id) => {
     if (selected?.id === id) {
@@ -112,6 +118,7 @@ const TemplateSelect: React.FC<Props> = (props) => {
               templateItemNameCls={templateItemNameCls}
               onEdit={handleEditOk}
               onDelete={handleDeleteOk}
+              selectTemplateOk={selectTemplateOk}
             />
           </div>
           )}

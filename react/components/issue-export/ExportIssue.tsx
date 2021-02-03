@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import { find, uniq } from 'lodash';
+import { find, isEqual, uniq } from 'lodash';
 import { Divider } from 'choerodon-ui';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
@@ -13,6 +13,7 @@ import TableColumnCheckBoxes, { useTableColumnCheckBoxes } from '@/components/ta
 import WsProgress from '@/components/ws-progress';
 import { getProjectName } from '@/utils/common';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { getReverseExportFieldCodes } from '@/routes/Issue/components/ExportIssue/utils';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
@@ -67,12 +68,16 @@ interface IDownLoadInfo {
   lastUpdateDate: string | null,
 }
 const ExportIssue: React.FC = () => {
+  const [templateIsExist, setTemplateIsExist] = useState(false);
+  const templateSelectRef = useRef<{
+    onOk:(template: ITemplate) => Promise<void>,
+    templateList: ITemplate[]
+  }>();
+
   const {
     prefixCls, checkOptions: propsCheckOptions, store, fields, modal,
   } = useExportIssueStore();
-  const templateSelectRef = useRef<{
-    onOk:(template: ITemplate) => void,
-      }>();
+
   // 添加筛选配置 数据
   const [choseDataProps, choseComponentProps] = useChoseField({
     fields,
@@ -174,6 +179,23 @@ const ExportIssue: React.FC = () => {
     openSaveTemplate({ action: 'agile_export_issue', onOk: templateSelectRef.current?.onOk, fieldCodes: JSON.stringify(uniq(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps))) });
   }, [checkBoxDataProps, store]);
 
+  const selectTemplateOk = useCallback((fieldCodes) => {
+    const newCheckedOptions = getReverseExportFieldCodes(uniq(fieldCodes));
+    checkBoxDataProps.dataSet.current?.set('exportCodes', newCheckedOptions);
+    checkBoxDataProps.setCheckedOptions(newCheckedOptions);
+  }, [checkBoxDataProps]);
+
+  useEffect(() => {
+    const templateList = templateSelectRef && templateSelectRef.current ? templateSelectRef.current.templateList : [];
+    for (let i = 0; i < templateList.length; i += 1) {
+      if (isEqual(JSON.parse(templateList[i].templateJson), store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps))) {
+        setTemplateIsExist(true);
+        return;
+      }
+    }
+    setTemplateIsExist(false);
+  }, [checkBoxDataProps, store]);
+
   return (
     <div>
       <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
@@ -190,6 +212,7 @@ const ExportIssue: React.FC = () => {
           action="agile_export_issue"
           // @ts-ignore
           checkOptions={checkOptions}
+          selectTemplateOk={selectTemplateOk}
         />
       </FormPart>
       <Divider className={`${prefixCls}-horizontal`} />
@@ -221,14 +244,18 @@ const ExportIssue: React.FC = () => {
         >
           导出问题
         </Button>
-        <Button
-          icon="unarchive"
-          funcType={'flat' as FuncType}
-          onClick={handleSaveTemplate}
-          color={'primary' as ButtonColor}
-        >
-          保存为常用模板
-        </Button>
+        {
+          !templateIsExist && (
+            <Button
+              icon="unarchive"
+              funcType={'flat' as FuncType}
+              onClick={handleSaveTemplate}
+              color={'primary' as ButtonColor}
+            >
+              保存为常用模板
+            </Button>
+          )
+        }
       </div>
     </div>
   );
