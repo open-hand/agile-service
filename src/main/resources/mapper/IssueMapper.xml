@@ -448,39 +448,41 @@
         (
             select aii.issue_id
             from agile_issue aii
-            where (
-            aii.parent_issue_id in
+            where aii.issue_id in
             <foreach collection="issueIds" item="issueId" open="(" separator=","
                      close=")">
                 #{issueId}
             </foreach>
-            <if test="childrenIds != null and childrenIds.size > 0">
-                and aii.issue_id in
-                <foreach collection="childrenIds" item="id" open="(" separator=","
+            <if test="withChildren">
+                or (
+                aii.parent_issue_id in
+                <foreach collection="issueIds" item="issueId" open="(" separator=","
                          close=")">
-                    #{id}
+                    #{issueId}
                 </foreach>
-            </if>
-            )
-            or (
-            aii.relate_issue_id in
-            <foreach collection="issueIds" item="issueId" open="(" separator=","
-                     close=")">
-                #{issueId}
-            </foreach>
-            <if test="childrenIds != null and childrenIds.size > 0">
-                and aii.issue_id in
-                <foreach collection="childrenIds" item="id" open="(" separator=","
+                <if test="childrenIds != null and childrenIds.size > 0">
+                    and aii.issue_id in
+                    <foreach collection="childrenIds" item="id" open="(" separator=","
+                             close=")">
+                        #{id}
+                    </foreach>
+                </if>
+                )
+                or (
+                aii.relate_issue_id in
+                <foreach collection="issueIds" item="issueId" open="(" separator=","
                          close=")">
-                    #{id}
+                    #{issueId}
                 </foreach>
+                <if test="childrenIds != null and childrenIds.size > 0">
+                    and aii.issue_id in
+                    <foreach collection="childrenIds" item="id" open="(" separator=","
+                             close=")">
+                        #{id}
+                    </foreach>
+                </if>
+                )
             </if>
-            )
-            or aii.issue_id in
-            <foreach collection="issueIds" item="issueId" open="(" separator=","
-                     close=")">
-                #{issueId}
-            </foreach>
         )
 
         <!-- mysql的按照顺序排序在h2会报错，所以用下面的 -->
