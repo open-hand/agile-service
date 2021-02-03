@@ -28,6 +28,7 @@ interface IConfig {
 }
 export interface ITableColumnCheckBoxesDataProps {
   checkedOptions: string[],
+  setCheckedOptions: (codes: string[]) => void,
   dataSet: DataSet,
   options: Props['options'],
   actions: { checkAll: () => void, unCheckAll: () => void, check: (val: string) => void }
@@ -89,6 +90,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
 
   const dataProps: ITableColumnCheckBoxesDataProps = {
     checkedOptions,
+    setCheckedOptions,
     options,
     dataSet: form.dataSet,
     actions: { checkAll, unCheckAll, check: checkOption },

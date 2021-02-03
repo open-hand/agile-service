@@ -4,7 +4,7 @@ import { openExportIssueModal as originOpenExportIssueModal } from '@/components
 import IssueExportStore from '@/components/issue-export/stores/store';
 import { issueApi } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import { set } from 'lodash';
+import { set, uniq } from 'lodash';
 import { getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields } from './utils';
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
@@ -35,7 +35,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     transformSystemFilter: getTransformSystemFilter,
     transformExportFieldCodes: (data, { dataSet }) => {
       data.push(...(dataSet.current?.get('required-option') || []));
-      return getExportFieldCodes(data);
+      return getExportFieldCodes(uniq(data));
     },
     events: {
       exportAxios: (searchData, sort) => {

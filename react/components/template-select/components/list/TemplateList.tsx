@@ -17,14 +17,16 @@ interface Props {
   templateItemNameCls: string
   onEdit: (template: ITemplate) => void
   onDelete: (id: string) => void
+  selectTemplateOk: (codes: string[]) => void,
 }
 
 const TemplateList: React.FC<Props> = ({
-  action, checkOptions, templateList, setSelected, templateItemNameCls, onEdit, onDelete,
+  action, checkOptions, templateList, setSelected, templateItemNameCls, onEdit, onDelete, selectTemplateOk,
 }) => {
   const handleSelect = useCallback((template) => {
     setSelected(template);
-  }, [setSelected]);
+    selectTemplateOk(JSON.parse(template.templateJson));
+  }, [selectTemplateOk, setSelected]);
 
   const handleClickEdit = useCallback(({ template }) => {
     openEditTemplate({
