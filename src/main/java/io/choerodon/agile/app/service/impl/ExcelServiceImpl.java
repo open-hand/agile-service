@@ -2511,7 +2511,7 @@ public class ExcelServiceImpl implements ExcelService {
                 if (!parentIds.isEmpty()) {
                     Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
                     cursor.addCollections(childrenIds);
-                    issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true);
+                    issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true, true);
                 }
                 Map<Long, ExportIssuesVO> issueMap = new LinkedHashMap<>();
                 cursor

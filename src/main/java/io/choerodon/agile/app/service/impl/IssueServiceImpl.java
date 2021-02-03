@@ -527,7 +527,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (issueIdPage.getContent() != null && !issueIdPage.getContent().isEmpty()) {
                 List<Long> issueIds = issueIdPage.getContent();
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
-                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false);
+                boolean withChildren =
+                        Boolean.TRUE.equals(
+                                Optional.ofNullable(searchVO.getOtherArgs())
+                                        .map(x -> x.get("withChildren"))
+                                        .orElse(true));
+                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, withChildren);
                 Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
                 Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
