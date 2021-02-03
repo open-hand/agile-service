@@ -9,7 +9,7 @@ import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
 import IssueFilterForm, { useIssueFilterForm } from '@/components/issue-filter-form';
 import ChooseField, { useChoseField } from '@/components/chose-field';
-import TableColumnCheckBoxes, { useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
+import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
 import WsProgress from '@/components/ws-progress';
 import { getProjectName } from '@/utils/common';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
@@ -72,7 +72,11 @@ const ExportIssue: React.FC = () => {
   const templateSelectRef = useRef<{
     onOk:(template: ITemplate) => Promise<void>,
     templateList: ITemplate[]
+    setTemplate: (template: ITemplate | undefined) => void
+    templateFirstLoaded: boolean
   }>();
+
+  const checkBoxDataPropsRef = useRef<ITableColumnCheckBoxesDataProps>();
 
   const {
     prefixCls, checkOptions: propsCheckOptions, store, fields, modal,
@@ -89,6 +93,24 @@ const ExportIssue: React.FC = () => {
       choseField: (data) => handleChange(data),
     },
   });
+
+  const handleCheckBoxChangeOk = useCallback((value) => {
+    const templateList = templateSelectRef?.current?.templateList || [];
+    for (let i = 0; i < templateList.length; i += 1) {
+      if (isEqual(JSON.parse(templateList[i].templateJson).sort(), store.transformExportFieldCodes(value, checkBoxDataPropsRef?.current).sort())) {
+        templateSelectRef?.current?.setTemplate(templateList[i]);
+        return;
+      }
+    }
+    templateSelectRef?.current?.setTemplate(undefined);
+  }, [store]);
+
+  useEffect(() => {
+    if (templateSelectRef?.current?.templateFirstLoaded) {
+      handleCheckBoxChangeOk(store.defaultCheckedExportFields);
+    }
+  }, [handleCheckBoxChangeOk, store.defaultCheckedExportFields, templateSelectRef?.current?.templateFirstLoaded]);
+
   const { store: choseFieldStore } = choseDataProps;
   const checkOptions = useMemo(() => { // checkBokProps
     const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig.get(option.value) })) || [];
@@ -100,6 +122,11 @@ const ExportIssue: React.FC = () => {
     options: checkOptions,
     defaultValue: store.defaultCheckedExportFields,
     events: { initOptions: store.defaultInitOptions },
+    onChange: handleCheckBoxChangeOk,
+  });
+
+  Object.assign(checkBoxDataPropsRef, {
+    current: checkBoxDataProps,
   });
 
   const [filterData, filterComponentProps] = useIssueFilterForm({
@@ -176,7 +203,7 @@ const ExportIssue: React.FC = () => {
 
   const handleSaveTemplate = useCallback(() => {
     // @ts-ignore
-    openSaveTemplate({ action: 'agile_export_issue', onOk: templateSelectRef.current?.onOk, fieldCodes: JSON.stringify(uniq(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps))) });
+    openSaveTemplate({ action: 'agile_export_issue', onOk: templateSelectRef.current?.onOk, fieldCodes: JSON.stringify(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps)) });
   }, [checkBoxDataProps, store]);
 
   const selectTemplateOk = useCallback((fieldCodes) => {
@@ -186,7 +213,7 @@ const ExportIssue: React.FC = () => {
   }, [checkBoxDataProps]);
 
   useEffect(() => {
-    const templateList = templateSelectRef && templateSelectRef.current ? templateSelectRef.current.templateList : [];
+    const templateList = templateSelectRef?.current?.templateList || [];
     for (let i = 0; i < templateList.length; i += 1) {
       if (isEqual(JSON.parse(templateList[i].templateJson), store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps))) {
         setTemplateIsExist(true);
@@ -194,7 +221,7 @@ const ExportIssue: React.FC = () => {
       }
     }
     setTemplateIsExist(false);
-  }, [checkBoxDataProps, store]);
+  }, [checkBoxDataProps, store, templateSelectRef?.current?.templateList]);
 
   return (
     <div>

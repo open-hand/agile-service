@@ -46,7 +46,7 @@ class IssueExportStore {
 
   transformSystemFilter: (data: any) => object;
 
-  transformExportFieldCodes: (data: any, d2: any) => object;
+  transformExportFieldCodes: (data: any, d2: any) => string[];
 
   events: EventsProps = {};
 

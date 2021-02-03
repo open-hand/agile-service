@@ -67,10 +67,11 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
   const handleChange = (value: string[] | string) => {
     if (value) {
       Array.isArray(value) ? setCheckedOptions(value) : setCheckedOptions([value]);
+      onChange(Array.isArray(value) ? value : [value]);
     } else {
       setCheckedOptions([]);
+      onChange([]);
     }
-    onChange(value);
   };
   useEffect(() => {
     if (typeof (config?.defaultValue) !== 'undefined') {
