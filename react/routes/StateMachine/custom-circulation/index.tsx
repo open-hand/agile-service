@@ -336,7 +336,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     ) => item.id === selectedType)?.typeCode;
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
-      <Menu onClick={handleMenuClick.bind(this, record)}>
+      <Menu onClick={handleMenuClick.bind(this, record)} selectable={false}>
         <Menu.Item key="condition">流转条件</Menu.Item>
         {
           (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug' || selectedTypeCode === 'feature') && (
