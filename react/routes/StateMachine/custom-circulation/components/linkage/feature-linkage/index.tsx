@@ -121,7 +121,7 @@ const FeatureLinkage = ({
       <Loading loading={loading} />
       <div className={styles.tip}>{`当子项目的故事全部流转到指定状态时，关联的特性自动流转到${record.get('name')}状态。`}</div>
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, overflow: 'hidden' }}>
           <ProjectList value={currentProject} onChange={handleProjectChange} />
         </div>
         <div style={{ flex: 2 }}>
