@@ -7,11 +7,13 @@ import { issueTypeApi } from '@/api';
 import SelectIssueType from '@/components/select/select-issue-type';
 import { getSelectStyle } from '../utils';
 
-const list = [];
-function IssueTypeField({ field, value, onChange }) {
-  const [, setValue] = useState(0);
+function IssueTypeField({
+  field, value, onChange, projectId, applyType,
+}) {
   return (
     <SelectIssueType
+      projectId={projectId}
+      applyType={applyType}
       key={field.code}
       flat
       value={value || []}

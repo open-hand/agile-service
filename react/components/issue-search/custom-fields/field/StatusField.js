@@ -5,17 +5,19 @@ import SelectStatus from '@/components/select/select-status';
 import { statusApi } from '@/api';
 import { getSelectStyle } from '../utils';
 
-const issueStatus = [];
-function StatusField({ field, value, onChange }) {
+function StatusField({
+  field, value, onChange, projectId,
+}) {
   return (
     <SelectStatus
+      projectId={projectId}
       key={field.code}
       flat
       value={value || []}
       placeholder="状态"
       multiple
       maxTagCount={3}
-      request={() => statusApi.loadByProject('agile')}
+      request={() => statusApi.project(projectId).loadByProject('agile')}
       dropdownMatchSelectWidth={false}
       clearButton
       onChange={onChange}

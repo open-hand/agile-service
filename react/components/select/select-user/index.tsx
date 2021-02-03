@@ -33,6 +33,7 @@ export interface SelectUserProps extends Partial<SelectProps> {
   request?: SelectConfig<User>['request']
   afterLoad?: (users: User[]) => void
   flat?: boolean
+  projectId?: string
 }
 interface MemberLocalMapConfig {
   userMaps?: Map<string, User>,
@@ -146,7 +147,7 @@ function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStor
   return [dataProp, methods];
 }
 const SelectUser: React.FC<SelectUserProps> = forwardRef(({
-  selectedUser, extraOptions, dataRef, request, afterLoad, autoQueryConfig, flat, ...otherProps
+  selectedUser, extraOptions, dataRef, request, afterLoad, autoQueryConfig, flat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(autoQueryConfig?.selectedUserIds);
@@ -178,7 +179,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     textField: 'realName',
     valueField: 'id',
     request: request || (async ({ filter, page }) => {
-      const res = await userApi.getAllInProject(filter, page);
+      const res = await userApi.project(projectId).getAllInProject(filter, page, undefined, undefined);
       res.list = res.list.filter((user: User) => user.enabled);
       return res;
     }),
@@ -214,7 +215,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       }
       return newData;
     },
-  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish, JSON.stringify(selectedUserIds), extraOptions]);
+  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish, JSON.stringify(selectedUserIds), extraOptions, projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (

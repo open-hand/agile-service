@@ -73,7 +73,7 @@ class UserApi extends Api<UserApi> {
   getAllInProjectIncludesLeaveUsers(param?: string, page?: number, userId?: number) {
     return this.request({
       method: 'get',
-      url: `/agile/v1/projects/${getProjectId()}/issues/users`,
+      url: `/agile/v1/projects/${this.projectId}/issues/users`,
       params: {
         param,
         id: userId,

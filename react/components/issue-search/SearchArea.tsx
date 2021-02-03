@@ -24,9 +24,9 @@ const { Option, OptGroup } = Select;
 const SearchArea: React.FC = () => {
   const prefixCls = 'c7n-issue';
   const {
-    store, onClear, urlFilter, onClickSaveFilter,
+    store, onClear, urlFilter, onClickSaveFilter, projectId,
   } = useContext(IssueSearchContext);
-  const { data: quickFilters } = useQuickFilters();
+  const { data: quickFilters } = useQuickFilters({ projectId });
   const {
     isHasFilter, chosenFields, overflowLine, folded,
   } = store;

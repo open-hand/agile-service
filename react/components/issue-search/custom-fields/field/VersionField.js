@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import SelectVersion from '@/components/select/select-version';
 
-function VersionField({ field, value, onChange }) {
-  const [, setValue] = useState(0);
+function VersionField({
+  field, value, onChange, projectId, ...props
+}) {
   return (
     <SelectVersion
+      projectId={projectId}
       hasUnassign
       key={field.code}
       flat

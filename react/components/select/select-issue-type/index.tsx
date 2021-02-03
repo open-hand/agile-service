@@ -15,18 +15,19 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   valueField?: string
   flat?: boolean
-
+  projectId?:string
+  applyType?:string
 }
 
 const SelectIssueType: React.FC<Props> = forwardRef(({
   filterList = ['feature'], isProgram, valueField, dataRef, flat,
-  afterLoad, ...otherProps
+  afterLoad, projectId, applyType, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'issueType',
     textField: 'name',
     valueField: valueField || 'id',
-    request: () => issueTypeApi.loadAllWithStateMachineId(isProgram ? 'program' : undefined).then((issueTypes) => {
+    request: () => issueTypeApi.project(projectId).loadAllWithStateMachineId(applyType ?? isProgram ? 'program' : undefined).then((issueTypes) => {
       if (isProgram) {
         const featureTypes = [{
           id: 'business',

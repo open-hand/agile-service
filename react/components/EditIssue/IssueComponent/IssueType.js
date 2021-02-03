@@ -65,8 +65,8 @@ const IssueType = observer(({
   const issue = store.getIssue;
   const { isInProgram } = useIsInProgram();
   const { issueTypeVO = {}, featureVO = {}, subIssueVOList = [] } = issue;
-  const { typeCode } = issueTypeVO;
-  const { stateMachineId } = find(issueTypeData, { typeCode }) || {};
+  const { typeCode, id } = issueTypeVO;
+  const { stateMachineId } = find(issueTypeData, { id }) || {};
   const { featureType } = featureVO || {};
   let currentIssueType = issueTypeVO;
   if (typeCode === 'feature') {

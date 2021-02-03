@@ -6,11 +6,12 @@ import { configTheme } from '@/utils/common';
 import SelectLabel from '@/components/select/select-label';
 import { getSelectStyle } from '../utils';
 
-const list = [];
-function LabelField({ field, value, onChange }) {
-  const [, setValue] = useState(0);
+function LabelField({
+  field, value, onChange, projectId,
+}) {
   return (
     <SelectLabel
+      projectId={projectId}
       key={field.code}
       flat
       value={value || []}

@@ -25,7 +25,7 @@ import IssueSearchContext from '../context';
 import EnvironmentField from './field/EnvironmentField';
 
 function CustomField({ field }) {
-  const { store } = useContext(IssueSearchContext);
+  const { store, projectId, applyType } = useContext(IssueSearchContext);
   const { chosenFields } = store;
   const { fieldType } = field;
   const value = chosenFields.get(field.code) ? toJS(chosenFields.get(field.code).value) : undefined;
@@ -37,6 +37,8 @@ function CustomField({ field }) {
     case 'issueTypeId':
       return (
         <IssueTypeField
+          projectId={projectId}
+          applyType={applyType}
           field={field}
           value={value}
           onChange={handleChange}
@@ -45,6 +47,7 @@ function CustomField({ field }) {
     case 'statusId':
       return (
         <StatusField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
@@ -53,24 +56,27 @@ function CustomField({ field }) {
     case 'assigneeId':
       return (
         <MemberField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
-          request={({ filter, page }) => userApi.getAllInProjectIncludesLeaveUsers(filter, page)}
+          request={({ filter, page }) => userApi.project(projectId).getAllInProjectIncludesLeaveUsers(filter, page)}
         />
       );
     case 'reporterIds':
       return (
         <MemberField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
-          request={({ filter, page }) => commonApi.getIssueReports(page, filter, undefined)}
+          request={({ filter, page }) => commonApi.project(projectId).getIssueReports(page, filter, undefined)}
         />
       );
     case 'sprint':
       return (
         <SprintField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
@@ -79,6 +85,7 @@ function CustomField({ field }) {
     case 'component':
       return (
         <ComponentField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
@@ -87,6 +94,7 @@ function CustomField({ field }) {
     case 'label':
       return (
         <LabelField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
@@ -95,6 +103,7 @@ function CustomField({ field }) {
     case 'priorityId':
       return (
         <PriorityField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
@@ -103,6 +112,7 @@ function CustomField({ field }) {
     case 'version':
       return (
         <VersionField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
@@ -111,6 +121,7 @@ function CustomField({ field }) {
     case 'epic':
       return (
         <EpicField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
@@ -119,6 +130,7 @@ function CustomField({ field }) {
     case 'feature':
       return (
         <FeatureField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
@@ -174,10 +186,11 @@ function CustomField({ field }) {
     case 'member':
       return (
         <MemberField
+          projectId={projectId}
           field={field}
           value={value}
           onChange={handleChange}
-          request={({ filter, page }) => userApi.getAllInProject(filter, page).then((UserData) => ({ ...UserData, list: UserData.list.filter((user) => user.enabled) }))}
+          request={({ filter, page }) => userApi.project(projectId).getAllInProject(filter, page).then((UserData) => ({ ...UserData, list: UserData.list.filter((user) => user.enabled) }))}
         />
       );
     case 'number':

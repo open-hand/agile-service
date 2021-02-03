@@ -4,7 +4,7 @@ import { Select } from 'choerodon-ui';
 import SelectMember from '@/components/select/select-user';
 
 function MemberField({
-  field, value, onChange, request,
+  field, value, onChange, request, projectId,
 }) {
   const { code, name } = field;
   const [, setValue] = useState(0);
@@ -13,6 +13,7 @@ function MemberField({
   const defaultValue = useMemo(() => value, []);
   return (
     <SelectMember
+      projectId={projectId}
       key={code}
       flat
       value={value || []}

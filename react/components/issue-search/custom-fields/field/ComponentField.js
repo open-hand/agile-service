@@ -4,11 +4,12 @@ import { unionBy } from 'lodash';
 import { Select } from 'choerodon-ui';
 import SelectComponent from '@/components/select/select-component';
 
-const { Option } = Select;
-function ComponentField({ field, value, onChange }) {
-  const [, setValue] = useState(0);
+function ComponentField({
+  field, value, onChange, projectId,
+}) {
   return (
     <SelectComponent
+      projectId={projectId}
       key={field.code}
       flat
       value={value || []}

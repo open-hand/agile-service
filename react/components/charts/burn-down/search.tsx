@@ -52,6 +52,7 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
   onEmpty,
 }) => {
   const issueSearchStore = useMemo(() => new IssueSearchStore({
+    projectId,
     transformFilter,
     defaultSearchVO: searchVO,
     // @ts-ignore
@@ -122,6 +123,8 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
         显示非工作日
       </CheckBox>
       <IssueSearch
+        projectId={projectId}
+        applyType="agile"
         store={issueSearchStore}
         onClear={() => {
           const newSearchVO = issueSearchStore.getCustomFieldFilters();
