@@ -69,6 +69,9 @@ function EditIssue() {
 
     idRef.current = id;
     setIssueLoading(true);
+    if (paramIssueId !== currentIssueId) {
+      store.setIssue({});
+    }
     try {
       // 1. 加载详情
       let issue = await (programId

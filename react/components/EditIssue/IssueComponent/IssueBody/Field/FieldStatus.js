@@ -105,14 +105,14 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
             onSubmit={this.updateIssueStatus}
             initValue={statusId}
             submitTrigger={['blur', 'change']}
-            editor={() => (issueId === currentIssueId ? (
+            editor={() => (
               <SelectStatus
                 key={`edit-issue-select-status-statusId-${statusId}`}
                 statusArgs={{
                   statusId, issueId, typeId, projectId, applyType, name,
                 }}
               />
-            ) : <span />)}
+            )}
           >
             {
               statusId ? (
