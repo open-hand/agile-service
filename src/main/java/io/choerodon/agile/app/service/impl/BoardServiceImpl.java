@@ -505,7 +505,11 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public IssueMoveVO move(Long projectId, Long issueId, Long transformId, IssueMoveVO issueMoveVO, Boolean isDemo) {
         //执行状态机转换
-        Long preStatusId = issueMapper.selectByPrimaryKey(issueId).getStatusId();
+        IssueDTO preIssueDTO = issueMapper.selectByPrimaryKey(issueId);
+        if (preIssueDTO == null) {
+            throw new CommonException("error.issue.notFound");
+        }
+        Long preStatusId = preIssueDTO.getStatusId();
         Long nowStatusId = issueMoveVO.getStatusId();
         if (Boolean.TRUE.equals(isDemo)) {
             stateMachineClientService.executeTransformForDemo(projectId, issueId, transformId, issueMoveVO.getObjectVersionNumber(),
