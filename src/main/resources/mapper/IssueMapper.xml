@@ -453,7 +453,7 @@
                      close=")">
                 #{issueId}
             </foreach>
-            <if test="withChildren">
+            <if test="withChildren or childrenIds.size > 0">
                 or (
                 aii.parent_issue_id in
                 <foreach collection="issueIds" item="issueId" open="(" separator=","
