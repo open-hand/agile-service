@@ -47,7 +47,9 @@ interface Props {
   checkOptions: IFieldOption[]
   templateSelectRef: React.MutableRefObject<{
     onOk: (template: ITemplate) => Promise<void>,
-    templateList: ITemplate[]
+    templateList: ITemplate[],
+    setTemplate: (template: ITemplate | undefined) => void
+    templateFirstLoaded: boolean,
   } | undefined>
   selectTemplateOk: (codes: string[]) => void
 }
@@ -55,6 +57,7 @@ const TemplateSelect: React.FC<Props> = (props) => {
   const { action, templateSelectRef, selectTemplateOk } = props;
   const [templateList, setTemplateList] = useState<ITemplate[]>([]);
   const [selected, setSelected] = useState<ITemplate | undefined>();
+  const [firstLoaded, setFirstLoaded] = useState<boolean>(false);
 
   const [hidden, setHidden] = useState(true);
 
@@ -68,7 +71,11 @@ const TemplateSelect: React.FC<Props> = (props) => {
   }), [action]);
 
   useEffect(() => {
-    getTemplates();
+    const loadTemplates = async () => {
+      await getTemplates();
+      setFirstLoaded(true);
+    };
+    loadTemplates();
   }, [getTemplates]);
 
   const handleCreateOk = useCallback(async (template) => {
@@ -79,22 +86,25 @@ const TemplateSelect: React.FC<Props> = (props) => {
   useImperativeHandle(templateSelectRef, () => ({
     onOk: handleCreateOk,
     templateList,
+    setTemplate: setSelected,
+    templateFirstLoaded: firstLoaded,
   }));
 
-  const handleEditOk = useCallback((template) => {
+  const handleEditOk = useCallback(async (template) => {
+    await getTemplates();
     if (selected?.id === template.id) {
       setSelected(template);
       selectTemplateOk(JSON.parse(template.templateJson));
     }
-    getTemplates();
   }, [getTemplates, selectTemplateOk, selected?.id]);
 
-  const handleDeleteOk = useCallback((id) => {
+  const handleDeleteOk = useCallback(async (id) => {
+    await getTemplates();
     if (selected?.id === id) {
       setSelected(undefined);
+      selectTemplateOk(JSON.parse(selected?.templateJson || JSON.stringify([]))); // 为了使重新判断模板是否存在
     }
-    getTemplates();
-  }, [getTemplates, selected?.id]);
+  }, [getTemplates, selectTemplateOk, selected?.id, selected?.templateJson]);
 
   return (
     <div className={styles.template_select}>

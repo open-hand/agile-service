@@ -77,7 +77,7 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
   };
 }
 
-const getExportFieldCodes = (data: Array<any>) => {
+const getExportFieldCodes = (data: Array<any>): string[] => {
   const fieldTransform = {
     issueNum: 'issueNum',
     issueId: 'summary',

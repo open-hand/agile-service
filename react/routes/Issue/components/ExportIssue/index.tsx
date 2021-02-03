@@ -33,8 +33,8 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     },
     dataSetSystemFields: getFilterFormSystemFields(),
     transformSystemFilter: getTransformSystemFilter,
-    transformExportFieldCodes: (data, { dataSet }) => {
-      data.push(...(dataSet.current?.get('required-option') || []));
+    transformExportFieldCodes: (data, { dataSet }): string[] => {
+      data.push(...(dataSet?.current?.get('required-option') || []));
       return getExportFieldCodes(uniq(data));
     },
     events: {
