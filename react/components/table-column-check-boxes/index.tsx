@@ -50,7 +50,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
       newOptions = config.events.initOptions({ options: newOptions, checkedOptions, dataSet: form.dataSet }) || newOptions;
     }
     setOptions(newOptions || []);
-  }, [config?.options]);
+  }, [checkedOptions, config?.events, config?.options, form.dataSet]);
   const checkAll = () => {
     const newCheckedOptions = options?.map((option) => option.value) || [];
     form.dataSet.current?.set(name, newCheckedOptions);
@@ -121,6 +121,7 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
     set(formProps, 'dataSet', newDataSet);
     return newDataSet;
   }, [defaultValue, formProps, name, propsDataSet]);
+
   return (
     <Form dataSet={dataSet} {...formProps}>
       <div>

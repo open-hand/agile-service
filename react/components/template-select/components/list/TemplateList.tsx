@@ -15,26 +15,27 @@ interface Props {
   templateList: ITemplate[]
   setSelected: Function
   templateItemNameCls: string
+  onEdit: (template: ITemplate) => void
+  onDelete: (id: string) => void
 }
 
 const TemplateList: React.FC<Props> = ({
-  action, checkOptions, templateList, setSelected, templateItemNameCls,
+  action, checkOptions, templateList, setSelected, templateItemNameCls, onEdit, onDelete,
 }) => {
-  const { isProgram } = useIsProgram();
-  console.log('templateList:');
-  console.log(templateList);
-
   const handleSelect = useCallback((template) => {
     setSelected(template);
   }, [setSelected]);
 
   const handleClickEdit = useCallback(({ template }) => {
-    openEditTemplate({ template, checkOptions, action });
-  }, [action, checkOptions]);
+    openEditTemplate({
+      template, checkOptions, action, onEdit,
+    });
+  }, [action, checkOptions, onEdit]);
 
   const handleClickDelete = useCallback(async (template) => {
     await templateApi.delete(template.id);
-  }, []);
+    onDelete(template.id);
+  }, [onDelete]);
 
   return (
     <div className={styles.template_list}>
@@ -43,7 +44,7 @@ const TemplateList: React.FC<Props> = ({
           <>
             {
             templateList.map((template) => (
-              <div className={styles.template_item}>
+              <div className={styles.template_item} key={template.id}>
                 <span className={classnames(styles.template_item_name, templateItemNameCls)} role="none" onClick={() => handleSelect(template)}>{template.name}</span>
                 <div className={styles.template_item_action}>
                   <Tooltip title="修改">
@@ -74,7 +75,7 @@ const TemplateList: React.FC<Props> = ({
             ))
           }
           </>
-        ) : '暂无模板'
+        ) : <div className={styles.hasNoTemplate}>暂无模板</div>
       }
     </div>
   );

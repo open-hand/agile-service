@@ -18,6 +18,7 @@ class TemplateApi extends Api<TemplateApi> {
       url: `${this.prefix}/personal_template/user/${userId}`,
       params: {
         action,
+        type: 'excel',
       },
     });
   }
@@ -54,6 +55,7 @@ class TemplateApi extends Api<TemplateApi> {
         name,
         userId,
         action,
+        type: 'excel',
       },
     });
   }

@@ -1,7 +1,6 @@
 import React, {
-  useState, useEffect, useCallback, memo, ReactElement, useMemo,
+  useState, useEffect, useCallback, memo, ReactElement, useMemo, useRef,
 } from 'react';
-import { observer } from 'mobx-react-lite';
 import {
   Modal, TextField, Form, Button, DataSet,
 } from 'choerodon-ui/pro';
@@ -9,9 +8,10 @@ import { Choerodon } from '@choerodon/boot';
 import TableColumnCheckBoxes, { useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
 import { IModalProps } from '@/common/types';
 import { TemplateAction, templateApi } from '@/api';
-import { getExportFieldCodes } from '@/routes/Issue/components/ExportIssue/utils';
+import { getExportFieldCodes, getReverseExportFieldCodes } from '@/routes/Issue/components/ExportIssue/utils';
 import classnames from 'classnames';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { uniq } from 'lodash';
 import styles from './EditTemplate.less';
 
 interface FormPartProps {
@@ -57,6 +57,8 @@ const FormPart: React.FC<FormPartProps> = memo((props) => {
 export interface ITemplate {
   id: string
   name: string
+  objectVersionNumber: number,
+  templateJson: string
 }
 
 export interface IFieldOption {
@@ -72,25 +74,26 @@ interface Props {
   template: ITemplate
   modal?: IModalProps
   checkOptions: IFieldOption[]
+  onEdit: (template: ITemplate) => void
 }
 
 const EditTemplate: React.FC<Props> = ({
-  modal, template, checkOptions, action,
+  modal, template, checkOptions, action, onEdit,
 }) => {
-  const [templateInfo, setTemplateInfo] = useState({});
+  const templateFieldsRef = useRef();
 
   useEffect(() => {
-    templateApi.getTemplate(template.id).then((res: any) => {
-      setTemplateInfo(res);
+    Object.assign(templateFieldsRef, {
+      current: getReverseExportFieldCodes(JSON.parse(template.templateJson)),
     });
-  }, [template.id]);
+  }, [template.templateJson]);
 
   const checkName = useCallback(async (value, name, record) => {
     if (value === template.name) {
       return true;
     }
     const res = await templateApi.checkName(value, action);
-    if (res) {
+    if (!res) {
       return true;
     }
     return '模板名称重复';
@@ -122,7 +125,7 @@ const EditTemplate: React.FC<Props> = ({
     name: 'templateCodes',
     options: checkOptions,
     // @ts-ignore
-    defaultValue: templateInfo?.templateJson || [],
+    defaultValue: templateFieldsRef?.current,
     events: { initOptions: defaultInitOptions },
   });
 
@@ -138,20 +141,20 @@ const EditTemplate: React.FC<Props> = ({
     }
     const templateName = templateDataSet.current?.get('templateName');
     const fieldCodes = transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
-    console.log(templateName, fieldCodes);
     if (checkBoxDataProps.checkedOptions.length === 0) {
       Choerodon.prompt('请至少选择一个字段');
       return false;
     }
-
     const data = {
-      ...templateInfo,
+      ...template,
       name: templateName,
-      templateJson: fieldCodes,
+      templateJson: JSON.stringify(uniq(fieldCodes)),
     };
-    templateApi.edit(template.id, data);
+    const newTemplate: ITemplate = await templateApi.edit(template.id, data);
+    onEdit(newTemplate);
+    modal?.close();
     return false;
-  }, [checkBoxDataProps, template.id, templateDataSet, templateInfo, transformExportFieldCodes]);
+  }, [checkBoxDataProps, modal, onEdit, template, templateDataSet, transformExportFieldCodes]);
 
   useEffect(() => {
   modal?.handleOk(handleOk);
@@ -168,7 +171,7 @@ const EditTemplate: React.FC<Props> = ({
 
   return (
     <div className={styles.template_edit}>
-      <FormPart title="筛选问题">
+      <FormPart title="修改名称">
         <div className={styles.template_edit_name}>
           <Form dataSet={templateDataSet}>
             <TextField name="templateName" />
@@ -176,7 +179,7 @@ const EditTemplate: React.FC<Props> = ({
         </div>
       </FormPart>
 
-      <FormPart title="筛选问题" btnOnClick={handleChangeFieldStatus}>
+      <FormPart title="修改模板选择字段" btnOnClick={handleChangeFieldStatus}>
         <div className={styles.template_edit_fields}>
           <TableColumnCheckBoxes {...checkBoxComponentProps} />
         </div>
@@ -184,8 +187,6 @@ const EditTemplate: React.FC<Props> = ({
     </div>
   );
 };
-
-const ObserverEditTemplate = observer(EditTemplate);
 
 const openEditTemplate = (props: Props) => {
   Modal.open({
@@ -196,8 +197,22 @@ const openEditTemplate = (props: Props) => {
       width: 380,
     },
     className: styles.editTemplateModal,
-    children: <ObserverEditTemplate {...props} />,
+    children: <EditTemplate {...props} />,
   });
+
+  // Modal.open({
+  //   drawer: true,
+  //   key: Modal.key(),
+  //   title: '编辑模板',
+  //   style: {
+  //     width: 380,
+  //   },
+  //   className: styles.editTemplateModal,
+  //   children: (
+  //     <span>childred</span>
+  //   ),
+  //   // children: <ObserverEditTemplate {...props} />,
+  // });
 };
 
 export default openEditTemplate;

@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/tabindex-no-positive */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 import React, {
-  useState, useRef, useCallback, useEffect,
+  useState, useRef, useCallback, useEffect, useImperativeHandle,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Icon } from 'choerodon-ui';
@@ -45,23 +45,11 @@ function useClickOut(onClickOut) {
 interface Props {
   action: TemplateAction
   checkOptions: IFieldOption[]
+  templateSelectRef: React.MutableRefObject<{onOk: (template: ITemplate) => void} | undefined>
 }
 const TemplateSelect: React.FC<Props> = (props) => {
-  const { action } = props;
-  const { isProgram } = useIsProgram();
-  console.log('isProgram：');
-  console.log(isProgram);
-
-  const [templateList, setTemplateList] = useState<ITemplate[]>([{
-    id: '1',
-    name: '模板1模板1模板1模板1',
-  }, {
-    id: '2',
-    name: '模板2',
-  }, {
-    id: '3',
-    name: '模板3',
-  }]);
+  const { action, templateSelectRef } = props;
+  const [templateList, setTemplateList] = useState<ITemplate[]>([]);
   const [selected, setSelected] = useState<ITemplate | undefined>();
 
   const [hidden, setHidden] = useState(true);
@@ -71,11 +59,36 @@ const TemplateSelect: React.FC<Props> = (props) => {
   }, []);
   const ref = useClickOut(handleClickOut);
 
+  const getTemplates = useCallback(async () => templateApi.getList(action).then((res: ITemplate[]) => {
+    setTemplateList(res);
+  }), [action]);
+
   useEffect(() => {
-    templateApi.getList(action).then((res: ITemplate[]) => {
-      setTemplateList(res);
-    });
-  }, [action]);
+    getTemplates();
+  }, [getTemplates]);
+
+  const handleCreateOk = useCallback(async (template) => {
+    await getTemplates();
+    setSelected(template);
+  }, [getTemplates]);
+
+  useImperativeHandle(templateSelectRef, () => ({
+    onOk: handleCreateOk,
+  }));
+
+  const handleEditOk = useCallback((template) => {
+    if (selected?.id === template.id) {
+      setSelected(template);
+    }
+    getTemplates();
+  }, [getTemplates, selected?.id]);
+
+  const handleDeleteOk = useCallback((id) => {
+    if (selected?.id === id) {
+      setSelected(undefined);
+    }
+    getTemplates();
+  }, [getTemplates, selected?.id]);
 
   return (
     <div className={styles.template_select}>
@@ -92,7 +105,14 @@ const TemplateSelect: React.FC<Props> = (props) => {
               e.stopPropagation();
             }}
           >
-            <TemplateList {...props} templateList={templateList} setSelected={setSelected} templateItemNameCls={templateItemNameCls} />
+            <TemplateList
+              {...props}
+              templateList={templateList}
+              setSelected={setSelected}
+              templateItemNameCls={templateItemNameCls}
+              onEdit={handleEditOk}
+              onDelete={handleDeleteOk}
+            />
           </div>
           )}
         trigger={['click'] as Action[]}

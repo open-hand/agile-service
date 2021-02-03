@@ -4,8 +4,7 @@ import { openExportIssueModal as originOpenExportIssueModal } from '@/components
 import IssueExportStore from '@/components/issue-export/stores/store';
 import { issueApi } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { omit, set } from 'lodash';
+import { set } from 'lodash';
 import { getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields } from './utils';
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,

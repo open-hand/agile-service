@@ -1,9 +1,9 @@
 import React, {
-  memo, ReactElement, useCallback, useEffect, useMemo, useState,
+  memo, ReactElement, useCallback, useEffect, useMemo, useState, useRef,
 } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import { find } from 'lodash';
+import { find, uniq } from 'lodash';
 import { Divider } from 'choerodon-ui';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
@@ -18,6 +18,7 @@ import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
 import TemplateSelect from '../template-select/TemplateSelect';
 import openSaveTemplate from '../template-select/components/save/SaveTemplate';
+import { ITemplate } from '../template-select/components/edit/EditTemplate';
 
 interface FormPartProps {
   title: string | ReactElement,
@@ -69,6 +70,9 @@ const ExportIssue: React.FC = () => {
   const {
     prefixCls, checkOptions: propsCheckOptions, store, fields, modal,
   } = useExportIssueStore();
+  const templateSelectRef = useRef<{
+    onOk:(template: ITemplate) => void,
+      }>();
   // 添加筛选配置 数据
   const [choseDataProps, choseComponentProps] = useChoseField({
     fields,
@@ -165,6 +169,11 @@ const ExportIssue: React.FC = () => {
     return null;
   };
 
+  const handleSaveTemplate = useCallback(() => {
+    // @ts-ignore
+    openSaveTemplate({ action: 'agile_export_issue', onOk: templateSelectRef.current?.onOk, fieldCodes: JSON.stringify(uniq(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps))) });
+  }, [checkBoxDataProps, store]);
+
   return (
     <div>
       <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
@@ -177,6 +186,7 @@ const ExportIssue: React.FC = () => {
       <Divider className={`${prefixCls}-horizontal`} />
       <FormPart title="选择常用模板" className={`${prefixCls}-form-template`}>
         <TemplateSelect
+          templateSelectRef={templateSelectRef}
           action="agile_export_issue"
           // @ts-ignore
           checkOptions={checkOptions}
@@ -211,14 +221,14 @@ const ExportIssue: React.FC = () => {
         >
           导出问题
         </Button>
-        {/* <Button
+        <Button
           icon="unarchive"
           funcType={'flat' as FuncType}
-          onClick={openSaveTemplate}
-          color="primary"
+          onClick={handleSaveTemplate}
+          color={'primary' as ButtonColor}
         >
           保存为常用模板
-        </Button> */}
+        </Button>
       </div>
     </div>
   );
