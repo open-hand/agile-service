@@ -30,12 +30,14 @@ const ReportPage: React.FC<Props> = ({ store, edit, preview: forcePreview }) => 
     <Dropdown
       trigger={['click' as Action]}
       overlay={(
-        <Menu onClick={({ key }) => {
-          openAddModal({
-            type: key as IReportContentType,
-            store,
-          });
-        }}
+        <Menu
+          onClick={({ key }) => {
+            openAddModal({
+              type: key as IReportContentType,
+              store,
+            });
+          }}
+          selectable={false}
         >
           <Menu.Item key="text">文本</Menu.Item>
           {!isProgram && [

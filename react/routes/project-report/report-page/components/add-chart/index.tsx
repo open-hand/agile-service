@@ -9,6 +9,7 @@ import SelectTeam from '@/components/select/select-team';
 import useIsProgram from '@/hooks/useIsProgram';
 import { groupBy } from 'lodash';
 import OptGroup from 'choerodon-ui/pro/lib/option/OptGroup';
+import useHasDevops from '@/hooks/useHasDevops';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';
@@ -56,6 +57,7 @@ export interface ChartRefProps {
 }
 const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
+  const hasDevops = useHasDevops();
   const { isProgram } = useIsProgram();
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
@@ -105,7 +107,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const subProjectId = dataSet.current?.get('subProjectId');
   const ChartComponent = optionalCharts.get(chart)?.component;
   const isSubProjectChart = isProgram && [...defaultCharts.keys()].includes(chart);
-  const optionGroups = groupBy([...optionalCharts.entries()].map(([key, { name, group }]) => ({ key, name, group })), 'group');
+  const optionGroups = groupBy([...optionalCharts.entries()].filter((([key, { group }]) => (hasDevops ? true : group !== '质量'))).map(([key, { name, group }]) => ({ key, name, group })), 'group');
   return (
     <>
       <Form dataSet={dataSet} style={{ width: 512 }}>
