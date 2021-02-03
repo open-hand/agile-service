@@ -208,12 +208,25 @@
               WHEN ai.assignee_id IS NULL THEN 0 ELSE ai.assignee_id
             END AS assignee_id,
             ai.story_points,
-            ai.remaining_time
+            (ai.remaining_time + IFNULL(wl.work_time,0)) as remaining_time
             FROM
             agile_issue ai,
-            agile_issue_sprint_rel aisr
+            agile_issue_sprint_rel aisr,
+            (
+                select
+                    wl1.issue_id,
+                    SUM(wl1.work_time) as work_time
+                from agile_work_log wl1
+                where
+                    wl1.issue_id in
+                    <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                        #{issueId}
+                    </foreach>
+                group by wl1.issue_id
+            ) wl
             WHERE
             aisr.issue_id = ai.issue_id
+            AND ai.issue_id = wl.issue_id
             AND aisr.sprint_id in
             <foreach collection="sprintIds" item="sprintId" open="(" separator="," close=")">
                 #{sprintId}
@@ -358,12 +371,25 @@
                   ai.assignee_id IS NULL THEN 0 ELSE ai.assignee_id
                 END AS assignee_id,
                 ai.story_points,
-                ai.remaining_time
+                (ai.remaining_time + IFNULL(wl.work_time,0)) as remaining_time
             FROM
                 agile_issue ai,
-                agile_issue_sprint_rel aisr
+                agile_issue_sprint_rel aisr,
+                (
+                    select
+                        wl1.issue_id,
+                        SUM(wl1.work_time) as work_time
+                        from agile_work_log wl1
+                    where
+                    wl1.issue_id in
+                    <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                        #{issueId}
+                    </foreach>
+                    group by wl1.issue_id
+                ) wl
             WHERE
                 aisr.issue_id = ai.issue_id
+                AND ai.issue_id = wl.issue_id
                 AND aisr.project_id = #{projectId}
                 AND aisr.sprint_id = #{sprintId}
                 AND ai.issue_id in
