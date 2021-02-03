@@ -82,10 +82,26 @@ const SearchArea: React.FC = () => {
       }
     }
   };
+  const handleClearFilter = (v?: LabeledValue) => {
+    let content: string[] = [];
+
+    if (hasSummaryField) {
+      content = store.getFilterValueByCode('contents');
+    }
+    const sameFilter = findSameFilter();
+    const isSelectedOption = sameFilter && (!v || v.key.split('|')[1] === sameFilter.filterId);
+    if (content[0] && content[0] !== '' && !isSelectedOption) {
+      onClear();
+      store.clearAllFilter();
+      handleInputChange(content[0]);
+    } else {
+      reset();
+    }
+  };
   const handleDeselect = (v: LabeledValue) => {
     // clear
     if (!v) {
-      reset();
+      handleClearFilter(v);
       return;
     }
     const { key } = v;
@@ -182,7 +198,7 @@ const SearchArea: React.FC = () => {
                 onSelect={handleSelect}
                 onDeselect={handleDeselect}
                 onClear={() => {
-                  reset();
+                  handleClearFilter();
                 }}
                 value={myFilterSelectValue}
               >
