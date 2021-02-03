@@ -27,7 +27,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
     name: 'issueType',
     textField: 'name',
     valueField: valueField || 'id',
-    request: () => issueTypeApi.loadAllWithStateMachineId(applyType ?? isProgram ? 'program' : undefined, projectId).then((issueTypes) => {
+    request: () => issueTypeApi.loadAllWithStateMachineId(applyType ?? (isProgram ? 'program' : undefined), projectId).then((issueTypes) => {
       if (isProgram) {
         const featureTypes = [{
           id: 'business',
