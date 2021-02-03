@@ -16,7 +16,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ value, onChange }) => {
     <div className={styles['project-list']}>
       <TextField
         value={search}
-        onChange={setSearch}
+        onChange={(v) => setSearch(v ?? '')}
         prefix={<Icon type="search" style={{ color: 'rgba(0, 0, 0, 0.45)', marginLeft: 2 }} />}
         placeholder="请输入搜索内容"
         style={{ display: 'block', margin: '13px 7px' }}
