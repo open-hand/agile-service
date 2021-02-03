@@ -96,7 +96,7 @@ class Commits extends Component {
       {
         title: '分支',
         dataIndex: 'branchName',
-        width: 200,
+        width: 150,
         fixed: 'left',
         render: (branchName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
@@ -115,6 +115,7 @@ class Commits extends Component {
         title: '',
         dataIndex: 'id',
         width: 50,
+        fixed: 'left',
         render: (id, record) => (
           <Dropdown
             overlay={(
@@ -137,7 +138,7 @@ class Commits extends Component {
       {
         title: '应用名称',
         dataIndex: 'appServiceName',
-        width: 200,
+        width: 150,
         render: (appName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={appName}>
@@ -154,7 +155,7 @@ class Commits extends Component {
       {
         title: '所属项目',
         dataIndex: 'projectName',
-        width: 200,
+        width: 150,
         render: (projectName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={projectName}>
@@ -171,7 +172,7 @@ class Commits extends Component {
       {
         title: '来源分支',
         dataIndex: 'originBranch',
-        width: 200,
+        width: 150,
         render: (originBranch) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={originBranch}>
@@ -188,7 +189,7 @@ class Commits extends Component {
       {
         title: '提交数',
         dataIndex: 'appId',
-        width: 200,
+        width: 60,
         render: (appId, record) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={status}>
@@ -205,7 +206,7 @@ class Commits extends Component {
       {
         title: '状态',
         dataIndex: 'status',
-        width: 200,
+        width: 80,
         render: (status, record) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Popover

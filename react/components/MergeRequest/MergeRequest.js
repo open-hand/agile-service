@@ -56,7 +56,7 @@ class MergeRequest extends Component {
       {
         title: '名称',
         dataIndex: 'title',
-        width: 200,
+        width: 180,
         fixed: 'left',
         render: (title, record) => (
           <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
@@ -100,18 +100,18 @@ class MergeRequest extends Component {
       {
         title: '分支',
         dataIndex: 'sourceBranch',
-        width: 350,
+        width: 250,
         render: (sourceBranch, record) => (
           <div style={{
-            display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', justifyContent: 'space-around',
+            display: 'flex', alignItems: 'center', whiteSpace: 'nowrap',
           }}
           >
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100 }}>
               <Icon type="branch" />
               {sourceBranch}
             </div>
             <Icon type="trending_flat" />
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100 }}>
               <Icon type="branch" />
               {record.sourceBranch}
             </div>
