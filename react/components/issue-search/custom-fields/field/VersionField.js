@@ -3,10 +3,11 @@ import { observer } from 'mobx-react-lite';
 import SelectVersion from '@/components/select/select-version';
 
 function VersionField({
-  field, value, onChange, ...props
+  field, value, onChange, projectId, ...props
 }) {
   return (
     <SelectVersion
+      projectId={projectId}
       hasUnassign
       key={field.code}
       flat
