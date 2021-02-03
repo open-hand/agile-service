@@ -408,11 +408,12 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   // @ts-ignore
   const renderStatusLinkageSetting = (statusLinkageVOS: IStatusLinkageVOS[], record) => {
-    const selectedTypeCode = find(issueTypes, (
+    const selectedIssueType = find(issueTypes, (
       item: IIssueType,
-    ) => item.id === selectedType)?.typeCode;
+    ) => item.id === selectedType);
+    const selectedTypeCode = selectedIssueType?.typeCode;
     if (statusLinkageVOS && statusLinkageVOS.length && (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug')) {
-      const prefixStr = `全部${selectedTypeCode === 'sub_task' ? '子任务' : '子缺陷'}都在【${record.get('name')}】状态，则将`;
+      const prefixStr = `全部${selectedIssueType?.name}都在【${record.get('name')}】状态，则将`;
       const parentDes = (
         statusLinkageVOS.map((linkageSetting) => {
           const { statusVO, issueTypeVO } = linkageSetting;
