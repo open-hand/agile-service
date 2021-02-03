@@ -371,7 +371,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
                                                    @Param("childrenIds") Set<Long> childrenIds,
-                                                   @Param("isExcelExported") boolean isExcelExported);
+                                                   @Param("isExcelExported") boolean isExcelExported,
+                                                   @Param("withChildren") boolean withChildren);
 
     List<IssueDTO> selectWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
                                            @Param("childrenIds") Set<Long> childrenIds);
