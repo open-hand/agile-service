@@ -35,7 +35,8 @@ const CodeQuality: React.FC<CodeQualityProps> = ({
 }) => {
   const getFontSize = useFontSize();
   const FontSize = getFontSize(12);
-  const { series = [], legend = [] } = data;
+  const series = useMemo(() => data.series ?? [], [data.series]);
+  const legend = data.legend ?? [];
   const total: number = useMemo(() => series.reduce((result, current) => result + current.value, 0), [series]);
   const percents = useMemo(() => series.map((item) => toFixed((item.value / total) * 100, 2)), [series, total]);
   const getOption = (): EChartOption => ({
