@@ -202,7 +202,7 @@ const ExportIssue: React.FC = () => {
 
   const handleSaveTemplate = useCallback(() => {
     // @ts-ignore
-    openSaveTemplate({ action, onOk: templateSelectRef.current?.onOk, fieldCodes: JSON.stringify(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps)) });
+    openSaveTemplate({ action, onOk: templateSelectRef.current?.onOk, templateJson: JSON.stringify(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps)) });
   }, [action, checkBoxDataProps, store]);
 
   const selectTemplateOk = useCallback((fieldCodes) => {
