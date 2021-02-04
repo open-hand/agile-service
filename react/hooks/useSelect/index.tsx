@@ -82,7 +82,8 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   const request = usePersistFn(requestFn);
   const afterLoad = usePersistFn(afterLoadFn || noop);
   const renderer = useCallback(({ value, maxTagTextLength }) => {
-    const item = cacheRef.current?.get(value);
+    // 兼容primitiveValue为false
+    const item = value && typeof value === 'object' ? value : cacheRef.current?.get(value);
     if (item) {
       const result = optionRenderer(item);
       return maxTagTextLength

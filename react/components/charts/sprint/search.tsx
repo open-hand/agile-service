@@ -16,6 +16,7 @@ export interface SprintSearchProps {
   useCurrentSprint?: boolean
   setUseCurrentSprint: (useCurrentSprint: boolean) => void
   projectId?:string
+  onEmpty: () => void
 }
 const SprintSearch: React.FC<SprintSearchProps> = ({
   sprintId,
@@ -28,6 +29,7 @@ const SprintSearch: React.FC<SprintSearchProps> = ({
   useCurrentSprint,
   setUseCurrentSprint,
   projectId,
+  onEmpty,
 }) => (
   <div>
     <SelectSprint
@@ -37,12 +39,20 @@ const SprintSearch: React.FC<SprintSearchProps> = ({
       projectId={projectId}
       statusList={['started', 'closed']}
       currentSprintOption
+        // onOption={({ record }) => ({
+        //   disabled: record.get('sprintId') === '0' && !currentSprintId,
+        // })}
       afterLoad={(sprints) => {
+        const current = find(sprints, { statusCode: 'started' });
+        if (current) {
+          setCurrentSprintId(current.sprintId);
+        }
         if (useCurrentSprint && !currentSprintId) {
-          const current = find(sprints, { statusCode: 'started' });
           if (current) {
             setSprintId(current.sprintId);
-            setCurrentSprintId(current.sprintId);
+          } else {
+            setSprintId(undefined);
+            onEmpty();
           }
         } else if (!sprintId && sprints.length > 0) {
           setSprintId(sprints[0].sprintId);

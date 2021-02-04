@@ -8,7 +8,6 @@ import { transformFilter } from '@/routes/Issue/stores/utils';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { ISearchVO, ISprint } from '@/common/types';
-import { flattenObject } from '@/components/issue-search/utils';
 import { IBurndownChartType } from '.';
 
 const { Option } = Select;
@@ -59,7 +58,6 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
     getSystemFields: () => getSystemFields().filter((f) => !['contents', 'sprint', 'quickFilterIds'].includes(f.code)),
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), []);
-
   return (
     <div>
       <SelectSprint
@@ -69,15 +67,19 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
         projectId={projectId}
         statusList={['started', 'closed']}
         currentSprintOption
+        // onOption={({ record }) => ({
+        //   disabled: record.get('sprintId') === '0' && !currentSprintId,
+        // })}
         afterLoad={(sprints) => {
+          const current = find(sprints, { statusCode: 'started' });
+          if (current) {
+            setCurrentSprintId(current.sprintId);
+          }
           if (useCurrentSprint && !currentSprintId) {
-            const current = find(sprints, { statusCode: 'started' });
             if (current) {
               setSprintId(current.sprintId);
-              setCurrentSprintId(current.sprintId);
             } else {
               setSprintId(undefined);
-              setCurrentSprintId(undefined);
               onEmpty();
             }
           } else if (!sprintId && sprints.length > 0) {
