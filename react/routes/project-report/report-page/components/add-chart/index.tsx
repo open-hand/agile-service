@@ -7,7 +7,6 @@ import {
 import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import SelectTeam from '@/components/select/select-team';
-import { FieldIgnore } from 'choerodon-ui/pro/lib/data-set/enum';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';
@@ -49,6 +48,8 @@ export interface ChartRefProps {
   submit: () => Promise<ChartSearchVO>
 }
 const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
+  const initProject = useMemo(() => editData?.chartSearchVO.projectId, [editData?.chartSearchVO.projectId]);
+  const initChartCode = useMemo(() => editData?.chartCode, [editData?.chartCode]);
   const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
   const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
   const isProgram = type === 'program';
@@ -77,6 +78,9 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
     },
     ],
   }), [editData, isProgram]);
+  const projectChanged = dataSet.current?.get('subProjectId') !== initProject;
+  const codeChanged = dataSet.current?.get('chart') !== initChartCode;
+  const ignoreSearchVO = projectChanged || codeChanged;
   const handleSubmit = useCallback(async () => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();
@@ -100,6 +104,12 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const subProjectId = dataSet.current?.get('subProjectId');
   const ChartComponent = optionalCharts.get(chart)?.component;
   const isSubProjectChart = isProgram && [...defaultCharts.keys()].includes(chart);
+  const data = useMemo(() => (ignoreSearchVO ? {
+    ...editData,
+    chartSearchVO: {
+      projectId: dataSet.current?.get('subProjectId'),
+    },
+  } : editData), [dataSet, editData, ignoreSearchVO]);
   return (
     <>
       <Form dataSet={dataSet} style={{ width: 512 }}>
@@ -113,7 +123,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
         <ChartComponent
           key={subProjectId}
           innerRef={chartRef}
-          data={editData}
+          data={data}
           projectId={isProgram ? subProjectId : undefined}
         />
       ) : null}
