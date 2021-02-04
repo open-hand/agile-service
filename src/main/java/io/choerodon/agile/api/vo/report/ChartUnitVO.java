@@ -87,7 +87,9 @@ public class ChartUnitVO extends ReportUnitVO {
 
         switch (this.chartCode){
             case BURN_DOWN_REPORT:
-                Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
+                if (!Boolean.TRUE.equals(chartSearchVO.getCurrentSprint())) {
+                    Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
+                }
                 Assert.notNull(chartSearchVO.getType(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
             case CUMULATIVE_FLOW_DIAGRAM:
@@ -134,7 +136,9 @@ public class ChartUnitVO extends ReportUnitVO {
             case ISSUE_CHART:
             case SPRINT_STATISTICS_CHART:
             case ISSUE_COUNT_CHART:
-                Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
+                if (!Boolean.TRUE.equals(chartSearchVO.getCurrentSprint())) {
+                    Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
+                }
                 break;
             default:
                 break;
