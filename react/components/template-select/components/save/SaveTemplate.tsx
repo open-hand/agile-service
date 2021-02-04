@@ -14,14 +14,14 @@ import styles from './SaveTemplate.less';
 interface Props {
   modal?: IModalProps,
   onOk: (template: ITemplate) => void
-  fieldCodes: string[],
+  templateJson: string,
   action: TemplateAction
 }
 
 const { AppState } = stores;
 
 const SaveTemplate: React.FC<Props> = ({
-  modal, onOk, fieldCodes, action,
+  modal, onOk, templateJson, action,
 }) => {
   const checkName = useCallback(async (value: string) => {
     const data: boolean = await templateApi.checkName(value, action);
@@ -49,7 +49,7 @@ const SaveTemplate: React.FC<Props> = ({
     const value = dataSet.toData()[0] as any;
     const data = {
       name: value.filterName,
-      templateJson: fieldCodes,
+      templateJson,
       userId: AppState.userInfo.id,
       action,
       type: 'excel',
@@ -65,7 +65,7 @@ const SaveTemplate: React.FC<Props> = ({
       Choerodon.prompt('保存失败');
       return false;
     }
-  }, [action, dataSet, fieldCodes, onOk]);
+  }, [action, dataSet, templateJson, onOk]);
 
   useEffect(() => {
     modal?.handleOk(handleSubmit);

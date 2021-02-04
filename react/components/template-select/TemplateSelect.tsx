@@ -86,7 +86,8 @@ const TemplateSelect: React.FC<Props> = (props) => {
   const handleCreateOk = useCallback(async (template) => {
     await getTemplates();
     setSelected(template);
-  }, [getTemplates]);
+    selectTemplateOk(JSON.parse(template.templateJson));
+  }, [getTemplates, selectTemplateOk]);
 
   useImperativeHandle(templateSelectRef, () => ({
     onOk: handleCreateOk,

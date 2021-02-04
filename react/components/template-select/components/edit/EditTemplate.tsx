@@ -165,11 +165,6 @@ const EditTemplate: React.FC<Props> = ({
     return true;
   };
 
-  console.log('编辑的选中:');
-  console.log(checkBoxDataProps.checkedOptions);
-  console.log('编辑的选项:');
-  console.log(checkBoxDataProps.options);
-
   return (
     <div className={styles.template_edit}>
       <FormPart title="修改名称">
@@ -200,20 +195,6 @@ const openEditTemplate = (props: Props) => {
     className: styles.editTemplateModal,
     children: <EditTemplate {...props} />,
   });
-
-  // Modal.open({
-  //   drawer: true,
-  //   key: Modal.key(),
-  //   title: '编辑模板',
-  //   style: {
-  //     width: 380,
-  //   },
-  //   className: styles.editTemplateModal,
-  //   children: (
-  //     <span>childred</span>
-  //   ),
-  //   // children: <ObserverEditTemplate {...props} />,
-  // });
 };
 
 export default openEditTemplate;
