@@ -63,6 +63,7 @@ export interface ITemplate {
 export interface IFieldOption {
   label: string
   value: string
+  system: boolean
   disabled?: boolean,
   defaultChecked?: boolean,
   name?: string
@@ -76,16 +77,22 @@ interface Props {
   onEdit: (template: ITemplate) => void
   transformExportFieldCodes: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>
   reverseTransformExportFieldCodes: (data: string[]) => string[]
+  defaultInitCodes: string[]
 }
 
+export const transformTemplateJsonToArr = (templateJson: string) => {
+  const templateParse = JSON.parse(templateJson);
+  return Array.isArray(templateParse) ? templateParse : [...(templateParse.systemFields || []), ...(templateParse.customFields || [])];
+};
+
 const EditTemplate: React.FC<Props> = ({
-  modal, template, checkOptions, action, onEdit, transformExportFieldCodes, reverseTransformExportFieldCodes,
+  modal, template, checkOptions, action, onEdit, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
 }) => {
   const templateFieldsRef = useRef();
 
   useEffect(() => {
     Object.assign(templateFieldsRef, {
-      current: reverseTransformExportFieldCodes(JSON.parse(template.templateJson)),
+      current: reverseTransformExportFieldCodes(transformTemplateJsonToArr(template.templateJson)),
     });
   }, [reverseTransformExportFieldCodes, template.templateJson]);
 
@@ -118,8 +125,8 @@ const EditTemplate: React.FC<Props> = ({
 
   const defaultInitOptions = useCallback(({ dataSet }) => {
     dataSet.addField('required-option', { multiple: true });
-    dataSet.current?.set('required-option', ['issueTypeId', 'issueNum', 'issueId']);
-  }, []);
+    dataSet.current?.set('required-option', defaultInitCodes);
+  }, [defaultInitCodes]);
 
   // 选择字段框配置 数据
   const [checkBoxDataProps, checkBoxComponentProps] = useTableColumnCheckBoxes({
@@ -136,7 +143,16 @@ const EditTemplate: React.FC<Props> = ({
       return false;
     }
     const templateName = templateDataSet.current?.get('templateName');
-    const fieldCodes = transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
+    const fieldCodesArr = uniq(transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps));
+
+    const fieldCodesObj: {
+      systemFields: string[]
+      customFields: string[]
+    } = { systemFields: [], customFields: [] };
+
+    fieldCodesObj.systemFields = fieldCodesArr.filter((code) => checkOptions.find((item: any) => item.value === code && item.system));
+    fieldCodesObj.customFields = fieldCodesArr.filter((code) => checkOptions.find((item:any) => item.value === code && !item.system));
+
     if (checkBoxDataProps.checkedOptions.length === 0) {
       Choerodon.prompt('请至少选择一个字段');
       return false;
@@ -144,13 +160,13 @@ const EditTemplate: React.FC<Props> = ({
     const data = {
       ...template,
       name: templateName,
-      templateJson: JSON.stringify(uniq(fieldCodes)),
+      templateJson: action === 'agile_import_issue' || action === 'program_import_feature' ? JSON.stringify(fieldCodesObj) : JSON.stringify(fieldCodesArr),
     };
     const newTemplate: ITemplate = await templateApi.edit(template.id, data);
     onEdit(newTemplate);
     modal?.close();
     return false;
-  }, [checkBoxDataProps, modal, onEdit, template, templateDataSet, transformExportFieldCodes]);
+  }, [action, checkBoxDataProps, checkOptions, modal, onEdit, template, templateDataSet, transformExportFieldCodes]);
 
   useEffect(() => {
   modal?.handleOk(handleOk);

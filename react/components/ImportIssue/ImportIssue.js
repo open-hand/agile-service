@@ -327,13 +327,17 @@ class ImportIssue extends Component {
             checkOptions={allFields.map((item) => ({
               label: item.title,
               value: item.code,
-              disabled: includes(requiredFields, item.code),
-              defaultChecked: includes(requiredFields, item.code),
-              name: item.title,
+              system: item.system,
+              checkBoxProps: includes(requiredFields, item.code) ? {
+                disabled: includes(requiredFields, item.code),
+                defaultChecked: includes(requiredFields, item.code),
+                name: 'required-option',
+              } : undefined,
             }))}
             selectTemplateOk={this.selectTemplateOk}
             transformExportFieldCodes={(data) => data}
             reverseTransformExportFieldCodes={(data) => data}
+            defaultInitCodes={requiredFields}
           />
         </ImportIssueForm>
         <Divider />

@@ -222,7 +222,6 @@ const ExportIssue: React.FC = () => {
     setTemplateIsExist(false);
   }, [checkBoxDataProps, store, templateSelectRef?.current?.templateList]);
 
-  // console.log(templateSelectRef?.current?.templateList, store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps));
   return (
     <div>
       <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
@@ -245,6 +244,7 @@ const ExportIssue: React.FC = () => {
                 selectTemplateOk={selectTemplateOk}
                 transformExportFieldCodes={store.transformExportFieldCodes}
                 reverseTransformExportFieldCodes={store.reverseTransformExportFieldCodes}
+                defaultInitCodes={['issueTypeId', 'issueNum', 'issueId']}
               />
             </FormPart>
             <Divider className={`${prefixCls}-horizontal`} />
