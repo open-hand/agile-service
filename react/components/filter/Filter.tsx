@@ -242,7 +242,10 @@ const Filter: React.FC<FilterProps> = ({
         onChange={handleSelectChange}
         triggerElement={flat ? (
           <Button>
-            <span style={{ display: 'flex', alignItems: 'center' }}>
+            <span style={{
+              display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.87)', fontWeight: 500,
+            }}
+            >
               添加筛选
               <Icon type="arrow_drop_down" />
             </span>

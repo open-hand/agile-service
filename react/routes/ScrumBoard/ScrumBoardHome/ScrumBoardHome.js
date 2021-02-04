@@ -566,7 +566,7 @@ class ScrumBoardHome extends Component {
             >
               <p>
                 {'任务'}
-                {ScrumBoardStore.getUpdatedParentIssue.issueNum}
+                {ScrumBoardStore.getUpdatedParentIssue?.issueNum}
                 {'的全部子任务为done'}
               </p>
               <div style={{ display: 'flex', alignItems: 'center' }}>

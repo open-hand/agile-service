@@ -415,12 +415,8 @@ class ScrumBoardStore {
     statusApi.loadTransformStatusByIssue(parentIssue.statusId,
       parentIssue.issueId, parentIssue.issueTypeId).then(
       action('fetchSuccess', (res) => {
-        this.updatedParentIssue = this.interconnectedData.get(parentId);
+        this.updatedParentIssue = parentIssue;
         this.translateToCompleted = res.filter((transform) => transform.statusVO.type === 'done');
-        this.interconnectedData.set(parentId, {
-          ...this.interconnectedData.get(parentId),
-          canMoveToComplish: true,
-        });
         this.updateParent = true;
       }),
     );
