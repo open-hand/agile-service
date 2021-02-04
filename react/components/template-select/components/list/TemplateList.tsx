@@ -21,10 +21,11 @@ interface Props {
   selectTemplateOk: (codes: string[]) => void,
   transformExportFieldCodes: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>
   reverseTransformExportFieldCodes: (data: string[]) => string[]
+  defaultInitCodes: string[]
 }
 
 const TemplateList: React.FC<Props> = ({
-  action, checkOptions, templateList, setSelected, templateItemNameCls, onEdit, onDelete, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes,
+  action, checkOptions, templateList, setSelected, templateItemNameCls, onEdit, onDelete, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
 }) => {
   const handleSelect = useCallback((template) => {
     setSelected(template);
@@ -33,9 +34,9 @@ const TemplateList: React.FC<Props> = ({
 
   const handleClickEdit = useCallback(({ template }) => {
     openEditTemplate({
-      template, checkOptions, action, onEdit, transformExportFieldCodes, reverseTransformExportFieldCodes,
+      template, checkOptions, action, onEdit, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
     });
-  }, [action, checkOptions, onEdit, reverseTransformExportFieldCodes, transformExportFieldCodes]);
+  }, [action, checkOptions, defaultInitCodes, onEdit, reverseTransformExportFieldCodes, transformExportFieldCodes]);
 
   const handleClickDelete = useCallback(async (template) => {
     await templateApi.delete(template.id);

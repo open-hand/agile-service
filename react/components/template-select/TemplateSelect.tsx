@@ -55,10 +55,11 @@ interface Props {
   selectTemplateOk: (codes: string[]) => void
   transformExportFieldCodes: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>
   reverseTransformExportFieldCodes: (data: string[]) => string[]
+  defaultInitCodes: string[]
 }
 const TemplateSelect: React.FC<Props> = (props) => {
   const {
-    action, templateSelectRef, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes,
+    action, templateSelectRef, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
   } = props;
   const [templateList, setTemplateList] = useState<ITemplate[]>([]);
   const [selected, setSelected] = useState<ITemplate | undefined>();
@@ -137,6 +138,7 @@ const TemplateSelect: React.FC<Props> = (props) => {
               selectTemplateOk={selectTemplateOk}
               transformExportFieldCodes={transformExportFieldCodes}
               reverseTransformExportFieldCodes={reverseTransformExportFieldCodes}
+              defaultInitCodes={defaultInitCodes}
             />
           </div>
           )}
