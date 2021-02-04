@@ -271,7 +271,7 @@ class ImportIssue extends Component {
     const fields = this.importFieldsRef.current?.fields || [];
     importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system));
     importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system));
-    openSaveTemplate({ action: 'agile_import_issue', onOk: this.templateSelectRef.current?.onOk, fieldCodes: JSON.stringify(importFieldsData) });
+    openSaveTemplate({ action: this.props.action, onOk: this.templateSelectRef.current?.onOk, fieldCodes: JSON.stringify(importFieldsData) });
   };
 
   handleSetReRender = () => {
@@ -308,6 +308,7 @@ class ImportIssue extends Component {
     const {
       uploading, latestInfo, wsData, templateIsExist,
     } = this.state;
+    const { action } = this.props;
     const {
       successCount, failCount, fileUrl, id,
     } = latestInfo;
@@ -317,30 +318,36 @@ class ImportIssue extends Component {
 
     return (
       <div>
-        <ImportIssueForm
-          title="选择常用模板"
-          bottom={null}
-        >
-          <TemplateSelect
-            templateSelectRef={this.templateSelectRef}
-            action="agile_import_issue"
-            checkOptions={allFields.map((item) => ({
-              label: item.title,
-              value: item.code,
-              system: item.system,
-              checkBoxProps: includes(requiredFields, item.code) ? {
-                disabled: includes(requiredFields, item.code),
-                defaultChecked: includes(requiredFields, item.code),
-                name: 'required-option',
-              } : undefined,
-            }))}
-            selectTemplateOk={this.selectTemplateOk}
-            transformExportFieldCodes={(data) => data}
-            reverseTransformExportFieldCodes={(data) => data}
-            defaultInitCodes={requiredFields}
-          />
-        </ImportIssueForm>
-        <Divider />
+        {
+          action && (
+          <>
+            <ImportIssueForm
+              title="选择常用模板"
+              bottom={null}
+            >
+              <TemplateSelect
+                templateSelectRef={this.templateSelectRef}
+                action={action}
+                checkOptions={allFields.map((item) => ({
+                  label: item.title,
+                  value: item.code,
+                  system: item.system,
+                  checkBoxProps: includes(requiredFields, item.code) ? {
+                    disabled: includes(requiredFields, item.code),
+                    defaultChecked: includes(requiredFields, item.code),
+                    name: 'required-option',
+                  } : undefined,
+                }))}
+                selectTemplateOk={this.selectTemplateOk}
+                transformExportFieldCodes={(data) => data}
+                reverseTransformExportFieldCodes={(data) => data}
+                defaultInitCodes={requiredFields}
+              />
+            </ImportIssueForm>
+            <Divider />
+          </>
+          )
+        }
         <ImportIssueForm
           title="选择模板字段"
           bottom={(
@@ -352,12 +359,17 @@ class ImportIssue extends Component {
               >
                 下载模板
               </Button>
-              <SaveTemplateBtn
-                importFieldsRef={this.importFieldsRef}
-                templateSelectRef={this.templateSelectRef}
-                checkBoxChangeOk={this.handleCheckBoxChangeOk}
-                templateIsExist={templateIsExist}
-              />
+              {
+                action && (
+                <SaveTemplateBtn
+                  action={action}
+                  importFieldsRef={this.importFieldsRef}
+                  templateSelectRef={this.templateSelectRef}
+                  checkBoxChangeOk={this.handleCheckBoxChangeOk}
+                  templateIsExist={templateIsExist}
+                />
+                )
+              }
             </>
           )}
         >
@@ -415,7 +427,7 @@ class ImportIssue extends Component {
 
 const ObserverImportIssue = observer(ImportIssue);
 
-const handleOpenImport = ({ onFinish }) => {
+const handleOpenImport = (props) => {
   Modal.open({
     drawer: true,
     className: 'c7n-importIssue',
@@ -427,7 +439,7 @@ const handleOpenImport = ({ onFinish }) => {
     },
     okText: '关闭',
     footer: (okBtn) => okBtn,
-    children: <ObserverImportIssue onFinish={onFinish} />,
+    children: <ObserverImportIssue {...props} />,
   });
 };
 

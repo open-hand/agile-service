@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Button, DataSet } from 'choerodon-ui/pro';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { uniq } from 'lodash';
+import { TemplateAction } from '@/api';
 import openSaveTemplate from '../template-select/components/save/SaveTemplate';
 import { ITemplate } from '../template-select/components/edit/EditTemplate';
 
@@ -28,10 +29,11 @@ interface Props {
   } | undefined>
   checkBoxChangeOk: (data: string[]) => void
   templateIsExist: boolean
+  action: TemplateAction
 }
 
 const SaveTemplateBtn: React.FC<Props> = ({
-  importFieldsRef, templateSelectRef, checkBoxChangeOk, templateIsExist,
+  importFieldsRef, templateSelectRef, checkBoxChangeOk, templateIsExist, action,
 }) => {
   const handleSaveTemplate = useCallback(() => {
     const importFieldsData: {
@@ -44,12 +46,12 @@ const SaveTemplateBtn: React.FC<Props> = ({
     importFieldsData.systemFields = fields.filter((code: string) => allFields.find((item) => item.code === code && item.system));
     importFieldsData.customFields = fields.filter((code: string) => allFields.find((item) => item.code === code && !item.system));
     openSaveTemplate({
-      action: 'agile_import_issue',
+      action,
       // @ts-ignore
       onOk: templateSelectRef.current?.onOk,
       templateJson: JSON.stringify(importFieldsData),
     });
-  }, [importFieldsRef, templateSelectRef]);
+  }, [action, importFieldsRef, templateSelectRef]);
 
   useEffect(() => {
     if (templateSelectRef?.current?.templateFirstLoaded) {

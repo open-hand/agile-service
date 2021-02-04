@@ -199,7 +199,7 @@ const Issue = observer(() => {
           icon="archive"
           funcType="flat"
           onClick={() => handleOpenImport({
-            onFinish: refresh,
+            onFinish: refresh, action: 'agile_import_issue',
           })}
         >
           导入问题
