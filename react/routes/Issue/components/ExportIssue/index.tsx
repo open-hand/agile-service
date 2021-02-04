@@ -2,13 +2,15 @@ import React from 'react';
 import { DataSet, Table } from 'choerodon-ui/pro/lib';
 import { openExportIssueModal as originOpenExportIssueModal } from '@/components/issue-export';
 import IssueExportStore from '@/components/issue-export/stores/store';
-import { issueApi } from '@/api';
+import { issueApi, TemplateAction } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { set, uniq } from 'lodash';
-import { getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields } from './utils';
+import {
+  getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields, getReverseExportFieldCodes,
+} from './utils';
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
-  tableDataSet: DataSet, tableRef: React.RefObject<Table>, tableListMode: boolean) {
+  tableDataSet: DataSet, tableRef: React.RefObject<Table>, tableListMode: boolean, action?: TemplateAction) {
   const store = new IssueExportStore({
     defaultInitFieldAction: (data, self) => {
       if (data.code === 'sprint') {
@@ -37,6 +39,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
       data.push(...(dataSet?.current?.get('required-option') || []));
       return getExportFieldCodes(uniq(data));
     },
+    reverseTransformExportFieldCodes: getReverseExportFieldCodes,
     events: {
       exportAxios: (searchData, sort) => {
         set(searchData, 'searchArgs.tree', tableListMode);
@@ -51,6 +54,6 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     },
   });
 
-  originOpenExportIssueModal(fields, chosenFields, tableDataSet, tableRef, store);
+  originOpenExportIssueModal(fields, chosenFields, tableDataSet, tableRef, store, action);
 }
 export { openExportIssueModal };

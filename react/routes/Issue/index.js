@@ -203,11 +203,14 @@ const Issue = observer(() => {
           className="leftBtn"
           icon="unarchive"
           funcType="flat"
-          onClick={() => openExportIssueModal(
-            issueSearchStore.getAllFields,
-            issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
-            dataSet, tableRef, tableListMode,
-          )}
+          onClick={() => {
+            openExportIssueModal(
+              issueSearchStore.getAllFields,
+              issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
+              dataSet, tableRef, tableListMode,
+              'agile_export_issue',
+            );
+          }}
         >
           导出问题
         </Button>

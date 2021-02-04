@@ -13,7 +13,6 @@ import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnC
 import WsProgress from '@/components/ws-progress';
 import { getProjectName } from '@/utils/common';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
-import { getReverseExportFieldCodes } from '@/routes/Issue/components/ExportIssue/utils';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
@@ -79,7 +78,7 @@ const ExportIssue: React.FC = () => {
   const checkBoxDataPropsRef = useRef<ITableColumnCheckBoxesDataProps>();
 
   const {
-    prefixCls, checkOptions: propsCheckOptions, store, fields, modal,
+    prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action,
   } = useExportIssueStore();
 
   // 添加筛选配置 数据
@@ -203,14 +202,14 @@ const ExportIssue: React.FC = () => {
 
   const handleSaveTemplate = useCallback(() => {
     // @ts-ignore
-    openSaveTemplate({ action: 'agile_export_issue', onOk: templateSelectRef.current?.onOk, fieldCodes: JSON.stringify(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps)) });
-  }, [checkBoxDataProps, store]);
+    openSaveTemplate({ action, onOk: templateSelectRef.current?.onOk, fieldCodes: JSON.stringify(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps)) });
+  }, [action, checkBoxDataProps, store]);
 
   const selectTemplateOk = useCallback((fieldCodes) => {
-    const newCheckedOptions = getReverseExportFieldCodes(uniq(fieldCodes));
+    const newCheckedOptions = store.reverseTransformExportFieldCodes(uniq(fieldCodes));
     checkBoxDataProps.dataSet.current?.set('exportCodes', newCheckedOptions);
     checkBoxDataProps.setCheckedOptions(newCheckedOptions);
-  }, [checkBoxDataProps]);
+  }, [checkBoxDataProps, store]);
 
   useEffect(() => {
     const templateList = templateSelectRef?.current?.templateList || [];
@@ -223,6 +222,7 @@ const ExportIssue: React.FC = () => {
     setTemplateIsExist(false);
   }, [checkBoxDataProps, store, templateSelectRef?.current?.templateList]);
 
+  // console.log(templateSelectRef?.current?.templateList, store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps));
   return (
     <div>
       <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
@@ -233,16 +233,24 @@ const ExportIssue: React.FC = () => {
         </IssueFilterForm>
       </FormPart>
       <Divider className={`${prefixCls}-horizontal`} />
-      <FormPart title="选择常用模板" className={`${prefixCls}-form-template`}>
-        <TemplateSelect
-          templateSelectRef={templateSelectRef}
-          action="agile_export_issue"
-          // @ts-ignore
-          checkOptions={checkOptions}
-          selectTemplateOk={selectTemplateOk}
-        />
-      </FormPart>
-      <Divider className={`${prefixCls}-horizontal`} />
+      {
+        action && (
+          <>
+            <FormPart title="选择常用模板" className={`${prefixCls}-form-template`}>
+              <TemplateSelect
+                templateSelectRef={templateSelectRef}
+                action={action}
+                // @ts-ignore
+                checkOptions={checkOptions}
+                selectTemplateOk={selectTemplateOk}
+                transformExportFieldCodes={store.transformExportFieldCodes}
+                reverseTransformExportFieldCodes={store.reverseTransformExportFieldCodes}
+              />
+            </FormPart>
+            <Divider className={`${prefixCls}-horizontal`} />
+          </>
+        )
+      }
       <FormPart title="选择模板字段" btnOnClick={handleChangeFieldStatus}>
         <TableColumnCheckBoxes {...checkBoxComponentProps} />
         {renderExport()}
