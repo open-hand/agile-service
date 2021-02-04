@@ -1029,7 +1029,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Long relatedIssueId = rowIssueIdMap.get(relatedRow);
                     if (relatedIssueId == null) {
                         deleteIssueIds.add(issueId);
-                        cell.setCellValue(buildWithErrorMsg(value, "第" + relatedRow + "行插入失败"));
+                        cell.setCellValue(buildWithErrorMsg(value, "第" + (relatedRow + 1) + "行问题项不存在"));
                         addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
                         ok = false;
                         break;
