@@ -30,6 +30,7 @@ interface IssueExportStoreProps {
   defaultInitFieldFinishAction?: (data: { customFields: IChosenFieldField[], systemFields: IChosenFieldField[], currentChosenField: Map<string, IChosenFieldField> }, store: IssueExportStore) => void, /** 初始化字段完成时调用 */
   transformSystemFilter?: (data: any) => any, /** 提交数据前 对系统筛选字段数据转换 */
   transformExportFieldCodes?: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>, /** 提交数据 对系统导出字段数据转换 */
+  reverseTransformExportFieldCodes?: (data: Array<string>) => Array<string>
   events?: EventsProps,
   renderField?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null, /** 系统筛选字段项渲染 */
   extraFields?: IChosenFieldField[], /** 额外的筛选字段项  不在下拉菜单中 */
@@ -47,6 +48,8 @@ class IssueExportStore {
   transformSystemFilter: (data: any) => object;
 
   transformExportFieldCodes: (data: any, d2: any) => string[];
+
+  reverseTransformExportFieldCodes: (data: string[]) => string[]
 
   events: EventsProps = {};
 
@@ -79,6 +82,7 @@ class IssueExportStore {
     this.dataSetSystemFields = props?.dataSetSystemFields || [];
     this.transformSystemFilter = props?.transformSystemFilter || ((data) => data);
     this.transformExportFieldCodes = props?.transformExportFieldCodes || ((data) => data);
+    this.reverseTransformExportFieldCodes = props?.reverseTransformExportFieldCodes || ((data) => data);
     this.defaultCheckedExportFields = props?.defaultCheckedExportFields || [];
     this.defaultInitFieldAction = props?.defaultInitFieldAction || ((data: IChosenFieldField, store: IssueExportStore) => data);
     this.defaultInitFieldFinishAction = props?.defaultInitFieldFinishAction || ((data: any) => data);

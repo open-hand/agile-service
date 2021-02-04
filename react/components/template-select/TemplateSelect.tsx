@@ -13,6 +13,7 @@ import { TemplateAction, templateApi } from '@/api';
 import styles from './TemplateSelect.less';
 import TemplateList from './components/list';
 import { IFieldOption, ITemplate } from './components/edit/EditTemplate';
+import { ITableColumnCheckBoxesDataProps } from '../table-column-check-boxes';
 
 const templateItemNameCls = 'c7n-templateItem-name';
 // @ts-ignore
@@ -52,9 +53,13 @@ interface Props {
     templateFirstLoaded: boolean,
   } | undefined>
   selectTemplateOk: (codes: string[]) => void
+  transformExportFieldCodes: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>
+  reverseTransformExportFieldCodes: (data: string[]) => string[]
 }
 const TemplateSelect: React.FC<Props> = (props) => {
-  const { action, templateSelectRef, selectTemplateOk } = props;
+  const {
+    action, templateSelectRef, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes,
+  } = props;
   const [templateList, setTemplateList] = useState<ITemplate[]>([]);
   const [selected, setSelected] = useState<ITemplate | undefined>();
   const [firstLoaded, setFirstLoaded] = useState<boolean>(false);
@@ -129,6 +134,8 @@ const TemplateSelect: React.FC<Props> = (props) => {
               onEdit={handleEditOk}
               onDelete={handleDeleteOk}
               selectTemplateOk={selectTemplateOk}
+              transformExportFieldCodes={transformExportFieldCodes}
+              reverseTransformExportFieldCodes={reverseTransformExportFieldCodes}
             />
           </div>
           )}

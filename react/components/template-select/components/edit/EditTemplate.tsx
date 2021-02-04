@@ -5,10 +5,9 @@ import {
   Modal, TextField, Form, Button, DataSet,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
-import TableColumnCheckBoxes, { useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
+import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
 import { IModalProps } from '@/common/types';
 import { TemplateAction, templateApi } from '@/api';
-import { getExportFieldCodes, getReverseExportFieldCodes } from '@/routes/Issue/components/ExportIssue/utils';
 import classnames from 'classnames';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { uniq } from 'lodash';
@@ -75,18 +74,20 @@ interface Props {
   modal?: IModalProps
   checkOptions: IFieldOption[]
   onEdit: (template: ITemplate) => void
+  transformExportFieldCodes: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>
+  reverseTransformExportFieldCodes: (data: string[]) => string[]
 }
 
 const EditTemplate: React.FC<Props> = ({
-  modal, template, checkOptions, action, onEdit,
+  modal, template, checkOptions, action, onEdit, transformExportFieldCodes, reverseTransformExportFieldCodes,
 }) => {
   const templateFieldsRef = useRef();
 
   useEffect(() => {
     Object.assign(templateFieldsRef, {
-      current: getReverseExportFieldCodes(JSON.parse(template.templateJson)),
+      current: reverseTransformExportFieldCodes(JSON.parse(template.templateJson)),
     });
-  }, [template.templateJson]);
+  }, [reverseTransformExportFieldCodes, template.templateJson]);
 
   const checkName = useCallback(async (value, name, record) => {
     if (value === template.name) {
@@ -129,11 +130,6 @@ const EditTemplate: React.FC<Props> = ({
     events: { initOptions: defaultInitOptions },
   });
 
-  const transformExportFieldCodes = useCallback((data, { dataSet }) => {
-    data.push(...(dataSet.current?.get('required-option') || []));
-    return getExportFieldCodes(data);
-  }, []);
-
   const handleOk = useCallback(async () => {
     const validate = await templateDataSet.validate();
     if (!validate) {
@@ -168,6 +164,11 @@ const EditTemplate: React.FC<Props> = ({
     }
     return true;
   };
+
+  console.log('编辑的选中:');
+  console.log(checkBoxDataProps.checkedOptions);
+  console.log('编辑的选项:');
+  console.log(checkBoxDataProps.options);
 
   return (
     <div className={styles.template_edit}>
