@@ -212,9 +212,14 @@ const ExportIssue: React.FC = () => {
   }, [checkBoxDataProps, store]);
 
   useEffect(() => {
+    const currentFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
+    if (!currentFieldCodes.length) { // 没有字段选中时不应该显示保存按钮
+      setTemplateIsExist(true);
+      return;
+    }
     const templateList = templateSelectRef?.current?.templateList || [];
     for (let i = 0; i < templateList.length; i += 1) {
-      if (isEqual(JSON.parse(templateList[i].templateJson), store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps))) {
+      if (isEqual(JSON.parse(templateList[i].templateJson), currentFieldCodes)) {
         setTemplateIsExist(true);
         return;
       }
@@ -276,6 +281,7 @@ const ExportIssue: React.FC = () => {
           onClick={exportExcel}
           color={'primary' as ButtonColor}
           loading={store.exportButtonConfig?.buttonProps?.loading}
+          className="c7n-exportIssue-btn"
         >
           导出问题
         </Button>
@@ -286,6 +292,10 @@ const ExportIssue: React.FC = () => {
               funcType={'flat' as FuncType}
               onClick={handleSaveTemplate}
               color={'primary' as ButtonColor}
+              className="c7n-exportIssue-btn"
+              style={{
+                marginLeft: 16,
+              }}
             >
               保存为常用模板
             </Button>
