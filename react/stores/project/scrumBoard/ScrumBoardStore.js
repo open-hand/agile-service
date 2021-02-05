@@ -19,6 +19,10 @@ class ScrumBoardStore {
     sprintId: undefined,
   };
 
+  @observable searchVO = {};
+
+  @observable filterManageVisible = false;
+
   @observable personalFilter = []
 
   @observable priorityIds = []
@@ -382,6 +386,18 @@ class ScrumBoardStore {
     this.personalFilter = personalFilter;
   }
 
+  @action setSearchVO(data) {
+    this.searchVO = data;
+  }
+
+  @action setFilterManageVisible(data) {
+    this.filterManageVisible = data;
+  }
+
+  @computed get getFilterManageVisible() {
+    return this.filterManageVisible;
+  }
+
   @action clearFilter() {
     this.quickSearchObj.assigneeFilterIds = [];
     this.quickSearchObj.onlyMe = false;
@@ -391,6 +407,7 @@ class ScrumBoardStore {
     this.quickSearchObj.sprintId = undefined;
     this.personalFilter = [];
     this.priorityIds = [];
+    this.searchVO = {};
   }
 
   @computed get hasSetFilter() {
@@ -627,17 +644,7 @@ class ScrumBoardStore {
     const {
       onlyMe, onlyStory, starBeacon, quickSearchArray, assigneeFilterIds, sprintId,
     } = this.quickSearchObj;
-    return boardApi.load(boardId,
-      {
-        onlyMe,
-        onlyStory,
-        starBeacon,
-        quickFilterIds: quickSearchArray,
-        assigneeFilterIds,
-        sprintId,
-        personalFilterIds: this.personalFilter,
-        priorityIds: this.priorityIds,
-      });
+    return boardApi.load(boardId, this.searchVO);
   }
 
   updateIssue = (

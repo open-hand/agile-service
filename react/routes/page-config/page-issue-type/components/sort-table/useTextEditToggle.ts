@@ -32,6 +32,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
   const handleSubmit = useCallback((value: any) => {
     const currentData = record.toData();
     let newValue = value;
+    let extraConfig: boolean | undefined;
     let currentDefaultValueObj = currentData.localDefaultObj || currentData.defaultValueObj;
     if (fieldType === 'member') {
       const newLocalDefaultObj = dataRef.current?.find((item) => item.id === value);
@@ -50,15 +51,19 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
     }
     if (['date', 'datetime', 'time'].includes(fieldType)) {
       const { meaning, value: dateValue } = newValue || {};
-      console.log('newValue...', newValue);
-      newValue = dateValue === 'current' ? currentData.defaultValue || meaning : dateValue;
-      record.set('extraConfig', dateValue === 'current');
+      extraConfig = dateValue === 'current';
+      console.log('newValue...', currentData.defaultValue, newValue);
+      // newValue = currentData.defaultValue;
+      newValue = extraConfig ? currentData.defaultValue || meaning : dateValue;
+      console.log('newValue.==', newValue);
+      extraConfig && record.init('defaultValue', newValue);
+      record.set('extraConfig', extraConfig);
     }
 
     record.set('defaultValue', newValue);
     record.set('showDefaultValueText', transformDefaultValue({
       ...currentData,
-      // @ts-ignore
+      extraConfig,
       optionKey: currentData.localSource === 'created' ? 'tempKey' : 'id',
       defaultValue: newValue,
       defaultValueObj: currentDefaultValueObj,

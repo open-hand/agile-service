@@ -47,14 +47,11 @@ class BoardApi extends Api<BoardApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
-  load(boardId: string, searchVO: BoardSearchVO) {
+  load(boardId: string, searchVO: any) {
     return axios({
       method: 'post',
       url: `${this.prefix}/board/${boardId}/all_data/${getOrganizationId()}`,
-      data: {
-        ...omit(searchVO, 'onlyMe'),
-        assigneeId: searchVO?.onlyMe ? AppState.getUserId : '',
-      },
+      data: searchVO,
     });
   }
 
