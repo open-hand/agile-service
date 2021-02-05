@@ -97,7 +97,7 @@ const ListBlock: React.FC<Props> = ({
     };
   });
   return (
-    <div style={{ padding: '10px 26px' }}>
+    <div>
       <Spin spinning={loading}>
         <Table<Issue>
           data={treeData}
