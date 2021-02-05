@@ -1,6 +1,5 @@
 import React, { useState, ReactNode } from 'react';
 import { Tabs } from 'choerodon-ui';
-import { stores } from '@choerodon/boot';
 import { find } from 'lodash';
 import permission from '@/components/permission';
 import useQuery from '@/hooks/useQuery';
@@ -10,8 +9,6 @@ import CustomCirculation from './custom-circulation';
 import StateMachineContext from './context';
 import useSelectedType from './useSelectedType';
 import styles from './index.less';
-
-const { AppState } = stores;
 
 export interface TabComponentProps<Params extends { [K in keyof Params]?: string } = {}> {
   tab: ReactNode

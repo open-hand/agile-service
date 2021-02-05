@@ -61,14 +61,14 @@ import TextEditToggle from '@/components/TextEditTogglePro';
               {
                 fieldCode === 'storyPoints' && (
                   <>
-                    {value ? `${value} 点` : '无'}
+                    {value !== null && value !== undefined ? `${value} 点` : '无'}
                   </>
                 )
               }
               {
                 !completed && fieldCode === 'remainingTime' && (
                   <>
-                    {value ? `${value} 小时` : '无'}
+                    {value !== null && value !== undefined ? `${value} 小时` : '无'}
                   </>
                 )
               }
