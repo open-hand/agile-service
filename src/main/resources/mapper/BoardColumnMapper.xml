@@ -84,41 +84,11 @@
         from agile_issue ai1, agile_issue_sprint_rel aisr
         WHERE aisr.sprint_id = #{sprintId} AND ai1.issue_id = aisr.issue_id
         AND ai1.type_code in ('story', 'task', 'bug', 'sub_task')
-        <if test='onlyStory != null and onlyStory == true'>
-            AND ai1.type_code = 'story'
-        </if>
-        <if test='assigneeId != null'>
-            AND ai1.assignee_id = #{assigneeId}
-        </if>
         <if test='filterSql != null'>
             AND ai1.issue_id IN (${filterSql})
         </if>
-        <if test='assigneeFilterIds != null and assigneeFilterIds.size > 0'>
-            AND ai1.assignee_id IN
-            <foreach collection="assigneeFilterIds" item="assigneeFilterId"
-                     open="(" close=")" separator=",">
-                #{assigneeFilterId}
-            </foreach>
-        </if>
-        <if test='searchList != null and searchList.size > 0'>
-            <foreach collection="searchList" item="searchVO">
-                AND ai1.issue_id IN (<include refid="selectIssueIdBysearchVO"/>)
-            </foreach>
-        </if>
-        <if test='priorityIds != null and priorityIds.size > 0'>
-            AND ai1.priority_id IN
-            <foreach collection="priorityIds" item="priorityId" open="(" close=")" separator=",">
-                #{priorityId}
-            </foreach>
-        </if>
-        <if test="starBeacon != null and starBeacon == true">
-            AND ai1.issue_id IN (
-                SELECT fsb.instance_id
-                FROM fd_star_beacon fsb
-                WHERE fsb.type = 'issue'
-                AND fsb.project_id = #{projectId}
-                AND fsb.user_id = #{userId}
-            )
+        <if test='searchVO != null'>
+            AND ai1.issue_id IN (<include refid="selectIssueIdBysearchVO"/>)
         </if>
         ) ai ON ai.status_id = ais.status_id
         LEFT JOIN agile_project_info api ON api.project_id = ai.project_id

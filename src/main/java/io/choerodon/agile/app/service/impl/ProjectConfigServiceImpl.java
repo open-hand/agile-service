@@ -635,7 +635,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public List<IssueTypeVO> checkExistStatusIssueType(Long projectId, Long organizationId, Long statusId) {
-        String applyType = Objects.equals(ConvertUtil.queryProject(projectId).getCategory(), ProjectCategory.PROGRAM) ? "program" : "agile";
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+        String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
         if (stateMachineSchemeId == null) {
             throw new CommonException(ERROR_STATEMACHINESCHEMEID_NULL);
