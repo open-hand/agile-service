@@ -356,6 +356,7 @@ class ImportIssue extends Component {
                 type="primary"
                 onClick={() => this.exportExcel()}
                 icon="get_app"
+                className="c7n-importIssue-btn"
               >
                 下载模板
               </Button>
@@ -385,6 +386,7 @@ class ImportIssue extends Component {
               type="primary"
               onClick={() => this.importExcel()}
               icon="archive"
+              className="c7n-importIssue-btn"
             >
               导入问题
             </Button>

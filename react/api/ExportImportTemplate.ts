@@ -4,7 +4,7 @@ import Api from './Api';
 
 const { AppState } = stores;
 
-export type TemplateAction = 'agile_import_issue' | 'agile_export_issue' | 'program_import_feature' | 'program_export_feature' | 'agile_export_feature';
+export type TemplateAction = 'agile_import_issue' | 'agile_export_issue' | 'program_import_feature' | 'program_export_feature' | 'agile_export_feature' | 'program_export_backlog' | 'agile_export_backlog';
 
 class TemplateApi extends Api<TemplateApi> {
   get prefix() {
