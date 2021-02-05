@@ -54,7 +54,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
         return issueTypes.filter((issueType) => !filterList.some((filter) => filter === issueType.typeCode));
       }
       return issueTypes;
-    })),
+    }),
     middleWare: (issueTypes) => {
       if (afterLoad) {
         afterLoad(issueTypes);
