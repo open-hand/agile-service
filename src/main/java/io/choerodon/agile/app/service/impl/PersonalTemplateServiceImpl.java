@@ -31,8 +31,8 @@ import java.util.Objects;
 @Transactional(rollbackFor = Exception.class)
 public class PersonalTemplateServiceImpl implements PersonalTemplateService {
 
-    private static final String[] AGILE_PERSONAL_TEMPLATE_ACTIONS = {"agile_import_issue","agile_export_issue","agile_export_feature"};
-    private static final String[] PROGRAM_PERSONAL_TEMPLATE_ACTIONS = {"program_import_feature","program_export_feature"};
+    private static final String[] AGILE_PERSONAL_TEMPLATE_ACTIONS = {"agile_import_issue","agile_export_issue","agile_export_feature", "agile_export_backlog"};
+    private static final String[] PROGRAM_PERSONAL_TEMPLATE_ACTIONS = {"program_import_feature","program_export_feature", "program_export_backlog"};
     private static final String[] PERSONAL_TEMPLATE_TYPES = {"excel"};
     @Autowired
     private PersonalTemplateMapper personalTemplateMapper;
