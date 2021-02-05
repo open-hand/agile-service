@@ -1,4 +1,4 @@
-import React, { useCallback, useImperativeHandle } from 'react';
+import React, { useCallback, useImperativeHandle, useMemo } from 'react';
 import Accumulation from '@/components/charts/accumulation';
 import AccumulationSearch from '@/components/charts/accumulation/search';
 import useAccumulationReport, { AccumulationConfig } from '@/components/charts/accumulation/useAccumulationReport';
@@ -24,10 +24,12 @@ interface Props {
   projectId?: string
 }
 const AccumulationComponent: React.FC<Props> = ({ innerRef, data, projectId }) => {
-  const [searchProps, props] = useAccumulationReport({
+  const config = useMemo(() => ({
     ...transformAccumulationSearch(data?.chartSearchVO as AccumulationSearchVO),
     projectId,
-  });
+  }),
+  [data?.chartSearchVO, projectId]);
+  const [searchProps, props] = useAccumulationReport(config);
   const handleSubmit = useCallback(async (): Promise<AccumulationSearchVO> => ({
     boardId: searchProps.boardId,
     startDate: searchProps.range[0].format('YYYY-MM-DD 00:00:00'),

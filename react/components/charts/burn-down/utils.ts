@@ -34,7 +34,7 @@ type IMarkAreaData = [{
 export function transformBurnDownChartData(
   data: IBurnDownData,
   {
-    endDate,
+    endDate: end,
     restDayShow,
     restDays,
   }: IBurnDownConfig,
@@ -52,6 +52,7 @@ export function transformBurnDownChartData(
       markAreaData: [],
     };
   }
+  const endDate = end || '';
   const keys = Object.keys(data.coordinate);
   let [minDate, maxDate] = [keys[0], keys[0]];
   for (let a = 1, len = keys.length; a < len; a += 1) {

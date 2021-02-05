@@ -2557,7 +2557,11 @@ public class ExcelServiceImpl implements ExcelService {
         }
         project.setCode(projectInfoDTO.getProjectCode());
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
-        boolean isTreeView = !Boolean.FALSE.equals(searchVO.getSearchArgs().get("tree"));
+        boolean isTreeView =
+                !Boolean.FALSE.equals(
+                        Optional.ofNullable(searchVO.getSearchArgs())
+                                .map(x -> x.get("tree"))
+                                .orElse(false));
 
         String sheetName = project.getName();
         Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);

@@ -123,10 +123,11 @@ const PieSearch: React.FC<PieSearchProps> = ({
       {
         chooseDimension ? (
           <Select
+            key={chooseDimension}
             className={styles.c7n_pieChart_filter_item}
             style={{ minWidth: 200 }}
             labelLayout={'float' as LabelLayout}
-            value={chooseId.toString()}
+            value={chooseId?.toString()}
             onChange={handleChooseIdChange}
             clearButton
           >

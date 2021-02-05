@@ -21,10 +21,10 @@ const SprintComponent: React.FC<Props> = ({ filter, onFinish }) => {
         option={{
           animation: false,
           grid: {
-            top: 10,
+            top: 40,
             bottom: 0,
             left: 0,
-            right: 0,
+            right: 30,
             containLabel: true,
           },
         }}

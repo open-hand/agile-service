@@ -135,6 +135,7 @@ export interface SearchVO {
     sprint?: string[],
     summary?: string[],
     version?: string[],
+    withChildren?: boolean
   },
   searchArgs?: {
     createStartDate?: string,
