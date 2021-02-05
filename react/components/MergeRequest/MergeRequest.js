@@ -77,7 +77,7 @@ class MergeRequest extends Component {
       },
       {
         title: '编码',
-        dataIndex: 'viewId',
+        dataIndex: 'gitlabMergeRequestId',
         width: 100,
         render: (id, record) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
@@ -88,9 +88,7 @@ class MergeRequest extends Component {
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
                 }}
               >
-                #
-                {' '}
-                {id}
+                {`!${id}`}
               </p>
             </Tooltip>
           </div>
