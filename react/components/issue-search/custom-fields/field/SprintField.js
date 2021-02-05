@@ -14,7 +14,7 @@ function SprintField({
       statusList={[]}
       value={value || []}
       placeholder={field.name}
-      multiple
+      multiple={field.fieldType === 'multiple'}
       maxTagCount={3}
       maxTagTextLength={10}
       dropdownMatchSelectWidth={false}

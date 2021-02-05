@@ -32,6 +32,12 @@ function CustomField({ field }) {
   const handleChange = (v) => {
     store.handleFilterChange(field.code, v);
   };
+  const fieldElement = store.renderField(field, { onChange: handleChange, value, projectId });
+  if (fieldElement) {
+    return fieldElement;
+  } if (fieldElement === false) {
+    return null;
+  }
   // 系统自带字段
   switch (field.code) {
     case 'issueTypeId':

@@ -72,25 +72,8 @@ class ScrumBoardHome extends Component {
 
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
-    const scrumboardInitValue = localPageCacheStore.getItem('scrumboard');
-    if (scrumboardInitValue) {
-      const {
-        onlyMeChecked, onlyStoryChecked, moreChecked, starBeacon, personalFilters = [], assigneeFilter, sprintFilter, priorityIds,
-      } = scrumboardInitValue;
-
-      ScrumBoardStore.addQuickSearchFilter(
-        onlyMeChecked,
-        onlyStoryChecked,
-        starBeacon,
-        moreChecked,
-        personalFilters,
-      );
-      assigneeFilter && ScrumBoardStore.addAssigneeFilter(assigneeFilter.map((item) => item.key));
-      if (sprintFilter) {
-        ScrumBoardStore.addSprintFilter(sprintFilter);
-      }
-      priorityIds && ScrumBoardStore.setPriority(priorityIds);
-    }
+    const defaultSearchVO = localPageCacheStore.getItem('scrumBoard.searchVO');
+    ScrumBoardStore.setSearchVO(defaultSearchVO || {});
     this.getBoard();
     // eslint-disable-next-line react/destructuring-assignment
     const { state } = this.props.location;
@@ -130,43 +113,6 @@ class ScrumBoardHome extends Component {
     });
     return retObj;
   };
-
-  onQuickSearchChange = (
-    onlyMeChecked = false,
-    onlyStoryChecked = false,
-    starBeacon = false,
-    moreChecked,
-    personalFilters,
-  ) => {
-    ScrumBoardStore.addQuickSearchFilter(
-      onlyMeChecked,
-      onlyStoryChecked,
-      starBeacon,
-      moreChecked,
-      personalFilters,
-    );
-    localPageCacheStore.mergeSetItem('scrumboard', {
-      onlyMeChecked,
-      onlyStoryChecked,
-      starBeacon,
-      moreChecked,
-      personalFilters,
-    });
-    this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-  };
-
-  onAssigneeChange = (value) => {
-    ScrumBoardStore.addAssigneeFilter(value);
-    this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-  };
-
-  onSprintChange = (value) => {
-    ScrumBoardStore.addSprintFilter(value);
-    localPageCacheStore.mergeSetItem('scrumboard', {
-      sprintFilter: value,
-    });
-    this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-  }
 
   handleClearFilter = () => {
     ScrumBoardStore.clearFilter();
@@ -377,14 +323,6 @@ class ScrumBoardHome extends Component {
     });
   }
 
-  handlePriorityChange = (value) => {
-    ScrumBoardStore.setPriority(value);
-    localPageCacheStore.mergeSetItem('scrumboard', {
-      priorityIds: value,
-    });
-    this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-  }
-
   handleFilterChange = () => {
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
@@ -503,30 +441,21 @@ class ScrumBoardHome extends Component {
         }}
         >
           <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
-          {/* <div style={{ display: 'flex' }}>
-            <QuickSearch
-              onQuickSearchChange={this.onQuickSearchChange}
-              onAssigneeChange={this.onAssigneeChange}
-              onSprintChange={this.onSprintChange}
-              style={{ height: 32, margin: '0 0 16px 16px' }}
-            />
-            <SelectPriority onChange={this.handlePriorityChange} />
-            {ScrumBoardStore.hasSetFilter && <Button type="primary" onClick={this.handleClearFilter}>清除筛选</Button>}
-          </div> */}
+
           <Spin spinning={ScrumBoardStore.getSpinIf}>
             <div className="c7n-scrumboard" style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 270px)' }}>
               <div style={{ display: 'table', minWidth: '100%' }}>
                 <div className="c7n-scrumboard-header">
                   <StatusColumn />
                 </div>
-                {(!ScrumBoardStore.didCurrentSprintExist
+                {this.issueSearchStore && (!ScrumBoardStore.didCurrentSprintExist
                   || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
                     && (!ScrumBoardStore.interconnectedData
                       || ScrumBoardStore.interconnectedData.size === 0))) ? (
                         <NoneSprint
                           doingSprintExist={ScrumBoardStore.didCurrentSprintExist}
-                          hasSetFilter={ScrumBoardStore.hasSetFilter}
-                          quickSearchObj={ScrumBoardStore.quickSearchObj}
+                          hasSetFilter={this.issueSearchStore.isHasFilter}
+                          filterItems={this.issueSearchStore.currentFlatFilter}
                         />
                   )
                   : (
