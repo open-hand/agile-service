@@ -85,7 +85,9 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   } = config;
   const request = usePersistFn(requestFn);
   const afterLoad = usePersistFn(afterLoadFn || noop);
-  const renderer = useCallback(({ value, text: originText, maxTagTextLength }) => {
+  const renderer = useCallback(({
+    value, text: originText, maxTagTextLength, ...ote
+  }) => {
     // 兼容primitiveValue为false
     const item = value && typeof value === 'object' ? value : cacheRef.current?.get(value);
     if (item) {
@@ -97,9 +99,9 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
         : result;
       return text;
     }
-    // if (cacheRef.current.size > 0 && value === originText) {
-    //   return originText;
-    // }
+    if (!firstRef.current && value === originText) {
+      return originText;
+    }
     return '';
   }, [optionRenderer]);
   // 不分页时，本地搜索
