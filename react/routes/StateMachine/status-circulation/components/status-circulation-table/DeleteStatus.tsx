@@ -29,7 +29,7 @@ const DeleteStatus: React.FC<Props> = ({
     modal.handleOk(handleSubmit);
   }, [modal, handleSubmit]);
 
-  return <div style={{ marginTop: '-.24rem' }}>{`确定删除状态“${data.name}”`}</div>;
+  return <div style={{ marginTop: '-.24rem' }}>{`确定删除状态“${data.name}”？`}</div>;
 };
 
 export default DeleteStatus;
