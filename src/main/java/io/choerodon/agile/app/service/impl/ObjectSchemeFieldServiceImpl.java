@@ -307,7 +307,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         } else {
             //判断组织下如果没有开启需求池的项目，组织层不展示需求类型的系统字段
             List<ProjectVO> projectVOList = baseFeignClient.listProjectsByOrgId(organizationId).getBody();
-            if (!CollectionUtils.isEmpty(projectVOList)) {
+            if (backlogExpandService != null && !CollectionUtils.isEmpty(projectVOList)) {
                 List<Long> projectIds = projectVOList.stream().map(ProjectVO::getId).collect(Collectors.toList());
                 for (Long id : projectIds) {
                     if (Boolean.TRUE.equals(backlogExpandService.enabled(id))) {

@@ -452,32 +452,32 @@
 
     <select id="selectNotSyncField" resultMap="objectSchemeFieldWithExtends">
         select
-            t4.id,
-            t4.code,
-            t4.default_value,
-            t4.description,
-            t4.field_type,
+            fosf.id,
+            fosf.code,
+            fosf.default_value,
+            fosf.description,
+            fosf.field_type,
             flv.name as field_type_name,
-            t4.name,
-            t4.object_version_number,
-            t4.organization_id,
-            t4.project_id,
-            t4.is_system,
-            t4.is_required,
-            t4.extra_config,
+            fosf.name,
+            fosf.object_version_number,
+            fosf.organization_id,
+            fosf.project_id,
+            fosf.is_system,
+            fosf.is_required,
+            fosf.extra_config,
             'system' as created_level
-        from fd_object_scheme_field t4
-        left join lookup_value flv on flv.value_code = t4.field_type and flv.type_code = 'field_type'
+        from fd_object_scheme_field fosf
+        left join lookup_value flv on flv.value_code = fosf.field_type and flv.type_code = 'field_type'
         where
-        t4.organization_id = 0
-        AND t4.project_id = 0
-        AND t4.is_system = 1
-        AND t4.id NOT IN
+        fosf.organization_id = 0
+        AND fosf.project_id = 0
+        AND fosf.is_system = 1
+        AND fosf.id NOT IN
         <foreach collection="systemFieldIds" item="systemFieldId" open="(" close=")" separator=",">
            #{systemFieldId}
         </foreach>
         <if test=" includeBacklogSystemField != true ">
-            AND t4.context != 'backlog'
+            AND fosf.context != 'backlog'
         </if>
     </select>
 
