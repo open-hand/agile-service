@@ -15,6 +15,7 @@ import {
 import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import FilterManage from '@/components/FilterManage';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -32,6 +33,7 @@ import { service } from '../setting/Setting';
 import SelectPriority from './SelectPriority';
 import CreateIssue from '../ScrumBoardComponent/create-issue';
 import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
+import BoardSearch from '../ScrumBoardComponent/board-search';
 
 const { Option } = Select;
 const { AppState } = stores;
@@ -62,6 +64,7 @@ class ScrumBoardHome extends Component {
     super(props);
     this.dataConverter = new ScrumBoardDataController();
     this.ref = null;
+    this.issueSearchStore = null;
     this.state = {
       updateParentStatus: null,
     };
@@ -382,8 +385,21 @@ class ScrumBoardHome extends Component {
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
 
+  handleFilterChange = () => {
+    this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
+  }
+
   handleCreateIssue = () => {
     ScrumBoardStore.setCreateIssueVisible(true);
+  };
+
+  handleSaveSearchStore = (data) => {
+    this.issueSearchStore = data;
+  }
+
+  handleClickFilterManage = () => {
+    const filterManageVisible = ScrumBoardStore.getFilterManageVisible;
+    ScrumBoardStore.setFilterManageVisible(!filterManageVisible);
   };
 
   render() {
@@ -451,6 +467,7 @@ class ScrumBoardHome extends Component {
           >
             配置看板
           </Button>
+          <Button onClick={this.handleClickFilterManage} icon="settings">个人筛选</Button>
           <ExpandAllButton />
           <ScrumBoardFullScreen />
           {
@@ -485,7 +502,8 @@ class ScrumBoardHome extends Component {
           paddingTop: 16,
         }}
         >
-          <div style={{ display: 'flex' }}>
+          <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
+          {/* <div style={{ display: 'flex' }}>
             <QuickSearch
               onQuickSearchChange={this.onQuickSearchChange}
               onAssigneeChange={this.onAssigneeChange}
@@ -494,7 +512,7 @@ class ScrumBoardHome extends Component {
             />
             <SelectPriority onChange={this.handlePriorityChange} />
             {ScrumBoardStore.hasSetFilter && <Button type="primary" onClick={this.handleClearFilter}>清除筛选</Button>}
-          </div>
+          </div> */}
           <Spin spinning={ScrumBoardStore.getSpinIf}>
             <div className="c7n-scrumboard" style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 270px)' }}>
               <div style={{ display: 'table', minWidth: '100%' }}>
@@ -537,6 +555,13 @@ class ScrumBoardHome extends Component {
           <IssueDetail
             refresh={this.refresh}
           />
+          {this.issueSearchStore ? (
+            <FilterManage
+              visible={ScrumBoardStore.getFilterManageVisible}
+              setVisible={() => ScrumBoardStore.setFilterManageVisible(!ScrumBoardStore.getFilterManageVisible)}
+              issueSearchStore={this.issueSearchStore}
+            />
+          ) : null}
         </Content>
         {
           ScrumBoardStore.getUpdateParent ? (
