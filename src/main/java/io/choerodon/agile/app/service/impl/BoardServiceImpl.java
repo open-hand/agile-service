@@ -369,8 +369,11 @@ public class BoardServiceImpl implements BoardService {
         JSONObject jsonObject = new JSONObject(true);
         //没有传冲刺id，则使用激活的冲刺
         SprintDTO currentSprint;
-        List<String> sprintIds = (List<String>) searchVO.getOtherArgs().get("sprint");
-        Long sprintId = Long.valueOf(sprintIds.get(0));
+        Long sprintId = null;
+        if (searchVO.getOtherArgs() != null && searchVO.getOtherArgs().get("sprint") != null) {
+            List<String> sprintIds = (List<String>) searchVO.getOtherArgs().get("sprint");
+            sprintId = Long.valueOf(sprintIds.get(0));
+        }
         if (ObjectUtils.isEmpty(sprintId)) {
             currentSprint = getActiveSprint(projectId);
         } else {
@@ -386,7 +389,7 @@ public class BoardServiceImpl implements BoardService {
         List<Long> epicIds = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
         List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, sprintId, filterSql, searchVO, searchVO.getAssigneeFilterIds(), userId);
-        Boolean condition = false;
+        Boolean condition = handlerAssigneeAndStory(searchVO);
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
@@ -426,6 +429,33 @@ public class BoardServiceImpl implements BoardService {
         //处理用户默认看板设置，保存最近一次的浏览
         handleUserSetting(boardId, projectId);
         return jsonObject;
+    }
+
+    private Boolean handlerAssigneeAndStory(SearchVO searchVO) {
+        if (ObjectUtils.isEmpty(searchVO)) {
+            return false;
+        }
+        Boolean isAssignee = false;
+        if (searchVO.getOtherArgs() != null && searchVO.getOtherArgs().get("assigneeId") != null) {
+            List<String> assigneeIds = (List<String>) searchVO.getOtherArgs().get("assigneeId");
+            String userId = DetailsHelper.getUserDetails().getUserId().toString();
+            isAssignee = assigneeIds.contains(userId);
+        }
+        Boolean onlyStory = false;
+        if (searchVO.getAdvancedSearchArgs() != null && searchVO.getAdvancedSearchArgs().get("issueTypeId") != null) {
+            List<String> issueTypeIds = (List<String>) searchVO.getOtherArgs().get("issueTypeId");
+            for (String issueTypeId : issueTypeIds) {
+                String typeCode = issueTypeService.getIssueTypeById(Long.valueOf(issueTypeId));
+                if (Objects.equals(typeCode, "story")) {
+                    onlyStory = true;
+                    continue;
+                } else {
+                    onlyStory = false;
+                    break;
+                }
+            }
+        }
+        return isAssignee && onlyStory;
     }
 
     @Override
