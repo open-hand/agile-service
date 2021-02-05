@@ -1,23 +1,23 @@
 /* eslint-disable no-param-reassign */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   DraggableProvided, DraggingStyle, NotDraggingStyle,
 } from 'react-beautiful-dnd';
 import classnames from 'classnames';
 import { Menu, Modal } from 'choerodon-ui';
 import {
-  Button, Icon, Tooltip, DataSet,
+  Button, Icon, Tooltip, DataSet, Select,
 } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { observer } from 'mobx-react-lite';
-import moment from 'moment';
+
+import { Observer, observer } from 'mobx-react-lite';
 import TableDropMenu from '@/common/TableDropMenu';
 import CheckBox from '@/components/check-box';
+import TextEditToggle from '@/components/TextEditTogglePro';
 import { usePageIssueTypeStore } from '../../stores';
-import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
 import { useSortTableContext } from './stores';
-
+import useTextEditTogglePropsWithPage from './useTextEditToggle';
 // import CheckBox from './components/Checkbox';
 
 interface Props {
@@ -27,11 +27,18 @@ interface Props {
   draggingClassName?: string,
   isDragDisabled?: boolean,
 }
+function SpanPlaceholder({ fieldType }: { fieldType: string }) {
+  let placeholder = '请选择';
+  if (['input', 'number', 'text'].includes(fieldType)) {
+    placeholder = '请输入';
+  }
+  return <span style={{ color: 'rgba(0,0,0,0.6)', fontStyle: 'italic' }}>{placeholder}</span>;
+}
 const DraggableItem: React.FC<Props> = ({
   data, isDragDisabled, virtualizedStyle, provided, draggingClassName,
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
-  const { onDelete, showSplitLine, prefixCls: originPrefixCls } = useSortTableContext();
+  const { onDelete, showSplitLine /** 显示则代表时组织层 */, prefixCls: originPrefixCls } = useSortTableContext();
   const prefixCls = `${originPrefixCls}-drag`;
   const pageConfigFieldEdited = data?.get('pageConfigFieldEdited') || {};
   const {
@@ -39,10 +46,12 @@ const DraggableItem: React.FC<Props> = ({
     createdFieldCanNotEdit = false,
     editedFieldCanNotEdit = false,
   } = pageConfigFieldEdited;
-  // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除
-  const disabledDel = !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
+  // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除 禁用问题类型字段不可操作
+  const disabledDel = !pageIssueTypeStore.currentIssueType.enabled && !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
+  const textEditToggleProps = useTextEditTogglePropsWithPage(data, !showSplitLine, { className: `${prefixCls}-item-defaultValue`, disabled: !pageIssueTypeStore.currentIssueType.enabled });
+
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
-    <div className={`${prefixCls}-text`}>
+    <div className={classnames(`${prefixCls}-text`, { [`${prefixCls}-text-edit`]: !textEditToggleProps.disabled })}>
 
       <TableDropMenu
         menu={(
@@ -103,54 +112,70 @@ const DraggableItem: React.FC<Props> = ({
         name, record, dataSet,
       }, editDisabled)}
       {
-          (!disabledDel && !showSplitLine && record?.get('createdLevel') !== 'organization')
-          && (
-            <Button
-              className={`${prefixCls}-action-button`}
-              disabled={isDragDisabled}
-              style={{ marginLeft: 10 }}
-              onClick={() => onClickDel(record!, dataSet!)}
-            >
-              <Icon type="delete" style={{ fontSize: 18 }} />
-            </Button>
-          )
-        }
+        (!disabledDel && !showSplitLine && record?.get('createdLevel') !== 'organization')
+        && (
+          <Button
+            className={`${prefixCls}-action-button`}
+            disabled={isDragDisabled}
+            style={{ marginLeft: 10 }}
+            onClick={() => onClickDel(record!, dataSet!)}
+          >
+            <Icon type="delete" style={{ fontSize: 18 }} />
+          </Button>
+        )
+      }
 
     </div>
   );
   const getStyle = (draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => ({
     ...draggableStyle,
     ...virtualizedStyle,
-    cursor: 'all-scroll',
+    cursor: isDragDisabled ? 'auto' : 'all-scroll',
   });
 
+  const renderDefaultValue = useCallback(() => (
+    <TextEditToggle
+      {...textEditToggleProps}
+    >
+
+      <Observer>
+        {() => (
+          <Tooltip title={data.get('showDefaultValueText') !== '' ? data.get('showDefaultValueText') : undefined}>
+            <span>
+              {(!textEditToggleProps.disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? <SpanPlaceholder fieldType={data.get('fieldType')} /> : data.get('showDefaultValueText') || '')}
+            </span>
+          </Tooltip>
+        )}
+      </Observer>
+    </TextEditToggle>
+
+  ), [data, textEditToggleProps]);
   return (
 
     <div
       role="none"
       ref={provided.innerRef}
       {...provided.draggableProps}
-      {...provided.dragHandleProps}
       style={getStyle(provided.draggableProps.style)}
       className={classnames(`${prefixCls}`, { [`${prefixCls}-split`]: showSplitLine }, draggingClassName)}
-      onClick={(e) => { }}
     >
-      <div className={`${prefixCls}-item`}>
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
         {renderFieldName({ value: data.get('fieldName'), record: data, dataSet: data.dataSet })}
       </div>
-      <div className={`${prefixCls}-item ${prefixCls}-item-text`}>
-        <Tooltip title={data.get('localDefaultValue') || data.get('defaultValue')} placement="top">
-          {data.get('localDefaultValue') || data.get('defaultValue')}
-        </Tooltip>
+      <div
+        role="none"
+        className={`${prefixCls}-item ${prefixCls}-item-text`}
+      >
+        {renderDefaultValue()}
       </div>
-      <div className={`${prefixCls}-item`}>
-        {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, requiredFieldCanNotEdit)}
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
+        {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, !pageIssueTypeStore.currentIssueType.enabled || requiredFieldCanNotEdit)}
       </div>
-      <div className={`${prefixCls}-item`}>
-        {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, createdFieldCanNotEdit)}
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
+        {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, !pageIssueTypeStore.currentIssueType.enabled || editedFieldCanNotEdit)}
       </div>
-      <div className={`${prefixCls}-item`}>
-        {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, editedFieldCanNotEdit)}
+      <div className={`${prefixCls}-item`} {...provided.dragHandleProps}>
+        {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, !pageIssueTypeStore.currentIssueType.enabled || createdFieldCanNotEdit)}
       </div>
     </div>
 

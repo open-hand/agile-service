@@ -3,126 +3,248 @@
 
 <mapper namespace="io.choerodon.agile.infra.mapper.IssueTypeMapper">
 
-    <!--<select id="fulltextSearch" resultType="io.choerodon.issue.domain.IssueType">-->
-    <!--SELECT * FROM issue_type-->
-    <!--WHERE 1=1-->
-    <!--<if test="issueType.organizationId != null">-->
-    <!--AND organization_id = #{issueType.organizationId}-->
-    <!--</if>-->
-    <!--<if test="issueType.name != null">-->
-    <!--AND name LIKE concat('%',#{issueType.name},'%')-->
-    <!--</if>-->
-    <!--<if test="issueType.description != null">-->
-    <!--AND description LIKE concat('%',#{issueType.description},'%')-->
-    <!--</if>-->
-    <!--<if test="param != null">-->
-    <!--AND ( name LIKE concat('%',#{param},'%')-->
-    <!--OR description LIKE concat('%',#{param},'%')-->
-    <!--)-->
-    <!--</if>-->
-    <!--</select>-->
-
-    <select id="queryByOrgId" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
-        SELECT
-        t.*
-        FROM fd_issue_type t
-        WHERE t.organization_id = #{organizationId}
-    </select>
-
     <select id="queryBySchemeId" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
-        SELECT
-        t.*,
-        c.sequence
-        FROM fd_issue_type t
-        LEFT JOIN fd_issue_type_scheme_config c on c.issue_type_id = t.id
+        select
+        t1.id,
+        t1.organization_id,
+        t1.object_version_number,
+        t1.created_by,
+        t1.creation_date,
+        t1.last_updated_by,
+        t1.last_update_date,
+        t1.type_code,
+        t1.project_id,
+        t1.referenced,
+        t1.source,
+        t1.reference_id,
+        t1.is_initialize as initialize,
+        ifnull(t3.enabled, 1) as enabled,
+        ifnull(t3.name, t1.name) as name,
+        ifnull(t3.description, t1.description) as description,
+        ifnull(t3.icon, t1.icon) as icon,
+        ifnull(t3.colour, t1.colour) as colour,
+        t2.sequence
+        from fd_issue_type t1
+        left join fd_issue_type_scheme_config t2 on t2.issue_type_id = t1.id
+        left join fd_issue_type_extend t3 on t1.id = t3.issue_type_id and t3.project_id = #{projectId}
         WHERE 1=1
-        <if test="organizationId != null">
-            AND t.organization_id = #{organizationId}
-        </if>
+        <choose>
+            <when test="projectId == 0">
+                and t1.organization_id = #{organizationId}
+                and t1.project_id = #{projectId}
+            </when>
+            <otherwise>
+                and t1.id in (
+                select t4.id
+                from fd_issue_type t4
+                where t4.organization_id = #{organizationId}
+                and t4.project_id = #{projectId}
+                union
+                select t5.id
+                from fd_issue_type t5
+                where t5.organization_id = #{organizationId}
+                and t5.project_id = 0
+                and t5.source = 'system'
+                )
+            </otherwise>
+        </choose>
         <if test="schemeId != null">
-            AND c.scheme_id = #{schemeId}
+            AND t2.scheme_id = #{schemeId}
         </if>
-        order by c.sequence
+        <if test="onlyEnabled">
+            and ifnull(t3.enabled, 1) = 1
+        </if>
+        order by t2.sequence desc
     </select>
 
-    <select id="selectIssueTypeIds" resultType="java.lang.Long">
-        select
-        it.id
-        from fd_issue_type it
-        where it.organization_id = #{organizationId}
-        <if test="issueTypeSearchVO.name != null">
-            AND it.name LIKE concat('%',#{issueTypeSearchVO.name},'%')
-        </if>
-        <if test="issueTypeSearchVO.description != null">
-            AND it.description LIKE concat('%',#{issueTypeSearchVO.description},'%')
-        </if>
-        <if test="issueTypeSearchVO.param != null">
-            AND (it.name LIKE concat('%',#{issueTypeSearchVO.param},'%')
-            OR it.description LIKE concat('%',#{issueTypeSearchVO.param},'%')
-            )
-        </if>
-    </select>
-
-    <resultMap id="issueTypeListMap" type="io.choerodon.agile.infra.dto.IssueTypeWithInfoDTO">
-        <id property="id" column="it_id"/>
-        <id property="name" column="it_name"/>
-        <id property="description" column="it_description"/>
-        <id property="icon" column="it_icon"/>
-        <id property="colour" column="it_colour"/>
-        <id property="organizationId" column="it_organization_id"/>
-        <id property="initialize" column="it_is_initialize"/>
-        <id property="objectVersionNumber" column="it_object_version_number"/>
-        <collection property="issueTypeSchemeRelationList" autoMapping="true"
-                    ofType="io.choerodon.agile.infra.dto.IssueTypeSchemeRelationDTO">
-            <id property="issueTypeSchemeId" column="itscits_scheme_id"/>
-            <id property="issueTypeSchemeName" column="itscits_name"/>
-        </collection>
-    </resultMap>
-
-    <select id="queryIssueTypeList" resultMap="issueTypeListMap">
-        select
-        it.id as it_id,
-        it.name as it_name,
-        it.description as it_description,
-        it.icon as it_icon,
-        it.colour as it_colour,
-        it.organization_id as it_organization_id,
-        it.type_code as it_type_code,
-        it.is_initialize as it_is_initialize,
-        it.object_version_number as it_object_version_number,
-        itscits.scheme_id as itscits_scheme_id,
-        itscits.name as itscits_name
-        from fd_issue_type it
-        left join
-        (
-        select
-        itsc.issue_type_id,
-        itsc.scheme_id,
-        its.name
-        from fd_issue_type_scheme_config itsc, fd_issue_type_scheme its
-        where itsc.scheme_id = its.id
-        ) itscits on it.id = itscits.issue_type_id
-        where organization_id = #{organizationId}
-        and it.id in
-        <foreach collection="issueTypeIds" item="issueTypeId"
-                 open="(" close=")" separator=",">
-            #{issueTypeId}
-        </foreach>
-        order by it.id desc
-    </select>
-
-    <select id="selectByOrganizationIds" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+    <select id="selectSystemIssueTypeByOrganizationIds" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
         select * from fd_issue_type
         where organization_id in
         <foreach collection="organizationIds" item="organizationId" open="(" close=")" separator=",">
             #{organizationId}
         </foreach>
+        and source = 'system'
+        and project_id = 0
     </select>
 
-    <select id="selectByTypeCode" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
-        select *
-        from fd_issue_type
-        where type_code = #{typeCode}
+    <select id="selectByOptions" resultType="io.choerodon.agile.api.vo.IssueTypeVO">
+        select
+        t3.*
+        from (
+            select
+            t1.id,
+            t1.organization_id,
+            t1.object_version_number,
+            t1.created_by,
+            t1.creation_date,
+            t1.last_updated_by,
+            t1.last_update_date,
+            t1.type_code,
+            t1.project_id,
+            t1.referenced,
+            t1.source,
+            t1.reference_id,
+            t1.is_initialize as initialize,
+            ifnull(t2.enabled, 1) as enabled,
+            ifnull(t2.name, t1.name) as name,
+            ifnull(t2.description, t1.description) as description,
+            ifnull(t2.icon, t1.icon) as icon,
+            ifnull(t2.colour, t1.colour) as colour
+            from fd_issue_type t1
+            left join fd_issue_type_extend t2
+            on t1.id = t2.issue_type_id and t2.project_id = #{projectId}
+            where t1.organization_id = #{organizationId}
+            <choose>
+                <when test="projectId == 0">
+                    and t1.project_id = #{projectId}
+                </when>
+                <otherwise>
+                    and t1.id in (
+                    select t2.id
+                    from fd_issue_type t2
+                    where t2.organization_id = #{organizationId}
+                    and t2.project_id = #{projectId}
+                    union
+                    select t3.id
+                    from fd_issue_type t3
+                    where t3.organization_id = #{organizationId}
+                    and t3.project_id = 0
+                    and t3.source = 'system'
+                    )
+                </otherwise>
+            </choose>
+            <if test="issueTypeSearchVO != null">
+                <if test="issueTypeSearchVO.typeCodes != null and issueTypeSearchVO.typeCodes.size > 0">
+                    and t1.type_code in
+                    <foreach collection="issueTypeSearchVO.typeCodes" item="item" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="issueTypeSearchVO.issueTypeIds != null and issueTypeSearchVO.issueTypeIds.size > 0">
+                    and t1.id in
+                    <foreach collection="issueTypeSearchVO.issueTypeIds" item="item" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+            </if>
+        ) t3
+        where 1=1
+        <if test="issueTypeSearchVO != null">
+            <if test="issueTypeSearchVO.name != null">
+                and t3.name like concat('%',#{issueTypeSearchVO.name},'%')
+            </if>
+            <if test="issueTypeSearchVO.description != null">
+                and t3.description like concat('%',#{issueTypeSearchVO.description},'%')
+            </if>
+            <if test="issueTypeSearchVO.source != null">
+                and t3.source = #{issueTypeSearchVO.source}
+            </if>
+            <if test="issueTypeSearchVO.enabled != null">
+                and t3.enabled = #{issueTypeSearchVO.enabled}
+            </if>
+            <if test="issueTypeSearchVO.referenced != null">
+                and t3.referenced = #{issueTypeSearchVO.referenced}
+            </if>
+            <if test="issueTypeSearchVO.param != null">
+                and (
+                t3.name like concat('%',#{issueTypeSearchVO.param},'%')
+                or t3.description like concat('%',#{issueTypeSearchVO.param},'%')
+                or t3.source = #{issueTypeSearchVO.source}
+                )
+            </if>
+        </if>
+        order by t3.id desc
+    </select>
+
+    <select id="selectByReferenceId" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+        select
+        t1.id,
+        t1.reference_id,
+        t1.project_id
+        from fd_issue_type t1
+        where t1.organization_id = #{organizationId}
+        and t1.project_id != 0
+        and t1.reference_id in
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="selectEnableReference" resultType="io.choerodon.agile.api.vo.IssueTypeVO">
+        select
+        t2.*
+        from fd_issue_type t2
+        where t2.organization_id = #{organizationId}
+        and t2.project_id = 0
+        and t2.source = 'organization'
+        and t2.referenced = 1
+        and t2.id not in (
+            select
+            t1.reference_id
+            from fd_issue_type t1
+            where t1.organization_id = #{organizationId}
+            and t1.project_id = #{projectId}
+            and t1.reference_id is not null
+        )
+    </select>
+
+    <select id="selectWithAlias" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+        select
+        t1.id,
+        t1.organization_id,
+        t1.object_version_number,
+        t1.created_by,
+        t1.creation_date,
+        t1.last_updated_by,
+        t1.last_update_date,
+        t1.type_code,
+        t1.project_id,
+        t1.referenced,
+        t1.source,
+        t1.reference_id,
+        t1.is_initialize as initialize,
+        ifnull(t2.enabled, 1) as enabled,
+        ifnull(t2.name, t1.name) as name,
+        ifnull(t2.description, t1.description) as description,
+        ifnull(t2.icon, t1.icon) as icon,
+        ifnull(t2.colour, t1.colour) as colour
+        from fd_issue_type t1
+        left join fd_issue_type_extend t2
+        on t1.id = t2.issue_type_id and t2.project_id = #{projectId}
+        where t1.id = #{issueTypeId}
+    </select>
+
+    <select id="selectWithAliasByIds" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+        select
+        t1.id,
+        t1.organization_id,
+        t1.object_version_number,
+        t1.created_by,
+        t1.creation_date,
+        t1.last_updated_by,
+        t1.last_update_date,
+        t1.type_code,
+        t1.project_id,
+        t1.referenced,
+        t1.source,
+        t1.reference_id,
+        t1.is_initialize as initialize,
+        ifnull(t2.enabled, 1) as enabled,
+        ifnull(t2.name, t1.name) as name,
+        ifnull(t2.description, t1.description) as description,
+        ifnull(t2.icon, t1.icon) as icon,
+        ifnull(t2.colour, t1.colour) as colour
+        from fd_issue_type t1
+        left join fd_issue_type_extend t2
+        on t1.id = t2.issue_type_id
+        and t2.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
+        where t1.id in
+        <foreach collection="issueTypeIds" item="issueTypeId" open="(" close=")" separator=",">
+            #{issueTypeId}
+        </foreach>
     </select>
 
 </mapper>

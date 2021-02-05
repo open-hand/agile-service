@@ -44,4 +44,12 @@ databaseChangeLog(logicalFilePath: 'fd_status_linkage.groovy') {
             column(name: "parent_issue_status_setting")
         }
     }
+
+    changeSet(author: 'kaiwen.li@hand-china.com',id: '2021-01-25-fd-status-linkage-add-column'){
+        addColumn(tableName: 'fd_status_linkage') {
+            column(name: 'parent_issue_type_id', type: 'BIGINT UNSIGNED', remarks: '父级问题的类型id', defaultValue: '0') {
+                constraints(nullable: false)
+            }
+        }
+    }
 }

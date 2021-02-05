@@ -390,7 +390,7 @@ public class BoardServiceImpl implements BoardService {
         Boolean condition = boardQuery.getAssigneeId() != null && boardQuery.getOnlyStory();
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         putDatasAndSort(columns, parentIds, assigneeIds, boardId, epicIds, condition, organizationId, parentWithSubs, statusMap, issueTypeDTOMap);
         jsonObject.put("parentIds", EncryptionUtils.encryptList(parentIds));
         jsonObject.put("parentIssues", getParentIssues(projectId, parentIds, statusMap, issueTypeDTOMap));
@@ -505,6 +505,12 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public IssueMoveVO move(Long projectId, Long issueId, Long transformId, IssueMoveVO issueMoveVO, Boolean isDemo) {
         //执行状态机转换
+        IssueDTO preIssueDTO = issueMapper.selectByPrimaryKey(issueId);
+        if (preIssueDTO == null) {
+            throw new CommonException("error.issue.notFound");
+        }
+        Long preStatusId = preIssueDTO.getStatusId();
+        Long nowStatusId = issueMoveVO.getStatusId();
         if (Boolean.TRUE.equals(isDemo)) {
             stateMachineClientService.executeTransformForDemo(projectId, issueId, transformId, issueMoveVO.getObjectVersionNumber(),
                     SchemeApplyType.AGILE, new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO))));
@@ -535,7 +541,9 @@ public class BoardServiceImpl implements BoardService {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
         IssueMoveVO result = modelMapper.map(issueDTO, IssueMoveVO.class);
-        sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
+        if (!preStatusId.equals(nowStatusId)) {
+            sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
+        }
         return result;
     }
 

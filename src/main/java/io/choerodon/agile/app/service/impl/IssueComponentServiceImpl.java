@@ -90,13 +90,14 @@ public class IssueComponentServiceImpl implements IssueComponentService {
     }
 
     @Override
-    public IssueComponentVO update(Long projectId, Long id, IssueComponentVO issueComponentVO) {
+    public IssueComponentVO update(Long projectId, Long id, IssueComponentVO issueComponentVO, List<String> fieldList) {
         if (checkNameUpdate(projectId, id, issueComponentVO.getName())) {
             throw new CommonException("error.componentName.exist");
         }
+        IssueComponentValidator.checkUpdateComponent(projectId, issueComponentVO);
         issueComponentVO.setComponentId(id);
         IssueComponentDTO issueComponentDTO = modelMapper.map(issueComponentVO, IssueComponentDTO.class);
-        return modelMapper.map(updateBase(issueComponentDTO), IssueComponentVO.class);
+        return modelMapper.map(updateOptional(issueComponentDTO, fieldList), IssueComponentVO.class);
     }
 
     private void unRelateIssueWithComponent(Long projectId, Long id) {
@@ -122,6 +123,8 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
     @Override
     public void delete(Long projectId, Long id, Long relateComponentId) {
+//        //默认值校验
+//        objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfMultiple(projectId, id, FieldCode.COMPONENT);
         if (relateComponentId == null) {
             unRelateIssueWithComponent(projectId, id);
         } else {
@@ -230,6 +233,14 @@ public class IssueComponentServiceImpl implements IssueComponentService {
     public IssueComponentDTO createBase(IssueComponentDTO issueComponentDTO) {
         if (issueComponentMapper.insert(issueComponentDTO) != 1) {
             throw new CommonException("error.scrum_issue_component.insert");
+        }
+        redisUtil.deleteRedisCache(new String[]{PIECHART + issueComponentDTO.getProjectId() + ':' + CPMPONENT + "*"});
+        return modelMapper.map(issueComponentMapper.selectByPrimaryKey(issueComponentDTO.getComponentId()), IssueComponentDTO.class);
+    }
+
+    private IssueComponentDTO updateOptional(IssueComponentDTO issueComponentDTO, List<String> fieldList){
+        if (issueComponentMapper.updateOptional(issueComponentDTO,fieldList.toArray(new String[fieldList.size()])) != 1) {
+            throw new CommonException("error.scrum_issue_component.update");
         }
         redisUtil.deleteRedisCache(new String[]{PIECHART + issueComponentDTO.getProjectId() + ':' + CPMPONENT + "*"});
         return modelMapper.map(issueComponentMapper.selectByPrimaryKey(issueComponentDTO.getComponentId()), IssueComponentDTO.class);

@@ -453,7 +453,7 @@
                      close=")">
                 #{issueId}
             </foreach>
-            <if test="withChildren or childrenIds.size > 0">
+            <if test="withSubIssues">
                 or (
                 aii.parent_issue_id in
                 <foreach collection="issueIds" item="issueId" open="(" separator=","
@@ -512,6 +512,7 @@
         ai.parent_issue_id,
         ai.relate_issue_id,
         ai.status_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
         ais.is_completed as completed
         from agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
@@ -525,7 +526,7 @@
                 #{child}
             </foreach>
         </if>
-        order by issue_issue_id desc
+        order by issue_num_convert desc
     </select>
 
     <select id="queryIssueIdsListWithSub" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -547,15 +548,22 @@
                 ai.assignee_id,
                 ai.last_update_date,
                 concat(api.project_code,'-', ai.issue_num) as issue_num1,
-                CONVERT(ai.issue_num,SIGNED) as issue_num,
+                CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
                 ai.issue_type_id
             from (
                 select
-                    distinct case
-                    when search.type_code = 'sub_task' then search.parent_issue_id
-                    when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
-                    else search.issue_issue_id
-                    end as issue_issue_id
+                <choose>
+                    <when test="isTreeView">
+                        distinct case
+                        when search.type_code = 'sub_task' then search.parent_issue_id
+                        when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
+                        else search.issue_issue_id
+                        end as issue_issue_id
+                    </when>
+                    <otherwise>
+                        distinct search.issue_issue_id
+                    </otherwise>
+                </choose>
                 from (
                     <include refid="queryIssueIdsListWithSubSql"/>
                 )search
@@ -642,6 +650,7 @@
         select
         ai.issue_id as issue_id,
         ai.summary,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
         CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
         ai.reporter_id,
         ai.last_update_date,
@@ -932,6 +941,43 @@
                      close=")">
                 #{id}
             </foreach>)
+            )
+        </if>
+
+        <if test='searchVO.otherArgs.fixVersion != null and searchVO.otherArgs.fixVersion.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.fixVersionNull != null and searchVO.otherArgs.fixVersionNull == true'>
+                ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
+                left join agile_version_issue_rel avir44
+                on ai31.issue_id = avir44.issue_id
+                WHERE avir44.version_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT avir3.issue_id FROM
+            agile_version_issue_rel avir3 WHERE avir3.version_id in
+            <foreach collection="searchVO.otherArgs.fixVersion" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            and relation_type = 'fix'
+            )
+            )
+        </if>
+        <if test='searchVO.otherArgs.influenceVersion != null and searchVO.otherArgs.influenceVersion.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.influenceVersionNull != null and searchVO.otherArgs.influenceVersionNull == true'>
+                ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
+                left join agile_version_issue_rel avir44
+                on ai31.issue_id = avir44.issue_id
+                WHERE avir44.version_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT avir3.issue_id FROM
+            agile_version_issue_rel avir3 WHERE avir3.version_id in
+            <foreach collection="searchVO.otherArgs.influenceVersion" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            AND relation_type = 'influence'
+             )
             )
         </if>
         <if test='searchVO.otherArgs.label != null and searchVO.otherArgs.label.size > 0'>
@@ -1353,6 +1399,7 @@
         ai.issue_id, ai.summary,
         ai.project_id, ai.type_code,
         ai.issue_type_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
         CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -1385,6 +1432,7 @@
             ai.issue_id, ai.summary,
             ai.project_id, ai.type_code,
             ai.issue_type_id,
+            CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
             CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
             FROM agile_issue ai
             LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -1795,15 +1843,17 @@
 
     <select id="queryIssueEpicSelectList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
-            issue_id,
-            epic_name,
-            creation_date
+            ai.issue_id,
+            ai.epic_name,
+            ai.creation_date,
+            alv.name AS epicColor
         FROM
-            agile_issue
+            agile_issue ai
+            LEFT JOIN lookup_value alv ON ai.color_code = alv.value_code
         WHERE
-            project_id = #{projectId}
-            AND type_code = 'issue_epic'
-        ORDER BY epic_sequence DESC
+            ai.project_id = #{projectId}
+            AND ai.type_code = 'issue_epic'
+        ORDER BY ai.epic_sequence DESC
     </select>
 
     <delete id="batchRemoveFromVersion">
@@ -2011,6 +2061,7 @@
     <select id="listByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueInfoDTO">
         SELECT
         ai.issue_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
         CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -2019,7 +2070,7 @@
                  close=")">
             #{issueId}
         </foreach>
-        ORDER BY ai.issue_id
+        ORDER BY issue_num_convert
     </select>
 
     <select id="listIssueWithLinkedIssues" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -2033,6 +2084,7 @@
         ai.assignee_id,
         ai.project_id,
         ai.issue_type_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
         CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -2153,6 +2205,7 @@
         ai.assignee_id,
         ai.project_id,
         ai.issue_type_id,
+        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
         CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -2628,6 +2681,7 @@
     <select id="queryUnDistributedIssues" resultType="io.choerodon.agile.infra.dto.UndistributedIssueDTO">
         SELECT
           ai.issue_id,
+          CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
           CONCAT_WS('-',api.project_code,ai.issue_num) AS issue_num,
           ai.type_code,
           ai.summary,
@@ -2640,12 +2694,13 @@
         where ai.project_id = #{projectId}
         and ai.type_code in ('story','task','bug')
         and (ai.assignee_id is null or ai.assignee_id = 0)
-        order by ai.issue_id desc
+        order by issue_num_convert desc
     </select>
 
     <select id="queryUnfinishedIssues" resultType="io.choerodon.agile.infra.dto.UnfinishedIssueDTO">
         SELECT
           ai.issue_id,
+          CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
           CONCAT_WS('-',api.project_code,ai.issue_num) AS issue_num,
           ai.type_code,
           ai.summary,
@@ -2658,7 +2713,7 @@
         where ai.project_id = #{projectId}
         and ai.type_code in ('story','task','bug')
         and ai.assignee_id= #{assigneeId}
-        order by ai.issue_id desc
+        order by issue_num_convert desc
         limit 6
     </select>
 
@@ -3244,6 +3299,7 @@
         select
         t1.issue_id,
         t1.summary,
+        CONVERT(t1.issue_num,UNSIGNED) as issue_num_convert,
         CONCAT_WS('-', t2.project_code, t1.issue_num) AS issue_num,
         t1.type_code,
         t1.issue_type_id
@@ -3269,7 +3325,7 @@
                 or CONCAT_WS('-', t2.project_code, t1.issue_num) like CONCAT(CONCAT('%', #{param}), '%')
             )
         </if>
-        order by t1.issue_id desc
+        order by issue_num_convert desc
     </select>
 
     <select id="listMyStarIssuesByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -3434,5 +3490,46 @@
         left join agile_data_log t3 on t2.log_id = t3.log_id
     </select>
 
+    <select id="selectSubIssueIds" resultType="java.lang.Long">
+        select ai.issue_id from agile_issue ai
+        where
+        ai.type_code in ('sub_task','bug')
+        AND
+        (ai.parent_issue_id = #{issueId}
+         OR ai.relate_issue_id = #{issueId})
+    </select>
 
+    <select id="selectCountGroupByIssueTypeId" resultType="io.choerodon.agile.api.vo.IssueTypeCountVO">
+        select
+        t1.issue_type_id,
+        count(t1.issue_id) as count
+        from agile_issue t1
+        where t1.project_id = #{projectId}
+        and t1.issue_type_id in
+        <foreach collection="issueTypeIds" item="issueTypeId" open="(" close=")" separator=",">
+            #{issueTypeId}
+        </foreach>
+        group by t1.issue_type_id
+    </select>
+
+    <update id="updateIssueLastUpdateInfo">
+        update agile_issue
+        set last_update_date = current_timestamp,
+            last_updated_by = #{userId}
+        where
+            issue_id = #{issueId}
+        and project_id = #{projectId}
+    </update>
+
+    <update id="updateIssueLastUpdateInfoByStaticFile">
+        update agile_issue
+        set last_update_date = current_timestamp,
+        last_updated_by = #{userId}
+        where
+        issue_id in (
+            select issue_id
+            from agile_issue_static_file_rel aisfr
+            where aisfr.project_id = #{projectId}
+            and aisfr.static_file_id = #{fileId})
+    </update>
 </mapper>

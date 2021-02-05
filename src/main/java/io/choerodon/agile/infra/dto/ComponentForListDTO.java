@@ -1,5 +1,7 @@
 package io.choerodon.agile.infra.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/31.
  * Email: fuqianghuang01@gmail.com
@@ -19,6 +21,9 @@ public class ComponentForListDTO {
     private String defaultAssigneeRole;
 
     private Integer issueCount;
+
+    @ApiModelProperty(value = "模块排序")
+    private Integer sequence;
 
     public Long getComponentId() {
         return componentId;
@@ -74,5 +79,13 @@ public class ComponentForListDTO {
 
     public void setIssueCount(Integer issueCount) {
         this.issueCount = issueCount;
+    }
+
+    public Integer getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
     }
 }

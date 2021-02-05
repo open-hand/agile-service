@@ -1,11 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { unionBy } from 'lodash';
-import SelectFocusLoad from '@/components/SelectFocusLoad';
-import { configTheme } from '@/utils/common';
 import SelectFeature from '@/components/select/select-feature';
 import { featureApi } from '@/api';
-import { getSelectStyle } from '../utils';
 
 function FeatureField({
   field, value, onChange, projectId,

@@ -6,6 +6,7 @@ import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;
@@ -13,7 +14,12 @@ import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.entity.MessageSender;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +46,13 @@ public class SendMsgUtil {
     private static final String ERROR_PROJECT_NOTEXIST = "error.project.notExist";
     private static final String SUB_TASK = "sub_task";
     private static final String STATUS_ID = "statusId";
+    private static final String INSERT = "insert";
+    private static final String IMAGE = "image";
 
+    private static final String FEATURE_URL_TEMPLATE1 = "#/agile/feature?type=project&id=";
+    private static final String FEATURE_URL_TEMPLATE2 = "&name=";
+    private static final String FEATURE_URL_TEMPLATE3 = "&category=";
+    private static final String FEATURE_URL_TEMPLATE4 = "&organizationId=";
     @Autowired
     private SiteMsgUtil siteMsgUtil;
 
@@ -92,6 +104,13 @@ public class SendMsgUtil {
                 + URL_TEMPLATE3 + result.getIssueNum() 
                 + URL_TEMPLATE4 + paramIssueId 
                 + URL_TEMPLATE5 + result.getIssueId();
+    }
+
+    public String getFeatureUrl(ProjectVO projectVO) {
+        return FEATURE_URL_TEMPLATE1 + projectVO.getId()
+                + FEATURE_URL_TEMPLATE2 + convertProjectName(projectVO)
+                + FEATURE_URL_TEMPLATE3 + projectVO.getCategory()
+                + FEATURE_URL_TEMPLATE4 + projectVO.getOrganizationId();
     }
 
     @Async
@@ -311,4 +330,88 @@ public class SendMsgUtil {
         return projectVO;
     }
 
+    @Async
+    public void sendMsgByIssueComment(Long projectId, IssueDetailDTO issueDTO, IssueCommentVO issueCommentVO) {
+        IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
+        Map<Long, String> actionMap = new HashMap<>(3);
+        String url;
+        String issueType;
+
+        ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+        if ("feature".equals(issueVO.getTypeCode())) {
+            issueType = "特性";
+            url = getFeatureUrl(projectVO);
+        } else {
+            issueType = "问题";
+            url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId());
+        }
+        //设置动作与发送人
+        List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUE_COMMENT", issueVO);
+        setIssueCommentMessageActionAndUser(actionMap, issueCommentVO.getUserId(), issueVO, projectVO, userIds);
+        String summary = String.join("-", issueVO.getIssueNum(), issueVO.getSummary());
+        String comment = Optional.ofNullable(issueCommentVO.getCommentText()).map(SendMsgUtil::getText).orElse("无");
+
+        if (CollectionUtils.isNotEmpty(actionMap.keySet())) {
+            siteMsgUtil.sendIssueComment(actionMap, projectVO, summary, url, comment, issueCommentVO, issueType);
+        }
+    }
+
+    private void setIssueCommentMessageActionAndUser(Map<Long, String> actionMap, Long userId, IssueVO issueVO, ProjectVO projectVO, List<Long> userIds) {
+        Map<Long, String> map = new HashMap<>(2);
+        map.put(issueVO.getAssigneeId(), "处理的");
+        map.put(issueVO.getReporterId(), "负责的");
+        userIds.forEach(sendUserId -> {
+            if(sendUserId.equals(userId)){
+                return;
+            }
+            actionMap.put(sendUserId, map.getOrDefault(userId, "管理的"));
+        });
+    }
+
+    @Async
+    public void sendMsgByIssueCommentReply(Long projectId, IssueDetailDTO issueDTO, IssueCommentVO issueCommentVO) {
+        Map<Long, String> actionMap = new HashMap<>(1);
+        actionMap.put(issueCommentVO.getReplyToUserId(), "评论的");
+        IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
+        String url;
+        String issueType;
+
+        ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+        if ("feature".equals(issueVO.getTypeCode())) {
+            issueType = "特性";
+            url = getFeatureUrl(projectVO);
+        } else {
+            issueType = "问题";
+            url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId());
+        }
+
+        String summary = String.join("-", issueVO.getIssueNum(), issueVO.getSummary());
+        String comment = Optional.ofNullable(issueCommentVO.getCommentText()).map(SendMsgUtil::getText).orElse("无");
+        siteMsgUtil.sendIssueComment(actionMap, projectVO, summary, url, comment, issueCommentVO, issueType);
+    }
+
+    public static String getText(String rawText) {
+        if (StringUtils.isEmpty(rawText)){
+            return null;
+        }
+        StringBuilder result = new StringBuilder();
+        try {
+            JSONArray root = JSON.parseArray(rawText);
+            for (Object o : root) {
+                JSONObject object = (JSONObject) o;
+                if (!(object.get(INSERT) instanceof JSONObject)) {
+                    result.append(object.getString(INSERT));
+                } else if (!(((JSONObject) object.get(INSERT)).get(IMAGE) instanceof JSONObject)) {
+                    result.append("<img style=\"width: auto;height: auto;max-width: 650px;\" src=\"").append(((JSONObject) object.get(INSERT)).getString(IMAGE)).append("\"></img>");
+                }
+            }
+        } catch (Exception e) {
+            return rawText;
+        }
+        if (result.length() == 0) {
+            return null;
+        }
+        StringUtils.replace(rawText, "\n", "<br >");
+        return result.toString();
+    }
 }

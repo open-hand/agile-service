@@ -3,22 +3,29 @@ import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
 import { Permission } from '@choerodon/boot';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
+import useHasDevops from '@/hooks/useHasDevops';
+import useHasTest from '@/hooks/useHasTest';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
+import openIssueMove from './issue-move';
 
 const { confirm } = Modal;
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue,
+  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef,
 }) => {
   const {
-    store, onUpdate, isOnlyAgileProject, applyType,
+    store, onUpdate, applyType,
   } = useContext(EditIssueContext);
+
+  const docs = store.getDoc;
+  const hasDevops = useHasDevops();
+  const hasTest = useHasTest();
+
   const issue = store.getIssue;
   const {
-    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi,
+    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi, issueTypeVO, parentRelateSummary,
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
   const handleDeleteIssue = () => {
@@ -89,6 +96,18 @@ const IssueDropDown = ({
       store.setCreateSubBugShow(true);
     } else if (e.key === '10') {
       store.setRelateStoryShow(true);
+    } else if (e.key === 'item_11') {
+      openIssueMove({
+        issue,
+        customFields: store.customFields,
+        onMoveIssue: onDeleteIssue,
+        loseItems: {
+          test: hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && testLinkStoreRef.current?.data?.length,
+          doc: docs && docs.knowledgeRelationList?.length,
+          backlog: store.backlogLinks && store.backlogLinks.length,
+          linkIssue: store.getLinkIssues && store.getLinkIssues.length,
+        },
+      });
     }
   };
   const getMenu = () => (
@@ -151,7 +170,7 @@ const IssueDropDown = ({
         )
       }
       {
-        applyType !== 'program' && !isOnlyAgileProject && (
+        applyType !== 'program' && hasDevops && (
           <Menu.Item key="6">
             创建分支
           </Menu.Item>
@@ -176,6 +195,27 @@ const IssueDropDown = ({
           <Menu.Item key="10">
             关联问题
           </Menu.Item>
+        )
+      }
+      {
+        (typeCode !== 'sub_task' && !parentRelateSummary) && ( // 子缺陷、子任务不能移
+        <Permission
+          service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+          noAccessChildren={(
+            <Menu.Item
+              key="move"
+              disabled={disableFeatureDeleteWhilePiDoing || (loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
+            >
+              移动
+            </Menu.Item>
+        )}
+        >
+          <Menu.Item
+            key="move"
+          >
+            移动
+          </Menu.Item>
+        </Permission>
         )
       }
     </Menu>

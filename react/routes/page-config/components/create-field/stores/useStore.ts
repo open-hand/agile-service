@@ -6,7 +6,7 @@ export default function useStore(type: string, id: string | number, orgId: strin
     apiGetway: `/agile/v1/${type}s/${id}`,
     iamGetway: `/iam/choerodon/v1/${type}s/${id}`,
     orgId,
-
+    eternalContext: [] as string[],
     checkCode(code: string, schemeCode: string) {
       return axios.get(`${this.apiGetway}/object_scheme_field/check_code?code=${code}&organizationId=${this.orgId}&schemeCode=${schemeCode}`);
     },

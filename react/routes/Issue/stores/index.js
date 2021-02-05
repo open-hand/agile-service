@@ -20,6 +20,20 @@ export const StoreProvider = inject('AppState')(injectIntl(
     const { intl, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
     const [fields, setFields] = useState([]);
     const [hasBatchDeletePermission, setHasBatchDeletePermission] = useState(false);
+    const [tableListMode, changeTableListMode] = useState(() => {
+      const defaultMode = localPageCacheStore.getItem('issues.table.mode');
+      if (defaultMode === 'list') {
+        return defaultMode;
+      }
+      return undefined;
+    });/** 类型为boolean 时 则为用户操作  类型为string 即值为list时为缓存数据 */
+    useEffect(() => {
+      if (typeof (tableListMode) === 'boolean') {
+        tableListMode ? localPageCacheStore.setItem('issues.table.mode', 'list') : localPageCacheStore.remove('issues.table.mode');
+        handleUnSelect({ dataSet }, issueSearchStore, hasBatchDeletePermission);
+        IssueStore.query();
+      }
+    }, [tableListMode]);
     useEffect(() => {
       const loadData = async () => {
         const Fields = await fieldApi.getFoundationHeader();
@@ -47,6 +61,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
       organizationId,
       issueSearchStore,
       IssueStore,
+      tableListMode,
       events: {
         select: () => handleSelect({ dataSet }, issueSearchStore, hasBatchDeletePermission),
         selectAll: () => handleSelect({ dataSet }, issueSearchStore, hasBatchDeletePermission),
@@ -59,7 +74,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
           }
         },
       },
-    })), [hasBatchDeletePermission, intl, issueSearchStore, organizationId, projectId]);
+    })), [hasBatchDeletePermission, intl, issueSearchStore, organizationId, projectId, tableListMode]);
     IssueStore.dataSet = dataSet;
     /**
     * detail data
@@ -69,6 +84,8 @@ export const StoreProvider = inject('AppState')(injectIntl(
 
     const value = {
       ...props,
+      tableListMode,
+      changeTableListMode,
       issueSearchStore,
       fields,
       dataSet,

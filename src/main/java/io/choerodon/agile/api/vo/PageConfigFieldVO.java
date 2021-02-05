@@ -46,6 +46,11 @@ public class PageConfigFieldVO {
 
     private List<FieldOptionVO> fieldOptions;
 
+    private List<Object> defaultValueObjs;
+
+    @Encrypt
+    private Long issueTypeId;
+
     public Object getDefaultValueObj() {
         return defaultValueObj;
     }
@@ -180,5 +185,21 @@ public class PageConfigFieldVO {
 
     public void setCreatedLevel(String createdLevel) {
         this.createdLevel = createdLevel;
+    }
+
+    public List<Object> getDefaultValueObjs() {
+        return defaultValueObjs;
+    }
+
+    public void setDefaultValueObjs(List<Object> defaultValueObjs) {
+        this.defaultValueObjs = defaultValueObjs;
+    }
+
+    public Long getIssueTypeId() {
+        return issueTypeId;
+    }
+
+    public void setIssueTypeId(Long issueTypeId) {
+        this.issueTypeId = issueTypeId;
     }
 }

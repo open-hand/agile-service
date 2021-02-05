@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Table, Button, CheckBox, Modal, Menu, Icon,
+  Table, Button, Modal, Menu, Icon,
 } from 'choerodon-ui/pro';
 import { Tag } from 'choerodon-ui';
 import {
@@ -18,6 +18,8 @@ import TableDropMenu from '../../../common/TableDropMenu';
 import CreateField from '../components/create-field';
 import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
+import { disabledEditDefaultFields, orgDisabledEditDefaultFields } from '../page-issue-type/components/sort-table/useTextEditToggle';
+import { openSyncDefaultValueEditForm } from './components/sync-default-value-modal';
 
 const { Column } = Table;
 enum IRequireScopeType {
@@ -53,6 +55,18 @@ function ObjectScheme() {
       cancelProps: { color: 'dark' },
     };
     schemeTableDataSet.delete(record, modalProps);
+  }
+  function handleSyncDefault() {
+    const record = schemeTableDataSet.current!.clone();
+    openSyncDefaultValueEditForm(record, prefixCls);
+  }
+  function handleClickMenu({ key }: { key: string }) {
+    if (key === 'del') {
+      handleRemove();
+    }
+    if (key === 'sync') {
+      handleSyncDefault();
+    }
   }
   function handleCheckChange(value: boolean) {
     if (handleContinueCheckChange()) {
@@ -126,6 +140,7 @@ function ObjectScheme() {
       handleRefresh,
       record,
     };
+
     Modal.open({
       key: editModelKey,
       title: formatMessage({ id: 'field.edit' }),
@@ -140,24 +155,35 @@ function ObjectScheme() {
   const renderDropDown = ({ text, record }: RenderProps) => {
     const system = record?.get('system');
     const projectId = record?.get('projectId');
-    if (system || (getMenuType() === 'project' && !projectId)) {
-      return text;
-    }
-    const menu = (
-      <Menu onClick={handleRemove}>
+    const disabledFields = getMenuType() === 'project' ? disabledEditDefaultFields : orgDisabledEditDefaultFields;
+
+    // 系统字段 和项目层的组织字段 禁止编辑,禁止删除
+    const disabledEditDel = system || (getMenuType() === 'project' && projectId === null);
+    const menuItems = [
+      <Menu.Item key="sync">
+        <span>{formatMessage({ id: 'defaultValue.sync' })}</span>
+      </Menu.Item>,
+    ];
+    if (!disabledEditDel) {
+      menuItems.push(
         <Menu.Item key="del">
           <span>{formatMessage({ id: 'delete' })}</span>
-        </Menu.Item>
+        </Menu.Item>,
+      );
+    }
+    const menu = (
+      <Menu onClick={handleClickMenu}>
+        {menuItems}
       </Menu>
-
     );
+
     return (
       <div className="c7n-table-cell-drop-menu">
         <TableDropMenu
           menu={menu}
-          onClickEdit={openEditFieldModal}
+          onClickEdit={disabledEditDel ? undefined : openEditFieldModal}
           text={text}
-          isHasMenu={!(system || (getMenuType() === 'project' && !projectId))}
+          isHasMenu={!(system && disabledFields.includes(record?.get('code')))}
         />
       </div>
     );

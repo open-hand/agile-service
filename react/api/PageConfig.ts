@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { AxiosRequestConfig } from 'axios';
+import { IFieldType } from '@/common/types';
 import { getProjectId, getOrganizationId, getMenuType } from '@/utils/common';
 import Api from './Api';
 
@@ -12,6 +13,14 @@ export enum PageConfigIssueType {
   epic = 'issue_epic',
   demand = 'demand',
   null = '',
+}
+interface ISyncDefaultPostData {
+  defaultValue?: any
+  extraConfig?: boolean
+  fieldOptions?: Array<IFieldOption & { isDefault: boolean }>
+  custom: boolean
+  fieldType?: IFieldType
+  issueTypeIds: string[]
 }
 export interface IFieldOption {
   id: string,
@@ -29,6 +38,7 @@ interface IFiled {
   fieldName: string,
   fieldType: string,
   defaultValueObj: any,
+  defaultValueObjs?: Array<any>,
   fieldOptions: Array<IFieldOption> | null
   id: string,
   issueType: PageConfigIssueType,
@@ -67,7 +77,7 @@ interface PageIssueType {
 }
 type FiledUpdate = Required<Pick<IFiled, 'fieldId' | 'required' | 'created' | 'edited' | 'objectVersionNumber'>>;
 export interface UIssueTypeConfig {
-  issueType: PageConfigIssueType,
+  issueTypeId: string,
   fields: Array<FiledUpdate>,
   issueTypeFieldVO?: Partial<IssueTypeFieldVO>,
   deleteIds?: string[],
@@ -99,6 +109,20 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   /**
+   * 通过字段id加载字段详情
+   * @param fieldId
+   */
+  loadById(fieldId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/${fieldId}`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
    * 根据问题类型id查询字段
    * @param issueTypeId
    */
@@ -122,7 +146,7 @@ class PageConfigApi extends Api<PageConfigApi> {
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/description_template`,
       params: {
-        issueType,
+        issueTypeId: issueType,
         organizationId: getOrganizationId(),
       },
     });
@@ -133,7 +157,7 @@ class PageConfigApi extends Api<PageConfigApi> {
    *
    */
   loadAvailableIssueType(): Promise<{ id: string, name: string, typeCode: string }[]> {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/configs/issue_types`,
       params: {
@@ -144,14 +168,14 @@ class PageConfigApi extends Api<PageConfigApi> {
 
   /**
    * 根据问题类型加载页面配置
-   * @param issueType
+   * @param issueTypeId
    */
-  loadByIssueType(issueType: PageConfigIssueType): Promise<PageIssueType> {
+  loadByIssueType(issueTypeId: string): Promise<PageIssueType> {
     return axios({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/configs`,
       params: {
-        issueType,
+        issueTypeId,
         organizationId: getOrganizationId(),
       },
     });
@@ -201,6 +225,23 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   /**
+   * 同步主默认值到 issueType 类型
+   * @param fieldId
+   * @param issueTypeStr
+   */
+  syncDefaultValue(fieldId: string, data: ISyncDefaultPostData) {
+    return axios({
+      method: 'post',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/sync_default_value`,
+      params: {
+        field_id: fieldId,
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  /**
    * 删除字段
    * @param fieldId
    */
@@ -218,12 +259,12 @@ class PageConfigApi extends Api<PageConfigApi> {
    * 查询当前类型未选择的字段列表
    * @param issueType
    */
-  loadUnSelected(issueType: PageConfigIssueType): Promise<IFiledListItemProps[]> {
+  loadUnSelected(issueTypeId: string): Promise<IFiledListItemProps[]> {
     return axios({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/unselected`,
       params: {
-        issueType,
+        issueTypeId,
         organizationId: getOrganizationId(),
       },
     });

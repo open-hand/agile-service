@@ -105,13 +105,23 @@ public class IssueAssembler extends AbstractAssembler {
         issueVO.setReporterLoginName(reporterLoginName);
         issueVO.setReporterRealName(reporterRealName);
         if (issueCommentCondition) {
-            issueVO.getIssueCommentVOList().forEach(issueCommentDTO -> {
-                UserMessageDTO commentUser = userMessageDOMap.get(issueCommentDTO.getUserId());
-                issueCommentDTO.setUserName(commentUser != null ? commentUser.getName() : null);
-                issueCommentDTO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
-                issueCommentDTO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
-                issueCommentDTO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
-            });
+            Map<Long, Integer> parentSizeMap = new HashMap<>(issueVO.getIssueCommentVOList().size());
+            Iterator<IssueCommentVO> iterator = issueVO.getIssueCommentVOList().iterator();
+            while (iterator.hasNext()) {
+                IssueCommentVO issueCommentVO = iterator.next();
+                if (issueCommentVO.getParentId() != null && issueCommentVO.getParentId() != 0L) {
+                    Integer size = parentSizeMap.get(issueCommentVO.getParentId()) != null ? parentSizeMap.get(issueCommentVO.getParentId()) : 0;
+                    parentSizeMap.put(issueCommentVO.getParentId(), size + 1);
+                    iterator.remove();
+                } else {
+                    UserMessageDTO commentUser = userMessageDOMap.get(issueCommentVO.getUserId());
+                    issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
+                    issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
+                    issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
+                    issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
+                    issueCommentVO.setReplySize(parentSizeMap.get(issueCommentVO.getCommentId()) != null ? parentSizeMap.get(issueCommentVO.getCommentId()) : 0);
+                }
+            }
         }
         // 添加主要负责人、测试负责人信息
         issueVO.setMainResponsible(userMessageDOMap.get(issueDetailDTO.getMainResponsibleId()));
@@ -153,7 +163,12 @@ public class IssueAssembler extends AbstractAssembler {
             issueListFieldKVVO.setStatusVO(statusMapDTOMap.get(issueDO.getStatusId()));
             issueListFieldKVVO.setAssigneeImageUrl(assigneeImageUrl);
             issueListFieldKVVO.setReporterImageUrl(reporterImageUrl);
-            issueListFieldKVVO.setVersionIssueRelVOS(toTargetList(issueDO.getVersionIssueRelDTOS(), VersionIssueRelVO.class));
+            List<VersionIssueRelVO> versionList = toTargetList(issueDO.getVersionIssueRelDTOS(), VersionIssueRelVO.class);
+            issueListFieldKVVO.setVersionIssueRelVOS(versionList);
+            if (!CollectionUtils.isEmpty(versionList)) {
+                issueListFieldKVVO.setFixVersionIssueRelVOS(versionList.stream().filter(versionIssueRelDTO -> Objects.equals("fix",versionIssueRelDTO.getRelationType())).collect(Collectors.toList()));
+                issueListFieldKVVO.setInfluenceVersionIssueRelVOS(versionList.stream().filter(versionIssueRelDTO -> Objects.equals("influence",versionIssueRelDTO.getRelationType())).collect(Collectors.toList()));
+            }
             issueListFieldKVVO.setIssueComponentBriefVOS(toTargetList(issueDO.getIssueComponentBriefDTOS(), IssueComponentBriefVO.class));
             issueListFieldKVVO.setIssueSprintVOS(toTargetList(issueDO.getIssueSprintDTOS(), IssueSprintVO.class));
             issueListFieldKVVO.setLabelIssueRelVOS(toTargetList(issueDO.getLabelIssueRelDTOS(), LabelIssueRelVO.class));
@@ -172,7 +187,7 @@ public class IssueAssembler extends AbstractAssembler {
      */
     public List<IssueCompletedStatusVO> issueDTOToIssueCountVO(List<IssueOverviewVO> issueList, Set<Long> priority){
         Set<Long> userIdList = new HashSet<>();
-        rx.Observable.from(priority)
+        Observable.from(priority)
                 .mergeWith(Observable.from(issueList.stream().map(IssueOverviewVO::getCreatedBy).collect(Collectors.toSet())))
                 .toList().subscribe(userIdList::addAll);
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(new ArrayList<>(userIdList), true);
@@ -183,6 +198,7 @@ public class IssueAssembler extends AbstractAssembler {
         List<IssueCompletedStatusVO> result = createdlist.stream()
                 .map(entry -> new IssueCompletedStatusVO(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         result.addAll(priority.stream()
+                .filter(userId -> !ObjectUtils.isEmpty(userMap.get(userId)))
                 .map(userId -> userMap.get(userId).getRealName())
                 .filter(realName -> !createdlist.stream().map(Map.Entry::getKey).collect(Collectors.toSet())
                         .contains(realName)).map(IssueCompletedStatusVO::new)
@@ -211,6 +227,7 @@ public class IssueAssembler extends AbstractAssembler {
                 .filter(issue -> BooleanUtils.isTrue(issue.getCompleted()) && Objects.nonNull(issue.getAssigneeId()))
                 .collect(Collectors.groupingBy(IssueOverviewVO::getAssigneeId)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
+                .filter(entry -> !ObjectUtils.isEmpty(userMap.get(entry.getKey())))
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
                 .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
     }
@@ -229,11 +246,13 @@ public class IssueAssembler extends AbstractAssembler {
         list.addAll(group.getOrDefault(Boolean.TRUE, Collections.emptyList())
                 .stream().collect(Collectors.groupingBy(IssueOverviewVO::getCreatedBy)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
+                .filter(entry -> !ObjectUtils.isEmpty(userMap.get(entry.getKey())))
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
                 .collect(Collectors.toList()));
         list.addAll(group.getOrDefault(Boolean.FALSE, Collections.emptyList())
                 .stream().collect(Collectors.groupingBy(IssueOverviewVO::getCreatedBy)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
+                .filter(entry -> !ObjectUtils.isEmpty(userMap.get(entry.getKey())))
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
                 .collect(Collectors.toList()));
         return list;
@@ -366,13 +385,29 @@ public class IssueAssembler extends AbstractAssembler {
         issueSubVO.setCreaterName(createrName);
         issueSubVO.setCreaterImageUrl(createrName != null ? userMessageDOMap.get(issueSubVO.getCreatedBy()).getImageUrl() : null);
         if (issueCommentCondition) {
-            issueSubVO.getIssueCommentVOList().forEach(issueCommentDTO -> {
-                UserMessageDTO commentUser = userMessageDOMap.get(issueCommentDTO.getUserId());
-                issueCommentDTO.setUserName(commentUser != null ? commentUser.getName() : null);
-                issueCommentDTO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
-                issueCommentDTO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
-                issueCommentDTO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
-            });
+            Map<Long, IssueCommentVO> commentMap = new HashMap<>(issueSubVO.getIssueCommentVOList().size());
+            for (int i = issueSubVO.getIssueCommentVOList().size() - 1; i >= 0; i--) {
+                IssueCommentVO issueCommentVO = issueSubVO.getIssueCommentVOList().get(i);
+                UserMessageDTO commentUser = userMessageDOMap.get(issueCommentVO.getUserId());
+                issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
+                issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
+                issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
+                issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
+                issueCommentVO.setReplySize(0);
+                commentMap.put(issueCommentVO.getCommentId(), issueCommentVO);
+                if (issueCommentVO.getParentId() != null
+                        && issueCommentVO.getParentId() != 0L
+                        && !ObjectUtils.isEmpty(commentMap.get(issueCommentVO.getParentId()))) {
+                    //设置被回复人信息
+                    IssueCommentVO parentComment = commentMap.get(issueCommentVO.getParentId());
+                    parentComment.setReplySize(parentComment.getReplySize() + 1);
+                    issueCommentVO.setReplyToUserId(parentComment.getUserId());
+                    issueCommentVO.setReplyToUserName(parentComment.getUserName());
+                    issueCommentVO.setReplyToUserLoginName(parentComment.getUserLoginName());
+                    issueCommentVO.setReplyToUserRealName(parentComment.getUserRealName());
+                    issueCommentVO.setReplyToUserImageUrl(parentComment.getUserImageUrl());
+                }
+            }
         }
         return issueSubVO;
     }
@@ -562,7 +597,7 @@ public class IssueAssembler extends AbstractAssembler {
     }
 
     public  List<IssueLinkVO> issueDTOTOVO(Long projectId, List<IssueDTO> issueDTOs){
-        List<io.choerodon.agile.api.vo.IssueLinkVO> issueLinkVOList = new ArrayList<>(issueDTOs.size());
+        List<IssueLinkVO> issueLinkVOList = new ArrayList<>(issueDTOs.size());
         if (!issueDTOs.isEmpty()) {
             Map<Long, IssueTypeVO> testIssueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.TEST);
             Map<Long, IssueTypeVO> agileIssueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);

@@ -1,124 +1,172 @@
-import React, { useMemo, useEffect, useState } from 'react';
-import { Form, DataSet, Select } from 'choerodon-ui/pro';
+import React, {
+  useMemo, useEffect, useCallback, useState,
+} from 'react';
+import {
+  Form, DataSet, Button, Select, Row, Col,
+} from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { find } from 'lodash';
-import { useIssueTypes } from '@/hooks';
-import { IIssueType } from '@/common/types';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import SelectStatus from '@/components/select/select-status';
 import { statusTransformApi } from '@/api';
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import Loading from '@/components/Loading';
+import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
+import useFields from '@/routes/Issue/components/BatchModal/useFields';
+import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import styles from './index.less';
 
 interface IParentIssueStatusSetting {
   id: string
   issueTypeId: string
   parentIssueStatusSetting: string
-  parentIssueTypeCode: 'story' | 'task' | 'bug'
+  parentIssueTypeId: string
   projectId: number
   statusId: string
 }
-
+const { Option } = Select;
 const Linkage = ({
-// @ts-ignore
+  // @ts-ignore
   modal, record, selectedType, customCirculationDataSet,
 }) => {
-  const [issueTypes] = useIssueTypes();
+  const { data: issueTypes } = useProjectIssueTypes({ typeCode: ['story', 'task', 'bug'] });
+  const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
   const linkageDataSet = useMemo(() => new DataSet({
     autoCreate: true,
-    fields: [
-      {
-        name: 'story', label: '指定状态', type: 'string' as FieldType, textField: 'name', valueField: 'id',
-      },
-      {
-        name: 'task', label: '指定状态', type: 'string' as FieldType, textField: 'name', valueField: 'id',
-      },
-      {
-        name: 'bug', label: '指定状态', type: 'string' as FieldType, textField: 'name', valueField: 'id',
-      },
-    ],
   }), []);
-
-  const selectedTypeCode = find(issueTypes, (
-    item: IIssueType,
-  ) => item.id === selectedType)?.typeCode;
-
-  useEffect(() => {
+  const getFieldValue = useCallback((name) => {
     const { current } = linkageDataSet;
-    if (selectedTypeCode) { // 有selectedTypeCode的时候再请求，防止请求两边，浪费一次没有意义的请求
-      setLoading(true);
-      statusTransformApi.getLinkage(selectedType, record.get('id')).then((res: IParentIssueStatusSetting[]) => {
-        setLoading(false);
-        current?.set('story', find(res, { parentIssueTypeCode: 'story' })?.parentIssueStatusSetting);
-        current?.set('task', find(res, { parentIssueTypeCode: 'task' })?.parentIssueStatusSetting);
-        if (selectedTypeCode === 'sub_task') {
-          current?.set('bug', find(res, { parentIssueTypeCode: 'bug' })?.parentIssueStatusSetting);
-        }
-      }).catch(() => {
-        setLoading(false);
-      });
+    if (current) {
+      return current.get(name);
     }
-  }, [linkageDataSet, record, selectedType, selectedTypeCode]);
+    return '';
+  }, [linkageDataSet]);
+  const getField = useCallback((name) => linkageDataSet.current?.getField(name), [linkageDataSet]);
 
+  const addField = useCallback((name, props) => {
+    const field = new DataSetField({ ...props, name }, linkageDataSet, linkageDataSet.current);
+    linkageDataSet?.current?.fields.set(name, field);
+  }, [linkageDataSet]);
+
+  const addFieldRule = useCallback((key) => {
+    addField(`${key}-type`, {
+      required: true,
+    });
+    addField(`${key}-status`, {
+      required: true,
+    });
+  }, [addField]);
+
+  const setFieldValue = useCallback((name: string, value: any) => {
+    const { current } = linkageDataSet;
+    if (current) {
+      current.set(name, value);
+    }
+  }, [linkageDataSet]);
+  const removeField = useCallback((name) => {
+    linkageDataSet.fields.delete(name);
+    linkageDataSet.current?.fields.delete(name);
+  }, [linkageDataSet]);
+  useEffect(() => {
+    setLoading(true);
+    statusTransformApi.getLinkage(selectedType, record.get('id')).then((res: IParentIssueStatusSetting[]) => {
+      const initFields = Field.init(new Array(Math.max(res.length, 1)).fill({}));
+      initFields.forEach((item: { key: number }, i: number) => {
+        addFieldRule(item.key);
+        setFieldValue(`${item.key}-type`, res[i].parentIssueTypeId);
+        setFieldValue(`${item.key}-status`, res[i].parentIssueStatusSetting);
+      });
+      setLoading(false);
+    }).catch(() => {
+      setLoading(false);
+    });
+  }, [Field, addFieldRule, linkageDataSet, record, selectedType, setFieldValue]);
   useEffect(() => {
     const handleOk = async () => {
-      const data = linkageDataSet.toData();
-      // @ts-ignore
-      const { story, task, bug } = data && data[0];
-      const updateData = [];
-      if (story) {
-        updateData.push({
-          parentIssueTypeCode: 'story',
-          parentIssueStatusSetting: story,
+      if (await linkageDataSet.validate()) {
+        const data: any = linkageDataSet.current?.toData();
+        const updateData: any[] = [];
+        fields.forEach((f: any) => {
+          const { key } = f;
+          updateData.push({
+            parentIssueTypeId: data[`${key}-type`],
+            parentIssueStatusSetting: data[`${key}-status`],
+          });
         });
+        // @ts-ignore
+        await statusTransformApi.updateLinkage(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+        customCirculationDataSet.query(customCirculationDataSet.currentPage);
+        return true;
       }
-      if (task) {
-        updateData.push({
-          parentIssueTypeCode: 'task',
-          parentIssueStatusSetting: task,
-        });
-      }
-      if (bug) {
-        updateData.push({
-          parentIssueTypeCode: 'bug',
-          parentIssueStatusSetting: bug,
-        });
-      }
-      // @ts-ignore
-      await statusTransformApi.updateLinkage(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
-      customCirculationDataSet.query(customCirculationDataSet.currentPage);
+      return false;
     };
     if (modal) {
       modal.handleOk(handleOk);
     }
-  }, [customCirculationDataSet, linkageDataSet, modal, record, selectedType]);
-
-  const getIssueTypeId = (code: string) => find(issueTypes, (
-    item: IIssueType,
-  ) => item.typeCode === code)?.id;
-
+  }, [customCirculationDataSet, fields, linkageDataSet, modal, record, selectedType]);
+  const selectedIssueTypes = (() => {
+    const data: any = linkageDataSet.toData()[0];
+    return Object.keys(data).reduce((result: string[], key) => {
+      const [k, code] = key.split('-');
+      if (code === 'type') {
+        result.push(data[key]);
+      }
+      return result;
+    }, []);
+  })();
   return (
     <div className={styles.linkage}>
       <Loading loading={loading} />
       <div className={styles.tip}>当工作项流转到此状态后，关联的父任务状态设置。</div>
       <Form dataSet={linkageDataSet}>
+        {fields.map((f: any) => {
+          const { key, id } = f;
+          const typeName = `${key}-type`;
+          const statusName = `${key}-status`;
+          const issueTypeId = getFieldValue(typeName);
+          return (
+            <Row key={key} gutter={20}>
+              <Col span={11}>
+                <Select
+                  label="父任务类型"
+                  name={typeName}
+                  onChange={() => {
+                    getField(statusName)?.reset();
+                  }}
+                >
+                  {issueTypes?.filter((type) => (issueTypeId && type.id === issueTypeId) || !selectedIssueTypes.includes(type.id)).map((type) => (
+                    <Option value={type.id}>
+                      {type.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Col>
+              <Col span={11} key={id}>
+                <SelectStatus label="指定状态" key={`${key}-${issueTypeId}`} name={statusName} issueTypeId={issueTypeId} />
+              </Col>
+              <Col span={2}>
+                <Button
+                  style={{ flexShrink: 0 }}
+                  icon="delete"
+                  onClick={() => {
+                    Field.remove(key);
+                    removeField(typeName);
+                    removeField(statusName);
+                  }}
+                />
+              </Col>
+            </Row>
+          );
+        })}
         <div>
-          <p className={styles.label}>父级为故事类型</p>
-          <SelectStatus name="story" key={getIssueTypeId('story')} issueTypeId={getIssueTypeId('story')} />
+          <Button
+            icon="playlist_add"
+            color={'blue' as ButtonColor}
+            onClick={() => {
+              const newKey = Field.add();
+              addFieldRule(newKey);
+            }}
+          />
         </div>
-        <div>
-          <p className={styles.label}>父级为任务类型</p>
-          <SelectStatus name="task" key={getIssueTypeId('task')} issueTypeId={getIssueTypeId('task')} />
-        </div>
-        {
-          selectedTypeCode === 'sub_task' && (
-            <div>
-              <p className={styles.label}>父级为缺陷类型</p>
-              <SelectStatus name="bug" key={getIssueTypeId('bug')} issueTypeId={getIssueTypeId('bug')} />
-            </div>
-          )
-        }
       </Form>
     </div>
   );

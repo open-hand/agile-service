@@ -6,6 +6,7 @@ import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.fallback.BaseFeignClientFallback;
 import io.swagger.annotations.ApiParam;
+import org.apache.ibatis.annotations.Param;
 import org.hzero.common.HZeroService;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -116,6 +117,17 @@ public interface BaseFeignClient {
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/all")
     ResponseEntity<List<ProjectVO>> listProjectsByOrgId(@PathVariable("organization_id") Long organizationId);
+
+    /**
+     *
+     * @param organizationId
+     * @return
+     */
+    @PostMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/all_with_category")
+    ResponseEntity<Page<ProjectVO>> listWithCategoryByOrganizationIds(@PathVariable("organization_id") Long organizationId,
+                                                                      @RequestBody ProjectSearchVO projectSearchVO,
+                                                                      @RequestParam Integer page,
+                                                                      @RequestParam Integer size);
 
 
     /**

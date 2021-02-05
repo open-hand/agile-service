@@ -1,6 +1,4 @@
 /*eslint-disable*/
-const pageDetail = {
-};
 
 const en_US = {
   refresh: 'Refresh',
@@ -230,6 +228,8 @@ const en_US = {
   'field.label': 'label',
   'field.member': 'member',
   'field.default': 'defaultValue',
+  'field.default.sync': 'sync defaultValue to',
+  'defaultValue.sync':'sync defaultValue',
   'field.decimal': 'decimal',
   'field.urlError': 'URL error',
   'field.useCurrentDate': 'Use Current Date',
@@ -241,7 +241,5 @@ const en_US = {
   'dragList.active': 'active',
   'dragList.placeholder': 'Please enter an option value',
   'dragList.placeholder.code': 'Please enter an option code',
-
-  ...pageDetail,
 };
 export default en_US;

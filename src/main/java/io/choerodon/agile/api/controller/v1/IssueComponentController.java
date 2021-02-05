@@ -1,9 +1,12 @@
 package io.choerodon.agile.api.controller.v1;
 
+import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.ComponentForListVO;
+import io.choerodon.agile.api.vo.MoveComponentVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.SearchVO;
 
+import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -37,6 +40,8 @@ public class IssueComponentController {
 
     @Autowired
     private IssueComponentService issueComponentService;
+    @Autowired
+    private VerifyUpdateUtil verifyUpdateUtil;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建component")
@@ -58,8 +63,10 @@ public class IssueComponentController {
                                                             @ApiParam(value = "component id", required = true)
                                                              @PathVariable @Encrypt  Long id,
                                                             @ApiParam(value = "components对象", required = true)
-                                                             @RequestBody IssueComponentVO issueComponentVO) {
-        return Optional.ofNullable(issueComponentService.update(projectId, id, issueComponentVO))
+                                                             @RequestBody JSONObject jsonObject) {
+        IssueComponentVO issueComponentVO = new IssueComponentVO();
+        List<String> fieldList = verifyUpdateUtil.verifyUpdateData(jsonObject, issueComponentVO);
+        return Optional.ofNullable(issueComponentService.update(projectId, id, issueComponentVO, fieldList))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.component.update"));
     }
@@ -102,7 +109,7 @@ public class IssueComponentController {
                                                                     @ApiParam(value = "查询参数")
                                                                      @RequestBody(required = false) SearchVO searchVO,
                                                                     @ApiParam(value = "分页信息", required = true)
-                                                                     @SortDefault(value = "component_id", direction = Sort.Direction.DESC)
+                                                                     @SortDefault(sort = {"sequence","component_id"}, direction = Sort.Direction.DESC)
                                                                      @ApiIgnore PageRequest pageRequest) {
         return Optional.ofNullable(issueComponentService.queryComponentByProjectId(projectId, componentId, noIssueTest, searchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -147,5 +154,4 @@ public class IssueComponentController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.checkName.get"));
     }
-
 }

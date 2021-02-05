@@ -4,7 +4,7 @@ import Api from './Api';
 
 class PiApi extends Api<PiApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**

@@ -55,11 +55,11 @@ public interface AgilePluginService {
     /**
      * 过滤出项目群字段
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @param pageFields
      * @return
      */
-    List<PageFieldDTO> handlerProgramPageField(Long projectId, String issueType, List<PageFieldDTO> pageFields);
+    List<PageFieldDTO> handlerProgramPageField(Long projectId, Long issueTypeId, List<PageFieldDTO> pageFields);
 
     /**
      * 创建issue初始化特性相关的值
@@ -178,19 +178,19 @@ public interface AgilePluginService {
      * 查询项目群的问题类型
      * @param projectId
      * @param issueTypes
-     * @param contextArray
+     * @param issueTypeIds
      * @return
      */
-    List<IssueTypeVO> queryProgramIssueType(Long projectId, List<IssueTypeVO> issueTypes, List<String> contextArray);
+    List<IssueTypeVO> queryProgramIssueType(Long projectId, List<IssueTypeVO> issueTypes, List<Long> issueTypeIds);
 
     /**
      * 项目群史诗查询pageConfig
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @param pageConfigFieldVOS
      * @return
      */
-    List<PageConfigFieldVO> queryProgramPageConfigFields(Long projectId, String issueType, List<PageConfigFieldVO> pageConfigFieldVOS);
+    List<PageConfigFieldVO> queryProgramPageConfigFields(Long projectId, Long issueTypeId, List<PageConfigFieldVO> pageConfigFieldVOS);
 
     /**
      * 添加项目群问题类型
@@ -338,9 +338,9 @@ public interface AgilePluginService {
     /**
      * 获取字段Code
      * @param fieldCodeS
-     * @param typeCode
+     * @param issueTypeId
      */
-    void getIssueTypeFieldCodes(List<String> fieldCodeS, String typeCode);
+    void getIssueTypeFieldCodes(List<String> fieldCodeS, Long issueTypeId);
 
     /**
      * 处理冲刺是否是规划中
@@ -374,4 +374,35 @@ public interface AgilePluginService {
      * @param statusFieldValueSettingDTOS
      */
     void handlerProgramFieldValue(StatusFieldSettingVO statusFieldSettingVO, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS);
+
+    /**
+     * 跨项目转交处理Feature需要清空得数据
+     * @param projectId
+     * @param issueDTO
+     */
+    void handlerFeatureCleanValue(Long projectId, IssueDetailDTO issueDTO);
+
+    /**
+     * 项目群子项目需要清空逻辑
+     * @param issueDTO
+     * @param issueUpdateVO
+     * @param fieldList
+     */
+    void handlerFeatureSelfValue(IssueDetailDTO issueDTO, IssueUpdateVO issueUpdateVO, List<String> fieldList);
+
+    /**
+     * 修改agile_feature和wsjf表中数据的projectId
+     * @param projectId
+     * @param issueDTO
+     * @param targetProjectId
+     */
+    void projectMoveUpdateFeatureValue(Long projectId, IssueDTO issueDTO, Long targetProjectId);
+
+    /**
+     * 设置商业版预定义字段的默认值对象
+     * @param pageFieldViews
+     * @param projectId
+     * @param organizationId
+     */
+    void setBussinessDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
 }

@@ -33,7 +33,7 @@ interface IFieldValue {
   statusFieldSettingId: string,
   projectId: number,
   optionId: null | string | string[],
-  fieldType: 'member' | 'radio' | 'single' |'checkbox' | 'multiple' | 'text' | 'input' | 'number' | 'date' | 'time' | 'datetime',
+  fieldType: 'member' | 'radio' | 'single' | 'checkbox' | 'multiple' | 'text' | 'input' | 'number' | 'date' | 'time' | 'datetime',
   operateType: 'clear' | 'specifier' | 'current_time' | 'add' | 'reportor' | 'creator' | 'operator',
   numberValue: null | number,
   numberAddValue: null | number,
@@ -52,7 +52,7 @@ export interface ISettingField {
   statusId: string
 }
 
-type ISelectUserMap = Map<string, {id: null | string, realName: null | string}>
+type ISelectUserMap = Map<string, { id: null | string, realName: null | string }>
 
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate'];
 
@@ -61,7 +61,7 @@ const transformUpdateData = (data) => {
   const updateData = [];
   for (const [key, fieldValue] of Object.entries(data)) {
     const {
-    // @ts-ignore
+      // @ts-ignore
       fieldType, fieldId, selected, value,
     } = fieldValue;
     switch (key) {
@@ -235,7 +235,7 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
     }
   }
 };
-
+const memberTypeList = ['member', 'multiMember'];
 const UpdateField = ({
   // @ts-ignore
   modal, selectedType, record, customCirculationDataSet,
@@ -246,11 +246,12 @@ const UpdateField = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [selectUserMap, setSelectUserMap] = useState<ISelectUserMap>(new Map());
 
-  const userFields = useMemo(() => fieldData.filter((field) => field.fieldType === 'member').map((field) => ({
+  const userFields = useMemo(() => fieldData.filter((field) => memberTypeList.includes(field.fieldType)).map((field) => ({
     name: field.code,
     type: 'string' as FieldType,
     textField: 'realName',
     valueField: 'id',
+    multiple: field.fieldType === 'multiMember',
     label: '人员',
   })), [fieldData]);
 
@@ -497,8 +498,8 @@ const UpdateField = ({
               {id && (
                 <Col span={11} key={id}>
                   {
-                  // @ts-ignore
-                  renderField(f, data, selectUserMap)
+                    // @ts-ignore
+                    renderField(f, data, selectUserMap)
                   }
                 </Col>
               )}
@@ -519,7 +520,7 @@ const UpdateField = ({
       }
       <div>
         <Button
-            // @ts-ignore
+          // @ts-ignore
           onClick={Field.add}
           icon="add"
           color={'blue' as ButtonColor}

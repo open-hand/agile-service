@@ -6,8 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author superlee
@@ -22,5 +24,11 @@ public class CustomFileRemoteServiceFallback implements CustomFileRemoteService 
     public ResponseEntity<String> deleteFileByUrl(Long organizationId, String bucketName, List<String> urls) {
         logger.error("Delete file failed,organizationId = {}, bucketName = {}.", organizationId, bucketName);
         throw new CommonException("File service is not available, please check", new Object[0]);
+    }
+
+    @Override
+    public ResponseEntity<String> fragmentCombineBlock(Long organizationId, String guid, String fileName, Map<String, String> args) {
+        logger.error("Combine file failed,organizationId = {}, fileName = {}, guid = {}.", organizationId, fileName, guid);
+        throw new CommonException("File service is not available, please check");
     }
 }

@@ -67,8 +67,8 @@ public class GanttChartServiceImpl implements GanttChartService {
                 filterSql = null;
             }
             boardAssembler.handleOtherArgs(searchVO);
-            String orderStr = "issue_id desc";
-            List<IssueDTO> issues = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr);
+            String orderStr = "issue_num_convert desc";
+            List<IssueDTO> issues = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds(), orderStr, true);
             List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!ObjectUtils.isEmpty(issueIds)) {
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, filterSql, searchVO.getAssigneeFilterIds());
@@ -92,7 +92,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         String key = "issueTypeId";
         List<Long> allowedIssueTypeIds =
                 projectConfigService
-                        .queryIssueTypesWithStateMachineIdByProjectId(projectId, "agile")
+                        .queryIssueTypesWithStateMachineIdByProjectId(projectId, "agile", false)
                         .stream()
                         .filter(x -> issueTypes.contains(x.getTypeCode()))
                         .map(IssueTypeWithStateMachineIdVO::getId)
@@ -194,7 +194,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                  Long projectId,
                                                  Map<Long, Date> completedDateMap) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
         Set<Long> userIds = new HashSet<>();
         for (IssueDTO dto : issueList) {

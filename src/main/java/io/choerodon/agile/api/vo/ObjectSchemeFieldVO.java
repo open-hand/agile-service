@@ -51,6 +51,11 @@ public class ObjectSchemeFieldVO {
     private List<String> contexts;
     @ApiModelProperty(value = "是否允许小数")
     private Boolean extraConfig;
+    @ApiModelProperty(value = "问题类型范围")
+    private List<IssueTypeVO> issueTypeVOList;
+    @ApiModelProperty(value = "问题类型id")
+    @Encrypt
+    private List<Long> issueTypeIds;
 
     public Boolean getExtraConfig() {
         return extraConfig;
@@ -210,5 +215,21 @@ public class ObjectSchemeFieldVO {
 
     public void setDefaultValueObj(Object defaultValueObj) {
         this.defaultValueObj = defaultValueObj;
+    }
+
+    public List<IssueTypeVO> getIssueTypeVOList() {
+        return issueTypeVOList;
+    }
+
+    public void setIssueTypeVOList(List<IssueTypeVO> issueTypeVOList) {
+        this.issueTypeVOList = issueTypeVOList;
+    }
+
+    public List<Long> getIssueTypeIds() {
+        return issueTypeIds;
+    }
+
+    public void setIssueTypeIds(List<Long> issueTypeIds) {
+        this.issueTypeIds = issueTypeIds;
     }
 }

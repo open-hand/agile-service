@@ -7,6 +7,8 @@ import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { Observer } from 'mobx-react-lite';
+import { CheckBoxProps } from 'choerodon-ui/pro/lib/check-box/CheckBox';
+import { ITableColumnCheckBoxesDataProps } from '@/components/table-column-check-boxes';
 
 interface EventsProps extends IChosenFieldFieldEvents {
   loadRecordAxios?: (store: IssueExportStore) => Promise<any> /** 查询导出记录 */
@@ -20,13 +22,15 @@ interface IDownLoadInfo {
   lastUpdateDate: string | null,
 }
 
-interface Props {
+interface IssueExportStoreProps {
   dataSetSystemFields?: FieldProps[], /** dataSet 数据管理 系统字段配置 */
   defaultCheckedExportFields?: string[], /** 默认选中导出字段 */
+  defaultInitOptions?: (data: { options: Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps }>, checkedOptions: string[], dataSet: DataSet }) => Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps }> | void /** 初始化选择字段的字段选项时调用 当返回空时则不进行选项覆盖 */
   defaultInitFieldAction?: (data: IChosenFieldField, store: IssueExportStore) => IChosenFieldField | false | undefined | void, /** 初始化字段时调用，当返回值不为IChosenFieldField 则跳过此字段 */
   defaultInitFieldFinishAction?: (data: { customFields: IChosenFieldField[], systemFields: IChosenFieldField[], currentChosenField: Map<string, IChosenFieldField> }, store: IssueExportStore) => void, /** 初始化字段完成时调用 */
   transformSystemFilter?: (data: any) => any, /** 提交数据前 对系统筛选字段数据转换 */
-  transformExportFieldCodes?: (data: Array<string>) => Array<string>, /** 提交数据 对系统导出字段数据转换 */
+  transformExportFieldCodes?: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>, /** 提交数据 对系统导出字段数据转换 */
+  reverseTransformExportFieldCodes?: (data: Array<string>) => Array<string>
   events?: EventsProps,
   renderField?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null, /** 系统筛选字段项渲染 */
   extraFields?: IChosenFieldField[], /** 额外的筛选字段项  不在下拉菜单中 */
@@ -35,13 +39,17 @@ interface Props {
     buttonProps?: Partial<ButtonProps>,
     buttonChildren?: any,
   }
+  checkboxOptionsExtraConfig?: Map<string, { checkBoxProps: CheckBoxProps }>
 }
+export { IssueExportStoreProps };
 class IssueExportStore {
   dataSetSystemFields: FieldProps[] = [];
 
   transformSystemFilter: (data: any) => object;
 
-  transformExportFieldCodes: (data: any) => object;
+  transformExportFieldCodes: (data: any, d2: any) => string[];
+
+  reverseTransformExportFieldCodes: (data: string[]) => string[]
 
   events: EventsProps = {};
 
@@ -53,9 +61,13 @@ class IssueExportStore {
 
   defaultExportBefore = (data: any) => data;
 
+  defaultInitOptions = (data: any) => { };
+
   renderField: any;
 
-  exportButtonConfig: Props['exportButtonConfig'];
+  exportButtonConfig: IssueExportStoreProps['exportButtonConfig'];
+
+  checkboxOptionsExtraConfig: Map<string, { checkBoxProps: CheckBoxProps }>;
 
   @observable innerState = observable.map<string, any>();
 
@@ -65,17 +77,20 @@ class IssueExportStore {
     this.defaultCheckedExportFields = data;
   }
 
-  constructor(props?: Props) {
+  constructor(props?: IssueExportStoreProps) {
     this.events = props?.events || {};
     this.dataSetSystemFields = props?.dataSetSystemFields || [];
     this.transformSystemFilter = props?.transformSystemFilter || ((data) => data);
     this.transformExportFieldCodes = props?.transformExportFieldCodes || ((data) => data);
+    this.reverseTransformExportFieldCodes = props?.reverseTransformExportFieldCodes || ((data) => data);
     this.defaultCheckedExportFields = props?.defaultCheckedExportFields || [];
     this.defaultInitFieldAction = props?.defaultInitFieldAction || ((data: IChosenFieldField, store: IssueExportStore) => data);
     this.defaultInitFieldFinishAction = props?.defaultInitFieldFinishAction || ((data: any) => data);
+    this.defaultInitOptions = props?.defaultInitOptions || ((data: any) => { });
     this.extraFields = props?.extraFields || [];
     this.renderField = props?.renderField;
     this.exportButtonConfig = props?.exportButtonConfig || {};
+    this.checkboxOptionsExtraConfig = props?.checkboxOptionsExtraConfig || new Map();
   }
 
   @observable downloadInfo = {} as IDownLoadInfo;

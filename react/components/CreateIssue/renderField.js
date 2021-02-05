@@ -4,9 +4,8 @@ import {
   Select, Input, InputNumber,
   Checkbox, TimePicker, Row, Col, Radio, DatePicker,
 } from 'choerodon-ui';
-import { findIndex } from 'lodash';
 import moment from 'moment';
-import SelectFocusLoad from '../SelectFocusLoad';
+import SelectUser from '@/components/select/select-user-old';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -107,6 +106,8 @@ export default function renderField(field) {
   } if (field.fieldType === 'single') {
     return (
       <Select
+        filter
+        filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
         label={fieldName}
         allowClear={!required}
         getPopupContainer={(triggerNode) => triggerNode.parentNode}
@@ -126,6 +127,8 @@ export default function renderField(field) {
   } if (field.fieldType === 'multiple') {
     return (
       <Select
+        filter
+        filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
         label={fieldName}
         mode="multiple"
         getPopupContainer={(triggerNode) => triggerNode.parentNode}
@@ -158,22 +161,13 @@ export default function renderField(field) {
         maxLength={255}
       />
     );
-  } if (field.fieldType === 'member') {
+  } if (['member', 'multiMember'].includes(field.fieldType)) {
     return (
-      <SelectFocusLoad
+      <SelectUser
         label={fieldName}
         allowClear
-        type="user"
-        saveList={(v) => {
-          // 假如本项目无此人，则将默认值手动增添进去
-          if (field.defaultValue && field.defaultValueObj) {
-            const index = findIndex(v, { id: field.defaultValue });
-            if (index === -1) {
-              v.push(field.defaultValueObj);
-            }
-          }
-        }}
-        loadWhenMount
+        mode={field.fieldType === 'multiMember' ? 'multiple' : undefined}
+        extraOption={field.fieldType === 'multiMember' ? field.defaultValueObjs : field.defaultValueObj}
       />
     );
   }

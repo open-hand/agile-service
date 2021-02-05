@@ -120,7 +120,16 @@ export function getSystemFields(excludeCodes = []) {
   }, {
     code: 'version',
     name: '版本',
-    defaultShow: false,
+    // 不可选择，这个字段被废弃了，但是可以展示
+    archive: true,
+    fieldType: 'multiple',
+  }, {
+    code: 'fixVersion',
+    name: '修复的版本',
+    fieldType: 'multiple',
+  }, {
+    code: 'influenceVersion',
+    name: '影响的版本',
     fieldType: 'multiple',
   }, {
     code: 'epic',

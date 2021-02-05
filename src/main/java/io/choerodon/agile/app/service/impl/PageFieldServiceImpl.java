@@ -68,6 +68,8 @@ public class PageFieldServiceImpl implements PageFieldService {
     protected ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired
+    private IssueTypeService issueTypeService;
 
     @Override
     public PageFieldDTO baseCreate(PageFieldDTO field) {
@@ -101,15 +103,15 @@ public class PageFieldServiceImpl implements PageFieldService {
     }
 
     @Override
-    public Map<String, Object> listQuery(Long organizationId, Long projectId, String pageCode, String context) {
+    public Map<String, Object> listQuery(Long organizationId, Long projectId, String pageCode, String context, Long issueTypeId) {
         Map<String, Object> result = new HashMap<>(2);
         if (!EnumUtil.contain(PageCode.class, pageCode)) {
             throw new CommonException(ERROR_PAGECODE_ILLEGAL);
         }
-        if (context != null && !EnumUtil.contain(ObjectSchemeFieldContext.class, context)) {
+        if (issueTypeId != null && !EnumUtil.contain(ObjectSchemeFieldContext.class, context)) {
             throw new CommonException(ERROR_CONTEXT_ILLEGAL);
         }
-        List<PageFieldDTO> pageFields = queryPageField(organizationId, projectId, pageCode, context);
+        List<PageFieldDTO> pageFields = queryPageField(organizationId, projectId, pageCode, issueTypeId);
         List<PageFieldVO> pageFieldVOS = modelMapper.map(pageFields, new TypeToken<List<PageFieldVO>>() {
         }.getType());
         fillContextName(pageFieldVOS);
@@ -147,7 +149,7 @@ public class PageFieldServiceImpl implements PageFieldService {
      * @return
      */
     @Override
-    public List<PageFieldDTO> queryPageField(Long organizationId, Long projectId, String pageCode, String issueType) {
+    public List<PageFieldDTO> queryPageField(Long organizationId, Long projectId, String pageCode, Long issueTypeId) {
         Boolean created = null;
         if (PageCode.AGILE_ISSUE_CREATE.equals(pageCode)) {
             created = true;
@@ -156,20 +158,22 @@ public class PageFieldServiceImpl implements PageFieldService {
         if (PageCode.AGILE_ISSUE_EDIT.equals(pageCode)) {
             edited = true;
         }
-        return selectPageField(organizationId, projectId, issueType, created, edited);
+        return selectPageField(organizationId, projectId, issueTypeId, created, edited);
     }
 
-    protected List<PageFieldDTO> selectPageField(Long organizationId, Long projectId, String issueType, Boolean created, Boolean edited) {
+    protected List<PageFieldDTO> selectPageField(Long organizationId, Long projectId, Long issueTypeId, Boolean created, Boolean edited) {
+        String issueType = issueTypeService.getIssueTypeById(issueTypeId);
         List<PageFieldDTO> pageFields =
-                objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueType, created, edited);
+                objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueTypeId, created, edited);
         if (pageFields.isEmpty()) {
             objectSchemeFieldService.createSystemFieldIfNotExisted(organizationId);
             pageFields =
-                    objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueType, created, edited);
+                    objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueTypeId, created, edited);
         }
+
         addNotSyncField(organizationId, projectId, pageFields, issueType, created, edited);
         if (agilePluginService != null) {
-            pageFields = agilePluginService.handlerProgramPageField(projectId,issueType,pageFields);
+            pageFields = agilePluginService.handlerProgramPageField(projectId,issueTypeId,pageFields);
         }
         return pageFields;
     }
@@ -365,7 +369,7 @@ public class PageFieldServiceImpl implements PageFieldService {
 
     @Override
     public List<PageFieldViewVO> queryPageFieldViewList(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO) {
-        String issueType = paramDTO.getContext();
+        Long issueTypeId = paramDTO.getIssueTypeId();
         String pageCode = paramDTO.getPageCode();
         if (!EnumUtil.contain(PageCode.class, pageCode)) {
             throw new CommonException(ERROR_PAGECODE_ILLEGAL);
@@ -373,14 +377,12 @@ public class PageFieldServiceImpl implements PageFieldService {
         if (!EnumUtil.contain(ObjectSchemeCode.class, paramDTO.getSchemeCode())) {
             throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
         }
-        if (!EnumUtil.contain(ObjectSchemeFieldContext.class, issueType)) {
-            throw new CommonException(ERROR_CONTEXT_ILLEGAL);
-        }
-        List<PageFieldDTO> pageFields = queryPageField(organizationId, projectId, pageCode, issueType);
+        List<PageFieldDTO> pageFields = queryPageField(organizationId, projectId, pageCode, issueTypeId);
         List<PageFieldViewVO> pageFieldViews = modelMapper.map(pageFields, new TypeToken<List<PageFieldViewVO>>() {
         }.getType());
         //填充option
         optionService.fillOptions(organizationId, projectId, pageFieldViews);
+        objectSchemeFieldService.setDefaultValueObjs(pageFieldViews, projectId, organizationId);
         FieldValueUtil.handleDefaultValue(pageFieldViews);
         return pageFieldViews;
     }
@@ -409,7 +411,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         Map<Long, Map<String, Object>> result = new HashMap<>();
         Map<Long, ObjectSchemeFieldDTO> fieldMap = fieldDTOS.stream().collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
         Map<Long, List<FieldValueDTO>> valuesMap = values.stream().collect(Collectors.groupingBy(FieldValueDTO::getInstanceId));
-        Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER)).map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
+        Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> (x.getFieldType().equals(FieldType.MEMBER) || x.getFieldType().equals(FieldType.MULTI_MEMBER))).map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
         for (Long instanceId : instanceIds) {
             Map<String, Object> codeValueMap = new HashMap<>();
             List<FieldValueDTO> instanceValues = valuesMap.get(instanceId);

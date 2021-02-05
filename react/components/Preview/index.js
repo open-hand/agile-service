@@ -34,9 +34,9 @@ const Preview = ({
   return (
     <div className={`${prefixCls}`}>
       <div className={`${prefixCls}-toolbar`}>
-        <Button funcType="flat" className={`${prefixCls}-header-downloadWrap`} onClick={handleDownLoadFile}>
+        <Button funcType="flat" className={`${prefixCls}-header-downloadWrap`}>
           <span className={`${prefixCls}-header-downloadWrap-span`}>
-            <a style={{ marginRight: 6 }}>
+            <a style={{ marginRight: 6 }} role="none" onClick={handleDownLoadFile}>
               <Icon type="get_app" style={{ color: '#000' }} />
               <span className={`${prefixCls}-header-downloadWrap-fileName`}>{decodeURIComponent(fileName)}</span>
             </a>

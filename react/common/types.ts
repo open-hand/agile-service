@@ -78,10 +78,11 @@ export interface IProgramVersion {
   name: string,
   programId: string,
   statusCode: string,
-  versionBase: {
+  versionBase?: {
     id: string,
     name: string,
   }
+  versionBaseId: string,
 }
 
 export interface IModalProps extends ModalProps {
@@ -164,6 +165,7 @@ export interface IIssueType {
   name: string,
   stateMachineId: string,
   typeCode: string,
+  enabled: boolean
 }
 export type IFeatureType = 'business' | 'enabler'
 
@@ -175,6 +177,7 @@ interface FieldOption {
 }
 export interface IField {
   code: string,
+  fieldId: string,
   fieldOptions?: FieldOption[],
   fieldType: string,
   fieldTypeName?: string,
@@ -182,14 +185,46 @@ export interface IField {
   name: string,
   system: boolean,
   extraConfig?: boolean,
+  fieldCode?: string
+  fieldName?: string
+  projectId?: string | number
+  required: boolean
 }
-
+export interface IComment {
+  commentId: string
+  commentText: string
+  issueId: number
+  lastUpdateDate: string
+  objectVersionNumber: number
+  projectId: number
+  userId: number
+  userImageUrl: string
+  userLoginName: string
+  userName: string
+  userRealName: string
+  replySize: number
+}
+interface Attachment {
+  id: number
+  fileName: string
+  url: string
+  createdBy: number
+}
+export type ISubIssue = Issue & {
+  loginName: string
+  realName: string
+  imageUrl: string
+}
 export interface Issue {
   issueId: string
   issueNum: string
   summary: string
+  description: string
+  creationDate: string
   typeCode?: string,
+  issueTypeId: string
   issueTypeVO: IIssueType,
+  lastUpdateDate: string
   parentIssueId?: string
   parentIssueNum?: string
   parentIssueSummary?: string
@@ -198,6 +233,7 @@ export interface Issue {
   sameParentIssueVOList?: Issue[],
   sameParentBugVOList?: Issue[]
   assigneeRealName: string
+  reporterId: string
   reporterRealName: string
   statusVO: IStatus
   priorityVO: IPriority
@@ -212,6 +248,28 @@ export interface Issue {
   actualCompletedDate?: string
   foundationFieldValue: {
     [key: string]: any
+  }
+  issueCommentVOList: IComment[]
+  issueAttachmentVOList: Attachment[]
+  starBeacon: boolean
+  featureVO: {
+    featureType: 'business' | 'enabler'
+  }
+  createdBy: string
+  createrImageUrl: string
+  createrEmail: string
+  createrName: string
+  createrRealName: string
+  createrLoginName: string
+  assigneeId: string,
+  assigneeImageUrl: string,
+  assigneeLoginName: string,
+  assigneeName: string
+  parentSummary?: string
+  subIssueVOList: ISubIssue[]
+  subBugVOList: ISubIssue[]
+  mainResponsible?: {
+    id: string
   }
 }
 
@@ -270,7 +328,7 @@ export type IIssueColumnName =
   'feature';
 
 export type IFieldType =
-  'text' | 'input' | 'member' | 'single' | 'multiple' | 'radio' | 'checkbox' |
+  'text' | 'input' | 'member' | 'multiMember' | 'single' | 'multiple' | 'radio' | 'checkbox' |
   'number' | 'time' | 'date' | 'datetime'
 
 export type ISystemFieldCode =

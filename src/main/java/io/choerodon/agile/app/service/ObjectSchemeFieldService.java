@@ -15,10 +15,10 @@ public interface ObjectSchemeFieldService {
     /**
      * @param field
      * @param issueTypes
-     * @param issueTypeForRank 需要设置rank值的issueType，空值时不设置
+     * @param issueTypeIdForRank 需要设置rank值的issueType，空值时不设置
      * @return
      */
-    ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field, List<IssueTypeVO> issueTypes, String issueTypeForRank);
+    ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field, List<IssueTypeVO> issueTypes, Long issueTypeIdForRank);
 
     void baseUpdate(ObjectSchemeFieldDTO field);
 
@@ -43,10 +43,10 @@ public interface ObjectSchemeFieldService {
      * @param organizationId
      * @param projectId
      * @param fieldCreateDTO
-     * @param issueTypeForRank 需要设置rank值的issueType，空值时不设置
+     * @param issueTypeIdForRank 需要设置rank值的issueType，空值时不设置
      * @return
      */
-    ObjectSchemeFieldDetailVO create(Long organizationId, Long projectId, ObjectSchemeFieldCreateVO fieldCreateDTO, String issueTypeForRank);
+    ObjectSchemeFieldDetailVO create(Long organizationId, Long projectId, ObjectSchemeFieldCreateVO fieldCreateDTO, Long issueTypeIdForRank);
 
     /**
      * 组织层/项目层 查询字段详情
@@ -120,10 +120,10 @@ public interface ObjectSchemeFieldService {
      *
      * @param organizationId
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @return
      */
-    PageConfigVO listConfigs(Long organizationId, Long projectId, String issueType);
+    PageConfigVO listConfigs(Long organizationId, Long projectId, Long issueTypeId);
 
     /**
      * 查询字段及字段配置
@@ -161,10 +161,10 @@ public interface ObjectSchemeFieldService {
      *
      * @param organizationId
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @return
      */
-    List<ObjectSchemeFieldVO> unselected(Long organizationId, Long projectId, String issueType);
+    List<ObjectSchemeFieldVO> unselected(Long organizationId, Long projectId, Long issueTypeId);
 
     /**
      * 组织初始化系统字段
@@ -186,22 +186,81 @@ public interface ObjectSchemeFieldService {
      *
      * @param organizationId
      * @param projectId
-     * @param issueTypes
+     * @param issueTypeIds
      * @return
      */
-    Boolean containsAllIssueTypes(Long organizationId, Long projectId, List<String> issueTypes);
+    Boolean containsAllIssueTypes(Long organizationId, Long projectId, List<Long> issueTypeIds);
 
     /**
      * 查询项目下某个类型的描述模版
      *
      * @param projectId
-     * @param issueType
+     * @param issueTypeId
      * @param organizationId
      * @return
      */
-    IssueTypeFieldVO queryDescriptionTemplate(Long projectId, String issueType, Long organizationId);
+    IssueTypeFieldVO queryDescriptionTemplate(Long projectId, Long issueTypeId, Long organizationId);
 
     String getFieldContext(String code);
 
-    List<ObjectSchemeFieldVO> listPageFieldWithOption(Long organizationId, Long projectId, String schemeCode, List<String> issueTypeList);
+    List<ObjectSchemeFieldVO> listPageFieldWithOption(Long organizationId, Long projectId, String schemeCode, List<Long> issueTypeIds);
+
+    void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, ObjectSchemeFieldUpdateVO updateDTO);
+
+    /**
+     * 设置预定义字段的默认值对象
+     * @param pageFieldViews
+     * @param projectId
+     * @param organizationId
+     */
+    void setDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
+
+    /**
+     * 根据schemeCode查询预定义字段
+     * @param fieldCode
+     * @return
+     */
+    ObjectSchemeFieldDTO getObjectSchemeFieldDTO(String fieldCode);
+
+//    /**
+//     * 单选类型系统字段的默认值校验
+//     * @param projectId
+//     * @param id
+//     * @param fieldCode
+//     */
+//    void checkObjectSchemeFieldDefaultValueOfSingle(Long projectId, Long id, String fieldCode);
+//
+//    /**
+//     * 多选类型系统字段的默认值校验
+//     * @param projectId
+//     * @param id
+//     * @param fieldCode
+//     */
+//    void checkObjectSchemeFieldDefaultValueOfMultiple(Long projectId, Long id, String fieldCode);
+
+    /**
+     * 多选类型系统字段设置默认值对象
+     * @param defaultValue
+     * @param valueMap
+     * @param view
+     */
+    void setDefaultValueObjsOfMultiple(Object defaultValue, Map<Long, Object> valueMap, PageFieldViewVO view);
+
+    /**
+     * 单选类型系统字段设置默认值对象
+     * @param valueMap
+     * @param view
+     */
+    void setDefaultValueObjsOfSingle(Map<Long, Object> valueMap, PageFieldViewVO view);
+
+    /**
+     * 快速创建issue根据issueTypeId获取概要字段默认值
+     * @param organizationId
+     * @param projectId
+     * @param issueTypeId
+     * @return
+     */
+    String getIssueSummaryDefaultValue(Long organizationId, Long projectId, Long issueTypeId);
+
+    List<PageConfigFieldVO> queryPageConfigFields(Long organizationId, Long projectId, Long issueTypeId);
 }

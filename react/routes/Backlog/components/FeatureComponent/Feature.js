@@ -77,9 +77,9 @@ class Feature extends Component {
             allowClear
           >
             {
-              notDonePiList.map((pi) => (
+              [...notDonePiList, { id: '0' }].map((pi) => (
                 <Option key={pi.id} value={pi.id}>
-                  {`${pi.code}-${pi.name}`}
+                  {pi.id === '0' ? '未分配PI' : `${pi.code}-${pi.name}`}
                   {pi.id === (BacklogStore.piInfo && BacklogStore.piInfo.id) && (
                     <div
                       style={{

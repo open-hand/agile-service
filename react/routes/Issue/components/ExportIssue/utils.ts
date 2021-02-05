@@ -25,7 +25,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     reporterIds,
     sprint,
     summary,
-    version,
+    fixVersion,
+    influenceVersion,
     testResponsibleIds,
     mainResponsibleIds,
     environment,
@@ -52,7 +53,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       label,
       sprint,
       summary,
-      version,
+      fixVersion,
+      influenceVersion,
       starBeacon,
       userId: starBeacon ? userId : undefined,
       testResponsibleIds,
@@ -75,7 +77,7 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
   };
 }
 
-const getExportFieldCodes = (data: Array<any>) => {
+const getExportFieldCodes = (data: Array<any>): string[] => {
   const fieldTransform = {
     issueNum: 'issueNum',
     issueId: 'summary',
@@ -94,11 +96,44 @@ const getExportFieldCodes = (data: Array<any>) => {
     priorityId: 'priorityName',
     //  "subTask":
     //  "remainingTime":
-    version: 'versionName',
+    fixVersion: 'fixVersionName',
+    influenceVersion: 'influenceVersionName',
     epic: 'epicName',
     label: 'labelName',
     storyPoints: 'storyPoints',
     component: 'componentName',
+  };
+  // @ts-ignore
+  return data.map((code: string) => fieldTransform[code] || code);
+};
+
+const getReverseExportFieldCodes = (data: Array<any>) => {
+  const fieldTransform = {
+    issueNum: 'issueNum',
+    summary: 'issueId',
+    //  "description":
+    typeName: 'issueTypeId',
+    //  "projectName":
+    assigneeName: 'assigneeId',
+    // "assigneeRealName":
+    reporterName: 'reporterId',
+    //  "reporterRealName":
+    //   "resolution":
+    statusName: 'statusId',
+    issueSprintVOS: 'sprintName',
+    // "creationDate":
+    lastUpdateDate: 'lastUpdateDate',
+
+    priorityName: 'priorityId',
+    //  "subTask":
+    //  "remainingTime":
+    fixVersionName: 'fixVersion',
+    influenceVersionName: 'influenceVersion',
+
+    epicName: 'epic',
+    labelName: 'label',
+    storyPoints: 'storyPoints',
+    componentName: 'component',
   };
   // @ts-ignore
   return data.map((code: string) => fieldTransform[code] || code);
@@ -150,12 +185,17 @@ function getFilterFormSystemFields(): FieldProps[] {
     valueField: 'componentId',
     textField: 'name',
   }, {
-    name: 'version',
-    label: '版本',
+    name: 'fixVersion',
+    label: '修复的版本',
+    valueField: 'versionId',
+    textField: 'name',
+  }, {
+    name: 'influenceVersion',
+    label: '影响的版本',
     valueField: 'versionId',
     textField: 'name',
   }]);
 }
 export {
-  getExportFieldCodes, getFilterFormSystemFields, transformSystemFilter as getTransformSystemFilter,
+  getExportFieldCodes, getReverseExportFieldCodes, getFilterFormSystemFields, transformSystemFilter as getTransformSystemFilter,
 };

@@ -180,8 +180,11 @@ class ScrumBoardHome extends Component {
   handleFinishSprint = async () => {
     const sprintId = ScrumBoardStore.getSprintId;
     const completeMessage = await sprintApi.loadSprintAndCountIssue(sprintId);
+    const sprintInfo = completeMessage.sprintNames[0];
+    const defaultValuePrompt = undefined; // (sprintId) ? `提示：冲刺${sprintInfo.sprintName}是默认选项，完成后冲刺字段默认值将清空` : undefined;
     CloseSprint({
       completeMessage,
+      defaultValuePrompt,
       sprintId,
       afterClose: async () => {
         const axiosGetSprintNotClosed = sprintApi.loadSprints(['sprint_planning', 'started']);
@@ -526,8 +529,10 @@ class ScrumBoardHome extends Component {
                   )}
               </div>
             </div>
-
           </Spin>
+          <IssueDetail
+            refresh={this.refresh}
+          />
           <CreateIssue refresh={this.refresh} />
           <IssueDetail
             refresh={this.refresh}
@@ -561,7 +566,7 @@ class ScrumBoardHome extends Component {
             >
               <p>
                 {'任务'}
-                {ScrumBoardStore.getUpdatedParentIssue.issueNum}
+                {ScrumBoardStore.getUpdatedParentIssue?.issueNum}
                 {'的全部子任务为done'}
               </p>
               <div style={{ display: 'flex', alignItems: 'center' }}>

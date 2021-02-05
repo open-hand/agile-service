@@ -9,4 +9,12 @@
         and organization_id = #{organizationId}
     </delete>
 
+    <select id="selectMaxSequence" resultType="java.math.BigDecimal">
+        select
+        max(sequence)
+        from fd_issue_type_scheme_config
+        where scheme_id = #{issueTypeSchemeId}
+        and organization_id = #{organizationId}
+    </select>
+
 </mapper>

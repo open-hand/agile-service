@@ -4,7 +4,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import classnames from 'classnames';
 import {
-  stores, Permission, Choerodon, 
+  stores, Permission, Choerodon,
 } from '@choerodon/boot';
 import {
   Icon, Dropdown, Menu, Input,
@@ -39,7 +39,6 @@ class VersionItem extends Component {
     );
   }
 
-
   /**
    *更新描述
    *
@@ -50,7 +49,7 @@ class VersionItem extends Component {
     const { item: { objectVersionNumber, versionId }, index } = this.props;
     const req = {
       objectVersionNumber,
-      projectId: parseInt(AppState.currentMenuType.id, 10),
+      projectId: AppState.currentMenuType.id,
       versionId,
       description: value,
     };
@@ -115,7 +114,6 @@ class VersionItem extends Component {
         });
     }
   }
-
 
   /**
    *更新日期
@@ -207,7 +205,7 @@ class VersionItem extends Component {
                   onPressEnter={this.handleBlurName}
                   onBlur={this.handleBlurName}
                   border={false}
-                  onClick={e => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
                   maxLength={15}
                 />
               ) : (
@@ -215,7 +213,7 @@ class VersionItem extends Component {
               )}
 
               <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
-                <Dropdown onClick={e => e.stopPropagation()} overlay={this.getmenu()} trigger={['click']}>
+                <Dropdown onClick={(e) => e.stopPropagation()} overlay={this.getmenu()} trigger={['click']}>
                   <Icon
                     style={{
                       width: 12,
@@ -288,7 +286,7 @@ class VersionItem extends Component {
                   <EasyEdit
                     type="date"
                     defaultValue={item.startDate ? moment(item.startDate.split(' ')[0], 'YYYY-MM-DD') : ''}
-                    disabledDate={item.expectReleaseDate ? current => current > moment(item.expectReleaseDate, 'YYYY-MM-DD HH:mm:ss') : ''}
+                    disabledDate={item.expectReleaseDate ? (current) => current > moment(item.expectReleaseDate, 'YYYY-MM-DD HH:mm:ss') : ''}
                     onChange={(date, dateString) => {
                       this.updateDate('startDate', dateString);
                     }}
@@ -306,7 +304,7 @@ class VersionItem extends Component {
                   <EasyEdit
                     type="date"
                     defaultValue={item.expectReleaseDate ? moment(item.expectReleaseDate.split(' ')[0], 'YYYY-MM-DD') : ''}
-                    disabledDate={item.startDate ? current => current < moment(item.startDate, 'YYYY-MM-DD HH:mm:ss') : ''}
+                    disabledDate={item.startDate ? (current) => current < moment(item.startDate, 'YYYY-MM-DD HH:mm:ss') : ''}
                     onChange={(date, dateString) => {
                       this.updateDate('expectReleaseDate', dateString);
                     }}

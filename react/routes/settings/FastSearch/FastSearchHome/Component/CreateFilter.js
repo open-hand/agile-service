@@ -27,6 +27,7 @@ const customFieldType = {
   single: 'option',
   multiple: 'option',
   member: 'option',
+  multiMember: 'option',
   date: 'date',
 };
 
@@ -181,6 +182,7 @@ const OPERATION_FILTER = {
   single: arrOperation5,
   multiple: arrOperation6,
   member: arrOperation2,
+  multiMember: arrOperation2,
   date: arrOperation3,
 };
 
@@ -225,11 +227,11 @@ const CreateFilter = (props) => {
     } if (filter === 'issue_type') {
       if (type === '[object Array]') {
         const v = _.map(value, 'key');
-        const vv = v.map((e) => `'${e}'`);
+        const vv = v.map((e) => `${e}`);
         return `(${vv.join(',')})`;
       }
       const v = value.key;
-      return `'${v}'`;
+      return `${v}`;
     } if (type === '[object Array]') {
       const v = _.map(value, 'key');
       return `(${v.join(',')})`;
@@ -589,7 +591,7 @@ const CreateFilter = (props) => {
       issue_type: {
         url: '',
         prop: '',
-        id: 'typeCode',
+        id: 'id',
         name: 'name',
       },
       feature: {
@@ -655,7 +657,7 @@ const CreateFilter = (props) => {
         <Select label="值" />
       );
     } if ((['assignee', 'reporter', 'created_user',
-      'last_updated_user'].indexOf(filter) > -1 && !id) || (id && type === 'member')) {
+      'last_updated_user'].indexOf(filter) > -1 && !id) || (id && ['member', 'multiMember'].includes(type))) {
       if (['=', '!='].indexOf(operation) > -1) {
         // return normal value
         return (

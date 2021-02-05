@@ -28,7 +28,7 @@ class CloseSprint extends Component {
    *
    * @memberof CloseSprint
    */
-  handleCloseSprint=() => {
+  handleCloseSprint = () => {
     const { selectChose } = this.state;
     const {
       sprintId, modal, afterClose,
@@ -49,7 +49,7 @@ class CloseSprint extends Component {
   }
 
   render() {
-    const { completeMessage } = this.props;
+    const { completeMessage, defaultValuePrompt } = this.props;
     const { selectChose } = this.state;
     return (
       <div>
@@ -82,6 +82,7 @@ class CloseSprint extends Component {
           ) : ''}
           <Option value="0">待办事项</Option>
         </Select>
+        {defaultValuePrompt && <p style={{ marginTop: 10, color: 'rgba(0,0,0,0.65)' }}>{defaultValuePrompt}</p>}
       </div>
     );
   }

@@ -114,12 +114,12 @@ public class ProjectReportServiceImpl implements ProjectReportService {
                 projectReportVO.setReportUnitList(commonMapper.readValue(projectReport.getReportData(),
                         commonMapper.getTypeFactory().constructParametricType(List.class, ReportUnitVO.class)));
                 for (ReportUnitVO reportUnitVO : projectReportVO.getReportUnitList()) {
-                    if (reportUnitVO instanceof StaticListUnitVO){
+                    if (reportUnitVO instanceof StaticListUnitVO) {
                         SearchVO searchVO = ((StaticListUnitVO) reportUnitVO).getSearchVO();
                         ((StaticListUnitVO) reportUnitVO).setSearchVO(
                                 objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(
                                         objectMapper.writeValueAsString(searchVO), true), SearchVO.class));
-                    }else if (reportUnitVO instanceof DynamicListUnitVO){
+                    } else if (reportUnitVO instanceof DynamicListUnitVO) {
                         SearchVO searchVO = ((DynamicListUnitVO) reportUnitVO).getSearchVO();
                         ((DynamicListUnitVO) reportUnitVO).setSearchVO(
                                 objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(

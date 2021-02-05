@@ -42,10 +42,10 @@ class CommonApi extends Api<CommonApi> {
    * 查询项目群下的子项目
    * @param onlySelectEnableSubProject  是否只查询启动的子项目
    */
-  getSubProjects(onlySelectEnableSubProject: boolean = false) {
+  getSubProjects(onlySelectEnableSubProject: boolean = false, projectId?: string) {
     return this.request({
       method: 'get',
-      url: `/iam/choerodon/v1/organizations/${getOrganizationId()}/project_relations/${getProjectId()}/${getProjectId()}`,
+      url: `/iam/choerodon/v1/organizations/${getOrganizationId()}/project_relations/${projectId || getProjectId()}/${projectId || getProjectId()}`,
       params: {
         only_select_enable: onlySelectEnableSubProject || false,
       },
@@ -57,10 +57,10 @@ class CommonApi extends Api<CommonApi> {
    * 在项目群中返回项目群信息
    * 不在项目群中无返回信息
    */
-  getProjectsInProgram() {
+  getProjectsInProgram(projectId?: string) {
     return this.request({
       method: 'get',
-      url: `iam/choerodon/v1/organizations/${getOrganizationId()}/projects/${getProjectId()}/program`,
+      url: `iam/choerodon/v1/organizations/${getOrganizationId()}/projects/${projectId || getProjectId()}/program`,
       cache: true,
     });
   }

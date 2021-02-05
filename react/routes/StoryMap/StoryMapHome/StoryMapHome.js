@@ -115,16 +115,6 @@ const StoryMapHome = observer(() => {
     );
   };
 
-  /**
-   * 问题宽度localStorage.getItem('agile.EditIssue.width')
-   * @param {*} width
-   */
-  const setIssueWidth = (width) => {
-    if (ref.current) {
-      ref.current.source.style.width = `calc(100% - ${width || 400}px)`;
-    }
-  };
-
   const handleNoStoryCheckBoxChange = (value) => {
     localPageCacheStore.setItem('stroyMap.hidden.no.stroy', value);
     StoryMapStore.setHiddenColumnNoStory(value);
@@ -147,16 +137,16 @@ const StoryMapHome = observer(() => {
     loading, selectedIssueMap, storyMapData, storyData, hiddenColumnNoStory,
   } = StoryMapStore;
   const isEmpty = StoryMapStore.getIsEmpty;
-  /**
-   * 打开问题详情时设置样式 用以显示全部地图
-   */
-  useEffect(() => {
-    if (ref.current && selectedIssueMap.size) {
-      ref.current.source.style.width = `calc(100% - ${localStorage.getItem('agile.EditIssue.width')})`;
-    } else if (ref.current) {
-      ref.current.source.style.width = '';
-    }
-  }, [selectedIssueMap.size]);
+  // /**
+  //  * 打开问题详情时设置样式 用以显示全部地图
+  //  */
+  // useEffect(() => {
+  //   if (ref.current && selectedIssueMap.size) {
+  //     ref.current.source.style.width = `calc(100% - ${localStorage.getItem('agile.EditIssue.width')})`;
+  //   } else if (ref.current) {
+  //     ref.current.source.style.width = '';
+  //   }
+  // }, [selectedIssueMap.size]);
 
   const { isInProgram } = useIsInProgram(); // 判断是否为项目群下的子项目 是则不显示史诗
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7nagile-StoryMap-fullScreen');
@@ -185,7 +175,7 @@ const StoryMapHome = observer(() => {
         <SwitchSwimLine />
         {isInProgram && <CheckBox style={{ marginLeft: 20 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>}
         <CheckBox name="foldCompletedEpic" style={{ marginLeft: 20 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起已完成的史诗列</CheckBox>
-        {/* <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button> */}
+        {/* <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button> */}
       </Header>
       <Breadcrumb />
       <Content style={{
@@ -225,7 +215,7 @@ const StoryMapHome = observer(() => {
         />
         <SideIssueList handleClickOutside={handleCloseIssueList} eventTypes={['click']} />
         <CreateEpicModal onOk={handleCreateEpic} />
-        <IssueDetail refresh={handleRefresh} isFullScreen={isFullScreen} onChangeWidth={setIssueWidth} />
+        <IssueDetail refresh={handleRefresh} isFullScreen={isFullScreen} />
       </Content>
     </Page>
   );

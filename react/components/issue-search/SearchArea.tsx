@@ -1,25 +1,23 @@
 import React, { useContext, useMemo, useCallback } from 'react';
 import {
-  Select, Icon, Tooltip,
+  Icon, Tooltip,
 } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import { find, remove } from 'lodash';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui/pro';
-import { SelectMode } from 'choerodon-ui/lib/select/enum';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-import { LabeledValue } from 'choerodon-ui/lib/select';
 import { flattenObject, isFilterSame } from './utils';
 import IssueSearchContext from './context';
 import SummaryField from './custom-fields/field/SummaryField';
 import CustomFields from './custom-fields';
-import { getSelectStyle } from './custom-fields/utils';
 import useQuickFilters from './useQuickFilters';
 import ListenSearchSize from './ListenSearchSize';
+import FlatSelect from '../flat-select';
 
 const { AppState } = stores;
-const { Option, OptGroup } = Select;
+const { Option, OptGroup } = FlatSelect;
 
 const SearchArea: React.FC = () => {
   const prefixCls = 'c7n-issue';
@@ -32,23 +30,24 @@ const SearchArea: React.FC = () => {
   } = store;
   const myFilters = store.getMyFilters;
   const selectedQuickFilterIds = chosenFields.get('quickFilterIds') ? toJS(chosenFields.get('quickFilterIds')?.value) : undefined;
+  const archiveFields = [...chosenFields.values()].filter((field) => field.archive);
   const getSelectedQuickFilters = () => (selectedQuickFilterIds || []).map((id: string) => {
     const target = find(quickFilters, { filterId: id });
-    return target ? { key: `quick|${target.filterId}`, label: target.name } : {};
+    return target ? `quick|${target.filterId}` : undefined;
   });
-  const selectedQuickFilters: LabeledValue[] = getSelectedQuickFilters();
+  const selectedQuickFilters: string[] = getSelectedQuickFilters();
   const userId = String(AppState.userInfo.id);
   const reset = () => {
     onClear();
     store.clearAllFilter();
     store.query();
   };
-  const handleSelect = (v: LabeledValue) => {
-    const { key: k } = v;
+
+  const handleSelect = (k: string) => {
     const [type, id] = k.split('|');
     if (type === 'quick') {
-      const newSelectedQuickFilters = [...selectedQuickFilters, v];
-      const quickFilterIds = newSelectedQuickFilters.map((filter) => filter.key.split('|')[1]);
+      const newSelectedQuickFilters = [...selectedQuickFilters, k];
+      const quickFilterIds = newSelectedQuickFilters.map((filter) => filter.split('|')[1]);
       store.handleFilterChange('quickFilterIds', quickFilterIds);
     } else if (type === 'my') {
       const targetMyFilter = find(myFilters, { filterId: id });
@@ -82,35 +81,12 @@ const SearchArea: React.FC = () => {
       }
     }
   };
-  const handleClearFilter = (v?: LabeledValue) => {
-    let content: string[] = [];
-
-    if (hasSummaryField) {
-      content = store.getFilterValueByCode('contents');
-    }
-    const sameFilter = findSameFilter();
-    const isSelectedOption = sameFilter && (!v || v.key.split('|')[1] === sameFilter.filterId);
-    if (content[0] && content[0] !== '' && !isSelectedOption) {
-      onClear();
-      store.clearAllFilter();
-      handleInputChange(content[0]);
-    } else {
-      reset();
-    }
-  };
-  const handleDeselect = (v: LabeledValue) => {
-    // clear
-    if (!v) {
-      handleClearFilter(v);
-      return;
-    }
-    const { key } = v;
+  const handleDeselect = (key: string) => {
     const [type, id] = key.split('|');
     if (type === 'quick') {
-      remove(selectedQuickFilters, { key });
+      remove(selectedQuickFilters, key);
     } else if (type === 'my') {
-      store.clearAllFilter();
-      store.query();
+      handleClearFilter(id);
     } else if (type === 'commonly') {
       if (id === 'onlyMe') {
         store.handleFilterChange('assigneeId', []);
@@ -119,9 +95,45 @@ const SearchArea: React.FC = () => {
         store.handleFilterChange('userId', undefined);
       }
     }
-    const quickFilterIds = selectedQuickFilters.map((filter) => filter.key.split('|')[1]);
+    const quickFilterIds = selectedQuickFilters.map((filter) => filter.split('|')[1]);
     store.handleFilterChange('quickFilterIds', quickFilterIds);
   };
+  const handleClearFilter = (v?: string) => {
+    if (!hasSummaryField) {
+      reset();
+      return;
+    }
+    const content: string[] = store.getFilterValueByCode('contents') || [];
+    const sameFilter = findSameFilter();
+    const isSelectedOption = sameFilter && (!v || v === sameFilter.filterId);
+    if (content[0] && content[0] !== '' && !isSelectedOption) {
+      onClear();
+      store.clearAllFilter();
+      handleInputChange(content[0]);
+    } else {
+      reset();
+    }
+  };
+  const handlePersonalFilterChange = (values: string[] | null) => {
+    if (!values) {
+      handleClearFilter();
+      return;
+    }
+    // 取消选择
+    if (myFilterSelectValue.length > (values as string[]).length) {
+      const unSelected = find(myFilterSelectValue, (v) => !values?.includes(v as string));
+      if (unSelected) {
+        handleDeselect(unSelected);
+      }
+      // 选择
+    } else {
+      const newSelect = find(values, (v) => !myFilterSelectValue?.includes(v));
+      if (newSelect) {
+        handleSelect(newSelect);
+      }
+    }
+  };
+
   const findSameFilter = () => {
     const currentFilterDTO = store.getCustomFieldFilters()
       ? flattenObject(store.getCustomFieldFilters()) : {};
@@ -139,19 +151,13 @@ const SearchArea: React.FC = () => {
     const { starBeacon } = currentFilterDTO.otherArgs;
     const result = [...selectedQuickFilters];
     if (targetMyFilter) {
-      result.push(
-        { key: `my|${targetMyFilter.filterId}`, label: targetMyFilter.name },
-      );
+      result.push(`my|${targetMyFilter.filterId}`);
     }
     if (onlyMe) {
-      result.push(
-        { key: 'commonly|onlyMe', label: '仅我的问题' },
-      );
+      result.push('commonly|onlyMe');
     }
     if (starBeacon) {
-      result.push(
-        { key: 'commonly|starBeacon', label: '我的关注' },
-      );
+      result.push('commonly|starBeacon');
     }
     return result;
   };
@@ -184,23 +190,12 @@ const SearchArea: React.FC = () => {
         <CustomFields>
           {hasQuickFilterField ? (
             <div style={{ margin: '4px 5px' }}>
-              <Select
-                mode={'multiple' as SelectMode}
-                showCheckAll={false}
-                allowClear
-                className="SelectTheme"
-                dropdownMatchSelectWidth={false}
-                placeholder="快速筛选"
-                maxTagCount={0}
-                labelInValue
-                maxTagPlaceholder={(ommittedValues: LabeledValue[]) => `${ommittedValues.map((item) => item.label).join(', ')}`}
-                style={{ ...getSelectStyle({ name: '快速筛选' }, myFilterSelectValue), height: 34 }}
-                onSelect={handleSelect}
-                onDeselect={handleDeselect}
-                onClear={() => {
-                  handleClearFilter();
-                }}
+              <FlatSelect
+                placeholder="我的筛选"
                 value={myFilterSelectValue}
+                onChange={handlePersonalFilterChange}
+                popupCls={`${prefixCls}-search-hidden_my_filter`}
+                multiple
               >
                 <OptGroup key="commonly" label="常用选项">
                   <Option value="commonly|onlyMe">仅我的问题</Option>
@@ -218,7 +213,7 @@ const SearchArea: React.FC = () => {
                     ))
                   }
                 </OptGroup>
-              </Select>
+              </FlatSelect>
             </div>
           ) : null}
         </CustomFields>
@@ -234,13 +229,15 @@ const SearchArea: React.FC = () => {
           </Button>
         )}
         {onClickSaveFilter && !findSameFilter() && isHasFilter && !folded && (
-          <Button
-            onClick={onClickSaveFilter}
-            funcType={'flat' as FuncType}
-            className={`${prefixCls}-search-right-btn ${prefixCls}-search-right-saveBtn`}
-          >
-            保存筛选
-          </Button>
+          <Tooltip title={archiveFields.length > 0 && `${archiveFields.map((f) => f.name).join(',')}字段已被废弃，请去掉该字段后保存`}>
+            <Button
+              onClick={archiveFields.length > 0 ? undefined : onClickSaveFilter}
+              funcType={'flat' as FuncType}
+              className={`${prefixCls}-search-right-btn ${prefixCls}-search-right-saveBtn`}
+            >
+              保存筛选
+            </Button>
+          </Tooltip>
         )}
         {
           (overflowLine || folded === true) && (
@@ -267,7 +264,7 @@ const SearchArea: React.FC = () => {
         </div>
       </div>
       <div className={`${prefixCls}-search-right`}>
-        <Button onClick={reset} funcType={'flat' as FuncType} color={'blue' as ButtonColor}>重置</Button>
+        <Button style={{ marginTop: 10 }} onClick={reset} funcType={'flat' as FuncType} color={'blue' as ButtonColor}>重置</Button>
       </div>
     </>
   );

@@ -38,18 +38,22 @@ public interface ProjectConfigService {
      *
      * @param projectId
      * @param applyType
+     * @param onlyEnabled
      * @return
      */
-    List<IssueTypeVO> queryIssueTypesByProjectId(Long projectId, String applyType);
+    List<IssueTypeVO> queryIssueTypesByProjectId(Long projectId, String applyType, boolean onlyEnabled);
 
     /**
      * 根据项目id找到方案返回问题类型列表，带问题类型对应的状态机id
      *
      * @param projectId
      * @param applyType
+     * @param onlyEnabled
      * @return
      */
-    List<IssueTypeWithStateMachineIdVO> queryIssueTypesWithStateMachineIdByProjectId(Long projectId, String applyType);
+    List<IssueTypeWithStateMachineIdVO> queryIssueTypesWithStateMachineIdByProjectId(Long projectId,
+                                                                                     String applyType,
+                                                                                     Boolean onlyEnabled);
 
     /**
      * 根据项目id找到方案返回当前状态可以转换的列表

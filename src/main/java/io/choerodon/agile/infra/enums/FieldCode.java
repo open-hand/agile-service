@@ -39,5 +39,7 @@ public class FieldCode {
     public static final String PROGRAM_VERSION = "programVersion";
     public static final String MAIN_RESPONSIBLE = "mainResponsible";
     public static final String ENVIRONMENT = "environment";
+    public static final String BACKLOG_CLASSIFICATION = "backlogClassification";
+    public static final String BACKLOG_TYPE = "backlogType";
 
 }

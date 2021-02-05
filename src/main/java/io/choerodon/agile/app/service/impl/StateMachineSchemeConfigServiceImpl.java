@@ -4,17 +4,9 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.ChangeSchemeStatus;
-import io.choerodon.agile.infra.dto.ProjectConfigDTO;
-import io.choerodon.agile.infra.dto.StatusMachineSchemeConfigDTO;
-import io.choerodon.agile.infra.dto.StateMachineSchemeConfigDraftDTO;
-import io.choerodon.agile.infra.dto.StateMachineSchemeDTO;
-import io.choerodon.agile.infra.enums.SchemeType;
-import io.choerodon.agile.infra.enums.StateMachineSchemeDeployStatus;
-import io.choerodon.agile.infra.enums.StateMachineSchemeStatus;
-import io.choerodon.agile.infra.mapper.ProjectConfigMapper;
-import io.choerodon.agile.infra.mapper.StateMachineSchemeConfigDraftMapper;
-import io.choerodon.agile.infra.mapper.StatusMachineSchemeConfigMapper;
-import io.choerodon.agile.infra.mapper.StateMachineSchemeMapper;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.modelmapper.ModelMapper;
@@ -24,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,6 +57,12 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     private ModelMapper modelMapper;
     @Autowired
     private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
+    @Autowired
+    private StatusMachineMapper statusMachineMapper;
+    @Autowired
+    private InitService initService;
+    @Autowired
+    private IssueStatusMapper issueStatusMapper;
 
     @Override
     @ChangeSchemeStatus
@@ -77,7 +76,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         if (isDelete < 1) {
             throw new CommonException("error.stateMachineSchemeConfig.delete");
         }
-        return stateMachineSchemeService.querySchemeWithConfigById(true, organizationId, schemeId);
+        return stateMachineSchemeService.querySchemeWithConfigById(true, organizationId, schemeId, null);
     }
 
     @Override
@@ -116,7 +115,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
             config.setDefault(false);
         }
         configs.forEach(c -> configDraftMapper.insert(c));
-        return stateMachineSchemeService.querySchemeWithConfigById(true, organizationId, schemeId);
+        return stateMachineSchemeService.querySchemeWithConfigById(true, organizationId, schemeId, null);
     }
 
     @Override
@@ -443,7 +442,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         List<StateMachineWithStatusVO> stateMachineWithStatusVOS = stateMachineService.queryAllWithStatus(organizationId);
         Map<Long, StateMachineWithStatusVO> stateMachineMap = stateMachineWithStatusVOS.stream().collect(Collectors.toMap(StateMachineWithStatusVO::getId, x -> x));
         //获取所有问题类型
-        List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId);
+        List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, null);
         Map<Long, IssueTypeVO> issueTypeMap = issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, x -> x));
         //获取当前方案配置的项目列表
         List<ProjectConfigDTO> projectConfigs = projectConfigMapper.queryConfigsBySchemeId(SchemeType.STATE_MACHINE, schemeId);
@@ -492,7 +491,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
 //        Criteria criteria = new Criteria();
 //        criteria.update("status");
         schemeMapper.updateOptional(scheme, "status");
-        return stateMachineSchemeService.querySchemeWithConfigById(false, organizationId, schemeId);
+        return stateMachineSchemeService.querySchemeWithConfigById(false, organizationId, schemeId, null);
     }
 
     @Override
@@ -574,6 +573,55 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
             insert(organizationId, stateMachineId, stateMachineSchemeId, issueTypeId,false);
         }
         return stateMachineId;
+    }
+
+    @Override
+    public Long initStatusMachineAndSchemeConfig(Long organizationId, String name, Long schemeId, Long issueTypeId, ProjectVO projectVO, String applyType, Long statusMachineId) {
+        //发布状态机
+        Long currentStatusMachineId = null;
+        if (!ObjectUtils.isEmpty(statusMachineId)) {
+            currentStatusMachineId = stateMachineService.copyStateMachine(organizationId, statusMachineId, issueTypeId);
+        } else {
+            //初始化状态机
+            StatusMachineDTO statusMachine = new StatusMachineDTO();
+            statusMachine.setOrganizationId(organizationId);
+            statusMachine.setName(name);
+            statusMachine.setDescription(name);
+            statusMachine.setStatus(StateMachineStatus.ACTIVE);
+            statusMachine.setDefault(false);
+            if (statusMachineMapper.insert(statusMachine) != 1) {
+                throw new CommonException("error.insert.status.machine");
+            }
+            //创建状态机节点和转换
+            initService.createStateMachineDetail(organizationId, statusMachine.getId(), applyType);
+            currentStatusMachineId = statusMachine.getId();
+            //敏捷创建完状态机
+            List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectVO.getId(), currentStatusMachineId);
+            // 校验状态和项目是否关联
+            createIssueStatus(statusPayloads, projectVO);
+        }
+        // 创建状态机方案配置
+        insert(organizationId, currentStatusMachineId, schemeId, issueTypeId, false);
+        return currentStatusMachineId;
+    }
+
+    private void createIssueStatus(List<StatusPayload> statusPayloads, ProjectVO projectVO) {
+        for (StatusPayload statusPayload : statusPayloads) {
+            IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
+            issueStatusDTO.setProjectId(projectVO.getId());
+            issueStatusDTO.setStatusId(statusPayload.getStatusId());
+            IssueStatusDTO res = issueStatusMapper.selectOne(issueStatusDTO);
+            if (res == null) {
+                IssueStatusDTO issueStatus = new IssueStatusDTO();
+                issueStatus.setProjectId(projectVO.getId());
+                issueStatus.setStatusId(statusPayload.getStatusId());
+                issueStatus.setName(statusPayload.getStatusName());
+                issueStatus.setEnable(false);
+                issueStatus.setCategoryCode(statusPayload.getType());
+                issueStatus.setCompleted(Objects.equals("done", statusPayload.getType()));
+                issueStatusService.insertIssueStatus(issueStatus);
+            }
+        }
     }
 
     private void insert(Long organizationId, Long stateMachineId, Long stateMachineSchemeId, Long issueTypeId, boolean isDefault) {

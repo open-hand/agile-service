@@ -139,6 +139,33 @@ public class ChartSearchVO {
 
     private SearchVO currentSearchVO;
 
+    /**
+     * 代码质量图近多少天
+     */
+    private Integer days;
+
+    /**
+     * 服务id
+     */
+    @Encrypt
+    private Long serviceId;
+
+    public Long getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(Long serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public Integer getDays() {
+        return days;
+    }
+
+    public void setDays(Integer days) {
+        this.days = days;
+    }
+
     public SearchVO getCurrentSearchVO() {
         return currentSearchVO;
     }

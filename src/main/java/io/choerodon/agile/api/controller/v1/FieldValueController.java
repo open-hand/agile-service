@@ -163,4 +163,15 @@ public class FieldValueController {
         issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType, (ServletRequestAttributes)RequestContextHolder.currentRequestAttributes(), EncryptContext.encryptType().name());
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "快速创建根据问题类型获取概要字段默认值")
+    @GetMapping("/summary_default_value")
+    public ResponseEntity<String> getIssueSummaryDefaultValue(@ApiParam(value = "项目id", required = true)
+                                                              @PathVariable("project_id") Long projectId,
+                                                              @ApiParam(value = "组织id", required = true)
+                                                              @RequestParam Long organizationId,
+                                                              @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(objectSchemeFieldService.getIssueSummaryDefaultValue(organizationId, projectId, issueTypeId), HttpStatus.OK);
+    }
 }

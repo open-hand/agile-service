@@ -703,6 +703,31 @@ const fieldsMap = new Map([
       },
     },
   }],
+  ['Project Move', {
+    name: '所属项目',
+  }],
+  ['Static File', {
+    name: 'UI&UX文件',
+    create: {
+      operation: '上传',
+      transform: ({ newString }: { newString: string}) => newString.split('@')[1],
+    },
+    delete: {
+      operation: '删除',
+      transform: ({ oldString }: {oldString: string }) => oldString.split('@')[1],
+    },
+  }],
+  ['Static File Rel', {
+    name: 'UI&UX文件',
+    create: {
+      operation: '关联',
+      transform: ({ newString }: { newString: string}) => newString.split('@')[1],
+    },
+    delete: {
+      operation: '移除',
+      transform: ({ oldString }: {oldString: string }) => oldString.split('@')[1],
+    },
+  }],
 ]);
 
 export default fieldsMap;

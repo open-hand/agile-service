@@ -1,8 +1,8 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.IssueTypeSearchVO;
+import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.infra.dto.IssueTypeDTO;
-import io.choerodon.agile.infra.dto.IssueTypeWithInfoDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -17,13 +17,10 @@ import java.util.Set;
 @Component
 public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
 
-    List<IssueTypeDTO> queryBySchemeId(@Param("organizationId") Long organizationId, @Param("schemeId") Long schemeId);
-
-    List<IssueTypeDTO> queryByOrgId(@Param("organizationId") Long organizationId);
-
-    List<Long> selectIssueTypeIds(@Param("organizationId") Long organizationId, @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO);
-
-    List<IssueTypeWithInfoDTO> queryIssueTypeList(@Param("organizationId") Long organizationId, @Param("issueTypeIds") List<Long> issueTypeIds);
+    List<IssueTypeDTO> queryBySchemeId(@Param("organizationId") Long organizationId,
+                                       @Param("projectId") Long projectId,
+                                       @Param("schemeId") Long schemeId,
+                                       @Param("onlyEnabled") boolean onlyEnabled);
 
     /**
      * 根据id查询issue type
@@ -31,13 +28,57 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      * @param organizationIds
      * @return
      */
-    List<IssueTypeDTO> selectByOrganizationIds(@Param("organizationIds") Set<Long> organizationIds);
+    List<IssueTypeDTO> selectSystemIssueTypeByOrganizationIds(@Param("organizationIds") Set<Long> organizationIds);
 
     /**
-     * 根据typeCode查询issue type
+     * 根据条件查询issueType
      *
-     * @param typeCode
+     * @param organizationId
+     * @param projectId
+     * @param issueTypeSearchVO
      * @return
      */
-    List<IssueTypeDTO> selectByTypeCode(@Param("typeCode") String typeCode);
+    List<IssueTypeVO> selectByOptions(@Param("organizationId") Long organizationId,
+                                      @Param("projectId") Long projectId,
+                                      @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO);
+
+    /**
+     * 根据reference_id查询
+     *
+     * @param ids
+     * @param organizationId
+     * @return
+     */
+    List<IssueTypeDTO> selectByReferenceId(@Param("ids") Set<Long> ids,
+                                           @Param("organizationId") Long organizationId);
+
+    /**
+     * 查该项目可以引用的问题类型
+     *
+     * @param organizationId
+     * @param projectId
+     * @return
+     */
+    List<IssueTypeVO> selectEnableReference(@Param("organizationId") Long organizationId,
+                                            @Param("projectId") Long projectId);
+
+    /**
+     * 查询问题类型，如果有别名使用别名
+     *
+     * @param issueTypeId
+     * @param projectId
+     * @return
+     */
+    IssueTypeDTO selectWithAlias(@Param("issueTypeId") Long issueTypeId,
+                                 @Param("projectId") Long projectId);
+
+    /**
+     * 根据问题类型id和项目id查询问题类型
+     *
+     * @param issueTypeIds
+     * @param projectIds
+     * @return
+     */
+    List<IssueTypeDTO> selectWithAliasByIds(@Param("issueTypeIds") Set<Long> issueTypeIds,
+                                            @Param("projectIds") Set<Long> projectIds);
 }

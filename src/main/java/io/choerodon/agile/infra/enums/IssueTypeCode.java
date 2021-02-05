@@ -12,7 +12,9 @@ public enum IssueTypeCode {
     ISSUE_TEST("issue_test"),
     STORY("story"),
     SUB_TASK("sub_task"),
-    TASK("task");
+    TASK("task"),
+    BACKLOG("backlog"),
+    ;
 
     private String value;
 
@@ -30,6 +32,15 @@ public enum IssueTypeCode {
 
     public static boolean isSubTask(String value) {
         return SUB_TASK.value.equals(value);
+    }
+
+    public static boolean contains(String typeCode) {
+        for (IssueTypeCode issueTypeCode : IssueTypeCode.values()) {
+            if(issueTypeCode.value().equals(typeCode)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

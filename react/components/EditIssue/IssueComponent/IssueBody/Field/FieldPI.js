@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
+import { Permission } from '@choerodon/boot';
 import SelectPI from '@/components/select/select-pi';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { piApi } from '@/api';
@@ -23,7 +24,7 @@ class FieldPI extends Component {
   }
 
   render() {
-    const { store, hasPermission, disabled } = this.props;
+    const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { activePi, closePi } = issue;
     const {
@@ -39,27 +40,34 @@ class FieldPI extends Component {
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <TextEditToggle // IsInProgramStore
-            disabled={(disabled) || (!IsInProgramStore.isOwner && !hasPermission && statusCode === 'doing')}
-            onSubmit={this.updateIssuePI}
-            initValue={id}
-            editor={({ submit }) => (
-              <SelectPI
-                required={required}
-                statusList={['todo', 'doing']}
-                multiple={false}
-                allowClear
-                onChange={submit}
-                disabledCurrentPI={!IsInProgramStore.isOwner && !hasPermission}
-              />
-            )}
+          <Permission service={[
+            'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.completepi',
+            'choerodon.code.project.plan.feature.ps.choerodon.code.project.plan.feature.startpi',
+            'choerodon.code.project.plan.feature.ps.pi.plan',
+          ]}
           >
-            <Tooltip
-              placement="top"
-              title={`该特性经历PI数${closePi.length + (id ? 1 : 0)}`}
-            >
-              <div>
-                {
+            {(hasPermission) => (
+              <TextEditToggle // IsInProgramStore
+                disabled={(disabled) || (!hasPermission && statusCode === 'doing')}
+                onSubmit={this.updateIssuePI}
+                initValue={id}
+                editor={({ submit }) => (
+                  <SelectPI
+                    required={required}
+                    statusList={['todo', 'doing']}
+                    multiple={false}
+                    allowClear
+                    onChange={submit}
+                    disabledCurrentPI={!hasPermission}
+                  />
+                )}
+              >
+                <Tooltip
+                  placement="top"
+                  title={`该特性经历PI数${closePi.length + (id ? 1 : 0)}`}
+                >
+                  <div>
+                    {
                     !closePi.length && !id ? '无' : (
                       <div>
                         <div>
@@ -83,9 +91,12 @@ class FieldPI extends Component {
                       </div>
                     )
                   }
-              </div>
-            </Tooltip>
-          </TextEditToggle>
+                  </div>
+                </Tooltip>
+              </TextEditToggle>
+            )}
+          </Permission>
+
         </div>
       </div>
     );

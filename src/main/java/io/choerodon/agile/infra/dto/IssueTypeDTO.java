@@ -1,6 +1,5 @@
 package io.choerodon.agile.infra.dto;
 
-import com.google.common.base.MoreObjects;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -28,6 +27,12 @@ public class IssueTypeDTO extends AuditDomain {
     private String typeCode;
     @Column(name = "is_initialize")
     private Boolean initialize;
+    private Long projectId;
+    @Transient
+    private Boolean enabled;
+    private Boolean referenced;
+    private Long referenceId;
+    private String source;
 
     public IssueTypeDTO(String icon, String name, String description, Long organizationId, String colour, String typeCode, Boolean initialize) {
         this.icon = icon;
@@ -47,6 +52,46 @@ public class IssueTypeDTO extends AuditDomain {
 
     @Transient
     private StatusMachineSchemeConfigDTO stateMachineSchemeConfig;
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public Long getReferenceId() {
+        return referenceId;
+    }
+
+    public void setReferenceId(Long referenceId) {
+        this.referenceId = referenceId;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public Boolean getReferenced() {
+        return referenced;
+    }
+
+    public void setReferenced(Boolean referenced) {
+        this.referenced = referenced;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
 
     public Long getId() {
         return id;
@@ -131,17 +176,20 @@ public class IssueTypeDTO extends AuditDomain {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", id)
-                .add("icon", icon)
-                .add("name", name)
-                .add("description", description)
-                .add("organizationId", organizationId)
-                .add("colour", colour)
-                .add("typeCode", typeCode)
-                .add("initialize", initialize)
-                .add("sequence", sequence)
-                .add("stateMachineSchemeConfig", stateMachineSchemeConfig)
-                .toString();
+        return "IssueTypeDTO{" +
+                "id=" + id +
+                ", icon='" + icon + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", organizationId=" + organizationId +
+                ", colour='" + colour + '\'' +
+                ", typeCode='" + typeCode + '\'' +
+                ", initialize=" + initialize +
+                ", projectId=" + projectId +
+                ", enabled=" + enabled +
+                ", referenced=" + referenced +
+                ", sequence=" + sequence +
+                ", stateMachineSchemeConfig=" + stateMachineSchemeConfig +
+                '}';
     }
 }

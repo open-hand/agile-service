@@ -1,3 +1,4 @@
+/* eslint-disable no-const-assign */
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -5,21 +6,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Tooltip } from 'choerodon-ui';
-import { Modal } from 'choerodon-ui/pro';
-import FileSaver from 'file-saver';
+import { Modal, Progress } from 'choerodon-ui/pro';
 import { getFileSuffix } from '@/utils/common';
 import Preview from '@/components/Preview';
 import './SingleFileUpload.less';
+import FileSaver from 'file-saver';
 
 const previewSuffix = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'pdf', 'jpg', 'jpeg', 'gif', 'png'];
 const modalKey = Modal.key();
 function SingleFileUplaod(props) {
   const {
-    url, fileService, fileName, hasDeletePermission, onDeleteFile,
+    url, fileService, fileName, hasDeletePermission, onDeleteFile, percent, error,
   } = props;
+
   const handleDownLoadFile = () => {
     FileSaver.saveAs(`${fileService || ''}${url}`, fileName);
   };
+
   const handlePreviewClick = (service, name, fileUrl) => {
     Modal.open({
       key: modalKey,
@@ -34,11 +37,13 @@ function SingleFileUplaod(props) {
       children: <Preview service={service} fileName={name} fileUrl={fileUrl} handleDownLoadFile={handleDownLoadFile} />,
     });
   };
-  const previewAble = previewSuffix.includes(getFileSuffix(url));
+
+  const previewAble = url && previewSuffix.includes(getFileSuffix(url));
   return (
-    <div className="c7n-agile-singleFileUpload">
-      <span className="c7n-agile-singleFileUpload-icon">
-        {previewAble && (
+    <div className="c7n-agile-singleFileUpload-container">
+      <div className="c7n-agile-singleFileUpload">
+        <span className="c7n-agile-singleFileUpload-icon">
+          {previewAble && (
           <Tooltip title="预览">
             <Icon
               type="zoom_in"
@@ -46,28 +51,45 @@ function SingleFileUplaod(props) {
               onClick={handlePreviewClick.bind(this, fileService, fileName, url)}
             />
           </Tooltip>
-        )}
-      </span>
-      <a className="c7n-agile-singleFileUpload-download" onClick={handleDownLoadFile}>
-        <span className="c7n-agile-singleFileUpload-icon">
-          <Tooltip title="下载">
-            <Icon type="get_app" style={{ color: '#000' }} />
-          </Tooltip>
+          )}
         </span>
-      </a>
-      <span
-        className={`c7n-agile-singleFileUpload-fileName ${previewAble ? 'preview' : ''}`}
-        onClick={previewAble && handlePreviewClick.bind(this, fileService, fileName, url)}
-      >
-        {fileName}
-      </span>
-      {(hasDeletePermission && onDeleteFile) && (
-      <Tooltip title="删除">
-        <Icon
-          type="close"
-          onClick={() => { onDeleteFile(); }}
-        />
-      </Tooltip>
+        {
+        url && (
+        <a className="c7n-agile-singleFileUpload-download" onClick={handleDownLoadFile}>
+          <span className="c7n-agile-singleFileUpload-icon">
+            <Tooltip title="下载">
+              <Icon type="get_app" style={{ color: '#000' }} />
+            </Tooltip>
+          </span>
+        </a>
+        )
+      }
+        <span
+          className={`c7n-agile-singleFileUpload-fileName ${previewAble ? 'preview' : ''}`}
+          onClick={previewAble && handlePreviewClick.bind(this, fileService, fileName, url)}
+          style={{
+            cursor: previewAble ? 'pointer' : 'unset',
+          }}
+        >
+          {fileName}
+        </span>
+        {(hasDeletePermission && onDeleteFile && (url || error)) && (
+          <Tooltip title="删除">
+            <Icon
+              type="close"
+              onClick={() => { onDeleteFile(); }}
+            />
+          </Tooltip>
+        )}
+      </div>
+      { percent > 0 && (
+        <div className={`c7n-agile-singleFileUpload-process ${error ? 'c7n-agile-singleFileUpload-errorProcess' : ''}`}>
+          <Progress
+            value={Number(percent.toFixed(2))}
+            className="c7n-agile-singleFileUpload-process-progress"
+            status={error ? 'exception' : 'active'}
+          />
+        </div>
       )}
     </div>
   );

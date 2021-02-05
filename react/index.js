@@ -25,10 +25,12 @@ const State = React.lazy(() => import('./routes/state'));
 const PageConfig = React.lazy(() => import('./routes/page-config'));
 const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 const TeamPerformance = React.lazy(() => import('./routes/TeamPerformance'));
+const Release = React.lazy(() => (import('./routes/Release')));
 // 敏捷设置
 const Settings = React.lazy(() => import('./routes/settings'));
 const ProjectReport = React.lazy(() => import('./routes/project-report'));
 const GanttPage = React.lazy(() => import('./routes/gantt'));
+const UiPreview = React.lazy(() => import('./routes/ui-preview'));
 
 const { AppState } = stores;
 
@@ -44,11 +46,9 @@ class Agile extends React.Component {
 
   componentDidMount() {
     if (process.env.NODE_ENV === 'development') {
-      if (AppState.currentMenuType.category !== 'PROGRAM') {
-        // 切换项目查是否在项目群中
-        RunWhenProjectChange(IsInProgramStore.refresh);
-        IsInProgramStore.refresh();
-      }
+      // 切换项目查是否在项目群中
+      RunWhenProjectChange(IsInProgramStore.refresh);
+      IsInProgramStore.refresh();
     }
   }
 
@@ -72,6 +72,7 @@ class Agile extends React.Component {
               <Route path={`${match.url}/scrumboard`} component={ScrumBoard} />
               <Route path={`${match.url}/iterationBoard/:id`} component={IterationBoard} />
               <Route path={`${match.url}/gantt`} component={GanttPage} />
+              <Route path={`${match.url}/project-version`} component={Release} />
               {/* 运营 */}
               <Route path={`${match.url}/reporthost`} component={ReportHost} />
               {/* 设置页面 */}
@@ -83,10 +84,11 @@ class Agile extends React.Component {
               <Route path={`${match.url}/priorities`} component={Priority} />
               <Route path={`${match.url}/state-machine`} component={StateMachine} />
               <Route path={`${match.url}/project-report`} component={ProjectReport} />
+              <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />
               <Route path="*" component={nomatch} />
             </Switch>
+            <ModalContainer />
           </IntlProviderAsync>
-          <ModalContainer />
         </AgileProvider>
       </div>
     );

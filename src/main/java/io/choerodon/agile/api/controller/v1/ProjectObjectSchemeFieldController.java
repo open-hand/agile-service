@@ -123,8 +123,8 @@ public class ProjectObjectSchemeFieldController {
     @GetMapping(value = "/configs")
     public ResponseEntity<PageConfigVO> listConfigs(@PathVariable(name = "project_id") Long projectId,
                                                     @RequestParam Long organizationId,
-                                                    @RequestParam String issueType) {
-        return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, projectId, issueType), HttpStatus.OK);
+                                                    @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, projectId, issueTypeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -163,8 +163,8 @@ public class ProjectObjectSchemeFieldController {
     @GetMapping(value = "/unselected")
     public ResponseEntity<List<ObjectSchemeFieldVO>> unselected(@PathVariable("project_id") Long projectId,
                                                                 @RequestParam Long organizationId,
-                                                                @RequestParam String issueType) {
-        return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, projectId, issueType), HttpStatus.OK);
+                                                                @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, projectId, issueTypeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -194,7 +194,21 @@ public class ProjectObjectSchemeFieldController {
     @GetMapping(value = "/description_template")
     public ResponseEntity<IssueTypeFieldVO> queryDescriptionTemplate(@PathVariable("project_id") Long projectId,
                                                                      @RequestParam Long organizationId,
-                                                                     @RequestParam String issueType) {
-        return new ResponseEntity<>(objectSchemeFieldService.queryDescriptionTemplate(projectId, issueType, organizationId), HttpStatus.OK);
+                                                                     @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(objectSchemeFieldService.queryDescriptionTemplate(projectId, issueTypeId, organizationId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "同步字段默认值到扩展字段类型")
+    @PostMapping(value = "/sync_default_value")
+    public ResponseEntity syncDefaultValue(@ApiParam(value = "项目id", required = true)
+                                           @PathVariable("project_id") Long projectId,
+                                           @ApiParam(value = "组织id", required = true)
+                                           @RequestParam Long organizationId,
+                                           @ApiParam(value = "字段id", required = true)
+                                           @RequestParam("field_id") @Encrypt Long fieldId,
+                                           @RequestBody @Valid  ObjectSchemeFieldUpdateVO updateDTO) {
+        objectSchemeFieldService.syncDefaultValue(organizationId, projectId, fieldId, updateDTO);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

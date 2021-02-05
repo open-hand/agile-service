@@ -1,94 +1,67 @@
-import React, { Component } from 'react';
-import { observer } from 'mobx-react';
+import React, { useEffect, useImperativeHandle } from 'react';
+import { observer } from 'mobx-react-lite';
 import { versionApi } from '@/api';
-import EditIssue from '../../../../components/EditIssue';
+import DetailContainer, { useDetail } from '@/components/detail-container';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 
-@observer
-class IssueDetail extends Component {
-  constructor(props) {
-    super(props);
-
-    this.EditIssue = React.createRef();
-  }
-
-  componentDidMount() {
-    const { onRef } = this.props;
-    onRef(this);
-  }
-
-  /**
-   *detail有更新回调待办事项更新
-   *
-   * @memberof IssueDetail
-   */
-  handleIssueUpdate() {
-    const chosenEpic = BacklogStore.getChosenEpic;
-    BacklogStore.axiosGetSprint(BacklogStore.getSprintFilter()).then((res) => {
-      BacklogStore.setSprintData(res);
-    }).catch((error) => {
-    });
-  }
-
-  /**
-   * 重置点击
-   * @param {*} current
-   */
-  handleResetClicked(current) {
-    // BacklogStore.clickedOnce(sprintId, current);
-    BacklogStore.setClickIssueDetail(current);
-  }
-
-  /**
-   * 刷新issue详情的数据
-   */
-  refreshIssueDetail() {
-    if (this.EditIssue.current) {
-      this.EditIssue.current.loadIssueDetail();
-    }
-  }
-
-  render() {
-    // const { paramOpenIssueId } = this.state;
-    const { refresh } = this.props;
-    const visible = Object.keys(BacklogStore.getClickIssueDetail).length > 0;
-    const { programId, issueId } = BacklogStore.getClickIssueDetail || {};
-    return (
-      <EditIssue
-        visible={visible}
-        forwardedRef={this.EditIssue}
-        issueId={BacklogStore.getClickIssueId}
-        programId={programId}
-        disabled={programId}
-        applyType={programId ? 'program' : 'agile'}
-        afterIssueUpdate={this.handleResetClicked}
-        onCancel={() => {
-          BacklogStore.setClickIssueDetail({});
-          BacklogStore.setIsLeaveSprint(false);
-          BacklogStore.clearMultiSelected();
-        }}
-        onDeleteIssue={() => {
-          if (BacklogStore.chosenEpic === BacklogStore.getClickIssueId) {
-            BacklogStore.setChosenEpic('all');
-          }
-          BacklogStore.setClickIssueDetail({});
-          BacklogStore.setIsLeaveSprint(false);
-          refresh();
-        }}
-        onCreateVersion={() => {
-          versionApi.loadAll().then((data2) => {
-            const newVersion = [...data2];
-            for (let index = 0, len = newVersion.length; index < len; index += 1) {
-              newVersion[index].expand = false;
+const IssueDetail = ({ refresh, innerRef }) => {
+  const [detailProps] = useDetail();
+  const { open, close } = detailProps;
+  const refreshIssueDetail = () => {
+    close();
+  };
+  useImperativeHandle(innerRef, () => ({
+    refreshIssueDetail,
+  }));
+  const visible = Object.keys(BacklogStore.getClickIssueDetail).length > 0;
+  const { programId } = BacklogStore.getClickIssueDetail || {};
+  const issueId = BacklogStore.getClickIssueId;
+  useEffect(() => {
+    if (visible) {
+      open({
+        path: 'issue',
+        props: {
+          issueId,
+          programId,
+          disabled: programId,
+          applyType: programId ? 'program' : 'agile',
+        },
+        events: {
+          update: () => {
+            refresh();
+          },
+          delete: () => {
+            if (BacklogStore.chosenEpic === BacklogStore.getClickIssueId) {
+              BacklogStore.setChosenEpic('all');
             }
-            BacklogStore.setVersionData(newVersion);
-          }).catch((error) => {
-          });
-        }}
-        onUpdate={refresh}
-      />
-    );
-  }
-}
+            BacklogStore.setClickIssueDetail({});
+            BacklogStore.setIsLeaveSprint(false);
+            refresh();
+          },
+          close: () => {
+            BacklogStore.setClickIssueDetail({});
+            BacklogStore.setIsLeaveSprint(false);
+            BacklogStore.clearMultiSelected();
+          },
+          createVersion: () => {
+            versionApi.loadAll().then((data2) => {
+              const newVersion = [...data2];
+              for (let index = 0, len = newVersion.length; index < len; index += 1) {
+                newVersion[index].expand = false;
+              }
+              BacklogStore.setVersionData(newVersion);
+            }).catch((error) => {
+            });
+          },
+        },
+      });
+    } else {
+      close();
+    }
+  }, [visible, issueId]);
+  return (
+    <DetailContainer {...detailProps} />
+  );
+};
 
-export default IssueDetail;
+export default observer(IssueDetail);

@@ -1,4 +1,6 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, {
+  useMemo, useState, useEffect, useCallback,
+} from 'react';
 import { CheckBox, DataSet, Form } from 'choerodon-ui/pro/lib';
 import { set } from 'lodash';
 import { observer } from 'mobx-react-lite';
@@ -7,8 +9,8 @@ import { FormProps } from 'choerodon-ui/pro/lib/form/Form';
 import { pageConfigApi } from '@/api';
 
 interface Props {
-  options: Array<{ label: string, value: string }>,
-  otherCheckBokProps?: Partial<CheckBoxProps>,
+  options: Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps }>,
+  otherCheckBoxProps?: Partial<CheckBoxProps>,
   formProps?: Partial<FormProps>,
   name?: string,
   dataSet?: DataSet,
@@ -19,11 +21,14 @@ interface IConfig {
   name?: string,
   defaultValue?: any,
   options?: Props['options'],
+  events?: { initOptions?: (data: { options: Props['options'], checkedOptions: string[], dataSet: DataSet })
+  => Props['options'] | void }
   onChange?: (data: string[] | string) => void | boolean,
-  checkBokProps?: Partial<CheckBoxProps>,
+  checkBoxProps?: Partial<CheckBoxProps>,
 }
-interface ITableColumnCheckBoxesDataProps {
+export interface ITableColumnCheckBoxesDataProps {
   checkedOptions: string[],
+  setCheckedOptions: (codes: string[]) => void,
   dataSet: DataSet,
   options: Props['options'],
   actions: { checkAll: () => void, unCheckAll: () => void, check: (val: string) => void }
@@ -36,14 +41,17 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
   const name = useMemo(() => config?.name || 'exportCodes', [config?.name]);
   const form = useMemo(() => ({} as { dataSet: DataSet }), []);
   const onChange = useMemo(() => config?.onChange || (() => null), [config?.onChange]);
-  const loadData = async () => {
-    pageConfigApi.load().then((res: any) => {
-      const { content } = res;
-      if (content && Array.isArray(content)) {
-        setOptions(content.map((option) => ({ label: option.name, value: option.code })));
-      }
-    });
-  };
+  const loadData = useCallback(async () => {
+    let newOptions: any = config?.options;
+    if (!newOptions) {
+      const { content } = pageConfigApi.load();
+      newOptions = content.map((option: any) => ({ label: option.name, value: option.code }));
+    }
+    if (config?.events?.initOptions) {
+      newOptions = config.events.initOptions({ options: newOptions, checkedOptions, dataSet: form.dataSet }) || newOptions;
+    }
+    setOptions(newOptions || []);
+  }, [checkedOptions, config?.events, config?.options, form.dataSet]);
   const checkAll = () => {
     const newCheckedOptions = options?.map((option) => option.value) || [];
     form.dataSet.current?.set(name, newCheckedOptions);
@@ -59,10 +67,11 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
   const handleChange = (value: string[] | string) => {
     if (value) {
       Array.isArray(value) ? setCheckedOptions(value) : setCheckedOptions([value]);
+      onChange(Array.isArray(value) ? value : [value]);
     } else {
       setCheckedOptions([]);
+      onChange([]);
     }
-    onChange(value);
   };
   useEffect(() => {
     if (typeof (config?.defaultValue) !== 'undefined') {
@@ -77,15 +86,12 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
     }
   }, [config?.defaultValue]);
   useEffect(() => {
-    if (config?.options) {
-      setOptions(config?.options);
-    } else {
-      loadData();
-    }
-  }, [config?.options]);
+    loadData();
+  }, [loadData]);
 
   const dataProps: ITableColumnCheckBoxesDataProps = {
     checkedOptions,
+    setCheckedOptions,
     options,
     dataSet: form.dataSet,
     actions: { checkAll, unCheckAll, check: checkOption },
@@ -95,13 +101,14 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
     defaultValue: config?.defaultValue,
     handleChange,
     formProps: form,
-    otherCheckBokProps: config?.checkBokProps,
+    otherCheckBoxProps: config?.checkBoxProps,
+    name: config?.name || 'exportCodes',
   };
   return [dataProps, componentProps];
 }
 
 const TableColumnCheckBoxes: React.FC<Props> = ({
-  dataSet: propsDataSet, name = 'exportCodes', options, defaultValue, otherCheckBokProps, formProps = {}, handleChange,
+  dataSet: propsDataSet, name = 'exportCodes', options, defaultValue, otherCheckBoxProps, formProps = {}, handleChange,
 }) => {
   const dataSet = useMemo(() => {
     if (propsDataSet) {
@@ -122,7 +129,7 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
     <Form dataSet={dataSet} {...formProps}>
       <div>
         {options.map(((option) => (
-          <CheckBox name={name} value={option.value} {...otherCheckBokProps} onChange={handleChange}>
+          <CheckBox name={name} value={option.value} {...otherCheckBoxProps} onChange={handleChange} {...option.checkBoxProps}>
             {option.label}
           </CheckBox>
         )))}

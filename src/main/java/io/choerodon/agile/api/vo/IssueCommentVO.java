@@ -53,6 +53,29 @@ public class IssueCommentVO {
     @ApiModelProperty(value = "最后更新时间")
     private Date lastUpdateDate;
 
+    @ApiModelProperty("父评论id")
+    @Encrypt
+    private Long parentId;
+
+    @ApiModelProperty("被回复的用户id")
+    @Encrypt
+    private Long replyToUserId;
+
+    @ApiModelProperty("被回复的用户名称")
+    private String replyToUserName;
+
+    @ApiModelProperty("被回复的用户登录名称")
+    private String replyToUserLoginName;
+
+    @ApiModelProperty("被回复的用户真实名称")
+    private String replyToUserRealName;
+
+    @ApiModelProperty("被回复的用户图标")
+    private String replyToUserImageUrl;
+
+    @ApiModelProperty("评论下的回复")
+    private Integer replySize;
+
     @ApiModelProperty(value = "附件列表")
     private List<IssueAttachmentVO> issueAttachmentVOList;
 
@@ -150,6 +173,62 @@ public class IssueCommentVO {
 
     public void setUserRealName(String userRealName) {
         this.userRealName = userRealName;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Long getReplyToUserId() {
+        return replyToUserId;
+    }
+
+    public void setReplyToUserId(Long replyToUserId) {
+        this.replyToUserId = replyToUserId;
+    }
+
+    public String getReplyToUserName() {
+        return replyToUserName;
+    }
+
+    public void setReplyToUserName(String replyToUserName) {
+        this.replyToUserName = replyToUserName;
+    }
+
+    public String getReplyToUserLoginName() {
+        return replyToUserLoginName;
+    }
+
+    public void setReplyToUserLoginName(String replyToUserLoginName) {
+        this.replyToUserLoginName = replyToUserLoginName;
+    }
+
+    public String getReplyToUserRealName() {
+        return replyToUserRealName;
+    }
+
+    public void setReplyToUserRealName(String replyToUserRealName) {
+        this.replyToUserRealName = replyToUserRealName;
+    }
+
+    public String getReplyToUserImageUrl() {
+        return replyToUserImageUrl;
+    }
+
+    public void setReplyToUserImageUrl(String replyToUserImageUrl) {
+        this.replyToUserImageUrl = replyToUserImageUrl;
+    }
+
+    public Integer getReplySize() {
+        return replySize;
+    }
+
+    public void setReplySize(Integer replySize) {
+        this.replySize = replySize;
     }
 
     @Override

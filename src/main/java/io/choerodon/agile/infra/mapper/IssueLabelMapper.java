@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import java.util.List;
+import java.util.Set;
 
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.agile.infra.dto.*;
@@ -16,12 +17,12 @@ import org.apache.ibatis.annotations.Param;
 public interface IssueLabelMapper extends BaseMapper<IssueLabelDTO> {
 
     /**
-     * 回收没有再用的issue标签
+     * 回收没有再用且没有设为默认值的issue标签
      *
      * @param projectId projectId
      * @return int
      */
-    int labelGarbageCollection(@Param("projectId") Long projectId);
+    int labelGarbageCollection(@Param("projectId") Long projectId, @Param("defaultValueIds") Set<Long> defaultValueIds);
 
     /**
      * 重名校验

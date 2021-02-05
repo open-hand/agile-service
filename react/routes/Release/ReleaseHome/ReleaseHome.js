@@ -367,7 +367,7 @@ class ReleaseHome extends Component {
     return (
       <Page
         service={[
-          'choerodon.code.project.cooperation.work-list.ps.version',
+          'choerodon.code.project.cooperation.project-version.ps.default',
           'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion',
           'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
           'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',

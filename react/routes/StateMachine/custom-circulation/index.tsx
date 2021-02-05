@@ -7,7 +7,7 @@ import {
   Table, DataSet, Menu, Dropdown, Icon, Modal,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { useIssueTypes } from '@/hooks';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { find, filter } from 'lodash';
 import moment from 'moment';
 import STATUS from '@/constants/STATUS';
@@ -15,9 +15,10 @@ import { IIssueType, User, IStatus } from '@/common/types';
 import { statusTransformApiConfig } from '@/api';
 import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
 import { Divider, Tooltip } from 'choerodon-ui';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
-import FeatureLinkage from './components/linkage/FeatureLinkage';
+import FeatureLinkage from './components/linkage/feature-linkage';
 import NotifySetting from './components/notify-setting';
 import UpdateField from './components/update-field';
 import IssueTypeTab from '../components/issue-type-tab';
@@ -92,6 +93,7 @@ interface IStatusFieldSettingVOS {
 interface IStatusLinkageVOS {
   id: null | string
   issueTypeId: string
+  issueTypeName: string
   issueTypeVO: IIssueType
   parentIssueStatusSetting: string
   parentIssueTypeCode: 'story' | 'bug' | 'task'
@@ -211,7 +213,7 @@ const transformFieldValue = (fieldSetting) => {
 };
 
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
-  const [issueTypes] = useIssueTypes();
+  const { data: issueTypes } = useProjectIssueTypes();
   const { selectedType, setSelectedType } = useStateMachineContext();
 
   const customCirculationDataSet = useMemo(() => new DataSet({
@@ -269,17 +271,17 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         />,
       },
       linkage: {
-        width: 380,
+        width: selectedTypeCode === 'feature' ? MODAL_WIDTH.middle : MODAL_WIDTH.small,
         title: '状态联动',
         children: selectedTypeCode === 'feature' ? (
           // @ts-ignore
           <FeatureLinkage
+            issueTypeId={selectedType}
             record={record}
-            selectedType={selectedType}
             customCirculationDataSet={customCirculationDataSet}
           />
         ) : (
-        // @ts-ignore
+          // @ts-ignore
           <Linkage
             record={record}
             selectedType={selectedType}
@@ -334,7 +336,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     ) => item.id === selectedType)?.typeCode;
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
-      <Menu onClick={handleMenuClick.bind(this, record)}>
+      <Menu onClick={handleMenuClick.bind(this, record)} selectable={false}>
         <Menu.Item key="condition">流转条件</Menu.Item>
         {
           (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug' || selectedTypeCode === 'feature') && (
@@ -406,11 +408,12 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   // @ts-ignore
   const renderStatusLinkageSetting = (statusLinkageVOS: IStatusLinkageVOS[], record) => {
-    const selectedTypeCode = find(issueTypes, (
+    const selectedIssueType = find(issueTypes, (
       item: IIssueType,
-    ) => item.id === selectedType)?.typeCode;
+    ) => item.id === selectedType);
+    const selectedTypeCode = selectedIssueType?.typeCode;
     if (statusLinkageVOS && statusLinkageVOS.length && (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug')) {
-      const prefixStr = `全部${selectedTypeCode === 'sub_task' ? '子任务' : '子缺陷'}都在【${record.get('name')}】状态，则将`;
+      const prefixStr = `全部${selectedIssueType?.name}都在【${record.get('name')}】状态，则将`;
       const parentDes = (
         statusLinkageVOS.map((linkageSetting) => {
           const { statusVO, issueTypeVO } = linkageSetting;
@@ -424,9 +427,9 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       const prefixStr = '当项目';
       const linkageStr = (
         statusLinkageVOS.map((linkageSetting) => {
-          const { statusVO, projectVO } = linkageSetting;
+          const { statusVO, projectVO, issueTypeName } = linkageSetting;
           const toStatusName = statusVO?.name;
-          return `【${projectVO?.name}】的故事状态全为【${toStatusName}】`;
+          return `【${projectVO?.name}】的${issueTypeName}状态全为【${toStatusName}】`;
         })).join('，');
       const suffixStr = `，则关联的特性自动流转到【${record.get('name')}】状态。`;
       return `${prefixStr}${linkageStr}${suffixStr}`;

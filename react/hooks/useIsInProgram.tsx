@@ -3,6 +3,8 @@ import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { commonApi } from '@/api';
 import { stores } from '@choerodon/boot';
 import { AppStateProps } from '@/common/types';
+import useCategoryCodes from './useCategoryCodes';
+import useIsProgram from './useIsProgram';
 
 const { AppState }: { AppState: AppStateProps } = stores;
 const isDEV = process.env.NODE_ENV === 'development';
@@ -27,10 +29,8 @@ const useIsInProgram = (): ChildrenProps => {
   const [isShowFeature, setIsShowFeature] = useState<boolean>(false);
   const [artInfo, setArtInfo] = useState<object | boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-
-  const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
+  const { isProgram } = useIsProgram();
   const isProject = AppState.currentMenuType.type === 'project';
-  const isProgram = type === 'program';
   const refresh = useCallback(async () => {
     if (!isProgram) {
       setLoading(true);

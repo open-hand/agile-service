@@ -59,7 +59,10 @@ public interface StateMachineSchemeService {
      * @param schemeId       方案id
      * @return 状态机方案及配置
      */
-    StateMachineSchemeVO querySchemeWithConfigById(Boolean isDraft, Long organizationId, Long schemeId);
+    StateMachineSchemeVO querySchemeWithConfigById(Boolean isDraft,
+                                                   Long organizationId,
+                                                   Long schemeId,
+                                                   Long projectId);
 
     /**
      * 校验名字是否未被使用

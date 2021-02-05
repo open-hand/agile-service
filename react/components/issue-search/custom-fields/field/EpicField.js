@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import SelectEpic from '@/components/select/select-epic';
 import { epicApi } from '@/api';

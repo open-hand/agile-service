@@ -1,8 +1,6 @@
 import React, { Component, useMemo, forwardRef } from 'react';
-import { observer, inject } from 'mobx-react';
-import { withRouter } from 'react-router-dom';
+import { observer } from 'mobx-react';
 import { Select } from 'choerodon-ui/pro';
-import { injectIntl } from 'react-intl';
 import STATUS from '@/constants/STATUS';
 import { issueApi, statusApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
@@ -15,7 +13,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
   } = statusArgs;
   const config = useMemo(() => ({
     name: 'status',
-    request: () => statusApi.loadTransformStatusByIssue(
+    request: () => statusApi.project(projectId).loadTransformStatusByIssue(
       statusId,
       issueId,
       typeId,
@@ -53,7 +51,6 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
     />
   );
 });
-@inject('AppState')
 @observer class FieldStatus extends Component {
   updateIssueStatus = (transform) => {
     if (transform) {
@@ -89,7 +86,6 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
       statusVO = {}, statusId, issueTypeVO = {},
       issueId,
     } = issue;
-
     const { type, name } = statusVO || {};
     const typeId = issueTypeVO.id;
     return (
@@ -141,4 +137,4 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
   }
 }
 
-export default withRouter(injectIntl(FieldStatus));
+export default FieldStatus;

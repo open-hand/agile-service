@@ -10,6 +10,7 @@ import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   filterList?: string[]
+  request?: SelectConfig<any>['request']
   isProgram?: boolean
   afterLoad?: (sprints: IIssueType[]) => void
   dataRef?: React.MutableRefObject<any>
@@ -20,7 +21,7 @@ interface Props extends Partial<SelectProps> {
 }
 
 const SelectIssueType: React.FC<Props> = forwardRef(({
-  filterList = ['feature'], isProgram, valueField, dataRef, flat,
+  filterList = ['feature'], isProgram, request, valueField, dataRef, flat,
   afterLoad, projectId, applyType, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
@@ -29,7 +30,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
     valueField: valueField || 'id',
     request: () => issueTypeApi.loadAllWithStateMachineId(applyType ?? (isProgram ? 'program' : undefined), projectId).then((issueTypes) => {
       if (isProgram) {
-        const featureTypes = [{
+        const featureTypes: any = [{
           id: 'business',
           name: '特性',
           colour: '',
@@ -53,7 +54,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
         return issueTypes.filter((issueType) => !filterList.some((filter) => filter === issueType.typeCode));
       }
       return issueTypes;
-    }),
+    })),
     middleWare: (issueTypes) => {
       if (afterLoad) {
         afterLoad(issueTypes);
@@ -75,11 +76,6 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
       ref={ref}
       {...props}
       {...otherProps}
-    // optionRenderer={({ record, text, value }) => (
-    //   <Tooltip title={text}>
-    //     <span>{text}</span>
-    //   </Tooltip>
-    // )}
     />
   );
 });

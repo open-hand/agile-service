@@ -23,4 +23,10 @@
           )
     </select>
 
+    <update id="updateProject">
+        update agile_issue_attachment set project_id = #{targetProjectId}
+        where project_id = #{projectId}
+        AND issue_id = #{issueId}
+    </update>
+
 </mapper>

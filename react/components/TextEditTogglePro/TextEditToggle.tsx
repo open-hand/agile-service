@@ -12,25 +12,21 @@ interface RenderProps {
 interface EditorRender {
   submit: () => void
 }
-export enum Action {
-  click = 'click', // clickout提交
-  blur = 'blur', // 失焦提交
-  change = 'change'// change提交
-}
+export type Action = 'click' | 'blur' | 'change'
 interface Props {
   disabled?: boolean
   submitTrigger?: Action[] // 触发提交的动作
   alwaysRender?: boolean // 查看模式也挂载编辑器
   editor: (editorRender: EditorRender) => JSX.Element
   editorExtraContent?: () => JSX.Element
-  children: (({ value, editing }: RenderProps) => JSX.Element) | JSX.Element
+  children: (({ value, editing }: RenderProps) => React.ReactNode) | React.ReactNode
   className?: string
   onSubmit: (data: any) => void
   initValue: any
 }
 
 const TextEditToggle: React.FC<Props> = ({
-  disabled, submitTrigger = [Action.blur], editor, editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true,
+  disabled, submitTrigger = ['blur'], editor, editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true,
 } = {} as Props) => {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(initValue);
@@ -38,7 +34,7 @@ const TextEditToggle: React.FC<Props> = ({
   const dataRef = useRef(initValue);
   const editorRef = useRef<JSX.Element>(null);
   const handleClickOut = () => {
-    if (submitTrigger.includes(Action.click)) {
+    if (submitTrigger.includes('click')) {
       submit();
     }
   };
@@ -71,12 +67,12 @@ const TextEditToggle: React.FC<Props> = ({
     if (originOnChange) {
       originOnChange(newValue);
     }
-    if (submitTrigger.includes(Action.change)) {
+    if (submitTrigger.includes('change')) {
       submit();
     }
   };
   const handleEditorBlur = () => {
-    if (submitTrigger.includes(Action.blur)) {
+    if (submitTrigger.includes('blur')) {
       submit();
     }
   };
@@ -123,6 +119,7 @@ const TextEditToggle: React.FC<Props> = ({
     );
   };
   const renderText = () => {
+    // @ts-ignore
     const textElement = typeof text === 'function' ? text({ value: dataRef.current, editing }) : text;
     return textElement;
   };

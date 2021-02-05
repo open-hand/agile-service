@@ -22,6 +22,11 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     dropdownMatchSelectWidth: false,
   };
 
+  getTriggerIconFont() {
+    // return 'baseline-arrow_drop_down';
+    return this.isFocus && this.searchable ? 'search' : 'baseline-arrow_drop_down';
+  }
+
   // @ts-ignore
   getWrapperClassNames(...args): string {
     const { prefixCls, multiple, range } = this;
@@ -94,6 +99,15 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     return texts.join('，');
   }
 
+  getPlaceholders(): string[] {
+    const { placeholder } = this.props;
+    if (this.isFocus && this.searchable) {
+      return ['输入筛选条件'];
+    }
+    const holders: string[] = [];
+    return placeholder ? holders.concat(placeholder!) : holders;
+  }
+
   getEditor(): ReactNode {
     const {
       prefixCls,
@@ -132,7 +146,9 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     const text = this.getTextNode();
     const finalText = isString(text) ? text : this.getText(this.getValue());
     const hasValue = this.getValue() !== undefined && this.getValue() !== null;
-    const placeholder = this.hasFloatLabel ? undefined : this.getPlaceholders()[0];
+    const placeholder = this.hasFloatLabel
+      ? undefined
+      : this.getPlaceholders()[0];
     const { clearButton } = this.props;
     const width = (hasValue ? measureTextWidth(finalText) + (clearButton ? 52 : 35) : measureTextWidth(placeholder || '') + 32);
     if (isValidElement(text)) {

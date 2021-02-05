@@ -1,6 +1,13 @@
 package io.choerodon.agile.infra.enums;
 
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.core.exception.CommonException;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 项目类别
@@ -33,6 +40,25 @@ public class ProjectCategory {
      */
     public static final String PROGRAM_PROJECT = "PROGRAM_PROJECT";
 
+
+    /**
+     * 敏捷管理模块
+     */
+    public static final String MODULE_AGILE = "N_AGILE";
+
+    /**
+     * 敏捷项目群模块
+     */
+    public static final String MODULE_PROGRAM = "N_PROGRAM";
+    /**
+     * 敏捷项目群子项目模块
+     */
+    public static final String MODULE_PROGRAM_PROJECT = "N_PROGRAM_PROJECT";
+    /**
+     * 需求管理模块
+     */
+    public static final String MODULE_BACKLOG = "N_REQUIREMENT";
+
     public static String getApplyType(String category){
         if (PROGRAM.equals(category)) {
             return SchemeApplyType.PROGRAM;
@@ -41,5 +67,27 @@ public class ProjectCategory {
         } else {
             return null;
         }
+    }
+    public static Boolean checkContainProjectCategory(List<ProjectCategoryDTO> categories, String category){
+        if (CollectionUtils.isEmpty(categories)) {
+            throw new CommonException("error.categories.is.null");
+        }
+        Set<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toSet());
+        return codes.contains(category);
+    }
+
+    public static Boolean consumeProjectCreatEvent(Set<String> codes) {
+        if (ObjectUtils.isEmpty(codes)) {
+            return false;
+        }
+        if (codes.contains(MODULE_AGILE) && codes.contains(MODULE_PROGRAM)) {
+            throw new CommonException("can not create agile project with N_AGILE and N_PROGRAM");
+        }
+        if (codes.contains(MODULE_BACKLOG)
+                && !(codes.contains(MODULE_AGILE) || codes.contains(MODULE_PROGRAM))) {
+            throw new CommonException("can not create N_REQUIREMENT without N_AGILE or N_PROGRAM");
+        }
+        return codes.contains(MODULE_AGILE)
+                || codes.contains(MODULE_PROGRAM);
     }
 }

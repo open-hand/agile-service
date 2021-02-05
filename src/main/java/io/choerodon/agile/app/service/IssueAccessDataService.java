@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.infra.dto.BatchRemoveSprintDTO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -101,4 +102,5 @@ public interface IssueAccessDataService {
      */
     void batchUpdateIssuePriority(Long organizationId, Long priorityId, Long changePriorityId, Long userId, List<Long> projectIds);
 
+    IssueDTO transferProject(IssueDTO issueDTO);
 }

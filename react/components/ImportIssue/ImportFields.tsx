@@ -45,7 +45,8 @@ const projectSystemFields = [
   { code: 'remainingTime', title: '预估时间' },
   { code: 'storyPoints', title: '故事点' },
   { code: 'linkIssue', title: '关联问题' },
-  { code: 'fixVersion', title: '版本' },
+  { code: 'fixVersion', title: '修复的版本' },
+  { code: 'influenceVersion', title: '影响的版本' },
   { code: 'label', title: '标签' },
   { code: 'estimatedStartTime', title: '预计开始时间' },
   { code: 'estimatedEndTime', title: '预计结束时间' },
@@ -67,7 +68,8 @@ const subProjectSystemFields = [
   { code: 'remainingTime', title: '预估时间' },
   { code: 'storyPoints', title: '故事点' },
   { code: 'linkIssue', title: '关联问题' },
-  { code: 'fixVersion', title: '版本' },
+  { code: 'fixVersion', title: '修复的版本' },
+  { code: 'influenceVersion', title: '影响的版本' },
   { code: 'label', title: '标签' },
   { code: 'estimatedStartTime', title: '预计开始时间' },
   { code: 'estimatedEndTime', title: '预计结束时间' },
@@ -76,10 +78,17 @@ const subProjectSystemFields = [
 ];
 
 interface Props {
-  importFieldsRef: React.MutableRefObject<{fields: string[]}>,
+  importFieldsRef: React.MutableRefObject<{
+    fields: string[]
+    allFields: { title: string, code: string, system: boolean}[],
+    requiredFields: string[]
+    chooseDataSet: DataSet
+  }>,
+  setReRender: Function,
+  checkBoxChangeOk: (data: string[]) => void
 }
 
-const ImportFields: React.FC<Props> = ({ importFieldsRef }) => {
+const ImportFields: React.FC<Props> = ({ importFieldsRef, setReRender, checkBoxChangeOk }) => {
   const { isInProgram, loading } = useIsInProgram();
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [requiredFields, setRequiredFields] = useState<string[]>([]);
@@ -105,11 +114,13 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef }) => {
     events: {
       load: () => {
         setUpdateCount((count) => count + 1);
+        setReRender();
       },
     },
-  }), []);
+  }), [setReRender]);
 
   const chooseDataSet = useMemo(() => new DataSet({
+    autoCreate: true,
     autoQuery: true,
     fields: [{
       name: 'fields',
@@ -123,11 +134,13 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef }) => {
       fields: requiredFields,
     }],
     events: {
-      update: () => {
+      update: ({ value }: { value: string[]}) => {
+        checkBoxChangeOk(value);
         setUpdateCount((count) => count + 1);
+        setReRender();
       },
     },
-  }), [fieldsOptionDataSet, requiredFields]);
+  }), [checkBoxChangeOk, fieldsOptionDataSet, requiredFields, setReRender]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -142,7 +155,10 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef }) => {
 
   useImperativeHandle(importFieldsRef, () => ({
     fields: (chooseDataSet?.current?.get('fields') || requiredFields).filter((code: string) => !includes(['linkIssue', 'parentIssue'], code)),
+    // @ts-ignore
     allFields: fieldsOptionDataSet.toData(),
+    requiredFields,
+    chooseDataSet,
   }));
 
   return (

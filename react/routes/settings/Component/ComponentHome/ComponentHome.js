@@ -110,7 +110,6 @@ function ComponentHome() {
       service={['choerodon.code.project.setting.issue.ps.deletecomponent']}
     />
   );
-
   const renderTable = () => (
     <Table
       dataSet={dataSet}

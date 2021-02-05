@@ -34,13 +34,22 @@
   }
 }
 
-.customCirculation_conditionModal,
-.customCirculation_linkageModal {
+.customCirculation_conditionModal {
   :global {
     .c7n-pro-modal-body {
       height: calc(~"100% - 55px");
       padding: 0;
       overflow: hidden;
+    }
+  }
+}
+
+.customCirculation_linkageModal {
+  :global {
+    .c7n-pro-modal-body {
+      height: calc(~"100% - 55px");
+      padding: 0;
+      overflow-x: hidden;
     }
   }
 }

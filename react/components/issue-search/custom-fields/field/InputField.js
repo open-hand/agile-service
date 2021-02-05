@@ -7,7 +7,7 @@ function InputField({ field, value, onChange }) {
   return (
     <Input
       value={value}
-      onChange={e => onChange(e.target.value)}
+      onChange={(e) => onChange(e.target.value)}
       placeholder={name}
       style={{ width: 100 }}
     />

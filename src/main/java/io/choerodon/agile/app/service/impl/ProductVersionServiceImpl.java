@@ -1,15 +1,13 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.validator.ProductVersionValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.*;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.IssueCountDTO;
-import io.choerodon.agile.infra.dto.ProductVersionDTO;
-import io.choerodon.agile.infra.dto.VersionIssueDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.ProductVersionMapper;
 import io.choerodon.agile.infra.utils.PageUtil;
@@ -139,6 +137,9 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     @Override
     public Boolean deleteVersion(Long projectId, Long versionId, Long targetVersionId) {
         productVersionValidator.judgeExist(projectId, targetVersionId);
+//        //校验是否设为影响的版本和修复的版本默认值
+//        objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfMultiple(projectId, versionId, FieldCode.INFLUENCE_VERSION);
+//        objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfMultiple(projectId, versionId, FieldCode.FIX_VERSION);
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         if (targetVersionId != null && !Objects.equals(targetVersionId, 0L)) {
             List<VersionIssueDTO> versionFixIssues = productVersionMapper.queryIssuesByRelationType(projectId, versionId, FIX_RELATION_TYPE);
@@ -259,7 +260,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         if (condition) {
             Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
             Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
-            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
             List<Long> filterStatusIds = new ArrayList<>();
             if (statusCode != null) {
                 for (Long key : statusMapDTOMap.keySet()) {

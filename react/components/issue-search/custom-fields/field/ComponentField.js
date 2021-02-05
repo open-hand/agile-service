@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { unionBy } from 'lodash';
-import { Select } from 'choerodon-ui';
 import SelectComponent from '@/components/select/select-component';
 
 function ComponentField({
@@ -17,6 +15,9 @@ function ComponentField({
       multiple
       maxTagCount={3}
       dropdownMatchSelectWidth={false}
+      dropdownMenuStyle={{
+        maxWidth: 250,
+      }}
       clearButton
       onChange={onChange}
     />

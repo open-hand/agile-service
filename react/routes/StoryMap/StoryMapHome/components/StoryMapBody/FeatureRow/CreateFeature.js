@@ -11,7 +11,6 @@ import Card from '../Card';
 import clickOutSide from '../../../../../../components/CommonComponent/ClickOutSide';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 
-
 class CreateFeature extends Component {
   // 防止重复创建
   canAdd = true;
@@ -38,12 +37,12 @@ class CreateFeature extends Component {
       const defaultPriority = StoryMapStore.getDefaultPriority;
       const req = {
         projectId: getProjectId(),
-        epicId,      
+        epicId,
         summary: value,
         typeCode: 'feature',
         featureVO: {
           featureType,
-        },        
+        },
         issueTypeId: featureTypeVO.id,
         priorityCode: `priority-${defaultPriority.id}`,
         priorityId: defaultPriority.id,
@@ -51,7 +50,7 @@ class CreateFeature extends Component {
       issueApi.create(req).then((res) => {
         const dto = {
           schemeCode: 'agile_issue',
-          context: res.typeCode,
+          issueTypeId: res.issueTypeId,
           pageCode: 'agile_issue_create',
         };
         onCreate({ ...res, featureType });
@@ -72,7 +71,7 @@ class CreateFeature extends Component {
     });
   }
 
-  handleChangeType=(type) => {   
+  handleChangeType=(type) => {
     this.setState({
       featureType: type.item.props.value,
     });
@@ -107,7 +106,7 @@ class CreateFeature extends Component {
         onClick={this.handleChangeType}
       >
         {
-          types.map(t => (
+          types.map((t) => (
             <Menu.Item value={t.featureType}>
               <TypeTag
                 style={{ margin: 0 }}
@@ -128,7 +127,7 @@ class CreateFeature extends Component {
       }}
       >
         <Input autoFocus value={value} placeholder="在此创建新内容" onChange={this.handleChange} onPressEnter={this.handleCreateIssue} maxLength={44} />
-        <Dropdown overlay={typeList} trigger={['click']} getPopupContainer={triggerNode => triggerNode.parentNode}>
+        <Dropdown overlay={typeList} trigger={['click']} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
           <div style={{ display: 'flex', marginTop: 5 }}>
             <TypeTag
               data={find(types, { featureType: currentType })}

@@ -3,7 +3,7 @@ import React, {
   useState, useEffect,
 } from 'react';
 import {
-  Form, Input, Select, Button,
+  Form, Input, Select, Button, InputNumber,
 } from 'choerodon-ui';
 import {
   Content, stores, Choerodon,
@@ -26,6 +26,7 @@ const EditComponent = (props) => {
   const [component, setComponent] = useState({});
   const [defaultAssigneeRole, setDefaultAssigneeRole] = useState(undefined);
   const [description, setDescription] = useState(undefined);
+  const [sequence, setSequence] = useState(undefined);
   const [managerId, setManagerId] = useState(undefined);
   const [name, setName] = useState(undefined);
   const [page, setPage] = useState(1);
@@ -38,7 +39,7 @@ const EditComponent = (props) => {
     props.form.validateFields((err, values, modify) => {
       if (!err && modify) {
         const {
-          defaultAssigneeRole, description, managerId, name,
+          defaultAssigneeRole, description, managerId, name, sequence,
         } = values;
         const editComponent = {
           objectVersionNumber: component.objectVersionNumber,
@@ -47,6 +48,7 @@ const EditComponent = (props) => {
           description,
           managerId: managerId ? JSON.parse(managerId).id || 0 : 0,
           name: name.trim(),
+          sequence,
         };
         setCreateLoading(true);
         componentApi.update(component.componentId, editComponent)
@@ -102,10 +104,11 @@ const EditComponent = (props) => {
     componentApi.load(componentId)
       .then((res) => {
         const {
-          defaultAssigneeRole, description, managerId, name,
+          defaultAssigneeRole, description, managerId, name, sequence,
         } = res;
         setDefaultAssigneeRole(defaultAssigneeRole);
         setDescription(description);
+        setSequence(sequence);
         setManagerId(managerId || undefined);
         setName(name);
         setComponent(res);
@@ -170,6 +173,13 @@ const EditComponent = (props) => {
             initialValue: description,
           })(
             <Input label="模块描述" autosize maxLength={30} />,
+          )}
+        </FormItem>
+        <FormItem style={{ marginBottom: 20 }}>
+          {getFieldDecorator('sequence', {
+            initialValue: sequence,
+          })(
+            <InputNumber label="模块顺序" min={1} max={100000} />,
           )}
         </FormItem>
         <FormItem style={{ marginBottom: 20 }}>

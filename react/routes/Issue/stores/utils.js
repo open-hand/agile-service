@@ -27,6 +27,8 @@ function transformSystemFilter(data) {
     sprint,
     summary,
     version,
+    fixVersion,
+    influenceVersion,
     starBeacon,
     userId,
     testResponsibleIds,
@@ -52,6 +54,8 @@ function transformSystemFilter(data) {
       sprint,
       summary,
       version,
+      fixVersion,
+      influenceVersion,
       testResponsibleIds,
       mainResponsibleIds,
       environment,
@@ -98,6 +102,7 @@ export function transformFilter(chosenFields) {
       case 'multiple':
       case 'radio':
       case 'checkbox':
+      case 'multiMember':
       case 'member': {
         const v = Array.isArray(value) ? value : [value];
         if (v.length > 0) {

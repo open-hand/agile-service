@@ -26,4 +26,6 @@ public interface WorkLogMapper extends BaseMapper<WorkLogDTO> {
                                             @Param("sprintId") Long springId,
                                             @Param("startDate") Date startDate,
                                             @Param("endDate") Date endDate);
+
+    void updateProject(@Param("projectId") Long projectId, @Param("issueId") Long issueId, @Param("targetProjectId") Long targetProjectId);
 }

@@ -25,6 +25,9 @@ public class PageConfigUpdateVO {
 
     private List<PageConfigFieldVO> addFields;
 
+    @Encrypt
+    private Long issueTypeId;
+
     public List<PageConfigFieldVO> getAddFields() {
         return addFields;
     }
@@ -71,5 +74,13 @@ public class PageConfigUpdateVO {
 
     public void setFields(List<PageConfigFieldVO> fields) {
         this.fields = fields;
+    }
+
+    public Long getIssueTypeId() {
+        return issueTypeId;
+    }
+
+    public void setIssueTypeId(Long issueTypeId) {
+        this.issueTypeId = issueTypeId;
     }
 }

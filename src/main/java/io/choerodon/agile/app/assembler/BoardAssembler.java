@@ -18,10 +18,19 @@ public class BoardAssembler extends AbstractAssembler {
         if (args != null) {
             assertNull(args, "sprint");
             assertNull(args, "version");
+            assertNull(args, "fixVersion");
+            assertNull(args, "influenceVersion");
             assertNull(args, "component");
             assertNull(args, "epic");
             assertNull(args, "label");
             assertNull(args, "assigneeId");
+        }
+    }
+
+    public void handleAdvanceSearch(SearchVO searchVO) {
+        Map<String, Object> args = searchVO.getAdvancedSearchArgs();
+        if (args != null) {
+            assertNull(args, "versionList");
         }
     }
 

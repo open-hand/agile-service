@@ -15,7 +15,7 @@ export interface SelectUserProps extends Partial<SelectProps> {
   // 由于用户是分页的，有时候已选的用户不在第一页，这时候传id过来，会直接显示id，这里多传一个用户过来，放到options里
   selectedUser?: User | User[],
   autoQueryConfig?: {
-    selectedUserIds: string | string[], /** 需要加载的用户id列表 */
+    selectedUserIds?: string | string[], /** 需要加载的用户id列表 */
     userMaps?: Map<string, User>, /** 已加载的用户缓存，当存在多次使用此组件时， 可传入一个userMaps做全局缓存 */
     taskStacks?: string[], /** 任务队列，组件将要加载的用户id 队列 */
     finishStack?: string[], /** 完成任务队列 ，当任务队列>=任务队列时将触发通知加载完成事件 */
@@ -56,7 +56,7 @@ interface MemberLocalStoreMapDataProps {
 interface MemberLocalStoreMapMethodProps {
   addOneQueryUser: (id: string) => void,
 }
-function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStoreMapDataProps, MemberLocalStoreMapMethodProps] {
+function useMemberLocalStoreMap(config?: MemberLocalMapConfig, projectId?: string): [MemberLocalStoreMapDataProps, MemberLocalStoreMapMethodProps] {
   const [finish, setFinish] = useState<boolean>();
   const [innerMode, setInnerMode] = useState<'outer' | 'inner'>('inner');
   const userMaps = useMemo(() => {
@@ -98,7 +98,7 @@ function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStor
             return { list: res ? [res] : [] };
           }) as Promise<{ list: User[] }>;
         }
-        (queryUserRequest ?? userApi.getById(id)).then((res: any) => {
+        (queryUserRequest ?? userApi.project(projectId).getById(id)).then((res: any) => {
           const { list } = res;
           if (list[0]) {
             userMaps.set(id!, { ...list[0], id: String(list[0].id) });
@@ -156,7 +156,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     }
     return ids ? [ids].filter((i) => i !== '0') : undefined;
   }, [JSON.stringify(autoQueryConfig?.selectedUserIds)]);
-  const [loadExtraData, loadExtraDataMethod] = useMemberLocalStoreMap(autoQueryConfig);
+  const [loadExtraData, loadExtraDataMethod] = useMemberLocalStoreMap(autoQueryConfig, projectId);
   const autoQueryUsers = (ids: string[], currentData: User[]) => {
     const idSets = new Set<string>(ids);
     let newIds = Array.from(idSets);
@@ -179,7 +179,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     textField: 'realName',
     valueField: 'id',
     request: request || (async ({ filter, page }) => {
-      const res = await userApi.project(projectId).getAllInProject(filter, page, undefined, undefined);
+      const res = await userApi.project(projectId).getAllInProject(filter, page, undefined, undefined, projectId);
       res.list = res.list.filter((user: User) => user.enabled);
       return res;
     }),
@@ -188,7 +188,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       const temp: User[] = [];
       if (selectedUser) {
         (toArray(selectedUser).forEach((user) => {
-          temp.push({ ...user, id: String(user.id) });
+          temp.push({ ...user, id: user?.id && String(user.id) });
         }));
       }
       // 存在待加载的id，第一页有数据，finish未准备状态（即值不boolean类型 false）则开始自动加载

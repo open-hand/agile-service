@@ -19,7 +19,7 @@ const TableAction = (props) => {
   return (
     <div className={prefix}>
       <span style={{ display: 'flex', overflow: 'hidden' }}>
-        <a style={{ overflow: 'hidden', lineHeight: '32px' }} role="button" onClick={onEditClick} onKeyDown={null}>
+        <a className="c7n-agile-table-cell-click" style={{ overflow: 'hidden', lineHeight: '32px' }} role="none" onClick={onEditClick} onKeyDown={null}>
           {text}
         </a>
       </span>

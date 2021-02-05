@@ -45,4 +45,13 @@ public enum AgileSystemFieldContext {
         return context;
     }
 
+    public static String getContextByFieldCode(String fieldCode) {
+        for (AgileSystemFieldContext field : AgileSystemFieldContext.values()) {
+            if (field.fieldCode.equals(fieldCode)) {
+                return field.context;
+            }
+        }
+        return null;
+    }
+
 }

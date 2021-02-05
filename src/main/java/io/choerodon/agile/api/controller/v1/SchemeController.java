@@ -49,15 +49,21 @@ public class SchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询项目的问题类型列表")
     @GetMapping(value = "/schemes/query_issue_types")
-    public ResponseEntity<List<IssueTypeVO>> queryIssueTypesByProjectId(@PathVariable("project_id") Long projectId, @RequestParam("apply_type") String applyType) {
-        return new ResponseEntity<>(projectConfigService.queryIssueTypesByProjectId(projectId, applyType), HttpStatus.OK);
+    public ResponseEntity<List<IssueTypeVO>> queryIssueTypesByProjectId(@PathVariable("project_id") Long projectId,
+                                                                        @RequestParam("apply_type") String applyType,
+                                                                        @RequestParam(value = "only_enabled", defaultValue = "false",
+                                                                                required = false) Boolean onlyEnabled) {
+        return new ResponseEntity<>(projectConfigService.queryIssueTypesByProjectId(projectId, applyType, onlyEnabled), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询项目的问题类型列表，带对应的状态机id")
     @GetMapping(value = "/schemes/query_issue_types_with_sm_id")
-    public ResponseEntity<List<IssueTypeWithStateMachineIdVO>> queryIssueTypesWithStateMachineIdByProjectId(@PathVariable("project_id") Long projectId, @RequestParam("apply_type") String applyType) {
-        return new ResponseEntity<>(projectConfigService.queryIssueTypesWithStateMachineIdByProjectId(projectId, applyType), HttpStatus.OK);
+    public ResponseEntity<List<IssueTypeWithStateMachineIdVO>> queryIssueTypesWithStateMachineIdByProjectId(@PathVariable("project_id") Long projectId,
+                                                                                                            @RequestParam("apply_type") String applyType,
+                                                                                                            @RequestParam(value = "only_enabled", defaultValue = "false",
+                                                                                                                    required = false) Boolean onlyEnabled) {
+        return new ResponseEntity<>(projectConfigService.queryIssueTypesWithStateMachineIdByProjectId(projectId, applyType, onlyEnabled), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
