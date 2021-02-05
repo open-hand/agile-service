@@ -241,6 +241,7 @@ const GanttPage: React.FC = () => {
           afterLoad={afterSprintLoad}
           hasUnassign
           style={{ marginRight: 40 }}
+          searchable={false}
         />
         <FlatSelect value={type} onChange={setType} clearButton={false}>
           <Option value="task">
