@@ -292,6 +292,7 @@ public class FixDataServiceImpl implements FixDataService {
         if (agileTriggerService != null) {
             agileTriggerService.fixRuleIssueTypeRel();
         }
+        LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! Version: 0.25.0 <<<<<<<<=================================");
     }
 
     private void fixStatusLinkage() {
