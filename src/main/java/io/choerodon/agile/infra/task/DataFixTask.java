@@ -32,6 +32,5 @@ public class DataFixTask {
     public void fixIssueTypeData(Map<String, Object> map) {
         LOGGER.info("==============================>>>>>>>> AGILE Data Fix Start, Version: 【0.25.0】 <<<<<<<<=================================");
         fixDataService.fixIssueTypeData();
-        LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! <<<<<<<<=================================");
     }
 }

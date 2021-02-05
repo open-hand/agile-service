@@ -288,10 +288,12 @@ public class FixDataServiceImpl implements FixDataService {
 
     @Override
     public void fixIssueTypeData() {
+        LOGGER.info("===>开始修复问题类型数据，版本：【0.25.0】");
         fixStatusLinkage();
         if (agileTriggerService != null) {
             agileTriggerService.fixRuleIssueTypeRel();
         }
+        LOGGER.info("===>修复问题类型数据完成，版本：【0.25.0】");
     }
 
     private void fixStatusLinkage() {
