@@ -95,8 +95,8 @@
             on t1.id = t2.issue_type_id and t2.project_id = #{projectId}
             where t1.organization_id = #{organizationId}
             <choose>
-                <when test="projectId == 0">
-                    and t1.project_id = #{projectId}
+                <when test="projectId == null or projectId == 0">
+                    and t1.project_id = 0
                 </when>
                 <otherwise>
                     and t1.id in (

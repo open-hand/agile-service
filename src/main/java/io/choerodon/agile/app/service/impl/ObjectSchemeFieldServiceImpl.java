@@ -287,6 +287,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                                Long issueTypeId) {
         List<String> issueTypes = null;
         Boolean isProgram = false;
+        boolean includeBacklogSystemField = false;
         if (!ObjectUtils.isEmpty(projectId)) {
             ProjectVO body = ConvertUtil.queryProject(projectId);
             if (!ObjectUtils.isEmpty(body) && ProjectCategory.checkContainProjectCategory(body.getCategories(),ProjectCategory.MODULE_PROGRAM)) {
@@ -300,23 +301,36 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             if (backlogExpandService != null) {
                 if (Boolean.TRUE.equals(backlogExpandService.enabled(projectId))) {
                     issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
+                    includeBacklogSystemField = true;
                 }
             }
+        } else {
+            //判断组织下如果没有开启需求池的项目，组织层不展示需求类型的系统字段
+            List<ProjectVO> projectVOList = baseFeignClient.listProjectsByOrgId(organizationId).getBody();
+            if (!CollectionUtils.isEmpty(projectVOList)) {
+                List<Long> projectIds = projectVOList.stream().map(ProjectVO::getId).collect(Collectors.toList());
+                for (Long id : projectIds) {
+                    if (Boolean.TRUE.equals(backlogExpandService.enabled(id))) {
+                        includeBacklogSystemField = true;
+                    }
+                }
+            }
+
         }
         List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, fieldId, issueTypeId, issueTypes);
-        addNotSyncedField(objectSchemeFieldDTOS,issueTypes);
+        addNotSyncedField(objectSchemeFieldDTOS, issueTypes, includeBacklogSystemField);
         if(isProgram && agilePluginService != null){
            return agilePluginService.filterProgramEpic(objectSchemeFieldDTOS);
         }
         return objectSchemeFieldDTOS;
     }
 
-    private void addNotSyncedField(List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS, List<String> issueTypes) {
+    private void addNotSyncedField(List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS, List<String> issueTypes, boolean includeBacklogSystemField) {
         List<Long> systemFieldIds = objectSchemeFieldDTOS.stream().filter(v -> Boolean.TRUE.equals(v.getSystem())).map(ObjectSchemeFieldDTO::getId).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(systemFieldIds)) {
             return;
         }
-        List<ObjectSchemeFieldDTO> notSyncFields = objectSchemeFieldMapper.selectNotSyncField(systemFieldIds);
+        List<ObjectSchemeFieldDTO> notSyncFields = objectSchemeFieldMapper.selectNotSyncField(systemFieldIds, includeBacklogSystemField);
         if (CollectionUtils.isEmpty(issueTypes)) {
             objectSchemeFieldDTOS.addAll(notSyncFields);
             return;

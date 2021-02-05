@@ -476,6 +476,9 @@
         <foreach collection="systemFieldIds" item="systemFieldId" open="(" close=")" separator=",">
            #{systemFieldId}
         </foreach>
+        <if test=" includeBacklogSystemField != true ">
+            AND t4.context != 'backlog'
+        </if>
     </select>
 
     <select id="selectNotSyncFieldByFieldConfig" resultMap="objectSchemeFieldWithExtends">
