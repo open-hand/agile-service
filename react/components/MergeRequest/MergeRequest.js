@@ -104,15 +104,19 @@ class MergeRequest extends Component {
             display: 'flex', alignItems: 'center', whiteSpace: 'nowrap',
           }}
           >
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100 }}>
-              <Icon type="branch" />
-              {sourceBranch}
-            </div>
+            <Tooltip title={sourceBranch}>
+              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100 }}>
+                <Icon type="branch" />
+                {sourceBranch}
+              </div>
+            </Tooltip>
             <Icon type="trending_flat" />
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100 }}>
-              <Icon type="branch" />
-              {record.sourceBranch}
-            </div>
+            <Tooltip title={record.targetBranch}>
+              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100 }}>
+                <Icon type="branch" />
+                {record.targetBranch}
+              </div>
+            </Tooltip>
           </div>
         ),
       },
