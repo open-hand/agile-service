@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, { useContext } from 'react';
-import { observer } from 'mobx-react-lite';
+import { observer, Observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { Icon } from 'choerodon-ui';
 import { userApi, commonApi } from '@/api';

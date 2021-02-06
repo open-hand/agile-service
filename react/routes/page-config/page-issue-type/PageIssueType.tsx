@@ -15,7 +15,9 @@ import {
 } from '@/api/PageConfig';
 import { uploadAndReplaceImg, text2Delta } from '@/utils/richText';
 import { validKeyReturnValue } from '@/common/commonValid';
-import { omit, set } from 'lodash';
+import {
+  omit, set, pick, isEmpty,
+} from 'lodash';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -63,6 +65,8 @@ function PageIssueType() {
           edited = item.dataSetRecord.get('edited');
           required = item.dataSetRecord.get('required');
           extraProps = beforeSubmitTransform(item.dataSetRecord, 'tempKey');
+        } else {
+          extraProps = { defaultValue: isEmpty(item.defaultValue) ? '' : String(item.defaultValue) };
         }
         return {
           ...omit(item, 'dataSetRecord', 'local', 'showDefaultValueText', 'localSource'),
@@ -149,7 +153,7 @@ function PageIssueType() {
     !oldField && pageIssueTypeStore.addCreatedField(newData);
     // 当是增添的已有字段 或是当前类型字段时 增添数据至表格
     if (oldField
-      || (newData.issueTypeIds.some((item: any) => item === pageIssueTypeStore.currentIssueType))) {
+      || (newData.issueTypeIds.some((item: any) => item === pageIssueTypeStore.currentIssueType.id))) {
       const newRank = await pageConfigApi.loadRankValue({
         previousRank: null,
         nextRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),

@@ -77,10 +77,10 @@ class ScrumBoardHome extends Component {
     ScrumBoardStore.bindFunction('refresh', (sprintId) => {
       if (!defaultSearchVO.otherArgs || !defaultSearchVO.otherArgs.sprint || defaultSearchVO.otherArgs.sprint.length === 0) {
         // defaultSearchVO.otherArgs.sprint = [sprintId];
-        set(defaultSearchVO, 'otherArgs.sprint', [sprintId]);
+        sprintId && set(defaultSearchVO, 'otherArgs.sprint', [sprintId]);
       }
       ScrumBoardStore.setSearchVO(defaultSearchVO);
-      this.getBoard();
+      this.getBoard(!sprintId);
     });
     // eslint-disable-next-line react/destructuring-assignment
     const { state } = this.props.location;
@@ -94,7 +94,7 @@ class ScrumBoardHome extends Component {
     ScrumBoardStore.resetDataBeforeUnmount();
   }
 
-  getBoard = async () => {
+  getBoard = async (noRefresh) => {
     const { location } = this.props;
     const url = this.paramConverter(location.search);
     const boardListData = await boardApi.loadAll();
@@ -104,7 +104,7 @@ class ScrumBoardHome extends Component {
     const defaultBoard = boardListData.find((item) => item.userDefault) || boardListData[0];
     if (defaultBoard.boardId) {
       ScrumBoardStore.setSelectedBoardId(defaultBoard.boardId);
-      this.refresh(defaultBoard, url, boardListData);
+      noRefresh ? ScrumBoardStore.setSpinIf(false) : this.refresh(defaultBoard, url, boardListData);
     }
   }
 

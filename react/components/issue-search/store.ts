@@ -30,7 +30,7 @@ export type IBatchAction = undefined | 'edit' | 'delete'
 export interface IssueSearchStoreProps {
   getSystemFields: () => ILocalField[]
   transformFilter: (chosenFields: IChosenFields) => any
-  renderField?: (field: IChosenField, props: { onChange: (v: any) => void, value: any, projectId?: string }) => React.ReactElement | null | void | false
+  renderField?: (field: IChosenField, props: { onChange: (v: any) => void, value: any, projectId?: string }) => React.ReactElement | React.FunctionComponent | null | void | false
   defaultChosenFields?: IChosenFields,
   defaultSearchVO?: ISearchVO
   projectId?: string
