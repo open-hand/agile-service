@@ -1246,7 +1246,7 @@ class CreateIssue extends Component {
       >
         <Content>
           <Spin spinning={loading}>
-            <Form layout="vertical" style={{ width: 670 }} className="c7nagile-form">
+            <Form layout="vertical" className="c7nagile-form">
               <div className="c7nagile-createIssue-fields" key={newIssueTypeCode}>
                 {['sub_task', 'sub_bug'].includes(mode) && (
                   <FormItem>
