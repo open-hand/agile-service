@@ -22,9 +22,8 @@ interface Props {
 const Comments: React.FC<Props> = ({
   projectId, reloadIssue, disabled, outside,
 }) => {
-  const { store, hasAdminPermission, applyType } = useContext(EditIssueContext);
+  const { store, applyType } = useContext(EditIssueContext);
   const { issueId, issueCommentVOList = [] } = store.issue;
-  const loginUserId = AppState.userInfo.id;
   const comments = issueCommentVOList;
 
   const newCommit = (commit: IComment) => {
@@ -56,7 +55,6 @@ const Comments: React.FC<Props> = ({
               key={comment.commentId}
               comment={comment}
               reload={reload}
-              hasPermission={hasAdminPermission || String(comment.userId) === String(loginUserId)}
             />
           ))
         }

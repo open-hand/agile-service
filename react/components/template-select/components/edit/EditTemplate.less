@@ -2,7 +2,6 @@
   &_title {
     display: inline-block;
     height: .24rem;
-    font-size: 16px;
     font-family: PingFangSC-Medium, PingFang SC;
     font-weight: 500;
     color: rgba(0, 0, 0, 0.87);
@@ -10,6 +9,8 @@
     margin-bottom: .03rem;
 
     & >span {
+      font-weight: 500;
+      font-size: 14px;
       padding-right: .1rem;
     }
 
@@ -64,5 +65,11 @@
     .c7n-pro-form {
       margin-top: .03rem;
     }
+  }
+}
+.template_edit {
+  &_divider {
+    margin: 0 0 16px -24px;
+    width: calc(~"100% + 48px");
   }
 }

@@ -11,6 +11,7 @@ import { TemplateAction, templateApi } from '@/api';
 import classnames from 'classnames';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { map, uniq } from 'lodash';
+import { Divider } from 'choerodon-ui';
 import styles from './EditTemplate.less';
 
 interface FormPartProps {
@@ -195,7 +196,7 @@ const EditTemplate: React.FC<Props> = ({
           </Form>
         </div>
       </FormPart>
-
+      <Divider className={styles.template_edit_divider} />
       <FormPart title="修改模板选择字段" btnOnClick={handleChangeFieldStatus}>
         <div className={styles.template_edit_fields}>
           <TableColumnCheckBoxes {...checkBoxComponentProps} />

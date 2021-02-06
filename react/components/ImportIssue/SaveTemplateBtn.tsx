@@ -68,9 +68,10 @@ const SaveTemplateBtn: React.FC<Props> = ({
           funcType={'flat' as FuncType}
           color={'primary' as ButtonColor}
           onClick={handleSaveTemplate}
+          className="c7n-importIssue-btn"
           style={{
             marginTop: -6,
-            marginLeft: 5,
+            marginLeft: 16,
           }}
         >
           保存为常用模板
