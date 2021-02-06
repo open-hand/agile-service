@@ -221,6 +221,7 @@ const Issue = observer(() => {
         </Button>
         <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
         <CollapseAll dataSet={dataSet} tableRef={tableRef} />
+        <div style={{ flex: 1, visibility: 'hidden' }} />
         <TableModeSwitch
           data={tableListMode ? 'list' : 'tree'}
           onChange={(mode) => {
