@@ -7,6 +7,7 @@ import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
 import { toJS } from 'mobx';
+import { set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
 import {
@@ -72,9 +73,15 @@ class ScrumBoardHome extends Component {
 
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
-    const defaultSearchVO = localPageCacheStore.getItem('scrumBoard.searchVO');
-    ScrumBoardStore.setSearchVO(defaultSearchVO || {});
-    this.getBoard();
+    const defaultSearchVO = localPageCacheStore.getItem('scrumBoard.searchVO') || {};
+    ScrumBoardStore.bindFunction('refresh', (sprintId) => {
+      if (!defaultSearchVO.otherArgs || !defaultSearchVO.otherArgs.sprint || defaultSearchVO.otherArgs.sprint.length === 0) {
+        // defaultSearchVO.otherArgs.sprint = [sprintId];
+        set(defaultSearchVO, 'otherArgs.sprint', [sprintId]);
+      }
+      ScrumBoardStore.setSearchVO(defaultSearchVO);
+      this.getBoard();
+    });
     // eslint-disable-next-line react/destructuring-assignment
     const { state } = this.props.location;
     if (state && state.issueId) {

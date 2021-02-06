@@ -13,9 +13,9 @@ import SelectSprint from '@/components/select/select-sprint';
 import './index.less';
 
 interface Props {
-    onRefresh: () => void
-    saveStore: (store: IssueSearchStore) => void
-    //   issueSearchStore: IssueSearchStore,
+  onRefresh: () => void
+  saveStore: (store: IssueSearchStore) => void
+  //   issueSearchStore: IssueSearchStore,
 }
 function getSystemFields() {
   const systemFields = originGetSystemFields(['quickFilterIds', 'issueIds', 'sprint', 'assigneeId', 'priorityId']);
@@ -51,6 +51,17 @@ function renderField(field: ILocalField, props: any) {
         flat
         placeholder={field.name}
         maxTagTextLength={10}
+        afterLoad={(sprints) => {
+          if (sprints && sprints.length > 0) {
+            console.log('sprints', sprints);
+            scrumBoardStore.setSprintNotClosedArray(sprints);
+            const startedSprint = sprints.find((sprint) => sprint.statusCode === 'started');
+            if (startedSprint) {
+              scrumBoardStore.executeBindFunction(['refresh'], startedSprint.sprintId);
+              scrumBoardStore.removeBindFunction('refresh');
+            }
+          }
+        }}
         dropdownMatchSelectWidth={false}
         clearButton
         optionRenderer={({ record, text }) => {
@@ -70,7 +81,7 @@ function renderField(field: ILocalField, props: any) {
   }
   return null;
 }
-function transformFilter(chosenFields:IChosenFields) {
+function transformFilter(chosenFields: IChosenFields) {
   const filter = originTransformFilter(chosenFields);
   if (filter.otherArgs.sprint && filter.otherArgs.sprint !== '') {
     filter.otherArgs.sprint = [filter.otherArgs.sprint];
@@ -97,11 +108,7 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
     // StoryMapStore.getStoryMap();
   };
   useEffect(() => {
-    console.log('isHasFilter.', (!scrumBoardStore.didCurrentSprintExist
-        || ((!scrumBoardStore.otherIssue || scrumBoardStore.otherIssue.length === 0)
-          && (!scrumBoardStore.interconnectedData
-            || scrumBoardStore.interconnectedData.size === 0))), issueSearchStore.isHasFilter, issueSearchStore.getFilterValueByCode('sprint'));
-    // scrumBoardStore.setIsHasFilter(issueSearchStore.isHasFilter);
+
   }, [issueSearchStore.isHasFilter]);
   useEffect(() => {
     saveStore(issueSearchStore);
