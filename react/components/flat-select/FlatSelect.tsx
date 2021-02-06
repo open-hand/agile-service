@@ -182,13 +182,13 @@ class ObserverFlatSelect extends FlatSelect<SelectProps> {
 
   static OptGroup = OptGroup;
 }
-
-const SelectWrapper = (props: SelectProps, ref: React.Ref<SelectPro>) => {
+// @ts-ignore
+const SelectWrapper: typeof ObserverFlatSelect = forwardRef((props: SelectProps, ref: React.Ref<SelectPro>) => {
   const theme = useTheme();
   const Component = theme === '' ? ObserverFlatSelect : SelectPro;
 
   return <Component ref={ref} {...props} />;
-};
+});
 
 SelectWrapper.Option = Option;
 
@@ -198,5 +198,4 @@ SelectWrapper.displayName = FlatSelect.displayName;
 SelectWrapper.propTypes = FlatSelect.propTypes;
 SelectWrapper.contextType = FlatSelect.contextType;
 
-// @ts-ignore
-export default forwardRef(SelectWrapper) as typeof ObserverFlatSelect;
+export default SelectWrapper;
