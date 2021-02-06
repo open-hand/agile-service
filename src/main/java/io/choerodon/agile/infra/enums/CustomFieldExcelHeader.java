@@ -38,4 +38,26 @@ public enum CustomFieldExcelHeader {
     public Integer getWidth() {
         return width;
     }
+
+    public CustomFieldExcelHeader getHeaderByIndex(int index){
+        switch (index){
+            case 0:
+                return CODE;
+            case 1:
+                return NAME;
+            case 2:
+                return FIELD_TYPE;
+            case 3:
+                return ISSUE_TYPE;
+            case 4:
+                return DEFAULT_VALUE;
+            case 5:
+                return KEY;
+            case 6:
+                return VALUE;
+            case 7:
+                return ENABLED;
+            default: return null;
+        }
+    }
 }

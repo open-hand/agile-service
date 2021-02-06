@@ -106,6 +106,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserVO> listAllUsersByProject(Long projectId) {
+        ResponseEntity<Page<UserVO>> users = baseFeignClient.queryUsersByProject(projectId, null, 0, 0);
+        return users != null ? users.getBody() : new ArrayList<>();
+    }
+
+    @Override
+    public List<UserVO> listAllUsersByOrganization(Long organizationId) {
+        ResponseEntity<Page<UserVO>> users = baseFeignClient.queryUsersByOrganization(organizationId, null, 0, 0);
+        return users != null ? users.getBody() : new ArrayList<>();
+    }
+
+    @Override
     public ProjectVO queryProject(Long projectId) {
         return baseFeignClient.queryProject(projectId).getBody();
     }
