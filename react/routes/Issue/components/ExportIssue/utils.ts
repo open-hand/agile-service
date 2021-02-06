@@ -120,7 +120,8 @@ const getReverseExportFieldCodes = (data: Array<any>) => {
     //  "reporterRealName":
     //   "resolution":
     statusName: 'statusId',
-    issueSprintVOS: 'sprintName',
+    sprintName: 'issueSprintVOS',
+
     // "creationDate":
     lastUpdateDate: 'lastUpdateDate',
 
