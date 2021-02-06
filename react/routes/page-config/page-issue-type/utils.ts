@@ -42,7 +42,7 @@ function transformDefaultValue({
       return realName || defaultValue;
     }
     case 'multiMember': {
-      return String(Array.isArray(fieldOptions) ? (fieldOptions as User[]).map((item) => item.realName) : (defaultValueObj?.realName || ''));
+      return String(Array.isArray(fieldOptions) && Array.isArray(defaultValue) ? (fieldOptions as User[]).filter((item) => defaultValue.some((d) => d === item.id)).map((item) => item.realName) : (defaultValueObj?.realName || ''));
     }
     default:
       return defaultValue;

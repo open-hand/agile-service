@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from 'choerodon-ui/pro';
-import { observer } from 'mobx-react-lite';
+import { observer, useObservable } from 'mobx-react-lite';
 import IssueSearch, { IssueSearchStore, useIssueSearchStore } from '@/components/issue-search';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getSystemFields as originGetSystemFields } from '@/stores/project/issue/IssueStore';
@@ -43,41 +43,43 @@ function getSystemFields() {
   ]);
   return systemFields;
 }
+const ObserverSelectSprint: React.FC<any> = observer(({ field, value, ...otherProps }) => (
+  <SelectSprint
+    key={field.code}
+    value={value || null}
+    flat
+    placeholder={field.name}
+    maxTagTextLength={10}
+    afterLoad={(sprints) => {
+      console.log('sprints afterLoad', sprints);
+      scrumBoardStore.setSprintNotClosedArray(sprints);
+      const startedSprint = sprints.find((sprint) => sprint.statusCode === 'started');
+      if (startedSprint) {
+        scrumBoardStore.executeBindFunction(['refresh'], startedSprint.sprintId);
+      } else {
+        scrumBoardStore.executeBindFunction(['refresh']);
+      }
+      scrumBoardStore.removeBindFunction('refresh');
+    }}
+    dropdownMatchSelectWidth={false}
+    clearButton
+    optionRenderer={({ record, text }) => {
+      if (record?.get('statusCode') === 'started') {
+        return (
+          <span>
+            {text}
+            <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>
+          </span>
+        );
+      }
+      return <span>{text}</span>;
+    }}
+    {...otherProps}
+  />
+));
 function renderField(field: ILocalField, props: any) {
   if (field.code === 'sprint') {
-    return (
-      <SelectSprint
-        key={field.code}
-        flat
-        placeholder={field.name}
-        maxTagTextLength={10}
-        afterLoad={(sprints) => {
-          if (sprints && sprints.length > 0) {
-            console.log('sprints', sprints);
-            scrumBoardStore.setSprintNotClosedArray(sprints);
-            const startedSprint = sprints.find((sprint) => sprint.statusCode === 'started');
-            if (startedSprint) {
-              scrumBoardStore.executeBindFunction(['refresh'], startedSprint.sprintId);
-              scrumBoardStore.removeBindFunction('refresh');
-            }
-          }
-        }}
-        dropdownMatchSelectWidth={false}
-        clearButton
-        optionRenderer={({ record, text }) => {
-          if (record?.get('statusCode') === 'started') {
-            return (
-              <span>
-                {text}
-                <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>
-              </span>
-            );
-          }
-          return <span>{text}</span>;
-        }}
-        {...props}
-      />
-    );
+    return <ObserverSelectSprint field={field} {...props} />;
   }
   return null;
 }
@@ -89,8 +91,6 @@ function transformFilter(chosenFields: IChosenFields) {
   return filter;
 }
 const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
-  const [visible, setVisible] = useState<boolean>(false);
-
   const issueSearchStore = useIssueSearchStore({
     // @ts-ignore
     getSystemFields,
@@ -129,10 +129,6 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
           localPageCacheStore.setItem('scrumBoard.searchVO', newSearch);
           //   ScrumBoardStore
           scrumBoardStore.setSearchVO(newSearch);
-          onRefresh();
-          //   StoryMapStore.setSearchVO(issueSearchStore.getCustomFieldFilters());
-          //   StoryMapStore.clearData();
-          //   StoryMapStore.getStoryMap();
         }}
       />
 
