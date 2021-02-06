@@ -51,7 +51,7 @@ class BoardApi extends Api<BoardApi> {
     return axios({
       method: 'post',
       url: `${this.prefix}/board/${boardId}/all_data/${getOrganizationId()}`,
-      data: searchVO,
+      data: searchVO || {},
     });
   }
 
