@@ -27,6 +27,18 @@
       .c7n-pro-btn {
         padding-left: 0;
       }
+      .c7n-pro-checkbox:disabled + .c7n-pro-checkbox-inner {
+        border-color: #D7D7D7 !important;
+        background-color: #F5F5F5 !important;
+        &::after {
+          border-color: #D7D7D7 !important;
+          color: #FFF;
+          background-color: #F5F5F5 !important;
+        }
+        & + span {
+          color: rgba(0, 0, 0, 0.87);
+        }
+      }
       .c7n-pro-checkbox-float-label {
         padding-top: 0;
         margin-bottom: .14rem;

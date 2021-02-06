@@ -10,7 +10,7 @@ import { IModalProps } from '@/common/types';
 import { TemplateAction, templateApi } from '@/api';
 import classnames from 'classnames';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { uniq } from 'lodash';
+import { map, uniq } from 'lodash';
 import styles from './EditTemplate.less';
 
 interface FormPartProps {
@@ -143,15 +143,20 @@ const EditTemplate: React.FC<Props> = ({
       return false;
     }
     const templateName = templateDataSet.current?.get('templateName');
+
     const fieldCodesArr = uniq(transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps));
+
+    const reverseFieldCodes = reverseTransformExportFieldCodes(fieldCodesArr).filter((code: string) => map(checkOptions, 'value').includes(code));
+
+    const newFieldCodesArr = transformExportFieldCodes(reverseFieldCodes, checkBoxDataProps);
 
     const fieldCodesObj: {
       systemFields: string[]
       customFields: string[]
     } = { systemFields: [], customFields: [] };
 
-    fieldCodesObj.systemFields = fieldCodesArr.filter((code) => checkOptions.find((item: any) => item.value === code && item.system));
-    fieldCodesObj.customFields = fieldCodesArr.filter((code) => checkOptions.find((item:any) => item.value === code && !item.system));
+    fieldCodesObj.systemFields = newFieldCodesArr.filter((code) => checkOptions.find((item: any) => item.value === code && item.system));
+    fieldCodesObj.customFields = newFieldCodesArr.filter((code) => checkOptions.find((item:any) => item.value === code && !item.system));
 
     if (checkBoxDataProps.checkedOptions.length === 0) {
       Choerodon.prompt('请至少选择一个字段');
@@ -160,13 +165,13 @@ const EditTemplate: React.FC<Props> = ({
     const data = {
       ...template,
       name: templateName,
-      templateJson: action === 'agile_import_issue' || action === 'program_import_feature' ? JSON.stringify(fieldCodesObj) : JSON.stringify(fieldCodesArr),
+      templateJson: action === 'agile_import_issue' || action === 'program_import_feature' ? JSON.stringify(fieldCodesObj) : JSON.stringify(newFieldCodesArr),
     };
     const newTemplate: ITemplate = await templateApi.edit(template.id, data);
     onEdit(newTemplate);
     modal?.close();
     return false;
-  }, [action, checkBoxDataProps, checkOptions, modal, onEdit, template, templateDataSet, transformExportFieldCodes]);
+  }, [action, checkBoxDataProps, checkOptions, modal, onEdit, reverseTransformExportFieldCodes, template, templateDataSet, transformExportFieldCodes]);
 
   useEffect(() => {
   modal?.handleOk(handleOk);

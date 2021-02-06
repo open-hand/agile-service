@@ -10,7 +10,9 @@ import FileSaver from 'file-saver';
 import './ImportIssue.less';
 import { issueApi } from '@/api';
 import { getApplyType } from '@/utils/common';
-import { includes, isEqual, uniq } from 'lodash';
+import {
+  includes, isEqual, uniq, map,
+} from 'lodash';
 import ImportFields from './ImportFields';
 import TemplateSelect from '../template-select';
 import openSaveTemplate from '../template-select/components/save/SaveTemplate';
@@ -285,10 +287,17 @@ class ImportIssue extends Component {
     const templateList = this.templateSelectRef?.current?.templateList || [];
     const importFieldsData = { systemFields: [], customFields: [] };
     const allFields = this.importFieldsRef.current?.allFields || [];
-    const fields = uniq([...(value || []), ...(this.importFieldsRef.current?.requiredFields || [])]);
+    const fields = uniq([...(value || []), ...(this.importFieldsRef.current?.requiredFields || [])]).filter((code) => map(allFields, 'code').includes(code));
+
     importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system)).sort();
     importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system)).sort();
 
+    if (!fields.length) {
+      this.setState({
+        templateIsExist: true,
+      });
+      return;
+    }
     for (let i = 0; i < templateList.length; i += 1) {
       if (isEqual(transformTemplateJson(templateList[i].templateJson), importFieldsData)) {
         this.setState({

@@ -3,7 +3,9 @@ import React, {
 } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import { find, isEqual, uniq } from 'lodash';
+import {
+  find, isEqual, map, uniq,
+} from 'lodash';
 import { Divider } from 'choerodon-ui';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
@@ -76,6 +78,7 @@ const ExportIssue: React.FC = () => {
   }>();
 
   const checkBoxDataPropsRef = useRef<ITableColumnCheckBoxesDataProps>();
+  const selectTemplateOkRef = useRef<(codes: string[]) => void>();
 
   const {
     prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action,
@@ -93,16 +96,26 @@ const ExportIssue: React.FC = () => {
     },
   });
 
+  const { store: choseFieldStore } = choseDataProps;
+  const checkOptions = useMemo(() => { // checkBokProps
+    const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig.get(option.value) })) || [];
+    newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig.get(option.code) })));
+    return newCheckOptions;
+  }, [choseFieldStore.getOriginalField, propsCheckOptions, store.checkboxOptionsExtraConfig]);
+
   const handleCheckBoxChangeOk = useCallback((value) => {
+    const currentFieldCodes = store.transformExportFieldCodes(value, checkBoxDataPropsRef?.current);
+    const reverseFieldCodes = store.reverseTransformExportFieldCodes(uniq(currentFieldCodes)).filter((code) => map(checkOptions, 'value').includes(code));
+
     const templateList = templateSelectRef?.current?.templateList || [];
     for (let i = 0; i < templateList.length; i += 1) {
-      if (isEqual(JSON.parse(templateList[i].templateJson).sort(), store.transformExportFieldCodes(value, checkBoxDataPropsRef?.current).sort())) {
+      if (isEqual(JSON.parse(templateList[i].templateJson).sort(), store.transformExportFieldCodes(reverseFieldCodes, checkBoxDataPropsRef?.current).sort())) {
         templateSelectRef?.current?.setTemplate(templateList[i]);
         return;
       }
     }
     templateSelectRef?.current?.setTemplate(undefined);
-  }, [store]);
+  }, [checkOptions, store]);
 
   useEffect(() => {
     if (templateSelectRef?.current?.templateFirstLoaded) {
@@ -110,12 +123,6 @@ const ExportIssue: React.FC = () => {
     }
   }, [handleCheckBoxChangeOk, store.defaultCheckedExportFields, templateSelectRef?.current?.templateFirstLoaded]);
 
-  const { store: choseFieldStore } = choseDataProps;
-  const checkOptions = useMemo(() => { // checkBokProps
-    const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig.get(option.value) })) || [];
-    newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig.get(option.code) })));
-    return newCheckOptions;
-  }, [choseFieldStore.getOriginalField, propsCheckOptions, store.checkboxOptionsExtraConfig]);
   // 选择字段框配置 数据
   const [checkBoxDataProps, checkBoxComponentProps] = useTableColumnCheckBoxes({
     options: checkOptions,
@@ -206,10 +213,14 @@ const ExportIssue: React.FC = () => {
   }, [action, checkBoxDataProps, store]);
 
   const selectTemplateOk = useCallback((fieldCodes) => {
-    const newCheckedOptions = store.reverseTransformExportFieldCodes(uniq(fieldCodes));
+    const newCheckedOptions = store.reverseTransformExportFieldCodes(uniq(fieldCodes)).filter((code) => map(checkOptions, 'value').includes(code));
     checkBoxDataProps.dataSet.current?.set('exportCodes', newCheckedOptions);
     checkBoxDataProps.setCheckedOptions(newCheckedOptions);
-  }, [checkBoxDataProps, store]);
+  }, [checkBoxDataProps, checkOptions, store]);
+
+  Object.assign(selectTemplateOkRef, {
+    current: selectTemplateOk,
+  });
 
   useEffect(() => {
     const currentFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
@@ -217,15 +228,17 @@ const ExportIssue: React.FC = () => {
       setTemplateIsExist(true);
       return;
     }
+    const reverseFieldCodes = store.reverseTransformExportFieldCodes(uniq(currentFieldCodes)).filter((code) => map(checkOptions, 'value').includes(code));
+
     const templateList = templateSelectRef?.current?.templateList || [];
     for (let i = 0; i < templateList.length; i += 1) {
-      if (isEqual(JSON.parse(templateList[i].templateJson), currentFieldCodes)) {
+      if (isEqual(JSON.parse(templateList[i].templateJson), store.transformExportFieldCodes(reverseFieldCodes, checkBoxDataProps))) {
         setTemplateIsExist(true);
         return;
       }
     }
     setTemplateIsExist(false);
-  }, [checkBoxDataProps, store, templateSelectRef?.current?.templateList]);
+  }, [checkBoxDataProps, checkOptions, store, templateSelectRef?.current?.templateList]);
 
   return (
     <div>
