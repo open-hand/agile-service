@@ -28,7 +28,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
     name: 'issueType',
     textField: 'name',
     valueField: valueField || 'id',
-    request: () => issueTypeApi.loadAllWithStateMachineId(applyType ?? (isProgram ? 'program' : undefined), projectId).then((issueTypes) => {
+    request: request || (() => issueTypeApi.loadAllWithStateMachineId(applyType ?? (isProgram ? 'program' : undefined), projectId).then((issueTypes) => {
       if (isProgram) {
         const featureTypes: any = [{
           id: 'business',
@@ -54,7 +54,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
         return issueTypes.filter((issueType) => !filterList.some((filter) => filter === issueType.typeCode));
       }
       return issueTypes;
-    }),
+    })),
     middleWare: (issueTypes) => {
       if (afterLoad) {
         afterLoad(issueTypes);

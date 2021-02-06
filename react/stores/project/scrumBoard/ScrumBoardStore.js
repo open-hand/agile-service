@@ -2,7 +2,7 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { find } from 'lodash';
+import { find, isEmpty, set } from 'lodash';
 import { store, stores, Choerodon } from '@choerodon/boot';
 import { workCalendarApi, statusApi, boardApi } from '@/api';
 
@@ -480,7 +480,7 @@ class ScrumBoardStore {
     return this.currentConstraint;
   }
 
-  @observable isHasFilter=false;
+  @observable isHasFilter = false;
 
   @action setIsHasFilter(data) {
     this.isHasFilter = data;
@@ -590,6 +590,9 @@ class ScrumBoardStore {
   }
 
   axiosGetBoardData(boardId) {
+    if (!this.searchVO.otherArgs || isEmpty(this.searchVO.otherArgs.sprint)) {
+      this.getSprintId && set(this.searchVO, 'otherArgs.sprint', [this.getSprintId]);
+    }
     return boardApi.load(boardId, this.searchVO);
   }
 
