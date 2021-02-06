@@ -590,6 +590,15 @@
             join agile_issue ai
             on t1.issue_issue_id = ai.issue_id
             left join agile_project_info api on ai.project_id = api.project_id
+            <where>
+                <if test='searchVO.otherArgs.excludeIssueIds != null and searchVO.otherArgs.excludeIssueIds.size > 0'>
+                    AND ai.issue_id not in
+                    <foreach collection="searchVO.otherArgs.excludeIssueIds" item="issueId" open="(" separator=","
+                             close=")">
+                        #{issueId}
+                    </foreach>
+                </if>
+            </where>
             <if test="orderStr != null">
                 order by ${orderStr}
             </if>
