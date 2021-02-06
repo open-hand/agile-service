@@ -34,5 +34,14 @@
   }
   .right {
     cursor: pointer;
+    :global {
+      .c7n-pro-btn {
+        color: #3f51b5;
+        border-radius: unset;
+      }
+      .c7n-pro-btn + .c7n-pro-btn {
+        margin-left: 2px;
+      }
+    }
   }
 }
