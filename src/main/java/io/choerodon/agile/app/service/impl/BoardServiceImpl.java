@@ -367,18 +367,8 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public JSONObject queryAllData(Long projectId, Long boardId, Long organizationId, SearchVO searchVO) {
         JSONObject jsonObject = new JSONObject(true);
-        //没有传冲刺id，则使用激活的冲刺
-        SprintDTO currentSprint;
-        Long sprintId = null;
-        if (searchVO.getOtherArgs() != null && searchVO.getOtherArgs().get("sprint") != null) {
-            List<String> sprintIds = (List<String>) searchVO.getOtherArgs().get("sprint");
-            sprintId = Long.valueOf(sprintIds.get(0));
-        }
-        if (ObjectUtils.isEmpty(sprintId)) {
-            currentSprint = getActiveSprint(projectId);
-        } else {
-            currentSprint = sprintMapper.selectByPrimaryKey(sprintId);
-        }
+        //没有传冲刺id，则使用活跃的冲刺
+        SprintDTO currentSprint = handlerCurrentSprint(projectId, searchVO, organizationId);
         String filterSql = null;
         if (searchVO.getQuickFilterIds() != null && !searchVO.getQuickFilterIds().isEmpty()) {
             filterSql = getQuickFilter(searchVO.getQuickFilterIds());
@@ -388,7 +378,7 @@ public class BoardServiceImpl implements BoardService {
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, sprintId, filterSql, searchVO, searchVO.getAssigneeFilterIds(), userId);
+        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, currentSprint.getSprintId(), filterSql, searchVO, searchVO.getAssigneeFilterIds(), userId);
         Boolean condition = handlerAssigneeAndStory(searchVO);
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -429,6 +419,28 @@ public class BoardServiceImpl implements BoardService {
         //处理用户默认看板设置，保存最近一次的浏览
         handleUserSetting(boardId, projectId);
         return jsonObject;
+    }
+
+    private SprintDTO handlerCurrentSprint(Long projectId, SearchVO searchVO, Long organizationId) {
+        Long sprintId = null;
+        if (searchVO.getOtherArgs() != null && searchVO.getOtherArgs().get("sprint") != null) {
+            List<String> sprintIds = (List<String>) searchVO.getOtherArgs().get("sprint");
+            sprintId = Long.valueOf(sprintIds.get(0));
+        }
+        if (ObjectUtils.isEmpty(sprintId)) {
+            SprintDTO activeSprint = getActiveSprint(projectId);
+            if (ObjectUtils.isEmpty(activeSprint)) {
+               return new SprintDTO();
+            }
+            Map<String, Object> otherArgs = searchVO.getOtherArgs();
+            if (ObjectUtils.isEmpty(otherArgs)) {
+                otherArgs = new HashMap<>();
+            }
+            otherArgs.put("sprint", Arrays.asList(activeSprint.getSprintId()));
+            return activeSprint;
+        } else {
+            return sprintMapper.selectByPrimaryKey(sprintId);
+        }
     }
 
     private Boolean handlerAssigneeAndStory(SearchVO searchVO) {
