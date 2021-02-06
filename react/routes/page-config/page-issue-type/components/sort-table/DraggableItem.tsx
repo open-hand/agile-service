@@ -141,7 +141,7 @@ const DraggableItem: React.FC<Props> = ({
       <Observer>
         {() => (
           <Tooltip title={data.get('showDefaultValueText') !== '' ? data.get('showDefaultValueText') : undefined}>
-            <span>
+            <span className={`${prefixCls}-item-defaultValue-text`}>
               {(!textEditToggleProps.disabled && (!data.get('showDefaultValueText') || data.get('showDefaultValueText') === '') ? <SpanPlaceholder fieldType={data.get('fieldType')} /> : data.get('showDefaultValueText') || '')}
             </span>
           </Tooltip>
