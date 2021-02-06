@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import SelectIssueType from '@/components/select/select-issue-type-pro';
+import SelectIssueType from '@/components/select/pro/select-issue-type';
 
 function IssueTypeField({
   field, value, onChange, projectId, applyType,
