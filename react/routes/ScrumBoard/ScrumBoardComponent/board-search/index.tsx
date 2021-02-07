@@ -127,8 +127,8 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
           const newSearch = issueSearchStore.getCustomFieldFilters();
           localPageCacheStore.setItem('scrumBoard.search', issueSearchStore.currentFilter);
           localPageCacheStore.setItem('scrumBoard.searchVO', newSearch);
-          //   ScrumBoardStore
           scrumBoardStore.setSearchVO(newSearch);
+          onRefresh();
         }}
       />
 
