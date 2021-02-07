@@ -201,21 +201,28 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         ObjectSchemeFieldDTO field = new ObjectSchemeFieldDTO();
         field.setSystem(true);
         String typeCode = result.getTypeCode();
-        List<ObjectSchemeFieldDTO> fields =
+        List<ObjectSchemeFieldDTO> fields;
+        Long issueTypeId = result.getId();
+        if (!Objects.isNull(result.getReferenced())) {
+            fields = objectSchemeFieldMapper.selectByOptions(organizationId, null, null, null, result.getReferenceId(),Arrays.asList(typeCode));
+        } else {
+            fields =
                 objectSchemeFieldMapper.select(field)
-                        .stream()
-                        .filter(x -> {
-                            String context = AgileSystemFieldContext.getContextByFieldCode(x.getCode());
-                            if (context != null) {
-                                for (String str : context.split(",")) {
-                                    if (str.trim().equals(typeCode)) {
-                                        return true;
-                                    }
+                    .stream()
+                    .filter(x -> {
+                        String context = AgileSystemFieldContext.getContextByFieldCode(x.getCode());
+                        if (context != null) {
+                            for (String str : context.split(",")) {
+                                if (str.trim().equals(typeCode)) {
+                                    return true;
                                 }
                             }
-                            return false;
-                        }).collect(Collectors.toList());
-        Long issueTypeId = result.getId();
+                        }
+                        return false;
+                    }).collect(Collectors.toList());
+        }
+        Map<Long, ObjectSchemeFieldExtendDTO> referencedSystemFieldExtendMap = objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Arrays.asList(result.getReferenceId()), organizationId, null, null)
+                        .stream().collect(Collectors.toMap(ObjectSchemeFieldExtendDTO::getFieldId, Function.identity()));
         fields.forEach(x -> {
             Boolean required = x.getRequired();
             SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(x.getCode());
@@ -243,7 +250,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 extendDTO.setCreated(created);
                 extendDTO.setEdited(edited);
                 extendDTO.setRank(rank);
-                extendDTO.setDefaultValue(x.getDefaultValue());
+                if (!Objects.isNull(result.getReferenced())) {
+                    extendDTO.setDefaultValue(referencedSystemFieldExtendMap.get(x.getId()).getDefaultValue());
+                } else {
+                    extendDTO.setDefaultValue(x.getDefaultValue());
+                }
                 extendDTO.setExtraConfig(x.getExtraConfig());
                 objectSchemeFieldExtendMapper.insertSelective(extendDTO);
             }
