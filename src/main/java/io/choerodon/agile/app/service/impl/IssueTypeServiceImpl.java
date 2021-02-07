@@ -967,6 +967,12 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
+    public Map<Long, IssueTypeVO> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds) {
+        return issueTypeMapper.selectByProjectIds(organizationId, projectIds)
+                .stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
+    }
+
+    @Override
     public Map<Long, Map<String, Long>> initIssueTypeData(Long organizationId, List<Long> orgIds) {
         Map<Long, Map<String, Long>> result = new HashMap<>();
         for (Long orgId : orgIds) {
