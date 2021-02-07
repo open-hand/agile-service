@@ -1,8 +1,7 @@
 import React, {
-  useEffect, useState, useCallback, useRef,
+  useEffect, useState, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
 import {
   Icon, Row, Col, Tooltip,
 } from 'choerodon-ui';
@@ -40,11 +39,12 @@ interface Props {
   fieldsWithValue: IFieldWithValue[]
   targetProjectType: 'program' | 'project' | 'subProject'
   targetIssueType?: IIssueType
+  targetSubTaskType?: IIssueType
   loseItems: ILoseItems,
 }
 
 const Confirm: React.FC<Props> = ({
-  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, loseItems,
+  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, targetSubTaskType, loseItems,
 }) => {
   const {
     dataMap, selfFields, subTaskFields, moveToProjectList, subTaskDetailMap, subTaskTypeId, selectedUserIds, selectedUsers,
@@ -378,7 +378,7 @@ const Confirm: React.FC<Props> = ({
             subTaskTypeId ? subIssueVOList.map((subTask: any) => (
               <div className={styles.issueItem}>
                 <div className={styles.issueItemHeader}>
-                  <TypeTag data={subTask.issueTypeVO} />
+                  {targetSubTaskType && <TypeTag data={targetSubTaskType} />}
                   <span className={styles.issueNum}>{subTask.issueNum}</span>
                   <span className={styles.summary}>{subTask.summary}</span>
                 </div>
@@ -395,50 +395,50 @@ const Confirm: React.FC<Props> = ({
                     </Col>
                   </Row>
                   {
-                  subTaskFields.map((subTaskField) => {
-                    const { fieldCode, fieldName } = subTaskField;
-                    const subTaskDetail = subTaskDetailMap.get(`${subTask.issueId}-detail`) || {};
-                    const subTaskCustomFields = subTaskDetailMap.get(`${subTask.issueId}-fields`) || [];
-                    const transformedOriginValue = transformValue({ issue: subTaskDetail, field: subTaskField, fieldsWithValue: subTaskCustomFields });
-                    return (
-                      <Row key={fieldCode} className={styles.fieldRow}>
-                        <Col span={7}>
-                          <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
-                            {fieldName}
-                            {
-                              dataSet.current?.getField(`${subTask.issueId}-${fieldCode}`)?.props?.required && (
-                                <span className={styles.required}>*</span>
-                              )
-                            }
-                          </span>
-                        </Col>
-                        <Col span={8}>
-                          <Tooltip title={transformedOriginValue}>
-                            <span className={styles.fieldReadOnly}>{transformedOriginValue}</span>
-                          </Tooltip>
-                        </Col>
-                        <Col span={9}>
-                          {renderField({
-                            dataSet,
-                            issue: subTaskDetail,
-                            field: subTaskField,
-                            fieldsWithValue: subTaskCustomFields,
-                            targetIssueType: {
-                              typeCode: 'sub_task',
-                              id: subTaskTypeId,
-                            } as IIssueType,
-                            targetProject: {
-                              projectId: targetProjectId,
-                              projectType: targetProjectType,
-                            },
-                            dataMap,
-                            selectedUsers,
-                          })}
-                        </Col>
-                      </Row>
-                    );
-                  })
-              }
+                    subTaskFields.map((subTaskField) => {
+                      const { fieldCode, fieldName } = subTaskField;
+                      const subTaskDetail = subTaskDetailMap.get(`${subTask.issueId}-detail`) || {};
+                      const subTaskCustomFields = subTaskDetailMap.get(`${subTask.issueId}-fields`) || [];
+                      const transformedOriginValue = transformValue({ issue: subTaskDetail, field: subTaskField, fieldsWithValue: subTaskCustomFields });
+                      return (
+                        <Row key={fieldCode} className={styles.fieldRow}>
+                          <Col span={7}>
+                            <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
+                              {fieldName}
+                              {
+                                dataSet.current?.getField(`${subTask.issueId}-${fieldCode}`)?.props?.required && (
+                                  <span className={styles.required}>*</span>
+                                )
+                              }
+                            </span>
+                          </Col>
+                          <Col span={8}>
+                            <Tooltip title={transformedOriginValue}>
+                              <span className={styles.fieldReadOnly}>{transformedOriginValue}</span>
+                            </Tooltip>
+                          </Col>
+                          <Col span={9}>
+                            {renderField({
+                              dataSet,
+                              issue: subTaskDetail,
+                              field: subTaskField,
+                              fieldsWithValue: subTaskCustomFields,
+                              targetIssueType: {
+                                typeCode: 'sub_task',
+                                id: subTaskTypeId,
+                              } as IIssueType,
+                              targetProject: {
+                                projectId: targetProjectId,
+                                projectType: targetProjectType,
+                              },
+                              dataMap,
+                              selectedUsers,
+                            })}
+                          </Col>
+                        </Row>
+                      );
+                    })
+                  }
                 </div>
               </div>
             )) : null
