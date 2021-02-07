@@ -69,7 +69,7 @@ const Issue = observer(() => {
   const initFilter = async () => {
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
-      paramType, paramIssueId, paramName, paramOpenIssueId,
+      paramType, paramIssueId, paramName, paramOpenIssueId, detailTab,
       // eslint-disable-next-line no-restricted-globals
     } = queryString.parse(location.search);
     if (paramChoose || paramCurrentVersion || paramCurrentSprint || paramId
@@ -124,6 +124,19 @@ const Issue = observer(() => {
           issueId: id,
         },
         expand: true,
+      });
+      props.open({
+        path: 'issue',
+        props: {
+          issueId: id,
+          tab: detailTab === 'comment' ? 'comment' : undefined,
+          // store: detailStore,
+        },
+        events: {
+          update: () => {
+            refresh();
+          },
+        },
       });
       await IssueStore.query();
     } else {
