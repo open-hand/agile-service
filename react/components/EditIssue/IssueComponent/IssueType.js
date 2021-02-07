@@ -44,7 +44,7 @@ const IssueType = observer(({
         });
     } else {
       const issueUpdateTypeVO = {
-        epicName: type.key === 'issue_epic' ? summary : undefined,
+        epicName: type.item.props.typeCode === 'issue_epic' ? summary : undefined,
         issueId,
         objectVersionNumber,
         typeCode: type.item.props.typeCode,
