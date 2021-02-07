@@ -455,7 +455,7 @@ public class BoardServiceImpl implements BoardService {
         }
         Boolean onlyStory = false;
         if (searchVO.getAdvancedSearchArgs() != null && searchVO.getAdvancedSearchArgs().get("issueTypeId") != null) {
-            List<String> issueTypeIds = (List<String>) searchVO.getOtherArgs().get("issueTypeId");
+            List<String> issueTypeIds = (List<String>) searchVO.getAdvancedSearchArgs().get("issueTypeId");
             for (String issueTypeId : issueTypeIds) {
                 String typeCode = issueTypeService.getIssueTypeById(Long.valueOf(issueTypeId));
                 if (Objects.equals(typeCode, "story")) {
