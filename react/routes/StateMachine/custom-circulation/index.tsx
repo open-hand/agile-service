@@ -93,6 +93,7 @@ interface IStatusFieldSettingVOS {
 interface IStatusLinkageVOS {
   id: null | string
   issueTypeId: string
+  issueTypeName: string
   issueTypeVO: IIssueType
   parentIssueStatusSetting: string
   parentIssueTypeCode: 'story' | 'bug' | 'task'
@@ -280,7 +281,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             customCirculationDataSet={customCirculationDataSet}
           />
         ) : (
-        // @ts-ignore
+          // @ts-ignore
           <Linkage
             record={record}
             selectedType={selectedType}
@@ -335,7 +336,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     ) => item.id === selectedType)?.typeCode;
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
-      <Menu onClick={handleMenuClick.bind(this, record)}>
+      <Menu onClick={handleMenuClick.bind(this, record)} selectable={false}>
         <Menu.Item key="condition">流转条件</Menu.Item>
         {
           (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug' || selectedTypeCode === 'feature') && (
@@ -407,11 +408,12 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   // @ts-ignore
   const renderStatusLinkageSetting = (statusLinkageVOS: IStatusLinkageVOS[], record) => {
-    const selectedTypeCode = find(issueTypes, (
+    const selectedIssueType = find(issueTypes, (
       item: IIssueType,
-    ) => item.id === selectedType)?.typeCode;
+    ) => item.id === selectedType);
+    const selectedTypeCode = selectedIssueType?.typeCode;
     if (statusLinkageVOS && statusLinkageVOS.length && (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug')) {
-      const prefixStr = `全部${selectedTypeCode === 'sub_task' ? '子任务' : '子缺陷'}都在【${record.get('name')}】状态，则将`;
+      const prefixStr = `全部${selectedIssueType?.name}都在【${record.get('name')}】状态，则将`;
       const parentDes = (
         statusLinkageVOS.map((linkageSetting) => {
           const { statusVO, issueTypeVO } = linkageSetting;
@@ -425,9 +427,9 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       const prefixStr = '当项目';
       const linkageStr = (
         statusLinkageVOS.map((linkageSetting) => {
-          const { statusVO, projectVO } = linkageSetting;
+          const { statusVO, projectVO, issueTypeName } = linkageSetting;
           const toStatusName = statusVO?.name;
-          return `【${projectVO?.name}】的故事状态全为【${toStatusName}】`;
+          return `【${projectVO?.name}】的${issueTypeName}状态全为【${toStatusName}】`;
         })).join('，');
       const suffixStr = `，则关联的特性自动流转到【${record.get('name')}】状态。`;
       return `${prefixStr}${linkageStr}${suffixStr}`;

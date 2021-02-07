@@ -47,7 +47,7 @@ const IssueType = observer(({
         epicName: type.key === 'issue_epic' ? summary : undefined,
         issueId,
         objectVersionNumber,
-        typeCode: type.key,
+        typeCode: type.item.props.typeCode,
         issueTypeId: value,
         featureType,
       };
@@ -65,8 +65,8 @@ const IssueType = observer(({
   const issue = store.getIssue;
   const { isInProgram } = useIsInProgram();
   const { issueTypeVO = {}, featureVO = {}, subIssueVOList = [] } = issue;
-  const { typeCode } = issueTypeVO;
-  const { stateMachineId } = find(issueTypeData, { typeCode }) || {};
+  const { typeCode, id } = issueTypeVO;
+  const { stateMachineId } = find(issueTypeData, { id }) || {};
   const { featureType } = featureVO || {};
   let currentIssueType = issueTypeVO;
   if (typeCode === 'feature') {
@@ -107,7 +107,7 @@ const IssueType = observer(({
     >
       {
         issueTypeData.map((t) => (
-          <Menu.Item key={t.id} value={t.id} featureType={t.featureType}>
+          <Menu.Item key={t.id} typeCode={t.typeCode} value={t.id} featureType={t.featureType}>
             <TypeTag
               style={{ margin: 0 }}
               data={t}

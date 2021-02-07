@@ -21,8 +21,12 @@ interface Props {
   store: ProjectReportStore
   edit?: boolean
   preview?: boolean
+  refresh?: () => void
 }
-const ReportPage: React.FC<Props> = ({ store, edit, preview: forcePreview }) => {
+const noop = () => {};
+const ReportPage: React.FC<Props> = ({
+  store, edit, preview: forcePreview, refresh,
+}) => {
   const baseInfoRef = useRef<BaseInfoRef>({} as BaseInfoRef);
   const [preview, setPreview] = useState(forcePreview !== undefined ? forcePreview : false);
   const { isProgram } = useIsProgram();
@@ -30,12 +34,14 @@ const ReportPage: React.FC<Props> = ({ store, edit, preview: forcePreview }) => 
     <Dropdown
       trigger={['click' as Action]}
       overlay={(
-        <Menu onClick={({ key }) => {
-          openAddModal({
-            type: key as IReportContentType,
-            store,
-          });
-        }}
+        <Menu
+          onClick={({ key }) => {
+            openAddModal({
+              type: key as IReportContentType,
+              store,
+            });
+          }}
+          selectable={false}
         >
           <Menu.Item key="text">文本</Menu.Item>
           {!isProgram && [
@@ -58,6 +64,7 @@ const ReportPage: React.FC<Props> = ({ store, edit, preview: forcePreview }) => 
       edit: edit || false,
       preview,
       setPreview,
+      refresh: refresh || noop,
     }}
     >
       {preview ? <PreviewReport /> : (

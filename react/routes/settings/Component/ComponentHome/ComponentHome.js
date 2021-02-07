@@ -121,6 +121,7 @@ function ComponentHome() {
       />
       <Column
         name="issueCount"
+        className="c7n-agile-table-cell-click"
         renderer={({ text: issueCount, record }) => (
           issueCount ? (
             <Link

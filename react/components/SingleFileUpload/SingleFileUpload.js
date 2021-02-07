@@ -54,16 +54,16 @@ function SingleFileUplaod(props) {
           )}
         </span>
         {
-        url && (
-        <a className="c7n-agile-singleFileUpload-download" onClick={handleDownLoadFile}>
-          <span className="c7n-agile-singleFileUpload-icon">
-            <Tooltip title="下载">
-              <Icon type="get_app" style={{ color: '#000' }} />
-            </Tooltip>
-          </span>
-        </a>
-        )
-      }
+          url && (
+          <a className="c7n-agile-singleFileUpload-download" onClick={handleDownLoadFile}>
+            <span className="c7n-agile-singleFileUpload-icon">
+              <Tooltip title="下载">
+                <Icon type="get_app" style={{ color: '#000' }} />
+              </Tooltip>
+            </span>
+          </a>
+          )
+        }
         <span
           className={`c7n-agile-singleFileUpload-fileName ${previewAble ? 'preview' : ''}`}
           onClick={previewAble && handlePreviewClick.bind(this, fileService, fileName, url)}

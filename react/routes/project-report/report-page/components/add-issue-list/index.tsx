@@ -16,6 +16,7 @@ import {
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { IIssueColumnName } from '@/common/types';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { IReportListBlock } from '../../store';
 import { RefProps } from '../add-modal';
 
@@ -32,6 +33,37 @@ interface Props {
   innerRef: React.MutableRefObject<RefProps>
   data?: IReportListBlock
 }
+const autoSelectChildren = (dataSet: DataSet, record: Record) => {
+  if (record.children && record.children.length > 0) {
+    record.children.forEach((child) => {
+      if (!child.isSelected) {
+        child.set('source', 'auto');
+        dataSet.select(child);
+      }
+    });
+  }
+};
+const autoSelectParent = (dataSet: DataSet, record: Record) => {
+  if (record.parent) {
+    if (!record.parent.isSelected) {
+      record.parent.set('source', 'auto');
+      dataSet.select(record.parent);
+    }
+  }
+};
+const autoUnSelectChildren = (dataSet: DataSet, record: Record) => {
+  if (record.children && record.children.length > 0) {
+    record.children.forEach((child) => {
+      if (child.isSelected) {
+        child.set('source', 'auto');
+        dataSet.unSelect(child);
+      }
+    });
+  }
+};
+const autoUnSelectParent = (dataSet: DataSet, record: Record) => {
+
+};
 const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   const isEdit = Boolean(editData);
   const selectedRef = useRef<Set<string>>(new Set([...(editData?.searchVO?.otherArgs?.issueIds || [])]));
@@ -60,6 +92,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       },
     }],
   }), [editData]);
+
   // @ts-ignore
   const dataSet = useMemo(() => new DataSet(IssueTableDataSet({
     projectId: getProjectId(),
@@ -72,6 +105,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
         // @ts-ignore
         ds.forEach((record) => {
           if (selectedRef.current.has(record.get('issueId'))) {
+            record.set('source', 'auto');
             ds.select(record);
           }
         });
@@ -79,10 +113,24 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       // @ts-ignore
       select: ({ record }) => {
         selectedRef.current.add(record.get('issueId'));
+        const source = record.get('source');
+        if (source === 'auto') {
+          record.set('source', undefined);
+          return;
+        }
+        autoSelectChildren(dataSet, record);
+        autoSelectParent(dataSet, record);
       },
       // @ts-ignore
       unSelect: ({ record }) => {
         selectedRef.current.delete(record.get('issueId'));
+        const source = record.get('source');
+        if (source === 'auto') {
+          record.set('source', undefined);
+          return;
+        }
+        autoUnSelectChildren(dataSet, record);
+        autoUnSelectParent(dataSet, record);
       },
       // @ts-ignore
       selectAll: ({ dataSet: ds }) => {
@@ -98,8 +146,28 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           selectedRef.current.delete(record.get('issueId'));
         });
       },
-    } : undefined,
+    } : {
+      select: ({ record }: { record: Record }) => {
+        const source = record.get('source');
+        if (source === 'auto') {
+          record.set('source', undefined);
+          return;
+        }
+        autoSelectChildren(dataSet, record);
+        autoSelectParent(dataSet, record);
+      },
+      unSelect: ({ record }: { record: Record }) => {
+        const source = record.get('source');
+        if (source === 'auto') {
+          record.set('source', undefined);
+          return;
+        }
+        autoUnSelectChildren(dataSet, record);
+        autoUnSelectParent(dataSet, record);
+      },
+    },
   })), [isEdit, issueSearchStore]);
+
   const refresh = useCallback(() => {
     dataSet.query();
   }, [dataSet]);

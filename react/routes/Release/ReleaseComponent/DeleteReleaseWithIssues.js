@@ -74,7 +74,7 @@ class DeleteReleaseWithIssue extends Component {
                   <Icon
                     type="error"
                     style={{
-                      display: 'inline-block', marginRight: 10, marginTop: -3, color: 'red',
+                      display: 'inline-block', marginRight: 6, marginTop: -3, color: 'red',
                     }}
                   />
                   {'此版本有'}
@@ -111,7 +111,7 @@ class DeleteReleaseWithIssue extends Component {
           }
           {
             Object.keys(versionDelInfo).length && versionDelInfo.versionNames.length && versionDelInfo.agileIssueCount ? (
-              <div>
+              <div style={{ marginTop: 20 }}>
                 <div style={{ flex: 4 }}>
                   <Select
                     style={{
@@ -135,7 +135,7 @@ class DeleteReleaseWithIssue extends Component {
                     defaultValue={versionDelInfo.versionNames[0].versionId}
                   >
                     {
-                      [...versionDelInfo.versionNames, { versionId: -1, name: '无' }].map(item => (
+                      [...versionDelInfo.versionNames, { versionId: -1, name: '无' }].map((item) => (
                         <Option value={item.versionId}>{item.name}</Option>
                       ))
                     }

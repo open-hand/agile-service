@@ -28,6 +28,7 @@ interface IConfig {
 }
 export interface ITableColumnCheckBoxesDataProps {
   checkedOptions: string[],
+  setCheckedOptions: (codes: string[]) => void,
   dataSet: DataSet,
   options: Props['options'],
   actions: { checkAll: () => void, unCheckAll: () => void, check: (val: string) => void }
@@ -50,7 +51,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
       newOptions = config.events.initOptions({ options: newOptions, checkedOptions, dataSet: form.dataSet }) || newOptions;
     }
     setOptions(newOptions || []);
-  }, [config?.options]);
+  }, [checkedOptions, config?.events, config?.options, form.dataSet]);
   const checkAll = () => {
     const newCheckedOptions = options?.map((option) => option.value) || [];
     form.dataSet.current?.set(name, newCheckedOptions);
@@ -66,10 +67,11 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
   const handleChange = (value: string[] | string) => {
     if (value) {
       Array.isArray(value) ? setCheckedOptions(value) : setCheckedOptions([value]);
+      onChange(Array.isArray(value) ? value : [value]);
     } else {
       setCheckedOptions([]);
+      onChange([]);
     }
-    onChange(value);
   };
   useEffect(() => {
     if (typeof (config?.defaultValue) !== 'undefined') {
@@ -89,6 +91,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
 
   const dataProps: ITableColumnCheckBoxesDataProps = {
     checkedOptions,
+    setCheckedOptions,
     options,
     dataSet: form.dataSet,
     actions: { checkAll, unCheckAll, check: checkOption },
@@ -99,6 +102,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
     handleChange,
     formProps: form,
     otherCheckBoxProps: config?.checkBoxProps,
+    name: config?.name || 'exportCodes',
   };
   return [dataProps, componentProps];
 }
@@ -120,6 +124,7 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
     set(formProps, 'dataSet', newDataSet);
     return newDataSet;
   }, [defaultValue, formProps, name, propsDataSet]);
+
   return (
     <Form dataSet={dataSet} {...formProps}>
       <div>

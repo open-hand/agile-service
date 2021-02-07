@@ -4,6 +4,7 @@ import React, {
 import { Spin } from 'choerodon-ui';
 import { axios } from '@choerodon/boot';
 import { find } from 'lodash';
+import { toJS } from 'mobx';
 import { IReportListBlock } from '@/routes/project-report/report-page/store';
 import { Issue, IFoundationHeader } from '@/common/types';
 import { getProjectId, getOrganizationId } from '@/utils/common';
@@ -20,6 +21,17 @@ const ListBlock: React.FC<Props> = ({
     searchVO, colList, type, key,
   },
 }) => {
+  const clonedSearchVO = useMemo(() => {
+    const cloned = toJS(searchVO);
+    if (cloned) {
+      if (!cloned.otherArgs) {
+        cloned.otherArgs = {};
+      }
+      cloned.otherArgs.withChildren = false;
+    }
+    return cloned;
+  }, [searchVO]);
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fields, setFields] = useState<IFoundationHeader[]>([]);
@@ -41,16 +53,7 @@ const ListBlock: React.FC<Props> = ({
         size: 50,
         organizationId: getOrganizationId(),
       },
-      data: searchVO,
-      // data: {
-      //   advancedSearchArgs: {},
-      //   otherArgs: {
-      //     customField: {
-      //       option: [], date: [], date_hms: [], number: [], string: [], text: [],
-      //     },
-      //   },
-      //   searchArgs: {},
-      // },
+      data: clonedSearchVO,
     });
     dataRef.current = dataRef.current.concat(res.list);
     const hasNextPage = res.list.length > 0;
@@ -61,7 +64,7 @@ const ListBlock: React.FC<Props> = ({
       setLoading(false);
       setTimeout(onFinish);
     }
-  }, [onFinish, searchVO]);
+  }, [onFinish, clonedSearchVO]);
   const loadFields = useCallback(async () => {
     const Fields = await fieldApi.getFoundationHeader();
     setFields(Fields);
@@ -94,7 +97,7 @@ const ListBlock: React.FC<Props> = ({
     };
   });
   return (
-    <div style={{ padding: '10px 26px' }}>
+    <div>
       <Spin spinning={loading}>
         <Table<Issue>
           data={treeData}

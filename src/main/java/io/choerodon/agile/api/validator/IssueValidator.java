@@ -236,9 +236,6 @@ public class IssueValidator {
         if (issueUpdateTypeVO.getTypeCode().equals(SUB_TASK)) {
             throw new CommonException("error.IssueRule.subTask");
         }
-        if (issueUpdateTypeVO.getTypeCode().equals(issueConvertDTO.getTypeCode())) {
-            throw new CommonException("error.IssueRule.sameTypeCode");
-        }
         Long originStateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, issueConvertDTO.getIssueTypeId());
         Long currentStateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, issueUpdateTypeVO.getIssueTypeId());
         if (originStateMachineId == null || currentStateMachineId == null) {

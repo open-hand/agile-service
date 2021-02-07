@@ -18,10 +18,10 @@ import { linkUrl } from '@/utils/to';
 import LINK_URL, { getParams } from '@/constants/LINK_URL';
 import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import ImportIssue from '@/components/ImportIssue';
 import FilterManage from '@/components/FilterManage';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import TableModeSwitch from '@/components/tree-list-switch';
+import handleOpenImport from '@/components/ImportIssue/ImportIssue';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
@@ -36,7 +36,6 @@ const Issue = observer(() => {
   const history = useHistory();
   const location = useLocation();
   const [urlFilter, setUrlFilter] = useState(null);
-  const importRef = useRef();
   const tableRef = useRef();
   const [props] = useDetail();
   IssueStore.setTableRef(tableRef);
@@ -196,23 +195,33 @@ const Issue = observer(() => {
         >
           创建问题
         </Button>
-        <Button icon="archive" funcType="flat" onClick={() => importRef.current.open()}>
+        <Button
+          icon="archive"
+          funcType="flat"
+          onClick={() => handleOpenImport({
+            onFinish: refresh, action: 'agile_import_issue',
+          })}
+        >
           导入问题
         </Button>
         <Button
           className="leftBtn"
           icon="unarchive"
           funcType="flat"
-          onClick={() => openExportIssueModal(
-            issueSearchStore.getAllFields,
-            issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
-            dataSet, tableRef, tableListMode,
-          )}
+          onClick={() => {
+            openExportIssueModal(
+              issueSearchStore.getAllFields,
+              issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
+              dataSet, tableRef, tableListMode,
+              'agile_export_issue',
+            );
+          }}
         >
           导出问题
         </Button>
         <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
         <CollapseAll dataSet={dataSet} tableRef={tableRef} />
+        <div style={{ flex: 1, visibility: 'hidden' }} />
         <TableModeSwitch
           data={tableListMode ? 'list' : 'tree'}
           onChange={(mode) => {
@@ -278,7 +287,6 @@ const Issue = observer(() => {
           />
         )}
         <DetailContainer {...props} />
-        <ImportIssue ref={importRef} onFinish={refresh} />
       </Content>
     </Page>
   );

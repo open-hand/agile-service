@@ -1,0 +1,27 @@
+.template_list {
+  width: 3.35rem;
+  .template_item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.08rem 0.12rem;
+    cursor: pointer;
+    &:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    &_name {
+      flex: 1;
+      color: #000000;
+    }
+    &_action {
+      :global {
+        .icon {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+  .hasNoTemplate {
+    padding: 0.06rem 0.12rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}

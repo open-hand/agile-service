@@ -22,9 +22,9 @@ const { Option, OptGroup } = FlatSelect;
 const SearchArea: React.FC = () => {
   const prefixCls = 'c7n-issue';
   const {
-    store, onClear, urlFilter, onClickSaveFilter,
+    store, onClear, urlFilter, onClickSaveFilter, projectId,
   } = useContext(IssueSearchContext);
-  const { data: quickFilters } = useQuickFilters();
+  const { data: quickFilters } = useQuickFilters({ projectId });
   const {
     isHasFilter, chosenFields, overflowLine, folded,
   } = store;
@@ -86,8 +86,7 @@ const SearchArea: React.FC = () => {
     if (type === 'quick') {
       remove(selectedQuickFilters, key);
     } else if (type === 'my') {
-      store.clearAllFilter();
-      store.query();
+      handleClearFilter(id);
     } else if (type === 'commonly') {
       if (id === 'onlyMe') {
         store.handleFilterChange('assigneeId', []);
@@ -99,15 +98,25 @@ const SearchArea: React.FC = () => {
     const quickFilterIds = selectedQuickFilters.map((filter) => filter.split('|')[1]);
     store.handleFilterChange('quickFilterIds', quickFilterIds);
   };
-  const handlePersonalFilterChange = (values: string[] | null) => {
-    if (!values) {
-      let content: string[] = [];
-      if (hasSummaryField) {
-        content = store.getFilterValueByCode('contents');
-      }
+  const handleClearFilter = (v?: string) => {
+    if (!hasSummaryField) {
+      reset();
+      return;
+    }
+    const content: string[] = store.getFilterValueByCode('contents') || [];
+    const sameFilter = findSameFilter();
+    const isSelectedOption = sameFilter && (!v || v === sameFilter.filterId);
+    if (content[0] && content[0] !== '' && !isSelectedOption) {
       onClear();
       store.clearAllFilter();
-      content[0] && content[0] !== '' ? handleInputChange(content[0]) : store.query();
+      handleInputChange(content[0]);
+    } else {
+      reset();
+    }
+  };
+  const handlePersonalFilterChange = (values: string[] | null) => {
+    if (!values) {
+      handleClearFilter();
       return;
     }
     // 取消选择

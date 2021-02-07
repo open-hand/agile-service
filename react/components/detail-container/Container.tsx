@@ -1,11 +1,10 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import ResizeAble from '@/components/ResizeAble';
 import { find } from 'lodash';
-import { Tooltip, Icon } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui/pro';
 import EditIssue from '@/components/EditIssue';
 import './Container.less';
 import { useDetailContainerContext } from './context';
-import Back from './back.svg';
 
 const prefixCls = 'c7nagile-detail-container';
 interface Route {
@@ -26,7 +25,7 @@ export function registerPath(route: Route) {
 }
 const Container: React.FC = () => {
   const {
-    outside, topAnnouncementHeight, match, routes, close, pop, push, fullPage,
+    outside, topAnnouncementHeight, match, routes, close, pop, push, fullPage, resizeRef,
   } = useDetailContainerContext();
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -86,6 +85,7 @@ const Container: React.FC = () => {
       }}
     >
       <ResizeAble
+        ref={resizeRef}
         modes={['left']}
         size={{
           maxWidth: window.innerWidth * 0.6,

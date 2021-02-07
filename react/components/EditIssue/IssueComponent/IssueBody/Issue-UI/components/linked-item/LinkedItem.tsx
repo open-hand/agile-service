@@ -1,6 +1,6 @@
 import React, { useCallback, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Progress } from 'choerodon-ui/pro';
+import { Button, Progress } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
 import FileSaver from 'file-saver';
 import to from '@/utils/to';
@@ -92,19 +92,12 @@ const LinkItem: React.FC<Props> = ({ ui, reloadIssue, uploading = false }) => {
       <div className={styles.right}>
         {
           !uploading && ui.status !== 'failed' && (
-            <Icon
-              type="get_app"
-              style={{ marginRight: 5 }}
-              onClick={handleDownload}
-            />
+            <Button icon="get_app" onClick={handleDownload} />
           )
         }
         {
           !uploading && !disabled && (
-          <Icon
-            type="delete_forever"
-            onClick={() => { openDeleteModal({ ui: ui as IUi, store, reloadIssue }); }}
-          />
+            <Button icon="delete_forever" onClick={() => { openDeleteModal({ ui: ui as IUi, store, reloadIssue }); }} />
           )
         }
       </div>

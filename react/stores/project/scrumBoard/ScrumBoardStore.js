@@ -2,7 +2,7 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { find } from 'lodash';
+import { find, isEmpty, set } from 'lodash';
 import { store, stores, Choerodon } from '@choerodon/boot';
 import { workCalendarApi, statusApi, boardApi } from '@/api';
 
@@ -10,18 +10,9 @@ const { AppState } = stores;
 
 @store('ScrumBoardStore')
 class ScrumBoardStore {
-  @observable quickSearchObj = {
-    onlyMe: false,
-    onlyStory: false,
-    starBeacon: false,
-    quickSearchArray: [],
-    assigneeFilterIds: [],
-    sprintId: undefined,
-  };
+  @observable searchVO = {};
 
-  @observable personalFilter = []
-
-  @observable priorityIds = []
+  @observable filterManageVisible = false;
 
   @observable allColumnCount = [];
 
@@ -360,67 +351,28 @@ class ScrumBoardStore {
     }
   }
 
-  @action addAssigneeFilter(data) {
-    this.quickSearchObj.assigneeFilterIds = data;
+  @action setSearchVO(data) {
+    this.searchVO = data;
   }
 
-  @action addSprintFilter(data) {
-    this.quickSearchObj.sprintId = data;
+  @action setFilterManageVisible(data) {
+    this.filterManageVisible = data;
   }
 
-  @action addQuickSearchFilter(
-    onlyMeChecked = false,
-    onlyStoryChecked = false,
-    starBeacon = false,
-    moreChecked = [],
-    personalFilter,
-  ) {
-    this.quickSearchObj.onlyMe = onlyMeChecked;
-    this.quickSearchObj.onlyStory = onlyStoryChecked;
-    this.quickSearchObj.starBeacon = starBeacon;
-    this.quickSearchObj.quickSearchArray = moreChecked;
-    this.personalFilter = personalFilter;
+  @computed get getFilterManageVisible() {
+    return this.filterManageVisible;
   }
 
   @action clearFilter() {
-    this.quickSearchObj.assigneeFilterIds = [];
-    this.quickSearchObj.onlyMe = false;
-    this.quickSearchObj.onlyStory = false;
-    this.quickSearchObj.starBeacon = false;
-    this.quickSearchObj.quickSearchArray = [];
-    this.quickSearchObj.sprintId = undefined;
-    this.personalFilter = [];
-    this.priorityIds = [];
-  }
-
-  @computed get hasSetFilter() {
-    const {
-      onlyMe, onlyStory, starBeacon, quickSearchArray = [], assigneeFilterIds = [], sprintId,
-    } = this.quickSearchObj;
-    if (onlyMe === false
-      && onlyStory === false
-      && starBeacon === false
-      && quickSearchArray.length === 0
-      && assigneeFilterIds.length === 0
-      && !sprintId
-      && this.personalFilter.length === 0
-      && this.priorityIds.length === 0
-    ) {
-      return false;
-    }
-    return true;
+    this.searchVO = {};
   }
 
   setTransFromData(parentIssue, parentId) {
     statusApi.loadTransformStatusByIssue(parentIssue.statusId,
       parentIssue.issueId, parentIssue.issueTypeId).then(
       action('fetchSuccess', (res) => {
-        this.updatedParentIssue = this.interconnectedData.get(parentId);
+        this.updatedParentIssue = parentIssue;
         this.translateToCompleted = res.filter((transform) => transform.statusVO.type === 'done');
-        this.interconnectedData.set(parentId, {
-          ...this.interconnectedData.get(parentId),
-          canMoveToComplish: true,
-        });
         this.updateParent = true;
       }),
     );
@@ -528,6 +480,16 @@ class ScrumBoardStore {
     return this.currentConstraint;
   }
 
+  @observable isHasFilter = false;
+
+  @action setIsHasFilter(data) {
+    this.isHasFilter = data;
+  }
+
+  @computed get hasSetFilter() {
+    return this.isHasFilter;
+  }
+
   @action setCurrentConstraint(data) {
     this.currentConstraint = data;
   }
@@ -628,20 +590,10 @@ class ScrumBoardStore {
   }
 
   axiosGetBoardData(boardId) {
-    const {
-      onlyMe, onlyStory, starBeacon, quickSearchArray, assigneeFilterIds, sprintId,
-    } = this.quickSearchObj;
-    return boardApi.load(boardId,
-      {
-        onlyMe,
-        onlyStory,
-        starBeacon,
-        quickFilterIds: quickSearchArray,
-        assigneeFilterIds,
-        sprintId,
-        personalFilterIds: this.personalFilter,
-        priorityIds: this.priorityIds,
-      });
+    if (!this.searchVO.otherArgs || isEmpty(this.searchVO.otherArgs.sprint)) {
+      this.getSprintId && set(this.searchVO, 'otherArgs.sprint', [this.getSprintId]);
+    }
+    return boardApi.load(boardId, this.searchVO);
   }
 
   updateIssue = (
@@ -962,10 +914,6 @@ class ScrumBoardStore {
 
   @action setEditRef(ref) {
     this.editRef = ref;
-  }
-
-  @action setPriority(priorityIds) {
-    this.priorityIds = priorityIds;
   }
 
   @action setCreateIssueVisible(data) {

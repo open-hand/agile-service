@@ -2,7 +2,7 @@ import useSubProjects from '@/hooks/data/useSubProjects';
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import ProjectTag from '@/components/tag/project-tag';
-import { Input, Icon } from 'choerodon-ui';
+import { TextField, Icon } from 'choerodon-ui/pro';
 import styles from './ProjectList.less';
 
 interface ProjectListProps {
@@ -14,14 +14,12 @@ const ProjectList: React.FC<ProjectListProps> = ({ value, onChange }) => {
   const [search, setSearch] = useState('');
   return (
     <div className={styles['project-list']}>
-      <Input
+      <TextField
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="hidden-label"
+        onChange={(v) => setSearch(v ?? '')}
         prefix={<Icon type="search" style={{ color: 'rgba(0, 0, 0, 0.45)', marginLeft: 2 }} />}
-        style={{ width: 'calc(100% - 17px)', margin: '13px 15px' }}
         placeholder="请输入搜索内容"
-        label={false}
+        style={{ display: 'block', margin: '13px 7px' }}
       />
       {subProjects?.filter((project) => project.projName.indexOf(search) > -1).map((project) => (
         <div

@@ -37,6 +37,16 @@ public class IssueTypeWithStateMachineIdVO {
     @Encrypt
     private Long initStatusId;
 
+    private Boolean enabled;
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public Long getInitStatusId() {
         return initStatusId;
     }

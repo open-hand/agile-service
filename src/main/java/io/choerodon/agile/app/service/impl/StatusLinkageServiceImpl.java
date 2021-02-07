@@ -113,10 +113,6 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
 
     @Override
     public List<StatusLinkageVO> listByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds, String applyType) {
-        IssueTypeDTO issueTypeDTO = issueTypeMapper.selectWithAlias(issueTypeId, projectId);
-        if (issueTypeDTO == null) {
-            throw new CommonException("error.issue.type.not.existed");
-        }
         List<StatusLinkageDTO> statusLinkageDTOS = statusLinkageMapper.selectByStatusIds(projectId, issueTypeId, statusIds);
         if (CollectionUtils.isEmpty(statusLinkageDTOS)) {
             return new ArrayList<>();
@@ -135,11 +131,19 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (!CollectionUtils.isEmpty(statusVOS)) {
             typeVOMap.putAll(issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity())));
         }
+        Set<Long> issueTypeIds = new HashSet<>();
+        Set<Long> projectIds = new HashSet<>();
         for (StatusLinkageVO statusLinkageVO : linkageVOS) {
             statusLinkageVO.setStatusVO(statusMap.get(statusLinkageVO.getParentIssueStatusSetting()));
             statusLinkageVO.setIssueTypeVO(typeVOMap.get(statusLinkageVO.getParentIssueTypeId()));
-            statusLinkageVO.setIssueTypeName(issueTypeDTO.getName());
+            issueTypeIds.add(statusLinkageVO.getIssueTypeId());
+            projectIds.add(statusLinkageVO.getProjectId());
         }
+        Map<Long, String> issueTypeNameMap =
+                issueTypeMapper.selectWithAliasByIds(issueTypeIds, projectIds)
+                        .stream()
+                        .collect(Collectors.toMap(IssueTypeDTO::getId, IssueTypeDTO::getName));
+        linkageVOS.forEach(x -> x.setIssueTypeName(issueTypeNameMap.get(x.getIssueTypeId())));
         return linkageVOS;
     }
 

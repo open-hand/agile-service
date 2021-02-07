@@ -2,9 +2,12 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import SelectPriority from '@/components/select/select-priority';
 
-function PriorityField({ field, value, onChange }) {
+function PriorityField({
+  field, value, onChange, projectId,
+}) {
   return (
     <SelectPriority
+      projectId={projectId}
       key={field.code}
       flat
       value={value || []}

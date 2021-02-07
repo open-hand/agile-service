@@ -4,7 +4,7 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-import SelectIssueType from '@/components/select/select-issue-type-pro';
+import SelectIssueType from '@/components/select/pro/select-issue-type';
 import SelectStatus from '@/components/select/select-status';
 import { statusTransformApi } from '@/api';
 import { IFeatureLinkageSetting } from './index';

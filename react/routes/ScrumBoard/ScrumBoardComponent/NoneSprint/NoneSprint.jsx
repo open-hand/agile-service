@@ -3,20 +3,17 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import EmptyScrumboard from './emptyScrumboard.svg';
 
-const NoneSprint = ({ doingSprintExist, quickSearchObj }) => {
-  const {
-    onlyMe, onlyStory, quickSearchArray, assigneeFilterIds, sprintId,
-  } = quickSearchObj;
+const NoneSprint = ({ doingSprintExist, filterItems, hasSetFilter }) => {
   let tipTitle = '没有活跃的Sprint';
- 
-  if ((doingSprintExist || sprintId) && onlyMe === false && onlyStory === false && quickSearchArray.length === 0 && assigneeFilterIds.length === 0) {
+  const { sprint } = filterItems;
+  if ((doingSprintExist || sprint) && Object.keys(filterItems).length === 1) {
     tipTitle = '当前冲刺下未规划问题';
-  } else if (!(onlyMe === false && onlyStory === false && quickSearchArray.length === 0 && assigneeFilterIds.length === 0)) {
+  } else if (hasSetFilter) {
     tipTitle = '当前筛选条件下无问题';
   }
 
   return (
-    <React.Fragment>
+    <>
       <div
         style={{
           display: 'flex',
@@ -39,7 +36,7 @@ const NoneSprint = ({ doingSprintExist, quickSearchObj }) => {
           </p>
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

@@ -958,7 +958,7 @@ public class ExcelServiceImpl implements ExcelService {
             history.setSuccessCount(progress.getSuccessCount());
             sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, WEBSOCKET_IMPORT_CODE);
         }
-        updateRelatedIssue(relatedIssueList, rowIssueIdMap, errorRowColMap, headerMap, dataSheet, projectId);
+        updateRelatedIssue(relatedIssueList, rowIssueIdMap, errorRowColMap, headerMap, dataSheet, projectId, progress);
 
         //错误数据生成excel
         String status;
@@ -996,7 +996,8 @@ public class ExcelServiceImpl implements ExcelService {
                                     Map<Integer, List<Integer>> errorRowColMap,
                                     Map<Integer, ExcelColumnVO> headerMap,
                                     Sheet dataSheet,
-                                    Long projectId) {
+                                    Long projectId,
+                                    ExcelImportTemplate.Progress progress) {
         relatedIssueList =
                 relatedIssueList
                         .stream()
@@ -1024,14 +1025,18 @@ public class ExcelServiceImpl implements ExcelService {
                         cell.setCellValue(buildWithErrorMsg(value, "自己不能和自己关联，rowNum: " + (rowNum + 1)));
                         addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
                         ok = false;
+                        progress.failCountIncrease();
+                        progress.successCountDecrease();
                         break;
                     }
                     Long relatedIssueId = rowIssueIdMap.get(relatedRow);
                     if (relatedIssueId == null) {
                         deleteIssueIds.add(issueId);
-                        cell.setCellValue(buildWithErrorMsg(value, "第" + relatedRow + "行插入失败"));
+                        cell.setCellValue(buildWithErrorMsg(value, "第" + (relatedRow + 1) + "行问题项不存在"));
                         addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
                         ok = false;
+                        progress.failCountIncrease();
+                        progress.successCountDecrease();
                         break;
                     } else {
                         relatedIssueIds.add(relatedIssueId);
@@ -2552,7 +2557,11 @@ public class ExcelServiceImpl implements ExcelService {
         }
         project.setCode(projectInfoDTO.getProjectCode());
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
-        boolean isTreeView = !Boolean.FALSE.equals(searchVO.getSearchArgs().get("tree"));
+        boolean isTreeView =
+                !Boolean.FALSE.equals(
+                        Optional.ofNullable(searchVO.getSearchArgs())
+                                .map(x -> x.get("tree"))
+                                .orElse(false));
 
         String sheetName = project.getName();
         Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);

@@ -9,6 +9,7 @@ import SelectTeam from '@/components/select/select-team';
 import useIsProgram from '@/hooks/useIsProgram';
 import { groupBy } from 'lodash';
 import OptGroup from 'choerodon-ui/pro/lib/option/OptGroup';
+import useHasDevops from '@/hooks/useHasDevops';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';
@@ -55,7 +56,10 @@ export interface ChartRefProps {
   submit: () => Promise<ChartSearchVO>
 }
 const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
+  const initProject = useMemo(() => editData?.chartSearchVO.projectId, [editData?.chartSearchVO.projectId]);
+  const initChartCode = useMemo(() => editData?.chartCode, [editData?.chartCode]);
   const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
+  const hasDevops = useHasDevops();
   const { isProgram } = useIsProgram();
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
@@ -82,6 +86,9 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
     },
     ],
   }), [editData, isProgram]);
+  const projectChanged = dataSet.current?.get('subProjectId') !== initProject;
+  const codeChanged = dataSet.current?.get('chart') !== initChartCode;
+  const ignoreSearchVO = projectChanged || codeChanged;
   const handleSubmit = useCallback(async () => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();
@@ -105,7 +112,13 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const subProjectId = dataSet.current?.get('subProjectId');
   const ChartComponent = optionalCharts.get(chart)?.component;
   const isSubProjectChart = isProgram && [...defaultCharts.keys()].includes(chart);
-  const optionGroups = groupBy([...optionalCharts.entries()].map(([key, { name, group }]) => ({ key, name, group })), 'group');
+  const optionGroups = groupBy([...optionalCharts.entries()].filter((([key, { group }]) => (hasDevops ? true : group !== '质量'))).map(([key, { name, group }]) => ({ key, name, group })), 'group');
+  const data = useMemo(() => (ignoreSearchVO ? {
+    ...editData,
+    chartSearchVO: {
+      projectId: dataSet.current?.get('subProjectId'),
+    },
+  } : editData), [dataSet, editData, ignoreSearchVO]);
   return (
     <>
       <Form dataSet={dataSet} style={{ width: 512 }}>
@@ -123,7 +136,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
         <ChartComponent
           key={subProjectId}
           innerRef={chartRef}
-          data={editData}
+          data={data}
           projectId={isProgram ? subProjectId : undefined}
         />
       ) : null}

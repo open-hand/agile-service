@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { CheckBox } from 'choerodon-ui/pro';
 import { find } from 'lodash';
 import SelectSprint from '@/components/select/select-sprint';
@@ -16,6 +16,7 @@ export interface SprintSearchProps {
   useCurrentSprint?: boolean
   setUseCurrentSprint: (useCurrentSprint: boolean) => void
   projectId?:string
+  onEmpty: () => void
 }
 const SprintSearch: React.FC<SprintSearchProps> = ({
   sprintId,
@@ -28,52 +29,79 @@ const SprintSearch: React.FC<SprintSearchProps> = ({
   useCurrentSprint,
   setUseCurrentSprint,
   projectId,
-}) => (
-  <div>
-    <SelectSprint
-      label="迭代冲刺"
-      labelLayout={'float' as LabelLayout}
-      clearButton={false}
-      projectId={projectId}
-      statusList={['started', 'closed']}
-      currentSprintOption
-      afterLoad={(sprints) => {
-        if (useCurrentSprint && !currentSprintId) {
+  onEmpty,
+}) => {
+  const sprintsRef = useRef<ISprint[]>([]);
+  return (
+    <div>
+      <SelectSprint
+        label="迭代冲刺"
+        labelLayout={'float' as LabelLayout}
+        clearButton={false}
+        projectId={projectId}
+        statusList={['started', 'closed']}
+        currentSprintOption
+      // onOption={({ record }) => ({
+      //   disabled: record.get('sprintId') === '0' && !currentSprintId,
+      // })}
+        afterLoad={(sprints) => {
+          sprintsRef.current = sprints;
           const current = find(sprints, { statusCode: 'started' });
           if (current) {
-            setSprintId(current.sprintId);
             setCurrentSprintId(current.sprintId);
           }
-        } else if (!sprintId && sprints.length > 0) {
-          setSprintId(sprints[0].sprintId);
-        }
-      }}
-      value={useCurrentSprint ? 'current' : sprintId}
-      primitiveValue={false}
-      onChange={(sprint: ISprint | null) => {
-        if (sprint && sprint.sprintId === 'current') {
-          setSprintId(currentSprintId);
-          setUseCurrentSprint(true);
-          return;
-        }
-        if (sprint) {
-          setSprintId(sprint.sprintId);
-          setEndDate(sprint.endDate);
-          setUseCurrentSprint(false);
-        } else {
-          setSprintId(undefined);
-          setEndDate('');
-          setUseCurrentSprint(false);
-        }
-      }}
-    />
-    <CheckBox
-      style={{ marginLeft: 24 }}
-      checked={restDayShow}
-      onChange={setRestDayShow}
-    >
-      显示非工作日
-    </CheckBox>
-  </div>
-);
+          if (useCurrentSprint && !currentSprintId) {
+            if (current) {
+              setSprintId(current.sprintId);
+              setEndDate(current.endDate);
+            } else {
+              setSprintId(undefined);
+              setEndDate('');
+              onEmpty();
+            }
+          } else if (sprints.length > 0) {
+            if (!sprintId) {
+              setSprintId(sprints[0].sprintId);
+              setEndDate(sprints[0].endDate);
+            } else {
+              const target = find(sprints, { sprintId });
+              if (target) {
+                setEndDate(target.endDate);
+              }
+            }
+          }
+        }}
+        value={useCurrentSprint ? 'current' : sprintId}
+        primitiveValue={false}
+        onChange={(sprint: ISprint | null) => {
+          if (sprint && sprint.sprintId === 'current') {
+            setSprintId(currentSprintId);
+            const target = find(sprintsRef.current, { sprintId });
+            if (target) {
+              setEndDate(target.endDate);
+            }
+            setUseCurrentSprint(true);
+            return;
+          }
+          if (sprint) {
+            setSprintId(sprint.sprintId);
+            setEndDate(sprint.endDate);
+            setUseCurrentSprint(false);
+          } else {
+            setSprintId(undefined);
+            setEndDate('');
+            setUseCurrentSprint(false);
+          }
+        }}
+      />
+      <CheckBox
+        style={{ marginLeft: 24 }}
+        checked={restDayShow}
+        onChange={setRestDayShow}
+      >
+        显示非工作日
+      </CheckBox>
+    </div>
+  );
+};
 export default SprintSearch;

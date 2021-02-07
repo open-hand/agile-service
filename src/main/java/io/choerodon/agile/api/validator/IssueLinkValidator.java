@@ -52,6 +52,12 @@ public class IssueLinkValidator {
         issueLink.setLinkedIssueId(issueLinkDTO.getLinkedIssueId());
         issueLink.setProjectId(issueLinkDTO.getProjectId());
         List<IssueLinkDTO> issueLinkDTOList = issueLinkMapper.select(issueLink);
+        IssueLinkDTO issueBeLinked = new IssueLinkDTO();
+        issueBeLinked.setIssueId(issueLinkDTO.getLinkedIssueId());
+        issueBeLinked.setLinkTypeId(issueLinkDTO.getLinkTypeId());
+        issueBeLinked.setLinkedIssueId(issueLinkDTO.getIssueId());
+        issueBeLinked.setProjectId(issueLinkDTO.getProjectId());
+        issueLinkDTOList.addAll(issueLinkMapper.select(issueBeLinked));
         return ObjectUtils.isEmpty(issueLinkDTOList);
     }
 

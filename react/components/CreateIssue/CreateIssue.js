@@ -497,13 +497,16 @@ class CreateIssue extends Component {
   };
 
   getIssueTypes = (isInProgram) => {
-    const { mode } = this.props;
+    const { mode, enabledTypeCodes } = this.props;
     const { originIssueTypes } = this.state;
     // const filterSubType = (type) => (!['sub_task'].includes(type.typeCode));
     const filterEpic = (type) => (!['issue_epic'].includes(type.typeCode));
     const filterFeature = (type) => (!['feature'].includes(type.typeCode));
     if (mode === 'sub_task') {
       return originIssueTypes.filter((type) => type.typeCode === 'sub_task');
+    }
+    if (enabledTypeCodes && enabledTypeCodes.length > 0) {
+      return originIssueTypes.filter((type) => enabledTypeCodes.includes(type.typeCode));
     }
     const issueTypes = applyFilter(originIssueTypes, [
       // filterSubType,
@@ -556,7 +559,7 @@ class CreateIssue extends Component {
       case 'issueType':
         return (
           [
-            ['sub_bug', 'feature'].includes(mode) || hiddenIssueType
+            ['feature'].includes(mode) || hiddenIssueType
               ? getFieldDecorator('typeId', {
                 rules: [{ required: true, message: '问题类型为必输项' }], // 不需要展示，但是要有值
                 initialValue: defaultTypeId || '',
@@ -1243,7 +1246,7 @@ class CreateIssue extends Component {
       >
         <Content>
           <Spin spinning={loading}>
-            <Form layout="vertical" style={{ width: 670 }} className="c7nagile-form">
+            <Form layout="vertical" className="c7nagile-form">
               <div className="c7nagile-createIssue-fields" key={newIssueTypeCode}>
                 {['sub_task', 'sub_bug'].includes(mode) && (
                   <FormItem>

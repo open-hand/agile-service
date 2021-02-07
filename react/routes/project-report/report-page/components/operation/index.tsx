@@ -17,7 +17,7 @@ interface Props {
 }
 const Operation: React.FC<Props> = () => {
   const {
-    store, baseInfoRef, edit,
+    store, baseInfoRef, edit, refresh,
   } = useProjectReportContext();
   const [exporting, setExporting] = useState(false);
   const [sending, setSending] = useState(false);
@@ -33,6 +33,7 @@ const Operation: React.FC<Props> = () => {
           reportUnitList: toJS(store.blockList.map((block) => omit(block, 'key'))),
         } as IProjectReportUpdate;
         await projectReportApi.update(store?.baseInfo?.id as string, data);
+        refresh();
       } else {
         const data: IProjectReportCreate = {
           ...baseInfo,
@@ -40,10 +41,10 @@ const Operation: React.FC<Props> = () => {
           reportUnitList: toJS(store.blockList.map((block) => omit(block, 'key'))),
         } as IProjectReportCreate;
         await projectReportApi.create(data);
+        to('/agile/project-report');
       }
-      to('/agile/project-report');
     }
-  }, [baseInfoRef, edit, store.baseInfo?.id, store.baseInfo?.objectVersionNumber, store.blockList]);
+  }, [baseInfoRef, edit, refresh, store.baseInfo?.id, store.baseInfo?.objectVersionNumber, store.blockList]);
   const handlePreview = useCallback(() => {
     window.open(`/#${linkUrl(`/agile/project-report/preview/${store.baseInfo?.id}`, {
       type: 'project',
@@ -87,7 +88,7 @@ const Operation: React.FC<Props> = () => {
     <div
       className={styles.bar}
     >
-      <Button funcType={'raised' as FuncType} color={'blue' as ButtonColor} onClick={handleSubmit}>保存</Button>
+      <Button funcType={'raised' as FuncType} color={'blue' as ButtonColor} onClick={handleSubmit}>{edit ? '保存' : '创建'}</Button>
       {edit && (
         <>
           <Button funcType={'raised' as FuncType} onClick={handlePreview}>预览</Button>

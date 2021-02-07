@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -314,7 +315,7 @@ public class StatusServiceImpl implements StatusService {
         }
         List<Long> statusIds = content.stream().map(ProjectStatusVO::getId).collect(Collectors.toList());
         // 查询状态在当前项目的状态机的使用情况
-        String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";
+        String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(),ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
         ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
         StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
         List<IssueCountDTO> countDTOS = nodeDeployMapper.countIssueTypeByStatusIds(projectVO.getOrganizationId(),stateMachineSchemeVO.getId(),statusIds,applyType);

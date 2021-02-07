@@ -238,7 +238,7 @@ const PieChart: React.FC<PieChartProps> = ({
         className={styles.pie_chart}
       >
         <div style={{
-          position: 'relative',
+          position: 'relative', flex: 1,
         }}
         >
           <ReactEcharts
@@ -260,26 +260,25 @@ const PieChart: React.FC<PieChartProps> = ({
 
         <div className={styles.pie_legend}>
           <p className={styles.pie_legend_title}>数据统计</p>
-          <table>
+          <table style={{ tableLayout: 'fixed', width: '100%' }}>
             <thead>
               <tr>
-                <td style={{ width: '280px' }}>{currentType.title}</td>
-                <td style={{ width: '150px' }}>问题</td>
+                <td>{currentType.title}</td>
+                <td>问题</td>
                 <td style={{ paddingRight: 35 }}>百分比</td>
               </tr>
             </thead>
-          </table>
-          <table className={styles.pie_legend_tbody}>
-            {
+            <tbody className={styles.pie_legend_tbody}>
+              {
               data.map((item, index) => (
                 <tr>
-                  <td style={{ width: '280px', display: 'flex', alignItems: 'center' }}>
+                  <td style={{ display: 'flex', alignItems: 'center' }}>
                     <div className={styles.pie_legend_icon} style={{ background: colors[index] }} />
                     <Tooltip title={item && item.name}>
                       <div className={styles.pie_legend_text}>{item.name ? (item.realName || item.name) : '未分配'}</div>
                     </Tooltip>
                   </td>
-                  <td style={{ width: '150px' }}>
+                  <td>
                     {link ? (
                       <span
                         style={{
@@ -293,10 +292,11 @@ const PieChart: React.FC<PieChartProps> = ({
                       </span>
                     ) : item.value}
                   </td>
-                  <td style={{ width: '150px', paddingRight: 15 }}>{`${(item.percent).toFixed(2)}%`}</td>
+                  <td style={{ paddingRight: 15 }}>{`${(item.percent).toFixed(2)}%`}</td>
                 </tr>
               ))
             }
+            </tbody>
           </table>
         </div>
       </div>

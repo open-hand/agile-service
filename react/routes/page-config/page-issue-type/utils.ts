@@ -17,19 +17,19 @@ const fieldTextValueConfig = {
   backlogClassification: { optionKey: 'id', textKey: 'name' },
 };
 function transformDefaultValue({
-  fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey: propsOptionKey = 'id', textKey: propsTextKey = 'value', fieldCode,
-}: { fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | Array<User> | null, optionKey?: 'tempKey' | 'id' | string, textKey?: 'value' | string, fieldCode?: string }) {
+  fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey: propsOptionKey = 'id', textKey: propsTextKey = 'value', fieldCode, extraConfig,
+}: { fieldType: string, defaultValue: any, extraConfig?: boolean, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | Array<User> | null, optionKey?: 'tempKey' | 'id' | string, textKey?: 'value' | string, fieldCode?: string }) {
   if (!defaultValue && !defaultValueObj) {
     return defaultValue || '';
   }
   const { optionKey = propsOptionKey, textKey = propsTextKey } = fieldTextValueConfig[fieldCode as keyof typeof fieldTextValueConfig] || {};
   switch (fieldType) {
     case 'datetime':
-      return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+      return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
     case 'time':
-      return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
+      return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
     case 'date':
-      return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
+      return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
     case 'multiple':
     case 'checkbox':
     case 'single':
@@ -42,7 +42,7 @@ function transformDefaultValue({
       return realName || defaultValue;
     }
     case 'multiMember': {
-      return String(Array.isArray(fieldOptions) ? (fieldOptions as User[]).map((item) => item.realName) : (defaultValueObj?.realName || ''));
+      return String(Array.isArray(fieldOptions) && Array.isArray(defaultValue) ? (fieldOptions as User[]).filter((item) => defaultValue.some((d) => d === item.id)).map((item) => item.realName) : (defaultValueObj?.realName || ''));
     }
     default:
       return defaultValue;

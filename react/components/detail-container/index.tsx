@@ -78,6 +78,7 @@ interface DetailContainerProps {
   fullPage?: boolean
 }
 const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ...props }) => {
+  const resizeRef = useRef();
   const element = visible ? (
     <Container>{children}</Container>
   ) : null;
@@ -85,6 +86,7 @@ const DetailContainer: React.FC<DetailContainerProps> = ({ children, visible, ..
     <DetailContainerContext.Provider value={{
       topAnnouncementHeight: HeaderStore.announcementClosed ? 0 : 50,
       outside: false,
+      resizeRef,
       ...props,
     }}
     >

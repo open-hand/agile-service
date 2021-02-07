@@ -2,15 +2,21 @@
 import React, { Component } from 'react';
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import {
-  Modal, Button, Progress, Divider,
+  Button, Progress, Divider,
 } from 'choerodon-ui';
 import { observer } from 'mobx-react';
-import { Button as ButtonPro } from 'choerodon-ui/pro';
+import { Modal } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import './ImportIssue.less';
 import { issueApi } from '@/api';
 import { getApplyType } from '@/utils/common';
+import {
+  includes, isEqual, uniq, map,
+} from 'lodash';
 import ImportFields from './ImportFields';
+import TemplateSelect from '../template-select';
+import openSaveTemplate from '../template-select/components/save/SaveTemplate';
+import SaveTemplateBtn, { transformTemplateJson } from './SaveTemplateBtn';
 
 const ImportIssueForm = (formProps) => {
   const { title, children, bottom } = formProps;
@@ -26,14 +32,17 @@ class ImportIssue extends Component {
   constructor(props) {
     super(props);
     this.importFieldsRef = React.createRef();
+    this.templateSelectRef = React.createRef();
   }
 
   state = {
-    visible: false,
     wsData: null,
     historyId: false,
     ovn: false,
     latestInfo: false,
+    // eslint-disable-next-line react/no-unused-state
+    reRender: false,
+    templateIsExist: false,
   };
 
   loadLatestImport = () => {
@@ -48,20 +57,17 @@ class ImportIssue extends Component {
     });
   };
 
-  open = () => {
-    this.setState({
-      visible: true,
-    });
+  componentDidMount() {
     this.loadLatestImport();
-  };
+  }
 
-  onCancel = () => {
+  componentWillUnmount() {
     const { historyId, ovn } = this.state;
     if (historyId) {
       issueApi.cancelImport(historyId, ovn);
     }
     this.finish();
-  };
+  }
 
   exportExcel = () => {
     const importFieldsData = { systemFields: [], customFields: [] };
@@ -133,13 +139,10 @@ class ImportIssue extends Component {
       onFinish();
     }
     this.setState({
-      visible: false,
       wsData: null,
       historyId: false,
     });
   };
-
-  renderFooter = () => <ButtonPro color="primary" funcType="raised" onClick={this.finish}>关闭</ButtonPro>;
 
   renderProgress = () => {
     const { wsData } = this.state;
@@ -237,27 +240,151 @@ class ImportIssue extends Component {
     );
   };
 
-  renderForm = () => {
-    const { uploading, latestInfo, wsData } = this.state;
+  checkTemplateExist = (value) => {
+    const templateList = this.templateSelectRef?.current?.templateList || [];
+    const importFieldsData = { systemFields: [], customFields: [] };
+    const allFields = this.importFieldsRef.current?.allFields || [];
+    const fields = uniq([...(value || []), ...(this.importFieldsRef.current?.requiredFields || [])]);
+    importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system)).sort();
+    importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system)).sort();
+
+    for (let i = 0; i < templateList.length; i += 1) {
+      if (isEqual(transformTemplateJson(templateList[i].templateJson), importFieldsData)) {
+        this.setState({
+          templateIsExist: true,
+        });
+        return;
+      }
+    }
+    this.setState({
+      templateIsExist: false,
+    });
+  };
+
+  selectTemplateOk = (fieldCodes) => {
+    const newFields = Array.isArray(fieldCodes) ? fieldCodes : [...(fieldCodes.systemFields || []), ...(fieldCodes.customFields || [])];
+    this.importFieldsRef.current?.chooseDataSet?.current?.set('fields', [...newFields]);
+    this.checkTemplateExist(newFields);
+  };
+
+  handleSaveTemplate = () => {
+    const importFieldsData = { systemFields: [], customFields: [] };
+    const allFields = this.importFieldsRef.current?.allFields || [];
+    const fields = this.importFieldsRef.current?.fields || [];
+    importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system));
+    importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system));
+    openSaveTemplate({ action: this.props.action, onOk: this.templateSelectRef.current?.onOk, fieldCodes: JSON.stringify(importFieldsData) });
+  };
+
+  handleSetReRender = () => {
+    this.setState({
+      // eslint-disable-next-line react/no-unused-state
+      reRender: (reRander) => !reRander,
+    });
+  }
+
+  handleCheckBoxChangeOk = (value) => {
+    const templateList = this.templateSelectRef?.current?.templateList || [];
+    const importFieldsData = { systemFields: [], customFields: [] };
+    const allFields = this.importFieldsRef.current?.allFields || [];
+    const fields = uniq([...(value || []), ...(this.importFieldsRef.current?.requiredFields || [])]).filter((code) => map(allFields, 'code').includes(code));
+
+    importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system)).sort();
+    importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system)).sort();
+
+    if (!fields.length) {
+      this.setState({
+        templateIsExist: true,
+      });
+      return;
+    }
+    for (let i = 0; i < templateList.length; i += 1) {
+      if (isEqual(transformTemplateJson(templateList[i].templateJson), importFieldsData)) {
+        this.setState({
+          templateIsExist: true,
+        });
+        this.templateSelectRef?.current?.setTemplate(templateList[i]);
+        return;
+      }
+    }
+    this.setState({
+      templateIsExist: false,
+    });
+    this.templateSelectRef?.current?.setTemplate(undefined);
+  };
+
+  render() {
+    const {
+      uploading, latestInfo, wsData, templateIsExist,
+    } = this.state;
+    const { action } = this.props;
     const {
       successCount, failCount, fileUrl, id,
     } = latestInfo;
+
+    const allFields = this.importFieldsRef.current?.allFields || [];
+    const requiredFields = this.importFieldsRef.current?.requiredFields || [];
+
     return (
       <div>
-        <ImportIssueForm
-          title="下载模板"
-          bottom={(
-            <Button
-              type="primary"
-              onClick={() => this.exportExcel()}
-              icon="get_app"
+        {
+          action && (
+          <>
+            <ImportIssueForm
+              title="选择常用模板"
+              bottom={null}
             >
-              下载模板
-            </Button>
+              <TemplateSelect
+                templateSelectRef={this.templateSelectRef}
+                action={action}
+                checkOptions={allFields.map((item) => ({
+                  label: item.title,
+                  value: item.code,
+                  system: item.system,
+                  checkBoxProps: includes(requiredFields, item.code) ? {
+                    disabled: includes(requiredFields, item.code),
+                    defaultChecked: includes(requiredFields, item.code),
+                    name: 'required-option',
+                  } : undefined,
+                }))}
+                selectTemplateOk={this.selectTemplateOk}
+                transformExportFieldCodes={(data) => data}
+                reverseTransformExportFieldCodes={(data) => data}
+                defaultInitCodes={requiredFields}
+              />
+            </ImportIssueForm>
+            <Divider />
+          </>
+          )
+        }
+        <ImportIssueForm
+          title="选择模板字段"
+          bottom={(
+            <>
+              <Button
+                type="primary"
+                onClick={() => this.exportExcel()}
+                icon="get_app"
+                className="c7n-importIssue-btn"
+              >
+                下载模板
+              </Button>
+              {
+                action && (
+                <SaveTemplateBtn
+                  action={action}
+                  importFieldsRef={this.importFieldsRef}
+                  templateSelectRef={this.templateSelectRef}
+                  checkBoxChangeOk={this.handleCheckBoxChangeOk}
+                  templateIsExist={templateIsExist}
+                />
+                )
+              }
+            </>
           )}
         >
           您必须使用模板文件，录入问题信息。
-          <ImportFields importFieldsRef={this.importFieldsRef} />
+          <ImportFields importFieldsRef={this.importFieldsRef} setReRender={this.handleSetReRender} checkBoxChangeOk={this.handleCheckBoxChangeOk} />
         </ImportIssueForm>
         <Divider />
         <ImportIssueForm
@@ -268,6 +395,7 @@ class ImportIssue extends Component {
               type="primary"
               onClick={() => this.importExcel()}
               icon="archive"
+              className="c7n-importIssue-btn"
             >
               导入问题
             </Button>
@@ -305,26 +433,25 @@ class ImportIssue extends Component {
         </ImportIssueForm>
       </div>
     );
-  };
-
-  render() {
-    const {
-      visible,
-    } = this.state;
-    return (
-      <Modal.Sidebar
-        className="c7n-importIssue"
-        title="导入问题"
-        width={380}
-        visible={visible}
-        onCancel={this.onCancel}
-        footer={this.renderFooter()}
-        destroyOnClose
-      >
-        {this.renderForm()}
-      </Modal.Sidebar>
-    );
   }
 }
 
-export default observer(ImportIssue);
+const ObserverImportIssue = observer(ImportIssue);
+
+const handleOpenImport = (props) => {
+  Modal.open({
+    drawer: true,
+    className: 'c7n-importIssue',
+    maskClosable: false,
+    key: Modal.key(),
+    title: '导入问题',
+    style: {
+      width: 380,
+    },
+    okText: '关闭',
+    footer: (okBtn) => okBtn,
+    children: <ObserverImportIssue {...props} />,
+  });
+};
+
+export default handleOpenImport;

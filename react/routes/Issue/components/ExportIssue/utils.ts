@@ -77,7 +77,7 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
   };
 }
 
-const getExportFieldCodes = (data: Array<any>) => {
+const getExportFieldCodes = (data: Array<any>): string[] => {
   const fieldTransform = {
     issueNum: 'issueNum',
     issueId: 'summary',
@@ -102,6 +102,39 @@ const getExportFieldCodes = (data: Array<any>) => {
     label: 'labelName',
     storyPoints: 'storyPoints',
     component: 'componentName',
+  };
+  // @ts-ignore
+  return data.map((code: string) => fieldTransform[code] || code);
+};
+
+const getReverseExportFieldCodes = (data: Array<any>) => {
+  const fieldTransform = {
+    issueNum: 'issueNum',
+    summary: 'issueId',
+    //  "description":
+    typeName: 'issueTypeId',
+    //  "projectName":
+    assigneeName: 'assigneeId',
+    // "assigneeRealName":
+    reporterName: 'reporterId',
+    //  "reporterRealName":
+    //   "resolution":
+    statusName: 'statusId',
+    sprintName: 'issueSprintVOS',
+
+    // "creationDate":
+    lastUpdateDate: 'lastUpdateDate',
+
+    priorityName: 'priorityId',
+    //  "subTask":
+    //  "remainingTime":
+    fixVersionName: 'fixVersion',
+    influenceVersionName: 'influenceVersion',
+
+    epicName: 'epic',
+    labelName: 'label',
+    storyPoints: 'storyPoints',
+    componentName: 'component',
   };
   // @ts-ignore
   return data.map((code: string) => fieldTransform[code] || code);
@@ -165,5 +198,5 @@ function getFilterFormSystemFields(): FieldProps[] {
   }]);
 }
 export {
-  getExportFieldCodes, getFilterFormSystemFields, transformSystemFilter as getTransformSystemFilter,
+  getExportFieldCodes, getReverseExportFieldCodes, getFilterFormSystemFields, transformSystemFilter as getTransformSystemFilter,
 };
