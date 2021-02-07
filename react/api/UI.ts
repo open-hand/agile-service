@@ -31,7 +31,7 @@ class UiApi extends Api<UiApi> {
       method: 'get',
       url: `${this.outPrefix}/related_static_file/${issueId}`,
       params: {
-        projectId: this.projectId,
+        project_id: this.projectId,
         organizationId: this.orgId,
       },
     }) : this.request({

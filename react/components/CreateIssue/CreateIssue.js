@@ -264,9 +264,6 @@ class CreateIssue extends Component {
               [name]: field.defaultValueObjs?.map((c) => c.labelName),
             });
           } else {
-            if (field.fieldCode === 'epic') {
-              console.log('field.', field);
-            }
             Object.assign(result, {
               [name]: this.transformValue(field.fieldType, field.defaultValue),
             });
