@@ -84,7 +84,7 @@ class VersionItem extends Component {
           } else {
             const verisonData = {
               objectVersionNumber,
-              projectId: parseInt(AppState.currentMenuType.id, 10),
+              projectId: AppState.currentMenuType.id,
               versionId,
               name: value,
             };
@@ -126,7 +126,7 @@ class VersionItem extends Component {
     const { item: { objectVersionNumber, versionId } } = this.props;
     const req = {
       objectVersionNumber,
-      projectId: parseInt(AppState.currentMenuType.id, 10),
+      projectId: AppState.currentMenuType.id,
       versionId,
       [type]: date ? `${date} 00:00:00` : null,
     };
