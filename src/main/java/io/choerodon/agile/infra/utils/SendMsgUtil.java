@@ -383,7 +383,7 @@ public class SendMsgUtil {
             url = getFeatureUrl(projectVO);
         } else {
             issueType = "问题";
-            url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId());
+            url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         }
 
         String summary = String.join("-", issueVO.getIssueNum(), issueVO.getSummary());
