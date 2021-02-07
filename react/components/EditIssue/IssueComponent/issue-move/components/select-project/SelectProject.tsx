@@ -16,41 +16,39 @@ interface Props {
   issue: IssueWithSubIssueVOList
 }
 
-const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) => (
-  <div className={styles.selectProject}>
-    <div className={styles.tip}>
-      <Icon type="report" />
-      <p className={styles.tipText}>
-        由于目标项目与源项目的字段设置不同，在不同项目之间移动问题项，您可能会丢失部分数据信息。即使您移回源项目，也无法恢复这些数据。
-      </p>
+const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) => {
+  console.log(issueTypeDataSet.toData());
+  const hasSubIssue = issue.subIssueVOList?.length > 0;
+  return (
+    <div className={styles.selectProject}>
+      <div className={styles.tip}>
+        <Icon type="report" />
+        <p className={styles.tipText}>
+          由于目标项目与源项目的字段设置不同，在不同项目之间移动问题项，您可能会丢失部分数据信息。即使您移回源项目，也无法恢复这些数据。
+        </p>
+      </div>
+      <div className={styles.form}>
+        <div className={styles.formTip}>请选择目标项目和问题类型：</div>
+        <Form dataSet={dataSet}>
+          <SelectTargetProject
+            name="targetProjectId"
+            textField="name"
+            valueField="id"
+            request={() => moveIssueApi.getProjectListMoveTo(issue.typeCode as string)}
+            afterLoad={(data) => {
+              store.setMoveToProjectList(data);
+            }}
+          />
+          <Select
+            name="issueType"
+            optionsFilter={hasSubIssue ? (record) => record.get('typeCode') === 'story' || record.get('typeCode') === 'task'
+              : (record) => record.get('typeCode') !== 'sub_task'}
+          />
+          {hasSubIssue && <Select name="subTaskIssueTypeId" />}
+        </Form>
+      </div>
     </div>
-    <div className={styles.form}>
-      <div className={styles.formTip}>请选择目标项目和问题类型：</div>
-      <Form dataSet={dataSet}>
-        <SelectTargetProject
-          name="targetProjectId"
-          textField="name"
-          valueField="id"
-          request={() => moveIssueApi.getProjectListMoveTo(issue.typeCode as string)}
-          afterLoad={(data) => {
-            store.setMoveToProjectList(data);
-          }}
-        />
-        <Select name="issueType">
-          {
-            issueTypeDataSet.toData().map((issueType: IIssueType) => (
-              issueType.typeCode && (
-                <TypeTag
-                  data={issueType}
-                  showName
-                />
-              )
-            ))
-          }
-        </Select>
-      </Form>
-    </div>
-  </div>
-);
+  );
+};
 
 export default observer(SelectProject);

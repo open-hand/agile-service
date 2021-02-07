@@ -38,7 +38,7 @@ const { Step } = Steps;
 
 interface Props {
   issue: IssueWithSubIssueVOList,
-  modal?:IModalProps
+  modal?: IModalProps
   fieldsWithValue: IFieldWithValue[]
   onMoveIssue: () => void,
   loseItems: ILoseItems,
@@ -99,6 +99,15 @@ const IssueMove: React.FC<Props> = ({
         dynamicProps: {
           disabled: ({ record }) => issue.typeCode === 'feature' || !record.get('targetProjectId'),
         },
+      }, {
+        name: 'subTaskIssueTypeId',
+        textField: 'name',
+        valueField: 'id',
+        label: '选择子任务类型',
+        options: issueTypeDataSet,
+        dynamicProps: () => ({
+          required: issue.subIssueVOList?.length > 0,
+        }),
       },
     ],
     events: {
@@ -115,7 +124,7 @@ const IssueMove: React.FC<Props> = ({
               targetIsInProgram = Boolean(await commonApi.getProjectsInProgram(value));
             }
             const issueTypes: IIssueType[] = await issueTypeApi.loadAllWithStateMachineId(targetIsProgram ? 'program' : 'agile', value);
-            const excludeTypeCode: string[] = ['sub_task'];
+            const excludeTypeCode: string[] = [];
             if (!targetIsProgram) {
               excludeTypeCode.push('feature');
               if (targetIsInProgram) {
@@ -126,7 +135,6 @@ const IssueMove: React.FC<Props> = ({
               }
               if (issue.subIssueVOList && issue.subIssueVOList.length) {
                 excludeTypeCode.push('bug');
-                store.setSubTaskTypeId((issueTypes || []).find((item: IIssueType) => item.typeCode === 'sub_task')?.id);
               }
             } else {
               setTargetProjectType('program');
@@ -141,10 +149,10 @@ const IssueMove: React.FC<Props> = ({
             moveDataSet.current.set('issueType', undefined);
           }
         }
-        if (name === 'targetProjectId' || name === 'issueType') {
-          resetData(moveDataSet, ['targetProjectId', 'issueType']); // 改变项目或者问题类型应该重置
+        if (name === 'targetProjectId' || name === 'issueType' || name === 'subTaskIssueTypeId') {
+          resetData(moveDataSet, ['targetProjectId', 'issueType', 'subTaskIssueTypeId']); // 改变项目或者问题类型应该重置
 
-          Promise.all([moveDataSet.current?.getField('targetProjectId')?.checkValidity(), moveDataSet.current?.getField('issueType')?.checkValidity()]).then((validateRes) => {
+          Promise.all([moveDataSet.current?.getField('targetProjectId')?.checkValidity(), moveDataSet.current?.getField('issueType')?.checkValidity(), moveDataSet.current?.getField('subTaskIssueTypeId')?.checkValidity()]).then((validateRes) => {
             setsStep1NextDisabled(!validateRes.every((validate) => !!validate));
           });
         }
@@ -156,6 +164,9 @@ const IssueMove: React.FC<Props> = ({
         if (name !== 'targetProjectId' && name !== 'issueType') {
           const validate = await moveDataSet.validate();
           setSubmitBtnDisable(!validate);
+        }
+        if (name === 'subTaskIssueTypeId') {
+          store.setSubTaskTypeId(value);
         }
         setUpdateCount((count) => count + 1);
       },
@@ -181,6 +192,7 @@ const IssueMove: React.FC<Props> = ({
 
   const { selfFields, subTaskFields } = store;
   const targetTypeId = dataSet.current?.get('issueType');
+  const subTaskIssueTypeId = dataSet.current?.get('subTaskIssueTypeId');
   const targetProjectId = dataSet.current?.get('targetProjectId');
 
   const handleSubmit = useCallback(() => {
@@ -222,6 +234,7 @@ const IssueMove: React.FC<Props> = ({
                 if (currentSubIssueItemIndex === -1) {
                   submitData.subIssues.push({
                     issueId: kIssueId,
+                    issueTypeId: subTaskIssueTypeId,
                     ...fieldAndValue,
                   });
                 } else {
@@ -257,6 +270,7 @@ const IssueMove: React.FC<Props> = ({
             if (currentSubIssueItemIndex === -1) {
               submitData.subIssues.push({
                 issueId: kIssueId,
+                issueTypeId: subTaskIssueTypeId,
                 customFields: [
                   {
                     fieldId: fieldInfo.fieldId,
@@ -295,9 +309,10 @@ const IssueMove: React.FC<Props> = ({
       Choerodon.prompt('移动失败');
     });
     return false;
-  }, [dataMap, dataSet, issue.issueId, modal, onMoveIssue, selfFields, subTaskFields, targetProjectId, targetTypeId]);
+  }, [dataMap, dataSet, issue.issueId, modal, onMoveIssue, selfFields, subTaskFields, subTaskIssueTypeId, targetProjectId, targetTypeId]);
 
   const targetIssueType = issueTypeDataSet.toData().find((item: IIssueType) => item.id === targetTypeId) as IIssueType;
+  const targetSubTaskType = issueTypeDataSet.toData().find((item: IIssueType) => item.id === subTaskIssueTypeId) as IIssueType;
   return (
     <div className={styles.issueMove}>
       <Steps current={currentStep - 1}>
@@ -310,7 +325,17 @@ const IssueMove: React.FC<Props> = ({
       </Steps>
       <div className={styles.step_content}>
         {currentStep === 1 && <SelectProject issue={issue} dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} />}
-        {currentStep === 2 && <Confirm issue={issue} dataSet={dataSet} fieldsWithValue={fieldsWithValue} targetProjectType={targetProjectType} targetIssueType={targetIssueType} loseItems={loseItems} />}
+        {currentStep === 2 && (
+        <Confirm
+          issue={issue}
+          dataSet={dataSet}
+          fieldsWithValue={fieldsWithValue}
+          targetProjectType={targetProjectType}
+          targetIssueType={targetIssueType}
+          targetSubTaskType={targetSubTaskType}
+          loseItems={loseItems}
+        />
+        )}
       </div>
       <div className={styles.steps_action}>
         {currentStep === 1 && (
@@ -345,7 +370,7 @@ const ObserverIssueMove = observer(IssueMove);
 
 const openIssueMove = ({
   issue, customFields, onMoveIssue, loseItems,
-}: { issue: IssueWithSubIssueVOList, customFields: IFieldWithValue[], onMoveIssue: () => void, loseItems: ILoseItems}) => {
+}: { issue: IssueWithSubIssueVOList, customFields: IFieldWithValue[], onMoveIssue: () => void, loseItems: ILoseItems }) => {
   Modal.open({
     key: 'issueMoveModal',
     drawer: true,
