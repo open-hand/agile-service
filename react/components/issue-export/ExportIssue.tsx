@@ -265,7 +265,7 @@ const ExportIssue: React.FC = () => {
                 defaultInitCodes={['issueTypeId', 'issueNum', 'issueId']}
               />
             </FormPart>
-            <Divider className={`${prefixCls}-horizontal`} />
+            {/* <Divider className={`${prefixCls}-horizontal`} /> */}
           </>
         )
       }
