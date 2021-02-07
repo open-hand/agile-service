@@ -43,6 +43,7 @@ public class SendMsgUtil {
     private static final String URL_TEMPLATE5 = "&paramOpenIssueId=";
     private static final String URL_TEMPLATE6 = "&organizationId=";
     private static final String URL_TEMPLATE7 = "&orgId=";
+    private static final String URL_TEMPLATE8 = "&detailTab=comment";
     private static final String ERROR_PROJECT_NOTEXIST = "error.project.notExist";
     private static final String SUB_TASK = "sub_task";
     private static final String STATUS_ID = "statusId";
@@ -343,7 +344,7 @@ public class SendMsgUtil {
             url = getFeatureUrl(projectVO);
         } else {
             issueType = "问题";
-            url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId());
+            url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         }
         //设置动作与发送人
         List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUE_COMMENT", issueVO);
