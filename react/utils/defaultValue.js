@@ -5,6 +5,7 @@ const getDefaultValueMap = (fields) => {
     ['component', 'componentIssueRel'],
     ['label', 'issueLabel'],
     ['fixVersion', 'fixVersionIssueRel'],
+    ['influenceVersion', 'influenceVersion'],
     ['sprint', 'sprintId'],
     ['epic', 'epicId'],
   ]);

@@ -6,7 +6,7 @@ import { Choerodon } from '@choerodon/boot';
 import {
   Button, Icon, Dropdown, Input, Menu, Form, Tooltip,
 } from 'choerodon-ui';
-import { debounce } from 'lodash';
+import { debounce, isEmpty } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
@@ -59,7 +59,7 @@ class QuickCreateIssue extends Component {
   handleCreate = debounce(() => {
     const { currentTypeId } = this.state;
     const {
-      form, issueTypes, sprintId, epicId, versionIssueRelVOList, chosenFeatureId,
+      form, issueTypes, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId,
     } = this.props;
     form.validateFields(async (err, values) => {
       const { summary } = values;
@@ -87,12 +87,27 @@ class QuickCreateIssue extends Component {
             };
             const fields = await fieldApi.getFields(param);
             const fieldsMap = fields2Map(fields);
+            const versionIssueRelVOList = propsVersionIssueRelVOList || [];
+            const defaultVersionList = [];
+            if (!isEmpty(fieldsMap.get('influenceVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'influence')) {
+              fieldsMap.get('influenceVersion')?.defaultValue.forEach((item) => defaultVersionList.push({
+                versionId: item,
+                relationType: 'influence',
+              }));
+            }
+            if (!isEmpty(fieldsMap.get('fixVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'fix')) {
+              fieldsMap.get('fixVersion')?.defaultValue.forEach((item) => defaultVersionList.push({
+                versionId: item,
+                relationType: 'fix',
+              }));
+            }
+            versionIssueRelVOList.push(...defaultVersionList);
             const issue = {
               priorityCode: `priority-${defaultPriority.id}`,
               priorityId: defaultPriority.id,
               projectId: getProjectId(),
               programId: getProjectId(),
-              epicId: epicId || 0,
+              epicId: epicId || fieldsMap.get('epic')?.defaultValue || 0,
               summary: summary.trim(),
               issueTypeId: currentType.id,
               typeCode: currentType.typeCode,
@@ -105,7 +120,7 @@ class QuickCreateIssue extends Component {
               description: '',
               issueLinkCreateVOList: [],
               labelIssueRelVOList: fieldsMap.get('label')?.defaultValueObjs || [],
-              versionIssueRelVOList: versionIssueRelVOList || [],
+              versionIssueRelVOList,
               fixVersionIssueRel: fieldsMap.get('fixVersion')?.defaultValue || [],
               featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
               assigneeId: defaultAssignee || fieldsMap.get('assignee')?.defaultValue,
