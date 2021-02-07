@@ -10,6 +10,7 @@ import { find } from 'lodash';
 import { fieldApi } from '@/api';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { flattenObject } from '@/components/issue-search/utils';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import { IReportListBlock } from '../../store';
 import { RefProps } from '../add-modal';
 import ExportIssueContextProvider from './stores';
@@ -107,6 +108,7 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);
+  const { isInProgram } = useIsInProgram();
   return (
     <>
       <Form dataSet={formDataSet}>
@@ -129,7 +131,7 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           <Option value="fixVersion">修复的版本</Option>
           <Option value="influenceVersion">影响的版本</Option>
           <Option value="epic">史诗</Option>
-          <Option value="feature">特性</Option>
+          {isInProgram && <Option value="feature">特性</Option>}
           {fields.map((field) => (
             <Option value={field.code}>
               {field.name}
