@@ -996,15 +996,15 @@ class BacklogStore {
     Modal.confirm({
       width: 560,
       wrapClassName: 'deleteConfirm',
-      title: `删除冲刺${data.sprintName}`,
+      title: '删除冲刺',
       content: hasIssue ? (
         <div>
-          <p style={{ marginBottom: 10 }}>{`确认要删除冲刺${data.sprintName}吗？删除冲刺后当前规划的问题将移动到待办事项`}</p>
+          <p style={{ marginBottom: 10 }}>{`确认要删除冲刺“${data.sprintName}”吗？删除冲刺后当前规划的问题将移动到待办事项。`}</p>
           {defaultValuePrompt && <p style={{ marginBottom: 10 }}>{defaultValuePrompt}</p>}
         </div>
       ) : (
         <div>
-          <p style={{ marginBottom: 10 }}>{`确认要删除冲刺${data.sprintName}吗？`}</p>
+          <p style={{ marginBottom: 10 }}>{`确认要删除冲刺“${data.sprintName}”吗？`}</p>
           {defaultValuePrompt && <p style={{ marginBottom: 10 }}>{defaultValuePrompt}</p>}
         </div>
       ),
