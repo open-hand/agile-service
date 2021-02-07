@@ -238,6 +238,7 @@ class CreateIssue extends Component {
       ['reporter', 'reporterId'],
       ['component', 'componentIssueRel'],
       ['summary', 'summary'],
+      ['influenceVersion', 'influenceVersion'],
       ['label', 'issueLabel'],
       ['fixVersion', 'fixVersionIssueRel'],
       ['sprint', 'sprintId'],
@@ -263,6 +264,9 @@ class CreateIssue extends Component {
               [name]: field.defaultValueObjs?.map((c) => c.labelName),
             });
           } else {
+            if (field.fieldCode === 'epic') {
+              console.log('field.', field);
+            }
             Object.assign(result, {
               [name]: this.transformValue(field.fieldType, field.defaultValue),
             });
@@ -341,6 +345,7 @@ class CreateIssue extends Component {
       if (!err) {
         const {
           typeId,
+          reporterId,
           summary,
           description,
           storyPoints,
@@ -358,6 +363,7 @@ class CreateIssue extends Component {
           priorityId,
           issueLabel,
           fixVersionIssueRel,
+          influenceVersion,
           linkTypes,
           linkIssues,
           keys,
@@ -418,6 +424,7 @@ class CreateIssue extends Component {
           versionId,
           relationType: 'fix',
         }));
+        influenceVersion && fixVersionIssueRelVOList.push(...influenceVersion.map((item) => ({ versionId: item, relationType: 'influence' })));
         const issueLinkCreateVOList = this.getIssueLinks(keys, linkTypes, linkIssues);
 
         this.setState({ createLoading: true });
@@ -440,6 +447,7 @@ class CreateIssue extends Component {
             epicName,
             parentIssueId: subTaskParent || parentIssueId || 0, // 子任务
             relateIssueId: subBugParent || relateIssueId || 0, // 子bug
+            reporterId,
             assigneeId: assigneedId,
             labelIssueRelVOList,
             versionIssueRelVOList: fixVersionIssueRelVOList,
@@ -808,6 +816,29 @@ class CreateIssue extends Component {
             )}
           </FormItem>
         );
+      case 'influenceVersion':
+        return (
+          <FormItem label="影响的版本">
+            {getFieldDecorator('influenceVersion', {
+              rules: [{ transform: (value) => (value ? value.toString() : value) },
+                { required: field.required, message: '请选择修复的版本' }],
+            })(
+              <SelectFocusLoad
+                label="影响的版本"
+                mode="multiple"
+                loadWhenMount
+                type="version"
+                afterLoad={() => {
+                  if (this.props.chosenVersion) {
+                    form.setFieldsValue({
+                      influenceVersion: [this.props.chosenVersion],
+                    });
+                  }
+                }}
+              />,
+            )}
+          </FormItem>
+        );
       case 'fixVersion':
         return (
           <FormItem label="修复的版本">
@@ -850,9 +881,11 @@ class CreateIssue extends Component {
                             type="epic"
                             loadWhenMount
                             afterLoad={() => {
+                              const currentEpicId = form.getFieldValue('epicId');
                               form.setFieldsValue({
+
                                 // eslint-disable-next-line react/destructuring-assignment
-                                epicId: this.props.epicId,
+                                epicId: currentEpicId || this.props.epicId,
                               });
                             }}
                           />,
