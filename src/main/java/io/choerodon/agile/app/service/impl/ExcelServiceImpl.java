@@ -588,7 +588,7 @@ public class ExcelServiceImpl implements ExcelService {
             if (!FEATURE.equals(typeCode)) {
                 values.add(typeName);
             }
-            if ("bug".equals(typeCode)) {
+            if ("bug".equals(typeCode) && "system".equals(i.getSource())) {
                 values.add(SUB_BUG_CN);
             }
         });
