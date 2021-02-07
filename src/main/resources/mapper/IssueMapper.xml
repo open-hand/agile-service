@@ -1016,6 +1016,15 @@
                 #{evm}
             </foreach>
         </if>
+        <where>
+            <if test='searchVO.otherArgs.excludeIssueIds != null and searchVO.otherArgs.excludeIssueIds.size > 0'>
+                AND ai.issue_id not in
+                <foreach collection="searchVO.otherArgs.excludeIssueIds" item="issueId" open="(" separator=","
+                         close=")">
+                    #{issueId}
+                </foreach>
+            </if>
+        </where>
     </sql>
 
     <sql id="otherArgsSql2">
