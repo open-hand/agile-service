@@ -6,6 +6,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author shinan.chen
@@ -52,6 +53,17 @@ public class IssueTypeDTO extends AuditDomain {
 
     @Transient
     private StatusMachineSchemeConfigDTO stateMachineSchemeConfig;
+
+    @Transient
+    private List<IssueTypeExtendDTO> issueTypeExtends;
+
+    public List<IssueTypeExtendDTO> getIssueTypeExtends() {
+        return issueTypeExtends;
+    }
+
+    public void setIssueTypeExtends(List<IssueTypeExtendDTO> issueTypeExtends) {
+        this.issueTypeExtends = issueTypeExtends;
+    }
 
     public String getSource() {
         return source;

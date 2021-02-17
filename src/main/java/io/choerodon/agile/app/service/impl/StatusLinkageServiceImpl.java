@@ -7,7 +7,7 @@ import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusLinkageService;
-import io.choerodon.agile.infra.dto.IssueTypeDTO;
+import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusLinkageDTO;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
@@ -139,11 +139,29 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             issueTypeIds.add(statusLinkageVO.getIssueTypeId());
             projectIds.add(statusLinkageVO.getProjectId());
         }
-        Map<Long, String> issueTypeNameMap =
-                issueTypeMapper.selectWithAliasByIds(issueTypeIds, projectIds)
-                        .stream()
-                        .collect(Collectors.toMap(IssueTypeDTO::getId, IssueTypeDTO::getName));
-        linkageVOS.forEach(x -> x.setIssueTypeName(issueTypeNameMap.get(x.getIssueTypeId())));
+        Map<Long, Map<Long, String>> map = new HashMap<>();
+        final Long zero = 0L;
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        issueTypeMapper.selectWithAliasByIds(issueTypeIds, projectIds, organizationId)
+                .forEach(x -> {
+                    Long id = x.getId();
+                    Map<Long, String> projectIssueTypeMap = map.computeIfAbsent(id, y -> new HashMap<>());
+                    projectIssueTypeMap.put(zero, x.getName());
+                    List<IssueTypeExtendDTO> issueTypeExtends = x.getIssueTypeExtends();
+                    if (!ObjectUtils.isEmpty(issueTypeExtends)) {
+                        issueTypeExtends.forEach(y -> projectIssueTypeMap.put(y.getProjectId(), y.getName()));
+                    }
+                });
+        linkageVOS.forEach(x -> {
+            Long id = x.getIssueTypeId();
+            Map<Long, String> projectIssueTypeMap = map.get(id);
+            Long thisProjectId = x.getProjectId();
+            String name = projectIssueTypeMap.get(thisProjectId);
+            if (name == null) {
+                name = projectIssueTypeMap.get(zero);
+            }
+            x.setIssueTypeName(name);
+        });
         return linkageVOS;
     }
 

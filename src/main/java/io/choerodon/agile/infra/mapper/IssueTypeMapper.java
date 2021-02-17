@@ -80,7 +80,8 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      * @return
      */
     List<IssueTypeDTO> selectWithAliasByIds(@Param("issueTypeIds") Set<Long> issueTypeIds,
-                                            @Param("projectIds") Set<Long> projectIds);
+                                            @Param("projectIds") Set<Long> projectIds,
+                                            @Param("organizationId") Long organizationId);
 
     /**
      * 根据项目ids查询问题类型
@@ -90,4 +91,5 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      */
     List<IssueTypeVO> selectByProjectIds(@Param("organizationId") Long organizationId,
                                          @Param("projectIds") List<Long> projectIds);
+
 }

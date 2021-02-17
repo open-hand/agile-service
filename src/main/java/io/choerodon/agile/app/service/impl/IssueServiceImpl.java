@@ -2665,6 +2665,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
+    public Page<IssueListFieldKVVO> pagedQueryMyReported(Long organizationId,
+                                                         Long projectId,
+                                                         PageRequest pageRequest) {
+        WorkBenchIssueSearchVO workBenchIssueSearchVO = new WorkBenchIssueSearchVO();
+        workBenchIssueSearchVO.setType("myReported");
+        return queryBackLogIssuesByPersonal(organizationId, projectId, pageRequest, workBenchIssueSearchVO);
+    }
+
+    @Override
     public Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId,
                                                                  Long projectId,
                                                                  PageRequest pageRequest,
