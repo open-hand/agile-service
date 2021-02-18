@@ -385,4 +385,16 @@ public interface IssueService {
                                           IssueQueryVO issueQueryVO);
 
     IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum);
+
+    /**
+     * 分页查询我的报告
+     *
+     * @param organizationId
+     * @param projectId
+     * @param pageRequest
+     * @return
+     */
+    Page<IssueListFieldKVVO> pagedQueryMyReported(Long organizationId,
+                                                  Long projectId,
+                                                  PageRequest pageRequest);
 }

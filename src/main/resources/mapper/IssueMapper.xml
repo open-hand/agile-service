@@ -1251,22 +1251,27 @@
                             and fsb.user_id = #{userId}
                         )
                     </when>
-                    <otherwise>
+                    <when test="searchType == 'myBug'">
                         AND ai.type_code = 'bug'
-                        <if test="searchType == 'myBug'">
-                            AND ai.assignee_id = #{userId}
-                        </if>
-                        <if test="searchType == 'reportedBug'">
-                            AND ai.reporter_id = #{userId}
-                        </if>
+                        AND ai.assignee_id = #{userId}
                         AND ais.is_completed != 1
-                    </otherwise>
+                    </when>
+                    <when test="searchType == 'reportedBug'">
+                        AND ai.type_code = 'bug'
+                        AND ai.reporter_id = #{userId}
+                        AND ais.is_completed != 1
+                    </when>
+                    <when test="searchType == 'myReported'">
+                        AND ai.type_code in ('story','bug','task')
+                        AND (ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0)
+                        AND (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
+                        AND ai.reporter_id = #{userId}
+                    </when>
                 </choose>
-
                 AND ais.project_id = ai.project_id
                 AND ais.status_id = ai.status_id
             )
-        <if test="searchType == null or searchType == 'myStarBeacon'">
+        <if test="searchType == null or searchType == 'myStarBeacon' or searchType == 'myReported'">
         UNION ALL
             (
                 select
@@ -1369,7 +1374,7 @@
                 OR
                 (
                     <choose>
-                        <when test="searchType == null">
+                        <when test="searchType == null or searchType == 'myReported'">
                             ai.type_code IN ('sub_task','bug')
                             AND (
                                 ai.parent_issue_id in
@@ -1382,10 +1387,15 @@
                                     #{parentIssue}
                                 </foreach>
                             )
-                            AND ai.assignee_id = #{userId}
+                            <if test="searchType == null">
+                                AND ai.assignee_id = #{userId}
+                            </if>
+                            <if test="searchType == 'myReported'">
+                                AND ai.reporter_id = #{userId}
+                            </if>
                             AND ais.is_completed != 1
                         </when>
-                        <otherwise>
+                        <when test="searchType == 'myBug' or searchType == 'reportedBug'">
                             ai.type_code = 'bug'
                             and ai.relate_issue_id is not null
                             and ai.relate_issue_id != 0
@@ -1394,7 +1404,7 @@
                             <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
                                 #{parentIssue}
                             </foreach>
-                        </otherwise>
+                        </when>
                     </choose>
                 )
             )

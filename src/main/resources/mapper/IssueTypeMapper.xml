@@ -214,34 +214,56 @@
         where t1.id = #{issueTypeId}
     </select>
 
-    <select id="selectWithAliasByIds" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+    <resultMap id="issueTypeDTO" type="io.choerodon.agile.infra.dto.IssueTypeDTO">
+        <id column="id" property="id"/>
+        <result column="icon" property="icon"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="organization_id" property="organizationId"/>
+        <result column="colour" property="colour"/>
+        <result column="type_code" property="typeCode"/>
+        <result column="is_initialize" property="initialize"/>
+        <result column="project_id" property="projectId"/>
+        <result column="referenced" property="referenced"/>
+        <result column="reference_id" property="referenceId"/>
+        <result column="source" property="source"/>
+        <result column="object_version_number" property="objectVersionNumber"/>
+        <collection property="issueTypeExtends" ofType="io.choerodon.agile.infra.dto.IssueTypeExtendDTO">
+            <id column="extend_id" property="id"/>
+            <result column="extend_issue_type_id" property="issueTypeId"/>
+            <result column="extend_project_id" property="projectId"/>
+            <result column="extend_organization_id" property="organizationId"/>
+            <result column="extend_enabled" property="enabled"/>
+            <result column="extend_name" property="name"/>
+            <result column="extend_description" property="description"/>
+            <result column="extend_icon" property="icon"/>
+            <result column="extend_colour" property="colour"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectWithAliasByIds" resultMap="issueTypeDTO">
         select
-        t1.id,
-        t1.organization_id,
-        t1.object_version_number,
-        t1.created_by,
-        t1.creation_date,
-        t1.last_updated_by,
-        t1.last_update_date,
-        t1.type_code,
-        t1.project_id,
-        t1.referenced,
-        t1.source,
-        t1.reference_id,
-        t1.is_initialize as initialize,
-        ifnull(t2.enabled, 1) as enabled,
-        ifnull(t2.name, t1.name) as name,
-        ifnull(t2.description, t1.description) as description,
-        ifnull(t2.icon, t1.icon) as icon,
-        ifnull(t2.colour, t1.colour) as colour
-        from fd_issue_type t1
-        left join fd_issue_type_extend t2
-        on t1.id = t2.issue_type_id
-        and t2.project_id in
+        fit.*,
+        fite.id as extend_id,
+        fite.issue_type_id as extend_issue_type_id,
+        fite.project_id as extend_project_id,
+        fite.organization_id as extend_organization_id,
+        fite.enabled as extend_enabled,
+        fite.name as extend_name,
+        fite.description as extend_description,
+        fite.icon as extend_icon,
+        fite.colour as extend_colour
+        from fd_issue_type fit
+        left join fd_issue_type_extend fite
+        on (
+        fite.organization_id = #{organizationId}
+        and fite.project_id in
         <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
             #{projectId}
         </foreach>
-        where t1.id in
+        and fit.id = fite.issue_type_id
+        )
+        where fit.id in
         <foreach collection="issueTypeIds" item="issueTypeId" open="(" close=")" separator=",">
             #{issueTypeId}
         </foreach>
