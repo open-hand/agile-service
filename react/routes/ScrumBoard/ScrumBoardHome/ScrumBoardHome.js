@@ -438,19 +438,21 @@ class ScrumBoardHome extends Component {
           }
         </Header>
         <Breadcrumb />
-        <Content style={{
-          padding: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          borderTop: '1px solid #D8D8D8',
-          paddingTop: 16,
-        }}
+        <Content
+          className="c7n-scrumboard-content"
+          style={{
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            borderTop: '1px solid #D8D8D8',
+            paddingTop: 16,
+          }}
         >
           <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
 
           <Spin spinning={ScrumBoardStore.getSpinIf}>
-            <div className="c7n-scrumboard" style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 270px)' }}>
+            <div className="c7n-scrumboard">
               <div style={{ display: 'table', minWidth: '100%' }}>
                 <div className="c7n-scrumboard-header">
                   <StatusColumn />
@@ -468,7 +470,6 @@ class ScrumBoardHome extends Component {
                   : (
                     <div
                       className="c7n-scrumboard-content"
-                      style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 272px)' }}
                     >
                       <div className="c7n-scrumboard-container">
                         <SwimLane
@@ -488,9 +489,6 @@ class ScrumBoardHome extends Component {
             refresh={this.refresh}
           />
           <CreateIssue refresh={this.refresh} />
-          <IssueDetail
-            refresh={this.refresh}
-          />
           {this.issueSearchStore ? (
             <FilterManage
               visible={ScrumBoardStore.getFilterManageVisible}
