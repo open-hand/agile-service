@@ -438,6 +438,12 @@ class ScrumBoardStore {
   @action resetDataBeforeUnmount() {
     this.spinIf = true;
     this.swimLaneData = null;
+    this.interconnectedData = new Map();
+    this.statusColumnMap = new Map();
+    this.allDataMap = new Map();
+    this.boardData = [];
+    this.statusMap = new Map();
+    this.otherIssue = [];
     this.selectSprint = undefined;
     this.sprintNotClosedArray = [];
     this.headerData = new Map();
