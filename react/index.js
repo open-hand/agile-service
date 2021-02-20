@@ -85,6 +85,7 @@ class Agile extends React.Component {
               <Route path={`${match.url}/state-machine`} component={StateMachine} />
               <Route path={`${match.url}/project-report`} component={ProjectReport} />
               <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />
+              <Route path={`${match.url}/outside/ui-preview/:uuid`} component={UiPreview} />
               <Route path="*" component={nomatch} />
             </Switch>
             <ModalContainer />
