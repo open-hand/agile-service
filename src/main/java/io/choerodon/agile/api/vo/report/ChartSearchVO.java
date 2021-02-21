@@ -98,6 +98,12 @@ public class ChartSearchVO {
     private Long versionId;
 
     /**
+     * 统计图： 状态id(可选)
+     */
+    @Encrypt
+    private Long statusId;
+
+    /**
      * 史诗报告图: 史诗id(必选)
      * 史诗燃耗图： 史诗id(必选)
      */
@@ -340,5 +346,13 @@ public class ChartSearchVO {
 
     public void setLatitude(String latitude) {
         this.latitude = latitude;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 }
