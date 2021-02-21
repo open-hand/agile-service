@@ -17,7 +17,6 @@ interface Props {
 }
 
 const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) => {
-  console.log(issueTypeDataSet.toData());
   const hasSubIssue = issue.subIssueVOList?.length > 0;
   return (
     <div className={styles.selectProject}>
@@ -44,7 +43,12 @@ const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) =>
             optionsFilter={hasSubIssue ? (record) => record.get('typeCode') === 'story' || record.get('typeCode') === 'task'
               : (record) => record.get('typeCode') !== 'sub_task'}
           />
-          {hasSubIssue && <Select name="subTaskIssueTypeId" />}
+          {hasSubIssue && (
+            <Select
+              name="subTaskIssueTypeId"
+              optionsFilter={(record) => record.get('typeCode') === 'sub_task'}
+            />
+          )}
         </Form>
       </div>
     </div>
