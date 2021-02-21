@@ -117,7 +117,12 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         return fieldValues;
     }
 
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, fieldListName = "fieldList", idPosition = "arg")
+    @RuleNotice(
+            event = RuleNoticeEvent.ISSUE_CREATED,
+            fieldListName = "fieldList",
+            idPosition = "arg",
+            customFieldsAfterInstanceCreate = true
+    )
     @Override
     public void checkCreateCustomField(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList) {
         if (!fieldValues.isEmpty()) {
