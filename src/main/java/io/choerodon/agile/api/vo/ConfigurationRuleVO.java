@@ -47,6 +47,26 @@ public class ConfigurationRuleVO extends AuditDomain {
     @Encrypt
     private List<Long> memberFieldIds;
 
+    private List<String> receiverRoleNames;
+
+    private List<String> memberFieldNames;
+
+    public List<String> getReceiverRoleNames() {
+        return receiverRoleNames;
+    }
+
+    public void setReceiverRoleNames(List<String> receiverRoleNames) {
+        this.receiverRoleNames = receiverRoleNames;
+    }
+
+    public List<String> getMemberFieldNames() {
+        return memberFieldNames;
+    }
+
+    public void setMemberFieldNames(List<String> memberFieldNames) {
+        this.memberFieldNames = memberFieldNames;
+    }
+
     public List<Long> getReceiverRoleIds() {
         return receiverRoleIds;
     }
