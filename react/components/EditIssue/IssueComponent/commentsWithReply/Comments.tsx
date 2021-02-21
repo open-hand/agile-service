@@ -45,6 +45,7 @@ const Comments: React.FC<Props> = ({
     }
   };
 
+  const readonly = !(!disabled || (disabled && applyType === 'agile' && !outside));
   return (
     <div className={styles.comments}>
       <div className={styles.list}>
@@ -55,15 +56,21 @@ const Comments: React.FC<Props> = ({
               key={comment.commentId}
               comment={comment}
               reload={reload}
+              readonly={readonly}
             />
           ))
         }
       </div>
       {
-        (!disabled || (disabled && applyType === 'agile' && !outside)) && (
+        (!disabled || !readonly) && (
           <div className={styles.add}>
             <AddComment onSubmit={handleCreateCommit} />
           </div>
+        )
+      }
+      {
+        readonly && !comments.length && (
+          <span style={{ textAlign: 'center' }}>暂无评论</span>
         )
       }
     </div>

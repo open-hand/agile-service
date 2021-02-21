@@ -124,7 +124,7 @@ const UserHead: React.FC<UserHeadProps> = ({
                   <img src={img} alt="" style={{ width: iconSize, height: iconSize }} />
                 ) : (
                   <span style={{
-                    width: iconSize, height: iconSize, lineHeight: `${iconSize}px`, textAlign: 'center', color: '#6473c3',
+                    width: iconSize, height: iconSize, lineHeight: `${iconSize}px`, textAlign: 'center', color: '#6473c3', position: 'absolute',
                   }}
                   >
                     {getFirst(realName)}

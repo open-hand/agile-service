@@ -12,6 +12,7 @@ interface Props {
   comment: IComment
   onDelete?: Function
   reload: Function
+  readonly: boolean
 }
 
 const { AppState } = stores;
@@ -19,7 +20,7 @@ const { AppState } = stores;
 const Comment: React.FC<Props> = (props) => {
   const { store } = useContext(EditIssueContext);
   const { commentExpandMap, commentReplysMap } = store;
-  const { comment, reload } = props;
+  const { comment, reload, readonly } = props;
   const loginUserId = AppState.userInfo.id;
 
   const handleFold = useCallback(() => {
@@ -58,6 +59,7 @@ const Comment: React.FC<Props> = (props) => {
                   onUpdate={onReply}
                   parentId={comment.commentId}
                   hasPermission={hasPermission || String(comment.userId) === String(loginUserId)}
+                  readonly={readonly}
                 />
                 {
                   commentExpandMap.get(comment.commentId) && (
@@ -74,6 +76,7 @@ const Comment: React.FC<Props> = (props) => {
                             comment={item}
                             parentId={comment.commentId}
                             hasPermission={hasPermission || String(item.userId) === String(loginUserId)}
+                            readonly={readonly}
                           />
                         ))
                       }
