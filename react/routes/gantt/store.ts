@@ -6,6 +6,7 @@ import {
   observable, action,
 } from 'mobx';
 import { GanttRef, Gantt } from 'react-gantt-component';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 // 视图日视图、周视图、月视图、季视图、年视图
 export const units = [
   {
@@ -53,6 +54,7 @@ class GanttStore {
   @action
   setSprintId(sprintId: string | null) {
     this.sprintId = sprintId;
+    localPageCacheStore.setItem('gantt.search.sprint', sprintId);
   }
 
   @action
