@@ -6,8 +6,6 @@ import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.fallback.BaseFeignClientFallback;
 import io.swagger.annotations.ApiParam;
-import org.apache.ibatis.annotations.Param;
-import org.hzero.common.HZeroService;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -93,7 +91,8 @@ public interface BaseFeignClient {
     ResponseEntity<Page<UserVO>> pagingQueryUsersByRoleIdOnProjectLevel(
             @RequestParam(name = "page") int page,
             @RequestParam(name = "size") int size,
-            @RequestParam(name = "role_id") Long roleId,
+            @RequestParam(name = "role_id", required = false) Long roleId,
+            @RequestParam Boolean doPage,
             @PathVariable(name = "project_id") Long sourceId,
             @RequestBody(required = false) @Valid RoleAssignmentSearchVO roleAssignmentSearchVO);
 
@@ -192,5 +191,10 @@ public interface BaseFeignClient {
 
     @PostMapping(value = "/choerodon/v1/projects/ids")
     ResponseEntity<List<ProjectVO>> queryByIds(@RequestBody Set<Long> ids);
+
+    @GetMapping(value = "/choerodon/v1/projects/{project_id}/roles")
+    ResponseEntity<List<RoleVO>> listProjectRoles(@PathVariable("project_id") Long projectId,
+                                                  @RequestParam(name = "only_select_enable") Boolean onlySelectEnable,
+                                                  @RequestParam(name = "role_name") String roleName);
 }
 

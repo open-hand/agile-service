@@ -55,4 +55,11 @@ public @interface RuleNotice {
      * @return 默认false
      */
     boolean allFieldCheck() default false;
+
+    /**
+     * 标记问题创建后，设置自定义字段值的方法，用于处理触发器通知对象为人员自定义字段的情况
+     *
+     * @return
+     */
+    boolean customFieldsAfterInstanceCreate() default false;
 }

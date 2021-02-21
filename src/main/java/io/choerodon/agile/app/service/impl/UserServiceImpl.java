@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserVO> pagingQueryUsersByRoleIdOnProjectLevel(int page, int size, Long roleId, Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO) {
-        ResponseEntity<Page<UserVO>> users = baseFeignClient.pagingQueryUsersByRoleIdOnProjectLevel(page, size, roleId, sourceId, roleAssignmentSearchVO);
+        ResponseEntity<Page<UserVO>> users = baseFeignClient.pagingQueryUsersByRoleIdOnProjectLevel(page, size, roleId, true, sourceId, roleAssignmentSearchVO);
         return users != null ? users.getBody() : new Page<>();
     }
 
