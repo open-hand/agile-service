@@ -1099,6 +1099,7 @@ class CreateIssue extends Component {
       case 'estimatedStartTime':
         return (
           <FieldStartTime
+            style={{ display: 'block', width: 330 }}
             form={form}
             field={field || {}}
           />
@@ -1106,6 +1107,7 @@ class CreateIssue extends Component {
       case 'estimatedEndTime':
         return (
           <FieldEndTime
+            style={{ display: 'block', width: 330 }}
             form={form}
             field={field || {}}
           />
