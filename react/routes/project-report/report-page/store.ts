@@ -56,6 +56,7 @@ export type AccumulationSearchVO = {
 export type PieSearchVO = {
   sprintId?: string
   versionId?: string
+  statusId?: string
   projectId: string,
   organizationId: string,
   fieldName: IPieChartType,

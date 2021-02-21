@@ -43,9 +43,9 @@ class PieChartStore {
     return this.colors;
   }
 
-  getPieDatas = (type, sprintId, versionId) => {
+  getPieDatas = (type, sprintId, versionId, statusId) => {
     this.changePieLoading(true);
-    reportApi.loadPie(type, sprintId, versionId)
+    reportApi.loadPie(type, sprintId, versionId, statusId)
       .then((data) => {
         const len = data.length;
         if (len) {
