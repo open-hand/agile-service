@@ -41,7 +41,7 @@ const IssueDropDown = ({
             {
               subIssueVOList.length ? <p style={{ color: '#d50000' }}>{`注意：问题的${subIssueVOList.length}个子任务将被删除。`}</p> : null
             }
-            {store.promptExtraMap.get('delete.issue')}
+            {store.promptExtraNodeMap.get('delete.issue')}
           </div>
         ),
       onOk() {
@@ -128,7 +128,7 @@ const IssueDropDown = ({
             >
               删除
             </Menu.Item>
-        )}
+          )}
         >
           <Menu.Item
             key="1"
@@ -200,23 +200,23 @@ const IssueDropDown = ({
       }
       {
         (typeCode !== 'sub_task' && !parentRelateSummary) && ( // 子缺陷、子任务不能移
-        <Permission
-          service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
-          noAccessChildren={(
+          <Permission
+            service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+            noAccessChildren={(
+              <Menu.Item
+                key="move"
+                disabled={disableFeatureDeleteWhilePiDoing || (loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
+              >
+                移动
+              </Menu.Item>
+            )}
+          >
             <Menu.Item
               key="move"
-              disabled={disableFeatureDeleteWhilePiDoing || (loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
             >
               移动
             </Menu.Item>
-        )}
-        >
-          <Menu.Item
-            key="move"
-          >
-            移动
-          </Menu.Item>
-        </Permission>
+          </Permission>
         )
       }
     </Menu>
