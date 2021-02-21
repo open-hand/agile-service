@@ -6,8 +6,10 @@ import {
   PieChartProps, IPieChartType, IPieData, IDimension,
 } from '@/components/charts/pie-chart';
 import { PieSearchProps } from '@/components/charts/pie-chart/search';
-import { reportApi, sprintApi, versionApi } from '@/api';
-import { ISprint, IVersion } from '@/common/types';
+import {
+  reportApi, sprintApi, statusApi, versionApi,
+} from '@/api';
+import { ISprint, IStatus, IVersion } from '@/common/types';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 import { getProjectId } from '@/utils/common';
 
@@ -28,21 +30,24 @@ function usePieChartReport(config?: PieConfig, onFinish?: Function): [PieSearchP
   const [colors, setColors] = useState<string[]>([]);
   const [sprints, setSprints] = useState<ISprint[]>([]);
   const [versions, setVersions] = useState<IVersion[]>([]);
+  const [status, setStatusList] = useState<IStatus[]>([]);
 
   const loadSprintsAndVersions = useCallback(() => {
     axios.all([
       sprintApi.project(projectId).loadSprints(['started', 'closed']),
       versionApi.project(projectId).loadNamesByStatus(),
+      statusApi.project(projectId).loadByProject('agile'),
     ])
-      .then(axios.spread((sprintList: ISprint[], versionList: IVersion[]) => {
+      .then(axios.spread((sprintList: ISprint[], versionList: IVersion[], statusList: IStatus[]) => {
         setSprints(sprintList);
         setVersions(versionList);
+        setStatusList(statusList);
       }));
   }, [projectId]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    reportApi.project(projectId).loadPie(type, chooseDimension === 'sprint' ? chooseId : '', chooseDimension === 'version' ? chooseId : '')
+    reportApi.project(projectId).loadPie(type, chooseDimension === 'sprint' ? chooseId : '', chooseDimension === 'version' ? chooseId : '', chooseDimension === 'status' ? chooseId : '')
       .then((res: IPieData[]) => {
         const len = res.length;
         if (len) {
@@ -77,6 +82,7 @@ function usePieChartReport(config?: PieConfig, onFinish?: Function): [PieSearchP
     chooseId,
     sprints,
     versions,
+    status,
     chooseDimension,
     setType,
     setChooseDimension,
