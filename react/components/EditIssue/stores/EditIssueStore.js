@@ -261,6 +261,8 @@ class EditIssueStore {
 
   commentReplysMap = observable.map();
 
+  promptExtraNodeMap=observable.map();/** 各类提示信息的额外内容 */
+
   @observable linkedUI = [];
 
   @action setLinkedUI = (data) => {
