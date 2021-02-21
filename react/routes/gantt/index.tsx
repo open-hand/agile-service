@@ -16,6 +16,7 @@ import {
 import GanttComponent, { GanttProps, Gantt, GanttRef } from 'react-gantt-component';
 import 'react-gantt-component/dist/react-gantt-component.cjs.production.min.css';
 import { ganttApi, issueApi, workCalendarApi } from '@/api';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import TypeTag from '@/components/TypeTag';
 import Loading from '@/components/Loading';
 import SelectSprint from '@/components/select/select-sprint';
@@ -39,6 +40,15 @@ import GanttOperation from './components/gantt-operation';
 import './index.less';
 
 dayjs.extend(weekday);
+const typeOptions = [{
+  value: 'task',
+  label: '按任务查看',
+}, {
+  value: 'assignee',
+  label: '按经办人查看',
+}] as const;
+const typeValues = typeOptions.map((t) => t.value);
+type TypeValue = (typeof typeValues)[number];
 const renderTooltip = (user: User) => {
   const {
     loginName, realName, email, ldap,
@@ -89,7 +99,7 @@ const tableColumns: GanttProps<Issue>['columns'] = [{
 }];
 const GanttPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
-  const [type, setType] = useState<string>('task');
+  const [type, setType] = useState<TypeValue>(localPageCacheStore.getItem('gantt.search.type') ?? typeValues[0]);
   const [columns, setColumns] = useState<Gantt.Column[]>([]);
   const [workCalendar, setWorkCalendar] = useState<any>();
   const [projectWorkCalendar, setProjectWorkCalendar] = useState<any>();
@@ -154,14 +164,23 @@ const GanttPage: React.FC = () => {
   }, [store]);
   const afterSprintLoad = useCallback((sprints) => {
     if (!sprintId) {
-      const currentSprint = find(sprints, { statusCode: 'started' });
-      if (currentSprint) {
-        store.setSprintId(currentSprint.sprintId);
+      const cachedSprintId = localPageCacheStore.getItem('gantt.search.sprint');
+      if (cachedSprintId) {
+        store.setSprintId(cachedSprintId);
       } else {
-        store.setSprintId(sprints[0]?.sprintId || '0');
+        const currentSprint = find(sprints, { statusCode: 'started' });
+        if (currentSprint) {
+          store.setSprintId(currentSprint.sprintId);
+        } else {
+          store.setSprintId(sprints[0]?.sprintId || '0');
+        }
       }
     }
   }, [sprintId, store]);
+  const handleTypeChange = useCallback((newType) => {
+    setType(newType);
+    localPageCacheStore.setItem('gantt.search.type', newType);
+  }, []);
   const isRestDay = useCallback((date: string) => {
     if (!workCalendar) {
       return false;
@@ -243,13 +262,12 @@ const GanttPage: React.FC = () => {
           style={{ marginRight: 40 }}
           searchable={false}
         />
-        <FlatSelect value={type} onChange={setType} clearButton={false}>
-          <Option value="task">
-            按任务查看
-          </Option>
-          <Option value="assignee">
-            按经办人查看
-          </Option>
+        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false}>
+          {typeOptions.map((o) => (
+            <Option value={o.value}>
+              {o.label}
+            </Option>
+          ))}
         </FlatSelect>
         <HeaderLine />
         <Button
