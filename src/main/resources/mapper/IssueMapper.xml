@@ -3284,6 +3284,7 @@
             ai.type_code,
             ai.creation_date,
             ai.story_points,
+            ai.status_id,
             ai.remaining_time
         FROM
             agile_issue ai

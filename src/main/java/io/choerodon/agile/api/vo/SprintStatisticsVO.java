@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * @author jiaxu.cui@hand-china.com 2020/7/1 下午1:57
  */
@@ -12,19 +14,22 @@ public class SprintStatisticsVO {
     /**
      * 完成数量
      */
-    private Integer completedCount;
+    private IssueCountWithStatusIdsVO completedCount;
     /**
      * 未完成数量
      */
-    private Integer uncompletedCount;
+    private IssueCountWithStatusIdsVO uncompletedCount;
     /**
      * 待办数量
      */
-    private Integer todoCount;
+    private IssueCountWithStatusIdsVO todoCount;
     /**
      * 未分配数量
      */
     private Integer unassignCount;
+
+    @Encrypt
+    private Long sprintId;
 
     public Integer getTotal() {
         return total;
@@ -34,27 +39,27 @@ public class SprintStatisticsVO {
         this.total = total;
     }
 
-    public Integer getCompletedCount() {
+    public IssueCountWithStatusIdsVO getCompletedCount() {
         return completedCount;
     }
 
-    public void setCompletedCount(Integer completedCount) {
+    public void setCompletedCount(IssueCountWithStatusIdsVO completedCount) {
         this.completedCount = completedCount;
     }
 
-    public Integer getUncompletedCount() {
+    public IssueCountWithStatusIdsVO getUncompletedCount() {
         return uncompletedCount;
     }
 
-    public void setUncompletedCount(Integer uncompletedCount) {
+    public void setUncompletedCount(IssueCountWithStatusIdsVO uncompletedCount) {
         this.uncompletedCount = uncompletedCount;
     }
 
-    public Integer getTodoCount() {
+    public IssueCountWithStatusIdsVO getTodoCount() {
         return todoCount;
     }
 
-    public void setTodoCount(Integer todoCount) {
+    public void setTodoCount(IssueCountWithStatusIdsVO todoCount) {
         this.todoCount = todoCount;
     }
 
@@ -64,5 +69,13 @@ public class SprintStatisticsVO {
 
     public void setUnassignCount(Integer unassignCount) {
         this.unassignCount = unassignCount;
+    }
+
+    public Long getSprintId() {
+        return sprintId;
+    }
+
+    public void setSprintId(Long sprintId) {
+        this.sprintId = sprintId;
     }
 }

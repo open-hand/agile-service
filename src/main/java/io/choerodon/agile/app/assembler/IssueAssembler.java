@@ -637,22 +637,28 @@ public class IssueAssembler extends AbstractAssembler {
         Map<Boolean, List<IssueOverviewVO>> group = issueList.stream()
                 .collect(Collectors.groupingBy(issue -> BooleanUtils.isTrue(issue.getCompleted())));
         sprintStatistics.setTotal(issueList.size());
-        sprintStatistics.setCompletedCount(group.getOrDefault(Boolean.TRUE, Collections.emptyList()).size());
-        sprintStatistics.setUncompletedCount(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).size());
-        long todoCount =
-                group
-                        .getOrDefault(Boolean.FALSE, Collections.emptyList())
-                        .stream()
-                        .filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode()))
-                        .count();
-        sprintStatistics.setTodoCount((int) todoCount);
+        List<IssueOverviewVO> completedIssues = group.getOrDefault(Boolean.TRUE, Collections.emptyList());
+        List<IssueOverviewVO> unCompletedIssues = group.getOrDefault(Boolean.FALSE, Collections.emptyList());
+        List<IssueOverviewVO> todoIssues = unCompletedIssues.stream().filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode())).collect(Collectors.toList());
+
         long unAssignCount =
-                group
-                        .getOrDefault(Boolean.FALSE, Collections.emptyList())
+                completedIssues
+                        .stream()
+                        .filter(issue -> Objects.isNull(issue.getAssigneeId()))
+                        .count();
+        unAssignCount +=
+                unCompletedIssues
                         .stream()
                         .filter(issue -> Objects.isNull(issue.getAssigneeId()))
                         .count();
         sprintStatistics.setUnassignCount((int) unAssignCount);
+
+        Set<Long> completedIssueStatusIds = completedIssues.stream().map(IssueOverviewVO::getStatusId).collect(Collectors.toSet());
+        Set<Long> unCompletedIssueStatusIds = unCompletedIssues.stream().map(IssueOverviewVO::getStatusId).collect(Collectors.toSet());
+        Set<Long> todoIssueStatusIds = todoIssues.stream().map(IssueOverviewVO::getStatusId).collect(Collectors.toSet());
+        sprintStatistics.setCompletedCount(new IssueCountWithStatusIdsVO(completedIssueStatusIds, completedIssues.size()));
+        sprintStatistics.setUncompletedCount(new IssueCountWithStatusIdsVO(unCompletedIssueStatusIds, unCompletedIssues.size()));
+        sprintStatistics.setTodoCount(new IssueCountWithStatusIdsVO(todoIssueStatusIds, todoIssues.size()));
         return sprintStatistics;
     }
 
