@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './ResizeAble.less';
@@ -252,7 +253,7 @@ class ResizeAble extends Component {
         {children}
         {
           modes.map((position) => (
-            <div role="none" key={position} className={`resizable-${position}`} style={{ position: 'absolute', ...MODES[position] }} onMouseDown={this.handleMouseDown.bind(this, position)}>
+            <div role="none" key={position} className={`resizable-${position}`} style={{ position: 'absolute', zIndex: 10, ...MODES[position] }} onMouseDown={this.handleMouseDown.bind(this, position)}>
               <div className={`resizable-line-${position} ${resizing && position === mode ? 'active' : ''}`} />
             </div>
           ))
