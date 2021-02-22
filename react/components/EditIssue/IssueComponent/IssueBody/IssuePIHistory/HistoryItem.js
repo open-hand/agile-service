@@ -8,15 +8,15 @@ function HistoryItem({ data, featureType }) {
   const [expand, setExpand] = useState(false);
   const { name, code, teamSprintVOS } = data;
   const date = data.actualStartDate || data.startDate;
-  const renderTeam = team => (
+  const renderTeam = (team) => (
     <div className={`${prefix}-team`}>
       <div className={`${prefix}-team-name`}>
         {`${team.projectVO.name}:  `}
       </div>
       <div className={`${prefix}-sprints`}>
-        {team.sprints.map(sprint => (
+        {team.sprints.map((sprint) => (
           <div className={`${prefix}-sprint`}>
-            {sprint.sprintName}
+            {sprint.sprintName || '无'}
           </div>
         ))}
       </div>
@@ -44,11 +44,11 @@ function HistoryItem({ data, featureType }) {
           </div>
         </div>
         <div className={`${prefix}-content-bottom`}>
-          {(expand ? teamSprintVOS : teamSprintVOS.slice(0, 5)).map(team => renderTeam(team))}
+          {(expand ? teamSprintVOS : teamSprintVOS.slice(0, 5)).map((team) => renderTeam(team))}
         </div>
       </div>
       {teamSprintVOS.length > 5 && (
-        <div className={`${prefix}-expand ${expand ? `${prefix}-expanded` : ''}`} onClick={() => setExpand(e => !e)}>
+        <div className={`${prefix}-expand ${expand ? `${prefix}-expanded` : ''}`} onClick={() => setExpand((e) => !e)}>
           <Icon type="skipped_a" />
         </div>
       )}
