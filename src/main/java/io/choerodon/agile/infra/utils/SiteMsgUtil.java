@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -50,6 +51,7 @@ public class SiteMsgUtil {
     private static final String COMMENT_USER = "commentUser";
     private static final String COMMENT_TYPE = "commentType";
     private static final String ISSUE_TYPE = "issueType";
+    private static final String LOGIN_NAME = "loginName";
 
     @Autowired
     private BaseFeignClient baseFeignClient;
@@ -60,13 +62,19 @@ public class SiteMsgUtil {
     @Value("${services.domain.url}")
     private String domainUrl;
 
-    public void issueCreate(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
+    public void issueCreate(List<Long> userIds,
+                            String userName,
+                            String summary,
+                            String url,
+                            Long operatorId,
+                            Long projectId) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, userName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
+        setLoginNameAndRealName(operatorId, map);
         // 设置额外参数
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
@@ -74,6 +82,23 @@ public class SiteMsgUtil {
         MessageSender messageSender = handlerMessageSender(0L,"ISSUECREATE",userIds,map);
         messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);
+    }
+
+    private void setLoginNameAndRealName(Long operatorId, Map<String, String> map) {
+        UserDTO operator = queryUserById(operatorId);
+        if (operator != null) {
+            map.put(LOGIN_NAME, operator.getLoginName());
+            map.put(USER_NAME, operator.getRealName());
+        }
+    }
+
+    private UserDTO queryUserById(Long operatorId) {
+        List<UserDTO> users =
+                baseFeignClient.listUsersByIds(Arrays.asList(operatorId).toArray(new Long[1]), true).getBody();
+        if (ObjectUtils.isEmpty(users)) {
+            return null;
+        }
+        return users.get(0);
     }
 
     private MessageSender handlerMessageSender(Long tenantId,String messageCode,List<Long> userIds,Map<String,String> map){
@@ -111,7 +136,13 @@ public class SiteMsgUtil {
         return userDTOMap;
     }
 
-    public void issueAssignee(List<Long> userIds, String assigneeName, String summary, String url, Long projectId, String operatorName) {
+    public void issueAssignee(List<Long> userIds,
+                              String assigneeName,
+                              String summary,
+                              String url,
+                              Long projectId,
+                              String operatorName,
+                              Long operatorId) {
         // 设置模板参数
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
@@ -120,6 +151,7 @@ public class SiteMsgUtil {
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
         map.put(OPERATOR_NAME, operatorName);
+        setLoginNameAndRealName(operatorId, map);
         // 额外参数
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
@@ -129,7 +161,13 @@ public class SiteMsgUtil {
         messageClient.async().sendMessage(messageSender);
     }
 
-    public void issueSolve(List<Long> userIds, String assigneeName, String summary, String url, Long projectId, String operatorName) {
+    public void issueSolve(List<Long> userIds,
+                           String assigneeName,
+                           String summary,
+                           String url,
+                           Long projectId,
+                           String operatorName,
+                           Long operatorId) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, assigneeName);
@@ -137,6 +175,7 @@ public class SiteMsgUtil {
         map.put(SUMMARY, summary);
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
+        setLoginNameAndRealName(operatorId, map);
         // 额外参数
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
@@ -146,12 +185,17 @@ public class SiteMsgUtil {
         messageClient.async().sendMessage(messageSender);
     }
 
-    public void sendChangeIssueStatus(Long projectId, Set<Long> userSet, List<String> noticeTypeList, Map<String, String> templateArgsMap){
+    public void sendChangeIssueStatus(Long projectId,
+                                      Set<Long> userSet,
+                                      List<String> noticeTypeList,
+                                      Map<String, String> templateArgsMap,
+                                      Long operatorId){
         MessageSender messageSender = new MessageSender();
         messageSender.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
         messageSender.setMessageCode("ISSUECHANGESTATUS");
         List<Receiver> receiverList = new ArrayList<>();
         Map<Long, UserDTO> userMap = handleReceiver(receiverList, userSet);
+        setLoginNameAndRealName(operatorId, templateArgsMap);
         // 设置模板参数
         messageSender.setArgs(templateArgsMap);
         // 设置额外参数
@@ -194,13 +238,19 @@ public class SiteMsgUtil {
         messageClient.async().sendMessage(sender);
     }
 
-    public MessageSender issueCreateSender(List<Long> userIds,String userName, String summary, String url, Long projectId) {
+    public MessageSender issueCreateSender(List<Long> userIds,
+                                           String userName,
+                                           String summary,
+                                           String url,
+                                           Long projectId,
+                                           Long operatorId) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, userName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
+        setLoginNameAndRealName(operatorId, map);
         // 设置额外参数
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
@@ -210,7 +260,13 @@ public class SiteMsgUtil {
         return messageSender;
     }
 
-    public MessageSender issueAssigneeSender(List<Long> userIds, String assigneeName, String summary, String url, Long projectId, String operatorName) {
+    public MessageSender issueAssigneeSender(List<Long> userIds,
+                                             String assigneeName,
+                                             String summary,
+                                             String url,
+                                             Long projectId,
+                                             String operatorName,
+                                             Long operatorId) {
         // 设置模板参数
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
@@ -219,6 +275,7 @@ public class SiteMsgUtil {
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
         map.put(OPERATOR_NAME, operatorName);
+        setLoginNameAndRealName(operatorId, map);
         // 额外参数
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
@@ -228,7 +285,13 @@ public class SiteMsgUtil {
         return messageSender;
     }
 
-    public MessageSender issueSolveSender(List<Long> userIds, String assigneeName, String summary, String url, Long projectId, String operatorName) {
+    public MessageSender issueSolveSender(List<Long> userIds,
+                                          String assigneeName,
+                                          String summary,
+                                          String url,
+                                          Long projectId,
+                                          String operatorName,
+                                          Long operatorId) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, assigneeName);
@@ -236,6 +299,7 @@ public class SiteMsgUtil {
         map.put(SUMMARY, summary);
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
+        setLoginNameAndRealName(operatorId, map);
         // 额外参数
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
@@ -245,12 +309,17 @@ public class SiteMsgUtil {
         return messageSender;
     }
 
-    public MessageSender sendChangeIssueStatusSender(Long projectId, Set<Long> userSet, List<String> noticeTypeList, Map<String, String> templateArgsMap){
+    public MessageSender sendChangeIssueStatusSender(Long projectId,
+                                                     Set<Long> userSet,
+                                                     List<String> noticeTypeList,
+                                                     Map<String, String> templateArgsMap,
+                                                     Long operatorId){
         MessageSender messageSender = new MessageSender();
         messageSender.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
         messageSender.setMessageCode("ISSUECHANGESTATUS");
         List<Receiver> receiverList = new ArrayList<>();
         Map<Long, UserDTO> userMap = handleReceiver(receiverList, userSet);
+        setLoginNameAndRealName(operatorId, templateArgsMap);
         // 设置模板参数
         messageSender.setArgs(templateArgsMap);
         // 设置额外参数
@@ -266,12 +335,20 @@ public class SiteMsgUtil {
     }
 
     //发送问题评论消息
-    public void sendIssueComment(Map<Long, String> actionMap, ProjectVO projectVO, String summary, String url, String comment, IssueCommentVO issueCommentVO, String issueType) {
+    public void sendIssueComment(Map<Long, String> actionMap,
+                                 ProjectVO projectVO,
+                                 String summary,
+                                 String url,
+                                 String comment,
+                                 IssueCommentVO issueCommentVO,
+                                 String issueType,
+                                 Long operatorId) {
         List<MessageSender> senderList = new ArrayList<>();
         List<Receiver> receiverList = new ArrayList<>();
         handleReceiver(receiverList, actionMap.keySet());
         Map<Long, Receiver> usersMap = receiverList.stream().collect(Collectors.toMap(Receiver::getUserId, Function.identity()));
         boolean replyAble = issueCommentVO.getParentId() != null && issueCommentVO.getParentId() != 0L;
+        UserDTO operator = queryUserById(operatorId);
         actionMap.forEach((userId, action) -> {
             Map<String, String> argsMap = new HashMap<>(9);
             argsMap.put(PROJECT_NAME, projectVO.getName());
@@ -283,6 +360,10 @@ public class SiteMsgUtil {
             argsMap.put(COMMENT_USER, issueCommentVO.getUserRealName());
             argsMap.put(COMMENT_TYPE, replyAble ? "回复" : "评论");
             argsMap.put(ISSUE_TYPE, issueType);
+            if (operator != null) {
+                argsMap.put(LOGIN_NAME, operator.getLoginName());
+                argsMap.put(USER_NAME, operator.getRealName());
+            }
 
             MessageSender messageSender = new MessageSender();
             messageSender.setTenantId(ConvertUtil.getOrganizationId(projectVO.getId()));
