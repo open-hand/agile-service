@@ -13,6 +13,8 @@ import FieldStartTime from './Field/FieldStartTime';
 import FieldEndTime from './Field/FieldEndTime';
 import FieldProgramVersion from './Field/FieldProgramVersion';
 import FieldMember from './Field/FieldMember';
+import FieldCreator from './Field/FieldCreator';
+import FieldUpdater from './Field/FieldUpdater';
 import FieldEnvironment from './Field/FieldEnvironment';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
@@ -89,6 +91,10 @@ const IssueField = observer((props) => {
         return <FieldMember {...props} field={field} />;
       case 'environment':
         return <FieldEnvironment {...props} field={field} />;
+      case 'creator':
+        return <FieldCreator {...props} field={field} />;
+      case 'updator':
+        return <FieldUpdater {...props} field={field} />;
       default:
         return renderNormalField(field);
     }
