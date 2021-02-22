@@ -38,6 +38,7 @@ const Issue = observer(() => {
   const [urlFilter, setUrlFilter] = useState(null);
   const tableRef = useRef();
   const [props] = useDetail();
+  const { open } = props;
   IssueStore.setTableRef(tableRef);
   const visibleColumns = useMemo(() => {
     if (localPageCacheStore.getItem('issues.table')) {
@@ -53,13 +54,13 @@ const Issue = observer(() => {
    * 防止删除此页一条数据时页时停留当前页时出现无数据清空
    * @param {Boolean} isDelete  用于标记是否为删除操作
    */
-  const refresh = (isDelete = false) => dataSet.query(
+  const refresh = useCallback((isDelete = false) => dataSet.query(
     isDelete
       && dataSet.length === 1
       && dataSet.totalCount > 1
       ? dataSet.currentPage - 1
       : dataSet.currentPage,
-  );
+  ), [dataSet]);
   useEffect(() => () => {
     const columProps = tableRef.current
       ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden) : null;
@@ -178,10 +179,24 @@ const Issue = observer(() => {
     };
   }, []);
 
-  const handleCreateIssue = (issue) => {
+  const handleCreateIssue = useCallback((issue) => {
     IssueStore.createQuestion(false);
     dataSet.query();
-  };
+  }, [dataSet]);
+  const handleRowClick = useCallback((record) => {
+    open({
+      path: 'issue',
+      props: {
+        issueId: record.get('issueId'),
+        // store: detailStore,
+      },
+      events: {
+        update: () => {
+          refresh();
+        },
+      },
+    });
+  }, [open, refresh]);
   const handleClickFilterManage = () => {
     const editFilterInfo = IssueStore.getEditFilterInfo;
     const filterListVisible = IssueStore.getFilterListVisible;
@@ -278,31 +293,7 @@ const Issue = observer(() => {
           tableRef={tableRef}
           visibleColumns={visibleColumns}
           onCreateIssue={handleCreateIssue}
-          onRowClick={(record) => {
-            props.open({
-              path: 'issue',
-              props: {
-                issueId: record.get('issueId'),
-                // store: detailStore,
-              },
-              events: {
-                update: () => {
-                  refresh();
-                },
-              },
-            });
-            // dataSet.select(record);
-            // const editFilterInfo = IssueStore.getEditFilterInfo;
-            // IssueStore.setClickedRow({
-            //   selectedIssue: {
-            //     issueId: record.get('issueId'),
-            //   },
-            //   expand: true,
-            // });
-            // IssueStore.setFilterListVisible(false);
-            // IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
-          }}
-          selectedIssue={IssueStore.selectedIssue?.issueId}
+          onRowClick={handleRowClick}
         />
         <FilterManage
           visible={IssueStore.filterListVisible}
