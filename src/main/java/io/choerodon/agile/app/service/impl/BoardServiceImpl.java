@@ -583,7 +583,7 @@ public class BoardServiceImpl implements BoardService {
         }
         IssueMoveVO result = modelMapper.map(issueDTO, IssueMoveVO.class);
         if (!preStatusId.equals(nowStatusId)) {
-            sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
+            sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO, DetailsHelper.getUserDetails().getUserId());
         }
         return result;
     }
