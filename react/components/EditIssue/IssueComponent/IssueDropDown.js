@@ -40,7 +40,7 @@ const IssueDropDown = ({
             {
               subIssueVOList.length ? <p style={{ color: '#d50000' }}>{`注意：问题的${subIssueVOList.length}个子任务将被删除。`}</p> : null
             }
-            {store.promptExtraNodeMap.get('delete.issue')({ deleteModal: { destroy: () => deleteModal.destroy() } })}
+            {store.promptExtraNodeMap.has('delete.issue') ? store.promptExtraNodeMap.get('delete.issue')({ deleteModal: { destroy: () => deleteModal.destroy() } }) : null}
           </div>
         ),
       onOk() {
