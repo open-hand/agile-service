@@ -1128,7 +1128,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         agileSystemFieldContexts.forEach(v -> {
             IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
             issueTypeSearchVO.setTypeCodes(Arrays.asList(v.getContext().split(",")));
-            issueTypeSearchVO.setSource("system");
             List<Long> issueTypeIds =
                     issueTypeMapper.selectByOptions(organizationId, newProjectId, issueTypeSearchVO)
                             .stream().map(IssueTypeVO::getId).collect(Collectors.toList());
