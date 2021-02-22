@@ -250,7 +250,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         }
         Long issueTypeId = EncryptionUtils.decrypt(jsonObject.getString(ISSUE_TYPE_ID),EncryptionUtils.BLANK_KEY);
         jsonObject.remove(ISSUE_TYPE_ID);
-        IssueTypeVO issueTypeVO = issueTypeService.queryByOrgId(projectVO.getOrganizationId(), projectVO.getId()).stream()
+        IssueTypeVO issueTypeVO = issueTypeService.queryByOrgId(projectVO.getOrganizationId(), targetProjectVO.getId()).stream()
                 .filter(issueTypeVO1 -> Objects.equals(ObjectUtils.isEmpty(issueTypeId) ? issueDTO.getIssueTypeId() : issueTypeId, issueTypeVO1.getId()))
                 .findAny().orElse(null);
         // 处理需要清空的值
