@@ -93,9 +93,8 @@ public interface DataLogMapper extends BaseMapper<DataLogDTO> {
     /**
      * 批量创建日志
      *
-     * @param projectId        projectId
      * @param dataLogList dataLogList
      * @param userId           userId
      */
-    void batchCreateDataLog(@Param("dataLogList") List<DataLogDTO> dataLogList, @Param("projectId") Long projectId, @Param("userId") Long userId);
+    void batchCreateDataLog(@Param("dataLogList") List<DataLogDTO> dataLogList, @Param("userId") Long userId);
 }
