@@ -120,9 +120,16 @@ class IssueSearchStore {
   @observable chosenFields: IChosenFields = new Map();
 
   @action initChosenFields() {
-    this.chosenFields = new Map(this.getSystemFields()
+    const chosenFields = new Map(this.chosenFields);
+
+    this.getSystemFields()
       .filter((f) => f.defaultShow)
-      .map((f) => ([f.code, observable({ ...f, value: undefined })])));
+      .forEach((f) => {
+        if (!chosenFields.has(f.code)) {
+          chosenFields.set(f.code, observable({ ...f, value: undefined }));
+        }
+      });
+    this.chosenFields = chosenFields;
     if (this.defaultChosenFields) {
       this.defaultChosenFields.forEach((value, key) => {
         this.chosenFields.set(key, value);

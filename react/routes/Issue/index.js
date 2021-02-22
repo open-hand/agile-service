@@ -65,18 +65,35 @@ const Issue = observer(() => {
       ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden) : null;
     localPageCacheStore.mergeSetItem('issues.table', { pageInfo: { currentPage: dataSet.currentPage }, columProps });
   }, [dataSet]);
-
+  const hasUrlFilter = useCallback((obj) => {
+    const whiteList = ['type', 'category', 'id', 'name', 'organizationId'];
+    return Object.keys(obj).some((key) => !whiteList.includes(key));
+  }, []);
   const initFilter = async () => {
+    const search = queryString.parse(location.search.slice(1));
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
-      paramType, paramIssueId, paramName, paramOpenIssueId, detailTab,
-      // eslint-disable-next-line no-restricted-globals
-    } = queryString.parse(location.search);
-    if (paramChoose || paramCurrentVersion || paramCurrentSprint || paramId
-      || paramType || paramIssueId || paramName || paramOpenIssueId) {
+      paramType, paramIssueId, paramName, paramOpenIssueId, detailTab, ...searchArgs
+    } = search;
+    if (hasUrlFilter(search)) {
       issueSearchStore.clearAllFilter();
       localPageCacheStore.clear();
     }
+    Object.keys(searchArgs).forEach((key) => {
+      const value = searchArgs[key];
+      switch (key) {
+        case 'tableListMode': {
+          changeTableListMode(value);
+          break;
+        }
+        case 'statusId':
+        case 'assigneeId': {
+          issueSearchStore.handleFilterChange(key, value.split(','));
+          break;
+        }
+        default: break;
+      }
+    });
     let prefix = '';
     if (paramChoose) {
       if (paramChoose === 'version' && paramCurrentVersion) {
