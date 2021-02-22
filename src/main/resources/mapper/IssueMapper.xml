@@ -1028,6 +1028,22 @@
                 #{issueId}
             </foreach>
         </if>
+
+        <if test='searchVO.otherArgs.creatorIds != null and searchVO.otherArgs.creatorIds.size > 0'>
+            AND ai.created_by in
+            <foreach collection="searchVO.otherArgs.creatorIds" item="userId" open="(" separator=","
+                     close=")">
+                #{userId}
+            </foreach>
+        </if>
+
+        <if test='searchVO.otherArgs.updatorIds != null and searchVO.otherArgs.updatorIds.size > 0'>
+            AND ai.last_updated_by in
+            <foreach collection="searchVO.otherArgs.updatorIds" item="userId" open="(" separator=","
+                     close=")">
+                #{userId}
+            </foreach>
+        </if>
     </sql>
 
     <sql id="otherArgsSql2">
