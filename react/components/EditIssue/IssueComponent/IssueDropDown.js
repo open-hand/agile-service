@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
@@ -18,7 +18,6 @@ const IssueDropDown = ({
   const {
     store, onUpdate, applyType,
   } = useContext(EditIssueContext);
-
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
@@ -29,7 +28,7 @@ const IssueDropDown = ({
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
   const handleDeleteIssue = () => {
-    confirm({
+    const deleteModal = confirm({
       width: 560,
       title: `删除问题${issueNum}`,
       content:
@@ -41,7 +40,7 @@ const IssueDropDown = ({
             {
               subIssueVOList.length ? <p style={{ color: '#d50000' }}>{`注意：问题的${subIssueVOList.length}个子任务将被删除。`}</p> : null
             }
-            {store.promptExtraNodeMap.get('delete.issue')}
+            {store.promptExtraNodeMap.get('delete.issue')({ deleteModal: { destroy: () => deleteModal.destroy() } })}
           </div>
         ),
       onOk() {
