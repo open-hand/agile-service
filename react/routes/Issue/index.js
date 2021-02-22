@@ -2,12 +2,11 @@ import React, {
   useContext, useRef, useEffect, useState, useCallback, useMemo,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   Header, Content, Page, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui';
-import queryString from 'querystring';
 import { map } from 'lodash';
 import CreateIssue from '@/components/CreateIssue';
 import { projectApi } from '@/api/Project';
@@ -15,7 +14,8 @@ import { issueApi } from '@/api';
 import IssueSearch from '@/components/issue-search';
 import openSaveFilterModal from '@/components/SaveFilterModal';
 import { linkUrl } from '@/utils/to';
-import LINK_URL, { getParams } from '@/constants/LINK_URL';
+import LINK_URL from '@/constants/LINK_URL';
+import useQueryString from '@/hooks/useQueryString';
 import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import FilterManage from '@/components/FilterManage';
@@ -34,7 +34,7 @@ const Issue = observer(() => {
     dataSet, projectId, issueSearchStore, fields, changeTableListMode, tableListMode,
   } = useContext(Store);
   const history = useHistory();
-  const location = useLocation();
+  const params = useQueryString();
   const [urlFilter, setUrlFilter] = useState(null);
   const tableRef = useRef();
   const [props] = useDetail();
@@ -71,12 +71,11 @@ const Issue = observer(() => {
     return Object.keys(obj).some((key) => !whiteList.includes(key));
   }, []);
   const initFilter = async () => {
-    const search = queryString.parse(location.search.slice(1));
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
       paramType, paramIssueId, paramName, paramOpenIssueId, detailTab, ...searchArgs
-    } = search;
-    if (hasUrlFilter(search)) {
+    } = params;
+    if (hasUrlFilter(params)) {
       issueSearchStore.clearAllFilter();
       localPageCacheStore.clear();
     }
@@ -137,7 +136,6 @@ const Issue = observer(() => {
         }
       }
       issueSearchStore.handleFilterChange('issueIds', [id]);
-      // issueSearchStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
       IssueStore.setClickedRow({
         selectedIssue: {
           issueId: id,
@@ -210,8 +208,8 @@ const Issue = observer(() => {
     setUrlFilter(null);
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
-      paramType, paramIssueId, paramName, paramOpenIssueId, ...otherArgs
-    } = getParams(location.search);
+      paramType, paramIssueId, paramName, paramOpenIssueId,
+    } = params;
     if (paramOpenIssueId || paramIssueId || paramChoose || paramType) {
       history.replace(linkUrl(LINK_URL.workListIssue));
     }
