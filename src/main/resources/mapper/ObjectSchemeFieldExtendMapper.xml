@@ -289,6 +289,7 @@
         <foreach collection="fieldCodes" item="fieldCode" open="(" close=")" separator=",">
            #{fieldCode}
         </foreach>
+        order by field_id
     </select>
 
     <select id="selectProjectIdsByOrganizationId" resultType="java.lang.Long">
