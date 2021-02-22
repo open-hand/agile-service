@@ -34,6 +34,7 @@
         <id column="parent_relate_description" property="parentRelateDescription"/>
         <id column="main_responsible_id" property="mainResponsibleId"/>
         <id column="environment" property="environment"/>
+        <id column="last_updated_by" property="lastUpdatedBy"/>
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
         <association property="activeSprint" column="issue_id" select="queryActiveSprintNameByIssueId"/>
@@ -323,6 +324,8 @@
         <result property="summary" column="summary"/>
         <result property="priorityId" column="priority_id"/>
         <result property="issueTypeId" column="issue_type_id"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="lastUpdatedBy" column="last_updated_by"/>
         <result property="assigneeId" column="assignee_id"/>
         <result property="epicName" column="epic_name"/>
         <result property="epicId" column="epic_id"/>
@@ -396,6 +399,8 @@
         ai.status_id,
         ai.priority_id,
         ai.issue_type_id,
+        ai.created_by,
+        ai.last_updated_by,
         ai3.epic_name,
         alv2.name as epic_color,
         ai.epic_id,

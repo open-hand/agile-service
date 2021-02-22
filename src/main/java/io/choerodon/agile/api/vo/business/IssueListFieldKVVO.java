@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo.business;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -157,6 +158,10 @@ public class IssueListFieldKVVO {
 
     @ApiModelProperty(value = "影响的版本")
     private List<VersionIssueRelVO> influenceVersionIssueRelVOS;
+
+    private UserMessageDTO createUser;
+
+    private UserMessageDTO updateUser;
 
     public Boolean getStarBeacon() {
         return starBeacon;
@@ -538,5 +543,21 @@ public class IssueListFieldKVVO {
 
     public void setInfluenceVersionIssueRelVOS(List<VersionIssueRelVO> influenceVersionIssueRelVOS) {
         this.influenceVersionIssueRelVOS = influenceVersionIssueRelVOS;
+    }
+
+    public UserMessageDTO getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(UserMessageDTO createUser) {
+        this.createUser = createUser;
+    }
+
+    public UserMessageDTO getUpdateUser() {
+        return updateUser;
+    }
+
+    public void setUpdateUser(UserMessageDTO updateUser) {
+        this.updateUser = updateUser;
     }
 }

@@ -137,6 +137,8 @@ public class IssueDetailDTO {
 
     private String environment;
 
+    private Long lastUpdatedBy;
+
     public String getParentRelateDescription() {
         return parentRelateDescription;
     }
@@ -620,5 +622,13 @@ public class IssueDetailDTO {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public Long getLastUpdatedBy() {
+        return lastUpdatedBy;
+    }
+
+    public void setLastUpdatedBy(Long lastUpdatedBy) {
+        this.lastUpdatedBy = lastUpdatedBy;
     }
 }
