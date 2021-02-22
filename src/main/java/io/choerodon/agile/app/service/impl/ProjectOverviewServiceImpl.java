@@ -94,7 +94,9 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     @Override
     public SprintStatisticsVO selectSprintStatistics(Long projectId, Long sprintId) {
         List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
-        return issueAssembler.issueDTOToSprintStatisticsVO(issueList);
+        SprintStatisticsVO sprintStatisticsVO = issueAssembler.issueDTOToSprintStatisticsVO(issueList);
+        sprintStatisticsVO.setSprintId(sprintId);
+        return sprintStatisticsVO;
     }
 
     private List<IssueOverviewVO> selectIssueBysprint(Long projectId, Long sprintId) {
