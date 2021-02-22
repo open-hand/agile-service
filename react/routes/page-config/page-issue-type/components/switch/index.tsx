@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { pageConfigApi, PageConfigIssueType } from '@/api';
 import { Modal } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import useQuery from '@/hooks/useQuery';
+import useQueryString from '@/hooks/useQueryString';
 import { IIssueType } from '@/common/types';
 import { usePageIssueTypeStore } from '../../stores';
 import Switch from './Switch';
@@ -16,7 +16,7 @@ interface IssueOption {
 
 function PageSwitch() {
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
-  const params = useQuery();
+  const params = useQueryString();
   const { pageIssueTypeStore } = usePageIssueTypeStore();
   const handleSelectBox = (val: any, { valueObj }: { valueObj: any }) => {
     if (pageIssueTypeStore.getDirty) {
@@ -44,7 +44,7 @@ function PageSwitch() {
   useEffect(() => {
     pageIssueTypeStore.setLoading(true);
     pageConfigApi.loadAvailableIssueType().then((res) => {
-      const issueTypeId = params.get('issueTypeId');
+      const { issueTypeId } = params;
       let currentType;
       if (issueTypeId) {
         currentType = res.find((t) => String(t.id) === issueTypeId);
