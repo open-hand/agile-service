@@ -151,7 +151,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             initIssueTypeAndFieldRel(organizationId, projectId, result, issueTypeVO.getCopyCustomField());
         } else {
             //初始化组织系统字段与问题类型关系
-            initIssueTypeAndFieldRel(organizationId, null, result, false);
+            initIssueTypeAndFieldRel(organizationId, null, result, issueTypeVO.getCopyCustomField());
         }
         return result;
     }
@@ -160,9 +160,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                           Long projectId,
                                           IssueTypeVO result,
                                           Boolean copyField) {
-        if(Boolean.TRUE.equals(copyField) && !ObjectUtils.isEmpty(projectId)){
+        if (Boolean.TRUE.equals(copyField)) {
             copyFieldRel(organizationId, projectId, result);
-        }else {
+        } else {
             initFieldRel(organizationId, projectId, result);
         }
     }
