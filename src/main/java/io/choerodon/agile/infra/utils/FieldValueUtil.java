@@ -590,11 +590,11 @@ public class FieldValueUtil {
                     userIds.addAll(newFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
                     Map<Long, UserDTO> userMap = handleUserMap(userIds);
                     if (!oldFieldValues.isEmpty()) {
-                        create.setOldValue(userIds.stream().map(oldFieldValue -> String.valueOf(oldFieldValue)).collect(Collectors.joining(",")));
-                        create.setOldString(handlerStringValue(userIds,userMap));
+                        create.setOldValue(oldFieldValues.stream().map(oldFieldValue -> String.valueOf(oldFieldValue.getOptionId())).collect(Collectors.joining(",")));
+                        create.setOldString(handlerStringValue(oldFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList()),userMap));
                     }
                     if (!newFieldValues.isEmpty()) {
-                        create.setNewValue(newFieldValues.stream().map(newFieldValue -> String.valueOf(newFieldValue)).collect(Collectors.joining(",")));
+                        create.setNewValue(newFieldValues.stream().map(newFieldValue -> String.valueOf(newFieldValue.getOptionId())).collect(Collectors.joining(",")));
                         create.setNewString(handlerStringValue(newFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList()),userMap));
                     }
                     break;
@@ -609,7 +609,7 @@ public class FieldValueUtil {
 
     private static String handlerStringValue(List<Long> userIds, Map<Long, UserDTO> userMap) {
         List<String> stringList = new ArrayList<>();
-        userIds.forEach(userId -> stringList.add(userMap.getOrDefault(userMap,new UserDTO()).getRealName()));
+        userIds.forEach(userId -> stringList.add(userMap.getOrDefault(userId,new UserDTO()).getRealName()));
         return  stringList.stream().collect(Collectors.joining(","));
     }
 

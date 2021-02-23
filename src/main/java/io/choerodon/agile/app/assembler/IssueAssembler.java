@@ -143,8 +143,8 @@ public class IssueAssembler extends AbstractAssembler {
         List<IssueListFieldKVVO> issueListFieldKVDTOList = new ArrayList<>(issueDTOList.size());
         Set<Long> userIds = issueDTOList.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
         userIds.addAll(issueDTOList.stream().filter(issue -> issue.getReporterId() != null && !Objects.equals(issue.getReporterId(), 0L)).map(IssueDTO::getReporterId).collect(Collectors.toSet()));
-        userIds.addAll(issueDTOList.stream().filter(issue -> issue.getCreatedBy() != null && !Objects.equals(issue.getCreatedBy(), 0L)).map(IssueDTO::getReporterId).collect(Collectors.toSet()));
-        userIds.addAll(issueDTOList.stream().filter(issue -> issue.getLastUpdatedBy() != null && !Objects.equals(issue.getLastUpdatedBy(), 0L)).map(IssueDTO::getReporterId).collect(Collectors.toSet()));
+        userIds.addAll(issueDTOList.stream().filter(issue -> issue.getCreatedBy() != null && !Objects.equals(issue.getCreatedBy(), 0L)).map(IssueDTO::getCreatedBy).collect(Collectors.toSet()));
+        userIds.addAll(issueDTOList.stream().filter(issue -> issue.getLastUpdatedBy() != null && !Objects.equals(issue.getLastUpdatedBy(), 0L)).map(IssueDTO::getLastUpdatedBy).collect(Collectors.toSet()));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Lists.newArrayList(userIds), true);
         issueDTOList.forEach(issueDO -> {
             UserMessageDTO assigneeUserDO = usersMap.get(issueDO.getAssigneeId());
