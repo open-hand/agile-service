@@ -17,6 +17,12 @@ class Store {
     this.subTaskFields = data;
   }
 
+  @observable subBugFields: IField[] = [];
+
+  @action setSubBugFields = (data: IField[]) => {
+    this.subBugFields = data;
+  }
+
   @observable moveToProjectList = [];
 
   @action setMoveToProjectList = (data: any) => {
@@ -25,10 +31,18 @@ class Store {
 
   subTaskDetailMap = observable.map();
 
+  subBugDetailMap = observable.map();
+
   @observable subTaskTypeId: string | undefined;
 
   @action setSubTaskTypeId = (data?: string) => {
     this.subTaskTypeId = data;
+  }
+
+  @observable subBugTypeId: string | undefined;
+
+  @action setSubBugTypeId = (data?: string) => {
+    this.subBugTypeId = data;
   }
 
   @observable selectedUserIds: string[] = [];

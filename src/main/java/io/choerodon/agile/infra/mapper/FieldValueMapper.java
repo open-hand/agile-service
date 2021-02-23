@@ -5,6 +5,7 @@ import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author shinan.chen
@@ -33,4 +34,9 @@ public interface FieldValueMapper extends BaseMapper<FieldValueDTO> {
     List<FieldValueDTO> queryListByInstanceIds(@Param("projectIds") List<Long> projectIds, @Param("instanceIds") List<Long> instanceIds, @Param("schemeCode") String schemeCode, @Param("fieldId") Long fieldId);
 
     void updateProjectId(@Param("projectId") Long projectId, @Param("targetProjectId") Long targetProjectId, @Param("issueId") Long issueId, @Param("schemeCode") String schemeCode);
+
+    List<FieldValueDTO> selectByFieldIds(@Param("projectId") Long projectId,
+                                         @Param("instanceId") Long instanceId,
+                                         @Param("schemeCode") String schemeCode,
+                                         @Param("fieldIds") Set<Long> fieldIds);
 }

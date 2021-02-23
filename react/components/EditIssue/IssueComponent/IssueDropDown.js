@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
@@ -18,7 +18,6 @@ const IssueDropDown = ({
   const {
     store, onUpdate, applyType,
   } = useContext(EditIssueContext);
-
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
@@ -29,18 +28,19 @@ const IssueDropDown = ({
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
   const handleDeleteIssue = () => {
-    confirm({
+    const deleteModal = confirm({
       width: 560,
       title: `删除问题${issueNum}`,
       content:
         (
           <div>
             <p style={{ marginBottom: 10 }}>请确认您要删除这个问题。</p>
-            <p style={{ marginBottom: 10 }}>这个问题将会被彻底删除。包括所有附件和评论。</p>
+            <p style={{ marginBottom: 10 }}>该特性将会被彻底删除，包括所有附件、关联关系、评论。</p>
             <p style={{ marginBottom: 10 }}>如果您完成了这个问题，通常是已解决或者已关闭，而不是删除。</p>
             {
               subIssueVOList.length ? <p style={{ color: '#d50000' }}>{`注意：问题的${subIssueVOList.length}个子任务将被删除。`}</p> : null
             }
+            {store.promptExtraNodeMap.has('delete.issue') ? store.promptExtraNodeMap.get('delete.issue')({ deleteModal: { destroy: () => deleteModal.destroy() } }) : null}
           </div>
         ),
       onOk() {
@@ -127,7 +127,7 @@ const IssueDropDown = ({
             >
               删除
             </Menu.Item>
-        )}
+          )}
         >
           <Menu.Item
             key="1"
@@ -199,23 +199,23 @@ const IssueDropDown = ({
       }
       {
         (typeCode !== 'sub_task' && !parentRelateSummary) && ( // 子缺陷、子任务不能移
-        <Permission
-          service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
-          noAccessChildren={(
+          <Permission
+            service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+            noAccessChildren={(
+              <Menu.Item
+                key="move"
+                disabled={disableFeatureDeleteWhilePiDoing || (loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
+              >
+                移动
+              </Menu.Item>
+            )}
+          >
             <Menu.Item
               key="move"
-              disabled={disableFeatureDeleteWhilePiDoing || (loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
             >
               移动
             </Menu.Item>
-        )}
-        >
-          <Menu.Item
-            key="move"
-          >
-            移动
-          </Menu.Item>
-        </Permission>
+          </Permission>
         )
       }
     </Menu>

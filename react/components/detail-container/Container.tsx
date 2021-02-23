@@ -64,6 +64,7 @@ const Container: React.FC = () => {
         paddingTop: routes.length > 1 ? 34 : 0,
       }}
     >
+      <div className={`${prefixCls}-divider`} />
       {routes.length > 1 && (
       <div
         role="none"

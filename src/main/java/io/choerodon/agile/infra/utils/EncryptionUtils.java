@@ -48,7 +48,7 @@ public class EncryptionUtils {
 
     public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","last_update_date"};
 
-    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds","fixVersion","influenceVersion"};
+    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds","fixVersion","influenceVersion", "creatorIds", "updatorIds"};
 
     public static final String[] IGNORE_VALUES = {"0","none"};
     public static final String BLANK_KEY = "";
@@ -445,6 +445,20 @@ public class EncryptionUtils {
 
         //userId
         decryptUserId(search, oaMapOptional);
+
+        // creatorIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("creatorIds"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("creatorIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+
+        // updatorIds
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("updatorIds"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("updatorIds",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
     }
 
     public static void decryptUserId(SearchVO search, Optional<Map<String, Object>> oaMapOptional) {

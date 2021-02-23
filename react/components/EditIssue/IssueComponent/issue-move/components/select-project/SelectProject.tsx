@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select, Form, DataSet } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
@@ -17,8 +17,9 @@ interface Props {
 }
 
 const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) => {
-  console.log(issueTypeDataSet.toData());
   const hasSubIssue = issue.subIssueVOList?.length > 0;
+  const hasSubBug = issue.subBugVOList?.length > 0;
+
   return (
     <div className={styles.selectProject}>
       <div className={styles.tip}>
@@ -41,10 +42,21 @@ const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) =>
           />
           <Select
             name="issueType"
-            optionsFilter={hasSubIssue ? (record) => record.get('typeCode') === 'story' || record.get('typeCode') === 'task'
+            optionsFilter={hasSubBug ? (record) => record.get('typeCode') === 'story' || record.get('typeCode') === 'task'
               : (record) => record.get('typeCode') !== 'sub_task'}
           />
-          {hasSubIssue && <Select name="subTaskIssueTypeId" />}
+          {hasSubIssue && (
+            <Select
+              name="subTaskIssueTypeId"
+              optionsFilter={(record) => record.get('typeCode') === 'sub_task'}
+            />
+          )}
+          {hasSubBug && (
+            <Select
+              name="subBugIssueTypeId"
+              optionsFilter={(record) => record.get('typeCode') === 'bug'}
+            />
+          )}
         </Form>
       </div>
     </div>

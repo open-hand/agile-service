@@ -34,6 +34,7 @@
         <id column="parent_relate_description" property="parentRelateDescription"/>
         <id column="main_responsible_id" property="mainResponsibleId"/>
         <id column="environment" property="environment"/>
+        <id column="last_updated_by" property="lastUpdatedBy"/>
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
         <association property="activeSprint" column="issue_id" select="queryActiveSprintNameByIssueId"/>
@@ -323,6 +324,8 @@
         <result property="summary" column="summary"/>
         <result property="priorityId" column="priority_id"/>
         <result property="issueTypeId" column="issue_type_id"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="lastUpdatedBy" column="last_updated_by"/>
         <result property="assigneeId" column="assignee_id"/>
         <result property="epicName" column="epic_name"/>
         <result property="epicId" column="epic_id"/>
@@ -396,6 +399,8 @@
         ai.status_id,
         ai.priority_id,
         ai.issue_type_id,
+        ai.created_by,
+        ai.last_updated_by,
         ai3.epic_name,
         alv2.name as epic_color,
         ai.epic_id,
@@ -1023,6 +1028,22 @@
                 #{issueId}
             </foreach>
         </if>
+
+        <if test='searchVO.otherArgs.creatorIds != null and searchVO.otherArgs.creatorIds.size > 0'>
+            AND ai.created_by in
+            <foreach collection="searchVO.otherArgs.creatorIds" item="userId" open="(" separator=","
+                     close=")">
+                #{userId}
+            </foreach>
+        </if>
+
+        <if test='searchVO.otherArgs.updatorIds != null and searchVO.otherArgs.updatorIds.size > 0'>
+            AND ai.last_updated_by in
+            <foreach collection="searchVO.otherArgs.updatorIds" item="userId" open="(" separator=","
+                     close=")">
+                #{userId}
+            </foreach>
+        </if>
     </sql>
 
     <sql id="otherArgsSql2">
@@ -1355,14 +1376,28 @@
             ai.relate_issue_id,
             ai.last_update_date
             FROM agile_issue ai
-            LEFT JOIN agile_project_info api ON ai.project_id = api.project_id,agile_issue_status ais
-            WHERE
-                ais.status_id = ai.status_id
-                AND ais.project_id = ai.project_id
-                AND ai.project_id in
+            LEFT JOIN agile_project_info api ON ai.project_id = api.project_id,agile_issue_status ais, agile_issue_sprint_rel aisr
+            WHERE 1=1
+            AND aisr.project_id IN
+            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                #{projectId}
+            </foreach>
+            AND aisr.sprint_id IN (
+                SELECT sprint_id
+                FROM agile_sprint asp
+                where asp.project_id IN
                 <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
                     #{projectId}
                 </foreach>
+                AND asp.status_code = 'started'
+            )
+            AND ai.issue_id = aisr.issue_id
+            AND ais.status_id = ai.status_id
+            AND ais.project_id = ai.project_id
+            AND ai.project_id IN
+            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                #{projectId}
+            </foreach>
             AND
             (
                 (
@@ -1375,18 +1410,28 @@
                 (
                     <choose>
                         <when test="searchType == null or searchType == 'myReported'">
-                            ai.type_code IN ('sub_task','bug')
-                            AND (
-                                ai.parent_issue_id in
-                                <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
-                                    #{parentIssue}
-                                </foreach>
-                                OR
-                                ai.relate_issue_id in
+                            ai.project_id in
+                            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                                #{projectId}
+                            </foreach>
+                            and ((
+                                ai.type_code = 'sub_task'
+                                and ai.parent_issue_id is not null
+                                and ai.parent_issue_id != 0
+                                and ai.parent_issue_id in
                                 <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
                                     #{parentIssue}
                                 </foreach>
                             )
+                            or (
+                                ai.type_code = 'bug'
+                                and ai.relate_issue_id is not null
+                                and ai.relate_issue_id != 0
+                                and ai.relate_issue_id in
+                                <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                                    #{parentIssue}
+                                </foreach>
+                            ))
                             <if test="searchType == null">
                                 AND ai.assignee_id = #{userId}
                             </if>
@@ -3260,6 +3305,7 @@
             ai.type_code,
             ai.creation_date,
             ai.story_points,
+            ai.status_id,
             ai.remaining_time
         FROM
             agile_issue ai

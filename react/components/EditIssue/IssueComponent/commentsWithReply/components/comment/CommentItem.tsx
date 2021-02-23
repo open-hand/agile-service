@@ -31,10 +31,11 @@ interface Props {
   isReply: boolean
   parentId: string
   reload: Function
+  readonly: boolean
 }
 
 const CommentItem: React.FC<Props> = ({
-  hasPermission, comment, onDelete, onUpdate, onReply, projectId, isReply, parentId, reload,
+  hasPermission, comment, onDelete, onUpdate, onReply, projectId, isReply, parentId, reload, readonly,
 }) => {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState<Delta>();
@@ -187,31 +188,35 @@ const CommentItem: React.FC<Props> = ({
             </div>
           </div>
           <div className="c7n-action">
-            <Icon type="message_notification" onClick={handleClickReply} />
             {
-              hasPermission && (
-                <Icon
-                  type="mode_edit mlr-3 pointer"
-                  onClick={() => {
-                    if (canEditOrDelete) {
-                      if (replying) {
-                        setReplying(false);
-                        setReplyValue(undefined);
-                      }
-                      setEditing(true);
-                    }
-                  }}
-                />
+              !readonly && (
+                <Icon type="message_notification" onClick={handleClickReply} />
               )
+            }
+            {
+             !readonly && hasPermission && (
+             <Icon
+               type="mode_edit mlr-3 pointer"
+               onClick={() => {
+                 if (canEditOrDelete) {
+                   if (replying) {
+                     setReplying(false);
+                     setReplyValue(undefined);
+                   }
+                   setEditing(true);
+                 }
+               }}
+             />
+             )
             }
 
             {
-              hasPermission && (
-                <Icon
-                  type="delete_forever mlr-3 pointer"
-                  onClick={handleClickDltBtn}
-                />
-              )
+             !readonly && hasPermission && (
+             <Icon
+               type="delete_forever mlr-3 pointer"
+               onClick={handleClickDltBtn}
+             />
+             )
             }
           </div>
         </div>

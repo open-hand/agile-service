@@ -61,7 +61,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         issueCommentDTO.setReplyToUserId(0L);
         IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueCommentVO.getIssueId());
-        sendMsgUtil.sendMsgByIssueComment(projectId, issue, issueCommentVO);
+        sendMsgUtil.sendMsgByIssueComment(projectId, issue, issueCommentVO, DetailsHelper.getUserDetails().getUserId());
         return issueCommentVO;
     }
 
@@ -73,10 +73,11 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, issueCommentDTO.getCommentId());
 
             IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueCommentVO.getIssueId());
+            Long operatorId = DetailsHelper.getUserDetails().getUserId();
             if (issueCommentVO.getReplyToUserId() == null){
-                sendMsgUtil.sendMsgByIssueComment(projectId, issue, issueCommentVO);
+                sendMsgUtil.sendMsgByIssueComment(projectId, issue, issueCommentVO, operatorId);
             } else {
-                sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO);
+                sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO, operatorId);
             }
             return issueCommentVO;
         } else {
@@ -144,7 +145,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         issueCommentDTO.setProjectId(projectId);
         IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueCommentVO.getIssueId());
-        sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO);
+        sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO, DetailsHelper.getUserDetails().getUserId());
         return issueCommentVO;
     }
 

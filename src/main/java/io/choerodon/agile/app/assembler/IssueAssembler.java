@@ -76,6 +76,7 @@ public class IssueAssembler extends AbstractAssembler {
         assigneeIdList.add(issueDetailDTO.getReporterId());
         assigneeIdList.add(issueDetailDTO.getCreatedBy());
         assigneeIdList.add(issueDetailDTO.getMainResponsibleId());
+        assigneeIdList.add(issueDetailDTO.getLastUpdatedBy());
         Boolean issueCommentCondition = issueVO.getIssueCommentVOList() != null && !issueVO.getIssueCommentVOList().isEmpty();
         if (issueCommentCondition) {
             assigneeIdList.addAll(issueVO.getIssueCommentVOList().stream().map(IssueCommentVO::getUserId).collect(Collectors.toList()));
@@ -85,6 +86,7 @@ public class IssueAssembler extends AbstractAssembler {
         UserMessageDTO assigneeUserDO = userMessageDOMap.get(issueVO.getAssigneeId());
         UserMessageDTO reporterUserDO = userMessageDOMap.get(issueVO.getReporterId());
         UserMessageDTO createrUserDO = userMessageDOMap.get(issueVO.getCreatedBy());
+        UserMessageDTO updaterUserDO = userMessageDOMap.get(issueDetailDTO.getLastUpdatedBy());
         String assigneeName = assigneeUserDO != null ? assigneeUserDO.getName() : null;
         String assigneeLoginName = assigneeUserDO != null ? assigneeUserDO.getLoginName() : null;
         String assigneeRealName = assigneeUserDO != null ? assigneeUserDO.getRealName() : null;
@@ -104,6 +106,8 @@ public class IssueAssembler extends AbstractAssembler {
         issueVO.setAssigneeRealName(assigneeRealName);
         issueVO.setReporterLoginName(reporterLoginName);
         issueVO.setReporterRealName(reporterRealName);
+
+        issueVO.setUpdater(updaterUserDO);
         if (issueCommentCondition) {
             Map<Long, Integer> parentSizeMap = new HashMap<>(issueVO.getIssueCommentVOList().size());
             Iterator<IssueCommentVO> iterator = issueVO.getIssueCommentVOList().iterator();
@@ -139,6 +143,8 @@ public class IssueAssembler extends AbstractAssembler {
         List<IssueListFieldKVVO> issueListFieldKVDTOList = new ArrayList<>(issueDTOList.size());
         Set<Long> userIds = issueDTOList.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
         userIds.addAll(issueDTOList.stream().filter(issue -> issue.getReporterId() != null && !Objects.equals(issue.getReporterId(), 0L)).map(IssueDTO::getReporterId).collect(Collectors.toSet()));
+        userIds.addAll(issueDTOList.stream().filter(issue -> issue.getCreatedBy() != null && !Objects.equals(issue.getCreatedBy(), 0L)).map(IssueDTO::getReporterId).collect(Collectors.toSet()));
+        userIds.addAll(issueDTOList.stream().filter(issue -> issue.getLastUpdatedBy() != null && !Objects.equals(issue.getLastUpdatedBy(), 0L)).map(IssueDTO::getReporterId).collect(Collectors.toSet()));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Lists.newArrayList(userIds), true);
         issueDTOList.forEach(issueDO -> {
             UserMessageDTO assigneeUserDO = usersMap.get(issueDO.getAssigneeId());
@@ -174,6 +180,8 @@ public class IssueAssembler extends AbstractAssembler {
             issueListFieldKVVO.setLabelIssueRelVOS(toTargetList(issueDO.getLabelIssueRelDTOS(), LabelIssueRelVO.class));
             issueListFieldKVVO.setFoundationFieldValue(foundationCodeValue.get(issueDO.getIssueId()) != null ? foundationCodeValue.get(issueDO.getIssueId()) : new HashMap<>());
             setParentId(issueListFieldKVVO, issueDO);
+            issueListFieldKVVO.setCreateUser(usersMap.get(issueDO.getCreatedBy()));
+            issueListFieldKVVO.setUpdateUser(usersMap.get(issueDO.getLastUpdatedBy()));
             issueListFieldKVDTOList.add(issueListFieldKVVO);
         });
         return issueListFieldKVDTOList;
@@ -637,22 +645,28 @@ public class IssueAssembler extends AbstractAssembler {
         Map<Boolean, List<IssueOverviewVO>> group = issueList.stream()
                 .collect(Collectors.groupingBy(issue -> BooleanUtils.isTrue(issue.getCompleted())));
         sprintStatistics.setTotal(issueList.size());
-        sprintStatistics.setCompletedCount(group.getOrDefault(Boolean.TRUE, Collections.emptyList()).size());
-        sprintStatistics.setUncompletedCount(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).size());
-        long todoCount =
-                group
-                        .getOrDefault(Boolean.FALSE, Collections.emptyList())
-                        .stream()
-                        .filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode()))
-                        .count();
-        sprintStatistics.setTodoCount((int) todoCount);
+        List<IssueOverviewVO> completedIssues = group.getOrDefault(Boolean.TRUE, Collections.emptyList());
+        List<IssueOverviewVO> unCompletedIssues = group.getOrDefault(Boolean.FALSE, Collections.emptyList());
+        List<IssueOverviewVO> todoIssues = unCompletedIssues.stream().filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode())).collect(Collectors.toList());
+
         long unAssignCount =
-                group
-                        .getOrDefault(Boolean.FALSE, Collections.emptyList())
+                completedIssues
+                        .stream()
+                        .filter(issue -> Objects.isNull(issue.getAssigneeId()))
+                        .count();
+        unAssignCount +=
+                unCompletedIssues
                         .stream()
                         .filter(issue -> Objects.isNull(issue.getAssigneeId()))
                         .count();
         sprintStatistics.setUnassignCount((int) unAssignCount);
+
+        Set<Long> completedIssueStatusIds = completedIssues.stream().map(IssueOverviewVO::getStatusId).collect(Collectors.toSet());
+        Set<Long> unCompletedIssueStatusIds = unCompletedIssues.stream().map(IssueOverviewVO::getStatusId).collect(Collectors.toSet());
+        Set<Long> todoIssueStatusIds = todoIssues.stream().map(IssueOverviewVO::getStatusId).collect(Collectors.toSet());
+        sprintStatistics.setCompletedCount(new IssueCountWithStatusIdsVO(completedIssueStatusIds, completedIssues.size()));
+        sprintStatistics.setUncompletedCount(new IssueCountWithStatusIdsVO(unCompletedIssueStatusIds, unCompletedIssues.size()));
+        sprintStatistics.setTodoCount(new IssueCountWithStatusIdsVO(todoIssueStatusIds, todoIssues.size()));
         return sprintStatistics;
     }
 

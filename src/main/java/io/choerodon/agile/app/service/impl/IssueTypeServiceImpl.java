@@ -203,7 +203,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         String typeCode = result.getTypeCode();
         List<ObjectSchemeFieldDTO> fields;
         Long issueTypeId = result.getId();
-        if (!Objects.isNull(result.getReferenced())) {
+        if (!Objects.isNull(result.getReferenceId())) {
             fields = objectSchemeFieldMapper.selectByOptions(organizationId, null, null, null, result.getReferenceId(),Arrays.asList(typeCode));
         } else {
             fields =
@@ -250,7 +250,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 extendDTO.setCreated(created);
                 extendDTO.setEdited(edited);
                 extendDTO.setRank(rank);
-                if (!Objects.isNull(result.getReferenced())) {
+                if (!Objects.isNull(result.getReferenceId())) {
                     extendDTO.setDefaultValue(referencedSystemFieldExtendMap.get(x.getId()).getDefaultValue());
                 } else {
                     extendDTO.setDefaultValue(x.getDefaultValue());

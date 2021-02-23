@@ -28,6 +28,8 @@ public enum AgileSystemFieldContext {
     ESTIMATED_END_TIME(FieldCode.ESTIMATED_END_TIME,"story,issue_epic,bug,task,sub_task"),
     MAIN_RESPONSIBLE(FieldCode.MAIN_RESPONSIBLE,"story,task,bug,sub_task"),
     ENVIRONMENT(FieldCode.ENVIRONMENT,"bug"),
+    CREATOR(FieldCode.CREATOR,"story,issue_epic,bug,task,sub_task"),
+    UPDATER(FieldCode.UPDATOR,"story,issue_epic,bug,task,sub_task"),
     ;
     private String fieldCode;
     private String context;

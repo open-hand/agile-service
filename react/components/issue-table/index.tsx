@@ -209,6 +209,36 @@ const IssueTable: React.FC<Props> = ({
           )}
         />
         <Column
+          name="createUser"
+          hidden={columnHidden('createUser')}
+          renderer={({ record }) => (
+            <div style={{ display: 'inline-flex' }}>
+              {
+                record.get('createUser') && (
+                  <UserHead
+                    user={record.get('createUser')}
+                  />
+                )
+              }
+            </div>
+          )}
+        />
+        <Column
+          name="updateUser"
+          hidden={columnHidden('updateUser')}
+          renderer={({ record }) => (
+            <div style={{ display: 'inline-flex' }}>
+              {
+                record.get('updateUser') && (
+                  <UserHead
+                    user={record.get('updateUser')}
+                  />
+                )
+              }
+            </div>
+          )}
+        />
+        <Column
           sortable
           name="statusId"
           hidden={columnHidden('statusId')}

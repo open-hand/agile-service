@@ -2,7 +2,7 @@ import React, { useState, ReactNode } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { find } from 'lodash';
 import permission from '@/components/permission';
-import useQuery from '@/hooks/useQuery';
+import useQueryString from '@/hooks/useQueryString';
 import Status from './status';
 import StatusCirculation from './status-circulation';
 import CustomCirculation from './custom-circulation';
@@ -34,8 +34,8 @@ const tabs: ITab[] = [{
 
 const { TabPane } = Tabs;
 const StateMachine: React.FC = (props) => {
-  const params = useQuery();
-  const issueTypeId = params.get('issueTypeId');
+  const params = useQueryString();
+  const { issueTypeId } = params;
   const [selectedType, handleChangeSelectedType] = useSelectedType(issueTypeId || undefined);
   const [activeKey, setActiveKey] = useState(issueTypeId ? tabs[1].key : tabs[0].key);
   const Component = find(tabs, { key: activeKey })?.component;

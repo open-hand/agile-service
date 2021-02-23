@@ -105,9 +105,20 @@ const IssueMove: React.FC<Props> = ({
         valueField: 'id',
         label: '选择子任务类型',
         options: issueTypeDataSet,
-        dynamicProps: () => ({
-          required: issue.subIssueVOList?.length > 0,
-        }),
+        dynamicProps: {
+          disabled: ({ record }) => !record.get('targetProjectId'),
+          required: () => issue.subIssueVOList?.length > 0,
+        },
+      }, {
+        name: 'subBugIssueTypeId',
+        textField: 'name',
+        valueField: 'id',
+        label: '选择子缺陷类型',
+        options: issueTypeDataSet,
+        dynamicProps: {
+          disabled: ({ record }) => !record.get('targetProjectId'),
+          required: () => issue.subBugVOList?.length > 0,
+        },
       },
     ],
     events: {
@@ -133,9 +144,9 @@ const IssueMove: React.FC<Props> = ({
               } else {
                 setTargetProjectType('project');
               }
-              if (issue.subIssueVOList && issue.subIssueVOList.length) {
-                excludeTypeCode.push('bug');
-              }
+              // if (issue.subIssueVOList && issue.subIssueVOList.length) {
+              //   excludeTypeCode.push('bug');
+              // }
             } else {
               setTargetProjectType('program');
             }
@@ -149,10 +160,10 @@ const IssueMove: React.FC<Props> = ({
             moveDataSet.current.set('issueType', undefined);
           }
         }
-        if (name === 'targetProjectId' || name === 'issueType' || name === 'subTaskIssueTypeId') {
-          resetData(moveDataSet, ['targetProjectId', 'issueType', 'subTaskIssueTypeId']); // 改变项目或者问题类型应该重置
+        if (name === 'targetProjectId' || name === 'issueType' || name === 'subTaskIssueTypeId' || name === 'subBugIssueTypeId') {
+          resetData(moveDataSet, ['targetProjectId', 'issueType', 'subTaskIssueTypeId', 'subBugIssueTypeId']); // 改变项目或者问题类型应该重置
 
-          Promise.all([moveDataSet.current?.getField('targetProjectId')?.checkValidity(), moveDataSet.current?.getField('issueType')?.checkValidity(), moveDataSet.current?.getField('subTaskIssueTypeId')?.checkValidity()]).then((validateRes) => {
+          Promise.all([moveDataSet.current?.getField('targetProjectId')?.checkValidity(), moveDataSet.current?.getField('issueType')?.checkValidity(), moveDataSet.current?.getField('subTaskIssueTypeId')?.checkValidity(), moveDataSet.current?.getField('subBugIssueTypeId')?.checkValidity()]).then((validateRes) => {
             setsStep1NextDisabled(!validateRes.every((validate) => !!validate));
           });
         }
@@ -168,10 +179,13 @@ const IssueMove: React.FC<Props> = ({
         if (name === 'subTaskIssueTypeId') {
           store.setSubTaskTypeId(value);
         }
+        if (name === 'subBugIssueTypeId') {
+          store.setSubBugTypeId(value);
+        }
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [issue.issueId, issue.subIssueVOList, issue.typeCode, issueTypeDataSet, resetData]);
+  }), [issue.issueId, issue.subBugVOList?.length, issue.subIssueVOList, issue.typeCode, issueTypeDataSet, resetData]);
 
   const handlePre = () => {
     setCurrentStep(currentStep - 1);
@@ -190,9 +204,10 @@ const IssueMove: React.FC<Props> = ({
     store.setSelectUserIds(uniqUserIds);
   }, [fieldsWithValue, issue.assigneeId, issue.mainResponsible?.id, issue.reporterId]);
 
-  const { selfFields, subTaskFields } = store;
+  const { selfFields, subTaskFields, subBugFields } = store;
   const targetTypeId = dataSet.current?.get('issueType');
   const subTaskIssueTypeId = dataSet.current?.get('subTaskIssueTypeId');
+  const subBugIssueTypeId = dataSet.current?.get('subBugIssueTypeId');
   const targetProjectId = dataSet.current?.get('targetProjectId');
 
   const handleSubmit = useCallback(() => {
@@ -206,7 +221,16 @@ const IssueMove: React.FC<Props> = ({
       const kIssueId = k.split('-')[0];
       const isSelf = kIssueId === issue.issueId;
       if (kIssueId && kIssueId !== 'undefined' && k.split('-')[1] && v) {
-        const fieldInfo = (isSelf ? selfFields : subTaskFields).find((item: IField) => item.fieldCode === k.split('-')[1]);
+        const isSubTask = issue.subIssueVOList?.find((item) => item.issueId === kIssueId);
+        let fields = selfFields;
+        if (!isSelf) {
+          if (isSubTask) {
+            fields = subTaskFields;
+          } else {
+            fields = subBugFields;
+          }
+        }
+        const fieldInfo = fields.find((item: IField) => item.fieldCode === k.split('-')[1]);
         if (fieldInfo) {
           if (fieldInfo.system) { // 系统字段
             if (submitFieldMap.get(k.split('-')[1])) {
@@ -234,7 +258,7 @@ const IssueMove: React.FC<Props> = ({
                 if (currentSubIssueItemIndex === -1) {
                   submitData.subIssues.push({
                     issueId: kIssueId,
-                    issueTypeId: subTaskIssueTypeId,
+                    issueTypeId: isSubTask ? subTaskIssueTypeId : subBugIssueTypeId,
                     ...fieldAndValue,
                   });
                 } else {
@@ -265,12 +289,12 @@ const IssueMove: React.FC<Props> = ({
                 value: v,
               }];
             }
-          } else { // 非系统字段，子任务
+          } else { // 非系统字段，子任务 | 子缺陷
             const currentSubIssueItemIndex = submitData.subIssues.findIndex((item: any) => item.issueId === kIssueId);
             if (currentSubIssueItemIndex === -1) {
               submitData.subIssues.push({
                 issueId: kIssueId,
-                issueTypeId: subTaskIssueTypeId,
+                issueTypeId: isSubTask ? subTaskIssueTypeId : subBugIssueTypeId,
                 customFields: [
                   {
                     fieldId: fieldInfo.fieldId,
@@ -309,10 +333,11 @@ const IssueMove: React.FC<Props> = ({
       Choerodon.prompt('移动失败');
     });
     return false;
-  }, [dataMap, dataSet, issue.issueId, modal, onMoveIssue, selfFields, subTaskFields, subTaskIssueTypeId, targetProjectId, targetTypeId]);
+  }, [dataMap, dataSet, issue.issueId, issue.subIssueVOList, modal, onMoveIssue, selfFields, subBugFields, subBugIssueTypeId, subTaskFields, subTaskIssueTypeId, targetProjectId, targetTypeId]);
 
   const targetIssueType = issueTypeDataSet.toData().find((item: IIssueType) => item.id === targetTypeId) as IIssueType;
   const targetSubTaskType = issueTypeDataSet.toData().find((item: IIssueType) => item.id === subTaskIssueTypeId) as IIssueType;
+  const targetSubBugType = issueTypeDataSet.toData().find((item: IIssueType) => item.id === subBugIssueTypeId) as IIssueType;
   return (
     <div className={styles.issueMove}>
       <Steps current={currentStep - 1}>
@@ -333,6 +358,7 @@ const IssueMove: React.FC<Props> = ({
           targetProjectType={targetProjectType}
           targetIssueType={targetIssueType}
           targetSubTaskType={targetSubTaskType}
+          targetSubBugType={targetSubBugType}
           loseItems={loseItems}
         />
         )}

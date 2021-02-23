@@ -1,6 +1,8 @@
 .importFields {
   margin-top: 16px;
   &_title {
+    display: inline-flex;
+    align-items: center;
     margin-bottom: 5px;
   }
   &_content {
@@ -24,6 +26,14 @@
           }
         }
       }
+    }
+  }
+  &_btn {
+    color: #3F51B5;
+    font-size: .12rem;
+
+    & >span {
+      font-weight: 500;
     }
   }
 }

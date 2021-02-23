@@ -2,12 +2,11 @@ import React, {
   useContext, useRef, useEffect, useState, useCallback, useMemo,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   Header, Content, Page, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui';
-import queryString from 'querystring';
 import { map } from 'lodash';
 import CreateIssue from '@/components/CreateIssue';
 import { projectApi } from '@/api/Project';
@@ -15,7 +14,8 @@ import { issueApi } from '@/api';
 import IssueSearch from '@/components/issue-search';
 import openSaveFilterModal from '@/components/SaveFilterModal';
 import { linkUrl } from '@/utils/to';
-import LINK_URL, { getParams } from '@/constants/LINK_URL';
+import LINK_URL from '@/constants/LINK_URL';
+import useQueryString from '@/hooks/useQueryString';
 import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import FilterManage from '@/components/FilterManage';
@@ -34,10 +34,11 @@ const Issue = observer(() => {
     dataSet, projectId, issueSearchStore, fields, changeTableListMode, tableListMode,
   } = useContext(Store);
   const history = useHistory();
-  const location = useLocation();
+  const params = useQueryString();
   const [urlFilter, setUrlFilter] = useState(null);
   const tableRef = useRef();
   const [props] = useDetail();
+  const { open } = props;
   IssueStore.setTableRef(tableRef);
   const visibleColumns = useMemo(() => {
     if (localPageCacheStore.getItem('issues.table')) {
@@ -53,30 +54,47 @@ const Issue = observer(() => {
    * 防止删除此页一条数据时页时停留当前页时出现无数据清空
    * @param {Boolean} isDelete  用于标记是否为删除操作
    */
-  const refresh = (isDelete = false) => dataSet.query(
+  const refresh = useCallback((isDelete = false) => dataSet.query(
     isDelete
       && dataSet.length === 1
       && dataSet.totalCount > 1
       ? dataSet.currentPage - 1
       : dataSet.currentPage,
-  );
+  ), [dataSet]);
   useEffect(() => () => {
     const columProps = tableRef.current
       ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden) : null;
     localPageCacheStore.mergeSetItem('issues.table', { pageInfo: { currentPage: dataSet.currentPage }, columProps });
   }, [dataSet]);
-
+  const hasUrlFilter = useCallback((obj) => {
+    const whiteList = ['type', 'category', 'id', 'name', 'organizationId'];
+    return Object.keys(obj).some((key) => !whiteList.includes(key));
+  }, []);
   const initFilter = async () => {
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
-      paramType, paramIssueId, paramName, paramOpenIssueId, detailTab,
-      // eslint-disable-next-line no-restricted-globals
-    } = queryString.parse(location.search);
-    if (paramChoose || paramCurrentVersion || paramCurrentSprint || paramId
-      || paramType || paramIssueId || paramName || paramOpenIssueId) {
+      paramType, paramIssueId, paramName, paramOpenIssueId, detailTab, ...searchArgs
+    } = params;
+    if (hasUrlFilter(params)) {
       issueSearchStore.clearAllFilter();
       localPageCacheStore.clear();
     }
+    Object.keys(searchArgs).forEach((key) => {
+      const value = searchArgs[key];
+      switch (key) {
+        case 'tableListMode': {
+          changeTableListMode(value);
+          break;
+        }
+        case 'statusId':
+        case 'sprint':
+        case 'assigneeId': {
+          issueSearchStore.handleFilterChange(key, value.split(','));
+          break;
+        }
+        default: break;
+      }
+    });
     let prefix = '';
     if (paramChoose) {
       if (paramChoose === 'version' && paramCurrentVersion) {
@@ -118,7 +136,6 @@ const Issue = observer(() => {
         }
       }
       issueSearchStore.handleFilterChange('issueIds', [id]);
-      // issueSearchStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
       IssueStore.setClickedRow({
         selectedIssue: {
           issueId: id,
@@ -160,10 +177,24 @@ const Issue = observer(() => {
     };
   }, []);
 
-  const handleCreateIssue = (issue) => {
+  const handleCreateIssue = useCallback((issue) => {
     IssueStore.createQuestion(false);
     dataSet.query();
-  };
+  }, [dataSet]);
+  const handleRowClick = useCallback((record) => {
+    open({
+      path: 'issue',
+      props: {
+        issueId: record.get('issueId'),
+        // store: detailStore,
+      },
+      events: {
+        update: () => {
+          refresh();
+        },
+      },
+    });
+  }, [open, refresh]);
   const handleClickFilterManage = () => {
     const editFilterInfo = IssueStore.getEditFilterInfo;
     const filterListVisible = IssueStore.getFilterListVisible;
@@ -177,8 +208,8 @@ const Issue = observer(() => {
     setUrlFilter(null);
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
-      paramType, paramIssueId, paramName, paramOpenIssueId, ...otherArgs
-    } = getParams(location.search);
+      paramType, paramIssueId, paramName, paramOpenIssueId,
+    } = params;
     if (paramOpenIssueId || paramIssueId || paramChoose || paramType) {
       history.replace(linkUrl(LINK_URL.workListIssue));
     }
@@ -260,31 +291,7 @@ const Issue = observer(() => {
           tableRef={tableRef}
           visibleColumns={visibleColumns}
           onCreateIssue={handleCreateIssue}
-          onRowClick={(record) => {
-            props.open({
-              path: 'issue',
-              props: {
-                issueId: record.get('issueId'),
-                // store: detailStore,
-              },
-              events: {
-                update: () => {
-                  refresh();
-                },
-              },
-            });
-            // dataSet.select(record);
-            // const editFilterInfo = IssueStore.getEditFilterInfo;
-            // IssueStore.setClickedRow({
-            //   selectedIssue: {
-            //     issueId: record.get('issueId'),
-            //   },
-            //   expand: true,
-            // });
-            // IssueStore.setFilterListVisible(false);
-            // IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
-          }}
-          selectedIssue={IssueStore.selectedIssue?.issueId}
+          onRowClick={handleRowClick}
         />
         <FilterManage
           visible={IssueStore.filterListVisible}

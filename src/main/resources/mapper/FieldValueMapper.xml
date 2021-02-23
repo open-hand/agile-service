@@ -189,6 +189,18 @@
         </if>
     </select>
 
+    <select id="selectByFieldIds" resultType="io.choerodon.agile.infra.dto.FieldValueDTO">
+        select *
+        from fd_field_value
+        where project_id = #{projectId}
+        and scheme_code = #{schemeCode}
+        and instance_id = #{instanceId}
+        and field_id in
+        <foreach collection="fieldIds" item="fieldId" open="(" separator="," close=")">
+            #{fieldId}
+        </foreach>
+    </select>
+
     <update id="updateProjectId">
         update fd_field_value set project_id = #{targetProjectId}
         where project_id = #{projectId}

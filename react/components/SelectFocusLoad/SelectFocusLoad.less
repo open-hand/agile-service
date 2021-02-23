@@ -17,3 +17,18 @@
 .minSelectFocusLoadDropDownWidth {
   min-width: 180px;
 }
+
+.c7n-select-multiple .c7n-select-selection--multiple .c7n-select-selection__choice {
+  background-color: #3f51b5;
+  & > .c7n-select-selection__choice__content {
+    color: #fff !important;
+    span {
+      color: #fff !important;
+    }
+  }
+  & > .c7n-select-selection__choice__remove {
+    .icon-cancel {
+      color: rgba(255, 255, 255, 0.72);
+    }
+  }
+}
