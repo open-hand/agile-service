@@ -76,8 +76,8 @@ const UserHead: React.FC<UserHeadProps> = ({
             style={{
               width: 40,
               height: 40,
-              background: '#b3bac5',
-              color: '#fff',
+              background: '#c5cbe8',
+              color: '#6473c3',
               overflow: 'hidden',
               display: 'flex',
               justifyContent: 'center',
@@ -93,7 +93,7 @@ const UserHead: React.FC<UserHeadProps> = ({
               ) : (
                 <span
                   style={{
-                    width: 40, height: 40, lineHeight: '40px', textAlign: 'center', color: '#fff', fontSize: '12px',
+                    width: 40, height: 40, lineHeight: '40px', textAlign: 'center', color: '#6473c3', fontSize: '12px',
                   }}
                   className="user-Head-Title"
                 >
