@@ -93,6 +93,8 @@ interface IExportSearch {
     testResponsibleIds?: string[]
     mainResponsibleIds?: string[]
     environment?: string[]
+    creatorIds?: string
+    updatorIds?: string[]
   },
   searchArgs?: {
     estimatedStartTimeScopeStart?: string,
