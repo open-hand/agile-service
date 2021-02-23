@@ -107,11 +107,15 @@ public class SendMsgUtil {
                 + URL_TEMPLATE5 + result.getIssueId();
     }
 
-    public String getFeatureUrl(ProjectVO projectVO) {
+    public String getFeatureUrl(IssueVO result, ProjectVO projectVO, Long paramIssueId) {
         return FEATURE_URL_TEMPLATE1 + projectVO.getId()
                 + FEATURE_URL_TEMPLATE2 + convertProjectName(projectVO)
                 + FEATURE_URL_TEMPLATE3 + projectVO.getCategory()
-                + FEATURE_URL_TEMPLATE4 + projectVO.getOrganizationId();
+                + FEATURE_URL_TEMPLATE4 + projectVO.getOrganizationId()
+                + URL_TEMPLATE3 + result.getIssueNum()
+                + URL_TEMPLATE4 + paramIssueId
+                + URL_TEMPLATE5 + result.getIssueId();
+
     }
 
     @Async
@@ -367,7 +371,7 @@ public class SendMsgUtil {
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         if ("feature".equals(issueVO.getTypeCode())) {
             issueType = "特性";
-            url = getFeatureUrl(projectVO);
+            url = getFeatureUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         } else {
             issueType = "问题";
             url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
@@ -409,7 +413,7 @@ public class SendMsgUtil {
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         if ("feature".equals(issueVO.getTypeCode())) {
             issueType = "特性";
-            url = getFeatureUrl(projectVO);
+            url = getFeatureUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         } else {
             issueType = "问题";
             url = getIssueCreateUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
