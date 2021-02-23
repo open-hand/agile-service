@@ -54,7 +54,7 @@ export interface ISettingField {
 
 type ISelectUserMap = Map<string, { id: null | string, realName: null | string }>
 
-const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate'];
+const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate', 'created_user', 'last_updated_user'];
 
 // @ts-ignore
 const transformUpdateData = (data) => {
