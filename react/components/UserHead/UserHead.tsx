@@ -117,6 +117,7 @@ const UserHead: React.FC<UserHeadProps> = ({
               textAlign: 'center',
               borderRadius: '50%',
               flexShrink: 0,
+              position: 'relative',
             }}
           >
             {
