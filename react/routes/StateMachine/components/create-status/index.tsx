@@ -178,6 +178,7 @@ const CreateStatus: React.FC<Props> = ({
           name="valueCode"
           optionsFilter={isProgram ? undefined : (record) => (isProgram ? true : record.get('valueCode') !== 'prepare')}
           optionRenderer={({ record }) => (<StatusTypeTag code={record?.get('valueCode') as IStatus['valueCode']} />)}
+          renderer={({ value }) => (value ? <StatusTypeTag code={value as IStatus['valueCode']} /> : null)}
           disabled={type !== null}
         />
         <Select name="issueTypeIds" multiple>
@@ -208,6 +209,7 @@ const openCreateStatus = (props: Omit<Props, 'modal'>) => {
     style: {
       width: 380,
     },
+    okText: '创建',
     children: <ObserverCreateStatus {...props} />,
   });
 };
