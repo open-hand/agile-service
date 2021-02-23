@@ -6,7 +6,6 @@ import {
   debounce, isEmpty, isEqual, pick, includes,
 } from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import { fieldApi, personalFilterApi } from '@/api';
 
 export const isFilterSame = (obj, obj2) => {
   // 过滤掉 [] null '' 那些不起作用的属性
@@ -174,6 +173,17 @@ export function getSystemFields(excludeCodes = []) {
     name: '环境',
     defaultShow: false,
     fieldType: 'multiple',
+  },
+  {
+    code: 'creatorIds',
+    name: '创建人',
+    defaultShow: false,
+    fieldType: 'member',
+  }, {
+    code: 'updatorIds',
+    name: '更新人',
+    defaultShow: false,
+    fieldType: 'member',
   },
   ];
   return IsInProgramStore.isInProgram ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
