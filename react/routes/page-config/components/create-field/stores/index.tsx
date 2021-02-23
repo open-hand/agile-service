@@ -7,9 +7,11 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { InjectedIntl } from 'react-intl';
 import { AppStateProps, IModalProps } from '@/common/types';
 import { getApplyType } from '@/utils/common';
+import { useComputed, observer, useObservable } from 'mobx-react-lite';
 import FormDataSet from './FormDataSet';
 import useStore, { Store as HookStore } from './useStore';
 import { IFieldPostDataProps } from '../CreateField';
+import ContextOptionsDataSet from './ContextOptionsDataSet';
 
 interface Context {
   formatMessage: InjectedIntl['formatMessage'],
@@ -30,7 +32,7 @@ const Store = createContext({} as Context);
 export type CreateFiledProps = Pick<Context, 'formatMessage' | 'isEdit' | 'onSubmitLocal' |
   'localCheckCode' | 'localCheckName' | 'schemeCode' | 'handleRefresh' | 'record'>;
 export default Store;
-export const StoreProvider: React.FC<Context> = inject('AppState')(
+export const StoreProvider: React.FC<Context> = inject('AppState')(observer(
   (props) => {
     const {
       formatMessage, AppState: { currentMenuType: { type, id, organizationId } },
@@ -38,6 +40,8 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
     } = props;
     const isEdit = !!record;
     const store = useStore(type, id, organizationId);
+    const contextOptionsDataSet = useMemo(() => new DataSet(ContextOptionsDataSet({ isEdit, store, oldRecord: record })), [isEdit, record, store]);
+
     const formDataSet = useMemo(() => new DataSet(FormDataSet({
       formatMessage,
       type,
@@ -49,7 +53,14 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
       localCheckCode,
       localCheckName,
       defaultContext,
-    })), [defaultContext, formatMessage, id, isEdit, localCheckCode, localCheckName, record, schemeCode, store, type]);
+      contextOptionsDataSet,
+    })), [contextOptionsDataSet, defaultContext, formatMessage, id, isEdit, localCheckCode, localCheckName, record, schemeCode, store, type]);
+
+    useEffect(() => {
+      if (!isEdit && contextOptionsDataSet.length > 0 && defaultContext) {
+        formDataSet.current?.set('context', defaultContext);
+      }
+    }, [contextOptionsDataSet.length, defaultContext, formDataSet, isEdit]);
 
     useEffect(() => {
       if (isEdit) {
@@ -106,4 +117,4 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
       </Store.Provider>
     );
   },
-);
+));
