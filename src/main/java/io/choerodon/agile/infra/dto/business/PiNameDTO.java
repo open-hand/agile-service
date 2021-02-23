@@ -29,6 +29,8 @@ public class PiNameDTO {
 
     private Boolean hasSprint;
 
+    private String fullName;
+
     public Long getId() {
         return id;
     }
@@ -99,5 +101,13 @@ public class PiNameDTO {
 
     public void setHasSprint(Boolean hasSprint) {
         this.hasSprint = hasSprint;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }
