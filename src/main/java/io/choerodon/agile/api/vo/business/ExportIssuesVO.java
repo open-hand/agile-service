@@ -83,6 +83,18 @@ public class ExportIssuesVO {
     private Date estimatedEndTime;
     private String teamProjects;
 
+    @ApiModelProperty("创建人名称")
+    private String createdUserName;
+
+    @ApiModelProperty("创建人真实名称")
+    private String createdUserRealName;
+
+    @ApiModelProperty("更新人名称")
+    private String lastUpdatedUserName;
+
+    @ApiModelProperty("更新人真实名称")
+    private String lastUpdatedUserRealName;
+
     public ExportIssuesVO() {
     }
 
@@ -388,5 +400,37 @@ public class ExportIssuesVO {
 
     public void setEstimatedEndTime(Date estimatedEndTime) {
         this.estimatedEndTime = estimatedEndTime;
+    }
+
+    public String getCreatedUserName() {
+        return createdUserName;
+    }
+
+    public void setCreatedUserName(String createdUserName) {
+        this.createdUserName = createdUserName;
+    }
+
+    public String getLastUpdatedUserName() {
+        return lastUpdatedUserName;
+    }
+
+    public void setLastUpdatedUserName(String lastUpdatedUserName) {
+        this.lastUpdatedUserName = lastUpdatedUserName;
+    }
+
+    public String getCreatedUserRealName() {
+        return createdUserRealName;
+    }
+
+    public void setCreatedUserRealName(String createdUserRealName) {
+        this.createdUserRealName = createdUserRealName;
+    }
+
+    public String getLastUpdatedUserRealName() {
+        return lastUpdatedUserRealName;
+    }
+
+    public void setLastUpdatedUserRealName(String lastUpdatedUserRealName) {
+        this.lastUpdatedUserRealName = lastUpdatedUserRealName;
     }
 }
