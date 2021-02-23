@@ -34,6 +34,8 @@ export default ({
     { name: 'statusId', type: 'object', label: '状态' },
     { name: 'assigneeId', type: 'string', label: '经办人' },
     { name: 'reporterId', type: 'string', label: '报告人' },
+    { name: 'createUser', type: 'object', label: '创建人' },
+    { name: 'updateUser', type: 'object', label: '更新人' },
     { name: 'label', type: 'string', label: '标签' },
     { name: 'component', type: 'string', label: '模块' },
     { name: 'storyPoints', type: 'string', label: '故事点' },

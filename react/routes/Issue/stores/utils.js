@@ -33,6 +33,8 @@ function transformSystemFilter(data) {
     userId,
     testResponsibleIds,
     mainResponsibleIds,
+    creatorIds,
+    updatorIds,
     environment,
   } = data;
   return {
@@ -59,6 +61,8 @@ function transformSystemFilter(data) {
       testResponsibleIds,
       mainResponsibleIds,
       environment,
+      creatorIds,
+      updatorIds,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: estimatedStartTime[0],
