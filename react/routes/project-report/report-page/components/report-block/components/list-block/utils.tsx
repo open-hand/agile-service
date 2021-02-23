@@ -78,6 +78,16 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
       dataIndex: 'assign',
       render: (item) => item.reporterRealName,
     }],
+    ['createUser', {
+      title: '创建人',
+      dataIndex: 'createUser',
+      render: (item) => item.createUser?.realName,
+    }],
+    ['updateUser', {
+      title: '更新人',
+      dataIndex: 'updateUser',
+      render: (item) => item.updateUser?.realName,
+    }],
     ['status', {
       title: '状态',
       dataIndex: 'status',
