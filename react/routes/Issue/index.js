@@ -82,10 +82,6 @@ const Issue = observer(() => {
     Object.keys(searchArgs).forEach((key) => {
       const value = searchArgs[key];
       switch (key) {
-        case 'tableListMode': {
-          changeTableListMode(value);
-          break;
-        }
         case 'statusId':
         case 'sprint':
         case 'assigneeId': {
