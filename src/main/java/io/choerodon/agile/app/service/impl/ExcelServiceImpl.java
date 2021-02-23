@@ -208,6 +208,8 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put("lastUpdateDate", "最后更新时间");
         FIELD_MAP.put("estimatedStartTime", "预计开始时间");
         FIELD_MAP.put("estimatedEndTime", "预计结束时间");
+        FIELD_MAP.put("createdUserName", "创建人");
+        FIELD_MAP.put("lastUpdatedUserName", "更新人");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -2606,11 +2608,19 @@ public class ExcelServiceImpl implements ExcelService {
                         issueIds.add(i.getIssueId());
                         Long assigneeId = i.getAssigneeId();
                         Long reporterId = i.getReporterId();
+                        Long createdUser = i.getCreatedBy();
+                        Long updatedUser = i.getLastUpdatedBy();
                         if (!ObjectUtils.isEmpty(assigneeId) && !Objects.equals(assigneeId, 0L)) {
                             userIds.add(assigneeId);
                         }
                         if (!ObjectUtils.isEmpty(reporterId) && !Objects.equals(reporterId, 0L)) {
                             userIds.add(reporterId);
+                        }
+                        if (!ObjectUtils.isEmpty(createdUser) && !Objects.equals(createdUser, 0L)) {
+                            userIds.add(createdUser);
+                        }
+                        if (!ObjectUtils.isEmpty(updatedUser) && !Objects.equals(updatedUser, 0L)) {
+                            userIds.add(updatedUser);
                         }
                     });
                     Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
@@ -2699,6 +2709,8 @@ public class ExcelServiceImpl implements ExcelService {
         setTypeName(issueTypeDTOMap, issue, exportIssuesVO);
         setCloseSprintName(closeSprintNames, issueId, exportIssuesVO);
         setFixVersionName(fixVersionNames, issueId, exportIssuesVO);
+        setCreationUserName(usersMap, issue, exportIssuesVO);
+        setLastUpdatedUserName(usersMap, issue, exportIssuesVO);
         exportIssuesVO.setSprintName(exportIssuesSprintName(exportIssuesVO));
         setInfluenceVersionName(influenceVersionNames, issueId, exportIssuesVO);
         setLabelName(labelNames, issueId, exportIssuesVO);
@@ -2858,6 +2870,24 @@ public class ExcelServiceImpl implements ExcelService {
         if (!ObjectUtils.isEmpty(userMessage)) {
             exportIssuesVO.setAssigneeName(userMessage.getName());
             exportIssuesVO.setAssigneeRealName(userMessage.getRealName());
+        }
+    }
+
+    protected void setCreationUserName(Map<Long, UserMessageDTO> usersMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        Long createdUser = issue.getCreatedBy();
+        UserMessageDTO userMessage = usersMap.get(createdUser);
+        if (!ObjectUtils.isEmpty(userMessage)) {
+            exportIssuesVO.setCreatedUserName(userMessage.getName());
+            exportIssuesVO.setCreatedUserRealName(userMessage.getRealName());
+        }
+    }
+
+    protected void setLastUpdatedUserName(Map<Long, UserMessageDTO> usersMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        Long updatedUser = issue.getLastUpdatedBy();
+        UserMessageDTO userMessage = usersMap.get(updatedUser);
+        if (!ObjectUtils.isEmpty(userMessage)) {
+            exportIssuesVO.setLastUpdatedUserName(userMessage.getName());
+            exportIssuesVO.setLastUpdatedUserRealName(userMessage.getRealName());
         }
     }
 
