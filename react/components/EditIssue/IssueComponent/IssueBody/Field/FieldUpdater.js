@@ -7,7 +7,7 @@ import UserHead from '../../../../UserHead';
     const { store } = this.props;
     const issue = store.getIssue;
     const { updater } = issue;
-    const field = store.getFieldByCode('updator');
+    const field = store.getFieldByCode('last_updated_user');
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">

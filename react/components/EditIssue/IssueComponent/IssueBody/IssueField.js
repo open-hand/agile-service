@@ -91,9 +91,9 @@ const IssueField = observer((props) => {
         return <FieldMember {...props} field={field} />;
       case 'environment':
         return <FieldEnvironment {...props} field={field} />;
-      case 'creator':
+      case 'created_user':
         return <FieldCreator {...props} field={field} />;
-      case 'updator':
+      case 'last_updated_user':
         return <FieldUpdater {...props} field={field} />;
       default:
         return renderNormalField(field);
