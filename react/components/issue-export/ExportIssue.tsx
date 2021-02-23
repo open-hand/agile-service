@@ -81,7 +81,7 @@ const ExportIssue: React.FC = () => {
   const selectTemplateOkRef = useRef<(codes: string[]) => void>();
 
   const {
-    prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action,
+    prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action, exportBtnText,
   } = useExportIssueStore();
 
   // 添加筛选配置 数据
@@ -296,7 +296,7 @@ const ExportIssue: React.FC = () => {
           loading={store.exportButtonConfig?.buttonProps?.loading}
           className="c7n-exportIssue-btn"
         >
-          导出问题
+          {exportBtnText || '导出问题'}
         </Button>
         {
           !templateIsExist && (
