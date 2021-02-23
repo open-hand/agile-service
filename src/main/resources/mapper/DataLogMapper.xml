@@ -140,4 +140,13 @@
         where project_id = #{projectId}
         AND issue_id = #{issueId}
     </update>
+
+    <insert id="batchCreateDataLog">
+        INSERT INTO agile_data_log(project_id,field,old_value,old_string,new_value,new_string,issue_id,created_by,last_updated_by)
+        values
+        <foreach collection="dataLogList" item="dataLog" index="index" separator=",">
+            (#{dataLog.projectId} , #{dataLog.field} ,#{dataLog.oldValue} ,#{dataLog.oldString},#{dataLog.newValue} ,
+            #{dataLog.newString} ,#{dataLog.issueId},#{userId},#{userId})
+        </foreach>
+    </insert>
 </mapper>
