@@ -261,6 +261,8 @@ export interface Issue {
   createrEmail: string
   createrName: string
   createrRealName: string
+  createUser?: User
+  updateUser?: User
   createrLoginName: string
   assigneeId: string,
   assigneeImageUrl: string,
@@ -326,7 +328,9 @@ export type IIssueColumnName =
   'storyPoints' |
   'version' |
   'epic' |
-  'feature';
+  'feature' |
+  'createUser' |
+  'updateUser';
 
 export type IFieldType =
   'text' | 'input' | 'member' | 'multiMember' | 'single' | 'multiple' | 'radio' | 'checkbox' |

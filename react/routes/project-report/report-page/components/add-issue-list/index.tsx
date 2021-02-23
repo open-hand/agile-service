@@ -212,6 +212,8 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           <Option value="status">状态</Option>
           <Option value="sprint">冲刺</Option>
           <Option value="reporter">报告人</Option>
+          <Option value="createUser">创建人</Option>
+          <Option value="updateUser">更新人</Option>
           <Option value="creationDate">创建时间</Option>
           <Option value="lastUpdateDate">最后更新时间</Option>
           <Option value="estimatedStartTime">预计开始时间</Option>
