@@ -28,7 +28,7 @@ class FieldPI extends Component {
     const issue = store.getIssue;
     const { activePi, closePi } = issue;
     const {
-      name, code, id, statusCode,
+      name, code, id, statusCode, fullName,
     } = activePi || {};
     const field = store.getFieldByCode('pi');
     const required = field?.required;
@@ -71,7 +71,7 @@ class FieldPI extends Component {
                     !closePi.length && !id ? '无' : (
                       <div>
                         <div>
-                          {closePi.map((p) => `${p.code}-${p.name}`).join(' , ')}
+                          {closePi.map((p) => p.fullName || `${p.code}-${p.name}`).join(' , ')}
                         </div>
                         {
                           id && (
@@ -84,7 +84,7 @@ class FieldPI extends Component {
                                 marginTop: closePi.length ? 5 : 0,
                               }}
                             >
-                              {`${code}-${name}`}
+                              {fullName || `${code}-${name}`}
                             </div>
                           )
                         }

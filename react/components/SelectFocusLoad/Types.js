@@ -528,7 +528,7 @@ export default {
     request: () => piApi.getUnfinished(),
     render: (pi, disabledCurrentPI) => (
       <Option disabled={disabledCurrentPI && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
-        {`${pi.code}-${pi.name}`}
+        {pi.fullName || `${pi.code}-${pi.name}`}
       </Option>
     ),
   },

@@ -79,7 +79,7 @@ class Feature extends Component {
             {
               [...notDonePiList, { id: '0' }].map((pi) => (
                 <Option key={pi.id} value={pi.id}>
-                  {pi.id === '0' ? '未分配PI' : `${pi.code}-${pi.name}`}
+                  {pi.id === '0' ? '未分配PI' : pi.fullName || `${pi.code}-${pi.name}`}
                   {pi.id === (BacklogStore.piInfo && BacklogStore.piInfo.id) && (
                     <div
                       style={{
