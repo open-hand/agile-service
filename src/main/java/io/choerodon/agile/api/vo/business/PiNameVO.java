@@ -26,6 +26,8 @@ public class PiNameVO {
 
     private List<SprintDetailVO> sprints;
 
+    private String fullName;
+
     public List<SprintDetailVO> getSprints() {
         return sprints;
     }
@@ -64,5 +66,13 @@ public class PiNameVO {
 
     public void setStatusCode(String statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }
