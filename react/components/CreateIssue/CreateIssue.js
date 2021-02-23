@@ -1086,7 +1086,7 @@ class CreateIssue extends Component {
                         key={pi.id}
                         value={pi.id}
                       >
-                        {`${pi.code}-${pi.name}`}
+                        {pi.fullName || `${pi.code}-${pi.name}`}
                       </Option>
                     ))}
                   </SelectFocusLoad>,

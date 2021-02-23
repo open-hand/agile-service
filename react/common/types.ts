@@ -51,6 +51,7 @@ export interface PI {
   id: string
   code: string
   name: string
+  fullName: string
   startDate: string
   endDate: string
   actualStartDate: string | null
