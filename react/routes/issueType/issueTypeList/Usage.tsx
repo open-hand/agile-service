@@ -20,6 +20,7 @@ interface IUsage {
   id: string
   imageUrl: string
   name: string
+  creationDate: string
 }
 
 interface IRes {

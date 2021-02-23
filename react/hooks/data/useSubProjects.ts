@@ -6,6 +6,7 @@ export interface ISubProject {
   projectId: string,
   projName: string
   iamgeUrl: string
+  creationDate: string
 }
 
 export interface SubProjectsConfig {

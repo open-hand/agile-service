@@ -10,7 +10,7 @@ import UserHead from '../../../../UserHead';
       createdBy, createrImageUrl,
       createrLoginName, createrName, createrRealName,
     } = issue;
-    const field = store.getFieldByCode('creator');
+    const field = store.getFieldByCode('created_user');
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
