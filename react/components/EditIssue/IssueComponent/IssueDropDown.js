@@ -198,7 +198,7 @@ const IssueDropDown = ({
         )
       }
       {
-        (typeCode !== 'sub_task' && !parentRelateSummary) && ( // 子缺陷、子任务不能移
+        (includes(['story', 'task', 'bug']) && !parentRelateSummary) && ( // 故事、任务、缺陷能移 子缺陷不能移
           <Permission
             service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
             noAccessChildren={(
