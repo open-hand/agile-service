@@ -168,7 +168,10 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
                                     @Param("created") Boolean created,
                                     @Param("edited") Boolean edited);
 
-    List<ObjectSchemeFieldExtendDTO> selectExtendFields(@Param("organizationId") Long organizationId,@Param("fieldId") Long fieldId,@Param("projectId") Long projectId);
+    List<ObjectSchemeFieldExtendDTO> selectExtendFields(@Param("organizationId") Long organizationId,
+                                                        @Param("fieldId") Long fieldId,
+                                                        @Param("projectId") Long projectId,
+                                                        @Param("filterIssueTypeIds") List<Long> filterIssueTypeIds);
 
     /**
      * 查询根据code查询字段

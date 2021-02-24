@@ -215,6 +215,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<ObjectSchemeFieldVO> fieldViews = new ArrayList<>();
         List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, projectId);
         List<IssueTypeVO> filterIssueTypeVO = filterIssueType(projectId, issueTypeVOS, issueTypeVOS.stream().map(IssueTypeVO::getId).collect(Collectors.toList()));
+        List<Long> filterIssueTypeIds = filterIssueTypeVO.stream().map(IssueTypeVO::getId).collect(Collectors.toList());
         Map<Long, IssueTypeVO> issueTypeVOMap = filterIssueTypeVO.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
         fields.forEach(f -> {
             ObjectSchemeFieldVO vo = modelMapper.map(f, ObjectSchemeFieldVO.class);
@@ -224,7 +225,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             List<IssueTypeVO> issueTypeVOList = new ArrayList<>();
             boolean containsAllIssueTypes = containsAllIssueTypes(organizationId, projectId, issueTypeIds);
             String requiredScope =
-                    processIssueTyeAndRequiredScope(f,issueTypeIds, issueTypeNames, true, extendList, containsAllIssueTypes, organizationId, projectId);
+                    processIssueTyeAndRequiredScope(f,issueTypeIds, filterIssueTypeIds,  issueTypeNames, true, extendList, containsAllIssueTypes, organizationId, projectId);
             vo.setContext(StringUtils.join(issueTypeIds.toArray(), ","));
 
             if (!CollectionUtils.isEmpty(issueTypeIds)) {
@@ -440,6 +441,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     private String processIssueTyeAndRequiredScope(ObjectSchemeFieldDTO fieldDTO,
                                                    List<Long> issueTypeIds,
+                                                   List<Long> filterIssueTypeIds,
                                                    List<String> issueTypeNames,
                                                    boolean resetIssueType,
                                                    List<ObjectSchemeFieldExtendDTO> extendList,
@@ -451,14 +453,18 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         //系统字段或项目层下的组织字段
         if (Objects.equals(fieldDTO.getCreatedLevel(), CREATED_LEVEL_SYSTEM) ||
                 (!Objects.isNull(projectId) && Objects.equals(fieldDTO.getCreatedLevel(), CREATED_LEVEL_ORGANIZATION))) {
-            String fieldContext = getFieldContext(fieldDTO.getCode());
-            IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
-            issueTypeSearchVO.setTypeCodes(Arrays.asList(fieldContext.split(",")));
-            List<Long> ids = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO).stream().map(IssueTypeVO::getId).collect(Collectors.toList());
+            Set<Long> ids = new HashSet<>();
+            //系统字段
+            if (Boolean.TRUE.equals(fieldDTO.getSystem())) {
+                String fieldContext = getFieldContext(fieldDTO.getCode());
+                IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+                issueTypeSearchVO.setTypeCodes(Arrays.asList(fieldContext.split(",")));
+                ids = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO).stream().map(IssueTypeVO::getId).collect(Collectors.toSet());
+            }
             //项目层的组织字段获取组织层下配置的问题类型
-            if (Boolean.FALSE.equals(fieldDTO.getSystem())) {
-                fieldDTO = baseQueryById(organizationId, null, fieldDTO.getId());
-                ids = fieldDTO.getExtendFields().stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toList());
+            else if (Boolean.FALSE.equals(fieldDTO.getSystem())) {
+                List<ObjectSchemeFieldExtendDTO> fieldExtendDTOList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId, filterIssueTypeIds);
+                ids = fieldExtendDTOList.stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toSet());
             }
             issueTypeIds.addAll(ids);
             allIsRequired = allIsRequired && fieldDTO.getRequired();
@@ -677,7 +683,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<IssueTypeVO> issueTypeVOList = new ArrayList<>();
         boolean containsAllIssueTypes = containsAllIssueTypes(organizationId, projectId, issueTypeIds);
         String requiredScope =
-                processIssueTyeAndRequiredScope(field,issueTypeIds, issueTypeNames, false, extendList, containsAllIssueTypes, organizationId, projectId);
+                processIssueTyeAndRequiredScope(field,issueTypeIds, null, issueTypeNames, false, extendList, containsAllIssueTypes, organizationId, projectId);
         ObjectSchemeFieldDetailVO fieldDetailDTO = modelMapper.map(field, ObjectSchemeFieldDetailVO.class);
 //        fieldDetailDTO.setContext(issueTypeIds.toArray(new Long[0]));
         fieldDetailDTO.setRequiredScope(requiredScope);
@@ -905,9 +911,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
         //组织层下的系统字段，项目层下的系统字段和组织字段处理默认值
         else {
-            field = objectSchemeFieldMapper.selectOne(field);
             if (Boolean.FALSE.equals(field.getSystem())) {
                 field = baseQueryById(organizationId, null, fieldId);
+            } else {
+                field = objectSchemeFieldMapper.selectOne(field);
             }
             defaultValue = updateDTO.getDefaultValue();
             String value = tryDecryptDefaultValue(updateDTO.getFieldType(), updateDTO.getDefaultValue());
@@ -921,19 +928,23 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     private void checkIssueTypeLegality(Long organizationId, Long projectId, ObjectSchemeFieldDTO field, List<Long> issueTypeIds) {
-        List<Long> legalIssueTypeIds;
+        Set<Long> legalIssueTypeIds;
         IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, projectId);
+        List<IssueTypeVO> filterIssueTypeVO = filterIssueType(projectId, issueTypeVOS, issueTypeVOS.stream().map(IssueTypeVO::getId).collect(Collectors.toList()));
+        List<Long> filterIssueTypeIds = filterIssueTypeVO.stream().map(IssueTypeVO::getId).collect(Collectors.toList());
         if (Boolean.TRUE.equals(field.getSystem())) {
             List<String> legalIssueTypes = Arrays.asList(getFieldContext(field.getCode()).split(","));
             issueTypeSearchVO.setTypeCodes(legalIssueTypes);
             issueTypeSearchVO.setEnabled(true);
-            legalIssueTypeIds = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO).stream().map(IssueTypeVO::getId).collect(Collectors.toList());
+            legalIssueTypeIds = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO).stream().map(IssueTypeVO::getId).collect(Collectors.toSet());
         } else if (!Objects.isNull(projectId) && Objects.equals(field.getCreatedLevel(), CREATED_LEVEL_ORGANIZATION)) {
-            legalIssueTypeIds = field.getExtendFields().stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toList());
+            List<ObjectSchemeFieldExtendDTO> fieldExtendDTOList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, field.getId(), projectId, filterIssueTypeIds);
+            legalIssueTypeIds = fieldExtendDTOList.stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toSet());
         } else {
             issueTypeSearchVO.setEnabled(true);
             List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
-            legalIssueTypeIds = issueTypes.stream().map(IssueTypeVO::getId).collect(Collectors.toList());
+            legalIssueTypeIds = issueTypes.stream().map(IssueTypeVO::getId).collect(Collectors.toSet());
         }
         issueTypeIds.forEach(issueTypeId -> {
             if (!legalIssueTypeIds.contains(issueTypeId)) {
