@@ -8,6 +8,7 @@ import FlatSelect from '@/components/flat-select';
 interface Props extends Partial<SelectProps> {
   projectDataRef?: React.RefObject<Array<any>>,
   afterLoad?: (projects: any) => void
+  noAssign?: boolean
   flat?: boolean
   request?: () => Promise<any>
   textField?: string
@@ -16,7 +17,7 @@ interface Props extends Partial<SelectProps> {
 }
 
 const SelectTeam: React.FC<Props> = forwardRef(({
-  request, textField, valueField, projectDataRef = { current: null }, afterLoad, flat, projectId, ...otherProps
+  request, textField, valueField, projectDataRef = { current: null }, afterLoad, flat, projectId, noAssign, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
@@ -36,17 +37,18 @@ const SelectTeam: React.FC<Props> = forwardRef(({
     middleWare: (projects) => {
       if (Array.isArray(projects)) {
         // @ts-ignore
-      // eslint-disable-next-line
-      projectDataRef.current = projects;
+        // eslint-disable-next-line
+        projectDataRef.current = projects;
         return projects || [];
       }
       // @ts-ignore
 
       // eslint-disable-next-line no-param-reassign
       projectDataRef.current = (projects as any).content || [];
-      return (projects as any).content || [];
+      const list = (projects as any).content || [];
+      return noAssign ? [{ projName: '未分配', projectId: '0' }, ...list] : list;
     },
-  }), []);
+  }), [noAssign]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (
