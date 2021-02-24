@@ -333,7 +333,7 @@ const AddIssueType: React.FC<Props> = ({
             }
           </div>
           {
-            !typeId && (
+            !typeId && !isOrganization && (
             <CheckBox
               name="copyStatusMachine"
               style={{
@@ -343,7 +343,7 @@ const AddIssueType: React.FC<Props> = ({
             )
           }
           {
-            !typeId && (
+            !typeId && !isOrganization && (
             <CheckBox
               name="copyCustomField"
               style={{

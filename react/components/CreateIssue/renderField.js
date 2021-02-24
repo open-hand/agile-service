@@ -168,6 +168,7 @@ export default function renderField(field) {
         allowClear
         mode={field.fieldType === 'multiMember' ? 'multiple' : undefined}
         extraOption={field.fieldType === 'multiMember' ? field.defaultValueObjs : field.defaultValueObj}
+        className="multiMemberSelect"
       />
     );
   }
