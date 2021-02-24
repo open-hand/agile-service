@@ -24,6 +24,7 @@ const SelectFeature: React.FC<Props> = forwardRef(({
     name: 'feature',
     textField: 'summary',
     valueField: 'issueId',
+    tooltip: true,
     request: request || (({ filter, page }) => featureApi.getByEpicId(undefined, filter, page, undefined, projectId)),
     // @ts-ignore
     middleWare: (features) => {
