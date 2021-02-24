@@ -103,8 +103,8 @@ public class SendMsgUtil {
                 + URL_TEMPLATE6 + projectVO.getOrganizationId() 
                 + URL_TEMPLATE7 + projectVO.getOrganizationId() 
                 + URL_TEMPLATE3 + result.getIssueNum() 
-                + URL_TEMPLATE4 + paramIssueId 
-                + URL_TEMPLATE5 + result.getIssueId();
+                + URL_TEMPLATE4 + EncryptionUtils.encrypt(paramIssueId)
+                + URL_TEMPLATE5 + EncryptionUtils.encrypt(result.getIssueId());
     }
 
     public String getFeatureUrl(IssueVO result, ProjectVO projectVO, Long paramIssueId) {
@@ -113,8 +113,8 @@ public class SendMsgUtil {
                 + FEATURE_URL_TEMPLATE3 + projectVO.getCategory()
                 + FEATURE_URL_TEMPLATE4 + projectVO.getOrganizationId()
                 + URL_TEMPLATE3 + result.getIssueNum()
-                + URL_TEMPLATE4 + paramIssueId
-                + URL_TEMPLATE5 + result.getIssueId();
+                + URL_TEMPLATE4 + EncryptionUtils.encrypt(paramIssueId)
+                + URL_TEMPLATE5 + EncryptionUtils.encrypt(result.getIssueId());
 
     }
 
