@@ -196,18 +196,20 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             }
         }
         // 复制原有问题类型描述的默认值
-        IssueTypeFieldDTO issueTypeFieldDTO = new IssueTypeFieldDTO();
-        issueTypeFieldDTO.setProjectId(projectId);
-        issueTypeFieldDTO.setIssueTypeId(issueTypeDTO.getId());
-        List<IssueTypeFieldDTO> issueTypeField = issueTypeFieldMapper.select(issueTypeFieldDTO);
-        if (!CollectionUtils.isEmpty(issueTypeField)) {
-            IssueTypeFieldDTO typeFieldDTO = issueTypeField.get(0);
-            IssueTypeFieldDTO newIssueTypeField = new IssueTypeFieldDTO();
-            newIssueTypeField.setProjectId(projectId);
-            newIssueTypeField.setTemplate(typeFieldDTO.getTemplate());
-            newIssueTypeField.setIssueTypeId(result.getId());
-            if (issueTypeFieldMapper.insertSelective(newIssueTypeField) != 1) {
-               throw new CommonException("error.insert.issue.type.field");
+        if (!ObjectUtils.isEmpty(projectId)) {
+            IssueTypeFieldDTO issueTypeFieldDTO = new IssueTypeFieldDTO();
+            issueTypeFieldDTO.setProjectId(projectId);
+            issueTypeFieldDTO.setIssueTypeId(issueTypeDTO.getId());
+            List<IssueTypeFieldDTO> issueTypeField = issueTypeFieldMapper.select(issueTypeFieldDTO);
+            if (!CollectionUtils.isEmpty(issueTypeField)) {
+                IssueTypeFieldDTO typeFieldDTO = issueTypeField.get(0);
+                IssueTypeFieldDTO newIssueTypeField = new IssueTypeFieldDTO();
+                newIssueTypeField.setProjectId(projectId);
+                newIssueTypeField.setTemplate(typeFieldDTO.getTemplate());
+                newIssueTypeField.setIssueTypeId(result.getId());
+                if (issueTypeFieldMapper.insertSelective(newIssueTypeField) != 1) {
+                    throw new CommonException("error.insert.issue.type.field");
+                }
             }
         }
     }

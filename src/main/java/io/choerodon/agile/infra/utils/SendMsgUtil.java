@@ -249,11 +249,13 @@ public class SendMsgUtil {
         }
         Map<String, String> templateArgsMap = new HashMap<>();
         // 设置经办人
-        Long[] ids = new Long[2];
+        Long[] ids = new Long[3];
         ids[0] = issueDTO.getAssigneeId();
         ids[1] = userDetails.getUserId();
         List<UserDTO> userDTOList = userService.listUsersByIds(ids);
-        String assigneeName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), issueDTO.getAssigneeId()))
+        Boolean isProgram = Objects.equals(issueDTO.getApplyType(), "program") ? true : false;
+        String memberType = Boolean.TRUE.equals(isProgram) ? "报告人" : "经办人";
+        String assigneeName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), Boolean.TRUE.equals(isProgram) ? issueDTO.getReporterId(): issueDTO.getAssigneeId()))
                 .findFirst().map(UserDTO::getRealName).orElse("");
         // 设置概要
         String summary = issueDTO.getIssueNum() + "-" + issueDTO.getSummary();
@@ -262,6 +264,7 @@ public class SendMsgUtil {
                 .findFirst().map(UserDTO::getRealName).orElse("");
         // 设置状态
         String status = ConvertUtil.getIssueStatusMap(projectId).get(issueDTO.getStatusId()).getName();
+        templateArgsMap.put("memberType", memberType);
         templateArgsMap.put("assigneeName", assigneeName);
         templateArgsMap.put("summary", summary);
         templateArgsMap.put("operatorName", operatorName);
