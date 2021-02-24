@@ -44,7 +44,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
   const loadData = useCallback(async () => {
     let newOptions: any = config?.options;
     if (!newOptions) {
-      const { content } = pageConfigApi.load();
+      const { content } = await pageConfigApi.load();
       newOptions = content.map((option: any) => ({ label: option.name, value: option.code }));
     }
     if (config?.events?.initOptions) {
