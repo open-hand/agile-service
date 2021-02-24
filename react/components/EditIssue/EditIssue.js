@@ -61,10 +61,10 @@ function EditIssue() {
   const onCancel = useCallback(() => {
     close();
   }, [close]);
-  const onIssueCopy = useCallback(() => {
+  const onIssueCopy = useCallback((issue) => {
     const callback = issueEvents?.copy || issueEvents?.update;
     if (callback) {
-      callback();
+      callback(issue);
     }
   }, [issueEvents]);
   const onDeleteIssue = useCallback(() => {
@@ -168,8 +168,6 @@ function EditIssue() {
     loadIssueDetail(issue.issueId);
     if (onIssueCopy) {
       onIssueCopy(issue);
-    } else if (onUpdate) {
-      onUpdate();
     }
   };
 
