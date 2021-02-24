@@ -4,7 +4,7 @@ import { openExportIssueModal as originOpenExportIssueModal } from '@/components
 import IssueExportStore from '@/components/issue-export/stores/store';
 import { issueApi, TemplateAction } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import { set, uniq } from 'lodash';
+import { find, set, uniq } from 'lodash';
 import {
   getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields, getReverseExportFieldCodes,
 } from './utils';
@@ -48,9 +48,16 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
       loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file'),
     },
     checkboxOptionsExtraConfig: new Map(['issueTypeId', 'issueNum', 'issueId'].map((item) => [item, { checkBoxProps: { disabled: true, defaultChecked: true, name: 'required-option' } }])),
-    defaultInitOptions: ({ dataSet }) => {
+    defaultInitOptions: ({ options, dataSet }) => {
       dataSet.addField('required-option', { multiple: true });
       dataSet.current?.set('required-option', ['issueTypeId', 'issueNum', 'issueId']);
+      if (!find(options, { value: 'description' })) {
+        options.splice(3, 0, {
+          label: '描述',
+          value: 'description',
+        });
+      }
+      return options;
     },
   });
 
