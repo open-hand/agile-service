@@ -4,7 +4,7 @@ import React, {
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import {
-  find, isEqual, map, uniq,
+  find, findIndex, isEqual, map, uniq,
 } from 'lodash';
 import { Divider } from 'choerodon-ui';
 import classnames from 'classnames';
@@ -167,7 +167,7 @@ const ExportIssue: React.FC = () => {
     } else {
       return false;
     }
-    search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
+    search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions.sort((a, b) => findIndex(checkOptions, { value: a }) - findIndex(checkOptions, { value: b })), checkBoxDataProps);
     if (checkBoxDataProps.checkedOptions.length === 0) {
       Choerodon.prompt('请至少选择一个字段导出');
       return false;
