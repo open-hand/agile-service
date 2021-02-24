@@ -1,12 +1,26 @@
 package io.choerodon.agile.app.service.impl;
 
 
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.IssueCommentAssembler;
 import io.choerodon.agile.app.service.IIssueCommentService;
 import io.choerodon.agile.app.service.IssueCommentService;
-import io.choerodon.agile.infra.dto.IssueCommentDTO;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.IssueCommentDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
@@ -15,20 +29,6 @@ import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-
-import org.hzero.starter.keyencrypt.core.EncryptContext;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 敏捷开发Issue评论
@@ -65,9 +65,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         issueCommentDTO.setReplyToUserId(0L);
         IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueCommentVO.getIssueId());
-        sendMsgUtil.sendMsgByIssueComment(projectId, issue, issueCommentVO, DetailsHelper.getUserDetails().getUserId(),
-                (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(),
-                EncryptContext.encryptType().name());
+        sendMsgUtil.sendMsgByIssueComment(projectId, issue, issueCommentVO, DetailsHelper.getUserDetails().getUserId());
         return issueCommentVO;
     }
 
@@ -81,13 +79,9 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueCommentVO.getIssueId());
             Long operatorId = DetailsHelper.getUserDetails().getUserId();
             if (issueCommentVO.getReplyToUserId() == null){
-                sendMsgUtil.sendMsgByIssueComment(projectId, issue, issueCommentVO, operatorId,
-                        (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(),
-                        EncryptContext.encryptType().name());
+                sendMsgUtil.sendMsgByIssueComment(projectId, issue, issueCommentVO, operatorId);
             } else {
-                sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO, operatorId,
-                        (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(),
-                        EncryptContext.encryptType().name());
+                sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO, operatorId);
             }
             return issueCommentVO;
         } else {
@@ -155,9 +149,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         issueCommentDTO.setProjectId(projectId);
         IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueCommentVO.getIssueId());
-        sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO, DetailsHelper.getUserDetails().getUserId(),
-                (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(),
-                EncryptContext.encryptType().name());
+        sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO, DetailsHelper.getUserDetails().getUserId());
         return issueCommentVO;
     }
 

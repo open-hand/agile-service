@@ -1,12 +1,13 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.infra.utils.EncryptionUtils;
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 
 
 /**
@@ -22,7 +23,11 @@ public class EncryptionController {
     @GetMapping("/encrypt")
     public ResponseEntity<String> startArt(@ApiParam(value = "项目id", required = true)
                                            @PathVariable(name = "project_id") Long projectId,
-                                           @RequestParam Long issueId) {
-        return ResponseEntity.ok(EncryptionUtils.encrypt(issueId));
+                                           @RequestParam(required = false) Long issueId,
+                                           @RequestParam(required = false) Long id) {
+        if (issueId != null) {
+            id = issueId;
+        }
+        return ResponseEntity.ok(EncryptionUtils.encrypt(id));
     }
 }
