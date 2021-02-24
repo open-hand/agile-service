@@ -21,11 +21,14 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.entity.MessageSender;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.*;
 
@@ -362,7 +365,11 @@ public class SendMsgUtil {
     public void sendMsgByIssueComment(Long projectId,
                                       IssueDetailDTO issueDTO,
                                       IssueCommentVO issueCommentVO,
-                                      Long operatorId) {
+                                      Long operatorId,
+                                      ServletRequestAttributes requestAttributes,
+                                      String encryptType) {
+        EncryptContext.setEncryptType(encryptType);
+        RequestContextHolder.setRequestAttributes(requestAttributes);
         IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
         Map<Long, String> actionMap = new HashMap<>(3);
         String url;
@@ -403,7 +410,11 @@ public class SendMsgUtil {
     public void sendMsgByIssueCommentReply(Long projectId,
                                            IssueDetailDTO issueDTO,
                                            IssueCommentVO issueCommentVO,
-                                           Long operatorId) {
+                                           Long operatorId,
+                                           ServletRequestAttributes requestAttributes,
+                                           String encryptType) {
+        EncryptContext.setEncryptType(encryptType);
+        RequestContextHolder.setRequestAttributes(requestAttributes);
         Map<Long, String> actionMap = new HashMap<>(1);
         actionMap.put(issueCommentVO.getReplyToUserId(), "评论的");
         IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
