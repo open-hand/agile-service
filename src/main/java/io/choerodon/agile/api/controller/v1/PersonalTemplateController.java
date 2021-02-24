@@ -30,10 +30,10 @@ public class PersonalTemplateController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建模板")
     @PostMapping
-public ResponseEntity<PersonalTemplatelVO> create(@ApiParam(value = "项目id", required = true)
-                                                  @PathVariable(name = "project_id") Long projectId,
-                                                  @ApiParam(value = "模板创建对象", required = true)
-                                                  @RequestBody @Valid PersonalTemplateCreateVO personalTemplateCreateVO) {
+    public ResponseEntity<PersonalTemplatelVO> create(@ApiParam(value = "项目id", required = true)
+                                                      @PathVariable(name = "project_id") Long projectId,
+                                                      @ApiParam(value = "模板创建对象", required = true)
+                                                      @RequestBody @Valid PersonalTemplateCreateVO personalTemplateCreateVO) {
         return Optional.ofNullable(personalTemplateService.create(projectId, personalTemplateCreateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personal.template.create"));
