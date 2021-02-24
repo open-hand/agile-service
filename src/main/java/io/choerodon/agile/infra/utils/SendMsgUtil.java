@@ -1,10 +1,29 @@
 package io.choerodon.agile.infra.utils;
 
-import io.choerodon.agile.api.vo.*;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.boot.message.entity.MessageSender;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
+
+import java.util.*;
+
+import io.choerodon.agile.api.vo.IssueCommentVO;
+import io.choerodon.agile.api.vo.IssueMoveVO;
+import io.choerodon.agile.api.vo.IssueSubVO;
+import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.NoticeService;
-import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
@@ -14,23 +33,6 @@ import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.hzero.boot.message.entity.MessageSender;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.util.*;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/4/29.
@@ -106,8 +108,8 @@ public class SendMsgUtil {
                 + URL_TEMPLATE6 + projectVO.getOrganizationId() 
                 + URL_TEMPLATE7 + projectVO.getOrganizationId() 
                 + URL_TEMPLATE3 + result.getIssueNum() 
-                + URL_TEMPLATE4 + EncryptionUtils.encrypt(paramIssueId)
-                + URL_TEMPLATE5 + EncryptionUtils.encrypt(result.getIssueId());
+                + URL_TEMPLATE4 + paramIssueId
+                + URL_TEMPLATE5 + result.getIssueId();
     }
 
     public String getFeatureUrl(IssueVO result, ProjectVO projectVO, Long paramIssueId) {
@@ -116,8 +118,8 @@ public class SendMsgUtil {
                 + FEATURE_URL_TEMPLATE3 + projectVO.getCategory()
                 + FEATURE_URL_TEMPLATE4 + projectVO.getOrganizationId()
                 + URL_TEMPLATE3 + result.getIssueNum()
-                + URL_TEMPLATE4 + EncryptionUtils.encrypt(paramIssueId)
-                + URL_TEMPLATE5 + EncryptionUtils.encrypt(result.getIssueId());
+                + URL_TEMPLATE4 + paramIssueId
+                + URL_TEMPLATE5 + result.getIssueId();
 
     }
 
@@ -365,11 +367,7 @@ public class SendMsgUtil {
     public void sendMsgByIssueComment(Long projectId,
                                       IssueDetailDTO issueDTO,
                                       IssueCommentVO issueCommentVO,
-                                      Long operatorId,
-                                      ServletRequestAttributes requestAttributes,
-                                      String encryptType) {
-        EncryptContext.setEncryptType(encryptType);
-        RequestContextHolder.setRequestAttributes(requestAttributes);
+                                      Long operatorId) {
         IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
         Map<Long, String> actionMap = new HashMap<>(3);
         String url;
@@ -410,11 +408,7 @@ public class SendMsgUtil {
     public void sendMsgByIssueCommentReply(Long projectId,
                                            IssueDetailDTO issueDTO,
                                            IssueCommentVO issueCommentVO,
-                                           Long operatorId,
-                                           ServletRequestAttributes requestAttributes,
-                                           String encryptType) {
-        EncryptContext.setEncryptType(encryptType);
-        RequestContextHolder.setRequestAttributes(requestAttributes);
+                                           Long operatorId) {
         Map<Long, String> actionMap = new HashMap<>(1);
         actionMap.put(issueCommentVO.getReplyToUserId(), "评论的");
         IssueVO issueVO = modelMapper.map(issueDTO, IssueVO.class);
