@@ -4,6 +4,7 @@ import {
 } from 'choerodon-ui';
 import { Permission } from '@choerodon/boot';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
+import { includes } from 'lodash';
 import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
@@ -198,7 +199,7 @@ const IssueDropDown = ({
         )
       }
       {
-        (includes(['story', 'task', 'bug']) && !parentRelateSummary) && ( // 故事、任务、缺陷能移 子缺陷不能移
+        (includes(['story', 'task', 'bug'], typeCode) && !parentRelateSummary) && ( // 故事、任务、缺陷能移 子缺陷不能移
           <Permission
             service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
             noAccessChildren={(
