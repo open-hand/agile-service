@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Content, stores, Permission } from '@choerodon/boot';
+import {
+  Content, stores, Permission, Choerodon,
+} from '@choerodon/boot';
 import { Select } from 'choerodon-ui';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { last, cloneDeep, find } from 'lodash';
@@ -68,13 +70,22 @@ class SettingColumn extends Component {
     const sourceType = sourceDroppableId.split(',')[0];
     const sourceColumnId = sourceDroppableId.split(',')[1];
     const destinationType = destinationDroppableId.split(',')[0];
+
     const destinationColumnId = destinationDroppableId.split(',')[1];
     const [statusCode, statusObjectVersionNumber] = draggableId.split(',');
     if (sourceColumnId === destinationColumnId && sourceIndex === destinationIndex) {
       return;
     }
+
     // 保留原数据
     const originBoardData = cloneDeep(ScrumBoardStore.getBoardData);
+    if (sourceType !== 'unset' && destinationType === 'unset') {
+      const remainStatusCount = originBoardData.filter((column) => column.columnId !== '0').reduce((res, column) => res + column.subStatusDTOS.length, 0);
+      if (remainStatusCount <= 1) {
+        Choerodon.prompt('看板至少需要有一个状态');
+        return;
+      }
+    }
     const newState = ScrumBoardStore.getBoardData;
     const sourceStatusList = find(newState, { columnId: sourceColumnId }).subStatusDTOS;
     const destinationStatusList = find(newState, { columnId: destinationColumnId }).subStatusDTOS;
