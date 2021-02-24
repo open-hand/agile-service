@@ -405,4 +405,13 @@ public interface AgilePluginService {
      * @param organizationId
      */
     void setBussinessDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
+
+    /**
+     * 变更属性时处理feature的特有的系统字段
+     * @param v
+     * @param issueUpdateVO
+     * @param specifyMap
+     * @param statusFieldValueSettingDTOS
+     */
+    void handlerFeatureFieldValue(StatusFieldSettingVO v, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO);
 }

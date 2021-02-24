@@ -40,6 +40,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatusFieldSettingServiceImpl.class);
 
     private static final String[] FILTER_FIELD_TYPE = {"checkbox", "multiple", "member", "radio", "single"};
+    private static final String[] FEATURE_FIELD = {FieldCode.ACCEPTANCE_CRITERA, FieldCode.BENFIT_HYPOTHESIS, FieldCode.PROGRAM_VERSION};
     protected static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
     protected static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
     private static final String CLEAR = "clear";
@@ -184,6 +185,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<PageFieldViewUpdateVO> customField = new ArrayList<>();
         List<String> field = new ArrayList<>();
+        field.add("objectVersionNumber");
         Map<String,List<VersionIssueRelVO>> versionMap = new HashMap<>();
         Class aClass = issueUpdateVO.getClass();
         Map<String,Object> specifyMap = new HashMap<>();
@@ -193,12 +195,10 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 Boolean isVersion = FieldCode.FIX_VERSION.equals(v.getFieldCode()) || FieldCode.INFLUENCE_VERSION.equals(v.getFieldCode());
                 if (Boolean.TRUE.equals(isVersion)) {
                     handlerVersion(versionMap, v, statusFieldValueSettingDTOS);
-                } else if (FieldCode.PROGRAM_VERSION.equals(v.getFieldCode())) {
-                    List<Long> ids = new ArrayList<>();
-                    if (!CollectionUtils.isEmpty(statusFieldValueSettingDTOS) && !CLEAR.equals(statusFieldValueSettingDTOS.get(0).getOperateType())) {
-                        ids.addAll(statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getOptionId).collect(Collectors.toList()));
+                } else if (Arrays.asList(FEATURE_FIELD).contains(v.getFieldCode())){
+                    if (agilePluginService != null) {
+                        agilePluginService.handlerFeatureFieldValue(v, issueUpdateVO, specifyMap, statusFieldValueSettingDTOS, issueDTO);
                     }
-                    specifyMap.put(FieldCode.PROGRAM_VERSION, ids);
                 } else {
                     handlerPredefinedValue(issueUpdateVO, aClass, field, issueDTO, v, statusFieldValueSettingDTOS);
                 }
