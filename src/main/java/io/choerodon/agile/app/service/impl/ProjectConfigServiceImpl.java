@@ -240,7 +240,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         //获取状态机
         Long stateMachineId = stateMachineSchemeConfigService.queryStateMachineIdBySchemeIdAndIssueTypeId(false, organizationId, stateMachineSchemeId, issueTypeId);
-        return statusService.queryByStateMachineIds(organizationId, Collections.singletonList(stateMachineId));
+        List<StatusAndTransformVO> statuses = statusService.queryStatusByStateMachineId(organizationId, stateMachineId);
+        return modelMapper.map(statuses, new TypeToken<List<StatusVO>>() {}.getType());
     }
 
     @Override
