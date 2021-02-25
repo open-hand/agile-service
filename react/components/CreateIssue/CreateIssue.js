@@ -627,6 +627,9 @@ class CreateIssue extends Component {
                     label="关联父级任务"
                     type="subTask_parent_issue"
                     allowClear
+                    requestArgs={{
+                      projectId: getProjectId(),
+                    }}
                     onChange={((value) => {
                       this.autoSetSprint(value);
                     })}
