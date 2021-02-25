@@ -3,8 +3,10 @@ import React from 'react';
 import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField,
 } from 'choerodon-ui/pro';
+import moment from 'moment';
 import SelectUser from '@/components/select/select-user';
 import SelectFeature from '@/components/select/select-feature';
+import EndDateTimePicker from '@/components/date-time-picker';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
@@ -16,6 +18,15 @@ export default function renderField({ code, fieldType, fieldOptions }) {
     }
     case 'featureId': {
       return <SelectFeature name={code} style={{ width: '100%' }} />;
+    }
+    case 'estimatedEndTime': {
+      return (
+        <EndDateTimePicker
+          name={code}
+          style={{ width: '100%' }}
+          defaultPickerValue={moment().endOf('d')}
+        />
+      );
     }
     default: break;
   }
