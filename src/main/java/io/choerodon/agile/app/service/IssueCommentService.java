@@ -46,9 +46,10 @@ public interface IssueCommentService {
      *
      * @param projectId projectId
      * @param commentId commentId
+     * @param self 是否删除自己的评论
      * @return int
      */
-    int deleteIssueComment(Long projectId, Long commentId);
+    int deleteIssueComment(Long projectId, Long commentId, boolean self);
 
     /**
      * 根据issueId删除评论
@@ -80,6 +81,7 @@ public interface IssueCommentService {
      *
      * @param projectId projectId
      * @param commentId commentId
+     * @param self 是否是删除自己的评论
      */
-    void deleteIssueCommentReply(Long projectId, Long commentId);
+    void deleteIssueCommentReply(Long projectId, Long commentId, boolean self);
 }
