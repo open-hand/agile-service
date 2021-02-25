@@ -79,6 +79,7 @@ function IssueLinkHome() {
       okText: formatMessage({ id: 'delete' }),
       okProps: { color: 'red' },
       cancelProps: { color: 'dark' },
+      className: 'c7n-deleteLink-modal',
     });
   }
 
