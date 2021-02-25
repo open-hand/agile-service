@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
+import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { text2Delta, uploadAndReplaceImg } from '@/utils/richText';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
@@ -33,10 +34,13 @@ interface Props {
   reload: Function
   readonly: boolean
 }
+const { AppState } = stores;
 
 const CommentItem: React.FC<Props> = ({
   hasPermission, comment, onDelete, onUpdate, onReply, projectId, isReply, parentId, reload, readonly,
 }) => {
+  const loginUserId = AppState.userInfo.id;
+  const isSelf = String(comment.userId) === String(loginUserId);
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState<Delta>();
   const [replying, setReplying] = useState(false);
@@ -92,14 +96,14 @@ const CommentItem: React.FC<Props> = ({
   }, [comment.issueId, comment.userId, newReply, parentId, replyValue]);
 
   const updateComment = useCallback((ucomment: UComment) => {
-    issueCommentApi.project(projectId).update(ucomment).then(() => {
+    issueCommentApi.project(projectId).update(ucomment, isSelf).then(() => {
       setEditing(false);
       setValue(undefined);
       if (onUpdate) {
         onUpdate();
       }
     });
-  }, [onUpdate, projectId]);
+  }, [isSelf, onUpdate, projectId]);
 
   const handleUpdate = useCallback(async (delta: Delta) => {
     const commentText = await uploadAndReplaceImg(value);
