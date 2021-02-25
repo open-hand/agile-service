@@ -727,6 +727,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public void delete(Long organizationId, Long projectId, Long fieldId) {
+        isOrganizationIllegal(projectId, organizationId);
         ObjectSchemeFieldDTO field = baseQueryById(organizationId, projectId, fieldId);
         //组织层无法删除项目层
         if (projectId == null && field.getProjectId() != null) {
@@ -740,7 +741,18 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (field.getSystem()) {
             throw new CommonException(ERROR_FIELD_ILLEGAL);
         }
-
+        if (projectId == null) {
+            //组织层判断项目是否使用了该字段，如果使用则不能删除
+            List<Long> projectIds =
+                    baseFeignClient.listProjectsByOrgId(organizationId)
+                            .getBody()
+                            .stream()
+                            .map(ProjectVO::getId)
+                            .collect(Collectors.toList());
+            if (!projectIds.isEmpty()) {
+                isFieldDeleted(projectIds, fieldId, null);
+            }
+        }
         objectSchemeFieldMapper.cascadeDelete(organizationId, projectId, fieldId);
         //删除字段值
         fieldValueService.deleteByFieldId(fieldId);
@@ -1414,7 +1426,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<FieldValueDTO> fieldValues =
                 fieldValueMapper.queryListByInstanceIds(projectIds, null, schemeCode, fieldId);
         if (!fieldValues.isEmpty()) {
-            throw new CommonException("error.field.can.not.delete");
+            throw new CommonException("error.organization.field.can.not.delete");
         }
     }
 
