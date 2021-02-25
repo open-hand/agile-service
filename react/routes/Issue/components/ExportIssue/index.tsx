@@ -39,6 +39,12 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
       loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file'),
     },
   });
-  originOpenExportIssueModal(fields, chosenFields, tableDataSet, tableRef, store);
+  originOpenExportIssueModal(fields, chosenFields, tableDataSet, tableRef, store, undefined, (options) => {
+    options.splice(3, 0, {
+      label: '描述',
+      value: 'description',
+    });
+    return options;
+  });
 }
 export { openExportIssueModal };

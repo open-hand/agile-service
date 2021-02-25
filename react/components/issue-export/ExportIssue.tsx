@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import { find } from 'lodash';
+import { find, findIndex } from 'lodash';
 import { Divider } from 'choerodon-ui';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
@@ -121,7 +121,7 @@ const ExportIssue: React.FC = () => {
       Choerodon.prompt('请至少选择一个字段导出');
       return false;
     }
-    search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions);
+    search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions.sort((a, b) => findIndex(checkOptions, { value: a }) - findIndex(checkOptions, { value: b })));
     search = store.exportBefore(search);
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
     store.exportAxios(search, field ? `${field.value},${field.order}` : undefined);

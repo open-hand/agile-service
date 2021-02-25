@@ -25,7 +25,7 @@ export default function Index(props: IExportIssueProps) {
 }
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
-  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, otherModalProps?: ModalProps) {
+  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, otherModalProps?: ModalProps, optionsMiddleware?:(options:IExportIssueProps['checkOptions'])=>IExportIssueProps['checkOptions']) {
   const checkOptions = [...tableDataSet.fields.values()].map((option) => ({ value: option.props.name!, label: option.props.label as string, order: option.order }));
   const { className, ...otherProps } = otherModalProps || {};
   const key = Modal.key();
@@ -40,7 +40,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     children: <Index
       fields={fields}
       chosenFields={chosenFields}
-      checkOptions={checkOptions}
+      checkOptions={optionsMiddleware ? optionsMiddleware(checkOptions) : checkOptions}
       tableRef={tableRef}
       store={store}
     />,
