@@ -904,21 +904,10 @@ class VersionBurndown extends Component {
                         style={{ margin: '0 5px', cursor: 'pointer' }}
                         role="none"
                         onClick={() => {
-                          to(LINK_URL.workListBacklog);
+                          to(LINK_URL.workListVersion);
                         }}
                       >
-                        待办事项
-                      </span>
-                      <span>或</span>
-                      <span
-                        className="primary"
-                        style={{ margin: '0 5px', cursor: 'pointer' }}
-                        role="none"
-                        onClick={() => {
-                          to(LINK_URL.workListIssue);
-                        }}
-                      >
-                        问题管理
+                        版本列表
                       </span>
                       <span>中创建一个版本</span>
                     </div>
