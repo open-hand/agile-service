@@ -165,7 +165,9 @@ const Linkage = ({
               const newKey = Field.add();
               addFieldRule(newKey);
             }}
-          />
+          >
+            添加联动
+          </Button>
         </div>
       </Form>
     </div>
