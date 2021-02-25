@@ -1026,28 +1026,11 @@ public class ExcelServiceImpl implements ExcelService {
                 for (Integer relatedRow : relatedRows) {
                     if (Objects.equals(rowNum, relatedRow)) {
                         deleteIssueIds.add(issueId);
-                        Set<Integer> sonSet = parentSonMap.get(rowNum);
-                        if (!CollectionUtils.isEmpty(sonSet)) {
-                            sonSet.forEach(v -> {
-                                Long sonIssueId = rowIssueIdMap.get(v);
-                                if (!ObjectUtils.isEmpty(sonIssueId)) {
-                                    deleteIssueIds.add(sonIssueId);
-                                    progress.failCountIncrease();
-                                    progress.successCountDecrease();
-                                }
-                            });
-                            setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet, parentCol);
-                        }
                         cell.setCellValue(buildWithErrorMsg(value, "自己不能和自己关联，rowNum: " + (rowNum + 1)));
                         addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
                         ok = false;
                         progress.failCountIncrease();
                         progress.successCountDecrease();
-                        break;
-                    }
-                    Long relatedIssueId = rowIssueIdMap.get(relatedRow);
-                    if (relatedIssueId == null) {
-                        deleteIssueIds.add(issueId);
                         Set<Integer> sonSet = parentSonMap.get(rowNum);
                         if (!CollectionUtils.isEmpty(sonSet)) {
                             sonSet.forEach(v -> {
@@ -1060,11 +1043,28 @@ public class ExcelServiceImpl implements ExcelService {
                             });
                             setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet, parentCol);
                         }
+                        break;
+                    }
+                    Long relatedIssueId = rowIssueIdMap.get(relatedRow);
+                    if (relatedIssueId == null) {
+                        deleteIssueIds.add(issueId);
                         cell.setCellValue(buildWithErrorMsg(value, "第" + (relatedRow + 1) + "行问题项不存在"));
                         addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
                         ok = false;
                         progress.failCountIncrease();
                         progress.successCountDecrease();
+                        Set<Integer> sonSet = parentSonMap.get(rowNum);
+                        if (!CollectionUtils.isEmpty(sonSet)) {
+                            sonSet.forEach(v -> {
+                                Long sonIssueId = rowIssueIdMap.get(v);
+                                if (!ObjectUtils.isEmpty(sonIssueId)) {
+                                    deleteIssueIds.add(sonIssueId);
+                                    progress.failCountIncrease();
+                                    progress.successCountDecrease();
+                                }
+                            });
+                            setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet, parentCol);
+                        }
                         break;
                     } else {
                         relatedIssueIds.add(relatedIssueId);
