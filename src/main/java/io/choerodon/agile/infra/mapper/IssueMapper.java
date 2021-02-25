@@ -587,4 +587,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @param userId    当前用户id
      */
     void updateIssueLastUpdateInfoByStaticFile(@Param("fileId") Long fileId, @Param("projectId") Long projectId, @Param("userId") Long userId);
+
+    List<Long> selectIdsByIssueTypeIdsAndProjectIds(@Param("projectIds") List<Long> projectIds,
+                                                    @Param("issueTypeId") Long issueTypeId);
 }

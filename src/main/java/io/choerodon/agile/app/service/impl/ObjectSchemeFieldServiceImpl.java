@@ -86,6 +86,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private IssueLabelService issueLabelService;
     @Autowired
     private IssueTypeMapper issueTypeMapper;
+    @Autowired
+    private FieldValueMapper fieldValueMapper;
+    @Autowired
+    private FieldDataLogMapper fieldDataLogMapper;
 
     @Override
     public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field,
@@ -1245,6 +1249,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public void config(Long organizationId, Long projectId, PageConfigUpdateVO pageConfigUpdateVO) {
+        isOrganizationIllegal(projectId, organizationId);
         Long issueTypeId = pageConfigUpdateVO.getIssueTypeId();
         List<PageConfigFieldVO> fields = pageConfigUpdateVO.getFields();
         IssueTypeFieldVO issueTypeFieldVO = pageConfigUpdateVO.getIssueTypeFieldVO();
@@ -1275,6 +1280,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<PageConfigFieldVO> addFields = pageConfigUpdateVO.getAddFields();
         if (!ObjectUtils.isEmpty(addFields)) {
             addFieldConfig(organizationId, projectId, addFields, issueTypeId, issueTypeMap);
+        }
+    }
+
+    private void isOrganizationIllegal(Long projectId, Long organizationId) {
+        if (projectId != null
+                && !Objects.equals(organizationId, ConvertUtil.getOrganizationId(projectId))) {
+            throw new CommonException("error.project.not.belong.organization");
         }
     }
 
@@ -1324,8 +1336,16 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     objectSchemeFieldMapper.deleteByPrimaryKey(fieldId);
                 }
                 objectSchemeFieldExtendMapper.deleteByPrimaryKey(d);
+                deleteFieldValueAndDataLog(Arrays.asList(projectId), extend.getIssueTypeId(), fieldId, true);
             });
         } else {
+            //获取组织下所有项目
+            List<Long> projectIds =
+                    baseFeignClient.listProjectsByOrgId(organizationId)
+                            .getBody()
+                            .stream()
+                            .map(ProjectVO::getId)
+                            .collect(Collectors.toList());
             deleteIds.forEach(d -> {
                 ObjectSchemeFieldExtendDTO extend =
                         objectSchemeFieldExtendMapper.selectByPrimaryKey(d);
@@ -1341,8 +1361,74 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 target.setIssueTypeId(extend.getIssueTypeId());
                 target.setIssueType(extend.getIssueType());
                 objectSchemeFieldExtendMapper.delete(target);
+                deleteFieldValueAndDataLog(projectIds, extend.getIssueTypeId(), fieldId, false);
             });
         }
+    }
+
+    private void deleteFieldValueAndDataLog(List<Long> projectIds,
+                                            Long issueTypeId,
+                                            Long fieldId,
+                                            boolean editOnProjectLevel) {
+        if (ObjectUtils.isEmpty(projectIds)) {
+            return;
+        }
+        String schemeCode = getSchemeCodeByIssueTypeId(issueTypeId);
+        if (ObjectSchemeCode.BACKLOG.equals(schemeCode)) {
+            if (editOnProjectLevel) {
+                Long projectId = projectIds.get(0);
+                FieldValueDTO fieldValueDTO = new FieldValueDTO();
+                fieldValueDTO.setFieldId(fieldId);
+                fieldValueDTO.setProjectId(projectId);
+                fieldValueDTO.setSchemeCode(schemeCode);
+                fieldValueMapper.delete(fieldValueDTO);
+
+                FieldDataLogDTO fieldDataLogDTO = new FieldDataLogDTO();
+                fieldDataLogDTO.setProjectId(projectId);
+                fieldDataLogDTO.setSchemeCode(schemeCode);
+                fieldDataLogDTO.setFieldId(fieldId);
+                fieldDataLogMapper.delete(fieldDataLogDTO);
+            } else {
+                isFieldDeleted(projectIds, fieldId, schemeCode);
+            }
+        } else if (ObjectSchemeCode.AGILE_ISSUE.equals(schemeCode)) {
+            List<Long> issueIds = issueMapper.selectIdsByIssueTypeIdsAndProjectIds(projectIds, issueTypeId);
+            if (!issueIds.isEmpty()) {
+                if (editOnProjectLevel) {
+                    Long projectId = projectIds.get(0);
+                    fieldValueMapper.deleteByInstanceIds(projectId, issueIds, schemeCode, fieldId);
+                    fieldDataLogMapper.deleteByInstanceIdsAndFieldIds(projectId, issueIds, schemeCode, Arrays.asList(fieldId));
+                } else {
+                    //组织下的项目如果有相关的field_value值，如果有不允许删除
+                    isFieldDeleted(projectIds, fieldId, schemeCode);
+                }
+            }
+        } else {
+            throw new CommonException("error.illegal.schemeCode");
+        }
+    }
+
+    private void isFieldDeleted(List<Long> projectIds,
+                                Long fieldId,
+                                String schemeCode) {
+        List<FieldValueDTO> fieldValues =
+                fieldValueMapper.queryListByInstanceIds(projectIds, null, schemeCode, fieldId);
+        if (!fieldValues.isEmpty()) {
+            throw new CommonException("error.field.can.not.delete");
+        }
+    }
+
+    private String getSchemeCodeByIssueTypeId(Long issueTypeId) {
+        IssueTypeDTO dto = issueTypeMapper.selectByPrimaryKey(issueTypeId);
+        if (dto != null) {
+            String typeCode = dto.getTypeCode();
+            if (IssueTypeCode.BACKLOG.equals(typeCode)) {
+                return ObjectSchemeCode.BACKLOG;
+            } else {
+                return ObjectSchemeCode.AGILE_ISSUE;
+            }
+        }
+        return null;
     }
 
     @Override
