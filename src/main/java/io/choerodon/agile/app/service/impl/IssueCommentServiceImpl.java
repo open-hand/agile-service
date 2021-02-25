@@ -129,8 +129,11 @@ public class IssueCommentServiceImpl implements IssueCommentService {
     }
 
     @Override
-    public int deleteIssueComment(Long projectId, Long commentId) {
+    public int deleteIssueComment(Long projectId, Long commentId, boolean self) {
         IssueCommentDTO issueCommentDTO = getCommentById(projectId, commentId);
+        if (self && !DetailsHelper.getUserDetails().getUserId().equals(issueCommentDTO.getUserId())) {
+            throw new CommonException("error.created.user.illegal");
+        }
         return iIssueCommentService.deleteBase(issueCommentDTO);
     }
 
@@ -195,8 +198,11 @@ public class IssueCommentServiceImpl implements IssueCommentService {
     }
 
     @Override
-    public void deleteIssueCommentReply(Long projectId, Long commentId) {
+    public void deleteIssueCommentReply(Long projectId, Long commentId, boolean self) {
         IssueCommentDTO issueCommentDTO = getCommentById(projectId, commentId);
+        if (self && !DetailsHelper.getUserDetails().getUserId().equals(issueCommentDTO.getUserId())) {
+            throw new CommonException("error.created.user.illegal");
+        }
         iIssueCommentService.deleteBaseReply(issueCommentDTO);
     }
 

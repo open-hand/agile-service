@@ -110,7 +110,7 @@ public class IssueCommentController {
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "commentId", required = true)
                                              @PathVariable @Encrypt Long commentId) {
-        issueCommentService.deleteIssueComment(projectId, commentId);
+        issueCommentService.deleteIssueComment(projectId, commentId, false);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
@@ -121,7 +121,7 @@ public class IssueCommentController {
                                              @PathVariable(name = "project_id") Long projectId,
                                                   @ApiParam(value = "评论id", required = true)
                                              @PathVariable @Encrypt Long commentId) {
-        issueCommentService.deleteIssueCommentReply(projectId, commentId);
+        issueCommentService.deleteIssueCommentReply(projectId, commentId, false);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
@@ -132,7 +132,7 @@ public class IssueCommentController {
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "commentId", required = true)
                                              @PathVariable @Encrypt Long commentId) {
-        issueCommentService.deleteIssueComment(projectId, commentId);
+        issueCommentService.deleteIssueComment(projectId, commentId, true);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
@@ -143,7 +143,7 @@ public class IssueCommentController {
                                                   @PathVariable(name = "project_id") Long projectId,
                                                   @ApiParam(value = "评论id", required = true)
                                                   @PathVariable @Encrypt Long commentId) {
-        issueCommentService.deleteIssueCommentReply(projectId, commentId);
+        issueCommentService.deleteIssueCommentReply(projectId, commentId, true);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
