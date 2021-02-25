@@ -77,7 +77,7 @@ export default function renderField(field) {
       <TimePicker
         label={fieldName}
         placeholder={fieldName}
-        style={{ display: 'block' }}
+        style={{ display: 'block', width: '100%' }}
         defaultOpenValue={moment('00:00:00', 'HH:mm:ss')}
         allowEmpty={!required}
       />

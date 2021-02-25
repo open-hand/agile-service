@@ -19,7 +19,7 @@ const LINK_URL = {
   knowledgeDoc: (baseId: string) => `/knowledge/project/doc/${baseId}`,
   workListIssue: '/agile/work-list/issue',
   workListBacklog: '/agile/work-list/backlog',
-  workListVersion: '/agile/work-list/version',
+  workListVersion: '/agile/project-version',
   report: '/charts',
   reportBurnDown: '/agile/reporthost/burndownchart',
   reportIssueType: '/agile/reporthost/pieReport/typeCode',
