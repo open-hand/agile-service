@@ -125,4 +125,26 @@ public class IssueCommentController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("通过commentId删除删除自己的评论")
+    @DeleteMapping(value = "/self/{commentId}")
+    public ResponseEntity deleteSelfIssueComment(@ApiParam(value = "项目id", required = true)
+                                             @PathVariable(name = "project_id") Long projectId,
+                                             @ApiParam(value = "commentId", required = true)
+                                             @PathVariable @Encrypt Long commentId) {
+        issueCommentService.deleteIssueComment(projectId, commentId);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("通过commentId删除自己的评论及其回复")
+    @DeleteMapping(value = "/self/reply/{commentId}")
+    public ResponseEntity deleteSelfIssueCommentReply(@ApiParam(value = "项目id", required = true)
+                                                  @PathVariable(name = "project_id") Long projectId,
+                                                  @ApiParam(value = "评论id", required = true)
+                                                  @PathVariable @Encrypt Long commentId) {
+        issueCommentService.deleteIssueCommentReply(projectId, commentId);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
 }
