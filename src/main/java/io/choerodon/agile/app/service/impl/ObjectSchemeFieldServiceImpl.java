@@ -1449,7 +1449,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         IssueTypeDTO dto = issueTypeMapper.selectByPrimaryKey(issueTypeId);
         if (dto != null) {
             String typeCode = dto.getTypeCode();
-            if (IssueTypeCode.BACKLOG.equals(typeCode)) {
+            if (IssueTypeCode.BACKLOG.value().equals(typeCode)) {
                 return ObjectSchemeCode.BACKLOG;
             } else {
                 return ObjectSchemeCode.AGILE_ISSUE;
