@@ -4,9 +4,8 @@ import {
   Page, Header, Content, stores, Breadcrumb, Choerodon, Permission,
 } from '@choerodon/boot';
 import {
-  Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
+  Button, Select, Spin, Icon, Modal, Form, Tooltip,
 } from 'choerodon-ui';
-import { toJS } from 'mobx';
 import { set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
@@ -22,7 +21,6 @@ import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore'
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
 import './ScrumBoardHome.less';
 import IssueDetail from '../ScrumBoardComponent/IssueDetail/IssueDetail';
-import QuickSearch, { QuickSearchEvent } from '../../../components/QuickSearch';
 import NoneSprint from '../ScrumBoardComponent/NoneSprint/NoneSprint';
 import '../ScrumBoardComponent/RenderSwimLaneContext/RenderSwimLaneContext.less';
 import SwimLane from '../ScrumBoardComponent/RenderSwimLaneContext/SwimLane';
@@ -30,17 +28,12 @@ import CSSBlackMagic from '../../../components/CSSBlackMagic/CSSBlackMagic';
 import HeaderLine from '../../../components/HeaderLine';
 import ScrumBoardFullScreen from '../ScrumBoardComponent/ScrumBoardFullScreen';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
-import { service } from '../setting/Setting';
-import SelectPriority from './SelectPriority';
 import CreateIssue from '../ScrumBoardComponent/create-issue';
 import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
 import BoardSearch from '../ScrumBoardComponent/board-search';
 
 const { Option } = Select;
 const { AppState } = stores;
-
-const RadioGroup = Radio.Group;
-const RadioButton = Radio.Button;
 
 const style = (swimLaneId) => `
   .${swimLaneId}.c7n-swimlaneContext-itemBodyColumn {
@@ -124,7 +117,6 @@ class ScrumBoardHome extends Component {
   handleClearFilter = () => {
     ScrumBoardStore.clearFilter();
     localPageCacheStore.remove('scrumboard');
-    QuickSearchEvent.emit('clearQuickSearchSelect');
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
 
@@ -239,20 +231,6 @@ class ScrumBoardHome extends Component {
       SwimLaneId, destinationStatus, destinationStatusIndex, issue, false);
   };
 
-  handleToIterationBoard = () => {
-    if (!ScrumBoardStore.getSpinIf) {
-      to(LINK_URL.iterationBoard(ScrumBoardStore.getSprintId));
-    } else {
-      Choerodon.prompt('等待加载当前迭代');
-    }
-  }
-
-  handleModeChange = (e) => {
-    if (e.target.value === 'work') {
-      this.handleToIterationBoard();
-    }
-  }
-
   handleCreateBoardClick = () => {
     ModalPro.open({
       title: '创建看板',
@@ -279,23 +257,6 @@ class ScrumBoardHome extends Component {
         {`${ScrumBoardStore.getDayRemain >= 0 ? `${ScrumBoardStore.getDayRemain} days剩余` : '无剩余时间'}`}
       </span>
     </>
-  )
-
-  renderSwitchMode = () => (
-    <div style={{ marginLeft: 'auto' }}>
-      <RadioGroup className="c7nagile-switchRadio" value="board" style={{ marginLeft: 'auto', marginRight: 17 }} onChange={this.handleModeChange}>
-        <RadioButton value="board">
-          <Tooltip title="看板模式" placement="bottom">
-            <Icon type="view_week" />
-          </Tooltip>
-        </RadioButton>
-        <RadioButton value="work">
-          <Tooltip title="工作台模式" placement="bottom">
-            <Icon type="view_list" />
-          </Tooltip>
-        </RadioButton>
-      </RadioGroup>
-    </div>
   )
 
   refresh = (defaultBoard, url, boardListData) => {
@@ -348,12 +309,9 @@ class ScrumBoardHome extends Component {
   };
 
   render() {
-    const { HeaderStore } = this.props;
     const {
-      updateParentStatus, expandAll,
+      updateParentStatus,
     } = this.state;
-    const menu = AppState.currentMenuType;
-    const { type, id: projectId, organizationId: orgId } = menu;
     const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find((item) => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId);
     return (
       <Page
@@ -432,7 +390,6 @@ class ScrumBoardHome extends Component {
                     完成冲刺
                   </Button>
                 </Permission>
-                {this.renderSwitchMode()}
               </>
             )
           }
