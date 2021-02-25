@@ -76,7 +76,7 @@ function EditIssue() {
   }, [close, issueEvents]);
 
   const loadIssueDetail = async (paramIssueId, callback) => {
-    const id = paramIssueId || currentIssueId;
+    const id = paramIssueId || idRef.current || currentIssueId;
     if (idRef.current !== id && descriptionEditRef.current) {
       Choerodon.prompt('有未保存的描述');
       return;
