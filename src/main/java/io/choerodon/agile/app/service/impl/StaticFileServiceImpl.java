@@ -318,7 +318,10 @@ public class StaticFileServiceImpl implements StaticFileService {
         StaticFileIssueRelDTO relRecord = new StaticFileIssueRelDTO();
         relRecord.setProjectId(projectId);
         staticFileHeaderMapper.updateFileStatus(staticFileHeader.getId(), DOING);
-        issueMapper.updateIssueLastUpdateInfoByStaticFile(staticFileHeader.getId(), projectId, DetailsHelper.getUserDetails().getUserId());
+        List<Long> issueIds = staticFileHeaderMapper.selectRelatedIssueId(staticFileHeader.getId(), projectId);
+        if (CollectionUtils.isEmpty(issueIds)) {
+            issueMapper.batchUpdateIssueLastUpdateInfo(issueIds, projectId, DetailsHelper.getUserDetails().getUserId());
+        }
         staticFileDealService.deleteBase(relRecord, staticFileHeader, fileUrls, staticFileDeleteHistory);
     }
 

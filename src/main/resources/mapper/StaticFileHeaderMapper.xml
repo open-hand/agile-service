@@ -42,4 +42,11 @@
         SET status = #{status}
         WHERE id = #{id}
     </update>
+
+    <select id="selectRelatedIssueId" resultType="java.lang.Long">
+        select issue_id
+        from agile_issue_static_file_rel aisfr
+        where aisfr.project_id = #{projectId}
+        and aisfr.static_file_id = #{staticFileId}
+    </select>
 </mapper>
