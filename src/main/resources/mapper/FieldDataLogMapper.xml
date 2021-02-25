@@ -23,6 +23,22 @@
         <id property="objectVersionNumber" column="object_version_number"/>
     </resultMap>
 
+    <delete id="deleteByInstanceIdsAndFieldIds">
+        delete from fd_field_data_log
+        where project_id = #{projectId}
+        and instance_id in
+        <foreach collection="instanceIds" item="instanceId" open="(" close=")" separator=",">
+            #{instanceId}
+        </foreach>
+        and scheme_code = #{schemeCode}
+        <if test="fieldIds != null and fieldIds.size > 0">
+            and field_id in
+            <foreach collection="fieldIds" item="fieldId" open="(" close=")" separator=",">
+                #{fieldId}
+            </foreach>
+        </if>
+    </delete>
+
     <select id="queryByInstanceId" resultMap="fieldDataLogMap">
         SELECT
         fdl.*,

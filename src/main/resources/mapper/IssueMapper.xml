@@ -3434,5 +3434,15 @@
         left join agile_data_log t3 on t2.log_id = t3.log_id
     </select>
 
+    <select id="selectIdsByIssueTypeIdsAndProjectIds" resultType="java.lang.Long">
+        select issue_id
+        from agile_issue
+        where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
+        and issue_type_id = #{issueTypeId}
+    </select>
+
 
 </mapper>

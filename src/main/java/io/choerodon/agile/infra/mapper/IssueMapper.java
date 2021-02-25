@@ -558,4 +558,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<GanttChartVO> selectActuatorCompletedDateByIssueIds(@Param("issueIds") List<Long> issueIds,
                                                                   @Param("projectId") Long projectId);
+
+    List<Long> selectIdsByIssueTypeIdsAndProjectIds(@Param("projectIds") List<Long> projectIds,
+                                                    @Param("issueTypeId") Long issueTypeId);
+
 }
