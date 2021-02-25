@@ -15,7 +15,7 @@ const ProjectTag: React.FC<ProjectTagProps> = ({ data, ...otherProps }) => {
   return (
     <HeadTag
       src={imageUrl}
-      name={name[0]}
+      name={name[0].toUpperCase()}
       text={name}
       avatarStyle={{
         backgroundImage: !imageUrl ? getProjectColor(creationDate) : `url('${imageUrl}')`,
