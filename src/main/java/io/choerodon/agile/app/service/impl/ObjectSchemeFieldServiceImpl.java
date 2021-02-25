@@ -1061,7 +1061,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     private String tryDecryptDefaultValue(String fieldType, String defaultValue) {
         if (EncryptContext.isEncrypt()) {
-            if (Objects.equals(FieldType.MULTI_MEMBER, fieldType) && !ObjectUtils.isEmpty(defaultValue)) {
+            if (FieldType.multipleFieldType.contains(fieldType) && !ObjectUtils.isEmpty(defaultValue)) {
                 String[] splits = defaultValue.split(",");
                 List<String> list = new ArrayList<>();
                 for (String split : splits) {
@@ -1231,6 +1231,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         unselected.forEach(v -> {
             //获取字段选项，并设置默认值
             List<FieldOptionVO> fieldOptions = fieldOptionService.queryByFieldId(organizationId, v.getId());
+            // single,radio,checkbox,multiple
             if (!fieldOptions.isEmpty()) {
                 if (!ObjectUtils.isEmpty(v.getDefaultValue())) {
                     List<String> defaultIds = Arrays.asList(v.getDefaultValue().split(","));
@@ -1239,7 +1240,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 }
                 v.setFieldOptions(fieldOptions);
             }
-            if (FieldType.MEMBER.equals(v.getFieldType())) {
+            //member
+            else if (FieldType.MEMBER.equals(v.getFieldType())) {
                 BaseFeignClient baseFeignClient = SpringBeanUtil.getBean(BaseFeignClient.class);
                 if (v.getDefaultValue() != null && !"".equals(v.getDefaultValue())) {
                     Long defaultValue = Long.valueOf(String.valueOf(v.getDefaultValue()));
@@ -1247,6 +1249,19 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     List<UserDTO> list = baseFeignClient.listUsersByIds(Arrays.asList(defaultValue).toArray(new Long[1]), false).getBody();
                     if (!list.isEmpty()) {
                         v.setDefaultValueObj(list.get(0));
+                    }
+                }
+            }
+            //multiMember
+            else if (FieldType.MULTI_MEMBER.equals(v.getFieldType())) {
+                BaseFeignClient baseFeignClient = SpringBeanUtil.getBean(BaseFeignClient.class);
+                if (v.getDefaultValue() != null && !"".equals(v.getDefaultValue())) {
+                    List<String> defaultIds = Arrays.asList(v.getDefaultValue().split(","));
+                    List<String> encryptList = EncryptionUtils.encryptListToStr(defaultIds);
+                    v.setDefaultValue(StringUtils.join(encryptList.toArray(), ","));
+                    List<UserDTO> list = baseFeignClient.listUsersByIds(defaultIds.stream().map(Long::valueOf).toArray(Long[]::new), false).getBody();
+                    if (!CollectionUtils.isEmpty(list)) {
+                        v.setDefaultValueObj(list);
                     }
                 }
             }
