@@ -56,10 +56,12 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
     const newCheckedOptions = options?.map((option) => option.value) || [];
     form.dataSet.current?.set(name, newCheckedOptions);
     setCheckedOptions(newCheckedOptions);
+    onChange(newCheckedOptions);
   };
   const unCheckAll = () => {
     form.dataSet.current?.set(name, []);
     setCheckedOptions([]);
+    onChange([]);
   };
   const checkOption = (value: string) => {
     setCheckedOptions([...checkedOptions, value]);
