@@ -31,6 +31,8 @@ function transformSystemFilter(data:any) {
     testResponsibleIds,
     mainResponsibleIds,
     environment,
+    creatorIds,
+    updatorIds,
   } = data;
   return {
     advancedSearchArgs: {
@@ -55,6 +57,8 @@ function transformSystemFilter(data:any) {
       testResponsibleIds,
       mainResponsibleIds,
       environment,
+      creatorIds,
+      updatorIds,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: estimatedStartTime[0],
