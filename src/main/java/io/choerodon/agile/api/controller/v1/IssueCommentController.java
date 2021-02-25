@@ -71,7 +71,22 @@ public class IssueCommentController {
                                                               @PathVariable(name = "project_id") Long projectId,
                                                              @ApiParam(value = "更新issue对象", required = true)
                                                               @RequestBody JSONObject issueCommentUpdate) {
-        issueCommentValidator.verifyUpdateData(projectId, issueCommentUpdate);
+        issueCommentValidator.verifyUpdateData(projectId, issueCommentUpdate, false);
+        IssueCommentUpdateVO issueCommentUpdateVO = new IssueCommentUpdateVO();
+        List<String> stringList = verifyUpdateUtil.verifyUpdateData(issueCommentUpdate, issueCommentUpdateVO);
+        return Optional.ofNullable(issueCommentService.updateIssueComment(issueCommentUpdateVO, stringList,projectId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.IssueComment.updateIssueComment"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("更新issue评论")
+    @PostMapping(value = "/self/update")
+    public ResponseEntity<IssueCommentVO> updateSelfIssueComment(@ApiParam(value = "项目id", required = true)
+                                                             @PathVariable(name = "project_id") Long projectId,
+                                                             @ApiParam(value = "更新issue对象", required = true)
+                                                             @RequestBody JSONObject issueCommentUpdate) {
+        issueCommentValidator.verifyUpdateData(projectId, issueCommentUpdate, true);
         IssueCommentUpdateVO issueCommentUpdateVO = new IssueCommentUpdateVO();
         List<String> stringList = verifyUpdateUtil.verifyUpdateData(issueCommentUpdate, issueCommentUpdateVO);
         return Optional.ofNullable(issueCommentService.updateIssueComment(issueCommentUpdateVO, stringList,projectId))
