@@ -37,8 +37,7 @@ class ImportIssue extends Component {
 
   state = {
     wsData: null,
-    historyId: false,
-    ovn: false,
+
     latestInfo: false,
     // eslint-disable-next-line react/no-unused-state
     reRender: false,
@@ -50,8 +49,7 @@ class ImportIssue extends Component {
       if (res) {
         this.setState({
           latestInfo: res,
-          historyId: res.status === 'doing' ? res.id : false,
-          ovn: res.objectVersionNumber,
+
         });
       }
     });
@@ -62,10 +60,10 @@ class ImportIssue extends Component {
   }
 
   componentWillUnmount() {
-    const { historyId, ovn } = this.state;
-    if (historyId) {
-      issueApi.cancelImport(historyId, ovn);
-    }
+    // const { historyId, ovn } = this.state;
+    // if (historyId) {
+    //   issueApi.cancelImport(historyId, ovn);
+    // }
     this.finish();
   }
 
@@ -122,8 +120,6 @@ class ImportIssue extends Component {
     if (data) {
       this.setState({
         wsData: data,
-        historyId: data.id,
-        ovn: data.objectVersionNumber,
       });
       if (data.status === 'failed') {
         if (data.fileUrl) {
@@ -140,7 +136,6 @@ class ImportIssue extends Component {
     }
     this.setState({
       wsData: null,
-      historyId: false,
     });
   };
 
