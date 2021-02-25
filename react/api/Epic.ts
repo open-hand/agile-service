@@ -26,7 +26,7 @@ class EpicApi extends Api<EpicApi> {
       method: 'get',
       url: `${this.prefix}/issues/check_epic_name`,
       params: {
-        epicName: epicName.trim(),
+        epicName,
         epicId,
       },
     });
