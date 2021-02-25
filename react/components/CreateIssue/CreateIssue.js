@@ -592,7 +592,7 @@ class CreateIssue extends Component {
                             fieldApi.getFields(param).then((res) => {
                               const { fields } = this.state;
                               form.resetFields(['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
-                                'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel', 'status',
+                                'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel', 'statusId',
                                 ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary', 'description'].some((i) => i === code))]);
                               this.setState({
                                 fields: res,
@@ -1170,6 +1170,15 @@ class CreateIssue extends Component {
                   request={() => statusApi.loadAllForIssueType(newIssueTypeId, applyType)}
                   label={field.fieldName}
                   type="issue_status"
+                  loadWhenMount
+                  afterLoad={(statusList) => {
+                    const defaultStatus = find(statusList, { defaultStatus: true });
+                    if (defaultStatus && !form.getFieldValue(`${field.fieldCode}Id`)) {
+                      form.setFieldsValue({
+                        [`${field.fieldCode}Id`]: defaultStatus.id,
+                      });
+                    }
+                  }}
                 />,
               )}
             </div>
