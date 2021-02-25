@@ -38,4 +38,13 @@ public interface StaticFileHeaderMapper extends BaseMapper<StaticFileHeaderDTO> 
      * @param status 状态
      */
     void updateFileStatus(@Param("id") Long id, @Param("status") String status);
+
+    /**
+     * 获取静态文件关联的问题id
+     *
+     * @param staticFileId 静态文件id
+     * @param projectId 项目id
+     * @return 关联的问题id
+     */
+    List<Long> selectRelatedIssueId(@Param("staticFileId") Long staticFileId, @Param("projectId") Long projectId);
 }
