@@ -39,14 +39,13 @@ const SelectTeam: React.FC<Props> = forwardRef(({
         // @ts-ignore
         // eslint-disable-next-line
         projectDataRef.current = projects;
-        return projects || [];
+        return noAssign ? [{ projName: '未分配', projectId: '0' }, ...projects] : projects || [];
       }
       // @ts-ignore
 
       // eslint-disable-next-line no-param-reassign
       projectDataRef.current = (projects as any).content || [];
-      const list = (projects as any).content || [];
-      return noAssign ? [{ projName: '未分配', projectId: '0' }, ...list] : list;
+      return (projects as any).content || [];
     },
   }), [noAssign]);
   const props = useSelect(config);
