@@ -960,7 +960,7 @@ public class ExcelServiceImpl implements ExcelService {
             history.setSuccessCount(progress.getSuccessCount());
             sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, WEBSOCKET_IMPORT_CODE);
         }
-        updateRelatedIssue(relatedIssueList, rowIssueIdMap, errorRowColMap, headerMap, dataSheet, projectId, progress);
+        updateRelatedIssue(relatedIssueList, rowIssueIdMap, errorRowColMap, headerMap, dataSheet, projectId, progress, parentSonMap, parentCol);
 
         //错误数据生成excel
         String status;
@@ -999,7 +999,9 @@ public class ExcelServiceImpl implements ExcelService {
                                     Map<Integer, ExcelColumnVO> headerMap,
                                     Sheet dataSheet,
                                     Long projectId,
-                                    ExcelImportTemplate.Progress progress) {
+                                    ExcelImportTemplate.Progress progress,
+                                    Map<Integer, Set<Integer>> parentSonMap,
+                                    int parentCol) {
         relatedIssueList =
                 relatedIssueList
                         .stream()
@@ -1024,6 +1026,18 @@ public class ExcelServiceImpl implements ExcelService {
                 for (Integer relatedRow : relatedRows) {
                     if (Objects.equals(rowNum, relatedRow)) {
                         deleteIssueIds.add(issueId);
+                        Set<Integer> sonSet = parentSonMap.get(rowNum);
+                        if (!CollectionUtils.isEmpty(sonSet)) {
+                            sonSet.forEach(v -> {
+                                Long sonIssueId = rowIssueIdMap.get(v);
+                                if (!ObjectUtils.isEmpty(sonIssueId)) {
+                                    deleteIssueIds.add(sonIssueId);
+                                    progress.failCountIncrease();
+                                    progress.successCountDecrease();
+                                }
+                            });
+                            setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet, parentCol);
+                        }
                         cell.setCellValue(buildWithErrorMsg(value, "自己不能和自己关联，rowNum: " + (rowNum + 1)));
                         addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
                         ok = false;
@@ -1034,6 +1048,18 @@ public class ExcelServiceImpl implements ExcelService {
                     Long relatedIssueId = rowIssueIdMap.get(relatedRow);
                     if (relatedIssueId == null) {
                         deleteIssueIds.add(issueId);
+                        Set<Integer> sonSet = parentSonMap.get(rowNum);
+                        if (!CollectionUtils.isEmpty(sonSet)) {
+                            sonSet.forEach(v -> {
+                                Long sonIssueId = rowIssueIdMap.get(v);
+                                if (!ObjectUtils.isEmpty(sonIssueId)) {
+                                    deleteIssueIds.add(sonIssueId);
+                                    progress.failCountIncrease();
+                                    progress.successCountDecrease();
+                                }
+                            });
+                            setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet, parentCol);
+                        }
                         cell.setCellValue(buildWithErrorMsg(value, "第" + (relatedRow + 1) + "行问题项不存在"));
                         addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
                         ok = false;
