@@ -197,7 +197,7 @@ const Confirm: React.FC<Props> = ({
         batchedUpdates(() => {
           res.forEach((subTask) => {
             subTaskSelectedUserIds = [...subTaskSelectedUserIds, ...[subTask.assigneeId, subTask.reporterId, subTask.mainResponsible?.id]];
-            subTaskDetailMap.set(`${subTask.issueId}-detail`, subTask);
+            subTaskDetailMap.set(`${subTask.issueId}%detail`, subTask);
           });
           const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
           store.setSelectUserIds(uniqUserIds);
@@ -213,7 +213,7 @@ const Confirm: React.FC<Props> = ({
             });
             const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
             store.setSelectUserIds(uniqUserIds);
-            subTaskDetailMap.set(`${subIssueVOList[i].issueId}-fields`, fieldWidthValue);
+            subTaskDetailMap.set(`${subIssueVOList[i].issueId}%fields`, fieldWidthValue);
           });
         });
       });
@@ -237,7 +237,7 @@ const Confirm: React.FC<Props> = ({
         batchedUpdates(() => {
           res.forEach((subBug) => {
             subBugSelectedUserIds = [...subBugSelectedUserIds, ...[subBug.assigneeId, subBug.reporterId, subBug.mainResponsible?.id]];
-            subBugDetailMap.set(`${subBug.issueId}-detail`, subBug);
+            subBugDetailMap.set(`${subBug.issueId}%detail`, subBug);
           });
           const uniqUserIds = uniq(compact(subBugSelectedUserIds));
           store.setSelectUserIds(uniqUserIds);
@@ -253,7 +253,7 @@ const Confirm: React.FC<Props> = ({
             });
             const uniqUserIds = uniq(compact(subBugSelectedUserIds));
             store.setSelectUserIds(uniqUserIds);
-            subBugDetailMap.set(`${subBugVOList[i].issueId}-fields`, fieldWidthValue);
+            subBugDetailMap.set(`${subBugVOList[i].issueId}%fields`, fieldWidthValue);
           });
         });
       });
@@ -290,8 +290,8 @@ const Confirm: React.FC<Props> = ({
     });
 
     for (const [k, v] of subTaskDetailMap.entries()) {
-      const subTaskIssueId = k.split('-')[0];
-      const isDetail = k.split('-')[1] === 'detail';
+      const subTaskIssueId = k.split('%')[0];
+      const isDetail = k.split('%')[1] === 'detail';
       if (isDetail) {
         memberFieldsCodeAndValue.set(`${subTaskIssueId}-assignee`, v.assigneeId);
         memberFieldsCodeAndValue.set(`${subTaskIssueId}-reporter`, v.reporterId);
@@ -307,10 +307,9 @@ const Confirm: React.FC<Props> = ({
         });
       }
     }
-
     for (const [k, v] of subBugDetailMap.entries()) {
-      const subBugIssueId = k.split('-')[0];
-      const isDetail = k.split('-')[1] === 'detail';
+      const subBugIssueId = k.split('%')[0];
+      const isDetail = k.split('%')[1] === 'detail';
       if (isDetail) {
         memberFieldsCodeAndValue.set(`${subBugIssueId}-assignee`, v.assigneeId);
         memberFieldsCodeAndValue.set(`${subBugIssueId}-reporter`, v.reporterId);
