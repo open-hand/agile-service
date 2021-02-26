@@ -53,7 +53,9 @@ function PageIssueType() {
       message.success('保存成功');
       setBtnLoading(false);
     }).catch(() => {
-      message.error('网络异常');
+      // message.error('网络异常');
+      setBtnLoading(false);
+      pageIssueTypeStore.setLoading(false);
     });
   };
   const handleSubmit = () => {
