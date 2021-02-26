@@ -168,6 +168,8 @@ export interface IProjectReport {
   objectVersionNumber: number
 }
 class ProjectReportStore {
+  @observable dirty = false;
+
   @observable blockList: IReportBlock[] = []
 
   @observable baseInfo: IProjectReport | null = null
@@ -175,22 +177,26 @@ class ProjectReportStore {
   @action('添加一个block')
   addBlock(block: IReportBlock) {
     this.blockList.push(block);
+    this.dirty = true;
   }
 
   @action('更新一个block')
   updateBlock(index: number, block: IReportBlock) {
     this.blockList[index] = block;
+    this.dirty = true;
   }
 
   @action('移除一个block')
   removeBlock(index: number) {
     this.blockList.splice(index, 1);
+    this.dirty = true;
   }
 
   @action('设置ReportData')
   setReportData(reportData: IProjectReport) {
     this.blockList = (reportData.reportUnitList || []).map((block) => ({ ...block, key: String(Math.random()) }));
     this.baseInfo = reportData;
+    this.dirty = false;
   }
 
   @action('设置objectVersionNumber')
@@ -207,6 +213,7 @@ class ProjectReportStore {
       sourceIndex,
       destinationIndex,
     );
+    this.dirty = true;
   }
 }
 
