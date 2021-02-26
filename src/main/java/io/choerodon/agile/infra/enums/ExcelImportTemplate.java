@@ -48,6 +48,10 @@ public class ExcelImportTemplate {
             this.processNum++;
         }
 
+        public void successCountDecrease() {
+            this.successCount--;
+        }
+
         public Long getFailCount() {
             return failCount;
         }
