@@ -33,6 +33,7 @@ const Operation: React.FC<Props> = () => {
           reportUnitList: toJS(store.blockList.map((block) => omit(block, 'key'))),
         } as IProjectReportUpdate;
         await projectReportApi.update(store?.baseInfo?.id as string, data);
+        store.dirty = false;
         refresh();
       } else {
         const data: IProjectReportCreate = {
@@ -41,10 +42,11 @@ const Operation: React.FC<Props> = () => {
           reportUnitList: toJS(store.blockList.map((block) => omit(block, 'key'))),
         } as IProjectReportCreate;
         await projectReportApi.create(data);
+        store.dirty = false;
         to('/agile/project-report');
       }
     }
-  }, [baseInfoRef, edit, refresh, store.baseInfo?.id, store.baseInfo?.objectVersionNumber, store.blockList]);
+  }, [baseInfoRef, edit, refresh, store]);
   const handlePreview = useCallback(() => {
     window.open(`/#${linkUrl(`/agile/project-report/preview/${store.baseInfo?.id}`, {
       type: 'project',
