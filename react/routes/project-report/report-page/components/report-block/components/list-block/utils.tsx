@@ -199,6 +199,15 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
       title: '故事点',
       dataIndex: 'storyPoints',
     }],
+    ['mainResponsibleUser', {
+      title: '主要负责人',
+      dataIndex: 'mainResponsibleUser',
+      render: (item) => item.mainResponsibleUser?.realName,
+    }],
+    ['environmentName', {
+      title: '环境',
+      dataIndex: 'environmentName',
+    }],
   ]);
   return map.get(name);
 }

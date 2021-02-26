@@ -263,6 +263,7 @@ export interface Issue {
   createrRealName: string
   createUser?: User
   updateUser?: User
+  mainResponsibleUser?: User
   createrLoginName: string
   assigneeId: string,
   assigneeImageUrl: string,
@@ -330,7 +331,9 @@ export type IIssueColumnName =
   'epic' |
   'feature' |
   'createUser' |
-  'updateUser';
+  'updateUser' |
+  'mainResponsibleUser' |
+  'environmentName';
 
 export type IFieldType =
   'text' | 'input' | 'member' | 'multiMember' | 'single' | 'multiple' | 'radio' | 'checkbox' |
