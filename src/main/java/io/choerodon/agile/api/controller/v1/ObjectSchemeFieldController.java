@@ -166,13 +166,4 @@ public class ObjectSchemeFieldController {
         objectSchemeFieldService.syncDefaultValue(organizationId, null, fieldId, updateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "根据类型查询描述模版")
-    @GetMapping(value = "/description_template")
-    public ResponseEntity<IssueTypeFieldVO> queryDescriptionTemplate(@PathVariable("organization_id") Long organizationId,
-                                                                     @RequestParam @Encrypt Long issueTypeId) {
-        return new ResponseEntity<>(objectSchemeFieldService.queryDescriptionTemplate(null, issueTypeId, organizationId), HttpStatus.OK);
-    }
-
 }
