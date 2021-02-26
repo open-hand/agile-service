@@ -180,6 +180,9 @@ public class ExcelServiceImpl implements ExcelService {
 
     private static final String[] FIELDS;
 
+    @Autowired
+    private LookupValueService lookupValueService;
+
     protected static Map<String, String> FIELD_MAP = new LinkedHashMap<>();
 
     protected static String[] AUTO_SIZE_WIDTH = {"summary", "epicName", "feature",
@@ -210,6 +213,8 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put("estimatedEndTime", "预计结束时间");
         FIELD_MAP.put("createdUserName", "创建人");
         FIELD_MAP.put("lastUpdatedUserName", "更新人");
+        FIELD_MAP.put("mainResponsibleName", "主要负责人");
+        FIELD_MAP.put("environmentName", "环境");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -2640,6 +2645,7 @@ public class ExcelServiceImpl implements ExcelService {
                         Long reporterId = i.getReporterId();
                         Long createdUser = i.getCreatedBy();
                         Long updatedUser = i.getLastUpdatedBy();
+                        Long mainResponsibleId = i.getMainResponsibleId();
                         if (!ObjectUtils.isEmpty(assigneeId) && !Objects.equals(assigneeId, 0L)) {
                             userIds.add(assigneeId);
                         }
@@ -2652,6 +2658,9 @@ public class ExcelServiceImpl implements ExcelService {
                         if (!ObjectUtils.isEmpty(updatedUser) && !Objects.equals(updatedUser, 0L)) {
                             userIds.add(updatedUser);
                         }
+                        if (!ObjectUtils.isEmpty(mainResponsibleId) && !Objects.equals(mainResponsibleId, 0L)) {
+                            userIds.add(mainResponsibleId);
+                        }
                     });
                     Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
                     Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
@@ -2663,6 +2672,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
                     Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
                     Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, issueIds, true);
+                    Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
                     cursor
                             .addCollections(userIds)
                             .addCollections(usersMap)
@@ -2690,6 +2700,7 @@ public class ExcelServiceImpl implements ExcelService {
                                     labelNames,
                                     componentMap,
                                     foundationCodeValue,
+                                    envMap,
                                     issue));
                 }
                 if (!isTreeView) {
@@ -2725,6 +2736,7 @@ public class ExcelServiceImpl implements ExcelService {
                                                       Map<Long, List<LabelIssueRelDTO>> labelNames,
                                                       Map<Long, List<ComponentIssueRelDTO>> componentMap,
                                                       Map<Long, Map<String, Object>> foundationCodeValue,
+                                                      Map<String, String> envMap,
                                                       IssueDTO issue) {
         Long issueId = issue.getIssueId();
         ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
@@ -2734,6 +2746,8 @@ public class ExcelServiceImpl implements ExcelService {
         exportIssuesVO.setSprintName(getActiveSprintName(issue));
         setAssignee(usersMap, issue, exportIssuesVO);
         serReporter(usersMap, issue, exportIssuesVO);
+        setMainResponsible(usersMap, issue, exportIssuesVO);
+        setEnvironmentName(envMap, issue, exportIssuesVO);
         setPriorityName(priorityDTOMap, issue, exportIssuesVO);
         setStatusName(statusMapDTOMap, issue, exportIssuesVO);
         setTypeName(issueTypeDTOMap, issue, exportIssuesVO);
@@ -2752,6 +2766,21 @@ public class ExcelServiceImpl implements ExcelService {
         issueMap.put(issueId, exportIssuesVO);
         processParentSonRelation(parentSonMap, issue);
         return exportIssuesVO;
+    }
+
+    private void setEnvironmentName(Map<String, String> envMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        String environment = issue.getEnvironment();
+        if (!StringUtils.isEmpty(environment)) {
+            exportIssuesVO.setEnvironmentName(envMap.get(environment));
+        }
+    }
+
+    private void setMainResponsible(Map<Long, UserMessageDTO> usersMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        Long mainResponsibleId = issue.getMainResponsibleId();
+        UserMessageDTO userMessage = usersMap.get(mainResponsibleId);
+        if (!ObjectUtils.isEmpty(userMessage)) {
+            exportIssuesVO.setMainResponsibleName(userMessage.getName());
+        }
     }
 
     private void resetRemainingTimeIfCompleted(IssueDTO issue, ExportIssuesVO exportIssuesVO) {
