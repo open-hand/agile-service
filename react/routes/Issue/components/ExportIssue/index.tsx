@@ -4,6 +4,7 @@ import { openExportIssueModal as originOpenExportIssueModal } from '@/components
 import IssueExportStore from '@/components/issue-export/stores/store';
 import { issueApi, TemplateAction } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { find, set, uniq } from 'lodash';
 import {
   getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields, getReverseExportFieldCodes,
@@ -57,7 +58,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
           value: 'description',
         });
       }
-      return options;
+      return !IsInProgramStore.isInProgram ? options.filter((item) => item.value !== 'feature') : options;
     },
   });
 
