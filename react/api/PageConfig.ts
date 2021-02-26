@@ -53,6 +53,8 @@ interface IFiledListItem {
   context: 'feature' | 'bug' | 'sub_task' | 'issue_epic' | 'task' | 'story' | 'backlog',
   contextName: string,
   defaultValue: any,
+  defaultValueObj: Array<any> | null,
+  fieldOptions: any,
   description: string,
   fieldType: string,
   fieldTypeName: string,

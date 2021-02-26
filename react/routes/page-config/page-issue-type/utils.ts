@@ -1,6 +1,7 @@
 import { IFieldOptionProps } from '@/api';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import moment from 'moment';
+import { isEmpty } from 'lodash';
 import { toJS } from 'mobx';
 import { User } from '@/common/types';
 
@@ -42,7 +43,8 @@ function transformDefaultValue({
       return realName || defaultValue;
     }
     case 'multiMember': {
-      return String(Array.isArray(fieldOptions) && Array.isArray(defaultValue) ? (fieldOptions as User[]).filter((item) => defaultValue.some((d) => d === item.id)).map((item) => item.realName) : (defaultValueObj?.realName || ''));
+      const memberDefaultValue = Array.isArray(defaultValue) ? defaultValue : String(defaultValue).split(',');
+      return String(Array.isArray(toJS(fieldOptions)) && !isEmpty(memberDefaultValue) ? (fieldOptions as User[]).filter((item) => memberDefaultValue.some((d) => d === item.id)).map((item) => item.realName) : (defaultValueObj?.realName || ''));
     }
     default:
       return defaultValue;
