@@ -327,6 +327,7 @@
         t2.name,
         t2.field_type,
         t2.default_value,
+        t2.extra_config
         t2.organization_id,
         t2.project_id
         from (
