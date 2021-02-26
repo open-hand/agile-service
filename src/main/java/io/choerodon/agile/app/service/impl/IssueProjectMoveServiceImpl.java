@@ -233,7 +233,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
                 if (!ObjectUtils.isEmpty(subIssues)) {
                     for (int i = 0; i < subIssues.size(); i++) {
                         JSONObject jsonObject1 = subIssues.getJSONObject(i);
-                        if (Objects.equals(jsonObject1.getLong("issueId"), taskAndSubBugId)) {
+                        String subIssue = EncryptionUtils.decrypt(jsonObject1.getString("issueId"));
+                        if (Objects.equals(Long.valueOf(subIssue), taskAndSubBugId)) {
                             subJsonObject = jsonObject1;
                         }
                     }
