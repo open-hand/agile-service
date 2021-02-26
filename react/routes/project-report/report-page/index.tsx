@@ -1,6 +1,6 @@
 import React, { useRef, useState, useMemo } from 'react';
 import {
-  Page, Breadcrumb, Content, Header, stores,
+  Page, Breadcrumb, Content, Header,
 } from '@choerodon/boot';
 import { Button, Dropdown, Menu } from 'choerodon-ui/pro';
 import { IReportContentType } from '@/common/types';
@@ -16,7 +16,6 @@ import ProjectReportContext, { BaseInfoRef } from './context';
 import ProjectReportStore from './store';
 import styles from './index.less';
 
-const { AppState } = stores;
 interface Props {
   store: ProjectReportStore
   edit?: boolean
