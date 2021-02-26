@@ -54,7 +54,7 @@ class Column extends Component {
         Choerodon.prompt('设置失败');
       }
     }).catch((error) => {
-      Choerodon.prompt(error);
+      // Choerodon.prompt(error);
     });
   }
 
