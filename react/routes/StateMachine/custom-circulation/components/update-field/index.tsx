@@ -391,29 +391,33 @@ const UpdateField = ({
         const initFields = fieldData.filter((
           f,
         ) => res.find((item: ISettingField) => item.fieldId === f.id));
-        Field.init(initFields);
-        const { current } = dataSet;
-        if (current) {
-          (res || []).forEach((item: ISettingField) => {
-            const field = find(fieldData, { id: item.fieldId }) || {} as any;
-            // @ts-ignore
-            const fieldCode = field?.code;
-            const { fieldType } = field;
-            const { fieldValueList } = item;
-            const firstField = (fieldValueList && fieldValueList[0]) || {};
-            const { operateType, userId, name } = firstField;
-            const isSpecifier = operateType === 'specifier';
-            if (fieldType === 'member' && isSpecifier) {
-              // current.set(`${fieldCode}-name`, userId);
-              selectUserMap?.set(fieldCode, {
-                // @ts-ignore
-                id: userId,
-                realName: name,
-              });
-              setSelectUserMap(selectUserMap);
-            }
-            setCurrentByFieldType(current, item, fieldCode);
-          });
+        if (initFields.length) {
+          Field.init(initFields);
+          const { current } = dataSet;
+          if (current) {
+            (res || []).forEach((item: ISettingField) => {
+              const field = find(fieldData, { id: item.fieldId }) || {} as any;
+              // @ts-ignore
+              const fieldCode = field?.code;
+              const { fieldType } = field;
+              const { fieldValueList } = item;
+              const firstField = (fieldValueList && fieldValueList[0]) || {};
+              const { operateType, userId, name } = firstField;
+              const isSpecifier = operateType === 'specifier';
+              if (fieldType === 'member' && isSpecifier) {
+                // current.set(`${fieldCode}-name`, userId);
+                selectUserMap?.set(fieldCode, {
+                  // @ts-ignore
+                  id: userId,
+                  realName: name,
+                });
+                setSelectUserMap(selectUserMap);
+              }
+              setCurrentByFieldType(current, item, fieldCode);
+            });
+          }
+        } else {
+          Field.add();
         }
       }).catch(() => {
         setLoading(false);
@@ -446,7 +450,6 @@ const UpdateField = ({
       if (validate) {
         const data = getData();
         const updateData = transformUpdateData(data);
-        console.log(updateData);
         await statusTransformApi.updateField(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
@@ -455,6 +458,7 @@ const UpdateField = ({
     };
     modal.handleOk(submit);
   }, [customCirculationDataSet, getData, modal, record, selectedType]);
+
   const data = getData();
 
   const render = () => (
