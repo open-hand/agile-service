@@ -258,7 +258,7 @@ function EditIssue() {
           organizationId={organizationId}
           disabled={rightDisabled}
           store={store}
-          issueId={currentIssueId}
+          issueId={idRef.current}
           programId={programId}
           reloadIssue={loadIssueDetail}
           onUpdate={onUpdate}
