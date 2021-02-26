@@ -1078,23 +1078,27 @@ public class ExcelServiceImpl implements ExcelService {
         if (!deleteIssueIds.isEmpty()) {
             issueService.batchDeleteIssuesAgile(projectId, new ArrayList<>(deleteIssueIds));
         }
-        Long linkTypeId =
-                issueLinkTypeMapper.queryIssueLinkTypeByProjectId(projectId, null, "关联", null)
-                        .get(0)
-                        .getLinkTypeId();
-        relatedMap.forEach((k, v) -> {
-            Long issueId = k;
-            Set<Long> linkedIssueIds = v;
-            List<IssueLinkCreateVO> issueLinkList = new ArrayList<>();
-            linkedIssueIds.forEach(l -> {
-                IssueLinkCreateVO create = new IssueLinkCreateVO();
-                create.setIssueId(issueId);
-                create.setLinkTypeId(linkTypeId);
-                create.setLinkedIssueId(l);
-                issueLinkList.add(create);
+
+        List<IssueLinkTypeDTO> issueLinkTypeDTOS = issueLinkTypeMapper.queryIssueLinkTypeByProjectId(projectId, null, "关联", null);
+        if (!CollectionUtils.isEmpty(issueLinkTypeDTOS)) {
+            Long linkTypeId =
+                    issueLinkTypeMapper.queryIssueLinkTypeByProjectId(projectId, null, "关联", null)
+                            .get(0)
+                            .getLinkTypeId();
+            relatedMap.forEach((k, v) -> {
+                Long issueId = k;
+                Set<Long> linkedIssueIds = v;
+                List<IssueLinkCreateVO> issueLinkList = new ArrayList<>();
+                linkedIssueIds.forEach(l -> {
+                    IssueLinkCreateVO create = new IssueLinkCreateVO();
+                    create.setIssueId(issueId);
+                    create.setLinkTypeId(linkTypeId);
+                    create.setLinkedIssueId(l);
+                    issueLinkList.add(create);
+                });
+                issueLinkService.createIssueLinkList(issueLinkList, issueId, projectId);
             });
-            issueLinkService.createIssueLinkList(issueLinkList, issueId, projectId);
-        });
+        }
     }
 
     protected void insertCustomFields(Long issueId,
