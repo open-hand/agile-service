@@ -95,6 +95,12 @@ public class ExportIssuesVO {
     @ApiModelProperty("更新人真实名称")
     private String lastUpdatedUserRealName;
 
+    @ApiModelProperty("主要负责人")
+    private String mainResponsibleName;
+
+    @ApiModelProperty("环境")
+    private String environmentName;
+
     public ExportIssuesVO() {
     }
 
@@ -432,5 +438,21 @@ public class ExportIssuesVO {
 
     public void setLastUpdatedUserRealName(String lastUpdatedUserRealName) {
         this.lastUpdatedUserRealName = lastUpdatedUserRealName;
+    }
+
+    public String getMainResponsibleName() {
+        return mainResponsibleName;
+    }
+
+    public void setMainResponsibleName(String mainResponsibleName) {
+        this.mainResponsibleName = mainResponsibleName;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 }
