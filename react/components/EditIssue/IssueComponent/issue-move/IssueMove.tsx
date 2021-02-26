@@ -173,6 +173,11 @@ const IssueMove: React.FC<Props> = ({
             moveDataSet.current?.set(`${subTask.issueId}-sprint`, value);
           });
         }
+        if (name === `${issue.issueId}-sprint` && issue.subBugVOList && issue.subBugVOList.length) {
+          issue.subBugVOList.forEach((subTask) => {
+            moveDataSet.current?.set(`${subTask.issueId}-sprint`, value);
+          });
+        }
         if (name !== 'targetProjectId' && name !== 'issueType') {
           const validate = await moveDataSet.validate();
           setSubmitBtnDisable(!validate);
@@ -352,16 +357,16 @@ const IssueMove: React.FC<Props> = ({
       <div className={styles.step_content}>
         {currentStep === 1 && <SelectProject issue={issue} dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} />}
         {currentStep === 2 && (
-        <Confirm
-          issue={issue}
-          dataSet={dataSet}
-          fieldsWithValue={fieldsWithValue}
-          targetProjectType={targetProjectType}
-          targetIssueType={targetIssueType}
-          targetSubTaskType={targetSubTaskType}
-          targetSubBugType={targetSubBugType}
-          loseItems={loseItems}
-        />
+          <Confirm
+            issue={issue}
+            dataSet={dataSet}
+            fieldsWithValue={fieldsWithValue}
+            targetProjectType={targetProjectType}
+            targetIssueType={targetIssueType}
+            targetSubTaskType={targetSubTaskType}
+            targetSubBugType={targetSubBugType}
+            loseItems={loseItems}
+          />
         )}
       </div>
       <div className={styles.steps_action}>
