@@ -17,6 +17,7 @@ import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { IIssueColumnName } from '@/common/types';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import { IReportListBlock } from '../../store';
 import { RefProps } from '../add-modal';
 
@@ -200,6 +201,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);
+  const { isInProgram } = useIsInProgram();
   return (
     <div className="agile-portal">
       <Form dataSet={formDataSet} style={{ width: 512 }}>
@@ -231,7 +233,9 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           <Option value="storyPoints">故事点</Option>
           <Option value="version">版本</Option>
           <Option value="epic">史诗</Option>
-          <Option value="feature">特性</Option>
+          {isInProgram && <Option value="feature">特性</Option>}
+          <Option value="mainResponsibleUser">主要负责人</Option>
+          <Option value="environmentName">环境</Option>
           {issueSearchStore.fields.map((field) => (
             <Option value={field.code}>
               {field.name}
