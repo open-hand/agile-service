@@ -50,7 +50,7 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
       title: '概要',
       dataIndex: 'summary',
       render: (item) => (
-        <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', marginLeft: -4 }}>
           <TypeTag data={item.issueTypeVO} />
           <span style={{ marginLeft: 5 }}>{item.summary}</span>
         </div>
@@ -58,7 +58,6 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
     }],
     ['issueNum', {
       title: '编号',
-      width: 150,
       dataIndex: 'issueNum',
       render: (item) => <span style={{ whiteSpace: 'nowrap' }}>{item.issueNum}</span>,
     }],
