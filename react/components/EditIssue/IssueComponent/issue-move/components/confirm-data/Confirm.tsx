@@ -9,7 +9,7 @@ import {
   Issue, IField, User, IIssueType,
 } from '@/common/types';
 import {
-  includes, map, uniq, compact, flatten,
+  includes, map, uniq, compact, flatten, find,
 } from 'lodash';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
@@ -87,10 +87,13 @@ const Confirm: React.FC<Props> = ({
       required: true,
     } as IField;
     const resAdded = [
-      statusField,
       ...(res || []),
       reporterField,
     ];
+    // 后端返回了就不加了
+    if (!find(res, { fieldCode: 'status' })) {
+      resAdded.unshift(statusField);
+    }
     const filtered = filterFields(resAdded);
     if (targetProjectType === 'subProject' && targetIssueType?.typeCode === 'story') {
       const epicFieldIndex = filtered.findIndex((item) => item.fieldCode === 'epic');
