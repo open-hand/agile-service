@@ -115,7 +115,7 @@ function IssueBody(props) {
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
             ? <SubBug {...props} /> : ''}
           {hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
-            ? <TestLink {...props} testLinkStoreRef={testLinkStoreRef} /> : ''}
+            ? <TestLink {...props} testLinkStoreRef={testLinkStoreRef} noCreateLink /> : ''}
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
           {!outside && !otherProject && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
