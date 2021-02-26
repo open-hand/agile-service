@@ -475,8 +475,8 @@ const Confirm: React.FC<Props> = ({
                   {
                     subTaskFields.map((subTaskField) => {
                       const { fieldCode, fieldName } = subTaskField;
-                      const subTaskDetail = subTaskDetailMap.get(`${subTask.issueId}-detail`) || {};
-                      const subTaskCustomFields = subTaskDetailMap.get(`${subTask.issueId}-fields`) || [];
+                      const subTaskDetail = subTaskDetailMap.get(`${subTask.issueId}%detail`) || {};
+                      const subTaskCustomFields = subTaskDetailMap.get(`${subTask.issueId}%fields`) || [];
                       const transformedOriginValue = transformValue({ issue: subTaskDetail, field: subTaskField, fieldsWithValue: subTaskCustomFields });
                       return (
                         <Row key={fieldCode} className={styles.fieldRow}>
@@ -544,8 +544,8 @@ const Confirm: React.FC<Props> = ({
                   {
                     subBugFields.map((subBugField) => {
                       const { fieldCode, fieldName } = subBugField;
-                      const subBugDetail = subBugDetailMap.get(`${subBug.issueId}-detail`) || {};
-                      const subBugCustomFields = subBugDetailMap.get(`${subBug.issueId}-fields`) || [];
+                      const subBugDetail = subBugDetailMap.get(`${subBug.issueId}%detail`) || {};
+                      const subBugCustomFields = subBugDetailMap.get(`${subBug.issueId}%fields`) || [];
                       const transformedOriginValue = transformValue({ issue: subBugDetail, field: subBugField, fieldsWithValue: subBugCustomFields });
                       return (
                         <Row key={fieldCode} className={styles.fieldRow}>
