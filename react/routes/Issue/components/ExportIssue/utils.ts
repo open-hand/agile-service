@@ -108,6 +108,8 @@ const getExportFieldCodes = (data: Array<any>): string[] => {
     component: 'componentName',
     createUser: 'createdUserName',
     updateUser: 'lastUpdatedUserName',
+    mainResponsibleUser: 'mainResponsibleName',
+    environmentName: 'environmentName',
   };
   // @ts-ignore
   return data.map((code: string) => fieldTransform[code] || code);
