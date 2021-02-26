@@ -7,9 +7,11 @@ import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.service.LookupValueService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.StatusType;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;
@@ -47,6 +49,8 @@ public class IssueAssembler extends AbstractAssembler {
     private ModelMapper modelMapper;
     @Autowired
     private IssueStatusMapper issueStatusMapper;
+    @Autowired
+    private LookupValueService lookupValueService;
 
     /**
      * issueDetailDO转换到IssueDTO
@@ -145,7 +149,9 @@ public class IssueAssembler extends AbstractAssembler {
         userIds.addAll(issueDTOList.stream().filter(issue -> issue.getReporterId() != null && !Objects.equals(issue.getReporterId(), 0L)).map(IssueDTO::getReporterId).collect(Collectors.toSet()));
         userIds.addAll(issueDTOList.stream().filter(issue -> issue.getCreatedBy() != null && !Objects.equals(issue.getCreatedBy(), 0L)).map(IssueDTO::getCreatedBy).collect(Collectors.toSet()));
         userIds.addAll(issueDTOList.stream().filter(issue -> issue.getLastUpdatedBy() != null && !Objects.equals(issue.getLastUpdatedBy(), 0L)).map(IssueDTO::getLastUpdatedBy).collect(Collectors.toSet()));
+        userIds.addAll(issueDTOList.stream().filter(issue -> issue.getMainResponsibleId() != null && !Objects.equals(issue.getMainResponsibleId(), 0L)).map(IssueDTO::getMainResponsibleId).collect(Collectors.toSet()));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Lists.newArrayList(userIds), true);
+        Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
         issueDTOList.forEach(issueDO -> {
             UserMessageDTO assigneeUserDO = usersMap.get(issueDO.getAssigneeId());
             UserMessageDTO reporterUserDO = usersMap.get(issueDO.getReporterId());
@@ -182,6 +188,8 @@ public class IssueAssembler extends AbstractAssembler {
             setParentId(issueListFieldKVVO, issueDO);
             issueListFieldKVVO.setCreateUser(usersMap.get(issueDO.getCreatedBy()));
             issueListFieldKVVO.setUpdateUser(usersMap.get(issueDO.getLastUpdatedBy()));
+            issueListFieldKVVO.setMainResponsibleUser(usersMap.get(issueDO.getMainResponsibleId()));
+            issueListFieldKVVO.setEnvironmentName(envMap.get(issueDO.getEnvironment()));
             issueListFieldKVDTOList.add(issueListFieldKVVO);
         });
         return issueListFieldKVDTOList;
