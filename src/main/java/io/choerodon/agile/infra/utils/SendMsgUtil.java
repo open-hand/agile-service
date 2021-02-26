@@ -252,6 +252,7 @@ public class SendMsgUtil {
         Long[] ids = new Long[3];
         ids[0] = issueDTO.getAssigneeId();
         ids[1] = userDetails.getUserId();
+        ids[2] = issueDTO.getReporterId();
         List<UserDTO> userDTOList = userService.listUsersByIds(ids);
         Boolean isProgram = Objects.equals(issueDTO.getApplyType(), "program") ? true : false;
         String memberType = Boolean.TRUE.equals(isProgram) ? "报告人" : "经办人";
