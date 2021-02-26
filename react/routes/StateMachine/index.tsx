@@ -35,9 +35,14 @@ const tabs: ITab[] = [{
 const { TabPane } = Tabs;
 const StateMachine: React.FC = (props) => {
   const params = useQueryString();
-  const { issueTypeId } = params;
+  const { issueTypeId, activeKey: paramsActiveKey } = params;
   const [selectedType, handleChangeSelectedType] = useSelectedType(issueTypeId || undefined);
-  const [activeKey, setActiveKey] = useState(issueTypeId ? tabs[1].key : tabs[0].key);
+  const [activeKey, setActiveKey] = useState(() => {
+    if (paramsActiveKey) {
+      return paramsActiveKey;
+    }
+    return issueTypeId ? tabs[1].key : tabs[0].key;
+  });
   const Component = find(tabs, { key: activeKey })?.component;
   const tabComponent = (
     <Tabs className={styles.tabs} activeKey={activeKey} onChange={setActiveKey}>
