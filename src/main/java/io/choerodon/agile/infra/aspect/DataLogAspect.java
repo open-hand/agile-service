@@ -149,6 +149,7 @@ public class DataLogAspect {
     private static final String STATIC_FILE_REL_DELETE = "deleteStaticFileRelated";
     private static final String FIELD_STATIC_FILE = "Static File";
     private static final String FIELD_STATIC_FILE_REL = "Static File Rel";
+    private static final String ISSUE_TYPE_ID = "issueTypeId";
 
 
     @Autowired
@@ -1287,7 +1288,7 @@ public class DataLogAspect {
 
     private void handleType(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
         Long projectId = originIssueDTO.getProjectId();
-        if (field.contains(TYPE_CODE) && !Objects.equals(originIssueDTO.getTypeCode(), issueConvertDTO.getTypeCode())) {
+        if (field.contains(ISSUE_TYPE_ID) && !Objects.equals(originIssueDTO.getIssueTypeId(), issueConvertDTO.getIssueTypeId())) {
             String originTypeName = issueTypeService.queryById(originIssueDTO.getIssueTypeId(), projectId).getName();
             String currentTypeName = issueTypeService.queryById(issueConvertDTO.getIssueTypeId(), projectId).getName();
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_ISSUETYPE, originTypeName, currentTypeName,
