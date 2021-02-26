@@ -210,9 +210,9 @@ const NotifySetting = ({
           }
         }
 
-        // if ((noticeTypeList.length || webhook) && !userTypeList.length) {
-        //   return false;
-        // }
+        if ((noticeTypeList.length || webhook) && !userTypeList.length) {
+          return false;
+        }
         if (specifier && (!userIdList || userIdList.length === 0)) {
           setHidden(false);
         }
@@ -273,7 +273,7 @@ const NotifySetting = ({
   // @ts-ignore
     data[0].noticeTypeList && data[0].noticeTypeList.length > 0
     // @ts-ignore
-  ));
+  ) || data[0].webhook);
   return (
     <div className={styles.notify_setting}>
       <Loading loading={loading} />
