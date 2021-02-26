@@ -210,9 +210,9 @@ const NotifySetting = ({
           }
         }
 
-        if ((noticeTypeList.length || webhook) && !userTypeList.length) {
-          return false;
-        }
+        // if ((noticeTypeList.length || webhook) && !userTypeList.length) {
+        //   return false;
+        // }
         if (specifier && (!userIdList || userIdList.length === 0)) {
           setHidden(false);
         }
