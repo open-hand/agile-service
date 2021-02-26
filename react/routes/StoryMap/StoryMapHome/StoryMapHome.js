@@ -179,7 +179,7 @@ const StoryMapHome = observer(() => {
       </Header>
       <Breadcrumb />
       <Content style={{
-        padding: 0, borderTop: '1px solid #D8D8D8', overflow: 'hidden',
+        padding: 0, borderTop: '1px solid #D8D8D8', overflow: 'hidden', height: '100%',
       }}
       >
         <Loading loading={loading} />
