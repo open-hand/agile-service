@@ -1,7 +1,6 @@
-import React, {
+import {
   useCallback, useMemo, useRef,
 } from 'react';
-import { Select } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import renderEditor from '../../../components/renderEditor';
@@ -53,10 +52,8 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
     if (['date', 'datetime', 'time'].includes(fieldType)) {
       const { meaning, value: dateValue } = newValue || {};
       extraConfig = dateValue === 'current';
-      console.log('newValue...', currentData.defaultValue, newValue);
       // newValue = currentData.defaultValue;
       newValue = extraConfig ? currentData.defaultValue || meaning : dateValue;
-      console.log('newValue.==', newValue);
       extraConfig && record.init('defaultValue', newValue);
       record.set('extraConfig', extraConfig);
     }
