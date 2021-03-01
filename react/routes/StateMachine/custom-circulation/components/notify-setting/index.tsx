@@ -155,7 +155,7 @@ const NotifySetting = ({
             const members = memberOptionsDataSet.toData() || [];
             for (let i = 0; i < members.length; i += 1) {
               // @ts-ignore
-              if (record.get(members[i].code) && !record.get('webhook')) {
+              if (record.get(members[i].code)) {
                 return true;
               }
             }

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
@@ -8,7 +8,7 @@ import { statusTransformApiConfig, ITotalStatus } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
 import { Divider } from 'choerodon-ui';
-import { TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
+import { DragColumnAlign, TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
 import openDeleteStatus from './DeleteStatus';
@@ -56,6 +56,22 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
       },
     });
   };
+
+  const handleDragEnd = useCallback((ds, columns, resultDrag, provided) => {
+    console.log(ds, columns, resultDrag, provided);
+    const { source, destination } = resultDrag;
+    if (!destination || source.index === destination.index) {
+      return;
+    }
+    const sourceRecord = ds.get(source.index);
+    let beforeDestinationIndex = destination.index;
+    if (source.index < destination.index && destination.index !== ds.length - 1) {
+      beforeDestinationIndex += 1;
+    }
+    const destinationRecord = ds.get(beforeDestinationIndex);
+    // projectApi.sortSubProject({ projectId: sourceRecord.get('projectId'), before: beforeDestinationIndex !== dataSet.length - 1, outSetProjectId: destinationRecord.get('projectId') });
+  }, []);
+
   return (
     <Page>
       <Header>
@@ -74,6 +90,9 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
             diff: 100,
           }}
           filterBarFieldName="param"
+          dragRow
+          dragColumnAlign={'left' as DragColumnAlign}
+          onDragEndBefore={handleDragEnd}
         >
           <Column name="name" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
           <Column
