@@ -35,7 +35,7 @@ export default class ScrumBoardDataController {
       minNum,
       columnId,
       columnName: name,
-      columnIssueCount: this.flattenedArr.filter(issue => issue.columnId === columnId).length,
+      columnIssueCount: this.flattenedArr.filter((issue) => issue.columnId === columnId).length,
       hasStatus: subStatusDTOS.length > 0,
     }]);
   }
@@ -72,7 +72,7 @@ export default class ScrumBoardDataController {
   }
 
   addEpicLabelToFlattenData(flattenedArr, epicInfo, parentWithSubs, parentIssues, parentCompleted) {
-    const combinedIssueArr = [...flattenedArr, ...parentIssues.filter(issue => !this.flattenedArrSet.has(issue.issueId)).map(issue => ({
+    const combinedIssueArr = [...flattenedArr, ...parentIssues.filter((issue) => !this.flattenedArrSet.has(issue.issueId)).map((issue) => ({
       ...issue,
       statusName: issue.statusVO.name,
       categoryCode: issue.statusVO.type,
@@ -82,11 +82,11 @@ export default class ScrumBoardDataController {
       interConnectedDataMap: epicInfo ? epicInfo.map(({ epicId, epicName }) => [epicId, {
         epicId,
         epicName,
-        issueArrLength: combinedIssueArr.filter(issue => issue.epicId === epicId).length,
+        issueArrLength: combinedIssueArr.filter((issue) => issue.epicId === epicId).length,
         // 父子任务关系处理
         subIssueData: {
           ...this.addParentIdsLabelToFlattenData(
-            combinedIssueArr.filter(issue => issue.epicId === epicId),
+            combinedIssueArr.filter((issue) => issue.epicId === epicId),
             parentWithSubs,
             parentIssues,
             parentCompleted,
@@ -95,9 +95,9 @@ export default class ScrumBoardDataController {
         },
       }]) : [],
       unInterConnectedDataMap: {
-        issueArrLength: combinedIssueArr.filter(issue => issue.typeCode !== 'sub_task' && !issue.epicId).length,
+        issueArrLength: combinedIssueArr.filter((issue) => issue.typeCode !== 'sub_task' && !issue.epicId).length,
         ...this.addParentIdsLabelToFlattenData(
-          combinedIssueArr.filter(issue => !issue.epicId),
+          combinedIssueArr.filter((issue) => !issue.epicId),
           parentWithSubs,
           parentIssues,
           parentCompleted,
@@ -126,23 +126,22 @@ export default class ScrumBoardDataController {
 
   getAllDataMap(mode) {
     if (mode === 'parent_child') {
-      return new Map(this.combinedIssueArr.map(issue => [issue.issueId, issue]));
-    } else {
-      return new Map(this.flattenedArr.map(issue => [issue.issueId, issue]));
+      return new Map(this.combinedIssueArr.map((issue) => [issue.issueId, issue]));
     }
+    return new Map(this.flattenedArr.map((issue) => [issue.issueId, issue]));
   }
 
   addAssigneeLabelToFlattenData(flattenedArr, assigneeIds) {
-    const issueWithAssigneeArr = assigneeIds.map(assigneeId => ({
+    const issueWithAssigneeArr = assigneeIds.map((assigneeId) => ({
       assigneeId,
-      assigneeAvatarUrl: flattenedArr.filter(issue => issue.assigneeId === assigneeId)[0].imageUrl,
-      assigneeName: flattenedArr.filter(issue => issue.assigneeId === assigneeId)[0].assigneeName,
-      assigneeRealName: flattenedArr.filter(issue => issue.assigneeId === assigneeId)[0].assigneeRealName,
-      assigneeLoginName: flattenedArr.filter(issue => issue.assigneeId === assigneeId)[0].assigneeLoginName,
-      subIssueData: flattenedArr.filter(issue => issue.assigneeId === assigneeId),
+      assigneeAvatarUrl: flattenedArr.filter((issue) => issue.assigneeId === assigneeId)[0].imageUrl,
+      assigneeName: flattenedArr.filter((issue) => issue.assigneeId === assigneeId)[0].assigneeName,
+      assigneeRealName: flattenedArr.filter((issue) => issue.assigneeId === assigneeId)[0].assigneeRealName,
+      assigneeLoginName: flattenedArr.filter((issue) => issue.assigneeId === assigneeId)[0].assigneeLoginName,
+      subIssueData: flattenedArr.filter((issue) => issue.assigneeId === assigneeId),
     }));
-    const issueWithAssigneeMap = issueWithAssigneeArr.map(assigneeObj => [assigneeObj.assigneeId, assigneeObj]);
-    const issueWithoutAssignee = flattenedArr.filter(issue => !issue.assigneeId);
+    const issueWithAssigneeMap = issueWithAssigneeArr.map((assigneeObj) => [assigneeObj.assigneeId, assigneeObj]);
+    const issueWithoutAssignee = flattenedArr.filter((issue) => !issue.assigneeId);
     return {
       swimLaneData: this.swimLaneDataConstructor(issueWithAssigneeArr, issueWithoutAssignee, 'assignee', 'assigneeId'),
       interConnectedDataMap: issueWithAssigneeMap,
@@ -155,11 +154,13 @@ export default class ScrumBoardDataController {
   });
 
   addParentIdsLabelToFlattenData(flattenedArr, parentWithSubs, parentIssues, parentCompleted, mode = 'parent_child') {
+    const isEpic = mode.includes('swimlane_epic');
+    const isNoEpic = mode === 'swimlane_epic%unInterconnected';
     let combinedIssueArr = [];
     if (mode !== 'parent_child') {
       combinedIssueArr = flattenedArr;
     } else {
-      combinedIssueArr = [...flattenedArr, ...parentIssues.filter(issue => !this.flattenedArrSet.has(issue.issueId)).map(issue => ({
+      combinedIssueArr = [...flattenedArr, ...parentIssues.filter((issue) => !this.flattenedArrSet.has(issue.issueId)).map((issue) => ({
         ...issue,
         statusName: issue.statusVO.name,
         categoryCode: issue.statusVO.type,
@@ -167,28 +168,28 @@ export default class ScrumBoardDataController {
       this.combinedIssueArr = combinedIssueArr;
     }
     // 第一个 Map，issue Id 与 issue 相对应（临时 Map）
-    const issueIdDataMap = new Map(combinedIssueArr.map(issue => [issue.issueId, issue]));
-    const issueIdFullDataMap = new Map(this.flattenedArr.map(issue => [issue.issueId, issue]));
+    const issueIdDataMap = new Map(combinedIssueArr.map((issue) => [issue.issueId, issue]));
+    const issueIdFullDataMap = new Map(this.flattenedArr.map((issue) => [issue.issueId, issue]));
 
     const parentCompletedSet = new Set(parentCompleted);
-    const parentIdsSet = new Set(parentIssues.map(issue => issue.issueId));
-    const parentIssueIdsSet = new Set(combinedIssueArr.filter(issue => !issue.relateIssueId && !issue.parentIssueId && parentIdsSet.has(issue.issueId)).map(issue => issue.issueId));
-    const noParentIssueIdsSet = new Set(combinedIssueArr.filter(issue => !issue.relateIssueId && !issue.parentIssueId && !parentIdsSet.has(issue.issueId)).map(issue => issue.issueId));
+    const parentIdsSet = new Set(parentIssues.map((issue) => issue.issueId));
+    const parentIssueIdsSet = isEpic ? new Set(combinedIssueArr.filter((issue) => (isNoEpic ? true : issue.epicId)).map((issue) => issue.issueId)) : new Set(combinedIssueArr.filter((issue) => !issue.relateIssueId && !issue.parentIssueId && parentIdsSet.has(issue.issueId)).map((issue) => issue.issueId));
+    const noParentIssueIdsSet = isEpic ? new Set(combinedIssueArr.filter((issue) => (isNoEpic ? false : !issue.epicId)).map((issue) => issue.issueId)) : new Set(combinedIssueArr.filter((issue) => !issue.relateIssueId && !issue.parentIssueId && !parentIdsSet.has(issue.issueId)).map((issue) => issue.issueId));
     let parentDataMap = new Map();
     let parentDataArr = [];
     let otherIssueWithoutParent = [];
 
     if (parentIssueIdsSet.size) {
-      const unCompletedArr = [...parentIssueIdsSet].filter(id => !parentCompletedSet.has(id)).map(id => [id, {
+      const unCompletedArr = [...parentIssueIdsSet].filter((id) => !parentCompletedSet.has(id)).map((id) => [id, {
         isComplish: false,
-        canMoveToComplish: parentWithSubs[id].every(subId => issueIdFullDataMap.get(subId).categoryCode === 'done'),
-        subIssueData: parentWithSubs[id].map(subId => issueIdFullDataMap.get(subId)),
+        canMoveToComplish: (parentWithSubs[id] ?? []).every((subId) => issueIdFullDataMap.get(subId).categoryCode === 'done'),
+        subIssueData: (parentWithSubs[id] ?? []).map((subId) => issueIdFullDataMap.get(subId)),
         ...issueIdDataMap.get(id),
       }] || []);
-      const completedArr = [...parentIssueIdsSet].filter(id => parentCompletedSet.has(id)).map(id => [id, {
+      const completedArr = [...parentIssueIdsSet].filter((id) => parentCompletedSet.has(id)).map((id) => [id, {
         isComplish: true,
-        canMoveToComplish: parentWithSubs[id].every(subId => issueIdFullDataMap.get(subId).categoryCode === 'done'),
-        subIssueData: parentWithSubs[id].map(subId => issueIdFullDataMap.get(subId)),
+        canMoveToComplish: (parentWithSubs[id] ?? []).every((subId) => issueIdFullDataMap.get(subId).categoryCode === 'done'),
+        subIssueData: (parentWithSubs[id] ?? []).map((subId) => issueIdFullDataMap.get(subId)),
         ...issueIdDataMap.get(id),
       }] || []);
       parentDataArr = [...unCompletedArr, ...completedArr];
@@ -196,12 +197,12 @@ export default class ScrumBoardDataController {
     }
     if (noParentIssueIdsSet.size) {
       // parentIssueId 没有值可能为 null，也可能为 0（后端返回数据不可信）
-      otherIssueWithoutParent = combinedIssueArr.filter(issue => (issue.relateIssueId === 0 || issue.relateIssueId === null) && (issue.parentIssueId === 0 || issue.parentIssueId === null) && noParentIssueIdsSet.has(issue.issueId));
+      otherIssueWithoutParent = combinedIssueArr.filter((issue) => (issue.relateIssueId === 0 || issue.relateIssueId === null) && (issue.parentIssueId === 0 || issue.parentIssueId === null) && noParentIssueIdsSet.has(issue.issueId));
     }
 
     return {
       swimLaneData: this.swimLaneDataConstructor([...parentDataMap.values()], otherIssueWithoutParent, mode, 'issueId'),
-      interConnectedDataMap: mode.includes('swimlane_epic') ? parentDataMap : parentDataArr,
+      interConnectedDataMap: isEpic ? parentDataMap : parentDataArr,
       unInterConnectedDataMap: otherIssueWithoutParent,
     };
   }
@@ -224,7 +225,7 @@ export default class ScrumBoardDataController {
   convertDataWithStructure(data) {
     const structureMap = JSON.parse(JSON.stringify(this.statusStructureMap));
     Object.keys(structureMap).forEach((status) => {
-      structureMap[status] = _.sortBy(data.filter(issue => issue.statusId === status), o => o.rank);
+      structureMap[status] = _.sortBy(data.filter((issue) => issue.statusId === status), (o) => o.rank);
     });
     return structureMap;
   }
@@ -261,7 +262,7 @@ export default class ScrumBoardDataController {
       });
     });
     this.flattenedArr = flattenedArr;
-    this.flattenedArrSet = new Set(flattenedArr.map(issue => issue.issueId));
+    this.flattenedArrSet = new Set(flattenedArr.map((issue) => issue.issueId));
     this.columnStructureMap = columnStructureMap;
     this.statusStructureMap = statusStructureMap;
     this.statusMap = statusMap;
