@@ -18,4 +18,6 @@ public interface StatusLinkageMapper extends BaseMapper<StatusLinkageDTO> {
     List<StatusLinkageDTO> listByIssueTypeIdsParentTypeId(@Param("projectId") Long projectId, @Param("parentIssueTypeId") Long parentIssueTypeId, @Param("issueTypeIds") List<Long> issueTypeIds, @Param("parentChangeStatusId") Long parentChangeStatusId);
 
     List<StatusLinkageVO> selectWithStatusByProjectId(@Param("projectId") Long projectId);
+
+    List<StatusLinkageDTO> selectExistStatusLink(@Param("projectId") Long projectId, @Param("statusId") Long statusId, @Param("issueTypeId") Long issueTypeId);
 }
