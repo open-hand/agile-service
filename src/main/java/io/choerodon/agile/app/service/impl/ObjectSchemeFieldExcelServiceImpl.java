@@ -549,7 +549,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             cell.setCellValue(buildWithErrorMsg(name, "名称已经存在"));
             addErrorColumn(row.getRowNum(), 1, errorRowColMap);
         } else if (name.length() > 30) {
-            cell.setCellValue(buildWithErrorMsg(name, "名称字符数需要在6个以内"));
+            cell.setCellValue(buildWithErrorMsg(name, "名称字符数需要在30个以内"));
             addErrorColumn(row.getRowNum(), 1, errorRowColMap);
         } else {
             objectSchemeFieldCreateVO.setName(name);
