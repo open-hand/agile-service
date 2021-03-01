@@ -23,7 +23,7 @@ databaseChangeLog(logicalFilePath:'agile_file_operation_history.groovy') {
         }
     }
 
-    changeSet(id: '2021-03-01-agile-file-operation-history', author: 'chihao.ran@hand-china.com') {
+    changeSet(id: '2021-03-01-agile-file-operation-history-add-column', author: 'chihao.ran@hand-china.com') {
         addColumn(tableName: "agile_file_operation_history"){
             column(name:"organization_id",type:"BIGINT UNSIGNED", remarks:"组织id", defaultValue: "0"){
                 constraints(nullable: false)
