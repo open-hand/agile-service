@@ -749,6 +749,13 @@ public class ExcelServiceImpl implements ExcelService {
         messageClient.sendByUserId(userId, websocketKey, message);
     }
 
+    @Override
+    public FileOperationHistoryVO queryOrgLatestRecode(Long organizationId, String action) {
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        FileOperationHistoryDTO result = fileOperationHistoryMapper.queryOrgLatestRecode(organizationId, userId, action);
+        return result == null ? new FileOperationHistoryVO() : modelMapper.map(result, FileOperationHistoryVO.class);
+    }
+
     protected String uploadErrorExcel(Workbook errorWorkbook, Long organizationId) {
         // 上传错误的excel
         MultipartFile multipartFile = new MultipartExcelUtil(MULTIPART_NAME, ORIGINAL_FILE_NAME, errorWorkbook);
@@ -2545,6 +2552,17 @@ public class ExcelServiceImpl implements ExcelService {
                                                             String action,
                                                             String websocketKey) {
         FileOperationHistoryDTO fileOperationHistoryDTO = new FileOperationHistoryDTO(projectId, userId, action, 0L, 0L, status);
+        if (fileOperationHistoryMapper.insert(fileOperationHistoryDTO) != 1) {
+            throw new CommonException("error.FileOperationHistoryDTO.insert");
+        }
+        FileOperationHistoryDTO res = fileOperationHistoryMapper.selectByPrimaryKey(fileOperationHistoryDTO.getId());
+        sendProcess(res, userId, 0.0, websocketKey);
+        return res;
+    }
+
+    @Override
+    public FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long organizationId, Long userId, String status, String action, String websocketKey) {
+        FileOperationHistoryDTO fileOperationHistoryDTO = new FileOperationHistoryDTO(projectId, organizationId, userId, action, 0L, 0L, status);
         if (fileOperationHistoryMapper.insert(fileOperationHistoryDTO) != 1) {
             throw new CommonException("error.FileOperationHistoryDTO.insert");
         }

@@ -40,6 +40,7 @@ import io.choerodon.agile.infra.mapper.FileOperationHistoryMapper;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import io.choerodon.agile.infra.utils.CatalogExcelUtil;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.ExcelUtil;
 import io.choerodon.agile.infra.utils.MultipartExcelUtil;
 import io.choerodon.core.exception.CommonException;
@@ -57,6 +58,9 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     private static final int HEADER_LENGTH = 8;
     private static final int NOT_KEY_HEADER_LENGTH = 5;
 
+    private static final String PRO = "pro_";
+    private static final String ORG = "org_";
+
     protected static final String BACKETNAME = "agile-service";
     protected static final String MULTIPART_NAME = "file";
     protected static final String ORIGINAL_FILE_NAME = ".xlsx";
@@ -73,7 +77,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     private static final String FAILED = "failed";
     private static final String CANCELED = "canceled";
     private static final String UPLOAD_FILE_CUSTOM_FIELD = "upload_file_customer_field";
-    private static final String WEBSOCKET_IMPORT_CODE = "agile-import-customer-field";
+    private static final String WEBSOCKET_IMPORT_CODE = "agile-import-customer-field-";
 
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
@@ -117,12 +121,15 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         RequestContextHolder.setRequestAttributes(requestAttributes);
 
         Long userId = DetailsHelper.getUserDetails().getUserId();
+        String socketKey = (projectId == null || projectId == 0L) ?
+                WEBSOCKET_IMPORT_CODE + "org-" + organizationId : WEBSOCKET_IMPORT_CODE + "pro-" + projectId;
         FileOperationHistoryDTO history = excelService.initFileOperationHistory(
-                projectId == null ? 0 : projectId,
+                projectId == null ? 0L : projectId,
+                organizationId,
                 userId,
                 DOING,
                 UPLOAD_FILE_CUSTOM_FIELD,
-                WEBSOCKET_IMPORT_CODE);
+                socketKey);
         validExcelTemplate(workbook, history);
 
         Sheet sheet = workbook.getSheetAt(1);
@@ -178,6 +185,10 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     }
 
     private void updateFinalRecode(FileOperationHistoryDTO history, Long successCount, Long failCount, String status) {
+        String socketKey = (history.getProjectId() == null || history.getProjectId() == 0L) ?
+                WEBSOCKET_IMPORT_CODE + "org-" + history.getOrganizationId() :
+                WEBSOCKET_IMPORT_CODE + "pro-" + history.getOrganizationId();
+
         FileOperationHistoryDTO update = new FileOperationHistoryDTO();
         update.setId(history.getId());
         update.setSuccessCount(successCount);
@@ -187,7 +198,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         update.setObjectVersionNumber(history.getObjectVersionNumber());
         fileOperationHistoryMapper.updateByPrimaryKeySelective(update);
         FileOperationHistoryDTO result = fileOperationHistoryMapper.selectByPrimaryKey(update.getId());
-        excelService.sendProcess(result, result.getUserId(), 1.0, WEBSOCKET_IMPORT_CODE);
+        excelService.sendProcess(result, result.getUserId(), 1.0, socketKey);
     }
 
     private void generateErrorDataExcelAndUpload(Map<Integer, List<Integer>> errorRowColMap, Workbook workbook, Sheet sheet, FileOperationHistoryDTO history, Long organizationId) {
@@ -533,12 +544,11 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             addErrorColumn(row.getRowNum(), 1, errorRowColMap);
             return;
         }
-
         String name = cell.toString();
-        if (Boolean.TRUE.equals(objectSchemeFieldService.checkCode(organizationId, projectId, name, AGILE_ISSUE))) {
+        if (Boolean.TRUE.equals(objectSchemeFieldService.checkName(organizationId, projectId, name, AGILE_ISSUE))) {
             cell.setCellValue(buildWithErrorMsg(name, "名称已经存在"));
             addErrorColumn(row.getRowNum(), 1, errorRowColMap);
-        } else if (name.length() > 6) {
+        } else if (name.length() > 30) {
             cell.setCellValue(buildWithErrorMsg(name, "名称字符数需要在6个以内"));
             addErrorColumn(row.getRowNum(), 1, errorRowColMap);
         } else {
@@ -555,18 +565,18 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             return;
         }
 
-        String code = cell.toString();
+        String code = (projectId == null ? ORG : PRO) + cell.toString();
         if (Boolean.TRUE.equals(objectSchemeFieldService.checkCode(organizationId, projectId, code, AGILE_ISSUE))) {
             cell.setCellValue(buildWithErrorMsg(code, "编码已经存在"));
             addErrorColumn(row.getRowNum(), 0, errorRowColMap);
-        } else if (code.length() > 10) {
-            cell.setCellValue(buildWithErrorMsg(code, "编码字符数需要在10个以内"));
+        } else if (code.length() > 30) {
+            cell.setCellValue(buildWithErrorMsg(code, "编码字符数需要在30个以内"));
             addErrorColumn(row.getRowNum(), 0, errorRowColMap);
         } else if (!Pattern.matches("^[0-9a-zA-Z_]+$", code)) {
             cell.setCellValue(buildWithErrorMsg(code, "编码只允许数字、字母及下划线组成"));
             addErrorColumn(row.getRowNum(), 0, errorRowColMap);
         } else {
-            objectSchemeFieldCreateVO.setCode("pro_" + code);
+            objectSchemeFieldCreateVO.setCode(code);
         }
     }
 
@@ -612,13 +622,16 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     }
 
     private void validExcelTemplate(Workbook workbook, FileOperationHistoryDTO history) {
+        String socketKey = (history.getProjectId() == null || history.getProjectId() == 0L) ?
+                WEBSOCKET_IMPORT_CODE + "org-" + history.getOrganizationId() :
+                WEBSOCKET_IMPORT_CODE + "pro-" + history.getOrganizationId();
         Sheet dataSheet = workbook.getSheetAt(1);
         Row headerRow = dataSheet.getRow(0);
         if (headerRow == null) {
             history.setStatus("empty_data_sheet");
             fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
             FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
-            excelService.sendProcess(errorImport, history.getUserId(), 0.0, WEBSOCKET_IMPORT_CODE);
+            excelService.sendProcess(errorImport, history.getUserId(), 0.0, socketKey);
             throw new CommonException("error.sheet.empty");
         }
     }
@@ -720,6 +733,9 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     }
 
     private void sendProcessProgress(FileOperationHistoryDTO history, Long userId, Double progress) {
-        excelService.sendProcess(history, userId, progress * 0.97, WEBSOCKET_IMPORT_CODE);
+        String socketKey = (history.getProjectId() == null || history.getProjectId() == 0L) ?
+                WEBSOCKET_IMPORT_CODE + "org-" + history.getOrganizationId() :
+                WEBSOCKET_IMPORT_CODE + "pro-" + history.getOrganizationId();
+        excelService.sendProcess(history, userId, progress * 0.97, socketKey);
     }
 }

@@ -33,6 +33,8 @@ public interface ExcelService {
 
     FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status, String action, String websocketKey);
 
+    FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long organizationId, Long userId, String status, String action, String websocketKey);
+
     void processExportField(List<String> exportFieldCodes,
                             String[] fieldsName,
                             String[] fields,
@@ -43,4 +45,12 @@ public interface ExcelService {
     void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId);
 
     void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process, String websocketKey);
+
+    /**
+     * 查询组织层最后一次操作记录
+     * @param organizationId 组织id
+     * @param action 操作名称
+     * @return 最后一次操作记录
+     */
+    FileOperationHistoryVO queryOrgLatestRecode(Long organizationId, String action);
 }

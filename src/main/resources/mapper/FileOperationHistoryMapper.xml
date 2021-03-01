@@ -9,4 +9,10 @@
         order by id desc limit 1
     </select>
 
+    <select id="queryOrgLatestRecode" resultType="io.choerodon.agile.infra.dto.FileOperationHistoryDTO">
+        select *
+        from agile_file_operation_history
+        where organization_id = #{organizationId} and user_id = #{userId} and action = #{action} and project_id = 0
+        order by id desc limit 1
+    </select>
 </mapper>
