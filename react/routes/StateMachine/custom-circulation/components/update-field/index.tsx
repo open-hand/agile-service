@@ -6,7 +6,7 @@ import {
   DataSet, Select, Form, Button, Row, Col,
 } from 'choerodon-ui/pro';
 import { getProjectId } from '@/utils/common';
-import { find } from 'lodash';
+import { find, includes } from 'lodash';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { pageConfigApi, statusTransformApi } from '@/api';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
@@ -56,6 +56,7 @@ type ISelectUserMap = Map<string, { id: null | string, realName: null | string }
 
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate', 'created_user', 'last_updated_user'];
 
+const memberIsNotSpecifier = ['reportor', 'clear', 'operator', 'creator', 'assignee', 'mainResponsible'];
 // @ts-ignore
 const transformUpdateData = (data) => {
   const updateData = [];
@@ -84,7 +85,7 @@ const transformUpdateData = (data) => {
     }
     switch (fieldType) {
       case 'member': {
-        const isSpecifier = value !== 'reportor' && value !== 'creator' && value !== 'operator' && value !== 'clear';
+        const isSpecifier = !includes(memberIsNotSpecifier, value);
         if (value) {
           updateData.push({
             fieldId,
@@ -93,6 +94,24 @@ const transformUpdateData = (data) => {
               userId: isSpecifier ? value : undefined,
               fieldType,
             }],
+          });
+        }
+        break;
+      }
+      case 'multiMember': {
+        if (value && value.length) {
+          updateData.push({
+            fieldId,
+            fieldValueList: (value || []).map((item: string) => {
+              const isSpecifier = !includes(memberIsNotSpecifier, item);
+              return (
+                {
+                  operateType: !isSpecifier ? item : 'specifier',
+                  userId: isSpecifier ? item : undefined,
+                  fieldType,
+                }
+              );
+            }),
           });
         }
         break;
@@ -191,6 +210,16 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
       const { operateType, userId } = firstField;
       const isSpecifier = operateType === 'specifier';
       current.set(fieldCode, isSpecifier ? userId : operateType);
+      break;
+    }
+    case 'multiMember': {
+      const { operateType } = firstField;
+      const isClear = operateType === 'clear';
+      current.set(fieldCode, isClear ? ['clear'] : fieldValueList.map((item: IFieldValue) => {
+        const { operateType: fieldValueType } = item;
+        const isSpecifierUser = fieldValueType === 'specifier';
+        return isSpecifierUser ? item.userId : fieldValueType;
+      }));
       break;
     }
     case 'radio': case 'single': case 'checkbox': case 'multiple': {
@@ -411,6 +440,21 @@ const UpdateField = ({
                   id: userId,
                   realName: name,
                 });
+                setSelectUserMap(selectUserMap);
+              }
+              if (fieldType === 'multiMember') {
+                const selectedUsers: any = [];
+                (fieldValueList || []).forEach((fieldValue: IFieldValue) => {
+                  const { operateType: fieldValueType, userId: id, name: userName } = fieldValue;
+                  const isSpecifierUser = fieldValueType === 'specifier';
+                  if (isSpecifierUser) {
+                    selectedUsers.push({
+                      id,
+                      realName: userName,
+                    });
+                  }
+                });
+                selectUserMap?.set(fieldCode, selectedUsers);
                 setSelectUserMap(selectUserMap);
               }
               setCurrentByFieldType(current, item, fieldCode);
