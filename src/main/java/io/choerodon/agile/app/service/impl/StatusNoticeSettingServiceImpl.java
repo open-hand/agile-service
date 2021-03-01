@@ -82,7 +82,12 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
             deleteList.forEach(item -> statusNoticeSettingMapper.delete(item));
         }
         // 插入
-        if (CollectionUtils.isNotEmpty(statusNoticeSettingVO.getNoticeTypeList()) &&
+        if (CollectionUtils.isNotEmpty(statusNoticeSettingVO.getNoticeTypeList())
+                && statusNoticeSettingVO.getNoticeTypeList().size() == 1
+                && statusNoticeSettingVO.getNoticeTypeList().contains("WEB_HOOK")) {
+            StatusNoticeSettingDTO save = new StatusNoticeSettingDTO(statusNoticeSettingVO, "");
+            statusNoticeSettingMapper.insertSelective(save);
+        } else if (CollectionUtils.isNotEmpty(statusNoticeSettingVO.getNoticeTypeList()) &&
                 CollectionUtils.isNotEmpty(statusNoticeSettingVO.getUserTypeList())){
             List<StatusNoticeSettingDTO> saveList = statusNoticeSettingVO.getUserTypeList()
                     .stream()
