@@ -50,4 +50,15 @@
         left join fd_status t3 on t1.status_id = t3.id
         where t1.project_id = #{projectId}
     </select>
+
+    <select id="selectExistStatusLink" resultType="io.choerodon.agile.infra.dto.StatusLinkageDTO">
+        SELECT * FROM fd_status_linkage fsl
+        WHERE fsl.project_id = #{projectId}
+        AND fsl.issue_type_id  = #{issueTypeId} AND fsl.status_id = #{statusId}
+        UNION ALL
+        SELECT * FROM fd_status_linkage fsl
+        WHERE fsl.project_id = #{projectId}
+        AND fsl.parent_issue_type_id = #{issueTypeId}
+        AND fsl.parent_issue_status_setting = #{statusId}
+    </select>
 </mapper>
