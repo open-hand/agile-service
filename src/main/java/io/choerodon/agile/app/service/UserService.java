@@ -68,4 +68,8 @@ public interface UserService {
     List<UserVO> listUsersByRealNames(List<String> realNames, boolean onlyEnabled);
 
     List<UserVO> listProjectAdminUsersByProjectId(Long projectId);
+
+    List<UserVO> listAllUsersByProject(Long projectId);
+
+    List<UserVO> listAllUsersByOrganization(Long organizationId);
 }
