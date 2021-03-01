@@ -428,7 +428,13 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         }
         List<String> userIds = new ArrayList<>();
         for (StatusFieldValueSettingDTO statusFieldValueSettingDTO : statusFieldValueSettingDTOS) {
-            userIds.add(handlerMember(statusFieldValueSettingDTO, issueDTO).toString());
+            Long userId = handlerMember(statusFieldValueSettingDTO, issueDTO);
+            if (ObjectUtils.isEmpty(userId)) {
+                continue;
+            }
+            if (!userIds.contains(userId.toString())) {
+                userIds.add(userId.toString());
+            }
         }
         return userIds;
     }
