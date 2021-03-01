@@ -82,7 +82,7 @@ public class IssueLabelServiceImpl implements IssueLabelService {
 
         Set<Long> labelIdsOfDefaultValue = new HashSet<>();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
+        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId, null);
 
         objectSchemeFieldExtendList.forEach(f -> {
             String defaultValue = f.getDefaultValue();

@@ -41,14 +41,14 @@ const IssueLog = () => {
     // 创建Issue日志
     const createLog = {
       email: createrEmail,
-      field: issueTypeVO && issueTypeVO.typeCode,
+      field: 'createInitType',
       imageUrl: createrImageUrl,
       name: createrName,
       realName: createrRealName,
       loginName: createrLoginName,
       lastUpdateDate: creationDate,
       lastUpdatedBy: createdBy,
-      newString: 'issueNum',
+      newString: issueTypeVO && issueTypeVO.name ? issueTypeVO.name : '',
       newValue: 'issueNum',
       logId: 'create',
     };

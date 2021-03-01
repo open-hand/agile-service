@@ -49,7 +49,8 @@ class SelectU<T extends SelectProps> extends Select<T> {
     const tags = values.slice(0, maxTagCount).map((v) => {
       const key = this.getValueKey(v);
       const repeat = repeats.get(key) || 0;
-      const optionProps = onOption({ dataSet: options, record: this.findByValue(v)! }); // 待优化
+      const record = this.findByValue(v);
+      const optionProps = record ? onOption({ dataSet: options, record }) : {}; // 待优化
       const text = range ? this.renderRangeValue(true, v, repeat) : this.processRenderer(v, repeat); // 待优化
       repeats.set(key, repeat + 1);
       if (!isNil(text)) {

@@ -4,7 +4,7 @@ import {
 } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import moment from 'moment';
-import _ from 'lodash';
+import _, { find } from 'lodash';
 import {
   sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi,
   issueLabelApi, priorityApi, statusApi, quickFilterApi, commonApi, componentApi, issueTypeApi,
@@ -418,7 +418,6 @@ class AddComponent extends Component {
     // const customMemberField = quickFilterFiled.find((item) => ['member', 'multiMember'].includes(item.type)) || {};
     // const customMemberField = quickFilterFiled.find((item) => item.type === 'member') || {};
 
-    console.log('tempOption:customMemberField.. state', filter, OPTION_FILTER, OPTION_FILTER[filter].state, state);
     customFields.forEach((item) => {
       OPTION_FILTER[item.code] = {
         url: '',
@@ -521,11 +520,11 @@ class AddComponent extends Component {
     } if (filter === 'issue_type') {
       if (type === '[object Array]') {
         const v = _.map(value, 'key');
-        const vv = v.map((e) => `'${e}'`);
+        const vv = v.map((e) => `${e}`);
         return `(${vv.join(',')})`;
       }
       const v = value.key;
-      return `'${v}'`;
+      return `${v}`;
     } if (type === '[object Array]') {
       const v = _.map(value, 'key');
       return `(${v.join(',')})`;
@@ -598,7 +597,6 @@ class AddComponent extends Component {
     const { quickFilterFiled } = state;
     const customFields = quickFilterFiled.filter((item) => item.id);
     // const customMemberField = quickFilterFiled.find((item) => item.type === 'member') || {};
-    console.log('quickFilterFiled', quickFilterFiled);
     // const customMemberField = quickFilterFiled.find((item) => ['member', 'multiMember'].includes(item.type)) || {};
     customFields.forEach((item) => {
       OPTION_FILTER[item.code] = {
@@ -611,7 +609,6 @@ class AddComponent extends Component {
     });
     quickFilterFiled.forEach((item) => {
       if (['member', 'multiMember'].includes(item.type)) {
-        console.log('item..', item);
         OPTION_FILTER[item.code] = {
           url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=999`,
           prop: 'list',
@@ -671,19 +668,30 @@ class AddComponent extends Component {
         label: priority ? priority.name : k,
       });
     } if (filter === 'issue_type') {
+      const issueTypes = state[OPTION_FILTER[filter].state];
+      const idField = OPTION_FILTER[filter].id;
       if (operation === 'in' || operation === 'notIn' || operation === 'not in') {
-        const arr = value.slice(1, -1).split(',');
-        return arr.map((v) => ({
-          key: v.slice(1, -1),
-          label: _.find(state[OPTION_FILTER[filter].state],
-            { [OPTION_FILTER[filter].id]: v.slice(1, -1) }).name,
-        }));
+        const arr = value.split(',');
+        return arr.map((v) => {
+          let k = v;
+          if (_.find(issueTypes, { typeCode: k.slice(1, -1) })) {
+            k = _.find(issueTypes, { typeCode: k.slice(1, -1) }).id;
+          }
+          return {
+            key: k,
+            label: _.find(issueTypes,
+              { [idField]: k }).name,
+          };
+        });
       }
-      const k = value.slice(1, -1);
+      let k = value;
+      if (_.find(issueTypes, { typeCode: k.slice(1, -1) })) {
+        k = _.find(issueTypes, { typeCode: k.slice(1, -1) }).id;
+      }
       return ({
         key: k,
-        label: (_.find(state[OPTION_FILTER[filter].state],
-          { [OPTION_FILTER[filter].id]: k }) || {}).name,
+        label: (_.find(issueTypes,
+          { [idField]: k }) || {}).name,
       });
     } if (operation === 'in' || operation === 'notIn' || operation === 'not in') {
       const arr = value.slice(1, -1).split(',');
@@ -849,7 +857,7 @@ class AddComponent extends Component {
       return (
         <Select label="值" />
       );
-    } if (['assignee', 'priority', 'status', 'reporter', 'created_user', 'last_update_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'issue_type', 'feature'].indexOf(filter) > -1 || (field.id && (field.type === 'member' || field.type === 'multiMember' || field.type === 'single' || field.type === 'multiple' || field.type === 'radio' || field.type === 'checkbox'))) {
+    } if (['assignee', 'priority', 'status', 'reporter', 'created_user', 'last_updated_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'issue_type', 'feature'].indexOf(filter) > -1 || (field.id && (field.type === 'member' || field.type === 'multiMember' || field.type === 'single' || field.type === 'multiple' || field.type === 'radio' || field.type === 'checkbox'))) {
       // select
       if (['=', '!='].indexOf(operation) > -1) {
         // return normal value

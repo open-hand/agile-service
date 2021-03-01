@@ -2,7 +2,9 @@ import React, {
   useMemo, useEffect, useImperativeHandle, useState,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { SelectBox, DataSet } from 'choerodon-ui/pro';
+import {
+  SelectBox, CheckBox, DataSet, Button,
+} from 'choerodon-ui/pro';
 import { fieldApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { includes } from 'lodash';
@@ -78,14 +80,22 @@ const subProjectSystemFields = [
 ];
 
 interface Props {
-  importFieldsRef: React.MutableRefObject<{fields: string[]}>,
+  importFieldsRef: React.MutableRefObject<{
+    fields: string[]
+    allFields: { title: string, code: string, system: boolean }[],
+    requiredFields: string[]
+    chooseDataSet: DataSet
+  }>,
+  setReRender: Function,
+  checkBoxChangeOk: (data: string[]) => void
 }
 
-const ImportFields: React.FC<Props> = ({ importFieldsRef }) => {
+const ImportFields: React.FC<Props> = ({ importFieldsRef, setReRender, checkBoxChangeOk }) => {
   const { isInProgram, loading } = useIsInProgram();
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [requiredFields, setRequiredFields] = useState<string[]>([]);
-  const [systemFields, setSystemFields] = useState<{code: string, title: string}[]>([]);
+  const [btnStatus, setBtnStatus] = useState<'ALL' | 'NONE'>();
+  const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>([]);
   const applyType = getApplyType();
   useEffect(() => {
     if (!loading) {
@@ -107,11 +117,13 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef }) => {
     events: {
       load: () => {
         setUpdateCount((count) => count + 1);
+        setReRender();
       },
     },
-  }), []);
+  }), [setReRender]);
 
   const chooseDataSet = useMemo(() => new DataSet({
+    autoCreate: true,
     autoQuery: true,
     fields: [{
       name: 'fields',
@@ -125,11 +137,13 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef }) => {
       fields: requiredFields,
     }],
     events: {
-      update: () => {
+      update: ({ value }: { value: string[] }) => {
+        checkBoxChangeOk(value);
         setUpdateCount((count) => count + 1);
+        setReRender();
       },
     },
-  }), [fieldsOptionDataSet, requiredFields]);
+  }), [checkBoxChangeOk, fieldsOptionDataSet, requiredFields, setReRender]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -144,12 +158,28 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef }) => {
 
   useImperativeHandle(importFieldsRef, () => ({
     fields: (chooseDataSet?.current?.get('fields') || requiredFields).filter((code: string) => !includes(['linkIssue', 'parentIssue'], code)),
+    // @ts-ignore
     allFields: fieldsOptionDataSet.toData(),
+    requiredFields,
+    chooseDataSet,
   }));
-
+  function handleClick() {
+    const result = true;
+    const nextBtnStatus = btnStatus !== 'NONE' ? 'NONE' : 'ALL';
+    if (nextBtnStatus !== 'ALL') {
+      chooseDataSet.current?.set('fields', fieldsOptionDataSet.toData().map((item:any) => item.code));
+    } else {
+      chooseDataSet.current?.set('fields', requiredFields);
+      chooseDataSet.unSelectAll();
+    }
+    result && setBtnStatus(nextBtnStatus);
+  }
   return (
     <div className={styles.importFields}>
-      <div className={styles.importFields_title}>选择字段</div>
+      <div className={styles.importFields_title}>
+        <span>选择字段</span>
+        <Button className={styles.importFields_btn} onClick={handleClick}>{btnStatus !== 'NONE' ? '全选' : '全不选'}</Button>
+      </div>
       <div className={styles.importFields_content}>
         <SelectBox
           dataSet={chooseDataSet}

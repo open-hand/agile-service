@@ -370,7 +370,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                 if (entryName.contains(MACOSX) || entryName.contains(DS_STORE)) {
                     continue;
                 }
-                if (!entry.isDirectory() && entryName.contains(INDEX_HTML)) {
+                if (!entry.isDirectory() && entryName.endsWith(INDEX_HTML)) {
                     notIndex = false;
                     result = getPrefixPath(entry.getName());
                 }
@@ -395,7 +395,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                 if (name.contains(MACOSX) || name.contains(DS_STORE)) {
                     continue;
                 }
-                if (!fileHeader.isDirectory() && name.contains(INDEX_HTML)) {
+                if (!fileHeader.isDirectory() && name.endsWith(INDEX_HTML)) {
                     notIndex = false;
                     result = getPrefixPathSlash(name);
                 }
@@ -461,7 +461,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                 if (entryName.contains(MACOSX) || entryName.contains(DS_STORE)) {
                     continue;
                 }
-                if (!entry.isDirectory() && entryName.contains(INDEX_HTML)) {
+                if (!entry.isDirectory() && entryName.endsWith(INDEX_HTML)) {
                     if (inputToByte(in).length <= 0) {
                         throw new CommonException(INDEX_EMPTY_EXCEPTION_CODE);
                     }
@@ -484,7 +484,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                 if (name.contains(MACOSX) || name.contains(DS_STORE)) {
                     continue;
                 }
-                if (!fileHeader.isDirectory() && name.contains(INDEX_HTML)) {
+                if (!fileHeader.isDirectory() && name.endsWith(INDEX_HTML)) {
                     if (inputToByte(archive.getInputStream(fileHeader)).length <= 0) {
                         throw new CommonException(INDEX_EMPTY_EXCEPTION_CODE);
                     }

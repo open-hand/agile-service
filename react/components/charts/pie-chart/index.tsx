@@ -14,7 +14,7 @@ import { useFontSize } from '../context';
 
 export type IPieChartType = 'assignee' | 'component' | 'typeCode' | 'version' | 'priority' | 'status' | 'sprint' | 'epic' | 'label'
 
-export type IDimension = 'version' | 'sprint' | '';
+export type IDimension = 'version' | 'sprint' | 'status' | '';
 
 export interface IPieData {
   jsonObject?: null
@@ -114,6 +114,7 @@ const PieChart: React.FC<PieChartProps> = ({
     const CHOOSEQUERY = {
       sprint: { paramChoose: 'sprint', paramCurrentSprint: chooseId },
       version: { paramChoose: 'version', paramCurrentVersion: chooseId },
+      status: { paramChoose: 'status', paramCurrentStatus: chooseId },
     };
     return chooseDimension ? CHOOSEQUERY[chooseDimension] : ({});
   };
@@ -238,7 +239,7 @@ const PieChart: React.FC<PieChartProps> = ({
         className={styles.pie_chart}
       >
         <div style={{
-          position: 'relative',
+          position: 'relative', flex: 1,
         }}
         >
           <ReactEcharts
@@ -260,43 +261,43 @@ const PieChart: React.FC<PieChartProps> = ({
 
         <div className={styles.pie_legend}>
           <p className={styles.pie_legend_title}>数据统计</p>
-          <table>
+          <table style={{ tableLayout: 'fixed', width: '100%' }}>
             <thead>
               <tr>
-                <td style={{ width: '280px' }}>{currentType.title}</td>
-                <td style={{ width: '150px' }}>问题</td>
+                <td>{currentType.title}</td>
+                <td>问题</td>
                 <td style={{ paddingRight: 35 }}>百分比</td>
               </tr>
             </thead>
-          </table>
-          <table className={styles.pie_legend_tbody}>
-            {
-              data.map((item, index) => (
-                <tr>
-                  <td style={{ width: '280px', display: 'flex', alignItems: 'center' }}>
-                    <div className={styles.pie_legend_icon} style={{ background: colors[index] }} />
-                    <Tooltip title={item && item.name}>
-                      <div className={styles.pie_legend_text}>{item.name ? (item.realName || item.name) : '未分配'}</div>
-                    </Tooltip>
-                  </td>
-                  <td style={{ width: '150px' }}>
-                    {link ? (
-                      <span
-                        style={{
-                          color: '#3F51B5',
-                          cursor: 'pointer',
-                        }}
-                        role="none"
-                        onClick={handleLinkToIssue.bind(this, item)}
-                      >
-                        {item.value}
-                      </span>
-                    ) : item.value}
-                  </td>
-                  <td style={{ width: '150px', paddingRight: 15 }}>{`${(item.percent).toFixed(2)}%`}</td>
-                </tr>
-              ))
-            }
+            <tbody className={styles.pie_legend_tbody}>
+              {
+                data.map((item, index) => (
+                  <tr>
+                    <td style={{ display: 'flex', alignItems: 'center' }}>
+                      <div className={styles.pie_legend_icon} style={{ background: colors[index] }} />
+                      <Tooltip title={item && item.name}>
+                        <div className={styles.pie_legend_text}>{item.name ? (item.realName || item.name) : '未分配'}</div>
+                      </Tooltip>
+                    </td>
+                    <td>
+                      {link ? (
+                        <span
+                          style={{
+                            color: '#3F51B5',
+                            cursor: 'pointer',
+                          }}
+                          role="none"
+                          onClick={handleLinkToIssue.bind(this, item)}
+                        >
+                          {item.value}
+                        </span>
+                      ) : item.value}
+                    </td>
+                    <td style={{ paddingRight: 15 }}>{`${(item.percent).toFixed(2)}%`}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
           </table>
         </div>
       </div>

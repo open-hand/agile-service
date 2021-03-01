@@ -1,11 +1,10 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import ResizeAble from '@/components/ResizeAble';
 import { find } from 'lodash';
-import { Tooltip, Icon } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui/pro';
 import EditIssue from '@/components/EditIssue';
 import './Container.less';
 import { useDetailContainerContext } from './context';
-import Back from './back.svg';
 
 const prefixCls = 'c7nagile-detail-container';
 interface Route {
@@ -26,7 +25,7 @@ export function registerPath(route: Route) {
 }
 const Container: React.FC = () => {
   const {
-    outside, topAnnouncementHeight, match, routes, close, pop, push,
+    outside, topAnnouncementHeight, match, routes, close, pop, push, fullPage, resizeRef,
   } = useDetailContainerContext();
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -57,7 +56,29 @@ const Container: React.FC = () => {
     }
     return null;
   }, [match.key, match.path, match.props]);
-  return (
+  const element = (
+    <div
+      className={`${prefixCls}-resize`}
+      ref={container}
+      style={{
+        paddingTop: routes.length > 1 ? 34 : 0,
+      }}
+    >
+      <div className={`${prefixCls}-divider`} />
+      {routes.length > 1 && (
+      <div
+        role="none"
+        className={`${prefixCls}-back`}
+        onClick={pop}
+      >
+        <Icon type="navigate_before" />
+        返回上一层
+      </div>
+      )}
+      {match ? render() : null}
+    </div>
+  );
+  return fullPage ? element : (
     <div
       className={prefixCls}
       style={{
@@ -65,6 +86,7 @@ const Container: React.FC = () => {
       }}
     >
       <ResizeAble
+        ref={resizeRef}
         modes={['left']}
         size={{
           maxWidth: window.innerWidth * 0.6,
@@ -77,25 +99,7 @@ const Container: React.FC = () => {
         onResizeEnd={handleResizeEnd}
         onResize={handleResize}
       >
-        <div
-          className={`${prefixCls}-resize`}
-          ref={container}
-          style={{
-            paddingTop: routes.length > 1 ? 34 : 0,
-          }}
-        >
-          {routes.length > 1 && (
-            <div
-              role="none"
-              className={`${prefixCls}-back`}
-              onClick={pop}
-            >
-              <Icon type="navigate_before" />
-              返回上一层
-            </div>
-          )}
-          {match ? render() : null}
-        </div>
+        {element}
       </ResizeAble>
     </div>
   );

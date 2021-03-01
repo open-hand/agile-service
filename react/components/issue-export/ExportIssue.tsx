@@ -1,20 +1,26 @@
 import React, {
-  memo, ReactElement, useCallback, useEffect, useMemo, useState,
+  memo, ReactElement, useCallback, useEffect, useMemo, useState, useRef,
 } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import { find } from 'lodash';
+import {
+  find, findIndex, isEqual, map, uniq,
+} from 'lodash';
 import { Divider } from 'choerodon-ui';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
 import IssueFilterForm, { useIssueFilterForm } from '@/components/issue-filter-form';
 import ChooseField, { useChoseField } from '@/components/chose-field';
-import TableColumnCheckBoxes, { useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
+import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
 import WsProgress from '@/components/ws-progress';
 import { getProjectName } from '@/utils/common';
+import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
+import TemplateSelect from '../template-select/TemplateSelect';
+import openSaveTemplate from '../template-select/components/save/SaveTemplate';
+import { ITemplate } from '../template-select/components/edit/EditTemplate';
 
 interface FormPartProps {
   title: string | ReactElement,
@@ -63,9 +69,21 @@ interface IDownLoadInfo {
   lastUpdateDate: string | null,
 }
 const ExportIssue: React.FC = () => {
+  const [templateIsExist, setTemplateIsExist] = useState(false);
+  const templateSelectRef = useRef<{
+    onOk:(template: ITemplate) => Promise<void>,
+    templateList: ITemplate[]
+    setTemplate: (template: ITemplate | undefined) => void
+    templateFirstLoaded: boolean
+  }>();
+
+  const checkBoxDataPropsRef = useRef<ITableColumnCheckBoxesDataProps>();
+  const selectTemplateOkRef = useRef<(codes: string[]) => void>();
+
   const {
-    prefixCls, checkOptions: propsCheckOptions, store, fields, modal,
+    prefixCls, checkOptions: propsCheckOptions, store, fields, modal, action, exportBtnText,
   } = useExportIssueStore();
+
   // 添加筛选配置 数据
   const [choseDataProps, choseComponentProps] = useChoseField({
     fields,
@@ -77,17 +95,44 @@ const ExportIssue: React.FC = () => {
       choseField: (data) => handleChange(data),
     },
   });
+
   const { store: choseFieldStore } = choseDataProps;
   const checkOptions = useMemo(() => { // checkBokProps
     const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig.get(option.value) })) || [];
     newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig.get(option.code) })));
     return newCheckOptions;
   }, [choseFieldStore.getOriginalField, propsCheckOptions, store.checkboxOptionsExtraConfig]);
+
+  const handleCheckBoxChangeOk = useCallback((value) => {
+    const currentFieldCodes = store.transformExportFieldCodes(value, checkBoxDataPropsRef?.current);
+    const reverseFieldCodes = store.reverseTransformExportFieldCodes(uniq(currentFieldCodes)).filter((code) => map(checkOptions, 'value').includes(code));
+
+    const templateList = templateSelectRef?.current?.templateList || [];
+    for (let i = 0; i < templateList.length; i += 1) {
+      if (isEqual(JSON.parse(templateList[i].templateJson).sort(), store.transformExportFieldCodes(reverseFieldCodes, checkBoxDataPropsRef?.current).sort())) {
+        templateSelectRef?.current?.setTemplate(templateList[i]);
+        return;
+      }
+    }
+    templateSelectRef?.current?.setTemplate(undefined);
+  }, [checkOptions, store]);
+
+  useEffect(() => {
+    if (templateSelectRef?.current?.templateFirstLoaded) {
+      handleCheckBoxChangeOk(store.defaultCheckedExportFields);
+    }
+  }, [handleCheckBoxChangeOk, store.defaultCheckedExportFields, templateSelectRef?.current?.templateFirstLoaded]);
+
   // 选择字段框配置 数据
   const [checkBoxDataProps, checkBoxComponentProps] = useTableColumnCheckBoxes({
     options: checkOptions,
     defaultValue: store.defaultCheckedExportFields,
     events: { initOptions: store.defaultInitOptions },
+    onChange: handleCheckBoxChangeOk,
+  });
+
+  Object.assign(checkBoxDataPropsRef, {
+    current: checkBoxDataProps,
   });
 
   const [filterData, filterComponentProps] = useIssueFilterForm({
@@ -122,19 +167,24 @@ const ExportIssue: React.FC = () => {
     } else {
       return false;
     }
-    search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
+    search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions.sort((a, b) => findIndex(checkOptions, { value: a }) - findIndex(checkOptions, { value: b })), checkBoxDataProps);
     if (checkBoxDataProps.checkedOptions.length === 0) {
       Choerodon.prompt('请至少选择一个字段导出');
       return false;
     }
     search = store.exportBefore(search);
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
+    if (store.exportButtonConfig?.buttonProps) {
+      store.exportButtonConfig.buttonProps.loading = true;
+    } else if (store.exportButtonConfig && !store.exportButtonConfig.buttonProps) {
+      store.exportButtonConfig.buttonProps = {
+        loading: true,
+      };
+    }
     store.exportAxios(search, field ? `${field.value},${field.order}` : undefined);
     return false;
-  }, [checkBoxDataProps.checkedOptions, checkOptions, choseFieldStore.getAllChosenField, filterData.dataSet, store]);
-  useEffect(() => {
-    modal?.handleOk(exportExcel);
-  }, [exportExcel, modal]);
+  }, [checkBoxDataProps, checkOptions, choseFieldStore.getAllChosenField, filterData.dataSet, store]);
+
   const handleChangeFieldStatus = (status: 'ALL' | 'NONE') => {
     if (status !== 'ALL') {
       checkBoxDataProps.actions.checkAll();
@@ -145,7 +195,9 @@ const ExportIssue: React.FC = () => {
   };
   const handleFinish = (messageData: any) => {
     store.setExportBtnHidden(false);
-    modal?.update({ okProps: { loading: false } });
+    // @ts-ignore
+    store.exportButtonConfig.buttonProps.loading = false;
+    // modal?.update({ okProps: { loading: false } });
     store.setDownloadInfo(messageData);
   };
   const renderExport = () => {
@@ -154,6 +206,40 @@ const ExportIssue: React.FC = () => {
     }
     return null;
   };
+
+  const handleSaveTemplate = useCallback(() => {
+    // @ts-ignore
+    openSaveTemplate({ action, onOk: templateSelectRef.current?.onOk, templateJson: JSON.stringify(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps)) });
+  }, [action, checkBoxDataProps, store]);
+
+  const selectTemplateOk = useCallback((fieldCodes) => {
+    const newCheckedOptions = store.reverseTransformExportFieldCodes(uniq(fieldCodes)).filter((code) => map(checkOptions, 'value').includes(code));
+    checkBoxDataProps.dataSet.current?.set('exportCodes', newCheckedOptions);
+    checkBoxDataProps.setCheckedOptions(newCheckedOptions);
+  }, [checkBoxDataProps, checkOptions, store]);
+
+  Object.assign(selectTemplateOkRef, {
+    current: selectTemplateOk,
+  });
+
+  useEffect(() => {
+    const currentFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
+    if (!currentFieldCodes.length) { // 没有字段选中时不应该显示保存按钮
+      setTemplateIsExist(true);
+      return;
+    }
+    const reverseFieldCodes = store.reverseTransformExportFieldCodes(uniq(currentFieldCodes)).filter((code) => map(checkOptions, 'value').includes(code));
+
+    const templateList = templateSelectRef?.current?.templateList || [];
+    for (let i = 0; i < templateList.length; i += 1) {
+      if (isEqual(JSON.parse(templateList[i].templateJson), store.transformExportFieldCodes(reverseFieldCodes, checkBoxDataProps))) {
+        setTemplateIsExist(true);
+        return;
+      }
+    }
+    setTemplateIsExist(false);
+  }, [checkBoxDataProps, checkOptions, store, templateSelectRef?.current?.templateList]);
+
   return (
     <div>
       <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
@@ -164,7 +250,26 @@ const ExportIssue: React.FC = () => {
         </IssueFilterForm>
       </FormPart>
       <Divider className={`${prefixCls}-horizontal`} />
-      <FormPart title="选择字段" btnOnClick={handleChangeFieldStatus}>
+      {
+        action && (
+          <>
+            <FormPart title="选择常用模板" className={`${prefixCls}-form-template`}>
+              <TemplateSelect
+                templateSelectRef={templateSelectRef}
+                action={action}
+                // @ts-ignore
+                checkOptions={checkOptions}
+                selectTemplateOk={selectTemplateOk}
+                transformExportFieldCodes={store.transformExportFieldCodes}
+                reverseTransformExportFieldCodes={store.reverseTransformExportFieldCodes}
+                defaultInitCodes={['issueTypeId', 'issueNum', 'issueId']}
+              />
+            </FormPart>
+            {/* <Divider className={`${prefixCls}-horizontal`} /> */}
+          </>
+        )
+      }
+      <FormPart title="选择模板字段" btnOnClick={handleChangeFieldStatus}>
         <TableColumnCheckBoxes {...checkBoxComponentProps} />
         {renderExport()}
       </FormPart>
@@ -182,6 +287,34 @@ const ExportIssue: React.FC = () => {
           createDate: store.downloadInfo.creationDate!,
         } : undefined}
       />
+      <div className={`${prefixCls}-btns`}>
+        <Button
+          icon="unarchive"
+          funcType={'flat' as FuncType}
+          onClick={exportExcel}
+          color={'primary' as ButtonColor}
+          loading={store.exportButtonConfig?.buttonProps?.loading}
+          className="c7n-exportIssue-btn"
+        >
+          {exportBtnText || '导出问题'}
+        </Button>
+        {
+          !templateIsExist && (
+            <Button
+              icon="unarchive"
+              funcType={'flat' as FuncType}
+              onClick={handleSaveTemplate}
+              color={'primary' as ButtonColor}
+              className="c7n-exportIssue-btn"
+              style={{
+                marginLeft: 16,
+              }}
+            >
+              保存为常用模板
+            </Button>
+          )
+        }
+      </div>
     </div>
   );
 };

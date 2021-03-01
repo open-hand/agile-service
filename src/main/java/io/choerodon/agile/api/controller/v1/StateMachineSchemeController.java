@@ -83,8 +83,10 @@ public class StateMachineSchemeController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id查询状态机方案对象")
     @GetMapping(value = "/query_scheme_with_config/{scheme_id}")
-    public ResponseEntity<StateMachineSchemeVO> querySchemeWithConfigById(@PathVariable("organization_id") Long organizationId, @PathVariable("scheme_id") @Encrypt Long schemeId, @RequestParam("isDraft") Boolean isDraft) {
-        return new ResponseEntity<>(schemeService.querySchemeWithConfigById(isDraft, organizationId, schemeId), HttpStatus.OK);
+    public ResponseEntity<StateMachineSchemeVO> querySchemeWithConfigById(@PathVariable("organization_id") Long organizationId,
+                                                                          @PathVariable("scheme_id") @Encrypt Long schemeId,
+                                                                          @RequestParam("isDraft") Boolean isDraft) {
+        return new ResponseEntity<>(schemeService.querySchemeWithConfigById(isDraft, organizationId, schemeId, null), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

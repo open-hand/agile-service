@@ -39,10 +39,10 @@ class IssueCommentApi extends Api<IssueCommentApi> {
    * 更新issue的评论
    * @param commitObj
    */
-  update(commitUpdateObj:UComment) {
+  update(commitUpdateObj:UComment, isSelf: boolean) {
     return this.request({
       method: 'post',
-      url: `${this.prefix}/issue_comment/update`,
+      url: `${this.prefix}/issue_comment${isSelf ? '/self' : ''}/update`,
       data: commitUpdateObj,
     });
   }
@@ -51,17 +51,17 @@ class IssueCommentApi extends Api<IssueCommentApi> {
    * 根据commitId删除评论, 单条
    * @param commitId
    */
-  delete(commitId:string) {
+  delete(commitId:string, isSelf: boolean) {
     return this.request({
       method: 'delete',
-      url: `${this.prefix}/issue_comment/${commitId}`,
+      url: `${this.prefix}/issue_comment${isSelf ? '/self' : ''}/${commitId}`,
     });
   }
 
-  deleteWithReply(commentId: string) {
+  deleteWithReply(commentId: string, isSelf: boolean) {
     return this.request({
       method: 'delete',
-      url: `${this.prefix}/issue_comment/reply/${commentId}`,
+      url: `${this.prefix}/issue_comment${isSelf ? '/self' : ''}/reply/${commentId}`,
     });
   }
 

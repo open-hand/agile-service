@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public interface IssueTypeService {
 
-    IssueTypeVO queryById(Long issueTypeId);
+    IssueTypeVO queryById(Long issueTypeId, Long projectId);
 
     IssueTypeVO create(Long organizationId,
                        Long projectId,
@@ -133,4 +133,13 @@ public interface IssueTypeService {
      * @return
      */
     Boolean checkIcon(Long organizationId, Long projectId, String icon, Long id);
+
+    /**
+     * 根据projectIds查询问题类型
+     *
+     * @param organizationId
+     * @param projectIds
+     * @return
+     */
+    Map<Long, IssueTypeVO> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds);
 }

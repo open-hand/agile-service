@@ -1,8 +1,22 @@
+import { sameProject } from '@/utils/detail';
+import { getProjectId } from '@/utils/common';
 import Api from './Api';
 
 class UiApi extends Api<UiApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
+  }
+
+  get outPrefix() {
+    return '/agile/v1/backlog_external';
+  }
+
+  get isOutside() {
+    return false;
+  }
+
+  outside(outside: boolean) {
+    return this.overwrite('isOutside', outside);
   }
 
   getUIUnLinked(issueId: string) {
@@ -13,10 +27,26 @@ class UiApi extends Api<UiApi> {
   }
 
   getLinkedUI(issueId: string) {
-    return this.request({
+    return this.isOutside ? this.request({
       method: 'get',
-      url: `${this.prefix}/static_file/related/${issueId}`,
+      url: `${this.outPrefix}/related_static_file/${issueId}`,
+      params: {
+        project_id: this.projectId,
+        organizationId: this.orgId,
+      },
+    }) : this.request({
+      method: 'get',
+      url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/related_'}static_file/${sameProject(this.projectId) ? 'related/' : ''}${issueId}`,
+      params: {
+        organizationId: this.orgId,
+        instanceProjectId: this.projectId,
+      },
     });
+
+    // return this.request({
+    //   method: 'get',
+    //   url: `${this.prefix}/static_file/related/${issueId}`,
+    // });
   }
 
   uploadUI(issueId: string, file: FormData) {

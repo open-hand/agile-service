@@ -1,17 +1,14 @@
 import React, { useState, ReactNode } from 'react';
 import { Tabs } from 'choerodon-ui';
-import { stores } from '@choerodon/boot';
 import { find } from 'lodash';
 import permission from '@/components/permission';
-import useQuery from '@/hooks/useQuery';
+import useQueryString from '@/hooks/useQueryString';
 import Status from './status';
 import StatusCirculation from './status-circulation';
 import CustomCirculation from './custom-circulation';
 import StateMachineContext from './context';
 import useSelectedType from './useSelectedType';
 import styles from './index.less';
-
-const { AppState } = stores;
 
 export interface TabComponentProps<Params extends { [K in keyof Params]?: string } = {}> {
   tab: ReactNode
@@ -37,10 +34,15 @@ const tabs: ITab[] = [{
 
 const { TabPane } = Tabs;
 const StateMachine: React.FC = (props) => {
-  const params = useQuery();
-  const issueTypeId = params.get('issueTypeId');
+  const params = useQueryString();
+  const { issueTypeId, activeKey: paramsActiveKey } = params;
   const [selectedType, handleChangeSelectedType] = useSelectedType(issueTypeId || undefined);
-  const [activeKey, setActiveKey] = useState(issueTypeId ? tabs[1].key : tabs[0].key);
+  const [activeKey, setActiveKey] = useState(() => {
+    if (paramsActiveKey) {
+      return paramsActiveKey;
+    }
+    return issueTypeId ? tabs[1].key : tabs[0].key;
+  });
   const Component = find(tabs, { key: activeKey })?.component;
   const tabComponent = (
     <Tabs className={styles.tabs} activeKey={activeKey} onChange={setActiveKey}>

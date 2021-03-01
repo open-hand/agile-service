@@ -7,18 +7,21 @@ import { getProjectId, getOrganizationId } from '@/utils/common';
 
 import { ChartRefProps } from '../..';
 
-export const transformPieSearch = (searchVO: PieSearchVO | undefined) : PieConfig | undefined => {
+export const transformPieSearch = (searchVO: PieSearchVO | undefined): PieConfig | undefined => {
   if (!searchVO) {
     return undefined;
   }
-  let chooseDimension: 'version' | 'sprint' | '' = '';
+  let chooseDimension: 'version' | 'sprint' | 'status' | '' = '';
   let chooseId: string = '';
-  if (searchVO.sprintId && !searchVO.versionId) {
+  if (searchVO.sprintId) {
     chooseDimension = 'sprint';
     chooseId = searchVO.sprintId;
-  } else if (searchVO.versionId && !searchVO.sprintId) {
+  } else if (searchVO.versionId) {
     chooseDimension = 'version';
     chooseId = searchVO.versionId;
+  } else if (searchVO.statusId) {
+    chooseDimension = 'status';
+    chooseId = searchVO.statusId;
   }
   return ({
     type: searchVO.fieldName,
@@ -42,6 +45,7 @@ const PieComponent: React.FC<Props> = ({ innerRef, projectId, data }) => {
   const handleSubmit = useCallback(async (): Promise<PieSearchVO> => ({
     sprintId: chooseDimension === 'sprint' ? chooseId : undefined,
     versionId: chooseDimension === 'version' ? chooseId : undefined,
+    statusId: chooseDimension === 'status' ? chooseId : undefined,
     projectId: searchProps.projectId || getProjectId(),
     organizationId: getOrganizationId(),
     fieldName: type,

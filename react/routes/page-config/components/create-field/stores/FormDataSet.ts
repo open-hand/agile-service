@@ -19,6 +19,7 @@ interface Props {
   isEdit: boolean,
   oldRecord?: Record,
   defaultContext?: string[],
+  contextOptionsDataSet: DataSet
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
   localCheckName?: (name: string) => Promise<boolean> | boolean,
 }
@@ -51,7 +52,7 @@ function getLookupConfig(code: string, filterArr?: string[], type?: string, id?:
 const dateList = ['time', 'datetime', 'date'];
 
 const FormDataSet = ({
-  formatMessage, type, store, schemeCode, id, isEdit,
+  formatMessage, type, store, schemeCode, id, isEdit, contextOptionsDataSet,
   oldRecord, localCheckCode, localCheckName, defaultContext,
 }: Props): DataSetProps => {
   const regex = /^[0-9a-zA-Z_]+$/;
@@ -166,26 +167,7 @@ const FormDataSet = ({
         multiple: true,
         valueField: 'id',
         textField: 'name',
-        defaultValue: defaultContext || undefined,
-        options: new DataSet({
-          autoQuery: true,
-          paging: false,
-          transport: {
-            read: ({
-              ...pageConfigApiConfig.loadAvailableIssueType(),
-              transformResponse: (res: any) => {
-                const data = JSON.parse(res).filter((item: any) => item.enabled);
-                if (isEdit) {
-                  const issueTypeVOList = oldRecord?.get('issueTypeVOList')?.filter((item: any) => !item.enabled) || [];
-
-                  issueTypeVOList.length > 0 && store.eternalContext.push(...issueTypeVOList.map((item:any) => item.id));
-                  data.unshift(...issueTypeVOList);
-                }
-                return data;
-              },
-            }),
-          },
-        }),
+        options: contextOptionsDataSet,
       },
       {
         name: 'defaultValue',

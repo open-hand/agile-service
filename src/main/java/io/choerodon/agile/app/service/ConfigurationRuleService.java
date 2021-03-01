@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
+import io.choerodon.agile.infra.dto.UserTypeToReceiverParamDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.boot.message.entity.MessageSender;
@@ -77,9 +78,12 @@ public interface ConfigurationRuleService {
      *
      * @param rules
      * @param projectId
-     * @param reporterId
-     * @param assigneeId
+     * @param userTypeToReceiverParamDTO
+     * @param onlySendCustomFieldMember
      */
-    void convertUserTypeToReceiver(List<ConfigurationRuleVO> rules, Long projectId, Long reporterId, Long assigneeId);
+    void convertUserTypeToReceiver(List<ConfigurationRuleVO> rules,
+                                   Long projectId,
+                                   UserTypeToReceiverParamDTO userTypeToReceiverParamDTO,
+                                   boolean onlySendCustomFieldMember);
 }
 

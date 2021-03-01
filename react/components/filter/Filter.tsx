@@ -174,7 +174,7 @@ const Filter: React.FC<FilterProps> = ({
   const renderField = useCallback((field: IFilterField) => {
     const isSelect = ['single', 'multiple', 'radio', 'checkbox', 'member'].includes(field.fieldType);
     const isText = ['input', 'text'].includes(field.fieldType);
-    const isUser = ['member'].includes(field.fieldType);
+    const isUser = ['member', 'multiMember'].includes(field.fieldType);
     const isTime = ['time', 'datetime', 'date'].includes(field.fieldType);
     const className = flat ? classNames({
       'c7n-pro-select-flat': isSelect,
@@ -242,7 +242,10 @@ const Filter: React.FC<FilterProps> = ({
         onChange={handleSelectChange}
         triggerElement={flat ? (
           <Button>
-            <span style={{ display: 'flex', alignItems: 'center' }}>
+            <span style={{
+              display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.87)', fontWeight: 500,
+            }}
+            >
               添加筛选
               <Icon type="arrow_drop_down" />
             </span>

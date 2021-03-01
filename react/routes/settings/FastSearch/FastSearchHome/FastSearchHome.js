@@ -72,6 +72,7 @@ class Search extends Component {
         style: {
           width: 520,
         },
+        className: 'c7nagile-fastSearch-delete',
         okText: '删除',
         okType: 'danger',
         cancelText: '取消',

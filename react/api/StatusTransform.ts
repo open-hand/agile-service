@@ -294,12 +294,12 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * @param statusId
    */
 
-  getFeatureLinkage(statusId: string, typeCode?: string) {
+  getFeatureLinkage(statusId: string, issueTypeId: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/status_linkages/pro/${statusId}`,
       params: {
-        typeCode: typeCode || 'feature',
+        parentIssueTypeId: issueTypeId,
       },
     });
   }
@@ -310,13 +310,13 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * @param statusId
    * @param data
    */
-  updateFeatureLinkage(statusId: string, data: IFeatureLinkage[]) {
+  updateFeatureLinkage(statusId: string, data: IFeatureLinkage[], parentIssueTypeId:string) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/status_linkages/pro/setting_story_status`,
       params: {
         statusId,
-        typeCode: 'feature',
+        parentIssueTypeId,
       },
       data,
     });
@@ -326,12 +326,12 @@ class StatusTransformApi extends Api<StatusTransformApi> {
    * 获取设置特性状态联动时可设置的状态
    * @param data
    */
-  getFeatureLinkageStatus(data: { issueTypeId: string, projectId: string, parentIssueStatusSetting: string }) {
+  getFeatureLinkageStatus(data: { issueTypeId: string, projectId: string }, parentIssueTypeId: string) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/status_linkages/pro/list_status`,
       params: {
-        typeCode: 'feature',
+        parentIssueTypeId,
       },
       data,
     });

@@ -15,7 +15,7 @@ import {
   Button, Select, Icon, Spin, Tooltip,
 } from 'choerodon-ui';
 import './pie.less';
-import { sprintApi, versionApi } from '@/api';
+import { sprintApi, versionApi, statusApi } from '@/api';
 import to, { linkUrl } from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import SwitchChart from '../../Component/switchChart';
@@ -23,6 +23,9 @@ import PieChartStore from '../../../../stores/project/pieChart/PieChartStore';
 import NoDataComponent from '../../Component/noData';
 import pic from '../../../../assets/image/emptyChart.svg';
 
+const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
+  input.toLowerCase(),
+) >= 0;
 const { Option } = Select;
 @observer
 class PieChart extends Component {
@@ -32,6 +35,7 @@ class PieChart extends Component {
       type: '',
       sprints: [],
       versions: [],
+      status: [],
       chooseDimension: '',
       chooseId: '',
     };
@@ -44,11 +48,13 @@ class PieChart extends Component {
     await axios.all([
       sprintApi.loadSprints(['started', 'closed']),
       versionApi.loadNamesByStatus(),
+      statusApi.loadByProject('agile'),
     ])
-      .then(axios.spread((sprints, versions) => {
+      .then(axios.spread((sprints, versions, status) => {
         this.setState({
           sprints,
           versions,
+          status,
         });
       }));
   }
@@ -264,19 +270,19 @@ class PieChart extends Component {
 
   renderChooseDimension = () => {
     const {
-      sprints, versions, chooseDimension, chooseId,
+      sprints, versions, status, chooseDimension, chooseId,
     } = this.state;
-    const chooseVersion = versions.find((item) => item.versionId === chooseId);
-    const chooseSprint = sprints.find((item) => item.sprintId === chooseId);
 
     return (
       <div>
         <Select
           className="c7n-pieChart-filter-item"
           style={{ minWidth: 200 }}
-          value={chooseDimension === 'version' ? chooseVersion && chooseVersion.name : chooseSprint && chooseSprint.sprintName}
+          value={chooseId}
           onChange={this.handleChooseIdChange}
           allowClear
+          filter
+          filterOption={filterOption}
         >
           {
             chooseDimension === 'version' && versions.map((item) => (
@@ -290,18 +296,43 @@ class PieChart extends Component {
               </Option>
             ))
           }
+          {
+              chooseDimension === 'status' && status.map((s) => (
+                <Option value={s.id}>
+                  {s.name}
+                </Option>
+              ))
+            }
         </Select>
       </div>
     );
   }
 
   handleChooseDimensionChange = (chooseDimension) => {
-    const { type, sprints, versions } = this.state;
+    const {
+      type, sprints, versions, status,
+    } = this.state;
+    let chooseId;
+    switch (chooseDimension) {
+      case 'sprint': {
+        chooseId = sprints[0] && sprints[0].sprintId;
+        break;
+      }
+      case 'version': {
+        chooseId = versions[0] && versions[0].versionId;
+        break;
+      }
+      case 'status': {
+        chooseId = status[0] && status[0].id;
+        break;
+      }
+      default: break;
+    }
     this.setState({
       chooseDimension,
-      chooseId: chooseDimension === 'version' ? versions[0] && versions[0].versionId : sprints[0] && sprints[0].sprintId,
+      chooseId,
     });
-    PieChartStore.getPieDatas(type, chooseDimension === 'sprint' ? sprints[0] && sprints[0].sprintId : '', chooseDimension === 'version' ? versions[0] && versions[0].versionId : '');
+    PieChartStore.getPieDatas(type, chooseDimension === 'sprint' ? sprints[0] && sprints[0].sprintId : '', chooseDimension === 'version' ? versions[0] && versions[0].versionId : '', chooseDimension === 'status' ? status[0] && status[0].id : '');
   }
 
   handleChooseIdChange = (chooseValue) => {
@@ -309,7 +340,7 @@ class PieChart extends Component {
     this.setState({
       chooseId: chooseValue,
     });
-    PieChartStore.getPieDatas(type, chooseDimension === 'sprint' ? chooseValue : '', chooseDimension === 'version' ? chooseValue : '');
+    PieChartStore.getPieDatas(type, chooseDimension === 'sprint' ? chooseValue : '', chooseDimension === 'version' ? chooseValue : '', chooseDimension === 'status' ? chooseValue : '');
   }
 
   render() {
@@ -338,6 +369,9 @@ class PieChart extends Component {
       }, {
         key: 'version',
         name: '版本',
+      }, {
+        key: 'status',
+        name: '状态',
       },
     ];
 

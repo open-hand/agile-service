@@ -36,6 +36,8 @@ public class SystemFieldPageConfig {
         PROGRAM_VERSION(FieldCode.PROGRAM_VERSION, true, true),
         MAIN_RESPONSIBLE(FieldCode.MAIN_RESPONSIBLE, true, true),
         environment(FieldCode.ENVIRONMENT, true, true),
+        CREATER(FieldCode.CREATOR, false, true),
+        UPDATER(FieldCode.UPDATOR, false, true),
         ;
 
 

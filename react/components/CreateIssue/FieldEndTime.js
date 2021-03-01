@@ -13,6 +13,7 @@ function FieldEndTime({ form, field, initialValue }) {
         initialValue,
       })(
         <DatePicker
+          style={{ display: 'block', width: 330 }}
           label="预计结束时间"
           placeholder="预计结束时间"
           format="YYYY-MM-DD HH:mm:ss"

@@ -4,11 +4,12 @@ import React, {
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import fileSever, { FileSaverOptions } from 'file-saver';
 import moment from 'moment';
-import { Progress } from 'choerodon-ui/pro';
+import { Button, Progress } from 'choerodon-ui/pro';
 import { ProgressStatus, ProgressType } from 'choerodon-ui/lib/progress/enum';
 import { humanizeDuration } from '@/utils/common';
 import { observer } from 'mobx-react-lite';
 import './index.less';
+import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 
 /**
  * @param fieldKey websocket传输信息下载url的key  默认fileUrl
@@ -39,6 +40,7 @@ interface Props {
   downloadProps?: DownloadProps, /** 下载文件配置，当存在自动下载配置时，以自动下载配置为最高优先级 */
   onFinish?: (messageData: any) => void, /** websocket任务完成后回调 */
   onStart?: (messageData: any) => void, /** websocket任务开始时回调 */
+  downloadBtn?: boolean
 }
 interface StateProps {
   visible: boolean,
@@ -60,7 +62,7 @@ function onHumanizeDuration(createDate?: string, lastUpdateDate?: string, timeFo
 
 type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' }
 const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
-  const { percentKey = 'process' } = props;
+  const { percentKey = 'process', downloadBtn = false } = props;
   const downLoadProps = useMemo(() => {
     const tempProps = props.downloadProps;
     if (typeof (props.autoDownload) === 'object') {
@@ -163,13 +165,19 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
             ? (
               <>
                 <span>{downloadInfo.timeLine ?? `${doingTextTemplate}完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate, downloadInfo.timeFormat)}）`}</span>
-                <span role="none" className="c7n-agile-ws-finish-url" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</span>
+                {
+                  downloadBtn ? (
+                    <Button icon="archive" color={'primary' as ButtonColor} className="c7n-agile-ws-progress-download-btn" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</Button>
+                  ) : (
+                    <span role="none" className="c7n-agile-ws-finish-url" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</span>
+                  )
+                }
               </>
             ) : ''
         )}
       </div>
     ) : <></>;
-  }, [doingTextTemplate, downLoadProps?.fileName, downLoadProps?.fileSaverOptions, props, stateProgress.data]);
+  }, [doingTextTemplate, downLoadProps?.fileName, downLoadProps?.fileSaverOptions, downloadBtn, props, stateProgress.data]);
   useEffect(() => {
     if (typeof (props.visible) !== 'undefined') {
       dispatch({ type: 'visible', visible: props.visible });

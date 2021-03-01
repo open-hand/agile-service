@@ -227,11 +227,11 @@ const CreateFilter = (props) => {
     } if (filter === 'issue_type') {
       if (type === '[object Array]') {
         const v = _.map(value, 'key');
-        const vv = v.map((e) => `'${e}'`);
+        const vv = v.map((e) => `${e}`);
         return `(${vv.join(',')})`;
       }
       const v = value.key;
-      return `'${v}'`;
+      return `${v}`;
     } if (type === '[object Array]') {
       const v = _.map(value, 'key');
       return `(${v.join(',')})`;

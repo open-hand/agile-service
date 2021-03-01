@@ -193,7 +193,7 @@ class ReportApi extends Api<ReportApi> {
    * @param versionId
    * @param type
    */
-  loadPie(fieldName: string, sprintId?: string, versionId?: string, startDate?: string, endDate?: string) {
+  loadPie(fieldName: string, sprintId?: string, versionId?: string, statusId?: string, startDate?: string, endDate?: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
@@ -203,6 +203,7 @@ class ReportApi extends Api<ReportApi> {
         fieldName,
         sprintId,
         versionId,
+        statusId,
         startDate,
         endDate,
       },

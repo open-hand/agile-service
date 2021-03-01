@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Form, Select, DataSet, Modal,
 } from 'choerodon-ui/pro';
+import { isEmpty } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
 import { pageConfigApi } from '@/api';
@@ -21,6 +22,7 @@ interface IPage {
   fieldId?: string,
   id: string,
 }
+const defaultValueFieldType = ['multiple', 'checkbox', 'multiMember'];
 const AddFiled: React.FC<Props> = observer(({
   modal, dataSet, store, onSubmitLocal, onRestoreLocal,
 }) => {
@@ -30,7 +32,12 @@ const AddFiled: React.FC<Props> = observer(({
       const id = dataSet.current?.toData().field;
       const addFiledData = store.currentTypeAllFieldData.get(id);
       if (addFiledData) {
-        onSubmitLocal({ ...store.currentTypeAllFieldData.get(id), localRecordIndexId: dataSet.current?.index }, true);
+        onSubmitLocal({
+          ...addFiledData,
+          defaultValue: !isEmpty(addFiledData.defaultValue) && defaultValueFieldType.includes(addFiledData.fieldType) ? String(addFiledData.defaultValue).split(',') : addFiledData.defaultValue,
+          fieldOptions: addFiledData.fieldOptions || addFiledData.defaultValueObj,
+          localRecordIndexId: dataSet.current?.index,
+        }, true);
       } else {
         const deleteRecord = store.getDeleteRecords.find((record) => record.get('id') === id);
         deleteRecord && onRestoreLocal(deleteRecord);

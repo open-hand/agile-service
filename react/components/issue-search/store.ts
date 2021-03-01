@@ -6,7 +6,9 @@ import { fieldApi, personalFilterApi } from '@/api';
 import { IField, ISearchVO } from '@/common/types';
 import { getProjectId } from '@/utils/common';
 import { IPersonalFilter } from '../quick-search';
-import { flattenObject, isFilterSame, SearchVOToFilter } from './utils';
+import {
+  flattenObject, isFilterSame, SearchVOToFilter, filterInvalidAttribute,
+} from './utils';
 
 export type ILocalField = {
   code: string,
@@ -28,6 +30,7 @@ export type IBatchAction = undefined | 'edit' | 'delete'
 export interface IssueSearchStoreProps {
   getSystemFields: () => ILocalField[]
   transformFilter: (chosenFields: IChosenFields) => any
+  renderField?: (field: IChosenField, props: { onChange: (v: any) => void, value: any, projectId?: string }) => React.ReactElement | React.FunctionComponent | null | void | false
   defaultChosenFields?: IChosenFields,
   defaultSearchVO?: ISearchVO
   projectId?: string
@@ -36,6 +39,8 @@ class IssueSearchStore {
   query: () => void = () => { }
 
   getSystemFields: () => ILocalField[] = () => []
+
+  renderField: IssueSearchStoreProps['renderField']
 
   transformFilter: (chosenFields: IChosenFields) => any = () => { }
 
@@ -48,12 +53,14 @@ class IssueSearchStore {
   constructor({
     getSystemFields,
     transformFilter,
+    renderField,
     defaultChosenFields,
     defaultSearchVO,
     projectId,
   }: IssueSearchStoreProps) {
     this.getSystemFields = getSystemFields;
     this.transformFilter = transformFilter;
+    this.renderField = renderField || (() => null);
     this.defaultChosenFields = defaultChosenFields;
     this.defaultSearchVO = defaultSearchVO;
     this.projectId = projectId;
@@ -113,9 +120,16 @@ class IssueSearchStore {
   @observable chosenFields: IChosenFields = new Map();
 
   @action initChosenFields() {
-    this.chosenFields = new Map(this.getSystemFields()
+    const chosenFields = new Map(this.chosenFields);
+
+    this.getSystemFields()
       .filter((f) => f.defaultShow)
-      .map((f) => ([f.code, observable({ ...f, value: undefined })])));
+      .forEach((f) => {
+        if (!chosenFields.has(f.code)) {
+          chosenFields.set(f.code, observable({ ...f, value: undefined }));
+        }
+      });
+    this.chosenFields = chosenFields;
     if (this.defaultChosenFields) {
       this.defaultChosenFields.forEach((value, key) => {
         this.chosenFields.set(key, value);
@@ -227,6 +241,13 @@ class IssueSearchStore {
     const currentFilterDTO = this.getCustomFieldFilters()
       ? flattenObject(this.getCustomFieldFilters()) : {};
     return !isFilterSame({}, currentFilterDTO);
+  }
+
+  @computed
+  get currentFlatFilter() {
+    const currentFilterDTO = this.getCustomFieldFilters()
+      ? flattenObject(this.getCustomFieldFilters()) : {};
+    return filterInvalidAttribute(currentFilterDTO);
   }
 
   @observable batchAction: IBatchAction;

@@ -1,6 +1,6 @@
 import React, { forwardRef, useMemo, useState } from 'react';
 import { Select } from 'choerodon-ui';
-import useSelect from '@/hooks/useSelectS';
+import useSelect from '@/hooks/useSelectOld';
 import useProjectUsers from '@/hooks/data/useProjectUsers';
 import { SelectProps } from 'choerodon-ui/lib/select';
 import UserHead from '@/components/UserHead';

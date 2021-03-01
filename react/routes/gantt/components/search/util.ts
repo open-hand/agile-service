@@ -24,11 +24,15 @@ function transformSystemFilter(data:any) {
     reporterIds,
     summary,
     version,
+    fixVersion,
+    influenceVersion,
     starBeacon,
     userId,
     testResponsibleIds,
     mainResponsibleIds,
     environment,
+    creatorIds,
+    updatorIds,
   } = data;
   return {
     advancedSearchArgs: {
@@ -48,9 +52,13 @@ function transformSystemFilter(data:any) {
       label,
       summary,
       version,
+      fixVersion,
+      influenceVersion,
       testResponsibleIds,
       mainResponsibleIds,
       environment,
+      creatorIds,
+      updatorIds,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: estimatedStartTime[0],

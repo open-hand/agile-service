@@ -9,6 +9,8 @@ import io.choerodon.agile.infra.mapper.IssueCommentMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -56,7 +58,7 @@ public class IssueCommentValidator {
         }
     }
 
-    public void verifyUpdateData(Long projectId, JSONObject issueCommentUpdate) {
+    public void verifyUpdateData(Long projectId, JSONObject issueCommentUpdate, boolean self) {
         if (issueCommentUpdate.get(COMMENT_ID) == null) {
             throw new CommonException("error.IssueCommentRule.commentId");
         }
@@ -64,8 +66,12 @@ public class IssueCommentValidator {
         issueCommentDTO.setCommentId(EncryptionUtils.decrypt(issueCommentUpdate.get(COMMENT_ID).toString(),
                 EncryptionUtils.BLANK_KEY));
         issueCommentDTO.setProjectId(projectId);
-        if (issueCommentMapper.selectByPrimaryKey(issueCommentDTO) == null) {
+        IssueCommentDTO originIssueComment = issueCommentMapper.selectByPrimaryKey(issueCommentDTO);
+        if (originIssueComment == null) {
             throw new CommonException("error.IssueCommentRule.issueComment");
+        }
+        if (self && !DetailsHelper.getUserDetails().getUserId().equals(originIssueComment.getUserId())) {
+            throw new CommonException("error.created.user.illegal");
         }
     }
 

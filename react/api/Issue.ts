@@ -93,6 +93,8 @@ interface IExportSearch {
     testResponsibleIds?: string[]
     mainResponsibleIds?: string[]
     environment?: string[]
+    creatorIds?: string
+    updatorIds?: string[]
   },
   searchArgs?: {
     estimatedStartTimeScopeStart?: string,
@@ -232,7 +234,7 @@ class IssueApi extends Api<IssueApi> {
       },
     }) : this.request({
       method: 'get',
-      url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
+      url: `${this.prefix}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
       params: {
         organizationId: this.orgId,
         instanceProjectId: this.projectId,

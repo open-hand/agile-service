@@ -261,17 +261,45 @@ class EditIssueStore {
 
   commentReplysMap = observable.map();
 
+  promptExtraNodeMap=observable.map();/** 各类提示信息的额外内容 */
+
   @observable linkedUI = [];
 
   @action setLinkedUI = (data) => {
     this.linkedUI = data;
   }
 
+  @observable outside = false;
+
+  @observable organizationId;
+
+  @observable projectId;
+
+  /**
+   * api初始化， 外部与内部调用的接口在此进行判断
+   * @param source
+   */
+  initApi(outside, organizationId, projectId) {
+    this.outside = outside;
+    if (this.outside) {
+      this.organizationId = organizationId;
+    }
+    this.projectId = projectId;
+  }
+
+  @action
+  destroy() {
+    this.outside = false;
+    this.projectId = undefined;
+    this.organizationId = undefined;
+  }
+
   getLinkedUI = () => {
     if (this.issue.issueId) {
-      uiApi.getLinkedUI(this.issue.issueId).then((res) => {
-        this.setLinkedUI(res || []);
-      });
+      uiApi.project(this.projectId).org(this.organizationId).outside(this.outside).getLinkedUI(this.issue.issueId)
+        .then((res) => {
+          this.setLinkedUI(res || []);
+        });
     }
   }
 

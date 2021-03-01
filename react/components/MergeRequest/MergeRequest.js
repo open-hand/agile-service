@@ -8,6 +8,7 @@ import {
 import TimeAgo from 'timeago-react';
 import { devOpsApi } from '@/api';
 import UserHead from '../UserHead';
+import './MergeRequest.less';
 
 const STATUS_SHOW = {
   opened: '开放',
@@ -55,7 +56,7 @@ class MergeRequest extends Component {
       {
         title: '名称',
         dataIndex: 'title',
-        width: 200,
+        width: 180,
         fixed: 'left',
         render: (title, record) => (
           <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
@@ -76,7 +77,7 @@ class MergeRequest extends Component {
       },
       {
         title: '编码',
-        dataIndex: 'viewId',
+        dataIndex: 'gitlabMergeRequestId',
         width: 100,
         render: (id, record) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
@@ -87,9 +88,7 @@ class MergeRequest extends Component {
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
                 }}
               >
-                #
-                {' '}
-                {id}
+                {`!${id}`}
               </p>
             </Tooltip>
           </div>
@@ -99,21 +98,25 @@ class MergeRequest extends Component {
       {
         title: '分支',
         dataIndex: 'sourceBranch',
-        width: 350,
+        width: 250,
         render: (sourceBranch, record) => (
           <div style={{
-            display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', justifyContent: 'space-around',
+            display: 'flex', alignItems: 'center', whiteSpace: 'nowrap',
           }}
           >
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Icon type="branch" />
-              {sourceBranch}
-            </div>
+            <Tooltip title={sourceBranch}>
+              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100 }}>
+                <Icon type="branch" />
+                {sourceBranch}
+              </div>
+            </Tooltip>
             <Icon type="trending_flat" />
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Icon type="branch" />
-              {record.sourceBranch}
-            </div>
+            <Tooltip title={record.targetBranch}>
+              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100 }}>
+                <Icon type="branch" />
+                {record.targetBranch}
+              </div>
+            </Tooltip>
           </div>
         ),
       },
@@ -139,8 +142,9 @@ class MergeRequest extends Component {
             <UserHead
               user={{
                 id: record.assigneeId,
-                realName: record.assigneeImageUrl,
-                avatar: record.imageUrl,
+                name: record.assigneeName,
+                realName: record.assigneeName,
+                avatar: record.assigneeImageUrl,
               }}
             />
           </div>
@@ -168,6 +172,7 @@ class MergeRequest extends Component {
     ];
     return (
       <Table
+        className="c7nagile-MergeRequest"
         pagination={false}
         filterBar={false}
         rowKey={(record) => record.id}

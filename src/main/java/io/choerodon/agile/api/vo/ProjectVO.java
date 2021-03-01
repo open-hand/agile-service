@@ -5,6 +5,7 @@ import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,6 +35,9 @@ public class ProjectVO {
     private Long createdBy;
 
     private String imageUrl;
+
+    @ApiModelProperty("创建时间")
+    private Date creationDate;
 
     public Long getId() {
         return id;
@@ -118,5 +122,13 @@ public class ProjectVO {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 }

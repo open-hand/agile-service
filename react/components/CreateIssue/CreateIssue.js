@@ -13,6 +13,7 @@ import {
   featureApi, epicApi, fieldApi, issueTypeApi,
   issueApi,
   pageConfigApi,
+  statusApi,
 } from '@/api';
 import {
   uploadAndReplaceImg, handleFileUpload, validateFile, normFile, text2Delta,
@@ -92,6 +93,7 @@ class CreateIssue extends Component {
       originIssueTypes: [],
       defaultTypeId: false,
       newIssueTypeCode: '',
+      newIssueTypeId: '',
       fields: [],
     };
     this.originDescription = true;
@@ -236,6 +238,7 @@ class CreateIssue extends Component {
       ['reporter', 'reporterId'],
       ['component', 'componentIssueRel'],
       ['summary', 'summary'],
+      ['influenceVersion', 'influenceVersion'],
       ['label', 'issueLabel'],
       ['fixVersion', 'fixVersionIssueRel'],
       ['sprint', 'sprintId'],
@@ -294,6 +297,7 @@ class CreateIssue extends Component {
             originIssueTypes: res,
             defaultTypeId: defaultType.id,
             loading: false,
+            newIssueTypeId: defaultType.id,
             newIssueTypeCode: defaultType.typeCode,
           }, () => {
             this.setDefaultSprint();
@@ -338,11 +342,13 @@ class CreateIssue extends Component {
       if (!err) {
         const {
           typeId,
+          reporterId,
           summary,
           description,
           storyPoints,
           estimatedTime,
           sprintId,
+          statusId,
           epicId,
           pi,
           epicName,
@@ -354,6 +360,7 @@ class CreateIssue extends Component {
           priorityId,
           issueLabel,
           fixVersionIssueRel,
+          influenceVersion,
           linkTypes,
           linkIssues,
           keys,
@@ -414,6 +421,7 @@ class CreateIssue extends Component {
           versionId,
           relationType: 'fix',
         }));
+        influenceVersion && fixVersionIssueRelVOList.push(...influenceVersion.map((item) => ({ versionId: item, relationType: 'influence' })));
         const issueLinkCreateVOList = this.getIssueLinks(keys, linkTypes, linkIssues);
 
         this.setState({ createLoading: true });
@@ -422,6 +430,7 @@ class CreateIssue extends Component {
           const text = await uploadAndReplaceImg(deltaOps);
           const extra = {
             description: text,
+            statusId,
             programId: getProjectId(),
             projectId: getProjectId(),
             issueTypeId: currentTypeId,
@@ -435,6 +444,7 @@ class CreateIssue extends Component {
             epicName,
             parentIssueId: subTaskParent || parentIssueId || 0, // 子任务
             relateIssueId: subBugParent || relateIssueId || 0, // 子bug
+            reporterId,
             assigneeId: assigneedId,
             labelIssueRelVOList,
             versionIssueRelVOList: fixVersionIssueRelVOList,
@@ -492,13 +502,16 @@ class CreateIssue extends Component {
   };
 
   getIssueTypes = (isInProgram) => {
-    const { mode } = this.props;
+    const { mode, enabledTypeCodes } = this.props;
     const { originIssueTypes } = this.state;
     // const filterSubType = (type) => (!['sub_task'].includes(type.typeCode));
     const filterEpic = (type) => (!['issue_epic'].includes(type.typeCode));
     const filterFeature = (type) => (!['feature'].includes(type.typeCode));
     if (mode === 'sub_task') {
       return originIssueTypes.filter((type) => type.typeCode === 'sub_task');
+    }
+    if (enabledTypeCodes && enabledTypeCodes.length > 0) {
+      return originIssueTypes.filter((type) => enabledTypeCodes.includes(type.typeCode));
     }
     const issueTypes = applyFilter(originIssueTypes, [
       // filterSubType,
@@ -536,7 +549,7 @@ class CreateIssue extends Component {
 
   getFieldComponent = (field) => {
     const {
-      form, mode, hiddenIssueType, teamProjectIds,
+      form, mode, hiddenIssueType, teamProjectIds, applyType,
     } = this.props;
     const { getFieldDecorator } = form;
     const {
@@ -544,14 +557,14 @@ class CreateIssue extends Component {
     } = field;
     const {
       originIssueTypes,
-      newIssueTypeCode, defaultTypeId,
+      newIssueTypeCode, defaultTypeId, newIssueTypeId,
     } = this.state;
 
     switch (field.fieldCode) {
       case 'issueType':
         return (
           [
-            ['sub_bug', 'feature'].includes(mode) || hiddenIssueType
+            ['feature'].includes(mode) || hiddenIssueType
               ? getFieldDecorator('typeId', {
                 rules: [{ required: true, message: '问题类型为必输项' }], // 不需要展示，但是要有值
                 initialValue: defaultTypeId || '',
@@ -579,10 +592,11 @@ class CreateIssue extends Component {
                             fieldApi.getFields(param).then((res) => {
                               const { fields } = this.state;
                               form.resetFields(['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
-                                'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel',
+                                'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel', 'statusId',
                                 ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary', 'description'].some((i) => i === code))]);
                               this.setState({
                                 fields: res,
+                                newIssueTypeId: id,
                                 newIssueTypeCode: typeCode,
                               });
                               this.loadDefaultTemplate(id);
@@ -613,6 +627,9 @@ class CreateIssue extends Component {
                     label="关联父级任务"
                     type="subTask_parent_issue"
                     allowClear
+                    requestArgs={{
+                      projectId: getProjectId(),
+                    }}
                     onChange={((value) => {
                       this.autoSetSprint(value);
                     })}
@@ -799,6 +816,29 @@ class CreateIssue extends Component {
             )}
           </FormItem>
         );
+      case 'influenceVersion':
+        return (
+          <FormItem label="影响的版本">
+            {getFieldDecorator('influenceVersion', {
+              rules: [{ transform: (value) => (value ? value.toString() : value) },
+                { required: field.required, message: '请选择修复的版本' }],
+            })(
+              <SelectFocusLoad
+                label="影响的版本"
+                mode="multiple"
+                loadWhenMount
+                type="version"
+                afterLoad={() => {
+                  if (this.props.chosenVersion) {
+                    form.setFieldsValue({
+                      influenceVersion: [this.props.chosenVersion],
+                    });
+                  }
+                }}
+              />,
+            )}
+          </FormItem>
+        );
       case 'fixVersion':
         return (
           <FormItem label="修复的版本">
@@ -841,9 +881,11 @@ class CreateIssue extends Component {
                             type="epic"
                             loadWhenMount
                             afterLoad={() => {
+                              const currentEpicId = form.getFieldValue('epicId');
                               form.setFieldsValue({
+
                                 // eslint-disable-next-line react/destructuring-assignment
-                                epicId: this.props.epicId,
+                                epicId: currentEpicId || this.props.epicId,
                               });
                             }}
                           />,
@@ -860,10 +902,10 @@ class CreateIssue extends Component {
                           allowClear
                           type="feature"
                           loadWhenMount
-                          selectedFeature={{
+                          selectedFeature={this.props.chosenFeature ? {
                             issueId: this.props.chosenFeature,
                             summary: this.props.chosenFeatureName,
-                          }}
+                          } : []}
                           afterLoad={() => {
                             form.setFieldsValue({
                               featureId: this.props.chosenFeature,
@@ -882,7 +924,7 @@ class CreateIssue extends Component {
       case 'component':
         return (
           ['sub_task'].includes(newIssueTypeCode) ? null : (
-            <FormItem label="模块" className="c7nagile-line">
+            <FormItem label="模块">
               {getFieldDecorator('componentIssueRel', {
                 rules: [{ transform: (value) => (value ? value.toString() : value) },
                   { required: field.required, message: '请选择模块' },
@@ -1047,7 +1089,7 @@ class CreateIssue extends Component {
                         key={pi.id}
                         value={pi.id}
                       >
-                        {`${pi.code}-${pi.name}`}
+                        {pi.fullName || `${pi.code}-${pi.name}`}
                       </Option>
                     ))}
                   </SelectFocusLoad>,
@@ -1060,6 +1102,7 @@ class CreateIssue extends Component {
       case 'estimatedStartTime':
         return (
           <FieldStartTime
+            style={{ display: 'block', width: 330 }}
             form={form}
             field={field || {}}
           />
@@ -1067,6 +1110,7 @@ class CreateIssue extends Component {
       case 'estimatedEndTime':
         return (
           <FieldEndTime
+            style={{ display: 'block', width: 330 }}
             form={form}
             field={field || {}}
           />
@@ -1115,7 +1159,31 @@ class CreateIssue extends Component {
           </FormItem>
 
         );
-
+      case 'status':
+        return (
+          <FormItem label={field.fieldName} key={`${newIssueTypeCode}-${field.id}`}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {getFieldDecorator(`${field.fieldCode}Id`, {
+                rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
+              })(
+                <SelectFocusLoad
+                  request={() => statusApi.loadAllForIssueType(newIssueTypeId, applyType)}
+                  label={field.fieldName}
+                  type="issue_status"
+                  loadWhenMount
+                  afterLoad={(statusList) => {
+                    const defaultStatus = find(statusList, { defaultStatus: true });
+                    if (defaultStatus && !form.getFieldValue(`${field.fieldCode}Id`)) {
+                      form.setFieldsValue({
+                        [`${field.fieldCode}Id`]: defaultStatus.id,
+                      });
+                    }
+                  }}
+                />,
+              )}
+            </div>
+          </FormItem>
+        );
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>
@@ -1222,7 +1290,7 @@ class CreateIssue extends Component {
       >
         <Content>
           <Spin spinning={loading}>
-            <Form layout="vertical" style={{ width: 670 }} className="c7nagile-form">
+            <Form layout="vertical" className="c7nagile-form">
               <div className="c7nagile-createIssue-fields" key={newIssueTypeCode}>
                 {['sub_task', 'sub_bug'].includes(mode) && (
                   <FormItem>

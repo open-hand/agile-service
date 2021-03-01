@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
+import { stores, Permission } from '@choerodon/boot';
 import './Comment.less';
 import { IComment } from '@/common/types';
 import { issueCommentApi, UComment } from '@/api/IssueComment';
@@ -8,16 +9,19 @@ import EditIssueContext from '../../../../stores';
 
 interface Props {
   projectId?: string
-  hasPermission: boolean
   comment: IComment
   onDelete?: Function
   reload: Function
+  readonly: boolean
 }
+
+const { AppState } = stores;
 
 const Comment: React.FC<Props> = (props) => {
   const { store } = useContext(EditIssueContext);
   const { commentExpandMap, commentReplysMap } = store;
-  const { comment, reload } = props;
+  const { comment, reload, readonly } = props;
+  const loginUserId = AppState.userInfo.id;
 
   const handleFold = useCallback(() => {
     commentExpandMap.set(comment.commentId, false);
@@ -41,49 +45,61 @@ const Comment: React.FC<Props> = (props) => {
     <div
       className="c7n-comment"
     >
-      <div className="c7n-comment-self">
-        <CommentItem
-          isReply={false}
-          {...props}
-          onReply={onReply}
-          onDelete={onReply}
-          onUpdate={onReply}
-          parentId={comment.commentId}
-        />
+      <Permission
+        service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+      >
         {
-          commentExpandMap.get(comment.commentId) && (
-            <div className="c7n-comment-replys">
-              {
-                (commentReplysMap.get(comment.commentId) || []).map((item: IComment) => (
-                  <CommentItem
-                    isReply
-                    {...props}
-                    onReply={onReply}
-                    onDelete={onReply}
-                    onUpdate={onReply}
-                    reload={reload}
-                    comment={item}
-                    parentId={comment.commentId}
-                  />
-                ))
-              }
-            </div>
-          )
-        }
-        {
-          comment.replySize > 0 && (
-          <div className="c7n-comment-expand">
-            {
-              commentExpandMap.get(comment.commentId) ? <span role="none" onClick={handleFold}>收起评论</span> : (
-                <span role="none" onClick={() => { getReplys(); }}>
-                  {`打开评论(${comment.replySize})`}
-                </span>
-              )
-            }
-          </div>
-          )
-        }
-      </div>
+            (hasPermission: boolean) => (
+              <div className="c7n-comment-self">
+                <CommentItem
+                  isReply={false}
+                  {...props}
+                  onReply={onReply}
+                  onDelete={onReply}
+                  onUpdate={onReply}
+                  parentId={comment.commentId}
+                  hasPermission={hasPermission || String(comment.userId) === String(loginUserId)}
+                  readonly={readonly}
+                />
+                {
+                  commentExpandMap.get(comment.commentId) && (
+                    <div className="c7n-comment-replys">
+                      {
+                        (commentReplysMap.get(comment.commentId) || []).map((item: IComment) => (
+                          <CommentItem
+                            isReply
+                            {...props}
+                            onReply={onReply}
+                            onDelete={onReply}
+                            onUpdate={onReply}
+                            reload={reload}
+                            comment={item}
+                            parentId={comment.commentId}
+                            hasPermission={hasPermission || String(item.userId) === String(loginUserId)}
+                            readonly={readonly}
+                          />
+                        ))
+                      }
+                    </div>
+                  )
+                }
+                {
+                  comment.replySize > 0 && (
+                  <div className="c7n-comment-expand">
+                    {
+                      commentExpandMap.get(comment.commentId) ? <span role="none" onClick={handleFold}>收起评论</span> : (
+                        <span role="none" onClick={() => { getReplys(); }}>
+                          {`打开评论(${comment.replySize})`}
+                        </span>
+                      )
+                    }
+                  </div>
+                  )
+                }
+              </div>
+            )
+          }
+      </Permission>
     </div>
   );
 };

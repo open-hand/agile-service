@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Select, CheckBox } from 'choerodon-ui/pro';
 import { find } from 'lodash';
 import { IQuickSearchValue } from '@/components/quick-search';
@@ -8,7 +8,6 @@ import { transformFilter } from '@/routes/Issue/stores/utils';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { ISearchVO, ISprint } from '@/common/types';
-import { flattenObject } from '@/components/issue-search/utils';
 import { IBurndownChartType } from '.';
 
 const { Option } = Select;
@@ -51,14 +50,15 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
   setSearchVO,
   onEmpty,
 }) => {
+  const sprintsRef = useRef<ISprint[]>([]);
   const issueSearchStore = useMemo(() => new IssueSearchStore({
+    projectId,
     transformFilter,
     defaultSearchVO: searchVO,
     // @ts-ignore
     getSystemFields: () => getSystemFields().filter((f) => !['contents', 'sprint', 'quickFilterIds'].includes(f.code)),
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }), []);
-
   return (
     <div>
       <SelectSprint
@@ -68,19 +68,34 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
         projectId={projectId}
         statusList={['started', 'closed']}
         currentSprintOption
+        // onOption={({ record }) => ({
+        //   disabled: record.get('sprintId') === '0' && !currentSprintId,
+        // })}
         afterLoad={(sprints) => {
+          sprintsRef.current = sprints;
+          const current = find(sprints, { statusCode: 'started' });
+          if (current) {
+            setCurrentSprintId(current.sprintId);
+          }
           if (useCurrentSprint && !currentSprintId) {
-            const current = find(sprints, { statusCode: 'started' });
             if (current) {
               setSprintId(current.sprintId);
-              setCurrentSprintId(current.sprintId);
+              setEndDate(current.endDate);
             } else {
               setSprintId(undefined);
-              setCurrentSprintId(undefined);
+              setEndDate('');
               onEmpty();
             }
-          } else if (!sprintId && sprints.length > 0) {
-            setSprintId(sprints[0].sprintId);
+          } else if (sprints.length > 0) {
+            if (!sprintId) {
+              setSprintId(sprints[0].sprintId);
+              setEndDate(sprints[0].endDate);
+            } else {
+              const target = find(sprints, { sprintId });
+              if (target) {
+                setEndDate(target.endDate);
+              }
+            }
           }
         }}
         value={useCurrentSprint ? 'current' : sprintId}
@@ -88,6 +103,10 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
         onChange={(sprint: ISprint | null) => {
           if (sprint && sprint.sprintId === 'current') {
             setSprintId(currentSprintId);
+            const target = find(sprintsRef.current, { sprintId });
+            if (target) {
+              setEndDate(target.endDate);
+            }
             setUseCurrentSprint(true);
             return;
           }
@@ -122,6 +141,8 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
         显示非工作日
       </CheckBox>
       <IssueSearch
+        projectId={projectId}
+        applyType="agile"
         store={issueSearchStore}
         onClear={() => {
           const newSearchVO = issueSearchStore.getCustomFieldFilters();

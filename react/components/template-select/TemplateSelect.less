@@ -1,0 +1,49 @@
+.template_select {
+  margin-top: 13px;
+  .dropDown_trigger {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    height: 36px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    &:hover {
+      border: 1px solid #000;
+    }
+    &:focus {
+      outline: 0;
+      border: 2px solid #3f51b5;
+      .trigger_label {
+        color: #3f51b5;
+      }
+    }
+    &:focus-within {
+      .iconPicker {
+        transform:rotate(180deg);
+        -ms-transform:rotate(180deg); 	/* IE 9 */
+        -moz-transform:rotate(180deg); 	/* Firefox */
+        -webkit-transform:rotate(180deg); /* Safari 和 Chrome */
+        -o-transform:rotate(180deg); 	/* Opera */
+        transition:transform 0.3s, -webkit-transform 0.3s;
+        top: 8px;
+      }
+    }
+    .trigger_label {
+      position: absolute;
+      color: rgba(0, 0, 0, 0.6);
+      pointer-events: none;
+      top: 0;
+      padding: 0 4px;
+      background: #FFF;
+    }
+    .selected {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: #000;
+    }
+  }
+  
+}

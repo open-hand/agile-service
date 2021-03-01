@@ -77,7 +77,7 @@ export default function renderField(field) {
       <TimePicker
         label={fieldName}
         placeholder={fieldName}
-        style={{ display: 'block', width: 330 }}
+        style={{ display: 'block', width: '100%' }}
         defaultOpenValue={moment('00:00:00', 'HH:mm:ss')}
         allowEmpty={!required}
       />
@@ -89,7 +89,7 @@ export default function renderField(field) {
         label={fieldName}
         placeholder={fieldName}
         format="YYYY-MM-DD HH:mm:ss"
-        style={{ display: 'block', width: 330 }}
+        style={{ display: 'block' }}
         allowClear={!required}
       />
     );
@@ -99,7 +99,7 @@ export default function renderField(field) {
         label={fieldName}
         placeholder={fieldName}
         format="YYYY-MM-DD"
-        style={{ display: 'block', width: 330 }}
+        style={{ display: 'block' }}
         allowClear={!required}
       />
     );
@@ -168,6 +168,7 @@ export default function renderField(field) {
         allowClear
         mode={field.fieldType === 'multiMember' ? 'multiple' : undefined}
         extraOption={field.fieldType === 'multiMember' ? field.defaultValueObjs : field.defaultValueObj}
+        className="multiMemberSelect"
       />
     );
   }

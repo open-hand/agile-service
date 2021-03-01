@@ -42,7 +42,7 @@ const fieldsMap = new Map([
       },
     },
     update: {
-      transform: ({ oldString, newString }: {oldString?: string, newString?: string}) => {
+      transform: ({ oldString, newString }: { oldString?: string, newString?: string }) => {
         if (oldString) {
           return Number(oldString);
         } if (newString) {
@@ -85,7 +85,7 @@ const fieldsMap = new Map([
       },
     },
     update: {
-      transform: ({ oldString, newString }: {oldString?: string, newString?: string}) => {
+      transform: ({ oldString, newString }: { oldString?: string, newString?: string }) => {
         if (oldString) {
           return Number(oldString);
         } if (newString) {
@@ -117,11 +117,11 @@ const fieldsMap = new Map([
     name: '附件',
     create: {
       operation: '上传',
-      transform: ({ newString }: { newString: string}) => newString.split('@')[1],
+      transform: ({ newString }: { newString: string }) => newString.split('@')[1],
     },
     delete: {
       operation: '删除',
-      transform: ({ oldString }: {oldString: string }) => oldString.split('@')[1],
+      transform: ({ oldString }: { oldString: string }) => oldString.split('@')[1],
     },
   }],
   ['Comment', {
@@ -158,15 +158,15 @@ const fieldsMap = new Map([
   ['labels', {
     name: '标签',
     create: {
-      condition: ({ newString, oldString }: {newString: string, oldString: string}) => difference(newString && newString.trim().split(' '), oldString && oldString.trim().split(' ')).length > 0,
-      transform: ({ newString, oldString }: {newString: string, oldString: string}) => difference(newString && newString.trim().split(' '), oldString && oldString.trim().split(' ')).join(','),
+      condition: ({ newString, oldString }: { newString: string, oldString: string }) => difference(newString && newString.trim().split(' '), oldString && oldString.trim().split(' ')).length > 0,
+      transform: ({ newString, oldString }: { newString: string, oldString: string }) => difference(newString && newString.trim().split(' '), oldString && oldString.trim().split(' ')).join(','),
     },
     update: {
       dontJudge: true,
     },
     delete: {
-      condition: ({ newString, oldString }: {newString: string, oldString: string}) => difference(oldString && oldString.trim().split(' '), newString && newString.trim().split(' ')).length > 0,
-      transform: ({ newString, oldString }: {newString: string, oldString: string}) => difference(oldString && oldString.trim().split(' '), newString && newString.trim().split(' ')).join(','),
+      condition: ({ newString, oldString }: { newString: string, oldString: string }) => difference(oldString && oldString.trim().split(' '), newString && newString.trim().split(' ')).length > 0,
+      transform: ({ newString, oldString }: { newString: string, oldString: string }) => difference(oldString && oldString.trim().split(' '), newString && newString.trim().split(' ')).join(','),
     },
   }],
   ['Epic Link', {
@@ -193,14 +193,14 @@ const fieldsMap = new Map([
         return (
           <>
             {
-            ruleName && (
-              <span>
-                触发
-                <span className="c7n-Log-field">{`【${ruleName}】`}</span>
-                触发器，
-              </span>
-            )
-          }
+              ruleName && (
+                <span>
+                  触发
+                  <span className="c7n-Log-field">{`【${ruleName}】`}</span>
+                  触发器，
+                </span>
+              )
+            }
             <span>
               更新
               <span className="c7n-Log-field">【经办人】</span>
@@ -217,14 +217,14 @@ const fieldsMap = new Map([
         return (
           <>
             {
-            ruleName && (
-              <span>
-                触发
-                <span className="c7n-Log-field">{`【${ruleName}】`}</span>
-                触发器，
-              </span>
-            )
-          }
+              ruleName && (
+                <span>
+                  触发
+                  <span className="c7n-Log-field">{`【${ruleName}】`}</span>
+                  触发器，
+                </span>
+              )
+            }
             <span>将</span>
             <span className="c7n-Log-field">【经办人】</span>
             <span>由</span>
@@ -379,15 +379,15 @@ const fieldsMap = new Map([
     'Backlog Link', {
       name: '需求',
       create: {
-        condition: ({ newString, oldString }: {newString: string, oldString: string}) => difference(newString && newString.split(','), oldString && oldString.split(',')).length > 0,
-        transform: ({ newString, oldString }: {newString: string, oldString: string}) => difference(newString && newString.split(','), oldString && oldString.split(',')).join(','),
+        condition: ({ newString, oldString }: { newString: string, oldString: string }) => difference(newString && newString.split(','), oldString && oldString.split(',')).length > 0,
+        transform: ({ newString, oldString }: { newString: string, oldString: string }) => difference(newString && newString.split(','), oldString && oldString.split(',')).join(','),
       },
       update: {
         dontJudge: true,
       },
       delete: {
-        condition: ({ newString, oldString }: {newString: string, oldString: string}) => difference(oldString && oldString.split(','), newString && newString.split(',')).length > 0,
-        transform: ({ newString, oldString }: {newString: string, oldString: string}) => difference(oldString && oldString.split(','), newString && newString.split(',')).join(','),
+        condition: ({ newString, oldString }: { newString: string, oldString: string }) => difference(oldString && oldString.split(','), newString && newString.split(',')).length > 0,
+        transform: ({ newString, oldString }: { newString: string, oldString: string }) => difference(oldString && oldString.split(','), newString && newString.split(',')).join(','),
       },
     },
   ],
@@ -418,18 +418,35 @@ const fieldsMap = new Map([
     'SubTeam', {
       name: '负责的子团队',
       create: {
-        condition: ({ newString, oldString }: {newString: string, oldString: string}) => difference(newString && newString.split(','), oldString && oldString.split(',')).length > 0,
-        transform: ({ newString, oldString }: {newString: string, oldString: string}) => difference(newString && newString.split(','), oldString && oldString.split(',')).join(','),
+        condition: ({ newString, oldString }: { newString: string, oldString: string }) => difference(newString && newString.split(','), oldString && oldString.split(',')).length > 0,
+        transform: ({ newString, oldString }: { newString: string, oldString: string }) => difference(newString && newString.split(','), oldString && oldString.split(',')).join(','),
       },
       update: {
-        condition: ({ newString, oldString }: {newString: string, oldString: string}) => difference(newString && newString.split(','), oldString && oldString.split(',')).length === 0,
+        condition: ({ newString, oldString }: { newString: string, oldString: string }) => difference(newString && newString.split(','), oldString && oldString.split(',')).length === 0,
       },
       delete: {
-        condition: ({ newString, oldString }: {newString: string, oldString: string}) => difference(oldString && oldString.split(','), newString && newString.split(',')).length > 0,
-        transform: ({ newString, oldString }: {newString: string, oldString: string}) => difference(oldString && oldString.split(','), newString && newString.split(',')).join(','),
+        condition: ({ newString, oldString }: { newString: string, oldString: string }) => difference(oldString && oldString.split(','), newString && newString.split(',')).length > 0,
+        transform: ({ newString, oldString }: { newString: string, oldString: string }) => difference(oldString && oldString.split(','), newString && newString.split(',')).join(','),
       },
     },
   ],
+  ['createInitType', {
+    name: '创建问题',
+    create: {
+      render: (log: ILog) => (
+        <span>
+          创建
+          <span className="c7n-Log-value">{`【${log.newString}】`}</span>
+        </span>
+      ),
+    },
+    update: {
+      dontJudge: true,
+    },
+    delete: {
+      dontJudge: true,
+    },
+  }],
   [
     'issue_epic', {
       name: '史诗',
@@ -710,22 +727,22 @@ const fieldsMap = new Map([
     name: 'UI&UX文件',
     create: {
       operation: '上传',
-      transform: ({ newString }: { newString: string}) => newString.split('@')[1],
+      transform: ({ newString }: { newString: string }) => newString.split('@')[1],
     },
     delete: {
       operation: '删除',
-      transform: ({ oldString }: {oldString: string }) => oldString.split('@')[1],
+      transform: ({ oldString }: { oldString: string }) => oldString.split('@')[1],
     },
   }],
   ['Static File Rel', {
     name: 'UI&UX文件',
     create: {
       operation: '关联',
-      transform: ({ newString }: { newString: string}) => newString.split('@')[1],
+      transform: ({ newString }: { newString: string }) => newString.split('@')[1],
     },
     delete: {
       operation: '移除',
-      transform: ({ oldString }: {oldString: string }) => oldString.split('@')[1],
+      transform: ({ oldString }: { oldString: string }) => oldString.split('@')[1],
     },
   }],
 ]);

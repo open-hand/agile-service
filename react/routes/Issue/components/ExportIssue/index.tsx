@@ -2,14 +2,16 @@ import React from 'react';
 import { DataSet, Table } from 'choerodon-ui/pro/lib';
 import { openExportIssueModal as originOpenExportIssueModal } from '@/components/issue-export';
 import IssueExportStore from '@/components/issue-export/stores/store';
-import { issueApi } from '@/api';
+import { issueApi, TemplateAction } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { omit, set } from 'lodash';
-import { getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields } from './utils';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { find, set, uniq } from 'lodash';
+import {
+  getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields, getReverseExportFieldCodes,
+} from './utils';
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
-  tableDataSet: DataSet, tableRef: React.RefObject<Table>, tableListMode: boolean) {
+  tableDataSet: DataSet, tableRef: React.RefObject<Table>, tableListMode: boolean, action?: TemplateAction) {
   const store = new IssueExportStore({
     defaultInitFieldAction: (data, self) => {
       if (data.code === 'sprint') {
@@ -34,10 +36,11 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     },
     dataSetSystemFields: getFilterFormSystemFields(),
     transformSystemFilter: getTransformSystemFilter,
-    transformExportFieldCodes: (data, { dataSet }) => {
-      data.push(...(dataSet.current?.get('required-option') || []));
-      return getExportFieldCodes(data);
+    transformExportFieldCodes: (data, { dataSet }): string[] => {
+      data.push(...(dataSet?.current?.get('required-option') || []));
+      return getExportFieldCodes(uniq(data));
     },
+    reverseTransformExportFieldCodes: getReverseExportFieldCodes,
     events: {
       exportAxios: (searchData, sort) => {
         set(searchData, 'searchArgs.tree', tableListMode);
@@ -46,12 +49,19 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
       loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file'),
     },
     checkboxOptionsExtraConfig: new Map(['issueTypeId', 'issueNum', 'issueId'].map((item) => [item, { checkBoxProps: { disabled: true, defaultChecked: true, name: 'required-option' } }])),
-    defaultInitOptions: ({ dataSet }) => {
+    defaultInitOptions: ({ options, dataSet }) => {
       dataSet.addField('required-option', { multiple: true });
       dataSet.current?.set('required-option', ['issueTypeId', 'issueNum', 'issueId']);
+      if (!find(options, { value: 'description' })) {
+        options.splice(3, 0, {
+          label: '描述',
+          value: 'description',
+        });
+      }
+      return !IsInProgramStore.isInProgram ? options.filter((item) => item.value !== 'feature') : options;
     },
   });
 
-  originOpenExportIssueModal(fields, chosenFields, tableDataSet, tableRef, store);
+  originOpenExportIssueModal(fields, chosenFields, tableDataSet, tableRef, store, action);
 }
 export { openExportIssueModal };

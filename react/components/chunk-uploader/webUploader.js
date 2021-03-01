@@ -31,6 +31,7 @@ class WebUploader {
     $.ajaxSetup({
       beforeSend: (xhr) => {
         xhr.setRequestHeader('Authorization', this.Authorization);
+        xhr.setRequestHeader('H-Tenant-Id', organizationId);
       },
     });
 

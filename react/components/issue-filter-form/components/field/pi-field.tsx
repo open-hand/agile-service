@@ -22,7 +22,7 @@ const PIField: React.FC<Props> = forwardRef(({
     request: () => piApi.getPiListByStatus(),
     optionRenderer: (pi) => (
       <FragmentForSearch name={`${pi.code}-${pi.name}`}>
-        {pi.code === 'none' ? pi.name : `${pi.code}-${pi.name}`}
+        {pi.code === 'none' ? pi.name : pi.fullName || `${pi.code}-${pi.name}`}
       </FragmentForSearch>
     ),
     middleWare: (piList) => {
@@ -40,7 +40,7 @@ const PIField: React.FC<Props> = forwardRef(({
         actualStartDate: null,
         actualEndDate: null,
       }, ...piList];
-      return newPiList;
+      return newPiList as any;
     },
     paging: false,
   }), []);

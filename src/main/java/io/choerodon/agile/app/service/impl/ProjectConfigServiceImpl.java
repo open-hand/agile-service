@@ -168,7 +168,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (stateMachineSchemeConfigs != null && !stateMachineSchemeConfigs.isEmpty()) {
             Map<String, StateMachineSchemeVO> stateMachineSchemeMap = new HashMap<>(stateMachineSchemeConfigs.size());
             for (ProjectConfigDTO projectConfig : stateMachineSchemeConfigs) {
-                StateMachineSchemeVO stateMachineSchemeVO = stateMachineSchemeService.querySchemeWithConfigById(false, organizationId, projectConfig.getSchemeId());
+                StateMachineSchemeVO stateMachineSchemeVO = stateMachineSchemeService.querySchemeWithConfigById(false, organizationId, projectConfig.getSchemeId(), projectId);
                 stateMachineSchemeMap.put(projectConfig.getApplyType(), stateMachineSchemeVO);
             }
             projectConfigDetailVO.setStateMachineSchemeMap(stateMachineSchemeMap);
@@ -240,7 +240,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         //获取状态机
         Long stateMachineId = stateMachineSchemeConfigService.queryStateMachineIdBySchemeIdAndIssueTypeId(false, organizationId, stateMachineSchemeId, issueTypeId);
-        return statusService.queryByStateMachineIds(organizationId, Collections.singletonList(stateMachineId));
+        List<StatusAndTransformVO> statuses = statusService.queryStatusByStateMachineId(organizationId, stateMachineId);
+        return modelMapper.map(statuses, new TypeToken<List<StatusVO>>() {}.getType());
     }
 
     @Override
@@ -635,7 +636,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public List<IssueTypeVO> checkExistStatusIssueType(Long projectId, Long organizationId, Long statusId) {
-        String applyType = Objects.equals(ConvertUtil.queryProject(projectId).getCategory(), ProjectCategory.PROGRAM) ? "program" : "agile";
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+        String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
         if (stateMachineSchemeId == null) {
             throw new CommonException(ERROR_STATEMACHINESCHEMEID_NULL);
@@ -667,11 +669,16 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             throw new CommonException("error.status.status_issue_used");
         }
         // 校验当前node的状态是否与其他状态有联动
-        IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
-        List<StatusLinkageDTO> linkExistList = statusLinkageMapper.selectByCondition(Condition.builder(StatusLinkageDTO.class)
-                .andWhere(Sqls.custom().andEqualTo("projectId", projectId))
-                .andWhere(Sqls.custom().andEqualTo("statusId", currentStatusId).andEqualTo("issueTypeId", issueTypeId))
-                .orWhere(Sqls.custom().andEqualTo("parentIssueStatusSetting", currentStatusId).andEqualTo("parentIssueTypeCode", issueTypeDTO.getTypeCode())).build());
+        IssueTypeDTO issueTypeDTO = issueTypeMapper.selectWithAlias(issueTypeId, projectId);
+        List<StatusLinkageDTO> linkExistList =
+                statusLinkageMapper.selectByCondition(
+                        Condition.builder(StatusLinkageDTO.class)
+                                .andWhere(Sqls.custom().andEqualTo("projectId", projectId))
+                                .andWhere(Sqls.custom().andEqualTo("statusId", currentStatusId)
+                                        .andEqualTo("issueTypeId", issueTypeId))
+                                .orWhere(Sqls.custom().andEqualTo("parentIssueStatusSetting", currentStatusId)
+                                        .andEqualTo("parentIssueTypeId", issueTypeDTO.getId()))
+                                .build());
         if (CollectionUtils.isNotEmpty(linkExistList)){
             throw new CommonException("error.status.status_link_exist");
         }

@@ -285,7 +285,7 @@ export default {
       loadWhenMount: true,
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
     },
-    request: ({ filter, page }) => issueApi.loadParentIssues(page, 20, 'sub_task', filter), // 故事、任务、缺陷（不能是子缺陷）
+    request: ({ filter, page }, requestArgs) => issueApi.project(requestArgs.projectId).loadParentIssues(page, 20, 'sub_task', filter), // 故事、任务、缺陷（不能是子缺陷）
     render: (issue) => (
       <Option
         key={issue.issueId}
@@ -329,7 +329,7 @@ export default {
       loadWhenMount: true,
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
     },
-    request: ({ filter, page }) => issueApi.loadParentIssues(page, 20, 'bug', filter), // 故事、任务
+    request: ({ filter, page }, requestArgs) => issueApi.project(requestArgs.projectId).loadParentIssues(page, 20, 'bug', filter), // 故事、任务
     render: (issue) => (
       <Option
         key={issue.issueId}
@@ -528,7 +528,7 @@ export default {
     request: () => piApi.getUnfinished(),
     render: (pi, disabledCurrentPI) => (
       <Option disabled={disabledCurrentPI && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
-        {`${pi.code}-${pi.name}`}
+        {pi.fullName || `${pi.code}-${pi.name}`}
       </Option>
     ),
   },

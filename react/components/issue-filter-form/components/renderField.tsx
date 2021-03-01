@@ -241,6 +241,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           } : undefined}
           style={{ width: '100%' }}
           name={code}
+          extraOptions={code === 'assigneeId' ? [{ id: '0', realName: '未分配' }] : undefined}
           {...otherComponentProps}
         />
       );

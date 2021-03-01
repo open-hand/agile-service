@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './ResizeAble.less';
@@ -92,8 +93,7 @@ class ResizeAble extends Component {
     };
   }
 
-
-  saveRef = name => (ref) => {
+  saveRef = (name) => (ref) => {
     this[name] = ref;
   }
 
@@ -224,6 +224,10 @@ class ResizeAble extends Component {
     }
   }
 
+  setWidth(width) {
+    this.resizable.style.width = `${width}px`;
+  }
+
   render() {
     const { modes, children, defaultSize } = this.props;
     const { resizing, mode } = this.state;
@@ -248,8 +252,8 @@ class ResizeAble extends Component {
         )}
         {children}
         {
-          modes.map(position => (
-            <div role="none" key={position} className={`resizable-${position}`} style={{ position: 'absolute', ...MODES[position] }} onMouseDown={this.handleMouseDown.bind(this, position)}>
+          modes.map((position) => (
+            <div role="none" key={position} className={`resizable-${position}`} style={{ position: 'absolute', zIndex: 10, ...MODES[position] }} onMouseDown={this.handleMouseDown.bind(this, position)}>
               <div className={`resizable-line-${position} ${resizing && position === mode ? 'active' : ''}`} />
             </div>
           ))

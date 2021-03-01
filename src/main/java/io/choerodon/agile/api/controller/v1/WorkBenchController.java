@@ -39,4 +39,14 @@ public class WorkBenchController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLabel.queryIssueLabelList"));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
+    @ApiOperation("查询工作台我的报告")
+    @PostMapping("/personal/my_reported")
+    public ResponseEntity<Page<IssueListFieldKVVO>> pagedQueryMyReported(@ApiParam(value = "组织id", required = true)
+                                                                         @PathVariable(name = "organization_id") Long organizationId,
+                                                                         @RequestParam(required = false) Long projectId,
+                                                                         PageRequest pageRequest) {
+        return ResponseEntity.ok(issueService.pagedQueryMyReported(organizationId, projectId, pageRequest));
+    }
 }

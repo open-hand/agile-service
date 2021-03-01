@@ -76,6 +76,19 @@ public class ChartUnitVO extends ReportUnitVO {
     public static final String SUB_PROJECT_WORKLOAD_CHART = "sub_project_workload_chart";
 
     /**
+     * 代码质量图
+     */
+    public static final String CODE_QUALITY = "code_quality";
+    /**
+     * 代码质量变化图
+     */
+    public static final String CODE_QUALITY_VARY = "code_quality_vary";
+    /**
+     * 服务代码质量图
+     */
+    public static final String SERVICE_CODE_QUALITY = "service_code_quality";
+
+    /**
      * 各图表必输校验
      */
     public void validateAndconvert(){
@@ -87,7 +100,9 @@ public class ChartUnitVO extends ReportUnitVO {
 
         switch (this.chartCode){
             case BURN_DOWN_REPORT:
-                Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
+                if (!Boolean.TRUE.equals(chartSearchVO.getCurrentSprint())) {
+                    Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
+                }
                 Assert.notNull(chartSearchVO.getType(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
             case CUMULATIVE_FLOW_DIAGRAM:
@@ -134,7 +149,16 @@ public class ChartUnitVO extends ReportUnitVO {
             case ISSUE_CHART:
             case SPRINT_STATISTICS_CHART:
             case ISSUE_COUNT_CHART:
-                Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
+                if (!Boolean.TRUE.equals(chartSearchVO.getCurrentSprint())) {
+                    Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
+                }
+                break;
+            case CODE_QUALITY_VARY:
+                Assert.notNull(chartSearchVO.getDays(), BaseConstants.ErrorCode.DATA_INVALID);
+                break;
+            case SERVICE_CODE_QUALITY:
+                Assert.notNull(chartSearchVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
+                Assert.notNull(chartSearchVO.getServiceId(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
             default:
                 break;

@@ -22,7 +22,7 @@ interface IDownLoadInfo {
   lastUpdateDate: string | null,
 }
 
-interface Props {
+interface IssueExportStoreProps {
   dataSetSystemFields?: FieldProps[], /** dataSet 数据管理 系统字段配置 */
   defaultCheckedExportFields?: string[], /** 默认选中导出字段 */
   defaultInitOptions?: (data: { options: Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps }>, checkedOptions: string[], dataSet: DataSet }) => Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps }> | void /** 初始化选择字段的字段选项时调用 当返回空时则不进行选项覆盖 */
@@ -30,6 +30,7 @@ interface Props {
   defaultInitFieldFinishAction?: (data: { customFields: IChosenFieldField[], systemFields: IChosenFieldField[], currentChosenField: Map<string, IChosenFieldField> }, store: IssueExportStore) => void, /** 初始化字段完成时调用 */
   transformSystemFilter?: (data: any) => any, /** 提交数据前 对系统筛选字段数据转换 */
   transformExportFieldCodes?: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>, /** 提交数据 对系统导出字段数据转换 */
+  reverseTransformExportFieldCodes?: (data: Array<string>) => Array<string>
   events?: EventsProps,
   renderField?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null, /** 系统筛选字段项渲染 */
   extraFields?: IChosenFieldField[], /** 额外的筛选字段项  不在下拉菜单中 */
@@ -40,12 +41,15 @@ interface Props {
   }
   checkboxOptionsExtraConfig?: Map<string, { checkBoxProps: CheckBoxProps }>
 }
+export { IssueExportStoreProps };
 class IssueExportStore {
   dataSetSystemFields: FieldProps[] = [];
 
   transformSystemFilter: (data: any) => object;
 
-  transformExportFieldCodes: (data: any, d2: any) => object;
+  transformExportFieldCodes: (data: any, d2: any) => string[];
+
+  reverseTransformExportFieldCodes: (data: string[]) => string[]
 
   events: EventsProps = {};
 
@@ -61,7 +65,7 @@ class IssueExportStore {
 
   renderField: any;
 
-  exportButtonConfig: Props['exportButtonConfig'];
+  exportButtonConfig: IssueExportStoreProps['exportButtonConfig'];
 
   checkboxOptionsExtraConfig: Map<string, { checkBoxProps: CheckBoxProps }>;
 
@@ -73,11 +77,12 @@ class IssueExportStore {
     this.defaultCheckedExportFields = data;
   }
 
-  constructor(props?: Props) {
+  constructor(props?: IssueExportStoreProps) {
     this.events = props?.events || {};
     this.dataSetSystemFields = props?.dataSetSystemFields || [];
     this.transformSystemFilter = props?.transformSystemFilter || ((data) => data);
     this.transformExportFieldCodes = props?.transformExportFieldCodes || ((data) => data);
+    this.reverseTransformExportFieldCodes = props?.reverseTransformExportFieldCodes || ((data) => data);
     this.defaultCheckedExportFields = props?.defaultCheckedExportFields || [];
     this.defaultInitFieldAction = props?.defaultInitFieldAction || ((data: IChosenFieldField, store: IssueExportStore) => data);
     this.defaultInitFieldFinishAction = props?.defaultInitFieldFinishAction || ((data: any) => data);

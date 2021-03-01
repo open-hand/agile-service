@@ -40,6 +40,10 @@ public class ExcelImportTemplate {
             this.failCount++;
         }
 
+        public void successCountDecrease() {
+            this.successCount--;
+        }
+
         public void successCountIncrease() {
             this.successCount++;
         }

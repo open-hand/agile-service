@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.IssueTypeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.ProjectVO;
@@ -91,6 +93,8 @@ public class FixDataServiceImpl implements FixDataService {
     private BacklogExpandService backlogExpandService;
     @Autowired
     private StatusLinkageMapper statusLinkageMapper;
+    @Autowired(required = false)
+    private AgileTriggerService agileTriggerService;
 
     @Override
     public void fixCreateProject() {
@@ -287,11 +291,18 @@ public class FixDataServiceImpl implements FixDataService {
     @Override
     public void fixIssueTypeData() {
         fixStatusLinkage();
+        if (agileTriggerService != null) {
+            agileTriggerService.fixRuleIssueTypeRel();
+        }
+        LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! Version: 0.25.0 <<<<<<<<=================================");
     }
 
     private void fixStatusLinkage() {
+        LOGGER.info("===>开始修复fd_status_linkage数据");
         Long zero = 0L;
-        List<StatusLinkageDTO> statusLinkageList = statusLinkageMapper.selectAll();
+        StatusLinkageDTO statusLinkageDTO = new StatusLinkageDTO();
+        statusLinkageDTO.setParentIssueTypeId(zero);
+        List<StatusLinkageDTO> statusLinkageList = statusLinkageMapper.select(statusLinkageDTO);
         if (statusLinkageList.isEmpty()) {
             LOGGER.info("fd_status_linkage数据为空，跳过该步骤");
             return;
@@ -314,6 +325,7 @@ public class FixDataServiceImpl implements FixDataService {
                 projectIdSet.forEach(y -> multiKeyMap.put(y, x.getTypeCode(), x.getId()));
             }
         });
+        ObjectMapper objectMapper = new ObjectMapper();
         statusLinkageList.forEach(x -> {
             if (zero.equals(x.getParentIssueTypeId())) {
                 Long projectId = x.getProjectId();
@@ -322,9 +334,16 @@ public class FixDataServiceImpl implements FixDataService {
                 if (issueTypeId != null) {
                     x.setParentIssueTypeId(issueTypeId);
                     statusLinkageMapper.updateByPrimaryKeySelective(x);
+                } else {
+                    try {
+                        LOGGER.warn("项目【{}】的问题类型【{}】不存在，跳过该条数据: {}", projectId, parentTypeCode, objectMapper.writeValueAsString(x));
+                    } catch (JsonProcessingException e) {
+                        LOGGER.error("convert object to json error: {}", e);
+                    }
                 }
             }
         });
+        LOGGER.info("===>修复fd_status_linkage数据完成");
     }
 
     private void resetSameRank(List<ObjectSchemeFieldExtendDTO> insertList) {

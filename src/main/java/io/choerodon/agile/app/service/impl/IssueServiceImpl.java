@@ -375,7 +375,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
-        sendMsgUtil.sendMsgByIssueCreate(projectId, result);
+        sendMsgUtil.sendMsgByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
         return result;
     }
 
@@ -473,8 +473,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
-        sendMsgUtil.sendMsgByIssueAssignee(projectId, fieldList, result);
-        sendMsgUtil.sendMsgByIssueComplete(projectId, fieldList, result);
+        Long operatorId = DetailsHelper.getUserDetails().getUserId();
+        sendMsgUtil.sendMsgByIssueAssignee(projectId, fieldList, result, operatorId);
+        sendMsgUtil.sendMsgByIssueComplete(projectId, fieldList, result, operatorId);
         return result;
     }
 
@@ -485,7 +486,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         //处理用户搜索
         Boolean condition = handleSearchUser(searchVO, projectId);
-        boolean isTreeView = !Boolean.FALSE.equals(searchVO.getSearchArgs().get("tree"));
+        boolean isTreeView =
+                !Boolean.FALSE.equals(
+                        Optional.ofNullable(searchVO.getSearchArgs())
+                                .map(x -> x.get("tree"))
+                                .orElse(false));
         if (condition) {
             Page<Long> issueIdPage;
             String filterSql = null;
@@ -1132,7 +1137,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public IssueSubVO queryIssueSub(Long projectId, Long organizationId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         issue.setPriorityVO(priorityService.queryById(organizationId, issue.getPriorityId()));
-        issue.setIssueTypeVO(issueTypeService.queryById(issue.getIssueTypeId()));
+        issue.setIssueTypeVO(issueTypeService.queryById(issue.getIssueTypeId(), projectId));
         issue.setStatusVO(statusService.queryStatusById(organizationId, issue.getStatusId()));
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
@@ -1148,7 +1153,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
         }
         IssueSubVO result = issueAssembler.issueDetailDoToIssueSubDto(issue);
-        sendMsgUtil.sendMsgBySubIssueCreate(projectId, result);
+        sendMsgUtil.sendMsgBySubIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
         return result;
     }
 
@@ -1882,7 +1887,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Long newIssueId;
             Long objectVersionNumber;
             issueDetailDTO.setSummary(copyConditionVO.getSummary());
-            IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId());
+            IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId(), projectId);
             if (issueTypeVO.getTypeCode().equals(SUB_TASK)) {
                 IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToIssueSubCreateDto(issueDetailDTO);
                 IssueSubVO newIssue = stateMachineClientService.createSubIssue(issueSubCreateVO);
@@ -2661,6 +2666,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
+    public Page<IssueListFieldKVVO> pagedQueryMyReported(Long organizationId,
+                                                         Long projectId,
+                                                         PageRequest pageRequest) {
+        WorkBenchIssueSearchVO workBenchIssueSearchVO = new WorkBenchIssueSearchVO();
+        workBenchIssueSearchVO.setType("myReported");
+        return queryBackLogIssuesByPersonal(organizationId, projectId, pageRequest, workBenchIssueSearchVO);
+    }
+
+    @Override
     public Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId,
                                                                  Long projectId,
                                                                  PageRequest pageRequest,
@@ -2690,7 +2704,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
         }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, ProjectVO> projectVOMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
         List<IssueListFieldKVVO> list = new ArrayList<>();

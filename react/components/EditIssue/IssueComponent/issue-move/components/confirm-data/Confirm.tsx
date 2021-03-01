@@ -1,8 +1,7 @@
 import React, {
-  useEffect, useState, useCallback, useRef,
+  useEffect, useState, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
 import {
   Icon, Row, Col, Tooltip,
 } from 'choerodon-ui';
@@ -10,7 +9,7 @@ import {
   Issue, IField, User, IIssueType,
 } from '@/common/types';
 import {
-  includes, map, uniq, compact, flatten,
+  includes, map, uniq, compact, flatten, find,
 } from 'lodash';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
@@ -40,18 +39,20 @@ interface Props {
   fieldsWithValue: IFieldWithValue[]
   targetProjectType: 'program' | 'project' | 'subProject'
   targetIssueType?: IIssueType
+  targetSubTaskType?: IIssueType
+  targetSubBugType?: IIssueType
   loseItems: ILoseItems,
 }
 
 const Confirm: React.FC<Props> = ({
-  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, loseItems,
+  issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, targetSubTaskType, targetSubBugType, loseItems,
 }) => {
   const {
-    dataMap, selfFields, subTaskFields, moveToProjectList, subTaskDetailMap, subTaskTypeId, selectedUserIds, selectedUsers,
+    dataMap, selfFields, subTaskFields, subBugFields, moveToProjectList, subTaskDetailMap, subBugDetailMap, subTaskTypeId, subBugTypeId, selectedUserIds, selectedUsers,
   } = store;
   const [fieldsLosed, setFieldsLosed] = useState<IField[]>([]);
   const {
-    issueId, issueNum, summary, typeCode, subIssueVOList, epicName,
+    issueId, issueNum, summary, typeCode, subIssueVOList, subBugVOList, epicName,
   } = issue;
   const targetProjectId = dataSet?.current?.get('targetProjectId');
   const issueType = dataSet?.current?.get('issueType');
@@ -86,10 +87,13 @@ const Confirm: React.FC<Props> = ({
       required: true,
     } as IField;
     const resAdded = [
-      statusField,
       ...(res || []),
       reporterField,
     ];
+    // 后端返回了就不加了
+    if (!find(res, { fieldCode: 'status' })) {
+      resAdded.unshift(statusField);
+    }
     const filtered = filterFields(resAdded);
     if (targetProjectType === 'subProject' && targetIssueType?.typeCode === 'story') {
       const epicFieldIndex = filtered.findIndex((item) => item.fieldCode === 'epic');
@@ -149,8 +153,27 @@ const Confirm: React.FC<Props> = ({
           });
         });
       }
+      if (subBugVOList && subBugVOList.length) {
+        fieldApi.getFields({
+          issueTypeId: subBugTypeId as string,
+          pageCode: 'agile_issue_create',
+          schemeCode: 'agile_issue',
+        }, targetProjectId).then((res: IField[]) => {
+          batchedUpdates(() => {
+            const finalFields = getFinalFields(res || []);
+            subBugVOList.forEach((subBug: Issue) => {
+              finalFields.forEach((item) => {
+                addField(`${subBug.issueId}-${item.fieldCode}`, {
+                  required: item.required,
+                });
+              });
+            });
+            store.setSubBugFields(finalFields);
+          });
+        });
+      }
     }
-  }, [addField, filterFields, getFinalFields, issueId, issueType, subIssueVOList, subTaskTypeId, targetProjectId, targetProjectType]);
+  }, [addField, getFinalFields, issueId, issueType, subBugTypeId, subBugVOList, subIssueVOList, subTaskTypeId, targetProjectId]);
 
   useEffect(() => {
     if (targetProjectId && issueId && targetIssueType?.id) {
@@ -177,7 +200,7 @@ const Confirm: React.FC<Props> = ({
         batchedUpdates(() => {
           res.forEach((subTask) => {
             subTaskSelectedUserIds = [...subTaskSelectedUserIds, ...[subTask.assigneeId, subTask.reporterId, subTask.mainResponsible?.id]];
-            subTaskDetailMap.set(`${subTask.issueId}-detail`, subTask);
+            subTaskDetailMap.set(`${subTask.issueId}%detail`, subTask);
           });
           const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
           store.setSelectUserIds(uniqUserIds);
@@ -193,12 +216,52 @@ const Confirm: React.FC<Props> = ({
             });
             const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
             store.setSelectUserIds(uniqUserIds);
-            subTaskDetailMap.set(`${subIssueVOList[i].issueId}-fields`, fieldWidthValue);
+            subTaskDetailMap.set(`${subIssueVOList[i].issueId}%fields`, fieldWidthValue);
           });
         });
       });
     }
   }, [fieldsWithValue, subIssueVOList, subTaskDetailMap, subTaskTypeId]);
+
+  useEffect(() => {
+    if (subBugTypeId) {
+      const detailRequestArr: Promise<Issue>[] = [];
+      const customFieldsRequestArr: Promise<IFieldWithValue>[] = [];
+      subBugVOList.forEach((subBug: any) => {
+        detailRequestArr.push(issueApi.load(subBug.issueId));
+        customFieldsRequestArr.push(fieldApi.getFieldAndValue(subBug.issueId, {
+          schemeCode: 'agile_issue',
+          issueTypeId: subBugTypeId as string,
+          pageCode: 'agile_issue_edit',
+        }));
+      });
+      let subBugSelectedUserIds: any[] = [...store.selectedUserIds];
+      Promise.all(detailRequestArr).then((res: Issue[]) => {
+        batchedUpdates(() => {
+          res.forEach((subBug) => {
+            subBugSelectedUserIds = [...subBugSelectedUserIds, ...[subBug.assigneeId, subBug.reporterId, subBug.mainResponsible?.id]];
+            subBugDetailMap.set(`${subBug.issueId}%detail`, subBug);
+          });
+          const uniqUserIds = uniq(compact(subBugSelectedUserIds));
+          store.setSelectUserIds(uniqUserIds);
+        });
+      });
+      Promise.all(customFieldsRequestArr).then((res: IFieldWithValue[]) => {
+        res.forEach((fieldWidthValue, i) => {
+          batchedUpdates(() => {
+            fieldsWithValue.forEach((item) => {
+              if (!item.system && item.fieldType === 'member' && !item.projectId) {
+                subBugSelectedUserIds = [...subBugSelectedUserIds, item.value];
+              }
+            });
+            const uniqUserIds = uniq(compact(subBugSelectedUserIds));
+            store.setSelectUserIds(uniqUserIds);
+            subBugDetailMap.set(`${subBugVOList[i].issueId}%fields`, fieldWidthValue);
+          });
+        });
+      });
+    }
+  }, [fieldsWithValue, subBugDetailMap, subBugTypeId, subBugVOList]);
 
   const targetProject = moveToProjectList.find((item: any) => item.id === targetProjectId) || { name: '' };
 
@@ -230,8 +293,8 @@ const Confirm: React.FC<Props> = ({
     });
 
     for (const [k, v] of subTaskDetailMap.entries()) {
-      const subTaskIssueId = k.split('-')[0];
-      const isDetail = k.split('-')[1] === 'detail';
+      const subTaskIssueId = k.split('%')[0];
+      const isDetail = k.split('%')[1] === 'detail';
       if (isDetail) {
         memberFieldsCodeAndValue.set(`${subTaskIssueId}-assignee`, v.assigneeId);
         memberFieldsCodeAndValue.set(`${subTaskIssueId}-reporter`, v.reporterId);
@@ -243,6 +306,24 @@ const Confirm: React.FC<Props> = ({
           } = field;
           if (!system && !projectId && fieldType === 'member' && value) {
             memberFieldsCodeAndValue.set(`${subTaskIssueId}-${fieldCode}`, value);
+          }
+        });
+      }
+    }
+    for (const [k, v] of subBugDetailMap.entries()) {
+      const subBugIssueId = k.split('%')[0];
+      const isDetail = k.split('%')[1] === 'detail';
+      if (isDetail) {
+        memberFieldsCodeAndValue.set(`${subBugIssueId}-assignee`, v.assigneeId);
+        memberFieldsCodeAndValue.set(`${subBugIssueId}-reporter`, v.reporterId);
+        memberFieldsCodeAndValue.set(`${subBugIssueId}-mainResponsible`, v.mainResponsible?.id);
+      } else {
+        v.forEach((field: IFieldWithValue) => {
+          const {
+            fieldCode, projectId, fieldType, system, value,
+          } = field;
+          if (!system && !projectId && fieldType === 'member' && value) {
+            memberFieldsCodeAndValue.set(`${subBugIssueId}-${fieldCode}`, value);
           }
         });
       }
@@ -260,7 +341,7 @@ const Confirm: React.FC<Props> = ({
     return () => {
       memberFieldsCodeAndValue.clear();
     };
-  }, [dataSet, fieldsWithValue, issue.assigneeId, issue.issueId, issue.mainResponsible?.id, issue.reporterId, selectedUsers, subTaskDetailMap]);
+  }, [dataSet, fieldsWithValue, issue.assigneeId, issue.issueId, issue.mainResponsible?.id, issue.reporterId, selectedUsers, subBugDetailMap, subTaskDetailMap]);
 
   useEffect(() => {
     if (epicName && !dataSet.current?.get(`${issueId}-epicName`)) {
@@ -378,7 +459,7 @@ const Confirm: React.FC<Props> = ({
             subTaskTypeId ? subIssueVOList.map((subTask: any) => (
               <div className={styles.issueItem}>
                 <div className={styles.issueItemHeader}>
-                  <TypeTag data={subTask.issueTypeVO} />
+                  {targetSubTaskType && <TypeTag data={targetSubTaskType} />}
                   <span className={styles.issueNum}>{subTask.issueNum}</span>
                   <span className={styles.summary}>{subTask.summary}</span>
                 </div>
@@ -395,50 +476,119 @@ const Confirm: React.FC<Props> = ({
                     </Col>
                   </Row>
                   {
-                  subTaskFields.map((subTaskField) => {
-                    const { fieldCode, fieldName } = subTaskField;
-                    const subTaskDetail = subTaskDetailMap.get(`${subTask.issueId}-detail`) || {};
-                    const subTaskCustomFields = subTaskDetailMap.get(`${subTask.issueId}-fields`) || [];
-                    const transformedOriginValue = transformValue({ issue: subTaskDetail, field: subTaskField, fieldsWithValue: subTaskCustomFields });
-                    return (
-                      <Row key={fieldCode} className={styles.fieldRow}>
-                        <Col span={7}>
-                          <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
-                            {fieldName}
-                            {
-                              dataSet.current?.getField(`${subTask.issueId}-${fieldCode}`)?.props?.required && (
-                                <span className={styles.required}>*</span>
-                              )
-                            }
-                          </span>
-                        </Col>
-                        <Col span={8}>
-                          <Tooltip title={transformedOriginValue}>
-                            <span className={styles.fieldReadOnly}>{transformedOriginValue}</span>
-                          </Tooltip>
-                        </Col>
-                        <Col span={9}>
-                          {renderField({
-                            dataSet,
-                            issue: subTaskDetail,
-                            field: subTaskField,
-                            fieldsWithValue: subTaskCustomFields,
-                            targetIssueType: {
-                              typeCode: 'sub_task',
-                              id: subTaskTypeId,
-                            } as IIssueType,
-                            targetProject: {
-                              projectId: targetProjectId,
-                              projectType: targetProjectType,
-                            },
-                            dataMap,
-                            selectedUsers,
-                          })}
-                        </Col>
-                      </Row>
-                    );
-                  })
-              }
+                    subTaskFields.map((subTaskField) => {
+                      const { fieldCode, fieldName } = subTaskField;
+                      const subTaskDetail = subTaskDetailMap.get(`${subTask.issueId}%detail`) || {};
+                      const subTaskCustomFields = subTaskDetailMap.get(`${subTask.issueId}%fields`) || [];
+                      const transformedOriginValue = transformValue({ issue: subTaskDetail, field: subTaskField, fieldsWithValue: subTaskCustomFields });
+                      return (
+                        <Row key={fieldCode} className={styles.fieldRow}>
+                          <Col span={7}>
+                            <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
+                              {fieldName}
+                              {
+                                dataSet.current?.getField(`${subTask.issueId}-${fieldCode}`)?.props?.required && (
+                                  <span className={styles.required}>*</span>
+                                )
+                              }
+                            </span>
+                          </Col>
+                          <Col span={8}>
+                            <Tooltip title={transformedOriginValue}>
+                              <span className={styles.fieldReadOnly}>{transformedOriginValue}</span>
+                            </Tooltip>
+                          </Col>
+                          <Col span={9}>
+                            {renderField({
+                              dataSet,
+                              issue: subTaskDetail,
+                              field: subTaskField,
+                              fieldsWithValue: subTaskCustomFields,
+                              targetIssueType: {
+                                typeCode: 'sub_task',
+                                id: subTaskTypeId,
+                              } as IIssueType,
+                              targetProject: {
+                                projectId: targetProjectId,
+                                projectType: targetProjectType,
+                              },
+                              dataMap,
+                              selectedUsers,
+                            })}
+                          </Col>
+                        </Row>
+                      );
+                    })
+                  }
+                </div>
+              </div>
+            )) : null
+          }
+          {
+            subBugTypeId ? subBugVOList.map((subBug: any) => (
+              <div className={styles.issueItem}>
+                <div className={styles.issueItemHeader}>
+                  {targetSubBugType && <TypeTag data={targetSubBugType} />}
+                  <span className={styles.issueNum}>{subBug.issueNum}</span>
+                  <span className={styles.summary}>{subBug.summary}</span>
+                </div>
+                <div className={styles.issueItemFields}>
+                  <Row key={`${subBug.issueId}-fieldHeader`} className={styles.fieldHeaderRow}>
+                    <Col span={7}>
+                      <span className={styles.fieldHeader}>字段</span>
+                    </Col>
+                    <Col span={8}>
+                      <span className={styles.fieldHeader}>原始值</span>
+                    </Col>
+                    <Col span={9}>
+                      <span className={styles.fieldHeader}>更新值</span>
+                    </Col>
+                  </Row>
+                  {
+                    subBugFields.map((subBugField) => {
+                      const { fieldCode, fieldName } = subBugField;
+                      const subBugDetail = subBugDetailMap.get(`${subBug.issueId}%detail`) || {};
+                      const subBugCustomFields = subBugDetailMap.get(`${subBug.issueId}%fields`) || [];
+                      const transformedOriginValue = transformValue({ issue: subBugDetail, field: subBugField, fieldsWithValue: subBugCustomFields });
+                      return (
+                        <Row key={fieldCode} className={styles.fieldRow}>
+                          <Col span={7}>
+                            <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
+                              {fieldName}
+                              {
+                                dataSet.current?.getField(`${subBug.issueId}-${fieldCode}`)?.props?.required && (
+                                  <span className={styles.required}>*</span>
+                                )
+                              }
+                            </span>
+                          </Col>
+                          <Col span={8}>
+                            <Tooltip title={transformedOriginValue}>
+                              <span className={styles.fieldReadOnly}>{transformedOriginValue}</span>
+                            </Tooltip>
+                          </Col>
+                          <Col span={9}>
+                            {renderField({
+                              dataSet,
+                              issue: subBugDetail,
+                              field: subBugField,
+                              fieldsWithValue: subBugCustomFields,
+                              targetIssueType: {
+                                typeCode: 'bug',
+                                id: subBugTypeId,
+                              } as IIssueType,
+                              targetProject: {
+                                projectId: targetProjectId,
+                                projectType: targetProjectType,
+                              },
+                              dataMap,
+                              selectedUsers,
+                            })}
+                          </Col>
+                        </Row>
+                      );
+                    })
+                  }
                 </div>
               </div>
             )) : null

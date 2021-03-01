@@ -16,6 +16,7 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (versions: any[]) => void
   flat?: boolean
+  optionFlat?: boolean
   filterSelected?: boolean
   projectId?: string
 }
@@ -61,11 +62,11 @@ function useGetVersionData({
         const newOption = new Map<string, Array<IProgramVersion>>();
         const newHeadOption = new Array<{ id: string, name: string }>();
         data?.forEach((item) => {
-          if (newOption.has(item.versionBase.id)) {
-            newOption.get(item.versionBase.id)!.push(item);
+          if (newOption.has(item.versionBaseId)) {
+            newOption.get(item.versionBaseId)!.push(item);
           } else {
-            newHeadOption.push({ id: item.versionBase.id, name: item.versionBase.name });
-            newOption.set(item.versionBase.id, [item]);
+            newHeadOption.push({ id: item.versionBaseId, name: item.versionBase?.name || '' });
+            newOption.set(item.versionBaseId, [item]);
           }
         });
         return {
@@ -89,13 +90,17 @@ function useGetVersionData({
   return [versionData, { loadData, dispatch }];
 }
 const SelectProgramVersion: React.FC<Props> = forwardRef(({
-  teamProjectIds, dataRef, afterLoad, flat, projectId, ...otherProps
+  teamProjectIds, dataRef, afterLoad, flat, optionFlat, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const Component = flat ? FlatSelect : Select;
   const [versionData, method] = useGetVersionData({
     teamProjectIds, dataRef, afterLoad, projectId,
   });
-  const OptionComponent = versionData.headOptions.map((item) => {
+  const OptionComponent = optionFlat ? versionData.data.map((option) => (
+    <Component.Option value={option.id}>
+      {option.name}
+    </Component.Option>
+  )) : versionData.headOptions.map((item) => {
     const options = (versionData.option.get(item.id) || []);
 
     return (

@@ -20,6 +20,6 @@ const EditReport: React.FC = () => {
   useEffect(() => {
     refresh();
   }, [refresh]);
-  return loading ? <Loading loading /> : <ReportPage edit store={store} />;
+  return loading ? <Loading loading /> : <ReportPage refresh={refresh} edit store={store} />;
 };
 export default EditReport;

@@ -1,4 +1,5 @@
 import { find } from 'lodash';
+import { split } from './utils';
 
 export const submitFieldMap = new Map([
   ['status', 'statusId'],
@@ -26,7 +27,7 @@ interface Props {
 const transformValue = ({
   k, v, dataMap, targetProjectId,
 }: Props) => {
-  const fieldCode = k.split('-')[1];
+  const fieldCode = split(k, '-')[1];
   switch (fieldCode) {
     case 'programVersion':
     case 'subProject':

@@ -5,10 +5,16 @@ import {
 import classnames from 'classnames';
 import scrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { observer } from 'mobx-react-lite';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import { getProjectId } from '@/utils/common';
 import expandStyles from './index.less';
 
 function ExpandAllButton() {
-  const [expandAll, setExpandAll] = useState<boolean>();
+  const [expandAll, setExpandAll] = useState<boolean>(() => {
+    const isFirstInto = !localPageCacheStore.has(new RegExp('scrumBoard.panel'));
+    return !!isFirstInto;
+  });
+
   function handleClick() {
     if (scrumBoardStore.currentBindFunctionMaps.has('expandOrUp-epic')) {
       scrumBoardStore.bindFunction('expand-current-status', () => !expandAll);

@@ -7,8 +7,12 @@ import {
 import { IBurndownChartType } from '@/components/charts/burn-down';
 import { IPieChartType } from '@/components/charts/pie-chart';
 import { IUnit } from '@/components/charts/version-report/search';
+import { ServiceCodeQualityType } from '@/components/charts/service-code-quality/search';
 
-export type IChartCode = 'burn_down_report' | 'sprint_report' | 'cumulative_flow_diagram' | 'pie_chart' | 'version_chart' | 'epic_chart' | 'version_burn_down_report' | 'epic_burn_down_report' | 'velocity_chart'
+export type IChartCode = 'burn_down_report' | 'sprint_report' | 'cumulative_flow_diagram'
+  | 'pie_chart' | 'version_chart' | 'epic_chart' | 'version_burn_down_report'
+  | 'epic_burn_down_report' | 'velocity_chart' | 'code_quality' | 'code_quality_vary'
+  | 'service_code_quality'
 
 const reorder = <T>(list: T[], startIndex: number, endIndex: number): T[] => {
   const result = Array.from(list);
@@ -52,6 +56,7 @@ export type AccumulationSearchVO = {
 export type PieSearchVO = {
   sprintId?: string
   versionId?: string
+  statusId?: string
   projectId: string,
   organizationId: string,
   fieldName: IPieChartType,
@@ -87,8 +92,27 @@ export type IterationSpeedSearchVO = {
   type: IUnit,
   projectId: string,
 }
+export type CodeQualitySearchVO = {
+  projectId: string,
+}
+export type CodeQualityVarySearchVO = {
+  projectId: string,
+  days: number
+}
+export type ServiceCodeQualitySearchVO = {
+  projectId: string,
+  days: number | null
+  type: ServiceCodeQualityType
+  serviceId: string
+  startDate?: string
+  endDate?: string
+}
 
-export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO | AccumulationSearchVO | PieSearchVO | VersionReportSearchVO | EpicReportSearchVO | VersionBurndownSearchVO | EpicBurndownSearchVO | IterationSpeedSearchVO
+export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO
+  | AccumulationSearchVO | PieSearchVO | VersionReportSearchVO
+  | EpicReportSearchVO | VersionBurndownSearchVO | EpicBurndownSearchVO
+  | IterationSpeedSearchVO | CodeQualitySearchVO | CodeQualityVarySearchVO
+  | ServiceCodeQualitySearchVO
 
 export interface IReportChartBlock extends IBaseReportBlock {
   type: 'chart'
@@ -112,6 +136,7 @@ export interface SearchVO {
     sprint?: string[],
     summary?: string[],
     version?: string[],
+    withChildren?: boolean
   },
   searchArgs?: {
     createStartDate?: string,
@@ -143,6 +168,8 @@ export interface IProjectReport {
   objectVersionNumber: number
 }
 class ProjectReportStore {
+  @observable dirty = false;
+
   @observable blockList: IReportBlock[] = []
 
   @observable baseInfo: IProjectReport | null = null
@@ -150,22 +177,26 @@ class ProjectReportStore {
   @action('添加一个block')
   addBlock(block: IReportBlock) {
     this.blockList.push(block);
+    this.dirty = true;
   }
 
   @action('更新一个block')
   updateBlock(index: number, block: IReportBlock) {
     this.blockList[index] = block;
+    this.dirty = true;
   }
 
   @action('移除一个block')
   removeBlock(index: number) {
     this.blockList.splice(index, 1);
+    this.dirty = true;
   }
 
   @action('设置ReportData')
   setReportData(reportData: IProjectReport) {
     this.blockList = (reportData.reportUnitList || []).map((block) => ({ ...block, key: String(Math.random()) }));
     this.baseInfo = reportData;
+    this.dirty = false;
   }
 
   @action('设置objectVersionNumber')
@@ -182,6 +213,7 @@ class ProjectReportStore {
       sourceIndex,
       destinationIndex,
     );
+    this.dirty = true;
   }
 }
 

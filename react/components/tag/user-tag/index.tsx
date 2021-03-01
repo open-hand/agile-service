@@ -24,6 +24,7 @@ export const UserUniqueTag: React.FC<{ data: User } & HeadTagProps> = ({
       name={getFistStr(realName)}
       text={realName || loginName}
       showText={showText}
+      textClassName={styles.user_text}
       tooltip={data.ldap ? `${realName}(${loginName})` : `${realName}(${email})`}
       avatarStyle={{
         color: '#6473c3',

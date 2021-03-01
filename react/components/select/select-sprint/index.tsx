@@ -54,7 +54,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
       return newSprint;
     },
     paging: !!isProgram,
-  }), [isProgram, projectId, selectSprints, JSON.stringify(statusList), currentSprintOption]);
+  }), [isProgram, projectId, selectSprints, JSON.stringify(statusList), currentSprintOption, afterLoad]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (
@@ -63,11 +63,11 @@ const SelectSprint: React.FC<Props> = forwardRef(({
       {...props}
       {...otherProps}
       // @ts-ignore
-      optionRenderer={({ record, text, value }) => (
-        <Tooltip title={text}>
-          <span>{text}</span>
-        </Tooltip>
-      )}
+      // optionRenderer={({ record, text, value }) => (
+      //   <Tooltip title={text}>
+      //     <span>{text}</span>
+      //   </Tooltip>
+      // )}
     />
   );
 });

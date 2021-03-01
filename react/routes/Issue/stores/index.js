@@ -1,5 +1,5 @@
 import React, {
-  createContext, useMemo, useEffect, useState,
+  createContext, useMemo, useEffect, useState, useRef,
 } from 'react';
 import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
@@ -8,6 +8,7 @@ import { fieldApi, permissionApi } from '@/api';
 import IssueStore, { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import IssueDataSet from '@/components/issue-table/dataSet';
+import useQueryString from '@/hooks/useQueryString';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { transformFilter, handleSelect, handleUnSelect } from './utils';
 
@@ -20,7 +21,13 @@ export const StoreProvider = inject('AppState')(injectIntl(
     const { intl, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
     const [fields, setFields] = useState([]);
     const [hasBatchDeletePermission, setHasBatchDeletePermission] = useState(false);
+    const permissionRef = useRef(false);
+    permissionRef.current = hasBatchDeletePermission;
+    const params = useQueryString();
     const [tableListMode, changeTableListMode] = useState(() => {
+      if (params.tableListMode) {
+        return params.tableListMode;
+      }
       const defaultMode = localPageCacheStore.getItem('issues.table.mode');
       if (defaultMode === 'list') {
         return defaultMode;
@@ -63,8 +70,8 @@ export const StoreProvider = inject('AppState')(injectIntl(
       IssueStore,
       tableListMode,
       events: {
-        select: () => handleSelect({ dataSet }, issueSearchStore, hasBatchDeletePermission),
-        selectAll: () => handleSelect({ dataSet }, issueSearchStore, hasBatchDeletePermission),
+        select: () => handleSelect({ dataSet }, issueSearchStore, permissionRef.current),
+        selectAll: () => handleSelect({ dataSet }, issueSearchStore, permissionRef.current),
         unSelect: handleUnSelect,
         unSelectAll: handleUnSelect,
         load: () => {
@@ -74,7 +81,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
           }
         },
       },
-    })), [hasBatchDeletePermission, intl, issueSearchStore, organizationId, projectId, tableListMode]);
+    })), [intl, issueSearchStore, organizationId, projectId, tableListMode]);
     IssueStore.dataSet = dataSet;
     /**
     * detail data

@@ -198,6 +198,12 @@
         AND organization_id = #{organizationId}
         AND field_id = #{fieldId}
         AND (project_id = #{projectId} OR project_id is null)
+        <if test="filterIssueTypeIds != null and filterIssueTypeIds.size > 0">
+            AND issue_type_id IN
+            <foreach collection="filterIssueTypeIds" item="issueTypeId" index="index" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+        </if>
     </select>
 
     <select id="selectExtendFieldCount" resultType="java.lang.Integer">
@@ -289,6 +295,7 @@
         <foreach collection="fieldCodes" item="fieldCode" open="(" close=")" separator=",">
            #{fieldCode}
         </foreach>
+        order by field_id
     </select>
 
     <select id="selectProjectIdsByOrganizationId" resultType="java.lang.Long">
@@ -320,6 +327,7 @@
         t2.name,
         t2.field_type,
         t2.default_value,
+        t2.extra_config,
         t2.organization_id,
         t2.project_id
         from (

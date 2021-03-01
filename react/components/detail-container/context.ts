@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import { DetailEvents } from '.';
 
 export interface IRoute {
@@ -7,7 +7,7 @@ export interface IRoute {
   events?: DetailEvents
 }
 export interface IRouteWithKey extends IRoute {
-  key:React.Key
+  key: React.Key
 }
 interface DetailContainerContext {
   outside: boolean
@@ -19,6 +19,8 @@ interface DetailContainerContext {
   pop: () => void
   close: () => void
   eventsMap: Map<string, DetailEvents>
+  fullPage?: boolean
+  resizeRef: React.MutableRefObject<any>
 }
 const DetailContainerContext = createContext({} as DetailContainerContext);
 

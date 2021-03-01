@@ -16,6 +16,8 @@ import {
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { IIssueColumnName } from '@/common/types';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import { IReportListBlock } from '../../store';
 import { RefProps } from '../add-modal';
 
@@ -32,6 +34,37 @@ interface Props {
   innerRef: React.MutableRefObject<RefProps>
   data?: IReportListBlock
 }
+const autoSelectChildren = (dataSet: DataSet, record: Record) => {
+  if (record.children && record.children.length > 0) {
+    record.children.forEach((child) => {
+      if (!child.isSelected) {
+        child.set('source', 'auto');
+        dataSet.select(child);
+      }
+    });
+  }
+};
+const autoSelectParent = (dataSet: DataSet, record: Record) => {
+  if (record.parent) {
+    if (!record.parent.isSelected) {
+      record.parent.set('source', 'auto');
+      dataSet.select(record.parent);
+    }
+  }
+};
+const autoUnSelectChildren = (dataSet: DataSet, record: Record) => {
+  if (record.children && record.children.length > 0) {
+    record.children.forEach((child) => {
+      if (child.isSelected) {
+        child.set('source', 'auto');
+        dataSet.unSelect(child);
+      }
+    });
+  }
+};
+const autoUnSelectParent = (dataSet: DataSet, record: Record) => {
+
+};
 const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   const isEdit = Boolean(editData);
   const selectedRef = useRef<Set<string>>(new Set([...(editData?.searchVO?.otherArgs?.issueIds || [])]));
@@ -60,6 +93,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       },
     }],
   }), [editData]);
+
   // @ts-ignore
   const dataSet = useMemo(() => new DataSet(IssueTableDataSet({
     projectId: getProjectId(),
@@ -72,6 +106,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
         // @ts-ignore
         ds.forEach((record) => {
           if (selectedRef.current.has(record.get('issueId'))) {
+            record.set('source', 'auto');
             ds.select(record);
           }
         });
@@ -79,10 +114,24 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       // @ts-ignore
       select: ({ record }) => {
         selectedRef.current.add(record.get('issueId'));
+        const source = record.get('source');
+        if (source === 'auto') {
+          record.set('source', undefined);
+          return;
+        }
+        autoSelectChildren(dataSet, record);
+        autoSelectParent(dataSet, record);
       },
       // @ts-ignore
       unSelect: ({ record }) => {
         selectedRef.current.delete(record.get('issueId'));
+        const source = record.get('source');
+        if (source === 'auto') {
+          record.set('source', undefined);
+          return;
+        }
+        autoUnSelectChildren(dataSet, record);
+        autoUnSelectParent(dataSet, record);
       },
       // @ts-ignore
       selectAll: ({ dataSet: ds }) => {
@@ -98,8 +147,28 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           selectedRef.current.delete(record.get('issueId'));
         });
       },
-    } : undefined,
+    } : {
+      select: ({ record }: { record: Record }) => {
+        const source = record.get('source');
+        if (source === 'auto') {
+          record.set('source', undefined);
+          return;
+        }
+        autoSelectChildren(dataSet, record);
+        autoSelectParent(dataSet, record);
+      },
+      unSelect: ({ record }: { record: Record }) => {
+        const source = record.get('source');
+        if (source === 'auto') {
+          record.set('source', undefined);
+          return;
+        }
+        autoUnSelectChildren(dataSet, record);
+        autoUnSelectParent(dataSet, record);
+      },
+    },
   })), [isEdit, issueSearchStore]);
+
   const refresh = useCallback(() => {
     dataSet.query();
   }, [dataSet]);
@@ -132,11 +201,20 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);
+  const { isInProgram } = useIsInProgram();
   return (
     <div className="agile-portal">
       <Form dataSet={formDataSet} style={{ width: 512 }}>
         <TextField name="title" />
-        <Select name="visibleColumns" multiple help="为了保证最佳的预览效果，请将字段控制在6个以内">
+        <Select
+          name="visibleColumns"
+          multiple // @ts-ignore
+          help={(
+            <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.65)', marginTop: 8 }}>
+              为了保证最佳的预览效果，请将字段控制在6个以内
+            </div>
+          )}
+        >
           <Option value="summary">概要</Option>
           <Option value="issueNum">编号</Option>
           <Option value="priority">优先级</Option>
@@ -144,6 +222,8 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           <Option value="status">状态</Option>
           <Option value="sprint">冲刺</Option>
           <Option value="reporter">报告人</Option>
+          <Option value="createUser">创建人</Option>
+          <Option value="updateUser">更新人</Option>
           <Option value="creationDate">创建时间</Option>
           <Option value="lastUpdateDate">最后更新时间</Option>
           <Option value="estimatedStartTime">预计开始时间</Option>
@@ -153,7 +233,9 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           <Option value="storyPoints">故事点</Option>
           <Option value="version">版本</Option>
           <Option value="epic">史诗</Option>
-          <Option value="feature">特性</Option>
+          {isInProgram && <Option value="feature">特性</Option>}
+          <Option value="mainResponsibleUser">主要负责人</Option>
+          <Option value="environmentName">环境</Option>
           {issueSearchStore.fields.map((field) => (
             <Option value={field.code}>
               {field.name}

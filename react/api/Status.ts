@@ -20,6 +20,10 @@ class StatusApi extends Api<StatusApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
+  setProjectId(projectId?: string | number) {
+    return this.overwrite('prefix', `/agile/v1/projects/${projectId || this.projectId}`);
+  }
+
   /**
     * 创建状态
     * @param map

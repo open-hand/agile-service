@@ -2,6 +2,8 @@ package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.Set;
+
 
 public class RoleAssignmentSearchVO {
 
@@ -16,6 +18,26 @@ public class RoleAssignmentSearchVO {
 
     @ApiModelProperty(value = "参数")
     private String[] param;
+
+    private Boolean enabled;
+
+    private Set<Long> roleIds;
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public Set<Long> getRoleIds() {
+        return roleIds;
+    }
+
+    public void setRoleIds(Set<Long> roleIds) {
+        this.roleIds = roleIds;
+    }
 
     public String getLoginName() {
         return loginName;

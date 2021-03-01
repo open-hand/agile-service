@@ -1,20 +1,19 @@
 package io.choerodon.agile.infra.feign;
 
+import io.choerodon.core.domain.Page;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.feign.fallback.BaseFeignClientFallback;
 import io.swagger.annotations.ApiParam;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
-import javax.validation.Valid;
-
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
-import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.feign.fallback.BaseFeignClientFallback;
-import io.choerodon.core.domain.Page;
 
 /**
  * @author dinghuang123@gmail.com
@@ -92,7 +91,8 @@ public interface BaseFeignClient {
     ResponseEntity<Page<UserVO>> pagingQueryUsersByRoleIdOnProjectLevel(
             @RequestParam(name = "page") int page,
             @RequestParam(name = "size") int size,
-            @RequestParam(name = "role_id") Long roleId,
+            @RequestParam(name = "role_id", required = false) Long roleId,
+            @RequestParam Boolean doPage,
             @PathVariable(name = "project_id") Long sourceId,
             @RequestBody(required = false) @Valid RoleAssignmentSearchVO roleAssignmentSearchVO);
 
@@ -192,16 +192,9 @@ public interface BaseFeignClient {
     @PostMapping(value = "/choerodon/v1/projects/ids")
     ResponseEntity<List<ProjectVO>> queryByIds(@RequestBody Set<Long> ids);
 
-    @GetMapping(value = "/choerodon/v1/projects/{project_id}/users")
-    ResponseEntity<Page<UserVO>> queryUsersByProject(@PathVariable("project_id") Long projectId,
-                                                      @RequestParam("param") String param,
-                                                      @RequestParam int page,
-                                                      @RequestParam int size);
-
-    @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/users")
-    ResponseEntity<Page<UserVO>> queryUsersByOrganization(@PathVariable("organization_id") Long projectId,
-                                                           @RequestParam("param") String param,
-                                                           @RequestParam int page,
-                                                           @RequestParam int size);
+    @GetMapping(value = "/choerodon/v1/projects/{project_id}/roles")
+    ResponseEntity<List<RoleVO>> listProjectRoles(@PathVariable("project_id") Long projectId,
+                                                  @RequestParam(name = "only_select_enable") Boolean onlySelectEnable,
+                                                  @RequestParam(name = "role_name") String roleName);
 }
 

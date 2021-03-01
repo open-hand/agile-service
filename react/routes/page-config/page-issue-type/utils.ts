@@ -1,10 +1,11 @@
 import { IFieldOptionProps } from '@/api';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import moment from 'moment';
+import { isEmpty } from 'lodash';
 import { toJS } from 'mobx';
 import { User } from '@/common/types';
 
-const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description', 'environment'];
+const disabledEditDefaultFields = ['featureType', 'issueType', 'status', 'priority', 'creationDate', 'lastUpdateDate', 'timeTrace', 'belongToBacklog', 'urgent', 'progressFeedback', 'description', 'environment', 'created_user', 'last_updated_user'];
 const orgDisabledEditDefaultFields = [...disabledEditDefaultFields, 'component', 'label', 'influenceVersion', 'fixVersion', 'epic', 'sprint', 'pi', 'subProject', 'backlogClassification', 'backlogType', 'programVersion'];
 const fieldTextValueConfig = {
   epic: { optionKey: 'issueId', textKey: 'epicName' },
@@ -17,19 +18,19 @@ const fieldTextValueConfig = {
   backlogClassification: { optionKey: 'id', textKey: 'name' },
 };
 function transformDefaultValue({
-  fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey: propsOptionKey = 'id', textKey: propsTextKey = 'value', fieldCode,
-}: { fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | Array<User> | null, optionKey?: 'tempKey' | 'id' | string, textKey?: 'value' | string, fieldCode?: string }) {
+  fieldType, defaultValue, defaultValueObj, fieldOptions, optionKey: propsOptionKey = 'id', textKey: propsTextKey = 'value', fieldCode, extraConfig,
+}: { fieldType: string, defaultValue: any, extraConfig?: boolean, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | Array<User> | null, optionKey?: 'tempKey' | 'id' | string, textKey?: 'value' | string, fieldCode?: string }) {
   if (!defaultValue && !defaultValueObj) {
     return defaultValue || '';
   }
   const { optionKey = propsOptionKey, textKey = propsTextKey } = fieldTextValueConfig[fieldCode as keyof typeof fieldTextValueConfig] || {};
   switch (fieldType) {
     case 'datetime':
-      return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+      return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
     case 'time':
-      return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
+      return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
     case 'date':
-      return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
+      return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
     case 'multiple':
     case 'checkbox':
     case 'single':
@@ -42,7 +43,8 @@ function transformDefaultValue({
       return realName || defaultValue;
     }
     case 'multiMember': {
-      return String(Array.isArray(fieldOptions) ? (fieldOptions as User[]).map((item) => item.realName) : (defaultValueObj?.realName || ''));
+      const memberDefaultValue = Array.isArray(defaultValue) ? defaultValue : String(defaultValue).split(',');
+      return String(Array.isArray(toJS(fieldOptions)) && !isEmpty(memberDefaultValue) ? (fieldOptions as User[]).filter((item) => memberDefaultValue.some((d) => d === item.id)).map((item) => item.realName) : (defaultValueObj?.realName || ''));
     }
     default:
       return defaultValue;

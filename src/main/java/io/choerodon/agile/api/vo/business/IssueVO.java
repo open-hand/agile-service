@@ -239,6 +239,11 @@ public class IssueVO {
 
     private List<PiTargetInfoVO> piTargetInfoVOS;
 
+    @ApiModelProperty(value = "更新人图标")
+    private String updaterImageUrl;
+
+    private UserMessageDTO updater;
+
     public Long getSprintId() {
         return sprintId;
     }
@@ -896,5 +901,21 @@ public class IssueVO {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public String getUpdaterImageUrl() {
+        return updaterImageUrl;
+    }
+
+    public void setUpdaterImageUrl(String updaterImageUrl) {
+        this.updaterImageUrl = updaterImageUrl;
+    }
+
+    public UserMessageDTO getUpdater() {
+        return updater;
+    }
+
+    public void setUpdater(UserMessageDTO updater) {
+        this.updater = updater;
     }
 }

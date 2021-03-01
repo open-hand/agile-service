@@ -18,7 +18,7 @@ class PiApi extends Api<PiApi> {
       data: statusList,
       transformResponse: (res) => {
         const data = JSON.parse(res);
-        return data.map((pi: { code: string, name: string }) => ({ ...pi, piName: `${pi.code}-${pi.name}` }));
+        return data.map((pi: { code: string, name: string, fullName: string }) => ({ ...pi, piName: pi.fullName || `${pi.code}-${pi.name}` }));
       },
     });
   }
@@ -60,7 +60,7 @@ class PiApi extends Api<PiApi> {
       },
       transformResponse: (res: any) => {
         const data: any = JSON.parse(res);
-        return data.map((pi: { code: string, name: string }) => ({ ...pi, piName: `${pi.code}-${pi.name}` }));
+        return data.map((pi: { code: string, name: string, fullName: string }) => ({ ...pi, piName: pi.fullName || `${pi.code}-${pi.name}` }));
       },
       data: statusList,
     });

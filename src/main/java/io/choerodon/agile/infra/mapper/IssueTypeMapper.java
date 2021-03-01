@@ -60,6 +60,36 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      * @return
      */
     List<IssueTypeVO> selectEnableReference(@Param("organizationId") Long organizationId,
-                                             @Param("projectId") Long projectId);
+                                            @Param("projectId") Long projectId);
+
+    /**
+     * 查询问题类型，如果有别名使用别名
+     *
+     * @param issueTypeId
+     * @param projectId
+     * @return
+     */
+    IssueTypeDTO selectWithAlias(@Param("issueTypeId") Long issueTypeId,
+                                 @Param("projectId") Long projectId);
+
+    /**
+     * 根据问题类型id和项目id查询问题类型
+     *
+     * @param issueTypeIds
+     * @param projectIds
+     * @return
+     */
+    List<IssueTypeDTO> selectWithAliasByIds(@Param("issueTypeIds") Set<Long> issueTypeIds,
+                                            @Param("projectIds") Set<Long> projectIds,
+                                            @Param("organizationId") Long organizationId);
+
+    /**
+     * 根据项目ids查询问题类型
+     * @param organizationId
+     * @param projectIds
+     * @return
+     */
+    List<IssueTypeVO> selectByProjectIds(@Param("organizationId") Long organizationId,
+                                         @Param("projectIds") List<Long> projectIds);
 
 }

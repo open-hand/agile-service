@@ -23,7 +23,7 @@ const TypeTag: React.FC<Props> = ({
   } else if (featureType === 'enabler') {
     colour = '#FFCA28';
     name = '使能';
-    icon = 'characteristic';
+    // icon = 'characteristic';
   }
   if (icon === 'agile-backlog') {
     icon = 'highlight';

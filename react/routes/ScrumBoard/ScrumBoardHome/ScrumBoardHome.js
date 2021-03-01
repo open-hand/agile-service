@@ -4,9 +4,9 @@ import {
   Page, Header, Content, stores, Breadcrumb, Choerodon, Permission,
 } from '@choerodon/boot';
 import {
-  Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
+  Button, Select, Spin, Icon, Modal, Form, Tooltip,
 } from 'choerodon-ui';
-import { toJS } from 'mobx';
+import { set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
 import {
@@ -15,12 +15,12 @@ import {
 import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import FilterManage from '@/components/FilterManage';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
 import './ScrumBoardHome.less';
 import IssueDetail from '../ScrumBoardComponent/IssueDetail/IssueDetail';
-import QuickSearch, { QuickSearchEvent } from '../../../components/QuickSearch';
 import NoneSprint from '../ScrumBoardComponent/NoneSprint/NoneSprint';
 import '../ScrumBoardComponent/RenderSwimLaneContext/RenderSwimLaneContext.less';
 import SwimLane from '../ScrumBoardComponent/RenderSwimLaneContext/SwimLane';
@@ -28,16 +28,12 @@ import CSSBlackMagic from '../../../components/CSSBlackMagic/CSSBlackMagic';
 import HeaderLine from '../../../components/HeaderLine';
 import ScrumBoardFullScreen from '../ScrumBoardComponent/ScrumBoardFullScreen';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
-import { service } from '../setting/Setting';
-import SelectPriority from './SelectPriority';
 import CreateIssue from '../ScrumBoardComponent/create-issue';
 import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
+import BoardSearch from '../ScrumBoardComponent/board-search';
 
 const { Option } = Select;
 const { AppState } = stores;
-
-const RadioGroup = Radio.Group;
-const RadioButton = Radio.Button;
 
 const style = (swimLaneId) => `
   .${swimLaneId}.c7n-swimlaneContext-itemBodyColumn {
@@ -62,6 +58,7 @@ class ScrumBoardHome extends Component {
     super(props);
     this.dataConverter = new ScrumBoardDataController();
     this.ref = null;
+    this.issueSearchStore = null;
     this.state = {
       updateParentStatus: null,
     };
@@ -69,26 +66,15 @@ class ScrumBoardHome extends Component {
 
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
-    const scrumboardInitValue = localPageCacheStore.getItem('scrumboard');
-    if (scrumboardInitValue) {
-      const {
-        onlyMeChecked, onlyStoryChecked, moreChecked, starBeacon, personalFilters = [], assigneeFilter, sprintFilter, priorityIds,
-      } = scrumboardInitValue;
-
-      ScrumBoardStore.addQuickSearchFilter(
-        onlyMeChecked,
-        onlyStoryChecked,
-        starBeacon,
-        moreChecked,
-        personalFilters,
-      );
-      assigneeFilter && ScrumBoardStore.addAssigneeFilter(assigneeFilter.map((item) => item.key));
-      if (sprintFilter) {
-        ScrumBoardStore.addSprintFilter(sprintFilter);
+    const defaultSearchVO = localPageCacheStore.getItem('scrumBoard.searchVO') || {};
+    ScrumBoardStore.bindFunction('refresh', (sprintId) => {
+      if (!defaultSearchVO.otherArgs || !defaultSearchVO.otherArgs.sprint || defaultSearchVO.otherArgs.sprint.length === 0) {
+        // defaultSearchVO.otherArgs.sprint = [sprintId];
+        sprintId && set(defaultSearchVO, 'otherArgs.sprint', [sprintId]);
       }
-      priorityIds && ScrumBoardStore.setPriority(priorityIds);
-    }
-    this.getBoard();
+      ScrumBoardStore.setSearchVO(defaultSearchVO);
+      this.getBoard(!sprintId);
+    });
     // eslint-disable-next-line react/destructuring-assignment
     const { state } = this.props.location;
     if (state && state.issueId) {
@@ -101,7 +87,7 @@ class ScrumBoardHome extends Component {
     ScrumBoardStore.resetDataBeforeUnmount();
   }
 
-  getBoard = async () => {
+  getBoard = async (noRefresh) => {
     const { location } = this.props;
     const url = this.paramConverter(location.search);
     const boardListData = await boardApi.loadAll();
@@ -111,7 +97,7 @@ class ScrumBoardHome extends Component {
     const defaultBoard = boardListData.find((item) => item.userDefault) || boardListData[0];
     if (defaultBoard.boardId) {
       ScrumBoardStore.setSelectedBoardId(defaultBoard.boardId);
-      this.refresh(defaultBoard, url, boardListData);
+      noRefresh ? ScrumBoardStore.setSpinIf(false) : this.refresh(defaultBoard, url, boardListData);
     }
   }
 
@@ -128,47 +114,9 @@ class ScrumBoardHome extends Component {
     return retObj;
   };
 
-  onQuickSearchChange = (
-    onlyMeChecked = false,
-    onlyStoryChecked = false,
-    starBeacon = false,
-    moreChecked,
-    personalFilters,
-  ) => {
-    ScrumBoardStore.addQuickSearchFilter(
-      onlyMeChecked,
-      onlyStoryChecked,
-      starBeacon,
-      moreChecked,
-      personalFilters,
-    );
-    localPageCacheStore.mergeSetItem('scrumboard', {
-      onlyMeChecked,
-      onlyStoryChecked,
-      starBeacon,
-      moreChecked,
-      personalFilters,
-    });
-    this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-  };
-
-  onAssigneeChange = (value) => {
-    ScrumBoardStore.addAssigneeFilter(value);
-    this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-  };
-
-  onSprintChange = (value) => {
-    ScrumBoardStore.addSprintFilter(value);
-    localPageCacheStore.mergeSetItem('scrumboard', {
-      sprintFilter: value,
-    });
-    this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-  }
-
   handleClearFilter = () => {
     ScrumBoardStore.clearFilter();
     localPageCacheStore.remove('scrumboard');
-    QuickSearchEvent.emit('clearQuickSearchSelect');
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
 
@@ -283,20 +231,6 @@ class ScrumBoardHome extends Component {
       SwimLaneId, destinationStatus, destinationStatusIndex, issue, false);
   };
 
-  handleToIterationBoard = () => {
-    if (!ScrumBoardStore.getSpinIf) {
-      to(LINK_URL.iterationBoard(ScrumBoardStore.getSprintId));
-    } else {
-      Choerodon.prompt('等待加载当前迭代');
-    }
-  }
-
-  handleModeChange = (e) => {
-    if (e.target.value === 'work') {
-      this.handleToIterationBoard();
-    }
-  }
-
   handleCreateBoardClick = () => {
     ModalPro.open({
       title: '创建看板',
@@ -323,23 +257,6 @@ class ScrumBoardHome extends Component {
         {`${ScrumBoardStore.getDayRemain >= 0 ? `${ScrumBoardStore.getDayRemain} days剩余` : '无剩余时间'}`}
       </span>
     </>
-  )
-
-  renderSwitchMode = () => (
-    <div style={{ marginLeft: 'auto' }}>
-      <RadioGroup className="c7nagile-switchRadio" value="board" style={{ marginLeft: 'auto', marginRight: 17 }} onChange={this.handleModeChange}>
-        <RadioButton value="board">
-          <Tooltip title="看板模式" placement="bottom">
-            <Icon type="view_week" />
-          </Tooltip>
-        </RadioButton>
-        <RadioButton value="work">
-          <Tooltip title="工作台模式" placement="bottom">
-            <Icon type="view_list" />
-          </Tooltip>
-        </RadioButton>
-      </RadioGroup>
-    </div>
   )
 
   refresh = (defaultBoard, url, boardListData) => {
@@ -374,11 +291,7 @@ class ScrumBoardHome extends Component {
     });
   }
 
-  handlePriorityChange = (value) => {
-    ScrumBoardStore.setPriority(value);
-    localPageCacheStore.mergeSetItem('scrumboard', {
-      priorityIds: value,
-    });
+  handleFilterChange = () => {
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
 
@@ -386,13 +299,19 @@ class ScrumBoardHome extends Component {
     ScrumBoardStore.setCreateIssueVisible(true);
   };
 
+  handleSaveSearchStore = (data) => {
+    this.issueSearchStore = data;
+  }
+
+  handleClickFilterManage = () => {
+    const filterManageVisible = ScrumBoardStore.getFilterManageVisible;
+    ScrumBoardStore.setFilterManageVisible(!filterManageVisible);
+  };
+
   render() {
-    const { HeaderStore } = this.props;
     const {
-      updateParentStatus, expandAll,
+      updateParentStatus,
     } = this.state;
-    const menu = AppState.currentMenuType;
-    const { type, id: projectId, organizationId: orgId } = menu;
     const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find((item) => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId);
     return (
       <Page
@@ -451,6 +370,7 @@ class ScrumBoardHome extends Component {
           >
             配置看板
           </Button>
+          <Button onClick={this.handleClickFilterManage} icon="settings">个人筛选</Button>
           <ExpandAllButton />
           <ScrumBoardFullScreen />
           {
@@ -470,51 +390,43 @@ class ScrumBoardHome extends Component {
                     完成冲刺
                   </Button>
                 </Permission>
-                {this.renderSwitchMode()}
               </>
             )
           }
         </Header>
         <Breadcrumb />
-        <Content style={{
-          padding: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          borderTop: '1px solid #D8D8D8',
-          paddingTop: 16,
-        }}
+        <Content
+          className="c7n-scrumboard-content"
+          style={{
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            borderTop: '1px solid #D8D8D8',
+            paddingTop: 16,
+          }}
         >
-          <div style={{ display: 'flex' }}>
-            <QuickSearch
-              onQuickSearchChange={this.onQuickSearchChange}
-              onAssigneeChange={this.onAssigneeChange}
-              onSprintChange={this.onSprintChange}
-              style={{ height: 32, margin: '0 0 16px 16px' }}
-            />
-            <SelectPriority onChange={this.handlePriorityChange} />
-            {ScrumBoardStore.hasSetFilter && <Button type="primary" onClick={this.handleClearFilter}>清除筛选</Button>}
-          </div>
+          <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
+
           <Spin spinning={ScrumBoardStore.getSpinIf}>
-            <div className="c7n-scrumboard" style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 270px)' }}>
+            <div className="c7n-scrumboard">
               <div style={{ display: 'table', minWidth: '100%' }}>
                 <div className="c7n-scrumboard-header">
                   <StatusColumn />
                 </div>
-                {(!ScrumBoardStore.didCurrentSprintExist
+                {this.issueSearchStore && (!ScrumBoardStore.didCurrentSprintExist
                   || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
                     && (!ScrumBoardStore.interconnectedData
                       || ScrumBoardStore.interconnectedData.size === 0))) ? (
                         <NoneSprint
                           doingSprintExist={ScrumBoardStore.didCurrentSprintExist}
-                          hasSetFilter={ScrumBoardStore.hasSetFilter}
-                          quickSearchObj={ScrumBoardStore.quickSearchObj}
+                          hasSetFilter={this.issueSearchStore.isHasFilter}
+                          filterItems={this.issueSearchStore.currentFlatFilter}
                         />
                   )
                   : (
                     <div
                       className="c7n-scrumboard-content"
-                      style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 272px)' }}
                     >
                       <div className="c7n-scrumboard-container">
                         <SwimLane
@@ -534,9 +446,13 @@ class ScrumBoardHome extends Component {
             refresh={this.refresh}
           />
           <CreateIssue refresh={this.refresh} />
-          <IssueDetail
-            refresh={this.refresh}
-          />
+          {this.issueSearchStore ? (
+            <FilterManage
+              visible={ScrumBoardStore.getFilterManageVisible}
+              setVisible={() => ScrumBoardStore.setFilterManageVisible(!ScrumBoardStore.getFilterManageVisible)}
+              issueSearchStore={this.issueSearchStore}
+            />
+          ) : null}
         </Content>
         {
           ScrumBoardStore.getUpdateParent ? (
@@ -566,7 +482,7 @@ class ScrumBoardHome extends Component {
             >
               <p>
                 {'任务'}
-                {ScrumBoardStore.getUpdatedParentIssue.issueNum}
+                {ScrumBoardStore.getUpdatedParentIssue?.issueNum}
                 {'的全部子任务为done'}
               </p>
               <div style={{ display: 'flex', alignItems: 'center' }}>

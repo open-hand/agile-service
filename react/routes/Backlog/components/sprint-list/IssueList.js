@@ -77,7 +77,7 @@ function IssueList({ data, sprintId }) {
                   )}
                 </WindowScroller>
               )}
-            <div style={{ padding: '10px 0px 10px 33px', borderBottom: '0.01rem solid rgba(0, 0, 0, 0.12)' }}>
+            <div style={{ padding: '10px 0px 10px 20px', borderBottom: '0.01rem solid rgba(0, 0, 0, 0.12)' }}>
               <QuickCreateIssue
                 epicId={BacklogStore.getChosenEpic !== 'all' && BacklogStore.getChosenEpic !== 'unset' ? BacklogStore.getChosenEpic : undefined}
                 versionIssueRelVOList={BacklogStore.getChosenVersion !== 'all' && BacklogStore.getChosenVersion !== 'unset' ? [

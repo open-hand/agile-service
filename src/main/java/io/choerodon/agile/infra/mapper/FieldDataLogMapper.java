@@ -20,4 +20,9 @@ public interface FieldDataLogMapper extends BaseMapper<FieldDataLogDTO> {
     void deleteByInstanceIdAndFieldIds(@Param("projectId") Long projectId, @Param("instanceId") Long instanceId, @Param("schemeCode") String schemeCode, @Param("fieldIds") Set<Long> fieldIds);
 
     void updateProjectId(@Param("projectId") Long projectId, @Param("targetProjectId") Long targetProjectId, @Param("instanceId") Long instanceId, @Param("schemeCode") String schemeCode);
+
+    void deleteByInstanceIdsAndFieldIds(@Param("projectId") Long projectId,
+                                        @Param("instanceIds") List<Long> instanceIds,
+                                        @Param("schemeCode") String schemeCode,
+                                        @Param("fieldIds") List<Long> fieldIds);
 }

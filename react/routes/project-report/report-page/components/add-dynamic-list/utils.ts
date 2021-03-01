@@ -24,6 +24,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
     summary,
     fixVersion,
     influenceVersion,
+    creatorIds,
+    updatorIds,
   } = data;
   return {
     advancedSearchArgs: {
@@ -43,6 +45,8 @@ function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes
       summary,
       fixVersion,
       influenceVersion,
+      creatorIds,
+      updatorIds,
     },
     searchArgs: {
       createStartDate: createDate[0],

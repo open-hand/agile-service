@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import SelectLabel from '@/components/select/select-label';
 
-function LabelField({ field, value, onChange }) {
+function LabelField({
+  field, value, onChange, projectId,
+}) {
   return (
     <SelectLabel
+      projectId={projectId}
       key={field.code}
       flat
       value={value || []}

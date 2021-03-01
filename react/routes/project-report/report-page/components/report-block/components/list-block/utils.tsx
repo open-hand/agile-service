@@ -50,7 +50,7 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
       title: '概要',
       dataIndex: 'summary',
       render: (item) => (
-        <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', marginLeft: -4 }}>
           <TypeTag data={item.issueTypeVO} />
           <span style={{ marginLeft: 5 }}>{item.summary}</span>
         </div>
@@ -58,7 +58,6 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
     }],
     ['issueNum', {
       title: '编号',
-      width: 150,
       dataIndex: 'issueNum',
       render: (item) => <span style={{ whiteSpace: 'nowrap' }}>{item.issueNum}</span>,
     }],
@@ -77,6 +76,16 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
       title: '报告人',
       dataIndex: 'assign',
       render: (item) => item.reporterRealName,
+    }],
+    ['createUser', {
+      title: '创建人',
+      dataIndex: 'createUser',
+      render: (item) => item.createUser?.realName,
+    }],
+    ['updateUser', {
+      title: '更新人',
+      dataIndex: 'updateUser',
+      render: (item) => item.updateUser?.realName,
     }],
     ['status', {
       title: '状态',
@@ -189,6 +198,15 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
     ['storyPoints', {
       title: '故事点',
       dataIndex: 'storyPoints',
+    }],
+    ['mainResponsibleUser', {
+      title: '主要负责人',
+      dataIndex: 'mainResponsibleUser',
+      render: (item) => item.mainResponsibleUser?.realName,
+    }],
+    ['environmentName', {
+      title: '环境',
+      dataIndex: 'environmentName',
     }],
   ]);
   return map.get(name);

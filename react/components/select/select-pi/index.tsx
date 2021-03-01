@@ -11,7 +11,7 @@ const renderPi = (pi: any) => {
   if (pi) {
     return (
       <div style={{ display: 'inline-block' }}>
-        {pi.id === '0' ? pi.name : `${pi.code}-${pi.name}`}
+        {pi.id === '0' ? pi.name : pi.fullName || `${pi.code}-${pi.name}`}
         {
           pi.statusCode === 'doing' && (
             <div className={styles.current}>当前</div>
@@ -39,13 +39,13 @@ const SelectPI: React.FC<Props> = forwardRef(({
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Props['afterLoad']>();
   afterLoadRef.current = afterLoad;
-  const config = useMemo((): SelectConfig<PI> => ({
+  const config = useMemo((): SelectConfig<PI & { piName?: string }> => ({
     name: 'all_pi',
     textField: 'piName',
     valueField: 'id',
     request: request || (() => piApi.project(projectId).getPiListByStatus(statusList)),
     optionRenderer: (pi) => (
-      <FragmentForSearch name={pi.id === '0' ? pi.name : `${pi.code}-${pi.name}`}>
+      <FragmentForSearch name={pi.id === '0' ? pi.name : pi.piName || `${pi.code}-${pi.name}`}>
         {renderPi(pi)}
       </FragmentForSearch>
     ),

@@ -6,6 +6,8 @@ import classnames from 'classnames';
 import DaysView from 'choerodon-ui/pro/lib/date-picker/DaysView';
 import TimesView from 'choerodon-ui/pro/lib/date-picker/TimesView';
 import DateTimesView from 'choerodon-ui/pro/lib/date-picker/DateTimesView';
+import YearsView from 'choerodon-ui/pro/lib/date-picker/YearsView';
+import MonthsView from 'choerodon-ui/pro/lib/date-picker/MonthsView';
 import moment, { Moment } from 'moment';
 import { observer } from 'mobx-react';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -36,6 +38,8 @@ const DateViews = {
   dateTime: ObserverDateTimesView,
   date: DaysView,
   time: TimesView,
+  year: YearsView,
+  month: MonthsView,
 };
 
 type DateViewsKey = 'dateTime' | 'date' | 'time';
@@ -138,6 +142,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
                 onViewModeChange={(newMode) => {
                   setMode(newMode);
                 }}
+                onSelectedDateChange={(date) => { setValue(date); }}
                 mode={dateType === 'datetime' ? 'dateTime' : dateType as any}
                 step={{}}
               />

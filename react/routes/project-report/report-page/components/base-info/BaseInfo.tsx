@@ -5,6 +5,7 @@ import {
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import SelectUser from '@/components/select/select-user';
+import { Prompt } from 'react-router-dom';
 import { useProjectReportContext } from '../../context';
 
 const BaseInfo: React.FC = () => {
@@ -48,7 +49,12 @@ const BaseInfo: React.FC = () => {
       valueField: 'id',
       multiple: true,
     }],
-  }), [initData]);
+    events: {
+      update: () => {
+        store.dirty = true;
+      },
+    },
+  }), [initData, store]);
   const handleSubmit = useCallback(async () => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();
@@ -67,16 +73,20 @@ const BaseInfo: React.FC = () => {
   const selectedReceiverList = useMemo(() => (edit ? toJS(store.baseInfo?.receiverList) : undefined), [edit, store.baseInfo?.receiverList]);
   const selectedCCList = useMemo(() => (edit ? toJS(store.baseInfo?.ccList) : undefined), [edit, store.baseInfo?.ccList]);
   return (
-    <Form style={{ width: 600, marginLeft: 18 }} dataSet={dataSet}>
-      <TextField name="title" />
-      <TextArea
-        name="description"
+    <>
+      <Prompt message={edit ? '项目报告有更改，放弃更改？' : '项目报告未保存，放弃更改？'} when={store.dirty} />
+      <Form style={{ width: 600, marginLeft: 18 }} dataSet={dataSet}>
+        <TextField name="title" />
+        <TextArea
+          name="description"
         // @ts-ignore
-        resize="vertical"
-      />
-      <SelectUser name="receiverList" selectedUser={selectedReceiverList} />
-      <SelectUser name="ccList" selectedUser={selectedCCList} clearButton />
-    </Form>
+          resize="vertical"
+        />
+        <SelectUser name="receiverList" selectedUser={selectedReceiverList} />
+        <SelectUser name="ccList" selectedUser={selectedCCList} clearButton />
+      </Form>
+    </>
+
   );
 };
 export default observer(BaseInfo);

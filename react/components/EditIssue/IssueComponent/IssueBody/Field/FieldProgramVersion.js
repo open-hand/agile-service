@@ -67,12 +67,13 @@ class FieldProgramVersion extends Component {
             disabled={disabled}
           >
 
-            <p className="primary" style={{ wordBreak: 'break-word' }}>
-              {programVersionFeatureRelVOS && programVersionFeatureRelVOS.length > 0
-                ? programVersionFeatureRelVOS.map((item, index, arr) => this.renderItem(item.name, index === arr.length - 1 ? '' : undefined)) : '无'}
-
-            </p>
-
+            {programVersionFeatureRelVOS && programVersionFeatureRelVOS.length > 0 ? (
+              <p className="primary" style={{ wordBreak: 'break-word' }}>
+                {
+                  programVersionFeatureRelVOS.map((item, index, arr) => this.renderItem(item.name, index === arr.length - 1 ? '' : undefined))
+                }
+              </p>
+            ) : <span>无</span>}
           </TextEditToggle>
         </div>
       </div>

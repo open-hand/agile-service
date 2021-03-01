@@ -3,13 +3,16 @@ import { observer } from 'mobx-react-lite';
 import SelectEpic from '@/components/select/select-epic';
 import { epicApi } from '@/api';
 
-function EpicField({ field, value, onChange }) {
+function EpicField({
+  field, value, onChange, projectId,
+}) {
   return (
     <SelectEpic
+      projectId={projectId}
       key={field.code}
       flat
       value={value || []}
-      request={() => epicApi.loadEpicsForSelect()}
+      request={() => epicApi.loadEpicsForSelect(projectId)}
       placeholder={field.name}
       multiple
       unassignedEpic

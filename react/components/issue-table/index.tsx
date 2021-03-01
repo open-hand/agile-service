@@ -209,6 +209,36 @@ const IssueTable: React.FC<Props> = ({
           )}
         />
         <Column
+          name="createUser"
+          hidden={columnHidden('createUser')}
+          renderer={({ record }) => (
+            <div style={{ display: 'inline-flex' }}>
+              {
+                record.get('createUser') && (
+                  <UserHead
+                    user={record.get('createUser')}
+                  />
+                )
+              }
+            </div>
+          )}
+        />
+        <Column
+          name="updateUser"
+          hidden={columnHidden('updateUser')}
+          renderer={({ record }) => (
+            <div style={{ display: 'inline-flex' }}>
+              {
+                record.get('updateUser') && (
+                  <UserHead
+                    user={record.get('updateUser')}
+                  />
+                )
+              }
+            </div>
+          )}
+        />
+        <Column
           sortable
           name="statusId"
           hidden={columnHidden('statusId')}
@@ -288,6 +318,8 @@ const IssueTable: React.FC<Props> = ({
         <Column hidden={columnHidden('epic')} name="epic" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />
         {isInProgram && <Column hidden={columnHidden('feature')} name="feature" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />}
         <Column hidden={columnHidden('issueSprintVOS')} name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />
+        <Column name="mainResponsibleUser" className="c7n-agile-table-cell" hidden={columnHidden('mainResponsibleUser')} renderer={({ value }) => value && <UserTag data={value} />} />
+        <Column name="environmentName" className="c7n-agile-table-cell" hidden={columnHidden('environmentName')} />
         {fields.map((field) => (
           <Column
             hidden={columnHidden(field.code)}

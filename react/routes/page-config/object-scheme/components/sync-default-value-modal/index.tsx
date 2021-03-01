@@ -1,6 +1,5 @@
-import { pageConfigApi, pageConfigApiConfig } from '@/api';
+import { pageConfigApi } from '@/api';
 import { IIssueType, IModalProps } from '@/common/types';
-import TextEditToggle from '@/components/TextEditTogglePro';
 import { toJS } from 'mobx';
 import beforeSubmitProcessData from '@/routes/page-config/components/create-field/util';
 import renderEditor from '@/routes/page-config/components/renderEditor';
@@ -22,6 +21,11 @@ interface Props {
   modal?: IModalProps
 }
 const dateList = ['datetime', 'time', 'date'];
+const dateFormat = {
+  date: 'YYYY-MM-DD',
+  datetime: 'YYYY-MM-DD HH:mm:ss',
+  time: 'HH:mm:ss',
+};
 const SyncDefaultValueEditForm: React.FC<Props> = ({
   record, options, modal, prefixCls, defaultTypes,
 }) => {
@@ -30,14 +34,30 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
     if (defaultValue === '') {
       defaultValue = undefined;
     }
-    if (defaultValue && ['checkbox', 'multiple', 'radio', 'single', 'multiMember'].includes(record.get('fieldType'))) {
+    if (defaultValue && ['checkbox', 'multiple', 'radio', 'single'].includes(record.get('fieldType'))) {
       defaultValue = String(defaultValue).split(',');
     }
+    if (['datetime', 'time', 'date'].includes(record.get('fieldType')) && record.get('extraConfig')) {
+      defaultValue = 'current';
+    }
+    if (record.get('fieldType') === 'multiMember') {
+      defaultValue = record.get('defaultValueObj');
+    }
+
     return defaultValue;
   }, [record]);
   const ds = useMemo(() => {
-    const defaultValueFieldProps = dateList.includes(record.get('fieldType')); // valueField
+    let defaultValue = record.get('defaultValue');
 
+    if (defaultValue === '') {
+      defaultValue = undefined;
+    }
+    if (dateList.includes(record.get('fieldType')) && defaultValue) {
+      defaultValue = moment(defaultValue, dateFormat.datetime).format(dateFormat[record.get('fieldType') as 'date' | 'datetime' | 'time']);
+    }
+    if (defaultValue && ['checkbox', 'multiple', 'radio', 'single', 'multiMember'].includes(record.get('fieldType'))) {
+      defaultValue = String(defaultValue).split(',');
+    }
     return new DataSet({
       autoCreate: true,
       autoQuery: false,
@@ -45,7 +65,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
         {
           name: 'defaultValue',
           label: '默认值',
-          defaultValue: initValue,
+          defaultValue,
         },
         {
           name: 'syncIssueType',
@@ -57,22 +77,20 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
         },
       ],
     });
-  }, [defaultTypes, initValue]);
+  }, [defaultTypes, record]);
 
   const handleOk = useCallback(async () => {
     if (await ds.validate()) {
       const syncIssueType = toJS(ds.current!.get('syncIssueType'));
-      console.log(syncIssueType);
-      const defaultValue = ds.current!.get('defaultValue');
-      // const originFieldOptions: any[] | undefined = record.get('fieldOptions');
-      // const extraConfig = record.get('extraConfig');
+      let defaultValue = toJS(ds.current!.get('defaultValue'));
+      if (['date', 'datetime', 'time'].includes(record.get('fieldType')) && defaultValue && typeof (defaultValue) === 'object') {
+        if (defaultValue.value === 'current') {
+          record.set('check', true);
+        }
+        defaultValue = defaultValue.meaning;
+      }
       record.set('defaultValue', defaultValue);
       const newData = beforeSubmitProcessData(record);
-      // if (!record.get('system') && ['checkbox', 'multiple', 'radio', 'single'].includes(record.get('fieldType'))) {
-      //   fieldOptions = !defaultValue || defaultValue.length === 0 ? originFieldOptions?.map((item) => ({ ...item, isDefault: false }))
-      //     : originFieldOptions?.map((item) => ({ ...item, isDefault: defaultValue.includes(item.id) }));
-      // }
-      // if()
       let updateFiledFlag = false;
       if (!(record.get('system') || (getMenuType() === 'project' && record.get('projectId') === null))) {
         await pageConfigApi.updateField(record.get('id'), newData);
@@ -106,7 +124,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
       {renderEditor({
         data: {
           ...record.toData(),
-          defaultValue: ['datetime', 'time', 'date'].includes(record.get('fieldType')) && record.get('extraConfig') ? 'current' : initValue,
+          defaultValue: initValue,
         },
         onChange: ['datetime', 'time', 'date'].includes(record.get('fieldType')) ? handleChangeDate : undefined,
         name: 'defaultValue',

@@ -19,13 +19,9 @@ public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
     List<ColumnAndIssueDTO> selectColumnsByBoardId(@Param("projectId") Long projectId,
                                 @Param("boardId") Long boardId,
                                 @Param("sprintId") Long sprintId,
-                                @Param("assigneeId") Long assigneeId,
-                                @Param("onlyStory") Boolean onlyStory,
                                 @Param("filterSql") String filterSql,
+                                @Param("searchVO") SearchVO searchVO,
                                 @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
-                                @Param("searchList") List<SearchVO> searchList,
-                                @Param("priorityIds") List<Long> priorityIds,
-                                @Param("starBeacon") Boolean starBeacon,
                                 @Param("userId") Long userId);
 
     void columnSort(@Param("boardId") Long boardId,

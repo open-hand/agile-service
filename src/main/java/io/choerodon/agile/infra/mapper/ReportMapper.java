@@ -5,6 +5,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.GroupDataChartDTO;
 import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -22,7 +23,7 @@ public interface ReportMapper {
      * 获取当前冲刺开启前的issue的指定修改字段信息
      *
      * @param issueIdList issueIdList当前冲刺开启前的issueIdList
-     * @param sprintDTO    sprintDTO
+     * @param sprintDTO   sprintDTO
      * @param field       filed修改字段
      * @return ReportIssueDTO
      */
@@ -32,7 +33,7 @@ public interface ReportMapper {
      * 获取当前冲刺期间加入的issue(包含加入时间、加入时的字段值)
      *
      * @param issueIdAddList issueIdList当前冲刺期间加入的issueIdList
-     * @param sprintDTO       sprintDTO
+     * @param sprintDTO      sprintDTO
      * @param field          filed修改字段
      * @return ReportIssueConvertDTO
      */
@@ -42,7 +43,7 @@ public interface ReportMapper {
      * 获取当前冲刺期间移除的issue(包含移除时间、移除时的字段值)
      *
      * @param issueIdRemoveList issueIdRemoveList
-     * @param sprintDTO          sprintDTO
+     * @param sprintDTO         sprintDTO
      * @param field             filed修改字段
      * @return ReportIssueConvertDTO
      */
@@ -51,7 +52,7 @@ public interface ReportMapper {
     /**
      * 获取冲刺开启前的issue
      *
-     * @param sprintDTO sprintDTO
+     * @param sprintDTO        sprintDTO
      * @param burnDownSearchVO
      * @param projectId
      * @return issueIds
@@ -63,7 +64,7 @@ public interface ReportMapper {
     /**
      * 获取冲刺期间加入的issue
      *
-     * @param sprintDTO sprintDTO
+     * @param sprintDTO        sprintDTO
      * @param burnDownSearchVO
      * @param projectId
      * @return issueIdList
@@ -84,7 +85,7 @@ public interface ReportMapper {
      * 查询在冲刺期间添加的issue，包含issue加入的时间
      *
      * @param issueIdAddList issueIdAddList
-     * @param sprintDTO       sprintDTO
+     * @param sprintDTO      sprintDTO
      * @return ReportIssueDOList
      */
     List<ReportIssueDTO> queryAddIssueDuringSprint(@Param("issueIdAddList") List<Long> issueIdAddList, @Param("sprintDTO") SprintDTO sprintDTO);
@@ -93,7 +94,7 @@ public interface ReportMapper {
      * 查询在冲刺期间移除的issue，包含issue移除的时间
      *
      * @param issueIdRemoveList issueIdRemoveList
-     * @param sprintDTO          sprintDTO
+     * @param sprintDTO         sprintDTO
      * @return ReportIssueDOList
      */
     List<ReportIssueDTO> queryRemoveIssueDuringSprint(@Param("issueIdRemoveList") List<Long> issueIdRemoveList, @Param("sprintDTO") SprintDTO sprintDTO);
@@ -101,7 +102,7 @@ public interface ReportMapper {
     /**
      * 获取冲刺期间issue状态更改为done的issue
      *
-     * @param sprintDTO     sprintDTO
+     * @param sprintDTO    sprintDTO
      * @param issueAllList issueAllList
      * @return issueIds
      */
@@ -110,7 +111,7 @@ public interface ReportMapper {
     /**
      * 获取冲刺期间issue状态从done更改到其他的issue
      *
-     * @param sprintDTO     sprintDTO
+     * @param sprintDTO    sprintDTO
      * @param issueAllList issueAllList
      * @return issueIds
      */
@@ -119,9 +120,9 @@ public interface ReportMapper {
     /**
      * 获取冲刺期间移动到done状态的字段变更值（包含变更时间）
      *
-     * @param issueId  issueId
+     * @param issueId   issueId
      * @param sprintDTO sprintDTO
-     * @param field    field
+     * @param field     field
      * @return ReportIssueDOList
      */
     List<ReportIssueDTO> queryAddIssueDoneValueDuringSprint(@Param("issueId") Long issueId, @Param("sprintDTO") SprintDTO sprintDTO, @Param("field") String field);
@@ -129,9 +130,9 @@ public interface ReportMapper {
     /**
      * 获取冲刺期间done移动到非done状态的字段变更值（包含变更时间）
      *
-     * @param issueId  issueId
+     * @param issueId   issueId
      * @param sprintDTO sprintDTO
-     * @param field    field
+     * @param field     field
      * @return ReportIssueDOList
      */
     List<ReportIssueDTO> queryRemoveIssueDoneValueDurationSprint(@Param("issueId") Long issueId, @Param("sprintDTO") SprintDTO sprintDTO, @Param("field") String field);
@@ -140,7 +141,7 @@ public interface ReportMapper {
      * 获取开启冲刺前，issue状态为done的issueId
      *
      * @param issueIdList issueIdList开启冲刺前冲刺内的issue
-     * @param sprintDTO    sprintDTO
+     * @param sprintDTO   sprintDTO
      * @return issueDoneCount
      */
     List<Long> queryDoneIssueIdsBeforeSprintStart(@Param("issueIdList") List<Long> issueIdList, @Param("sprintDTO") SprintDTO sprintDTO);
@@ -149,7 +150,7 @@ public interface ReportMapper {
      * 冲刺期间issue移动到done的时间
      *
      * @param issueIdAddDoneList issueIdAddDoneList冲刺期间移动到done的issue
-     * @param sprintDTO           sprintDTO
+     * @param sprintDTO          sprintDTO
      * @return ReportIssueDOList
      */
     List<ReportIssueDTO> queryAddIssueDoneDetailDuringSprint(@Param("issueIdAddDoneList") List<Long> issueIdAddDoneList, @Param("sprintDTO") SprintDTO sprintDTO);
@@ -158,7 +159,7 @@ public interface ReportMapper {
      * 冲刺期间issue从done移除的时间
      *
      * @param issueIdRemoveDoneList issueIdAddDoneList冲刺期间移动到非done的issue
-     * @param sprintDTO              sprintDTO
+     * @param sprintDTO             sprintDTO
      * @return ReportIssueDOList
      */
     List<ReportIssueDTO> queryRemoveIssueDoneDetailDurationSprint(@Param("issueIdRemoveDoneList") List<Long> issueIdRemoveDoneList, @Param("sprintDTO") SprintDTO sprintDTO);
@@ -167,7 +168,7 @@ public interface ReportMapper {
      * 冲刺期间issue的字段值变化（包含变化时间）
      *
      * @param issueAllList issueAllList
-     * @param sprintDTO     sprintDTO
+     * @param sprintDTO    sprintDTO
      * @param field        field
      * @return ReportIssueDOList
      */
@@ -177,7 +178,7 @@ public interface ReportMapper {
      * 冲刺开启前的issue数量统计信息
      *
      * @param issueIdList issueIdList
-     * @param sprintDTO    sprintDTO
+     * @param sprintDTO   sprintDTO
      * @return ReportIssueDTO
      */
     List<ReportIssueDTO> queryAddIssueBeforeDuringSprint(@Param("issueIdList") List<Long> issueIdList, @Param("sprintDTO") SprintDTO sprintDTO);
@@ -194,7 +195,7 @@ public interface ReportMapper {
      * 查询冲刺结束后的字段value统计信息
      *
      * @param sprintDTO sprintDTO
-     * @param field    field
+     * @param field     field
      * @return ReportIssueDTO
      */
     List<ReportIssueDTO> queryIssueValueAfterSprint(@Param("sprintDTO") SprintDTO sprintDTO, @Param("field") String field);
@@ -221,7 +222,7 @@ public interface ReportMapper {
     /**
      * 冲刺期间移出的issue
      *
-     * @param sprintDTO sprintDTO
+     * @param sprintDTO        sprintDTO
      * @param projectId
      * @param burnDownSearchVO
      * @return Long
@@ -317,11 +318,13 @@ public interface ReportMapper {
      * @param endDate   endDate
      * @param sprintId  sprintId
      * @param versionId versionId
+     * @param statusId statusId
      * @return PieChartDTO
      */
     List<PieChartDTO> queryPieChartByParam(@Param("projectId") Long projectId, @Param("own") Boolean own,
                                            @Param("fieldName") String fieldName, @Param("typeCode") Boolean typeCode,
-                                           @Param("total") Integer total, @Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("sprintId") Long sprintId, @Param("versionId") Long versionId);
+                                           @Param("total") Integer total, @Param("startDate") Date startDate, @Param("endDate") Date endDate,
+                                           @Param("sprintId") Long sprintId, @Param("versionId") Long versionId, @Param("statusId") Long statusId);
 
     /**
      * 根据Epic查询统计信息

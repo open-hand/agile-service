@@ -1,11 +1,25 @@
 body.c7n-scrumboard-fullScreen {
-  .page-header, #menu {
+
+  .page-header,
+  #menu {
     display: none;
   }
 }
+
 .c7n-scrumboard-page-select-board-dropdown {
   .c7n-select-dropdown-footer {
     padding: 0;
+  }
+}
+
+.c7n-scrumboard-content {
+  & > .c7n-spin-nested-loading {
+    flex: 1;
+    overflow: hidden;
+
+    .c7n-spin-container {
+      height: 100%;
+    }
   }
 }
 
@@ -13,7 +27,7 @@ body.c7n-scrumboard-fullScreen {
   position: relative;
   flex-grow: 1;
   overflow: auto;
-  height: calc(~'100vh - 218px');
+  height: 100%;
 
   .c7n-scrumboard-header {
     .greaterThanMax {

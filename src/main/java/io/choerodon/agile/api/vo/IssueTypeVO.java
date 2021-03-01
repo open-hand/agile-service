@@ -31,6 +31,8 @@ public class IssueTypeVO {
     @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
+    private IssueTypeVO referenceIssueType;
+
     /**
      * 用于做状态机方案的配置时
      */
@@ -56,6 +58,18 @@ public class IssueTypeVO {
     private Boolean deleted;
 
     private Long referenceId;
+
+    private Boolean copyStatusMachine;
+
+    private Boolean copyCustomField;
+
+    public IssueTypeVO getReferenceIssueType() {
+        return referenceIssueType;
+    }
+
+    public void setReferenceIssueType(IssueTypeVO referenceIssueType) {
+        this.referenceIssueType = referenceIssueType;
+    }
 
     public Long getReferenceId() {
         return referenceId;
@@ -199,6 +213,22 @@ public class IssueTypeVO {
 
     public void setStateMachineId(Long stateMachineId) {
         this.stateMachineId = stateMachineId;
+    }
+
+    public Boolean getCopyStatusMachine() {
+        return copyStatusMachine;
+    }
+
+    public void setCopyStatusMachine(Boolean copyStatusMachine) {
+        this.copyStatusMachine = copyStatusMachine;
+    }
+
+    public Boolean getCopyCustomField() {
+        return copyCustomField;
+    }
+
+    public void setCopyCustomField(Boolean copyCustomField) {
+        this.copyCustomField = copyCustomField;
     }
 
     @Override

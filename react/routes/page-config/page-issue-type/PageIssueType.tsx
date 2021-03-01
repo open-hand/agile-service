@@ -3,7 +3,7 @@ import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import {
-  Button, Modal, Spin, message, Select,
+  Button, Modal, Spin, message, Select, Tooltip,
 } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -15,7 +15,10 @@ import {
 } from '@/api/PageConfig';
 import { uploadAndReplaceImg, text2Delta } from '@/utils/richText';
 import { validKeyReturnValue } from '@/common/commonValid';
-import { omit, set } from 'lodash';
+import {
+  omit, set, pick, isEmpty,
+} from 'lodash';
+import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -29,6 +32,14 @@ import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
 import { transformDefaultValue, beforeSubmitTransform } from './utils';
 
+const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> = ({
+  title, children, disabled, ...otherProps
+}) => {
+  if (title && disabled) {
+    return <Tooltip title={title}><Button disabled={disabled} {...omit(otherProps, 'onClick')}>{children}</Button></Tooltip>;
+  }
+  return <Button {...otherProps}>{children}</Button>;
+};
 type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: number, localDefaultObj: any, defaultValueObj: any, };
 function PageIssueType() {
   const {
@@ -42,7 +53,9 @@ function PageIssueType() {
       message.success('保存成功');
       setBtnLoading(false);
     }).catch(() => {
-      message.error('网络异常');
+      // message.error('网络异常');
+      setBtnLoading(false);
+      pageIssueTypeStore.setLoading(false);
     });
   };
   const handleSubmit = () => {
@@ -63,6 +76,8 @@ function PageIssueType() {
           edited = item.dataSetRecord.get('edited');
           required = item.dataSetRecord.get('required');
           extraProps = beforeSubmitTransform(item.dataSetRecord, 'tempKey');
+        } else {
+          extraProps = { defaultValue: isEmpty(item.defaultValue) ? '' : String(item.defaultValue) };
         }
         return {
           ...omit(item, 'dataSetRecord', 'local', 'showDefaultValueText', 'localSource'),
@@ -149,7 +164,7 @@ function PageIssueType() {
     !oldField && pageIssueTypeStore.addCreatedField(newData);
     // 当是增添的已有字段 或是当前类型字段时 增添数据至表格
     if (oldField
-      || (newData.issueTypeIds.some((item: any) => item === pageIssueTypeStore.currentIssueType))) {
+      || (newData.issueTypeIds.some((item: any) => item === pageIssueTypeStore.currentIssueType.id))) {
       const newRank = await pageConfigApi.loadRankValue({
         previousRank: null,
         nextRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
@@ -213,14 +228,16 @@ function PageIssueType() {
     >
       <Prompt message={`是否放弃更改 ${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageIssueTypeStore.getDirty} />
       <Header>
-        <Button icon="playlist_add" onClick={openCreateFieldModal}>创建字段</Button>
-        <Button
+        <TooltipButton title="该问题类型已停用，无法创建字段" disabled={!pageIssueTypeStore.currentIssueType.enabled} icon="playlist_add" onClick={openCreateFieldModal}>创建字段</TooltipButton>
+        <TooltipButton
           icon="add"
+          title="该问题类型已停用，无法添加已有字段"
+          disabled={!pageIssueTypeStore.currentIssueType.enabled}
           onClick={() => openAddField(addUnselectedDataSet,
             pageIssueTypeStore, onSubmitLocal, onRestoreLocal)}
         >
           添加已有字段
-        </Button>
+        </TooltipButton>
       </Header>
       <Breadcrumb />
       <Content className={`${prefixCls}-content`} style={{ overflowY: 'hidden' }}>

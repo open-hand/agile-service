@@ -51,6 +51,7 @@ export interface PI {
   id: string
   code: string
   name: string
+  fullName: string
   startDate: string
   endDate: string
   actualStartDate: string | null
@@ -78,10 +79,11 @@ export interface IProgramVersion {
   name: string,
   programId: string,
   statusCode: string,
-  versionBase: {
+  versionBase?: {
     id: string,
     name: string,
   }
+  versionBaseId: string,
 }
 
 export interface IModalProps extends ModalProps {
@@ -259,6 +261,9 @@ export interface Issue {
   createrEmail: string
   createrName: string
   createrRealName: string
+  createUser?: User
+  updateUser?: User
+  mainResponsibleUser?: User
   createrLoginName: string
   assigneeId: string,
   assigneeImageUrl: string,
@@ -324,7 +329,11 @@ export type IIssueColumnName =
   'storyPoints' |
   'version' |
   'epic' |
-  'feature';
+  'feature' |
+  'createUser' |
+  'updateUser' |
+  'mainResponsibleUser' |
+  'environmentName';
 
 export type IFieldType =
   'text' | 'input' | 'member' | 'multiMember' | 'single' | 'multiple' | 'radio' | 'checkbox' |

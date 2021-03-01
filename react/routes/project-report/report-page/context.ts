@@ -12,6 +12,7 @@ interface Context {
   edit: boolean
   preview: boolean
   setPreview: React.Dispatch<React.SetStateAction<boolean>>
+  refresh: () => void
 }
 const ProjectReportContext = createContext({} as Context);
 

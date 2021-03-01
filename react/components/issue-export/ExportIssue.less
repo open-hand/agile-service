@@ -34,7 +34,9 @@
         font-weight: 500;
       }
     }
-
+    &-template {
+      margin-bottom: .23rem;
+    }
     .c7n-pro-form {
       margin-top: .03rem;
     }
@@ -52,6 +54,10 @@
     height: .001rem;
   }
 
+  .c7n-agile-ws-progress-area {
+    margin-bottom: 10px;
+  }
+
   .c7n-pro-modal-header {
     padding-left: .2rem;
   }
@@ -63,6 +69,19 @@
 
   .c7n-pro-btn >.icon {
     font-size: .18rem;
+  }
+
+  .c7n-pro-checkbox:disabled + .c7n-pro-checkbox-inner {
+    border-color: #D7D7D7 !important;
+    background-color: #F5F5F5 !important;
+    &::after {
+      border-color: #D7D7D7 !important;
+      color: #FFF;
+      background-color: #F5F5F5 !important;
+    }
+    & + span {
+      color: rgba(0, 0, 0, 0.87);
+    }
   }
 
   .c7n-pro-checkbox-float-label {
@@ -95,5 +114,13 @@
 
   .c7n-agile-ws-finish {
     margin-top: .1rem;
+  }
+
+  .c7n-exportIssue-btn {
+    background: rgba(83, 101, 234, 0.14);
+    border-radius: 4px;
+  }
+  &-btns {
+    margin-top: .04rem;
   }
 }

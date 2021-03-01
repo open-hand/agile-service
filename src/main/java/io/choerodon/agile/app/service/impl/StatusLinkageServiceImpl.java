@@ -7,10 +7,12 @@ import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusLinkageService;
+import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusLinkageDTO;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.mapper.StatusLinkageMapper;
 import io.choerodon.agile.infra.mapper.StatusMachineTransformMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -54,6 +56,8 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
 
     @Autowired
     private StatusMachineTransformMapper statusMachineTransformMapper;
+    @Autowired
+    private IssueTypeMapper issueTypeMapper;
 
     @Override
     public List<StatusLinkageVO> createOrUpdate(Long projectId, Long issueTypeId, Long statusId, Long objectVersionNumber, String applyType, List<StatusLinkageVO> linkageVOS) {
@@ -67,6 +71,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
                 statusLinkageDTO.setProjectId(projectId);
                 statusLinkageDTO.setIssueTypeId(issueTypeId);
                 statusLinkageDTO.setStatusId(statusId);
+                statusLinkageDTO.setParentIssueTypeCode("");
                 baseInsert(statusLinkageDTO);
             }
         }
@@ -126,10 +131,37 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (!CollectionUtils.isEmpty(statusVOS)) {
             typeVOMap.putAll(issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity())));
         }
+        Set<Long> issueTypeIds = new HashSet<>();
+        Set<Long> projectIds = new HashSet<>();
         for (StatusLinkageVO statusLinkageVO : linkageVOS) {
             statusLinkageVO.setStatusVO(statusMap.get(statusLinkageVO.getParentIssueStatusSetting()));
             statusLinkageVO.setIssueTypeVO(typeVOMap.get(statusLinkageVO.getParentIssueTypeId()));
+            issueTypeIds.add(statusLinkageVO.getIssueTypeId());
+            projectIds.add(statusLinkageVO.getProjectId());
         }
+        Map<Long, Map<Long, String>> map = new HashMap<>();
+        final Long zero = 0L;
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        issueTypeMapper.selectWithAliasByIds(issueTypeIds, projectIds, organizationId)
+                .forEach(x -> {
+                    Long id = x.getId();
+                    Map<Long, String> projectIssueTypeMap = map.computeIfAbsent(id, y -> new HashMap<>());
+                    projectIssueTypeMap.put(zero, x.getName());
+                    List<IssueTypeExtendDTO> issueTypeExtends = x.getIssueTypeExtends();
+                    if (!ObjectUtils.isEmpty(issueTypeExtends)) {
+                        issueTypeExtends.forEach(y -> projectIssueTypeMap.put(y.getProjectId(), y.getName()));
+                    }
+                });
+        linkageVOS.forEach(x -> {
+            Long id = x.getIssueTypeId();
+            Map<Long, String> projectIssueTypeMap = map.get(id);
+            Long thisProjectId = x.getProjectId();
+            String name = projectIssueTypeMap.get(thisProjectId);
+            if (name == null) {
+                name = projectIssueTypeMap.get(zero);
+            }
+            x.setIssueTypeName(name);
+        });
         return linkageVOS;
     }
 
@@ -155,7 +187,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         Map<Long, StatusLinkageDTO> statusLinkageDTOMap = statusLinkageDTOS.stream().collect(Collectors.toMap(StatusLinkageDTO::getParentIssueTypeId, Function.identity()));
         Long parentIssueId = getParentIssueId(issueDTO);
         IssueDTO parentIssue = issueMapper.selectByPrimaryKey(parentIssueId);
-        StatusLinkageDTO statusLinkageDTO = statusLinkageDTOMap.get(parentIssue.getIssueId());
+        StatusLinkageDTO statusLinkageDTO = statusLinkageDTOMap.get(parentIssue.getIssueTypeId());
         if (ObjectUtils.isEmpty(statusLinkageDTO)) {
             return true;
         }
@@ -165,7 +197,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         // 查询父任务的子任务
         List<IssueDTO> issueDTOS = issueMapper.querySubIssueByParentIssueId(projectId, parentIssueId);
         List<Long> issueTypeIds = issueDTOS.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
-        List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeId(projectId,parentIssue.getIssueId(),issueTypeIds,statusLinkageDTO.getParentIssueStatusSetting());
+        List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeId(projectId,parentIssue.getIssueTypeId(),issueTypeIds,statusLinkageDTO.getParentIssueStatusSetting());
         Map<Long, List<StatusLinkageDTO>> linkageDTOMap = select.stream().collect(Collectors.groupingBy(StatusLinkageDTO::getIssueTypeId));
         Map<String, List<IssueDTO>> issueMap = issueDTOS.stream().collect(Collectors.groupingBy(IssueDTO::getTypeCode));
         if (select.size() == 1 && statusLinkageDTO.getIssueTypeId().equals(issueDTO.getIssueTypeId())) {

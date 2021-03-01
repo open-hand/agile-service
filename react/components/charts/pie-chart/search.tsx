@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui/pro';
-import { IVersion, ISprint } from '@/common/types';
+import { IVersion, ISprint, IStatus } from '@/common/types';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import styles from './index.less';
 import { IPieChartType } from './index';
@@ -24,15 +24,16 @@ export interface PieSearchProps {
   chooseId: string | '',
   versions: IVersion[],
   sprints: ISprint[],
+  status: IStatus[]
   type: IPieChartType,
-  chooseDimension: 'sprint' | 'version' | ''
+  chooseDimension: 'sprint' | 'version' | 'status' | ''
   setType: Function,
   setChooseDimension: Function,
   setChooseId: Function,
   projectId?: string
 }
 const PieSearch: React.FC<PieSearchProps> = ({
-  chooseId, versions, sprints, type, chooseDimension, setType, setChooseDimension, setChooseId,
+  chooseId, versions, sprints, status, type, chooseDimension, setType, setChooseDimension, setChooseId,
 }) => {
   let chooseDimensionType = [
     {
@@ -41,6 +42,9 @@ const PieSearch: React.FC<PieSearchProps> = ({
     }, {
       key: 'version',
       name: '版本',
+    }, {
+      key: 'status',
+      name: '状态',
     },
   ];
 
@@ -62,17 +66,29 @@ const PieSearch: React.FC<PieSearchProps> = ({
     ];
   }
 
-  const chooseDimensionTypeItem = chooseDimensionType.find((item) => item.key === chooseDimension);
-
   const changeType = (value: IPieChartType) => {
     setType(value);
     setChooseDimension('');
   };
 
-  const handleChooseDimensionChange = (value: 'sprint' | 'version' | '') => {
+  const handleChooseDimensionChange = (value: 'sprint' | 'version' | 'status' | '') => {
     setChooseDimension(value);
     if (value) {
-      setChooseId(value === 'version' ? versions[0] && versions[0].versionId : sprints[0] && sprints[0].sprintId);
+      switch (value) {
+        case 'sprint': {
+          setChooseId(sprints[0] && sprints[0].sprintId);
+          break;
+        }
+        case 'version': {
+          setChooseId(versions[0] && versions[0].versionId);
+          break;
+        }
+        case 'status': {
+          setChooseId(status[0] && status[0].id);
+          break;
+        }
+        default: break;
+      }
     }
   };
 
@@ -123,25 +139,34 @@ const PieSearch: React.FC<PieSearchProps> = ({
       {
         chooseDimension ? (
           <Select
+            key={chooseDimension}
             className={styles.c7n_pieChart_filter_item}
             style={{ minWidth: 200 }}
             labelLayout={'float' as LabelLayout}
-            value={chooseId.toString()}
+            value={chooseId?.toString()}
             onChange={handleChooseIdChange}
             clearButton
+            searchable
           >
             {
-            chooseDimension === 'version' && versions.map((item) => (
-              <Option key={item.versionId} value={item.versionId}>{item.name}</Option>
-            ))
-          }
+              chooseDimension === 'version' && versions.map((item) => (
+                <Option key={item.versionId} value={item.versionId}>{item.name}</Option>
+              ))
+            }
             {
-            chooseDimension === 'sprint' && sprints.map((item) => (
-              <Option key={item.sprintId} value={item.sprintId}>
-                {item.sprintName}
-              </Option>
-            ))
-          }
+              chooseDimension === 'sprint' && sprints.map((item) => (
+                <Option key={item.sprintId} value={item.sprintId}>
+                  {item.sprintName}
+                </Option>
+              ))
+            }
+            {
+              chooseDimension === 'status' && status.map((s) => (
+                <Option value={s.id}>
+                  {s.name}
+                </Option>
+              ))
+            }
           </Select>
         ) : ''
       }

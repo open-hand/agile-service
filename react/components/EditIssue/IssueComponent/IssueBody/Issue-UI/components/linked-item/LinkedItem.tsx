@@ -1,7 +1,6 @@
 import React, { useCallback, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Progress } from 'choerodon-ui/pro';
-import { Icon } from 'choerodon-ui';
+import { Button, Progress } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import to from '@/utils/to';
 import { ProgressStatus } from 'choerodon-ui/lib/progress/enum';
@@ -27,7 +26,8 @@ interface Props {
 }
 
 const LinkItem: React.FC<Props> = ({ ui, reloadIssue, uploading = false }) => {
-  const { store } = useContext(EditIssueContext);
+  const { store, disabled } = useContext(EditIssueContext);
+  const { outside } = store;
 
   const handleDownload = useCallback(() => {
     if (ui.url) {
@@ -37,15 +37,20 @@ const LinkItem: React.FC<Props> = ({ ui, reloadIssue, uploading = false }) => {
 
   const handlePreview = useCallback(() => {
     if (ui.id) {
-      to(`/agile/ui-preview/${ui.id}`, {
-        type: 'project',
-        params: {
-          fullPage: 'true',
+      if (!outside) {
+        to(`/agile/ui-preview/${ui.id}`, {
+          type: 'project',
+          params: {
+            fullPage: 'true',
+          },
         },
-      },
-      { blank: true });
+        { blank: true });
+      } else {
+        window.open(`/#/agile/outside/ui-preview/${ui.id}`);
+      }
     }
-  }, [ui.id]);
+  }, [outside, ui.id]);
+
   return (
     <div className={styles.linkedItem}>
       <div
@@ -92,19 +97,12 @@ const LinkItem: React.FC<Props> = ({ ui, reloadIssue, uploading = false }) => {
       <div className={styles.right}>
         {
           !uploading && ui.status !== 'failed' && (
-            <Icon
-              type="get_app"
-              style={{ marginRight: 5 }}
-              onClick={handleDownload}
-            />
+            <Button icon="get_app" onClick={handleDownload} />
           )
         }
         {
-          !uploading && (
-          <Icon
-            type="delete_forever"
-            onClick={() => { openDeleteModal({ ui: ui as IUi, store, reloadIssue }); }}
-          />
+          !uploading && !disabled && (
+            <Button icon="delete_forever" onClick={() => { openDeleteModal({ ui: ui as IUi, store, reloadIssue }); }} />
           )
         }
       </div>

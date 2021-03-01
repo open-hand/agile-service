@@ -1,7 +1,6 @@
-import React, {
+import {
   useCallback, useMemo, useRef,
 } from 'react';
-import { Select } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import renderEditor from '../../../components/renderEditor';
@@ -32,6 +31,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
   const handleSubmit = useCallback((value: any) => {
     const currentData = record.toData();
     let newValue = value;
+    let extraConfig: boolean | undefined;
     let currentDefaultValueObj = currentData.localDefaultObj || currentData.defaultValueObj;
     if (fieldType === 'member') {
       const newLocalDefaultObj = dataRef.current?.find((item) => item.id === value);
@@ -48,16 +48,20 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
         currentDefaultValueObj = undefined;
       }
     }
+
     if (['date', 'datetime', 'time'].includes(fieldType)) {
       const { meaning, value: dateValue } = newValue || {};
-      newValue = dateValue === 'current' ? currentData.defaultValue || meaning : value;
-      record.set('extraConfig', dateValue === 'current');
+      extraConfig = dateValue === 'current';
+      // newValue = currentData.defaultValue;
+      newValue = extraConfig ? currentData.defaultValue || meaning : dateValue;
+      extraConfig && record.init('defaultValue', newValue);
+      record.set('extraConfig', extraConfig);
     }
 
     record.set('defaultValue', newValue);
     record.set('showDefaultValueText', transformDefaultValue({
       ...currentData,
-      // @ts-ignore
+      extraConfig,
       optionKey: currentData.localSource === 'created' ? 'tempKey' : 'id',
       defaultValue: newValue,
       defaultValueObj: currentDefaultValueObj,
@@ -68,7 +72,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
     if (['date', 'datetime', 'time'].includes(fieldType) && record.get('extraConfig')) {
       return 'current';
     }
-    return typeof (record.get('defaultValue')) === 'undefined' || record.get('defaultValue') === '' ? undefined : record.get('defaultValue');
+    return typeof (record.get('defaultValue')) === 'undefined' || record.get('defaultValue') === '' || record.get('defaultValue') === null ? undefined : record.get('defaultValue');
   }, [fieldType, record, record.get('defaultValue'), record.get('extraConfig')]);
   const variableProps = useMemo(() => {
     let editor = () => renderEditor({
