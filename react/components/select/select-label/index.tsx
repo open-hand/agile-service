@@ -36,6 +36,7 @@ const SelectLabel: React.FC<Props> = forwardRef(({
       return [...extraOptions, ...data];
     },
     paging: false,
+    combo: otherProps.combo ?? true,
   }), []);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;

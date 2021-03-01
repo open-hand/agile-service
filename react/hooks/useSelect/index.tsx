@@ -54,6 +54,7 @@ export interface SelectConfig<T = {}> {
   paging?: boolean
   props?: object
   tooltip?: boolean
+  combo?: boolean
 }
 
 export interface RefHandle {
@@ -82,6 +83,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     afterLoad: afterLoadFn,
     paging = true,
     props,
+    combo,
   } = config;
   const request = usePersistFn(requestFn);
   const afterLoad = usePersistFn(afterLoadFn || noop);
@@ -99,11 +101,11 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
         : result;
       return text;
     }
-    if (!firstRef.current && value === originText) {
+    if (combo && !firstRef.current && value === originText) {
       return originText;
     }
     return '';
-  }, [optionRenderer]);
+  }, [combo, optionRenderer]);
   // 不分页时，本地搜索
   const localSearch = !paging;
   const loadData = useCallback(async ({ filter = textRef.current, page = 1 }: LoadConfig = {} as LoadConfig) => {
