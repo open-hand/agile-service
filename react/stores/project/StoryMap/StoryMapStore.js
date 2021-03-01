@@ -347,11 +347,7 @@ class StoryMapStore {
       storyData[epicId] = {
         epicId,
         // eslint-disable-next-line no-nested-ternary
-        collapse: this.foldCompletedEpic
-          ? true
-          : this.storyData[epicId]
-            ? this.storyData[epicId].collapse
-            : false,
+        collapse: (this.foldCompletedEpic && epic.statusVO?.completed) || this.storyData[epicId].collapse,
         storys: [],
         feature: epicId ? { // 无史诗不显示无特性
           none: {
