@@ -241,7 +241,7 @@ const PieChart = observer(() => {
                 <table>
                   <thead>
                     <tr>
-                      <td style={{ width: '166px' }}>经办人</td>
+                      <td style={{ width: '166px' }}>主要负责人</td>
                       <td style={{ width: '104px' }}>{currentTab}</td>
                       <td style={{ paddingRight: 38 }}>百分比</td>
                     </tr>
