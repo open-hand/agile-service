@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
+import { stores } from '@choerodon/boot';
 import { Modal, CheckBox } from 'choerodon-ui/pro';
 import { IComment, IModalProps } from '@/common/types';
 import { issueCommentApi } from '@/api/IssueComment';
@@ -14,9 +15,13 @@ interface Props {
   parentId: string
   reload: Function
 }
+const { AppState } = stores;
+
 const DeleteComment: React.FC<Props> = ({
   comment, isReply, modal, onDelete, projectId, parentId, reload,
 }) => {
+  const loginUserId = AppState.userInfo.id;
+  const isSelf = String(comment.userId) === String(loginUserId);
   const [deleteType, setDeleteType] = useState('deleteOnly');
   const handleChange = useCallback((value) => {
     if (value) {
@@ -28,7 +33,7 @@ const DeleteComment: React.FC<Props> = ({
 
   const handleDelete = useCallback(() => {
     if (deleteType === 'deleteWithReply') {
-      return issueCommentApi.project(projectId).deleteWithReply(comment.commentId).then(() => {
+      return issueCommentApi.project(projectId).deleteWithReply(comment.commentId, isSelf).then(() => {
         modal?.close();
         if (onDelete && isReply) {
           onDelete(parentId);
@@ -37,7 +42,7 @@ const DeleteComment: React.FC<Props> = ({
         }
       });
     }
-    return issueCommentApi.project(projectId).delete(comment.commentId)
+    return issueCommentApi.project(projectId).delete(comment.commentId, isSelf)
       .then(() => {
         modal?.close();
         if (onDelete && isReply) {
@@ -46,7 +51,7 @@ const DeleteComment: React.FC<Props> = ({
           reload();
         }
       });
-  }, [comment.commentId, deleteType, isReply, modal, onDelete, parentId, projectId, reload]);
+  }, [comment.commentId, deleteType, isReply, isSelf, modal, onDelete, parentId, projectId, reload]);
 
   useEffect(() => {
     modal?.handleOk(handleDelete);

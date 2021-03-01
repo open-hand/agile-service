@@ -273,7 +273,7 @@ const NotifySetting = ({
   // @ts-ignore
     data[0].noticeTypeList && data[0].noticeTypeList.length > 0
     // @ts-ignore
-  ));
+  ) || data[0].webhook);
   return (
     <div className={styles.notify_setting}>
       <Loading loading={loading} />
@@ -333,6 +333,9 @@ const NotifySetting = ({
               <div style={{ borderTop: '1px solid #e8e8e8', width: 'calc(100% + .4rem)', marginLeft: '-0.2rem' }} />
               <CheckBox
                 name="webhook"
+                style={{
+                  marginTop: 16,
+                }}
               />
             </>
           )

@@ -51,7 +51,6 @@ const ObserverSelectSprint: React.FC<any> = observer(({ field, value, ...otherPr
     placeholder={field.name}
     maxTagTextLength={10}
     afterLoad={(sprints) => {
-      console.log('sprints afterLoad', sprints);
       scrumBoardStore.setSprintNotClosedArray(sprints);
       const startedSprint = sprints.find((sprint) => sprint.statusCode === 'started');
       if (startedSprint) {

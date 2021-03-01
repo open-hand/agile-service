@@ -9,7 +9,7 @@ import {
   Issue, IField, User, IIssueType,
 } from '@/common/types';
 import {
-  includes, map, uniq, compact, flatten,
+  includes, map, uniq, compact, flatten, find,
 } from 'lodash';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
@@ -87,10 +87,13 @@ const Confirm: React.FC<Props> = ({
       required: true,
     } as IField;
     const resAdded = [
-      statusField,
       ...(res || []),
       reporterField,
     ];
+    // 后端返回了就不加了
+    if (!find(res, { fieldCode: 'status' })) {
+      resAdded.unshift(statusField);
+    }
     const filtered = filterFields(resAdded);
     if (targetProjectType === 'subProject' && targetIssueType?.typeCode === 'story') {
       const epicFieldIndex = filtered.findIndex((item) => item.fieldCode === 'epic');
@@ -197,7 +200,7 @@ const Confirm: React.FC<Props> = ({
         batchedUpdates(() => {
           res.forEach((subTask) => {
             subTaskSelectedUserIds = [...subTaskSelectedUserIds, ...[subTask.assigneeId, subTask.reporterId, subTask.mainResponsible?.id]];
-            subTaskDetailMap.set(`${subTask.issueId}-detail`, subTask);
+            subTaskDetailMap.set(`${subTask.issueId}%detail`, subTask);
           });
           const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
           store.setSelectUserIds(uniqUserIds);
@@ -213,7 +216,7 @@ const Confirm: React.FC<Props> = ({
             });
             const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
             store.setSelectUserIds(uniqUserIds);
-            subTaskDetailMap.set(`${subIssueVOList[i].issueId}-fields`, fieldWidthValue);
+            subTaskDetailMap.set(`${subIssueVOList[i].issueId}%fields`, fieldWidthValue);
           });
         });
       });
@@ -237,7 +240,7 @@ const Confirm: React.FC<Props> = ({
         batchedUpdates(() => {
           res.forEach((subBug) => {
             subBugSelectedUserIds = [...subBugSelectedUserIds, ...[subBug.assigneeId, subBug.reporterId, subBug.mainResponsible?.id]];
-            subBugDetailMap.set(`${subBug.issueId}-detail`, subBug);
+            subBugDetailMap.set(`${subBug.issueId}%detail`, subBug);
           });
           const uniqUserIds = uniq(compact(subBugSelectedUserIds));
           store.setSelectUserIds(uniqUserIds);
@@ -253,7 +256,7 @@ const Confirm: React.FC<Props> = ({
             });
             const uniqUserIds = uniq(compact(subBugSelectedUserIds));
             store.setSelectUserIds(uniqUserIds);
-            subBugDetailMap.set(`${subBugVOList[i].issueId}-fields`, fieldWidthValue);
+            subBugDetailMap.set(`${subBugVOList[i].issueId}%fields`, fieldWidthValue);
           });
         });
       });
@@ -290,8 +293,8 @@ const Confirm: React.FC<Props> = ({
     });
 
     for (const [k, v] of subTaskDetailMap.entries()) {
-      const subTaskIssueId = k.split('-')[0];
-      const isDetail = k.split('-')[1] === 'detail';
+      const subTaskIssueId = k.split('%')[0];
+      const isDetail = k.split('%')[1] === 'detail';
       if (isDetail) {
         memberFieldsCodeAndValue.set(`${subTaskIssueId}-assignee`, v.assigneeId);
         memberFieldsCodeAndValue.set(`${subTaskIssueId}-reporter`, v.reporterId);
@@ -307,10 +310,9 @@ const Confirm: React.FC<Props> = ({
         });
       }
     }
-
     for (const [k, v] of subBugDetailMap.entries()) {
-      const subBugIssueId = k.split('-')[0];
-      const isDetail = k.split('-')[1] === 'detail';
+      const subBugIssueId = k.split('%')[0];
+      const isDetail = k.split('%')[1] === 'detail';
       if (isDetail) {
         memberFieldsCodeAndValue.set(`${subBugIssueId}-assignee`, v.assigneeId);
         memberFieldsCodeAndValue.set(`${subBugIssueId}-reporter`, v.reporterId);
@@ -476,8 +478,8 @@ const Confirm: React.FC<Props> = ({
                   {
                     subTaskFields.map((subTaskField) => {
                       const { fieldCode, fieldName } = subTaskField;
-                      const subTaskDetail = subTaskDetailMap.get(`${subTask.issueId}-detail`) || {};
-                      const subTaskCustomFields = subTaskDetailMap.get(`${subTask.issueId}-fields`) || [];
+                      const subTaskDetail = subTaskDetailMap.get(`${subTask.issueId}%detail`) || {};
+                      const subTaskCustomFields = subTaskDetailMap.get(`${subTask.issueId}%fields`) || [];
                       const transformedOriginValue = transformValue({ issue: subTaskDetail, field: subTaskField, fieldsWithValue: subTaskCustomFields });
                       return (
                         <Row key={fieldCode} className={styles.fieldRow}>
@@ -545,8 +547,8 @@ const Confirm: React.FC<Props> = ({
                   {
                     subBugFields.map((subBugField) => {
                       const { fieldCode, fieldName } = subBugField;
-                      const subBugDetail = subBugDetailMap.get(`${subBug.issueId}-detail`) || {};
-                      const subBugCustomFields = subBugDetailMap.get(`${subBug.issueId}-fields`) || [];
+                      const subBugDetail = subBugDetailMap.get(`${subBug.issueId}%detail`) || {};
+                      const subBugCustomFields = subBugDetailMap.get(`${subBug.issueId}%fields`) || [];
                       const transformedOriginValue = transformValue({ issue: subBugDetail, field: subBugField, fieldsWithValue: subBugCustomFields });
                       return (
                         <Row key={fieldCode} className={styles.fieldRow}>

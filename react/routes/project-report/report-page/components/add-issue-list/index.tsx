@@ -17,6 +17,7 @@ import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { IIssueColumnName } from '@/common/types';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import { IReportListBlock } from '../../store';
 import { RefProps } from '../add-modal';
 
@@ -200,11 +201,20 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);
+  const { isInProgram } = useIsInProgram();
   return (
     <div className="agile-portal">
       <Form dataSet={formDataSet} style={{ width: 512 }}>
         <TextField name="title" />
-        <Select name="visibleColumns" multiple help="为了保证最佳的预览效果，请将字段控制在6个以内">
+        <Select
+          name="visibleColumns"
+          multiple // @ts-ignore
+          help={(
+            <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.65)', marginTop: 8 }}>
+              为了保证最佳的预览效果，请将字段控制在6个以内
+            </div>
+          )}
+        >
           <Option value="summary">概要</Option>
           <Option value="issueNum">编号</Option>
           <Option value="priority">优先级</Option>
@@ -223,7 +233,9 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           <Option value="storyPoints">故事点</Option>
           <Option value="version">版本</Option>
           <Option value="epic">史诗</Option>
-          <Option value="feature">特性</Option>
+          {isInProgram && <Option value="feature">特性</Option>}
+          <Option value="mainResponsibleUser">主要负责人</Option>
+          <Option value="environmentName">环境</Option>
           {issueSearchStore.fields.map((field) => (
             <Option value={field.code}>
               {field.name}

@@ -17,7 +17,6 @@ import './style/index.less';
 const ScrumBoard = React.lazy(() => import('./routes/ScrumBoard'));
 const ReportHost = React.lazy(() => import('./routes/ReportHost'));
 const StoryMap = React.lazy(() => import('./routes/StoryMap'));
-const IterationBoard = React.lazy(() => import('./routes/IterationBoard'));
 const WorkList = React.lazy(() => import('./routes/WorkList'));
 const IssueType = React.lazy(() => import('./routes/issueType'));
 const Priority = React.lazy(() => import('./routes/priority'));
@@ -70,7 +69,6 @@ class Agile extends React.Component {
               <Route path={`${match.url}/team-performance`} component={TeamPerformance} />
               {/* 开发-迭代计划 */}
               <Route path={`${match.url}/scrumboard`} component={ScrumBoard} />
-              <Route path={`${match.url}/iterationBoard/:id`} component={IterationBoard} />
               <Route path={`${match.url}/gantt`} component={GanttPage} />
               <Route path={`${match.url}/project-version`} component={Release} />
               {/* 运营 */}

@@ -153,6 +153,12 @@ public class IssueListFieldKVVO {
 
     private String environment;
 
+    @ApiModelProperty("主要负责人")
+    private UserMessageDTO mainResponsibleUser;
+
+    @ApiModelProperty("环境")
+    private String environmentName;
+
     @ApiModelProperty(value = "修复的版本")
     private List<VersionIssueRelVO> fixVersionIssueRelVOS;
 
@@ -559,5 +565,21 @@ public class IssueListFieldKVVO {
 
     public void setUpdateUser(UserMessageDTO updateUser) {
         this.updateUser = updateUser;
+    }
+
+    public UserMessageDTO getMainResponsibleUser() {
+        return mainResponsibleUser;
+    }
+
+    public void setMainResponsibleUser(UserMessageDTO mainResponsibleUser) {
+        this.mainResponsibleUser = mainResponsibleUser;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 }

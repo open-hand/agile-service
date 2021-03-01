@@ -20,6 +20,7 @@ interface IUsage {
   id: string
   imageUrl: string
   name: string
+  creationDate: string
 }
 
 interface IRes {
@@ -102,8 +103,8 @@ const Usage: React.FC<Props> = ({ modal, record }) => {
         ) : (
           <>
             {
-              !loading ? '没有项目使用该问题类型' : ''
-            }
+                !loading ? '没有项目使用该问题类型' : ''
+              }
           </>
         )
       }

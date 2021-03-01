@@ -1,20 +1,5 @@
 package io.choerodon.agile.infra.utils;
 
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.IssueVO;
-import io.choerodon.agile.app.service.NoticeService;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.mapper.IssueStatusMapper;
-import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.CustomUserDetails;
-import io.choerodon.core.oauth.DetailsHelper;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -28,6 +13,26 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+
+import io.choerodon.agile.api.vo.IssueCommentVO;
+import io.choerodon.agile.api.vo.IssueMoveVO;
+import io.choerodon.agile.api.vo.IssueSubVO;
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.service.NoticeService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.mapper.IssueStatusMapper;
+import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/4/29.
@@ -103,7 +108,7 @@ public class SendMsgUtil {
                 + URL_TEMPLATE6 + projectVO.getOrganizationId() 
                 + URL_TEMPLATE7 + projectVO.getOrganizationId() 
                 + URL_TEMPLATE3 + result.getIssueNum() 
-                + URL_TEMPLATE4 + paramIssueId 
+                + URL_TEMPLATE4 + paramIssueId
                 + URL_TEMPLATE5 + result.getIssueId();
     }
 
@@ -244,11 +249,14 @@ public class SendMsgUtil {
         }
         Map<String, String> templateArgsMap = new HashMap<>();
         // 设置经办人
-        Long[] ids = new Long[2];
+        Long[] ids = new Long[3];
         ids[0] = issueDTO.getAssigneeId();
         ids[1] = userDetails.getUserId();
+        ids[2] = issueDTO.getReporterId();
         List<UserDTO> userDTOList = userService.listUsersByIds(ids);
-        String assigneeName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), issueDTO.getAssigneeId()))
+        Boolean isProgram = Objects.equals(issueDTO.getApplyType(), "program") ? true : false;
+        String memberType = Boolean.TRUE.equals(isProgram) ? "报告人" : "经办人";
+        String assigneeName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), Boolean.TRUE.equals(isProgram) ? issueDTO.getReporterId(): issueDTO.getAssigneeId()))
                 .findFirst().map(UserDTO::getRealName).orElse("");
         // 设置概要
         String summary = issueDTO.getIssueNum() + "-" + issueDTO.getSummary();
@@ -257,6 +265,7 @@ public class SendMsgUtil {
                 .findFirst().map(UserDTO::getRealName).orElse("");
         // 设置状态
         String status = ConvertUtil.getIssueStatusMap(projectId).get(issueDTO.getStatusId()).getName();
+        templateArgsMap.put("memberType", memberType);
         templateArgsMap.put("assigneeName", assigneeName);
         templateArgsMap.put("summary", summary);
         templateArgsMap.put("operatorName", operatorName);

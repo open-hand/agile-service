@@ -99,6 +99,7 @@ class PageIssueTypeStore {
     };
     this.addFields.length = 0;
     this.createdFields.length = 0;
+    this.addUnselectedDataSet.reset();
   }
 
   @action addDeleteRecord(record: Record) {
@@ -225,7 +226,6 @@ class PageIssueTypeStore {
 
   loadData = () => {
     this.clear();
-    this.addUnselectedDataSet.clear();
     this.setLoading(true);
     pageConfigApi.loadByIssueType(this.getCurrentIssueType).then((res) => {
       this.sortTableDataSet.loadData(res.fields.map((field) => ({

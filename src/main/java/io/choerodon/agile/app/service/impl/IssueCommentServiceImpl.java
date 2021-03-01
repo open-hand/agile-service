@@ -1,20 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
 
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.assembler.IssueCommentAssembler;
-import io.choerodon.agile.app.service.IIssueCommentService;
-import io.choerodon.agile.app.service.IssueCommentService;
-import io.choerodon.agile.infra.dto.IssueCommentDTO;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.mapper.IssueCommentMapper;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.utils.SendMsgUtil;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.CustomUserDetails;
-import io.choerodon.core.oauth.DetailsHelper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +9,26 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.assembler.IssueCommentAssembler;
+import io.choerodon.agile.app.service.IIssueCommentService;
+import io.choerodon.agile.app.service.IssueCommentService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.IssueCommentDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.mapper.IssueCommentMapper;
+import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.utils.SendMsgUtil;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * 敏捷开发Issue评论
@@ -125,8 +129,11 @@ public class IssueCommentServiceImpl implements IssueCommentService {
     }
 
     @Override
-    public int deleteIssueComment(Long projectId, Long commentId) {
+    public int deleteIssueComment(Long projectId, Long commentId, boolean self) {
         IssueCommentDTO issueCommentDTO = getCommentById(projectId, commentId);
+        if (self && !DetailsHelper.getUserDetails().getUserId().equals(issueCommentDTO.getUserId())) {
+            throw new CommonException("error.created.user.illegal");
+        }
         return iIssueCommentService.deleteBase(issueCommentDTO);
     }
 
@@ -191,8 +198,11 @@ public class IssueCommentServiceImpl implements IssueCommentService {
     }
 
     @Override
-    public void deleteIssueCommentReply(Long projectId, Long commentId) {
+    public void deleteIssueCommentReply(Long projectId, Long commentId, boolean self) {
         IssueCommentDTO issueCommentDTO = getCommentById(projectId, commentId);
+        if (self && !DetailsHelper.getUserDetails().getUserId().equals(issueCommentDTO.getUserId())) {
+            throw new CommonException("error.created.user.illegal");
+        }
         iIssueCommentService.deleteBaseReply(issueCommentDTO);
     }
 

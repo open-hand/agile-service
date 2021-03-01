@@ -53,6 +53,8 @@ interface IFiledListItem {
   context: 'feature' | 'bug' | 'sub_task' | 'issue_epic' | 'task' | 'story' | 'backlog',
   contextName: string,
   defaultValue: any,
+  defaultValueObj: Array<any> | null,
+  fieldOptions: any,
   description: string,
   fieldType: string,
   fieldTypeName: string,
@@ -141,10 +143,10 @@ class PageConfigApi extends Api<PageConfigApi> {
    * 根据问题类型code查询默认模版
    * @param issueType
    */
-  loadTemplateByType(issueType: string) {
+  loadTemplateByType(issueType: string, projectId?: string) {
     return this.request({
       method: 'get',
-      url: `${this.prefixOrgOrPro}/object_scheme_field/description_template`,
+      url: `${projectId ? `/agile/v1/projects/${projectId}` : this.prefixOrgOrPro}/object_scheme_field/description_template`,
       params: {
         issueTypeId: issueType,
         organizationId: getOrganizationId(),

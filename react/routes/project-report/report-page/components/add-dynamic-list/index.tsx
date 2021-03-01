@@ -113,7 +113,16 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
     <>
       <Form dataSet={formDataSet}>
         <TextField name="title" />
-        <Select name="visibleColumns" multiple help="为了保证最佳的预览效果，请将字段控制在6个以内">
+        <Select
+          name="visibleColumns"
+          multiple
+          // @ts-ignore
+          help={(
+            <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.65)', marginTop: 8 }}>
+              为了保证最佳的预览效果，请将字段控制在6个以内
+            </div>
+          )}
+        >
           <Option value="summary">概要</Option>
           <Option value="issueNum">编号</Option>
           <Option value="priority">优先级</Option>
@@ -134,6 +143,8 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           <Option value="influenceVersion">影响的版本</Option>
           <Option value="epic">史诗</Option>
           {isInProgram && <Option value="feature">特性</Option>}
+          <Option value="mainResponsibleUser">主要负责人</Option>
+          <Option value="environmentName">环境</Option>
           {fields.map((field) => (
             <Option value={field.code}>
               {field.name}

@@ -580,11 +580,14 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     void updateIssueLastUpdateInfo(@Param("issueId") Long issueId, @Param("projectId") Long projectId, @Param("userId") Long userId);
 
     /**
-     * 更新被删除静态文件相关联的问题最后更新信息（不含版本号更新
+     * 批量更新问题最后更新信息（不含版本号更新
      *
-     * @param fileId    文件id
+     * @param issueIds  要更新的问题id
      * @param projectId 项目id
      * @param userId    当前用户id
      */
-    void updateIssueLastUpdateInfoByStaticFile(@Param("fileId") Long fileId, @Param("projectId") Long projectId, @Param("userId") Long userId);
+    void batchUpdateIssueLastUpdateInfo(@Param("issueIds") List<Long> issueIds, @Param("projectId") Long projectId, @Param("userId") Long userId);
+
+    List<Long> selectIdsByIssueTypeIdsAndProjectIds(@Param("projectIds") List<Long> projectIds,
+                                                    @Param("issueTypeId") Long issueTypeId);
 }

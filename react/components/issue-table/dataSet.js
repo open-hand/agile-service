@@ -49,6 +49,9 @@ export default ({
     { name: 'estimatedEndTime', type: 'string', label: '预计结束时间' },
     { name: 'remainingTime', type: 'string', label: '剩余预估时间' },
     { name: 'issueSprintVOS', type: 'array', label: '冲刺' },
+    { name: 'mainResponsibleUser', type: 'object', label: '主要负责人' },
+    { name: 'environmentName', type: 'string', label: '环境' },
+
   ],
   queryFields: [
     { name: 'issueTypeId', type: 'array', label: '问题类型' },

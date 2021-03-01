@@ -166,5 +166,4 @@ public class ObjectSchemeFieldController {
         objectSchemeFieldService.syncDefaultValue(organizationId, null, fieldId, updateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
 }

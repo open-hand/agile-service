@@ -82,7 +82,13 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
         List<FieldValueDTO> values = fieldValueMapper.queryList(projectId, instanceId, schemeCode, null);
-        Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> (x.getFieldType().equals(FieldType.MEMBER) || x.getFieldType().equals(FieldType.MULTI_MEMBER))).map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
+        Map<Long, UserDTO> userMap =
+                FieldValueUtil.handleUserMap(
+                        values
+                                .stream()
+                                .filter(x -> (FieldType.MEMBER.equals(x.getFieldType()) || FieldType.MULTI_MEMBER.equals(x.getFieldType())))
+                                .map(FieldValueDTO::getOptionId)
+                                .collect(Collectors.toList()));
         Map<Long, List<FieldValueDTO>> valueGroup = values.stream().collect(Collectors.groupingBy(FieldValueDTO::getFieldId));
         pageFieldViews.forEach(view -> {
             List<FieldValueDTO> fieldValues = valueGroup.get(view.getFieldId());
@@ -353,7 +359,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         }
         // 判断这个字段哪些问题类型可以添加
         customFields.forEach(v -> {
-            List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendDTOS = objectSchemeFieldExtendMapper.selectExtendFields(ConvertUtil.getOrganizationId(projectId), v.getFieldId(), projectId);
+            List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendDTOS = objectSchemeFieldExtendMapper.selectExtendFields(ConvertUtil.getOrganizationId(projectId), v.getFieldId(), projectId, null);
             List<String> contexts = objectSchemeFieldExtendDTOS.stream().map(ObjectSchemeFieldExtendDTO::getIssueType).collect(Collectors.toList());
             List<Long> needAddIssueIds = issueDTOS.stream().filter(issueDTO -> contexts.contains(issueDTO.getTypeCode())).map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(needAddIssueIds)) {

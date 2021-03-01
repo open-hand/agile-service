@@ -36,6 +36,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ value, onChange }) => {
               id: project.projectId,
               name: project.projName,
               imageUrl: project.iamgeUrl,
+              creationDate: project.creationDate,
             }}
             showText
           />

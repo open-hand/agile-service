@@ -28,6 +28,7 @@ import transformValue, { submitFieldMap } from './transformValue';
 import { IFieldWithValue } from './components/confirm-data/transformValue';
 
 import store from './store';
+import { split } from './utils';
 
 const isDEV = process.env.NODE_ENV === 'development';
 // @ts-ignore
@@ -172,6 +173,11 @@ const IssueMove: React.FC<Props> = ({
             moveDataSet.current?.set(`${subTask.issueId}-sprint`, value);
           });
         }
+        if (name === `${issue.issueId}-sprint` && issue.subBugVOList && issue.subBugVOList.length) {
+          issue.subBugVOList.forEach((subTask) => {
+            moveDataSet.current?.set(`${subTask.issueId}-sprint`, value);
+          });
+        }
         if (name !== 'targetProjectId' && name !== 'issueType') {
           const validate = await moveDataSet.validate();
           setSubmitBtnDisable(!validate);
@@ -218,9 +224,9 @@ const IssueMove: React.FC<Props> = ({
       subIssues: [],
     };
     for (const [k, v] of Object.entries(dataSet.current?.data || {})) {
-      const kIssueId = k.split('-')[0];
+      const kIssueId = split(k, '-')[0];
       const isSelf = kIssueId === issue.issueId;
-      if (kIssueId && kIssueId !== 'undefined' && k.split('-')[1] && v) {
+      if (kIssueId && kIssueId !== 'undefined' && split(k, '-')[1] && v) {
         const isSubTask = issue.subIssueVOList?.find((item) => item.issueId === kIssueId);
         let fields = selfFields;
         if (!isSelf) {
@@ -230,12 +236,12 @@ const IssueMove: React.FC<Props> = ({
             fields = subBugFields;
           }
         }
-        const fieldInfo = fields.find((item: IField) => item.fieldCode === k.split('-')[1]);
+        const fieldInfo = fields.find((item: IField) => item.fieldCode === split(k, '-')[1]);
         if (fieldInfo) {
           if (fieldInfo.system) { // 系统字段
-            if (submitFieldMap.get(k.split('-')[1])) {
+            if (submitFieldMap.get(split(k, '-')[1])) {
               const fieldAndValue = {
-                [submitFieldMap.get(k.split('-')[1]) as string]: transformValue({
+                [submitFieldMap.get(split(k, '-')[1]) as string]: transformValue({
                   k,
                   v,
                   dataMap,
@@ -351,16 +357,16 @@ const IssueMove: React.FC<Props> = ({
       <div className={styles.step_content}>
         {currentStep === 1 && <SelectProject issue={issue} dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} />}
         {currentStep === 2 && (
-        <Confirm
-          issue={issue}
-          dataSet={dataSet}
-          fieldsWithValue={fieldsWithValue}
-          targetProjectType={targetProjectType}
-          targetIssueType={targetIssueType}
-          targetSubTaskType={targetSubTaskType}
-          targetSubBugType={targetSubBugType}
-          loseItems={loseItems}
-        />
+          <Confirm
+            issue={issue}
+            dataSet={dataSet}
+            fieldsWithValue={fieldsWithValue}
+            targetProjectType={targetProjectType}
+            targetIssueType={targetIssueType}
+            targetSubTaskType={targetSubTaskType}
+            targetSubBugType={targetSubBugType}
+            loseItems={loseItems}
+          />
         )}
       </div>
       <div className={styles.steps_action}>

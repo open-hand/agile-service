@@ -41,25 +41,28 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
   const name = useMemo(() => config?.name || 'exportCodes', [config?.name]);
   const form = useMemo(() => ({} as { dataSet: DataSet }), []);
   const onChange = useMemo(() => config?.onChange || (() => null), [config?.onChange]);
+  const events = useMemo(() => config?.events, []);
   const loadData = useCallback(async () => {
     let newOptions: any = config?.options;
     if (!newOptions) {
-      const { content } = pageConfigApi.load();
+      const { content } = await pageConfigApi.load();
       newOptions = content.map((option: any) => ({ label: option.name, value: option.code }));
     }
-    if (config?.events?.initOptions) {
-      newOptions = config.events.initOptions({ options: newOptions, checkedOptions, dataSet: form.dataSet }) || newOptions;
+    if (events?.initOptions) {
+      newOptions = events.initOptions({ options: newOptions, checkedOptions, dataSet: form.dataSet }) || newOptions;
     }
     setOptions(newOptions || []);
-  }, [checkedOptions, config?.events, config?.options, form.dataSet]);
+  }, [checkedOptions, config?.options, events, form.dataSet]);
   const checkAll = () => {
     const newCheckedOptions = options?.map((option) => option.value) || [];
     form.dataSet.current?.set(name, newCheckedOptions);
     setCheckedOptions(newCheckedOptions);
+    onChange(newCheckedOptions);
   };
   const unCheckAll = () => {
     form.dataSet.current?.set(name, []);
     setCheckedOptions([]);
+    onChange([]);
   };
   const checkOption = (value: string) => {
     setCheckedOptions([...checkedOptions, value]);
