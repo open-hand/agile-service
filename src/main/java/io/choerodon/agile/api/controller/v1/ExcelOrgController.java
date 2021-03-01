@@ -7,11 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletResponse;
+
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.app.service.ExcelService;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.ExcelUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -49,5 +55,28 @@ public class ExcelOrgController {
                                        @RequestParam Long objectVersionNumber) {
         excelService.cancelImport(0L, id, objectVersionNumber);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("下载自定义字段导入模版")
+    @GetMapping(value = "/object_scheme_field/download")
+    public void downloadObjectSchemeField(@ApiParam(value = "项目id", required = true)
+                         @PathVariable(name = "organization_id") Long organizationId,
+                         HttpServletResponse response) {
+        excelService.downloadObjectSchemeField(organizationId, null, response);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("导入自定义字段")
+    @PostMapping(value = "/object_scheme_field/import")
+    public ResponseEntity<Void> batchImportObjectSchemeField(@ApiParam(value = "项目id", required = true)
+                                            @PathVariable(name = "organization_id") Long organizationId,
+                                            @ApiParam(value = "导入文件", required = true)
+                                            @RequestParam("file") MultipartFile file) {
+        excelService.batchImportObjectSchemeField(
+                organizationId, null,
+                ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file),
+                RequestContextHolder.getRequestAttributes());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

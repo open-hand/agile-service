@@ -5,16 +5,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
 import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -23,28 +17,27 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
 
 import io.choerodon.agile.api.vo.FieldOptionUpdateVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
 import io.choerodon.agile.api.vo.UserVO;
-import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.app.service.FieldOptionService;
+import io.choerodon.agile.app.service.ObjectSchemeFieldExcelService;
+import io.choerodon.agile.app.service.ObjectSchemeFieldService;
+import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.enums.CustomFieldExcelHeader;
-import io.choerodon.agile.infra.enums.ExcelImportTemplate;
 import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.FieldTypeCnName;
 import io.choerodon.agile.infra.mapper.FileOperationHistoryMapper;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import io.choerodon.agile.infra.utils.CatalogExcelUtil;
-import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.ExcelUtil;
 import io.choerodon.agile.infra.utils.MultipartExcelUtil;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -52,8 +45,6 @@ import io.choerodon.core.oauth.DetailsHelper;
  */
 @Service
 public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcelService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ObjectSchemeFieldExcelServiceImpl.class);
 
     private static final int HEADER_LENGTH = 8;
     private static final int NOT_KEY_HEADER_LENGTH = 5;
@@ -70,14 +61,9 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     private static final String AGILE_ISSUE = "agile_issue";
     private static final String TEMPLATE_PATH = "templates";
     private static final String TEMPLATE_NAME = "ObjectSchemeFieldImportGuideTemplate.xlsx";
-    private static final String IMPORT_TEMPLATE_NAME = "导入模板";
 
-    private static final String DOING = "doing";
-    private static final String SUCCESS = "success";
-    private static final String FAILED = "failed";
     private static final String CANCELED = "canceled";
     private static final String UPLOAD_FILE_CUSTOM_FIELD = "upload_file_customer_field";
-    private static final String WEBSOCKET_IMPORT_CODE = "agile-import-customer-field-";
 
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
@@ -90,8 +76,6 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     @Autowired
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired
-    private ExcelService excelService;
-    @Autowired
     private UserService userService;
     @Autowired
     private FileClient fileClient;
@@ -99,109 +83,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     private ModelMapper modelMapper;
 
     @Override
-    public void download(Long organizationId, Long projectId, HttpServletResponse response) {
-        Workbook wb = new XSSFWorkbook();
-        //复制模板excel
-        copyGuideSheetFromTemplate(wb);
-        Sheet sheet = wb.createSheet(IMPORT_TEMPLATE_NAME);
-        CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
-        generateHeaders(sheet, style);
-        //填充预定义值
-        fillInPredefinedValues(wb, sheet, projectId, organizationId);
-        try {
-            wb.write(response.getOutputStream());
-        } catch (Exception e) {
-            LOGGER.info("exception: {}", e);
-        }
-    }
-
-    @Override
-    @Async
-    public void batchImport(Long organizationId, Long projectId, Workbook workbook, RequestAttributes requestAttributes) {
-        RequestContextHolder.setRequestAttributes(requestAttributes);
-
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        String socketKey = (projectId == null || projectId == 0L) ?
-                WEBSOCKET_IMPORT_CODE + "org-" + organizationId : WEBSOCKET_IMPORT_CODE + "pro-" + projectId;
-        FileOperationHistoryDTO history = excelService.initFileOperationHistory(
-                projectId == null ? 0L : projectId,
-                organizationId,
-                userId,
-                DOING,
-                UPLOAD_FILE_CUSTOM_FIELD,
-                socketKey);
-        validExcelTemplate(workbook, history);
-
-        Sheet sheet = workbook.getSheetAt(1);
-        int realRowCount = getRealRowCount(sheet);
-        int lastSendCountNum = 0;
-        ExcelImportTemplate.Progress progress = new ExcelImportTemplate.Progress();
-
-        List<Long> importedFieldIds = new ArrayList<>();
-        Map<Integer, List<Integer>> errorRowColMap = new HashMap<>(sheet.getPhysicalNumberOfRows());
-        List<IssueTypeVO> issueTypes = objectSchemeFieldService.issueTypes(organizationId, projectId);
-        Map<String, IssueTypeVO> issueTypeNameMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeVO::getName, a -> a, (k1, k2) -> k1));
-        Map<String, UserVO> userNameMap = getUserNameMap(organizationId, projectId);
-        for (int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) {
-            if (checkCanceled(organizationId, projectId, history.getId(), importedFieldIds)) {
-                return;
-            }
-
-            Row row = sheet.getRow(r);
-            if (isSkip(row) || (r > 1 && !isSkip(sheet.getRow(r - 1)) && isKeyValue(row))) {
-                continue;
-            }
-
-            ObjectSchemeFieldCreateVO objectSchemeFieldCreate = generateObjectSchemeField(organizationId, projectId, row, errorRowColMap, issueTypeNameMap);
-            int keyRowNum = r + 1;
-            while (isExtendKeyValue(sheet.getRow(keyRowNum))) {
-                setKeyValue(objectSchemeFieldCreate, sheet.getRow(keyRowNum));
-                keyRowNum++;
-            }
-            Map<String, Integer> keyRowMap = validKeyValue(objectSchemeFieldCreate, sheet, r, errorRowColMap);
-            validAndSetDefaultValue(objectSchemeFieldCreate, keyRowMap, row, userNameMap, errorRowColMap);
-            if (ObjectUtils.isEmpty(errorRowColMap.get(r))) {
-                createObjectSchemeField(projectId, organizationId, objectSchemeFieldCreate, issueTypes);
-                progress.successCountIncrease();
-                history.setSuccessCount(progress.getSuccessCount());
-            } else {
-                progress.failCountIncrease();
-                history.setFailCount(progress.getFailCount());
-            }
-            progress.processNumIncrease();
-            if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / realRowCount > 0.03) {
-                sendProcessProgress(history, userId, progress.getProcessNum() * 1.0 / realRowCount);
-            }
-        }
-        //错误数据生成excel
-        String status;
-        if (ObjectUtils.isEmpty(errorRowColMap)) {
-            status = SUCCESS;
-        } else {
-            generateErrorDataExcelAndUpload(errorRowColMap, workbook, sheet, history, organizationId);
-            status = FAILED;
-        }
-        updateFinalRecode(history, progress.getSuccessCount(), progress.getFailCount(), status);
-    }
-
-    private void updateFinalRecode(FileOperationHistoryDTO history, Long successCount, Long failCount, String status) {
-        String socketKey = (history.getProjectId() == null || history.getProjectId() == 0L) ?
-                WEBSOCKET_IMPORT_CODE + "org-" + history.getOrganizationId() :
-                WEBSOCKET_IMPORT_CODE + "pro-" + history.getOrganizationId();
-
-        FileOperationHistoryDTO update = new FileOperationHistoryDTO();
-        update.setId(history.getId());
-        update.setSuccessCount(successCount);
-        update.setFailCount(failCount);
-        update.setStatus(status);
-        update.setFileUrl(history.getFileUrl());
-        update.setObjectVersionNumber(history.getObjectVersionNumber());
-        fileOperationHistoryMapper.updateByPrimaryKeySelective(update);
-        FileOperationHistoryDTO result = fileOperationHistoryMapper.selectByPrimaryKey(update.getId());
-        excelService.sendProcess(result, result.getUserId(), 1.0, socketKey);
-    }
-
-    private void generateErrorDataExcelAndUpload(Map<Integer, List<Integer>> errorRowColMap, Workbook workbook, Sheet sheet, FileOperationHistoryDTO history, Long organizationId) {
+    public void generateErrorDataExcelAndUpload(Map<Integer, List<Integer>> errorRowColMap, Workbook workbook, Sheet sheet, FileOperationHistoryDTO history, Long organizationId) {
         CellStyle ztStyle = workbook.createCellStyle();
         Font ztFont = workbook.createFont();
         ztFont.setColor(Font.COLOR_RED);
@@ -225,7 +107,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         history.setFileUrl(errorWorkBookUrl);
     }
 
-    private void createObjectSchemeField(Long projectId, Long organizationId, ObjectSchemeFieldCreateVO objectSchemeFieldCreate, List<IssueTypeVO> issueTypes) {
+    @Override
+    public void createObjectSchemeField(Long projectId, Long organizationId, ObjectSchemeFieldCreateVO objectSchemeFieldCreate, List<IssueTypeVO> issueTypes) {
         ObjectSchemeFieldDTO field = modelMapper.map(objectSchemeFieldCreate, ObjectSchemeFieldDTO.class);
         Set<Long> issueTypeIds = new HashSet<>(objectSchemeFieldCreate.getIssueTypeIds());
         List<IssueTypeVO> setIssueTypes = issueTypes.stream().filter(issueTypeVO -> issueTypeIds.contains(issueTypeVO.getId())).collect(Collectors.toList());
@@ -250,7 +133,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         }
     }
 
-    private Map<String, UserVO> getUserNameMap(Long organizationId, Long projectId) {
+    @Override
+    public Map<String, UserVO> getUserNameMap(Long organizationId, Long projectId) {
         List<UserVO> userList;
         if (projectId != null) {
             userList = userService.listAllUsersByProject(projectId);
@@ -263,7 +147,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         return userList.stream().collect(Collectors.toMap(UserVO::getRealName, a -> a, (k1, k2) -> k1));
     }
 
-    private void validAndSetDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Map<String, Integer> keyRowMap, Row row, Map<String, UserVO> userNameMap, Map<Integer, List<Integer>> errorRowColMap) {
+    @Override
+    public void validAndSetDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Map<String, Integer> keyRowMap, Row row, Map<String, UserVO> userNameMap, Map<Integer, List<Integer>> errorRowColMap) {
         String fieldType = objectSchemeFieldCreate.getFieldType();
 
         Cell cell = row.getCell(4);
@@ -383,7 +268,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         }
     }
 
-    private Map<String, Integer> validKeyValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Sheet sheet, int r, Map<Integer, List<Integer>> errorRowColMap) {
+    @Override
+    public Map<String, Integer> validKeyValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Sheet sheet, int r, Map<Integer, List<Integer>> errorRowColMap) {
         Map<String, Integer> keyRowMap = new HashMap<>(objectSchemeFieldCreate.getFieldOptions().size());
         if (!FieldTypeCnName.isOption(objectSchemeFieldCreate.getFieldType())) {
             setNotOptionError(objectSchemeFieldCreate, sheet, r, errorRowColMap);
@@ -435,7 +321,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         }
     }
 
-    private ObjectSchemeFieldCreateVO generateObjectSchemeField(Long organizationId, Long projectId, Row row, Map<Integer, List<Integer>> errorRowColMap, Map<String, IssueTypeVO> issueTypeNameMap) {
+    @Override
+    public ObjectSchemeFieldCreateVO generateObjectSchemeField(Long organizationId, Long projectId, Row row, Map<Integer, List<Integer>> errorRowColMap, Map<String, IssueTypeVO> issueTypeNameMap) {
         ObjectSchemeFieldCreateVO objectSchemeFieldCreateVO = new ObjectSchemeFieldCreateVO();
         objectSchemeFieldCreateVO.setFieldOptions(new ArrayList<>());
         objectSchemeFieldCreateVO.setSchemeCode(AGILE_ISSUE);
@@ -450,7 +337,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         return objectSchemeFieldCreateVO;
     }
 
-    private void setKeyValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreateVO, Row row) {
+    @Override
+    public void setKeyValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreateVO, Row row) {
         List<FieldOptionUpdateVO> optionList = objectSchemeFieldCreateVO.getFieldOptions();
         FieldOptionUpdateVO fieldOptionUpdateVO = new FieldOptionUpdateVO();
         fieldOptionUpdateVO.setStatus("add");
@@ -580,7 +468,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         }
     }
 
-    private boolean isSkip(Row row) {
+    @Override
+    public boolean isSkip(Row row) {
         if (row == null) {
             return true;
         }
@@ -593,7 +482,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         return skip;
     }
 
-    private boolean isKeyValue(Row row) {
+    @Override
+    public boolean isKeyValue(Row row) {
         if (row == null) {
             return false;
         }
@@ -607,7 +497,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         return false;
     }
 
-    private boolean isExtendKeyValue(Row row) {
+    @Override
+    public boolean isExtendKeyValue(Row row) {
         if (row == null) {
             return false;
         }
@@ -621,22 +512,25 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         return isKeyValue(row);
     }
 
-    private void validExcelTemplate(Workbook workbook, FileOperationHistoryDTO history) {
-        String socketKey = (history.getProjectId() == null || history.getProjectId() == 0L) ?
-                WEBSOCKET_IMPORT_CODE + "org-" + history.getOrganizationId() :
-                WEBSOCKET_IMPORT_CODE + "pro-" + history.getOrganizationId();
-        Sheet dataSheet = workbook.getSheetAt(1);
-        Row headerRow = dataSheet.getRow(0);
-        if (headerRow == null) {
+    @Override
+    public boolean validExcelTemplate(Workbook workbook, FileOperationHistoryDTO history) {
+        boolean result;
+        if (workbook.getNumberOfSheets() < 2) {
+            result = false;
+        } else {
+            Sheet dataSheet = workbook.getSheetAt(1);
+            Row headerRow = dataSheet.getRow(0);
+            result = (headerRow != null);
+        }
+        if (!result) {
             history.setStatus("empty_data_sheet");
             fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
-            FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
-            excelService.sendProcess(errorImport, history.getUserId(), 0.0, socketKey);
-            throw new CommonException("error.sheet.empty");
         }
+        return result;
     }
 
-    private void copyGuideSheetFromTemplate(Workbook wb) {
+    @Override
+    public void copyGuideSheetFromTemplate(Workbook wb) {
         Sheet guideSheet = wb.createSheet("要求");
         InputStream inputStream = this.getClass().getResourceAsStream("/" + TEMPLATE_PATH + "/" + TEMPLATE_NAME);
         XSSFWorkbook srcWorkbook;
@@ -648,7 +542,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         ExcelUtil.copySheet(srcWorkbook.getSheetAt(0), guideSheet, ExcelUtil.copyCellStyle(srcWorkbook, wb));
     }
 
-    private void generateHeaders(Sheet sheet, CellStyle style) {
+    @Override
+    public void generateHeaders(Sheet sheet, CellStyle style) {
         CustomFieldExcelHeader[] headers = CustomFieldExcelHeader.values();
         Row row = sheet.createRow(0);
         for (int i = 0; i < headers.length; i++) {
@@ -658,7 +553,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         }
     }
 
-    private void fillInPredefinedValues(Workbook wb, Sheet sheet, Long projectId, Long organizationId) {
+    @Override
+    public void fillInPredefinedValues(Workbook wb, Sheet sheet, Long projectId, Long organizationId) {
         ExcelUtil.dropDownList2007(wb,
                 sheet,
                 getFieldTypePredefined(),
@@ -692,7 +588,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         return cell == null || "".equals(cell.toString()) || cell.getCellTypeEnum() == CellType.BLANK;
     }
 
-    private boolean checkCanceled(Long organizationId, Long projectId, Long fileOperationHistoryId, List<Long> importedFieldIds) {
+    @Override
+    public boolean checkCanceled(Long organizationId, Long projectId, Long fileOperationHistoryId, List<Long> importedFieldIds) {
         FileOperationHistoryDTO checkCanceledDO = fileOperationHistoryMapper.selectByPrimaryKey(fileOperationHistoryId);
         if (UPLOAD_FILE_CUSTOM_FIELD.equals(checkCanceledDO.getAction())
                 && CANCELED.equals(checkCanceledDO.getStatus())) {
@@ -719,7 +616,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         return Arrays.asList(value.split(regex));
     }
 
-    private Integer getRealRowCount(Sheet sheet) {
+    @Override
+    public Integer getRealRowCount(Sheet sheet) {
         Integer count = 0;
         for (int r = 1; r <= sheet.getPhysicalNumberOfRows(); r++) {
             Row row = sheet.getRow(r);
@@ -730,12 +628,5 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             count++;
         }
         return count;
-    }
-
-    private void sendProcessProgress(FileOperationHistoryDTO history, Long userId, Double progress) {
-        String socketKey = (history.getProjectId() == null || history.getProjectId() == 0L) ?
-                WEBSOCKET_IMPORT_CODE + "org-" + history.getOrganizationId() :
-                WEBSOCKET_IMPORT_CODE + "pro-" + history.getOrganizationId();
-        excelService.sendProcess(history, userId, progress * 0.97, socketKey);
     }
 }

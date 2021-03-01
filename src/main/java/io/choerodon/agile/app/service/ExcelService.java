@@ -7,6 +7,7 @@ import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,4 +54,21 @@ public interface ExcelService {
      * @return 最后一次操作记录
      */
     FileOperationHistoryVO queryOrgLatestRecode(Long organizationId, String action);
+
+    /**
+     * 下载自定义字段导入模板
+     * @param organizationId 组织id
+     * @param projectId 项目id
+     * @param response response
+     */
+    void downloadObjectSchemeField(Long organizationId, Long projectId, HttpServletResponse response);
+
+    /**
+     * 导入自定义字段
+     * @param organizationId 组织id
+     * @param projectId 项目id
+     * @param workbookFromMultipartFile 文件
+     * @param requestAttributes 请求头
+     */
+    void batchImportObjectSchemeField(Long organizationId, Long projectId, Workbook workbookFromMultipartFile, RequestAttributes requestAttributes);
 }

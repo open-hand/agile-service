@@ -7,8 +7,8 @@ import java.util.stream.Stream;
 /**
  * 自定义字段的类型
  *
- * @author superlee
- * @since 2020-05-07
+ * @author chihao.ran@hand-china.com
+ * @since 2021-03-01
  */
 public enum FieldTypeCnName {
 
