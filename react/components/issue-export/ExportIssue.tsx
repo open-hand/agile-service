@@ -15,6 +15,7 @@ import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnC
 import WsProgress from '@/components/ws-progress';
 import { getProjectName } from '@/utils/common';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { IModalProps } from '@/common/types';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
@@ -197,7 +198,7 @@ const ExportIssue: React.FC = () => {
     store.setExportBtnHidden(false);
     // @ts-ignore
     store.exportButtonConfig.buttonProps.loading = false;
-    // modal?.update({ okProps: { loading: false } });
+    modal?.update({ okProps: { loading: false } });
     store.setDownloadInfo(messageData);
   };
   const renderExport = () => {
@@ -221,7 +222,9 @@ const ExportIssue: React.FC = () => {
   Object.assign(selectTemplateOkRef, {
     current: selectTemplateOk,
   });
-
+  useEffect(() => {
+    modal?.handleOk(exportExcel);
+  }, [exportExcel, modal]);
   useEffect(() => {
     const currentFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps);
     if (!currentFieldCodes.length) { // 没有字段选中时不应该显示保存按钮
@@ -288,7 +291,7 @@ const ExportIssue: React.FC = () => {
         } : undefined}
       />
       <div className={`${prefixCls}-btns`}>
-        <Button
+        {/* <Button
           icon="unarchive"
           funcType={'flat' as FuncType}
           onClick={exportExcel}
@@ -297,7 +300,7 @@ const ExportIssue: React.FC = () => {
           className="c7n-exportIssue-btn"
         >
           {exportBtnText || '导出问题'}
-        </Button>
+        </Button> */}
         {
           !templateIsExist && (
             <Button
@@ -307,7 +310,7 @@ const ExportIssue: React.FC = () => {
               color={'primary' as ButtonColor}
               className="c7n-exportIssue-btn"
               style={{
-                marginLeft: 16,
+                // marginLeft: 16,
               }}
             >
               保存为常用模板
