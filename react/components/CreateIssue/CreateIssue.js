@@ -26,6 +26,7 @@ import { IsProjectMember } from '@/hooks/useIsProjectMember';
 import { IsInProgram } from '@/hooks/useIsInProgram';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectUser from '@/components/select/select-user-old';
+import { MAX_LENGTH_LABEL } from '@/constants/MAX_LENGTH';
 import { UploadButton } from '../CommonComponent';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
@@ -782,7 +783,7 @@ class CreateIssue extends Component {
               },
               { required: field.required, message: '请选择标签' },
               ],
-              normalize: (value) => (value ? value.map((s) => s.toString().substr(0, 10))
+              normalize: (value) => (value ? value.map((s) => s.toString().substr(0, MAX_LENGTH_LABEL))
                 : value), // 限制最长10位
             })(
               <SelectFocusLoad
