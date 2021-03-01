@@ -25,7 +25,7 @@ databaseChangeLog(logicalFilePath:'agile_file_operation_history.groovy') {
 
     changeSet(id: '2021-01-14-agile-issue-comment-add-column', author: 'chihao.ran@hand-china.com') {
         addColumn(tableName: "agile_file_operation_history"){
-            column(name:"organizationId",type:"BIGINT UNSIGNED", remarks:"组织id", defaultValue: "0"){
+            column(name:"organization_id",type:"BIGINT UNSIGNED", remarks:"组织id", defaultValue: "0"){
                 constraints(nullable: false)
             }
         }
