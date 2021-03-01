@@ -34,7 +34,7 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
 
     private String issueType;
 
-    @Column(name = "`rank`")
+    @Column(name = "rank")
     private String rank;
 
     @Column(name = "is_required")
