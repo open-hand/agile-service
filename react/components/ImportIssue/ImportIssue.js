@@ -56,6 +56,8 @@ class ImportIssue extends Component {
   };
 
   componentDidMount() {
+    const { modal } = this.props;
+    modal.handleOk(() => this.importExcel());
     this.loadLatestImport();
   }
 
@@ -82,6 +84,7 @@ class ImportIssue extends Component {
 
   importExcel = () => {
     this.uploadInput.click();
+    return false;
   };
 
   beforeUpload = (e) => {
@@ -116,31 +119,40 @@ class ImportIssue extends Component {
     if (message === 'ok') {
       return;
     }
+    const { modal } = this.props;
     const data = JSON.parse(message);
     if (data) {
       this.setState({
         wsData: data,
       });
+      if (!modal.okProps || !modal.okProps.loading) {
+        modal?.update({ okProps: { loading: true } });
+      }
+      if (data.status === 'success') {
+        modal?.update({ okProps: { loading: false } });
+      }
       if (data.status === 'failed') {
         if (data.fileUrl) {
           window.location.href = data.fileUrl;
         }
+        modal?.update({ okProps: { loading: false } });
       }
     }
   };
 
   finish = () => {
-    const { onFinish } = this.props;
+    const { onFinish, modal } = this.props;
     if (onFinish) {
       onFinish();
     }
     this.setState({
       wsData: null,
-    });
+    }, () => modal?.update({ okProps: { loading: false } }));
   };
 
   renderProgress = () => {
     const { wsData } = this.state;
+    const { modal } = this.props;
     if (!wsData) {
       return null;
     }
@@ -151,7 +163,6 @@ class ImportIssue extends Component {
       fileUrl,
       successCount,
     } = wsData;
-
     if (status === 'doing') {
       return (
         <div className="c7n-importIssue-progress-area">
@@ -324,32 +335,32 @@ class ImportIssue extends Component {
       <div>
         {
           action && (
-          <>
-            <ImportIssueForm
-              title="选择常用模板"
-              bottom={null}
-            >
-              <TemplateSelect
-                templateSelectRef={this.templateSelectRef}
-                action={action}
-                checkOptions={allFields.map((item) => ({
-                  label: item.title,
-                  value: item.code,
-                  system: item.system,
-                  checkBoxProps: includes(requiredFields, item.code) ? {
-                    disabled: includes(requiredFields, item.code),
-                    defaultChecked: includes(requiredFields, item.code),
-                    name: 'required-option',
-                  } : undefined,
-                }))}
-                selectTemplateOk={this.selectTemplateOk}
-                transformExportFieldCodes={(data) => data}
-                reverseTransformExportFieldCodes={(data) => data}
-                defaultInitCodes={requiredFields}
-              />
-            </ImportIssueForm>
-            <Divider />
-          </>
+            <>
+              <ImportIssueForm
+                title="选择常用模板"
+                bottom={null}
+              >
+                <TemplateSelect
+                  templateSelectRef={this.templateSelectRef}
+                  action={action}
+                  checkOptions={allFields.map((item) => ({
+                    label: item.title,
+                    value: item.code,
+                    system: item.system,
+                    checkBoxProps: includes(requiredFields, item.code) ? {
+                      disabled: includes(requiredFields, item.code),
+                      defaultChecked: includes(requiredFields, item.code),
+                      name: 'required-option',
+                    } : undefined,
+                  }))}
+                  selectTemplateOk={this.selectTemplateOk}
+                  transformExportFieldCodes={(data) => data}
+                  reverseTransformExportFieldCodes={(data) => data}
+                  defaultInitCodes={requiredFields}
+                />
+              </ImportIssueForm>
+              <Divider />
+            </>
           )
         }
         <ImportIssueForm
@@ -366,13 +377,13 @@ class ImportIssue extends Component {
               </Button>
               {
                 action && (
-                <SaveTemplateBtn
-                  action={action}
-                  importFieldsRef={this.importFieldsRef}
-                  templateSelectRef={this.templateSelectRef}
-                  checkBoxChangeOk={this.handleCheckBoxChangeOk}
-                  templateIsExist={templateIsExist}
-                />
+                  <SaveTemplateBtn
+                    action={action}
+                    importFieldsRef={this.importFieldsRef}
+                    templateSelectRef={this.templateSelectRef}
+                    checkBoxChangeOk={this.handleCheckBoxChangeOk}
+                    templateIsExist={templateIsExist}
+                  />
                 )
               }
             </>
@@ -381,22 +392,11 @@ class ImportIssue extends Component {
           您必须使用模板文件，录入问题信息。
           <ImportFields importFieldsRef={this.importFieldsRef} setReRender={this.handleSetReRender} checkBoxChangeOk={this.handleCheckBoxChangeOk} />
         </ImportIssueForm>
-        <Divider />
-        <ImportIssueForm
-          title="导入问题"
-          bottom={!wsData && (
-            <Button
-              loading={uploading}
-              type="primary"
-              onClick={() => this.importExcel()}
-              icon="archive"
-              className="c7n-importIssue-btn"
-            >
-              导入问题
-            </Button>
-          )}
-        >
-          {id && (
+        {id && <Divider />}
+        {id && (
+          <ImportIssueForm
+            title="导入问题"
+          >
             <div style={{ marginTop: 10 }}>
               上次导入共导入
               <span style={{ color: '#00bfa5', fontSize: 20, margin: '0 .04rem' }}>{successCount}</span>
@@ -409,23 +409,25 @@ class ImportIssue extends Component {
                 </a>
               )}
             </div>
-          )}
-          <input
-            ref={
-              (uploadInput) => { this.uploadInput = uploadInput; }
-            }
-            type="file"
-            onChange={this.beforeUpload}
-            style={{ display: 'none' }}
-            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          />
-          <WSHandler
-            messageKey={getApplyType() === 'program' ? 'agile-import' : 'agile-import-issues'}
-            onMessage={this.handleMessage}
-          >
-            {this.renderProgress()}
-          </WSHandler>
-        </ImportIssueForm>
+
+          </ImportIssueForm>
+        )}
+
+        <input
+          ref={
+            (uploadInput) => { this.uploadInput = uploadInput; }
+          }
+          type="file"
+          onChange={this.beforeUpload}
+          style={{ display: 'none' }}
+          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        />
+        <WSHandler
+          messageKey={getApplyType() === 'program' ? 'agile-import' : 'agile-import-issues'}
+          onMessage={this.handleMessage}
+        >
+          {this.renderProgress()}
+        </WSHandler>
       </div>
     );
   }
@@ -443,8 +445,9 @@ const handleOpenImport = (props) => {
     style: {
       width: 380,
     },
-    okText: '关闭',
-    footer: (okBtn) => okBtn,
+    okText: '导入',
+    cancelText: '关闭',
+    // footer: (okBtn) => okBtn,
     children: <ObserverImportIssue {...props} />,
   });
 };
