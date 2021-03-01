@@ -4,6 +4,8 @@ import static java.util.Comparator.*;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.validator.BoardValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -98,6 +101,8 @@ public class BoardServiceImpl implements BoardService {
     private BacklogExpandService backlogExpandService;
     @Autowired
     private StarBeaconMapper starBeaconMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -455,7 +460,14 @@ public class BoardServiceImpl implements BoardService {
         }
         Boolean onlyStory = false;
         if (searchVO.getAdvancedSearchArgs() != null && searchVO.getAdvancedSearchArgs().get("issueTypeId") != null) {
-            List<String> issueTypeIds = (List<String>) searchVO.getAdvancedSearchArgs().get("issueTypeId");
+            List<String> issueTypeIds = new ArrayList<>();
+            try {
+                String issueTypeListString = objectMapper.writeValueAsString(searchVO.getAdvancedSearchArgs().get("issueTypeId"));
+                issueTypeIds = objectMapper.readValue(issueTypeListString, new TypeReference<List<String>>(){});
+            } catch (IOException e) {
+                throw new CommonException(e.getMessage(), e);
+            }
+
             for (String issueTypeId : issueTypeIds) {
                 String typeCode = issueTypeService.getIssueTypeById(Long.valueOf(issueTypeId));
                 if (Objects.equals(typeCode, "story")) {
