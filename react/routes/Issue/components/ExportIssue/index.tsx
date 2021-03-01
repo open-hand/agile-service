@@ -43,7 +43,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     reverseTransformExportFieldCodes: getReverseExportFieldCodes,
     events: {
       exportAxios: (searchData, sort) => {
-        set(searchData, 'searchArgs.tree', tableListMode);
+        set(searchData, 'searchArgs.tree', !tableListMode);
         return issueApi.export(searchData, sort);
       },
       loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file'),
