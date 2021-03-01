@@ -386,7 +386,6 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
         switch (v.getFieldType()) {
             case FieldType.CHECKBOX:
-            case FieldType.MULTI_MEMBER:
             case FieldType.MULTIPLE:
                 pageFieldViewUpdateVO.setValue(statusFieldValueSettingDTOS.stream().map(settingDTO -> settingDTO.getOptionId().toString()).collect(Collectors.toList()));
                 break;
@@ -411,9 +410,27 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             case FieldType.NUMBER:
                 pageFieldViewUpdateVO.setValue(handlerNumber(v, statusFieldValueSettingDTO, issueDTO));
                 break;
+            case FieldType.MULTI_MEMBER:
+                pageFieldViewUpdateVO.setValue(handlerMultiMember(statusFieldValueSettingDTOS, issueDTO));
+                break;
             default:
                 break;
         }
+    }
+
+    private Object handlerMultiMember(List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO) {
+        if (CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
+            return null;
+        }
+        StatusFieldValueSettingDTO settingDTO = statusFieldValueSettingDTOS.get(0);
+        if (CLEAR.equals(settingDTO.getOperateType())) {
+            return null;
+        }
+        List<String> userIds = new ArrayList<>();
+        for (StatusFieldValueSettingDTO statusFieldValueSettingDTO : statusFieldValueSettingDTOS) {
+            userIds.add(handlerMember(statusFieldValueSettingDTO, issueDTO).toString());
+        }
+        return userIds;
     }
 
     private BigDecimal handlerNumber(StatusFieldSettingVO v, StatusFieldValueSettingDTO statusFieldValueSettingDTO, IssueDTO issueDTO) {
