@@ -44,6 +44,12 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     protected static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
     protected static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
     private static final String CLEAR = "clear";
+    private static final String OPERATOR = "operator";
+    private static final String CREATOR = "creator";
+    private static final String REPORTOR = "reportor";
+    private static final String ASSIGNEE = "assignee";
+    private static final String MAIN_RESPONSIBLE = "mainResponsible";
+
     @Autowired
     private StatusFieldSettingMapper statusFieldSettingMapper;
     @Autowired
@@ -280,7 +286,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             }
             handlerFieldName(issueUpdateVO, statusFieldValueSettingDTOS, issueDTO, statusFieldValueSettingDTO, v, field);
         } catch (Exception e) {
-            throw new CommonException("error.transform.object");
+            throw new CommonException("error.transform.object", e);
         }
     }
 
@@ -380,7 +386,6 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
         switch (v.getFieldType()) {
             case FieldType.CHECKBOX:
-            case FieldType.MULTI_MEMBER:
             case FieldType.MULTIPLE:
                 pageFieldViewUpdateVO.setValue(statusFieldValueSettingDTOS.stream().map(settingDTO -> settingDTO.getOptionId().toString()).collect(Collectors.toList()));
                 break;
@@ -405,9 +410,27 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             case FieldType.NUMBER:
                 pageFieldViewUpdateVO.setValue(handlerNumber(v, statusFieldValueSettingDTO, issueDTO));
                 break;
+            case FieldType.MULTI_MEMBER:
+                pageFieldViewUpdateVO.setValue(handlerMultiMember(statusFieldValueSettingDTOS, issueDTO));
+                break;
             default:
                 break;
         }
+    }
+
+    private Object handlerMultiMember(List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO) {
+        if (CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
+            return null;
+        }
+        StatusFieldValueSettingDTO settingDTO = statusFieldValueSettingDTOS.get(0);
+        if (CLEAR.equals(settingDTO.getOperateType())) {
+            return null;
+        }
+        List<String> userIds = new ArrayList<>();
+        for (StatusFieldValueSettingDTO statusFieldValueSettingDTO : statusFieldValueSettingDTOS) {
+            userIds.add(handlerMember(statusFieldValueSettingDTO, issueDTO).toString());
+        }
+        return userIds;
     }
 
     private BigDecimal handlerNumber(StatusFieldSettingVO v, StatusFieldValueSettingDTO statusFieldValueSettingDTO, IssueDTO issueDTO) {
@@ -429,12 +452,17 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     private Long handlerMember(StatusFieldValueSettingDTO statusFieldValueSettingDTO, IssueDTO issueDTO) {
         Long userId = null;
-        if ("operator".equals(statusFieldValueSettingDTO.getOperateType())) {
+        String operateType = statusFieldValueSettingDTO.getOperateType();
+        if (OPERATOR.equals(operateType)) {
             userId = DetailsHelper.getUserDetails().getUserId();
-        } else if ("creator".equals(statusFieldValueSettingDTO.getOperateType())) {
+        } else if (CREATOR.equals(operateType)) {
             userId = issueDTO.getCreatedBy();
-        } else if ("reportor".equals(statusFieldValueSettingDTO.getOperateType())) {
+        } else if (REPORTOR.equals(operateType)) {
             userId = issueDTO.getReporterId();
+        } else if (ASSIGNEE.equals(operateType)) {
+            userId = issueDTO.getAssigneeId();
+        } else if (MAIN_RESPONSIBLE.equals(operateType)) {
+            userId = issueDTO.getMainResponsibleId();
         } else {
             userId = statusFieldValueSettingDTO.getUserId();
         }
