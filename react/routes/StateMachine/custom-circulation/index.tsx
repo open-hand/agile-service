@@ -115,6 +115,7 @@ const transformedMember = {
   assignee: '经办人',
   projectOwner: '项目所有者',
   clear: '清空',
+  mainResponsible: '主要负责人',
 };
 
 const transformedNoticeType = {
@@ -156,6 +157,15 @@ const transformFieldValue = (fieldSetting) => {
       transformedValue = isSpecifier
         // @ts-ignore
         ? fieldValueList.map((item) => item.name) : transformedMember[operateType];
+      break;
+    }
+    case 'multiMember': {
+      transformedValue = fieldValueList.map((item: IFieldValue) => {
+        const { operateType } = item;
+        const isSpecifier = operateType === 'specifier';
+        // @ts-ignore
+        return isSpecifier ? item.name : transformedMember[operateType];
+      }).join('、');
       break;
     }
     case 'radio': case 'single': case 'checkbox': case 'multiple': {
