@@ -24,6 +24,8 @@ public class EpicWithInfoDTO {
 
     private StatusVO statusVO;
 
+    private Long objectVersionNumber;
+
     public Long getIssueId() {
         return issueId;
     }
@@ -86,5 +88,13 @@ public class EpicWithInfoDTO {
 
     public void setStatusVO(StatusVO statusVO) {
         this.statusVO = statusVO;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
     }
 }

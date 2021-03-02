@@ -33,6 +33,7 @@
         <!--<id column="ai_program_id" property="programId"/>-->
         <id column="ar_rank" property="epicRank"/>
         <id column="ar_object_version_number" property="epicRankObjectVersionNumber"/>
+        <id column="epic_object_version_number" property="objectVersionNumber"/>
         <association property="statusVO" javaType="io.choerodon.agile.api.vo.StatusVO">
             <id property="id" column="status_id"/>
             <result property="name" column="status_name"/>
@@ -50,6 +51,7 @@
             ai.type_code as ai_type_code,
             ai.summary as ai_summary,
             ai.epic_name as ai_epic_name,
+            ai.object_version_number as epic_object_version_number,
 --             ai.program_id as ai_program_id,
             ar.rank as ar_rank,
             ar.object_version_number as ar_object_version_number,
