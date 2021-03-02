@@ -62,7 +62,7 @@ const BodyRow = (props: any) => {
 };
 
 const rowSource = {
-  beginDrag(props) {
+  beginDrag(props: any) {
     return {
       index: props.index,
     };
@@ -70,7 +70,7 @@ const rowSource = {
 };
 
 const rowTarget = {
-  drop(props, monitor) {
+  drop(props: any, monitor: any) {
     const dragIndex = monitor.getItem().index;
     const hoverIndex = props.index;
 
