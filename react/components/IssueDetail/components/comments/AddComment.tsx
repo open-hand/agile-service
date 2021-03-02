@@ -1,36 +1,25 @@
 import React, { useState, useCallback } from 'react';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-// @ts-ignore
-import Delta from 'quill-delta';
 
 interface Props {
-  onSubmit: (delta: Delta) => Promise<any>
+  onSubmit: (delta: string) => Promise<any>
 }
 const Comments: React.FC<Props> = ({ onSubmit }) => {
   const [adding, setAdding] = useState(false);
-  const [value, setValue] = useState<Delta>();
+  const [value, setValue] = useState<string>('');
   const cancel = () => {
     setAdding(false);
-    setValue(undefined);
+    setValue('');
   };
-  const handleChange = useCallback((delta: Delta) => {
+  const handleChange = useCallback((delta: string) => {
     setValue(delta);
   }, []);
   // 校验评论是否为空
-  function verifyComment(comment: Delta) {
-    let result = false;
-    if (comment && comment.length) {
-      comment.forEach((item:any) => {
-        // @ts-ignore
-        if (!result && item.insert && (item.insert.image || item.insert.trim())) {
-          result = true;
-        }
-      });
-    }
-    return result;
+  function verifyComment(comment: string) {
+    return comment.length > 0;
   }
 
-  const handleCreateCommit = async (delta: Delta) => {
+  const handleCreateCommit = async (delta: string) => {
     if (delta && verifyComment(delta)) {
       try {
         await onSubmit(delta);
@@ -46,14 +35,14 @@ const Comments: React.FC<Props> = ({ onSubmit }) => {
     <div className="line-start mt-10" style={{ width: '100%' }}>
       <WYSIWYGEditor
         autoFocus
-        bottomBar
+        footer
         style={{ height: 200, width: '100%' }}
-        handleDelete={() => {
+        onCancel={() => {
           cancel();
         }}
         value={value}
         onChange={handleChange}
-        handleSave={handleCreateCommit}
+        onOk={handleCreateCommit}
       />
     </div>
   ) : (
