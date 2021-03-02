@@ -207,6 +207,7 @@ const en_US = {
   'stateMachine.publish.des': 'The current state machine draft cannot be deleted because the state of the associated issue has been removed from your edits and the issue needs to be transitioned to another state in order to continue publishing.',
 
   'field.create': 'add field',
+  'field.import': 'import field',
   'field.edit': 'edit field',
   'field.context': 'Context',
   'field.code.rule': 'code only allows numbers, letters and underscores',

@@ -3,6 +3,7 @@ import { AxiosRequestConfig } from 'axios';
 import { IFieldType } from '@/common/types';
 import { getProjectId, getOrganizationId, getMenuType } from '@/utils/common';
 import Api from './Api';
+import { IImportOrExportRecord } from './Issue';
 
 export enum PageConfigIssueType {
   feature = 'feature',
@@ -285,6 +286,56 @@ class PageConfigApi extends Api<PageConfigApi> {
         organizationId: getOrganizationId(),
       },
       data,
+    });
+  }
+
+  /**
+   * 下载导入模版
+   */
+  downloadTemplate() {
+    return axios({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/excel/download`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  import(data: any) {
+    return axios({
+      method: 'post',
+      headers: { 'Content-Type': 'multipart/form-data' },
+      url: `${this.prefixOrgOrPro}/object_scheme_field/excel`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  importCancel(data: { id: string, objectVersionNumber: number }) {
+    return axios({
+      method: 'put',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/excel/cancel`,
+      params: {
+        organizationId: getOrganizationId(),
+        ...data,
+      },
+    });
+  }
+
+  /**
+   * 查询最近导入记录
+   */
+  loadLastImportRecord(action = 'upload_file_customer_field'):Promise<IImportOrExportRecord> {
+    return axios({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/excel/latest`,
+      params: {
+        organizationId: getOrganizationId(),
+        action,
+      },
     });
   }
 }
