@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import omit from 'lodash/omit';
 import autobind from 'choerodon-ui/pro/lib/_util/autobind';
 // @ts-ignore
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
+import WYSIWYGEditor from '@/components/CKEditor';
 import { FormField, FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
 
 interface TestProps extends FormFieldProps {

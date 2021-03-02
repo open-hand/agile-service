@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
 import { text2Delta } from '@/utils/richText';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
+import WYSIWYGEditor from '@/components/CKEditor';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
 import UserHead from '@/components/UserHead';

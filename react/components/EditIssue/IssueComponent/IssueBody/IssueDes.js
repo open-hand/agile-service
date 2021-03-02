@@ -6,7 +6,7 @@ import {
 } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/master';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
+import WYSIWYGEditor from '@/components/CKEditor';
 import { issueApi } from '@/api';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';

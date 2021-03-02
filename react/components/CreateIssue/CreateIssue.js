@@ -28,7 +28,7 @@ import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectUser from '@/components/select/select-user-old';
 import { UploadButton } from '../CommonComponent';
 import SelectNumber from '../SelectNumber';
-import WYSIWYGEditor from '../WYSIWYGEditor';
+import WYSIWYGEditor from '../CKEditor';
 import TypeTag from '../TypeTag';
 import './CreateIssue.less';
 import SelectFocusLoad from '../SelectFocusLoad';
