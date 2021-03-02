@@ -42,26 +42,17 @@ const CommentItem: React.FC<Props> = ({
   const loginUserId = AppState.userInfo.id;
   const isSelf = String(comment.userId) === String(loginUserId);
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState<Delta>();
+  const [value, setValue] = useState<string>('');
   const [replying, setReplying] = useState(false);
-  const [replyValue, setReplyValue] = useState<Delta>();
+  const [replyValue, setReplyValue] = useState<string>('');
   useEffect(() => {
     const delta = text2Delta(comment.commentText);
     setValue(delta);
   }, [comment.commentText]);
 
   // 校验评论是否为空
-  function verifyComment(delta: Delta) {
-    let result = false;
-    if (delta && delta.length) {
-      delta.forEach((item: any) => {
-        // @ts-ignore
-        if (!result && item.insert && (item.insert.image || item.insert.trim())) {
-          result = true;
-        }
-      });
-    }
-    return result;
+  function verifyComment(delta: string) {
+    return delta.length > 0;
   }
 
   const newReply = useCallback((commit: IReplyCreate) => {
@@ -85,28 +76,28 @@ const CommentItem: React.FC<Props> = ({
           commentText,
         });
         setReplying(false);
-        setReplyValue(undefined);
+        setReplyValue('');
       } catch {
         //
       }
     } else {
       setReplying(false);
-      setReplyValue(undefined);
+      setReplyValue('');
     }
   }, [comment.issueId, comment.userId, newReply, parentId, replyValue]);
 
   const updateComment = useCallback((ucomment: UComment) => {
     issueCommentApi.project(projectId).update(ucomment, isSelf).then(() => {
       setEditing(false);
-      setValue(undefined);
+      setValue('');
       if (onUpdate) {
         onUpdate();
       }
     });
   }, [isSelf, onUpdate, projectId]);
 
-  const handleUpdate = useCallback(async (delta: Delta) => {
-    const commentText = await uploadAndReplaceImg(value);
+  const handleUpdate = useCallback(async (delta: string) => {
+    const commentText = value;
     updateComment({
       commentId: comment.commentId,
       objectVersionNumber: comment.objectVersionNumber,
@@ -123,7 +114,7 @@ const CommentItem: React.FC<Props> = ({
 
   const canEditOrDelete = hasPermission;
 
-  const handleChange = useCallback((delta: Delta) => {
+  const handleChange = useCallback((delta: string) => {
     setValue(delta);
   }, []);
 
@@ -137,7 +128,7 @@ const CommentItem: React.FC<Props> = ({
     setReplying(true);
   }, [comment.commentText, editing]);
 
-  const handleReplyChange = useCallback((delta: Delta) => {
+  const handleReplyChange = useCallback((delta: string) => {
     setReplyValue(delta);
   }, []);
 
@@ -205,7 +196,7 @@ const CommentItem: React.FC<Props> = ({
                  if (canEditOrDelete) {
                    if (replying) {
                      setReplying(false);
-                     setReplyValue(undefined);
+                     setReplyValue('');
                    }
                    setEditing(true);
                  }
@@ -229,14 +220,14 @@ const CommentItem: React.FC<Props> = ({
             <div className="c7n-conent-commit" style={{ marginTop: 10 }}>
               <WYSIWYGEditor
                 autoFocus
-                bottomBar
+                footer
                 value={value}
                 onChange={handleChange}
                 style={{ height: 200, width: '100%' }}
-                handleDelete={() => {
+                onCancel={() => {
                   setEditing(false);
                 }}
-                handleSave={handleUpdate}
+                onOk={handleUpdate}
               />
             </div>
           ) : (
@@ -251,16 +242,16 @@ const CommentItem: React.FC<Props> = ({
           <div className="c7n-comment-reply">
             <WYSIWYGEditor
               autoFocus
-              bottomBar
+              footer
               value={replyValue}
               onChange={handleReplyChange}
               style={{ height: 200, width: '100%' }}
-              handleDelete={() => {
+              onCancel={() => {
                 setReplying(false);
-                setReplyValue(undefined);
+                setReplyValue('');
               }}
-              handleSave={handleReply}
-              saveText="回复"
+              onOk={handleReply}
+              okText="回复"
             />
           </div>
         )

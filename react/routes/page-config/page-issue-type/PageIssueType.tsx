@@ -124,19 +124,7 @@ function PageIssueType() {
         createdFields: CreatedFields,
         deleteIds: pageIssueTypeStore.getDeleteIds,
       };
-      if (issueTypeFieldVO.dirty) {
-        uploadAndReplaceImg(text2Delta(issueTypeFieldVO.template)).then((text) => {
-          if (data.issueTypeFieldVO) {
-            data.issueTypeFieldVO.template = text;
-          }
-          handleRequest(data);
-        }).catch(() => {
-          setBtnLoading(false);
-          pageIssueTypeStore.setLoading(false);
-        });
-      } else {
-        handleRequest(data);
-      }
+      handleRequest(data);
     }
     return true;
   };
@@ -251,11 +239,7 @@ function PageIssueType() {
                     <SortTable />
                   </IssueTypeWrap>,
                   <IssueTypeWrap title="描述信息格式">
-                    {
-                      !pageIssueTypeStore.getLoading ? (
-                        <PageDescription />
-                      ) : ''
-                    }
+                    <PageDescription />
                   </IssueTypeWrap>]
             }
           </div>

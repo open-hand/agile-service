@@ -16,7 +16,7 @@ import {
   statusApi,
 } from '@/api';
 import {
-  uploadAndReplaceImg, handleFileUpload, validateFile, normFile, text2Delta,
+  handleFileUpload, validateFile, normFile, text2Delta,
 } from '@/utils/richText';
 import {
   getProjectName, getProjectId,
@@ -425,11 +425,9 @@ class CreateIssue extends Component {
         const issueLinkCreateVOList = this.getIssueLinks(keys, linkTypes, linkIssues);
 
         this.setState({ createLoading: true });
-        const deltaOps = description;
         try {
-          const text = await uploadAndReplaceImg(deltaOps);
           const extra = {
-            description: text,
+            description,
             statusId,
             programId: getProjectId(),
             projectId: getProjectId(),
