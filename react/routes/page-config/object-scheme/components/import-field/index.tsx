@@ -1,7 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import { Modal, Button } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import { Divider } from 'choerodon-ui';
+import { set } from 'lodash';
 import fileSaver from 'file-saver';
 import WsProgress from '@/components/ws-progress';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
@@ -21,21 +24,18 @@ const ImportFormItem: React.FC<IImportFormItemProps> = ({ title, footer, childre
     {footer}
   </div>
 );
-// function useGetWsData(messageKey:string):[any, {}] {
-//   const [data, setData] = useState<any>({});
 
-//   const componentProps = {
-
-//   };
-//   return [data, componentProps];
-// }
 const ImportField: React.FC<{ modal?: IModalProps }> = ({ modal }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState({} as IImportOrExportRecord);
-  useEffect(() => {
+  const [wsData, setWsData] = useState({} as IImportOrExportRecord);
+  function loadRecord() {
     pageConfigApi.loadLastImportRecord().then((res) => {
       setData(res);
     });
+  }
+  useEffect(() => {
+    loadRecord();
   }, []);
   function handleDownload() {
     pageConfigApi.downloadTemplate().then((res: any) => {
@@ -53,19 +53,33 @@ const ImportField: React.FC<{ modal?: IModalProps }> = ({ modal }) => {
     const formData = new FormData();
     formData.append('file', file);
     modal?.update({ okProps: { loading: true } });
-    pageConfigApi.import(formData).then(() => {
-    }).catch(() => {
-      modal?.update({ okProps: { loading: false } });
+
+    pageConfigApi.import(formData).catch(() => {
       Choerodon.prompt('网络错误');
+      modal?.update({ okProps: { loading: false } });
+    }).finally(() => {
+      set(inputRef.current || {}, 'value', '');
     });
   }
-  async function handleImport() {
-    inputRef.current?.click();
+  const handleFinish = useCallback((newWsData?: any) => {
+    loadRecord();
+    setWsData(() => {
+      modal?.update({ okText: '导入' });
+      return newWsData;
+    });
+  }, [modal]);
+  const handleImport = useCallback(async () => {
+    if (wsData.status !== 'doing') {
+      inputRef.current?.click();
+    } else if (wsData.id && wsData.objectVersionNumber) {
+      pageConfigApi.importCancel({ id: wsData.id, objectVersionNumber: wsData.objectVersionNumber });
+      handleFinish({});
+    }
     return false;
-  }
+  }, [handleFinish, wsData]);
   useEffect(() => {
     modal?.handleOk(handleImport);
-  }, [modal]);
+  }, [handleImport, modal]);
   return (
     <div className="im">
       <ImportFormItem
@@ -102,16 +116,23 @@ const ImportField: React.FC<{ modal?: IModalProps }> = ({ modal }) => {
         </ImportFormItem>
       )}
       <WsProgress
+        className={importStyles.progress}
+        visible={wsData.status === 'doing'}
         messageKey={getMenuType() === 'project' ? `agile-import-customer-field-pro-${getProjectId()}`
           : `agile-import-customer-field-org-${getOrganizationId()}`}
-        onStart={(wsData: any) => {
-          // setData(wsData);
-          modal?.update({ okProps: { loading: true } });
+        onStart={(newWsData: any) => {
+          setWsData(() => {
+            modal?.update({ okProps: { loading: false }, okText: '取消导入' });
+            return newWsData;
+          });
         }}
-        onFinish={() => {
-          // setData(undefined);
-          modal?.update({ okProps: { loading: false } });
+        handleMessage={(newWsData: any) => {
+          if (newWsData.status === 'failed') {
+            return true;
+          }
+          return false;
         }}
+        onFinish={handleFinish}
         predefineProgressTextConfig="import"
       />
       <input

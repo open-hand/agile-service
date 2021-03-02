@@ -295,7 +295,8 @@ class PageConfigApi extends Api<PageConfigApi> {
   downloadTemplate() {
     return axios({
       method: 'get',
-      url: `${this.prefixOrgOrPro}/object_scheme_field/excel/download`,
+      responseType: 'arraybuffer',
+      url: `${this.prefixOrgOrPro}/excel/object_scheme_field/download`,
       params: {
         organizationId: getOrganizationId(),
       },
@@ -306,7 +307,7 @@ class PageConfigApi extends Api<PageConfigApi> {
     return axios({
       method: 'post',
       headers: { 'Content-Type': 'multipart/form-data' },
-      url: `${this.prefixOrgOrPro}/object_scheme_field/excel`,
+      url: `${this.prefixOrgOrPro}/excel/object_scheme_field/import`,
       params: {
         organizationId: getOrganizationId(),
       },
@@ -317,7 +318,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   importCancel(data: { id: string, objectVersionNumber: number }) {
     return axios({
       method: 'put',
-      url: `${this.prefixOrgOrPro}/object_scheme_field/excel/cancel`,
+      url: `${this.prefixOrgOrPro}/excel/cancel`,
       params: {
         organizationId: getOrganizationId(),
         ...data,
