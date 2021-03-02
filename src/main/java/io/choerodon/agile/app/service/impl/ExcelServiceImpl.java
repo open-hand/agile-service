@@ -846,7 +846,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
             progress.processNumIncrease();
             if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / realRowCount > 0.03) {
-                sendProcess(history, userId, (progress.getProcessNum() * 1.0 / realRowCount) * 0.97, socketKey);
+                sendProcess(history, userId, (progress.getProcessNum() * 1.0 / realRowCount) * 0.97 * 100, socketKey);
             }
         }
         //错误数据生成excel
@@ -869,7 +869,7 @@ public class ExcelServiceImpl implements ExcelService {
         update.setObjectVersionNumber(history.getObjectVersionNumber());
         fileOperationHistoryMapper.updateByPrimaryKeySelective(update);
         FileOperationHistoryDTO result = fileOperationHistoryMapper.selectByPrimaryKey(update.getId());
-        sendProcess(result, result.getUserId(), 1.0, socketKey);
+        sendProcess(result, result.getUserId(), 100.0, socketKey);
     }
 
     protected String uploadErrorExcel(Workbook errorWorkbook, Long organizationId) {
