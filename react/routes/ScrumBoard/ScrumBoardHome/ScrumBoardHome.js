@@ -6,6 +6,7 @@ import {
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip,
 } from 'choerodon-ui';
+import Loading from '@/components/Loading';
 import { set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
@@ -400,15 +401,18 @@ class ScrumBoardHome extends Component {
           style={{
             padding: 0,
             display: 'flex',
-            flexDirection: 'column',
             overflow: 'hidden',
             borderTop: '1px solid #D8D8D8',
             paddingTop: 16,
           }}
         >
-          <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
+          <div style={{
+            flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column',
+          }}
+          >
+            <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
 
-          <Spin spinning={ScrumBoardStore.getSpinIf}>
+            <Loading loading={ScrumBoardStore.getSpinIf} />
             <div className="c7n-scrumboard">
               <div style={{ display: 'table', minWidth: '100%' }}>
                 <div className="c7n-scrumboard-header">
@@ -441,18 +445,18 @@ class ScrumBoardHome extends Component {
                   )}
               </div>
             </div>
-          </Spin>
-          <IssueDetail
-            refresh={this.refresh}
-          />
-          <CreateIssue refresh={this.refresh} />
-          {this.issueSearchStore ? (
-            <FilterManage
-              visible={ScrumBoardStore.getFilterManageVisible}
-              setVisible={() => ScrumBoardStore.setFilterManageVisible(!ScrumBoardStore.getFilterManageVisible)}
-              issueSearchStore={this.issueSearchStore}
+            <IssueDetail
+              refresh={this.refresh}
             />
-          ) : null}
+            <CreateIssue refresh={this.refresh} />
+            {this.issueSearchStore ? (
+              <FilterManage
+                visible={ScrumBoardStore.getFilterManageVisible}
+                setVisible={() => ScrumBoardStore.setFilterManageVisible(!ScrumBoardStore.getFilterManageVisible)}
+                issueSearchStore={this.issueSearchStore}
+              />
+            ) : null}
+          </div>
         </Content>
         {
           ScrumBoardStore.getUpdateParent ? (
