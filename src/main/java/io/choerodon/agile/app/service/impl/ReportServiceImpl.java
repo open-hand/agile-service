@@ -6,6 +6,7 @@ import io.choerodon.agile.infra.dto.GroupDataChartDTO;
 import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
+import io.choerodon.agile.infra.enums.InitIssueType;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.IssueAssembler;
@@ -1501,6 +1502,14 @@ public class ReportServiceImpl implements ReportService {
         handleAddDoneIssueCountDuringSprint(sprintDTO, reportIssueConvertDTOList, issueAllList);
         //获取当前冲刺期间移出done状态的bug
         handleRemoveDoneIssueCountDuringSprint(sprintDTO, reportIssueConvertDTOList, issueAllList);
+
+        Set<String> statusSet = new HashSet<>();
+        statusSet.add(InitIssueType.BUG.getTypeCode());
+        List<IssueOverviewVO> issueOverviewVOS = issueMapper.selectIssueBysprint(projectId, sprintId, statusSet);
+        if (!CollectionUtils.isEmpty(issueOverviewVOS)) {
+            List<Long> issueIds = issueOverviewVOS.stream().map(IssueOverviewVO::getIssueId).collect(Collectors.toList());
+            reportIssueConvertDTOList = reportIssueConvertDTOList.stream().filter(v -> issueIds.contains(v.getIssueId())).collect(Collectors.toList());
+        }
         return reportIssueConvertDTOList;
     }
 
