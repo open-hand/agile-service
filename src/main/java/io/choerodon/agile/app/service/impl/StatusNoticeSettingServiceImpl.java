@@ -166,6 +166,8 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
             case StatusNoticeUserType.SPECIFIER:
                 userSet.add(noticeDTO.getUserId());
                 break;
+            case StatusNoticeUserType.ONLY_WEB_HOOK:
+                break;
             default:
                 // 不在默认配置里，则检索自定义字段，有则加入，没有则忽略
                 userSet.add(fieldValueMapper.selectUserIdByField(projectId, noticeDTO.getUserType(), issue.getIssueId()));
