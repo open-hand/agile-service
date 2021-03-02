@@ -16,7 +16,7 @@ import {
   statusApi,
 } from '@/api';
 import {
-  handleFileUpload, validateFile, normFile, text2Delta,
+  handleFileUpload, validateFile, normFile,
 } from '@/utils/richText';
 import {
   getProjectName, getProjectId,
@@ -221,7 +221,7 @@ class CreateIssue extends Component {
     pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
       const { template } = res || {};
       form.setFieldsValue({
-        description: text2Delta(template),
+        description: template,
       });
       if (!template) {
         form.setFieldsValue({

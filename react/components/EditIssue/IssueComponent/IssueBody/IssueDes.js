@@ -7,15 +7,12 @@ import {
 import { Choerodon } from '@choerodon/master';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-import { text2Delta, uploadAndReplaceImg } from '@/utils/richText';
 import { issueApi } from '@/api';
-import FullEditor from '../../../FullEditor';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const IssueDes = ({ reloadIssue, setIssueLoading }) => {
   const [editDesShow, setEditDesShow] = useState(false);
-  const [fullEdit, setFullEdit] = useState(false);
   const [editDes, setEditDes] = useState('');
   const { store, disabled, descriptionEditRef } = useContext(EditIssueContext);
   const { description, descriptionTemplate, typeCode } = store.getIssue;
@@ -37,7 +34,6 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
       };
       await issueApi.update(obj);
       setEditDesShow(false);
-      setFullEdit(false);
       if (reloadIssue) {
         reloadIssue(issueId);
       }
@@ -108,11 +104,6 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
         /> */}
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px', position: 'relative' }}>
-            <Tooltip title="全屏编辑" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => setFullEdit(true)}>
-                <Icon type="zoom_out_map icon" style={{ marginRight: 2 }} />
-              </Button>
-            </Tooltip>
             <Tooltip placement="topRight" autoAdjustOverflow={false} title="编辑">
               <Button
                 style={{ padding: '0 6px' }}
@@ -134,17 +125,6 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
         )}
       </div>
       {renderDes()}
-      {
-        fullEdit ? (
-          <FullEditor
-            autoFocus
-            initValue={text2Delta(editDes)}
-            visible={fullEdit}
-            onCancel={() => setFullEdit(false)}
-            onOk={callback}
-          />
-        ) : null
-      }
     </div>
   );
 };

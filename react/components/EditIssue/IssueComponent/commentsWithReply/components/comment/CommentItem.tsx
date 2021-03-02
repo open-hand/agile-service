@@ -1,14 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Icon, Popconfirm } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import { text2Delta, uploadAndReplaceImg } from '@/utils/richText';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
 import UserHead from '@/components/UserHead';
-// @ts-ignore
-import Delta from 'quill-delta';
 import './Comment.less';
 import { IComment } from '@/common/types';
 import { issueCommentApi, UComment, IReplyCreate } from '@/api/IssueComment';
@@ -46,7 +43,7 @@ const CommentItem: React.FC<Props> = ({
   const [replying, setReplying] = useState(false);
   const [replyValue, setReplyValue] = useState<string>('');
   useEffect(() => {
-    const delta = text2Delta(comment.commentText);
+    const delta = comment.commentText;
     setValue(delta);
   }, [comment.commentText]);
 
@@ -66,7 +63,7 @@ const CommentItem: React.FC<Props> = ({
   const handleReply = useCallback(async () => {
     if (replyValue && verifyComment(replyValue)) {
       try {
-        const commentText = await uploadAndReplaceImg(replyValue);
+        const commentText = replyValue;
         newReply({
           // @ts-ignore
           issueId: comment.issueId,
@@ -121,7 +118,7 @@ const CommentItem: React.FC<Props> = ({
   const handleClickReply = useCallback(() => {
     if (editing) {
       setEditing(false);
-      const delta = text2Delta(comment.commentText);
+      const delta = comment.commentText;
       setValue(delta);
     }
 

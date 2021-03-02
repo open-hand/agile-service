@@ -4,7 +4,6 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import Editor from '@/components/Editor';
-import { uploadAndReplaceImg } from '@/utils/richText';
 import { RefProps } from '../add-modal';
 import { IReportTextBlock } from '../../store';
 
@@ -29,7 +28,7 @@ const AddText: React.FC<Props> = ({ innerRef, data: editData }) => {
   const handleSubmit = useCallback(async () => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();
-      const text = await uploadAndReplaceImg(data.description);
+      const text = data.description;
       const block: IReportTextBlock = {
         key: String(Math.random()),
         title: data.title,
