@@ -136,9 +136,9 @@ class Commits extends Component {
         ),
       },
       {
-        title: '应用名称',
+        title: '应用服务名称',
         dataIndex: 'appServiceName',
-        width: 150,
+        width: 140,
         render: (appName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={appName}>
@@ -155,7 +155,7 @@ class Commits extends Component {
       {
         title: '所属项目',
         dataIndex: 'projectName',
-        width: 150,
+        width: 140,
         render: (projectName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={projectName}>
