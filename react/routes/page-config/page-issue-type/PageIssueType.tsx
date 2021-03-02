@@ -13,7 +13,6 @@ import { Prompt } from 'react-router-dom';
 import {
   pageConfigApi, UIssueTypeConfig,
 } from '@/api/PageConfig';
-import { uploadAndReplaceImg, text2Delta } from '@/utils/richText';
 import { validKeyReturnValue } from '@/common/commonValid';
 import {
   omit, set, pick, isEmpty,

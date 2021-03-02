@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
-import {
-  text2Delta, uploadAndReplaceImg,
-} from '@/utils/richText';
 import { workLogApi } from '@/api';
 import UserHead from '../../UserHead';
 import WYSIWYGEditor from '../../WYSIWYGEditor';
@@ -43,7 +40,7 @@ class Log extends Component {
     const { logId, objectVersionNumber } = log;
     const { editLog } = this.state;
     try {
-      const text = await uploadAndReplaceImg(editLog);
+      const text = editLog;
       this.updateLog({
         logId,
         objectVersionNumber,
@@ -70,7 +67,7 @@ class Log extends Component {
       realName, loginName,
       userName, createdBy, userImageUrl,
     } = worklog;
-    const deltaEdit = text2Delta(editLog);
+    const deltaEdit = editLog;
 
     return (
       <div
@@ -192,19 +189,19 @@ class Log extends Component {
                 worklog.logId === editLogId ? (
                   <WYSIWYGEditor
                     autoFocus
-                    bottomBar
+                    footer
                     value={deltaEdit}
                     style={{ height: 200, width: '100%' }}
                     onChange={(value) => {
                       this.setState({ editLog: value });
                     }}
-                    handleDelete={() => {
+                    onCancel={() => {
                       this.setState({
                         editLogId: undefined,
                         editLog: undefined,
                       });
                     }}
-                    handleSave={this.handleUpdateLog.bind(this, worklog)}
+                    onOk={this.handleUpdateLog.bind(this, worklog)}
                     toolbarHeight={isWide ? null : 66}
                   />
                 ) : null
