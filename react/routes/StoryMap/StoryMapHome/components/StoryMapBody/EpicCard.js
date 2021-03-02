@@ -1,8 +1,8 @@
 import React, { Component, createRef } from 'react';
-import PropTypes from 'prop-types';
 import { Tooltip, Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react';
 import StatusTag from '@/components/StatusTag';
+import { IsInProgram } from '@/hooks/useIsInProgram';
 import EpicDrag from './EpicDrag';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import Card from './Card';
@@ -89,9 +89,24 @@ class EpicCard extends Component {
                 </Tooltip>
               </div>
               <div style={{ marginLeft: 5 }}>{`(${subIssueNum})`}</div>
-              <div className="c7nagile-StoryMap-EpicCard-editIcon" role="none" onClick={this.handleEditEpic.bind(this)}>
-                <Icon type="mode_edit" />
-              </div>
+              <IsInProgram>
+                {
+                  ({ isInProgram, loading }) => (
+                    !isInProgram && !loading && (
+                      <>
+                        {
+                          epicName && (
+                            <div className="c7nagile-StoryMap-EpicCard-editIcon" role="none" onClick={this.handleEditEpic.bind(this)}>
+                              <Icon type="mode_edit" />
+                            </div>
+                          )
+                        }
+                      </>
+                    )
+                  )
+                }
+              </IsInProgram>
+
             </div>
             {
               epicName && (

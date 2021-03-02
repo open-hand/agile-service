@@ -8,7 +8,9 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
   &-editIcon {
+    display: none;
     margin-left: 5px;
     .icon {
       cursor: pointer;
@@ -16,6 +18,13 @@
       color: #3F51B5;
     }
   }
+
+  &:hover {
+    .c7nagile-StoryMap-EpicCard-editIcon {
+      display: block;
+    }
+  }
+  
   .progress {
     position: absolute;
     top: 0;

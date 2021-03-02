@@ -30,14 +30,10 @@ const EditEpic: React.FC<Props> = ({
   }, []);
 
   const handleEditEpic = useCallback(async (newValue) => {
-    console.log('提交value:');
-    console.log(newValue);
-
     if (!canEdit) {
       return;
     }
     canEdit = false;
-    // console.log(e.target.value);
     if (newValue !== '' && newValue.trim()) {
       epicApi.checkName(newValue, epic.issueId).then((checkRes: boolean) => {
         if (checkRes) {
@@ -50,8 +46,8 @@ const EditEpic: React.FC<Props> = ({
           };
           issueApi.update(req).then((res) => {
             setEditing(false);
-            StoryMapStore.afterEditEpicName();
-          }).catch(() => {
+            StoryMapStore.afterEditEpicName(res);
+          }).catch((e) => {
             setEditing(false);
             setValue(epic.epicName);
             Choerodon.prompt('编辑史诗失败');
@@ -84,7 +80,7 @@ const EditEpic: React.FC<Props> = ({
         justifyContent: 'center',
       }}
       >
-        <Input autoFocus onPressEnter={handleEditEpic} placeholder="编辑史诗名称" maxLength="22" value={value} onChange={handleChange} />
+        <Input autoFocus onPressEnter={handleEditEpic} placeholder="编辑史诗名称" maxLength={22} value={value} onChange={handleChange} />
       </Card>
     </div>
   );

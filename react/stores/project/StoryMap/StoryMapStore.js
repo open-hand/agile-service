@@ -549,8 +549,17 @@ class StoryMapStore {
     });
   }
 
-  @action afterEditEpicName() {
-
+  @action afterEditEpicName(newEpic) {
+    this.storyMapData.epicWithFeature = this.storyMapData.epicWithFeature.map((epic) => {
+      if (epic.issueId === newEpic.issueId) {
+        return ({
+          ...epic,
+          epicName: newEpic.epicName,
+          objectVersionNumber: epic.objectVersionNumber + 1,
+        });
+      }
+      return epic;
+    });
   }
 
   @action addFeature(epic) {
