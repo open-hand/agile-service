@@ -292,8 +292,17 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     private void handlerFieldName(IssueUpdateVO issueUpdateVO, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO, StatusFieldValueSettingDTO fieldValueSettingDTO, StatusFieldSettingVO v, Field field) throws IllegalAccessException {
         switch (v.getFieldCode()) {
-            case FieldCode.ASSIGNEE:
             case FieldCode.REPORTER:
+                Boolean canSetValue = ((MAIN_RESPONSIBLE.equals(fieldValueSettingDTO.getOperateType()) && !ObjectUtils.isEmpty(issueDTO.getMainResponsibleId()))
+                        || !(ASSIGNEE.equals(fieldValueSettingDTO.getOperateType()) || MAIN_RESPONSIBLE.equals(fieldValueSettingDTO.getOperateType()))
+                        || (ASSIGNEE.equals(fieldValueSettingDTO.getOperateType()) && !ObjectUtils.isEmpty(issueDTO.getAssigneeId())));
+                if (Boolean.TRUE.equals(canSetValue)) {
+                    field.set(issueUpdateVO, handlerMember(fieldValueSettingDTO, issueDTO));
+                } else {
+                    field.set(issueUpdateVO, issueDTO.getReporterId());
+                }
+                break;
+            case FieldCode.ASSIGNEE:
             case FieldCode.MAIN_RESPONSIBLE:
                 field.set(issueUpdateVO, handlerMember(fieldValueSettingDTO, issueDTO));
                 break;
