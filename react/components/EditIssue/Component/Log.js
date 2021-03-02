@@ -3,7 +3,7 @@ import { Icon, Popconfirm } from 'choerodon-ui';
 import { workLogApi } from '@/api';
 import UserHead from '../../UserHead';
 import WYSIWYGEditor from '../../CKEditor';
-import WYSIWYGViewer from '../../WYSIWYGViewer';
+import WYSIWYGViewer from '../../CKEditorViewer';
 import { DatetimeAgo } from '../../CommonComponent';
 import './Log.less';
 
@@ -180,7 +180,7 @@ class Log extends Component {
                 <span style={{ flex: 1 }}>
                   {
                     worklog.logId !== editLogId ? (
-                      <WYSIWYGViewer data={worklog.description} />
+                      <WYSIWYGViewer value={worklog.description} />
                     ) : null
                   }
                 </span>

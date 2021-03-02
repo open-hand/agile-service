@@ -3,7 +3,7 @@ import { Tooltip, Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import WYSIWYGEditor from '@/components/CKEditor';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import WYSIWYGViewer from '@/components/CKEditorViewer';
 import FullEditor from '@/components/FullEditor';
 import { text2Delta } from '@/utils/richText';
 import Section from '../section';
@@ -77,7 +77,7 @@ const Description: React.FC = () => {
             }}
             onOk={updateIssueDes}
           />
-        ) : <WYSIWYGViewer data={description} />}
+        ) : <WYSIWYGViewer value={description} />}
         {
           fullEdit ? (
             <FullEditor
