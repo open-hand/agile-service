@@ -166,7 +166,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             case FieldType.MULTIPLE:
                 cell.setCellType(CellType.STRING);
                 objectSchemeFieldCreate.setDefaultValue(cell.toString());
-                validateOptionDefaultValue(fieldType, objectSchemeFieldCreate.getDefaultValue(), keyRowMap, row, errorRowColMap);
+                validateOptionDefaultValue(fieldType, objectSchemeFieldCreate.getFieldOptions(), objectSchemeFieldCreate.getDefaultValue(), keyRowMap, row, errorRowColMap);
                 break;
             case FieldType.MEMBER:
             case FieldType.MULTI_MEMBER:
@@ -237,8 +237,17 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         }
     }
 
-    private void validateOptionDefaultValue(String fieldType, String defaultValue, Map<String, Integer> keyRowMap, Row row, Map<Integer, List<Integer>> errorRowColMap) {
+    private void validateOptionDefaultValue(String fieldType, List<FieldOptionUpdateVO> fieldOptions, String defaultValue, Map<String, Integer> keyRowMap, Row row, Map<Integer, List<Integer>> errorRowColMap) {
+
+        Map<String, FieldOptionUpdateVO> optionMap;
         List<String> defaultKeys;
+
+        if (!CollectionUtils.isEmpty(fieldOptions)) {
+            optionMap = fieldOptions.stream().collect(Collectors.toMap(
+                    FieldOptionUpdateVO::getCode, option -> option, (oldVal, currVal) -> oldVal));
+        } else {
+            optionMap = new HashMap<>(0);
+        }
 
         switch (fieldType) {
             case FieldType.RADIO:
@@ -257,6 +266,9 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         StringBuilder errMsg = new StringBuilder();
 
         defaultKeys.forEach(defaultKey -> {
+            if (optionMap.get(defaultKey) != null){
+                optionMap.get(defaultKey).setDefault(true);
+            }
             if (keyRowMap.get(defaultKey) == null) {
                 errMsg.append("\"").append(defaultKey).append("\", ");
             }
