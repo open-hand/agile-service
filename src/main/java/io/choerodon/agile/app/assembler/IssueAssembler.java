@@ -688,9 +688,19 @@ public class IssueAssembler extends AbstractAssembler {
         // 去重
         for (Date date : group.keySet()) {
             List<ReportIssueConvertDTO> reportIssueConvertDTOS = group.get(date);
-            if (CollectionUtils.isNotEmpty(reportIssueConvertDTOList)) {
-               group.put(date, reportIssueConvertDTOS.stream().collect(collectingAndThen(
-                       toCollection(() -> new TreeSet<>(comparing(n->n.getIssueId()))),ArrayList::new)));
+            if (CollectionUtils.isNotEmpty(reportIssueConvertDTOS)) {
+                List<ReportIssueConvertDTO> issueList = new ArrayList<>();
+                List<ReportIssueConvertDTO> issueNullList = reportIssueConvertDTOS.stream().filter(v -> ObjectUtils.isEmpty(v.getIssueId())).collect(Collectors.toList());
+                List<ReportIssueConvertDTO> issueNotNullList = reportIssueConvertDTOS.stream().filter(v -> !ObjectUtils.isEmpty(v.getIssueId())).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(issueNullList)) {
+                    issueList.addAll(issueNullList);
+                }
+                if (CollectionUtils.isNotEmpty(issueNotNullList)) {
+                    issueNotNullList = issueNotNullList.stream().collect(collectingAndThen(
+                            toCollection(() -> new TreeSet<>(comparing(n -> n.getIssueId()))), ArrayList::new));
+                    issueList.addAll(issueNotNullList);
+                }
+                group.put(date, issueList);
             }
         }
         return group.entrySet().stream().sorted(Map.Entry.comparingByKey())
