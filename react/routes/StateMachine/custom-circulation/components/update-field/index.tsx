@@ -14,6 +14,7 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Priority, IField } from '@/common/types';
 import Loading from '@/components/Loading';
 import moment from 'moment';
+import useIsProgram from '@/hooks/useIsProgram';
 import renderField from './renderField';
 import styles from './index.less';
 
@@ -269,6 +270,7 @@ const UpdateField = ({
   // @ts-ignore
   modal, selectedType, record, customCirculationDataSet,
 }) => {
+  const { isProgram } = useIsProgram();
   const [fieldData, setFieldData] = useState<IField[]>([]);
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [fields, Field] = useFields();
@@ -547,7 +549,7 @@ const UpdateField = ({
                 <Col span={11} key={id}>
                   {
                     // @ts-ignore
-                    renderField(f, data, selectUserMap)
+                    renderField(f, data, selectUserMap, isProgram)
                   }
                 </Col>
               )}
