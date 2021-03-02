@@ -331,7 +331,7 @@ class IssueApi extends Api<IssueApi> {
  * 取消导入
  * @param id 导入id
  */
-  cancelImport(id: number, objectVersionNumber: number) {
+  cancelImport(id: number|string, objectVersionNumber: number) {
     return axios({
       method: 'put',
       url: `${this.prefix}/excel/cancel`,
