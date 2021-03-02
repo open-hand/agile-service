@@ -22,7 +22,7 @@ const clearIdMap = new Map([
 const extraOptionsMap = new Map();
 export default function renderField({
   code, fieldType, fieldOptions, required,
-}, data, selectUserMap) {
+}, data, selectUserMap, isProgram) {
   switch (code) {
     case 'component': {
       return (
@@ -325,19 +325,15 @@ export default function renderField({
           { id: 'reportor', realName: '报告人' },
           { id: 'creator', realName: '创建人' },
           { id: 'operator', realName: '当前操作人' },
-          { id: 'mainResponsible', realName: '主要负责人' },
         ];
       } else if (code === 'reporter') {
         extraOptionsMap.member = [
-          { id: 'assignee', realName: '经办人' },
           { id: 'creator', realName: '创建人' },
           { id: 'operator', realName: '当前操作人' },
-          { id: 'mainResponsible', realName: '主要负责人' },
 
         ];
       } else if (code === 'mainResponsible') {
         extraOptionsMap.member = [
-          { id: 'assignee', realName: '经办人' },
           { id: 'reportor', realName: '报告人' },
           { id: 'creator', realName: '创建人' },
           { id: 'operator', realName: '当前操作人' },
@@ -345,12 +341,22 @@ export default function renderField({
         ];
       } else {
         extraOptionsMap.member = [
-          { id: 'assignee', realName: '经办人' },
           { id: 'reportor', realName: '报告人' },
           { id: 'creator', realName: '创建人' },
           { id: 'operator', realName: '当前操作人' },
-          { id: 'mainResponsible', realName: '主要负责人' },
         ];
+      }
+
+      if (!isProgram && code !== 'mainResponsible') {
+        extraOptionsMap.member.push({
+          id: 'mainResponsible', realName: '主要负责人',
+        });
+      }
+
+      if (!isProgram && code !== 'assignee') {
+        extraOptionsMap.member.unshift({
+          id: 'assignee', realName: '经办人',
+        });
       }
 
       if (!required || code !== 'reporter') {
