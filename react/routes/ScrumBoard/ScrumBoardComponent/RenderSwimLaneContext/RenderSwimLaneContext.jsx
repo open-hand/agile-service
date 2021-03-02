@@ -77,7 +77,7 @@ class SwimLaneContext extends React.Component {
 
   static getDerivedStateFromProps(props, state) {
     const { mode } = props;
-    const issues = [...props.parentIssueArr.values(), props.otherIssueWithoutParent];
+    const issues = [...props.parentIssueArr?.values(), props.otherIssueWithoutParent];
     const activeKey = getDefaultExpanded(mode, issues).slice(0, 15);
     const activeKeyFromOld = getDefaultExpanded(state.mode, state.issues).slice(0, 15);
     if (!isEqual(activeKey, activeKeyFromOld)) {
