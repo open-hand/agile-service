@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
 import { text2Delta } from '@/utils/richText';
 import WYSIWYGEditor from '@/components/CKEditor';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import WYSIWYGViewer from '@/components/CKEditorViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
 import UserHead from '@/components/UserHead';
 import './Comment.less';
@@ -107,7 +107,7 @@ const Comment: React.FC<Props> = ({
           </div>
         ) : (
           <div style={{ marginTop: 10 }}>
-            <WYSIWYGViewer data={comment.commentText} />
+            <WYSIWYGViewer value={comment.commentText} />
           </div>
         )
       }

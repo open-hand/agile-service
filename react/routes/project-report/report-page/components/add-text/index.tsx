@@ -14,7 +14,7 @@ interface Props {
 const AddText: React.FC<Props> = ({ innerRef, data: editData }) => {
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
-    data: editData ? [{ title: editData.title, description: JSON.parse(editData.content) }] : undefined,
+    data: editData ? [{ title: editData.title, description: editData.content }] : undefined,
     fields: [{
       name: 'title',
       label: '文本标题',

@@ -5,7 +5,7 @@ import {
   Icon, Button, Tooltip,
 } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/master';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import WYSIWYGViewer from '@/components/CKEditorViewer';
 import WYSIWYGEditor from '@/components/CKEditor';
 import { issueApi } from '@/api';
 import EditIssueContext from '../../stores';
@@ -80,7 +80,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
           className="mt-10 c7n-description"
           role="none"
         >
-          <WYSIWYGViewer data={description} />
+          <WYSIWYGViewer value={description} />
         </div>
       </div>
     );

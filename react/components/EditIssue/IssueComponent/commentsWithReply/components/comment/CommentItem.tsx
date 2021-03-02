@@ -3,7 +3,7 @@ import { Icon } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import WYSIWYGEditor from '@/components/CKEditor';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import WYSIWYGViewer from '@/components/CKEditorViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
 import UserHead from '@/components/UserHead';
 import './Comment.less';
@@ -229,7 +229,7 @@ const CommentItem: React.FC<Props> = ({
             </div>
           ) : (
             <div style={{ marginTop: 10, paddingLeft: 23 }}>
-              <WYSIWYGViewer data={comment.commentText} />
+              <WYSIWYGViewer value={comment.commentText} />
             </div>
           )
         }

@@ -2,6 +2,7 @@ import React, {
   useRef, useMemo, useCallback,
 } from 'react';
 import { Button } from 'choerodon-ui/pro';
+import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import '@choerodon/ckeditor/build/translations/zh-cn';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { delta2Html } from '@/utils/richText';
@@ -22,6 +23,7 @@ function isJSON(string: string) {
 
 interface EditorProps {
   autoFocus?: boolean
+  toolbar?: boolean
   footer?: boolean
   style?: React.CSSProperties
   value?: string
@@ -42,6 +44,7 @@ const Editor: React.FC<EditorProps> = ({
   okText,
   onCancel,
   autoFocus,
+  toolbar = true,
   footer,
   style,
   height,
@@ -52,17 +55,18 @@ const Editor: React.FC<EditorProps> = ({
   const data = useMemo(() => (value && isJSON(value) ? delta2Html(value) : value), [value]);
   const editorRef = useRef<any>(null);
   const handleReady = useCallback((editor) => {
-    // Insert the toolbar before the editable area.
-    editor.ui.getEditableElement().parentElement.insertBefore(
-      editor.ui.view.toolbar.element,
-      editor.ui.getEditableElement(),
-    );
-
+    if (toolbar) {
+      // Insert the toolbar before the editable area.
+      editor.ui.getEditableElement().parentElement.insertBefore(
+        editor.ui.view.toolbar.element,
+        editor.ui.getEditableElement(),
+      );
+    }
     editorRef.current = editor;
     if (autoFocus) {
       editor.focus();
     }
-  }, [autoFocus]);
+  }, [autoFocus, toolbar]);
   const handleChange = useCallback((event, editor) => {
     const newValue = editor.getData();
     onChange && onChange(newValue);
@@ -92,10 +96,10 @@ const Editor: React.FC<EditorProps> = ({
       />
       {footer && (
         <div className={`${prefixCls}-footer`}>
-          <Button onClick={handleCancel}>
+          <Button onClick={handleCancel} color={'blue' as ButtonColor}>
             取消
           </Button>
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} color={'blue' as ButtonColor}>
             {okText ?? '确定'}
           </Button>
         </div>

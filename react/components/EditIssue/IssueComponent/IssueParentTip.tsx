@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import WYSIWYGViewer from '@/components/CKEditorViewer';
 import Star from '@/components/tag/star';
 import styles from './IssueParentTip.less';
 
@@ -30,7 +30,7 @@ const IssueParentTip: React.FC<Props> = ({ parentSummary, parentDescription, par
               <span className={styles.issueParentTip_content_item_content}>
                 {
                   parentDescription ? (
-                    <WYSIWYGViewer data={parentDescription} />
+                    <WYSIWYGViewer value={parentDescription} />
                   ) : '暂无描述'
                 }
               </span>
