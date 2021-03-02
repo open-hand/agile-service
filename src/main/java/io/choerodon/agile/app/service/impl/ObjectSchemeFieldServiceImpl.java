@@ -1646,14 +1646,14 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         String[] ids = String.valueOf(defaultValue).split(",");
         List<Long> defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
         if (!CollectionUtils.isEmpty(defaultIds)) {
+            List<Long> newDefaultIds = new ArrayList<>();
             defaultIds.forEach(id -> {
                 if (valueMap.containsKey(id)) {
                     defaultObjs.add(valueMap.get(id));
-                } else {
-                    defaultIds.remove(id);
+                    newDefaultIds.add(id);
                 }
             });
-            view.setDefaultValue(StringUtils.join(defaultIds, ","));
+            view.setDefaultValue(StringUtils.join(newDefaultIds, ","));
             view.setDefaultValueObjs(defaultObjs);
         }
     }
