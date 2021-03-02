@@ -549,6 +549,10 @@ class StoryMapStore {
     });
   }
 
+  @action afterEditEpicName() {
+
+  }
+
   @action addFeature(epic) {
     const feature = {
       adding: true,

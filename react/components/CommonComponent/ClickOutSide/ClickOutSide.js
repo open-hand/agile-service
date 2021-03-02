@@ -84,7 +84,7 @@ export default function onClickOutsideHOC(WrappedComponent, config) {
         if (this.props.stopPropagation) { event.stopPropagation(); }
         if (this.props.excludeScrollbar && DOMHelpers.clickedScrollbar(event)) return;
         const current = event.target;
-        if (DOMHelpers.findHighest(current, this.componentNode, this.props.outsideClickIgnoreClass) 
+        if (DOMHelpers.findHighest(current, this.componentNode, this.props.outsideClickIgnoreClass)
           !== document) return;
         this.outsideClickHandler(event);
       };
@@ -107,13 +107,11 @@ export default function onClickOutsideHOC(WrappedComponent, config) {
         if (!events.forEach) {
           events = [events];
         }
-        events.forEach(eventName =>
-          document.removeEventListener(
-            eventName,
-            fn,
-            getEventHandlerOptions(this, eventName),
-          ),
-        );
+        events.forEach((eventName) => document.removeEventListener(
+          eventName,
+          fn,
+          getEventHandlerOptions(this, eventName),
+        ));
         delete handlersMap[this.uid];
       }
     };
