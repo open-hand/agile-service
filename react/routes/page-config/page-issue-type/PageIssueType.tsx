@@ -19,6 +19,7 @@ import {
   omit, set, pick, isEmpty,
 } from 'lodash';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
+import Loading from '@/components/Loading';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -240,11 +241,11 @@ function PageIssueType() {
         </TooltipButton>
       </Header>
       <Breadcrumb />
-      <Content className={`${prefixCls}-content`} style={{ overflowY: 'hidden' }}>
+      <Content className={`${prefixCls}-content`} style={{ overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <Switch />
-        <Spin spinning={pageIssueTypeStore.getLoading}>
-          <div className={styles.top}>
-            {
+        <Loading loading={pageIssueTypeStore.getLoading} />
+        <div className={styles.top}>
+          {
               !isProject ? <SortTable />
                 : [
                   <IssueTypeWrap title="字段配置">
@@ -258,8 +259,7 @@ function PageIssueType() {
                     }
                   </IssueTypeWrap>]
             }
-          </div>
-        </Spin>
+        </div>
         <div className={styles.bottom}>
           <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageIssueTypeStore.getDirty} loading={btnLoading} onClick={handleSubmit}>
             保存
