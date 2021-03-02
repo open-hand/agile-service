@@ -9,7 +9,7 @@ import { Button } from 'choerodon-ui/pro';
 import { workLogApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectNumber from '@/components/select/select-number';
-import WYSIWYGEditor from '../WYSIWYGEditor';
+import WYSIWYGEditor from '../CKEditor';
 import './DailyLog.less';
 
 const DATA_FORMAT = 'YYYY-MM-DD HH:mm:ss';

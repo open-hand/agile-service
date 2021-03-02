@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
 import { workLogApi } from '@/api';
 import UserHead from '../../UserHead';
-import WYSIWYGEditor from '../../WYSIWYGEditor';
+import WYSIWYGEditor from '../../CKEditor';
 import WYSIWYGViewer from '../../WYSIWYGViewer';
 import { DatetimeAgo } from '../../CommonComponent';
 import './Log.less';

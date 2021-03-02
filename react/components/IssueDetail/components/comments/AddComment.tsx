@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
+import WYSIWYGEditor from '@/components/CKEditor';
 
 interface Props {
   onSubmit: (delta: string) => Promise<any>

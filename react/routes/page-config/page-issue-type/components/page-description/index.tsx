@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
+import WYSIWYGEditor from '@/components/CKEditor';
 import { usePageIssueTypeStore } from '../../stores';
 
 function PageDescription() {

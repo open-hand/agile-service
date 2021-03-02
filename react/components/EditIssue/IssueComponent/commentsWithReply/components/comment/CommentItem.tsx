@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Icon } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
+import WYSIWYGEditor from '@/components/CKEditor';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
 import UserHead from '@/components/UserHead';
