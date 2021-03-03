@@ -147,7 +147,8 @@ const dateTransform = (fieldType: string, d: Date) => {
 };
 // @ts-ignore
 const transformFieldValue = (fieldSetting) => {
-  const { fieldType, fieldValueList } = fieldSetting;
+  const { fieldType, fieldValueList: values } = fieldSetting;
+  const fieldValueList = values ?? [];
   const firstField = (fieldValueList && fieldValueList[0]) || {};
   let transformedValue = '';
   switch (fieldType) {
