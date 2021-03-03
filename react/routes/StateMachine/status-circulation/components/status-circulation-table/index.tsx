@@ -9,7 +9,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 
 import STATUS from '@/constants/STATUS';
-import { IStatusCirculation } from '@/api';
+import { IStatusCirculation, statusTransformApi } from '@/api';
 import Table, { ColumnsType } from 'antd/lib/table';
 import 'antd/lib/table/style';
 import { useStateMachineContext } from '@/routes/StateMachine/context';
@@ -155,16 +155,27 @@ const StatusCirculationTable: React.FC = () => {
   };
 
   const moveRow = useCallback((dragIndex, hoverIndex) => {
-    console.log('moveRow');
     const dragRow = data[dragIndex];
-    console.log(dragIndex, hoverIndex);
     update(data, {
       $splice: [
         [dragIndex, 1],
         [hoverIndex, 0, dragRow],
       ],
     });
-  }, [data]);
+    const down = dragIndex < hoverIndex;
+    if (hoverIndex !== dragIndex && data[dragIndex] && data[hoverIndex]) {
+      // @ts-ignore
+      statusTransformApi.sortStatus(data[dragIndex].stateMachineId, {
+        // @ts-ignore
+        outSetId: data[hoverIndex].nodeId,
+        before: !down,
+        // @ts-ignore
+        nodeId: data[dragIndex].nodeId,
+      }).then(() => {
+        store.getStatusList(selectedType);
+      });
+    }
+  }, [data, selectedType, store]);
 
   return (
     <Measure
