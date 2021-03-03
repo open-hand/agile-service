@@ -135,6 +135,7 @@
          AND smn.organization_id = fs.organization_id
          AND smn.status_id = fs.id
          AND smn.state_machine_id = #{stateMachineId}
+         order by smn.rank , smn.id
     </select>
 
     <select id="listStatusTransferByStateMachineId" resultType="io.choerodon.agile.api.vo.StatusSettingVO">

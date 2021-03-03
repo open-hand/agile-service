@@ -40,4 +40,10 @@ databaseChangeLog(logicalFilePath: 'fd_status_machine_node.groovy') {
             column(name: "type", type: "VARCHAR(30)")
         }
     }
+
+    changeSet(id:  '2021-03-02-status-machine-node-add-column', author: 'ztxemail@163.com') {
+        addColumn(tableName: 'fd_status_machine_node') {
+            column(name: 'rank', type: 'VARCHAR(255)',  remarks: 'rank排序')
+        }
+    }
 }

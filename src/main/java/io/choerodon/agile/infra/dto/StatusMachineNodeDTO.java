@@ -29,6 +29,8 @@ public class StatusMachineNodeDTO extends AuditDomain {
      */
     private Long allStatusTransformId;
 
+    private String rank;
+
     @Transient
     private StatusDTO status;
 
@@ -127,5 +129,13 @@ public class StatusMachineNodeDTO extends AuditDomain {
 
     public void setAllStatusTransformId(Long allStatusTransformId) {
         this.allStatusTransformId = allStatusTransformId;
+    }
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
     }
 }
