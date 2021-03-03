@@ -83,9 +83,26 @@ const Editor: React.FC<EditorProps> = ({
     language: 'zh-cn',
     extraPlugins: [UploadAdapterPlugin],
     placeholder: placeholder ?? '描述',
+    toolbar: {
+      items: [
+        'heading', '|',
+        'fullscreen', '|',
+        'alignment', '|',
+        'bold', 'italic', 'strikethrough', 'underline', 'subscript', 'superscript', '|',
+        'link', '|',
+        'bulletedList', 'numberedList', 'todoList',
+        'fontsize', 'fontColor', 'fontBackgroundColor', '|',
+        'insertTable', '|',
+        'outdent', 'indent', '|',
+        'imageUpload', 'blockQuote', '|',
+        'undo', 'redo',
+      ],
+      shouldNotGroupWhenFull: true,
+    },
   }), [placeholder]);
+  const editorStyle = useMemo(() => (!style?.height && !style?.minHeight ? { height: 280, ...style } : style), [style]);
   return (
-    <div className={prefixCls} style={style}>
+    <div className={prefixCls} style={editorStyle}>
       <CKEditor
         disabled={disabled}
         editor={DecoupledEditor}
