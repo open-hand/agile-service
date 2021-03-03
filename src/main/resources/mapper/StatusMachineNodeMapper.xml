@@ -11,6 +11,7 @@
         <result property="width" column="width"/>
         <result property="height" column="height"/>
         <result property="type" column="type"/>
+        <result property="rank" column="rank"/>
         <result property="allStatusTransformId" column="all_status_transform_id"/>
         <result property="creationDate" column="creation_date"/>
         <result property="createdBy" column="created_by"/>
@@ -196,6 +197,42 @@
         AND fsmn.status_id = #{statusId}
         AND fpc.apply_type = #{applyType}
         AND fpc.scheme_type = 'scheme_state_machine'
+    </select>
+
+    <select id="selectNullRankNodes" resultType="io.choerodon.agile.infra.dto.StatusMachineNodeDTO">
+        select * from fd_status_machine_node fsmn
+        where fsmn.organization_id = #{organizationId}
+        and fsmn.state_machine_id = #{statusMachineId}
+        and fsmn.rank IS NULL
+        and fsmn.type != 'node_start'
+    </select>
+
+    <select id="queryLeftRank" resultType="java.lang.String">
+        select fsmn.rank from fd_status_machine_node fsmn
+        where fsmn.organization_id = #{organizationId}
+        and fsmn.state_machine_id = #{statusMachineId}
+        and fsmn.rank &lt; #{rank}
+        limit 1
+    </select>
+
+    <select id="queryRightRank" resultType="java.lang.String">
+        select fsmn.rank from fd_status_machine_node fsmn
+        where fsmn.organization_id = #{organizationId}
+        and fsmn.state_machine_id = #{statusMachineId}
+        and fsmn.rank > #{rank}
+        limit 1
+    </select>
+
+    <select id="queryMaxRank" resultType="java.lang.String">
+        select MAX(fsmn.rank) from fd_status_machine_node fsmn
+        where fsmn.organization_id = #{organizationId}
+        and fsmn.state_machine_id = #{statusMachineId}
+    </select>
+
+    <select id="queryMinRank" resultType="java.lang.String">
+        select MIN(fsmn.rank) from fd_status_machine_node fsmn
+        where fsmn.organization_id = #{organizationId}
+        and fsmn.state_machine_id = #{statusMachineId}
     </select>
 
     <insert id="migrateStatusMachineNode">

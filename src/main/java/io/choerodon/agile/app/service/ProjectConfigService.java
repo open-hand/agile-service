@@ -230,4 +230,6 @@ public interface ProjectConfigService {
     void checkDeleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId);
 
     List<IssueTypeVO> checkExistStatusIssueType(Long projectId, Long organizationId, Long statusId);
+
+    NodeSortVO updateSort(Long projectId, Long statusMachineId, NodeSortVO nodeSortVO, String applyType);
 }

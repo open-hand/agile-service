@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.NodeSortVO;
 import io.choerodon.agile.api.vo.StatusMachineNodeVO;
 import io.choerodon.agile.api.vo.StatusMachineTransformVO;
 import io.choerodon.agile.api.vo.StatusVO;
@@ -10,6 +11,7 @@ import io.choerodon.agile.infra.annotation.ChangeStateMachineStatus;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -17,10 +19,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -299,6 +301,63 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
     public void baseCreate(StatusMachineNodeDTO statusMachineNodeDTO) {
         if (nodeDeployMapper.insertSelective(statusMachineNodeDTO) != 1) {
             throw new CommonException("error.insert.state.machine.node");
+        }
+    }
+
+    @Override
+    public void handlerNullRankNode(Long organizationId, Long statusMachineId, String applyType) {
+        List<StatusMachineNodeDTO> statusMachineNodeDTOS = nodeDeployMapper.selectNullRankNodes(organizationId, statusMachineId);
+        if (!CollectionUtils.isEmpty(statusMachineNodeDTOS)) {
+            Integer index = null;
+            for (StatusMachineNodeDTO statusMachineNodeDTO : statusMachineNodeDTOS) {
+                if (Objects.equals(statusMachineNodeDTO.getType(), NodeType.INIT)) {
+                    index = statusMachineNodeDTOS.indexOf(statusMachineNodeDTO);
+                }
+            }
+            if (index > 0) {
+                Collections.swap(statusMachineNodeDTOS, 0, index);
+            }
+            // 设置rank
+            String rank = nodeDeployMapper.queryMaxRank(organizationId, statusMachineId);
+            if (ObjectUtils.isEmpty(rank)) {
+                rank = RankUtil.mid();
+            }
+            for (StatusMachineNodeDTO statusMachineNodeDTO : statusMachineNodeDTOS) {
+                statusMachineNodeDTO.setRank(rank);
+                baseUpdate(statusMachineNodeDTO);
+                rank = RankUtil.genNext(rank);
+            }
+        }
+    }
+
+    @Override
+    public void sortNode(Long organizationId, Long statusMachineId, NodeSortVO nodeSortVO, String applyType) {
+        // 查询当前node
+        StatusMachineNodeDTO oustSet = nodeDeployMapper.selectByPrimaryKey(nodeSortVO.getOutSetId());
+        String rank = null;
+        if (Boolean.TRUE.equals(nodeSortVO.getBefore())) {
+            String leftRank = nodeDeployMapper.queryLeftRank(organizationId, statusMachineId, oustSet.getRank());
+            String rightRank = oustSet.getRank();
+            if (ObjectUtils.isEmpty(leftRank)) {
+                rank = RankUtil.genPre(rightRank);
+            } else {
+                rank = RankUtil.between(leftRank, rightRank);
+            }
+        } else {
+            String leftRank = oustSet.getRank();
+            String rightRank = nodeDeployMapper.queryRightRank(organizationId, statusMachineId, oustSet.getRank());
+            if (ObjectUtils.isEmpty(rightRank)) {
+                rank = RankUtil.genNext(leftRank);
+            } else {
+                rank = RankUtil.between(leftRank, rightRank);
+            }
+        }
+        StatusMachineNodeDTO statusMachineNodeDTO = nodeDeployMapper.selectByPrimaryKey(nodeSortVO.getNodeId());
+        if (ObjectUtils.isEmpty(rank)) {
+            throw new CommonException("error.rank.null");
+        } else {
+            statusMachineNodeDTO.setRank(rank);
+            baseUpdate(statusMachineNodeDTO);
         }
     }
 
