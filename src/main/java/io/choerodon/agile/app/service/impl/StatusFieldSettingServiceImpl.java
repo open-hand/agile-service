@@ -157,29 +157,31 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             String fieldType = statusFieldSettingVO.getFieldType();
             List<String> fieldTypes = Arrays.asList(FILTER_FIELD_TYPE);
             List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(projectId, statusFieldSettingVO.getId());
-            if (!fieldTypes.contains(fieldType)) {
-                statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
-                return;
-            }
-            if (!Objects.equals("specifier", statusFieldValueSettingDTOS.get(0).getOperateType())) {
-                statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
-                return;
-            }
-            if ("member".equals(statusFieldSettingVO.getFieldType())) {
-                // 查询用户信息
-                List<Long> userIds = statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
-                List<UserDTO> body = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).getBody();
-                if (CollectionUtils.isEmpty(body)) {
+            if (!CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
+                if (!fieldTypes.contains(fieldType)) {
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                     return;
                 }
-                Map<Long, UserDTO> userDTOMap = body.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
-                statusFieldValueSettingDTOS.forEach(v -> v.setName(ObjectUtils.isEmpty(userDTOMap.get(v.getUserId())) ? null : userDTOMap.get(v.getUserId()).getRealName()));
+                if (!Objects.equals("specifier", statusFieldValueSettingDTOS.get(0).getOperateType())) {
+                    statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
+                    return;
+                }
+                if ("member".equals(statusFieldSettingVO.getFieldType())) {
+                    // 查询用户信息
+                    List<Long> userIds = statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
+                    List<UserDTO> body = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).getBody();
+                    if (CollectionUtils.isEmpty(body)) {
+                        statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
+                        return;
+                    }
+                    Map<Long, UserDTO> userDTOMap = body.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
+                    statusFieldValueSettingDTOS.forEach(v -> v.setName(ObjectUtils.isEmpty(userDTOMap.get(v.getUserId())) ? null : userDTOMap.get(v.getUserId()).getRealName()));
+                    statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
+                    return;
+                }
+                handlerFieldValue(statusFieldSettingVO, statusFieldValueSettingDTOS);
                 statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
-                return;
             }
-            handlerFieldValue(statusFieldSettingVO, statusFieldValueSettingDTOS);
-            statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
         });
         return list;
     }
