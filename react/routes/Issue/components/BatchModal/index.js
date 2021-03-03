@@ -364,7 +364,7 @@ function BatchModal({
           );
         })}
         <div>
-          <Button onClick={Field.add} icon="add" color="blue">添加字段</Button>
+          <Button onClick={Field.add} icon="add" color="blue">选择字段</Button>
         </div>
       </Form>
       {loading && (
