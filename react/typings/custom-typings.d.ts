@@ -12,3 +12,4 @@ declare module 'react-color';
 declare module '@choerodon/master';
 declare module '@ckeditor/ckeditor5-react';
 declare module '@choerodon/ckeditor';
+declare module 'react-image-lightbox';
