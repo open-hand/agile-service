@@ -383,13 +383,12 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
 
     private void validateAndSetIssueType(ObjectSchemeFieldCreateVO objectSchemeFieldCreateVO, Row row, Map<Integer, List<Integer>> errorRowColMap, Map<String, IssueTypeVO> issueTypeNameMap) {
         Cell cell = row.getCell(3);
-        cell.setCellType(CellType.STRING);
         if (isCellEmpty(cell)) {
             row.createCell(3).setCellValue(buildWithErrorMsg("", "问题类型不能为空"));
             addErrorColumn(row.getRowNum(), 3, errorRowColMap);
             return;
         }
-
+        cell.setCellType(CellType.STRING);
         String issueType = cell.toString();
         StringBuilder errMsg = new StringBuilder();
         Set<Long> issueTypeIds = getIssueTypeIdsByCnName(issueType, issueTypeNameMap, errMsg);
@@ -419,13 +418,12 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
 
     private void validateAndSetFieldType(ObjectSchemeFieldCreateVO objectSchemeFieldCreateVO, Row row, Map<Integer, List<Integer>> errorRowColMap) {
         Cell cell = row.getCell(2);
-        cell.setCellType(CellType.STRING);
         if (isCellEmpty(cell)) {
             row.createCell(2).setCellValue(buildWithErrorMsg("", "字段类型不能为空"));
             addErrorColumn(row.getRowNum(), 2, errorRowColMap);
             return;
         }
-
+        cell.setCellType(CellType.STRING);
         String fieldType = cell.toString();
         Optional<FieldTypeCnName> fieldTypeCnNameOptional = FieldTypeCnName.getFieldTypeByCnName(fieldType);
         if (!fieldTypeCnNameOptional.isPresent()) {
@@ -438,12 +436,12 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
 
     private void validateAndSetName(Long organizationId, Long projectId, ObjectSchemeFieldCreateVO objectSchemeFieldCreateVO, Row row, Map<Integer, List<Integer>> errorRowColMap) {
         Cell cell = row.getCell(1);
-        cell.setCellType(CellType.STRING);
         if (isCellEmpty(cell)) {
             row.createCell(1).setCellValue(buildWithErrorMsg("", "名称不能为空"));
             addErrorColumn(row.getRowNum(), 1, errorRowColMap);
             return;
         }
+        cell.setCellType(CellType.STRING);
         String name = cell.toString();
         if (Boolean.TRUE.equals(objectSchemeFieldService.checkName(organizationId, projectId, name, AGILE_ISSUE))) {
             cell.setCellValue(buildWithErrorMsg(name, "名称已经存在"));
@@ -458,13 +456,12 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
 
     private void validateAndSetCode(Long organizationId, Long projectId, ObjectSchemeFieldCreateVO objectSchemeFieldCreateVO, Row row, Map<Integer, List<Integer>> errorRowColMap) {
         Cell cell = row.getCell(0);
-        cell.setCellType(CellType.STRING);
         if (isCellEmpty(cell)) {
             row.createCell(0).setCellValue(buildWithErrorMsg("", "编码不能为空"));
             addErrorColumn(row.getRowNum(), 0, errorRowColMap);
             return;
         }
-
+        cell.setCellType(CellType.STRING);
         String code = (projectId == null ? ORG : PRO) + cell.toString();
         if (Boolean.TRUE.equals(objectSchemeFieldService.checkCode(organizationId, projectId, code, AGILE_ISSUE))) {
             cell.setCellValue(buildWithErrorMsg(code, "编码已经存在"));
