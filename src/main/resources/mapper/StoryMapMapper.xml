@@ -52,7 +52,6 @@
             ai.summary as ai_summary,
             ai.epic_name as ai_epic_name,
             ai.object_version_number as epic_object_version_number,
---             ai.program_id as ai_program_id,
             ar.rank as ar_rank,
             ar.object_version_number as ar_object_version_number,
             ais.name as status_name,
