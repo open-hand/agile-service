@@ -5,7 +5,6 @@ import './index.less';
 
 const prefixCls = 'c7n-ckeditor-viewer';
 
-const isImgElement = (element: Element): element is HTMLImageElement => element.nodeName === 'IMG';
 interface EditorProps {
   value?: string
 }
@@ -18,11 +17,9 @@ const Editor: React.FC<EditorProps> = ({
   }, []);
   const handleClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const element = e.target;
-    if (element && element instanceof Element) {
+    if (element && element instanceof HTMLImageElement) {
       e.stopPropagation();
-      if (isImgElement(element)) {
-        setSrc(element.src);
-      }
+      setSrc(element.src);
     }
   }, []);
 
