@@ -1293,8 +1293,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             updateFieldConfig(organizationId, projectId, issueTypeId, fields, issueTypeMap);
         }
         if (!ObjectUtils.isEmpty(projectId)
-                && !ObjectUtils.isEmpty(issueTypeFieldVO)
-                && !StringUtils.isEmpty(issueTypeFieldVO.getTemplate())) {
+                && !ObjectUtils.isEmpty(issueTypeFieldVO)) {
             updateTemplate(projectId, issueTypeId, issueTypeFieldVO, issueTypeMap);
         }
         if (!ObjectUtils.isEmpty(deleteIds)) {
