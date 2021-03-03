@@ -293,6 +293,13 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
 
     private void validIsOptionKeyValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Sheet sheet, int r, Map<String, Integer> keyRowMap, Map<Integer, List<Integer>> errorRowColMap) {
         int jumpRow = isKeyValue(sheet.getRow(r)) ? 0 : 1;
+        if (CollectionUtils.isEmpty(objectSchemeFieldCreate.getFieldOptions())) {
+            Row row = sheet.getRow(r);
+            row.createCell(5).setCellValue(buildWithErrorMsg("", "字段列表不能为空"));
+            addErrorColumn(row.getRowNum(), 5, errorRowColMap);
+            addErrorColumn(r, 10, errorRowColMap);
+            return;
+        }
         for (int i = 0; i < objectSchemeFieldCreate.getFieldOptions().size(); i++) {
             FieldOptionUpdateVO fieldOption = objectSchemeFieldCreate.getFieldOptions().get(i);
             Row row = sheet.getRow(r + jumpRow + i);
