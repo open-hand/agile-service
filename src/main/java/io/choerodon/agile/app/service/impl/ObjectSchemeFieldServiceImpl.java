@@ -244,6 +244,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 });
                 vo.setContexts(contexts);
                 vo.setIssueTypeVOList(issueTypeVOList);
+            } else {
+                return;
             }
             vo.setContextName(String.join(",", issueTypeNames));
             vo.setRequiredScope(requiredScope);
