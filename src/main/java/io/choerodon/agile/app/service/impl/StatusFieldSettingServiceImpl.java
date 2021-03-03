@@ -579,8 +579,26 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         if(CollectionUtils.isEmpty(select)){
             return new ArrayList<>();
         }
-        handlerDTO(select);
-        return select;
+        //过滤不存在的字段选项
+        List<Long> fieldOptionIds = select.stream()
+                .filter(v -> !Objects.isNull(v.getOptionId()))
+                .map(StatusFieldValueSettingDTO::getOptionId)
+                .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(fieldOptionIds)) {
+            List<StatusFieldValueSettingDTO> result = new ArrayList<>();
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            List<Long> existFieldOptionIds = fieldOptionMapper.selectByOptionIds(organizationId, fieldOptionIds).stream().map(FieldOptionDTO::getId).collect(Collectors.toList());
+            select.forEach(v -> {
+                if (Objects.isNull(v.getOptionId()) || existFieldOptionIds.contains(v.getOptionId())) {
+                    result.add(v);
+                }
+            });
+            handlerDTO(result);
+            return result;
+        } else {
+            handlerDTO(select);
+            return select;
+        }
     }
 
     private void handlerDTO(List<StatusFieldValueSettingDTO> statusFieldValueSetting) {
