@@ -101,7 +101,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           }}
         />
         {tab}
-        <div style={{ flex: 1, overflow: 'hidden' }}>
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
           <StatusCirculationTable />
         </div>
         <Save />
