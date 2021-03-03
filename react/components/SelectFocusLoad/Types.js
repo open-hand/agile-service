@@ -285,7 +285,7 @@ export default {
       loadWhenMount: true,
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
     },
-    request: ({ filter, page }, requestArgs) => issueApi.project(requestArgs.projectId).loadParentIssues(page, 20, 'sub_task', filter), // 故事、任务、缺陷（不能是子缺陷）
+    request: ({ filter, page }, requestArgs) => issueApi.project(requestArgs?.projectId).loadParentIssues(page, 20, 'sub_task', filter), // 故事、任务、缺陷（不能是子缺陷）
     render: (issue) => (
       <Option
         key={issue.issueId}
