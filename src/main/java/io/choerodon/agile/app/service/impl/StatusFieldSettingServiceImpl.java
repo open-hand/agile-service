@@ -199,23 +199,25 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         Map<String,Object> specifyMap = new HashMap<>();
         list.forEach(v -> {
             List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(projectId, v.getId());
-            if (Boolean.TRUE.equals(v.getSystem())) {
-                Boolean isVersion = FieldCode.FIX_VERSION.equals(v.getFieldCode()) || FieldCode.INFLUENCE_VERSION.equals(v.getFieldCode());
-                if (Boolean.TRUE.equals(isVersion)) {
-                    handlerVersion(versionMap, v, statusFieldValueSettingDTOS);
-                } else if (Arrays.asList(FEATURE_FIELD).contains(v.getFieldCode())){
-                    if (agilePluginService != null) {
-                        agilePluginService.handlerFeatureFieldValue(v, issueUpdateVO, specifyMap, statusFieldValueSettingDTOS, issueDTO);
+            if (!CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
+                if (Boolean.TRUE.equals(v.getSystem())) {
+                    Boolean isVersion = FieldCode.FIX_VERSION.equals(v.getFieldCode()) || FieldCode.INFLUENCE_VERSION.equals(v.getFieldCode());
+                    if (Boolean.TRUE.equals(isVersion)) {
+                        handlerVersion(versionMap, v, statusFieldValueSettingDTOS);
+                    } else if (Arrays.asList(FEATURE_FIELD).contains(v.getFieldCode())){
+                        if (agilePluginService != null) {
+                            agilePluginService.handlerFeatureFieldValue(v, issueUpdateVO, specifyMap, statusFieldValueSettingDTOS, issueDTO);
+                        }
+                    } else {
+                        handlerPredefinedValue(issueUpdateVO, aClass, field, issueDTO, v, statusFieldValueSettingDTOS);
                     }
                 } else {
-                    handlerPredefinedValue(issueUpdateVO, aClass, field, issueDTO, v, statusFieldValueSettingDTOS);
+                    PageFieldViewUpdateVO pageFieldViewUpdateVO = new PageFieldViewUpdateVO();
+                    pageFieldViewUpdateVO.setFieldType(v.getFieldType());
+                    pageFieldViewUpdateVO.setFieldId(v.getFieldId());
+                    setCustomFieldValue(issueDTO, v, pageFieldViewUpdateVO, statusFieldValueSettingDTOS);
+                    customField.add(pageFieldViewUpdateVO);
                 }
-            } else {
-                PageFieldViewUpdateVO pageFieldViewUpdateVO = new PageFieldViewUpdateVO();
-                pageFieldViewUpdateVO.setFieldType(v.getFieldType());
-                pageFieldViewUpdateVO.setFieldId(v.getFieldId());
-                setCustomFieldValue(issueDTO, v, pageFieldViewUpdateVO, statusFieldValueSettingDTOS);
-                customField.add(pageFieldViewUpdateVO);
             }
         });
         // 执行更新
