@@ -822,8 +822,8 @@ public class ExcelServiceImpl implements ExcelService {
 
             Row row = sheet.getRow(r);
             if (objectSchemeFieldExcelService.isSkip(row)
-                    || (r > 1 && !objectSchemeFieldExcelService.isSkip(sheet.getRow(r - 1))
-                    && objectSchemeFieldExcelService.isKeyValue(row))) {
+                    || (r > 1 && objectSchemeFieldExcelService.isKeyValue(sheet.getRow(r - 1))
+                    && objectSchemeFieldExcelService.isExtendKeyValue(row))) {
                 continue;
             }
 
