@@ -7,9 +7,10 @@ const prefixCls = 'c7n-ckeditor-viewer';
 
 interface EditorProps {
   value?: string
+  style?: React.CSSProperties
 }
 const Editor: React.FC<EditorProps> = ({
-  value: propsValue,
+  value: propsValue, style,
 }) => {
   const [src, setSrc] = useState<string>();
   const handleClose = useCallback(() => {
@@ -24,11 +25,12 @@ const Editor: React.FC<EditorProps> = ({
   }, []);
 
   return (
-    <div role="none" className={prefixCls} onClick={handleClick}>
+    <div role="none" className={prefixCls} onClick={handleClick} style={style}>
       <CKEditor
         disabled
         toolbar={false}
         value={propsValue}
+        style={{ height: 'auto' }}
       />
       {
         src && (
