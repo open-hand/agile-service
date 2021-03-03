@@ -266,8 +266,12 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         StringBuilder errMsg = new StringBuilder();
 
         defaultKeys.forEach(defaultKey -> {
-            if (optionMap.get(defaultKey) != null){
-                optionMap.get(defaultKey).setDefault(true);
+            if (optionMap.get(defaultKey) != null) {
+                if (Boolean.FALSE.equals(optionMap.get(defaultKey).getEnabled())) {
+                    errMsg.append("\"").append(defaultKey).append("\", ");
+                } else {
+                    optionMap.get(defaultKey).setDefault(true);
+                }
             }
             if (keyRowMap.get(defaultKey) == null) {
                 errMsg.append("\"").append(defaultKey).append("\", ");
