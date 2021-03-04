@@ -407,20 +407,12 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         //状态机id->状态id->转换列表
         Map<Long, Map<Long, List<TransformVO>>> statusMap = transformService.queryStatusTransformsMap(organizationId, Arrays.asList(stateMachineId));
         Map<Long, List<TransformVO>> listMap = statusMap.get(stateMachineId);
-        int index = 0;
         for (StatusAndTransformVO item : statusVOS) {
-            if (Boolean.TRUE.equals(item.getDefaultStatus())) {
-                index = statusVOS.indexOf(item);
-            }
             List<TransformVO> transformVOS = listMap.get(item.getId());
             if (!CollectionUtils.isEmpty(transformVOS)) {
                 item.setCanTransformStatus(transformVOS.stream().map(TransformVO::getEndStatusId).collect(Collectors.toSet()));
             }
-
             item.setHasIssue(issueUseStatusId.contains(item.getId()));
-        }
-        if (index > 0) {
-            Collections.swap(statusVOS, 0, index);
         }
 
         return statusVOS;
