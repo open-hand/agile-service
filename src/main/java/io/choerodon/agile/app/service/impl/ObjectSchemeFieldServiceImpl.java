@@ -804,7 +804,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         Set<String> typeCodes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO)
                 .stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toSet());
         update.setContext(String.join(",", typeCodes));
-        if (Objects.equals(FieldType.MULTI_MEMBER, update.getFieldType()) && !ObjectUtils.isEmpty(update.getDefaultValue())) {
+        boolean isMember = Objects.equals(FieldType.MULTI_MEMBER, update.getFieldType()) || Objects.equals(FieldType.MEMBER, update.getFieldType());
+        if (isMember && !ObjectUtils.isEmpty(update.getDefaultValue())) {
             String defaultValue = tryDecryptDefaultValue(update.getFieldType(), update.getDefaultValue());
             if (defaultValue != null) {
                 update.setDefaultValue(defaultValue);
