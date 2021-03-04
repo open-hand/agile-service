@@ -45,7 +45,6 @@ const SelectLabel: React.FC<Props> = forwardRef(({
     <Component
       ref={ref}
       multiple
-      combo
       maxLength={MAX_LENGTH_LABEL}
       {...props}
       {...otherProps}
