@@ -10,6 +10,7 @@ import {
 import { InjectedIntl } from 'react-intl';
 import { Size } from 'choerodon-ui/lib/_util/enum';
 import './DragList.less';
+import { MAX_LENGTH_FIELD_OPTION_CODE, MAX_LENGTH_FIELD_OPTION_VALUE } from '@/constants/MAX_LENGTH';
 
 interface OptionData {
   id: string,
@@ -438,7 +439,7 @@ class DragList extends Component<Props, StateProps> {
                               onChange={this.onCodeChange}
                               className="hidden-label"
                               placeholder={formatMessage({ id: 'dragList.placeholder.code' })}
-                              maxLength={10}
+                              maxLength={MAX_LENGTH_FIELD_OPTION_CODE}
                             />
                           </span>
                           <span className="issue-dragList-input">
@@ -447,7 +448,7 @@ class DragList extends Component<Props, StateProps> {
                               onChange={this.onValueChange}
                               className="hidden-label"
                               placeholder={formatMessage({ id: 'dragList.placeholder' })}
-                              maxLength={10}
+                              maxLength={MAX_LENGTH_FIELD_OPTION_VALUE}
                             />
                           </span>
                           <div className="issue-dragList-btns">
