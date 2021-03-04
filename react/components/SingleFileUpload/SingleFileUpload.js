@@ -27,9 +27,6 @@ function SingleFileUplaod(props) {
     Modal.open({
       key: modalKey,
       title: '预览',
-      // style: {
-      //   width: '80%',
-      // },
       footer: (okBtn, cancelBtn) => null,
       className: 'c7n-agile-preview-Modal',
       cancelText: '关闭',
@@ -42,20 +39,33 @@ function SingleFileUplaod(props) {
   return (
     <div className="c7n-agile-singleFileUpload-container">
       <div className="c7n-agile-singleFileUpload">
-        <span className="c7n-agile-singleFileUpload-icon">
+        <span
+          className={`c7n-agile-singleFileUpload-fileName ${previewAble ? 'preview' : ''}`}
+          onClick={previewAble && handlePreviewClick.bind(this, fileService, fileName, url)}
+          style={{
+            cursor: previewAble ? 'pointer' : 'unset',
+          }}
+        >
           {previewAble && (
-          <Tooltip title="预览">
-            <Icon
-              type="zoom_in"
-              style={{ cursor: 'pointer' }}
-              onClick={handlePreviewClick.bind(this, fileService, fileName, url)}
-            />
-          </Tooltip>
+            <Tooltip title="预览">
+              <Icon
+                type="zoom_in"
+                className="c7n-agile-singleFileUpload-icon"
+                style={{ cursor: 'pointer', marginTop: -2 }}
+              />
+            </Tooltip>
           )}
+          {fileName}
         </span>
         {
           url && (
-          <a className="c7n-agile-singleFileUpload-download" onClick={handleDownLoadFile}>
+          <a
+            className="c7n-agile-singleFileUpload-download"
+            style={{
+              marginLeft: 4,
+            }}
+            onClick={handleDownLoadFile}
+          >
             <span className="c7n-agile-singleFileUpload-icon">
               <Tooltip title="下载">
                 <Icon type="get_app" style={{ color: '#000' }} />
@@ -64,15 +74,6 @@ function SingleFileUplaod(props) {
           </a>
           )
         }
-        <span
-          className={`c7n-agile-singleFileUpload-fileName ${previewAble ? 'preview' : ''}`}
-          onClick={previewAble && handlePreviewClick.bind(this, fileService, fileName, url)}
-          style={{
-            cursor: previewAble ? 'pointer' : 'unset',
-          }}
-        >
-          {fileName}
-        </span>
         {(hasDeletePermission && onDeleteFile && (url || error)) && (
           <Tooltip title="删除">
             <Icon
