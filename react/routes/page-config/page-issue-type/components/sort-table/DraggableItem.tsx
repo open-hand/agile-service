@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import {
-  DraggableProvided, DraggingStyle, NotDraggingStyle,
+  DraggingStyle, NotDraggingStyle,
 } from 'react-beautiful-dnd';
 import classnames from 'classnames';
 import { Menu, Modal } from 'choerodon-ui';
@@ -21,8 +21,7 @@ import useTextEditTogglePropsWithPage from './useTextEditToggle';
 
 interface Props {
   data: Record,
-  // @ts-ignore
-  provided: DraggableProvided,
+  provided: any,
   virtualizedStyle?: React.CSSProperties,
   draggingClassName?: string,
   isDragDisabled?: boolean,
