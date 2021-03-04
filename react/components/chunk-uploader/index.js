@@ -145,7 +145,9 @@ const FragmentUpload = inject('AppState')(observer((props) => {
     });
     fileMap.current.delete(file.uid);
     if (success) {
-      onSuccess(data);
+      if (onSuccess) {
+        onSuccess(data);
+      }
       setFileList((list) => list.map((item) => {
         if (!item.url && item.uid === file.uid) {
           return {
