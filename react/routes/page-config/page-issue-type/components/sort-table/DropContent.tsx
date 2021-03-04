@@ -20,7 +20,7 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
     const record = rows[rowProps.index];
     return (
       <Draggable draggableId={String(record.key)} index={rowProps.index} key={record.key} isDragDisabled={isDropDisabled}>
-        {(provided, snapshot) => (
+        {(provided: any, snapshot: any) => (
           <DraggableItem
             provided={provided}
             data={rows[rowProps.index]}
@@ -35,15 +35,16 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
       droppableId="sort-table"
       mode="virtual"
       isDropDisabled={isDropDisabled}
-      renderClone={(provided, snapshot, rubric) => (
+      renderClone={(provided: any, snapshot: any, rubric: { source: { index: string | number; }; }) => (
         <DraggableItem
           draggingClassName={`${prefixCls}-dragging-item`}
           provided={provided}
+          // @ts-ignore
           data={rows[rubric.source.index]}
         />
       )}
     >
-      {(provided, snapshot) => {
+      {(provided: { innerRef: (arg0: HTMLElement) => void; }, snapshot: any) => {
         const rowCount = rows.length;
         return (
           <AutoSizer>

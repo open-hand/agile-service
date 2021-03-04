@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import React, { useCallback } from 'react';
 import {
   DraggableProvided, DraggingStyle, NotDraggingStyle,
@@ -22,6 +21,7 @@ import useTextEditTogglePropsWithPage from './useTextEditToggle';
 
 interface Props {
   data: Record,
+  // @ts-ignore
   provided: DraggableProvided,
   virtualizedStyle?: React.CSSProperties,
   draggingClassName?: string,
@@ -127,6 +127,7 @@ const DraggableItem: React.FC<Props> = ({
 
     </div>
   );
+  // @ts-ignore
   const getStyle = (draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => ({
     ...draggableStyle,
     ...virtualizedStyle,
