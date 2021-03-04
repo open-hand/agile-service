@@ -197,7 +197,7 @@ public class FieldValueUtil {
                     break;
                 case FieldType.NUMBER:
                     //如果勾选了是否小数
-                    if (view.getExtraConfig() != null && !view.getExtraConfig()) {
+                    if (view.getExtraConfig() != null && !view.getExtraConfig() && !ObjectUtils.isEmpty(view.getDefaultValue())) {
                         view.setDefaultValue(view.getDefaultValue().toString().split("\\.")[0]);
                     }
                     break;
