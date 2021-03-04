@@ -9,6 +9,7 @@ import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { Observer } from 'mobx-react-lite';
 import { CheckBoxProps } from 'choerodon-ui/pro/lib/check-box/CheckBox';
 import { ITableColumnCheckBoxesDataProps } from '@/components/table-column-check-boxes';
+import { OptionProps } from 'choerodon-ui/lib/select';
 
 interface EventsProps extends IChosenFieldFieldEvents {
   loadRecordAxios?: (store: IssueExportStore) => Promise<any> /** 查询导出记录 */
@@ -39,7 +40,7 @@ interface IssueExportStoreProps {
     buttonProps?: Partial<ButtonProps>,
     buttonChildren?: any,
   }
-  checkboxOptionsExtraConfig?: Map<string, { checkBoxProps: CheckBoxProps }>
+  checkboxOptionsExtraConfig?: Map<string, { checkBoxProps?: CheckBoxProps, optionConfig: OptionProps, defaultChecked?: boolean }>
 }
 export { IssueExportStoreProps };
 class IssueExportStore {
@@ -67,7 +68,7 @@ class IssueExportStore {
 
   exportButtonConfig: IssueExportStoreProps['exportButtonConfig'];
 
-  checkboxOptionsExtraConfig: Map<string, { checkBoxProps: CheckBoxProps }>;
+  checkboxOptionsExtraConfig: IssueExportStoreProps['checkboxOptionsExtraConfig'];
 
   @observable innerState = observable.map<string, any>();
 
