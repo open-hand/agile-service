@@ -103,7 +103,10 @@ public class InstanceServiceImpl implements InstanceService {
         List<StatusMachineNodeDTO> nodes = nodeDeployMapper.selectByStateMachineId(stateMachineId);
         List<StateMachineConfigVO> configs = configService.queryDeployByTransformIds(organizationId, ConfigType.CONDITION, stateMachineTransforms.stream().map(StatusMachineTransformDTO::getId).collect(Collectors.toList()));
         Map<Long, Long> nodeMap = nodes.stream().collect(Collectors.toMap(StatusMachineNodeDTO::getId, StatusMachineNodeDTO::getStatusId));
-        Map<Long, String> nodeRankMap = nodes.stream().collect(Collectors.toMap(StatusMachineNodeDTO::getId, StatusMachineNodeDTO::getRank));
+        Map<Long, String> nodeRankMap = new HashMap<>();
+        for (StatusMachineNodeDTO node : nodes) {
+            nodeRankMap.put(node.getId(), node.getRank());
+        }
         Map<Long, List<StateMachineConfigVO>> configMaps = configs.stream().collect(Collectors.groupingBy(StateMachineConfigVO::getTransformId));
         List<TransformInfo> transformInfos = new ArrayList<>(stateMachineTransforms.size());
         Boolean hasRankNull = false;
