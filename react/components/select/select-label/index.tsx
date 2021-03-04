@@ -11,7 +11,7 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
   valueField?: string
   afterLoad?: (sprints: ILabel[]) => void
-  flat?:boolean
+  flat?: boolean
   projectId?: string
   extraOptions?: any[]
 }
@@ -19,6 +19,7 @@ interface Props extends Partial<SelectProps> {
 const SelectLabel: React.FC<Props> = forwardRef(({
   dataRef, valueField, afterLoad, flat, projectId, extraOptions = [], ...otherProps
 }, ref: React.Ref<Select>) => {
+  const { combo } = otherProps;
   const config = useMemo((): SelectConfig => ({
     name: 'label',
     textField: 'labelName',
@@ -36,8 +37,8 @@ const SelectLabel: React.FC<Props> = forwardRef(({
       return [...extraOptions, ...data];
     },
     paging: false,
-    combo: otherProps.combo ?? true,
-  }), []);
+    combo: combo ?? true,
+  }), [combo]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 
@@ -45,7 +46,7 @@ const SelectLabel: React.FC<Props> = forwardRef(({
     <Component
       ref={ref}
       multiple
-      maxLength={MAX_LENGTH_LABEL}
+      maxLength={combo ? MAX_LENGTH_LABEL : undefined}
       {...props}
       {...otherProps}
     />
