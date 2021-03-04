@@ -52,6 +52,9 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     private static final String PRO = "pro_";
     private static final String ORG = "org_";
 
+    private static final String CODE = "code_";
+    private static final String VALUE = "value_";
+
     protected static final String BACKETNAME = "agile-service";
     protected static final String MULTIPART_NAME = "file";
     protected static final String ORIGINAL_FILE_NAME = ".xlsx";
@@ -286,7 +289,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
 
     @Override
     public Map<String, Integer> validKeyValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Sheet sheet, int r, Map<Integer, List<Integer>> errorRowColMap) {
-        Map<String, Integer> keyRowMap = new HashMap<>(objectSchemeFieldCreate.getFieldOptions().size());
+        Map<String, Integer> keyRowMap = new HashMap<>(objectSchemeFieldCreate.getFieldOptions().size() * 2);
         if (!FieldTypeCnName.isOption(objectSchemeFieldCreate.getFieldType())) {
             setNotOptionError(objectSchemeFieldCreate, sheet, r, errorRowColMap);
         } else {
@@ -309,24 +312,43 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             Row row = sheet.getRow(r + jumpRow + i);
 
             if (StringUtils.isEmpty(fieldOption.getCode())) {
-                row.createCell(5).setCellValue(buildWithErrorMsg("", "值不能为空"));
+                row.createCell(5).setCellValue(buildWithErrorMsg("", "显示值不能为空"));
                 addErrorColumn(row.getRowNum(), 5, errorRowColMap);
                 addErrorColumn(r, 10, errorRowColMap);
-            } else if (keyRowMap.get(fieldOption.getCode()) != null) {
-                row.getCell(5).setCellValue(buildWithErrorMsg(fieldOption.getCode(), "值重复"));
+            } else if(fieldOption.getCode().length() > 30){
+                row.getCell(5).setCellValue(buildWithErrorMsg(fieldOption.getCode(), "显示值长度需在30以内"));
                 addErrorColumn(row.getRowNum(), 5, errorRowColMap);
-                Row firstRepeatRow = sheet.getRow(keyRowMap.get(fieldOption.getCode()));
-                firstRepeatRow.getCell(5).setCellValue(buildWithErrorMsg(fieldOption.getCode(), "值重复"));
+                addErrorColumn(r, 10, errorRowColMap);
+            } else if (keyRowMap.get(CODE + fieldOption.getCode()) != null) {
+                row.getCell(5).setCellValue(buildWithErrorMsg(fieldOption.getCode(), "显示值重复"));
+                addErrorColumn(row.getRowNum(), 5, errorRowColMap);
+                Row firstRepeatRow = sheet.getRow(keyRowMap.get(CODE + fieldOption.getCode()));
+                firstRepeatRow.getCell(5).setCellValue(buildWithErrorMsg(fieldOption.getCode(), "显示值重复"));
                 addErrorColumn(firstRepeatRow.getRowNum(), 5, errorRowColMap);
                 addErrorColumn(r, 10, errorRowColMap);
             } else {
-                keyRowMap.put(fieldOption.getCode(), row.getRowNum());
+                keyRowMap.put(CODE + fieldOption.getCode(), row.getRowNum());
             }
-            if (StringUtils.isEmpty(fieldOption.getCode())) {
-                row.createCell(6).setCellValue(buildWithErrorMsg("", "显示值不能为空"));
+
+            if (StringUtils.isEmpty(fieldOption.getValue())) {
+                row.createCell(6).setCellValue(buildWithErrorMsg("", "值不能为空"));
                 addErrorColumn(row.getRowNum(), 6, errorRowColMap);
                 addErrorColumn(r, 10, errorRowColMap);
+            } else if(fieldOption.getValue().length() > 30){
+                row.getCell(6).setCellValue(buildWithErrorMsg(fieldOption.getCode(), "值字符长度需在30以内"));
+                addErrorColumn(row.getRowNum(), 5, errorRowColMap);
+                addErrorColumn(r, 10, errorRowColMap);
+            } else if (keyRowMap.get(VALUE + fieldOption.getValue()) != null) {
+                row.getCell(6).setCellValue(buildWithErrorMsg(fieldOption.getCode(), "值重复"));
+                addErrorColumn(row.getRowNum(), 6, errorRowColMap);
+                Row firstRepeatRow = sheet.getRow(keyRowMap.get(VALUE + fieldOption.getValue()));
+                firstRepeatRow.getCell(6).setCellValue(buildWithErrorMsg(fieldOption.getCode(), "值重复"));
+                addErrorColumn(firstRepeatRow.getRowNum(), 6, errorRowColMap);
+                addErrorColumn(r, 10, errorRowColMap);
+            } else {
+                keyRowMap.put(CODE + fieldOption.getCode(), row.getRowNum());
             }
+
             if (fieldOption.getEnabled() == null) {
                 row.createCell(7).setCellValue(buildWithErrorMsg("", "是否启用输入错误"));
                 addErrorColumn(row.getRowNum(), 7, errorRowColMap);
