@@ -15,7 +15,7 @@ import UserHead from '../../../../UserHead';
             {field?.fieldName}
           </span>
         </div>
-        <div className="c7n-value-wrapper" style={{ display: 'flex', flexWrap: 'nowrap' }}>
+        <div className="c7n-value-wrapper" style={{ display: 'flex', flexWrap: 'nowrap', padding: '0 0.05rem' }}>
           {
               updater ? (
                 <UserHead

@@ -15,7 +15,7 @@ import { DatetimeAgo } from '../../../../CommonComponent';
             {`${fieldName}`}
           </span>
         </div>
-        <div className="c7n-value-wrapper">
+        <div className="c7n-value-wrapper" style={{ padding: '0 0.05rem' }}>
           <DatetimeAgo
             date={value}
           />
