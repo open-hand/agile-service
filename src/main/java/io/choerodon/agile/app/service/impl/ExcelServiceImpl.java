@@ -2668,7 +2668,7 @@ public class ExcelServiceImpl implements ExcelService {
                                                             String action,
                                                             String websocketKey) {
         FileOperationHistoryDTO fileOperationHistoryDTO = new FileOperationHistoryDTO(projectId, userId, action, 0L, 0L, status);
-        if (fileOperationHistoryMapper.insert(fileOperationHistoryDTO) != 1) {
+        if (fileOperationHistoryMapper.insertSelective(fileOperationHistoryDTO) != 1) {
             throw new CommonException("error.FileOperationHistoryDTO.insert");
         }
         FileOperationHistoryDTO res = fileOperationHistoryMapper.selectByPrimaryKey(fileOperationHistoryDTO.getId());
@@ -2679,7 +2679,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long organizationId, Long userId, String status, String action, String websocketKey) {
         FileOperationHistoryDTO fileOperationHistoryDTO = new FileOperationHistoryDTO(projectId, organizationId, userId, action, 0L, 0L, status);
-        if (fileOperationHistoryMapper.insert(fileOperationHistoryDTO) != 1) {
+        if (fileOperationHistoryMapper.insertSelective(fileOperationHistoryDTO) != 1) {
             throw new CommonException("error.FileOperationHistoryDTO.insert");
         }
         FileOperationHistoryDTO res = fileOperationHistoryMapper.selectByPrimaryKey(fileOperationHistoryDTO.getId());
