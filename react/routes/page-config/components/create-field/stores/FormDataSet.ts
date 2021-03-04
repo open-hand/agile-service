@@ -1,13 +1,11 @@
 import moment from 'moment';
-import { remove, intersectionBy } from 'lodash';
+import { remove } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-// import jsonBig from 'json-bigint';
-import { getOrganizationId } from '@/utils/common';
-import { pageConfigApiConfig } from '@/api';
+import { MAX_LENGTH_FIELD_CODE, MAX_LENGTH_FIELD_NAME } from '@/constants/MAX_LENGTH';
 import { Store } from './useStore';
 
 interface Props {
@@ -132,7 +130,7 @@ const FormDataSet = ({
         type: 'string' as FieldType,
         label: formatMessage({ id: 'code' }),
         required: !isEdit,
-        maxLength: isEdit ? 15 : 10,
+        maxLength: isEdit ? MAX_LENGTH_FIELD_CODE + 5 : MAX_LENGTH_FIELD_CODE,
         validator: checkCode,
       },
       {
@@ -140,7 +138,7 @@ const FormDataSet = ({
         type: 'string' as FieldType,
         label: formatMessage({ id: 'name' }),
         required: true,
-        maxLength: 6,
+        maxLength: MAX_LENGTH_FIELD_NAME,
         validator: checkName,
       },
       {
