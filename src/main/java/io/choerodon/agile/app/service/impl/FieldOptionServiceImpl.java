@@ -8,12 +8,16 @@ import io.choerodon.agile.app.service.FieldOptionService;
 import io.choerodon.agile.app.service.FieldValueService;
 import io.choerodon.agile.infra.dto.FieldOptionDTO;
 import io.choerodon.agile.infra.mapper.FieldOptionMapper;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -142,7 +146,21 @@ public class FieldOptionServiceImpl implements FieldOptionService {
             List<FieldOptionVO> options = modelMapper.map(fieldOptionMapper.selectByFieldIds(organizationId, fieldIds), new TypeToken<List<FieldOptionVO>>() {
             }.getType());
             Map<Long, List<FieldOptionVO>> optionGroup = options.stream().collect(Collectors.groupingBy(FieldOptionVO::getFieldId));
-            pageFieldViews.forEach(view -> view.setFieldOptions(optionGroup.get(view.getFieldId())));
+            pageFieldViews.forEach(view -> {
+                view.setFieldOptions(optionGroup.get(view.getFieldId()));
+                String[] ids = String.valueOf(view.getDefaultValue()).split(",");
+                List<Long> defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
+                if (!CollectionUtils.isEmpty(defaultIds) && !CollectionUtils.isEmpty(view.getFieldOptions())) {
+                    List<Long> newDefaultIds = new ArrayList<>();
+                    List<Long> optionIds = view.getFieldOptions().stream().map(FieldOptionVO::getId).collect(Collectors.toList());
+                    defaultIds.forEach(id -> {
+                        if (optionIds.contains(id)) {
+                            newDefaultIds.add(id);
+                        }
+                    });
+                    view.setDefaultValue(StringUtils.join(newDefaultIds, ","));
+                }
+            });
         }
     }
 }

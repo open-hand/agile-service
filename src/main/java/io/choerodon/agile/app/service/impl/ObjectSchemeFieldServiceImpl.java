@@ -244,6 +244,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 });
                 vo.setContexts(contexts);
                 vo.setIssueTypeVOList(issueTypeVOList);
+            } else {
+                return;
             }
             vo.setContextName(String.join(",", issueTypeNames));
             vo.setRequiredScope(requiredScope);
@@ -574,9 +576,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         field.setOrganizationId(organizationId);
         field.setProjectId(projectId);
 
-        String defaultValue = tryDecryptDefaultValue(field.getFieldType(), field.getDefaultValue());
-        if (defaultValue != null) {
-            field.setDefaultValue(defaultValue);
+        if (Objects.equals(FieldType.MULTI_MEMBER, field.getFieldType()) && !ObjectUtils.isEmpty(field.getDefaultValue())) {
+            String defaultValue = tryDecryptDefaultValue(field.getFieldType(), field.getDefaultValue());
+            if (defaultValue != null) {
+                field.setDefaultValue(defaultValue);
+            }
         }
         field = baseCreate(field, issueTypes, issueTypeIdForRank);
         //处理字段选项
@@ -776,9 +780,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         Set<String> typeCodes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO)
                 .stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toSet());
         update.setContext(String.join(",", typeCodes));
-        String defaultValue = tryDecryptDefaultValue(update.getFieldType(), update.getDefaultValue());
-        if (defaultValue != null) {
-            update.setDefaultValue(defaultValue);
+        if (Objects.equals(FieldType.MULTI_MEMBER, update.getFieldType()) && !ObjectUtils.isEmpty(update.getDefaultValue())) {
+            String defaultValue = tryDecryptDefaultValue(update.getFieldType(), update.getDefaultValue());
+            if (defaultValue != null) {
+                update.setDefaultValue(defaultValue);
+            }
         }
         updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, update.getDefaultValue(), updateDTO);
         update.setId(fieldId);
@@ -1641,11 +1647,14 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         String[] ids = String.valueOf(defaultValue).split(",");
         List<Long> defaultIds = Arrays.asList((Long[]) ConvertUtils.convert(ids, Long.class));
         if (!CollectionUtils.isEmpty(defaultIds)) {
+            List<Long> newDefaultIds = new ArrayList<>();
             defaultIds.forEach(id -> {
                 if (valueMap.containsKey(id)) {
                     defaultObjs.add(valueMap.get(id));
+                    newDefaultIds.add(id);
                 }
             });
+            view.setDefaultValue(StringUtils.join(newDefaultIds, ","));
             view.setDefaultValueObjs(defaultObjs);
         }
     }
@@ -1655,6 +1664,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         long defaultId = Long.parseLong(view.getDefaultValue().toString());
         if (valueMap.containsKey(defaultId)) {
             view.setDefaultValueObj(valueMap.get(defaultId));
+        } else {
+            view.setDefaultValue("");
         }
     }
 

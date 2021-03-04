@@ -35,6 +35,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
+
 /**
  * @author dinghuang123@gmail.com
  */
@@ -681,6 +685,24 @@ public class IssueAssembler extends AbstractAssembler {
     public List<Map.Entry<String, Integer>> convertBugEntry(List<ReportIssueConvertDTO> reportIssueConvertDTOList, DateFormat df, Function<ReportIssueConvertDTO, Boolean> func){
         Map<Date, List<ReportIssueConvertDTO>> group = reportIssueConvertDTOList.stream()
                 .filter(func::apply).collect(Collectors.groupingBy(bug1 -> DateUtils.truncate(bug1.getDate(), Calendar.DAY_OF_MONTH)));
+        // 去重
+        for (Date date : group.keySet()) {
+            List<ReportIssueConvertDTO> reportIssueConvertDTOS = group.get(date);
+            if (CollectionUtils.isNotEmpty(reportIssueConvertDTOS)) {
+                List<ReportIssueConvertDTO> issueList = new ArrayList<>();
+                List<ReportIssueConvertDTO> issueNullList = reportIssueConvertDTOS.stream().filter(v -> ObjectUtils.isEmpty(v.getIssueId())).collect(Collectors.toList());
+                List<ReportIssueConvertDTO> issueNotNullList = reportIssueConvertDTOS.stream().filter(v -> !ObjectUtils.isEmpty(v.getIssueId())).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(issueNullList)) {
+                    issueList.addAll(issueNullList);
+                }
+                if (CollectionUtils.isNotEmpty(issueNotNullList)) {
+                    issueNotNullList = issueNotNullList.stream().collect(collectingAndThen(
+                            toCollection(() -> new TreeSet<>(comparing(n -> n.getIssueId()))), ArrayList::new));
+                    issueList.addAll(issueNotNullList);
+                }
+                group.put(date, issueList);
+            }
+        }
         return group.entrySet().stream().sorted(Map.Entry.comparingByKey())
                 .map(entry -> new ImmutablePair<>(df.format(entry.getKey()),
                         entry.getValue().stream()

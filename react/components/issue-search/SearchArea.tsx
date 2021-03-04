@@ -84,7 +84,8 @@ const SearchArea: React.FC = () => {
   const handleDeselect = (key: string) => {
     const [type, id] = key.split('|');
     if (type === 'quick') {
-      remove(selectedQuickFilters, key);
+      const quickFilterIds = selectedQuickFilters.filter((k) => k !== key).map((filter) => filter.split('|')[1]);
+      store.handleFilterChange('quickFilterIds', quickFilterIds);
     } else if (type === 'my') {
       handleClearFilter(id);
     } else if (type === 'commonly') {
@@ -95,8 +96,6 @@ const SearchArea: React.FC = () => {
         store.handleFilterChange('userId', undefined);
       }
     }
-    const quickFilterIds = selectedQuickFilters.map((filter) => filter.split('|')[1]);
-    store.handleFilterChange('quickFilterIds', quickFilterIds);
   };
   const handleClearFilter = (v?: string) => {
     if (!hasSummaryField) {

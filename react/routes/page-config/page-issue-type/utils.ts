@@ -36,7 +36,10 @@ function transformDefaultValue({
     case 'single':
     case 'radio': {
       const valueArr = String(defaultValue).split(',');
-      return (fieldOptions as Array<IFieldOptionProps> | undefined)?.filter((option) => valueArr.some((v) => v === option[optionKey as keyof typeof option])).map((item) => item[textKey as keyof typeof item]).join(',') || defaultValue;
+      const selectOptions = (fieldOptions as Array<IFieldOptionProps> | undefined)?.
+      filter((option) => valueArr.some((v) => v === option[optionKey as keyof typeof option])).
+      map((item) => item[textKey as keyof typeof item]) || [];
+      return selectOptions.length > 0 ? selectOptions.join(',') : '';
     }
     case 'member': {
       const { realName } = defaultValueObj || {};

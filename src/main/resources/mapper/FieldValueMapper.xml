@@ -118,7 +118,7 @@
     </select>
     <select id="selectUserIdByField" resultType="java.lang.Long">
         SELECT
-            CASE WHEN ffv.option_id IS NULL THEN fosf.default_value ELSE ffv.option_id END AS user_id
+            ffv.option_id
         FROM
             fd_field_value ffv
         JOIN fd_object_scheme_field fosf ON ffv.field_id = fosf.id

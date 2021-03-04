@@ -346,7 +346,8 @@ class StoryMapStore {
       const epicWithWidth = find(storyMapWidth, { issueId: epic.issueId, type: 'epic' });
       storyData[epicId] = {
         epicId,
-        collapse: this.storyData[epicId] ? this.storyData[epicId].collapse : false,
+        // eslint-disable-next-line no-nested-ternary
+        collapse: (this.foldCompletedEpic && epic.statusVO?.completed) || this.storyData[epicId]?.collapse,
         storys: [],
         feature: epicId ? { // 无史诗不显示无特性
           none: {

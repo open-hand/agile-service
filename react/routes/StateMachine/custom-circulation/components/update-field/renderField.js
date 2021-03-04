@@ -22,7 +22,7 @@ const clearIdMap = new Map([
 const extraOptionsMap = new Map();
 export default function renderField({
   code, fieldType, fieldOptions, required,
-}, data, selectUserMap) {
+}, data, selectUserMap, isProgram) {
   switch (code) {
     case 'component': {
       return (
@@ -330,6 +330,14 @@ export default function renderField({
         extraOptionsMap.member = [
           { id: 'creator', realName: '创建人' },
           { id: 'operator', realName: '当前操作人' },
+
+        ];
+      } else if (code === 'mainResponsible') {
+        extraOptionsMap.member = [
+          { id: 'reportor', realName: '报告人' },
+          { id: 'creator', realName: '创建人' },
+          { id: 'operator', realName: '当前操作人' },
+
         ];
       } else {
         extraOptionsMap.member = [
@@ -339,15 +347,33 @@ export default function renderField({
         ];
       }
 
+      if (!isProgram && code !== 'mainResponsible') {
+        extraOptionsMap.member.push({
+          id: 'mainResponsible', realName: '主要负责人',
+        });
+      }
+
+      if (!isProgram && code !== 'assignee') {
+        extraOptionsMap.member.unshift({
+          id: 'assignee', realName: '经办人',
+        });
+      }
+
       if (!required || code !== 'reporter') {
         extraOptionsMap.member.unshift({ id: 'clear', realName: '清空' });
       }
+
       return (
         <SelectUser
           style={{ width: '100%' }}
           name={code}
           extraOptions={extraOptionsMap.member}
           selectedUser={selectUserMap.get(code)}
+          maxTagCount={2}
+          maxTagTextLength={10}
+          onOption={({ record }) => ({
+            disabled: fieldType === 'multiMember' && data[code].value.length && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
+          })}
         />
       );
     }

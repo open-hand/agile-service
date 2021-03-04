@@ -44,6 +44,12 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     protected static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
     protected static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
     private static final String CLEAR = "clear";
+    private static final String OPERATOR = "operator";
+    private static final String CREATOR = "creator";
+    private static final String REPORTOR = "reportor";
+    private static final String ASSIGNEE = "assignee";
+    private static final String MAIN_RESPONSIBLE = "mainResponsible";
+
     @Autowired
     private StatusFieldSettingMapper statusFieldSettingMapper;
     @Autowired
@@ -151,29 +157,31 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             String fieldType = statusFieldSettingVO.getFieldType();
             List<String> fieldTypes = Arrays.asList(FILTER_FIELD_TYPE);
             List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(projectId, statusFieldSettingVO.getId());
-            if (!fieldTypes.contains(fieldType)) {
-                statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
-                return;
-            }
-            if (!Objects.equals("specifier", statusFieldValueSettingDTOS.get(0).getOperateType())) {
-                statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
-                return;
-            }
-            if ("member".equals(statusFieldSettingVO.getFieldType())) {
-                // 查询用户信息
-                List<Long> userIds = statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
-                List<UserDTO> body = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).getBody();
-                if (CollectionUtils.isEmpty(body)) {
+            if (!CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
+                if (!fieldTypes.contains(fieldType)) {
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                     return;
                 }
-                Map<Long, UserDTO> userDTOMap = body.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
-                statusFieldValueSettingDTOS.forEach(v -> v.setName(ObjectUtils.isEmpty(userDTOMap.get(v.getUserId())) ? null : userDTOMap.get(v.getUserId()).getRealName()));
+                if (!Objects.equals("specifier", statusFieldValueSettingDTOS.get(0).getOperateType())) {
+                    statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
+                    return;
+                }
+                if ("member".equals(statusFieldSettingVO.getFieldType())) {
+                    // 查询用户信息
+                    List<Long> userIds = statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
+                    List<UserDTO> body = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).getBody();
+                    if (CollectionUtils.isEmpty(body)) {
+                        statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
+                        return;
+                    }
+                    Map<Long, UserDTO> userDTOMap = body.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
+                    statusFieldValueSettingDTOS.forEach(v -> v.setName(ObjectUtils.isEmpty(userDTOMap.get(v.getUserId())) ? null : userDTOMap.get(v.getUserId()).getRealName()));
+                    statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
+                    return;
+                }
+                handlerFieldValue(statusFieldSettingVO, statusFieldValueSettingDTOS);
                 statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
-                return;
             }
-            handlerFieldValue(statusFieldSettingVO, statusFieldValueSettingDTOS);
-            statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
         });
         return list;
     }
@@ -191,23 +199,25 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         Map<String,Object> specifyMap = new HashMap<>();
         list.forEach(v -> {
             List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(projectId, v.getId());
-            if (Boolean.TRUE.equals(v.getSystem())) {
-                Boolean isVersion = FieldCode.FIX_VERSION.equals(v.getFieldCode()) || FieldCode.INFLUENCE_VERSION.equals(v.getFieldCode());
-                if (Boolean.TRUE.equals(isVersion)) {
-                    handlerVersion(versionMap, v, statusFieldValueSettingDTOS);
-                } else if (Arrays.asList(FEATURE_FIELD).contains(v.getFieldCode())){
-                    if (agilePluginService != null) {
-                        agilePluginService.handlerFeatureFieldValue(v, issueUpdateVO, specifyMap, statusFieldValueSettingDTOS, issueDTO);
+            if (!CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
+                if (Boolean.TRUE.equals(v.getSystem())) {
+                    Boolean isVersion = FieldCode.FIX_VERSION.equals(v.getFieldCode()) || FieldCode.INFLUENCE_VERSION.equals(v.getFieldCode());
+                    if (Boolean.TRUE.equals(isVersion)) {
+                        handlerVersion(versionMap, v, statusFieldValueSettingDTOS);
+                    } else if (Arrays.asList(FEATURE_FIELD).contains(v.getFieldCode())){
+                        if (agilePluginService != null) {
+                            agilePluginService.handlerFeatureFieldValue(v, issueUpdateVO, specifyMap, statusFieldValueSettingDTOS, issueDTO);
+                        }
+                    } else {
+                        handlerPredefinedValue(issueUpdateVO, aClass, field, issueDTO, v, statusFieldValueSettingDTOS);
                     }
                 } else {
-                    handlerPredefinedValue(issueUpdateVO, aClass, field, issueDTO, v, statusFieldValueSettingDTOS);
+                    PageFieldViewUpdateVO pageFieldViewUpdateVO = new PageFieldViewUpdateVO();
+                    pageFieldViewUpdateVO.setFieldType(v.getFieldType());
+                    pageFieldViewUpdateVO.setFieldId(v.getFieldId());
+                    setCustomFieldValue(issueDTO, v, pageFieldViewUpdateVO, statusFieldValueSettingDTOS);
+                    customField.add(pageFieldViewUpdateVO);
                 }
-            } else {
-                PageFieldViewUpdateVO pageFieldViewUpdateVO = new PageFieldViewUpdateVO();
-                pageFieldViewUpdateVO.setFieldType(v.getFieldType());
-                pageFieldViewUpdateVO.setFieldId(v.getFieldId());
-                setCustomFieldValue(issueDTO, v, pageFieldViewUpdateVO, statusFieldValueSettingDTOS);
-                customField.add(pageFieldViewUpdateVO);
             }
         });
         // 执行更新
@@ -280,14 +290,23 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             }
             handlerFieldName(issueUpdateVO, statusFieldValueSettingDTOS, issueDTO, statusFieldValueSettingDTO, v, field);
         } catch (Exception e) {
-            throw new CommonException("error.transform.object");
+            throw new CommonException("error.transform.object", e);
         }
     }
 
     private void handlerFieldName(IssueUpdateVO issueUpdateVO, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO, StatusFieldValueSettingDTO fieldValueSettingDTO, StatusFieldSettingVO v, Field field) throws IllegalAccessException {
         switch (v.getFieldCode()) {
-            case FieldCode.ASSIGNEE:
             case FieldCode.REPORTER:
+                Boolean canSetValue = ((MAIN_RESPONSIBLE.equals(fieldValueSettingDTO.getOperateType()) && !ObjectUtils.isEmpty(issueDTO.getMainResponsibleId()))
+                        || !(ASSIGNEE.equals(fieldValueSettingDTO.getOperateType()) || MAIN_RESPONSIBLE.equals(fieldValueSettingDTO.getOperateType()))
+                        || (ASSIGNEE.equals(fieldValueSettingDTO.getOperateType()) && !ObjectUtils.isEmpty(issueDTO.getAssigneeId())));
+                if (Boolean.TRUE.equals(canSetValue)) {
+                    field.set(issueUpdateVO, handlerMember(fieldValueSettingDTO, issueDTO));
+                } else {
+                    field.set(issueUpdateVO, issueDTO.getReporterId());
+                }
+                break;
+            case FieldCode.ASSIGNEE:
             case FieldCode.MAIN_RESPONSIBLE:
                 field.set(issueUpdateVO, handlerMember(fieldValueSettingDTO, issueDTO));
                 break;
@@ -380,7 +399,6 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
         switch (v.getFieldType()) {
             case FieldType.CHECKBOX:
-            case FieldType.MULTI_MEMBER:
             case FieldType.MULTIPLE:
                 pageFieldViewUpdateVO.setValue(statusFieldValueSettingDTOS.stream().map(settingDTO -> settingDTO.getOptionId().toString()).collect(Collectors.toList()));
                 break;
@@ -405,9 +423,33 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             case FieldType.NUMBER:
                 pageFieldViewUpdateVO.setValue(handlerNumber(v, statusFieldValueSettingDTO, issueDTO));
                 break;
+            case FieldType.MULTI_MEMBER:
+                pageFieldViewUpdateVO.setValue(handlerMultiMember(statusFieldValueSettingDTOS, issueDTO));
+                break;
             default:
                 break;
         }
+    }
+
+    private Object handlerMultiMember(List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO) {
+        if (CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
+            return null;
+        }
+        StatusFieldValueSettingDTO settingDTO = statusFieldValueSettingDTOS.get(0);
+        if (CLEAR.equals(settingDTO.getOperateType())) {
+            return null;
+        }
+        List<String> userIds = new ArrayList<>();
+        for (StatusFieldValueSettingDTO statusFieldValueSettingDTO : statusFieldValueSettingDTOS) {
+            Long userId = handlerMember(statusFieldValueSettingDTO, issueDTO);
+            if (ObjectUtils.isEmpty(userId)) {
+                continue;
+            }
+            if (!userIds.contains(userId.toString())) {
+                userIds.add(userId.toString());
+            }
+        }
+        return userIds;
     }
 
     private BigDecimal handlerNumber(StatusFieldSettingVO v, StatusFieldValueSettingDTO statusFieldValueSettingDTO, IssueDTO issueDTO) {
@@ -429,12 +471,17 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     private Long handlerMember(StatusFieldValueSettingDTO statusFieldValueSettingDTO, IssueDTO issueDTO) {
         Long userId = null;
-        if ("operator".equals(statusFieldValueSettingDTO.getOperateType())) {
+        String operateType = statusFieldValueSettingDTO.getOperateType();
+        if (OPERATOR.equals(operateType)) {
             userId = DetailsHelper.getUserDetails().getUserId();
-        } else if ("creator".equals(statusFieldValueSettingDTO.getOperateType())) {
+        } else if (CREATOR.equals(operateType)) {
             userId = issueDTO.getCreatedBy();
-        } else if ("reportor".equals(statusFieldValueSettingDTO.getOperateType())) {
+        } else if (REPORTOR.equals(operateType)) {
             userId = issueDTO.getReporterId();
+        } else if (ASSIGNEE.equals(operateType)) {
+            userId = issueDTO.getAssigneeId();
+        } else if (MAIN_RESPONSIBLE.equals(operateType)) {
+            userId = issueDTO.getMainResponsibleId();
         } else {
             userId = statusFieldValueSettingDTO.getUserId();
         }
@@ -536,8 +583,26 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         if(CollectionUtils.isEmpty(select)){
             return new ArrayList<>();
         }
-        handlerDTO(select);
-        return select;
+        //过滤不存在的字段选项
+        List<Long> fieldOptionIds = select.stream()
+                .filter(v -> !Objects.isNull(v.getOptionId()))
+                .map(StatusFieldValueSettingDTO::getOptionId)
+                .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(fieldOptionIds)) {
+            List<StatusFieldValueSettingDTO> result = new ArrayList<>();
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            List<Long> existFieldOptionIds = fieldOptionMapper.selectByOptionIds(organizationId, fieldOptionIds).stream().map(FieldOptionDTO::getId).collect(Collectors.toList());
+            select.forEach(v -> {
+                if (Objects.isNull(v.getOptionId()) || existFieldOptionIds.contains(v.getOptionId())) {
+                    result.add(v);
+                }
+            });
+            handlerDTO(result);
+            return result;
+        } else {
+            handlerDTO(select);
+            return select;
+        }
     }
 
     private void handlerDTO(List<StatusFieldValueSettingDTO> statusFieldValueSetting) {

@@ -5,6 +5,7 @@ import { issueLabelApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
 import FlatSelect from '@/components/flat-select';
+import { MAX_LENGTH_LABEL } from '@/constants/MAX_LENGTH';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
@@ -35,6 +36,7 @@ const SelectLabel: React.FC<Props> = forwardRef(({
       return [...extraOptions, ...data];
     },
     paging: false,
+    combo: otherProps.combo ?? true,
   }), []);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
@@ -44,6 +46,7 @@ const SelectLabel: React.FC<Props> = forwardRef(({
       ref={ref}
       multiple
       combo
+      maxLength={MAX_LENGTH_LABEL}
       {...props}
       {...otherProps}
     />

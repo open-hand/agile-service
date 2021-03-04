@@ -6,7 +6,7 @@ function MemberField({
   field, value, onChange, request, projectId,
 }) {
   const { code, name } = field;
-  const defaultValue = useMemo(() => value, []);
+  const defaultValue = useMemo(() => value, [value]);
   return (
     <SelectMember
       projectId={projectId}

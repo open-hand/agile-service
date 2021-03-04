@@ -118,7 +118,7 @@ function IssueBody(props) {
             ? <TestLink {...props} testLinkStoreRef={testLinkStoreRef} noCreateLink /> : ''}
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
-          {!outside && !otherProject && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
+          {!outside && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
         </TabPane>
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'

@@ -43,7 +43,7 @@ const SelectProject: React.FC<Props> = ({ issue, dataSet, issueTypeDataSet }) =>
           <Select
             name="issueType"
             optionsFilter={hasSubBug ? (record) => record.get('typeCode') === 'story' || record.get('typeCode') === 'task'
-              : (record) => record.get('typeCode') !== 'sub_task'}
+              : (record) => record.get('typeCode') === 'story' || record.get('typeCode') === 'task' || record.get('typeCode') === 'bug'}
           />
           {hasSubIssue && (
             <Select

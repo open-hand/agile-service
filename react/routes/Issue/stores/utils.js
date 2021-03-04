@@ -200,14 +200,14 @@ function Header({
                 style={{ color: 'white', marginRight: 6 }}
                 onClick={onClickEdit}
               >
-                编辑
+                批量编辑
               </Button>
               <Button
                 icon="delete_forever"
                 style={{ color: 'white', marginRight: 18 }}
                 onClick={onClickDelete}
               >
-                删除
+                批量删除
               </Button>
             </div>
           )
