@@ -422,12 +422,15 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected PredefinedDTO processIssueStatusPredefined(Long projectId, ExcelImportTemplate.Cursor cursor, List<String> fieldCodes) {
+        int col = fieldCodes.indexOf(fieldCodes);
+        if (col == -1) {
+            return null;
+        }
         List<StatusVO> issueStatus = projectConfigService.queryStatusByProjectId(projectId, APPLY_TYPE_AGILE);
         List<String> values = new ArrayList<>();
         issueStatus.forEach(i -> {
             values.add(i.getName());
         });
-        int col = getColByFieldCode(fieldCodes, FieldCode.ISSUE_STATUS);
         return new PredefinedDTO(values,
                 PREDEFINED_VALUE_START_ROW,
                 PREDEFINED_VALUE_END_ROW,
