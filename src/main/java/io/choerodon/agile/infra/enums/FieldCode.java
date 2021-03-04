@@ -44,4 +44,6 @@ public class FieldCode {
     public static final String BACKLOG_CLASSIFICATION = "backlogClassification";
     public static final String BACKLOG_TYPE = "backlogType";
 
+    public static final String ISSUE_STATUS = "issueStatus";
+
 }
