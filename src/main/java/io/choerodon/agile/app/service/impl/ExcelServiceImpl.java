@@ -421,7 +421,7 @@ public class ExcelServiceImpl implements ExcelService {
         return result;
     }
 
-    private PredefinedDTO processIssueStatusPredefined(Long projectId, ExcelImportTemplate.Cursor cursor, List<String> fieldCodes) {
+    protected PredefinedDTO processIssueStatusPredefined(Long projectId, ExcelImportTemplate.Cursor cursor, List<String> fieldCodes) {
         List<StatusVO> issueStatus = projectConfigService.queryStatusByProjectId(projectId, APPLY_TYPE_AGILE);
         List<String> values = new ArrayList<>();
         issueStatus.forEach(i -> {
@@ -1653,7 +1653,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void validateAndSetIssueStatus(Row row, Integer col, ExcelColumnVO excelColumn, Map<Integer, List<Integer>> errorRowColMap, IssueCreateVO issueCreateVO, String issueType) {
+    protected void validateAndSetIssueStatus(Row row, Integer col, ExcelColumnVO excelColumn, Map<Integer, List<Integer>> errorRowColMap, IssueCreateVO issueCreateVO, String issueType) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
         Map<String, StatusVO> issueStatusMap = excelColumn.getIssueStatusMap();
@@ -2460,7 +2460,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void processIssueType(Long projectId, ExcelColumnVO excelColumnVO) {
+    protected void processIssueType(Long projectId, ExcelColumnVO excelColumnVO) {
         List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE, true);
         Map<String, StatusVO> issueStatusMap = new HashMap<>();
         if (CollectionUtils.isEmpty(issueTypes)) {
