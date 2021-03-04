@@ -45,9 +45,11 @@ const SortTable: React.FC = () => {
   const { sortTableDataSet, pageIssueTypeStore } = usePageIssueTypeStore();
   const { showSplitLine, prefixCls } = useSortTableContext();
   const type = showSplitLine ? 'organization' : 'project';
+  // @ts-ignore
   const onDragStart = (initial: DragStart, provided: ResponderProvided) => {
 
   };
+  // @ts-ignore
   const onDragEnd = async (result: DropResult, provided: ResponderProvided) => {
     const { destination, source } = result;
     if (!destination) {

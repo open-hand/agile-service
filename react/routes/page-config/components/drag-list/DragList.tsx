@@ -54,6 +54,7 @@ class DragList extends Component<Props, StateProps> {
    * 拖动完成时触发
    * @param result
    */
+  // @ts-ignore
   onDragEnd = (result: DropResult) => {
     const { data, onChange } = this.props;
     const { source, destination } = result;
@@ -81,6 +82,7 @@ class DragList extends Component<Props, StateProps> {
   };
 
   // 获取元素样式，根据是否拖动变化
+  // @ts-ignore
   getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDraggingStyle | undefined,
     item: OptionData): CSSProperties => {
     let color = '#DDE7F2';
@@ -300,7 +302,7 @@ class DragList extends Component<Props, StateProps> {
               className="issue-dragList-card"
             >
               <Droppable droppableId="droppable">
-                {(provided) => (
+                {(provided: { innerRef: React.LegacyRef<HTMLDivElement> | undefined; placeholder: string | number | boolean | {} | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactNodeArray | React.ReactPortal | null | undefined; }) => (
                   <div
                     ref={provided.innerRef}
                     className="issue-issueTypeDrag-drop"
@@ -311,7 +313,7 @@ class DragList extends Component<Props, StateProps> {
                         draggableId={String(item.tempKey || item.id)}
                         index={index}
                       >
-                        {(subProvided, subSnapshot) => (
+                        {(subProvided: { innerRef: React.LegacyRef<HTMLDivElement> | undefined; draggableProps: JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>; dragHandleProps: JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>; }, subSnapshot: { isDragging: boolean; }) => (
                           <div
                             ref={subProvided.innerRef}
                             {...subProvided.draggableProps}

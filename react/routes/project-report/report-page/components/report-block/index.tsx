@@ -18,6 +18,7 @@ import listStyles from '../../index.less';
 interface BlockProps {
   data: IReportBlock
   index: number
+  // @ts-ignore
   provided: DraggableProvided
 }
 interface BlockPreviewProps {
