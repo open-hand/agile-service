@@ -124,18 +124,11 @@ const EditTemplate: React.FC<Props> = ({
     templateDataSet?.current?.set('templateName', template.name);
   }, [template.name, templateDataSet]);
 
-  const defaultInitOptions = useCallback(({ dataSet }) => {
-    dataSet.addField('required-option', { multiple: true });
-    dataSet.current?.set('required-option', defaultInitCodes);
-  }, [defaultInitCodes]);
-
   // 选择字段框配置 数据
   const [checkBoxDataProps, checkBoxComponentProps] = useTableColumnCheckBoxes({
     name: 'templateCodes',
     options: checkOptions,
-    // @ts-ignore
     defaultValue: templateFieldsRef?.current,
-    events: { initOptions: defaultInitOptions },
   });
 
   const handleOk = useCallback(async () => {

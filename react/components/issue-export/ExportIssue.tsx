@@ -99,8 +99,8 @@ const ExportIssue: React.FC = () => {
 
   const { store: choseFieldStore } = choseDataProps;
   const checkOptions = useMemo(() => { // checkBokProps
-    const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig.get(option.value) })) || [];
-    newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig.get(option.code) })));
+    const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig?.get(option.value) })) || [];
+    newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig?.get(option.code) })));
     return newCheckOptions;
   }, [choseFieldStore.getOriginalField, propsCheckOptions, store.checkboxOptionsExtraConfig]);
 
@@ -265,7 +265,6 @@ const ExportIssue: React.FC = () => {
                 selectTemplateOk={selectTemplateOk}
                 transformExportFieldCodes={store.transformExportFieldCodes}
                 reverseTransformExportFieldCodes={store.reverseTransformExportFieldCodes}
-                defaultInitCodes={['issueTypeId', 'issueNum', 'issueId']}
               />
             </FormPart>
             {/* <Divider className={`${prefixCls}-horizontal`} /> */}

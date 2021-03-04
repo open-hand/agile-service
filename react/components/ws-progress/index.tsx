@@ -185,7 +185,6 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
       dispatch({ type: 'visible', visible: props.visible });
     }
   }, [props.visible]);
-  console.log('stateProgress.data', stateProgress.data);
   return (
     <WSHandler
       messageKey={messageKey}
