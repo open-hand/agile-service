@@ -16,7 +16,7 @@ const previewSuffix = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'pdf', 'jpg'
 const modalKey = Modal.key();
 function SingleFileUplaod(props) {
   const {
-    url, fileService, fileName, hasDeletePermission, onDeleteFile, percent, error,
+    url, fileService, fileName, hasDeletePermission, onDeleteFile, percent, error, onPreview, isUI,
   } = props;
 
   const handleDownLoadFile = () => {
@@ -24,18 +24,22 @@ function SingleFileUplaod(props) {
   };
 
   const handlePreviewClick = (service, name, fileUrl) => {
-    Modal.open({
-      key: modalKey,
-      title: '预览',
-      footer: (okBtn, cancelBtn) => null,
-      className: 'c7n-agile-preview-Modal',
-      cancelText: '关闭',
-      fullScreen: true,
-      children: <Preview service={service} fileName={name} fileUrl={fileUrl} handleDownLoadFile={handleDownLoadFile} />,
-    });
+    if (onPreview) {
+      onPreview();
+    } else {
+      Modal.open({
+        key: modalKey,
+        title: '预览',
+        footer: (okBtn, cancelBtn) => null,
+        className: 'c7n-agile-preview-Modal',
+        cancelText: '关闭',
+        fullScreen: true,
+        children: <Preview service={service} fileName={name} fileUrl={fileUrl} handleDownLoadFile={handleDownLoadFile} />,
+      });
+    }
   };
 
-  const previewAble = url && previewSuffix.includes(getFileSuffix(url));
+  const previewAble = ((url && previewSuffix.includes(getFileSuffix(url))) || isUI);
   return (
     <div className="c7n-agile-singleFileUpload-container">
       <div className="c7n-agile-singleFileUpload">
