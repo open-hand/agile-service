@@ -422,7 +422,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected PredefinedDTO processIssueStatusPredefined(Long projectId, ExcelImportTemplate.Cursor cursor, List<String> fieldCodes) {
-        int col = fieldCodes.indexOf(fieldCodes);
+        int col = fieldCodes.indexOf(FieldCode.ISSUE_STATUS);
         if (col == -1) {
             return null;
         }
