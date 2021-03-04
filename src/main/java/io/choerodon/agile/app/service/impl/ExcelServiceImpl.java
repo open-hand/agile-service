@@ -416,7 +416,25 @@ public class ExcelServiceImpl implements ExcelService {
                 .ifPresent(x -> result.add(x));
         Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, Arrays.asList("非生产环境", "生产环境"), FieldCode.ENVIRONMENT))
                 .ifPresent(x -> result.add(x));
+        Optional.ofNullable(processIssueStatusPredefined(projectId, cursor, systemFields))
+                .ifPresent(x -> result.add(x));
         return result;
+    }
+
+    private PredefinedDTO processIssueStatusPredefined(Long projectId, ExcelImportTemplate.Cursor cursor, List<String> fieldCodes) {
+        List<StatusVO> issueStatus = projectConfigService.queryStatusByProjectId(projectId, APPLY_TYPE_AGILE);
+        List<String> values = new ArrayList<>();
+        issueStatus.forEach(i -> {
+            values.add(i.getName());
+        });
+        int col = getColByFieldCode(fieldCodes, FieldCode.ISSUE_STATUS);
+        return new PredefinedDTO(values,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.ISSUE_STATUS,
+                cursor.getAndIncreaseSheetNum());
     }
 
     private PredefinedDTO processLabelPredefined(Long projectId,
@@ -1627,8 +1645,27 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.ENVIRONMENT:
                 validateAndSetEnvironment(row, col, issueCreateVO, errorRowColMap, excelColumn, issueType);
                 break;
+            case FieldCode.ISSUE_STATUS:
+                validateAndSetIssueStatus(row, col, excelColumn, errorRowColMap, issueCreateVO, issueType);
+                break;
             default:
                 break;
+        }
+    }
+
+    private void validateAndSetIssueStatus(Row row, Integer col, ExcelColumnVO excelColumn, Map<Integer, List<Integer>> errorRowColMap, IssueCreateVO issueCreateVO, String issueType) {
+        Cell cell = row.getCell(col);
+        int rowNum = row.getRowNum();
+        Map<String, StatusVO> issueStatusMap = excelColumn.getIssueStatusMap();
+        if (!isCellEmpty(cell)) {
+            String value = cell.toString();
+            StatusVO statusVO = issueStatusMap.get(issueType + "-" + value);
+            if (statusVO == null) {
+                cell.setCellValue(buildWithErrorMsg(value, "状态输入错误"));
+                addErrorColumn(rowNum, col, errorRowColMap);
+            } else {
+                issueCreateVO.setStatusId(statusVO.getId());
+            }
         }
     }
 
@@ -2415,9 +2452,31 @@ public class ExcelServiceImpl implements ExcelService {
             case FieldCode.ENVIRONMENT:
                 processEnvironment(excelColumnVO);
                 break;
+            case FieldCode.ISSUE_STATUS:
+                processIssueType(projectId, excelColumnVO);
+                break;
             default:
                 break;
         }
+    }
+
+    private void processIssueType(Long projectId, ExcelColumnVO excelColumnVO) {
+        List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE, true);
+        Map<String, StatusVO> issueStatusMap = new HashMap<>();
+        if (CollectionUtils.isEmpty(issueTypes)) {
+            return;
+        }
+        issueTypes.forEach(issueTypeVO -> {
+            List<StatusVO> issueStatusList = projectConfigService.queryStatusByIssueTypeId(projectId, issueTypeVO.getId(), APPLY_TYPE_AGILE);
+            if (CollectionUtils.isEmpty(issueStatusList)) {
+                return;
+            }
+            issueStatusList.forEach(status -> {
+                String key = issueTypeVO.getName() + "-" + status.getName();
+                issueStatusMap.put(key, status);
+            });
+        });
+        excelColumnVO.setIssueStatusMap(issueStatusMap);
     }
 
     private void processEnvironment(ExcelColumnVO excelColumnVO) {
