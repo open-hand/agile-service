@@ -25,6 +25,13 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     dropdownMatchSelectWidth: false,
   };
 
+  cache: Map<string, string>
+
+  constructor(props: SelectProps, context: any) {
+    super(props, context);
+    this.cache = new Map();
+  }
+
   getTriggerIconFont() {
     // return 'baseline-arrow_drop_down';
     return this.isFocus && this.searchable ? 'search' : 'baseline-arrow_drop_down';
@@ -90,11 +97,15 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     const values = this.getValues();
     const repeats: Map<any, number> = new Map<any, number>();
     const texts = values.map((v) => {
+      if (this.cache.has(v)) {
+        return this.cache.get(v);
+      }
       const key = this.getValueKey(v);
       const repeat = repeats.get(key) || 0;
       const text = this.processText(this.getText(v));
       repeats.set(key, repeat + 1);
       if (!isNil(text)) {
+        this.cache.set(v, text);
         return text;
       }
       return undefined;
