@@ -34,7 +34,6 @@ interface EditorProps {
   onCancel?: () => void
   placeholder?: string
   disabled?: boolean
-  height?: number
 }
 const Editor: React.FC<EditorProps> = ({
   value: propsValue,
@@ -47,7 +46,6 @@ const Editor: React.FC<EditorProps> = ({
   toolbar = true,
   footer,
   style,
-  height,
   placeholder,
   disabled,
 }) => {

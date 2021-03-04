@@ -190,6 +190,7 @@ const renderField = ({
           initValue={undefined}
           editor={() => (
             <SelectLabel
+              combo
               dataSet={dataSet}
               name={`${issueId}-label`}
               valueField="labelName"
