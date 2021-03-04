@@ -9,6 +9,7 @@ public class StatusNoticeUserType {
     public static final String ASSIGNEE = "assignee";
     public static final String REPORTER = "reporter";
     public static final String SPECIFIER = "specifier";
+    public static final String ONLY_WEB_HOOK = "";
 
     public static final String[] BASE_USER_TYPE_LIST = new String[]{PROJECT_OWNER, ASSIGNEE, REPORTER};
 }
