@@ -1081,4 +1081,14 @@
         order by ai.rank desc limit 1
     </select>
 
+    <select id="selectActiveSprintsByProjectIds" resultType="io.choerodon.agile.infra.dto.SprintDTO">
+        SELECT *
+        FROM agile_sprint
+        WHERE project_id IN
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        AND status_code = 'started'
+    </select>
+
 </mapper>
