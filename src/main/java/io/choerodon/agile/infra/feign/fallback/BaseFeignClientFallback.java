@@ -163,4 +163,9 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     public ResponseEntity<Page<UserVO>> queryUsersByOrganization(Long projectId, String param, int page, int size) {
         throw new CommonException("error.list.organization.users");
     }
+
+    @Override
+    public ResponseEntity<List<ProjectWithUserVO>> listProjectOwnerByIds(Set<Long> projectIds) {
+        throw new CommonException("error.listProjectOwnerByIds");
+    }
 }
