@@ -2454,14 +2454,14 @@ public class ExcelServiceImpl implements ExcelService {
                 processEnvironment(excelColumnVO);
                 break;
             case FieldCode.ISSUE_STATUS:
-                processIssueType(projectId, excelColumnVO);
+                processIssueStatus(projectId, excelColumnVO);
                 break;
             default:
                 break;
         }
     }
 
-    protected void processIssueType(Long projectId, ExcelColumnVO excelColumnVO) {
+    protected void processIssueStatus(Long projectId, ExcelColumnVO excelColumnVO) {
         List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE, true);
         Map<String, StatusVO> issueStatusMap = new HashMap<>();
         if (CollectionUtils.isEmpty(issueTypes)) {
