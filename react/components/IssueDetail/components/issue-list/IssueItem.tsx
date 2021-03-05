@@ -4,8 +4,8 @@ import Star from '@/components/tag/star';
 import PriorityTag from '@/components/PriorityTag';
 import StatusTag from '@/components/StatusTag';
 import TypeTag from '@/components/TypeTag';
-import UserHead from '@/components/UserHead';
 import { ISubIssue } from '@/common/types';
+import UserTag from '@/components/tag/user-tag';
 
 function getIssueTypeName(typeCode: string) {
   switch (typeCode) {
@@ -96,14 +96,14 @@ const IssueItem: React.FC<IssueListProps> = ({
         showAssignee ? (
           <div style={{ marginRight: 10, display: 'flex', justifyContent: 'flex-end' }}>
             <div>
-              <UserHead
-                hiddenText
-                user={{
-                  id: assigneeId,
-                  name: assigneeName,
+              <UserTag
+                showText={false}
+                data={{
+                  // id: assigneeId,
+                  tooltip: assigneeName,
                   loginName,
                   realName,
-                  avatar: imageUrl,
+                  imageUrl,
                 }}
               />
             </div>

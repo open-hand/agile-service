@@ -5,10 +5,10 @@ import { observer } from 'mobx-react-lite';
 import WYSIWYGEditor from '@/components/CKEditor';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
-import UserHead from '@/components/UserHead';
 import './Comment.less';
 import { IComment } from '@/common/types';
 import { issueCommentApi, UComment, IReplyCreate } from '@/api/IssueComment';
+import UserTag from '@/components/tag/user-tag';
 import openDeleteModal from '../deleteComment';
 
 export interface ReplyComment extends IComment {
@@ -134,16 +134,15 @@ const CommentItem: React.FC<Props> = ({
       <div className={`c7n-comment-item  ${isReply ? 'c7n-comment-reply' : ''}`}>
         <div className="line-justify">
           <div className="c7n-title-commit" style={{ flex: 1 }}>
-            <UserHead
-              // @ts-ignore
-              user={{
-                id: comment.userId,
-                name: comment.userName,
+            <UserTag
+              data={{
+                // id: comment.userId,
+                tooltip: comment.userName,
                 realName: comment.userRealName,
                 loginName: comment.userLoginName,
-                avatar: comment.userImageUrl,
+                imageUrl: comment.userImageUrl,
               }}
-              color="#3f51b5"
+              textStyle={{ color: '#3f51b5' }}
             />
             {
               isReply && (
@@ -155,20 +154,15 @@ const CommentItem: React.FC<Props> = ({
                   >
                     回复
                   </span>
-                  <UserHead
-                    user={{
-                      // @ts-ignore
-                      id: comment.replyToUserId,
-                      // @ts-ignore
-                      name: comment.replyToUserName,
-                      // @ts-ignore
-                      realName: comment.replyToUserRealName,
-                      // @ts-ignore
-                      loginName: comment.replyToUserLoginName,
-                      // @ts-ignore
-                      avatar: comment.replyToUserImageUrl,
+                  <UserTag
+                    data={{
+                      // id: comment.replyToUserId,
+                      tooltip: (comment as ReplyComment).replyToUserName,
+                      realName: (comment as ReplyComment).replyToUserRealName,
+                      loginName: (comment as ReplyComment).replyToUserLoginName,
+                      imageUrl: (comment as ReplyComment).replyToUserImageUrl,
                     }}
-                    color="#3f51b5"
+                    textStyle={{ color: '#3f51b5' }}
                   />
                 </div>
               )
@@ -186,29 +180,29 @@ const CommentItem: React.FC<Props> = ({
               )
             }
             {
-             !readonly && hasPermission && (
-             <Icon
-               type="mode_edit mlr-3 pointer"
-               onClick={() => {
-                 if (canEditOrDelete) {
-                   if (replying) {
-                     setReplying(false);
-                     setReplyValue('');
-                   }
-                   setEditing(true);
-                 }
-               }}
-             />
-             )
+              !readonly && hasPermission && (
+                <Icon
+                  type="mode_edit mlr-3 pointer"
+                  onClick={() => {
+                    if (canEditOrDelete) {
+                      if (replying) {
+                        setReplying(false);
+                        setReplyValue('');
+                      }
+                      setEditing(true);
+                    }
+                  }}
+                />
+              )
             }
 
             {
-             !readonly && hasPermission && (
-             <Icon
-               type="delete_forever mlr-3 pointer"
-               onClick={handleClickDltBtn}
-             />
-             )
+              !readonly && hasPermission && (
+                <Icon
+                  type="delete_forever mlr-3 pointer"
+                  onClick={handleClickDltBtn}
+                />
+              )
             }
           </div>
         </div>

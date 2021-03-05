@@ -10,7 +10,6 @@ import QuickCreateIssue from '@/components/QuickCreateIssue';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
-import UserHead from '@/components/UserHead';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import UserTag from '@/components/tag/user-tag';
@@ -148,13 +147,13 @@ function IssueTable({ tableRef, onCreateIssue }) {
             <div style={{ display: 'inline-flex' }}>
               {
                 record.get('assigneeId') && record.get('assigneeId') !== '0' && (
-                  <UserHead
-                    user={{
+                  <UserTag
+                    data={{
                       id: record.get('assigneeId'),
-                      name: record.get('assigneeName'),
+                      tooltip: record.get('assigneeName'),
                       loginName: record.get('assigneeLoginName'),
                       realName: record.get('assigneeRealName'),
-                      avatar: record.get('assigneeImageUrl'),
+                      imageUrl: record.get('assigneeImageUrl'),
                     }}
                   />
                 )
@@ -187,13 +186,13 @@ function IssueTable({ tableRef, onCreateIssue }) {
           renderer={({ record }) => (
             <div style={{ display: 'inline-flex' }}>
               {record?.get('reporterId') && record.get('reporterId') !== '0' && (
-                <UserHead
-                  user={{
+                <UserTag
+                  data={{
                     id: record.get('reporterId'),
-                    name: record.get('reporterName'),
+                    tooltip: record.get('reporterName'),
                     loginName: record.get('reporterLoginName'),
                     realName: record.get('reporterRealName'),
-                    avatar: record.get('reporterImageUrl'),
+                    imageUrl: record.get('reporterImageUrl'),
                   }}
                 />
               )}

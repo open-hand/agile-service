@@ -19,8 +19,8 @@ import SelectProgramVersion from '@/components/select/select-program-version';
 import SelectFeature from '@/components/select/select-feature';
 import { DataSet, TextField } from 'choerodon-ui/pro/lib';
 import { epicApi } from '@/api';
-import { UserHead } from '@/components';
 import Item from 'choerodon-ui/lib/list/Item';
+import UserTag from '@/components/tag/user-tag';
 
 export interface IFieldWithValue extends IField {
   value: any,
@@ -373,9 +373,8 @@ const renderField = ({
         >
           {fieldValueItem
             ? (
-              <UserHead
-                // @ts-ignore
-                user={fieldValueItem}
+              <UserTag
+                data={fieldValueItem}
               />
             ) : (
               <div>
@@ -560,9 +559,8 @@ const renderField = ({
         >
           {fieldValueItem
             ? (
-              <UserHead
-                // @ts-ignore
-                user={fieldValueItem}
+              <UserTag
+                data={fieldValueItem}
               />
             ) : (
               <div>
@@ -598,9 +596,8 @@ const renderField = ({
         >
           {fieldValueItem
             ? (
-              <UserHead
-                // @ts-ignore
-                user={fieldValueItem}
+              <UserTag
+                data={fieldValueItem}
               />
             ) : (
               <div>
@@ -660,9 +657,8 @@ const renderField = ({
         >
           {fieldValueItem
             ? (
-              <UserHead
-                    // @ts-ignore
-                user={fieldValueItem}
+              <UserTag
+                data={fieldValueItem}
               />
             ) : (
               <div>

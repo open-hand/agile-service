@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { Permission } from '@choerodon/boot';
-import { withRouter } from 'react-router-dom';
-import { injectIntl } from 'react-intl';
 import { issueApi } from '@/api';
-import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectUser from '@/components/select/select-user';
-import UserHead from '../../../../UserHead';
+import UserTag from '@/components/tag/user-tag';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import { Permission } from '@choerodon/boot';
+import { inject, observer } from 'mobx-react';
+import React, { Component } from 'react';
+import { injectIntl } from 'react-intl';
+import { withRouter } from 'react-router-dom';
 
 @inject('AppState')
 @observer class FieldStatus extends Component {
@@ -78,13 +78,13 @@ import UserHead from '../../../../UserHead';
                 >
                   {
                       reporterId && reporterLoginName ? (
-                        <UserHead
-                          user={{
+                        <UserTag
+                          data={{
                             id: reporterId,
                             loginName: reporterLoginName,
                             realName: reporterRealName,
                             avatar: reporterImageUrl,
-                            name: reporterName,
+                            tooltip: reporterName,
                           }}
                         />
                       ) : (

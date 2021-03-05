@@ -1,15 +1,15 @@
-import React, { forwardRef } from 'react';
-import moment from 'moment';
-import { omit } from 'lodash';
+import { IFieldType } from '@/common/types';
 import SelectUser from '@/components/select/select-user';
+import UserTag from '@/components/tag/user-tag';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import {
-  TextField, TextArea, Select, NumberField, DatePicker, DateTimePicker, TimePicker, SelectBox,
+  DatePicker, DateTimePicker, NumberField, Select, SelectBox, TextArea, TextField, TimePicker,
 } from 'choerodon-ui/pro';
 import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
-import TextEditToggle from '@/components/TextEditTogglePro';
-import UserHead from '@/components/UserHead';
-import { IFieldType } from '@/common/types';
-import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
+import { omit } from 'lodash';
+import moment from 'moment';
+import React, { forwardRef } from 'react';
 
 export { IFieldType };
 const getEditorByFieldType = (fieldType: IFieldType, outside: boolean) => {
@@ -19,7 +19,7 @@ const getEditorByFieldType = (fieldType: IFieldType, outside: boolean) => {
     case 'input':
       return <TextField />;
     case 'multiMember':
-      return <SelectUser />;
+      return <SelectUser multiple />;
     case 'member':
       return <SelectUser />;
     case 'single':
@@ -51,7 +51,7 @@ export interface ICustomField {
   code: string
   value?: string
   fieldType: IFieldType
-  valueStr?: string
+  valueStr?: string | any
   required: boolean
   fieldOptions?: IFieldOption[]
 }
@@ -150,11 +150,10 @@ const CustomField: React.FC<Props> = forwardRef(({
         submitTrigger={submitTrigger}
       >
         <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
-          {fieldType === 'member' && valueStr
+          {['member', 'multiMember'].includes(fieldType) && valueStr
             ? (
-              <UserHead
-                // @ts-ignore
-                user={valueStr}
+              <UserTag
+                data={valueStr}
               />
             ) : (valueStr || '无')}
         </div>

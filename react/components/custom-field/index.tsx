@@ -8,9 +8,9 @@ import {
 import { IFieldType } from '@/common/types';
 import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import UserHead from '@/components/UserHead';
 // import SelectUserOutSide from './select-user-outside';
 import { Action } from '../TextEditTogglePro/TextEditToggle';
+import UserTag from '../tag/user-tag';
 
 export { IFieldType };
 const getEditorByFieldType = (fieldType: IFieldType, outside: boolean) => {
@@ -20,8 +20,9 @@ const getEditorByFieldType = (fieldType: IFieldType, outside: boolean) => {
     case 'input':
       return <TextField />;
     case 'member':
+    case 'multiMember':
       // return outside ? <SelectUserOutSide /> : <SelectUser />;
-      return <SelectUser />;
+      return <SelectUser multiple={fieldType === 'multiMember'} />;
     case 'single':
       return <Select />;
     case 'multiple':
@@ -155,9 +156,9 @@ const CustomField: React.FC<Props> = forwardRef(({
         submitTrigger={submitTrigger}
       >
         <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
-          {fieldType === 'member' && valueStr
+          {['member', 'multiMember'].includes(fieldType) && valueStr
             ? (
-              <UserHead
+              <UserTag
                 // @ts-ignore
                 user={valueStr}
               />

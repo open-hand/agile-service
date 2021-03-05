@@ -1,7 +1,9 @@
+/* eslint-disable react/jsx-no-bind */
 import React, { Component } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
 import { workLogApi } from '@/api';
-import UserHead from '../../UserHead';
+import UserTag from '@/components/tag/user-tag';
+
 import WYSIWYGEditor from '../../CKEditor';
 import WYSIWYGViewer from '../../CKEditorViewer';
 import { DatetimeAgo } from '../../CommonComponent';
@@ -112,15 +114,15 @@ class Log extends Component {
           }
           <div className="c7n-title-log">
             <div style={{ marginRight: 19 }}>
-              <UserHead
-                user={{
+              <UserTag
+                data={{
                   id: createdBy,
                   realName,
                   loginName,
-                  avatar: userImageUrl,
-                  name: userName,
+                  imageUrl: userImageUrl,
+                  tooltip: userName,
                 }}
-                color="#3f51b5"
+                textStyle={{ color: '#3f51b5' }}
               />
             </div>
             <span style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
