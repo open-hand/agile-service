@@ -61,6 +61,12 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
         this.edited = edited;
     }
 
+    public ObjectSchemeFieldExtendDTO(Long projectId, Long issueTypeId, Long fieldId) {
+        this.projectId = projectId;
+        this.issueTypeId = issueTypeId;
+        this.fieldId = fieldId;
+    }
+
     public String getDefaultValue() {
         return defaultValue;
     }
