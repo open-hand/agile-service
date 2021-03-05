@@ -833,6 +833,12 @@ public class ExcelServiceImpl implements ExcelService {
         Map<String, IssueTypeVO> issueTypeNameMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeVO::getName, a -> a, (k1, k2) -> k1));
         Map<String, UserVO> userNameMap = objectSchemeFieldExcelService.getUserNameMap(organizationId, projectId);
         for (int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) {
+            Row row = sheet.getRow(r);
+            if (objectSchemeFieldExcelService.isSkip(row)
+                    || (r > 1 && objectSchemeFieldExcelService.isKeyValue(sheet.getRow(r - 1))
+                    && objectSchemeFieldExcelService.isExtendKeyValue(row))) {
+                continue;
+            }
             if (objectSchemeFieldExcelService.checkCanceled(
                     organizationId,
                     projectId,
@@ -840,14 +846,6 @@ public class ExcelServiceImpl implements ExcelService {
                     importedFieldIds)) {
                 return;
             }
-
-            Row row = sheet.getRow(r);
-            if (objectSchemeFieldExcelService.isSkip(row)
-                    || (r > 1 && objectSchemeFieldExcelService.isKeyValue(sheet.getRow(r - 1))
-                    && objectSchemeFieldExcelService.isExtendKeyValue(row))) {
-                continue;
-            }
-
             ObjectSchemeFieldCreateVO objectSchemeFieldCreate =
                     objectSchemeFieldExcelService.generateObjectSchemeField(organizationId, projectId, row, errorRowColMap, issueTypeNameMap);
             int keyRowNum = r + 1;
@@ -2456,14 +2454,14 @@ public class ExcelServiceImpl implements ExcelService {
                 processEnvironment(excelColumnVO);
                 break;
             case FieldCode.ISSUE_STATUS:
-                processIssueType(projectId, excelColumnVO);
+                processIssueStatus(projectId, excelColumnVO);
                 break;
             default:
                 break;
         }
     }
 
-    protected void processIssueType(Long projectId, ExcelColumnVO excelColumnVO) {
+    protected void processIssueStatus(Long projectId, ExcelColumnVO excelColumnVO) {
         List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE, true);
         Map<String, StatusVO> issueStatusMap = new HashMap<>();
         if (CollectionUtils.isEmpty(issueTypes)) {
