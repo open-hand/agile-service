@@ -30,6 +30,8 @@ const EditEpic: React.FC<Props> = ({
   }, []);
 
   const handleEditEpic = useCallback(async (newValue) => {
+    console.log('pressEnter');
+
     if (!canEdit) {
       return;
     }
@@ -80,7 +82,7 @@ const EditEpic: React.FC<Props> = ({
         justifyContent: 'center',
       }}
       >
-        <Input autoFocus onPressEnter={handleEditEpic} placeholder="编辑史诗名称" maxLength={22} value={value} onChange={handleChange} />
+        <Input autoFocus onPressEnter={() => handleEditEpic(value)} placeholder="编辑史诗名称" maxLength={22} value={value} onChange={handleChange} />
       </Card>
     </div>
   );
