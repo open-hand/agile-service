@@ -7,10 +7,10 @@ import {
 } from 'choerodon-ui/pro';
 import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import UserHead from '@/components/UserHead';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import { IFieldType } from '@/common/types';
 import { ICustomField } from '@/components/filter';
+import UserTag from '@/components/tag/user-tag';
 
 const getEditorByFieldType = (fieldType: IFieldType, outside: boolean) => {
   switch (fieldType) {
@@ -138,11 +138,10 @@ const CustomField: React.FC<Props> = forwardRef(({
         submitTrigger={submitTrigger}
       >
         <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
-          {fieldType === 'member' && valueStr
+          {['member', 'multiMember'].includes(fieldType) && valueStr
             ? (
-              <UserHead
-                // @ts-ignore
-                user={valueStr}
+              <UserTag
+                data={valueStr}
               />
             ) : (valueStr || '无')}
         </div>

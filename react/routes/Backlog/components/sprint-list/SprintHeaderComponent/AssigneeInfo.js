@@ -3,10 +3,10 @@ import { observer } from 'mobx-react';
 import { findIndex } from 'lodash';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
-import UserHead from '@/components/UserHead';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import './AssigneeInfo.less';
+import { UserUniqueTag } from '@/components/tag/user-tag';
 
 @observer class AssigneeInfo extends Component {
   constructor(props) {
@@ -61,38 +61,37 @@ import './AssigneeInfo.less';
                 assigneeRealName,
                 imageUrl,
               }) => (
-                <UserHead
+                <UserUniqueTag
                   key={assigneeId}
-                  title={(
-                    <div>
-                      <p>{assigneeName}</p>
-                      <p>
-                        {'故事点: '}
-                        {totalStoryPoints || 0}
-                      </p>
-                      <p>
-                        {'剩余预估时间: '}
-                        {totalRemainingTime || '无'}
-                      </p>
-                      <p>
-                        {'问题: '}
-                        {issueCount}
-                      </p>
-                    </div>
-                    )}
-                  hiddenText
+                  showText={false}
                   className={classnames({
                     'c7n-backlog-assignInfo-item': true,
                     'c7n-backlog-assignInfo-item-active': filterSprintAssignId === assigneeId,
                   })}
                   onClick={() => this.handleSearchAssignee(assigneeId)}
                   size={24}
-                  user={{
+                  data={{
                     id: assigneeId,
                     loginName: assigneeLoginName,
                     realName: assigneeRealName,
                     name: assigneeName,
-                    avatar: imageUrl,
+                    tooltip: (
+                      <div>
+                        <p>{assigneeName}</p>
+                        <p>
+                          {'故事点: '}
+                          {totalStoryPoints || 0}
+                        </p>
+                        <p>
+                          {'剩余预估时间: '}
+                          {totalRemainingTime || '无'}
+                        </p>
+                        <p>
+                          {'问题: '}
+                          {issueCount}
+                        </p>
+                      </div>),
+                    imageUrl,
                   }}
                 />
               )) : null}

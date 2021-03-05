@@ -4,9 +4,9 @@ import { text2Delta } from '@/utils/richText';
 import WYSIWYGEditor from '@/components/CKEditor';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
-import UserHead from '@/components/UserHead';
 import './Comment.less';
 import { IComment } from '@/common/types';
+import UserTag from '@/components/tag/user-tag';
 import { useDetailContext } from '../../context';
 
 interface Props {
@@ -41,14 +41,13 @@ const Comment: React.FC<Props> = ({
     >
       <div className="line-justify">
         <div className="c7n-title-commit" style={{ flex: 1 }}>
-          <UserHead
-            // @ts-ignore
-            user={{
-              id: comment.userId,
-              name: comment.userName,
+          <UserTag
+            data={{
+              // id: comment.userId,
+              tooltip: comment.userName,
               realName: comment.userRealName,
               loginName: comment.userLoginName,
-              avatar: comment.userImageUrl,
+              imageUrl: comment.userImageUrl,
             }}
             color="#3f51b5"
           />

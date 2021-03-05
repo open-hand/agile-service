@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import UserHead from '../../../../UserHead';
+import UserTag from '@/components/tag/user-tag';
 
 @observer class FieldUpdater extends Component {
   render() {
@@ -18,8 +18,8 @@ import UserHead from '../../../../UserHead';
         <div className="c7n-value-wrapper" style={{ display: 'flex', flexWrap: 'nowrap', padding: '0 0.05rem' }}>
           {
               updater ? (
-                <UserHead
-                  user={updater}
+                <UserTag
+                  data={updater}
                 />
               ) : (
                 <div>

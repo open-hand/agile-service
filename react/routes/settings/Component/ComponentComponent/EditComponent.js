@@ -10,7 +10,8 @@ import {
 } from '@choerodon/boot';
 import _ from 'lodash';
 import { userApi, componentApi } from '@/api';
-import UserHead from '../../../../components/UserHead';
+import UserTag from '@/components/tag/user-tag';
+
 import './component.less';
 
 const { Option } = Select;
@@ -218,8 +219,8 @@ const EditComponent = (props) => {
                   {originUsers.map((user) => (
                     <Option key={JSON.stringify(user)} value={JSON.stringify(user)}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
-                        <UserHead
-                          user={user}
+                        <UserTag
+                          data={user}
                         />
                       </div>
                     </Option>

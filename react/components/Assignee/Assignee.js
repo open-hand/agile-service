@@ -6,8 +6,8 @@ import {
 } from 'choerodon-ui';
 import { userApi, issueApi } from '@/api';
 import { IsProjectMember } from '@/hooks/useIsProjectMember';
-import UserHead from '../UserHead';
 import './Assignee.less';
+import UserTag from '../tag/user-tag';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -136,13 +136,8 @@ class Assignee extends Component {
                 {originUsers.map((user) => (
                   <Option key={user.id} value={user.id}>
                     <div className="wrap">
-                      <UserHead
-                        user={{
-                          id: user.id,
-                          loginName: user.loginName,
-                          realName: user.realName,
-                          avatar: user.imageUrl,
-                        }}
+                      <UserTag
+                        data={user}
                       />
                     </div>
                   </Option>

@@ -9,7 +9,6 @@ import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { projectReportApiConfig, projectReportApi } from '@/api';
-import UserHead from '@/components/UserHead';
 import TableAction from '@/components/TableAction';
 import Users from '@/components/tag/users';
 import { User } from '@/common/types';
@@ -17,6 +16,7 @@ import to from '@/utils/to';
 import Empty from '@/components/Empty';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import Loading from '@/components/Loading';
+import UserTag from '@/components/tag/user-tag';
 import NoReport from './no-report.svg';
 
 const { Column } = Table;
@@ -100,10 +100,9 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
             return null;
           }
           return (
-            <UserHead
-              // @ts-ignore
+            <UserTag
               style={{ display: 'inline-flex' }}
-              user={createdUser as User}
+              data={createdUser as User}
             />
           );
         }}
