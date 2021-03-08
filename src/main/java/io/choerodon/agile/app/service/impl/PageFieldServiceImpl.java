@@ -171,14 +171,14 @@ public class PageFieldServiceImpl implements PageFieldService {
                     objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueTypeId, created, edited);
         }
 
-        addNotSyncField(organizationId, projectId, pageFields, issueType, created, edited);
+        addNotSyncField(organizationId, projectId, pageFields, issueType, created, edited, issueTypeId);
         if (agilePluginService != null) {
             pageFields = agilePluginService.handlerProgramPageField(projectId,issueTypeId,pageFields);
         }
         return pageFields;
     }
 
-    private void addNotSyncField(Long organizationId, Long projectId, List<PageFieldDTO> pageFields, String issueType,Boolean created, Boolean edited) {
+    private void addNotSyncField(Long organizationId, Long projectId, List<PageFieldDTO> pageFields, String issueType,Boolean created, Boolean edited, Long issueTypeId) {
         List<Long> existFields = pageFields.stream().filter(v -> Boolean.TRUE.equals(v.getSystem())).map(PageFieldDTO::getFieldId).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(existFields)) {
             return;
@@ -192,7 +192,7 @@ public class PageFieldServiceImpl implements PageFieldService {
             String fieldContext = objectSchemeFieldService.getFieldContext(objectSchemeFieldDTO.getCode());
             List<String> context = Arrays.asList(fieldContext.split(","));
             if (context.contains(issueType)) {
-                boolean checkFieldPageConfig = checkFieldPageConfig(issueType,objectSchemeFieldDTO.getCode(),created,edited);
+                boolean checkFieldPageConfig = checkFieldPageConfig(projectId, issueTypeId, objectSchemeFieldDTO.getId(), issueType, objectSchemeFieldDTO.getCode() ,created ,edited);
                 if (Boolean.FALSE.equals(checkFieldPageConfig)) {
                     continue;
                 }
@@ -209,8 +209,12 @@ public class PageFieldServiceImpl implements PageFieldService {
         }
     }
 
-    private boolean checkFieldPageConfig(String issueType, String code, Boolean created, Boolean edited) {
+    private boolean checkFieldPageConfig(Long projectId, Long issueTypeId, Long fieldId, String issueType, String code, Boolean created, Boolean edited) {
         Boolean checkConfig = false;
+        ObjectSchemeFieldExtendDTO extendDTO = objectSchemeFieldExtendMapper.selectOne(new ObjectSchemeFieldExtendDTO(projectId, issueTypeId, fieldId));
+        if (!Objects.isNull(extendDTO)) {
+            return Objects.equals(extendDTO.getCreated(), created) || Objects.equals(extendDTO.getEdited(), edited);
+        }
         SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(code);
         if (!ObjectUtils.isEmpty(commonField)) {
             return Objects.equals(commonField.created(), created) || Objects.equals(commonField.edited(), edited);
