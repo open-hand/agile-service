@@ -168,6 +168,9 @@
         FROM fd_field_value fv
         LEFT JOIN fd_field_option fo ON fo.id = fv.option_id
         LEFT JOIN fd_object_scheme_field f ON f.id = fv.field_id
+        LEFT JOIN agile_issue ai ON ai.issue_id = fv.instance_id
+        LEFT JOIN fd_object_scheme_field_extend fosfe ON ai.issue_type_id = fosfe.issue_type_id
+        AND fosfe.field_id = f.id
         WHERE 1 = 1
         <if test="projectIds != null and projectIds.size > 0">
             AND fv.project_id in
@@ -180,6 +183,7 @@
             <foreach collection="instanceIds" item="instanceId" open="(" separator="," close=")">
                 #{instanceId}
             </foreach>
+            AND fosfe.id IS NOT NULL
         </if>
         <if test="schemeCode != null">
             AND fv.scheme_code = #{schemeCode}

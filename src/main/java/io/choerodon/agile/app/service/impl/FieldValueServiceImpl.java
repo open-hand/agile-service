@@ -274,6 +274,11 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 issueUpdateVO.setStoryPoints(null);
             }
 
+            if (!"bug".equals(v.getTypeCode())) {
+                fieldList.remove(String.valueOf("environment"));
+                issueUpdateVO.setEnvironment(null);
+            }
+
             if ("story".equals(v.getTypeCode()) && agilePluginService != null) {
                 agilePluginService.setFeatureId(issueUpdateVO,programMap,fieldList);
             }
@@ -357,11 +362,11 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (CollectionUtils.isEmpty(customFields)) {
             throw new CommonException("error.customFields.null");
         }
-        // 判断这个字段哪些问题类型可以添加
+        // 根据issueTypeId判断这个字段哪些问题类型可以添加
         customFields.forEach(v -> {
             List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendDTOS = objectSchemeFieldExtendMapper.selectExtendFields(ConvertUtil.getOrganizationId(projectId), v.getFieldId(), projectId, null);
-            List<String> contexts = objectSchemeFieldExtendDTOS.stream().map(ObjectSchemeFieldExtendDTO::getIssueType).collect(Collectors.toList());
-            List<Long> needAddIssueIds = issueDTOS.stream().filter(issueDTO -> contexts.contains(issueDTO.getTypeCode())).map(IssueDTO::getIssueId).collect(Collectors.toList());
+            List<Long> issueTypeIds = objectSchemeFieldExtendDTOS.stream().map(ObjectSchemeFieldExtendDTO::getIssueTypeId).collect(Collectors.toList());
+            List<Long> needAddIssueIds = issueDTOS.stream().filter(issueDTO -> issueTypeIds.contains(issueDTO.getIssueTypeId())).map(IssueDTO::getIssueId).collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(needAddIssueIds)) {
                 batchHandlerCustomFields(projectId, v, schemeCode, needAddIssueIds);
             }
