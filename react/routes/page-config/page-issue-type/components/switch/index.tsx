@@ -39,7 +39,7 @@ function PageSwitch() {
     if (pageIssueTypeStore.currentIssueType.id) {
       pageIssueTypeStore.loadData();
     }
-  }, [pageIssueTypeStore.currentIssueType]);
+  }, [pageIssueTypeStore, pageIssueTypeStore.currentIssueType]);
   // 加载全部字段 用于增添已有字段
   useEffect(() => {
     pageIssueTypeStore.setLoading(true);
@@ -58,6 +58,7 @@ function PageSwitch() {
       })));
     });
   }, []);
+
   return (
     <Switch
       value={pageIssueTypeStore.currentIssueType.id}

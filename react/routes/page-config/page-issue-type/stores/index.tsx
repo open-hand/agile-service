@@ -3,12 +3,12 @@ import React, {
 } from 'react';
 import { injectIntl, InjectedIntl } from 'react-intl';
 import { getMenuType } from '@/utils/common';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import { observer } from 'mobx-react-lite';
 import SortTableDataSet from './SortTableDataSet';
 import AddUnselectedDataSet from './AddUnselectedDataSet';
 import PageIssueTypeStore from './PageIssueTypeStore';
+import { usePageConfigContext } from '../../stores';
 
 interface Context {
   sortTableDataSet: DataSet,
@@ -29,11 +29,11 @@ export function usePageIssueTypeStore() {
 const PageIssueTypeProvider = injectIntl(observer(
   (props: any) => {
     const sortTableDataSet = useMemo(() => new DataSet(SortTableDataSet()), []);
+    const { isInProgram } = usePageConfigContext();
     const addUnselectedDataSet = useMemo(() => new DataSet(AddUnselectedDataSet()), []);
     const pageIssueTypeStore = useMemo(() => new PageIssueTypeStore(
-      { sortTableDataSet, addUnselectedDataSet },
-    ), [sortTableDataSet, addUnselectedDataSet]);
-    const { isInProgram } = useIsInProgram();
+      { sortTableDataSet, addUnselectedDataSet, isInProgram },
+    ), [sortTableDataSet, addUnselectedDataSet, isInProgram]);
     const value = {
       ...props,
       sortTableDataSet,
@@ -41,7 +41,6 @@ const PageIssueTypeProvider = injectIntl(observer(
       pageIssueTypeStore,
       prefixCls: 'c7n-agile-page-config-page-issue-type',
       isProject: getMenuType() === 'project',
-      isInProgram,
     };
     return (
       <PageIssueTypeContext.Provider value={value}>
