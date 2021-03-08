@@ -210,7 +210,7 @@ public interface BaseFeignClient {
                                                           @RequestParam int page,
                                                           @RequestParam int size);
 
-    @PostMapping(value = "/choerodon/v1/projects/list_owner")
+    @PostMapping(value = "/choerodon/v1/inner/projects/list_owner")
     ResponseEntity<List<ProjectWithUserVO>> listProjectOwnerByIds(@RequestBody Set<Long> projectIds);
 }
 
