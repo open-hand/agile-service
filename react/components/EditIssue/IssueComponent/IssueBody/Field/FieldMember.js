@@ -31,8 +31,10 @@ import React, { Component } from 'react';
 
   renderEditor = () => {
     const { field } = this.props;
-    const { value, fieldType, required } = field;
-    return <SelectUser required={required} clearButton />;
+    const {
+      value, fieldType, required, valueStr,
+    } = field;
+    return <SelectUser required={required} clearButton selectedUser={valueStr} />;
   }
 
   render() {

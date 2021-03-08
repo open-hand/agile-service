@@ -64,9 +64,10 @@ const EditorMap = new Map([
 
   renderEditor = () => {
     const { field } = this.props;
-    const { value, fieldType, required } = field;
+    const {
+      value, fieldType, required, valueStr,
+    } = field;
     const Editor = EditorMap.get(fieldType);
-
     if (Editor) {
       switch (fieldType) {
         case 'single':
@@ -94,7 +95,10 @@ const EditorMap = new Map([
           return <Editor required={required} autoSize />;
         }
         case 'multiMember': {
-          return <Editor required={required} multiple />;
+          return <Editor required={required} multiple selectedUser={valueStr} />;
+        }
+        case 'member': {
+          return <Editor required={required} selectedUser={valueStr} />;
         }
         default: return <Editor required={required} />;
       }
