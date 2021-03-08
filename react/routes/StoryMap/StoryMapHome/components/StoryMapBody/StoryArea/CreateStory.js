@@ -3,11 +3,13 @@ import {
   Input, Menu, Dropdown, Icon,
 } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
+import { isEmpty } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
 import { issueApi, fieldApi } from '@/api';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { TypeTag } from '@/components';
+import { fields2Map } from '@/utils/defaultValue';
 import Card from '../Card';
 import './CreateStory.less';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
@@ -58,25 +60,64 @@ class CreateStory extends Component {
       } = this.props;
       const storyType = StoryMapStore.getIssueTypeByCode('story');
       const defaultPriority = StoryMapStore.getDefaultPriority;
-      const req = {
-        epicId: epic.issueId,
-        featureId: feature.issueId === 'none' ? 0 : feature.issueId,
-        projectId: getProjectId(),
-        summary: value,
-        typeCode: 'story',
+      const param = {
+        schemeCode: 'agile_issue',
         issueTypeId: currentTypeId,
+        pageCode: 'agile_issue_create',
+      };
+      const propsVersionIssueRelVOList = swimLine === 'version' && version.versionId !== 'none' ? [{
+        ...version,
+        relationType: 'fix',
+      }] : undefined;
+      const sprintId = swimLine === 'sprint' && sprint.sprintId !== 'none' ? sprint.sprintId : undefined;
+      const fields = await fieldApi.getFields(param);
+      const fieldsMap = fields2Map(fields);
+      const versionIssueRelVOList = propsVersionIssueRelVOList || [];
+      const defaultVersionList = [];
+      if (!isEmpty(fieldsMap.get('influenceVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'influence')) {
+        fieldsMap.get('influenceVersion')?.defaultValue.forEach((item) => defaultVersionList.push({
+          versionId: item,
+          relationType: 'influence',
+        }));
+      }
+      if (!isEmpty(fieldsMap.get('fixVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'fix')) {
+        fieldsMap.get('fixVersion')?.defaultValue.forEach((item) => defaultVersionList.push({
+          versionId: item,
+          relationType: 'fix',
+        }));
+      }
+      versionIssueRelVOList.push(...defaultVersionList);
+      const issue = {
         priorityCode: `priority-${defaultPriority.id}`,
         priorityId: defaultPriority.id,
-        ...swimLine === 'version' && version.versionId !== 'none' ? {
-          versionIssueRelVOList: [{
-            ...version,
-            relationType: 'fix',
-          }],
-        } : {},
-        ...swimLine === 'sprint' && sprint.sprintId !== 'none' ? {
-          sprintId: sprint.sprintId,
-        } : {},
+        projectId: getProjectId(),
+        programId: getProjectId(),
+        epicId: epic.issueId || 0,
+        summary: value.trim(),
+        issueTypeId: currentTypeId,
+        typeCode: 'story',
+        parentIssueId: 0,
+        relateIssueId: 0,
+        featureVO: {},
+        sprintId: sprintId || fieldsMap.get('sprint')?.defaultValue || 0,
+        epicName: currentTypeId === 'issue_epic' ? value.trim() : undefined,
+        componentIssueRelVOList: fieldsMap.get('component')?.defaultValueObjs || [],
+        description: '',
+        issueLinkCreateVOList: [],
+        labelIssueRelVOList: fieldsMap.get('label')?.defaultValueObjs || [],
+        versionIssueRelVOList,
+        fixVersionIssueRel: fieldsMap.get('fixVersion')?.defaultValue || [],
+        featureId: feature.issueId === 'none' ? 0 : feature.issueId,
+        assigneeId: fieldsMap.get('assignee')?.defaultValue,
+        reporterId: fieldsMap.get('reporter')?.defaultValue,
+        estimatedEndTime: fieldsMap.get('estimatedEndTime')?.defaultValue,
+        estimatedStartTime: fieldsMap.get('estimatedStartTime')?.defaultValue,
+        storyPoints: fieldsMap.get('storyPoints')?.defaultValue,
+        remainingTime: fieldsMap.get('remainingTime')?.defaultValue,
+        mainResponsibleId: fieldsMap.get('mainResponsible')?.defaultValue,
+        testResponsibleId: fieldsMap.get('testResponsible')?.defaultValue,
       };
+
       if (!await checkCanQuickCreate(storyType.id)) {
         Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
         this.canAdd = true;
@@ -86,7 +127,7 @@ class CreateStory extends Component {
         });
         return;
       }
-      issueApi.create(req).then((res) => {
+      issueApi.create(issue).then((res) => {
         const dto = {
           schemeCode: 'agile_issue',
           issueTypeId: res.issueTypeId,
@@ -96,8 +137,8 @@ class CreateStory extends Component {
           adding: false,
           value: '',
         });
-        const { versionIssueRelVOList } = res;
-        onCreate({ ...res, storyMapVersionDTOList: versionIssueRelVOList, storyMapSprintList: [{ sprintId: sprint && sprint.sprintId !== 'none' ? sprint.sprintId : 0 }] });
+        const { versionIssueRelVOList: storyMapVersionDTOList } = res;
+        onCreate({ ...res, storyMapVersionDTOList, storyMapSprintList: [{ sprintId: sprintId || fieldsMap.get('sprint')?.defaultValue || 0 }] });
         fieldApi.quickCreateDefault(res.issueId, dto);
       }).finally(() => {
         this.canAdd = true;
@@ -127,7 +168,7 @@ class CreateStory extends Component {
     StoryMapStore.setSideIssueListVisible(true);
   }
 
-  handleChangeType=({ key }) => {
+  handleChangeType = ({ key }) => {
     this.setState({
       currentTypeId: key,
     });
