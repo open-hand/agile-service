@@ -8,7 +8,7 @@ import {
 import { fieldApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import UserTag from '@/components/tag/user-tag';
-import { MAX_NUMBER_VALUE } from '@/constants/MAX_VALUE';
+import { MAX_NUMBER_VALUE, MAX_NUMBER_STEP } from '@/constants/MAX_VALUE';
 
 const EditorMap = new Map([
   ['text', TextArea],
@@ -98,7 +98,7 @@ const EditorMap = new Map([
           return <Editor required={required} multiple />;
         }
         case 'number': {
-          return <Editor required={required} max={MAX_NUMBER_VALUE} />;
+          return <Editor required={required} max={MAX_NUMBER_VALUE} step={MAX_NUMBER_STEP} />;
         }
         default: return <Editor required={required} />;
       }
