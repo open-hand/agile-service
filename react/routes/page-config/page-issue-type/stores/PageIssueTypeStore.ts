@@ -44,10 +44,13 @@ interface IPageIssueTypeStoreIssueType {
   [x: string]: any
 }
 class PageIssueTypeStore {
-  constructor(props: { addUnselectedDataSet: DataSet, sortTableDataSet: DataSet }) {
+  constructor(props: { addUnselectedDataSet: DataSet, sortTableDataSet: DataSet, isInProgram: boolean }) {
     this.addUnselectedDataSet = props.addUnselectedDataSet;
     this.sortTableDataSet = props.sortTableDataSet;
+    this.isInProgram = props.isInProgram;
   }
+
+  @observable isInProgram: boolean;
 
   @observable sortTableDataSet: DataSet;
 
@@ -231,6 +234,17 @@ class PageIssueTypeStore {
       this.sortTableDataSet.loadData(res.fields.map((field) => ({
         ...field,
         showDefaultValueText: transformDefaultValue({ ...field, defaultValue: !field.defaultValueObjs || (field.defaultValueObjs && field.defaultValueObjs.length > 0) ? field.defaultValue : undefined, fieldOptions: field.fieldOptions || field.defaultValueObjs || [field.defaultValueObj].filter((item) => item) }),
+        ...this.isInProgram && field.fieldCode === 'epic' ? {
+          created: false,
+          pageConfigFieldEdited: {
+            createdFieldCanNotEdit: true,
+            editedFieldCanNotEdit: true,
+            requiredFieldCanNotEdit: true,
+          },
+          defaultValue: null,
+          defaultValueObj: null,
+          showDefaultValueText: '',
+        } : {},
       })));
       if (res.issueTypeFieldVO) {
         this.setDescriptionObj({

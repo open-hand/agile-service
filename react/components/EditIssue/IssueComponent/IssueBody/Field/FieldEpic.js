@@ -168,7 +168,7 @@ import styles from './FieldEpic.less';
                 </div>
                 <div className="c7n-value-wrapper">
                   <TextEditToggle
-                    disabled={featureName || disabled}
+                    disabled={isShowFeature || disabled}
                     onSubmit={this.updateIssueEpic}
                     initValue={issueEpicName ? epicId || null : null}
                     editor={({ submit }) => <SelectEpic required={required} onChange={submit} />}
