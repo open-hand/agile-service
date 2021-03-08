@@ -180,13 +180,36 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private ObjectSchemeFieldDTO selectOneByFieldId(Long organizationId,
                                                     Long projectId,
                                                     Long fieldId) {
+        List<String> issueTypes = getLegalIssueTypes(projectId);
         List<ObjectSchemeFieldDTO> dtoList =
-                objectSchemeFieldMapper.selectByOptions(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE, fieldId, null, null);
+                objectSchemeFieldMapper.selectByOptions(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE, fieldId, null, issueTypes);
         if (dtoList.isEmpty()) {
             throw new CommonException(ERROR_FIELD_NOTFOUND);
         } else {
             return dtoList.get(0);
         }
+    }
+
+    private List<String> getLegalIssueTypes(Long projectId) {
+        List<String> issueTypes = null;
+        if (!ObjectUtils.isEmpty(projectId)) {
+            ProjectVO body = ConvertUtil.queryProject(projectId);
+            if (!ObjectUtils.isEmpty(body) && ProjectCategory.checkContainProjectCategory(body.getCategories(),ProjectCategory.MODULE_PROGRAM)) {
+                if(agilePluginService != null){
+                    issueTypes = agilePluginService.addProgramIssueType();
+                }
+            } else {
+                issueTypes = new ArrayList<>(ObjectSchemeFieldContext.NORMAL_PROJECT);
+            }
+            if (backlogExpandService != null) {
+                if (Boolean.TRUE.equals(backlogExpandService.enabled(projectId))) {
+                    issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
+                }
+            }
+        } else {
+            issueTypes = ObjectSchemeFieldContext.getIssueTye();
+        }
+        return issueTypes;
     }
 
     @Override
@@ -319,6 +342,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 for (Long id : projectIds) {
                     if (Boolean.TRUE.equals(backlogExpandService.enabled(id))) {
                         includeBacklogSystemField = true;
+                        break;
                     }
                 }
             }
