@@ -17,6 +17,7 @@ public class IssueOverviewVO extends AuditDomain {
     private BigDecimal storyPoints;
     private BigDecimal remainingTime;
     private Long statusId;
+    private Long issueTypeId;
 
     public BigDecimal getStoryPoints() {
         return storyPoints;
@@ -88,5 +89,13 @@ public class IssueOverviewVO extends AuditDomain {
 
     public void setStatusId(Long statusId) {
         this.statusId = statusId;
+    }
+
+    public Long getIssueTypeId() {
+        return issueTypeId;
+    }
+
+    public void setIssueTypeId(Long issueTypeId) {
+        this.issueTypeId = issueTypeId;
     }
 }

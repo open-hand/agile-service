@@ -14,9 +14,13 @@ public class IssueCountWithStatusIdsVO {
 
     private Integer count;
 
-    public IssueCountWithStatusIdsVO(Set<Long> statusIds, Integer count) {
+    @Encrypt
+    private Set<Long> issueTypeIds;
+
+    public IssueCountWithStatusIdsVO(Set<Long> statusIds, Integer count, Set<Long> issueTypeIds) {
         this.statusIds = statusIds;
         this.count = count;
+        this.issueTypeIds = issueTypeIds;
     }
 
     public Set<Long> getStatusIds() {
@@ -33,5 +37,13 @@ public class IssueCountWithStatusIdsVO {
 
     public void setCount(Integer count) {
         this.count = count;
+    }
+
+    public Set<Long> getIssueTypeIds() {
+        return issueTypeIds;
+    }
+
+    public void setIssueTypeIds(Set<Long> issueTypeIds) {
+        this.issueTypeIds = issueTypeIds;
     }
 }
