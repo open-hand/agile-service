@@ -13,7 +13,7 @@ import {
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { isInProgram } from '@/utils/program';
 
 const moment = extendMoment(Moment);
 function randomItem(array) {
@@ -903,8 +903,9 @@ class BacklogStore {
   };
 
   getPlanPi = async (sprintData = this.sprintData, setPiIdIf = true) => {
-    if (IsInProgramStore.isInProgram) {
-      const notDonePiList = await piApi.getPiByPiStatus(['todo', 'doing'], IsInProgramStore.program.id);
+    if (isInProgram()) {
+      const program = await commonApi.getProjectsInProgram();
+      const notDonePiList = await piApi.getPiByPiStatus(['todo', 'doing'], program?.id);
       // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
       const piIds = intersection(notDonePiList.map((pi) => pi.id), uniq(sprintData.filter((sprint) => sprint.planning).map((sprint) => sprint.piId)));
       if (piIds.length > 0) {
@@ -1113,8 +1114,9 @@ class BacklogStore {
 
   @observable sprints = []; // 用于时间判断
 
-  loadPiInfoAndSprint = async (programId = IsInProgramStore.artInfo.programId, artId = IsInProgramStore.artInfo.id) => {
-    const currentPiInfo = await piApi.getCurrent(programId, artId);
+  loadPiInfoAndSprint = async () => {
+    const artInfo = await commonApi.getIsShowFeature();
+    const currentPiInfo = await piApi.getCurrent(artInfo?.programId, artInfo?.id);
     if (currentPiInfo.id) {
       const sprints = await sprintApi.getAllByPiId(currentPiInfo.id);
       this.setPiInfo(currentPiInfo);
