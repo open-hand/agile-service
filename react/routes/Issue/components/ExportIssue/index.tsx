@@ -4,8 +4,8 @@ import { openExportIssueModal as originOpenExportIssueModal } from '@/components
 import IssueExportStore from '@/components/issue-export/stores/store';
 import { issueApi, TemplateAction } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { set } from 'lodash';
+import { isInProgram } from '@/utils/program';
 import {
   getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields, getReverseExportFieldCodes,
 } from './utils';
@@ -52,7 +52,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
         label: '描述',
         value: 'description',
       });
-      return !IsInProgramStore.isInProgram ? options.filter((item) => item.value !== 'feature') : options;
+      return !isInProgram() ? options.filter((item) => item.value !== 'feature') : options;
     },
   });
 

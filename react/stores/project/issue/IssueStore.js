@@ -5,7 +5,7 @@ import {
 import {
   debounce, isEmpty, isEqual, pick, includes,
 } from 'lodash';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { isInProgram } from '@/utils/program';
 
 export const isFilterSame = (obj, obj2) => {
   // 过滤掉 [] null '' 那些不起作用的属性
@@ -133,7 +133,7 @@ export function getSystemFields(excludeCodes = []) {
   }, {
     code: 'epic',
     name: '史诗',
-    defaultShow: !IsInProgramStore.isInProgram,
+    defaultShow: !isInProgram(),
     fieldType: 'multiple',
   }, {
     code: 'feature',
@@ -186,7 +186,7 @@ export function getSystemFields(excludeCodes = []) {
     fieldType: 'member',
   },
   ];
-  return IsInProgramStore.isInProgram ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
+  return isInProgram() ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }
 export function getSystemFieldsInStoryMap(excludeCodes = []) {
   const systemFields = [{
@@ -262,7 +262,7 @@ export function getSystemFieldsInStoryMap(excludeCodes = []) {
   }, {
     code: 'epic',
     name: '史诗',
-    defaultShow: !IsInProgramStore.isInProgram,
+    defaultShow: !isInProgram(),
     fieldType: 'multiple',
   }, {
     code: 'feature',
@@ -294,7 +294,7 @@ export function getSystemFieldsInStoryMap(excludeCodes = []) {
   },
 
   ];
-  return IsInProgramStore.isInProgram ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
+  return isInProgram() ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }
 class IssueStore {
   // 当前加载状态
