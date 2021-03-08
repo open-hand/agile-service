@@ -2,14 +2,13 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import moment from 'moment';
 import SelectUser from '@/components/select/select-user';
-import { toJS } from 'mobx';
 import {
   TextField, TextArea, Select, NumberField, DatePicker, DateTimePicker, TimePicker, SelectBox,
 } from 'choerodon-ui/pro';
 import { fieldApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import UserHead from '@/components/UserHead';
 import UserTag from '@/components/tag/user-tag';
+import { MAX_NUMBER_VALUE } from '@/constants/MAX_VALUE';
 
 const EditorMap = new Map([
   ['text', TextArea],
@@ -97,6 +96,9 @@ const EditorMap = new Map([
         }
         case 'multiMember': {
           return <Editor required={required} multiple />;
+        }
+        case 'number': {
+          return <Editor required={required} max={MAX_NUMBER_VALUE} />;
         }
         default: return <Editor required={required} />;
       }

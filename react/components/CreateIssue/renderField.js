@@ -6,6 +6,7 @@ import {
 } from 'choerodon-ui';
 import moment from 'moment';
 import SelectUser from '@/components/select/select-user-old';
+import { MAX_NUMBER_VALUE } from '@/constants/MAX_VALUE';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -150,7 +151,7 @@ export default function renderField(field) {
       <InputNumber
         label={fieldName}
         step={field.extraConfig ? 0.01 : 1}
-        maxLength={8}
+        max={MAX_NUMBER_VALUE}
       />
     );
   } if (field.fieldType === 'text') {

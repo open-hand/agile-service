@@ -8,6 +8,7 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 // import jsonBig from 'json-bigint';
 import { getOrganizationId } from '@/utils/common';
 import { pageConfigApiConfig } from '@/api';
+import { MAX_NUMBER_VALUE } from '@/constants/MAX_VALUE';
 import { Store } from './useStore';
 
 interface Props {
@@ -178,7 +179,7 @@ const FormDataSet = ({
           max: ({ record }: { record: Record }) => {
             const fieldType = record.get('fieldType');
             if (fieldType === 'number') {
-              return Number.MAX_SAFE_INTEGER;
+              return MAX_NUMBER_VALUE;
             }
             return null;
           },
