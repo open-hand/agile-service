@@ -19,6 +19,7 @@ import PublicRelease from '../ReleaseComponent/PublicRelease';
 import TableDropMenu from '../../../common/TableDropMenu';
 import DeleteReleaseWithIssues from '../ReleaseComponent/DeleteReleaseWithIssues';
 import { openLinkVersionModal } from '../ReleaseComponent/link-program-vesion';
+import { openReleaseDetail } from '../components/release-detail';
 
 const { AppState } = stores;
 const COLOR_MAP = {
@@ -115,11 +116,12 @@ class ReleaseHome extends Component {
     }
     if (key === '5') {
       versionApi.load(record.versionId).then((res) => {
-        ReleaseStore.setVersionDetail(res);
-        this.setState({
-          selectItem: record,
-          editRelease: true,
-        });
+        // ReleaseStore.setVersionDetail(res);
+        // this.setState({
+        //   selectItem: record,
+        //   editRelease: true,
+        // });
+        openReleaseDetail(record.versionId);
       }).catch(() => {
       });
     }

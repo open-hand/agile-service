@@ -1,0 +1,21 @@
+.c7n-agile-release-detail {
+    position: fixed;
+    right: 0;
+    top: 50px;
+    bottom: 0;
+    background: white;
+    z-index: 98;
+    overflow: hidden;
+    &-resize {
+        border-left: 1px solid rgba(216, 216, 216, 1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .c7n-agile-release-detail-table-progress {
+        width: max-content;
+        .c7n-progress-inner {
+            width: .6rem;
+        }
+    }
+  }
