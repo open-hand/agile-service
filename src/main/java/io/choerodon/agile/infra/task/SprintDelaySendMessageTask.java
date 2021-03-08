@@ -70,9 +70,9 @@ public class SprintDelaySendMessageTask {
             oneExecution = false,
             params = {},
             triggerType = TriggerTypeEnum.CRON_TRIGGER,
-            cronExpression = "0 0 1 * * ? "
+            cronExpression = "0 0 3 * * ? "
     )
-    public void run() {
+    public void run(Map<String, Object> map) {
         LOGGER.info("===> 开始执行冲刺延期发送消息定时任务");
         //获取所有配置过冲刺延期发送消息的项目
         List<ProjectMessageVO> projectMessageList =

@@ -27,7 +27,7 @@ public class TestTaskController {
     @ApiOperation(value = "测试冲刺延期定时任务")
     @GetMapping(value = "/sprint_delay")
     public ResponseEntity sprintDelay() {
-        sprintDelaySendMessageTask.run();
+        sprintDelaySendMessageTask.run(null);
         return new ResponseEntity(HttpStatus.OK);
     }
 }
