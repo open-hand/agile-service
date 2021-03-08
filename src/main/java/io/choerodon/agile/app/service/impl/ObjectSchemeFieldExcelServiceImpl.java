@@ -218,8 +218,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
 
     private void validateDateDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Row row, Cell cell, Map<Integer, List<Integer>> errorRowColMap) {
         SimpleDateFormat sdf = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
-        String defaultValue = objectSchemeFieldCreate.getDefaultValue();
-        if (CellType.STRING.equals(cell.getCellTypeEnum()) && "当前时间".equals(defaultValue)) {
+        if (CellType.STRING.equals(cell.getCellTypeEnum()) && "当前时间".equals(cell.toString())) {
             objectSchemeFieldCreate.setExtraConfig(true);
             objectSchemeFieldCreate.setDefaultValue(sdf.format(new Date()));
             return;
@@ -281,7 +280,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             }
         });
         if (!StringUtils.isEmpty(errMsg.toString())) {
-            errMsg.append("不在值有效范围内");
+            errMsg.append("不在显示值有效范围内");
             row.getCell(4).setCellValue(buildWithErrorMsg(defaultValue, errMsg.toString()));
             addErrorColumn(row.getRowNum(), 4, errorRowColMap);
         }
@@ -401,7 +400,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             fieldOptionUpdateVO.setValue(value);
         }
         if (isCellEmpty(enabledCell)) {
-            fieldOptionUpdateVO.setEnabled(false);
+            fieldOptionUpdateVO.setEnabled(true);
         } else {
             enabledCell.setCellType(CellType.STRING);
             String enabled = enabledCell.toString();
