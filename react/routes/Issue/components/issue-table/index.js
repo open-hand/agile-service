@@ -11,7 +11,7 @@ import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import IssueStore from '@/stores/project/issue/IssueStore';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import UserTag from '@/components/tag/user-tag';
 import CollapseAll from './CollapseAll';
 import Store from '../../stores';
@@ -22,7 +22,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
   const {
     dataSet, fields,
   } = useContext(Store);
-  const { isInProgram } = IsInProgramStore;
+  const { isInProgram } = useIsInProgram();
   const handleRowClick = (record) => {
     // dataSet.select(record);
     const editFilterInfo = IssueStore.getEditFilterInfo;

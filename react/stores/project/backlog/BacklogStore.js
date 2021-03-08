@@ -5,19 +5,17 @@ import {
 import {
   sortBy, find, uniq, intersection,
 } from 'lodash';
-import { store, stores } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
 import Moment from 'moment';
 import {
-  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi,
+  featureApi, sprintApi, piApi, storyMapApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi,
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
 const moment = extendMoment(Moment);
-const { AppState } = stores;
 function randomItem(array) {
   const index = Math.floor(Math.random() * (array.length - 1));
   return array[index];
@@ -97,8 +95,6 @@ class BacklogStore {
   @observable quickFilters = [];
 
   @observable projectInfo = {};
-
-  @observable quickSearchList = [];
 
   @observable selectIssues = [];
 
@@ -342,14 +338,6 @@ class BacklogStore {
     this.spinIf = false;
   }
 
-  @computed get getQuickSearchList() {
-    return toJS(this.quickSearchList);
-  }
-
-  @action setQuickSearchList(data) {
-    this.quickSearchList = data;
-  }
-
   @observable assigneeFilterIds = [];
 
   @computed get getAssigneeFilterIds() {
@@ -399,11 +387,9 @@ class BacklogStore {
     return this.spinIf;
   }
 
-  @action initBacklogData(quickSearchData, issueTypesData, priorityArrData, { backlogData, sprintData }) {
+  @action initBacklogData(issueTypesData, priorityArrData, { backlogData, sprintData }) {
     this.issueCantDrag = false;
     this.onBlurClick();
-    // this.multiSelected = observable.map();
-    this.quickSearchList = quickSearchData;
     if (issueTypesData && !issueTypesData.failed) {
       this.issueTypes = issueTypesData;
     }
@@ -907,14 +893,13 @@ class BacklogStore {
    * 加载选择快速搜索的冲刺数据
    */
   getSprint = async (setPiIdIf) => {
-    const [quickSearch, issueTypes, priorityArr, backlogData] = await Promise.all([
-      quickFilterApi.loadAll(),
+    const [issueTypes, priorityArr, backlogData] = await Promise.all([
       issueTypeApi.loadAllWithStateMachineId(),
       priorityApi.getDefaultByProject(),
       this.axiosGetSprint(),
     ]);
     await this.getPlanPi(backlogData.sprintData, setPiIdIf);
-    this.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
+    this.initBacklogData(issueTypes, priorityArr, backlogData);
   };
 
   getPlanPi = async (sprintData = this.sprintData, setPiIdIf = true) => {

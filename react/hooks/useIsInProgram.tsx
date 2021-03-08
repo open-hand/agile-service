@@ -3,7 +3,6 @@ import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { commonApi } from '@/api';
 import { stores } from '@choerodon/boot';
 import { AppStateProps } from '@/common/types';
-import useCategoryCodes from './useCategoryCodes';
 import useIsProgram from './useIsProgram';
 
 const { AppState }: { AppState: AppStateProps } = stores;
