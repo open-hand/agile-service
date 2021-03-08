@@ -660,26 +660,19 @@ public class IssueAssembler extends AbstractAssembler {
         List<IssueOverviewVO> completedIssues = group.getOrDefault(Boolean.TRUE, Collections.emptyList());
         List<IssueOverviewVO> unCompletedIssues = group.getOrDefault(Boolean.FALSE, Collections.emptyList());
         List<IssueOverviewVO> todoIssues = unCompletedIssues.stream().filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode())).collect(Collectors.toList());
+        List<IssueOverviewVO> unAssignIssues = issueList.stream().filter(issue -> Objects.isNull(issue.getAssigneeId())).collect(Collectors.toList());
 
-        long unAssignCount =
-                completedIssues
-                        .stream()
-                        .filter(issue -> Objects.isNull(issue.getAssigneeId()))
-                        .count();
-        unAssignCount +=
-                unCompletedIssues
-                        .stream()
-                        .filter(issue -> Objects.isNull(issue.getAssigneeId()))
-                        .count();
-        sprintStatistics.setUnassignCount((int) unAssignCount);
-
-        Set<Long> completedIssueStatusIds = completedIssues.stream().map(IssueOverviewVO::getStatusId).collect(Collectors.toSet());
-        Set<Long> unCompletedIssueStatusIds = unCompletedIssues.stream().map(IssueOverviewVO::getStatusId).collect(Collectors.toSet());
-        Set<Long> todoIssueStatusIds = todoIssues.stream().map(IssueOverviewVO::getStatusId).collect(Collectors.toSet());
-        sprintStatistics.setCompletedCount(new IssueCountWithStatusIdsVO(completedIssueStatusIds, completedIssues.size()));
-        sprintStatistics.setUncompletedCount(new IssueCountWithStatusIdsVO(unCompletedIssueStatusIds, unCompletedIssues.size()));
-        sprintStatistics.setTodoCount(new IssueCountWithStatusIdsVO(todoIssueStatusIds, todoIssues.size()));
+        sprintStatistics.setCompletedCount(getIssueCountWithStatusIdsVO(completedIssues));
+        sprintStatistics.setUncompletedCount(getIssueCountWithStatusIdsVO(unCompletedIssues));
+        sprintStatistics.setTodoCount(getIssueCountWithStatusIdsVO(todoIssues));
+        sprintStatistics.setUnassignCount(getIssueCountWithStatusIdsVO(unAssignIssues));
         return sprintStatistics;
+    }
+
+    private IssueCountWithStatusIdsVO getIssueCountWithStatusIdsVO(List<IssueOverviewVO> issues) {
+        Set<Long> statusIds = issues.stream().map(IssueOverviewVO::getStatusId).collect(Collectors.toSet());
+        Set<Long> issueTypeIds = issues.stream().map(IssueOverviewVO::getIssueTypeId).collect(Collectors.toSet());
+        return new IssueCountWithStatusIdsVO(statusIds, issues.size(), issueTypeIds);
     }
 
     public List<Map.Entry<String, Integer>> convertBugEntry(List<ReportIssueConvertDTO> reportIssueConvertDTOList, DateFormat df, Function<ReportIssueConvertDTO, Boolean> func){
