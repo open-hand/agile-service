@@ -9,9 +9,8 @@
   ],
   "dependencies": {
     "@babel/helper-regex": "^7.10.5",
+    "@choerodon/components": "^0.0.1",
     "@choerodon/react-component-debounce": "^0.0.4",
-    "@choerodon/ckeditor": "^0.0.1",
-    "@ckeditor/ckeditor5-react": "^3.0.0",
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
     "ahooks": "^2.7.1",
