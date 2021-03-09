@@ -53,8 +53,8 @@ public class IssueDelaySendMessageTask {
 
     private static final String BACKSLASH_TR = "</tr>";
     private static final String BACKSLASH_TH = "</th>";
-    private static final String TH = "</th>";
-    private static final String TR = "</tr>";
+    private static final String TH = "<th>";
+    private static final String TR = "<tr>";
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -208,7 +208,7 @@ public class IssueDelaySendMessageTask {
             String priorityName = Optional.ofNullable(priorityNameMap.get(dto.getPriorityId())).orElse("");
             String statusName = Optional.ofNullable(statusNameMap.get(dto.getStatusId())).orElse("");
             String startDate = Optional.ofNullable(dto.getEstimatedStartTime()).map(x -> sdf.format(x)).orElse("");
-            String endDate = Optional.ofNullable(dto.getEndDate()).map(x -> sdf.format(x)).orElse("");
+            String endDate = Optional.ofNullable(dto.getEstimatedEndTime()).map(x -> sdf.format(x)).orElse("");
             String assignee = "";
             if (dto.getAssigneeId() != null) {
                 UserDTO user = userMap.get(dto.getAssigneeId());
@@ -287,7 +287,7 @@ public class IssueDelaySendMessageTask {
             issueList.forEach(x -> {
                 Date estimatedEndTime = x.getEstimatedEndTime();
                 LocalDate estimatedEndDate = estimatedEndTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                int delayDay = Period.between(localDate, estimatedEndDate).getDays();
+                int delayDay = Period.between(estimatedEndDate, localDate).getDays();
                 Long assigneeId = x.getAssigneeId();
                 if (assigneeId != null && !Objects.equals(0L, assigneeId)) {
                     userIds.add(assigneeId);
