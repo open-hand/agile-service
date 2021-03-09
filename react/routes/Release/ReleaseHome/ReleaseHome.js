@@ -10,6 +10,7 @@ import {
 } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
 import { versionApi } from '@/api';
+import DetailContainer from '@/components/detail-container';
 import DragSortingTable from '../ReleaseComponent/DragSortingTable';
 import AddRelease from '../ReleaseComponent/AddRelease';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
@@ -19,7 +20,6 @@ import PublicRelease from '../ReleaseComponent/PublicRelease';
 import TableDropMenu from '../../../common/TableDropMenu';
 import DeleteReleaseWithIssues from '../ReleaseComponent/DeleteReleaseWithIssues';
 import { openLinkVersionModal } from '../ReleaseComponent/link-program-vesion';
-import { openReleaseDetail } from '../components/release-detail';
 
 const { AppState } = stores;
 const COLOR_MAP = {
@@ -115,14 +115,22 @@ class ReleaseHome extends Component {
       });
     }
     if (key === '5') {
-      versionApi.load(record.versionId).then((res) => {
-        // ReleaseStore.setVersionDetail(res);
-        // this.setState({
-        //   selectItem: record,
-        //   editRelease: true,
-        // });
-        openReleaseDetail(record.versionId);
-      }).catch(() => {
+      const { detailProps, detailProps: { open } } = this.props;
+      // versionApi.load(record.versionId).then((res) => {
+      //   // ReleaseStore.setVersionDetail(res);
+      //   // this.setState({
+      //   //   selectItem: record,
+      //   //   editRelease: true,
+      //   // });
+      //   openReleaseDetail(record.versionId);
+      // }).catch(() => {
+      // });
+      console.log('detailProps', detailProps, this.props);
+      open({
+        path: 'version',
+        props: {
+          id: record.versionId,
+        },
       });
     }
     if (key === '3') {
@@ -282,7 +290,7 @@ class ReleaseHome extends Component {
       publicVersion,
       release,
     } = this.state;
-    const { isInProgram } = this.props;
+    const { isInProgram, detailProps } = this.props;
     const deleteReleaseVisible = ReleaseStore.getDeleteReleaseVisible;
     const versionData = ReleaseStore.getVersionList.length > 0 ? ReleaseStore.getVersionList : [];
     const versionColumn = [{
@@ -458,6 +466,7 @@ class ReleaseHome extends Component {
             />
           ) : null}
         </Content>
+        <DetailContainer {...detailProps} />
       </Page>
     );
   }
