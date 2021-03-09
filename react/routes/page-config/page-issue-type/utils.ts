@@ -28,7 +28,7 @@ function transformDefaultValue({
     case 'datetime':
       return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
     case 'time':
-      return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
+      return extraConfig ? '当前时间' : moment(defaultValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).format('HH:mm:ss');
     case 'date':
       return extraConfig ? '当前时间' : moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
     case 'multiple':

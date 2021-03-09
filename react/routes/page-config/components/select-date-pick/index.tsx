@@ -53,7 +53,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
 }, ref) => {
   const innerRef = useRef<Select>();
   const [value, setValue] = useState<Moment | undefined>(() => {
-    const momentValue = moment(propsValue || defaultValue, 'YYYY-MM-DD HH:mm:ss');
+    const momentValue = moment(propsValue || defaultValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']);
     return momentValue.isValid() ? momentValue : moment();
   });
   const [mode, setMode] = useState(() => {
@@ -70,7 +70,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
     }]);
   const [optionValue, setOptionValue] = useState<string | undefined>(() => {
     if (propsValue || defaultValue) {
-      return moment(propsValue || defaultValue, 'YYYY-MM-DD HH:mm:ss').isValid() ? 'custom' : propsValue || defaultValue;
+      return moment(propsValue || defaultValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).isValid() ? 'custom' : propsValue || defaultValue;
     }
     return undefined;
   });
