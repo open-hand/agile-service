@@ -854,8 +854,17 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             deleteList.forEach(d -> objectSchemeFieldExtendMapper.deleteByPrimaryKey(d));
             insertSet.forEach(i -> insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, false, issueTypeMap, i, true, true, defaultValue, extraConfig));
         } else {
+            List<Long> projectIdList =
+                    baseFeignClient.listProjectsByOrgId(organizationId)
+                            .getBody()
+                            .stream()
+                            .map(ProjectVO::getId)
+                            .collect(Collectors.toList());
             //组织层新增或删除，项目层数据同时新增或删除
             deleteList.forEach(d -> {
+                Long issueTypeId = d.getIssueTypeId();
+                String schemeCode = getSchemeCodeByIssueTypeId(issueTypeId);
+                isFieldDeleted(projectIdList, fieldId, schemeCode);
                 String issueType = d.getIssueType();
                 ObjectSchemeFieldExtendDTO target = new ObjectSchemeFieldExtendDTO();
                 target.setIssueType(issueType);
@@ -1391,9 +1400,12 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 if (objectSchemeFieldExtendMapper.select(example).size() <= 1) {
                     //删除最后一个关联关系时，同时删除字段
                     objectSchemeFieldMapper.deleteByPrimaryKey(fieldId);
+                    //删除字段值
+                    fieldValueService.deleteByFieldId(fieldId);
+                    //删除日志
+                    fieldDataLogService.deleteByFieldId(projectId, fieldId);
                 }
                 objectSchemeFieldExtendMapper.deleteByPrimaryKey(d);
-                deleteFieldValueAndDataLog(Arrays.asList(projectId), extend.getIssueTypeId(), fieldId, true);
             });
         } else {
             //获取组织下所有项目
@@ -1468,6 +1480,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private void isFieldDeleted(List<Long> projectIds,
                                 Long fieldId,
                                 String schemeCode) {
+        if (ObjectUtils.isEmpty(projectIds)) {
+            return;
+        }
         List<FieldValueDTO> fieldValues =
                 fieldValueMapper.queryListByInstanceIds(projectIds, null, schemeCode, fieldId);
         if (!fieldValues.isEmpty()) {
