@@ -45,7 +45,7 @@ function getLookupConfig(code: string, filterArr?: string[], type?: string, id?:
         return response;
       }
     },
-  };
+  } as const;
 }
 const dateList = ['time', 'datetime', 'date'];
 
