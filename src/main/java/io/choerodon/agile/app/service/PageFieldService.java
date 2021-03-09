@@ -123,5 +123,5 @@ public interface PageFieldService {
      * @param instanceIds
      * @return
      */
-    Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds, Boolean isJustStr);
+    Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds, Boolean isJustStr, String schemeCode);
 }
