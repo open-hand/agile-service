@@ -181,14 +181,14 @@ const FormDataSet = ({
             if (fieldType === 'number') {
               return MAX_NUMBER_VALUE;
             }
-            return null;
+            return undefined;
           },
           step: ({ record }: { record: Record }) => {
             const fieldType = record.get('fieldType');
             if (fieldType === 'number') {
               return MAX_NUMBER_STEP;
             }
-            return null;
+            return undefined;
           },
         },
       },

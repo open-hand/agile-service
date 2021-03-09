@@ -48,13 +48,6 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             statusList={[]}
             isProgram={code === 'sprintList'}
             multiple
-            afterLoad={code === 'sprintList' ? () => { } : (sprints: any) => {
-              if (!dataSet.current?.getState(`init_${code}`) && !defaultValue && Array.isArray(sprints) && sprints.length > 0) {
-                const data = find<any>(sprints, { statusCode: 'started' }) ?? sprints[0];
-                dataSet.current?.set(field.code, [data.sprintId]);
-                dataSet.current?.setState(`init_${code}`, true);
-              }
-            }}
             hasUnassign
             selectSprints={value}
             {...otherComponentProps}
