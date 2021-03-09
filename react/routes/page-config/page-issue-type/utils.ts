@@ -37,8 +37,8 @@ function transformDefaultValue({
     case 'radio': {
       const valueArr = String(defaultValue).split(',');
       const selectOptions = (fieldOptions as Array<IFieldOptionProps> | undefined)?.
-      filter((option) => valueArr.some((v) => v === option[optionKey as keyof typeof option])).
-      map((item) => item[textKey as keyof typeof item]) || [];
+        filter((option) => valueArr.some((v) => v === option[optionKey as keyof typeof option])).
+        map((item) => item[textKey as keyof typeof item]) || [];
       return selectOptions.length > 0 ? selectOptions.join(',') : '';
     }
     case 'member': {
@@ -55,7 +55,7 @@ function transformDefaultValue({
 }
 function beforeSubmitTransform(item: Record, optionKey = 'id') {
   let fieldOptions = item.get('fieldOptions') as Array<any> | undefined;
-  const defaultValue = toJS(item.get('defaultValue'));
+  let defaultValue = toJS(item.get('defaultValue'));
   const fieldType = item.get('fieldType');
   if (fieldOptions && !defaultValue) {
     fieldOptions = fieldOptions.map((option) => ({ ...option, isDefault: false }));
@@ -67,6 +67,9 @@ function beforeSubmitTransform(item: Record, optionKey = 'id') {
       }
       return ({ ...option, isDefault: false });
     });
+  }
+  if (['datetime', 'time', 'date'].includes(fieldType)) {
+    defaultValue = moment(defaultValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).isValid() ? moment(defaultValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).format('YYYY-MM-DD HH:mm:ss') : defaultValue;
   }
   return {
     defaultValue: typeof (defaultValue) === 'undefined' || defaultValue === null ? '' : String(defaultValue),
