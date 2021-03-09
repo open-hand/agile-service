@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.infra.task.IssueDelaySendMessageTask;
 import io.choerodon.agile.infra.task.SprintDelaySendMessageTask;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -21,6 +22,8 @@ public class TestTaskController {
 
     @Autowired
     private SprintDelaySendMessageTask sprintDelaySendMessageTask;
+    @Autowired
+    private IssueDelaySendMessageTask issueDelaySendMessageTask;
 
 
     @Permission(level = ResourceLevel.SITE)
@@ -28,6 +31,14 @@ public class TestTaskController {
     @GetMapping(value = "/sprint_delay")
     public ResponseEntity sprintDelay() {
         sprintDelaySendMessageTask.run(null);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation(value = "测试问题延期定时任务")
+    @GetMapping(value = "/issue_delay")
+    public ResponseEntity issueDelay() {
+        issueDelaySendMessageTask.run(null);
         return new ResponseEntity(HttpStatus.OK);
     }
 }
