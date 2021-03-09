@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.task;
 import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.api.vo.ProjectWithUserVO;
 import io.choerodon.agile.api.vo.SprintDelayCarrierVO;
+import io.choerodon.agile.app.service.DelayTaskService;
 import io.choerodon.agile.infra.dto.SprintDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
@@ -14,7 +15,6 @@ import io.choerodon.asgard.schedule.enums.TriggerTypeEnum;
 import io.choerodon.core.enums.MessageAdditionalType;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
-import org.hzero.boot.message.entity.Receiver;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -58,6 +58,8 @@ public class SprintDelaySendMessageTask {
     private MessageClient messageClient;
     @Autowired
     private BaseFeignClient baseFeignClient;
+    @Autowired
+    private DelayTaskService delayTaskService;
 
     @JobTask(
             maxRetryCount = 3,
@@ -74,17 +76,11 @@ public class SprintDelaySendMessageTask {
     )
     public void run(Map<String, Object> map) {
         LOGGER.info("===> 开始执行冲刺延期发送消息定时任务");
-        //获取所有配置过冲刺延期发送消息的项目
-        List<ProjectMessageVO> projectMessageList =
-                notifyFeignClient.listEnabledSettingByCode(SPRINT_DELAY, "agile").getBody();
-        if (ObjectUtils.isEmpty(projectMessageList)) {
+        Map<Long, ProjectMessageVO> projectMap = delayTaskService.listEnabledMsgProjects(SPRINT_DELAY);
+        if (ObjectUtils.isEmpty(projectMap)) {
             LOGGER.info("===> 没有配置发送消息的项目，冲刺延期发送消息定时任务完成");
             return;
         }
-        Map<Long, ProjectMessageVO> projectMap =
-                projectMessageList
-                        .stream()
-                        .collect(Collectors.toMap(ProjectMessageVO::getId, Function.identity()));
         Set<Long> projectIds = projectMap.keySet();
         List<SprintDelayCarrierVO> sprintDelayCarrierList = new ArrayList<>();
         if (!ObjectUtils.isEmpty(projectIds)) {
@@ -95,7 +91,7 @@ public class SprintDelaySendMessageTask {
                     LocalDate now = LocalDate.now();
                     LocalDate end = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                     if (now.isAfter(end)) {
-                        int delayDas = Period.between(end, now).getDays();
+                        int delayDay = Period.between(end, now).getDays();
                         Long projectId = x.getProjectId();
                         ProjectMessageVO projectMessageVO = projectMap.get(projectId);
                         String projectName = null;
@@ -104,7 +100,7 @@ public class SprintDelaySendMessageTask {
                             projectName = projectMessageVO.getName();
                             organizationId = projectMessageVO.getOrganizationId();
                         }
-                        SprintDelayCarrierVO sprintDelayCarrierVO = new SprintDelayCarrierVO(projectId, x, delayDas, projectName, organizationId);
+                        SprintDelayCarrierVO sprintDelayCarrierVO = new SprintDelayCarrierVO(projectId, x, delayDay, projectName, organizationId);
                         sprintDelayCarrierList.add(sprintDelayCarrierVO);
                     }
                 }
@@ -182,7 +178,7 @@ public class SprintDelaySendMessageTask {
             paramMap.put(END_DATE, sdf.format(sprint.getEndDate()));
             paramMap.put(URL, buildSprintDelayUrl(projectId, x.getProjectName(), x.getOrganizationId()));
             List<UserDTO> users = generateUser(x.getUserIds(), userMap, projectOwnerMap.get(projectId));
-            MessageSender messageSender = buildSender(0L, SPRINT_DELAY, paramMap, users);
+            MessageSender messageSender = delayTaskService.buildSender(0L, SPRINT_DELAY, paramMap, users);
             Map<String, Object> additionalInformationMap = new HashMap<>();
             additionalInformationMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(), projectId);
             messageSender.setAdditionalInformation(additionalInformationMap);
@@ -226,36 +222,5 @@ public class SprintDelaySendMessageTask {
                 }
             });
         }
-    }
-
-    public MessageSender buildSender(Long tenantId,
-                                     String messageCode,
-                                     Map<String, String> paramMap,
-                                     List<UserDTO> users) {
-        MessageSender messageSender = new MessageSender();
-        messageSender.setTenantId(tenantId);
-        messageSender.setMessageCode(messageCode);
-        List<Receiver> receivers = buildReceivers(users);
-        // 设置参数
-        messageSender.setArgs(paramMap);
-        // 设置接收者
-        messageSender.setReceiverAddressList(receivers);
-        return messageSender;
-    }
-
-    private List<Receiver> buildReceivers(List<UserDTO> users) {
-        List<Receiver> receivers = new ArrayList<>();
-        if (ObjectUtils.isEmpty(users)) {
-            return receivers;
-        }
-        users.forEach(x -> {
-            Receiver receiver = new Receiver();
-            receivers.add(receiver);
-            receiver.setUserId(x.getId());
-            receiver.setEmail(x.getEmail());
-            receiver.setPhone(x.getPhone());
-            receiver.setTargetUserTenantId(x.getOrganizationId());
-        });
-        return receivers;
     }
 }

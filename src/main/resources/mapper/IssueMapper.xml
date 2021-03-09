@@ -3604,4 +3604,39 @@
             #{issueId}
         </foreach>
     </update>
+
+
+    <select id="selectDelayIssues" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.summary,
+        concat_ws('-', api.project_code, ai.issue_num) as issue_num,
+        ai.priority_id,
+        ai.status_id,
+        ai.estimated_start_time,
+        ai.estimated_end_time,
+        ai.assignee_id,
+        ai.reporter_id,
+        ai.project_id
+        from agile_issue ai
+        left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
+        left join agile_project_info api on ai.project_id = api.project_id
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
+        and ai.issue_id in (
+            select aisr.issue_id
+            from agile_sprint sprint
+            join agile_issue_sprint_rel aisr on sprint.sprint_id = aisr.sprint_id
+            where sprint.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                #{projectId}
+            </foreach>
+            and sprint.status_code = 'started'
+        )
+        and ais.is_completed != 1
+        and ai.estimated_end_time is not null
+        and date(ai.estimated_end_time) &lt; date(#{date})
+    </select>
 </mapper>
