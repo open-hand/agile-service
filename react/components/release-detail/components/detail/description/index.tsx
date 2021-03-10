@@ -45,6 +45,7 @@ const Description: React.FC = () => {
         </Tooltip>
       ) : ''
     }
+      contentClassName={styles.description}
     >
       {edit ? (
         <div className={styles.edit}>
