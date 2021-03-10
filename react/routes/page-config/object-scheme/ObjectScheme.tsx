@@ -41,7 +41,6 @@ function ObjectScheme() {
     prefixCls, schemeTableDataSet, intl: { formatMessage },
     schemeCode,
   } = useObjectSchemeStore();
-
   function handleRefresh() {
     schemeTableDataSet.query();
   }
@@ -157,7 +156,6 @@ function ObjectScheme() {
     const system = record?.get('system');
     const projectId = record?.get('projectId');
     const disabledFields = getMenuType() === 'project' ? disabledEditDefaultFields : orgDisabledEditDefaultFields;
-
     // 系统字段 和项目层的组织字段 禁止编辑,禁止删除
     const disabledEditDel = system || (getMenuType() === 'project' && projectId === null);
     const menuItems = [

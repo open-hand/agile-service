@@ -110,6 +110,18 @@ const systemFields = new Map([
     name: '预计结束时间',
     fieldType: 'datetime',
   }],
+  ['mainResponsibleId', {
+    id: 'mainResponsibleId',
+    code: 'mainResponsibleId',
+    name: '主要负责人',
+    fieldType: 'member',
+  }],
+  ['environment', {
+    id: 'environment',
+    code: 'environment',
+    name: '环境',
+    fieldType: 'single',
+  }],
 ]);
 const { Option } = Select;
 

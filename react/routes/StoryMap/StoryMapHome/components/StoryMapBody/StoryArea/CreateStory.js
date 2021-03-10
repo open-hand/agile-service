@@ -1,9 +1,15 @@
 import React, { Component } from 'react';
-import { Input } from 'choerodon-ui';
+import {
+  Input, Menu, Dropdown, Icon,
+} from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
+import { isEmpty } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
 import { issueApi, fieldApi } from '@/api';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
+import { TypeTag } from '@/components';
+import { fields2Map } from '@/utils/defaultValue';
 import Card from '../Card';
 import './CreateStory.less';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
@@ -13,14 +19,29 @@ class CreateStory extends Component {
   // 防止重复创建
   canAdd = true;
 
-  state = {
-    adding: false,
-    value: '',
+  constructor(props) {
+    super(props);
+    this.state = {
+      adding: false,
+      value: '',
+      currentTypeId: props.issueTypes[0]?.id,
+
+    };
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (!prevState.currentTypeId && nextProps.issueTypes.length > 0) {
+      return {
+        currentTypeId: nextProps.issueTypes[0]?.id,
+      };
+    }
+    return null;
   }
 
   handleClickOutside = (e) => {
     const { adding } = this.state;
-    if (!adding) {
+
+    if (e?.path.some((i) => i.id === 'create-stroy-issue-type-menu') || !adding) {
       return;
     }
     this.handleCreateIssue();
@@ -31,7 +52,7 @@ class CreateStory extends Component {
       return;
     }
     this.canAdd = false;
-    const { value } = this.state;
+    const { value, currentTypeId } = this.state;
     if (value && value.trim()) {
       const { swimLine } = StoryMapStore;
       const {
@@ -39,25 +60,64 @@ class CreateStory extends Component {
       } = this.props;
       const storyType = StoryMapStore.getIssueTypeByCode('story');
       const defaultPriority = StoryMapStore.getDefaultPriority;
-      const req = {
-        epicId: epic.issueId,
-        featureId: feature.issueId === 'none' ? 0 : feature.issueId,
-        projectId: getProjectId(),
-        summary: value,
-        typeCode: 'story',
-        issueTypeId: storyType.id,
+      const param = {
+        schemeCode: 'agile_issue',
+        issueTypeId: currentTypeId,
+        pageCode: 'agile_issue_create',
+      };
+      const propsVersionIssueRelVOList = swimLine === 'version' && version.versionId !== 'none' ? [{
+        ...version,
+        relationType: 'fix',
+      }] : undefined;
+      const sprintId = swimLine === 'sprint' && sprint.sprintId !== 'none' ? sprint.sprintId : undefined;
+      const fields = await fieldApi.getFields(param);
+      const fieldsMap = fields2Map(fields);
+      const versionIssueRelVOList = propsVersionIssueRelVOList || [];
+      const defaultVersionList = [];
+      if (!isEmpty(fieldsMap.get('influenceVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'influence')) {
+        fieldsMap.get('influenceVersion')?.defaultValue.forEach((item) => defaultVersionList.push({
+          versionId: item,
+          relationType: 'influence',
+        }));
+      }
+      if (!isEmpty(fieldsMap.get('fixVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'fix')) {
+        fieldsMap.get('fixVersion')?.defaultValue.forEach((item) => defaultVersionList.push({
+          versionId: item,
+          relationType: 'fix',
+        }));
+      }
+      versionIssueRelVOList.push(...defaultVersionList);
+      const issue = {
         priorityCode: `priority-${defaultPriority.id}`,
         priorityId: defaultPriority.id,
-        ...swimLine === 'version' && version.versionId !== 'none' ? {
-          versionIssueRelVOList: [{
-            ...version,
-            relationType: 'fix',
-          }],
-        } : {},
-        ...swimLine === 'sprint' && sprint.sprintId !== 'none' ? {
-          sprintId: sprint.sprintId,
-        } : {},
+        projectId: getProjectId(),
+        programId: getProjectId(),
+        epicId: epic.issueId || 0,
+        summary: value.trim(),
+        issueTypeId: currentTypeId,
+        typeCode: 'story',
+        parentIssueId: 0,
+        relateIssueId: 0,
+        featureVO: {},
+        sprintId: sprintId || fieldsMap.get('sprint')?.defaultValue || 0,
+        epicName: currentTypeId === 'issue_epic' ? value.trim() : undefined,
+        componentIssueRelVOList: fieldsMap.get('component')?.defaultValueObjs || [],
+        description: '',
+        issueLinkCreateVOList: [],
+        labelIssueRelVOList: fieldsMap.get('label')?.defaultValueObjs || [],
+        versionIssueRelVOList,
+        fixVersionIssueRel: fieldsMap.get('fixVersion')?.defaultValue || [],
+        featureId: feature.issueId === 'none' ? 0 : feature.issueId,
+        assigneeId: fieldsMap.get('assignee')?.defaultValue,
+        reporterId: fieldsMap.get('reporter')?.defaultValue,
+        estimatedEndTime: fieldsMap.get('estimatedEndTime')?.defaultValue,
+        estimatedStartTime: fieldsMap.get('estimatedStartTime')?.defaultValue,
+        storyPoints: fieldsMap.get('storyPoints')?.defaultValue,
+        remainingTime: fieldsMap.get('remainingTime')?.defaultValue,
+        mainResponsibleId: fieldsMap.get('mainResponsible')?.defaultValue,
+        testResponsibleId: fieldsMap.get('testResponsible')?.defaultValue,
       };
+
       if (!await checkCanQuickCreate(storyType.id)) {
         Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
         this.canAdd = true;
@@ -67,7 +127,7 @@ class CreateStory extends Component {
         });
         return;
       }
-      issueApi.create(req).then((res) => {
+      issueApi.create(issue).then((res) => {
         const dto = {
           schemeCode: 'agile_issue',
           issueTypeId: res.issueTypeId,
@@ -77,8 +137,8 @@ class CreateStory extends Component {
           adding: false,
           value: '',
         });
-        const { versionIssueRelVOList } = res;
-        onCreate({ ...res, storyMapVersionDTOList: versionIssueRelVOList, storyMapSprintList: [{ sprintId: sprint && sprint.sprintId !== 'none' ? sprint.sprintId : 0 }] });
+        const { versionIssueRelVOList: storyMapVersionDTOList } = res;
+        onCreate({ ...res, storyMapVersionDTOList, storyMapSprintList: [{ sprintId: sprintId || fieldsMap.get('sprint')?.defaultValue || 0 }] });
         fieldApi.quickCreateDefault(res.issueId, dto);
       }).finally(() => {
         this.canAdd = true;
@@ -108,8 +168,41 @@ class CreateStory extends Component {
     StoryMapStore.setSideIssueListVisible(true);
   }
 
+  handleChangeType = ({ key }) => {
+    this.setState({
+      currentTypeId: key,
+    });
+  }
+
   render() {
-    const { adding, value } = this.state;
+    const { adding, value, currentTypeId } = this.state;
+    const { issueTypes } = this.props;
+    const currentType = issueTypes.find((t) => t.id === currentTypeId);
+
+    const typeList = (
+      <Menu
+        style={{
+          background: '#fff',
+          boxShadow: '0 5px 5px -3px rgba(0, 0, 0, 0.20), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12)',
+          borderRadius: '2px',
+        }}
+        id="create-stroy-issue-type-menu"
+        onClick={this.handleChangeType}
+      >
+        {
+          issueTypes.map((type) => (
+            <Menu.Item key={type.id}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <TypeTag
+                  data={type}
+                  showName
+                />
+              </div>
+            </Menu.Item>
+          ))
+        }
+      </Menu>
+    );
     return (
       <Card
         style={{
@@ -123,7 +216,30 @@ class CreateStory extends Component {
       >
         {
           adding
-            ? <Input autoFocus onPressEnter={this.handleCreateIssue} placeholder="在此创建新内容" value={value} onChange={this.handleChange} maxLength={44} />
+            ? (
+              <div style={{ display: 'inline-flex', position: 'relative' }}>
+                <Dropdown overlay={typeList} trigger={['click']}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    position: 'absolute',
+                    top: 4,
+                    zIndex: 3,
+                  }}
+                  >
+                    <TypeTag
+                      data={currentType}
+                      iconSize={20}
+                    />
+                    <Icon
+                      type="arrow_drop_down"
+                      style={{ fontSize: 16, marginLeft: -7 }}
+                    />
+                  </div>
+                </Dropdown>
+                <Input autoFocus onPressEnter={this.handleCreateIssue} placeholder="在此创建新内容" value={value} onChange={this.handleChange} maxLength={44} />
+              </div>
+            )
             : (
               <div className="c7nagile-StoryMap-CreateStory-btn">
                 <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleAddStoryClick}>新建问题</span>
@@ -142,5 +258,14 @@ class CreateStory extends Component {
 CreateStory.propTypes = {
 
 };
-
-export default clickOutSide(CreateStory);
+const ClickOutSideCreateStory = clickOutSide(CreateStory);
+const WrapCreateStory = (props) => {
+  const { data: issueTypes } = useProjectIssueTypes({ onlyEnabled: true });
+  return (
+    <ClickOutSideCreateStory
+      issueTypes={(issueTypes || []).filter(({ typeCode }) => typeCode === 'story')}
+      {...props}
+    />
+  );
+};
+export default WrapCreateStory;

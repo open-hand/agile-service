@@ -7,6 +7,7 @@ import moment from 'moment';
 import SelectUser from '@/components/select/select-user';
 import SelectFeature from '@/components/select/select-feature';
 import EndDateTimePicker from '@/components/date-time-picker';
+import SelectEnvironment from '@/components/select/select-environment';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
@@ -25,6 +26,14 @@ export default function renderField({ code, fieldType, fieldOptions }) {
           name={code}
           style={{ width: '100%' }}
           defaultPickerValue={moment().endOf('d')}
+        />
+      );
+    }
+    case 'environment': {
+      return (
+        <SelectEnvironment
+          name={code}
+          style={{ width: '100%' }}
         />
       );
     }

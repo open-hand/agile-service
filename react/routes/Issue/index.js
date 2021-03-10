@@ -84,6 +84,7 @@ const Issue = observer(() => {
       switch (key) {
         case 'statusId':
         case 'sprint':
+        case 'issueTypeId':
         case 'assigneeId': {
           issueSearchStore.handleFilterChange(key, value.split(','));
           break;
