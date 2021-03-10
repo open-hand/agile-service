@@ -21,6 +21,7 @@ import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -46,6 +47,7 @@ public class IssueDelaySendMessageTask {
     private static final String ISSUE_DELAY = "ISSUE_DELAY";
     private static final String PROJECT_NAME = "projectName";
     private static final String HTML_TABLE = "htmlTable";
+    private static final String OUT_HTML_TABLE = "outHtmlTable";
     private static final String PROJECT_OWNER = "projectOwner";
     private static final String ASSIGNEE = "assignee";
     private static final String REPORTER = "reporter";
@@ -70,6 +72,9 @@ public class IssueDelaySendMessageTask {
     private PriorityService priorityService;
     @Autowired
     private StatusService statusService;
+
+    @Value("${services.domain.url}")
+    private String domainUrl;
 
     @JobTask(
             maxRetryCount = 3,
@@ -164,7 +169,8 @@ public class IssueDelaySendMessageTask {
         String projectName = projectMessageVO.getName();
         result.put(PROJECT_NAME, projectName);
         result.put(DELAY_COUNT, list.size() + "");
-        result.put(HTML_TABLE, buildHtmlTable(list, projectMessageVO, priorityNameMap, statusNameMap, userMap));
+        result.put(HTML_TABLE, buildHtmlTable(list, projectMessageVO, priorityNameMap, statusNameMap, userMap, false));
+        result.put(OUT_HTML_TABLE, buildHtmlTable(list, projectMessageVO, priorityNameMap, statusNameMap, userMap, true));
         return result;
     }
 
@@ -172,11 +178,14 @@ public class IssueDelaySendMessageTask {
                                   ProjectMessageVO projectMessageVO,
                                   Map<Long, String> priorityNameMap,
                                   Map<Long, String> statusNameMap,
-                                  Map<Long, UserDTO> userMap) {
+                                  Map<Long, UserDTO> userMap, boolean isOut) {
         Long projectId = projectMessageVO.getId();
         Long organizationId = projectMessageVO.getOrganizationId();
         String projectName = projectMessageVO.getName();
         StringBuilder prefix = new StringBuilder();
+        if (isOut) {
+            prefix.append(domainUrl);
+        }
         prefix.append("/#/agile/work-list/issue?type=project&id=")
                 .append(projectId)
                 .append("&name=")
