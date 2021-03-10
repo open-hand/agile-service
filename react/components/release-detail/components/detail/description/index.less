@@ -1,28 +1,31 @@
 .description {
-    width: 100%;
+  width: 100%;
+
+  color: rgba(0, 0, 0, 0.65);
 }
+
 .edit {
-    .editor {
-      width: 100%;
+  .editor {
+    width: 100%;
 
-      :global {
-        textarea {
-          border: none;
-        }
+    :global {
+      textarea {
+        border: none;
       }
-
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) inset;
     }
 
-    .editor:focus-within {
-      box-shadow: 0 0 0 2px #3f51b5 inset;
-    }
-
-    .operation {
-      display: flex;
-      justify-content: flex-end;
-      border: 1px solid rgba(0, 0, 0, 0.2);
-      border-top: none;
-      padding: 0 8px;
-    }
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) inset;
   }
+
+  .editor:focus-within {
+    box-shadow: 0 0 0 2px #3f51b5 inset;
+  }
+
+  .operation {
+    display: flex;
+    justify-content: flex-end;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-top: none;
+    padding: 0 8px;
+  }
+}
