@@ -5,7 +5,6 @@ import { Permission } from '@choerodon/boot';
 import SelectPI from '@/components/select/select-pi';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { piApi } from '@/api';
-import { IsInProgramStore } from '@/exports';
 
 @observer
 class FieldPI extends Component {
@@ -47,7 +46,7 @@ class FieldPI extends Component {
           ]}
           >
             {(hasPermission) => (
-              <TextEditToggle // IsInProgramStore
+              <TextEditToggle
                 disabled={(disabled) || (!hasPermission && statusCode === 'doing')}
                 onSubmit={this.updateIssuePI}
                 initValue={id}

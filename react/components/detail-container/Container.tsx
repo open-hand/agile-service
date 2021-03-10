@@ -5,6 +5,7 @@ import { Icon } from 'choerodon-ui/pro';
 import EditIssue from '@/components/EditIssue';
 import './Container.less';
 import { useDetailContainerContext } from './context';
+import ReleaseDetail from '../release-detail';
 
 const prefixCls = 'c7nagile-detail-container';
 interface Route {
@@ -17,7 +18,11 @@ const paths: Route[] = [{
 }, {
   path: 'program_issue',
   component: EditIssue,
-}];
+}, {
+  path: 'version',
+  component: ReleaseDetail,
+},
+];
 export function registerPath(route: Route) {
   if (!paths.find((p) => p.path === route.path)) {
     paths.push(route);
@@ -66,14 +71,14 @@ const Container: React.FC = () => {
     >
       <div className={`${prefixCls}-divider`} />
       {routes.length > 1 && (
-      <div
-        role="none"
-        className={`${prefixCls}-back`}
-        onClick={pop}
-      >
-        <Icon type="navigate_before" />
-        返回上一层
-      </div>
+        <div
+          role="none"
+          className={`${prefixCls}-back`}
+          onClick={pop}
+        >
+          <Icon type="navigate_before" />
+          返回上一层
+        </div>
       )}
       {match ? render() : null}
     </div>

@@ -4,8 +4,12 @@ import {
 } from 'choerodon-ui/pro';
 import Measure from 'react-measure';
 import { observer, Observer, useComputed } from 'mobx-react-lite';
+import { DragDropContextProvider } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import update from 'immutability-helper';
+
 import STATUS from '@/constants/STATUS';
-import { IStatusCirculation } from '@/api';
+import { IStatusCirculation, statusTransformApi } from '@/api';
 import Table, { ColumnsType } from 'antd/lib/table';
 import 'antd/lib/table/style';
 import { useStateMachineContext } from '@/routes/StateMachine/context';
@@ -13,6 +17,7 @@ import CheckboxAll from '@/components/check-box';
 import { useStatusCirculationContext } from '../..';
 import Checkbox from './Checkbox';
 import DeleteStatus from './DeleteStatus';
+import DragableBodyRow from './DragableBodyRow';
 import styles from './index.less';
 
 const StatusCirculationTable: React.FC = () => {
@@ -142,6 +147,36 @@ const StatusCirculationTable: React.FC = () => {
 
     ),
   }], [handleDeleteClick, statusColumns]);
+
+  const components = {
+    body: {
+      row: DragableBodyRow,
+    },
+  };
+
+  const moveRow = useCallback((dragIndex, hoverIndex) => {
+    const dragRow = data[dragIndex];
+    update(data, {
+      $splice: [
+        [dragIndex, 1],
+        [hoverIndex, 0, dragRow],
+      ],
+    });
+    const down = dragIndex < hoverIndex;
+    if (hoverIndex !== dragIndex && data[dragIndex] && data[hoverIndex]) {
+      // @ts-ignore
+      statusTransformApi.sortStatus(data[dragIndex].stateMachineId, {
+        // @ts-ignore
+        outSetId: data[hoverIndex].nodeId,
+        before: !down,
+        // @ts-ignore
+        nodeId: data[dragIndex].nodeId,
+      }).then(() => {
+        store.getStatusList(selectedType);
+      });
+    }
+  }, [data, selectedType, store]);
+
   return (
     <Measure
       bounds
@@ -155,6 +190,7 @@ const StatusCirculationTable: React.FC = () => {
         <div ref={measureRef} className={styles.table}>
           <Spin spinning={loading}>
             <Table
+              key={selectedType}
               size="small"
               dataSource={data}
               scroll={{ x: 'max-content', y: height - 50 }}
@@ -163,6 +199,12 @@ const StatusCirculationTable: React.FC = () => {
               locale={{
                 emptyText: '暂无数据',
               }}
+              components={components}
+              // @ts-ignore
+              onRow={(record, index) => ({
+                index,
+                moveRow,
+              })}
             />
           </Spin>
         </div>
@@ -170,4 +212,11 @@ const StatusCirculationTable: React.FC = () => {
     </Measure>
   );
 };
-export default observer(StatusCirculationTable);
+
+const ObserverStatusCirculationTable = observer(StatusCirculationTable);
+
+export default ({ ...props }) => (
+  <DragDropContextProvider backend={HTML5Backend}>
+    <ObserverStatusCirculationTable {...props} />
+  </DragDropContextProvider>
+);

@@ -13,7 +13,6 @@ import { Prompt } from 'react-router-dom';
 import {
   pageConfigApi, UIssueTypeConfig,
 } from '@/api/PageConfig';
-import { uploadAndReplaceImg, text2Delta } from '@/utils/richText';
 import { validKeyReturnValue } from '@/common/commonValid';
 import {
   omit, set, pick, isEmpty,
@@ -125,19 +124,7 @@ function PageIssueType() {
         createdFields: CreatedFields,
         deleteIds: pageIssueTypeStore.getDeleteIds,
       };
-      if (issueTypeFieldVO.dirty) {
-        uploadAndReplaceImg(text2Delta(issueTypeFieldVO.template)).then((text) => {
-          if (data.issueTypeFieldVO) {
-            data.issueTypeFieldVO.template = text;
-          }
-          handleRequest(data);
-        }).catch(() => {
-          setBtnLoading(false);
-          pageIssueTypeStore.setLoading(false);
-        });
-      } else {
-        handleRequest(data);
-      }
+      handleRequest(data);
     }
     return true;
   };
@@ -252,11 +239,7 @@ function PageIssueType() {
                     <SortTable />
                   </IssueTypeWrap>,
                   <IssueTypeWrap title="描述信息格式">
-                    {
-                      !pageIssueTypeStore.getLoading ? (
-                        <PageDescription />
-                      ) : ''
-                    }
+                    <PageDescription />
                   </IssueTypeWrap>]
             }
         </div>

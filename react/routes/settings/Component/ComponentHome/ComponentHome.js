@@ -8,10 +8,10 @@ import {
 } from '@choerodon/boot';
 import './ComponentHome.less';
 import TableAction from '@/components/TableAction';
+import UserTag from '@/components/tag/user-tag';
 import CreateComponent from '../ComponentComponent/AddComponent';
 import EditComponent from '../ComponentComponent/EditComponent';
 import DeleteComponent from '../ComponentComponent/DeleteComponent';
-import UserHead from '../../../../components/UserHead';
 import Store from './stores';
 
 const { AppState } = stores;
@@ -138,14 +138,14 @@ function ComponentHome() {
         className="c7n-agile-table-cell"
         renderer={({ record }) => (
           record.get('managerId') ? (
-            <UserHead
+            <UserTag
               style={{ display: 'inline-flex' }}
-              user={{
+              data={{
                 id: record.get('managerId'),
                 loginName: record.get('managerLoginName'),
                 realName: record.get('managerRealName'),
-                name: record.get('managerName'),
-                avatar: record.get('imageUrl'),
+                tooltip: record.get('managerName'),
+                imageUrl: record.get('imageUrl'),
               }}
             />
           ) : null

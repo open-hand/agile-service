@@ -2,8 +2,7 @@
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.04);
-  padding: 0 5px;
-  padding-right: 18px;
+  padding: 0 18px 0 10px !important;
   margin-right: 3px;
   margin-bottom: 3px;
   height: fit-content;
@@ -53,6 +52,10 @@
     &-fileName.preview:hover {
       text-decoration: underline;
       color: #3F51B5;
+      & + .c7n-agile-singleFileUpload-icon {
+        text-decoration: underline;
+        color: #3F51B5;
+      }
     }
     .icon-close {
       font-size: 14px;

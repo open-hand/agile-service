@@ -590,4 +590,13 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<Long> selectIdsByIssueTypeIdsAndProjectIds(@Param("projectIds") List<Long> projectIds,
                                                     @Param("issueTypeId") Long issueTypeId);
+
+    /**
+     * 根据项目id和日期查询活跃冲刺中的延期的问题
+     *
+     * @param projectIds
+     * @param date
+     */
+    List<IssueDTO> selectDelayIssues(@Param("projectIds") Set<Long> projectIds,
+                                     @Param("date") Date date);
 }

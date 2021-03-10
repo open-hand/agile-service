@@ -4,10 +4,8 @@ import { observer } from 'mobx-react';
 import omit from 'lodash/omit';
 import autobind from 'choerodon-ui/pro/lib/_util/autobind';
 // @ts-ignore
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
+import WYSIWYGEditor from '@/components/CKEditor';
 import { FormField, FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
-// @ts-ignore
-import Delta from 'quill-delta';
 
 interface TestProps extends FormFieldProps {
   placeholder?: string
@@ -19,7 +17,7 @@ class Editor<T extends TestProps> extends FormField<T> {
   }
 
   @autobind
-  handleChange(value: Delta) {
+  handleChange(value: string) {
     this.setValue(value);
   }
 
@@ -37,7 +35,7 @@ class Editor<T extends TestProps> extends FormField<T> {
           <WYSIWYGEditor
             {...otherProps}
             placeholder={placeholder}
-            readOnly={!this.editable}
+            disabled={!this.editable}
             value={toJS(this.getValue())}
             style={{
               width: '100%',

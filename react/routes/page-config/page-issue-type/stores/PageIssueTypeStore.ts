@@ -19,7 +19,7 @@ export enum PageIssueTypeStoreStatusCode {
 
 interface IDescriptionTempleProps {
   id: string | undefined,
-  template: undefined | string | Array<any>,
+  template: undefined | string,
   originTemplate: undefined | string,
   objectVersionNumber: undefined | number,
   dirty: boolean,
@@ -173,12 +173,12 @@ class PageIssueTypeStore {
     this.descriptionObj = data;
   }
 
-  @action changeTemplate(data: Array<any>) {
-    const dataStr = JSON.stringify(data);
+  @action changeTemplate(data: string) {
+    const dataStr = data;
     if (dataStr === this.descriptionObj.originTemplate) {
       this.descriptionObj.dirty = false;
     } else {
-      this.descriptionObj.dirty = !this.descriptionObj.id ? dataStr !== JSON.stringify([{ insert: '\n' }]) : true;
+      this.descriptionObj.dirty = !this.descriptionObj.id ? dataStr !== '' : true;
     }
     this.descriptionObj.template = data;
   }

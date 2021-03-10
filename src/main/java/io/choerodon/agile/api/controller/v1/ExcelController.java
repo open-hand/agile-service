@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.app.service.ExcelService;
 
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ExcelUtil;
 import io.choerodon.core.iam.ResourceLevel;
@@ -44,7 +45,7 @@ public class ExcelController {
     private ExcelService excelService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("下载导入模版")
+    @ApiOperation("下载issue导入模版")
     @PostMapping(value = "/download")
     public void download(@ApiParam(value = "项目id", required = true)
                          @PathVariable(name = "project_id") Long projectId,
@@ -111,6 +112,31 @@ public class ExcelController {
                              HttpServletResponse response) {
         EncryptionUtils.decryptSearchVO(searchVO);
         excelService.asyncExportIssues(projectId, searchVO, request, response, organizationId, pageRequest.getSort(), (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("下载自定义字段导入模版")
+    @GetMapping(value = "/object_scheme_field/download")
+    public void downloadObjectSchemeField(@ApiParam(value = "项目id", required = true)
+                         @PathVariable(name = "project_id") Long projectId,
+                         @ApiParam(value = "组织id", required = true)
+                         @RequestParam Long organizationId,
+                         HttpServletResponse response) {
+        excelService.downloadObjectSchemeField(organizationId, projectId, response);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("导入自定义字段")
+    @PostMapping(value = "/object_scheme_field/import")
+    public ResponseEntity<Void> batchImportObjectSchemeField(@ApiParam(value = "项目id", required = true)
+                                            @PathVariable(name = "project_id") Long projectId,
+                                            @ApiParam(value = "导入文件", required = true)
+                                            @RequestParam("file") MultipartFile file) {
+        excelService.batchImportObjectSchemeField(
+                ConvertUtil.getOrganizationId(projectId), projectId,
+                ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file),
+                RequestContextHolder.getRequestAttributes());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

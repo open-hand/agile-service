@@ -5,19 +5,17 @@ import {
 import {
   sortBy, find, uniq, intersection,
 } from 'lodash';
-import { store, stores } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
 import Moment from 'moment';
 import {
-  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi,
+  featureApi, sprintApi, piApi, storyMapApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi,
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import { isInProgram } from '@/utils/program';
 
 const moment = extendMoment(Moment);
-const { AppState } = stores;
 function randomItem(array) {
   const index = Math.floor(Math.random() * (array.length - 1));
   return array[index];
@@ -97,8 +95,6 @@ class BacklogStore {
   @observable quickFilters = [];
 
   @observable projectInfo = {};
-
-  @observable quickSearchList = [];
 
   @observable selectIssues = [];
 
@@ -342,14 +338,6 @@ class BacklogStore {
     this.spinIf = false;
   }
 
-  @computed get getQuickSearchList() {
-    return toJS(this.quickSearchList);
-  }
-
-  @action setQuickSearchList(data) {
-    this.quickSearchList = data;
-  }
-
   @observable assigneeFilterIds = [];
 
   @computed get getAssigneeFilterIds() {
@@ -399,11 +387,9 @@ class BacklogStore {
     return this.spinIf;
   }
 
-  @action initBacklogData(quickSearchData, issueTypesData, priorityArrData, { backlogData, sprintData }) {
+  @action initBacklogData(issueTypesData, priorityArrData, { backlogData, sprintData }) {
     this.issueCantDrag = false;
     this.onBlurClick();
-    // this.multiSelected = observable.map();
-    this.quickSearchList = quickSearchData;
     if (issueTypesData && !issueTypesData.failed) {
       this.issueTypes = issueTypesData;
     }
@@ -907,19 +893,19 @@ class BacklogStore {
    * 加载选择快速搜索的冲刺数据
    */
   getSprint = async (setPiIdIf) => {
-    const [quickSearch, issueTypes, priorityArr, backlogData] = await Promise.all([
-      quickFilterApi.loadAll(),
+    const [issueTypes, priorityArr, backlogData] = await Promise.all([
       issueTypeApi.loadAllWithStateMachineId(),
       priorityApi.getDefaultByProject(),
       this.axiosGetSprint(),
     ]);
     await this.getPlanPi(backlogData.sprintData, setPiIdIf);
-    this.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
+    this.initBacklogData(issueTypes, priorityArr, backlogData);
   };
 
   getPlanPi = async (sprintData = this.sprintData, setPiIdIf = true) => {
-    if (IsInProgramStore.isInProgram) {
-      const notDonePiList = await piApi.getPiByPiStatus(['todo', 'doing'], IsInProgramStore.program.id);
+    if (isInProgram()) {
+      const program = await commonApi.getProjectsInProgram();
+      const notDonePiList = await piApi.getPiByPiStatus(['todo', 'doing'], program?.id);
       // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
       const piIds = intersection(notDonePiList.map((pi) => pi.id), uniq(sprintData.filter((sprint) => sprint.planning).map((sprint) => sprint.piId)));
       if (piIds.length > 0) {
@@ -1128,8 +1114,9 @@ class BacklogStore {
 
   @observable sprints = []; // 用于时间判断
 
-  loadPiInfoAndSprint = async (programId = IsInProgramStore.artInfo.programId, artId = IsInProgramStore.artInfo.id) => {
-    const currentPiInfo = await piApi.getCurrent(programId, artId);
+  loadPiInfoAndSprint = async () => {
+    const artInfo = await commonApi.getIsShowFeature();
+    const currentPiInfo = await piApi.getCurrent(artInfo?.programId, artInfo?.id);
     if (currentPiInfo.id) {
       const sprints = await sprintApi.getAllByPiId(currentPiInfo.id);
       this.setPiInfo(currentPiInfo);

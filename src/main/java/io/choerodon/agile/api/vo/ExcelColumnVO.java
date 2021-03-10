@@ -43,6 +43,8 @@ public class ExcelColumnVO {
 
     private Map<String, IssueTypeVO> issueTypeMap;
 
+    private Map<String, StatusVO> issueStatusMap;
+
     private PageFieldViewUpdateVO customFieldDetail;
 
     public boolean isDateType() {
@@ -107,5 +109,13 @@ public class ExcelColumnVO {
 
     public void setPredefinedValues(List<String> predefinedValues) {
         this.predefinedValues = predefinedValues;
+    }
+
+    public Map<String, StatusVO> getIssueStatusMap() {
+        return issueStatusMap;
+    }
+
+    public void setIssueStatusMap(Map<String, StatusVO> issueStatusMap) {
+        this.issueStatusMap = issueStatusMap;
     }
 }

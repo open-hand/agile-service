@@ -5,7 +5,7 @@ import {
   Spin, Stores, Tooltip, Form, Select,
 } from 'choerodon-ui/pro';
 import classnames from 'classnames';
-import UserHead from '@/components/UserHead';
+import UserTag from '@/components/tag/user-tag';
 import EmptyBlock from '../EmptyBlock';
 import Store from '../../stores';
 import firstSvg from '../../image/first.svg';
@@ -77,15 +77,15 @@ const QualityRankList = () => {
                             </div>
                             <div className="rank-img">
                               <div className="rank-img-container">
-                                <UserHead
+                                <UserTag
                                   size={34}
-                                  hiddenText
-                                  user={{
+                                  showText={false}
+                                  data={{
                                     id: userId,
-                                    name,
+                                    tooltip: name,
                                     loginName,
                                     realName,
-                                    avatar: imageUrl,
+                                    imageUrl,
                                   }}
                                 />
                                 {[0, 1, 2].includes(index) && <img className="rank-img-container-crown" src={rankImg[index]} />}

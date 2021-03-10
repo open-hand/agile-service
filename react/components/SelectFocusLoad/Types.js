@@ -12,10 +12,9 @@ import {
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
 
 import { Tooltip } from 'choerodon-ui/pro';
-import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
-import { IsInProgramStore } from '../../exports';
+import UserTag from '../tag/user-tag';
 // 增加 typeof 避免选项中 加载更多 影响
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
   input.toLowerCase(),
@@ -75,8 +74,8 @@ export default {
           display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
         }}
         >
-          <UserHead
-            user={user}
+          <UserTag
+            data={user}
           />
         </div>
       </Option>

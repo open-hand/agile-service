@@ -11,7 +11,7 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
   valueField?: string
   afterLoad?: (sprints: ILabel[]) => void
-  flat?:boolean
+  flat?: boolean
   projectId?: string
   extraOptions?: any[]
 }

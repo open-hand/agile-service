@@ -6,11 +6,10 @@ import {
   Select, DatePicker, Modal, Radio,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
-import { uploadAndReplaceImg } from '@/utils/richText';
 import { workLogApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectNumber from '@/components/select/select-number';
-import WYSIWYGEditor from '../WYSIWYGEditor';
+import WYSIWYGEditor from '../CKEditor';
 import './DailyLog.less';
 
 const DATA_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -88,7 +87,7 @@ class DailyLog extends Component {
       num = this.transformTime('reduce', 'reduceUnit');
     }
     try {
-      const text = await uploadAndReplaceImg(delta);
+      const text = delta;
       const extra = {
         issueId,
         projectId: AppState.currentMenuType.id,

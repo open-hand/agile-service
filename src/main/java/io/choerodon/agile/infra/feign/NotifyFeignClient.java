@@ -1,10 +1,13 @@
 package io.choerodon.agile.infra.feign;
 
+import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.infra.feign.fallback.NotifyFeignClientFallback;
 import io.choerodon.agile.infra.feign.vo.MessageSettingVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @FeignClient(value = "choerodon-message", fallback = NotifyFeignClientFallback.class)
 public interface NotifyFeignClient {
@@ -20,4 +23,8 @@ public interface NotifyFeignClient {
     @GetMapping("/choerodon/v1/upgrade")
     ResponseEntity<String> checkLog(@RequestParam(value = "version") String version,
                                     @RequestParam(value = "type") String type);
+
+    @PostMapping("/choerodon/v1/messages/setting/{code}/enabled")
+    ResponseEntity<List<ProjectMessageVO>> listEnabledSettingByCode(@PathVariable String code,
+                                                                    @RequestParam(value = "notify_type") String notifyType);
 }

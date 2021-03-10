@@ -4,10 +4,10 @@ import { stores, Permission } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
 import { issueApi } from '@/api';
 import Star from '@/components/tag/star';
+import UserTag from '@/components/tag/user-tag';
 import PriorityTag from '../../PriorityTag';
 import StatusTag from '../../StatusTag';
 import TypeTag from '../../TypeTag';
-import UserHead from '../../UserHead';
 
 const { AppState } = stores;
 
@@ -111,14 +111,14 @@ class IssueList extends Component {
           showAssignee ? (
             <div style={{ marginRight: 10, display: 'flex', justifyContent: 'flex-end' }}>
               <div>
-                <UserHead
-                  hiddenText
-                  user={{
+                <UserTag
+                  showText={false}
+                  data={{
                     id: issue.assigneeId,
                     name: issue.assigneeName,
                     loginName: issue.loginName,
                     realName: issue.realName,
-                    avatar: issue.imageUrl,
+                    imageUrl: issue.imageUrl,
                   }}
                 />
               </div>

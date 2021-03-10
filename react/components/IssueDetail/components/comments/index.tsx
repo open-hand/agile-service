@@ -13,7 +13,7 @@ const { AppState } = stores;
 const Comments: React.FC = () => {
   const { store, hasAdminPermission } = useDetailContext();
   const [expand, setExpand] = useState(false);
-  const handleCreateCommit = async (delta: Delta) => {
+  const handleCreateCommit = async (delta: string) => {
     store.createComment(delta);
   };
 

@@ -155,7 +155,7 @@ const NotifySetting = ({
             const members = memberOptionsDataSet.toData() || [];
             for (let i = 0; i < members.length; i += 1) {
               // @ts-ignore
-              if (record.get(members[i].code) && !record.get('webhook')) {
+              if (record.get(members[i].code)) {
                 return true;
               }
             }
@@ -165,7 +165,7 @@ const NotifySetting = ({
       },
       {
         name: 'webhook',
-        label: '启用webhook通知',
+        label: '启用Webhook通知',
         type: 'boolean' as FieldType,
       },
     ],
@@ -210,7 +210,7 @@ const NotifySetting = ({
           }
         }
 
-        if ((noticeTypeList.length || webhook) && !userTypeList.length) {
+        if (noticeTypeList.length && !userTypeList.length) {
           return false;
         }
         if (specifier && (!userIdList || userIdList.length === 0)) {
@@ -269,11 +269,11 @@ const NotifySetting = ({
       });
     }
   }
-  const memberIsRequired = data[0] && ((
+  const memberIsRequired = data[0] && (
   // @ts-ignore
     data[0].noticeTypeList && data[0].noticeTypeList.length > 0
     // @ts-ignore
-  ) || data[0].webhook);
+  );
   return (
     <div className={styles.notify_setting}>
       <Loading loading={loading} />

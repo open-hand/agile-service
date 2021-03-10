@@ -1,40 +1,38 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
 import { text2Delta } from '@/utils/richText';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import WYSIWYGEditor from '@/components/CKEditor';
+import WYSIWYGViewer from '@/components/CKEditorViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
-import UserHead from '@/components/UserHead';
-// @ts-ignore
-import Delta from 'quill-delta';
 import './Comment.less';
 import { IComment } from '@/common/types';
+import UserTag from '@/components/tag/user-tag';
 import { useDetailContext } from '../../context';
 
 interface Props {
   hasPermission: boolean
   comment: IComment
   onDelete: Function
-  onUpdate: (delta: Delta) => Promise<any>
+  onUpdate: (delta: string) => Promise<any>
 }
 const Comment: React.FC<Props> = ({
   hasPermission, comment, onDelete, onUpdate,
 }) => {
   const { outside } = useDetailContext();
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState<Delta>();
+  const [value, setValue] = useState<string>('');
   useEffect(() => {
     const delta = text2Delta(comment.commentText);
     setValue(delta);
   }, [comment.commentText]);
-  const handleUpdate = useCallback(async (delta: Delta) => {
+  const handleUpdate = useCallback(async (delta: string) => {
     await onUpdate(delta);
     setEditing(false);
   }, [onUpdate]);
 
   const canEditOrDelete = hasPermission;
 
-  const handleChange = useCallback((delta: Delta) => {
+  const handleChange = useCallback((delta: string) => {
     setValue(delta);
   }, []);
   return (
@@ -43,14 +41,13 @@ const Comment: React.FC<Props> = ({
     >
       <div className="line-justify">
         <div className="c7n-title-commit" style={{ flex: 1 }}>
-          <UserHead
-            // @ts-ignore
-            user={{
-              id: comment.userId,
-              name: comment.userName,
+          <UserTag
+            data={{
+              // id: comment.userId,
+              tooltip: comment.userName,
               realName: comment.userRealName,
               loginName: comment.userLoginName,
-              avatar: comment.userImageUrl,
+              imageUrl: comment.userImageUrl,
             }}
             color="#3f51b5"
           />
@@ -97,19 +94,19 @@ const Comment: React.FC<Props> = ({
           <div className="c7n-conent-commit" style={{ marginTop: 10 }}>
             <WYSIWYGEditor
               autoFocus
-              bottomBar
+              footer
               value={value}
               onChange={handleChange}
               style={{ height: 200, width: '100%' }}
-              handleDelete={() => {
+              onCancel={() => {
                 setEditing(false);
               }}
-              handleSave={handleUpdate}
+              onOk={handleUpdate}
             />
           </div>
         ) : (
           <div style={{ marginTop: 10 }}>
-            <WYSIWYGViewer data={comment.commentText} />
+            <WYSIWYGViewer value={comment.commentText} />
           </div>
         )
       }

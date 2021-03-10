@@ -188,6 +188,16 @@ public class SchemeController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "支持对状态机-状态与流转进行排序")
+    @PutMapping(value = "/status_transform/sort")
+    public ResponseEntity<NodeSortVO> updateSort(@PathVariable("project_id") Long projectId,
+                                                 @Encrypt Long statusMachineId,
+                                                 @RequestBody NodeSortVO nodeSortVO,
+                                                 @RequestParam String applyType) {
+        return new ResponseEntity<>(projectConfigService.updateSort(projectId, statusMachineId, nodeSortVO, applyType), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "设置状态机的默认状态")
     @PutMapping(value = "/status_transform/setting_default_status")
     public ResponseEntity settingDefaultStatus(@PathVariable("project_id") Long projectId,

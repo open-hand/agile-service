@@ -119,4 +119,15 @@ public interface BacklogExpandService {
      * @return 开启了需求池的项目id
      */
     Set<Long> listProjectIdsWhichEnableBacklog(Set<Long> projectIds);
+
+    /**
+     * 根据特性id集合，将特性关联的需求和版本进行关联
+     *
+     * @param issueIds
+     * @param programVersionId
+     */
+    void associateWithBacklogAndVersionByFeatureIds(Set<Long> issueIds,
+                                                    Long programVersionId,
+                                                    Long organizationId,
+                                                    Long programId);
 }

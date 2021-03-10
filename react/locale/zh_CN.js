@@ -56,6 +56,7 @@ const zh_CN = {
   'issue_link.msg': '将会从所有相关的任务中删除此链接，相关的问题可以选择关联到其他链接，或者不关联。',
 
   'field.create': '创建字段',
+  'field.import': '导入字段',
   'field.edit': '编辑自定义字段',
   'field.context': '问题类型',
   'field.code.rule': '编码只允许数字、字母及下划线',

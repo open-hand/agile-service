@@ -20,6 +20,9 @@ public class FileOperationHistoryVO {
     @ApiModelProperty(value = "项目id")
     private Long projectId;
 
+    @ApiModelProperty(value = "组织id")
+    private Long organizationId;
+
     @ApiModelProperty(value = "用户id")
     private Long userId;
 
@@ -133,5 +136,13 @@ public class FileOperationHistoryVO {
 
     public void setLastUpdateDate(Date lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

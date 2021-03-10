@@ -396,6 +396,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         // 获取状态加Id
         Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        // 处理rank值
+        stateMachineNodeService.handlerNullRankNode(organizationId, stateMachineId, applyType);
         // 查询当前状态机有哪些状态
         List<StatusAndTransformVO> statusVOS = statusService.queryStatusByStateMachineId(organizationId, stateMachineId);
         if (CollectionUtils.isEmpty(statusVOS)) {
@@ -405,20 +407,12 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         //状态机id->状态id->转换列表
         Map<Long, Map<Long, List<TransformVO>>> statusMap = transformService.queryStatusTransformsMap(organizationId, Arrays.asList(stateMachineId));
         Map<Long, List<TransformVO>> listMap = statusMap.get(stateMachineId);
-        int index = 0;
         for (StatusAndTransformVO item : statusVOS) {
-            if (Boolean.TRUE.equals(item.getDefaultStatus())) {
-                index = statusVOS.indexOf(item);
-            }
             List<TransformVO> transformVOS = listMap.get(item.getId());
             if (!CollectionUtils.isEmpty(transformVOS)) {
                 item.setCanTransformStatus(transformVOS.stream().map(TransformVO::getEndStatusId).collect(Collectors.toSet()));
             }
-
             item.setHasIssue(issueUseStatusId.contains(item.getId()));
-        }
-        if (index > 0) {
-            Collections.swap(statusVOS, 0, index);
         }
 
         return statusVOS;
@@ -448,6 +442,11 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         olderDefaultNode.setType(NodeType.CUSTOM);
         stateMachineNodeService.baseUpdate(olderDefaultNode);
         nodeDTO.setType(NodeType.INIT);
+        // 设置rank值
+        String minRank = statusMachineNodeMapper.queryMinRank(organizationId, stateMachineId);
+        if (!ObjectUtils.isEmpty(minRank)) {
+            nodeDTO.setRank(RankUtil.genPre(minRank));
+        }
         stateMachineNodeService.baseUpdate(nodeDTO);
         // 修改初始转换
         changeInitTransform(organizationId, stateMachineId, olderDefaultNode.getId(), nodeDTO.getId());
@@ -535,6 +534,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             issueStatusDTO.setEnable(false);
             issueStatusService.insertIssueStatus(issueStatusDTO);
         }
+        stateMachineNodeService.handlerNullRankNode(organizationId, statusId, applyType);
         Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
         StatusMachineNodeDTO stateMachineNode = new StatusMachineNodeDTO();
         stateMachineNode.setStatusId(statusId);
@@ -545,6 +545,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (CollectionUtils.isEmpty(select)) {
             List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, stateMachineId, false);
             stateMachineNode.setType(NodeType.CUSTOM);
+            String maxRank = statusMachineNodeMapper.queryMaxRank(organizationId, stateMachineId);
+            stateMachineNode.setRank(maxRank);
             stateMachineNodeService.baseCreate(stateMachineNode);
             if (Boolean.TRUE.equals(defaultStatus)) {
                 defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
@@ -649,6 +651,24 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
         issueTypeSearchVO.setIssueTypeIds(issueTypeIds);
         return issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
+    }
+
+    @Override
+    public NodeSortVO updateSort(Long projectId, Long statusMachineId, NodeSortVO nodeSortVO, String applyType) {
+        if (ObjectUtils.isEmpty(nodeSortVO.getNodeId())) {
+            throw new CommonException("error.sort.node.null");
+        }
+        if (ObjectUtils.isEmpty(nodeSortVO.getOutSetId())) {
+            throw new CommonException("error.outSetId.null");
+        }
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        // 对rank值为空的node进行处理
+        stateMachineNodeService.handlerNullRankNode(projectVO.getOrganizationId(), statusMachineId, applyType);
+        // 进行排序
+        stateMachineNodeService.sortNode(projectId, statusMachineId, nodeSortVO, applyType);
+        // 清除状态机实例
+        instanceCache.cleanStateMachine(statusMachineId);
+        return null;
     }
 
     private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {

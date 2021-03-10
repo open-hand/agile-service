@@ -8,7 +8,6 @@ import QuickCreateIssue from '@/components/QuickCreateIssue';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
-import UserHead from '@/components/UserHead';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { IField, IIssueColumnName } from '@/common/types';
 import { TableMode, ColumnAlign, ColumnLock } from 'choerodon-ui/pro/lib/table/enum';
@@ -194,13 +193,13 @@ const IssueTable: React.FC<Props> = ({
             <div style={{ display: 'inline-flex' }}>
               {
                 record.get('assigneeId') && record.get('assigneeId') !== '0' && (
-                  <UserHead
-                    user={{
+                  <UserTag
+                    data={{
                       id: record.get('assigneeId'),
-                      name: record.get('assigneeName'),
+                      tooltip: record.get('assigneeName'),
                       loginName: record.get('assigneeLoginName'),
                       realName: record.get('assigneeRealName'),
-                      avatar: record.get('assigneeImageUrl'),
+                      imageUrl: record.get('assigneeImageUrl'),
                     }}
                   />
                 )
@@ -215,8 +214,8 @@ const IssueTable: React.FC<Props> = ({
             <div style={{ display: 'inline-flex' }}>
               {
                 record.get('createUser') && (
-                  <UserHead
-                    user={record.get('createUser')}
+                  <UserTag
+                    data={record.get('createUser')}
                   />
                 )
               }
@@ -230,8 +229,8 @@ const IssueTable: React.FC<Props> = ({
             <div style={{ display: 'inline-flex' }}>
               {
                 record.get('updateUser') && (
-                  <UserHead
-                    user={record.get('updateUser')}
+                  <UserTag
+                    data={record.get('updateUser')}
                   />
                 )
               }
@@ -265,13 +264,13 @@ const IssueTable: React.FC<Props> = ({
           renderer={({ record }) => (
             <div style={{ display: 'inline-flex' }}>
               {record?.get('reporterId') && record?.get('reporterId') !== '0' && (
-                <UserHead
-                  user={{
+                <UserTag
+                  data={{
                     id: record?.get('reporterId'),
-                    name: record?.get('reporterName'),
+                    tooltip: record?.get('reporterName'),
                     loginName: record?.get('reporterLoginName'),
                     realName: record?.get('reporterRealName'),
-                    avatar: record?.get('reporterImageUrl'),
+                    imageUrl: record?.get('reporterImageUrl'),
                   }}
                 />
               )}

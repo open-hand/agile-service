@@ -4,20 +4,8 @@ import { withRouter } from 'react-router-dom';
 import { Progress } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
-import TextEditToggle from '../../../../TextEditToggle';
 
-const { Text, Edit } = TextEditToggle;
-
-@inject('AppState')
 @observer class FieldTimeTrace extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
-  componentDidMount() {
-  }
-
   getWorkloads = () => {
     const { store } = this.props;
     const worklogs = store.getWorkLogs;
@@ -39,59 +27,34 @@ const { Text, Edit } = TextEditToggle;
             时间跟踪
           </span>
         </div>
-        <div className="c7n-value-wrapper">
-          <TextEditToggle
-            style={{ width: '100%' }}
-            disabled
-          >
-            <Text>
-              <div style={{ display: 'flex' }}>
-                <Progress
-                  style={{ flex: 1, maxWidth: 100, paddingRight: 5 }}
-                  percent={
-                    workloads !== 0
-                      ? (workloads * 100)
-                      / (workloads + (remainingTime || 0))
-                      : 0
-                  }
-                  size="small"
-                  status="success"
-                  showInfo={false}
-                />
-                <span>
-                  {workloads}
-                  {'小时/'}
-                  {workloads + (remainingTime || 0)}
-                  {'小时'}
-                </span>
-
+        <div className="c7n-value-wrapper" style={{ paddingLeft: '0.05rem' }}>
+          <span style={{ flex: 1 }}>
+            {workloads}
+            {'小时/'}
+            {workloads + (remainingTime || 0)}
+            {'小时'}
+          </span>
+          {
+            !disabled && (
+              <div
+                role="none"
+                className="primary"
+                style={{
+                  margin: '0 10px',
+                  cursor: 'pointer',
+                }}
+                onClick={() => {
+                  store.setWorkLogShow(true);
+                }}
+              >
+                登记工作
               </div>
-              {
-                !disabled && (
-                <div
-                  role="none"
-                  className="primary"
-                  style={{
-                    marginLeft: '8px',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    store.setWorkLogShow(true);
-                  }}
-                >
-                  登记工作
-                </div>
-                )
-              }
-            </Text>
-            <Edit>
-              <div>{remainingTime}</div>
-            </Edit>
-          </TextEditToggle>
+            )
+          }
         </div>
       </div>
     );
   }
 }
 
-export default withRouter(injectIntl(FieldTimeTrace));
+export default FieldTimeTrace;

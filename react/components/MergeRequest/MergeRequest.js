@@ -7,8 +7,8 @@ import {
 } from '@choerodon/boot';
 import TimeAgo from 'timeago-react';
 import { devOpsApi } from '@/api';
-import UserHead from '../UserHead';
 import './MergeRequest.less';
+import UserTag from '../tag/user-tag';
 
 const STATUS_SHOW = {
   opened: '开放',
@@ -139,12 +139,12 @@ class MergeRequest extends Component {
             width: '100%', overflow: 'hidden', flexShrink: 0, justifyContent: 'flex-start',
           }}
           >
-            <UserHead
-              user={{
+            <UserTag
+              data={{
                 id: record.assigneeId,
-                name: record.assigneeName,
+                tooltip: record.assigneeName,
                 realName: record.assigneeName,
-                avatar: record.assigneeImageUrl,
+                imageUrl: record.assigneeImageUrl,
               }}
             />
           </div>

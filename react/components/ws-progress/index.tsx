@@ -1,13 +1,14 @@
 import React, {
-  useState, useReducer, useEffect, useCallback, useMemo,
+  useReducer, useEffect, useCallback, useMemo,
 } from 'react';
-import { WSHandler, Choerodon } from '@choerodon/boot';
+import { WSHandler } from '@choerodon/boot';
 import fileSever, { FileSaverOptions } from 'file-saver';
 import moment from 'moment';
 import { Button, Progress } from 'choerodon-ui/pro';
 import { ProgressStatus, ProgressType } from 'choerodon-ui/lib/progress/enum';
 import { humanizeDuration } from '@/utils/common';
 import { observer } from 'mobx-react-lite';
+import classnames from 'classnames';
 import './index.less';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 
@@ -35,6 +36,7 @@ interface Props {
   renderEndProgress?: (messageData: any) => React.ReactElement | React.ReactElement[] | null | string,
   visible?: boolean, /**  可控类型 控制进度条是否显示 */
   messageKey: string,
+  className?: string,
   predefineProgressTextConfig?: 'export' | 'import' | 'none' /** 预定义配置 ws进行时的下方提示文字的配置 默认export */
   autoDownload?: boolean | DownloadProps, /** 完成后是否自动下载 */
   downloadProps?: DownloadProps, /** 下载文件配置，当存在自动下载配置时，以自动下载配置为最高优先级 */
@@ -189,7 +191,7 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
       onMessage={handleMessage}
     >
       {stateProgress.visible ? (
-        <div className="c7n-agile-ws-progress-area">
+        <div className={classnames('c7n-agile-ws-progress-area', props.className)}>
           <Progress
             className="c7n-agile-ws-progress"
             status={'active' as ProgressStatus}

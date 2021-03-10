@@ -1,14 +1,13 @@
-import React, { Component } from 'react';
+import { fieldApi } from '@/api';
+import SelectUser from '@/components/select/select-user';
+import UserTag from '@/components/tag/user-tag';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import {
+  DatePicker, DateTimePicker, NumberField, Select, SelectBox, TextArea, TextField, TimePicker,
+} from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
 import moment from 'moment';
-import SelectUser from '@/components/select/select-user';
-import {
-  TextField, TextArea, Select, NumberField, DatePicker, DateTimePicker, TimePicker, SelectBox,
-} from 'choerodon-ui/pro';
-import { fieldApi } from '@/api';
-import TextEditToggle from '@/components/TextEditTogglePro';
-import UserTag from '@/components/tag/user-tag';
-import { MAX_NUMBER_VALUE, MAX_NUMBER_STEP } from '@/constants/MAX_VALUE';
+import React, { Component } from 'react';
 
 const EditorMap = new Map([
   ['text', TextArea],
@@ -65,9 +64,10 @@ const EditorMap = new Map([
 
   renderEditor = () => {
     const { field } = this.props;
-    const { value, fieldType, required } = field;
+    const {
+      value, fieldType, required, valueStr,
+    } = field;
     const Editor = EditorMap.get(fieldType);
-
     if (Editor) {
       switch (fieldType) {
         case 'single':
@@ -95,7 +95,10 @@ const EditorMap = new Map([
           return <Editor required={required} autoSize />;
         }
         case 'multiMember': {
-          return <Editor required={required} multiple />;
+          return <Editor required={required} multiple selectedUser={valueStr} />;
+        }
+        case 'member': {
+          return <Editor required={required} selectedUser={valueStr} />;
         }
         case 'number': {
           return <Editor required={required} max={MAX_NUMBER_VALUE} step={MAX_NUMBER_STEP} />;

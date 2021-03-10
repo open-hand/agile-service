@@ -1,17 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Icon, Popconfirm } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import { text2Delta, uploadAndReplaceImg } from '@/utils/richText';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import WYSIWYGEditor from '@/components/CKEditor';
+import WYSIWYGViewer from '@/components/CKEditorViewer';
 import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
-import UserHead from '@/components/UserHead';
-// @ts-ignore
-import Delta from 'quill-delta';
 import './Comment.less';
 import { IComment } from '@/common/types';
 import { issueCommentApi, UComment, IReplyCreate } from '@/api/IssueComment';
+import UserTag from '@/components/tag/user-tag';
 import openDeleteModal from '../deleteComment';
 
 export interface ReplyComment extends IComment {
@@ -42,26 +39,17 @@ const CommentItem: React.FC<Props> = ({
   const loginUserId = AppState.userInfo.id;
   const isSelf = String(comment.userId) === String(loginUserId);
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState<Delta>();
+  const [value, setValue] = useState<string>('');
   const [replying, setReplying] = useState(false);
-  const [replyValue, setReplyValue] = useState<Delta>();
+  const [replyValue, setReplyValue] = useState<string>('');
   useEffect(() => {
-    const delta = text2Delta(comment.commentText);
+    const delta = comment.commentText;
     setValue(delta);
   }, [comment.commentText]);
 
   // 校验评论是否为空
-  function verifyComment(delta: Delta) {
-    let result = false;
-    if (delta && delta.length) {
-      delta.forEach((item: any) => {
-        // @ts-ignore
-        if (!result && item.insert && (item.insert.image || item.insert.trim())) {
-          result = true;
-        }
-      });
-    }
-    return result;
+  function verifyComment(delta: string) {
+    return delta.length > 0;
   }
 
   const newReply = useCallback((commit: IReplyCreate) => {
@@ -75,7 +63,7 @@ const CommentItem: React.FC<Props> = ({
   const handleReply = useCallback(async () => {
     if (replyValue && verifyComment(replyValue)) {
       try {
-        const commentText = await uploadAndReplaceImg(replyValue);
+        const commentText = replyValue;
         newReply({
           // @ts-ignore
           issueId: comment.issueId,
@@ -85,28 +73,28 @@ const CommentItem: React.FC<Props> = ({
           commentText,
         });
         setReplying(false);
-        setReplyValue(undefined);
+        setReplyValue('');
       } catch {
         //
       }
     } else {
       setReplying(false);
-      setReplyValue(undefined);
+      setReplyValue('');
     }
   }, [comment.issueId, comment.userId, newReply, parentId, replyValue]);
 
   const updateComment = useCallback((ucomment: UComment) => {
     issueCommentApi.project(projectId).update(ucomment, isSelf).then(() => {
       setEditing(false);
-      setValue(undefined);
+      setValue('');
       if (onUpdate) {
         onUpdate();
       }
     });
   }, [isSelf, onUpdate, projectId]);
 
-  const handleUpdate = useCallback(async (delta: Delta) => {
-    const commentText = await uploadAndReplaceImg(value);
+  const handleUpdate = useCallback(async (delta: string) => {
+    const commentText = value;
     updateComment({
       commentId: comment.commentId,
       objectVersionNumber: comment.objectVersionNumber,
@@ -123,21 +111,21 @@ const CommentItem: React.FC<Props> = ({
 
   const canEditOrDelete = hasPermission;
 
-  const handleChange = useCallback((delta: Delta) => {
+  const handleChange = useCallback((delta: string) => {
     setValue(delta);
   }, []);
 
   const handleClickReply = useCallback(() => {
     if (editing) {
       setEditing(false);
-      const delta = text2Delta(comment.commentText);
+      const delta = comment.commentText;
       setValue(delta);
     }
 
     setReplying(true);
   }, [comment.commentText, editing]);
 
-  const handleReplyChange = useCallback((delta: Delta) => {
+  const handleReplyChange = useCallback((delta: string) => {
     setReplyValue(delta);
   }, []);
 
@@ -146,16 +134,15 @@ const CommentItem: React.FC<Props> = ({
       <div className={`c7n-comment-item  ${isReply ? 'c7n-comment-reply' : ''}`}>
         <div className="line-justify">
           <div className="c7n-title-commit" style={{ flex: 1 }}>
-            <UserHead
-              // @ts-ignore
-              user={{
-                id: comment.userId,
-                name: comment.userName,
+            <UserTag
+              data={{
+                // id: comment.userId,
+                tooltip: comment.userName,
                 realName: comment.userRealName,
                 loginName: comment.userLoginName,
-                avatar: comment.userImageUrl,
+                imageUrl: comment.userImageUrl,
               }}
-              color="#3f51b5"
+              textStyle={{ color: '#3f51b5' }}
             />
             {
               isReply && (
@@ -167,20 +154,15 @@ const CommentItem: React.FC<Props> = ({
                   >
                     回复
                   </span>
-                  <UserHead
-                    user={{
-                      // @ts-ignore
-                      id: comment.replyToUserId,
-                      // @ts-ignore
-                      name: comment.replyToUserName,
-                      // @ts-ignore
-                      realName: comment.replyToUserRealName,
-                      // @ts-ignore
-                      loginName: comment.replyToUserLoginName,
-                      // @ts-ignore
-                      avatar: comment.replyToUserImageUrl,
+                  <UserTag
+                    data={{
+                      // id: comment.replyToUserId,
+                      tooltip: (comment as ReplyComment).replyToUserName,
+                      realName: (comment as ReplyComment).replyToUserRealName,
+                      loginName: (comment as ReplyComment).replyToUserLoginName,
+                      imageUrl: (comment as ReplyComment).replyToUserImageUrl,
                     }}
-                    color="#3f51b5"
+                    textStyle={{ color: '#3f51b5' }}
                   />
                 </div>
               )
@@ -198,29 +180,29 @@ const CommentItem: React.FC<Props> = ({
               )
             }
             {
-             !readonly && hasPermission && (
-             <Icon
-               type="mode_edit mlr-3 pointer"
-               onClick={() => {
-                 if (canEditOrDelete) {
-                   if (replying) {
-                     setReplying(false);
-                     setReplyValue(undefined);
-                   }
-                   setEditing(true);
-                 }
-               }}
-             />
-             )
+              !readonly && hasPermission && (
+                <Icon
+                  type="mode_edit mlr-3 pointer"
+                  onClick={() => {
+                    if (canEditOrDelete) {
+                      if (replying) {
+                        setReplying(false);
+                        setReplyValue('');
+                      }
+                      setEditing(true);
+                    }
+                  }}
+                />
+              )
             }
 
             {
-             !readonly && hasPermission && (
-             <Icon
-               type="delete_forever mlr-3 pointer"
-               onClick={handleClickDltBtn}
-             />
-             )
+              !readonly && hasPermission && (
+                <Icon
+                  type="delete_forever mlr-3 pointer"
+                  onClick={handleClickDltBtn}
+                />
+              )
             }
           </div>
         </div>
@@ -229,19 +211,19 @@ const CommentItem: React.FC<Props> = ({
             <div className="c7n-conent-commit" style={{ marginTop: 10 }}>
               <WYSIWYGEditor
                 autoFocus
-                bottomBar
+                footer
                 value={value}
                 onChange={handleChange}
                 style={{ height: 200, width: '100%' }}
-                handleDelete={() => {
+                onCancel={() => {
                   setEditing(false);
                 }}
-                handleSave={handleUpdate}
+                onOk={handleUpdate}
               />
             </div>
           ) : (
             <div style={{ marginTop: 10, paddingLeft: 23 }}>
-              <WYSIWYGViewer data={comment.commentText} />
+              <WYSIWYGViewer value={comment.commentText} />
             </div>
           )
         }
@@ -251,16 +233,16 @@ const CommentItem: React.FC<Props> = ({
           <div className="c7n-comment-reply">
             <WYSIWYGEditor
               autoFocus
-              bottomBar
+              footer
               value={replyValue}
               onChange={handleReplyChange}
               style={{ height: 200, width: '100%' }}
-              handleDelete={() => {
+              onCancel={() => {
                 setReplying(false);
-                setReplyValue(undefined);
+                setReplyValue('');
               }}
-              handleSave={handleReply}
-              saveText="回复"
+              onOk={handleReply}
+              okText="回复"
             />
           </div>
         )

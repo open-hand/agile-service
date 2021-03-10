@@ -6,6 +6,7 @@ import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.fallback.BaseFeignClientFallback;
 import io.swagger.annotations.ApiParam;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -196,5 +197,20 @@ public interface BaseFeignClient {
     ResponseEntity<List<RoleVO>> listProjectRoles(@PathVariable("project_id") Long projectId,
                                                   @RequestParam(name = "only_select_enable") Boolean onlySelectEnable,
                                                   @RequestParam(name = "role_name") String roleName);
+
+    @GetMapping(value = "/choerodon/v1/projects/{project_id}/users")
+    ResponseEntity<Page<UserVO>> queryUsersByProject(@PathVariable("project_id") Long projectId,
+                                                     @RequestParam("param") String param,
+                                                     @RequestParam int page,
+                                                     @RequestParam int size);
+
+    @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/users")
+    ResponseEntity<Page<UserVO>> queryUsersByOrganization(@PathVariable("organization_id") Long projectId,
+                                                          @RequestParam("param") String param,
+                                                          @RequestParam int page,
+                                                          @RequestParam int size);
+
+    @PostMapping(value = "/choerodon/v1/inner/projects/list_owner")
+    ResponseEntity<List<ProjectWithUserVO>> listProjectOwnerByIds(@RequestBody Set<Long> projectIds);
 }
 

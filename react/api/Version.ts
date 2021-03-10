@@ -39,7 +39,7 @@ class VersionApi extends Api<VersionApi> {
    * 根据版本id查询版本详情及issue统计信息
    * @param versionId
    */
-  load(versionId: number) {
+  load(versionId: number | string) {
     return axios.get(`${this.prefix}/product_version/${versionId}`);
   }
 
@@ -143,7 +143,7 @@ class VersionApi extends Api<VersionApi> {
    * 根据版本id查询的版本详细信息 用于查询规划中的版本
    * @param versionId
    */
-  loadPublicVersionDetail(versionId: number) {
+  loadPublicVersionDetail(versionId: number | string) {
     return axios.get(`${this.prefix}/product_version/${versionId}/plan_names`);
   }
 

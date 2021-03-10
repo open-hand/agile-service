@@ -29,6 +29,7 @@ public class TransformInfo {
     private String conditionStrategy;
     private Long organizationId;
     private Long objectVersionNumber;
+    private String rank;
 
     private List<StateMachineConfigVO> conditions;
 
@@ -134,5 +135,13 @@ public class TransformInfo {
 
     public void setConditions(List<StateMachineConfigVO> conditions) {
         this.conditions = conditions;
+    }
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
     }
 }

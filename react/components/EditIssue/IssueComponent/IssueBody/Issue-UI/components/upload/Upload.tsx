@@ -8,19 +8,18 @@ import styles from './Upload.less';
 import EditIssueContext from '../../../../../stores';
 
 interface Props {
-  reloadIssue: Function,
   hasPermission?: boolean,
   uploading: boolean
 }
 
 const UploadUI: React.FC<Props> = (props) => {
-  const { reloadIssue, hasPermission = true, uploading } = props;
+  const { hasPermission = true, uploading } = props;
   const { store, disabled } = useContext(EditIssueContext);
   const { issueId } = store.getIssue;
   const { linkedUI } = store;
 
   const config = {
-    multiple: true,
+    multiple: false,
     beforeUpload: (file: File) => {
       if (file.size > 1024 * 1024 * 30) {
         Choerodon.prompt('文件不能超过30M');
@@ -32,8 +31,9 @@ const UploadUI: React.FC<Props> = (props) => {
       const tmp = file;
       // @ts-ignore
       tmp.status = 'done';
+
       if (linkedUI.length > 0) {
-        handleUpdate(linkedUI.slice().concat(file));
+        handleUpdate(linkedUI.slice().concat([file]));
       } else {
         handleUpdate([file]);
       }
