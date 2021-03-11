@@ -17,6 +17,7 @@ import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -46,6 +47,7 @@ public class SprintDelaySendMessageTask {
     private static final String START_DATE = "startDate";
     private static final String END_DATE = "endDate";
     private static final String URL = "url";
+    private static final String LINK = "link";
     private static final String PROJECT_OWNER = "projectOwner";
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -61,6 +63,9 @@ public class SprintDelaySendMessageTask {
     @Autowired
     private DelayTaskService delayTaskService;
 
+    @Value("${services.domain.url}")
+    private String domainUrl;
+
     @JobTask(
             maxRetryCount = 3,
             code = "sprintDelaySendMessage",
@@ -72,7 +77,7 @@ public class SprintDelaySendMessageTask {
             oneExecution = false,
             params = {},
             triggerType = TriggerTypeEnum.CRON_TRIGGER,
-            cronExpression = "0 0 3 * * ? "
+            cronExpression = "0 0 10 * * ? "
     )
     public void run(Map<String, Object> map) {
         LOGGER.info("===> 开始执行冲刺延期发送消息定时任务");
@@ -170,16 +175,18 @@ public class SprintDelaySendMessageTask {
                     || ObjectUtils.isEmpty(sprint.getEndDate())) {
                 return;
             }
-            Map<String, String> paramMap = new HashMap<>();
+            String url = buildSprintDelayUrl(projectId, x.getProjectName(), x.getOrganizationId());
+            Map<String, String> paramMap = new HashMap<>(7);
             paramMap.put(PROJECT_NAME, x.getProjectName());
             paramMap.put(SPRINT_NAME, sprint.getSprintName());
             paramMap.put(DELAY_DAY, String.valueOf(delayDay));
             paramMap.put(START_DATE, sdf.format(sprint.getStartDate()));
             paramMap.put(END_DATE, sdf.format(sprint.getEndDate()));
-            paramMap.put(URL, buildSprintDelayUrl(projectId, x.getProjectName(), x.getOrganizationId()));
+            paramMap.put(URL, url);
+            paramMap.put(LINK, domainUrl + url);
             List<UserDTO> users = generateUser(x.getUserIds(), userMap, projectOwnerMap.get(projectId));
             MessageSender messageSender = delayTaskService.buildSender(0L, SPRINT_DELAY, paramMap, users);
-            Map<String, Object> additionalInformationMap = new HashMap<>();
+            Map<String, Object> additionalInformationMap = new HashMap<>(1);
             additionalInformationMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(), projectId);
             messageSender.setAdditionalInformation(additionalInformationMap);
             messageSenders.add(messageSender);
