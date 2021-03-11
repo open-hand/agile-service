@@ -494,15 +494,16 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             return;
         }
         cell.setCellType(CellType.STRING);
-        String code = (projectId == null ? ORG : PRO) + cell.toString();
+        String originCode = cell.toString();
+        String code = (projectId == null ? ORG : PRO) + originCode;
         if (Boolean.TRUE.equals(objectSchemeFieldService.checkCode(organizationId, projectId, code, AGILE_ISSUE))) {
-            cell.setCellValue(buildWithErrorMsg(code, "编码已经存在"));
+            cell.setCellValue(buildWithErrorMsg(originCode, "编码已经存在"));
             addErrorColumn(row.getRowNum(), 0, errorRowColMap);
         } else if (code.length() > 30) {
-            cell.setCellValue(buildWithErrorMsg(code, "编码字符数需要在30个以内"));
+            cell.setCellValue(buildWithErrorMsg(originCode, "编码字符数需要在30个以内"));
             addErrorColumn(row.getRowNum(), 0, errorRowColMap);
         } else if (!Pattern.matches("^[0-9a-zA-Z_]+$", code)) {
-            cell.setCellValue(buildWithErrorMsg(code, "编码只允许数字、字母及下划线组成"));
+            cell.setCellValue(buildWithErrorMsg(originCode, "编码只允许数字、字母及下划线组成"));
             addErrorColumn(row.getRowNum(), 0, errorRowColMap);
         } else {
             objectSchemeFieldCreateVO.setCode(code);
