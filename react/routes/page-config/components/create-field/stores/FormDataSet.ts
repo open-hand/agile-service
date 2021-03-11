@@ -176,9 +176,16 @@ const FormDataSet = ({
           max: ({ record }: { record: Record }) => {
             const fieldType = record.get('fieldType');
             if (fieldType === 'number') {
-              return Number.MAX_SAFE_INTEGER;
+              return MAX_NUMBER_VALUE;
             }
-            return null;
+            return undefined;
+          },
+          step: ({ record }: { record: Record }) => {
+            const fieldType = record.get('fieldType');
+            if (fieldType === 'number') {
+              return MAX_NUMBER_STEP;
+            }
+            return undefined;
           },
         },
       },

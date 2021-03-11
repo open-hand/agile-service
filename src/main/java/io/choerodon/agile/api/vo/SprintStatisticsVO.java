@@ -26,7 +26,7 @@ public class SprintStatisticsVO {
     /**
      * 未分配数量
      */
-    private Integer unassignCount;
+    private IssueCountWithStatusIdsVO unassignCount;
 
     @Encrypt
     private Long sprintId;
@@ -63,11 +63,11 @@ public class SprintStatisticsVO {
         this.todoCount = todoCount;
     }
 
-    public Integer getUnassignCount() {
+    public IssueCountWithStatusIdsVO getUnassignCount() {
         return unassignCount;
     }
 
-    public void setUnassignCount(Integer unassignCount) {
+    public void setUnassignCount(IssueCountWithStatusIdsVO unassignCount) {
         this.unassignCount = unassignCount;
     }
 

@@ -159,7 +159,6 @@ function getFilterFormSystemFields(): FieldProps[] {
   }, {
     name: 'sprint',
     label: '冲刺',
-    required: true,
     valueField: 'sprintId',
     textField: 'sprintName',
   }, {

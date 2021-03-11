@@ -100,6 +100,9 @@ const EditorMap = new Map([
         case 'member': {
           return <Editor required={required} selectedUser={valueStr} />;
         }
+        case 'number': {
+          return <Editor required={required} max={MAX_NUMBER_VALUE} step={MAX_NUMBER_STEP} />;
+        }
         default: return <Editor required={required} />;
       }
     }

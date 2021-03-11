@@ -59,7 +59,7 @@ class QuickCreateIssue extends Component {
   handleCreate = debounce(() => {
     const { currentTypeId } = this.state;
     const {
-      form, issueTypes, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId,
+      form, issueTypes, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram,
     } = this.props;
     form.validateFields(async (err, values) => {
       const { summary } = values;
@@ -107,7 +107,7 @@ class QuickCreateIssue extends Component {
               priorityId: defaultPriority.id,
               projectId: getProjectId(),
               programId: getProjectId(),
-              epicId: epicId || fieldsMap.get('epic')?.defaultValue || 0,
+              epicId: !isInProgram ? epicId || fieldsMap.get('epic')?.defaultValue || 0 : 0,
               summary: summary.trim(),
               issueTypeId: currentType.id,
               typeCode: currentType.typeCode,

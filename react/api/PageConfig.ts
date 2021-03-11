@@ -36,6 +36,7 @@ interface IFiled {
   defaultValue: any,
   edited: boolean,
   fieldId: string,
+  fieldCode: string,
   fieldName: string,
   fieldType: string,
   defaultValueObj: any,
@@ -47,6 +48,7 @@ interface IFiled {
   rank: string,
   required: boolean,
   source: string,
+  pageConfigFieldEdited: any
 }
 
 interface IFiledListItem {
