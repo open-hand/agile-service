@@ -319,7 +319,7 @@ public class IssueDelaySendMessageTask {
                                 new IssueDelayCarrierVO(x, x.getIssueId(), delayDay, organizationId));
                     }
                 }
-                if (receiverTypes.contains(PROJECT_OWNER)) {
+                if (receiverTypes != null && receiverTypes.contains(PROJECT_OWNER)) {
                     projectIdForProjectOwner.add(projectId);
                 }
                 projectMessageVO.getUserIds().forEach(y -> {
