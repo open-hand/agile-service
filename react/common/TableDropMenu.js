@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dropdown, Icon } from 'choerodon-ui';
+import { Dropdown, Icon, Tooltip } from 'choerodon-ui';
 import { Permission } from '@choerodon/boot';
 import './TableDropMenu.less';
 
@@ -17,7 +17,7 @@ import './TableDropMenu.less';
 
 const TableDropMenu = (props) => {
   const {
-    menu, isHasMenu = !!menu, text, onClickEdit, className, menuPermissionProps = {},
+    menu, isHasMenu = !!menu, text, onClickEdit, className, menuPermissionProps = {}, tooltip,
   } = props;
   const { permission } = props;
   const {
@@ -31,7 +31,8 @@ const TableDropMenu = (props) => {
         {text}
       </a>
     );
-    return onClickEdit ? textA : text;
+    const finalText = onClickEdit ? textA : text;
+    return tooltip ? <Tooltip placement="topLeft" title={typeof (tooltip) !== 'boolean' ? tooltip : text}>{finalText}</Tooltip> : finalText;
   };// cursor: 'pointer'
   return (
     <div
@@ -40,7 +41,10 @@ const TableDropMenu = (props) => {
       }}
       className={className || 'table-drop-menu-base'}
     >
-      <span style={{ display: 'flex' }}>
+      <span style={{
+        display: 'inline-block', width: '100%', textOverflow: 'ellipsis', overflow: 'hidden',
+      }}
+      >
         {permission
           ? (
             <Permission
