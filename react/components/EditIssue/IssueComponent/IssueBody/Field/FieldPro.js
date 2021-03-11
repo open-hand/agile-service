@@ -7,6 +7,7 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
 import moment from 'moment';
+import { MAX_NUMBER_STEP, MAX_NUMBER_VALUE } from '@/constants/MAX_VALUE';
 import React, { Component } from 'react';
 
 const EditorMap = new Map([
