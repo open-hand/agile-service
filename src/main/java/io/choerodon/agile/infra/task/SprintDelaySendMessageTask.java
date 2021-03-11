@@ -77,7 +77,7 @@ public class SprintDelaySendMessageTask {
             oneExecution = false,
             params = {},
             triggerType = TriggerTypeEnum.CRON_TRIGGER,
-            cronExpression = "0 0 3 * * ? "
+            cronExpression = "0 0 10 * * ? "
     )
     public void run(Map<String, Object> map) {
         LOGGER.info("===> 开始执行冲刺延期发送消息定时任务");
