@@ -140,7 +140,7 @@ public class SprintDelaySendMessageTask {
                 userIds.addAll(projectMessageVO.getUserIds());
             }
             Set<String> receiverTypes = projectMessageVO.getReceiverTypes();
-            if (receiverTypes.contains(PROJECT_OWNER)) {
+            if (receiverTypes != null && receiverTypes.contains(PROJECT_OWNER)) {
                 projectIdForProjectOwner.add(projectId);
             }
         });
