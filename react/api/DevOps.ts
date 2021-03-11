@@ -128,7 +128,7 @@ class DevOpsApi extends Api<DevOpsApi> {
    * @param size
    * @param searchVO
    */
-  loadTagsByService(applicationId: number, page: number = 1, size: number = 5, searchVO: any) {
+  loadTagsByService(applicationId: number | string, page: number = 1, size: number = 5, searchVO: any) {
     return axios({
       method: 'post',
       url: `${this.prefix}/app_service/${applicationId}/git/page_tags_by_options`,
@@ -140,7 +140,7 @@ class DevOpsApi extends Api<DevOpsApi> {
     });
   }
 
-  removeLinkBranch(applicationId: number, branchName: string, issueId:string) {
+  removeLinkBranch(applicationId: number, branchName: string, issueId: string) {
     return axios({
       method: 'delete',
       url: `${this.prefix}/app_service/${applicationId}/git/branch/issue/remove_association`,

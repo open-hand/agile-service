@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { useReleaseDetailContext } from '../../../stores';
 import { openImportPomModal } from '../../import-pom';
 import Section from '../../section';
-import { openLinkServiceModal } from '../link-service-modal';
+import { openLinkServiceModal } from '../../link-service-modal';
 import './index.less';
 
 const LinkService: React.FC = () => {

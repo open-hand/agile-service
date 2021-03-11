@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import Container from './Container';
 import './index.less';
@@ -8,7 +8,9 @@ const ReleaseDetail: React.FC = () => {
   const {
     store, id,
   } = useReleaseDetailContext();
-  store.select(id);
+  useEffect(() => {
+    id && store.select(id);
+  }, [id, store]);
   return (
     <>
       {store.getVisible && <Container key="release-detail" />}
