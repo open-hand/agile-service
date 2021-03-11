@@ -180,6 +180,7 @@ function ObjectScheme() {
       <div className="c7n-table-cell-drop-menu">
         <TableDropMenu
           menu={menu}
+          tooltip
           onClickEdit={disabledEditDel ? undefined : openEditFieldModal}
           text={text}
           isHasMenu={!(system && disabledFields.includes(record?.get('code')))}
