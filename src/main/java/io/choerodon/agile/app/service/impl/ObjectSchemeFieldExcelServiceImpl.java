@@ -46,6 +46,15 @@ import io.choerodon.core.exception.CommonException;
 @Service
 public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcelService {
 
+    private static final short DATE_TIME_FORMAT = 22;
+    private static final short DATE_FORMAT = 14;
+    private static final short TIME_FORMAT = 21;
+
+    private static final SimpleDateFormat BASE_SDF = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
+    private static final SimpleDateFormat DATE_TIME_SDF = new SimpleDateFormat(BaseConstants.Pattern.SYS_DATETIME);
+    private static final SimpleDateFormat DATE_SDF = new SimpleDateFormat(BaseConstants.Pattern.SYS_DATE);
+    private static final SimpleDateFormat TIME_SDF = new SimpleDateFormat(BaseConstants.Pattern.TIME_SS);
+
     private static final int HEADER_LENGTH = 8;
     private static final int NOT_KEY_HEADER_LENGTH = 5;
 
@@ -184,15 +193,28 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             case FieldType.DATETIME:
             case FieldType.TIME:
             case FieldType.DATE:
-                validateDateDefaultValue(objectSchemeFieldCreate, row, cell, errorRowColMap);
+                validateDateDefaultValue(objectSchemeFieldCreate, fieldType, row, cell, errorRowColMap);
                 break;
             case FieldType.TEXT:
+                validateTextDefaultValue(objectSchemeFieldCreate, row, cell, errorRowColMap);
+                break;
             case FieldType.INPUT:
                 cell.setCellType(CellType.STRING);
                 objectSchemeFieldCreate.setDefaultValue(cell.toString());
                 break;
             default:
                 break;
+        }
+    }
+
+    private void validateTextDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Row row, Cell cell, Map<Integer, List<Integer>> errorRowColMap) {
+        cell.setCellType(CellType.STRING);
+        String txt = cell.toString();
+        if (txt != null && txt.contains("\n")) {
+            cell.setCellValue(buildWithErrorMsg(txt, "单行文本不能有多行"));
+            addErrorColumn(row.getRowNum(), 4, errorRowColMap);
+        } else {
+            objectSchemeFieldCreate.setDefaultValue(cell.toString());
         }
     }
 
@@ -216,11 +238,10 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         }
     }
 
-    private void validateDateDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Row row, Cell cell, Map<Integer, List<Integer>> errorRowColMap) {
-        SimpleDateFormat sdf = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
+    private void validateDateDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, String fieldType, Row row, Cell cell, Map<Integer, List<Integer>> errorRowColMap) {
         if (CellType.STRING.equals(cell.getCellTypeEnum()) && "当前时间".equals(cell.toString())) {
             objectSchemeFieldCreate.setExtraConfig(true);
-            objectSchemeFieldCreate.setDefaultValue(sdf.format(new Date()));
+            objectSchemeFieldCreate.setDefaultValue(BASE_SDF.format(new Date()));
             return;
         }
         if (!CellType.NUMERIC.equals(cell.getCellTypeEnum()) || !DateUtil.isCellDateFormatted(cell)) {
@@ -229,7 +250,43 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             addErrorColumn(row.getRowNum(), 4, errorRowColMap);
             return;
         }
-        objectSchemeFieldCreate.setDefaultValue(sdf.format(cell.getDateCellValue()));
+        short cellFormat = cell.getCellStyle().getDataFormat();
+        switch (cellFormat) {
+            case DATE_TIME_FORMAT:
+                if (!FieldType.DATETIME.equals(fieldType)) {
+                    String oldDateStr = DATE_TIME_SDF.format(cell.getDateCellValue());
+                    cell.setCellType(CellType.STRING);
+                    cell.setCellValue(buildWithErrorMsg(oldDateStr, "该字段类型默认值不支持时间日期"));
+                    addErrorColumn(row.getRowNum(), 4, errorRowColMap);
+                    return;
+                }
+                break;
+            case TIME_FORMAT:
+                if (!FieldType.TIME.equals(fieldType)) {
+                    String oldDateStr = TIME_SDF.format(cell.getDateCellValue());
+                    cell.setCellType(CellType.STRING);
+                    cell.setCellValue(buildWithErrorMsg(oldDateStr, "该字段类型默认值不支持仅时间"));
+                    addErrorColumn(row.getRowNum(), 4, errorRowColMap);
+                    return;
+                }
+                break;
+            case DATE_FORMAT:
+                if (!FieldType.DATE.equals(fieldType)) {
+                    String oldDateStr = DATE_SDF.format(cell.getDateCellValue());
+                    cell.setCellType(CellType.STRING);
+                    cell.setCellValue(buildWithErrorMsg(oldDateStr, "该字段类型默认值不支持仅日期"));
+                    addErrorColumn(row.getRowNum(), 4, errorRowColMap);
+                    addErrorColumn(row.getRowNum(), 4, errorRowColMap);
+                    return;
+                }
+                break;
+            default:
+                cell.setCellType(CellType.STRING);
+                cell.setCellValue("请不要修改默认单元格格式");
+                addErrorColumn(row.getRowNum(), 4, errorRowColMap);
+                return;
+        }
+        objectSchemeFieldCreate.setDefaultValue(BASE_SDF.format(cell.getDateCellValue()));
     }
 
     private void validateNumberDefaultValue(String defaultValue, Row row, Map<Integer, List<Integer>> errorRowColMap) {
