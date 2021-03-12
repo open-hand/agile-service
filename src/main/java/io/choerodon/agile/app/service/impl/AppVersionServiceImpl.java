@@ -1,23 +1,40 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.AppServiceRepVO;
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.app.service.PomService;
+import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.AppVersionVO;
 import io.choerodon.agile.app.service.AppVersionService;
 import io.choerodon.agile.infra.dto.AppVersionDTO;
 import io.choerodon.agile.infra.dto.AppVersionIssueRelDTO;
 import io.choerodon.agile.infra.dto.ProductAppVersionRelDTO;
-import io.choerodon.agile.infra.dto.SprintDTO;
-import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
 import io.choerodon.agile.infra.mapper.AppVersionIssueRelMapper;
 import io.choerodon.agile.infra.mapper.AppVersionMapper;
 import io.choerodon.agile.infra.mapper.ProductAppVersionRelMapper;
 import io.choerodon.core.exception.CommonException;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * @author superlee
@@ -35,6 +52,12 @@ public class AppVersionServiceImpl implements AppVersionService {
     private AppVersionIssueRelMapper appVersionIssueRelMapper;
     @Autowired
     private ProductAppVersionRelMapper productAppVersionRelMapper;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
+    @Autowired
+    private DevopsClientOperator devopsClientOperator;
+    @Autowired
+    private PomService pomService;
 
     @Override
     public AppVersionVO createAppVersion(Long projectId, AppVersionVO appVersionVO) {
@@ -105,5 +128,47 @@ public class AppVersionServiceImpl implements AppVersionService {
         record.setArtifactId(appVersionVO.getArtifactId());
         record.setVersion(appVersionVO.getVersion());
         return (appVersionMapper.selectCount(record) > 0);
+    }
+
+    @Override
+    public List<AppVersionVO> parsePom(Long projectId,
+                                       String groupId,
+                                       MultipartFile multipartFile) {
+        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        if (project == null) {
+            throw new CommonException("error.project.not.existed");
+        }
+        validateProjectCategories(project);
+        List<AppServiceRepVO> appServiceRepList =
+                devopsClientOperator.listAppService(projectId, 1, 0, true);
+        String fileName = multipartFile.getOriginalFilename();
+        if (!fileName.endsWith(".xml")) {
+            throw new CommonException("error.illegal.pom.file");
+        }
+        try {
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            InputStream pomInputStream = multipartFile.getInputStream();
+            List<AppVersionVO> appVersionList = pomService.parse(groupId, pomInputStream, appServiceRepList, organizationId);
+            return appVersionList;
+        } catch (IOException
+                | SAXException
+                | ParserConfigurationException e) {
+            throw new CommonException("error.parse.pom", e);
+        }
+    }
+
+    private void validateProjectCategories(ProjectVO project) {
+        Set<String> projectCategoryCodes = new HashSet<>();
+        if (!ObjectUtils.isEmpty(project.getCategories())) {
+            projectCategoryCodes.addAll(
+                    project
+                            .getCategories()
+                            .stream()
+                            .map(ProjectCategoryDTO::getCode)
+                            .collect(Collectors.toSet()));
+        }
+        if (!projectCategoryCodes.contains(ProjectCategory.MODULE_DEVOPS)) {
+            throw new CommonException("error.project.category.not.contains.devops");
+        }
     }
 }

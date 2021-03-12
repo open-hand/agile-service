@@ -58,6 +58,10 @@ public class ProjectCategory {
      * 需求管理模块
      */
     public static final String MODULE_BACKLOG = "N_REQUIREMENT";
+    /**
+     * devops流程模块
+     */
+    public static final String MODULE_DEVOPS = "N_DEVOPS";
 
     public static String getApplyType(String category){
         if (PROGRAM.equals(category)) {
