@@ -12,15 +12,16 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import io.choerodon.agile.api.vo.AppVersionCreateVO;
+import io.choerodon.agile.api.vo.AppVersionUpdateVO;
 import io.choerodon.agile.api.vo.AppVersionVO;
 import io.choerodon.agile.app.service.AppVersionService;
 import io.choerodon.agile.infra.dto.AppVersionDTO;
@@ -29,6 +30,7 @@ import io.choerodon.agile.infra.dto.ProductAppVersionRelDTO;
 import io.choerodon.agile.infra.mapper.AppVersionIssueRelMapper;
 import io.choerodon.agile.infra.mapper.AppVersionMapper;
 import io.choerodon.agile.infra.mapper.ProductAppVersionRelMapper;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,12 +62,13 @@ public class AppVersionServiceImpl implements AppVersionService {
     private PomService pomService;
 
     @Override
-    public AppVersionVO createAppVersion(Long projectId, AppVersionVO appVersionVO) {
-        if (Boolean.FALSE.equals(checkTagRepeat(appVersionVO))) {
+    public AppVersionVO createAppVersion(Long projectId, AppVersionCreateVO appVersionCreateVO) {
+        AppVersionDTO appVersionDTO = modelMapper.map(appVersionCreateVO, AppVersionDTO.class);
+        appVersionDTO.setProjectId(projectId);
+        if (Boolean.TRUE.equals(checkRepeat(appVersionDTO))) {
             throw new CommonException("error.appVersion.repeat");
         }
-        appVersionVO.setProjectId(projectId);
-        AppVersionDTO appVersionDTO = modelMapper.map(appVersionVO, AppVersionDTO.class);
+        appVersionDTO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
         if (appVersionMapper.insertSelective(appVersionDTO) != 1) {
             throw new CommonException("error.appVersion.insert");
         }
@@ -74,16 +77,19 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     @Override
-    public AppVersionVO updateAppVersion(Long projectId, Long appVersionId, AppVersionVO appVersionVO) {
-        if (!Objects.equals(projectId, appVersionVO.getProjectId())) {
-            throw new CommonException("error.projectId.notEqual");
+    public AppVersionVO updateAppVersion(Long projectId, Long appVersionId, AppVersionUpdateVO appVersionUpdateVO) {
+        AppVersionDTO appVersionDTO = appVersionMapper.selectByPrimaryKey(appVersionId);
+
+        if (ObjectUtils.isEmpty(appVersionDTO)) {
+            throw new CommonException("error.appVersion.notExist");
         }
-        if (Boolean.FALSE.equals(checkTagRepeat(appVersionVO))) {
+        appVersionDTO.setVersion(appVersionUpdateVO.getVersion());
+        appVersionDTO.setVersionAlias(appVersionUpdateVO.getVersionAlias());
+        if (Boolean.TRUE.equals(checkRepeat(appVersionDTO))) {
             throw new CommonException("error.appVersion.repeat");
         }
-
-        appVersionVO.setId(appVersionId);
-        AppVersionDTO appVersionDTO = modelMapper.map(appVersionVO, AppVersionDTO.class);
+        appVersionDTO.setId(appVersionId);
+        appVersionDTO.setObjectVersionNumber(appVersionUpdateVO.getObjectVersionNumber());
         if (appVersionMapper.updateByPrimaryKeySelective(appVersionDTO) != 1) {
             throw new CommonException("error.appVersion.update");
         }
@@ -122,11 +128,21 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     @Override
-    public Boolean checkTagRepeat(AppVersionVO appVersionVO) {
+    public Boolean checkRepeat(Long projectId, AppVersionVO appVersionVO) {
         AppVersionDTO record = new AppVersionDTO();
-        record.setGroupId(appVersionVO.getGroupId());
+        record.setProjectId(projectId);
+        record.setServiceCode(appVersionVO.getServiceCode());
         record.setArtifactId(appVersionVO.getArtifactId());
         record.setVersion(appVersionVO.getVersion());
+        return (appVersionMapper.selectCount(record) > 0);
+    }
+
+    private Boolean checkRepeat(AppVersionDTO appVersionDTO) {
+        AppVersionDTO record = new AppVersionDTO();
+        record.setProjectId(appVersionDTO.getProjectId());
+        record.setServiceCode(appVersionDTO.getServiceCode());
+        record.setArtifactId(appVersionDTO.getArtifactId());
+        record.setVersion(appVersionDTO.getVersion());
         return (appVersionMapper.selectCount(record) > 0);
     }
 
@@ -155,6 +171,15 @@ public class AppVersionServiceImpl implements AppVersionService {
                 | ParserConfigurationException e) {
             throw new CommonException("error.parse.pom", e);
         }
+    }
+
+    @Override
+    public List<AppVersionVO> batchCreateAppVersion(Long projectId, List<AppVersionCreateVO> appVersionCreateVOList) {
+        List<AppVersionVO> result = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(result)){
+            appVersionCreateVOList.forEach(appVersionCreateVO -> result.add(createAppVersion(projectId, appVersionCreateVO)));
+        }
+        return result;
     }
 
     private void validateProjectCategories(ProjectVO project) {
