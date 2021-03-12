@@ -67,4 +67,24 @@ public interface ProductVersionService {
     int batchUpdateSequence(Integer sequence, Long projectId, Integer add, Long versionId);
 
     List<TestVersionFixVO> queryByVersionId();
+
+    /**
+     * 查询产品版本关联的应用版本
+     *
+     * @param versionId 产品版本id
+     * @param projectId 项目id
+     * @param appVersionSearchVO 查询条件
+     * @return 产品版本关联的应用版本
+     */
+    List<AppVersionVO> listAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO);
+
+    /**
+     * 查询产品版本未关联的应用版本
+     *
+     * @param projectId 项目id
+     * @param versionId 产品版本id
+     * @param appVersionSearchVO 查询条件
+     * @return 产品版本未关联的应用版本
+     */
+    List<AppVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO);
 }

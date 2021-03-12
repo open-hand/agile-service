@@ -497,4 +497,17 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             return new ArrayList<>();
         }
     }
+
+    @Override
+    public List<AppVersionVO> listAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO) {
+        List<AppVersionVO> result = productVersionMapper.listAppVersionByOption(projectId, versionId, appVersionSearchVO);
+
+        return result;
+    }
+
+    @Override
+    public List<AppVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO) {
+        List<AppVersionVO> result = productVersionMapper.listUnRelAppVersionByOption(projectId, versionId, appVersionSearchVO);
+        return result;
+    }
 }

@@ -48,6 +48,8 @@ public class ProductVersionController {
     private static final String REVOKE_RELEASE_ERROR = "error.productVersion.revokeRelease";
     private static final String ARCHIVED_ERROR = "error.productVersion.archived";
     private static final String REVOKE_ARCHIVED_ERROR = "error.productVersion.revokeArchived";
+    private static final String RELATED_APP_VERSION_ERROR = "error.productVersion.related.appVersion.query";
+    private static final String UN_RELATED_APP_VERSION_ERROR = "error.productVersion.unrelated.appVersion.query";
 
     @Autowired
     private ProductVersionService productVersionService;
@@ -262,5 +264,35 @@ public class ProductVersionController {
         return Optional.ofNullable(productVersionService.dragVersion(projectId, versionSequenceVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(DRAG_ERROR));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询产品版本关联的应用版本")
+    @GetMapping(value = "/{versionId}/rel_app_version")
+    public ResponseEntity<List<AppVersionVO>> listAppVersionByOption(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "产品版本id", required = true)
+            @PathVariable(name = "versionId") Long versionId,
+            @ApiParam(value = "筛选条件")
+            @RequestParam AppVersionSearchVO appVersionSearchVO) {
+        return Optional.ofNullable(productVersionService.listAppVersionByOption(projectId, versionId, appVersionSearchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException(RELATED_APP_VERSION_ERROR));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询产品版本项目下未关联的应用版本")
+    @GetMapping(value = "/{versionId}/un_rel_app_version")
+    public ResponseEntity<List<AppVersionVO>> listUnRelAppVersionByOption(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "产品版本id", required = true)
+            @PathVariable(name = "versionId") Long versionId,
+            @ApiParam(value = "筛选条件")
+            @RequestParam AppVersionSearchVO appVersionSearchVO) {
+        return Optional.ofNullable(productVersionService.listUnRelAppVersionByOption(projectId, versionId, appVersionSearchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException(UN_RELATED_APP_VERSION_ERROR));
     }
 }
