@@ -22,9 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -77,7 +75,7 @@ public class SprintDelaySendMessageTask {
             oneExecution = false,
             params = {},
             triggerType = TriggerTypeEnum.CRON_TRIGGER,
-            cronExpression = "0 0 10 * * ? "
+            cronExpression = "0 0 3 * * ? "
     )
     public void run(Map<String, Object> map) {
         LOGGER.info("===> 开始执行冲刺延期发送消息定时任务");
@@ -93,10 +91,11 @@ public class SprintDelaySendMessageTask {
             sprints.forEach(x -> {
                 Date endDate = x.getEndDate();
                 if (!ObjectUtils.isEmpty(endDate)) {
-                    LocalDate now = LocalDate.now();
-                    LocalDate end = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime end = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                     if (now.isAfter(end)) {
-                        int delayDay = Period.between(end, now).getDays();
+                        long delayDay = end.isBefore(now) ?
+                                Duration.between(end, now).toDays() + 1 : 0;
                         Long projectId = x.getProjectId();
                         ProjectMessageVO projectMessageVO = projectMap.get(projectId);
                         String projectName = null;
@@ -169,7 +168,7 @@ public class SprintDelaySendMessageTask {
         sprintDelayCarrierList.forEach(x -> {
             Long projectId = x.getProjectId();
             SprintDTO sprint = x.getSprintDTO();
-            Integer delayDay = x.getDelayDay();
+            Long delayDay = x.getDelayDay();
             if (ObjectUtils.isEmpty(sprint)
                     || ObjectUtils.isEmpty(sprint.getStartDate())
                     || ObjectUtils.isEmpty(sprint.getEndDate())) {

@@ -14,7 +14,7 @@ public class SprintDelayCarrierVO {
 
     private SprintDTO sprintDTO;
 
-    private Integer delayDay;
+    private Long delayDay;
 
     private String projectName;
 
@@ -24,7 +24,7 @@ public class SprintDelayCarrierVO {
 
     public SprintDelayCarrierVO(Long projectId,
                                 SprintDTO sprintDTO,
-                                Integer delayDay,
+                                Long delayDay,
                                 String projectName,
                                 Long organizationId) {
         this.projectId = projectId;
@@ -74,11 +74,11 @@ public class SprintDelayCarrierVO {
         this.sprintDTO = sprintDTO;
     }
 
-    public Integer getDelayDay() {
+    public Long getDelayDay() {
         return delayDay;
     }
 
-    public void setDelayDay(Integer delayDay) {
+    public void setDelayDay(Long delayDay) {
         this.delayDay = delayDay;
     }
 }
