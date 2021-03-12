@@ -183,7 +183,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             case FieldType.MEMBER:
             case FieldType.MULTI_MEMBER:
                 cell.setCellType(CellType.STRING);
-                validateMemberDefaultValue(objectSchemeFieldCreate, cell.toString(), row, userNameMap, errorRowColMap);
+                validateMemberDefaultValue(objectSchemeFieldCreate, fieldType, cell.toString(), row, userNameMap, errorRowColMap);
                 break;
             case FieldType.NUMBER:
                 cell.setCellType(CellType.STRING);
@@ -218,8 +218,13 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         }
     }
 
-    private void validateMemberDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, String defaultValue, Row row, Map<String, UserVO> userNameMap, Map<Integer, List<Integer>> errorRowColMap) {
+    private void validateMemberDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, String fieldType, String defaultValue, Row row, Map<String, UserVO> userNameMap, Map<Integer, List<Integer>> errorRowColMap) {
         List<String> memberNames = splitByComma(defaultValue);
+        if (FieldType.MEMBER.equals(fieldType) && memberNames.size() > 1) {
+            row.getCell(4).setCellValue(buildWithErrorMsg(defaultValue, "人员单选只可输入一个人员"));
+            addErrorColumn(row.getRowNum(), 4, errorRowColMap);
+            return;
+        }
         List<Long> ids = new ArrayList<>();
         StringBuilder errMsg = new StringBuilder();
         memberNames.forEach(memberName -> {
