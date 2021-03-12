@@ -1,10 +1,13 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.AppVersionSearchVO;
+import io.choerodon.agile.api.vo.AppVersionVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.TestVersionFixVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.mybatis.common.BaseMapper;
+
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -149,4 +152,24 @@ public interface ProductVersionMapper extends BaseMapper<ProductVersionDTO> {
     Integer queryStatusIssueCount(@Param("statusIds") List<Long> statusIds, @Param("projectId") Long projectId, @Param("versionId") Long versionId);
 
     List<TestVersionFixVO> queryByVersionId();
+
+    /**
+     * 查询产品版本关联的应用版本
+     *
+     * @param versionId          产品版本id
+     * @param projectId          项目id
+     * @param appVersionSearchVO 查询条件
+     * @return 产品版本关联的应用版本
+     */
+    List<AppVersionVO> listAppVersionByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("appVersionSearchVO") AppVersionSearchVO appVersionSearchVO);
+
+    /**
+     * 查询产品版本未关联的应用版本
+     *
+     * @param projectId          项目id
+     * @param versionId          产品版本id
+     * @param appVersionSearchVO 查询条件
+     * @return 产品版本未关联的应用版本
+     */
+    List<AppVersionVO> listUnRelAppVersionByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("appVersionSearchVO") AppVersionSearchVO appVersionSearchVO);
 }

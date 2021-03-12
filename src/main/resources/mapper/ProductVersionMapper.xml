@@ -518,4 +518,46 @@
         LIMIT 1;
     </select>
 
+    <select id="listAppVersionByOption" resultType="io.choerodon.agile.api.vo.AppVersionVO">
+        SELECT
+            aav.id,
+            aav.group_id,
+            aav.artifact_id,
+            aav.version,
+            aav.version_alias,
+            aav.service_code,
+            aav.project_id,
+            aav.organization_id,
+            aav.object_version_number
+        FROM agile_app_version aav
+        WHERE
+            aav.id IN (
+                SELECT
+                aisr1.issue_id
+                FROM
+                agile_product_app_version_rel apavr
+                WHERE
+                apavr.project_id = #{projectId}
+                AND apavr.product_version_id = #{versionId}
+            )
+        AND aav.project_id = #{projectId}
+    </select>
+
+    <select id="listUnRelAppVersionByOption" resultType="io.choerodon.agile.api.vo.AppVersionVO">
+        SELECT
+            aav.id,
+            aav.group_id,
+            aav.artifact_id,
+            aav.version,
+            aav.version_alias,
+            aav.service_code,
+            aav.project_id,
+            aav.organization_id,
+            aav.object_version_number
+        FROM agile_app_version aav
+        LEFT JOIN agile_product_app_version_rel apavr ON apavr.app_version_id = aav.id AND apavr.app_version_id = #{versionId}
+        WHERE aav.project_id = #{projectId}
+        AND apavr.id IS NULL
+        AND aav.service_code = #{appVersionSearchVO.serviceCode}
+    </select>
 </mapper>
