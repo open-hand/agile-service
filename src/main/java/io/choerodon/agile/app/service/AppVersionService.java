@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.AppVersionCreateVO;
+import io.choerodon.agile.api.vo.AppVersionUpdateVO;
 import io.choerodon.agile.api.vo.AppVersionVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,19 +16,19 @@ public interface AppVersionService {
     /**
      * 创建应用版本
      * @param projectId 项目id
-     * @param appVersionVO 要创建的应用版本
+     * @param appVersionCreateVO 要创建的应用版本
      * @return 创建的应用版本
      */
-    AppVersionVO createAppVersion(Long projectId, AppVersionVO appVersionVO);
+    AppVersionVO createAppVersion(Long projectId, AppVersionCreateVO appVersionCreateVO);
 
     /**
      * 更新应用版本
      * @param projectId 项目id
      * @param appVersionId 要更新的应用版本id
-     * @param appVersionVO 更新的应用版本内容
+     * @param appVersionUpdateVO 更新的应用版本内容
      * @return 更新的应用版本内容
      */
-    AppVersionVO updateAppVersion(Long projectId, Long appVersionId, AppVersionVO appVersionVO);
+    AppVersionVO updateAppVersion(Long projectId, Long appVersionId, AppVersionUpdateVO appVersionUpdateVO);
 
 
     /**
@@ -46,10 +48,12 @@ public interface AppVersionService {
 
     /**
      * 是否重复
+     *
+     * @param projectId 项目id
      * @param appVersionVO 要校验的应用版本tag
      * @return 是否重复
      */
-    Boolean checkTagRepeat(AppVersionVO appVersionVO);
+    Boolean checkRepeat(Long projectId, AppVersionVO appVersionVO);
 
     /**
      * 解析pom文件
@@ -60,4 +64,12 @@ public interface AppVersionService {
      * @return
      */
     List<AppVersionVO> parsePom(Long projectId, String groupId, MultipartFile multipartFile);
+
+    /**
+     * 批量创建应用版本
+     * @param projectId 项目id
+     * @param appVersionCreateVOList 要创建的应用版本
+     * @return 创建的应用版本
+     */
+    List<AppVersionVO> batchCreateAppVersion(Long projectId, List<AppVersionCreateVO> appVersionCreateVOList);
 }

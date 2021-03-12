@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 
+import io.choerodon.agile.api.vo.AppVersionCreateVO;
+import io.choerodon.agile.api.vo.AppVersionUpdateVO;
 import io.choerodon.agile.api.vo.AppVersionVO;
 import io.choerodon.agile.app.service.AppVersionService;
 import io.choerodon.core.exception.CommonException;
@@ -38,9 +40,23 @@ public class AppVersionController {
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @ApiParam(value = "新增应用版本", required = true)
-            @RequestBody @Valid AppVersionVO appVersionVO) {
+            @RequestBody @Valid AppVersionCreateVO appVersionCreateVO) {
         return Optional.ofNullable(appVersionService.createAppVersion(
-                projectId, appVersionVO))
+                projectId, appVersionCreateVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
+                .orElseThrow(() -> new CommonException("error.appVersion.create"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("创建应用版本")
+    @PostMapping
+    public ResponseEntity<List<AppVersionVO>> batchCreateAppVersion(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "新增应用版本", required = true)
+            @RequestBody @Valid List<AppVersionCreateVO> appVersionCreateVOList) {
+        return Optional.ofNullable(appVersionService.batchCreateAppVersion(
+                projectId, appVersionCreateVOList))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.appVersion.create"));
     }
@@ -54,8 +70,8 @@ public class AppVersionController {
             @ApiParam(value = "appVersionId", required = true)
             @PathVariable @Encrypt Long appVersionId,
             @ApiParam(value = "version信息", required = true)
-            @RequestBody AppVersionVO appVersionVO) {
-        return Optional.ofNullable(appVersionService.updateAppVersion(projectId, appVersionId, appVersionVO))
+            @RequestBody AppVersionUpdateVO appVersionUpdateVO) {
+        return Optional.ofNullable(appVersionService.updateAppVersion(projectId, appVersionId, appVersionUpdateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.appVersion.update"));
     }
@@ -87,14 +103,14 @@ public class AppVersionController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "应用版本TAG是否重复")
+    @ApiOperation(value = "应用版本是否重复")
     @PostMapping(value = "/check")
     public ResponseEntity<Boolean> checkTag(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @ApiParam(value = "name", required = true)
             @RequestBody @Valid AppVersionVO appVersionVO) {
-        return Optional.ofNullable(appVersionService.checkTagRepeat(appVersionVO))
+        return Optional.ofNullable(appVersionService.checkRepeat(projectId, appVersionVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.appVersion.check"));
     }
