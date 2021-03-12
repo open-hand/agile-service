@@ -26,9 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -87,7 +85,7 @@ public class IssueDelaySendMessageTask {
             oneExecution = false,
             params = {},
             triggerType = TriggerTypeEnum.CRON_TRIGGER,
-            cronExpression = "0 0 10 * * ? "
+            cronExpression = "0 0 2 * * ? "
     )
     public void run(Map<String, Object> map) {
         LOGGER.info("===> 开始执行问题延期发送消息定时任务");
@@ -109,17 +107,17 @@ public class IssueDelaySendMessageTask {
                     issues.stream().collect(Collectors.groupingBy(IssueDTO::getProjectId));
             Set<Long> userIds = new HashSet<>();
             Set<Long> projectIdForProjectOwner = new HashSet<>();
-            LocalDate localDate = now.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDateTime localDateTime = now.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
             processIssueToMultiKeyMap(
                     projectMap,
                     multiKeyMap,
-                    localDate,
+                    localDateTime,
                     issueGroupByProject,
                     userIds,
                     projectIdForProjectOwner,
                     priorityNameMap,
                     statusNameMap);
-            processProjectOwner(projectMap, multiKeyMap, issueGroupByProject, userIds, projectIdForProjectOwner, localDate);
+            processProjectOwner(projectMap, multiKeyMap, issueGroupByProject, userIds, projectIdForProjectOwner, localDateTime);
             if (!userIds.isEmpty()) {
                 userMap.putAll(
                         baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true)
@@ -249,7 +247,7 @@ public class IssueDelaySendMessageTask {
         return builder.toString();
     }
 
-    private void processProjectOwner(Map<Long, ProjectMessageVO> projectMap, MultiKeyMap multiKeyMap, Map<Long, List<IssueDTO>> issueGroupByProject, Set<Long> userIds, Set<Long> projectIdForProjectOwner, LocalDate localDate) {
+    private void processProjectOwner(Map<Long, ProjectMessageVO> projectMap, MultiKeyMap multiKeyMap, Map<Long, List<IssueDTO>> issueGroupByProject, Set<Long> userIds, Set<Long> projectIdForProjectOwner, LocalDateTime localDateTime) {
         if (!projectIdForProjectOwner.isEmpty()) {
             List<ProjectWithUserVO> projectWithUserList =
                     baseFeignClient.listProjectOwnerByIds(projectIdForProjectOwner).getBody();
@@ -261,8 +259,10 @@ public class IssueDelaySendMessageTask {
                     if (ObjectUtils.isEmpty(issueList)) {
                         issueList.forEach(z -> {
                             Long organizationId = projectMap.get(projectId).getOrganizationId();
-                            LocalDate estimatedEndDate = z.getEstimatedEndTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                            int delayDay = Period.between(estimatedEndDate, localDate).getDays();
+                            LocalDateTime estimatedEndDate = z.getEstimatedEndTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+                            long delayDay = estimatedEndDate.isBefore(localDateTime) ?
+                                    Duration.between(estimatedEndDate, localDateTime).toDays() + 1 : 0;
                             addValueToMultiKeyMap(
                                     multiKeyMap,
                                     projectId,
@@ -277,7 +277,7 @@ public class IssueDelaySendMessageTask {
 
     private void processIssueToMultiKeyMap(Map<Long, ProjectMessageVO> projectMap,
                                            MultiKeyMap multiKeyMap,
-                                           LocalDate localDate,
+                                           LocalDateTime localDateTime,
                                            Map<Long, List<IssueDTO>> issueGroupByProject,
                                            Set<Long> userIds,
                                            Set<Long> projectIdForProjectOwner,
@@ -295,8 +295,9 @@ public class IssueDelaySendMessageTask {
             queryOrganizationStatusMap(organizationId, statusMap);
             issueList.forEach(x -> {
                 Date estimatedEndTime = x.getEstimatedEndTime();
-                LocalDate estimatedEndDate = estimatedEndTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                int delayDay = Period.between(estimatedEndDate, localDate).getDays();
+                LocalDateTime estimatedEndDate = estimatedEndTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                long delayDay = estimatedEndDate.isBefore(localDateTime) ?
+                        Duration.between(estimatedEndDate, localDateTime).toDays() + 1 : 0;
                 Long assigneeId = x.getAssigneeId();
                 if (assigneeId != null && !Objects.equals(0L, assigneeId)) {
                     userIds.add(assigneeId);

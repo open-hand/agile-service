@@ -14,13 +14,13 @@ public class IssueDelayCarrierVO {
 
     private Long issueId;
 
-    private Integer delayDay;
+    private Long delayDay;
 
     private Long organizationId;
 
     public IssueDelayCarrierVO(IssueDTO issueDTO,
                                Long issueId,
-                               Integer delayDay,
+                               Long delayDay,
                                Long organizationId) {
         this.issueDTO = issueDTO;
         this.issueId = issueId;
@@ -44,11 +44,11 @@ public class IssueDelayCarrierVO {
         this.issueId = issueId;
     }
 
-    public Integer getDelayDay() {
+    public Long getDelayDay() {
         return delayDay;
     }
 
-    public void setDelayDay(Integer delayDay) {
+    public void setDelayDay(Long delayDay) {
         this.delayDay = delayDay;
     }
 
