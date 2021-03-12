@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 
@@ -17,6 +18,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author superlee
@@ -95,5 +97,18 @@ public class AppVersionController {
         return Optional.ofNullable(appVersionService.checkTagRepeat(appVersionVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.appVersion.check"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "解析pom返回数据")
+    @PostMapping(value = "/parse_pom")
+    public ResponseEntity<List<AppVersionVO>> parsePom(@ApiParam(value = "项目id", required = true)
+                                                       @PathVariable(name = "project_id") Long projectId,
+                                                       @ApiParam(value = "groupId", required = true)
+                                                       @RequestParam String groupId,
+                                                       @RequestBody MultipartFile file) {
+        return Optional.ofNullable(appVersionService.parsePom(projectId, groupId, file))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.appVersion.parsePom"));
     }
 }

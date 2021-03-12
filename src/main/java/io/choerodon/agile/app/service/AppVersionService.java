@@ -1,6 +1,9 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.AppVersionVO;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * @author superlee
@@ -47,4 +50,14 @@ public interface AppVersionService {
      * @return 是否重复
      */
     Boolean checkTagRepeat(AppVersionVO appVersionVO);
+
+    /**
+     * 解析pom文件
+     *
+     * @param projectId
+     * @param groupId
+     * @param multipartFile
+     * @return
+     */
+    List<AppVersionVO> parsePom(Long projectId, String groupId, MultipartFile multipartFile);
 }
