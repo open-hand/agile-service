@@ -220,14 +220,14 @@ public class IssueDelaySendMessageTask {
             if (dto.getAssigneeId() != null) {
                 UserDTO user = userMap.get(dto.getAssigneeId());
                 if (user != null) {
-                    assignee = user.getLoginName();
+                    assignee = user.getRealName();
                 }
             }
             String reporter = "";
             if (dto.getReporterId() != null) {
                 UserDTO user = userMap.get(dto.getReporterId());
                 if (user != null) {
-                    reporter = user.getLoginName();
+                    reporter = user.getRealName();
                 }
             }
             builder
