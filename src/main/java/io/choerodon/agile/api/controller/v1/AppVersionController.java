@@ -48,8 +48,8 @@ public class AppVersionController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("创建应用版本")
-    @PostMapping
+    @ApiOperation("批量创建应用版本")
+    @PostMapping("/batch")
     public ResponseEntity<List<AppVersionVO>> batchCreateAppVersion(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
