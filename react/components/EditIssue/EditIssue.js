@@ -108,7 +108,7 @@ function EditIssue() {
       };
       const fields = await fieldApi.project(projectId).org(organizationId).outside(outside).getFieldAndValue(id, param);
       const { description, issueTypeVO: { typeCode, id: typeId } } = issue;
-      if (!disabled && (!description || description === JSON.stringify([{ insert: '\n' }]))) { // 加载默认模版
+      if (!disabled && (!description || description === JSON.stringify([{ insert: '\n' }]))) { // 加载默认模板
         const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(issue.issueTypeId) || {};
         const { template } = issueTemplateInfo;
         issue.descriptionTemplate = template;

@@ -215,7 +215,7 @@ class CreateIssue extends Component {
 
   loadDefaultTemplate = (issueTypeId) => {
     const { form } = this.props;
-    if (this.props.defaultDescription) { // 如果有外部默认描述信息则 放弃加载默认模版
+    if (this.props.defaultDescription) { // 如果有外部默认描述信息则 放弃加载默认模板
       return;
     }
     const currentDes = form.getFieldValue('description');
