@@ -26,7 +26,7 @@ const Description: React.FC = () => {
   function handleOk() {
     console.log('handleUpdate', editRef.current);
   }
-  console.log('description', description);
+
   return (
     <Section
       title="描述"

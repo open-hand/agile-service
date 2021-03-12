@@ -151,6 +151,10 @@ class ReleaseHome extends Component {
     if (key === '6') {
       openLinkVersionModal(record.versionId, this.props.program.id, record.programVersionInfoVOS ? record.programVersionInfoVOS[0] : undefined, () => this.refresh(pagination));
     }
+    if (key === '7') {
+      // 导出
+
+    }
   }
 
   handleChangeTable(pagination, filters, sorter, barFilters) {
@@ -228,6 +232,13 @@ class ReleaseHome extends Component {
               </Menu.Item>
             </Permission>
           )}
+        <Menu.Item key="7">
+          <Tooltip placement="top" title="导出">
+            <span>
+              导出
+            </span>
+          </Tooltip>
+        </Menu.Item>
         {record.statusCode === 'archived'
           ? null
           : (

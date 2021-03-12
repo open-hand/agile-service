@@ -75,7 +75,6 @@ const SelectVersion: React.FC<Partial<SelectProps>> = observer(({ ...otherProps 
                     }}
                     >
                       取消
-
                     </Button>
                   </div>
                 ) : (
@@ -91,9 +90,7 @@ const SelectVersion: React.FC<Partial<SelectProps>> = observer(({ ...otherProps 
                     创建版本
                   </Button>
                 )
-
               }
-              {/*  */}
             </div>
 
           </div>
