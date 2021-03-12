@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
-  DataSet, Modal, Select, Table,
+  DataSet, Modal, Select, Table, Tooltip,
 } from 'choerodon-ui/pro/lib';
 import { Button } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
@@ -59,13 +59,15 @@ const ImportPom: React.FC = () => {
   }
   return (
     <div className={prefixCls}>
-      <Select label="GROUPID" labelLayout={'float' as any} required style={{ width: '6.2rem' }} value={groupId} onChange={setGroupId}>
+      <Select label="groupId" labelLayout={'float' as any} required style={{ width: '6.2rem' }} value={groupId} onChange={setGroupId}>
         <Select.Option value="0">11</Select.Option>
       </Select>
       <div className={`${prefixCls}-body`}>
         <div className={`${prefixCls}-upload`}>
           <span>上传pom文件</span>
-          <Button disabled={!groupId} funcType="raised" size={'small' as any} type="primary" style={{ color: groupId ? 'white' : undefined }} icon="file_upload" shape="circle" onClick={() => inputRef.current?.click()} />
+          <Tooltip title={!groupId ? '请先选择groupId' : undefined}>
+            <Button disabled={!groupId} funcType="raised" size={'small' as any} type="primary" style={{ color: groupId ? 'white' : undefined }} icon="file_upload" shape="circle" onClick={() => inputRef.current?.click()} />
+          </Tooltip>
         </div>
 
         <Table dataSet={ds} queryBar={'none' as any}>
