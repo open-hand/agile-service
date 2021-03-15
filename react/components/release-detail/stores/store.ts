@@ -20,6 +20,8 @@ class ReleaseDetailStore {
 
   @observable current: IReleaseDetailData | undefined;
 
+  @observable appServiceList: Array<any> = [];
+
   @observable visible: boolean = false;
 
   @observable disabled: boolean | undefined = false;
@@ -30,6 +32,14 @@ class ReleaseDetailStore {
 
   @computed get getVisible() {
     return this.visible;
+  }
+
+  @computed get getAppServiceList() {
+    return this.appServiceList;
+  }
+
+  @action setAppServiceList(data: Array<any>) {
+    this.appServiceList = data;
   }
 
   @action setDisabled(data: boolean) {
@@ -44,12 +54,13 @@ class ReleaseDetailStore {
     return this.current || this.currentClickKDetail || {} as IReleaseDetailData;
   }
 
-  @action clear(key?: string) {
+  @action clear() {
     this.loading = false;
     this.current = undefined;
     this.currentClickKDetail = undefined;
     this.visible = false;
     this.disabled = false;
+    this.appServiceList = [];
   }
 
   @action init(initData?: { disabled?: boolean, events?: Partial<EventsProps>, programId?: string }) {
@@ -65,7 +76,9 @@ class ReleaseDetailStore {
   @action async loadData(id: string = this.getCurrentData.id) {
     this.loading = true;
     const versionData = await versionApi.load(id);
-    this.setCurrentData(versionData);
+    const versionList = await versionApi.loadAppVersionList(id);
+    this.setAppServiceList(versionList.map((i: any) => ({ ...i, name: i.versionAlias || i.version })));
+    this.setCurrentData({ ...versionData, id: versionData.versionId });
     await this.events.load({ versionData });
     this.loading = false;
   }
@@ -88,7 +101,6 @@ class ReleaseDetailStore {
     }
     this.currentClickKDetail = newClickDetail as IReleaseDetailData;
     this.loadData(waitQueryId as string);
-
     this.visible = true;
   }
 

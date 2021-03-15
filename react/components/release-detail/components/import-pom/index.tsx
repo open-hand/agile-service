@@ -1,6 +1,8 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, {
+  useMemo, useRef, useState, useCallback, useEffect,
+} from 'react';
 import {
-  DataSet, Modal, Select, Table, TextField, Tooltip,
+  DataSet, Modal, Select, Spin, Table, TextField, Tooltip,
 } from 'choerodon-ui/pro/lib';
 import { Button } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
@@ -11,9 +13,10 @@ import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import SelectTeam from '@/components/select/select-team';
 import { IModalProps } from '@/common/types';
 import { versionApi } from '@/api';
+import Loading from '@/components/Loading';
 
 interface IImportPomFunctionProps {
-  handleOk?: (data: any) => void
+  handleOk?: ((data: any) => void) | (() => Promise<any>)
   programMode?: boolean
 }
 
@@ -21,7 +24,7 @@ const { Column } = Table;
 const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = ({ modal, handleOk, programMode }) => {
   const prefixCls = 'c7n-agile-release-detail-import-pom';
   const [groupId, setGroupId] = useState<string | undefined>();
-
+  const [loading, setLoading] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
@@ -46,9 +49,13 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
       const formData = new FormData();
       formData.append('file', file);
       inputRef.current?.setAttribute('value', '');
+      setLoading(true);
       versionApi.importPom(formData, groupId!).then((res) => {
         ds.loadData(res);
+      }).finally(() => {
+        setLoading(false);
       });
+
       // issueApi.import(formData).then((res) => {
 
       // }).catch((e) => {
@@ -57,6 +64,17 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
       // });
     }
   };
+  const handleSubmit = useCallback(async () => {
+    if (!await ds.validate()) {
+      return false;
+    }
+    const data = ds.toData();
+    const result = handleOk && await handleOk(data);
+    return typeof (result) !== 'undefined' ? result : true;
+  }, [ds, handleOk]);
+  useEffect(() => {
+    modal?.handleOk(handleSubmit);
+  }, [handleSubmit, modal]);
   function renderAlias({ value }: RenderProps) {
     if (!value) {
       return <i className={`${prefixCls}-table-alias-no-value`}>请输入别名</i>;
@@ -92,10 +110,11 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
         style={{ display: 'none' }}
       // accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       />
+      <Loading loading={loading} />
     </div>
   );
 };
-function openImportPomModal(props?: IImportPomFunctionProps) {
+function openImportPomModal(props: IImportPomFunctionProps) {
   const key = Modal.key();
   Modal.open({
     key,
@@ -105,7 +124,7 @@ function openImportPomModal(props?: IImportPomFunctionProps) {
     },
     className: classnames('c7n-agile-export-issue-modal'),
     drawer: true,
-    children: <ImportPom />,
+    children: <ImportPom {...props} />,
   });
 }
 export { openImportPomModal };

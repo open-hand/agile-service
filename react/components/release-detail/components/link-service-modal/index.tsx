@@ -4,8 +4,10 @@ import React, {
 } from 'react';
 import {
   Button,
+  CheckBox,
   DataSet, Form, Modal, Radio, Select, TextField,
 } from 'choerodon-ui/pro/lib';
+import { debounce, isEmpty } from 'lodash';
 import classnames from 'classnames';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectAppService from '@/components/select/select-app-service';
@@ -16,20 +18,60 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Observer, observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
+import { IAppVersionData, versionApi } from '@/api';
+import { Checkbox } from 'choerodon-ui';
 
 interface ILinkServiceProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
+  versionId: string
   openProgramConfig?: boolean
 }
 const { Option } = Select;
-const SelectVersion: React.FC<Partial<SelectProps>> = observer(({ ...otherProps }) => {
+interface SelectVersionProps extends Partial<SelectProps> {
+  versionId: string
+  serviceCode?: string
+}
+const SelectVersion: React.FC<SelectVersionProps> = observer(({
+  versionId, serviceCode, multiple, ...otherProps
+}) => {
   const inputRef = useRef<TextField>(null);
   const selectRef = useRef<Select>(null);
   const [inputVisible, setInputVisible] = useState<boolean>();
-  function handleSelect(newValue: string) {
-    selectRef.current?.choose(new Record({ name: '1111111', value: newValue }));
+  function handleSelect(record: Record) {
+    if (multiple && selectRef.current?.isSelected(record)) {
+      selectRef.current?.unChoose(record);
+    } else {
+      selectRef.current?.choose(record);
+    }
   }
-  const [options, setOptions] = useState<Array<any>>(() => new Array(19).fill(0).map((item, index) => ({ value: String(index), name: `${1.2 + index}b` })));
+  const loadData = useCallback(() => {
+    console.log('versionId.', versionId, serviceCode);
+    versionId && serviceCode && versionApi.loadAvailableAppVersionList(versionId, serviceCode).then((res: any) => {
+      setOptions(res);
+    });
+  }, [serviceCode, versionId]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+  const [options, setOptions] = useState<Array<any>>([]);
+  function handleCheckVersion(name: string) {
+    return versionApi.checkAppVersion({ artifactId: serviceCode!, serviceCode: serviceCode!, version: name });
+  }
+  // async function handleInput(value: string) {
+
+  // }
+  const handleInput = debounce((v) => {
+    if (!isEmpty(v)) {
+      inputRef.current?.validate(v);
+    }
+  }, 350);
+  async function handleValidator(value?: string) {
+    if (isEmpty(value)) {
+      return '请输入版本名称';
+    }
+    const res = await handleCheckVersion(value!);
+    return res ? '版本名称重复' : true;
+  }
   return (
     <Select
       ref={selectRef}
@@ -38,32 +80,44 @@ const SelectVersion: React.FC<Partial<SelectProps>> = observer(({ ...otherProps 
         console.log('props', dataSet.length);
         return (
           <div>
+            {multiple ? (
+              <div className="c7n-pro-select-select-all-none">
+                <span role="none" onClick={() => selectRef.current?.chooseAll()}>全选</span>
+                <span role="none" onClick={() => selectRef.current?.chooseRe()}>反选</span>
+                <span role="none" onClick={() => selectRef.current?.unChooseAll()}>无</span>
+              </div>
+            ) : null}
             <ul className="c7n-pro-select-dropdown-menu  c7n-pro-select-dropdown-menu-root c7n-pro-select-dropdown-menu-vertical">
-              {dataSet.map((i, index) => (
+              {dataSet.length > 0 ? dataSet.map((i) => (
                 <li
                   role="none"
-                  className={classnames('c7n-pro-select-dropdown-menu-item', { 'c7n-pro-select-dropdown-menu-item-selected': selectRef.current?.getValue() === String(index) })}
-                  onClick={() => handleSelect(i.get('value'))}
+                  className={classnames('c7n-pro-select-dropdown-menu-item', { 'c7n-pro-select-dropdown-menu-item-selected': selectRef.current?.getValue() === i.get('value') })}
+                  onClick={() => handleSelect(i)}
                 >
+                  {multiple ? <Checkbox checked={selectRef.current?.isSelected(i)} /> : null}
                   {i.get('name')}
                 </li>
-              ))}
+              )) : <li className="c7n-pro-select-dropdown-menu-item c7n-pro-select-dropdown-menu-item-disabled">无匹配结果。</li>}
             </ul>
-            <div role="none" className="c7n-agile-release-detail-select-footer" onFocus={(e) => { e.stopPropagation(); console.log('onFocus footer....'); }}>
+            <div role="none" className="c7n-agile-release-detail-select-footer">
               {
                 inputVisible ? (
                   <div className="c7n-agile-release-detail-select-footer-input">
-                    <TextField ref={inputRef} onClick={(e) => { e.stopPropagation(); console.log('click...'); inputRef.current?.focus(); }} autoFocus style={{ width: '100%' }} />
+                    <TextField ref={inputRef} onInput={(e: any) => handleInput(e.target.value)} validator={handleValidator} onClick={(e) => { e.stopPropagation(); inputRef.current?.focus(); }} autoFocus style={{ width: '100%' }} />
                     <Button
                       color={'primary' as any}
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
                         // handleLoadMore();
-                        console.log('primary', inputRef.current?.getValue());
-                        setOptions((oldOptions) => [...oldOptions, { name: inputRef.current?.getValue(), value: '009' }]);
-                        handleSelect(String(dataSet.length));
-                        // dataSet.create({ name: inputRef.current?.getValue(), value: '009' });
-                        setInputVisible(false);
+                        const versionName = inputRef.current?.getValue();
+                        if (await inputRef.current?.validate(versionName) && serviceCode) {
+                          const newVersion: IAppVersionData = await versionApi.createAppVersion({ artifactId: serviceCode!, serviceCode, version: versionName });
+                          const newOption = { ...newVersion, name: newVersion.versionAlias || newVersion.version!, value: newVersion.id! };
+                          setOptions((oldOptions) => [...oldOptions, newOption]);
+                          handleSelect(new Record(newOption));
+                          // dataSet.create({ name: inputRef.current?.getValue(), value: '009' });
+                          setInputVisible(false);
+                        }
 
                         // dataSet.unshift(new Record({ name: inputRef.current?.getValue(), value: `0001${inputRef.current?.getValue()}` }));
                       }}
@@ -101,11 +155,11 @@ const SelectVersion: React.FC<Partial<SelectProps>> = observer(({ ...otherProps 
       }}
       {...otherProps}
     >
-      {options.flatMap((i, index) => <Option value={String(index)}>{`${1.2 + index}b`}</Option>)}
+      {options.flatMap((i) => <Option value={i.id}>{i.versionAlias || i.version}</Option>)}
     </Select>
   );
 });
-const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({ modal, handleOk }) => {
+const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({ modal, versionId, handleOk }) => {
   const [applicationId, setApplicationId] = useState<string>();
   const [versionType, setVersionType] = useState<string>('tag');
 
@@ -120,7 +174,7 @@ const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({ mo
       { name: 'appService', label: '选择应用服务', required: true },
       { name: 'tag', label: '选择tag', dynamicProps: { required: ({ record }) => record.get('change') === 'tag' } },
       {
-        name: 'version', label: '选择版本', textField: 'name', valueField: 'value', dynamicProps: { required: ({ record }) => record.get('change') === 'version' },
+        name: 'version', label: '选择版本', multiple: true, textField: 'name', valueField: 'value', dynamicProps: { required: ({ record }) => record.get('change') === 'version' },
       },
       { name: 'change', defaultValue: 'tag' },
     ],
@@ -147,12 +201,12 @@ const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({ mo
         <Radio name="change" value="version" onChange={setVersionType}>选择版本</Radio>
       </RadioGroup>
       {versionType === 'tag' ? <SelectGitTags name="tag" applicationId={applicationId} key={`git-tags-${applicationId}`} />
-        : <SelectVersion name="version" disabled={!applicationId} />}
+        : <SelectVersion name="version" disabled={!applicationId} maxTagCount={5} versionId={versionId} serviceCode={applicationId} multiple />}
 
     </Form>
   );
 };
-function openLinkServiceModal(props?: ILinkServiceProps) {
+function openLinkServiceModal(props: ILinkServiceProps) {
   const key = Modal.key();
   Modal.open({
     key,
@@ -161,7 +215,7 @@ function openLinkServiceModal(props?: ILinkServiceProps) {
       width: MODAL_WIDTH.small,
     },
     drawer: true,
-    children: <LinkService />,
+    children: <LinkService {...props} />,
 
   });
 }
