@@ -25,6 +25,7 @@ public class AppVersionVO {
     @ApiModelProperty(value = "版本别名")
     private String versionAlias;
     @ApiModelProperty(value = "服务编码")
+    @NotEmpty(message = "error.field.serviceCodeNotNull")
     private String serviceCode;
     @ApiModelProperty(value = "项目id")
     private Long projectId;
