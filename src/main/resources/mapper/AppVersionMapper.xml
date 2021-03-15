@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.AppVersionMapper">
+
+    <select id="selectByProjectIds" resultType="io.choerodon.agile.api.vo.AppVersionVO">
+        select
+        aav.id,
+        aav.group_id,
+        aav.artifact_id,
+        ifnull(aav.version_alias, aav.version) as version,
+        aav.service_code,
+        aav.project_id,
+        aav.organization_id,
+        aav.object_version_number
+        from agile_app_version aav
+        where aav.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
+    </select>
+</mapper>

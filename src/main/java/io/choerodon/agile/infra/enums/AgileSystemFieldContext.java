@@ -30,6 +30,7 @@ public enum AgileSystemFieldContext {
     ENVIRONMENT(FieldCode.ENVIRONMENT,"bug"),
     CREATOR(FieldCode.CREATOR,"story,issue_epic,bug,task,sub_task"),
     UPDATER(FieldCode.UPDATOR,"story,issue_epic,bug,task,sub_task"),
+    APP_VERSION(FieldCode.APP_VERSION,"story,bug,task"),
     ;
     private String fieldCode;
     private String context;
