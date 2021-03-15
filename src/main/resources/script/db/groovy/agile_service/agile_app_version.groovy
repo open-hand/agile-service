@@ -6,9 +6,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_app_version.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'group_id', type: 'VARCHAR(255)', remarks: 'group id') {
-                constraints(nullable: false)
-            }
+            column(name: 'group_id', type: 'VARCHAR(255)', remarks: 'group id')
             column(name: 'artifact_id', type: 'VARCHAR(255)', remarks: 'artifact id') {
                 constraints(nullable: false)
             }
