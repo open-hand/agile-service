@@ -8,6 +8,7 @@ interface IReleaseDetailData {
   createDate: string
   actualReleaseDate: string
   creator: any
+  versionId: string
   description: string
 }
 export default IReleaseDetailData;

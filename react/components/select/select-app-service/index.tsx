@@ -21,7 +21,7 @@ const SelectAppService: React.FC<Props> = forwardRef(({
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
     textField: 'name',
-    valueField: 'id',
+    valueField: 'code',
     request: () => devOpsApi.loadActiveService(),
     middleWare: (data: any) => {
       if (dataRef) {

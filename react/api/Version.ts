@@ -30,7 +30,7 @@ interface DragVersionData {
   objectVersionNumber: number,
   versionId: number
 }
-interface IImportPomData {
+export interface IAppVersionData {
   artifactId: string
   groupId: string
   id: null | string
@@ -39,6 +39,15 @@ interface IImportPomData {
   serviceCode: string
   version: null | string
   versionAlias: null | string
+}
+export interface IAppVersionCreateData {
+  versionAlias?: string
+  version: string
+  artifactId: string
+  serviceCode: string
+}
+interface IAppVersionUpdateData extends Omit<IAppVersionCreateData, 'artifactId' | 'serviceCode'> {
+
 }
 class VersionApi extends Api<VersionApi> {
   get prefix() {
@@ -252,13 +261,155 @@ class VersionApi extends Api<VersionApi> {
     return axios.post(`${this.prefix}/issues/to_version/${versionId}`, issueIds);
   }
 
-  importPom(data:any, groupId:string):Promise<IImportPomData[]> {
+  importPom(data: any, groupId: string): Promise<IAppVersionData[]> {
     return axios({
       method: 'post',
       url: `${this.prefix}/app_version/parse_pom`,
       data,
       params: {
         groupId,
+      },
+    });
+  }
+
+  /**
+   * 加载关联的应用版本列表
+   */
+  loadAppVersionList(versionId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/product_version/${versionId}/rel_app_version`,
+    });
+  }
+
+  loadAvailableAppVersionList(versionId: string, serviceCode: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/product_version/${versionId}/un_rel_app_version`,
+      params: {
+        serviceCode,
+      },
+    });
+  }
+
+  /**
+   * 创建应用版本
+   * @param data
+   * @returns
+   */
+  createAppVersion(data: IAppVersionCreateData) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_version`,
+      data,
+    });
+  }
+
+  /**
+   * 批量创建应用版本
+   * @param data
+   * @returns
+   */
+  createBatchAppVersion(data: IAppVersionCreateData) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_version/batch`,
+      data,
+    });
+  }
+
+  /**
+   * 更新应用版本
+   * @param data
+   * @param appVersionId
+   * @returns
+   */
+  updateAppVersion(data: IAppVersionUpdateData, appVersionId: string) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_version/update/${appVersionId}`,
+      data,
+    });
+  }
+
+  /**
+   * 应用版本重复校验
+   * @param data
+   * @returns
+   */
+  checkAppVersion(data: Pick<IAppVersionCreateData, 'artifactId' | 'serviceCode' | 'version'>) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_version/check`,
+      data,
+    });
+  }
+
+  /**
+   * 关联应用版本
+   */
+  linkAppVersions(versionId: string, appVersionIds: string[]) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/product_version/${versionId}/rel_app_version`,
+      data: {
+        appVersionIds,
+      },
+    });
+  }
+
+  /**
+   * 删除版本关联的应用版本的关联
+   * @param versionId
+   * @param appVersionId
+   * @returns
+   */
+  deleteLinkAppVersion(versionId: string, appVersionId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/app_version/delete/${appVersionId}/product_version/${versionId}`,
+
+    });
+  }
+
+  loadVersionStory(versionId: string, data: any) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/product_version/${versionId}/story`,
+      data: {
+        advancedSearchArgs: {
+          statusId: [],
+        },
+        otherArgs: {
+          appVersion: [],
+          feature: [],
+          assigneeId: [],
+        },
+        searchArgs: {
+          summary: '',
+          issueNum: '',
+        },
+      },
+    });
+  }
+
+  loadVersionBug(versionId: string, data: any) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/product_version/${versionId}/bug`,
+      data: {
+        advancedSearchArgs: {
+          statusId: [],
+        },
+        otherArgs: {
+          appVersion: [],
+          feature: [],
+          assigneeId: [],
+        },
+        searchArgs: {
+          summary: '',
+          issueNum: '',
+        },
       },
     });
   }
