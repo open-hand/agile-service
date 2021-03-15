@@ -34,6 +34,7 @@ public class FieldCode {
     public static final String FEATURE = "feature";
     public static final String CREATOR = "created_user";
     public static final String UPDATOR = "last_updated_user";
+    public static final String APP_VERSION = "app_version";
 
     public static final String SUB_PROJECT = "subProject";
     public static final String ESTIMATED_START_TIME = "estimatedStartTime";
