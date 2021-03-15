@@ -24,6 +24,8 @@ public class AppVersionSearchVO {
     private String versionAlias;
     @ApiModelProperty(value = "服务编码")
     private String serviceCode;
+    @ApiModelProperty(value = "版本或版本别名")
+    private String content;
 
     public Long getId() {
         return id;
@@ -71,5 +73,13 @@ public class AppVersionSearchVO {
 
     public void setServiceCode(String serviceCode) {
         this.serviceCode = serviceCode;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

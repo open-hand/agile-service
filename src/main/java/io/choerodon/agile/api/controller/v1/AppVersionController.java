@@ -13,11 +13,16 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import io.choerodon.agile.api.vo.AppVersionCreateVO;
+import io.choerodon.agile.api.vo.AppVersionSearchVO;
 import io.choerodon.agile.api.vo.AppVersionUpdateVO;
 import io.choerodon.agile.api.vo.AppVersionVO;
 import io.choerodon.agile.app.service.AppVersionService;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import org.springframework.web.multipart.MultipartFile;
@@ -86,6 +91,21 @@ public class AppVersionController {
             @ApiParam(value = "appVersionId", required = true)
             @PathVariable @Encrypt Long appVersionId) {
         return Optional.ofNullable(appVersionService.queryAppVersionById(projectId, appVersionId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.version.query"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @CustomPageRequest
+    @ApiOperation(value = "分页查询项目下应用版本")
+    @GetMapping
+    public ResponseEntity<Page<AppVersionVO>> listAppVersionByProjectId(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @SortDefault(value = {"service_code", "version"}, direction = Sort.Direction.ASC)
+                    PageRequest pageRequest,
+            @ApiParam(value = "筛选条件") AppVersionSearchVO appVersionSearchVO) {
+        return Optional.ofNullable(appVersionService.listAppVersionByProjectId(projectId, appVersionSearchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.version.query"));
     }

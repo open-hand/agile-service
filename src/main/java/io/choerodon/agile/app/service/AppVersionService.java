@@ -1,8 +1,12 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.AppVersionCreateVO;
+import io.choerodon.agile.api.vo.AppVersionSearchVO;
 import io.choerodon.agile.api.vo.AppVersionUpdateVO;
 import io.choerodon.agile.api.vo.AppVersionVO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -88,4 +92,13 @@ public interface AppVersionService {
      * @param issueId 问题id
      */
     void deleteAppVersionIssueRel(Long projectId, Long appVersionId, Long issueId);
+
+    /**
+     * 查询项目下应用版本
+     * @param projectId 项目id
+     * @param appVersionSearchVO 查询参数
+     * @param pageRequest 分页参数
+     * @return 项目下应用版本
+     */
+    Page<AppVersionVO> listAppVersionByProjectId(Long projectId, AppVersionSearchVO appVersionSearchVO, PageRequest pageRequest);
 }

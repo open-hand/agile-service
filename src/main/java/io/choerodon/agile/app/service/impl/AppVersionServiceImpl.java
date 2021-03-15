@@ -32,7 +32,10 @@ import io.choerodon.agile.infra.mapper.AppVersionIssueRelMapper;
 import io.choerodon.agile.infra.mapper.AppVersionMapper;
 import io.choerodon.agile.infra.mapper.ProductAppVersionRelMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author superlee
@@ -210,6 +213,12 @@ public class AppVersionServiceImpl implements AppVersionService {
         issueRelRecord.setProjectId(projectId);
         issueRelRecord.setIssueId(issueId);
         appVersionIssueRelMapper.delete(issueRelRecord);
+    }
+
+    @Override
+    public Page<AppVersionVO> listAppVersionByProjectId(Long projectId, AppVersionSearchVO appVersionSearchVO, PageRequest pageRequest) {
+        return PageHelper.doPageAndSort(pageRequest, () ->
+                appVersionMapper.listAppVersionByProjectId(projectId, appVersionSearchVO));
     }
 
     private void validateProjectCategories(ProjectVO project) {

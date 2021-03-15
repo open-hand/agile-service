@@ -289,13 +289,15 @@ public class ProductVersionController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询产品版本项目下未关联的应用版本")
     @GetMapping(value = "/{versionId}/un_rel_app_version")
-    public ResponseEntity<List<AppVersionVO>> listUnRelAppVersionByOption(
+    public ResponseEntity<Page<AppVersionVO>> listUnRelAppVersionByOption(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @ApiParam(value = "产品版本id", required = true)
             @Encrypt @PathVariable(name = "versionId") Long versionId,
+            @SortDefault(value = {"service_code", "version"}, direction = Sort.Direction.ASC)
+                    PageRequest pageRequest,
             @ApiParam(value = "筛选条件") AppVersionSearchVO appVersionSearchVO) {
-        return Optional.ofNullable(productVersionService.listUnRelAppVersionByOption(projectId, versionId, appVersionSearchVO))
+        return Optional.ofNullable(productVersionService.listUnRelAppVersionByOption(projectId, versionId, appVersionSearchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(UN_RELATED_APP_VERSION_ERROR));
     }

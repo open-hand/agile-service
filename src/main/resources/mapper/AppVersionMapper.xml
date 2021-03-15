@@ -18,4 +18,25 @@
             #{projectId}
         </foreach>
     </select>
+
+    <select id="listAppVersionByProjectId" resultType="io.choerodon.agile.api.vo.AppVersionVO">
+        SELECT
+        aav.id,
+        aav.group_id,
+        aav.artifact_id,
+        aav.version_alias,
+        aav.version,
+        aav.service_code,
+        aav.project_id,
+        aav.organization_id,
+        aav.object_version_number
+        FROM agile_app_version aav
+        WHERE aav.project_id = #{projectId}
+        <if test="appVersionSearchVO.content != null and !''.equals(appVersionSearchVO.content)">
+            <bind name="contentLike" value="'%' + appVersionSearchVO.content + '%'"/>
+            AND (aav.version LIKE #{contentLike}
+                OR aav.version_alias LIKE #{contentLike}
+                OR aav.service_code LIKE #{contentLike})
+        </if>
+    </select>
 </mapper>
