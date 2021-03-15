@@ -173,7 +173,12 @@ const Issue = observer(() => {
       Modal.close('modal');
     };
   }, []);
-
+  // 退出时若有url筛选 则清空缓存内筛选
+  useEffect(() => () => {
+    if (hasUrlFilter(params)) {
+      localPageCacheStore.remove('issues');
+    }
+  }, [hasUrlFilter, params]);
   const handleCreateIssue = useCallback((issue) => {
     IssueStore.createQuestion(false);
     dataSet.query();
