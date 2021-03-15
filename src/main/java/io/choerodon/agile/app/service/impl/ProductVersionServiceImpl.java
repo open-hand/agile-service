@@ -38,6 +38,7 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -537,15 +538,17 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     }
 
     @Override
-    public List<AppVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO) {
+    public Page<AppVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO, PageRequest pageRequest) {
         if (StringUtils.isEmpty(appVersionSearchVO.getServiceCode())) {
             throw new CommonException("error.serviceCode.empty");
         }
         ProductVersionDTO productVersionDTO = productVersionMapper.selectByPrimaryKey(versionId);
         if (ObjectUtils.isEmpty(productVersionDTO)) {
-            return new ArrayList<>();
+            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         }
-        return productVersionMapper.listUnRelAppVersionByOption(projectId, versionId, appVersionSearchVO);
+        return PageHelper.doPage(pageRequest, () ->
+            productVersionMapper.listUnRelAppVersionByOption(projectId, versionId, appVersionSearchVO)
+        );
     }
 
     @Override

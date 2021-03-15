@@ -562,6 +562,11 @@
         WHERE aav.project_id = #{projectId}
         AND apavr.id IS NULL
         AND aav.service_code = #{appVersionSearchVO.serviceCode}
+        <if test="appVersionSearchVO.content != null and !''.equals(appVersionSearchVO.content)">
+            <bind name="contentLike" value="'%' + appVersionSearchVO.content + '%'"/>
+            AND (aav.version LIKE #{contentLike}
+            OR aav.version_alias LIKE #{contentLike})
+        </if>
     </select>
 
     <resultMap id="versionStoryMap" type="io.choerodon.agile.infra.dto.business.IssueDTO">

@@ -85,9 +85,10 @@ public interface ProductVersionService {
      * @param projectId 项目id
      * @param versionId 产品版本id
      * @param appVersionSearchVO 查询条件
+     * @param pageRequest 分页参数
      * @return 产品版本未关联的应用版本
      */
-    List<AppVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO);
+    Page<AppVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO, PageRequest pageRequest);
 
     /**
      * 创建产品版本与应用版本的关联关系
