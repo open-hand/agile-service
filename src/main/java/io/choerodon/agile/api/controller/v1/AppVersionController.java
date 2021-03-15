@@ -103,6 +103,32 @@ public class AppVersionController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("根据id删除应用版本与产品版本关系")
+    @DeleteMapping(value = "/delete/{appVersionId}/product_version/{productVersionId}")
+    public ResponseEntity<Void> deleteAppVersionProductVersionRel(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "versionId", required = true)
+            @PathVariable @Encrypt Long appVersionId,
+            @PathVariable @Encrypt Long productVersionId) {
+        appVersionService.deleteAppVersionProductVersionRel(projectId, appVersionId, productVersionId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("删除应用版本与问题关系")
+    @DeleteMapping(value = "/delete/{appVersionId}/issue/{issueId}")
+    public ResponseEntity<Void> deleteAppVersionIssueRel(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "versionId", required = true)
+            @PathVariable @Encrypt Long appVersionId,
+            @PathVariable @Encrypt Long issueId) {
+        appVersionService.deleteAppVersionIssueRel(projectId, appVersionId, issueId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "应用版本是否重复")
     @PostMapping(value = "/check")
     public ResponseEntity<Boolean> checkTag(

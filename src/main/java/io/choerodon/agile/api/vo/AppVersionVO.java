@@ -15,7 +15,6 @@ public class AppVersionVO {
     @Encrypt
     private Long id;
     @ApiModelProperty(value = "应用版本父组织标识符")
-    @NotEmpty(message = "error.field.groupIdNotNull")
     private String groupId;
     @NotEmpty(message = "error.field.artifactIdNotNull")
     @ApiModelProperty(value = "应用版本名称")
@@ -26,6 +25,7 @@ public class AppVersionVO {
     @ApiModelProperty(value = "版本别名")
     private String versionAlias;
     @ApiModelProperty(value = "服务编码")
+    @NotEmpty(message = "error.field.serviceCodeNotNull")
     private String serviceCode;
     @ApiModelProperty(value = "项目id")
     private Long projectId;
