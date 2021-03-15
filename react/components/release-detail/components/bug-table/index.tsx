@@ -1,14 +1,26 @@
 import React from 'react';
-import { Button, Table, Tooltip } from 'choerodon-ui/pro';
+import {
+  Button, Modal, Table, Tooltip,
+} from 'choerodon-ui/pro';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import UserTag from '@/components/tag/user-tag';
+import renderStatus from '@/components/column-renderer/status';
+import renderPriority from '@/components/column-renderer/priority';
 import { useReleaseDetailContext } from '../../stores';
 
 const { Column } = Table;
 function BugTable() {
   const { bugTableDataSet, isInProgram } = useReleaseDetailContext();
+  function handleDelete() {
+    Modal.confirm({
+      title: '是否删除？',
+      children: '确定删除该问题项与当前版本及应用版本库的关联关系？',
+      // okText: '确定',
+      // okProps: { disabled: true },
+    });
+  }
   function renderAction({}:RenderProps) {
-    return <Button icon="delete_forever" />;
+    return <Button icon="delete_forever" onClick={handleDelete} />;
   }
   function renderSummary({ value }:RenderProps) {
     return (
@@ -48,8 +60,8 @@ function BugTable() {
     <Table dataSet={bugTableDataSet}>
       <Column name="summary" lock={'left' as any} width={210} renderer={renderSummary} />
       <Column name="issueNum" width={120} tooltip={'overflow' as any} className="c7n-agile-table-cell" />
-      <Column name="status" />
-      <Column name="priority" />
+      <Column name="status" renderer={renderStatus} />
+      <Column name="priority" renderer={renderPriority} />
       <Column name="influenceVersion" />
       <Column name="assigner" className="c7n-agile-table-cell" renderer={({ value }) => (value ? <UserTag data={value} /> : '')} />
       <Column name="action" lock={'right' as any} renderer={renderAction} width={60} />

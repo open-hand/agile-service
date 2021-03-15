@@ -1,4 +1,5 @@
 import React, {
+  useCallback,
   useEffect, useMemo, useRef, useState,
 } from 'react';
 import {
@@ -14,9 +15,11 @@ import './index.less';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Observer, observer } from 'mobx-react-lite';
+import { IModalProps } from '@/common/types';
 
 interface ILinkServiceProps {
-  handleOk?: (data: any) => void
+  handleOk?: ((data: any) => void) | (() => Promise<any>)
+  openProgramConfig?: boolean
 }
 const { Option } = Select;
 const SelectVersion: React.FC<Partial<SelectProps>> = observer(({ ...otherProps }) => {
@@ -102,7 +105,7 @@ const SelectVersion: React.FC<Partial<SelectProps>> = observer(({ ...otherProps 
     </Select>
   );
 });
-const LinkService: React.FC = () => {
+const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({ modal, handleOk }) => {
   const [applicationId, setApplicationId] = useState<string>();
   const [versionType, setVersionType] = useState<string>('tag');
 
@@ -125,6 +128,17 @@ const LinkService: React.FC = () => {
   useEffect(() => {
     ds.current?.init(versionType, undefined);
   }, [ds, versionType]);
+  const handleSubmit = useCallback(async () => {
+    if (!await ds.current?.validate()) {
+      return false;
+    }
+    const data = ds.current?.toData();
+    const result = handleOk && await handleOk(data);
+    return typeof (result) !== 'undefined' ? result : true;
+  }, [ds, handleOk]);
+  useEffect(() => {
+    modal?.handleOk(handleSubmit);
+  }, [handleSubmit, modal]);
   return (
     <Form dataSet={ds}>
       <SelectAppService name="appService" onChange={setApplicationId} />

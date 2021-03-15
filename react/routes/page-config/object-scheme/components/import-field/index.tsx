@@ -41,7 +41,7 @@ const ImportField: React.FC<{ modal?: IModalProps }> = ({ modal }) => {
     pageConfigApi.downloadTemplate().then((res: any) => {
       const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-      fileSaver.saveAs(blob, '字段导入模版.xlsx');
+      fileSaver.saveAs(blob, '字段导入模板.xlsx');
     });
   }
 
@@ -83,7 +83,7 @@ const ImportField: React.FC<{ modal?: IModalProps }> = ({ modal }) => {
   return (
     <div className="im">
       <ImportFormItem
-        title="下载模版"
+        title="下载模板"
         footer={(
           <Button
             color={'primary' as any}
@@ -94,7 +94,7 @@ const ImportField: React.FC<{ modal?: IModalProps }> = ({ modal }) => {
           </Button>
         )}
       >
-        您必须使用模版文件，导入字段信息
+        您必须使用模板文件，导入字段信息
       </ImportFormItem>
       {data.id && <Divider />}
       {data.id && (

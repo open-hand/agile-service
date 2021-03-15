@@ -11,18 +11,19 @@ interface Props extends Partial<SelectProps> {
   valueField?: string
   afterLoad?: (sprints: ILabel[]) => void
   flat?: boolean
+  programMode?: boolean /** 是否为项目群访问模式  */
   projectId?: string
 }
 
 const SelectAppService: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, projectId, ...otherProps
+  dataRef, valueField, afterLoad, flat, projectId, programMode, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
     textField: 'name',
     valueField: 'id',
     request: () => devOpsApi.loadActiveService(),
-    middleWare: (data:any) => {
+    middleWare: (data: any) => {
       if (dataRef) {
         Object.assign(dataRef, {
           current: data,
@@ -33,7 +34,7 @@ const SelectAppService: React.FC<Props> = forwardRef(({
       }
       return data;
     },
-    paging: false,
+    paging: !!programMode,
   }), []);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;

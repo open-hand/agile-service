@@ -224,7 +224,7 @@ class ImportIssue extends Component {
       return (
         <div>
           <span className="c7n-importIssue-text">
-            模版不正确，缺少必要的列
+            模板不正确，缺少必要的列
           </span>
         </div>
       );

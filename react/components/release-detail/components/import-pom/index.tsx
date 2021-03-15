@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
-  DataSet, Modal, Select, Table, Tooltip,
+  DataSet, Modal, Select, Table, TextField, Tooltip,
 } from 'choerodon-ui/pro/lib';
 import { Button } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
@@ -8,30 +8,36 @@ import classnames from 'classnames';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import './index.less';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
+import SelectTeam from '@/components/select/select-team';
+import { IModalProps } from '@/common/types';
+import { versionApi } from '@/api';
 
 interface IImportPomFunctionProps {
   handleOk?: (data: any) => void
+  programMode?: boolean
 }
+
 const { Column } = Table;
-const ImportPom: React.FC = () => {
+const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = ({ modal, handleOk, programMode }) => {
   const prefixCls = 'c7n-agile-release-detail-import-pom';
   const [groupId, setGroupId] = useState<string | undefined>();
+
   const inputRef = useRef<HTMLInputElement>(null);
   const ds = useMemo(() => new DataSet({
-    autoQuery: true,
+    autoQuery: false,
     paging: false,
-    data: [
-      { appService: '应用1', version: '0.18.a', alias: undefined },
-    ],
+    // data: [
+    //   { appService: '应用1', version: '0.18.a', alias: undefined },
+    // ],
     fields: [
-      { name: 'appService', label: '应用服务' },
+      { name: 'artifactId', label: '应用服务' },
       { name: 'version', label: '版本名称' },
-      { name: 'alias', label: '版本别名' },
+      { name: 'versionAlias', label: '版本别名' },
 
     ],
   }), []);
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files && e.target.files[0] && groupId) {
       const file = e.target.files[0];
       if (!file) {
         Choerodon.prompt('请选择文件');
@@ -40,6 +46,9 @@ const ImportPom: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
       inputRef.current?.setAttribute('value', '');
+      versionApi.importPom(formData, groupId!).then((res) => {
+        ds.loadData(res);
+      });
       // issueApi.import(formData).then((res) => {
 
       // }).catch((e) => {
@@ -54,14 +63,13 @@ const ImportPom: React.FC = () => {
     }
     return value;
   }
-  function renderAction({ }: RenderProps) {
-    return <Button icon="delete_forever" />;
+  function renderAction({ record }: RenderProps) {
+    return <Button icon="delete_forever" onClick={() => ds.delete(record!)} />;
   }
   return (
     <div className={prefixCls}>
-      <Select label="groupId" labelLayout={'float' as any} required style={{ width: '6.2rem' }} value={groupId} onChange={setGroupId}>
-        <Select.Option value="0">11</Select.Option>
-      </Select>
+      {programMode ? <SelectTeam labelLayout={'float' as any} style={{ width: '6.2rem' }} /> : null}
+      <TextField label="groupId" labelLayout={'float' as any} required style={{ width: '6.2rem' }} onChange={setGroupId} />
       <div className={`${prefixCls}-body`}>
         <div className={`${prefixCls}-upload`}>
           <span>上传pom文件</span>
@@ -71,9 +79,9 @@ const ImportPom: React.FC = () => {
         </div>
 
         <Table dataSet={ds} queryBar={'none' as any}>
-          <Column name="appService" />
+          <Column name="artifactId" />
           <Column name="version" editor />
-          <Column name="alias" editor renderer={renderAlias} tooltip={'overflow' as any} />
+          <Column name="versionAlias" editor renderer={renderAlias} tooltip={'overflow' as any} />
           <Column name="action" renderer={renderAction} width={65} />
         </Table>
       </div>

@@ -143,7 +143,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   /**
-   * 根据问题类型code查询默认模版
+   * 根据问题类型code查询默认模板
    * @param issueType
    */
   loadTemplateByType(issueType: string, projectId?: string) {
@@ -292,7 +292,7 @@ class PageConfigApi extends Api<PageConfigApi> {
   }
 
   /**
-   * 下载导入模版
+   * 下载导入模板
    */
   downloadTemplate() {
     return axios({
