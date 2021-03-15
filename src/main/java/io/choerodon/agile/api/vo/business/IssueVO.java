@@ -266,6 +266,16 @@ public class IssueVO {
 
     private String environment;
 
+    private List<AppVersionVO> appVersions;
+
+    public List<AppVersionVO> getAppVersions() {
+        return appVersions;
+    }
+
+    public void setAppVersions(List<AppVersionVO> appVersions) {
+        this.appVersions = appVersions;
+    }
+
     public String getErrorMsg() {
         return errorMsg;
     }
