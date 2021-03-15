@@ -172,7 +172,7 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Override
     public List<AppVersionVO> batchCreateAppVersion(Long projectId, List<AppVersionCreateVO> appVersionCreateVOList) {
         List<AppVersionVO> result = new ArrayList<>();
-        if(!CollectionUtils.isEmpty(result)){
+        if(!CollectionUtils.isEmpty(appVersionCreateVOList)){
             appVersionCreateVOList.forEach(appVersionCreateVO -> result.add(createAppVersion(projectId, appVersionCreateVO)));
         }
         return result;

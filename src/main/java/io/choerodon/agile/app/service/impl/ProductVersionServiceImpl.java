@@ -221,6 +221,10 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             List<Long> content = versionIds.getContent();
             List<ProductVersionPageVO> productVersionPageVOS = productVersionPageAssembler.toTargetList(productVersionMapper.
                     queryVersionByIds(projectId, content), ProductVersionPageVO.class);
+            List<Long> userIds = productVersionPageVOS.stream().map(ProductVersionPageVO::getCreationBy).collect(toList());
+            Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Lists.newArrayList(userIds), true);
+            productVersionPageVOS.forEach(productVersionPageVO ->
+                    productVersionPageVO.setCreationUser(usersMap.get(productVersionPageVO.getCreationBy())));
             AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
             if(agilePluginService != null){
                 agilePluginService.settingProgramVersions(productVersionPageVOS,projectId,content);

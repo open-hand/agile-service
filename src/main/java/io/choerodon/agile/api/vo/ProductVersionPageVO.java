@@ -2,6 +2,8 @@ package io.choerodon.agile.api.vo;
 
 
 import io.choerodon.agile.api.vo.business.ProgramVersionInfoVO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -47,6 +49,15 @@ public class ProductVersionPageVO {
 
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
+
+    @ApiModelProperty(value = "创建时间")
+    private Long creationDate;
+
+    @ApiModelProperty(value = "创建人id")
+    private Long creationBy;
+
+    @ApiModelProperty(value = "创建人")
+    private UserMessageDTO creationUser;
 
     @ApiModelProperty(value = "子项目版本关联的项目群版本")
     private List<ProgramVersionInfoVO> programVersionInfoVOS;
@@ -145,5 +156,29 @@ public class ProductVersionPageVO {
 
     public void setProgramVersionInfoVOS(List<ProgramVersionInfoVO> programVersionInfoVOS) {
         this.programVersionInfoVOS = programVersionInfoVOS;
+    }
+
+    public Long getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Long creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public Long getCreationBy() {
+        return creationBy;
+    }
+
+    public void setCreationBy(Long creationBy) {
+        this.creationBy = creationBy;
+    }
+
+    public UserMessageDTO getCreationUser() {
+        return creationUser;
+    }
+
+    public void setCreationUser(UserMessageDTO creationUser) {
+        this.creationUser = creationUser;
     }
 }
