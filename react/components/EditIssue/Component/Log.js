@@ -15,7 +15,7 @@ class Log extends Component {
     this.state = {
       editLogId: undefined,
       editLog: undefined,
-      expand: false,
+      expand: true,
     };
   }
 
