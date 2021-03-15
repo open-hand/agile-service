@@ -72,4 +72,20 @@ public interface AppVersionService {
      * @return 创建的应用版本
      */
     List<AppVersionVO> batchCreateAppVersion(Long projectId, List<AppVersionCreateVO> appVersionCreateVOList);
+
+    /**
+     * 删除应用版本和产品版本的关系
+     * @param projectId 项目id
+     * @param appVersionId 应用版本
+     * @param productVersionId 产品版本
+     */
+    void deleteAppVersionProductVersionRel(Long projectId, Long appVersionId, Long productVersionId);
+
+    /**
+     * 删除应用版本和产品版本的关系
+     * @param projectId 项目id
+     * @param appVersionId 应用版本
+     * @param issueId 问题id
+     */
+    void deleteAppVersionIssueRel(Long projectId, Long appVersionId, Long issueId);
 }

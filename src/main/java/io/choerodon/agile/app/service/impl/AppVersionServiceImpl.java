@@ -1,42 +1,38 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.AppServiceRepVO;
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.app.service.PomService;
-import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
-import io.choerodon.agile.infra.utils.ConvertUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import javax.xml.parsers.ParserConfigurationException;
 
-import io.choerodon.agile.api.vo.AppVersionCreateVO;
-import io.choerodon.agile.api.vo.AppVersionUpdateVO;
-import io.choerodon.agile.api.vo.AppVersionVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.AppVersionService;
+import io.choerodon.agile.app.service.PomService;
 import io.choerodon.agile.infra.dto.AppVersionDTO;
 import io.choerodon.agile.infra.dto.AppVersionIssueRelDTO;
 import io.choerodon.agile.infra.dto.ProductAppVersionRelDTO;
+import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.AppVersionIssueRelMapper;
 import io.choerodon.agile.infra.mapper.AppVersionMapper;
 import io.choerodon.agile.infra.mapper.ProductAppVersionRelMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.multipart.MultipartFile;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * @author superlee
@@ -180,6 +176,40 @@ public class AppVersionServiceImpl implements AppVersionService {
             appVersionCreateVOList.forEach(appVersionCreateVO -> result.add(createAppVersion(projectId, appVersionCreateVO)));
         }
         return result;
+    }
+
+    @Override
+    public void deleteAppVersionProductVersionRel(Long projectId, Long appVersionId, Long productVersionId) {
+        AppVersionDTO record = new AppVersionDTO();
+        record.setId(appVersionId);
+        record.setProjectId(projectId);
+
+        if (appVersionMapper.selectCount(record) <= 0) {
+            throw new CommonException("error.appVersion.notExist");
+        }
+
+        ProductAppVersionRelDTO productRelRecord = new ProductAppVersionRelDTO();
+        productRelRecord.setAppVersionId(appVersionId);
+        productRelRecord.setProjectId(projectId);
+        productRelRecord.setProductVersionId(productVersionId);
+        productAppVersionRelMapper.delete(productRelRecord);
+    }
+
+    @Override
+    public void deleteAppVersionIssueRel(Long projectId, Long appVersionId, Long issueId) {
+        AppVersionDTO record = new AppVersionDTO();
+        record.setId(appVersionId);
+        record.setProjectId(projectId);
+
+        if (appVersionMapper.selectCount(record) <= 0) {
+            throw new CommonException("error.appVersion.notExist");
+        }
+
+        AppVersionIssueRelDTO issueRelRecord = new AppVersionIssueRelDTO();
+        issueRelRecord.setAppVersionId(appVersionId);
+        issueRelRecord.setProjectId(projectId);
+        issueRelRecord.setIssueId(issueId);
+        appVersionIssueRelMapper.delete(issueRelRecord);
     }
 
     private void validateProjectCategories(ProjectVO project) {
