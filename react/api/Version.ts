@@ -30,6 +30,16 @@ interface DragVersionData {
   objectVersionNumber: number,
   versionId: number
 }
+interface IImportPomData {
+  artifactId: string
+  groupId: string
+  id: null | string
+  organizationId: string
+  projectId: string
+  serviceCode: string
+  version: null | string
+  versionAlias: null | string
+}
 class VersionApi extends Api<VersionApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -240,6 +250,17 @@ class VersionApi extends Api<VersionApi> {
    */
   addIssues(versionId: number, issueIds: Array<number>) {
     return axios.post(`${this.prefix}/issues/to_version/${versionId}`, issueIds);
+  }
+
+  importPom(data:any, groupId:string):Promise<IImportPomData[]> {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_version/parse_pom`,
+      data,
+      params: {
+        groupId,
+      },
+    });
   }
 }
 
