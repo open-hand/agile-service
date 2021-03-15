@@ -4,7 +4,7 @@ import SelectFocusLoad from '../SelectFocusLoad';
 
 let id = 0;
 function getOtherSelected(total, key) {
-  let result = []; 
+  let result = [];
   Object.keys(total).forEach((innerKey) => {
     if (String(key) !== String(innerKey)) {
       result = result.concat(total[innerKey]);
@@ -24,7 +24,7 @@ function FieldIssueLinks({ form }) {
 
     // can use data-binding to set
     form.setFieldsValue({
-      keys: keys.filter(key => key !== k),
+      keys: keys.filter((key) => key !== k),
     });
   };
 
@@ -45,7 +45,7 @@ function FieldIssueLinks({ form }) {
   const linkIssues = getFieldValue('linkIssues');
   let adding = keys.length > 0;
   if (linkIssues || linkTypes) {
-    adding = keys.some(key => (!linkIssues || !linkTypes[`${key}]`]) || !linkTypes || !linkIssues[`${key}]`]);
+    adding = keys.some((key) => (!linkIssues || !linkTypes[`${key}]`]) || !linkTypes || !linkIssues[`${key}]`]);
   }
   const selectedIssues = keys.reduce((total, key) => {
     if (linkIssues && linkIssues[`${key}]`]) {
@@ -61,7 +61,7 @@ function FieldIssueLinks({ form }) {
           <FormItem label="关系" style={{ width: '30%', marginBottom: 10 }}>
             {getFieldDecorator(`linkTypes[${k}]`, {
               rules: [{
-                required: true,   
+                required: true,
                 message: '请选择关联关系',
               }],
             })(
@@ -74,14 +74,15 @@ function FieldIssueLinks({ form }) {
           <FormItem label="问题" style={{ marginLeft: 20, width: 'calc(70% - 20px)', marginBottom: 10 }}>
             {getFieldDecorator(`linkIssues[${k}]`, {
               rules: [{
-                required: true,   
+                required: true,
                 message: '请选择关联问题',
               }],
             })(
               <SelectFocusLoad
                 label="问题"
                 type="issues_in_link"
-                optionFilter={issue => !getOtherSelected(selectedIssues, k).includes(issue.issueId)}
+                optionFilter={(issue) => !getOtherSelected(selectedIssues, k).includes(issue.issueId)}
+                getPopupContainer={() => (document.getElementsByClassName('c7n-modal-body') ? document.getElementsByClassName('c7n-modal-body')[0] : document.body)}
               />,
             )}
           </FormItem>
