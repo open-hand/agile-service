@@ -744,9 +744,6 @@
         FROM agile_product_app_version_rel apavr
         WHERE apavr.project_id = #{projectId} AND apavr.product_version_id = #{versionId}))
         <if test='searchVO.searchArgs != null'>
-            <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
-            </if>
             <if test='searchVO.searchArgs.summary != null and searchVO.searchArgs.summary != ""'>
                 AND ai.summary LIKE concat(concat('%',#{searchVO.searchArgs.summary}),'%')
             </if>
