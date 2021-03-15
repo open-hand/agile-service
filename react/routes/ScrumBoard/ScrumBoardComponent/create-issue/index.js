@@ -1,12 +1,8 @@
 import React from 'react';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import CreateIssue from '@/components/CreateIssue';
 import scrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 
-// interface Props {
-//   refresh: (boardId: string) => void,
-// }
 const ScrumBoardCreateIssue = ({ refresh }) => {
   const doingSprint = scrumBoardStore.didCurrentSprintExist ? scrumBoardStore.sprintNotClosedArray.find((item) => item.statusCode === 'started') : {};
   return (
@@ -16,7 +12,7 @@ const ScrumBoardCreateIssue = ({ refresh }) => {
         onCancel={() => {
           scrumBoardStore.setCreateIssueVisible(false);
         }}
-        chosenSprint={scrumBoardStore.quickSearchObj && scrumBoardStore.quickSearchObj.sprintId ? scrumBoardStore.quickSearchObj.sprintId : doingSprint.sprintId}
+        chosenSprint={scrumBoardStore.quickSearchObj?.sprintId || doingSprint?.sprintId}
         onOk={(res, requestData) => {
           scrumBoardStore.setCreateIssueVisible(false);
           // // 创建issue后刷新
