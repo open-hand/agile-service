@@ -185,6 +185,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private WikiRelationMapper wikiRelationMapper;
     @Autowired
     private FieldValueMapper fieldValueMapper;
+    @Autowired
+    private AppVersionIssueRelMapper appVersionIssueRelMapper;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -300,21 +302,51 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
-        handleCreateIssueRearAction(issueConvertDTO, issueId, projectInfoDTO, issueCreateVO.getLabelIssueRelVOList(), issueCreateVO.getComponentIssueRelVOList(), issueCreateVO.getVersionIssueRelVOList(), issueCreateVO.getIssueLinkCreateVOList());
+        handleCreateIssueRearAction(issueConvertDTO, issueId, projectInfoDTO, issueCreateVO);
     }
 
-    private void handleCreateIssueRearAction(IssueConvertDTO issueConvertDTO, Long issueId, ProjectInfoDTO projectInfoDTO, List<LabelIssueRelVO> labelIssueRelVOList, List<ComponentIssueRelVO> componentIssueRelVOList, List<VersionIssueRelVO> versionIssueRelVOList, List<IssueLinkCreateVO> issueLinkCreateVOList) {
+    private void handleCreateIssueRearAction(IssueConvertDTO issueConvertDTO,
+                                             Long issueId,
+                                             ProjectInfoDTO projectInfoDTO,
+                                             IssueCreateVO issueCreateVO) {
         //处理冲刺
         handleCreateSprintRel(issueConvertDTO.getSprintId(), issueConvertDTO.getProjectId(), issueId);
-        handleCreateLabelIssue(labelIssueRelVOList, issueId);
-        handleCreateComponentIssueRel(componentIssueRelVOList, projectInfoDTO.getProjectId(), issueId, projectInfoDTO, issueConvertDTO.getAssigneerCondtiion());
-        handleCreateVersionIssueRel(versionIssueRelVOList, projectInfoDTO.getProjectId(), issueId);
-        handleCreateIssueLink(issueLinkCreateVOList, projectInfoDTO.getProjectId(), issueId);
+        handleCreateLabelIssue(issueCreateVO.getLabelIssueRelVOList(), issueId);
+        handleCreateComponentIssueRel(issueCreateVO.getComponentIssueRelVOList(), projectInfoDTO.getProjectId(), issueId, projectInfoDTO, issueConvertDTO.getAssigneerCondtiion());
+        handleCreateVersionIssueRel(issueCreateVO.getVersionIssueRelVOList(), projectInfoDTO.getProjectId(), issueId);
+        handleCreateIssueLink(issueCreateVO.getIssueLinkCreateVOList(), projectInfoDTO.getProjectId(), issueId);
+        handleCreateAppVersionIssueRel(issueCreateVO.getAppVersions(), projectInfoDTO.getProjectId(), issueId);
+    }
+
+    private void handleCreateAppVersionIssueRel(List<AppVersionVO> appVersions, Long projectId, Long issueId) {
+        if (!ObjectUtils.isEmpty(appVersions)) {
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            appVersions.forEach(x -> {
+                Long appVersionId = x.getId();
+                if (appVersionId == null) {
+                    throw new CommonException("error.issue.app.version.null");
+                }
+                AppVersionIssueRelDTO dto = new AppVersionIssueRelDTO();
+                dto.setIssueId(issueId);
+                dto.setOrganizationId(organizationId);
+                dto.setAppVersionId(appVersionId);
+                dto.setProjectId(projectId);
+                if (appVersionIssueRelMapper.select(dto).isEmpty()) {
+                    appVersionIssueRelMapper.insertSelective(dto);
+                }
+            });
+        }
     }
 
     @Override
     public void afterCreateSubIssue(Long issueId, IssueConvertDTO subIssueConvertDTO, IssueSubCreateVO issueSubCreateVO, ProjectInfoDTO projectInfoDTO) {
-        handleCreateIssueRearAction(subIssueConvertDTO, issueId, projectInfoDTO, issueSubCreateVO.getLabelIssueRelVOList(), issueSubCreateVO.getComponentIssueRelVOList(), issueSubCreateVO.getVersionIssueRelVOList(), issueSubCreateVO.getIssueLinkCreateVOList());
+        IssueCreateVO issueCreateVO = new IssueCreateVO();
+        issueCreateVO.setLabelIssueRelVOList(issueCreateVO.getLabelIssueRelVOList());
+        issueCreateVO.setComponentIssueRelVOList(issueCreateVO.getComponentIssueRelVOList());
+        issueCreateVO.setVersionIssueRelVOList(issueCreateVO.getVersionIssueRelVOList());
+        issueCreateVO.setIssueLinkCreateVOList(issueCreateVO.getIssueLinkCreateVOList());
+        issueCreateVO.setAppVersions(issueCreateVO.getAppVersions());
+        handleCreateIssueRearAction(subIssueConvertDTO, issueId, projectInfoDTO, issueCreateVO);
     }
 
     @Override
@@ -682,6 +714,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (issueUpdateVO.getVersionIssueRelVOList() != null && issueUpdateVO.getVersionType() != null) {
             this.self().handleUpdateVersionIssueRel(issueUpdateVO.getVersionIssueRelVOList(), projectId, issueId, issueUpdateVO.getVersionType());
+        }
+        if (issueUpdateVO.getAppVersions() != null) {
+            this.self().handleUpdateAppVersionIssueRel(issueUpdateVO.getAppVersions(), projectId, issueId);
         }
         return queryIssueByUpdate(projectId, issueId, fieldList);
     }
@@ -1455,6 +1490,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 componentIssueRelService.batchComponentDelete(issueId);
             }
         }
+    }
+
+    @Override
+    public void handleUpdateAppVersionIssueRel(List<AppVersionVO> appVersions, Long projectId, Long issueId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        AppVersionIssueRelDTO dto = new AppVersionIssueRelDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setIssueId(issueId);
+        appVersionIssueRelMapper.delete(dto);
+        handleCreateAppVersionIssueRel(appVersions, projectId, issueId);
     }
 
     private void handleLabelIssue(LabelIssueRelDTO labelIssueRelDTO) {

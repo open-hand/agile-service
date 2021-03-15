@@ -133,6 +133,16 @@ public class IssueCreateVO {
     @Encrypt
     private Long statusId;
 
+    private List<AppVersionVO> appVersions;
+
+    public List<AppVersionVO> getAppVersions() {
+        return appVersions;
+    }
+
+    public void setAppVersions(List<AppVersionVO> appVersions) {
+        this.appVersions = appVersions;
+    }
+
     public List<Long> getProgramVersionIds() {
         return programVersionIds;
     }

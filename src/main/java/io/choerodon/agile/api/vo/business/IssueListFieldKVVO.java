@@ -169,6 +169,16 @@ public class IssueListFieldKVVO {
 
     private UserMessageDTO updateUser;
 
+    private List<AppVersionVO> appVersions;
+
+    public List<AppVersionVO> getAppVersions() {
+        return appVersions;
+    }
+
+    public void setAppVersions(List<AppVersionVO> appVersions) {
+        this.appVersions = appVersions;
+    }
+
     public Boolean getStarBeacon() {
         return starBeacon;
     }
