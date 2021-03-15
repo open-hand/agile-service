@@ -1,35 +1,45 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.business.IssueListVO;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.utils.SpringBeanUtil;
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.api.validator.ProductVersionValidator;
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.assembler.*;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.mapper.ProductVersionMapper;
-import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.agile.infra.utils.RedisUtil;
-import io.choerodon.asgard.saga.feign.SagaClient;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.CustomUserDetails;
-import io.choerodon.core.oauth.DetailsHelper;
+import com.google.common.collect.Lists;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+
+import io.choerodon.agile.api.validator.ProductVersionValidator;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.app.assembler.*;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.mapper.AppVersionMapper;
+import io.choerodon.agile.infra.mapper.ProductAppVersionRelMapper;
+import io.choerodon.agile.infra.mapper.ProductVersionMapper;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.agile.infra.utils.RedisUtil;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
+import io.choerodon.asgard.saga.feign.SagaClient;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/14.
@@ -81,6 +91,14 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     private ProjectConfigService projectConfigService;
     @Autowired
     private StatusService statusService;
+    @Autowired
+    private AppVersionMapper appVersionMapper;
+    @Autowired
+    private ProductAppVersionRelMapper productAppVersionRelMapper;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private BoardAssembler boardAssembler;
 
     private static final String VERSION_PLANNING = "version_planning";
     private static final String NOT_EQUAL_ERROR = "error.projectId.notEqual";
@@ -94,6 +112,10 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     private static final String VERSION_STATUS_RELEASE_CODE = "released";
     private static final String REVOKE_RELEASE_ERROR = "error.productVersion.revokeRelease";
     private static final String SOURCE_VERSION_ERROR = "error.sourceVersionIds.notNull";
+    private static final String APP_VERSION_ID_NULL_ERROR = "error.appVersionId.null";
+    private static final String PRODUCT_VERSION_NULL_ERROR = "error.productVersion.null";
+    private static final String APP_VERSION_NULL_ERROR = "error.appVersion.null";
+    private static final String APP_VERSION_RELATED_EXIST_ERROR = "error.productVersion.appVersion.related.exist";
     private static final String FIX_RELATION_TYPE = "fix";
     private static final String INFLUENCE_RELATION_TYPE = "influence";
 
@@ -500,14 +522,127 @@ public class ProductVersionServiceImpl implements ProductVersionService {
 
     @Override
     public List<AppVersionVO> listAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO) {
-        List<AppVersionVO> result = productVersionMapper.listAppVersionByOption(projectId, versionId, appVersionSearchVO);
+        ProductVersionDTO productVersionDTO = productVersionMapper.selectByPrimaryKey(versionId);
+        if (ObjectUtils.isEmpty(productVersionDTO)) {
+            return new ArrayList<>();
+        }
 
-        return result;
+        return productVersionMapper.listAppVersionByOption(projectId, versionId, appVersionSearchVO);
     }
 
     @Override
     public List<AppVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO) {
-        List<AppVersionVO> result = productVersionMapper.listUnRelAppVersionByOption(projectId, versionId, appVersionSearchVO);
+        if (StringUtils.isEmpty(appVersionSearchVO.getServiceCode())) {
+            throw new CommonException("error.serviceCode.empty");
+        }
+        ProductVersionDTO productVersionDTO = productVersionMapper.selectByPrimaryKey(versionId);
+        if (ObjectUtils.isEmpty(productVersionDTO)) {
+            return new ArrayList<>();
+        }
+        return productVersionMapper.listUnRelAppVersionByOption(projectId, versionId, appVersionSearchVO);
+    }
+
+    @Override
+    public List<AppVersionVO> createRelAppVersion(Long projectId, Long versionId, ProductVersionRelAppVersionVO productRelAppVersion) {
+        if (CollectionUtils.isEmpty(productRelAppVersion.getAppVersionIds())) {
+            throw new CommonException(APP_VERSION_ID_NULL_ERROR);
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        ProductVersionDTO productVersionRecord = new ProductVersionDTO();
+        productVersionRecord.setVersionId(versionId);
+        productVersionRecord.setProjectId(projectId);
+
+        ProductVersionDTO productVersion = productVersionMapper.selectOne(productVersionRecord);
+        if (ObjectUtils.isEmpty(productVersion)) {
+            throw new CommonException(PRODUCT_VERSION_NULL_ERROR);
+        }
+
+        String ids = productRelAppVersion.getAppVersionIds().stream().map(String::valueOf).collect(Collectors.joining(","));
+        List<AppVersionDTO> appVersionList = appVersionMapper.selectByIds(ids);
+        if (CollectionUtils.isEmpty(appVersionList) || appVersionList.size() < productRelAppVersion.getAppVersionIds().size()) {
+            throw new CommonException(APP_VERSION_NULL_ERROR);
+        }
+
+        appVersionList.forEach(appVersion -> {
+            ProductAppVersionRelDTO newRelDTO = new ProductAppVersionRelDTO();
+            newRelDTO.setAppVersionId(appVersion.getId());
+            newRelDTO.setProductVersionId(versionId);
+            ProductAppVersionRelDTO oldRelDTO = productAppVersionRelMapper.selectOne(newRelDTO);
+            if (!ObjectUtils.isEmpty(oldRelDTO)) {
+                throw new CommonException(APP_VERSION_RELATED_EXIST_ERROR);
+            }
+            newRelDTO.setProjectId(projectId);
+            newRelDTO.setOrganizationId(organizationId);
+            productAppVersionRelMapper.insertSelective(newRelDTO);
+        });
+        return productVersionMapper.listAppVersionByOption(projectId, versionId, null);
+    }
+
+    @Override
+    public List<IssueListFieldKVVO> listRelStoryByOption(Long projectId, Long versionId, SearchVO searchVO) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        boardAssembler.handleOtherArgs(searchVO);
+
+        List<IssueDTO> issueDTOList = productVersionMapper.listRelStoryByOption(projectId, versionId, searchVO);
+
+        Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
+        List<IssueListFieldKVVO> result = new ArrayList<>(issueDTOList.size());
+        Set<Long> userIds = issueDTOList.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
+        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Lists.newArrayList(userIds), true);
+        issueDTOList.forEach(issueDO -> {
+            UserMessageDTO assigneeUserDO = usersMap.get(issueDO.getAssigneeId());
+            String assigneeName = assigneeUserDO != null ? assigneeUserDO.getName() : null;
+            String assigneeLoginName = assigneeUserDO != null ? assigneeUserDO.getLoginName() : null;
+            String assigneeRealName = assigneeUserDO != null ? assigneeUserDO.getRealName() : null;
+            String assigneeImageUrl = assigneeUserDO != null ? assigneeUserDO.getImageUrl() : null;
+
+            IssueListFieldKVVO issueListField = modelMapper.map(issueDO, IssueListFieldKVVO.class);
+            issueListField.setAssigneeName(assigneeName);
+            issueListField.setAssigneeLoginName(assigneeLoginName);
+            issueListField.setAssigneeRealName(assigneeRealName);
+            issueListField.setAssigneeImageUrl(assigneeImageUrl);
+            issueListField.setStatusVO(statusMap.get(issueDO.getStatusId()));
+            List<AppVersionVO> appVersionList = modelMapper.map(issueDO.getAppVersions(), new TypeToken<List<AppVersionVO>>(){}.getType());
+            issueListField.setAppVersions(appVersionList);
+            result.add(issueListField);
+        });
+        AgilePluginService expandBean = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (!ObjectUtils.isEmpty(expandBean) && !CollectionUtils.isEmpty(result)) {
+            expandBean.doToIssueListFieldKVDTO(projectId, result);
+        }
+        return result;
+    }
+
+    @Override
+    public List<IssueListFieldKVVO> listRelBugByOption(Long projectId, Long versionId, SearchVO searchVO) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        boardAssembler.handleOtherArgs(searchVO);
+
+        List<IssueDTO> issueDTOList = productVersionMapper.listRelBugByOption(projectId, versionId, searchVO);
+
+        Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
+        List<IssueListFieldKVVO> result = new ArrayList<>(issueDTOList.size());
+        Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
+        Set<Long> userIds = issueDTOList.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
+        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Lists.newArrayList(userIds), true);
+        issueDTOList.forEach(issueDO -> {
+            UserMessageDTO assigneeUserDO = usersMap.get(issueDO.getAssigneeId());
+            String assigneeName = assigneeUserDO != null ? assigneeUserDO.getName() : null;
+            String assigneeLoginName = assigneeUserDO != null ? assigneeUserDO.getLoginName() : null;
+            String assigneeRealName = assigneeUserDO != null ? assigneeUserDO.getRealName() : null;
+            String assigneeImageUrl = assigneeUserDO != null ? assigneeUserDO.getImageUrl() : null;
+
+            IssueListFieldKVVO issueListField = modelMapper.map(issueDO, IssueListFieldKVVO.class);
+            issueListField.setAssigneeName(assigneeName);
+            issueListField.setAssigneeLoginName(assigneeLoginName);
+            issueListField.setAssigneeRealName(assigneeRealName);
+            issueListField.setAssigneeImageUrl(assigneeImageUrl);
+            List<VersionIssueRelVO> versionList = modelMapper.map(issueDO.getVersionIssueRelDTOS(), new TypeToken<List<VersionIssueRelVO>>(){}.getType());
+            issueListField.setVersionIssueRelVOS(versionList);
+            issueListField.setStatusVO(statusMap.get(issueDO.getStatusId()));
+            issueListField.setPriorityVO(priorityMap.get(issueDO.getPriorityId()));
+            result.add(issueListField);
+        });
         return result;
     }
 }

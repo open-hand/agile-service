@@ -459,6 +459,12 @@ public class EncryptionUtils {
             search.getOtherArgs().put("updatorIds",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
+
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("appVersion"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("appVersion",
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
     }
 
     public static void decryptUserId(SearchVO search, Optional<Map<String, Object>> oaMapOptional) {

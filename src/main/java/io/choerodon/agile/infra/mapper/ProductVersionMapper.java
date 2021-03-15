@@ -172,4 +172,24 @@ public interface ProductVersionMapper extends BaseMapper<ProductVersionDTO> {
      * @return 产品版本未关联的应用版本
      */
     List<AppVersionVO> listUnRelAppVersionByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("appVersionSearchVO") AppVersionSearchVO appVersionSearchVO);
+
+    /**
+     * 查询产品版本关联的已完成故事
+     *
+     * @param projectId 项目id
+     * @param versionId 产品版本id
+     * @param searchVO  查询参数
+     * @return 产品版本关联的已完成故事
+     */
+    List<IssueDTO> listRelStoryByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("searchVO") SearchVO searchVO);
+
+    /**
+     * 查询产品版本关联的已完成故事
+     *
+     * @param projectId 项目id
+     * @param versionId 产品版本id
+     * @param searchVO  查询参数
+     * @return 产品版本关联的已完成故事
+     */
+    List<IssueDTO> listRelBugByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("searchVO") SearchVO searchVO);
 }
