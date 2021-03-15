@@ -15,22 +15,15 @@ public class AppVersionSearchVO {
     @Encrypt
     private Long id;
     @ApiModelProperty(value = "应用版本父组织标识符")
-    @NotEmpty(message = "error.field.groupIdNotNull")
     private String groupId;
-    @NotEmpty(message = "error.field.artifactIdNotNull")
     @ApiModelProperty(value = "应用版本名称")
     private String artifactId;
-    @NotEmpty(message = "error.field.versionNotNull")
     @ApiModelProperty(value = "应用版本")
     private String version;
     @ApiModelProperty(value = "版本别名")
     private String versionAlias;
     @ApiModelProperty(value = "服务编码")
     private String serviceCode;
-    @ApiModelProperty(value = "项目id")
-    private Long projectId;
-    @ApiModelProperty(value = "组织id")
-    private Long organizationId;
 
     public Long getId() {
         return id;
@@ -78,21 +71,5 @@ public class AppVersionSearchVO {
 
     public void setServiceCode(String serviceCode) {
         this.serviceCode = serviceCode;
-    }
-
-    public Long getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(Long projectId) {
-        this.projectId = projectId;
-    }
-
-    public Long getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
     }
 }

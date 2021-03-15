@@ -1,13 +1,14 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.IssueListVO;
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.infra.dto.ProductVersionDTO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
 import java.util.Date;
 import java.util.List;
+
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.infra.dto.ProductVersionDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/14.
@@ -87,4 +88,31 @@ public interface ProductVersionService {
      * @return 产品版本未关联的应用版本
      */
     List<AppVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO);
+
+    /**
+     * 创建产品版本与应用版本的关联关系
+     * @param projectId 项目id
+     * @param versionId 产品版本id
+     * @param productRelAppVersion 应用版本id
+     * @return 产品版本下关联的应用版本
+     */
+    List<AppVersionVO> createRelAppVersion(Long projectId, Long versionId, ProductVersionRelAppVersionVO productRelAppVersion);
+
+    /**
+     * 查询产品版本项目下关联的应用版本下已完成故事
+     * @param projectId 项目id
+     * @param versionId 产品版本id
+     * @param searchVO 查询参数
+     * @return 产品版本项目下关联的应用版本下已完成故事
+     */
+    List<IssueListFieldKVVO> listRelStoryByOption(Long projectId, Long versionId, SearchVO searchVO);
+
+    /**
+     * 查询产品版本项目下关联的应用版本下已完成缺陷
+     * @param projectId 项目id
+     * @param versionId 产品版本id
+     * @param searchVO 查询参数
+     * @return 产品版本项目下关联的应用版本下已完成缺陷
+     */
+    List<IssueListFieldKVVO> listRelBugByOption(Long projectId, Long versionId, SearchVO searchVO);
 }

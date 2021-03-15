@@ -2,8 +2,10 @@ package io.choerodon.agile.api.controller.v1;
 
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.ProductVersionService;
 
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -50,6 +52,9 @@ public class ProductVersionController {
     private static final String REVOKE_ARCHIVED_ERROR = "error.productVersion.revokeArchived";
     private static final String RELATED_APP_VERSION_ERROR = "error.productVersion.related.appVersion.query";
     private static final String UN_RELATED_APP_VERSION_ERROR = "error.productVersion.unrelated.appVersion.query";
+    private static final String RELATE_APP_VERSION_ERROR = "error.productVersion.appVersion.relate";
+    private static final String COMPLETED_STORY_ERROR = "error.productVersion.completed.story.query";
+    private static final String COMPLETED_BUG_ERROR = "error.productVersion.completed.bug.query";
 
     @Autowired
     private ProductVersionService productVersionService;
@@ -273,9 +278,9 @@ public class ProductVersionController {
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @ApiParam(value = "产品版本id", required = true)
-            @PathVariable(name = "versionId") Long versionId,
+            @Encrypt @PathVariable(name = "versionId") Long versionId,
             @ApiParam(value = "筛选条件")
-            @RequestParam AppVersionSearchVO appVersionSearchVO) {
+            AppVersionSearchVO appVersionSearchVO) {
         return Optional.ofNullable(productVersionService.listAppVersionByOption(projectId, versionId, appVersionSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(RELATED_APP_VERSION_ERROR));
@@ -288,11 +293,57 @@ public class ProductVersionController {
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @ApiParam(value = "产品版本id", required = true)
-            @PathVariable(name = "versionId") Long versionId,
-            @ApiParam(value = "筛选条件")
-            @RequestParam AppVersionSearchVO appVersionSearchVO) {
+            @Encrypt @PathVariable(name = "versionId") Long versionId,
+            @ApiParam(value = "筛选条件") AppVersionSearchVO appVersionSearchVO) {
         return Optional.ofNullable(productVersionService.listUnRelAppVersionByOption(projectId, versionId, appVersionSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(UN_RELATED_APP_VERSION_ERROR));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "产品版本关联应用版本")
+    @PostMapping(value = "/{versionId}/rel_app_version")
+    public ResponseEntity<List<AppVersionVO>> createRelAppVersion(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "产品版本id", required = true)
+            @Encrypt @PathVariable(name = "versionId") Long versionId,
+            @ApiParam(value = "要关联的应用版本")
+            @RequestBody ProductVersionRelAppVersionVO productRelAppVersion) {
+        return Optional.ofNullable(productVersionService.createRelAppVersion(projectId, versionId, productRelAppVersion))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
+                .orElseThrow(() -> new CommonException(RELATE_APP_VERSION_ERROR));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询产品版本项目下关联的应用版本下已完成故事")
+    @PostMapping(value = "/{versionId}/story")
+    public ResponseEntity<List<IssueListFieldKVVO>> listRelStoryByOption(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "产品版本id", required = true)
+            @Encrypt @PathVariable(name = "versionId") Long versionId,
+            @ApiParam(value = "筛选条件")
+            @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return Optional.ofNullable(productVersionService.listRelStoryByOption(projectId, versionId, searchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException(COMPLETED_STORY_ERROR));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询产品版本项目下关联的应用版本下已完成缺陷")
+    @PostMapping(value = "/{versionId}/bug")
+    public ResponseEntity<List<IssueListFieldKVVO>> listRelBugByOption(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "产品版本id", required = true)
+            @Encrypt @PathVariable(name = "versionId") Long versionId,
+            @ApiParam(value = "筛选条件")
+            @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return Optional.ofNullable(productVersionService.listRelBugByOption(projectId, versionId, searchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException(COMPLETED_BUG_ERROR));
     }
 }

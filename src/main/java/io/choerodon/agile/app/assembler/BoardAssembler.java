@@ -24,6 +24,7 @@ public class BoardAssembler extends AbstractAssembler {
             assertNull(args, "epic");
             assertNull(args, "label");
             assertNull(args, "assigneeId");
+            assertNull(args, "feature");
         }
     }
 
