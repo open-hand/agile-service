@@ -33,8 +33,17 @@ public interface StaticFileCompressService {
     /**
      * 获取index文件相对路径
      * @param multipartFile multipartFile
+     * @param staticFileCompressDTO staticFileCompressDTO
      * @return 相对路径
      * @throws IOException IOException
      */
-    String getIndexPrefixPath(MultipartFile multipartFile) throws IOException;
+    String getIndexPrefixPath(MultipartFile multipartFile, StaticFileCompressDTO staticFileCompressDTO) throws IOException;
+
+    /**
+     * 获取编码
+     * @param multipartFile 文件
+     * @param suffix 前缀
+     * @return 编码
+     */
+    String getEncoding(MultipartFile multipartFile, String suffix);
 }

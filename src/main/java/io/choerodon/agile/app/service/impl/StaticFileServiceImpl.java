@@ -167,7 +167,7 @@ public class StaticFileServiceImpl implements StaticFileService {
         try {
             staticFileCompressDTO.setIn(multipartFile.getInputStream());
             staticFileCompressDTO.setSize(multipartFile.getBytes().length);
-            staticFileCompressDTO.setPrefixPath(staticFileCompressService.getIndexPrefixPath(multipartFile));
+            staticFileCompressDTO.setPrefixPath(staticFileCompressService.getIndexPrefixPath(multipartFile, staticFileCompressDTO));
         } catch (IOException e) {
             throw new CommonException(IO_EXCEPTION_CODE);
         }
