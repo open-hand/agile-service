@@ -139,7 +139,7 @@ export default {
     props: {
       filterOption,
     },
-    request: () => epicApi.loadEpicsForSelect(),
+    request: () => epicApi.loadEpics(),
     render: (epic) => (
       <Option
         key={epic.issueId}
