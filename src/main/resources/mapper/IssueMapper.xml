@@ -1070,6 +1070,19 @@
                 #{userId}
             </foreach>
         </if>
+        <if test='searchVO.otherArgs.appVersion != null and searchVO.otherArgs.appVersion.size > 0'>
+            AND (
+            ai.issue_id in (
+                SELECT aavir1.issue_id
+                FROM agile_app_version_issue_rel aavir1
+                WHERE aavir1.app_version_id in
+                <foreach collection="searchVO.otherArgs.appVersion" item="appVersionId" open="(" separator=","
+                         close=")">
+                    #{appVersionId}
+                </foreach>
+            )
+            )
+        </if>
     </sql>
 
     <sql id="otherArgsSql2">
