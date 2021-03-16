@@ -351,7 +351,7 @@ public class ProductVersionController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建应用版本并关联产品版本")
-    @PostMapping(value = "/{versionId}/create_rel_app_version")
+    @PostMapping(value = "/{versionId}/create_app_version")
     public ResponseEntity<List<AppVersionVO>> createAndRelAppVersion(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
