@@ -337,7 +337,7 @@ public class ExcelUtil {
      * @param fontSize 字体大小
      * @return 单元格样式
      */
-    protected static CellStyle createCellStyle(SXSSFWorkbook workbook, short fontSize, short aligment, Boolean bold) {
+    protected static CellStyle createCellStyle(Workbook workbook, short fontSize, short aligment, Boolean bold) {
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setAlignment(aligment);
         //垂直居中

@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.List;
 import java.util.Map;
@@ -130,4 +131,20 @@ public interface BacklogExpandService {
                                                     Long programVersionId,
                                                     Long organizationId,
                                                     Long programId);
+
+    /**
+     * 版本关联的需求写入excel
+     *
+     * @param workbook
+     * @param sheetName
+     * @param projectId
+     * @param programVersionId
+     * @param startRow
+     * @return
+     */
+    int writeProgramVersionBacklog(Workbook workbook,
+                                   String sheetName,
+                                   Long projectId,
+                                   Long programVersionId,
+                                   int startRow);
 }
