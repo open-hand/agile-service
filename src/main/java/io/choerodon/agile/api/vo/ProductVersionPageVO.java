@@ -54,7 +54,7 @@ public class ProductVersionPageVO {
     private Long creationDate;
 
     @ApiModelProperty(value = "创建人id")
-    private Long creationBy;
+    private Long createdBy;
 
     @ApiModelProperty(value = "创建人")
     private UserMessageDTO creationUser;
@@ -166,12 +166,12 @@ public class ProductVersionPageVO {
         this.creationDate = creationDate;
     }
 
-    public Long getCreationBy() {
-        return creationBy;
+    public Long getCreatedBy() {
+        return createdBy;
     }
 
-    public void setCreationBy(Long creationBy) {
-        this.creationBy = creationBy;
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
     }
 
     public UserMessageDTO getCreationUser() {

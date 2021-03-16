@@ -177,7 +177,11 @@
             apv.release_date,
             apv.status_code,
             alv.name AS status_name,
-            apv.project_id
+            apv.project_id,
+            apv.object_version_number,
+            apv.release_date,
+            apv.creation_date,
+            apv.created_by
         FROM agile_product_version apv
             LEFT JOIN lookup_value alv ON alv.value_code = apv.status_code
         WHERE apv.project_id = #{projectId} AND apv.version_id = #{versionId}
