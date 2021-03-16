@@ -2,7 +2,7 @@ import React, {
   useMemo, useRef, useState, useCallback, useEffect,
 } from 'react';
 import {
-  DataSet, Modal, Select, Spin, Table, TextField, Tooltip,
+  DataSet, Form, Modal, Select, Spin, Table, TextField, Tooltip,
 } from 'choerodon-ui/pro/lib';
 import { Button } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
@@ -14,6 +14,7 @@ import SelectTeam from '@/components/select/select-team';
 import { IModalProps } from '@/common/types';
 import { versionApi } from '@/api';
 import Loading from '@/components/Loading';
+import { observer } from 'mobx-react-lite';
 
 interface IImportPomFunctionProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
@@ -24,8 +25,26 @@ const { Column } = Table;
 const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = ({ modal, handleOk, programMode }) => {
   const prefixCls = 'c7n-agile-release-detail-import-pom';
   const [groupId, setGroupId] = useState<string | undefined>();
+  const [subProjectId, setSubProjectId] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const formDs = useMemo(() => new DataSet({
+    autoCreate: true,
+    fields: [
+      { name: 'subProject', label: '所属项目', required: programMode },
+      { name: 'groupId', label: 'GroupId', required: true },
+    ],
+  }), [programMode]);
+  const disabledUpload = useMemo(() => {
+    if (!programMode && formDs.current?.get('groupId')) {
+      return false;
+    }
+    if (programMode && formDs.current?.get('groupId') && formDs.current?.get('subProject')) {
+      return false;
+    }
+    return true;
+  }, [formDs, formDs.current?.get('groupId'), formDs.current?.get('subProject')]);
+
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
     paging: false,
@@ -50,7 +69,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
       formData.append('file', file);
       inputRef.current?.setAttribute('value', '');
       setLoading(true);
-      versionApi.importPom(formData, groupId!).then((res) => {
+      (programMode ? versionApi.importProgramPom(formData, groupId!, subProjectId!) : versionApi.importPom(formData, groupId!)).then((res: any) => {
         ds.loadData(res);
       }).finally(() => {
         setLoading(false);
@@ -86,13 +105,16 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
   }
   return (
     <div className={prefixCls}>
-      {programMode ? <SelectTeam labelLayout={'float' as any} style={{ width: '6.2rem' }} /> : null}
-      <TextField label="groupId" labelLayout={'float' as any} required style={{ width: '6.2rem' }} onChange={setGroupId} />
+      <Form dataSet={formDs} style={{ width: '6.2rem' }}>
+        {programMode ? <SelectTeam name="subProject" onChange={setSubProjectId} /> : null}
+
+        <TextField name="groupId" onChange={setGroupId} />
+      </Form>
       <div className={`${prefixCls}-body`}>
         <div className={`${prefixCls}-upload`}>
           <span>上传pom文件</span>
-          <Tooltip title={!groupId ? '请先选择groupId' : undefined}>
-            <Button disabled={!groupId} funcType="raised" size={'small' as any} type="primary" style={{ color: groupId ? 'white' : undefined }} icon="file_upload" shape="circle" onClick={() => inputRef.current?.click()} />
+          <Tooltip title={disabledUpload ? `请先选择groupId${programMode ? '和所属项目' : ''}` : undefined}>
+            <Button disabled={disabledUpload} funcType="raised" size={'small' as any} type="primary" style={{ color: !disabledUpload ? 'white' : undefined }} icon="file_upload" shape="circle" onClick={() => inputRef.current?.click()} />
           </Tooltip>
         </div>
 
@@ -114,6 +136,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     </div>
   );
 };
+const ObserverImportPom = observer(ImportPom);
 function openImportPomModal(props: IImportPomFunctionProps) {
   const key = Modal.key();
   Modal.open({
@@ -124,7 +147,7 @@ function openImportPomModal(props: IImportPomFunctionProps) {
     },
     className: classnames('c7n-agile-export-issue-modal'),
     drawer: true,
-    children: <ImportPom {...props} />,
+    children: <ObserverImportPom {...props} />,
   });
 }
 export { openImportPomModal };

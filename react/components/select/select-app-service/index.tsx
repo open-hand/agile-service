@@ -1,7 +1,7 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { devOpsApi } from '@/api';
+import { devOpsApi, versionApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
 import FlatSelect from '@/components/flat-select';
@@ -11,7 +11,7 @@ interface Props extends Partial<SelectProps> {
   valueField?: string
   afterLoad?: (sprints: ILabel[]) => void
   flat?: boolean
-  programMode?: boolean /** 是否为项目群访问模式  */
+  programMode?: string /** 是否为项目群访问模式  */
   projectId?: string
 }
 
@@ -34,7 +34,7 @@ const SelectAppService: React.FC<Props> = forwardRef(({
       }
       return data;
     },
-    paging: !!programMode,
+    paging: false,
   }), []);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
