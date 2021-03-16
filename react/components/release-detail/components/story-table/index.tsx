@@ -1,23 +1,37 @@
 import React from 'react';
-import { Button, Table, Tooltip } from 'choerodon-ui/pro';
+import {
+  Button, Modal, Table, Tooltip,
+} from 'choerodon-ui/pro';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import UserTag from '@/components/tag/user-tag';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { versionApi } from '@/api';
 import { useReleaseDetailContext } from '../../stores';
 
 const { Column } = Table;
 function StoryTable() {
   const { storyTableDataSet, isInProgram } = useReleaseDetailContext();
-  function renderAction({}:RenderProps) {
-    return <Button icon="delete_forever" />;
+
+  function handleDelete(record: Record) {
+    Modal.confirm({
+      title: '是否删除关联',
+      children: `您确定要删除问题${record.get('issueNum')}与版本的关联？`,
+      onOk: () => versionApi.deleteLinkIssueId(record.get('issueId'), '').then((res:any) => {
+        storyTableDataSet.query();
+      }),
+    });
   }
-  function renderSummary({ value }:RenderProps) {
+  function renderAction({ record }: RenderProps) {
+    return <Button icon="delete_forever" onClick={() => handleDelete(record!)} />;
+  }
+  function renderSummary({ value }: RenderProps) {
     return (
       <Tooltip title={value} placement="topLeft">
         <span className="c7n-agile-table-cell-click">{value}</span>
       </Tooltip>
     );
   }
-  function renderEpicOrFeature({ record, name: fieldName }:RenderProps) {
+  function renderEpicOrFeature({ record, name: fieldName }: RenderProps) {
     const color = fieldName === 'epic' ? record?.get('epicColor') : record?.get('featureColor');
     const name = fieldName === 'epic' ? record?.get('epicName') : record?.get('featureName');
     return name ? (

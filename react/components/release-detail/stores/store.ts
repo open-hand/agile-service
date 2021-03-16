@@ -1,6 +1,6 @@
 import { observable, action, computed } from 'mobx';
-import { set, get } from 'lodash';
-import { projectApi, versionApi } from '@/api';
+import { set, get, pick } from 'lodash';
+import { IAppVersionData, projectApi, versionApi } from '@/api';
 import IReleaseDetailData from '../types';
 
 interface EventsProps {
@@ -20,7 +20,7 @@ class ReleaseDetailStore {
 
   @observable current: IReleaseDetailData | undefined;
 
-  @observable appServiceList: Array<any> = [];
+  @observable appServiceList: Array<IAppVersionData & { name: string, type?: any }> = [];
 
   @observable visible: boolean = false;
 
@@ -73,23 +73,26 @@ class ReleaseDetailStore {
     }
   }
 
-  @action async loadData(id: string = this.getCurrentData.id) {
+  @action async loadData(id: string = this.getCurrentData.id, ignoreLoad: string[] = []) {
     this.loading = true;
-    const versionData = await versionApi.load(id);
-    const versionList = await versionApi.loadAppVersionList(id);
+    const versionData = ignoreLoad.includes('detail') ? this.current : await versionApi.load(id);
+
+    const versionList = ignoreLoad.includes('app') ? this.getAppServiceList : await versionApi.loadAppVersionList(id);
     this.setAppServiceList(versionList.map((i: any) => ({ ...i, name: i.versionAlias || i.version })));
+
     this.setCurrentData({ ...versionData, id: versionData.versionId });
     await this.events.load({ versionData });
     this.loading = false;
   }
 
-  @action('更新PI目标详情')
+  @action('更新版本详情')
   async update(key: string, value: any) {
-
-    // set(data, key, value);
-    // await piAimApi.update(data);
-    // await this.loadData();
-    // await this.events.update(data);
+    this.loading = true;
+    const data = pick(this.getCurrentData!, ['description', 'expectReleaseDate', 'name', 'objectVersionNumber', 'projectId', 'startDate']);
+    set(data, key, value);
+    await versionApi.update(this.getCurrentData.versionId, data);
+    await this.loadData();
+    await this.events.update(data);
   }
 
   @action select(data: string | IReleaseDetailData) {

@@ -7,7 +7,7 @@ interface Props {
 const Field: React.FC<Props> = ({ label, children }) => (
   <div className={styles.field}>
     <div className={styles.label}>{`${label}:`}</div>
-    {children}
+    {typeof (children) === 'string' ? <span className={styles.text}>{children}</span> : children}
   </div>
 );
 

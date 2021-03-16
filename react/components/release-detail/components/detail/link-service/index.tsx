@@ -1,14 +1,17 @@
 import CustomIcon from '@/components/custom-icon';
-import { Button, Icon, Tooltip } from 'choerodon-ui/pro/lib';
+import {
+  Button, Icon, Modal, Tooltip,
+} from 'choerodon-ui/pro/lib';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { versionApi } from '@/api';
+import { IAppVersionData, versionApi } from '@/api';
 import { useReleaseDetailContext } from '../../../stores';
 import { openImportPomModal } from '../../import-pom';
 import Section from '../../section';
 import { openLinkServiceModal } from '../../link-service-modal';
 import './index.less';
+import { openEditAppVersionModal } from './EditAppVersionModal';
 
 const LinkService: React.FC = () => {
   const { disabled, prefixCls, store } = useReleaseDetailContext();
@@ -19,9 +22,13 @@ const LinkService: React.FC = () => {
       store.loadData();
     });
   }
-  function handleDelete(v: string) {
-    versionApi.deleteLinkAppVersion(detailData.versionId, v).then(() => {
-      store.loadData();
+  function handleDelete(v: IAppVersionData) {
+    Modal.confirm({
+      title: '删除应用版本',
+      children: `您确定要删除关联的应用版本【${v.versionAlias || v.version}】？`,
+      onOk: () => versionApi.deleteLinkAppVersion(detailData.versionId, v.id!).then(() => {
+        store.loadData();
+      }),
     });
   }
   async function handleImportPom(pomData: any) {
@@ -30,6 +37,7 @@ const LinkService: React.FC = () => {
     store.loadData();
     return true;
   }
+
   return (
     <Section
       title="关联应用版本"
@@ -66,12 +74,12 @@ const LinkService: React.FC = () => {
       contentClassName={`${prefixCls}-link-service`}
     >
       {data.map((item) => (
-        <div className={`${prefixCls}-link-service-item`}>
+        <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => openEditAppVersionModal({ data: item, handleOk: store.loadData })}>
           <span className={`${prefixCls}-link-service-item-left`}>
             {item.type === 'service' ? <Icon type="local_offer" style={{ fontSize: 15 }} /> : <CustomIcon type="icon-pom-multiColor" width={17} height={17} />}
             <span className={`${prefixCls}-link-service-item-left-text`}>{item.name}</span>
           </span>
-          <Button icon="delete_forever" className={`${prefixCls}-link-service-item-btn`} onClick={() => handleDelete(item.id)} />
+          <Button icon="delete_forever" className={`${prefixCls}-link-service-item-btn`} onClick={() => handleDelete(item)} />
         </div>
       ))}
     </Section>

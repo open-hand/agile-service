@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DatePicker } from 'choerodon-ui/pro/lib';
 import TextEditToggle from '@/components/TextEditTogglePro';
+import moment, { Moment } from 'moment';
 import Field from '../field';
 import { useReleaseDetailContext } from '../../../stores';
 
@@ -10,16 +11,18 @@ interface Props {
 }
 const BusinessValue: React.FC<Props> = () => {
   const { disabled, store } = useReleaseDetailContext();
-  const { expectReleaseDate } = store.getCurrentData;
+  const { expectReleaseDate: originData } = store.getCurrentData;
+  const expectReleaseDate = useMemo(() => (originData ? moment(originData, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD') : undefined), [originData]);
+
   return (
 
     <Field label="预计发布时间">
       <TextEditToggle
-        onSubmit={(value: string) => {
-          store.update('expectReleaseDate', value);
+        onSubmit={(value: Moment | null) => {
+          store.update('expectReleaseDate', value?.format('YYYY-MM-DD HH:mm:ss'));
         }}
         disabled={disabled}
-        initValue={expectReleaseDate}
+        initValue={expectReleaseDate ? moment(expectReleaseDate, 'YYYY-MM-DD') : undefined}
         submitTrigger={['blur', 'change']}
         editor={() => (
           <DatePicker style={{ width: '100%' }} />

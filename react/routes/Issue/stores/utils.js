@@ -36,6 +36,7 @@ function transformSystemFilter(data) {
     creatorIds,
     updatorIds,
     environment,
+    appVersion,
   } = data;
   return {
     advancedSearchArgs: {
@@ -63,6 +64,7 @@ function transformSystemFilter(data) {
       environment,
       creatorIds,
       updatorIds,
+      appVersion,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: estimatedStartTime[0],

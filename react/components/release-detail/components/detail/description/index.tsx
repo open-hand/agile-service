@@ -1,10 +1,7 @@
 import React, { ChangeEvent, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import CKEditor from '@/components/CKEditor';
-import CKEditorViewer from '@/components/CKEditorViewer';
 import { Button, Tooltip, TextArea } from 'choerodon-ui/pro/lib';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-
 import { MAX_LENGTH_VERSION_DESCRIPTION } from '@/constants/MAX_LENGTH';
 import { useReleaseDetailContext } from '../../../stores';
 import styles from './index.less';
@@ -13,17 +10,15 @@ import Section from '../../section';
 const Description: React.FC = () => {
   const [edit, setEdit] = useState(false);
   const editRef = useRef<string>();
-  const [current, setCurrent] = useState<string|undefined>();
   const { store, disabled } = useReleaseDetailContext();
   const { description } = store.getCurrentData;
-  function handleUpdate(val:string) {
-    console.log('handleUpdate', val);
-  }
+
   function handleCancel() {
     setEdit(false);
     editRef.current = '';
   }
   function handleOk() {
+    store.update('description', editRef.current);
     console.log('handleUpdate', editRef.current);
   }
 
