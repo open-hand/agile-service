@@ -238,10 +238,10 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     }
 
     @Override
-    public ProjectReportDTO send(Long projectId, Long id, String imgData) {
+    public ProjectReportDTO send(Long projectId, Long id, String html) {
         List<ProjectReportReceiverDTO> receiverList = projectReportReceiverMapper.select(new ProjectReportReceiverDTO(id, projectId));
-        if (StringUtils.isNotBlank(imgData)){
-            siteMsgUtil.sendProjectReport(projectId, receiverList, imgData);
+        if (StringUtils.isNotBlank(html)){
+            siteMsgUtil.sendProjectReport(projectId, receiverList, html);
         }
         // 更新最后发送时间
         ProjectReportDTO projectReportDTO = projectReportMapper.selectOne(new ProjectReportDTO(id, projectId));

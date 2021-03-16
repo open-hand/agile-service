@@ -24,5 +24,5 @@ public interface ProjectReportService {
 
     void export(Long projectId, Long id, MultipartFile multipartFile, HttpServletResponse response);
 
-    ProjectReportDTO send(Long projectId, Long id, String imgData);
+    ProjectReportDTO send(Long projectId, Long id, String html);
 }
