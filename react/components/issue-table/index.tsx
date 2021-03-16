@@ -319,6 +319,8 @@ const IssueTable: React.FC<Props> = ({
         <Column hidden={columnHidden('issueSprintVOS')} name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />
         <Column name="mainResponsibleUser" className="c7n-agile-table-cell" hidden={columnHidden('mainResponsibleUser')} renderer={({ value }) => value && <UserTag data={value} />} />
         <Column name="environmentName" className="c7n-agile-table-cell" hidden={columnHidden('environmentName')} />
+        <Column name="appVersion" className="c7n-agile-table-cell" hidden={columnHidden('appVersion')} />
+
         {fields.map((field) => (
           <Column
             hidden={columnHidden(field.code)}

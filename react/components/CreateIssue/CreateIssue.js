@@ -378,6 +378,7 @@ class CreateIssue extends Component {
           subTaskParent,
           programVersion,
           environment,
+          appVersions,
           mainResponsibleId,
           testResponsibleId,
         } = values;
@@ -430,6 +431,7 @@ class CreateIssue extends Component {
           const extra = {
             description,
             statusId,
+            appVersions: appVersions ? appVersions.map((i) => ({ id: i })) : [],
             programId: getProjectId(),
             projectId: getProjectId(),
             issueTypeId: currentTypeId,
@@ -1178,6 +1180,32 @@ class CreateIssue extends Component {
                       });
                     }
                   }}
+                />,
+              )}
+            </div>
+          </FormItem>
+        );
+      case 'app_version':
+        return (
+          <FormItem label={field.fieldName} key={`${newIssueTypeCode}-${field.id}`}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {getFieldDecorator('appVersions', {
+                rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
+              })(
+                <SelectFocusLoad
+                  label={field.fieldName}
+                  type="app_version"
+                  loadWhenMount
+                  mode="multiple"
+                  selectedAppService={field.defaultValue}
+                // afterLoad={(statusList) => {
+                //   const defaultStatus = find(statusList, { defaultStatus: true });
+                //   if (defaultStatus && !form.getFieldValue(`${field.fieldCode}Id`)) {
+                //     form.setFieldsValue({
+                //       [`${field.fieldCode}Id`]: defaultStatus.id,
+                //     });
+                //   }
+                // }}
                 />,
               )}
             </div>

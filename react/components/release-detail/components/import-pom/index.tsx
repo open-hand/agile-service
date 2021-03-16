@@ -48,6 +48,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
     paging: false,
+    selection: false,
     // data: [
     //   { appService: '应用1', version: '0.18.a', alias: undefined },
     // ],
@@ -87,6 +88,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     if (!await ds.validate()) {
       return false;
     }
+
     const data = ds.toData();
     const result = handleOk && await handleOk(data);
     return typeof (result) !== 'undefined' ? result : true;
