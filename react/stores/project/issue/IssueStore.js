@@ -185,6 +185,12 @@ export function getSystemFields(excludeCodes = []) {
     defaultShow: false,
     fieldType: 'member',
   },
+  {
+    code: 'app_version',
+    name: '应用版本',
+    defaultShow: false,
+    fieldType: 'multiple',
+  },
   ];
   return isInProgram() ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }

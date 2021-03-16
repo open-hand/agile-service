@@ -15,7 +15,7 @@ const LinkService: React.FC = () => {
   const data = store.getAppServiceList;
   const detailData = store.getCurrentData;
   function handleLinkAppService(linkData: any) {
-    versionApi.linkAppVersions(detailData.versionId, [linkData.version]).then(() => {
+    versionApi.linkAppVersions(detailData.versionId, linkData.version).then(() => {
       store.loadData();
     });
   }
@@ -26,8 +26,9 @@ const LinkService: React.FC = () => {
   }
   async function handleImportPom(pomData: any) {
     console.log('handleImportPom', pomData);
-    await versionApi.createBatchAppVersion(pomData);
-    return false;
+    await versionApi.createBranchAndLinkAppService(detailData.versionId, pomData);
+    store.loadData();
+    return true;
   }
   return (
     <Section

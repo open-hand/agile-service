@@ -445,6 +445,25 @@ class VersionApi extends Api<VersionApi> {
       data,
     });
   }
+
+  /**
+   * 加载应用版本列表
+   */
+  loadAppService(content?: string, page = 1, size = 20) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/app_version`,
+      params: {
+        content,
+        page,
+        size,
+      },
+    }).then((res: any) => {
+      const newList = res.content.map((i: any) => ({ ...i, name: i.versionAlias || i.version }));
+      const newData = ({ ...res, content: newList, list: newList });
+      return newData;
+    });
+  }
 }
 
 const versionApi = new VersionApi();
