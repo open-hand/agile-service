@@ -348,4 +348,19 @@ public class ProductVersionController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(COMPLETED_BUG_ERROR));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "创建应用版本并关联产品版本")
+    @PostMapping(value = "/{versionId}/create_app_version")
+    public ResponseEntity<List<AppVersionVO>> createAndRelAppVersion(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "产品版本id", required = true)
+            @Encrypt @PathVariable(name = "versionId") Long versionId,
+            @ApiParam(value = "要创建并关联的应用版本")
+            @RequestBody @Valid List<AppVersionCreateVO> appVersionCreateList) {
+        return Optional.ofNullable(productVersionService.createAndRelAppVersion(projectId, versionId, appVersionCreateList))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
+                .orElseThrow(() -> new CommonException(RELATE_APP_VERSION_ERROR));
+    }
 }
