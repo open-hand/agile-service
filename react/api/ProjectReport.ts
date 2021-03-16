@@ -54,12 +54,12 @@ class ProjectReportApi extends Api<ProjectReportApi> {
     });
   }
 
-  send(reportId: string, imgData: string) {
+  send(reportId: string, html: string) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/project_report/send/${reportId}`,
       data: {
-        imgData,
+        html,
       },
     });
   }
