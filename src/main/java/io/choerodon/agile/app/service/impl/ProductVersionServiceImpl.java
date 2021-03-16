@@ -93,6 +93,8 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     @Autowired
     private StatusService statusService;
     @Autowired
+    private AppVersionService appVersionService;
+    @Autowired
     private AppVersionMapper appVersionMapper;
     @Autowired
     private ProductAppVersionRelMapper productAppVersionRelMapper;
@@ -653,5 +655,14 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             result.add(issueListField);
         });
         return result;
+    }
+
+    @Override
+    public List<AppVersionVO> createAndRelAppVersion(Long projectId, Long versionId, List<AppVersionCreateVO> appVersionCreateList) {
+        List<AppVersionVO> appVersions = appVersionService.batchCreateAppVersion(projectId, appVersionCreateList);
+        List<Long> appVersionIds = appVersions.stream().map(AppVersionVO::getId).collect(toList());
+        ProductVersionRelAppVersionVO productVersionRelAppVersionVO = new ProductVersionRelAppVersionVO();
+        productVersionRelAppVersionVO.setAppVersionIds(appVersionIds);
+        return createRelAppVersion(projectId, versionId, productVersionRelAppVersionVO);
     }
 }

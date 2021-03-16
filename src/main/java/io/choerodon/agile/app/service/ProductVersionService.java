@@ -116,4 +116,13 @@ public interface ProductVersionService {
      * @return 产品版本项目下关联的应用版本下已完成缺陷
      */
     List<IssueListFieldKVVO> listRelBugByOption(Long projectId, Long versionId, SearchVO searchVO);
+
+    /**
+     * 创建应用版本并关联产品版本
+     * @param projectId 项目id
+     * @param versionId 版本id
+     * @param appVersionCreateList 创建应用版本并关联产品版本
+     * @return 产品版本关联的应用版本
+     */
+    List<AppVersionVO> createAndRelAppVersion(Long projectId, Long versionId, List<AppVersionCreateVO> appVersionCreateList);
 }
