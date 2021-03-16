@@ -31,6 +31,8 @@ public class AppVersionVO {
     private Long projectId;
     @ApiModelProperty(value = "组织id")
     private Long organizationId;
+    @ApiModelProperty(value = "版本号")
+    private Long objectVersionNumber;
 
     public Long getId() {
         return id;
@@ -94,5 +96,13 @@ public class AppVersionVO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
     }
 }
