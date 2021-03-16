@@ -38,7 +38,6 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -225,10 +224,10 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             List<ProductVersionPageVO> productVersionPageVOS = productVersionPageAssembler.toTargetList(productVersionMapper.
                     queryVersionByIds(projectId, content), ProductVersionPageVO.class);
             if (!CollectionUtils.isEmpty(productVersionPageVOS)) {
-                List<Long> userIds = productVersionPageVOS.stream().map(ProductVersionPageVO::getCreationBy).collect(toList());
+                List<Long> userIds = productVersionPageVOS.stream().map(ProductVersionPageVO::getCreatedBy).collect(toList());
                 Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Lists.newArrayList(userIds), true);
                 productVersionPageVOS.forEach(productVersionPageVO ->
-                        productVersionPageVO.setCreationUser(usersMap.get(productVersionPageVO.getCreationBy())));
+                        productVersionPageVO.setCreationUser(usersMap.get(productVersionPageVO.getCreatedBy())));
             }
             AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
             if(agilePluginService != null){
@@ -274,6 +273,8 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         List<StatusVO> statusMapVOS = projectConfigService.queryStatusByProjectId(projectId, SchemeApplyType.AGILE);
         Map<String, List<Long>> statusIdMap = statusMapVOS.stream().collect(Collectors.groupingBy(StatusVO::getType, Collectors.mapping(StatusVO::getId, Collectors.toList())));
         Map<String, List<StatusVO>> statusMap = statusMapVOS.stream().collect(Collectors.groupingBy(StatusVO::getType));
+        UserDTO userDTO = userService.queryUserNameByOption(productVersionStatisticsVO.getCreatedBy(), false);
+        productVersionStatisticsVO.setCreationUser(userDTO);
         productVersionStatisticsVO.setTodoIssueCount(statusIdMap.get(CATEGORY_TODO_CODE) != null && !statusIdMap.get(CATEGORY_TODO_CODE).isEmpty() ? productVersionMapper.queryStatusIssueCount(statusIdMap.get(CATEGORY_TODO_CODE), projectId, versionId) : 0);
         productVersionStatisticsVO.setDoingIssueCount(statusIdMap.get(CATEGORY_DOING_CODE) != null && !statusIdMap.get(CATEGORY_DOING_CODE).isEmpty() ? productVersionMapper.queryStatusIssueCount(statusIdMap.get(CATEGORY_DOING_CODE), projectId, versionId) : 0);
         productVersionStatisticsVO.setDoneIssueCount(statusIdMap.get(CATEGORY_DONE_CODE) != null && !statusIdMap.get(CATEGORY_DONE_CODE).isEmpty() ? productVersionMapper.queryStatusIssueCount(statusIdMap.get(CATEGORY_DONE_CODE), projectId, versionId) : 0);
