@@ -20,19 +20,22 @@ import { Observer, observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
 import { IAppVersionData, versionApi } from '@/api';
 import { Checkbox } from 'choerodon-ui';
+import SelectTeam from '@/components/select/select-team';
 
 interface ILinkServiceProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
   versionId: string
-  openProgramConfig?: boolean
+  programMode?: boolean
 }
 const { Option } = Select;
 interface SelectVersionProps extends Partial<SelectProps> {
   versionId: string
   serviceCode?: string
+  subProjectId?: string
+  programMode?: boolean
 }
 const SelectVersion: React.FC<SelectVersionProps> = observer(({
-  versionId, serviceCode, multiple, ...otherProps
+  versionId, serviceCode, subProjectId, multiple, programMode, ...otherProps
 }) => {
   const inputRef = useRef<TextField>(null);
   const selectRef = useRef<Select>(null);
@@ -46,10 +49,16 @@ const SelectVersion: React.FC<SelectVersionProps> = observer(({
   }
   const loadData = useCallback(() => {
     console.log('versionId.', versionId, serviceCode);
-    versionId && serviceCode && versionApi.loadAvailableAppVersionList(versionId, serviceCode).then((res: any) => {
-      setOptions(res);
-    });
-  }, [serviceCode, versionId]);
+    if (programMode) {
+      versionId && subProjectId && versionApi.loadProgramAppService(versionId, subProjectId).then((res: any) => {
+        setOptions(res);
+      });
+    } else {
+      versionId && serviceCode && versionApi.loadAvailableAppVersionList(versionId, serviceCode).then((res: any) => {
+        setOptions(res.content);
+      });
+    }
+  }, [programMode, serviceCode, subProjectId, versionId]);
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -159,7 +168,9 @@ const SelectVersion: React.FC<SelectVersionProps> = observer(({
     </Select>
   );
 });
-const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({ modal, versionId, handleOk }) => {
+const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({
+  modal, versionId, programMode, handleOk,
+}) => {
   const [applicationId, setApplicationId] = useState<string>();
   const [versionType, setVersionType] = useState<string>('tag');
 
@@ -171,7 +182,9 @@ const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({ mo
     //   { appService: '应用1', alias: undefined },
     // ],
     fields: [
-      { name: 'appService', label: '选择应用服务', required: true },
+      { name: 'appService', label: '选择应用服务', required: !programMode },
+      { name: 'subProject', label: '选择子项目', required: !!programMode },
+
       { name: 'tag', label: '选择tag', dynamicProps: { required: ({ record }) => record.get('change') === 'tag' } },
       {
         name: 'version', label: '选择版本', multiple: true, textField: 'name', valueField: 'value', dynamicProps: { required: ({ record }) => record.get('change') === 'version' },
@@ -195,13 +208,16 @@ const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({ mo
   }, [handleSubmit, modal]);
   return (
     <Form dataSet={ds}>
-      <SelectAppService name="appService" onChange={setApplicationId} />
+      {programMode
+        ? <SelectTeam name="subProject" onChange={setApplicationId} />
+        : <SelectAppService name="appService" onChange={setApplicationId} />}
+
       <RadioGroup>
         <Radio name="change" value="tag" onChange={setVersionType}>选择Tag</Radio>
         <Radio name="change" value="version" onChange={setVersionType}>选择版本</Radio>
       </RadioGroup>
       {versionType === 'tag' ? <SelectGitTags name="tag" applicationId={applicationId} key={`git-tags-${applicationId}`} />
-        : <SelectVersion name="version" disabled={!applicationId} maxTagCount={5} versionId={versionId} serviceCode={applicationId} multiple />}
+        : <SelectVersion name="version" disabled={!applicationId} maxTagCount={5} versionId={versionId} serviceCode={applicationId} subProjectId={applicationId} programMode={programMode} multiple />}
 
     </Form>
   );

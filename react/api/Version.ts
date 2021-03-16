@@ -288,6 +288,7 @@ class VersionApi extends Api<VersionApi> {
       url: `${this.prefix}/product_version/${versionId}/un_rel_app_version`,
       params: {
         serviceCode,
+        size: 0,
       },
     });
   }
@@ -411,6 +412,37 @@ class VersionApi extends Api<VersionApi> {
           issueNum: '',
         },
       },
+    });
+  }
+
+  importProgramPom(data: any, groupId: string, subProjectId: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/version_tree/parse_pom`,
+      params: {
+        groupId,
+        subProjectId,
+      },
+      data,
+    });
+  }
+
+  loadProgramAppService(programVersionId: string, subProjectId?: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/version_tree/available_app_version`,
+      params: {
+        programVersionId,
+        subProjectId,
+      },
+    });
+  }
+
+  createBranchAndLinkAppService(versionId: string, data: IAppVersionCreateData) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/product_version/${versionId}/create_app_version`,
+      data,
     });
   }
 }
