@@ -746,7 +746,7 @@
         LEFT JOIN agile_version_issue_rel avir on avir.issue_id = ai.issue_id and avir.relation_type = 'influence'
         LEFT JOIN agile_product_version apv on avir.version_id = apv.version_id
         WHERE
-        ai.type_code = 'story'
+        ai.type_code = 'bug'
         AND ais.is_completed = 1
         AND ai.issue_id IN
         (SELECT aavir2.issue_id
