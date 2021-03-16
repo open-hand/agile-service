@@ -45,12 +45,6 @@ const PreviewReport: React.FC<Props> = ({
         <div className={styles.preview} ref={innerRef} {...otherProps}>
           <div ref={ref}>
             <BaseInfo preview />
-            <div style={{
-              height: 1,
-              background: '#3F51B5FF',
-              margin: '30px 0 20px 0',
-            }}
-            />
             <div>
               <BlockList preview />
             </div>

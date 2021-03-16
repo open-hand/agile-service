@@ -7,7 +7,7 @@ import PreviewReport from '@/routes/project-report/report-preview/Preview';
 import ReactDOM from 'react-dom';
 
 export interface IExportProps {
-  export: (callback: (canvas: HTMLCanvasElement) => void) => void
+  export: (callback: (canvas: HTMLCanvasElement[]) => void) => void
 }
 interface Props {
   innerRef: React.Ref<IExportProps>
@@ -15,19 +15,20 @@ interface Props {
 
 const Export: React.FC<Props> = ({ innerRef }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const callbackRef = useRef<(canvas: HTMLCanvasElement) => void>();
+  const callbackRef = useRef<(canvas: HTMLCanvasElement[]) => void>();
   const task = useMemo(() => generateTask('export', () => {
     if (containerRef.current) {
-      const element = containerRef.current;
-      html2canvas(element, {
+      const container = containerRef.current;
+      const blocks = container.getElementsByClassName('c7n-project-report-block');
+      Promise.all(Array.from(blocks).map((element) => html2canvas(element as HTMLElement, {
         allowTaint: true,
         useCORS: true,
         logging: false,
         height: element.scrollHeight,
-        width: element.scrollWidth,
+        width: container.scrollWidth,
         windowHeight: element.scrollHeight,
-        windowWidth: element.scrollWidth,
-      }).then((canvas) => {
+        windowWidth: container.scrollWidth,
+      }))).then((canvas) => {
         setExporting(false);
         task.reset();
         callbackRef.current && callbackRef.current(canvas);
