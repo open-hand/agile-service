@@ -225,7 +225,7 @@ class VersionApi extends Api<VersionApi> {
    * @param versionId
    * @param data
    */
-  update(versionId: number, data: UVersionVO) {
+  update(versionId: number|string, data: UVersionVO) {
     return axios.put(`${this.prefix}/product_version/update/${versionId}`, data);
   }
 
@@ -326,8 +326,8 @@ class VersionApi extends Api<VersionApi> {
    * @returns
    */
   updateAppVersion(data: IAppVersionUpdateData, appVersionId: string) {
-    return axios({
-      method: 'post',
+    return this.request({
+      method: 'put',
       url: `${this.prefix}/app_version/update/${appVersionId}`,
       data,
     });
@@ -369,6 +369,20 @@ class VersionApi extends Api<VersionApi> {
     return axios({
       method: 'delete',
       url: `${this.prefix}/app_version/delete/${appVersionId}/product_version/${versionId}`,
+
+    });
+  }
+
+  /**
+ * 删除版本与问题关联关系
+ * @param issueId
+ * @param appVersionId
+ * @returns
+ */
+  deleteLinkIssueId(issueId: string, appVersionId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/app_version/delete/${appVersionId}/issue/${issueId}`,
 
     });
   }

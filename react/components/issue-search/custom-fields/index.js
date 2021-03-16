@@ -170,7 +170,7 @@ function CustomField({ field }) {
           onChange={handleChange}
         />
       );
-    case 'app_version':
+    case 'appVersion':
       return (
         <AppVersionField
           field={field}

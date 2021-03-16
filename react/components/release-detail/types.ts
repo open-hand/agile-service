@@ -5,10 +5,12 @@ interface IReleaseDetailData {
   expectReleaseDate: string
   statusCode: 'version_planning' | 'released' | 'archived'
   statusName: string
-  createDate: string
-  actualReleaseDate: string
-  creator: any
+  creationDate: string
+  releaseDate: string | null
+  creationUser: any
   versionId: string
   description: string
+  objectVersionNumber: number
+  projectId: number
 }
 export default IReleaseDetailData;

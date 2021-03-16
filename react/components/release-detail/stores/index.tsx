@@ -37,17 +37,18 @@ const Provider: React.FC<ReleaseDetailProps> = ({
   const storyTableDataSet = useMemo(() => new DataSet(store.current?.id ? ReleaseStoryTableDataSet(store.current.id) : {}), [store.current?.id]);
   const bugTableDataSet = useMemo(() => new DataSet(store.current?.id ? ReleaseBugTableDataSet(store.current.id) : {}), [store.current?.id]);
 
-  // const propsEvents = eventsMap.get('pi_aim');
-  const propsEvents = {} as any;
+  const propsEvents = eventsMap.get('version');
+  // const propsEvents = {} as any;
   const updateDetail = useMemo(() => {
-    if (propsEvents?.updateAfter) {
+    if (propsEvents?.update) {
       // @ts-ignore
-      return (data: any) => propsEvents.updateAfter!(data, 'detail-update');
+      return (data: any) => propsEvents.update!(data);
     }
     return undefined;
-  }, [propsEvents?.updateAfter]);
-
-  // store.init({ events: { update: updateDetail }, programId, disabled: restProps.disabled });
+  }, [propsEvents?.update]);
+  useEffect(() => {
+    store.init({ events: { update: updateDetail }, programId, disabled: restProps.disabled });
+  }, []);
   useEffect(() => () => {
     store.clear();
   },

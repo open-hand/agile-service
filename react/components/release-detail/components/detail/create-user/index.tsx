@@ -11,10 +11,10 @@ interface Props {
 }
 const BusinessValue: React.FC<Props> = () => {
   const { disabled, store } = useReleaseDetailContext();
-  const { creator } = store.getCurrentData;
+  const { creationUser } = store.getCurrentData;
   return (
     <Field label="创建人">
-      {creator ? <UserTag data={creator} /> : '无'}
+      {creationUser ? <UserTag data={creationUser} /> : '无'}
     </Field>
 
   );

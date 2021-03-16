@@ -11,6 +11,8 @@ import {
 import { withRouter } from 'react-router-dom';
 import { versionApi } from '@/api';
 import DetailContainer from '@/components/detail-container';
+import { Modal } from 'choerodon-ui/pro/lib';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import DragSortingTable from '../ReleaseComponent/DragSortingTable';
 import AddRelease from '../ReleaseComponent/AddRelease';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
@@ -131,6 +133,9 @@ class ReleaseHome extends Component {
         props: {
           id: record.versionId,
         },
+        events: {
+          update: () => this.refresh(pagination),
+        },
       });
     }
     if (key === '3') {
@@ -153,7 +158,14 @@ class ReleaseHome extends Component {
     }
     if (key === '7') {
       // 导出
-
+      Modal.open({
+        title: '导出版本',
+        children: '正在。。。',
+        drawer: true,
+        style: {
+          width: MODAL_WIDTH.small,
+        },
+      });
     }
   }
 
