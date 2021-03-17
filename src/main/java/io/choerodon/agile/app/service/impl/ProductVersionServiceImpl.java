@@ -594,9 +594,13 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     public List<IssueListFieldKVVO> listRelStoryByOption(Long projectId, Long versionId, SearchVO searchVO) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         boardAssembler.handleOtherArgs(searchVO);
+        //获取产品版本关联的应用版本关联的所有产品版本中其是最小序列的应用版本
+        List<Long> appVersionIds = getMinSequenceAppVersionIds(projectId, versionId);
+        if (CollectionUtils.isEmpty(appVersionIds)) {
+            return new ArrayList<>();
+        }
 
-        List<IssueDTO> issueDTOList = productVersionMapper.listRelStoryByOption(projectId, versionId, searchVO);
-
+        List<IssueDTO> issueDTOList = appVersionMapper.listRelStoryByOption(projectId, appVersionIds, searchVO);
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
         List<IssueListFieldKVVO> result = new ArrayList<>(issueDTOList.size());
         Set<Long> userIds = issueDTOList.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
@@ -614,8 +618,11 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             issueListField.setAssigneeRealName(assigneeRealName);
             issueListField.setAssigneeImageUrl(assigneeImageUrl);
             issueListField.setStatusVO(statusMap.get(issueDO.getStatusId()));
-            List<AppVersionVO> appVersionList = modelMapper.map(issueDO.getAppVersions(), new TypeToken<List<AppVersionVO>>(){}.getType());
-            issueListField.setAppVersions(appVersionList);
+            if (issueDO.getAppVersions() != null) {
+                List<AppVersionVO> appVersionList = modelMapper.map(issueDO.getAppVersions(), new TypeToken<List<AppVersionVO>>() {
+                }.getType());
+                issueListField.setAppVersions(appVersionList);
+            }
             result.add(issueListField);
         });
         AgilePluginService expandBean = SpringBeanUtil.getExpandBean(AgilePluginService.class);
@@ -629,8 +636,13 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     public List<IssueListFieldKVVO> listRelBugByOption(Long projectId, Long versionId, SearchVO searchVO) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         boardAssembler.handleOtherArgs(searchVO);
+        //获取产品版本关联的应用版本关联的所有产品版本中其是最小序列的应用版本
+        List<Long> appVersionIds = getMinSequenceAppVersionIds(projectId, versionId);
+        if (CollectionUtils.isEmpty(appVersionIds)) {
+            return new ArrayList<>();
+        }
 
-        List<IssueDTO> issueDTOList = productVersionMapper.listRelBugByOption(projectId, versionId, searchVO);
+        List<IssueDTO> issueDTOList = appVersionMapper.listRelBugByOption(projectId, appVersionIds, searchVO);
 
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
         List<IssueListFieldKVVO> result = new ArrayList<>(issueDTOList.size());
@@ -665,5 +677,25 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         ProductVersionRelAppVersionVO productVersionRelAppVersionVO = new ProductVersionRelAppVersionVO();
         productVersionRelAppVersionVO.setAppVersionIds(appVersionIds);
         return createRelAppVersion(projectId, versionId, productVersionRelAppVersionVO);
+    }
+
+    //获取产品版本关联的应用版本关联的所有产品版本中其是最小序列的应用版本
+    private List<Long> getMinSequenceAppVersionIds(Long projectId, Long versionId) {
+        ProductVersionDTO productVersionDTO = productVersionMapper.selectByPrimaryKey(versionId);
+        List<Long> appVersionIds = productVersionMapper.listAppVersionIdByVersionId(projectId, versionId);
+        if (CollectionUtils.isEmpty(appVersionIds) || ObjectUtils.isEmpty(productVersionDTO)) {
+            return new ArrayList<>();
+        }
+        List<AppVersionRelProductSequenceVO> sequenceList = productVersionMapper.listMinSequenceByAppVersion(projectId, appVersionIds);
+        List<Long> resultIds = sequenceList.stream()
+                .filter(sequence ->
+                        productVersionDTO.getSequence().equals(sequence.getSequence()))
+                .map(AppVersionRelProductSequenceVO::getAppVersionId)
+                .collect(toList());
+
+        if (CollectionUtils.isEmpty(resultIds)) {
+            return new ArrayList<>();
+        }
+        return resultIds;
     }
 }

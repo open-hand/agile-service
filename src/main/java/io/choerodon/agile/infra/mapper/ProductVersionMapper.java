@@ -1,9 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.api.vo.AppVersionSearchVO;
-import io.choerodon.agile.api.vo.AppVersionVO;
-import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.TestVersionFixVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -174,22 +171,20 @@ public interface ProductVersionMapper extends BaseMapper<ProductVersionDTO> {
     List<AppVersionVO> listUnRelAppVersionByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("appVersionSearchVO") AppVersionSearchVO appVersionSearchVO);
 
     /**
-     * 查询产品版本关联的已完成故事
+     * 查询产品版本关联的应用版本id
      *
-     * @param projectId 项目id
      * @param versionId 产品版本id
-     * @param searchVO  查询参数
-     * @return 产品版本关联的已完成故事
+     * @param projectId 项目id
+     * @return 产品版本关联的应用版本
      */
-    List<IssueDTO> listRelStoryByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("searchVO") SearchVO searchVO);
+    List<Long> listAppVersionIdByVersionId(@Param("projectId") Long projectId, @Param("versionId") Long versionId);
 
     /**
-     * 查询产品版本关联的已完成故事
+     * 查询应用版本关联的产品版本中的最小序列
      *
-     * @param projectId 项目id
-     * @param versionId 产品版本id
-     * @param searchVO  查询参数
-     * @return 产品版本关联的已完成故事
+     * @param projectId     项目id
+     * @param appVersionIds 应用版本id
+     * @return 关联的产品版本中的最小序列
      */
-    List<IssueDTO> listRelBugByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("searchVO") SearchVO searchVO);
+    List<AppVersionRelProductSequenceVO> listMinSequenceByAppVersion(@Param("projectId") Long projectId, @Param("appVersionIds") List<Long> appVersionIds);
 }
