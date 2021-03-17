@@ -3,6 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.ExcelTemplateVO;
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.ExcelService;
 
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -43,6 +44,8 @@ public class ExcelController {
 
     @Autowired
     private ExcelService excelService;
+    @Autowired
+    private BoardAssembler boardAssembler;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("下载issue导入模版")
@@ -111,6 +114,8 @@ public class ExcelController {
                              HttpServletRequest request,
                              HttpServletResponse response) {
         EncryptionUtils.decryptSearchVO(searchVO);
+        //处理未匹配的筛选
+        boardAssembler.handleOtherArgs(searchVO);
         excelService.asyncExportIssues(projectId, searchVO, request, response, organizationId, pageRequest.getSort(), (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
     }
 
