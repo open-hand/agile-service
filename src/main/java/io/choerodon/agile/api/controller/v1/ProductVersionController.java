@@ -363,4 +363,17 @@ public class ProductVersionController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(RELATE_APP_VERSION_ERROR));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("删除产品版本下所有应用版本与问题关系")
+    @DeleteMapping(value = "/{versionId}/issue/{issueId}")
+    public ResponseEntity<Void> deleteIssueRel(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "versionId", required = true)
+            @PathVariable @Encrypt Long versionId,
+            @PathVariable @Encrypt Long issueId) {
+        productVersionService.deleteIssueRel(projectId, versionId, issueId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
