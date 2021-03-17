@@ -26,6 +26,7 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.mapper.AppVersionIssueRelMapper;
 import io.choerodon.agile.infra.mapper.AppVersionMapper;
 import io.choerodon.agile.infra.mapper.ProductAppVersionRelMapper;
 import io.choerodon.agile.infra.mapper.ProductVersionMapper;
@@ -74,6 +75,8 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     private ProductVersionValidator productVersionValidator;
     @Autowired
     private ProductVersionMapper productVersionMapper;
+    @Autowired
+    private AppVersionIssueRelMapper appVersionIssueRelMapper;
 
     @Autowired
     private IssueService issueService;
@@ -677,6 +680,15 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         ProductVersionRelAppVersionVO productVersionRelAppVersionVO = new ProductVersionRelAppVersionVO();
         productVersionRelAppVersionVO.setAppVersionIds(appVersionIds);
         return createRelAppVersion(projectId, versionId, productVersionRelAppVersionVO);
+    }
+
+    @Override
+    public void deleteIssueRel(Long projectId, Long versionId, Long issueId) {
+        List<Long> appVersionIds = productVersionMapper.listAppVersionIdByVersionId(projectId, versionId);
+        if (CollectionUtils.isEmpty(appVersionIds)) {
+            return;
+        }
+        appVersionIssueRelMapper.deleteIssueRelByAppVersionIds(projectId, issueId, appVersionIds);
     }
 
     //获取产品版本关联的应用版本关联的所有产品版本中其是最小序列的应用版本

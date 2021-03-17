@@ -17,4 +17,13 @@ public interface AppVersionIssueRelMapper extends BaseMapper<AppVersionIssueRelD
     List<AppVersionWithIssueVO> selectCompletedBugByAppVersionIds(@Param("projectIds") Set<Long> projectIds,
                                                                   @Param("organizationId") Long organizationId,
                                                                   @Param("appVersionIds") Set<Long> appVersionIds);
+
+    /**
+     * 删除问题与应用版本的关系
+     *
+     * @param projectId     项目id
+     * @param issueId       问题id
+     * @param appVersionIds 应用版本id
+     */
+    void deleteIssueRelByAppVersionIds(@Param("projectId") Long projectId, @Param("issueId") Long issueId, @Param("appVersionIds") List<Long> appVersionIds);
 }
