@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 import store, { ReleaseDetailStore } from './store';
 import { ReleaseDetailProps } from '..';
 import ReleaseStoryTableDataSet from './ReleaseStoryTableDataSet';
@@ -32,7 +33,7 @@ const Provider: React.FC<ReleaseDetailProps> = ({
   children, disableInitStore, programId, ...restProps
 }) => {
   const prefixCls = 'c7n-agile-release-detail';
-  const { eventsMap } = useDetailContainerContext();
+  const { eventsMap, push } = useDetailContainerContext();
   const { isInProgram, loading } = useIsInProgram();
   const storyTableDataSet = useMemo(() => new DataSet(store.current?.id ? ReleaseStoryTableDataSet(store.current.id) : {}), [store.current?.id]);
   const bugTableDataSet = useMemo(() => new DataSet(store.current?.id ? ReleaseBugTableDataSet(store.current.id) : {}), [store.current?.id]);
@@ -46,8 +47,16 @@ const Provider: React.FC<ReleaseDetailProps> = ({
     }
     return undefined;
   }, [propsEvents?.update]);
+  const selectIssue = useMemo(() => (id:string) => push({
+    path: 'issue',
+    props: {
+      issueId: id,
+      projectId: getProjectId(),
+      organizationId: getOrganizationId(),
+    },
+  }), [push]);
   useEffect(() => {
-    store.init({ events: { update: updateDetail }, programId, disabled: restProps.disabled });
+    store.init({ events: { update: updateDetail, selectIssue }, programId, disabled: restProps.disabled });
   }, []);
   useEffect(() => () => {
     store.clear();

@@ -14,7 +14,7 @@ function ReleaseStoryTableDataSet(versionId:string): DataSetProps {
       { name: 'priority', label: '优先级' },
       { name: 'influenceVersion', label: '影响的版本' },
 
-      { name: 'assigner', label: '经办人' },
+      { name: 'assigneeId', label: '经办人' },
 
     ],
     transport: {

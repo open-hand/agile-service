@@ -30,7 +30,6 @@ const SelectAppVersion: React.FC<Props> = forwardRef(({
       }
       return versionApi.project(projectId || getProjectId()).loadAppService(filter, page);
     },
-    optionRenderer: (i) => i.versionAlias || i.version! as any,
     middleWare: (versions: IAppVersionData[]) => {
       if (dataRef) {
         Object.assign(dataRef, {

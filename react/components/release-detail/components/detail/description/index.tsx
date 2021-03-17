@@ -19,7 +19,7 @@ const Description: React.FC = () => {
   }
   function handleOk() {
     store.update('description', editRef.current);
-    console.log('handleUpdate', editRef.current);
+    handleCancel();
   }
 
   return (
