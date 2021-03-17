@@ -31,4 +31,18 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_app_version.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(id: '2021-03-17-agile-app-version-add-columns', author: 'kaiwen.li@hand-china.com') {
+        addColumn(tableName: 'agile_app_version') {
+            column(name: 'app_service', type: 'TINYINT UNSIGNED(1)', remarks: '是否为应用服务的版本', defaultValue: false) {
+                constraints(nullable: false)
+            }
+            column(name: 'tag', type: 'TINYINT UNSIGNED(1)', remarks: '是否为tag', defaultValue: false) {
+                constraints(nullable: false)
+            }
+            column(name: 'parent_id', type: 'BIGINT UNSIGNED', remarks: '父节点id', defaultValue: '0') {
+                constraints(nullable: false)
+            }
+        }
+    }
 }

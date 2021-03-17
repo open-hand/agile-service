@@ -20,6 +20,28 @@ public class AppVersionCreateVO {
     @ApiModelProperty(value = "服务编码")
     @NotEmpty(message = "error.field.serviceCodeNull")
     private String serviceCode;
+    @ApiModelProperty(value = "是否为tag")
+    @NotEmpty(message = "error.field.tagNull")
+    private Boolean tag;
+    @ApiModelProperty(value = "是否为应用服务")
+    @NotEmpty(message = "error.field.appServiceNull")
+    private Boolean appService;
+
+    public Boolean getTag() {
+        return tag;
+    }
+
+    public void setTag(Boolean tag) {
+        this.tag = tag;
+    }
+
+    public Boolean getAppService() {
+        return appService;
+    }
+
+    public void setAppService(Boolean appService) {
+        this.appService = appService;
+    }
 
     public String getArtifactId() {
         return artifactId;
