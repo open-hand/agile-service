@@ -40,7 +40,7 @@ const LinkService: React.FC = () => {
 
   return (
     <Section
-      title="关联应用版本"
+      title="关联应用服务版本"
       buttons={
         !disabled ? (
           <div className={`${prefixCls}-link-service-operation`}>

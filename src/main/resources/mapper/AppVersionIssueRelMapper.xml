@@ -79,4 +79,17 @@
         </foreach>
         and concat_ws( '-', api.project_code, ai.issue_num) != ''
     </select>
+
+    <delete id="deleteIssueRelByAppVersionIds">
+        DELETE
+        FROM agile_app_version_issue_rel
+        WHERE
+        project_id = #{projectId}
+        AND issue_id = #{issueId}
+        AND app_version_id IN
+        <foreach collection="appVersionIds" item="appVersionId" index="index"
+                 open="(" close=")" separator=",">
+            #{appVersionId}
+        </foreach>
+    </delete>
 </mapper>

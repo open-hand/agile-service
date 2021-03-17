@@ -4,7 +4,6 @@ import React, {
 } from 'react';
 import {
   Button,
-  CheckBox,
   DataSet, Form, Modal, Radio, Select, TextField,
 } from 'choerodon-ui/pro/lib';
 import { debounce, isEmpty } from 'lodash';
@@ -16,7 +15,7 @@ import RadioGroup from 'choerodon-ui/lib/radio/group';
 import './index.less';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { Observer, observer } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
 import { IAppVersionData, versionApi } from '@/api';
 import { Checkbox } from 'choerodon-ui';

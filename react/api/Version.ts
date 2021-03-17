@@ -374,16 +374,26 @@ class VersionApi extends Api<VersionApi> {
   }
 
   /**
- * 删除版本与问题关联关系
+ * 删除应用版本与问题关联关系
  * @param issueId
  * @param appVersionId
  * @returns
  */
-  deleteLinkIssueId(issueId: string, appVersionId: string) {
+  deleteAppVersionLinkIssueId(issueId: string, appVersionId: string) {
     return axios({
       method: 'delete',
       url: `${this.prefix}/app_version/delete/${appVersionId}/issue/${issueId}`,
 
+    });
+  }
+
+  /**
+   * 删除版本与问题关联关系
+   */
+  deleteLinkIssueId(issueId: string, versionId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/product_version/${versionId}/issue/${issueId}`,
     });
   }
 
@@ -473,7 +483,7 @@ class VersionApi extends Api<VersionApi> {
         size,
       },
     }).then((res: any) => {
-      const newList = res.content.map((i: any) => ({ ...i, name: i.versionAlias || i.version }));
+      const newList = res.content.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` }));
       const newData = ({ ...res, content: newList, list: newList });
       return newData;
     });

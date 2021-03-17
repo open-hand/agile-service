@@ -11,10 +11,10 @@ function ReleaseStoryTableDataSet(versionId: string): DataSetProps {
       { name: 'summary', label: '概要' },
       { name: 'issueNum', label: '编号' },
       { name: 'status', label: '状态' },
-      { name: 'appService', label: '应用版本' },
+      { name: 'appVersions', label: '应用版本' },
       { name: 'featureVO', label: '所属特性' },
       { name: 'epic', label: '所属史诗' },
-      { name: 'assigner', label: '经办人' },
+      { name: 'assigneeId', label: '经办人' },
 
     ],
     transport: {

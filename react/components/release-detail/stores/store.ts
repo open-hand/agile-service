@@ -5,6 +5,7 @@ import IReleaseDetailData from '../types';
 
 interface EventsProps {
   load: (data: any) => any | Promise<any>
+  selectIssue: (id: string) => any
   update: ((data: any) => any | Promise<any>)
 }
 interface INoticeMessage {
@@ -12,7 +13,7 @@ interface INoticeMessage {
   content?: string,
 }
 class ReleaseDetailStore {
-  events: EventsProps = { update: () => true, load: () => true };
+  events: EventsProps = { update: () => true, load: () => true, selectIssue: () => {} };
 
   @observable loading: boolean = false;
 
@@ -105,6 +106,10 @@ class ReleaseDetailStore {
     this.currentClickKDetail = newClickDetail as IReleaseDetailData;
     this.loadData(waitQueryId as string);
     this.visible = true;
+  }
+
+  @action selectIssue(issueId: string) {
+    this.events.selectIssue(issueId);
   }
 
   @action unSelect() {

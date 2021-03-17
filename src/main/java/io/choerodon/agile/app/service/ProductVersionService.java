@@ -125,4 +125,13 @@ public interface ProductVersionService {
      * @return 产品版本关联的应用版本
      */
     List<AppVersionVO> createAndRelAppVersion(Long projectId, Long versionId, List<AppVersionCreateVO> appVersionCreateList);
+
+
+    /**
+     * 删除产品版本下应用版本和问题的关系
+     * @param projectId 项目id
+     * @param versionId 应用版本
+     * @param issueId 问题id
+     */
+    void deleteIssueRel(Long projectId, Long versionId, Long issueId);
 }
