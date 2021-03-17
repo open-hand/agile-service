@@ -63,11 +63,11 @@ public interface AppVersionService {
      * 解析pom文件
      *
      * @param projectId
-     * @param groupId
+     * @param groupIds
      * @param multipartFile
      * @return
      */
-    List<AppVersionVO> parsePom(Long projectId, String groupId, MultipartFile multipartFile);
+    List<AppVersionVO> parsePom(Long projectId, String groupIds, MultipartFile multipartFile);
 
     /**
      * 批量创建应用版本

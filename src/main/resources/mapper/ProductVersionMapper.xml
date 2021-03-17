@@ -535,7 +535,10 @@
             aav.service_code,
             aav.project_id,
             aav.organization_id,
-            aav.object_version_number
+            aav.object_version_number,
+            aav.app_service,
+            aav.tag,
+            aav.parent_id
         FROM agile_app_version aav
         WHERE
             aav.id IN (
@@ -548,6 +551,11 @@
                 AND apavr.product_version_id = #{versionId}
             )
         AND aav.project_id = #{projectId}
+        <if test="appVersionSearchVO != null">
+            <if test="appVersionSearchVO.appService != null and appVersionSearchVO.appService">
+                and aav.app_service = #{appVersionSearchVO.appService}
+            </if>
+        </if>
     </select>
 
     <select id="listUnRelAppVersionByOption" resultType="io.choerodon.agile.api.vo.AppVersionVO">

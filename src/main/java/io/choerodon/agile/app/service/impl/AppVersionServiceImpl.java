@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -147,7 +148,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Override
     public List<AppVersionVO> parsePom(Long projectId,
-                                       String groupId,
+                                       String groupIds,
                                        MultipartFile multipartFile) {
         ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
         if (project == null) {
@@ -163,7 +164,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         try {
             Long organizationId = ConvertUtil.getOrganizationId(projectId);
             InputStream pomInputStream = multipartFile.getInputStream();
-            List<AppVersionVO> appVersionList = pomService.parse(groupId, pomInputStream, appServiceRepList, organizationId);
+            List<AppVersionVO> appVersionList = pomService.parse(groupIds, pomInputStream, appServiceRepList, organizationId);
             return appVersionList;
         } catch (IOException
                 | SAXException
@@ -176,7 +177,38 @@ public class AppVersionServiceImpl implements AppVersionService {
     public List<AppVersionVO> batchCreateAppVersion(Long projectId, List<AppVersionCreateVO> appVersionCreateVOList) {
         List<AppVersionVO> result = new ArrayList<>();
         if(!CollectionUtils.isEmpty(appVersionCreateVOList)){
-            appVersionCreateVOList.forEach(appVersionCreateVO -> result.add(createAppVersion(projectId, appVersionCreateVO)));
+            for(AppVersionCreateVO appVersionCreateVO : appVersionCreateVOList) {
+                String artifactId =  appVersionCreateVO.getArtifactId();
+                String version = appVersionCreateVO.getVersion();
+                String serviceCode = appVersionCreateVO.getServiceCode();
+                AppVersionDTO dto = new AppVersionDTO();
+                dto.setArtifactId(artifactId);
+                dto.setVersion(version);
+                dto.setServiceCode(serviceCode);
+                dto.setProjectId(projectId);
+                List<AppVersionDTO> list = appVersionMapper.select(dto);
+                if (list.isEmpty()) {
+                    result.add(createAppVersion(projectId, appVersionCreateVO));
+                } else {
+                    dto = list.get(0);
+                    AppVersionUpdateVO update = modelMapper.map(dto, AppVersionUpdateVO.class);
+                    update.setTag(null);
+                    String alias = appVersionCreateVO.getVersionAlias();
+                    if (StringUtils.isEmpty(alias)) {
+                        update.setVersionAlias(null);
+                    } else {
+                        update.setVersionAlias(alias);
+                    }
+                    if (Boolean.FALSE.equals(update.getAppService())
+                            && Boolean.TRUE.equals(appVersionCreateVO.getAppService())) {
+                        update.setAppService(true);
+                    }
+                    AppVersionVO vo = updateAppVersion(projectId, dto.getId(), modelMapper.map(dto, AppVersionUpdateVO.class));
+                    //设置源appService的值，用于解析父子关系
+                    vo.setAppService(appVersionCreateVO.getAppService());
+                    result.add(vo);
+                }
+            }
         }
         return result;
     }

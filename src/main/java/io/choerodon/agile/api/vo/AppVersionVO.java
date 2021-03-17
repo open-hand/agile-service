@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -33,6 +34,46 @@ public class AppVersionVO {
     private Long organizationId;
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
+    @ApiModelProperty(value = "是否为应用服务")
+    private Boolean appService;
+    @ApiModelProperty(value = "是否为tag")
+    private Boolean tag;
+    @ApiModelProperty(value = "子版本")
+    private List<AppVersionVO> children;
+    @ApiModelProperty(value = "父级id")
+    private Long parentId;
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public List<AppVersionVO> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<AppVersionVO> children) {
+        this.children = children;
+    }
+
+    public Boolean getAppService() {
+        return appService;
+    }
+
+    public void setAppService(Boolean appService) {
+        this.appService = appService;
+    }
+
+    public Boolean getTag() {
+        return tag;
+    }
+
+    public void setTag(Boolean tag) {
+        this.tag = tag;
+    }
 
     public Long getId() {
         return id;

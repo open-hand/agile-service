@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface PomService {
 
-    List<AppVersionVO> parse(String groupId,
+    List<AppVersionVO> parse(String groupIds,
                              InputStream inputStream,
                              List<AppServiceRepVO> appServiceRepList,
                              Long organizationId)

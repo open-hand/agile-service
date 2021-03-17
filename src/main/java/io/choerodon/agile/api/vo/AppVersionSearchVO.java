@@ -26,6 +26,16 @@ public class AppVersionSearchVO {
     private String serviceCode;
     @ApiModelProperty(value = "版本或版本别名")
     private String content;
+    @ApiModelProperty(value = "是否为应用服务")
+    private Boolean appService;
+
+    public Boolean getAppService() {
+        return appService;
+    }
+
+    public void setAppService(Boolean appService) {
+        this.appService = appService;
+    }
 
     public Long getId() {
         return id;

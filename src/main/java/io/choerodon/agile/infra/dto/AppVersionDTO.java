@@ -35,6 +35,36 @@ public class AppVersionDTO extends AuditDomain {
 
     private Long organizationId;
 
+    private Boolean appService;
+
+    private Boolean tag;
+
+    private Long parentId;
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Boolean getAppService() {
+        return appService;
+    }
+
+    public void setAppService(Boolean appService) {
+        this.appService = appService;
+    }
+
+    public Boolean getTag() {
+        return tag;
+    }
+
+    public void setTag(Boolean tag) {
+        this.tag = tag;
+    }
+
     public Long getId() {
         return id;
     }

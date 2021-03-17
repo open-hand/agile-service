@@ -167,9 +167,9 @@ public class AppVersionController {
     public ResponseEntity<List<AppVersionVO>> parsePom(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "groupId", required = true)
-                                                       @RequestParam String groupId,
+                                                       @RequestParam(required = false) String groupIds,
                                                        @RequestBody MultipartFile file) {
-        return Optional.ofNullable(appVersionService.parsePom(projectId, groupId, file))
+        return Optional.ofNullable(appVersionService.parsePom(projectId, groupIds, file))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.appVersion.parsePom"));
     }
