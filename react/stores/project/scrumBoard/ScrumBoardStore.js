@@ -596,9 +596,9 @@ class ScrumBoardStore {
   }
 
   axiosGetBoardData(boardId) {
-    if (!this.searchVO.otherArgs || isEmpty(this.searchVO.otherArgs.sprint)) {
-      this.getSprintId && set(this.searchVO, 'otherArgs.sprint', [this.getSprintId]);
-    }
+    // if (!this.searchVO.otherArgs || isEmpty(this.searchVO.otherArgs.sprint)) {
+    //   this.getSprintId && set(this.searchVO, 'otherArgs.sprint', [this.getSprintId]);
+    // }
     return boardApi.load(boardId, this.searchVO);
   }
 

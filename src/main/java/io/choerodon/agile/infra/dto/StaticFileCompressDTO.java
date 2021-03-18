@@ -14,6 +14,7 @@ public class StaticFileCompressDTO {
     private String fileName;
     private String status;
     private String issueId;
+    private String encode;
     private StaticFileOperationHistoryDTO staticFileCompressHistory;
 
     public Long getId() {
@@ -78,5 +79,13 @@ public class StaticFileCompressDTO {
 
     public void setIssueId(String issueId) {
         this.issueId = issueId;
+    }
+
+    public String getEncode() {
+        return encode;
+    }
+
+    public void setEncode(String encode) {
+        this.encode = encode;
     }
 }

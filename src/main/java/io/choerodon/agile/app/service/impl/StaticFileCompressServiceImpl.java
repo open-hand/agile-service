@@ -45,8 +45,6 @@ import io.choerodon.agile.infra.dto.StaticFileHeaderDTO;
 import io.choerodon.agile.infra.dto.StaticFileLineDTO;
 import io.choerodon.agile.infra.dto.StaticFileOperationHistoryDTO;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.EncodeUtil;
-import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.helper.snowflake.SnowflakeHelper;
@@ -111,11 +109,12 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
             boolean notIndex;
             //判断压缩类型，调用不同的解压方法
             String suffix = getSuffix(multipartFile.getOriginalFilename());
+            String encode = getEncoding(multipartFile, suffix);
             switch (suffix) {
                 case ZIP:
                 case TAR:
                 case TAR_GZ:
-                    notIndex = validIndexExistByApache(multipartFile, suffix);
+                    notIndex = validIndexExistByApache(multipartFile, suffix, encode);
                     break;
                 case RAR:
                     notIndex = validIndexExistByRar(multipartFile);
@@ -177,7 +176,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     }
 
     @Override
-    public String getIndexPrefixPath(MultipartFile multipartFile) throws IOException {
+    public String getIndexPrefixPath(MultipartFile multipartFile, StaticFileCompressDTO staticFileCompressDTO) throws IOException {
         String result;
         String suffix = getSuffix(multipartFile.getOriginalFilename());
         //判断压缩类型，调用不同的解压方法
@@ -185,7 +184,8 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
             case ZIP:
             case TAR:
             case TAR_GZ:
-                result = getIndexPrefixPathByApache(multipartFile, suffix);
+                staticFileCompressDTO.setEncode(getEncoding(multipartFile, suffix));
+                result = getIndexPrefixPathByApache(multipartFile, suffix, staticFileCompressDTO);
                 break;
             case RAR:
                 result = getIndexPrefixPathByRar(multipartFile);
@@ -271,8 +271,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         String prefixPath = staticFileCompress.getPrefixPath();
         try (
                 BufferedInputStream bufferedInputStream = new BufferedInputStream(staticFileCompress.getIn());
-                //根据文件后缀名获取不同的压缩流
-                ArchiveInputStream in = getArchiveInputStream(bufferedInputStream, suffix)
+                ArchiveInputStream in = getArchiveInputStream(bufferedInputStream, suffix, staticFileCompress.getEncode())
         ) {
             ArchiveEntry entry;
             while (Objects.nonNull(entry = in.getNextEntry())) {
@@ -329,14 +328,15 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         staticFileHeaderMapper.updateFileStatus(id, status);
     }
 
-    private ArchiveInputStream getArchiveInputStream(BufferedInputStream bufferedInputStream, String suffix) throws IOException {
+    private ArchiveInputStream getArchiveInputStream(BufferedInputStream bufferedInputStream, String suffix, String encode) throws IOException {
+        //根据文件后缀名获取不同的压缩流
         switch (suffix) {
             case ZIP:
-                return new ZipArchiveInputStream(bufferedInputStream);
+                return new ZipArchiveInputStream(bufferedInputStream, encode);
             case TAR:
-                return new TarArchiveInputStream(bufferedInputStream);
+                return new TarArchiveInputStream(bufferedInputStream, encode);
             case TAR_GZ:
-                return new TarArchiveInputStream(new GzipCompressorInputStream(bufferedInputStream));
+                return new TarArchiveInputStream(new GzipCompressorInputStream(bufferedInputStream), encode);
             default:
                 throw new CommonException(COMPRESSED_TYPE_EXCEPTION_CODE);
         }
@@ -357,11 +357,11 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         return dealRelativePath(name.replace("\\", PATH_SPLIT), prefixPath);
     }
 
-    public String getIndexPrefixPathByApache(MultipartFile multipartFile, String suffix) {
+    public String getIndexPrefixPathByApache(MultipartFile multipartFile, String suffix, StaticFileCompressDTO staticFileCompressDTO) {
         String result = "";
         boolean notIndex = true;
         try (BufferedInputStream bufferedInputStream = new BufferedInputStream(multipartFile.getInputStream());
-             ArchiveInputStream in = getArchiveInputStream(bufferedInputStream, suffix)
+             ArchiveInputStream in = getArchiveInputStream(bufferedInputStream, suffix, staticFileCompressDTO.getEncode())
         ) {
             ArchiveEntry entry;
             while (Objects.nonNull(entry = in.getNextEntry())) {
@@ -449,10 +449,10 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         return entryName.substring(entryName.lastIndexOf(PATH_SPLIT) + 1);
     }
 
-    private boolean validIndexExistByApache(MultipartFile multipartFile, String suffix) {
+    private boolean validIndexExistByApache(MultipartFile multipartFile, String suffix, String encode) {
         boolean notIndex = true;
         try (BufferedInputStream bufferedInputStream = new BufferedInputStream(multipartFile.getInputStream());
-             ArchiveInputStream in = getArchiveInputStream(bufferedInputStream, suffix)
+             ArchiveInputStream in = getArchiveInputStream(bufferedInputStream, suffix, encode)
         ) {
             ArchiveEntry entry;
             while (Objects.nonNull(entry = in.getNextEntry())) {
@@ -516,5 +516,37 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
             return TAR_GZ;
         }
         return upperFileName.substring(upperFileName.lastIndexOf("."));
+    }
+
+    @Override
+    public String getEncoding(MultipartFile multipartFile, String suffix){
+        String resultCode = "GBK";
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(multipartFile.getInputStream());
+             ArchiveInputStream in = getArchiveInputStream(bufferedInputStream, suffix, resultCode)
+        ) {
+            ArchiveEntry entry;
+            while (Objects.nonNull(entry = in.getNextEntry())) {
+                if(isMessyCode((entry.getName()))){
+                   resultCode = "UTF-8";
+                   break;
+                }
+            }
+        } catch (IOException e) {
+            resultCode = "UTF-8";
+        }
+        return resultCode;
+    }
+
+    private boolean isMessyCode(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            // 当从Unicode编码向某个字符集转换时，如果在该字符集中没有对应的编码，则得到0x3f（即问号字符?）
+            // 从其他字符集向Unicode编码转换时，如果这个二进制数在该字符集中没有标识任何的字符，则得到的结果是0xfffd
+            if ((int) c == 0xfffd) {
+                // 存在乱码
+                return true;
+            }
+        }
+        return false;
     }
 }

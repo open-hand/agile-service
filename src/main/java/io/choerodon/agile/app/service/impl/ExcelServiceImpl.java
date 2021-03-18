@@ -240,7 +240,7 @@ public class ExcelServiceImpl implements ExcelService {
         if (ObjectUtils.isEmpty(systemFields)) {
             throw new CommonException("error.excel.header.code.empty");
         }
-        boolean withFeature = (withFeature(projectId, organizationId) && agilePluginService != null);
+        boolean withFeature = (agilePluginService != null && withFeature(projectId, organizationId));
 
         validateSystemField(systemFields, withFeature);
         systemFields = ExcelImportTemplate.IssueHeader.addFields(systemFields);
@@ -964,7 +964,7 @@ public class ExcelServiceImpl implements ExcelService {
         validateWorkbook(workbook, history, WEBSOCKET_IMPORT_CODE);
         List<String> headerNames = resolveCodeFromHeader(workbook, history, WEBSOCKET_IMPORT_CODE);
         Map<Integer, ExcelColumnVO> headerMap = new LinkedHashMap<>();
-        boolean withFeature = (withFeature(projectId, organizationId) && agilePluginService != null);
+        boolean withFeature = (agilePluginService != null && withFeature(projectId, organizationId));
         //获取日期类型的列
         Set<Integer> dateTypeColumns = new HashSet<>();
         processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history, dateTypeColumns, WEBSOCKET_IMPORT_CODE);

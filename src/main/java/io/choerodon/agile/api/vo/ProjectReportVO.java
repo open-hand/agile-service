@@ -42,16 +42,8 @@ public class ProjectReportVO {
     private UserDTO createdUser;
     @ApiModelProperty("版本号")
     private Long objectVersionNumber;
-    @ApiModelProperty("图片的base64数据")
-    private String imgData;
-    
-    public String getImgData() {
-        return imgData;
-    }
-
-    public void setImgData(String imgData) {
-        this.imgData = imgData;
-    }
+    @ApiModelProperty("html字符串")
+    private String html;
 
     public UserDTO getCreatedUser() {
         return createdUser;
@@ -147,5 +139,13 @@ public class ProjectReportVO {
 
     public void setReceiverList(List<UserDTO> receiverList) {
         this.receiverList = receiverList;
+    }
+
+    public String getHtml() {
+        return html;
+    }
+
+    public void setHtml(String html) {
+        this.html = html;
     }
 }

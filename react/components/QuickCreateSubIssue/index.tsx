@@ -5,6 +5,7 @@ import {
 } from 'choerodon-ui';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { useLockFn } from 'ahooks';
+import { isEmpty } from 'lodash';
 import { IIssueType } from '@/common/types';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
 import { FormProps } from 'choerodon-ui/lib/form';
@@ -56,6 +57,22 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           };
           const fields = await fieldApi.getFields(param);
           const fieldsMap = fields2Map(fields);
+          const versionIssueRelVOList:any[] = [];
+          const defaultVersionList:any[] = [];
+
+          if (!isEmpty(fieldsMap.get('influenceVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'influence')) {
+            fieldsMap.get('influenceVersion')?.defaultValue.forEach((item:any) => defaultVersionList.push({
+              versionId: item,
+              relationType: 'influence',
+            }));
+          }
+          if (!isEmpty(fieldsMap.get('fixVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'fix')) {
+            fieldsMap.get('fixVersion')?.defaultValue.forEach((item:any) => defaultVersionList.push({
+              versionId: item,
+              relationType: 'fix',
+            }));
+          }
+          versionIssueRelVOList.push(...defaultVersionList);
           const issue = {
             summary,
             priorityId,
@@ -67,7 +84,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
             componentIssueRelVOList: fieldsMap.get('component')?.defaultValueObjs || [],
             labelIssueRelVOList: fieldsMap.get('label')?.defaultValueObjs || [],
             fixVersionIssueRel: fieldsMap.get('fixVersion')?.defaultValue || [],
+            versionIssueRelVOList,
             assigneeId: fieldsMap.get('assignee')?.defaultValue,
+            reporterId: fieldsMap.get('reporter')?.defaultValue,
             estimatedEndTime: fieldsMap.get('estimatedEndTime')?.defaultValue,
             estimatedStartTime: fieldsMap.get('estimatedStartTime')?.defaultValue,
             remainingTime: fieldsMap.get('remainingTime')?.defaultValue,

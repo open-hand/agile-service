@@ -82,6 +82,6 @@ public class ProjectReportController {
     public ResponseEntity<ProjectReportDTO> send(@PathVariable("project_id") Long projectId,
                                      @PathVariable("id") @Encrypt Long id,
                                      @RequestBody ProjectReportVO projectReportVO) {
-        return Results.success(projectReportService.send(projectId, id, projectReportVO.getImgData()));
+        return Results.success(projectReportService.send(projectId, id, projectReportVO.getHtml()));
     }
 }

@@ -8,7 +8,7 @@ const BaseInfoPreview: React.FC = () => {
   const { baseInfo } = store;
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} c7n-project-report-block`}>
       <div className={styles.title}>
         {baseInfo?.title}
       </div>
@@ -36,6 +36,12 @@ const BaseInfoPreview: React.FC = () => {
           {(baseInfo?.ccList || []).map((user) => user.realName).join(',')}
         </div>
       </section>
+      <div style={{
+        height: 1,
+        background: '#3F51B5FF',
+        margin: '30px 0 20px 0',
+      }}
+      />
     </div>
   );
 };

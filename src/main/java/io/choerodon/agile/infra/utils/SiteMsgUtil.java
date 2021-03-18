@@ -213,7 +213,7 @@ public class SiteMsgUtil {
     }
 
     @Async
-    public void sendProjectReport(Long projectId, List<ProjectReportReceiverDTO> receiverList, String imgData) {
+    public void sendProjectReport(Long projectId, List<ProjectReportReceiverDTO> receiverList, String html) {
         // 获取接收人, 抄送人
         Map<String, List<ProjectReportReceiverDTO>> group =
                 receiverList.stream().collect(Collectors.groupingBy(ProjectReportReceiverDTO::getType));
@@ -229,7 +229,7 @@ public class SiteMsgUtil {
         handleReceiver(ccReceiver, ccList);
         // 设置参数
         Map<String, String> argsMap = new HashMap<>();
-        argsMap.put("data", "<img style='width: 780px;' src='"+imgData+"'>" );
+        argsMap.put("data", html);
         // 设置sender
         MessageSender sender = new MessageSender();
         sender.setMessageCode("PROJECT_REPORT");

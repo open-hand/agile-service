@@ -61,7 +61,7 @@ const ReportBlock: React.FC<Props> = (props) => {
     });
   }, [data, index, store]);
   return (
-    <div className={styles.report_block}>
+    <div className={`${styles.report_block} c7n-project-report-block`}>
       <div
         className={classNames(styles.header, {
           [styles.header_preview]: isPreview,
