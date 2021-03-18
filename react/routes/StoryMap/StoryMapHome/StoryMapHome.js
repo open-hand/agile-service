@@ -154,9 +154,6 @@ const StoryMapHome = observer(() => {
   return (
     <Page
       className="c7nagile-StoryMap"
-      // service={[
-      //   'choerodon.code.project.cooperation.story-map.ps.default',
-      // ]}
     >
       <Header title="故事地图">
         {!isInProgram && isEmpty && !loading ? <Button onClick={handleCreateEpicClick} icon="playlist_add">创建史诗</Button> : null}

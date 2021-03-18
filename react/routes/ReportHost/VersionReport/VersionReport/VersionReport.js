@@ -575,7 +575,9 @@ class EpicReport extends Component {
   render() {
     const urlParams = AppState.currentMenuType;
     return (
-      <Page className="c7n-versionReport" serice={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.versionreport']}>
+      <Page
+        className="c7n-versionReport"
+      >
         <Header
           title="版本报告图"
           backPath={linkUrl(LINK_URL.report)}

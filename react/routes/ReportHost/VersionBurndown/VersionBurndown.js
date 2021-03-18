@@ -782,7 +782,9 @@ class VersionBurndown extends Component {
     const { checkbox, tabActiveKey, linkFromParamUrl } = this.state;
     const urlParams = AppState.currentMenuType;
     return (
-      <Page className="c7n-versionBurndown" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.versionburndown']}>
+      <Page
+        className="c7n-versionBurndown"
+      >
         <Header
           title="版本燃耗图"
           /**

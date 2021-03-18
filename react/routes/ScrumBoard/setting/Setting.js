@@ -23,19 +23,6 @@ import CreateColumn from './components/create-column';
 
 const { TabPane } = Tabs;
 const { confirm } = Modal;
-
-const service = [
-  'choerodon.code.project.cooperation.iteration-plan.ps.config',
-  'choerodon.code.project.cooperation.iteration-plan.ps.status.create',
-  'choerodon.code.project.cooperation.iteration-plan.ps.column.create',
-  'choerodon.code.project.cooperation.iteration-plan.ps.board.delete',
-  'choerodon.code.project.cooperation.iteration-plan.ps.board.update',
-  'choerodon.code.project.cooperation.iteration-plan.ps.column',
-  'choerodon.code.project.cooperation.iteration-plan.ps.status.update',
-  'choerodon.code.project.cooperation.iteration-plan.ps.status.delete',
-  'choerodon.code.project.cooperation.iteration-plan.ps.work_calendar.update',
-];
-
 @observer
 class Setting extends Component {
   constructor(props) {
@@ -152,9 +139,7 @@ class Setting extends Component {
   render() {
     const { loading, activeKey } = this.state;
     return (
-      <Page
-        service={service}
-      >
+      <Page>
         <Header title="配置看板">
           {activeKey === '1' ? (
             <>
@@ -223,4 +208,3 @@ class Setting extends Component {
 }
 
 export default withRouter(Setting);
-export { service };

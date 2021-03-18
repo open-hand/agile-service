@@ -441,11 +441,7 @@ function StateList(props) {
     };
 
     return (
-      <Page
-        service={[
-          'choerodon.code.organization.setting.issue.states.ps.state',
-        ]}
-      >
+      <Page>
         <Header title={<FormattedMessage id="state.title" />}>
           {!initialTotal
             ? (
@@ -476,7 +472,7 @@ function StateList(props) {
         </Content>
         {show && (
           <Sidebar
-        maskClosable
+            maskClosable
             title={<FormattedMessage id={showType === 'create' ? 'state.create' : 'state.edit'} />}
             visible={show}
             okText={<FormattedMessage id={showType === 'create' ? 'create' : 'save'} />}

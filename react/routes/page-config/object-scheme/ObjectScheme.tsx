@@ -239,17 +239,8 @@ function ObjectScheme() {
     );
   };
 
-  const service = getMenuType() === 'project' ? [
-    'choerodon.code.project.setting.page.ps.field',
-  ]
-    : [
-      'choerodon.code.organization.setting.issue.page.ps.filed',
-    ];
-
   return (
-    <Page
-      service={service}
-    >
+    <Page>
       <Header>
         <Button
           funcType={'flat' as FuncType}

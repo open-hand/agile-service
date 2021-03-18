@@ -335,7 +335,7 @@ class VelocityChart extends Component {
   render() {
     const urlParams = AppState.currentMenuType;
     return (
-      <Page className="c7n-velocity" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.velocity_chart']}>
+      <Page className="c7n-velocity">
         <Header
           title="迭代速度图"
           backPath={linkUrl(LINK_URL.report)}
