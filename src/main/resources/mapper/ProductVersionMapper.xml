@@ -39,7 +39,10 @@
         apv.project_id,
         apv.object_version_number,
         apv.sequence,
-        alv. NAME AS STATUS
+        alv. NAME AS STATUS,
+        apv.creation_date,
+        apv.created_by,
+        apv.release_date
         FROM
         agile_product_version apv
         LEFT JOIN lookup_value alv ON alv.value_code = apv.status_code
@@ -174,7 +177,11 @@
             apv.release_date,
             apv.status_code,
             alv.name AS status_name,
-            apv.project_id
+            apv.project_id,
+            apv.object_version_number,
+            apv.release_date,
+            apv.creation_date,
+            apv.created_by
         FROM agile_product_version apv
             LEFT JOIN lookup_value alv ON alv.value_code = apv.status_code
         WHERE apv.project_id = #{projectId} AND apv.version_id = #{versionId}
@@ -518,4 +525,83 @@
         LIMIT 1;
     </select>
 
+    <select id="listAppVersionByOption" resultType="io.choerodon.agile.api.vo.AppVersionVO">
+        SELECT
+            aav.id,
+            aav.group_id,
+            aav.artifact_id,
+            aav.version,
+            aav.version_alias,
+            aav.service_code,
+            aav.project_id,
+            aav.organization_id,
+            aav.object_version_number,
+            aav.app_service,
+            aav.tag,
+            aav.parent_id
+        FROM agile_app_version aav
+        WHERE
+            aav.id IN (
+                SELECT
+                apavr.app_version_id
+                FROM
+                agile_product_app_version_rel apavr
+                WHERE
+                apavr.project_id = #{projectId}
+                AND apavr.product_version_id = #{versionId}
+            )
+        AND aav.project_id = #{projectId}
+        <if test="appVersionSearchVO != null">
+            <if test="appVersionSearchVO.appService != null and appVersionSearchVO.appService">
+                and aav.app_service = #{appVersionSearchVO.appService}
+            </if>
+        </if>
+    </select>
+
+    <select id="listUnRelAppVersionByOption" resultType="io.choerodon.agile.api.vo.AppVersionVO">
+        SELECT
+            aav.id,
+            aav.group_id,
+            aav.artifact_id,
+            aav.version,
+            aav.version_alias,
+            aav.service_code,
+            aav.project_id,
+            aav.organization_id,
+            aav.object_version_number
+        FROM agile_app_version aav
+        LEFT JOIN agile_product_app_version_rel apavr ON apavr.app_version_id = aav.id AND apavr.product_version_id = #{versionId}
+        WHERE aav.project_id = #{projectId}
+        AND apavr.id IS NULL
+        AND aav.service_code = #{appVersionSearchVO.serviceCode}
+        <if test="appVersionSearchVO.content != null and !''.equals(appVersionSearchVO.content)">
+            <bind name="contentLike" value="'%' + appVersionSearchVO.content + '%'"/>
+            AND (aav.version LIKE #{contentLike}
+            OR aav.version_alias LIKE #{contentLike})
+        </if>
+    </select>
+
+    <select id="listAppVersionIdByVersionId" resultType="java.lang.Long">
+        SELECT
+            apavr.app_version_id
+        FROM agile_product_app_version_rel apavr
+        WHERE
+            apavr.project_id = #{projectId}
+        AND apavr.product_version_id = #{versionId}
+    </select>
+
+    <select id="listMinSequenceByAppVersion" resultType="io.choerodon.agile.api.vo.AppVersionRelProductSequenceVO">
+        SELECT
+            apav.app_version_id,
+            MIN(apv.sequence) AS sequence
+        FROM agile_product_version apv
+        LEFT JOIN agile_product_app_version_rel apav ON apv.version_id = apav.product_version_id
+        WHERE
+            apv.project_id = #{projectId}
+        AND apav.app_version_id IN
+            <foreach collection="appVersionIds" item="appVersionId" open="(" separator="," close=")">
+                #{appVersionId}
+            </foreach>
+        GROUP BY apav.app_version_id
+    </select>
 </mapper>

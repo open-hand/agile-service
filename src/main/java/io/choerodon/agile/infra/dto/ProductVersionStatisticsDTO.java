@@ -15,6 +15,9 @@ public class ProductVersionStatisticsDTO {
     private String statusCode;
     private String statusName;
     private Long projectId;
+    private Date creationDate;
+    private Long createdBy;
+    private Long objectVersionNumber;
 
     public Long getVersionId() {
         return versionId;
@@ -86,5 +89,29 @@ public class ProductVersionStatisticsDTO {
 
     public void setStatusName(String statusName) {
         this.statusName = statusName;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
     }
 }

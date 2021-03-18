@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import WYSIWYGViewer from '@/components/CKEditorViewer';
 import { IReportTextBlock } from '@/routes/project-report/report-page/store';
 import { useTaskContext } from '@/routes/project-report/report-preview/taskContext';
 
@@ -39,7 +39,7 @@ const TextBlock: React.FC<Props> = ({ data: { content, key } }) => {
   }, [onFinish]);
   return (
     <div style={{ padding: '10px 26px' }} ref={ref}>
-      <WYSIWYGViewer data={content} />
+      <WYSIWYGViewer value={content} />
     </div>
   );
 };

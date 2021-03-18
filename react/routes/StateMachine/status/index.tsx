@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
@@ -56,6 +56,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
       },
     });
   };
+
   return (
     <Page>
       <Header>

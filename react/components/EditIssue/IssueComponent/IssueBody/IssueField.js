@@ -16,6 +16,7 @@ import FieldMember from './Field/FieldMember';
 import FieldCreator from './Field/FieldCreator';
 import FieldUpdater from './Field/FieldUpdater';
 import FieldEnvironment from './Field/FieldEnvironment';
+import FieldAppVersion from './Field/FieldAppVersion';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -95,6 +96,8 @@ const IssueField = observer((props) => {
         return <FieldCreator {...props} field={field} />;
       case 'last_updated_user':
         return <FieldUpdater {...props} field={field} />;
+      case 'app_version':
+        return <FieldAppVersion {...props} field={field} />;
       default:
         return renderNormalField(field);
     }

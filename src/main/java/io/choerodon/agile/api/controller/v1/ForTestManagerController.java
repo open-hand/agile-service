@@ -62,9 +62,7 @@ public class ForTestManagerController {
                                                             @PathVariable(name = "project_id") Long projectId,
                                                             @ApiParam(value = "issue编号", required = true)
                                                             @RequestBody String issueNum) {
-        return Optional.ofNullable(issueService.queryIssueByIssueNum(projectId, issueNum))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueNum"));
+        return new ResponseEntity<>(issueService.queryIssueByIssueNum(projectId, issueNum), HttpStatus.OK);
     }
 
 }

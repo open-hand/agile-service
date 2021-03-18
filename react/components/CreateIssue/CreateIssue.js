@@ -16,7 +16,7 @@ import {
   statusApi,
 } from '@/api';
 import {
-  uploadAndReplaceImg, handleFileUpload, validateFile, normFile, text2Delta,
+  handleFileUpload, validateFile, normFile,
 } from '@/utils/richText';
 import {
   getProjectName, getProjectId,
@@ -29,7 +29,7 @@ import SelectUser from '@/components/select/select-user-old';
 import { MAX_LENGTH_LABEL } from '@/constants/MAX_LENGTH';
 import { UploadButton } from '../CommonComponent';
 import SelectNumber from '../SelectNumber';
-import WYSIWYGEditor from '../WYSIWYGEditor';
+import WYSIWYGEditor from '../CKEditor';
 import TypeTag from '../TypeTag';
 import './CreateIssue.less';
 import SelectFocusLoad from '../SelectFocusLoad';
@@ -215,14 +215,14 @@ class CreateIssue extends Component {
 
   loadDefaultTemplate = (issueTypeId) => {
     const { form } = this.props;
-    if (this.props.defaultDescription) { // 如果有外部默认描述信息则 放弃加载默认模版
+    if (this.props.defaultDescription) { // 如果有外部默认描述信息则 放弃加载默认模板
       return;
     }
     const currentDes = form.getFieldValue('description');
     pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
       const { template } = res || {};
       form.setFieldsValue({
-        description: text2Delta(template),
+        description: template,
       });
       if (!template) {
         form.setFieldsValue({
@@ -378,6 +378,7 @@ class CreateIssue extends Component {
           subTaskParent,
           programVersion,
           environment,
+          appVersions,
           mainResponsibleId,
           testResponsibleId,
         } = values;
@@ -426,12 +427,11 @@ class CreateIssue extends Component {
         const issueLinkCreateVOList = this.getIssueLinks(keys, linkTypes, linkIssues);
 
         this.setState({ createLoading: true });
-        const deltaOps = description;
         try {
-          const text = await uploadAndReplaceImg(deltaOps);
           const extra = {
-            description: text,
+            description,
             statusId,
+            appVersions: appVersions ? appVersions.map((i) => ({ id: i })) : [],
             programId: getProjectId(),
             projectId: getProjectId(),
             issueTypeId: currentTypeId,
@@ -1030,7 +1030,7 @@ class CreateIssue extends Component {
                 initialValue: this.props.defaultDescription,
               })(
                 <DebounceEditor
-                  style={{ height: 200, width: '100%' }}
+                  style={{ width: '100%' }}
                 />,
               )}
             </FormItem>
@@ -1180,6 +1180,32 @@ class CreateIssue extends Component {
                       });
                     }
                   }}
+                />,
+              )}
+            </div>
+          </FormItem>
+        );
+      case 'app_version':
+        return (
+          <FormItem label={field.fieldName} key={`${newIssueTypeCode}-${field.id}`}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {getFieldDecorator('appVersions', {
+                rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
+              })(
+                <SelectFocusLoad
+                  label={field.fieldName}
+                  type="app_version"
+                  loadWhenMount
+                  mode="multiple"
+                  selectedAppService={field.defaultValue}
+                // afterLoad={(statusList) => {
+                //   const defaultStatus = find(statusList, { defaultStatus: true });
+                //   if (defaultStatus && !form.getFieldValue(`${field.fieldCode}Id`)) {
+                //     form.setFieldsValue({
+                //       [`${field.fieldCode}Id`]: defaultStatus.id,
+                //     });
+                //   }
+                // }}
                 />,
               )}
             </div>

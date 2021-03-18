@@ -397,4 +397,13 @@ public interface IssueService {
     Page<IssueListFieldKVVO> pagedQueryMyReported(Long organizationId,
                                                   Long projectId,
                                                   PageRequest pageRequest);
+
+    /**
+     * 处理更新app version
+     *
+     * @param appVersions
+     * @param projectId
+     * @param issueId
+     */
+    void handleUpdateAppVersionIssueRel(List<AppVersionVO> appVersions, Long projectId, Long issueId);
 }

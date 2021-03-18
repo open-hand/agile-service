@@ -189,7 +189,8 @@ public class SiteMsgUtil {
                                       Set<Long> userSet,
                                       List<String> noticeTypeList,
                                       Map<String, String> templateArgsMap,
-                                      Long operatorId){
+                                      Long operatorId,
+                                      boolean onlyWebHook){
         MessageSender messageSender = new MessageSender();
         messageSender.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
         messageSender.setMessageCode("ISSUECHANGESTATUS");
@@ -202,7 +203,8 @@ public class SiteMsgUtil {
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
         messageSender.setAdditionalInformation(objectMap);
-        if (CollectionUtils.isEmpty(receiverList)) {
+        //如果noticeTypeList仅有WebHook不需要receiver
+        if (!onlyWebHook && CollectionUtils.isEmpty(receiverList)) {
             return;
         }
         messageSender.setTypeCodeList(noticeTypeList);

@@ -2,7 +2,6 @@ import React, { useState, useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { handleFileUpload } from '@/utils/richText';
 import { getProjectId } from '@/utils/common';
-import ChunkUploader from '@/components/chunk-uploader';
 import { UploadButtonNow } from '../../../CommonComponent';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';

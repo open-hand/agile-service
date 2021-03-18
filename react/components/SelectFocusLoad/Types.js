@@ -12,10 +12,9 @@ import {
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
 
 import { Tooltip } from 'choerodon-ui/pro';
-import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
-import { IsInProgramStore } from '../../exports';
+import UserTag from '../tag/user-tag';
 // 增加 typeof 避免选项中 加载更多 影响
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
   input.toLowerCase(),
@@ -75,8 +74,8 @@ export default {
           display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
         }}
         >
-          <UserHead
-            user={user}
+          <UserTag
+            data={user}
           />
         </div>
       </Option>
@@ -140,7 +139,7 @@ export default {
     props: {
       filterOption,
     },
-    request: () => epicApi.loadEpicsForSelect(),
+    request: () => epicApi.loadEpics(),
     render: (epic) => (
       <Option
         key={epic.issueId}
@@ -600,5 +599,27 @@ export default {
         ))}
       </OptGroup>
     ),
+  },
+  app_version: {
+    request: ({ filter, page }, requestArgs) => versionApi.loadAppService(filter, page),
+    render: (item) => (
+      <Option key={`${item.issueId}`} value={item.id}>{item.name || item.versionAlias || item.version}</Option>
+    ),
+    props: {
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+      filterOption,
+      loadWhenMount: true,
+    },
+    avoidShowError: (props, List) => new Promise((resolve) => {
+      const { selectedAppService } = props;
+      const extraList = [];
+      const values = selectedAppService instanceof Array ? selectedAppService : [selectedAppService];
+      values.forEach((feature) => {
+        if (feature && !find(List, { issueId: feature.issueId })) {
+          extraList.push(feature);
+        }
+      });
+      resolve(extraList);
+    }),
   },
 };

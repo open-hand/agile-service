@@ -3,14 +3,14 @@ import { Tooltip } from 'choerodon-ui';
 import classNames from 'classnames';
 import styles from './index.less';
 
-export interface HeadTagProps {
+export interface HeadTagProps extends React.HTMLAttributes<HTMLDivElement>{
   src?: string
   name?: React.ReactNode
   avatarStyle?: React.CSSProperties
   avatarClassName?: string
   textStyle?: React.CSSProperties
   textClassName?: string
-  tooltip?: boolean | string
+  tooltip?: boolean | React.ReactNode
   text?: string
   showText?: boolean
   size?: number
@@ -35,7 +35,7 @@ const HeadTag: React.FC<HeadTagProps> = ({
   const avatarSize = size || 20;
   const borderRadius = avatarSize / 3;
   const renderTooltip = useCallback(() => {
-    if (typeof tooltip === 'string') {
+    if (typeof tooltip === 'string' || React.isValidElement(tooltip)) {
       return tooltip;
     }
     return text;

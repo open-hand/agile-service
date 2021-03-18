@@ -28,6 +28,16 @@ public class FileOperationHistoryDTO extends AuditDomain {
         this.status = status;
     }
 
+    public FileOperationHistoryDTO(Long projectId, Long organizationId, Long userId, String action, Long successCount, Long failCount, String status) {
+        this.organizationId = organizationId;
+        this.projectId = projectId;
+        this.userId = userId;
+        this.action = action;
+        this.successCount = successCount;
+        this.failCount = failCount;
+        this.status = status;
+    }
+
     public FileOperationHistoryDTO(Long projectId, Long id, String action, String status, Long objectVersionNumber) {
         this.projectId = projectId;
         this.id = id;
@@ -42,6 +52,8 @@ public class FileOperationHistoryDTO extends AuditDomain {
     private Long id;
 
     private Long projectId;
+
+    private Long organizationId;
 
     private Long userId;
 
@@ -59,6 +71,16 @@ public class FileOperationHistoryDTO extends AuditDomain {
 
     @Transient
     private Double process;
+    @Transient
+    private String msg;
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
 
     public Long getId() {
         return id;
@@ -140,5 +162,13 @@ public class FileOperationHistoryDTO extends AuditDomain {
 
     public Double getProcess() {
         return process;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

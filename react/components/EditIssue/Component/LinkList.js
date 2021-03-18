@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import { issueLinkApi, featureApi } from '@/api';
-import Star from '@/components/tag/star';
-import UserHead from '../../UserHead';
+import UserTag from '@/components/tag/user-tag';
 import PriorityTag from '../../PriorityTag';
 import StatusTag from '../../StatusTag';
 import TypeTag from '../../TypeTag';
@@ -123,12 +122,13 @@ class LinkList extends Component {
               }}
               >
                 <div>
-                  <UserHead
+                  <UserTag
+                    tooltip={false}
                     user={{
                       id: issue.assigneeId,
                       loginName: '',
                       realName: issue.assigneeName,
-                      avatar: issue.imageUrl,
+                      imageUrl: issue.imageUrl,
                     }}
                   />
                 </div>

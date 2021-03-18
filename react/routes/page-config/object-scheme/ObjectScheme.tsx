@@ -20,6 +20,7 @@ import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
 import { disabledEditDefaultFields, orgDisabledEditDefaultFields } from '../page-issue-type/components/sort-table/useTextEditToggle';
 import { openSyncDefaultValueEditForm } from './components/sync-default-value-modal';
+import openImportField from './components/import-field';
 
 const { Column } = Table;
 enum IRequireScopeType {
@@ -179,6 +180,7 @@ function ObjectScheme() {
       <div className="c7n-table-cell-drop-menu">
         <TableDropMenu
           menu={menu}
+          tooltip
           onClickEdit={disabledEditDel ? undefined : openEditFieldModal}
           text={text}
           isHasMenu={!(system && disabledFields.includes(record?.get('code')))}
@@ -255,6 +257,13 @@ function ObjectScheme() {
         >
           <Icon type="playlist_add icon" />
           <span>{formatMessage({ id: 'field.create' })}</span>
+        </Button>
+        <Button
+          funcType={'flat' as FuncType}
+          onClick={openImportField}
+        >
+          <Icon type="archive" />
+          <span>{formatMessage({ id: 'field.import' })}</span>
         </Button>
       </Header>
       <Breadcrumb />

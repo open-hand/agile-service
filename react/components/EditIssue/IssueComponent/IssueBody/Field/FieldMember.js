@@ -1,11 +1,9 @@
-import React, { Component } from 'react';
-import { observer } from 'mobx-react';
-import moment from 'moment';
-import SelectUser from '@/components/select/select-user';
-import { Select } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
+import SelectUser from '@/components/select/select-user';
+import UserTag from '@/components/tag/user-tag';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import UserHead from '@/components/UserHead';
+import { observer } from 'mobx-react';
+import React, { Component } from 'react';
 
 @observer class FieldMember extends Component {
   updateIssueField = (value) => {
@@ -33,8 +31,10 @@ import UserHead from '@/components/UserHead';
 
   renderEditor = () => {
     const { field } = this.props;
-    const { value, fieldType, required } = field;
-    return <SelectUser required={required} clearButton />;
+    const {
+      value, fieldType, required, valueStr,
+    } = field;
+    return <SelectUser required={required} clearButton selectedUser={valueStr} />;
   }
 
   render() {
@@ -62,8 +62,8 @@ import UserHead from '@/components/UserHead';
             <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
               {value
                 ? (
-                  <UserHead
-                    user={value}
+                  <UserTag
+                    data={value}
                   />
                 ) : '无'}
             </div>

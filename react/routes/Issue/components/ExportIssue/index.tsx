@@ -4,8 +4,8 @@ import { openExportIssueModal as originOpenExportIssueModal } from '@/components
 import IssueExportStore from '@/components/issue-export/stores/store';
 import { issueApi, TemplateAction } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import { find, set, uniq } from 'lodash';
+import { set } from 'lodash';
+import { isInProgram } from '@/utils/program';
 import {
   getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields, getReverseExportFieldCodes,
 } from './utils';
@@ -36,10 +36,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     },
     dataSetSystemFields: getFilterFormSystemFields(),
     transformSystemFilter: getTransformSystemFilter,
-    transformExportFieldCodes: (data, { dataSet }): string[] => {
-      data.push(...(dataSet?.current?.get('required-option') || []));
-      return getExportFieldCodes(uniq(data));
-    },
+    transformExportFieldCodes: getExportFieldCodes,
     reverseTransformExportFieldCodes: getReverseExportFieldCodes,
     events: {
       exportAxios: (searchData, sort) => {
@@ -48,17 +45,14 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
       },
       loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file'),
     },
-    checkboxOptionsExtraConfig: new Map(['issueTypeId', 'issueNum', 'issueId'].map((item) => [item, { checkBoxProps: { disabled: true, defaultChecked: true, name: 'required-option' } }])),
-    defaultInitOptions: ({ options, dataSet }) => {
-      dataSet.addField('required-option', { multiple: true });
-      dataSet.current?.set('required-option', ['issueTypeId', 'issueNum', 'issueId']);
-      if (!find(options, { value: 'description' })) {
-        options.splice(3, 0, {
-          label: '描述',
-          value: 'description',
-        });
-      }
-      return !IsInProgramStore.isInProgram ? options.filter((item) => item.value !== 'feature') : options;
+    defaultCheckedExportFields: ['issueTypeId', 'issueNum', 'issueId', 'description'],
+    checkboxOptionsExtraConfig: new Map(['issueTypeId', 'issueNum', 'issueId'].map((item) => [item, { optionConfig: { disabled: true }, defaultChecked: true }])),
+    defaultInitOptions: ({ options }) => {
+      options.splice(3, 0, {
+        label: '描述',
+        value: 'description',
+      });
+      return !isInProgram() ? options.filter((item) => item.value !== 'feature') : options;
     },
   });
 

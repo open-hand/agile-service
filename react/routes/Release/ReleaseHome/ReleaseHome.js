@@ -10,6 +10,9 @@ import {
 } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
 import { versionApi } from '@/api';
+import DetailContainer from '@/components/detail-container';
+import { Modal } from 'choerodon-ui/pro/lib';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import DragSortingTable from '../ReleaseComponent/DragSortingTable';
 import AddRelease from '../ReleaseComponent/AddRelease';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
@@ -114,13 +117,25 @@ class ReleaseHome extends Component {
       });
     }
     if (key === '5') {
-      versionApi.load(record.versionId).then((res) => {
-        ReleaseStore.setVersionDetail(res);
-        this.setState({
-          selectItem: record,
-          editRelease: true,
-        });
-      }).catch(() => {
+      const { detailProps, detailProps: { open } } = this.props;
+      // versionApi.load(record.versionId).then((res) => {
+      //   // ReleaseStore.setVersionDetail(res);
+      //   // this.setState({
+      //   //   selectItem: record,
+      //   //   editRelease: true,
+      //   // });
+      //   openReleaseDetail(record.versionId);
+      // }).catch(() => {
+      // });
+      console.log('detailProps', detailProps, this.props);
+      open({
+        path: 'version',
+        props: {
+          id: record.versionId,
+        },
+        events: {
+          update: () => this.refresh(pagination),
+        },
       });
     }
     if (key === '3') {
@@ -140,6 +155,17 @@ class ReleaseHome extends Component {
     }
     if (key === '6') {
       openLinkVersionModal(record.versionId, this.props.program.id, record.programVersionInfoVOS ? record.programVersionInfoVOS[0] : undefined, () => this.refresh(pagination));
+    }
+    if (key === '7') {
+      // 导出
+      Modal.open({
+        title: '导出版本',
+        children: '正在。。。',
+        drawer: true,
+        style: {
+          width: MODAL_WIDTH.small,
+        },
+      });
     }
   }
 
@@ -218,6 +244,13 @@ class ReleaseHome extends Component {
               </Menu.Item>
             </Permission>
           )}
+        <Menu.Item key="7">
+          <Tooltip placement="top" title="导出">
+            <span>
+              导出
+            </span>
+          </Tooltip>
+        </Menu.Item>
         {record.statusCode === 'archived'
           ? null
           : (
@@ -280,7 +313,7 @@ class ReleaseHome extends Component {
       publicVersion,
       release,
     } = this.state;
-    const { isInProgram } = this.props;
+    const { isInProgram, detailProps } = this.props;
     const deleteReleaseVisible = ReleaseStore.getDeleteReleaseVisible;
     const versionData = ReleaseStore.getVersionList.length > 0 ? ReleaseStore.getVersionList : [];
     const versionColumn = [{
@@ -456,6 +489,7 @@ class ReleaseHome extends Component {
             />
           ) : null}
         </Content>
+        <DetailContainer {...detailProps} />
       </Page>
     );
   }

@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.List;
 import java.util.Map;
@@ -119,4 +120,31 @@ public interface BacklogExpandService {
      * @return 开启了需求池的项目id
      */
     Set<Long> listProjectIdsWhichEnableBacklog(Set<Long> projectIds);
+
+    /**
+     * 根据特性id集合，将特性关联的需求和版本进行关联
+     *
+     * @param issueIds
+     * @param programVersionId
+     */
+    void associateWithBacklogAndVersionByFeatureIds(Set<Long> issueIds,
+                                                    Long programVersionId,
+                                                    Long organizationId,
+                                                    Long programId);
+
+    /**
+     * 版本关联的需求写入excel
+     *
+     * @param workbook
+     * @param sheetName
+     * @param projectId
+     * @param programVersionId
+     * @param startRow
+     * @return
+     */
+    int writeProgramVersionBacklog(Workbook workbook,
+                                   String sheetName,
+                                   Long projectId,
+                                   Long programVersionId,
+                                   int startRow);
 }

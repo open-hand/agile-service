@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import UserHead from '@/components/UserHead/UserHead';
+import UserTag from '@/components/tag/user-tag';
 
 /**
  * 任务经办人呈现
@@ -16,16 +16,16 @@ function Assignee({
     <div>
       {
           assigneeId ? (
-            <UserHead
-              hiddenText
+            <UserTag
+              showText={false}
               size={28}
               style={{ marginLeft: 0 }}
-              user={{
+              data={{
                 id: assigneeId,
-                name: assigneeName,
+                tooltip: assigneeName,
                 loginName: assigneeLoginName,
                 realName: assigneeRealName,
-                avatar: imageUrl,
+                imageUrl,
               }}
             />
           ) : (

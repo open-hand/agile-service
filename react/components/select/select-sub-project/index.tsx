@@ -9,25 +9,32 @@ import { IIssueType, ISprint } from '@/common/types';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
+  hasUnassign?: boolean
   afterLoad?: (types: IIssueType[]) => void
 }
 
-const SelectSubProject: React.FC<Props> = forwardRef(({ dataRef, afterLoad, ...otherProps }, ref: React.Ref<Select>) => {
+const SelectSubProject: React.FC<Props> = forwardRef(({
+  dataRef, afterLoad, hasUnassign, ...otherProps
+}, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'subProject',
     textField: 'projName',
     valueField: 'projectId',
     request: () => commonApi.getSubProjects(true),
     middleWare: (data) => {
+      let newData = data;
       if (dataRef) {
         Object.assign(dataRef, {
-          current: data,
+          current: newData,
         });
       }
       if (afterLoad) {
-        afterLoad(data);
+        afterLoad(newData);
       }
-      return data;
+      if (hasUnassign) {
+        newData = [{ projectId: '0', projName: '未分配团队' } as unknown as IIssueType, ...newData];
+      }
+      return newData;
     },
     paging: false,
   }), []);

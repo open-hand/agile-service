@@ -3,8 +3,8 @@ import { Select } from 'choerodon-ui';
 import useSelect from '@/hooks/useSelectOld';
 import useProjectUsers from '@/hooks/data/useProjectUsers';
 import { SelectProps } from 'choerodon-ui/lib/select';
-import UserHead from '@/components/UserHead';
 import { User } from '@/common/types';
+import UserTag from '@/components/tag/user-tag';
 
 const { Option } = Select;
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -33,8 +33,8 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
           display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
         }}
         >
-          <UserHead
-            user={user}
+          <UserTag
+            data={user}
           />
         </div>
       </Option>

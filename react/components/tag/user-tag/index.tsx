@@ -4,17 +4,18 @@ import { User } from '@/common/types';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
 import HeadTag, { HeadTagProps } from '../head-tag';
 import { getFistStr } from './util';
-import styles from './index.less';
+import './index.less';
 /**
  * 数组内只有一个User 或者User是对象时,显示名字
  */
+type UserTagData = Pick<User, 'loginName' | 'realName' | 'imageUrl'> & Partial<Pick<User, 'ldap'|'email'>> & Pick<HeadTagProps, 'tooltip'>
 interface Props extends HeadTagProps {
-  data: User[] | User /**   */
+  data: UserTagData[] | UserTagData /**   */
   maxTagCount?: number /** @default 3 */
   style?: React.CSSProperties
 }
-export const UserUniqueTag: React.FC<{ data: User } & HeadTagProps> = ({
-  data, size = 18, showText = true, ...otherProps
+export const UserUniqueTag: React.FC<{ data: UserTagData, prefixCls?: string } & HeadTagProps> = ({
+  data, size = 18, showText = true, prefixCls = 'c7n-agile-user-tag', style, ...otherProps
 }) => {
   const { realName, email, loginName } = data;
   return (
@@ -24,8 +25,9 @@ export const UserUniqueTag: React.FC<{ data: User } & HeadTagProps> = ({
       name={getFistStr(realName)}
       text={realName || loginName}
       showText={showText}
-      textClassName={styles.user_text}
-      tooltip={data.ldap ? `${realName}(${loginName})` : `${realName}(${email})`}
+      textClassName={`${prefixCls}-text`}
+      tooltip={data.tooltip ?? (data.ldap ? `${realName}(${loginName})` : `${realName}(${email})`)}
+      style={{ maxWidth: 108, ...style }}
       avatarStyle={{
         color: '#6473c3',
         borderRadius: '50%',
@@ -39,6 +41,7 @@ const UserTag: React.FC<Props> = ({
   data: propsData, style, maxTagCount = 3, ...otherProps
 }) => {
   // return <span>1</span>;
+  const prefixCls = 'c7n-agile-user-tag';
   const data = useMemo(() => {
     const newData = toJS(propsData);
     if (!newData) {
@@ -54,9 +57,9 @@ const UserTag: React.FC<Props> = ({
     <div style={{ display: 'inline-flex', ...style }}>
       {data.slice(0, maxTagCount).map((item) => (
         <UserUniqueTag
-          className={compact ? styles.compact : undefined}
-          avatarClassName={compact ? styles.avatar : undefined}
-          key={item.id}
+          className={compact ? `${prefixCls}-compact` : undefined}
+          avatarClassName={compact ? `${prefixCls}-compact-avatar` : undefined}
+          key={item.realName}
           data={item}
           showText={false}
           size={compact ? 22 : 18}
@@ -66,15 +69,16 @@ const UserTag: React.FC<Props> = ({
       {maxTagCount && data.length > maxTagCount ? (
         <Tooltip
           // @ts-ignore
-          popupCls={styles.tooltip}
+          popupCls={`${prefixCls}-tooltip`}
           theme="light"
           title={(
             <div>
               {data.slice(maxTagCount).map((item) => (
-                <div key={item.id} style={{ marginBottom: 5 }}>
+                <div key={item.realName} style={{ marginBottom: 5 }}>
                   <UserUniqueTag
                     tooltip={false}
                     data={item}
+                    className={`${prefixCls}-tooltip-user`}
                     textStyle={{ color: '#000', lineHeight: '18px' }}
                     {...otherProps}
                   />
@@ -84,8 +88,8 @@ const UserTag: React.FC<Props> = ({
           )}
         >
           <HeadTag
-            className={compact ? styles.compact : undefined}
-            avatarClassName={compact ? styles.avatar : undefined}
+            className={compact ? `${prefixCls}-compact` : undefined}
+            avatarClassName={compact ? `${prefixCls}-compact` : undefined}
             name={<Icon type="more_horiz" style={{ fontSize: 'inherit', lineHeight: 'inherit' }} />}
             size={compact ? 24 : 18}
             avatarStyle={{ backgroundColor: 'rgb(240, 245, 255)', borderRadius: '50%' }}

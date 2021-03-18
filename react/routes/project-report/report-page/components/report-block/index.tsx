@@ -3,7 +3,6 @@ import classNames from 'classnames';
 import { Button, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-import { DraggableProvided } from 'react-beautiful-dnd';
 import {
   IReportBlock, IReportTextBlock, IReportChartBlock, IReportListBlock,
 } from '../../store';
@@ -18,7 +17,7 @@ import listStyles from '../../index.less';
 interface BlockProps {
   data: IReportBlock
   index: number
-  provided: DraggableProvided
+  provided: any
 }
 interface BlockPreviewProps {
   data: IReportBlock

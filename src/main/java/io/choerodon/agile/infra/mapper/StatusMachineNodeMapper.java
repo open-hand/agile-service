@@ -54,4 +54,14 @@ public interface StatusMachineNodeMapper extends BaseMapper<StatusMachineNodeDTO
     void migrateStatusMachineNode();
 
     boolean existByProjectId(@Param("projectId") Long projectId, @Param("statusId") Long statusId,@Param("applyType") String applyType);
+
+    List<StatusMachineNodeDTO> selectNullRankNodes(@Param("organizationId") Long organizationId, @Param("statusMachineId") Long statusMachineId);
+
+    String queryLeftRank(@Param("organizationId") Long organizationId, @Param("statusMachineId") Long statusMachineId, @Param("rank") String rank);
+
+    String queryRightRank(@Param("organizationId") Long organizationId, @Param("statusMachineId") Long statusMachineId, @Param("rank") String rank);
+
+    String queryMaxRank(@Param("organizationId") Long organizationId, @Param("statusMachineId") Long statusMachineId);
+
+    String queryMinRank(@Param("organizationId") Long organizationId, @Param("statusMachineId") Long statusMachineId);
 }

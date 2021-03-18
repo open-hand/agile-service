@@ -1,7 +1,6 @@
-/* eslint-disable no-param-reassign */
 import React, { useCallback } from 'react';
 import {
-  DraggableProvided, DraggingStyle, NotDraggingStyle,
+  DraggingStyle, NotDraggingStyle,
 } from 'react-beautiful-dnd';
 import classnames from 'classnames';
 import { Menu, Modal } from 'choerodon-ui';
@@ -22,7 +21,7 @@ import useTextEditTogglePropsWithPage from './useTextEditToggle';
 
 interface Props {
   data: Record,
-  provided: DraggableProvided,
+  provided: any,
   virtualizedStyle?: React.CSSProperties,
   draggingClassName?: string,
   isDragDisabled?: boolean,
@@ -127,6 +126,7 @@ const DraggableItem: React.FC<Props> = ({
 
     </div>
   );
+  // @ts-ignore
   const getStyle = (draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => ({
     ...draggableStyle,
     ...virtualizedStyle,

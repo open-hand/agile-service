@@ -7,6 +7,8 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import java.util.Date;
 import java.util.List;
 
+import io.choerodon.agile.infra.dto.UserDTO;
+
 /**
  * Created by jian_zhang02@163.com on 2018/5/18.
  */
@@ -60,6 +62,18 @@ public class ProductVersionStatisticsVO {
 
     @ApiModelProperty(value = "版本下的待处理问题计数")
     private Integer todoIssueCount;
+
+    @ApiModelProperty(value = "创建时间")
+    private Date creationDate;
+
+    @ApiModelProperty(value = "创建人id")
+    private Long createdBy;
+
+    @ApiModelProperty(value = "创建人")
+    private UserDTO creationUser;
+
+    @ApiModelProperty(value = "版本号")
+    private Long objectVersionNumber;
 
     public List<StatusVO> getDoneStatuses() {
         return doneStatuses;
@@ -187,5 +201,37 @@ public class ProductVersionStatisticsVO {
 
     public Date getExpectReleaseDate() {
         return expectReleaseDate;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public UserDTO getCreationUser() {
+        return creationUser;
+    }
+
+    public void setCreationUser(UserDTO creationUser) {
+        this.creationUser = creationUser;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
     }
 }

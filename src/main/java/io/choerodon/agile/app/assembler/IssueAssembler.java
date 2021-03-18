@@ -72,6 +72,7 @@ public class IssueAssembler extends AbstractAssembler {
         issueVO.setLabelIssueRelVOList(modelMapper.map(issueDetailDTO.getLabelIssueRelDTOList(), new TypeToken<List<LabelIssueRelVO>>(){}.getType()));
         issueVO.setIssueAttachmentVOList(modelMapper.map(issueDetailDTO.getIssueAttachmentDTOList(), new TypeToken<List<IssueAttachmentVO>>(){}.getType()));
         issueVO.setIssueCommentVOList(modelMapper.map(issueDetailDTO.getIssueCommentDTOList(), new TypeToken<List<IssueCommentVO>>(){}.getType()));
+        issueVO.setAppVersions(issueDetailDTO.getAppVersions());
         issueVO.setSubIssueVOList(issueDoToSubIssueDto(issueDetailDTO.getSubIssueDTOList(), issueTypeDTOMap, statusMapDTOMap, priorityDTOMap));
         issueVO.setSubBugVOList(issueDoToSubIssueDto(issueDetailDTO.getSubBugDOList(), issueTypeDTOMap, statusMapDTOMap, priorityDTOMap));
         issueVO.setSameParentIssueVOList(issueDoToSubIssueDto(issueDetailDTO.getSameParentIssueDTOList(), issueTypeDTOMap, statusMapDTOMap, priorityDTOMap));
@@ -194,6 +195,7 @@ public class IssueAssembler extends AbstractAssembler {
             issueListFieldKVVO.setUpdateUser(usersMap.get(issueDO.getLastUpdatedBy()));
             issueListFieldKVVO.setMainResponsibleUser(usersMap.get(issueDO.getMainResponsibleId()));
             issueListFieldKVVO.setEnvironmentName(envMap.get(issueDO.getEnvironment()));
+            issueListFieldKVVO.setAppVersions(issueDO.getAppVersions());
             issueListFieldKVDTOList.add(issueListFieldKVVO);
         });
         return issueListFieldKVDTOList;

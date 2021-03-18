@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.NodeSortVO;
 import io.choerodon.agile.api.vo.StatusMachineNodeVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.infra.dto.StatusMachineNodeDTO;
@@ -86,4 +87,8 @@ public interface StateMachineNodeService {
     void baseUpdate(StatusMachineNodeDTO olderDefaultNode);
 
     void baseCreate(StatusMachineNodeDTO statusMachineNodeDTO);
+
+    void handlerNullRankNode(Long organizationId, Long statusMachineId, String applyType);
+
+    void sortNode(Long organizationId, Long statusMachineId, NodeSortVO nodeSortVO, String applyType);
 }

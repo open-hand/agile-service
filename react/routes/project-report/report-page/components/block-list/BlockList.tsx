@@ -7,7 +7,7 @@ import ReportBlock from '../report-block';
 const BlockList: React.FC = () => {
   const { store } = useProjectReportContext();
   return (
-    <DragDropContext onDragEnd={(result) => {
+    <DragDropContext onDragEnd={(result: { destination: { index: number; }; source: { index: number; }; }) => {
       if (!result.destination) {
         return;
       }
@@ -15,7 +15,7 @@ const BlockList: React.FC = () => {
     }}
     >
       <Droppable droppableId="droppable">
-        {(provided) => (
+        {(provided: { droppableProps: JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>; innerRef: React.LegacyRef<HTMLDivElement> | undefined; placeholder: string | number | boolean | {} | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactNodeArray | React.ReactPortal | null | undefined; }) => (
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}
@@ -25,7 +25,7 @@ const BlockList: React.FC = () => {
                 <>
                   {store.blockList.map((block, index) => (
                     <Draggable key={block.key} draggableId={block.key} index={index}>
-                      {(innerProvided) => (
+                      {(innerProvided: { innerRef: React.LegacyRef<HTMLDivElement> | undefined; draggableProps: JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>; }) => (
                         <div
                           ref={innerProvided.innerRef}
                           {...innerProvided.draggableProps}

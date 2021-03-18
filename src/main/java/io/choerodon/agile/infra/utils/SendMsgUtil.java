@@ -244,7 +244,8 @@ public class SendMsgUtil {
                                   List<String> noticeTypeList,
                                   IssueDTO issueDTO,
                                   CustomUserDetails userDetails) {
-        if (CollectionUtils.isEmpty(userSet)){
+        boolean onlyWebHook = CollectionUtils.isNotEmpty(noticeTypeList) && noticeTypeList.size() == 1 && noticeTypeList.contains("WEB_HOOK");
+        if (!onlyWebHook && CollectionUtils.isEmpty(userSet)){
             return;
         }
         Map<String, String> templateArgsMap = new HashMap<>();
@@ -270,7 +271,7 @@ public class SendMsgUtil {
         templateArgsMap.put("summary", summary);
         templateArgsMap.put("operatorName", operatorName);
         templateArgsMap.put("status", status);
-        siteMsgUtil.sendChangeIssueStatus(projectId, userSet, noticeTypeList, templateArgsMap, userDetails.getUserId());
+        siteMsgUtil.sendChangeIssueStatus(projectId, userSet, noticeTypeList, templateArgsMap, userDetails.getUserId(), onlyWebHook);
     }
 
 

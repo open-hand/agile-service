@@ -1,12 +1,11 @@
+/* eslint-disable react/jsx-no-bind */
 import React, { Component } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
-import {
-  text2Delta, uploadAndReplaceImg,
-} from '@/utils/richText';
 import { workLogApi } from '@/api';
-import UserHead from '../../UserHead';
-import WYSIWYGEditor from '../../WYSIWYGEditor';
-import WYSIWYGViewer from '../../WYSIWYGViewer';
+import UserTag from '@/components/tag/user-tag';
+
+import WYSIWYGEditor from '../../CKEditor';
+import WYSIWYGViewer from '../../CKEditorViewer';
 import { DatetimeAgo } from '../../CommonComponent';
 import './Log.less';
 
@@ -16,7 +15,7 @@ class Log extends Component {
     this.state = {
       editLogId: undefined,
       editLog: undefined,
-      expand: false,
+      expand: true,
     };
   }
 
@@ -43,7 +42,7 @@ class Log extends Component {
     const { logId, objectVersionNumber } = log;
     const { editLog } = this.state;
     try {
-      const text = await uploadAndReplaceImg(editLog);
+      const text = editLog;
       this.updateLog({
         logId,
         objectVersionNumber,
@@ -70,7 +69,7 @@ class Log extends Component {
       realName, loginName,
       userName, createdBy, userImageUrl,
     } = worklog;
-    const deltaEdit = text2Delta(editLog);
+    const deltaEdit = editLog;
 
     return (
       <div
@@ -115,15 +114,15 @@ class Log extends Component {
           }
           <div className="c7n-title-log">
             <div style={{ marginRight: 19 }}>
-              <UserHead
-                user={{
+              <UserTag
+                data={{
                   id: createdBy,
                   realName,
                   loginName,
-                  avatar: userImageUrl,
-                  name: userName,
+                  imageUrl: userImageUrl,
+                  tooltip: userName,
                 }}
-                color="#3f51b5"
+                textStyle={{ color: '#3f51b5' }}
               />
             </div>
             <span style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
@@ -183,7 +182,7 @@ class Log extends Component {
                 <span style={{ flex: 1 }}>
                   {
                     worklog.logId !== editLogId ? (
-                      <WYSIWYGViewer data={worklog.description} />
+                      <WYSIWYGViewer value={worklog.description} />
                     ) : null
                   }
                 </span>
@@ -192,19 +191,19 @@ class Log extends Component {
                 worklog.logId === editLogId ? (
                   <WYSIWYGEditor
                     autoFocus
-                    bottomBar
+                    footer
                     value={deltaEdit}
                     style={{ height: 200, width: '100%' }}
                     onChange={(value) => {
                       this.setState({ editLog: value });
                     }}
-                    handleDelete={() => {
+                    onCancel={() => {
                       this.setState({
                         editLogId: undefined,
                         editLog: undefined,
                       });
                     }}
-                    handleSave={this.handleUpdateLog.bind(this, worklog)}
+                    onOk={this.handleUpdateLog.bind(this, worklog)}
                     toolbarHeight={isWide ? null : 66}
                   />
                 ) : null

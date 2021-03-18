@@ -62,6 +62,9 @@
         <collection property="subBugDOList" column="issue_id"
                     ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="querySubBugByIssueId"/>
+        <collection property="appVersions" column="issue_id"
+                    ofType="io.choerodon.agile.api.vo.AppVersionVO"
+                    select="queryAppVersionByIssueId"/>
     </resultMap>
 
     <resultMap id="issueSearch" type="io.choerodon.agile.infra.dto.business.IssueSearchDTO">
@@ -269,6 +272,20 @@
         WHERE acir.issue_id = #{issueId}
     </select>
 
+    <select id="queryAppVersionByIssueId" resultType="io.choerodon.agile.api.vo.AppVersionVO">
+        select
+        aav.id,
+        aav.group_id,
+        aav.artifact_id,
+        ifnull(aav.version_alias, aav.version) as version,
+        aav.service_code,
+        aav.project_id,
+        aav.organization_id
+        from agile_app_version aav
+        join agile_app_version_issue_rel aavir on aav.id = aavir.app_version_id
+        where aavir.issue_id = #{issueId}
+    </select>
+
     <select id="queryIssueCommentByIssueId" resultType="io.choerodon.agile.infra.dto.IssueCommentDTO">
         SELECT *
         FROM agile_issue_comment
@@ -374,6 +391,11 @@
             <id property="labelId" column="label_id"/>
             <result property="labelName" column="label_name"/>
         </collection>
+        <collection property="appVersions"
+                    ofType="io.choerodon.agile.api.vo.AppVersionVO">
+            <id property="id" column="app_version_id"/>
+            <result property="version" column="app_version"/>
+        </collection>
     </resultMap>
 
     <select id="queryIssueByIssueIdsAndSubIssueIds" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -434,7 +456,9 @@
         ai.object_version_number,
         ais.is_completed as completed,
         ai.main_responsible_id,
-        ai.environment
+        ai.environment,
+        aav.id as app_version_id,
+        ifnull(aav.version_alias, aav.version) as app_version
         FROM agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
         left join agile_issue ai3 on ai.epic_id = ai3.issue_id
@@ -448,6 +472,8 @@
         left join agile_issue_component aic on aic.component_id = acir.component_id
         left join agile_label_issue_rel alir on alir.issue_id = ai.issue_id
         left join agile_issue_label ail on ail.label_id = alir.label_id
+        left join agile_app_version_issue_rel aavir on ai.issue_id = aavir.issue_id
+        left join agile_app_version aav on aavir.app_version_id = aav.id
         WHERE
         ai.issue_id IN
         (
@@ -1043,6 +1069,19 @@
                      close=")">
                 #{userId}
             </foreach>
+        </if>
+        <if test='searchVO.otherArgs.appVersion != null and searchVO.otherArgs.appVersion.size > 0'>
+            AND (
+            ai.issue_id in (
+                SELECT aavir1.issue_id
+                FROM agile_app_version_issue_rel aavir1
+                WHERE aavir1.app_version_id in
+                <foreach collection="searchVO.otherArgs.appVersion" item="appVersionId" open="(" separator=","
+                         close=")">
+                    #{appVersionId}
+                </foreach>
+            )
+            )
         </if>
     </sql>
 
@@ -3605,4 +3644,39 @@
             #{issueId}
         </foreach>
     </update>
+
+
+    <select id="selectDelayIssues" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.summary,
+        concat_ws('-', api.project_code, ai.issue_num) as issue_num,
+        ai.priority_id,
+        ai.status_id,
+        ai.estimated_start_time,
+        ai.estimated_end_time,
+        ai.assignee_id,
+        ai.reporter_id,
+        ai.project_id
+        from agile_issue ai
+        left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
+        left join agile_project_info api on ai.project_id = api.project_id
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
+        and ai.issue_id in (
+            select aisr.issue_id
+            from agile_sprint sprint
+            join agile_issue_sprint_rel aisr on sprint.sprint_id = aisr.sprint_id
+            where sprint.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+                #{projectId}
+            </foreach>
+            and sprint.status_code = 'started'
+        )
+        and ais.is_completed != 1
+        and ai.estimated_end_time is not null
+        and date(ai.estimated_end_time) &lt; date(#{date})
+    </select>
 </mapper>

@@ -4,10 +4,6 @@ import {
 import {
   ILog, Issue, IComment,
 } from '@/common/types';
-// @ts-ignore
-import { uploadAndReplaceImage } from '@/utils/richText';
-// @ts-ignore
-import Delta from 'quill-delta';
 import { dataLogApi, fieldApi, issueApi } from '@/api';
 import type { Events, DemandEvents } from './index';
 import { IField } from '../custom-field';
@@ -255,14 +251,14 @@ class Store {
   }
 
   @action
-  async createComment(delta: Delta) {
+  async createComment(delta: string) {
     // await uploadAndReplaceImage(delta, this.outside, this.projectId);
     // await demandApi.project(this.projectId).createComment(delta, this.issue.id, this.outside, this.projectId);
     // this.refresh();
   }
 
   @action
-  async updateComment(delta: Delta, comment: IComment) {
+  async updateComment(delta: string, comment: IComment) {
     // const { id, objectVersionNumber } = comment;
     // await uploadAndReplaceImage(delta, this.outside, this.projectId);
     // await demandApi.project(this.projectId).updateComment(delta, id, objectVersionNumber, this.outside, this.projectId);

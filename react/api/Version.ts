@@ -30,6 +30,25 @@ interface DragVersionData {
   objectVersionNumber: number,
   versionId: number
 }
+export interface IAppVersionData {
+  artifactId: string
+  groupId: string
+  id: null | string
+  organizationId: string
+  projectId: string
+  serviceCode: string
+  version: null | string
+  versionAlias: null | string
+}
+export interface IAppVersionCreateData {
+  versionAlias?: string
+  version: string
+  artifactId: string
+  serviceCode: string
+}
+interface IAppVersionUpdateData extends Omit<IAppVersionCreateData, 'artifactId' | 'serviceCode'> {
+
+}
 class VersionApi extends Api<VersionApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -39,7 +58,7 @@ class VersionApi extends Api<VersionApi> {
    * 根据版本id查询版本详情及issue统计信息
    * @param versionId
    */
-  load(versionId: number) {
+  load(versionId: number | string) {
     return axios.get(`${this.prefix}/product_version/${versionId}`);
   }
 
@@ -143,7 +162,7 @@ class VersionApi extends Api<VersionApi> {
    * 根据版本id查询的版本详细信息 用于查询规划中的版本
    * @param versionId
    */
-  loadPublicVersionDetail(versionId: number) {
+  loadPublicVersionDetail(versionId: number | string) {
     return axios.get(`${this.prefix}/product_version/${versionId}/plan_names`);
   }
 
@@ -206,7 +225,7 @@ class VersionApi extends Api<VersionApi> {
    * @param versionId
    * @param data
    */
-  update(versionId: number, data: UVersionVO) {
+  update(versionId: number | string, data: UVersionVO) {
     return axios.put(`${this.prefix}/product_version/update/${versionId}`, data);
   }
 
@@ -240,6 +259,245 @@ class VersionApi extends Api<VersionApi> {
    */
   addIssues(versionId: number, issueIds: Array<number>) {
     return axios.post(`${this.prefix}/issues/to_version/${versionId}`, issueIds);
+  }
+
+  importPom(data: any, groupIds: string): Promise<IAppVersionData[]> {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_version/parse_pom`,
+      data,
+      params: {
+        groupIds,
+      },
+    });
+  }
+
+  /**
+   * 加载关联的应用版本列表
+   */
+  loadAppVersionList(versionId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/product_version/${versionId}/rel_app_version`,
+    });
+  }
+
+  loadAvailableAppVersionList(versionId: string, serviceCode: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/product_version/${versionId}/un_rel_app_version`,
+      params: {
+        serviceCode,
+        size: 0,
+      },
+    }).then((res: any) => {
+      const newList = res.content.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` }));
+      const newData = ({ ...res, content: newList, list: newList });
+      return newData;
+    });
+  }
+
+  /**
+   * 创建应用版本
+   * @param data
+   * @returns
+   */
+  createAppVersion(data: IAppVersionCreateData) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_version`,
+      data: {
+        ...data,
+        appService: true,
+        tag: false,
+      },
+    });
+  }
+
+  /**
+   * 批量创建应用版本
+   * @param data
+   * @returns
+   */
+  createBatchAppVersion(data: IAppVersionCreateData) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_version/batch`,
+      data,
+    });
+  }
+
+  /**
+   * 更新应用版本
+   * @param data
+   * @param appVersionId
+   * @returns
+   */
+  updateAppVersion(data: IAppVersionUpdateData, appVersionId: string) {
+    return this.request({
+      method: 'put',
+      url: `${this.prefix}/app_version/update/${appVersionId}`,
+      data,
+    });
+  }
+
+  /**
+   * 应用版本重复校验
+   * @param data
+   * @returns
+   */
+  checkAppVersion(data: Pick<IAppVersionCreateData, 'artifactId' | 'serviceCode' | 'version'>) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/app_version/check`,
+      data,
+    });
+  }
+
+  /**
+   * 关联应用版本
+   */
+  linkAppVersions(versionId: string, appVersionIds: string[]) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/product_version/${versionId}/rel_app_version`,
+      data: {
+        appVersionIds,
+      },
+    });
+  }
+
+  /**
+   * 删除版本关联的应用版本的关联
+   * @param versionId
+   * @param appVersionId
+   * @returns
+   */
+  deleteLinkAppVersion(versionId: string, appVersionId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/app_version/delete/${appVersionId}/product_version/${versionId}`,
+
+    });
+  }
+
+  /**
+ * 删除应用版本与问题关联关系
+ * @param issueId
+ * @param appVersionId
+ * @returns
+ */
+  deleteAppVersionLinkIssueId(issueId: string, appVersionId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/app_version/delete/${appVersionId}/issue/${issueId}`,
+
+    });
+  }
+
+  /**
+   * 删除版本与问题关联关系
+   */
+  deleteLinkIssueId(issueId: string, versionId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/product_version/${versionId}/issue/${issueId}`,
+    });
+  }
+
+  loadVersionStory(versionId: string, data: any) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/product_version/${versionId}/story`,
+      data: {
+        advancedSearchArgs: {
+          statusId: [],
+        },
+        otherArgs: {
+          appVersion: [],
+          feature: [],
+          assigneeId: [],
+        },
+        searchArgs: {
+          summary: '',
+          issueNum: '',
+        },
+      },
+    });
+  }
+
+  loadVersionBug(versionId: string, data: any) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/product_version/${versionId}/bug`,
+      data: {
+        advancedSearchArgs: {
+          statusId: [],
+        },
+        otherArgs: {
+          appVersion: [],
+          feature: [],
+          assigneeId: [],
+        },
+        searchArgs: {
+          summary: '',
+          issueNum: '',
+        },
+      },
+    });
+  }
+
+  importProgramPom(data: any, groupIds: string, subProjectId: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/version_tree/parse_pom`,
+      params: {
+        groupIds,
+        subProjectId,
+      },
+      data,
+    });
+  }
+
+  loadProgramAppService(programVersionId: string, subProjectId?: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/version_tree/available_app_version`,
+      params: {
+        programVersionId,
+        subProjectId,
+      },
+    }).then((res: any) => {
+      const newList = res.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` }));
+      return newList;
+    });
+  }
+
+  createBranchAndLinkAppService(versionId: string, data: IAppVersionCreateData) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/product_version/${versionId}/create_app_version`,
+      data,
+    });
+  }
+
+  /**
+   * 加载应用版本列表
+   */
+  loadAppService(content?: string, page = 1, size = 20) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/app_version`,
+      params: {
+        content,
+        page,
+        size,
+      },
+    }).then((res: any) => {
+      const newList = res.content.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` }));
+      const newData = ({ ...res, content: newList, list: newList });
+      return newData;
+    });
   }
 }
 

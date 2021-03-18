@@ -11,7 +11,6 @@ import moment from 'moment';
 import AgileProvider from '@/components/AgileProvider';
 import RunWhenProjectChange from '@/common/RunWhenProjectChange';
 import { setHistory } from '@/utils/to';
-import IsInProgramStore from './stores/common/program/IsInProgramStore';
 import './style/index.less';
 
 const ScrumBoard = React.lazy(() => import('./routes/ScrumBoard'));
@@ -42,14 +41,6 @@ class Agile extends React.Component {
   // componentDidCatch(error, info) {
   //   Choerodon.prompt(error.message);
   // }
-
-  componentDidMount() {
-    if (process.env.NODE_ENV === 'development') {
-      // 切换项目查是否在项目群中
-      RunWhenProjectChange(IsInProgramStore.refresh);
-      IsInProgramStore.refresh();
-    }
-  }
 
   render() {
     const { match } = this.props;

@@ -4,18 +4,15 @@ import React, {
 import {
   Icon, Button, Tooltip,
 } from 'choerodon-ui';
-
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-import { text2Delta, uploadAndReplaceImg } from '@/utils/richText';
+import { Choerodon } from '@choerodon/master';
+import WYSIWYGViewer from '@/components/CKEditorViewer';
+import WYSIWYGEditor from '@/components/CKEditor';
 import { issueApi } from '@/api';
-import FullEditor from '../../../FullEditor';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const IssueDes = ({ reloadIssue, setIssueLoading }) => {
   const [editDesShow, setEditDesShow] = useState(false);
-  const [fullEdit, setFullEdit] = useState(false);
   const [editDes, setEditDes] = useState('');
   const { store, disabled, descriptionEditRef } = useContext(EditIssueContext);
   const { description, descriptionTemplate, typeCode } = store.getIssue;
@@ -29,8 +26,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
 
     const newValue = value || editDes;
     try {
-      setIssueLoading(true);
-      const text = await uploadAndReplaceImg(newValue);
+      const text = newValue;
       const obj = {
         issueId,
         objectVersionNumber,
@@ -38,12 +34,11 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
       };
       await issueApi.update(obj);
       setEditDesShow(false);
-      setFullEdit(false);
       if (reloadIssue) {
         reloadIssue(issueId);
       }
     } catch (error) {
-      setIssueLoading(false);
+      Choerodon.prompt(error.message);
     }
   };
   useEffect(() => {
@@ -57,32 +52,24 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
       return (
         editDesShow && (
           <div
-            className="line-start mt-10 two-to-one"
+            className="line-start mt-10"
           >
-            <div style={{
-              width: '100%',
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-            }}
-            >
-              <WYSIWYGEditor
-                autoFocus
-                bottomBar
-                value={text2Delta(editDes) || text2Delta(descriptionTemplate)}
-                style={{
-                  height: '100%', width: '100%',
-                }}
-                onChange={(value) => {
-                  setEditDes(value);
-                }}
-                handleDelete={() => {
-                  setEditDesShow(false);
-                  setEditDes(description);
-                }}
-                handleSave={updateIssueDes}
-              />
-            </div>
+            <WYSIWYGEditor
+              autoFocus
+              footer
+              value={editDes ?? descriptionTemplate}
+              style={{
+                height: 'auto', width: '100%', minHeight: 280,
+              }}
+              onChange={(value) => {
+                setEditDes(value);
+              }}
+              onCancel={() => {
+                setEditDesShow(false);
+                setEditDes(description);
+              }}
+              onOk={updateIssueDes}
+            />
           </div>
         )
       );
@@ -93,7 +80,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
           className="mt-10 c7n-description"
           role="none"
         >
-          <WYSIWYGViewer data={description} />
+          <WYSIWYGViewer value={description} />
         </div>
       </div>
     );
@@ -117,11 +104,6 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
         /> */}
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px', position: 'relative' }}>
-            <Tooltip title="全屏编辑" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => setFullEdit(true)}>
-                <Icon type="zoom_out_map icon" style={{ marginRight: 2 }} />
-              </Button>
-            </Tooltip>
             <Tooltip placement="topRight" autoAdjustOverflow={false} title="编辑">
               <Button
                 style={{ padding: '0 6px' }}
@@ -143,17 +125,6 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
         )}
       </div>
       {renderDes()}
-      {
-        fullEdit ? (
-          <FullEditor
-            autoFocus
-            initValue={text2Delta(editDes)}
-            visible={fullEdit}
-            onCancel={() => setFullEdit(false)}
-            onOk={callback}
-          />
-        ) : null
-      }
     </div>
   );
 };

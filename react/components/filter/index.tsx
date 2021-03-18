@@ -24,7 +24,7 @@ export interface ICustomField {
   required: boolean
   fieldOptions?: IFieldOption[]
   value?: string
-  valueStr?: string
+  valueStr?: string | any
   system: boolean
 }
 export type IFilterField = ISystemField | ICustomField

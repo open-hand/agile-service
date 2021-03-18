@@ -187,7 +187,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       let newData = [];
       const temp: User[] = [];
       if (selectedUser) {
-        (toArray(selectedUser).forEach((user) => {
+        (toArray(toJS(selectedUser)).forEach((user) => {
           temp.push({ ...user, id: user?.id && String(user.id) });
         }));
       }

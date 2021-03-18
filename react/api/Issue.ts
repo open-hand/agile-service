@@ -110,7 +110,21 @@ interface IExportSearch {
   quickFilterIds?: Array<number>,
   contents?: string,
 }
-export { IExportSearch, ICustomFieldData };
+interface IImportOrExportRecord {
+  action: null | string
+  creationDate: null | string
+  failCount: null | number
+  fileUrl: null | string
+  id: null | string
+  lastUpdateDate: null | string
+  objectVersionNumber: null | number
+  organizationId: null | string
+  projectId: null | string
+  status: null | string
+  successCount: null | number
+  userId: null | string
+}
+export { IExportSearch, ICustomFieldData, IImportOrExportRecord };
 class IssueApi extends Api<IssueApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -234,7 +248,7 @@ class IssueApi extends Api<IssueApi> {
       },
     }) : this.request({
       method: 'get',
-      url: `${this.prefix}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
+      url: `${`/agile/v1/projects/${getProjectId()}`}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}issues/${issueId}`,
       params: {
         organizationId: this.orgId,
         instanceProjectId: this.projectId,
@@ -317,7 +331,7 @@ class IssueApi extends Api<IssueApi> {
  * 取消导入
  * @param id 导入id
  */
-  cancelImport(id: number, objectVersionNumber: number) {
+  cancelImport(id: number|string, objectVersionNumber: number) {
     return axios({
       method: 'put',
       url: `${this.prefix}/excel/cancel`,
@@ -332,7 +346,7 @@ class IssueApi extends Api<IssueApi> {
  * 查询最新的导入导出记录
  * @returns {V|*}
  */
-  loadLastImportOrExport(action: 'upload_file' | 'download_file') {
+  loadLastImportOrExport(action: 'upload_file' | 'download_file' | 'upload_file_customer_field'):Promise<IImportOrExportRecord> {
     return axios({
       url: `${this.prefix}/excel/latest`,
       method: 'get',

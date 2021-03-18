@@ -8,7 +8,7 @@ import {
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
-import { find, filter } from 'lodash';
+import { find, filter, includes } from 'lodash';
 import moment from 'moment';
 import STATUS from '@/constants/STATUS';
 import { IIssueType, User, IStatus } from '@/common/types';
@@ -121,7 +121,6 @@ const transformedMember = {
 const transformedNoticeType = {
   EMAIL: '邮件',
   WEB: '站内信',
-  WEB_HOOK: 'webhook',
 };
 
 const dateTransform = (fieldType: string, d: Date) => {
@@ -400,11 +399,16 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           members.push(user.realName);
         });
       }
-      noticeTypeList.forEach((noticeType) => {
+      (noticeTypeList.filter((item) => item !== 'WEB_HOOK')).forEach((noticeType: 'EMAIL' | 'WEB') => {
         noticeTypes.push(transformedNoticeType[noticeType]);
       });
     }
-    return `设置向【${members.join('、')}】发【${noticeTypes.join('、')}】通知`;
+    if (noticeTypeList.filter((item) => item !== 'WEB_HOOK').length) {
+      return `设置向【${members.join('、')}】发【${noticeTypes.join('、')}】通知${includes(noticeTypeList, 'WEB_HOOK') ? '，启用Webhook通知' : ''}`;
+    } if (includes(noticeTypeList, 'WEB_HOOK')) {
+      return '启用Webhook通知';
+    }
+    return null;
   };
 
   const renderStatusFieldSetting = (statusFieldSettingVOS: IStatusFieldSettingVOS[]) => {

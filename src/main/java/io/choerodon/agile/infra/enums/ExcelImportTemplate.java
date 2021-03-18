@@ -185,6 +185,7 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.MAIN_RESPONSIBLE, "主要负责人", false, null));
             HEADERS.add(new Header(FieldCode.ENVIRONMENT, "环境", false, null));
             HEADERS.add(new Header(RELATE_ISSUE, "关联问题", false, null));
+            HEADERS.add(new Header(FieldCode.ISSUE_STATUS, "状态", false, null));
 
             HEADERS.forEach(h -> {
                 String code = h.getCode();

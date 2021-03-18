@@ -5,7 +5,7 @@ import './SwimLaneHeader.less';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
-import UserHead from '@/components/UserHead';
+import UserTag from '@/components/tag/user-tag';
 
 @observer
 export default class SwimLaneHeader extends Component {
@@ -23,8 +23,8 @@ export default class SwimLaneHeader extends Component {
       ['swimlane_none', '子任务'],
     ]);
     if (mode === 'parent_child') {
-      const bugLength = parentIssue.subIssueData.filter(issue => issue.typeCode === 'bug').length;
-      const subTaskLength = parentIssue.subIssueData.filter(issue => issue.typeCode === 'sub_task').length;
+      const bugLength = parentIssue.subIssueData.filter((issue) => issue.typeCode === 'bug').length;
+      const subTaskLength = parentIssue.subIssueData.filter((issue) => issue.typeCode === 'sub_task').length;
       const shouldShowDot = bugLength && subTaskLength;
       return (
         <div
@@ -39,14 +39,13 @@ export default class SwimLaneHeader extends Component {
           <span className="c7n-parentIssue-count" style={{ whiteSpace: 'nowrap' }}>{`  (${subTaskLength ? `${subTaskLength} 子任务` : ''}${shouldShowDot ? ', ' : ''}${bugLength ? `${bugLength} 缺陷` : ''})`}</span>
         </div>
       );
-    } else {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {switchMap.get(mode)(parentIssue)}
-          <span className="c7n-parentIssue-count" style={{ whiteSpace: 'nowrap' }}>{`  (${subIssueDataLength} ${strMap.get(mode)})`}</span>
-        </div>
-      );
     }
+    return (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {switchMap.get(mode)(parentIssue)}
+        <span className="c7n-parentIssue-count" style={{ whiteSpace: 'nowrap' }}>{`  (${subIssueDataLength} ${strMap.get(mode)})`}</span>
+      </div>
+    );
   }
 
   renderStoryComponent = ({
@@ -55,7 +54,7 @@ export default class SwimLaneHeader extends Component {
   }) => {
     const { parentIssue } = this.props;
     return (
-      <React.Fragment>
+      <>
         <TypeTag
           style={{
             marginLeft: 8,
@@ -73,15 +72,15 @@ export default class SwimLaneHeader extends Component {
           style={{ marginRight: 10 }}
           name={statusName}
         />
-        <UserHead
+        <UserTag
           style={{ marginRight: 10 }}
-          hiddenText
+          showText={false}
           size={24}
-          user={{
+          data={{
             id: assigneeId,
             loginName: assigneeLoginName,
             realName: assigneeRealName,
-            avatar: imageUrl,
+            imageUrl,
             ldap,
             email,
           }}
@@ -93,34 +92,33 @@ export default class SwimLaneHeader extends Component {
             whiteSpace: 'nowrap',
             textOverflow: 'ellipsis',
             maxWidth: 330,
-          } : {}
-          }
+          } : {}}
         >
           {summary}
         </span>
-      </React.Fragment>
+      </>
     );
   };
 
   renderAssigneeComponent = ({
     assigneeName, assigneeAvatarUrl, assigneeId, assigneeLoginName, assigneeRealName, ldap, email,
   }) => (
-    <React.Fragment>
-      <UserHead
-        hiddenText
+    <>
+      <UserTag
+        showText={false}
         size={24}
-        user={{
+        data={{
           id: assigneeId,
           loginName: assigneeLoginName,
-          name: assigneeName,
+          tooltip: assigneeName,
           realName: assigneeRealName,
-          avatar: assigneeAvatarUrl,
+          imageUrl: assigneeAvatarUrl,
           ldap,
           email,
         }}
       />
       <span>{assigneeName}</span>
-    </React.Fragment>
+    </>
   );
 
   renderEpicComponent = ({ epicName }) => (
@@ -134,7 +132,7 @@ export default class SwimLaneHeader extends Component {
     if (keyId === 'other') {
       if (mode === 'swimlane_epic') {
         return `无史诗问题（${subIssueDataLength}）`;
-      } else if (mode === 'swimlane_none') {
+      } if (mode === 'swimlane_none') {
         return (
           <div
             className="c7n-swimlaneHeader"
@@ -146,21 +144,20 @@ export default class SwimLaneHeader extends Component {
             {`所有问题（${subIssueDataLength}）`}
           </div>
         );
-      } else {
-        return `其他问题(${subIssueDataLength} 任务)`;
       }
-    } else {
-      return (
-        <div
-          className="c7n-swimlaneHeader"
-          style={style}
-          role="none"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          {this.renderByMode(mode, subIssueDataLength)}
-          {
+      return `其他问题(${subIssueDataLength} 任务)`;
+    }
+    return (
+      <div
+        className="c7n-swimlaneHeader"
+        style={style}
+        role="none"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {this.renderByMode(mode, subIssueDataLength)}
+        {
             mode === 'parent_child' ? (
               <Button
                 type="primary"
@@ -177,8 +174,7 @@ export default class SwimLaneHeader extends Component {
               </Button>
             ) : null
           }
-        </div>
-      );
-    }
+      </div>
+    );
   }
 }

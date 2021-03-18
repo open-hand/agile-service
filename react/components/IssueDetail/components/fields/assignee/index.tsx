@@ -3,9 +3,9 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectUser from '@/components/select/select-user';
-import UserHead from '@/components/UserHead';
 import { User } from '@/common/types';
 import { useDetailContext } from '@/components/IssueDetail/context';
+import UserTag from '@/components/tag/user-tag';
 import Field from '../field';
 import fieldStyles from '../custom-fields/index.less';
 
@@ -44,13 +44,13 @@ const Assignee: React.FC = () => {
       >
         {
           assigneeId ? (
-            <UserHead
-              user={{
-                id: assigneeId,
+            <UserTag
+              data={{
+                // id: assigneeId,
                 loginName: assigneeLoginName,
                 realName: assigneeRealName,
-                avatar: assigneeImageUrl,
-                name: assigneeName,
+                imageUrl: assigneeImageUrl,
+                tooltip: assigneeName,
               }}
             />
           ) : (

@@ -424,6 +424,22 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       },
     });
   }
+
+  sortStatus(statusMachineId: string, data: {
+    outSetId: string,
+    before: boolean
+    nodeId: string
+  }) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/status_transform/sort`,
+      data,
+      params: {
+        statusMachineId,
+        applyType: getApplyType(),
+      },
+    });
+  }
 }
 
 const statusTransformApi = new StatusTransformApi();

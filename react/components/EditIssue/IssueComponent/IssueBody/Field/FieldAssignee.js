@@ -6,7 +6,7 @@ import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { IsProjectMember } from '@/hooks/useIsProjectMember';
 import SelectUser from '@/components/select/select-user';
-import UserHead from '../../../../UserHead';
+import UserTag from '@/components/tag/user-tag';
 
 @inject('AppState')
 @observer class FieldStatus extends Component {
@@ -69,13 +69,13 @@ import UserHead from '../../../../UserHead';
           >
             {
               assigneeId ? (
-                <UserHead
-                  user={{
+                <UserTag
+                  data={{
                     id: assigneeId,
                     loginName: assigneeLoginName,
                     realName: assigneeRealName,
-                    avatar: assigneeImageUrl,
-                    name: assigneeName,
+                    imageUrl: assigneeImageUrl,
+                    tooltip: assigneeName,
                   }}
                 />
               ) : (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import UserHead from '@/components/UserHead';
+import { UserUniqueTag } from '@/components/tag/user-tag';
 import styles from './SprintAssigneeInfo.less';
 
 interface IAssigneeInfo {
@@ -37,34 +37,32 @@ const SprintAssigneeInfo: React.FC<Props> = ({ assignees, ...otherProps }) => {
           assigneeRealName,
           imageUrl,
         }) => (
-          <UserHead
+          <UserUniqueTag
             key={assigneeId}
-            // @ts-ignore
-            title={(
-              <div>
-                <p>{assigneeName}</p>
-                <p>
-                  {'故事点: '}
-                  {totalStoryPoints || 0}
-                </p>
-                <p>
-                  {'剩余预估时间: '}
-                  {totalRemainingTime || '无'}
-                </p>
-                <p>
-                  {'问题: '}
-                  {issueCount}
-                </p>
-              </div>
-            )}
-            hiddenText
+            showText={false}
             size={20}
-            user={{
-              id: assigneeId,
+            data={{
+              // id: assigneeId,
               loginName: assigneeLoginName,
               realName: assigneeRealName,
-              name: assigneeName,
-              avatar: imageUrl,
+              tooltip: (
+                <div>
+                  <p>{assigneeName}</p>
+                  <p>
+                    {'故事点: '}
+                    {totalStoryPoints || 0}
+                  </p>
+                  <p>
+                    {'剩余预估时间: '}
+                    {totalRemainingTime || '无'}
+                  </p>
+                  <p>
+                    {'问题: '}
+                    {issueCount}
+                  </p>
+                </div>
+              ),
+              imageUrl,
             }}
           />
         ))

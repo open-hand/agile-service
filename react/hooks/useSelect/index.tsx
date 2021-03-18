@@ -8,6 +8,7 @@ import { usePersistFn } from 'ahooks';
 import { SearchMatcher } from 'choerodon-ui/pro/lib/select/Select';
 import { Renderer } from 'choerodon-ui/pro/lib/field/FormField';
 
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import FragmentForSearch from './FragmentForSearch';
 import styles from './index.less';
 
@@ -47,6 +48,9 @@ export interface SelectConfig<T = {}> {
   textField: string
   valueField: string
   optionRenderer?: (item: T, tooltip?: boolean) => JSX.Element
+  onOption?: ({ record }: { record: Record }) => {
+    [key: string]: any
+  }
   renderer?: (item: T) => JSX.Element
   request: ({ filter, page }: LoadConfig) => Promise<T[] | { list: T[], hasNextPage: boolean }>
   middleWare?: MiddleWare<T>,
@@ -77,6 +81,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     textField = 'meaning',
     valueField = 'value',
     optionRenderer = defaultRender,
+    onOption,
     // renderer,
     request: requestFn,
     middleWare = noop,
@@ -249,7 +254,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
           disabled: true,
         };
       }
-      return {};
+      return onOption ? onOption({ record }) : {};
     },
     ...omit(props, 'renderer', 'optionRenderer'),
   };

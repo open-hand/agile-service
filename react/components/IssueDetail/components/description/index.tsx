@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Tooltip, Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import WYSIWYGEditor from '@/components/CKEditor';
+import WYSIWYGViewer from '@/components/CKEditorViewer';
 import FullEditor from '@/components/FullEditor';
 import { text2Delta } from '@/utils/richText';
-// @ts-ignore
-import Delta from 'quill-delta';
 import Section from '../section';
 import { useDetailContext } from '../../context';
 
@@ -17,14 +15,14 @@ const Description: React.FC = () => {
 
   const { store, disabledDetailEdit } = useDetailContext();
   const { description } = store.issue;
-  const [delta, setDelta] = useState<Delta>(text2Delta(description));
+  const [delta, setDelta] = useState<string>(description);
 
   useEffect(() => {
     setDelta(text2Delta(description));
     setEdit(false);
   }, [description]);
 
-  const updateIssueDes = async (value: Delta = delta) => {
+  const updateIssueDes = async (value: string = delta) => {
     if (value) {
       await store.update('description', value);
       setEdit(false);
@@ -65,21 +63,21 @@ const Description: React.FC = () => {
         {edit ? (
           <WYSIWYGEditor
             autoFocus
-            bottomBar
+            footer
             value={delta}
             style={{
               minHeight: 260, width: '100%',
             }}
-            onChange={(value: Delta) => {
+            onChange={(value) => {
               setDelta(value);
             }}
-            handleDelete={() => {
+            onCancel={() => {
               setEdit(false);
               setDelta(text2Delta(description));
             }}
-            handleSave={updateIssueDes}
+            onOk={updateIssueDes}
           />
-        ) : <WYSIWYGViewer data={description} />}
+        ) : <WYSIWYGViewer value={description} />}
         {
           fullEdit ? (
             <FullEditor

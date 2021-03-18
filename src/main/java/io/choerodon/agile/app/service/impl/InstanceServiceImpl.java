@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -102,12 +103,22 @@ public class InstanceServiceImpl implements InstanceService {
         List<StatusMachineNodeDTO> nodes = nodeDeployMapper.selectByStateMachineId(stateMachineId);
         List<StateMachineConfigVO> configs = configService.queryDeployByTransformIds(organizationId, ConfigType.CONDITION, stateMachineTransforms.stream().map(StatusMachineTransformDTO::getId).collect(Collectors.toList()));
         Map<Long, Long> nodeMap = nodes.stream().collect(Collectors.toMap(StatusMachineNodeDTO::getId, StatusMachineNodeDTO::getStatusId));
+        Map<Long, String> nodeRankMap = new HashMap<>();
+        for (StatusMachineNodeDTO node : nodes) {
+            nodeRankMap.put(node.getId(), node.getRank());
+        }
         Map<Long, List<StateMachineConfigVO>> configMaps = configs.stream().collect(Collectors.groupingBy(StateMachineConfigVO::getTransformId));
         List<TransformInfo> transformInfos = new ArrayList<>(stateMachineTransforms.size());
+        Boolean hasRankNull = false;
         for (StatusMachineTransformDTO transform : stateMachineTransforms) {
             TransformInfo transformInfo = modelMapper.map(transform, TransformInfo.class);
             transformInfo.setStartStatusId(nodeMap.get(transform.getStartNodeId()));
             transformInfo.setEndStatusId(nodeMap.get(transform.getEndNodeId()));
+            String rank = nodeRankMap.get(transform.getEndNodeId());
+            if (ObjectUtils.isEmpty(rank)) {
+                hasRankNull = true;
+            }
+            transformInfo.setRank(rank);
             //获取转换的条件配置
             List<StateMachineConfigVO> conditionConfigs = configMaps.get(transform.getId());
             if (conditionConfigs == null) {
@@ -117,6 +128,9 @@ public class InstanceServiceImpl implements InstanceService {
                 isNeedFilter = true;
             }
             transformInfos.add(transformInfo);
+        }
+        if (Boolean.FALSE.equals(hasRankNull)) {
+            Collections.sort(transformInfos, (transformInfo1, transformInfo2) -> transformInfo1.getRank().compareTo(transformInfo2.getRank()));
         }
         //调用对应服务，根据条件校验转换，过滤掉不可用的转换
         if (isNeedFilter) {

@@ -152,4 +152,6 @@ public interface SprintMapper extends BaseMapper<SprintDTO> {
     List<SprintSearchVO> queryStoryPointProgress(@Param("projectId")  Long projectId, @Param("sprintIds") List<Long> sprintIds);
 
     Long queryOutIssueId(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
+
+    List<SprintDTO> selectActiveSprintsByProjectIds(@Param("projectIds") Set<Long> projectIds);
 }

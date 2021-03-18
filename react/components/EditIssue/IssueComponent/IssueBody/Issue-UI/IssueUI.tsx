@@ -6,19 +6,21 @@ import { WSHandler, Choerodon } from '@choerodon/boot';
 import { Divider, Tooltip } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import { getProjectId } from '@/utils/common';
-import LinkedItem from './components/linked-item';
+import SingleFileUpload from '@/components/SingleFileUpload';
+import to from '@/utils/to';
 import UploadUI from './components/upload';
 import openLinkUI from './components/link';
 import './IssueUI.less';
 
 import EditIssueContext from '../../../stores';
-import { IUi } from './components/delete/DeleteUI';
+import openDeleteModal, { IUi } from './components/delete/DeleteUI';
 import { WSItem } from './components/linked-item/LinkedItem';
 
 const IssueUI = (props: any) => {
   const [wsData, setWsData] = useState<WSItem[]>([]);
   const { store, disabled } = useContext(EditIssueContext);
   const { issueId } = store.getIssue;
+  const { outside } = store;
 
   useEffect(() => {
     store.getLinkedUI();
@@ -35,6 +37,7 @@ const IssueUI = (props: any) => {
     const data = JSON.parse(message);
     if (data) {
       setWsData(data);
+      store.setLinkedUI([...(store.linkedUI.filter((item: IUi) => item.url)), ...data]);
       if (data.every((item: WSItem) => item.status !== 'doing')) {
         props.reloadIssue();
         store.getLinkedUI();
@@ -47,9 +50,25 @@ const IssueUI = (props: any) => {
     }
   }, [props, store]);
 
-  const renderUploading = useCallback(() => wsData.map((item: WSItem) => (
-    <LinkedItem ui={item} reloadIssue={props.reloadIssue} uploading />
-  )), [props.reloadIssue, wsData]);
+  // const renderUploading = useCallback(() => wsData.map((item: WSItem) => (
+  //   <LinkedItem ui={item} reloadIssue={props.reloadIssue} uploading />
+  // )), [props.reloadIssue, wsData]);
+
+  const handlePreview = useCallback((ui) => {
+    if (ui.id) {
+      if (!outside) {
+        to(`/agile/ui-preview/${ui.id}`, {
+          type: 'project',
+          params: {
+            fullPage: 'true',
+          },
+        },
+        { blank: true });
+      } else {
+        window.open(`/#/agile/outside/ui-preview/${ui.id}`);
+      }
+    }
+  }, [outside]);
 
   const { linkedUI } = store;
   return (
@@ -71,20 +90,34 @@ const IssueUI = (props: any) => {
         }
 
       </div>
-      {
-        linkedUI.map((ui: IUi) => (
-          <LinkedItem ui={ui} reloadIssue={props.reloadIssue} />
-        ))
-      }
+      <div className="c7n-content-container">
+        {
+          linkedUI.map((ui: IUi | WSItem) => (
+            <SingleFileUpload
+              key={ui.id}
+              url={ui.url}
+              fileName={ui.fileName}
+              onDeleteFile={() => openDeleteModal({ ui: ui as IUi, store, reloadIssue: props.reloadIssue })}
+              hasDeletePermission={!disabled}
+              percent={ui.status === 'doing' ? Number((ui.process * 100).toFixed(2)) : 0}
+              error={ui.status === 'failed'}
+              onPreview={() => handlePreview(ui)}
+              isUI={ui.url}
+            />
+          ))
+        }
+      </div>
+
       {
         issueId && (
           <WSHandler
             messageKey={`${`agile-static-file-${getProjectId()}-${issueId}`}`}
             onMessage={handleMessage}
           >
-            {
-            renderUploading()
-          }
+            <div />
+            {/* {
+              renderUploading()
+            } */}
           </WSHandler>
         )
       }

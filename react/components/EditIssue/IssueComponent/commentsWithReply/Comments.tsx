@@ -1,16 +1,11 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { stores } from '@choerodon/boot';
-import Delta from 'quill-delta';
-import { uploadAndReplaceImg } from '@/utils/richText';
 import { issueCommentApi, IComment } from '@/api/IssueComment';
 import Comment from './components/comment';
 import AddComment from './components/addComment';
 import EditIssueContext from '../../stores';
 
 import styles from './Comments.less';
-
-const { AppState } = stores;
 
 interface Props {
   projectId: string
@@ -34,8 +29,8 @@ const Comments: React.FC<Props> = ({
     });
   };
 
-  const handleCreateCommit = async (delta: Delta) => {
-    const commentText = await uploadAndReplaceImg(delta);
+  const handleCreateCommit = async (delta: string) => {
+    const commentText = delta;
     newCommit({ issueId, commentText });
   };
 
