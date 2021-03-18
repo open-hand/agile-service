@@ -691,7 +691,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     @Override
     public List<AppVersionVO> createAndRelAppVersion(Long projectId, Long versionId, List<AppVersionCreateVO> appVersionCreateList) {
         List<AppVersionVO> appVersions = appVersionService.batchCreateAppVersion(projectId, appVersionCreateList);
-        updateParentId(appVersions);
+        appVersionService.updateParentId(appVersions);
         List<Long> appVersionIds = appVersions.stream().map(AppVersionVO::getId).collect(toList());
         ProductVersionRelAppVersionVO productVersionRelAppVersionVO = new ProductVersionRelAppVersionVO();
         productVersionRelAppVersionVO.setAppVersionIds(appVersionIds);
@@ -705,35 +705,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             return;
         }
         appVersionIssueRelMapper.deleteIssueRelByAppVersionIds(projectId, issueId, appVersionIds);
-    }
-
-    private void updateParentId(List<AppVersionVO> appVersions) {
-        AppVersionVO root = null;
-        int count = 0;
-        for (AppVersionVO appVersion : appVersions) {
-            Boolean appService = appVersion.getAppService();
-            if (Boolean.TRUE.equals(appService)) {
-                count++;
-                root = appVersion;
-            }
-        }
-        if (count == 0) {
-            throw new CommonException("error.pom.root.node.not.found");
-        }
-        if (count > 1) {
-            throw new CommonException("error.pom.multi.root.node");
-        }
-        Long parentId = root.getId();
-        appVersions.forEach(x -> {
-            if (x.getId().equals(parentId)) {
-                return;
-            }
-            AppVersionDTO dto = new AppVersionDTO();
-            dto.setId(x.getId());
-            dto.setObjectVersionNumber(x.getObjectVersionNumber());
-            dto.setParentId(parentId);
-            appVersionMapper.updateByPrimaryKeySelective(dto);
-        });
     }
 
     //获取产品版本关联的应用版本关联的所有产品版本中其是最小序列的应用版本
