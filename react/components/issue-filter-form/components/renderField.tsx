@@ -77,7 +77,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       case 'fixVersion':
       case 'influenceVersion':
         // @ts-ignore
-        return <SelectVersion name={code} valueField="versionId" {...otherComponentProps} />;
+        return <SelectVersion name={code} valueField="versionId" hasUnassign {...otherComponentProps} />;
       case 'feature': {
         // @ts-ignore
         return <FeatureProjectField name={code} multiple featureIds={defaultValue} {...otherComponentProps} />;// label={name} style={{ width: '100%' }}
@@ -114,7 +114,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       case 'programVersion': {
         return <SelectProgramVersion name={code} multiple clearButton {...otherComponentProps} />;
       }
-      case 'app_version': {
+      case 'appVersion': {
         return <SelectAppVersion name={code} multiple clearButton {...otherComponentProps} />;
       }
       default:

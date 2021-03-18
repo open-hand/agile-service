@@ -2,10 +2,12 @@ import CustomIcon from '@/components/custom-icon';
 import {
   Button, Icon, Modal, Tooltip,
 } from 'choerodon-ui/pro/lib';
+import { Tree } from 'choerodon-ui';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { IAppVersionData, versionApi } from '@/api';
+import { IAppVersionDataItem } from '@/components/release-detail/stores/store';
 import { useReleaseDetailContext } from '../../../stores';
 import { openImportPomModal } from '../../import-pom';
 import Section from '../../section';
@@ -13,6 +15,7 @@ import { openLinkServiceModal } from '../../link-service-modal';
 import './index.less';
 import { openEditAppVersionModal } from './EditAppVersionModal';
 
+const { TreeNode } = Tree;
 const LinkService: React.FC = () => {
   const { disabled, prefixCls, store } = useReleaseDetailContext();
   const data = store.getAppServiceList;
@@ -37,7 +40,24 @@ const LinkService: React.FC = () => {
     store.loadData();
     return true;
   }
-
+  function renderTreeNode(item: IAppVersionDataItem) {
+    return (
+      <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => openEditAppVersionModal({ data: item, handleOk: store.loadData })}>
+        <span className={`${prefixCls}-link-service-item-left`}>
+          {item.type === 'service' ? <Icon type="local_offer" style={{ fontSize: 15 }} /> : <CustomIcon type="icon-pom" width={17} height={17} />}
+          <span className={`${prefixCls}-link-service-item-left-text`}>{item.name || `${item.artifactId}/${item.versionAlias || item.version}`}</span>
+        </span>
+        <Button
+          icon="delete_forever"
+          className={`${prefixCls}-link-service-item-btn`}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDelete(item);
+          }}
+        />
+      </div>
+    );
+  }
   return (
     <Section
       title="关联应用服务版本"
@@ -73,15 +93,14 @@ const LinkService: React.FC = () => {
       }
       contentClassName={`${prefixCls}-link-service`}
     >
-      {data.map((item) => (
-        <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => openEditAppVersionModal({ data: item, handleOk: store.loadData })}>
-          <span className={`${prefixCls}-link-service-item-left`}>
-            {item.type === 'service' ? <Icon type="local_offer" style={{ fontSize: 15 }} /> : <CustomIcon type="icon-pom-multiColor" width={17} height={17} />}
-            <span className={`${prefixCls}-link-service-item-left-text`}>{item.name}</span>
-          </span>
-          <Button icon="delete_forever" className={`${prefixCls}-link-service-item-btn`} onClick={() => handleDelete(item)} />
-        </div>
-      ))}
+      <Tree className={`${prefixCls}-link-service-tree`}>
+        {data.map((item) => (
+          <TreeNode title={renderTreeNode(item)} key={item.id}>
+            {item.children?.flatMap((k) => <TreeNode title={renderTreeNode(k)} />)}
+          </TreeNode>
+        ))}
+      </Tree>
+
     </Section>
   );
 };

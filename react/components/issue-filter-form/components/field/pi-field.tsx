@@ -30,7 +30,7 @@ const PIField: React.FC<Props> = forwardRef(({
         afterLoadRef.current(piList);
       }
       const newPiList = [{
-        id: 'none',
+        id: '0',
         name: '未分配PI',
         piName: '未分配PI',
         code: 'none',

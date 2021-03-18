@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import {
   Button,
-  DataSet, Form, Modal, Radio, Select, TextField,
+  DataSet, Form, Modal, Radio, Select, TextField, Tooltip,
 } from 'choerodon-ui/pro/lib';
 import { debounce, isEmpty } from 'lodash';
 import classnames from 'classnames';
@@ -54,6 +54,7 @@ const SelectVersion: React.FC<SelectVersionProps> = observer(({
       });
     } else {
       versionId && serviceCode && versionApi.loadAvailableAppVersionList(versionId, serviceCode).then((res: any) => {
+        console.log('res', res.content);
         setOptions(res.content);
       });
     }
@@ -80,6 +81,7 @@ const SelectVersion: React.FC<SelectVersionProps> = observer(({
     const res = await handleCheckVersion(value!);
     return res ? '版本名称重复' : true;
   }
+
   return (
     <Select
       ref={selectRef}
@@ -103,67 +105,71 @@ const SelectVersion: React.FC<SelectVersionProps> = observer(({
                   onClick={() => handleSelect(i)}
                 >
                   {multiple ? <Checkbox checked={selectRef.current?.isSelected(i)} /> : null}
-                  {i.get('name')}
+                  <Tooltip title={i.get('name')}>
+                    {i.get('name')}
+                  </Tooltip>
                 </li>
               )) : <li className="c7n-pro-select-dropdown-menu-item c7n-pro-select-dropdown-menu-item-disabled">无匹配结果。</li>}
             </ul>
-            <div role="none" className="c7n-agile-release-detail-select-footer">
-              {
-                inputVisible ? (
-                  <div className="c7n-agile-release-detail-select-footer-input">
-                    <TextField ref={inputRef} onInput={(e: any) => handleInput(e.target.value)} validator={handleValidator} onClick={(e) => { e.stopPropagation(); inputRef.current?.focus(); }} autoFocus style={{ width: '100%' }} />
-                    <Button
-                      color={'primary' as any}
-                      onClick={async (e) => {
+            {!programMode ? (
+              <div role="none" className="c7n-agile-release-detail-select-footer">
+                {
+                  inputVisible ? (
+                    <div className="c7n-agile-release-detail-select-footer-input">
+                      <TextField ref={inputRef} onInput={(e: any) => handleInput(e.target.value)} validator={handleValidator} onClick={(e) => { e.stopPropagation(); inputRef.current?.focus(); }} autoFocus style={{ width: '100%' }} />
+                      <Button
+                        color={'primary' as any}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          // handleLoadMore();
+                          const versionName = inputRef.current?.getValue();
+                          if (await inputRef.current?.validate(versionName) && serviceCode) {
+                            const newVersion: IAppVersionData = await versionApi.createAppVersion({ artifactId: serviceCode!, serviceCode, version: versionName });
+                            const newOption = { ...newVersion, name: `${newVersion.artifactId}/${newVersion.versionAlias || newVersion.version || ''}`, value: newVersion.id! };
+                            setOptions((oldOptions) => [...oldOptions, newOption]);
+                            handleSelect(new Record(newOption));
+                            // dataSet.create({ name: inputRef.current?.getValue(), value: '009' });
+                            setInputVisible(false);
+                          }
+
+                          // dataSet.unshift(new Record({ name: inputRef.current?.getValue(), value: `0001${inputRef.current?.getValue()}` }));
+                        }}
+                      >
+                        保存
+                      </Button>
+
+                      <Button onClick={(e) => {
                         e.stopPropagation();
                         // handleLoadMore();
-                        const versionName = inputRef.current?.getValue();
-                        if (await inputRef.current?.validate(versionName) && serviceCode) {
-                          const newVersion: IAppVersionData = await versionApi.createAppVersion({ artifactId: serviceCode!, serviceCode, version: versionName });
-                          const newOption = { ...newVersion, name: newVersion.versionAlias || newVersion.version!, value: newVersion.id! };
-                          setOptions((oldOptions) => [...oldOptions, newOption]);
-                          handleSelect(new Record(newOption));
-                          // dataSet.create({ name: inputRef.current?.getValue(), value: '009' });
-                          setInputVisible(false);
-                        }
-
-                        // dataSet.unshift(new Record({ name: inputRef.current?.getValue(), value: `0001${inputRef.current?.getValue()}` }));
+                        setInputVisible(false);
                       }}
+                      >
+                        取消
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // handleLoadMore();
+                        setInputVisible(true);
+                      }}
+                      color={'primary' as any}
+                      style={{ margin: '-4px -12px', width: 'calc(100% + 24px)' }}
                     >
-                      保存
+                      创建版本
                     </Button>
-
-                    <Button onClick={(e) => {
-                      e.stopPropagation();
-                      // handleLoadMore();
-                      setInputVisible(false);
-                    }}
-                    >
-                      取消
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // handleLoadMore();
-                      setInputVisible(true);
-                    }}
-                    color={'primary' as any}
-                    style={{ margin: '-4px -12px', width: 'calc(100% + 24px)' }}
-                  >
-                    创建版本
-                  </Button>
-                )
-              }
-            </div>
-
+                  )
+                }
+              </div>
+            )
+              : null}
           </div>
         );
       }}
       {...otherProps}
     >
-      {options.flatMap((i) => <Option value={i.id}>{i.versionAlias || i.version}</Option>)}
+      {options.flatMap((i) => <Option value={i.id}>{i.name}</Option>)}
     </Select>
   );
 });
@@ -171,7 +177,7 @@ const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({
   modal, versionId, programMode, handleOk,
 }) => {
   const [applicationId, setApplicationId] = useState<string>();
-  const [versionType, setVersionType] = useState<string>('tag');
+  const [versionType, setVersionType] = useState<string>('version');
 
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
@@ -188,7 +194,7 @@ const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({
       {
         name: 'version', label: '选择版本', multiple: true, textField: 'name', valueField: 'value', dynamicProps: { required: ({ record }) => record.get('change') === 'version' },
       },
-      { name: 'change', defaultValue: 'tag' },
+      { name: 'change', defaultValue: 'version' },
     ],
   }), []);
   useEffect(() => {
@@ -212,8 +218,9 @@ const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({
         : <SelectAppService name="appService" onChange={setApplicationId} />}
 
       <RadioGroup>
-        <Radio name="change" value="tag" onChange={setVersionType}>选择Tag</Radio>
         <Radio name="change" value="version" onChange={setVersionType}>选择版本</Radio>
+
+        <Radio name="change" value="tag" onChange={setVersionType}>选择Tag</Radio>
       </RadioGroup>
       {versionType === 'tag' ? <SelectGitTags name="tag" applicationId={applicationId} key={`git-tags-${applicationId}`} />
         : <SelectVersion name="version" disabled={!applicationId} maxTagCount={5} versionId={versionId} serviceCode={applicationId} subProjectId={applicationId} programMode={programMode} multiple />}

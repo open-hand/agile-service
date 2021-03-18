@@ -12,8 +12,16 @@ interface INoticeMessage {
   type: 'cancel-feature' | 'select-feature',
   content?: string,
 }
+
+export interface IAppVersionDataItem extends IAppVersionData {
+  name: string,
+  type?: any,
+  appService: boolean
+  tag: boolean
+  children?: IAppVersionDataItem[],
+}
 class ReleaseDetailStore {
-  events: EventsProps = { update: () => true, load: () => true, selectIssue: () => {} };
+  events: EventsProps = { update: () => true, load: () => true, selectIssue: () => { } };
 
   @observable loading: boolean = false;
 
@@ -21,7 +29,7 @@ class ReleaseDetailStore {
 
   @observable current: IReleaseDetailData | undefined;
 
-  @observable appServiceList: Array<IAppVersionData & { name: string, type?: any }> = [];
+  @observable appServiceList: Array<IAppVersionDataItem> = [];
 
   @observable visible: boolean = false;
 
@@ -79,7 +87,7 @@ class ReleaseDetailStore {
     const versionData = ignoreLoad.includes('detail') ? this.current : await versionApi.load(id);
 
     const versionList = ignoreLoad.includes('app') ? this.getAppServiceList : await versionApi.loadAppVersionList(id);
-    this.setAppServiceList(versionList.map((i: any) => ({ ...i, name: i.versionAlias || i.version })));
+    this.setAppServiceList(versionList.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` })));
 
     this.setCurrentData({ ...versionData, id: versionData.versionId });
     await this.events.load({ versionData });
