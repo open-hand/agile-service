@@ -50,7 +50,7 @@ import { issueApi } from '@/api';
             )}
           >
             {appVersions && appVersions.length > 0
-              ? appVersions.map((i) => i.versionAlias || i.version).join('、') : '无'}
+              ? appVersions.map((i) => `${i.artifactId}/${i.versionAlias || i.version}`).join('、') : '无'}
           </TextEditToggle>
 
         </div>
