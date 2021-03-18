@@ -396,6 +396,20 @@ class VersionApi extends Api<VersionApi> {
   }
 
   /**
+ * 删除应用版本
+ * @param issueId
+ * @param appVersionId
+ * @returns
+ */
+  deleteAppVersion(appVersionId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/app_version/delete/${appVersionId}`,
+
+    });
+  }
+
+  /**
    * 删除版本与问题关联关系
    */
   deleteLinkIssueId(issueId: string, versionId: string) {

@@ -15,6 +15,7 @@ import { IModalProps } from '@/common/types';
 import { versionApi } from '@/api';
 import Loading from '@/components/Loading';
 import { observer } from 'mobx-react-lite';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 
 interface IImportPomFunctionProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
@@ -52,7 +53,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     // ],
     fields: [
       { name: 'artifactId', label: '应用服务' },
-      { name: 'version', label: '版本名称' },
+      { name: 'version', label: '版本名称', required: true },
       { name: 'versionAlias', label: '版本别名' },
       { name: 'appService', label: '主服务' },
     ],
@@ -71,9 +72,10 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
       const groupIdStr = groupId ? String(groupId) : undefined;
       (programMode ? versionApi.importProgramPom(formData, groupIdStr!, subProjectId!) : versionApi.importPom(formData, groupIdStr!)).then((res: any) => {
         ds.loadData(res);
+        // ds.splice(0,0,)
       }).finally(() => {
         setLoading(false);
-          inputRef.current?.setAttribute('value', '');
+        inputRef.current?.setAttribute('value', '');
       });
 
       // issueApi.import(formData).then((res) => {
@@ -85,7 +87,12 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     }
   };
   const handleSubmit = useCallback(async () => {
-    if (!await ds.validate()) {
+    console.log('submit');
+    const versionCheckRes = Promise.all(ds.map((r) => r.getField('version')?.checkValidity())).then((v) => {
+      console.log('iii', v);
+      return !v.some((i) => !i);
+    });
+    if (!await versionCheckRes) {
       return false;
     }
 

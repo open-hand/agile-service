@@ -1,10 +1,10 @@
 import CustomIcon from '@/components/custom-icon';
 import {
-  Button, Icon, Modal, Tooltip,
+  Button, Icon, Modal, SelectBox, Tooltip,
 } from 'choerodon-ui/pro/lib';
 import { Tree } from 'choerodon-ui';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-import React, { useMemo } from 'react';
+import React, { useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { IAppVersionData, versionApi } from '@/api';
 import { IAppVersionDataItem } from '@/components/release-detail/stores/store';
@@ -18,6 +18,7 @@ import { openEditAppVersionModal } from './EditAppVersionModal';
 const { TreeNode } = Tree;
 const LinkService: React.FC = () => {
   const { disabled, prefixCls, store } = useReleaseDetailContext();
+  const delConfigRef = useRef<string>('only');
   const data = store.getAppServiceList;
   const detailData = store.getCurrentData;
   function handleLinkAppService(linkData: any) {
@@ -28,21 +29,29 @@ const LinkService: React.FC = () => {
   function handleDelete(v: IAppVersionData) {
     Modal.confirm({
       title: '删除应用版本',
-      children: `您确定要删除关联的应用版本【${v.versionAlias || v.version}】？`,
-      onOk: () => versionApi.deleteLinkAppVersion(detailData.versionId, v.id!).then(() => {
-        store.loadData();
-      }),
+      children: (
+        <div>
+          <span>{`您确定要删除关联的应用版本【${v.versionAlias || v.version}】？`}</span>
+          <SelectBox mode={'box' as any} defaultValue="only" onChange={(value: any) => { delConfigRef.current = value; }}>
+            <SelectBox.Option value="only">仅删除关联关系</SelectBox.Option>
+            <SelectBox.Option value="all">删除关联关系及应用版本</SelectBox.Option>
+          </SelectBox>
+        </div>),
+      onOk: () => {
+        (delConfigRef.current === 'only' ? versionApi.deleteLinkAppVersion(detailData.versionId, v.id!) : versionApi.deleteAppVersion(v.id!)).then(() => {
+          store.loadData();
+        });
+      },
     });
   }
   async function handleImportPom(pomData: any) {
-    console.log('handleImportPom', pomData);
     await versionApi.createBranchAndLinkAppService(detailData.versionId, pomData);
     store.loadData();
     return true;
   }
   function renderTreeNode(item: IAppVersionDataItem) {
     return (
-      <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => openEditAppVersionModal({ data: item, handleOk: store.loadData })}>
+      <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => openEditAppVersionModal({ data: item, handleOk: () => store.loadData() })}>
         <span className={`${prefixCls}-link-service-item-left`}>
           {item.type === 'service' ? <Icon type="local_offer" style={{ fontSize: 15 }} /> : <CustomIcon type="icon-pom" width={17} height={17} />}
           <span className={`${prefixCls}-link-service-item-left-text`}>{item.name || `${item.artifactId}/${item.versionAlias || item.version}`}</span>
@@ -83,7 +92,6 @@ const LinkService: React.FC = () => {
                 color={'blue' as ButtonColor}
                 icon="local_offer"
                 onClick={() => {
-                  console.log('detailData', detailData);
                   openLinkServiceModal({ versionId: detailData.id || detailData.versionId, handleOk: handleLinkAppService });
                 }}
               />
