@@ -244,6 +244,36 @@ public class AppVersionServiceImpl implements AppVersionService {
                 appVersionMapper.listAppVersionByProjectId(projectId, appVersionSearchVO));
     }
 
+    @Override
+    public void updateParentId(List<AppVersionVO> appVersions) {
+        AppVersionVO root = null;
+        int count = 0;
+        for (AppVersionVO appVersion : appVersions) {
+            Boolean appService = appVersion.getAppService();
+            if (Boolean.TRUE.equals(appService)) {
+                count++;
+                root = appVersion;
+            }
+        }
+        if (count == 0) {
+            throw new CommonException("error.pom.root.node.not.found");
+        }
+        if (count > 1) {
+            throw new CommonException("error.pom.multi.root.node");
+        }
+        Long parentId = root.getId();
+        appVersions.forEach(x -> {
+            if (x.getId().equals(parentId)) {
+                return;
+            }
+            AppVersionDTO dto = new AppVersionDTO();
+            dto.setId(x.getId());
+            dto.setObjectVersionNumber(x.getObjectVersionNumber());
+            dto.setParentId(parentId);
+            appVersionMapper.updateByPrimaryKeySelective(dto);
+        });
+    }
+
     private void validateProjectCategories(ProjectVO project) {
         Set<String> projectCategoryCodes = new HashSet<>();
         if (!ObjectUtils.isEmpty(project.getCategories())) {

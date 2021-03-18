@@ -101,4 +101,6 @@ public interface AppVersionService {
      * @return 项目下应用版本
      */
     Page<AppVersionVO> listAppVersionByProjectId(Long projectId, AppVersionSearchVO appVersionSearchVO, PageRequest pageRequest);
+
+    void updateParentId(List<AppVersionVO> appVersions);
 }
