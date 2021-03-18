@@ -225,7 +225,7 @@ class VersionApi extends Api<VersionApi> {
    * @param versionId
    * @param data
    */
-  update(versionId: number|string, data: UVersionVO) {
+  update(versionId: number | string, data: UVersionVO) {
     return axios.put(`${this.prefix}/product_version/update/${versionId}`, data);
   }
 
@@ -261,13 +261,13 @@ class VersionApi extends Api<VersionApi> {
     return axios.post(`${this.prefix}/issues/to_version/${versionId}`, issueIds);
   }
 
-  importPom(data: any, groupId: string): Promise<IAppVersionData[]> {
+  importPom(data: any, groupIds: string): Promise<IAppVersionData[]> {
     return axios({
       method: 'post',
       url: `${this.prefix}/app_version/parse_pom`,
       data,
       params: {
-        groupId,
+        groupIds,
       },
     });
   }
@@ -290,6 +290,10 @@ class VersionApi extends Api<VersionApi> {
         serviceCode,
         size: 0,
       },
+    }).then((res: any) => {
+      const newList = res.content.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` }));
+      const newData = ({ ...res, content: newList, list: newList });
+      return newData;
     });
   }
 
@@ -302,7 +306,11 @@ class VersionApi extends Api<VersionApi> {
     return axios({
       method: 'post',
       url: `${this.prefix}/app_version`,
-      data,
+      data: {
+        ...data,
+        appService: true,
+        tag: false,
+      },
     });
   }
 
@@ -439,12 +447,12 @@ class VersionApi extends Api<VersionApi> {
     });
   }
 
-  importProgramPom(data: any, groupId: string, subProjectId: string) {
+  importProgramPom(data: any, groupIds: string, subProjectId: string) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/version_tree/parse_pom`,
       params: {
-        groupId,
+        groupIds,
         subProjectId,
       },
       data,
@@ -459,6 +467,9 @@ class VersionApi extends Api<VersionApi> {
         programVersionId,
         subProjectId,
       },
+    }).then((res: any) => {
+      const newList = res.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` }));
+      return newList;
     });
   }
 
