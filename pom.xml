@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>agile-service</artifactId>
-    <version>0.24.4.RELEASE</version>
+    <version>0.24.5-SNAPSHOT</version>
 
     <!--加parent-->
     <parent>
