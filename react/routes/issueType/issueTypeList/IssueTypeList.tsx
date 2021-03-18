@@ -261,11 +261,6 @@ function IssueTypeList() {
   return (
     <Page
       className={styles.issueType}
-      service={isOrganization ? [
-        'choerodon.code.organization.setting.issue.issue-type.ps.default',
-      ] : [
-        'choerodon.code.project.setting.issueType.ps.default',
-      ]}
     >
       <Header>
         <Button icon="playlist_add" onClick={handleAdd}>添加问题类型</Button>

@@ -254,17 +254,6 @@ class BacklogHome extends Component {
 // eslint-disable-next-line import/no-anonymous-default-export
 export default (props) => (
   <Page
-    // eslint-disable-next-line react/destructuring-assignment
-    service={props.isInProgram ? [
-      'choerodon.code.project.cooperation.work-list.ps.backlog',
-      'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.feature',
-      'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint',
-      'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.pi',
-    ] : [
-      'choerodon.code.project.cooperation.work-list.ps.backlog',
-      'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
-      'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.epic',
-    ]}
     className="c7n-backlog-page"
   >
     <BacklogHome {...props} />

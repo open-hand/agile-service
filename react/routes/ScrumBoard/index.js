@@ -4,8 +4,7 @@ import {
   Switch,
 } from 'react-router-dom';
 import { asyncRouter, nomatch } from '@choerodon/boot';
-import PermissionRoute from '@/components/PermissionRoute';
-import { service } from './setting/Setting';
+import { PermissionRoute } from '@choerodon/master';
 
 const ScrumBoardHome = asyncRouter(() => (import('./ScrumBoardHome')));
 const Setting = asyncRouter(() => (import('./setting')));
@@ -13,16 +12,30 @@ const Setting = asyncRouter(() => (import('./setting')));
 const ScrumBoardIndex = ({ match }) => (
   <Switch>
     <PermissionRoute
-      permissions={[...[
+      service={[
         'choerodon.code.project.cooperation.iteration-plan.ps.default',
         'choerodon.code.project.cooperation.iteration-plan.ps.board.create',
         'choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish',
-      ], ...service]}
+      ]}
       exact
       path={`${match.url}`}
       component={ScrumBoardHome}
     />
-    <Route path={`${match.url}/setting`} component={Setting} />
+    <PermissionRoute
+      service={[
+        'choerodon.code.project.cooperation.iteration-plan.ps.config',
+        'choerodon.code.project.cooperation.iteration-plan.ps.status.create',
+        'choerodon.code.project.cooperation.iteration-plan.ps.column.create',
+        'choerodon.code.project.cooperation.iteration-plan.ps.board.delete',
+        'choerodon.code.project.cooperation.iteration-plan.ps.board.update',
+        'choerodon.code.project.cooperation.iteration-plan.ps.column',
+        'choerodon.code.project.cooperation.iteration-plan.ps.status.update',
+        'choerodon.code.project.cooperation.iteration-plan.ps.status.delete',
+        'choerodon.code.project.cooperation.iteration-plan.ps.work_calendar.update',
+      ]}
+      path={`${match.url}/setting`}
+      component={Setting}
+    />
     <Route path="*" component={nomatch} />
   </Switch>
 );

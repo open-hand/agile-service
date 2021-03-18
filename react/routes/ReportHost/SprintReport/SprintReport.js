@@ -295,7 +295,7 @@ class SprintReport extends Component {
     ];
 
     return (
-      <Page className="c7n-report" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.sprintreport']}>
+      <Page className="c7n-report">
         <Header
           title="冲刺报告图"
           backPath={linkUrl(LINK_URL.report)}

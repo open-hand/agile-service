@@ -394,7 +394,9 @@ class PieChart extends Component {
     }
 
     return (
-      <Page className="pie-chart" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.piechart']}>
+      <Page
+        className="pie-chart"
+      >
         <Header
           title="统计图"
           backPath={linkUrl(LINK_URL.report)}

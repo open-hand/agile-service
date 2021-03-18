@@ -6,7 +6,7 @@ import {
 import LINK_URL from '@/constants/LINK_URL';
 
 const Backlog = withRouter(asyncRouter(() => import('../Backlog')));
-const Issue = withRouter(asyncRouter(() => (import('../Issue'))));
+const Issue = withRouter(asyncRouter(() => (import('../Issue/IssueIndex'))));
 
 const WorkList = ({ match }) => (
   <PageWrap

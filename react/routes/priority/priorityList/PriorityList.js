@@ -328,9 +328,6 @@ class PriorityList extends Component {
     return (
       <Page
         className="c7nagile-priority"
-        service={[
-          'choerodon.code.organization.setting.issue.priority.ps.default',
-        ]}
       >
         <Header title={<FormattedMessage id="priority.title" />}>
           <Button onClick={() => this.showSideBar('create')}>

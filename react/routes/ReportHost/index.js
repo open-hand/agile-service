@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { asyncRouter, nomatch } from '@choerodon/boot';
+import { PermissionRoute } from '@choerodon/master';
 
 const ReportHostHome = asyncRouter(() => (import('./Home')));
 const BurndownChart = asyncRouter(() => (import('./BurndownChart')));
@@ -16,15 +17,51 @@ const VersionBurndown = asyncRouter(() => (import('./VersionBurndown')));
 const ReportHostIndex = ({ match }) => (
   <Switch>
     <Route exact path={match.url} component={ReportHostHome} />
-    <Route path={`${match.url}/burndownchart`} component={BurndownChart} />
-    <Route path={`${match.url}/sprintreport`} component={sprintReport} />
-    <Route path={`${match.url}/accumulation`} component={Accumulation} />
-    <Route path={`${match.url}/velocityChart`} component={VelocityReport} />
-    <Route path={`${match.url}/EpicReport`} component={EpicReport} />
-    <Route path={`${match.url}/pieReport`} component={PieChartReport} />
-    <Route path={`${match.url}/versionReport`} component={VersionReport} />
-    <Route path={`${match.url}/epicBurndown`} component={EpicBurndown} />
-    <Route path={`${match.url}/versionBurndown`} component={VersionBurndown} />
+    <PermissionRoute
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.burndown']}
+      path={`${match.url}/burndownchart`}
+      component={BurndownChart}
+    />
+    <PermissionRoute
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.sprintreport']}
+      path={`${match.url}/sprintreport`}
+      component={sprintReport}
+    />
+    <PermissionRoute
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.cumulative_flow_diagram']}
+      path={`${match.url}/accumulation`}
+      component={Accumulation}
+    />
+    <PermissionRoute
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.velocity_chart']}
+      path={`${match.url}/velocityChart`}
+      component={VelocityReport}
+    />
+    <PermissionRoute
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.epicreport']}
+      path={`${match.url}/EpicReport`}
+      component={EpicReport}
+    />
+    <PermissionRoute
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.piechart']}
+      path={`${match.url}/pieReport`}
+      component={PieChartReport}
+    />
+    <PermissionRoute
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.versionreport']}
+      path={`${match.url}/versionReport`}
+      component={VersionReport}
+    />
+    <PermissionRoute
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.epicburndown']}
+      path={`${match.url}/epicBurndown`}
+      component={EpicBurndown}
+    />
+    <PermissionRoute
+      service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.versionburndown']}
+      path={`${match.url}/versionBurndown`}
+      component={VersionBurndown}
+    />
     <Route path="*" component={nomatch} />
   </Switch>
 );

@@ -210,10 +210,7 @@ function PageIssueType() {
     });
   }
   return (
-    <Page
-      service={isProject ? ['choerodon.code.project.setting.page.ps.scheme']
-        : ['choerodon.code.organization.setting.issue.page.ps.scheme']}
-    >
+    <Page>
       <Prompt message={`是否放弃更改 ${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageIssueTypeStore.getDirty} />
       <Header>
         <TooltipButton title="该问题类型已停用，无法创建字段" disabled={!pageIssueTypeStore.currentIssueType.enabled} icon="playlist_add" onClick={openCreateFieldModal}>创建字段</TooltipButton>

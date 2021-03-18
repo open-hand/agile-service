@@ -398,16 +398,7 @@ class ReleaseHome extends Component {
       render: (text, record) => this.renderProgramVersion({ text }),
     });
     return (
-      <Page
-        service={[
-          'choerodon.code.project.cooperation.project-version.ps.default',
-          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion',
-          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
-          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
-          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion',
-          'choerodon.code.project.cooperation.work-list.ps.version.link.program.version',
-        ]}
-      >
+      <Page>
         <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
           <Header title="版本管理">
             <Button

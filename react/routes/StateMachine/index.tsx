@@ -1,7 +1,6 @@
 import React, { useState, ReactNode } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { find } from 'lodash';
-import permission from '@/components/permission';
 import useQueryString from '@/hooks/useQueryString';
 import Status from './status';
 import StatusCirculation from './status-circulation';
@@ -60,7 +59,4 @@ const StateMachine: React.FC = (props) => {
   );
 };
 
-export default permission([
-  'choerodon.code.project.setting.state.ps.default',
-  'choerodon.code.project.setting.state.ps.master',
-])(StateMachine);
+export default StateMachine;

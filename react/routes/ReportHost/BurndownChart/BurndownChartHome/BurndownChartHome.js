@@ -247,7 +247,7 @@ class BurndownChartHome extends Component {
     } = this.state;
     const sprints = BurndownChartStore.getSprintList;
     return (
-      <Page service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.burndown']}>
+      <Page>
         <Header
           title="燃尽图"
           backPath={linkUrl(LINK_URL.report)}

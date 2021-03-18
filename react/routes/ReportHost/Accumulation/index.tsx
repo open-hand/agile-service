@@ -38,7 +38,7 @@ const AccumulationReport: React.FC = () => {
   };
 
   return (
-    <Page service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.cumulative_flow_diagram']}>
+    <Page>
       <Header
         title="累积流量图"
         backPath={linkUrl(LINK_URL.report)}

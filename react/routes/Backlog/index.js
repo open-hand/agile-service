@@ -4,12 +4,22 @@ import {
   Switch,
 } from 'react-router-dom';
 import { asyncRouter, nomatch } from '@choerodon/boot';
+import { PermissionRoute } from '@choerodon/master';
 
 const BacklogHome = asyncRouter(() => (import('./BacklogHome')), () => import('../../stores/project/backlog/BacklogStore'));
 
 const BacklogIndex = ({ match }) => (
   <Switch>
-    <Route path={`${match.url}`} component={BacklogHome} />
+    <PermissionRoute
+      service={['choerodon.code.project.cooperation.work-list.ps.backlog',
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.feature',
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint',
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.pi',
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
+        'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.epic']}
+      path={`${match.url}`}
+      component={BacklogHome}
+    />
     <Route path="*" component={nomatch} />
   </Switch>
 );

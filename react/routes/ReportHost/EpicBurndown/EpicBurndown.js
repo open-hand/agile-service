@@ -815,7 +815,9 @@ class EpicBurndown extends Component {
   render() {
     const { checkbox, tabActiveKey, linkFromParamUrl } = this.state;
     return (
-      <Page className="c7n-epicBurndown" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.epicburndown']}>
+      <Page
+        className="c7n-epicBurndown"
+      >
         <Header
           title="史诗燃耗图"
           backPath={linkUrl(LINK_URL.report)}

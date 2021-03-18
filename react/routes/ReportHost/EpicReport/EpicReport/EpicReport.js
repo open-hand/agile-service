@@ -586,7 +586,9 @@ class EpicReport extends Component {
     const { linkFromParamUrl } = this.state;
     const urlParams = AppState.currentMenuType;
     return (
-      <Page className="c7n-epicReport" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.epicreport']}>
+      <Page
+        className="c7n-epicReport"
+      >
         <Header
           title="史诗报告图"
           /**
