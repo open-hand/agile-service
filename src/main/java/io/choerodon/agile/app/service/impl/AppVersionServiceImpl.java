@@ -63,17 +63,37 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Override
     public AppVersionVO createAppVersion(Long projectId, AppVersionCreateVO appVersionCreateVO) {
-        AppVersionDTO appVersionDTO = modelMapper.map(appVersionCreateVO, AppVersionDTO.class);
-        appVersionDTO.setProjectId(projectId);
-        if (Boolean.TRUE.equals(checkRepeat(appVersionDTO))) {
-            throw new CommonException("error.appVersion.repeat");
+        AppVersionVO result;
+        String artifactId =  appVersionCreateVO.getArtifactId();
+        String version = appVersionCreateVO.getVersion();
+        String serviceCode = appVersionCreateVO.getServiceCode();
+        AppVersionDTO dto = new AppVersionDTO();
+        dto.setArtifactId(artifactId);
+        dto.setVersion(version);
+        dto.setServiceCode(serviceCode);
+        dto.setProjectId(projectId);
+        List<AppVersionDTO> list = appVersionMapper.select(dto);
+        if (list.isEmpty()) {
+            result = create(projectId, appVersionCreateVO);
+        } else {
+            dto = list.get(0);
+            AppVersionUpdateVO update = modelMapper.map(dto, AppVersionUpdateVO.class);
+            update.setTag(null);
+            String alias = appVersionCreateVO.getVersionAlias();
+            if (StringUtils.isEmpty(alias)) {
+                update.setVersionAlias(null);
+            } else {
+                update.setVersionAlias(alias);
+            }
+            if (Boolean.FALSE.equals(update.getAppService())
+                    && Boolean.TRUE.equals(appVersionCreateVO.getAppService())) {
+                update.setAppService(true);
+            }
+            result = updateAppVersion(projectId, dto.getId(), modelMapper.map(dto, AppVersionUpdateVO.class));
+            //设置源appService的值，用于解析父子关系
+            result.setAppService(appVersionCreateVO.getAppService());
         }
-        appVersionDTO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
-        if (appVersionMapper.insertSelective(appVersionDTO) != 1) {
-            throw new CommonException("error.appVersion.insert");
-        }
-        AppVersionDTO result = appVersionMapper.selectByPrimaryKey(appVersionDTO.getId());
-        return modelMapper.map(result, AppVersionVO.class);
+        return result;
     }
 
     @Override
@@ -178,36 +198,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         List<AppVersionVO> result = new ArrayList<>();
         if(!CollectionUtils.isEmpty(appVersionCreateVOList)){
             for(AppVersionCreateVO appVersionCreateVO : appVersionCreateVOList) {
-                String artifactId =  appVersionCreateVO.getArtifactId();
-                String version = appVersionCreateVO.getVersion();
-                String serviceCode = appVersionCreateVO.getServiceCode();
-                AppVersionDTO dto = new AppVersionDTO();
-                dto.setArtifactId(artifactId);
-                dto.setVersion(version);
-                dto.setServiceCode(serviceCode);
-                dto.setProjectId(projectId);
-                List<AppVersionDTO> list = appVersionMapper.select(dto);
-                if (list.isEmpty()) {
-                    result.add(createAppVersion(projectId, appVersionCreateVO));
-                } else {
-                    dto = list.get(0);
-                    AppVersionUpdateVO update = modelMapper.map(dto, AppVersionUpdateVO.class);
-                    update.setTag(null);
-                    String alias = appVersionCreateVO.getVersionAlias();
-                    if (StringUtils.isEmpty(alias)) {
-                        update.setVersionAlias(null);
-                    } else {
-                        update.setVersionAlias(alias);
-                    }
-                    if (Boolean.FALSE.equals(update.getAppService())
-                            && Boolean.TRUE.equals(appVersionCreateVO.getAppService())) {
-                        update.setAppService(true);
-                    }
-                    AppVersionVO vo = updateAppVersion(projectId, dto.getId(), modelMapper.map(dto, AppVersionUpdateVO.class));
-                    //设置源appService的值，用于解析父子关系
-                    vo.setAppService(appVersionCreateVO.getAppService());
-                    result.add(vo);
-                }
+                result.add(createAppVersion(projectId, appVersionCreateVO));
             }
         }
         return result;
@@ -266,5 +257,19 @@ public class AppVersionServiceImpl implements AppVersionService {
         if (!projectCategoryCodes.contains(ProjectCategory.MODULE_DEVOPS)) {
             throw new CommonException("error.project.category.not.contains.devops");
         }
+    }
+
+    private AppVersionVO create(Long projectId, AppVersionCreateVO appVersionCreateVO) {
+        AppVersionDTO appVersionDTO = modelMapper.map(appVersionCreateVO, AppVersionDTO.class);
+        appVersionDTO.setProjectId(projectId);
+        if (Boolean.TRUE.equals(checkRepeat(appVersionDTO))) {
+            throw new CommonException("error.appVersion.repeat");
+        }
+        appVersionDTO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
+        if (appVersionMapper.insertSelective(appVersionDTO) != 1) {
+            throw new CommonException("error.appVersion.insert");
+        }
+        AppVersionDTO result = appVersionMapper.selectByPrimaryKey(appVersionDTO.getId());
+        return modelMapper.map(result, AppVersionVO.class);
     }
 }

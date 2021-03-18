@@ -3,6 +3,7 @@ package io.choerodon.agile.api.vo;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -21,10 +22,9 @@ public class AppVersionCreateVO {
     @NotEmpty(message = "error.field.serviceCodeNull")
     private String serviceCode;
     @ApiModelProperty(value = "是否为tag")
-    @NotEmpty(message = "error.field.tagNull")
     private Boolean tag;
     @ApiModelProperty(value = "是否为应用服务")
-    @NotEmpty(message = "error.field.appServiceNull")
+    @NotNull(message = "error.field.appServiceNull")
     private Boolean appService;
 
     public Boolean getTag() {
