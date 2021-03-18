@@ -8,6 +8,7 @@ import { asyncLocaleProvider, stores, nomatch } from '@choerodon/boot';
 import 'moment/locale/zh-cn';
 import 'moment/locale/en-nz';
 import moment from 'moment';
+import { PermissionRoute } from '@choerodon/master';
 import AgileProvider from '@/components/AgileProvider';
 import RunWhenProjectChange from '@/common/RunWhenProjectChange';
 import { setHistory } from '@/utils/to';
@@ -55,7 +56,14 @@ class Agile extends React.Component {
           <IntlProviderAsync>
             <Switch>
               {/* 协作 */}
-              <Route path={`${match.url}/work-list`} component={WorkList} />
+              <PermissionRoute
+                service={[
+                  'choerodon.code.project.cooperation.work-list.ps.issue',
+                  'choerodon.code.project.cooperation.work-list.ps.backlog',
+                ]}
+                path={`${match.url}/work-list`}
+                component={WorkList}
+              />
               <Route path={`${match.url}/storyMap`} component={StoryMap} />
               <Route path={`${match.url}/team-performance`} component={TeamPerformance} />
               {/* 开发-迭代计划 */}

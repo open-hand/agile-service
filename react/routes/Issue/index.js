@@ -224,9 +224,9 @@ const Issue = observer(() => {
   return (
     <Page
       className="c7nagile-issue"
-      service={[
-        'choerodon.code.project.cooperation.work-list.ps.issue',
-      ]}
+      // service={[
+      //   'choerodon.code.project.cooperation.work-list.ps.issue',
+      // ]}
     >
       <Header
         title="问题管理"
