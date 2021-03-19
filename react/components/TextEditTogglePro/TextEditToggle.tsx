@@ -80,7 +80,7 @@ const TextEditToggle: React.FC<Props> = ({
     // 延缓submit，因为有时候blur之后才会onchange，保证拿到的值是最新的
     setTimeout(async () => {
       // @ts-ignore
-      if (editingRef.current && editorRef.current && await editorRef.current.checkValidity()) {
+      if (editingRef.current && editorRef.current && await editorRef.current?.validate(dataRef.current)) {
         if (containerRef.current) {
           containerRef.current.blur();
         }
