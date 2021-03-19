@@ -115,10 +115,15 @@ public class SprintDelaySendMessageTask {
         processUsers(userMap, sprintDelayCarrierList, projectMap, projectOwnerMap);
         List<MessageSender> messageSenders = buildMessageSender(sprintDelayCarrierList, userMap, projectOwnerMap);
         if(!messageSenders.isEmpty()) {
-            messageSenders
-                    .stream()
-                    .parallel()
-                    .forEach(x -> messageClient.async().sendMessage(x));
+            int step = 500;
+            for (int i = 0; i < messageSenders.size(); i += step) {
+                int end = (i + 1) * step;
+                if(end >= messageSenders.size()){
+                    end = messageSenders.size() - 1;
+                }
+                List<MessageSender> messageSenderList = messageSenders.subList(i, end);
+                notifyFeignClient.batchSendMessage(messageSenderList);
+            }
         }
         LOGGER.info("===> 冲刺延期发送消息定时任务完成");
     }
