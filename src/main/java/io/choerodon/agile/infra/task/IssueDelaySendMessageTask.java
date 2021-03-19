@@ -9,6 +9,7 @@ import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.asgard.schedule.annotation.JobTask;
 import io.choerodon.asgard.schedule.annotation.TimedTask;
@@ -59,7 +60,7 @@ public class IssueDelaySendMessageTask {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
-    private MessageClient messageClient;
+    private NotifyFeignClient notifyFeignClient;
     @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
@@ -149,11 +150,16 @@ public class IssueDelaySendMessageTask {
                 messageSenders.add(messageSender);
             }
         }
-        if(!messageSenders.isEmpty()) {
-            messageSenders
-                    .stream()
-                    .parallel()
-                    .forEach(x -> messageClient.async().sendMessage(x));
+        if (!messageSenders.isEmpty()) {
+            int step = 500;
+            for (int i = 0; i < messageSenders.size(); i += step) {
+                int end = (i + 1) * step;
+                if (end >= messageSenders.size()) {
+                    end = messageSenders.size() - 1;
+                }
+                List<MessageSender> messageSenderList = messageSenders.subList(i, end);
+                notifyFeignClient.batchSendMessage(messageSenderList);
+            }
         }
         LOGGER.info("===> 问题延期发送消息定时任务完成");
     }

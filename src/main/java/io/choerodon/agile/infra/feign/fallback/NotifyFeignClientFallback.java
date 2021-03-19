@@ -4,6 +4,8 @@ import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.feign.vo.MessageSettingVO;
 import io.choerodon.core.exception.CommonException;
+
+import org.hzero.boot.message.entity.MessageSender;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -30,5 +32,10 @@ public class NotifyFeignClientFallback implements NotifyFeignClient {
     @Override
     public ResponseEntity<List<ProjectMessageVO>> listEnabledSettingByCode(String code, String notifyType) {
         throw new CommonException("error.data.listEnabledSettingByCode");
+    }
+
+    @Override
+    public ResponseEntity<Void> batchSendMessage(List<MessageSender> senderList) {
+        throw new CommonException("error.batch.sendMessage");
     }
 }
