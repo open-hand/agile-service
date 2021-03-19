@@ -103,9 +103,10 @@ public class AppVersionServiceImpl implements AppVersionService {
         if (ObjectUtils.isEmpty(appVersionDTO)) {
             throw new CommonException("error.appVersion.notExist");
         }
+        boolean changeVersion = !appVersionDTO.getVersion().equals(appVersionUpdateVO.getVersion());
         appVersionDTO.setVersion(appVersionUpdateVO.getVersion());
         appVersionDTO.setVersionAlias(appVersionUpdateVO.getVersionAlias());
-        if (Boolean.TRUE.equals(checkRepeat(appVersionDTO))) {
+        if (changeVersion && Boolean.TRUE.equals(checkRepeat(appVersionDTO))) {
             throw new CommonException("error.appVersion.repeat");
         }
         appVersionDTO.setId(appVersionId);
