@@ -924,34 +924,34 @@ class CreateIssue extends Component {
         );
       case 'component':
         return (
-          ['sub_task'].includes(newIssueTypeCode) ? null : (
-            <FormItem label="模块">
-              {getFieldDecorator('componentIssueRel', {
-                rules: [{ transform: (value) => (value ? value.toString() : value) },
-                  { required: field.required, message: '请选择模块' },
-                ],
-              })(
-                <SelectFocusLoad
-                  label="模块"
-                  mode="multiple"
-                  type="component"
-                  allowClear
-                >
-                  {field.defaultValueObjs?.map((component) => (
-                    <Option
-                      key={component.name}
-                      value={component.name}
-                      name={component.name}
-                    >
-                      <Tooltip title={component.name} placement="top" arrowPointAtCenter>
-                        <span>{component.name}</span>
-                      </Tooltip>
-                    </Option>
-                  ))}
-                </SelectFocusLoad>,
-              )}
-            </FormItem>
-          )
+
+          <FormItem label="模块">
+            {getFieldDecorator('componentIssueRel', {
+              rules: [{ transform: (value) => (value ? value.toString() : value) },
+                { required: field.required, message: '请选择模块' },
+              ],
+            })(
+              <SelectFocusLoad
+                label="模块"
+                mode="multiple"
+                type="component"
+                allowClear
+              >
+                {field.defaultValueObjs?.map((component) => (
+                  <Option
+                    key={component.name}
+                    value={component.name}
+                    name={component.name}
+                  >
+                    <Tooltip title={component.name} placement="top" arrowPointAtCenter>
+                      <span>{component.name}</span>
+                    </Tooltip>
+                  </Option>
+                ))}
+              </SelectFocusLoad>,
+            )}
+          </FormItem>
+
         );
       case 'summary':
         return (
