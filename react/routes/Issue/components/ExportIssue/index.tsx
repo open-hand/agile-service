@@ -22,6 +22,10 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
         // self.addExtraField(data);
         return false;
       }
+      // @ts-ignore
+      if (data.archive) {
+        return false;
+      }
 
       return data;
     },

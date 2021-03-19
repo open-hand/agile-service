@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  CheckBox, Button, TextField, Icon,
+  CheckBox, Button, TextField, Icon, Tooltip,
 } from 'choerodon-ui/pro';
 import IssueSearchContext from '../context';
 import './FieldList.less';
@@ -68,15 +68,17 @@ function FieldList() {
               {filteredSystemFields.map((field) => {
                 const { name, code } = field;
                 return (
-                  <div className={`${prefix}-item`} key={code}>
-                    <CheckBox
-                      value={code}
-                      checked={chosenFields.has(code)}
-                      onChange={(value) => handleChosenFieldChange(value, field)}
-                    >
-                      {name}
-                    </CheckBox>
-                  </div>
+                  <Tooltip title={name}>
+                    <div className={`${prefix}-item`} key={code}>
+                      <CheckBox
+                        value={code}
+                        checked={chosenFields.has(code)}
+                        onChange={(value) => handleChosenFieldChange(value, field)}
+                      >
+                        {name}
+                      </CheckBox>
+                    </div>
+                  </Tooltip>
                 );
               })}
             </div>
@@ -89,15 +91,17 @@ function FieldList() {
               {filteredFields.map((field) => {
                 const { name, code } = field;
                 return (
-                  <div className={`${prefix}-item`} key={code}>
-                    <CheckBox
-                      value={code}
-                      checked={chosenFields.has(code)}
-                      onChange={(value) => handleChosenFieldChange(value, field)}
-                    >
-                      {name}
-                    </CheckBox>
-                  </div>
+                  <Tooltip title={name}>
+                    <div className={`${prefix}-item`} key={code}>
+                      <CheckBox
+                        value={code}
+                        checked={chosenFields.has(code)}
+                        onChange={(value) => handleChosenFieldChange(value, field)}
+                      >
+                        {name}
+                      </CheckBox>
+                    </div>
+                  </Tooltip>
                 );
               })}
             </div>

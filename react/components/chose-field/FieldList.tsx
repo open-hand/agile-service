@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  CheckBox, Button, TextField, Icon,
+  CheckBox, Button, TextField, Icon, Tooltip,
 } from 'choerodon-ui/pro';
 import './FieldList.less';
 import { IChosenFieldField, IUseChoseFieldProps } from './types';
 import ChoseFieldStore from './store';
 
-const prefix = 'c7nagile-choose-field-list';
+const prefix = 'c7n-agile-choose-field-list';
 
 export function useChoseFieldStore(props: IUseChoseFieldProps) {
   return useMemo(() => new ChoseFieldStore(props), [props]);
@@ -81,16 +81,19 @@ function FieldList({ store, closeMenu, onChose }: Props) {
                 const { name, code } = field;
                 const disabled = typeof (field.immutableCheck) !== 'undefined';
                 return (
-                  <div className={`${prefix}-item`} key={code}>
-                    <CheckBox
-                      value={code}
-                      disabled={disabled}
-                      checked={disabled ? field.immutableCheck : !!store.getChosenByCode(code)}
-                      onChange={(value) => handleChange(value, field)}
-                    >
-                      {name}
-                    </CheckBox>
-                  </div>
+                  <Tooltip title={name}>
+                    <div className={`${prefix}-item`} key={code}>
+                      <CheckBox
+                        value={code}
+                        disabled={disabled}
+                        checked={disabled ? field.immutableCheck : !!store.getChosenByCode(code)}
+                        onChange={(value) => handleChange(value, field)}
+                      >
+                        {name}
+                      </CheckBox>
+                    </div>
+                  </Tooltip>
+
                 );
               })}
 
@@ -105,16 +108,18 @@ function FieldList({ store, closeMenu, onChose }: Props) {
                 const { name, code } = field;
                 const disabled = typeof (field.immutableCheck) !== 'undefined';
                 return (
-                  <div className={`${prefix}-item`} key={code}>
-                    <CheckBox
-                      value={code}
-                      disabled={disabled}
-                      checked={disabled ? field.immutableCheck : !!store.getChosenByCode(code)}
-                      onChange={(value) => handleChange(value, field)}
-                    >
-                      {name}
-                    </CheckBox>
-                  </div>
+                  <Tooltip title={name}>
+                    <div className={`${prefix}-item`} key={code}>
+                      <CheckBox
+                        value={code}
+                        disabled={disabled}
+                        checked={disabled ? field.immutableCheck : !!store.getChosenByCode(code)}
+                        onChange={(value) => handleChange(value, field)}
+                      >
+                        {name}
+                      </CheckBox>
+                    </div>
+                  </Tooltip>
                 );
               })}
             </div>
