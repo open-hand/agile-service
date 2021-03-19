@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   background: white;
-  box-shadow:0px 1px 8px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.14),0px 2px 1px -2px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.12), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -2px rgba(0, 0, 0, 0.2);
   &-search {
     height: 50px;
     display: flex;
@@ -43,5 +43,15 @@
   &-item {
     width: 50%;
     margin: 6px 0;
+    label {
+      width: 100%;
+      .c7n-pro-checkbox-label {
+        width: 100%;
+        display: inline-block;
+        overflow: hidden;
+        line-height: 1.5;
+        text-overflow: ellipsis;
+      }
+    }
   }
 }
