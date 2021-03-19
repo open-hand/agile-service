@@ -235,13 +235,20 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     public List<StatusVO> queryStatusByIssueTypeId(Long projectId, Long issueTypeId, String applyType) {
         Long organizationId = projectUtil.getOrganizationId(projectId);
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
+        List<ProjectStatusVO> projectStatusVOList = statusMapper.listStatusByProjectId(projectId, organizationId,null);
+        Set<Long> statusIds = projectStatusVOList.stream().map(ProjectStatusVO::getId).collect(Collectors.toSet());
         if (stateMachineSchemeId == null) {
             throw new CommonException(ERROR_STATEMACHINESCHEMEID_NULL);
         }
         //获取状态机
         Long stateMachineId = stateMachineSchemeConfigService.queryStateMachineIdBySchemeIdAndIssueTypeId(false, organizationId, stateMachineSchemeId, issueTypeId);
         List<StatusAndTransformVO> statuses = statusService.queryStatusByStateMachineId(organizationId, stateMachineId);
-        return modelMapper.map(statuses, new TypeToken<List<StatusVO>>() {}.getType());
+        if(CollectionUtils.isEmpty(statuses)){
+            return new ArrayList<>();
+        }
+        List<StatusAndTransformVO> result = statuses.stream()
+                .filter(statusAndTransformVO -> statusIds.contains(statusAndTransformVO.getId())).collect(Collectors.toList());
+        return modelMapper.map(result, new TypeToken<List<StatusVO>>() {}.getType());
     }
 
     @Override
