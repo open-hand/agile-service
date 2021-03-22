@@ -4,7 +4,7 @@ import { IStatusCirculation, statusTransformApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import FlatSelect from '@/components/flat-select';
-import { includes } from 'lodash';
+import { includes, intersection } from 'lodash';
 
 interface Props extends Partial<SelectProps> {
   issueTypeId?: string
@@ -41,7 +41,15 @@ const SelectStatus: React.FC<Props> = forwardRef(
           ? statusList.filter(({ id }) => id !== expectStatusId)
           : statusList;
         if (issueTypeIds) {
-          data = data.filter((item) => includes(selectedIds, item.id) || item.code === 'create');
+          data = data.filter((item) => {
+            if (includes(selectedIds, item.id)) {
+              return true;
+            }
+            if (item.issueTypeIds) {
+              return intersection(issueTypeIds, item.issueTypeIds).length > 0;
+            }
+            return true;
+          });
         }
         if (dataRef) {
           Object.assign(dataRef, {
