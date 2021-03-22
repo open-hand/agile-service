@@ -4,6 +4,8 @@ package io.choerodon.agile.api.vo;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.util.List;
+
 /**
  * @author shinan.chen
  * @date 2018/10/24
@@ -35,6 +37,10 @@ public class StatusVO {
     private Boolean defaultStatus;
 
     private Boolean transferAll;
+
+    @ApiModelProperty("关联的问题类型")
+    @Encrypt
+    private List<Long> issueTypeIds;
 
     public StatusVO() {
     }
@@ -132,5 +138,13 @@ public class StatusVO {
 
     public void setTransferAll(Boolean transferAll) {
         this.transferAll = transferAll;
+    }
+
+    public List<Long> getIssueTypeIds() {
+        return issueTypeIds;
+    }
+
+    public void setIssueTypeIds(List<Long> issueTypeIds) {
+        this.issueTypeIds = issueTypeIds;
     }
 }
