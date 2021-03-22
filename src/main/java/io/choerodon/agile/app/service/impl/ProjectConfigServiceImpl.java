@@ -119,6 +119,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
     @Autowired
     private BaseFeignClient baseFeignClient;
+    @Autowired
+    private StatusMachineNodeMapper nodeDeployMapper;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -278,7 +280,22 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 .stream()
                 .filter(v -> !issueTypeIds.contains(v.getIssueTypeId()))
                 .map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
-        return statusService.queryByStateMachineIds(organizationId, stateMachineIds);
+        List<StatusVO> result = statusService.queryByStateMachineIds(organizationId, stateMachineIds);
+
+        //设置状态关联的issueTypeIds
+        List<Long> statusIds = result.stream().map(StatusVO::getId).collect(Collectors.toList());
+        ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
+        StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
+        List<IssueCountDTO> issueCounts = nodeDeployMapper.countIssueTypeByStatusIds(projectVO.getOrganizationId(), stateMachineSchemeVO.getId(), statusIds, applyType);
+        Map<Long, List<Long>> map = new HashMap<>();
+        if (!CollectionUtils.isEmpty(issueCounts)) {
+            map.putAll(issueCounts.stream().collect(Collectors.groupingBy(IssueCountDTO::getId, Collectors.mapping(IssueCountDTO::getIssueTypeId, Collectors.toList()))));
+        }
+        result.forEach(status -> {
+            status.setIssueTypeIds(map.get(status.getId()));
+        });
+
+        return result;
     }
 
     @Override
