@@ -58,6 +58,7 @@ function CustomField({ field }) {
           field={field}
           value={value}
           onChange={handleChange}
+          issueTypeIds={chosenFields.get('issueTypeId') ? toJS(chosenFields.get('issueTypeId').value) : undefined}
         />
       );
     case 'assigneeId':

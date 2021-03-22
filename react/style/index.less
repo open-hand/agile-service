@@ -12,18 +12,25 @@
   transform: none;
 }
 
-#agile,
-.agile-portal {
+.c7n-pro-btn-icon-only {
+  height: 0.3rem !important;
+}
+
+.c7n-pro-btn-icon-only.c7n-pro-btn-sm {
+  height: 0.24rem !important;
+}
+
+#agile {
   --theme: #3F51B5; //这样可以在jsx中的style使用
   height: 100%;
 
-  .c7n-pro-select > ul > li > input[type="text"] {
+  .c7n-pro-select >ul >li >input[type="text"] {
     // 解决在pro组件下拉框 游览器默认样式导致的字显示一半
     padding: 0;
     font-size: .13rem;
   }
 
-  > div:first-child {
+  >div:first-child {
     width: 100%;
     height: 100%;
   }
@@ -97,8 +104,6 @@
       }
     }
 
-
-
     // antd Select 组件覆盖
     .c7n-select-selection {
 
@@ -121,7 +126,7 @@
         margin-top: .04rem;
         padding: 0 !important;
 
-        ul > li {
+        ul >li {
           height: .23rem;
           margin-bottom: -.01rem;
         }
@@ -129,7 +134,7 @@
         // 单选多选内容框
         ul,
         .c7n-select-selection-selected-value {
-          width: calc(~"100% - .16rem");
+          width: ~"calc(100% - 0.16rem)";
           overflow: hidden;
         }
 
@@ -170,7 +175,7 @@
 
         ul,
         .c7n-select-selection-selected-value {
-          width: calc(~"100% - .40rem") !important;
+          width: ~"calc(100% - .40rem)" !important;
         }
       }
     }
@@ -205,7 +210,7 @@
       }
 
       .c7n-calendar-range-picker-input:nth-of-type(1) {
-        width: calc(~'100% - 33px');
+        width: ~"calc(100% - 33px)";
         text-overflow: ellipsis;
         text-align: left;
       }
@@ -256,7 +261,7 @@
   }
 
   .c7n-input-focused {
-    .hidden-label + .c7n-input-label-wrapper {
+    .hidden-label +.c7n-input-label-wrapper {
       .hidden-label-mixin;
     }
   }
@@ -279,23 +284,37 @@
     }
   }
 
+  .c7n-agile-table-cell {
+    color: rgba(0, 0, 0, 0.65);
+  }
+
+  .c7n-agile-table-cell-click {
+    cursor: pointer;
+    vertical-align: top;
+
+    &:hover {
+      color: #3F51B5;
+      text-decoration: underline;
+    }
+  }
+
   .primary {
     color: #3F51B5;
   }
 }
 
-.c7n-agile-table-cell {
-  color: rgba(0, 0, 0, 0.65);
+// 解决禁用时 选择框的样式的覆盖问题
+.dropdown_SelectTheme {
+  .c7n-checkbox-disabled .c7n-checkbox-inner {
+    background-color: #f5f5f5;
+  }
 }
 
-.c7n-agile-table-cell-click {
-  cursor: pointer;
-  vertical-align: top;
-  color: #3F51B5;
-
-  &:hover {
-    // color: #3F51B5;
-    text-decoration: underline;
+.c7n-pro-modal-container {
+  .c7n-pro-select >ul >li >input[type="text"] {
+    // 解决在pro组件下拉框 游览器默认样式导致的字显示一半
+    padding: 0;
+    font-size: .13rem;
   }
 }
 
@@ -307,15 +326,6 @@
       .c7n-input-label-wrapper {
         .hidden-label-mixin;
       }
-    }
-  }
-
-  .c7n-input-label-wrapper {
-    .c7n-input-label {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
   }
 }
@@ -344,30 +354,63 @@
   font-size: 16px !important;
 }
 
-// .c7n-pro-cascader-select-all-none + .c7n-spin-nested-loading > .c7n-spin-container > div {
+.greyColor {
+  color: rgba(0, 0, 0, 0.65);
+}
 
 
-//   &:hover {
-//     background-color: rgba(0, 0, 0, 0.04) !important;
-//   }
+.flat-mixin(@type) {
+  input.c7n-pro-@{type} {
+    width: 100px;
+  }
 
-//   &:text-only {
-//     margin: 0.08rem 0;
-//     padding: 0.04rem 0.12rem;
-//     color: rgba(0, 0, 0, 0.54);
-//     cursor: not-allowed;
-//     border-radius: 0 0 0.02rem 0.02rem;
-//   }
-// }
-// .c7n-pro-select-dropdown-menu-item {
+  .c7n-pro-@{type} {
+    display: flex;
+    align-items: center;
+    border: none;
 
-//   .c7n-checkbox-wrapper + span,
-//   .c7n-checkbox + span {
-//     text-overflow: ellipsis;
-//     padding-right: 0.08rem;
-//     padding-left: 0.08rem;
-//     width: calc(100% - 20px);
-//     display: inline-block;
-//     overflow: hidden;
-//   }
-// }
+    // padding-right: 15px !important;
+    &::placeholder {
+      // color: rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  & > input {
+    width: 100px;
+  }
+
+  .c7n-pro-@{type}-multiple-value {
+    width: 100px;
+  }
+
+  .c7n-pro-@{type}-placeholder {
+    // color: rgba(0, 0, 0, 0.6);
+  }
+
+  .c7n-@{type}-has-border.c7n-@{type}::before {
+    border: none;
+  }
+
+  .c7n-@{type}-search__field__placeholder {
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .c7n-@{type}-open {
+    .c7n-@{type}-search__field__placeholder {
+      color: rgba(0, 0, 0, 0.3);
+    }
+  }
+
+}
+
+.c7n-pro-select-flat {
+  .flat-mixin(select);
+}
+
+.c7n-pro-select-tree-flat {
+  .flat-mixin(select-tree);
+}
+
+.c7n-pro-cascader-flat {
+  .flat-mixin(cascader);
+}
