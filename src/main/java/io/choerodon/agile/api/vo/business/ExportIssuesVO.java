@@ -101,6 +101,12 @@ public class ExportIssuesVO {
     @ApiModelProperty("环境")
     private String environmentName;
 
+    @ApiModelProperty("已耗费时间")
+    private BigDecimal spentWorkTime;
+
+    @ApiModelProperty("总预估时间")
+    private BigDecimal allEstimateTime;
+
     public ExportIssuesVO() {
     }
 
@@ -454,5 +460,21 @@ public class ExportIssuesVO {
 
     public void setEnvironmentName(String environmentName) {
         this.environmentName = environmentName;
+    }
+
+    public BigDecimal getSpentWorkTime() {
+        return spentWorkTime;
+    }
+
+    public void setSpentWorkTime(BigDecimal spentWorkTime) {
+        this.spentWorkTime = spentWorkTime;
+    }
+
+    public BigDecimal getAllEstimateTime() {
+        return allEstimateTime;
+    }
+
+    public void setAllEstimateTime(BigDecimal allEstimateTime) {
+        this.allEstimateTime = allEstimateTime;
     }
 }
