@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import rx.Observable;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Function;
@@ -148,7 +149,7 @@ public class IssueAssembler extends AbstractAssembler {
      * @return IssueListFieldKVVO
      */
 
-    public List<IssueListFieldKVVO> issueDoToIssueListFieldKVDTO(List<IssueDTO> issueDTOList, Map<Long, PriorityVO> priorityMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, IssueTypeVO> issueTypeDTOMap, Map<Long, Map<String, Object>> foundationCodeValue) {
+    public List<IssueListFieldKVVO> issueDoToIssueListFieldKVDTO(List<IssueDTO> issueDTOList, Map<Long, PriorityVO> priorityMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, IssueTypeVO> issueTypeDTOMap, Map<Long, Map<String, Object>> foundationCodeValue, Map<Long, List<WorkLogVO>> workLogVOMap) {
         List<IssueListFieldKVVO> issueListFieldKVDTOList = new ArrayList<>(issueDTOList.size());
         Set<Long> userIds = issueDTOList.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
         userIds.addAll(issueDTOList.stream().filter(issue -> issue.getReporterId() != null && !Objects.equals(issue.getReporterId(), 0L)).map(IssueDTO::getReporterId).collect(Collectors.toSet()));
@@ -196,9 +197,33 @@ public class IssueAssembler extends AbstractAssembler {
             issueListFieldKVVO.setMainResponsibleUser(usersMap.get(issueDO.getMainResponsibleId()));
             issueListFieldKVVO.setEnvironmentName(envMap.get(issueDO.getEnvironment()));
             issueListFieldKVVO.setAppVersions(issueDO.getAppVersions());
+            setSpentWorkTimeAndAllEstimateTime(workLogVOMap, issueListFieldKVVO);
             issueListFieldKVDTOList.add(issueListFieldKVVO);
         });
         return issueListFieldKVDTOList;
+    }
+
+    /**
+     * 设置预估时间和耗费时间
+     *
+     * @param workLogVOMap
+     * @param issueListFieldKVVO
+     */
+    private void setSpentWorkTimeAndAllEstimateTime(Map<Long, List<WorkLogVO>> workLogVOMap, IssueListFieldKVVO issueListFieldKVVO) {
+        List<WorkLogVO> workLogVOList = workLogVOMap.get(issueListFieldKVVO.getIssueId());
+        BigDecimal spentWorkTime = null;
+        BigDecimal allEstimateTime;
+        if (!CollectionUtils.isEmpty(workLogVOList)) {
+            spentWorkTime = new BigDecimal(0);
+            for (WorkLogVO workLogVO : workLogVOList){
+                spentWorkTime = spentWorkTime.add(workLogVO.getWorkTime());
+            }
+            allEstimateTime = issueListFieldKVVO.getRemainingTime() == null ? spentWorkTime : spentWorkTime.add(issueListFieldKVVO.getRemainingTime());
+        } else {
+            allEstimateTime = issueListFieldKVVO.getRemainingTime();
+        }
+        issueListFieldKVVO.setSpentWorkTime(spentWorkTime);
+        issueListFieldKVVO.setAllEstimateTime(allEstimateTime);
     }
 
     /**

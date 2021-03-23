@@ -180,6 +180,8 @@ public class ExcelServiceImpl implements ExcelService {
     private IssueLinkTypeMapper issueLinkTypeMapper;
     @Autowired
     private ObjectSchemeFieldExcelService objectSchemeFieldExcelService;
+    @Autowired
+    protected WorkLogMapper workLogMapper;
 
     private static final String[] FIELDS_NAMES;
 
@@ -220,6 +222,8 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put("lastUpdatedUserName", "更新人");
         FIELD_MAP.put("mainResponsibleName", "主要负责人");
         FIELD_MAP.put("environmentName", "环境");
+        FIELD_MAP.put("spentWorkTime", "已耗费时间");
+        FIELD_MAP.put("allEstimateTime", "总预估时间");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -2866,6 +2870,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
                     Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
                     Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, issueIds, true, "agile_issue");
+                    Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                     Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
                     cursor
                             .addCollections(userIds)
@@ -2878,7 +2883,8 @@ public class ExcelServiceImpl implements ExcelService {
                             .addCollections(influenceVersionNames)
                             .addCollections(labelNames)
                             .addCollections(componentMap)
-                            .addCollections(foundationCodeValue);
+                            .addCollections(foundationCodeValue)
+                            .addCollections(workLogVOMap);
                     issues.forEach(issue ->
                             buildExcelIssueFromIssue(
                                     project.getName(),
@@ -2895,6 +2901,7 @@ public class ExcelServiceImpl implements ExcelService {
                                     componentMap,
                                     foundationCodeValue,
                                     envMap,
+                                    workLogVOMap,
                                     issue));
                 }
                 if (!isTreeView) {
@@ -2931,6 +2938,7 @@ public class ExcelServiceImpl implements ExcelService {
                                                       Map<Long, List<ComponentIssueRelDTO>> componentMap,
                                                       Map<Long, Map<String, Object>> foundationCodeValue,
                                                       Map<String, String> envMap,
+                                                      Map<Long, List<WorkLogVO>> workLogVOMap,
                                                       IssueDTO issue) {
         Long issueId = issue.getIssueId();
         ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
@@ -2959,7 +2967,31 @@ public class ExcelServiceImpl implements ExcelService {
         resetRemainingTimeIfCompleted(issue, exportIssuesVO);
         issueMap.put(issueId, exportIssuesVO);
         processParentSonRelation(parentSonMap, issue);
+        setSpentWorkTimeAndAllEstimateTime(workLogVOMap, exportIssuesVO);
         return exportIssuesVO;
+    }
+
+    /**
+     * 设置预估时间和耗费时间
+     *
+     * @param workLogVOMap
+     * @param exportIssuesVO
+     */
+    private void setSpentWorkTimeAndAllEstimateTime(Map<Long, List<WorkLogVO>> workLogVOMap, ExportIssuesVO exportIssuesVO) {
+        List<WorkLogVO> workLogVOList = workLogVOMap.get(exportIssuesVO.getIssueId());
+        BigDecimal spentWorkTime = null;
+        BigDecimal allEstimateTime;
+        if (!CollectionUtils.isEmpty(workLogVOList)) {
+            spentWorkTime = new BigDecimal(0);
+            for (WorkLogVO workLogVO : workLogVOList){
+                spentWorkTime = spentWorkTime.add(workLogVO.getWorkTime());
+            }
+            allEstimateTime = exportIssuesVO.getRemainingTime() == null ? spentWorkTime : spentWorkTime.add(exportIssuesVO.getRemainingTime());
+        } else {
+            allEstimateTime = exportIssuesVO.getRemainingTime();
+        }
+        exportIssuesVO.setSpentWorkTime(spentWorkTime);
+        exportIssuesVO.setAllEstimateTime(allEstimateTime);
     }
 
     private void setEnvironmentName(Map<String, String> envMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {

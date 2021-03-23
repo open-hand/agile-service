@@ -299,6 +299,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private StateMachineNodeService stateMachineNodeService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired
+    private WorkLogMapper workLogMapper;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -574,7 +576,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
                 List<Long> allIssueIds = issueDTOList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, allIssueIds, false, "agile_issue");
-                List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue);
+                Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), allIssueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
+                List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue, workLogVOMap);
                 AgilePluginService expandBean = SpringBeanUtil.getExpandBean(AgilePluginService.class);
                 if (!ObjectUtils.isEmpty(expandBean) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
                     expandBean.doToIssueListFieldKVDTO(projectId,issueListFieldKVVOS);

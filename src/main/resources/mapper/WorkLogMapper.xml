@@ -23,6 +23,19 @@
         AND awl.start_date &lt;= #{endDate}
     </select>
 
+    <select id="queryByIssueIds" resultType="io.choerodon.agile.api.vo.WorkLogVO">
+        SELECT *
+        FROM agile_work_log
+        WHERE project_id IN
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        AND issue_id IN
+        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
+            #{issueId}
+        </foreach>
+    </select>
+
     <update id="updateProject">
         update agile_work_log set project_id = #{targetProjectId}
         where project_id = #{projectId}

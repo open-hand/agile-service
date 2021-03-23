@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.WorkLogVO;
 import io.choerodon.agile.infra.dto.WorkLogDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -28,4 +29,6 @@ public interface WorkLogMapper extends BaseMapper<WorkLogDTO> {
                                             @Param("endDate") Date endDate);
 
     void updateProject(@Param("projectId") Long projectId, @Param("issueId") Long issueId, @Param("targetProjectId") Long targetProjectId);
+
+    List<WorkLogVO> queryByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 }
