@@ -43,12 +43,4 @@ public interface DataLogService {
 
     List<DataLogFixVO> queryListByProjectId(Long projectId);
 
-    /**
-     * 查询项目层操作动态，即问题下操作历史
-     * @param projectId 项目id
-     * @param dataLogQueryVO 查询参数
-     * @param pageRequest 分页参数
-     * @return 项目层操作动态
-     */
-    Page<AllDataLogVO> listAllDataLogByProjectId(Long projectId, DataLogQueryVO dataLogQueryVO, PageRequest pageRequest);
 }

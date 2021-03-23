@@ -9,8 +9,8 @@ import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 
 /**
- * Created by HuangFuqiang@choerodon.io on 2018/6/14.
- * Email: fuqianghuang01@gmail.com
+ * @author chihao.ran@hand-china.com
+ * @since 2021-03-23
  */
 
 public class AllDataLogVO {
