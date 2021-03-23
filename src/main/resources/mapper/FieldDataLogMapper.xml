@@ -79,4 +79,50 @@
         AND scheme_code = #{schemeCode}
     </update>
 
+    <select id="listFdDataLogByProjectId" resultType="io.choerodon.agile.api.vo.business.AllDataLogVO">
+        SELECT
+            ffdl.id AS log_id,
+            ffdl.project_id,
+            osf.code AS field,
+            osf.name AS field_name,
+            ffdl.old_value,
+            ffdl.old_string,
+            ffdl.new_value,
+            ffdl.new_string,
+            ffdl.instance_id,
+            ffdl.scheme_code AS log_type,
+            ffdl.created_by,
+            ffdl.creation_date,
+            1 AS is_cus_log
+        FROM fd_field_data_log ffdl
+        LEFT JOIN fd_object_scheme_field osf ON osf.id = ffdl.field_id
+        WHERE ffdl.project_id = #{projectId}
+        <if test="!containBacklog">
+            AND ffdl.scheme_code = 'agile_issue'
+        </if>
+        <if test="dataLogQueryVO != null">
+            <if test="dataLogQueryVO.createdByIds != null and dataLogQueryVO.createdByIds.size() != 0">
+                AND ffdl.created_by IN
+                <foreach collection="dataLogQueryVO.createdByIds" item="createdBy" open="(" separator=","
+                         close=")">
+                    #{createdBy}
+                </foreach>
+            </if>
+            <if test="dataLogQueryVO.startDate != null">
+                AND ffdl.creation_date &gt;= #{dataLogQueryVO.startDate}
+            </if>
+            <if test="dataLogQueryVO.endDate != null">
+                AND ffdl.creation_date &lt;= #{dataLogQueryVO.endDate}
+            </if>
+            <if test="dataLogQueryVO.typeIds != null and dataLogQueryVO.typeIds.size() != 0">
+                AND ffdl.instance_id IN (
+                SELECT issue_id FROM agile_issue ai
+                WHERE ai.issue_type_id IN
+                <foreach collection="dataLogQueryVO.typeIds" item="typeId" open="(" separator=","
+                         close=")">
+                    #{typeId}
+                </foreach>)
+            </if>
+        </if>
+    </select>
 </mapper>

@@ -1,24 +1,28 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.DataLogVO;
-import io.choerodon.agile.api.vo.business.RuleLogRelVO;
-import io.choerodon.agile.app.service.AgileTriggerService;
-import io.choerodon.agile.app.service.DataLogService;
-import io.choerodon.agile.app.service.FieldDataLogService;
-import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.mapper.DataLogMapper;
+import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
+import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.utils.PageUtils;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -39,9 +43,17 @@ public class DataLogServiceImpl implements DataLogService {
     @Autowired
     private FieldDataLogService fieldDataLogService;
     @Autowired
+    private FieldDataLogMapper fieldDataLogMapper;
+    @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private IssueMapper issueMapper;
+    @Autowired
+    private IssueTypeService issueTypeService;
     @Autowired(required = false)
     private AgileTriggerService agileTriggerService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     @Override
     public DataLogVO createDataLog(Long projectId, DataLogCreateVO createVO) {
@@ -145,5 +157,63 @@ public class DataLogServiceImpl implements DataLogService {
         } else {
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public Page<AllDataLogVO> listAllDataLogByProjectId(Long projectId, DataLogQueryVO dataLogQueryVO, PageRequest pageRequest) {
+        List<AllDataLogVO> issueDataLogList = dataLogMapper.listIssueDataLogByProjectId(projectId, dataLogQueryVO);
+        List<AllDataLogVO> allDataLogList = new ArrayList<>(issueDataLogList);
+        boolean containBacklog = ((CollectionUtils.isEmpty(dataLogQueryVO.getTypeIds()) || dataLogQueryVO.getTypeIds().contains(0L)) && backlogExpandService != null);
+        List<AllDataLogVO> fdDataLogList = fieldDataLogMapper.listFdDataLogByProjectId(projectId, dataLogQueryVO, containBacklog);
+        allDataLogList.addAll(fdDataLogList);
+
+        if (containBacklog) {
+            List<AllDataLogVO> backlogDataLogList = backlogExpandService.listBacklogDataLogByProjectId(projectId, dataLogQueryVO);
+            allDataLogList.addAll(backlogDataLogList);
+        }
+
+        Page<AllDataLogVO> result = PageUtils.createPageFromList(
+                allDataLogList.stream().sorted(Comparator.comparing(AllDataLogVO::getCreationDate).reversed()).collect(Collectors.toList()),
+                pageRequest
+        );
+        setDataLogIssueInfo(result, projectId);
+        if (containBacklog) {
+            backlogExpandService.setDataLogBacklogInfo(result);
+        }
+        setDataLogUserInfo(result);
+        return result;
+    }
+
+    private void setDataLogUserInfo(List<AllDataLogVO> dataLogList) {
+        List<Long> createdByIds = dataLogList.stream().map(AllDataLogVO::getCreatedBy).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(createdByIds)) {
+            return;
+        }
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(createdByIds, true);
+        dataLogList.forEach(dataLog -> dataLog.setCreatedByUser(userMap.get(dataLog.getCreatedBy())));
+    }
+
+    private void setDataLogIssueInfo(List<AllDataLogVO> issueDataLogList, Long projectId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<Long> issueIds = issueDataLogList
+                .stream()
+                .filter(dataLog -> "agile_issue".equals(dataLog.getLogType()))
+                .map(AllDataLogVO::getInstanceId)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(issueIds)) {
+            return;
+        }
+        Map<Long, IssueTypeVO> issueTypeMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
+        List<IssueSearchDTO> issueList = issueMapper.queryIssueByIssueIds(projectId, issueIds);
+        Map<Long, IssueSearchDTO> issueMap = issueList.stream().collect(Collectors.toMap(IssueSearchDTO::getIssueId, Function.identity()));
+        issueDataLogList.forEach(dataLog -> {
+            IssueSearchDTO issue = issueMap.get(dataLog.getInstanceId());
+            if(issue == null){
+                return;
+            }
+            dataLog.setNum(issue.getIssueNum());
+            dataLog.setSummary(issue.getSummary());
+            dataLog.setIssueTypeVO(issueTypeMap.get(issue.getIssueTypeId()));
+        });
     }
 }

@@ -149,4 +149,47 @@
             #{dataLog.newString} ,#{dataLog.issueId},#{userId},#{userId})
         </foreach>
     </insert>
+
+    <select id="listIssueDataLogByProjectId" resultType="io.choerodon.agile.api.vo.business.AllDataLogVO">
+        SELECT
+            adl.log_id,
+            adl.project_id,
+            adl.field,
+            adl.field AS field_name,
+            adl.old_value,
+            adl.old_string,
+            adl.new_value,
+            adl.new_string,
+            adl.issue_id instance_id,
+            'agile_issue' AS log_type,
+            adl.created_by,
+            adl.creation_date,
+            0 AS is_cus_log
+        FROM agile_data_log adl
+        WHERE adl.project_id = #{projectId}
+        <if test="dataLogQueryVO != null">
+            <if test="dataLogQueryVO.createdByIds != null and dataLogQueryVO.createdByIds.size() != 0">
+                AND adl.created_by IN
+                <foreach collection="dataLogQueryVO.createdByIds" item="createdBy" open="(" separator=","
+                         close=")">
+                    #{createdBy}
+                </foreach>
+            </if>
+            <if test="dataLogQueryVO.startDate != null">
+                AND adl.creation_date &gt;= #{dataLogQueryVO.startDate}
+            </if>
+            <if test="dataLogQueryVO.endDate != null">
+                AND adl.creation_date &lt;= #{dataLogQueryVO.endDate}
+            </if>
+            <if test="dataLogQueryVO.typeIds != null and dataLogQueryVO.typeIds.size() != 0">
+                AND adl.issue_id IN (
+                SELECT issue_id FROM agile_issue ai
+                WHERE ai.issue_type_id IN
+                <foreach collection="dataLogQueryVO.typeIds" item="typeId" open="(" separator=","
+                         close=")">
+                    #{typeId}
+                </foreach>)
+            </if>
+        </if>
+    </select>
 </mapper>
