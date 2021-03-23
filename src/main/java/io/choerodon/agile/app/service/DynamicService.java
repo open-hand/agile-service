@@ -9,7 +9,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
  * @author zhaotianxin
  * @date 2020-10-12 10:35
  */
-public interface LatestInfoService {
+public interface DynamicService {
 
     /**
      * 查询项目层操作动态，即问题下操作历史

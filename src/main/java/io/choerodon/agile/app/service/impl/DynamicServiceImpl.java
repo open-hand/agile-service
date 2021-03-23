@@ -17,7 +17,7 @@ import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.IssueTypeService;
-import io.choerodon.agile.app.service.LatestInfoService;
+import io.choerodon.agile.app.service.DynamicService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
@@ -35,7 +35,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class LatestInfoServiceImpl implements LatestInfoService {
+public class DynamicServiceImpl implements DynamicService {
 
     private static final int MAX_SIZE = 100;
 

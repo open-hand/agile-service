@@ -14,7 +14,7 @@ import javax.validation.Valid;
 
 import io.choerodon.agile.api.vo.DataLogQueryVO;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
-import io.choerodon.agile.app.service.LatestInfoService;
+import io.choerodon.agile.app.service.DynamicService;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
@@ -28,15 +28,15 @@ import io.choerodon.swagger.annotation.Permission;
  * @since 2021-03-23
  */
 @RestController
-@RequestMapping(value = "/v1/latest_info")
-public class LatestInfoController {
+@RequestMapping(value = "/v1/dynamic")
+public class DynamicController {
 
     @Autowired
-    private LatestInfoService latestInfoService;
+    private DynamicService dynamicService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询项目概览操作动态")
-    @PostMapping("/project/{project_id}/operation")
+    @PostMapping("/project/{project_id}/project_operation")
     public ResponseEntity<Page<AllDataLogVO>> listLatestOperationInfoByProjectId(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
@@ -45,7 +45,7 @@ public class LatestInfoController {
             @ApiParam(value = "分页信息", required = true)
             @SortDefault(sort = "creationDate", direction = Sort.Direction.DESC)
             @ApiIgnore PageRequest pageRequest) {
-        return Optional.ofNullable(latestInfoService.listLatestOperationInfoByProjectId(projectId, dataLogQueryVO, pageRequest))
+        return Optional.ofNullable(dynamicService.listLatestOperationInfoByProjectId(projectId, dataLogQueryVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.dataLogList.get"));
     }
