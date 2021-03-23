@@ -4,6 +4,7 @@ import { IStatusCirculation, statusTransformApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import FlatSelect from '@/components/flat-select';
+import { includes, intersection } from 'lodash';
 
 interface Props extends Partial<SelectProps> {
   issueTypeId?: string
@@ -14,11 +15,13 @@ interface Props extends Partial<SelectProps> {
   flat?: boolean
   projectId?: string
   applyType?: 'program' | 'agile'
+  issueTypeIds?: string[]
+  selectedIds?: string[]
 }
 
 const SelectStatus: React.FC<Props> = forwardRef(
   ({
-    request, issueTypeId, expectStatusId, dataRef, afterLoad, flat, projectId, applyType, ...otherProps
+    request, issueTypeId, expectStatusId, dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, ...otherProps
   }, ref: React.Ref<Select>) => {
     const config = useMemo((): SelectConfig<IStatusCirculation> => ({
       name: 'status',
@@ -34,9 +37,20 @@ const SelectStatus: React.FC<Props> = forwardRef(
         return Promise.resolve([]);
       },
       middleWare: (statusList) => {
-        const data = expectStatusId
+        let data = expectStatusId
           ? statusList.filter(({ id }) => id !== expectStatusId)
           : statusList;
+        if (issueTypeIds) {
+          data = data.filter((item) => {
+            if (includes(selectedIds, item.id)) {
+              return true;
+            }
+            if (item.issueTypeIds) {
+              return intersection(issueTypeIds, item.issueTypeIds).length > 0;
+            }
+            return true;
+          });
+        }
         if (dataRef) {
           Object.assign(dataRef, {
             current: data,
@@ -48,7 +62,7 @@ const SelectStatus: React.FC<Props> = forwardRef(
         return data;
       },
       paging: false,
-    }), [applyType, dataRef, expectStatusId, issueTypeId, projectId, request]);
+    }), [applyType, dataRef, expectStatusId, issueTypeId, projectId, request, issueTypeIds, selectedIds]);
     const props = useSelect(config);
     const Component = flat ? FlatSelect : Select;
     return (

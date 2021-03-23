@@ -156,7 +156,11 @@
     </insert>
 
     <select id="countIssueTypeByStatusIds" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
-        select fsmn.status_id as id,fit.name as name from fd_status_machine_scheme_config fsmsc
+        select
+               fsmn.status_id as id,
+               fit.name as name,
+               fit.id as issue_type_id
+        from fd_status_machine_scheme_config fsmsc
         ,fd_status_machine_node fsmn,fd_issue_type fit
         where fsmsc.organization_id = #{organizationId}
         AND fsmsc.scheme_id = #{schemeId}
@@ -171,7 +175,7 @@
         </if>
         AND fit.type_code not in ('issue_auto_test','issue_auto_test')
         AND fsmsc.issue_type_id != 0
-        group by fsmn.status_id,fit.name
+        group by fsmn.status_id,fit.name,fit.id
     </select>
 
     <select id="selectInitNode" resultType="io.choerodon.agile.infra.dto.StatusMachineNodeDTO">

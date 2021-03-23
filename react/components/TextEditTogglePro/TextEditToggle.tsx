@@ -1,6 +1,7 @@
 import React, {
   useState, useRef, cloneElement, useEffect, Fragment,
 } from 'react';
+import { toJS } from 'mobx';
 import classNames from 'classnames';
 import useClickOut from '@/hooks/useClickOut';
 import styles from './TextEditToggle.less';
@@ -62,6 +63,7 @@ const TextEditToggle: React.FC<Props> = ({
     }
   };
   const handleChange = (originOnChange: Function | undefined) => (newValue: any) => {
+    console.log('handleChange', newValue);
     dataRef.current = newValue;
     setValue(newValue);
     if (originOnChange) {
@@ -72,24 +74,28 @@ const TextEditToggle: React.FC<Props> = ({
     }
   };
   const handleEditorBlur = () => {
+    console.log('handleEditorBlur', toJS((editorRef.current as any)?.getValue()));
     if (submitTrigger.includes('blur')) {
       submit();
     }
   };
-  const submit = () => {
+  const submit = async () => {
     // 延缓submit，因为有时候blur之后才会onchange，保证拿到的值是最新的
-    setTimeout(async () => {
-      // @ts-ignore
-      if (editingRef.current && editorRef.current && await editorRef.current?.validate(dataRef.current)) {
-        if (containerRef.current) {
-          containerRef.current.blur();
-        }
-        hideEditor();
-        if (dataRef.current !== initValue) {
-          onSubmit(dataRef.current);
-        }
+    // setTimeout(async () => {
+
+    // });
+    const waitSubmitValue = (editorRef.current as any)?.getValue
+      ? toJS((editorRef.current as any)?.getValue()) : dataRef.current;
+    // @ts-ignore
+    if (editingRef.current && editorRef.current && await editorRef.current?.validate(waitSubmitValue)) {
+      if (containerRef.current) {
+        containerRef.current.blur();
       }
-    });
+      hideEditor();
+      if (waitSubmitValue !== initValue) {
+        onSubmit(waitSubmitValue);
+      }
+    }
   };
   const renderEditor = () => {
     const editorElement = typeof editor === 'function' ? editor({ submit }) : editor;

@@ -4,18 +4,21 @@ import SelectStatus from '@/components/select/select-status';
 import { statusApi } from '@/api';
 
 function StatusField({
-  field, value, onChange, projectId,
+  field, value, onChange, projectId, issueTypeIds,
 }) {
+  console.log(issueTypeIds);
   return (
     <SelectStatus
       projectId={projectId}
       key={field.code}
       flat
       value={value || []}
+      selectedIds={value}
       placeholder="状态"
       multiple
       maxTagCount={3}
       request={() => statusApi.project(projectId).loadByProject('agile')}
+      issueTypeIds={issueTypeIds}
       dropdownMatchSelectWidth={false}
       clearButton
       onChange={onChange}
