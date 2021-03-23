@@ -6,6 +6,7 @@ import {
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IStatus } from '@/common/types';
+import { includes, intersection } from 'lodash';
 
 interface Props extends Partial<SelectProps> {
   issueTypeId?: string
@@ -13,19 +14,35 @@ interface Props extends Partial<SelectProps> {
   isProgram?: boolean,
   dataRef?: React.MutableRefObject<any>,
   afterLoad?: (statusList: IStatus[]) => void
+  issueTypeIds?: string[]
+  selectedIds?: string[]
 }
 const SelectStatus: React.FC<Props> = ({
-  issueTypeId, expectStatusId, dataRef, isProgram, afterLoad, ...otherProps
+  issueTypeId, expectStatusId, dataRef, isProgram, afterLoad, issueTypeIds, selectedIds, ...otherProps
 }) => {
   const config = useMemo((): SelectConfig<IStatus> => ({
     name: 'statusId',
     textField: 'name',
     valueField: 'id',
     request: ({ filter, page }) => statusApi.loadByProject(isProgram ? 'program' : 'agile'),
-    middleWare: (data) => {
+    middleWare: (statusList) => {
+      let data = statusList;
       if (dataRef) {
         Object.assign(dataRef, {
           current: data,
+        });
+      }
+      if (issueTypeIds) {
+        data = data.filter((item) => {
+          if (includes(selectedIds, item.id)) {
+            return true;
+          }
+          // @ts-ignore
+          if (item.issueTypeIds) {
+            // @ts-ignore
+            return intersection(issueTypeIds, item.issueTypeIds).length > 0;
+          }
+          return true;
         });
       }
       if (afterLoad) {
@@ -34,7 +51,7 @@ const SelectStatus: React.FC<Props> = ({
       return data;
     },
     paging: false,
-  }), []);
+  }), [issueTypeIds, selectedIds]);
   const props = useSelect(config);
   return (
     <Select

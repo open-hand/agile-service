@@ -56,7 +56,16 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         );
       case 'statusId':
       case 'statusList':
-        return <SelectStatus name={code} isProgram={code === 'statusList'} multiple {...otherComponentProps} />;
+        return (
+          <SelectStatus
+            name={code}
+            isProgram={code === 'statusList'}
+            multiple
+            issueTypeIds={(dataSet.current?.get('issueTypeList') ?? dataSet.current?.get('issueTypeId')) ?? undefined}
+            selectedIds={dataSet.current?.get('statusList') ?? dataSet.current?.get('statusId')}
+            {...otherComponentProps}
+          />
+        );
       case 'issueTypeId':
       case 'issueTypeList':
         return <SelectIssueType name={code} isProgram={code === 'issueTypeList'} filterList={code === 'issueTypeList' ? [] : undefined} multiple {...otherComponentProps} />;
