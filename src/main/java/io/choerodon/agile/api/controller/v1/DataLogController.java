@@ -53,5 +53,4 @@ public class DataLogController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.dataLogList.get"));
     }
-
 }

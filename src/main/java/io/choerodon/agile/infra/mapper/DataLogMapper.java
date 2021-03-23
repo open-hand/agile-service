@@ -1,7 +1,9 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.DataLogFixVO;
+import io.choerodon.agile.api.vo.DataLogQueryVO;
 import io.choerodon.agile.api.vo.StatusVO;
+import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -97,4 +99,12 @@ public interface DataLogMapper extends BaseMapper<DataLogDTO> {
      * @param userId           userId
      */
     void batchCreateDataLog(@Param("dataLogList") List<DataLogDTO> dataLogList, @Param("userId") Long userId);
+
+    /**
+     * 查询项目下问题操作历史
+     * @param projectId 项目id
+     * @param dataLogQueryVO 查询参数
+     * @return 项目下问题操作历史
+     */
+    List<AllDataLogVO> listIssueDataLogByProjectId(@Param("projectId") Long projectId, @Param("dataLogQueryVO") DataLogQueryVO dataLogQueryVO);
 }

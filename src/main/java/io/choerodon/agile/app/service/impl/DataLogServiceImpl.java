@@ -1,24 +1,28 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.DataLogVO;
-import io.choerodon.agile.api.vo.business.RuleLogRelVO;
-import io.choerodon.agile.app.service.AgileTriggerService;
-import io.choerodon.agile.app.service.DataLogService;
-import io.choerodon.agile.app.service.FieldDataLogService;
-import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.mapper.DataLogMapper;
+import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
+import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.utils.PageUtils;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -39,9 +43,17 @@ public class DataLogServiceImpl implements DataLogService {
     @Autowired
     private FieldDataLogService fieldDataLogService;
     @Autowired
+    private FieldDataLogMapper fieldDataLogMapper;
+    @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private IssueMapper issueMapper;
+    @Autowired
+    private IssueTypeService issueTypeService;
     @Autowired(required = false)
     private AgileTriggerService agileTriggerService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     @Override
     public DataLogVO createDataLog(Long projectId, DataLogCreateVO createVO) {

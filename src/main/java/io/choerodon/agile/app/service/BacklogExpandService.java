@@ -1,10 +1,13 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.DataLogQueryVO;
 import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.api.vo.PageConfigFieldEditedVO;
 import io.choerodon.agile.api.vo.PageFieldViewVO;
+import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
+
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -147,4 +150,18 @@ public interface BacklogExpandService {
                                    Long projectId,
                                    Long programVersionId,
                                    int startRow);
+
+    /**
+     * 查询需求操作记录
+     * @param projectId 项目id
+     * @param dataLogQueryVO 查询参数
+     * @return 需求操作记录
+    */
+    List<AllDataLogVO> listBacklogDataLogByProjectId(Long projectId, DataLogQueryVO dataLogQueryVO);
+
+    /**
+     * 设置需求操作记录的需求信息
+     * @param backlogDataLog 需求操作记录
+     */
+    void setDataLogBacklogInfo(List<AllDataLogVO> backlogDataLog);
 }
