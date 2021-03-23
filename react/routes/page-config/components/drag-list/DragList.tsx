@@ -303,7 +303,7 @@ class DragList extends Component<Props, StateProps> {
               className="issue-dragList-card"
             >
               <Droppable droppableId="droppable">
-                {(provided: { innerRef: React.LegacyRef<HTMLDivElement> | undefined; placeholder: string | number | boolean | {} | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactNodeArray | React.ReactPortal | null | undefined; }) => (
+                {(provided) => (
                   <div
                     ref={provided.innerRef}
                     className="issue-issueTypeDrag-drop"
@@ -314,7 +314,7 @@ class DragList extends Component<Props, StateProps> {
                         draggableId={String(item.tempKey || item.id)}
                         index={index}
                       >
-                        {(subProvided: { innerRef: React.LegacyRef<HTMLDivElement> | undefined; draggableProps: JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>; dragHandleProps: JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>; }, subSnapshot: { isDragging: boolean; }) => (
+                        {(subProvided, subSnapshot) => (
                           <div
                             ref={subProvided.innerRef}
                             {...subProvided.draggableProps}

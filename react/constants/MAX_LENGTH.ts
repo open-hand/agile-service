@@ -7,3 +7,4 @@ export const MAX_LENGTH_FIELD_NAME = 30;
 export const MAX_LENGTH_FIELD_CODE = 30;
 export const MAX_LENGTH_FIELD_OPTION_CODE = 30;
 export const MAX_LENGTH_FIELD_OPTION_VALUE = 30;
+export const MAX_LENGTH_KANBAN_COLUMN_NAME = 10;

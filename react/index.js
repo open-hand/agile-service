@@ -30,6 +30,7 @@ const Settings = React.lazy(() => import('./routes/settings'));
 const ProjectReport = React.lazy(() => import('./routes/project-report'));
 const GanttPage = React.lazy(() => import('./routes/gantt'));
 const UiPreview = React.lazy(() => import('./routes/ui-preview'));
+const KanbanTemplate = React.lazy(() => import('./routes/kanban-template'));
 
 const { AppState } = stores;
 
@@ -96,6 +97,7 @@ class Agile extends React.Component {
               <Route path={`${match.url}/project-report`} component={ProjectReport} />
               <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />
               <Route path={`${match.url}/outside/ui-preview/:uuid`} component={UiPreview} />
+              <Route path={`${match.url}/kanban-template`} component={KanbanTemplate} />
               <Route path="*" component={nomatch} />
             </Switch>
             <ModalContainer />
