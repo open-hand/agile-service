@@ -25,8 +25,10 @@ import io.choerodon.agile.infra.mapper.DataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.utils.PageUtils;
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
@@ -57,21 +59,32 @@ public class DynamicServiceImpl implements DynamicService {
         if (pageRequest.getSize() > MAX_SIZE) {
             pageRequest.setSize(MAX_SIZE);
         }
-        List<AllDataLogVO> issueDataLogList = dataLogMapper.listIssueDataLogByProjectId(projectId, dataLogQueryVO);
-        List<AllDataLogVO> allDataLogList = new ArrayList<>(issueDataLogList);
-        boolean containBacklog = ((CollectionUtils.isEmpty(dataLogQueryVO.getTypeIds()) || dataLogQueryVO.getTypeIds().contains(0L)) && backlogExpandService != null);
-        List<AllDataLogVO> fdDataLogList = fieldDataLogMapper.listFdDataLogByProjectId(projectId, dataLogQueryVO, containBacklog);
-        allDataLogList.addAll(fdDataLogList);
+        List<AllDataLogVO> allDataLogList = new ArrayList<>();
+        boolean isNotFilter = CollectionUtils.isEmpty(dataLogQueryVO.getOtherTypes()) && CollectionUtils.isEmpty(dataLogQueryVO.getTypeIds());
+        boolean filterBacklog = !CollectionUtils.isEmpty(dataLogQueryVO.getOtherTypes()) && dataLogQueryVO.getOtherTypes().contains("backlog");
+        boolean containIssue = !CollectionUtils.isEmpty(dataLogQueryVO.getTypeIds()) || isNotFilter;
+        boolean containBacklog = ((isNotFilter || filterBacklog) && backlogExpandService != null);
 
+        if (containIssue) {
+            List<AllDataLogVO> issueDataLogList = dataLogMapper.listIssueDataLogByProjectId(projectId, dataLogQueryVO);
+            allDataLogList.addAll(issueDataLogList);
+        }
         if (containBacklog) {
             List<AllDataLogVO> backlogDataLogList = backlogExpandService.listBacklogDataLogByProjectId(projectId, dataLogQueryVO);
             allDataLogList.addAll(backlogDataLogList);
         }
-
+        if (containIssue || containBacklog) {
+            List<AllDataLogVO> fdDataLogList = fieldDataLogMapper.listFdDataLogByProjectId(projectId, dataLogQueryVO, containBacklog, containIssue);
+            allDataLogList.addAll(fdDataLogList);
+        }
+        if (CollectionUtils.isEmpty(allDataLogList)) {
+            return PageUtils.createPageFromList(allDataLogList, pageRequest);
+        }
         Page<AllDataLogVO> result = PageUtils.createPageFromList(
                 allDataLogList.stream().sorted(Comparator.comparing(AllDataLogVO::getCreationDate).reversed()).collect(Collectors.toList()),
                 pageRequest
         );
+
         setDataLogIssueInfo(result, projectId);
         if (containBacklog) {
             backlogExpandService.setDataLogBacklogInfo(result);

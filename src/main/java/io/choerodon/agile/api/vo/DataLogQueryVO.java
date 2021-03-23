@@ -14,12 +14,11 @@ public class DataLogQueryVO {
     @NotNull(message = "error.startDate.not.null")
     private Date startDate;
     private Date endDate;
-    @Encrypt(ignoreValue = "0")
+    @Encrypt
     private List<Long> typeIds;
     @Encrypt
     private List<Long> createdByIds;
-    private Boolean containBackLog;
-
+    private List<String> otherTypes;
     public Date getStartDate() {
         return startDate;
     }
@@ -52,11 +51,11 @@ public class DataLogQueryVO {
         this.createdByIds = createdByIds;
     }
 
-    public Boolean getContainBackLog() {
-        return containBackLog;
+    public List<String> getOtherTypes() {
+        return otherTypes;
     }
 
-    public void setContainBackLog(Boolean containBackLog) {
-        this.containBackLog = containBackLog;
+    public void setOtherTypes(List<String> otherTypes) {
+        this.otherTypes = otherTypes;
     }
 }

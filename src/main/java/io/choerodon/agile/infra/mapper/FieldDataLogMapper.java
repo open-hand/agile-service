@@ -33,10 +33,12 @@ public interface FieldDataLogMapper extends BaseMapper<FieldDataLogDTO> {
      * @param projectId 项目id
      * @param dataLogQueryVO 查询参数
      * @param containBacklog 是否包含需求
+     * @param containIssue
      * @return 自定义字段操作历史
      */
     List<AllDataLogVO> listFdDataLogByProjectId(
             @Param("projectId") Long projectId,
             @Param("dataLogQueryVO") DataLogQueryVO dataLogQueryVO,
-            @Param("containBacklog") boolean containBacklog);
+            @Param("containBacklog") boolean containBacklog,
+            @Param("containIssue") boolean containIssue);
 }
