@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -12,7 +14,9 @@ public class DataLogQueryVO {
     @NotNull(message = "error.startDate.not.null")
     private Date startDate;
     private Date endDate;
+    @Encrypt(ignoreValue = "0")
     private List<Long> typeIds;
+    @Encrypt
     private List<Long> createdByIds;
     private Boolean containBackLog;
 
