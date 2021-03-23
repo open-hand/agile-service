@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import { Choerodon } from '@choerodon/boot';
 import {
   Button, Input, Form, Icon, Dropdown, Menu,
@@ -7,7 +9,7 @@ import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { useLockFn } from 'ahooks';
 import { isEmpty } from 'lodash';
 import { IIssueType } from '@/common/types';
-import { checkCanQuickCreate } from '@/utils/quickCreate';
+import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { FormProps } from 'choerodon-ui/lib/form';
 import { getProjectId } from '@/utils/common';
 import { fieldApi, issueApi } from '@/api';
@@ -30,6 +32,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   const [expand, setExpand] = useState(false);
   const [id, setId] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
+  const currentTemplate = useRef<string>();
   const currentType = issueTypes?.find((t) => t.id === id);
   useEffect(() => {
     if (issueTypes && issueTypes.length > 0) {
@@ -57,42 +60,15 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           };
           const fields = await fieldApi.getFields(param);
           const fieldsMap = fields2Map(fields);
-          const versionIssueRelVOList:any[] = [];
-          const defaultVersionList:any[] = [];
-
-          if (!isEmpty(fieldsMap.get('influenceVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'influence')) {
-            fieldsMap.get('influenceVersion')?.defaultValue.forEach((item:any) => defaultVersionList.push({
-              versionId: item,
-              relationType: 'influence',
-            }));
-          }
-          if (!isEmpty(fieldsMap.get('fixVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'fix')) {
-            fieldsMap.get('fixVersion')?.defaultValue.forEach((item:any) => defaultVersionList.push({
-              versionId: item,
-              relationType: 'fix',
-            }));
-          }
-          versionIssueRelVOList.push(...defaultVersionList);
-          const issue = {
+          const issue = getQuickCreateDefaultObj({
             summary,
             priorityId,
-            priorityCode: `priority-${priorityId}`,
-            projectId: getProjectId(),
             parentIssueId,
             issueTypeId: currentType.id,
-            sprintId: sprintId || fieldsMap.get('sprint')?.defaultValue || 0,
-            componentIssueRelVOList: fieldsMap.get('component')?.defaultValueObjs || [],
-            labelIssueRelVOList: fieldsMap.get('label')?.defaultValueObjs || [],
-            fixVersionIssueRel: fieldsMap.get('fixVersion')?.defaultValue || [],
-            versionIssueRelVOList,
-            assigneeId: fieldsMap.get('assignee')?.defaultValue,
-            reporterId: fieldsMap.get('reporter')?.defaultValue,
-            estimatedEndTime: fieldsMap.get('estimatedEndTime')?.defaultValue,
-            estimatedStartTime: fieldsMap.get('estimatedStartTime')?.defaultValue,
-            remainingTime: fieldsMap.get('remainingTime')?.defaultValue,
-            mainResponsibleId: fieldsMap.get('mainResponsible')?.defaultValue,
-            testResponsibleId: fieldsMap.get('testResponsible')?.defaultValue,
-          };
+            typeCode: 'sub_task',
+            sprintId,
+          }, fieldsMap);
+
           const res = await issueApi.createSubtask(issue);
           fieldApi.quickCreateDefault(res.issueId, {
             schemeCode: 'agile_issue',
@@ -109,7 +85,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   useEffect(() => {
     if (expand && id) {
       fieldApi.getSummaryDefaultValue(id).then((res) => {
-        form?.setFieldsValue({
+        form?.getFieldValue('summary') === currentTemplate.current && form?.setFieldsValue({
           summary: res,
         });
       });

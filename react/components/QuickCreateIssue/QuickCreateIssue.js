@@ -9,7 +9,7 @@ import {
 import { debounce, isEmpty } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import { issueApi, fieldApi } from '@/api';
-import { checkCanQuickCreate } from '@/utils/quickCreate';
+import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { fields2Map } from '@/utils/defaultValue';
 import TypeTag from '../TypeTag';
 import './QuickCreateIssue.less';
@@ -25,6 +25,7 @@ const propTypes = {
 class QuickCreateIssue extends Component {
   constructor(props) {
     super(props);
+    this.currentTemplate = undefined;
     this.state = {
       create: false,
       loading: false,
@@ -44,9 +45,13 @@ class QuickCreateIssue extends Component {
   loadInitValue = async (currentIssueTypeId) => {
     const { form } = this.props;
     const defaultSummary = await fieldApi.getSummaryDefaultValue(currentIssueTypeId);
-    form.setFieldsValue({
-      summary: defaultSummary,
-    });
+    console.log('this.', this.currentTemplate, form.getFieldValue('summary'), form.getFieldValue('summary') !== this.currentTemplate);
+    if (form.getFieldValue('summary') === this.currentTemplate) {
+      this.currentTemplate = defaultSummary;
+      form.setFieldsValue({
+        summary: defaultSummary,
+      });
+    }
   };
 
   handleChangeType = ({ key }) => {
@@ -87,51 +92,16 @@ class QuickCreateIssue extends Component {
             };
             const fields = await fieldApi.getFields(param);
             const fieldsMap = fields2Map(fields);
-            const versionIssueRelVOList = propsVersionIssueRelVOList || [];
-            const defaultVersionList = [];
-            if (!isEmpty(fieldsMap.get('influenceVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'influence')) {
-              fieldsMap.get('influenceVersion')?.defaultValue.forEach((item) => defaultVersionList.push({
-                versionId: item,
-                relationType: 'influence',
-              }));
-            }
-            if (!isEmpty(fieldsMap.get('fixVersion')?.defaultValue) && !versionIssueRelVOList.some((item = {}) => item.relationType === 'fix')) {
-              fieldsMap.get('fixVersion')?.defaultValue.forEach((item) => defaultVersionList.push({
-                versionId: item,
-                relationType: 'fix',
-              }));
-            }
-            versionIssueRelVOList.push(...defaultVersionList);
-            const issue = {
-              priorityCode: `priority-${defaultPriority.id}`,
-              priorityId: defaultPriority.id,
-              projectId: getProjectId(),
-              programId: getProjectId(),
-              epicId: !isInProgram ? epicId || fieldsMap.get('epic')?.defaultValue || 0 : 0,
-              summary: summary.trim(),
+
+            const issue = getQuickCreateDefaultObj({
+              versionIssueRelVOList: propsVersionIssueRelVOList,
+              sprintId,
+              summary,
               issueTypeId: currentType.id,
               typeCode: currentType.typeCode,
-              parentIssueId: 0,
-              relateIssueId: 0,
-              featureVO: {},
-              sprintId: sprintId || fieldsMap.get('sprint')?.defaultValue || 0,
-              epicName: currentTypeId === 'issue_epic' ? summary.trim() : undefined,
-              componentIssueRelVOList: fieldsMap.get('component')?.defaultValueObjs || [],
-              description: '',
-              issueLinkCreateVOList: [],
-              labelIssueRelVOList: fieldsMap.get('label')?.defaultValueObjs || [],
-              versionIssueRelVOList,
-              fixVersionIssueRel: fieldsMap.get('fixVersion')?.defaultValue || [],
-              featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
-              assigneeId: defaultAssignee || fieldsMap.get('assignee')?.defaultValue,
-              reporterId: defaultAssignee || fieldsMap.get('reporter')?.defaultValue,
-              estimatedEndTime: fieldsMap.get('estimatedEndTime')?.defaultValue,
-              estimatedStartTime: fieldsMap.get('estimatedStartTime')?.defaultValue,
-              storyPoints: fieldsMap.get('storyPoints')?.defaultValue,
-              remainingTime: fieldsMap.get('remainingTime')?.defaultValue,
-              mainResponsibleId: fieldsMap.get('mainResponsible')?.defaultValue,
-              testResponsibleId: fieldsMap.get('testResponsible')?.defaultValue,
-            };
+              priorityId: defaultPriority.id,
+            }, fieldsMap);
+
             issueApi.create(issue).then((res) => {
               this.setState({
                 loading: false,
