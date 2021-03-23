@@ -6,7 +6,6 @@ import { statusApi } from '@/api';
 function StatusField({
   field, value, onChange, projectId, issueTypeIds,
 }) {
-  console.log(issueTypeIds);
   return (
     <SelectStatus
       projectId={projectId}
