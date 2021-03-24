@@ -27,4 +27,31 @@ public interface StatusNoticeSettingService {
      * @return 请注意: StatusNoticeSettingVO里仅userIdList和userTypeList有值
      */
     StatusNoticeSettingVO selectNoticeUserAndType(Long projectId, IssueDTO issue);
+
+    /**
+     * 组织层状态机模板查询通知设置
+     * @param organizationId
+     * @param issueTypeId
+     * @param statusId
+     * @param schemeCode
+     * @return
+     */
+    StatusNoticeSettingVO statusNoticeDetail(Long organizationId, Long issueTypeId, Long statusId, String schemeCode);
+
+    /**
+     * 组织层状态机模板设置通知设置
+     * @param organizationId
+     * @param statusNoticeSettingVO
+     */
+    void saveStatusNotice(Long organizationId, StatusNoticeSettingVO statusNoticeSettingVO);
+
+    /**
+     * 查询组织状态流转显示通知设置列表
+     * @param organizationId
+     * @param issueTypeId
+     * @param statusIdList
+     * @param schemeCode
+     * @return
+     */
+    List<StatusNoticeSettingVO> listStatusNoticeSetting(Long organizationId, Long issueTypeId, List<Long> statusIdList, String schemeCode);
 }

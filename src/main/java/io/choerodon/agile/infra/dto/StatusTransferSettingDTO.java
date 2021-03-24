@@ -32,6 +32,8 @@ public class StatusTransferSettingDTO extends AuditDomain {
     @Encrypt
     private Long userId;
 
+    private Long organizationId;
+
     public StatusTransferSettingDTO() {
     }
 
@@ -88,5 +90,13 @@ public class StatusTransferSettingDTO extends AuditDomain {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

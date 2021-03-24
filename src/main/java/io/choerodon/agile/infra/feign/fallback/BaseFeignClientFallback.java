@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.http.ResponseEntity;
@@ -167,5 +168,10 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     @Override
     public ResponseEntity<List<ProjectWithUserVO>> listProjectOwnerByIds(Set<Long> projectIds) {
         throw new CommonException("error.listProjectOwnerByIds");
+    }
+
+    @Override
+    public ResponseEntity<OrganizationInfoVO> query(Long id) {
+        throw new CommonException("error.organization.query");
     }
 }

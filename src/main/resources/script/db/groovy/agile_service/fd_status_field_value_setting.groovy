@@ -41,4 +41,10 @@ databaseChangeLog(logicalFilePath: 'fd_status_field_value_setting.groovy') {
             column(name: "field_type")
         }
     }
+
+    changeSet(author: 'ztxemail@163.com',id: '2021-03-23-fd-status-field-value-setting-add-column'){
+        addColumn(tableName: 'fd_status_field_value_setting') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
+        }
+    }
 }

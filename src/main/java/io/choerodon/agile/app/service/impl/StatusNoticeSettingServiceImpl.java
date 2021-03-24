@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.app.assembler.StatusNoticeSettingAssembler;
+import io.choerodon.agile.app.service.OrganizationConfigService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -53,6 +54,8 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     private StatusNoticeSettingAssembler statusNoticeSettingAssembler;
     @Autowired
     private ProjectConfigService projectConfigService;
+    @Autowired
+    private OrganizationConfigService organizationConfigService;
 
     @Override
     public StatusNoticeSettingVO detail(Long projectId, Long issueTypeId, Long statusId, String schemeCode) {
@@ -151,6 +154,81 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
         return statusNoticeSettingAssembler.statusNoticeDto2Vo(projectId, issueTypeId, list, schemeCode);
     }
 
+    @Override
+    public StatusNoticeSettingVO statusNoticeDetail(Long organizationId, Long issueTypeId, Long statusId, String schemeCode) {
+        StatusNoticeSettingVO statusNoticeSettingVO = new StatusNoticeSettingVO();
+        statusNoticeSettingVO.setOrganizationId(organizationId);
+        statusNoticeSettingVO.setIssueTypeId(issueTypeId);
+        statusNoticeSettingVO.setStatusId(statusId);
+        statusNoticeSettingVO.setProjectId(0L);
+        StatusNoticeSettingDTO notice = new StatusNoticeSettingDTO();
+        notice.setOrganizationId(organizationId);
+        notice.setIssueTypeId(issueTypeId);
+        notice.setStatusId(statusId);
+        notice.setProjectId(0L);
+        List<StatusNoticeSettingDTO> list = statusNoticeSettingMapper.select(notice);
+        if (CollectionUtils.isEmpty(list)){
+            return statusNoticeSettingVO;
+        }
+        list.forEach(item -> statusNoticeSettingVO.addUserWithNotice(item.getUserType(), item.getUserId()));
+        statusNoticeSettingVO.setNoticeTypeList(Stream.of(StringUtils.split(list.stream().map(StatusNoticeSettingDTO::getNoticeType)
+                .findFirst().orElse(""), BaseConstants.Symbol.COMMA)).collect(Collectors.toList()));
+        statusNoticeSettingAssembler.addUserInfo(statusNoticeSettingVO, schemeCode, issueTypeId);
+        return statusNoticeSettingVO;
+    }
+
+    @Override
+    public void saveStatusNotice(Long organizationId, StatusNoticeSettingVO statusNoticeSettingVO) {
+        Assert.notNull(statusNoticeSettingVO.getIssueTypeId(), BaseConstants.ErrorCode.NOT_NULL);
+        Assert.notNull(statusNoticeSettingVO.getStatusId(), BaseConstants.ErrorCode.NOT_NULL);
+        StatusNoticeSettingDTO noticeDTO = new StatusNoticeSettingDTO();
+        noticeDTO.setOrganizationId(organizationId);
+        noticeDTO.setIssueTypeId(statusNoticeSettingVO.getIssueTypeId());
+        noticeDTO.setStatusId(statusNoticeSettingVO.getStatusId());
+        noticeDTO.setProjectId(0L);
+        // 删除
+        List<StatusNoticeSettingDTO> deleteList = statusNoticeSettingMapper.select(noticeDTO);
+        if (CollectionUtils.isNotEmpty(deleteList)){
+            deleteList.forEach(item -> statusNoticeSettingMapper.delete(item));
+        }
+        statusNoticeSettingVO.setProjectId(0L);
+        statusNoticeSettingVO.setOrganizationId(organizationId);
+        // 插入
+        if (CollectionUtils.isNotEmpty(statusNoticeSettingVO.getNoticeTypeList())
+                && statusNoticeSettingVO.getNoticeTypeList().size() == 1
+                && statusNoticeSettingVO.getNoticeTypeList().contains("WEB_HOOK")) {
+            StatusNoticeSettingDTO save = new StatusNoticeSettingDTO(statusNoticeSettingVO, "");
+            statusNoticeSettingMapper.insertSelective(save);
+        } else if (CollectionUtils.isNotEmpty(statusNoticeSettingVO.getNoticeTypeList()) &&
+                CollectionUtils.isNotEmpty(statusNoticeSettingVO.getUserTypeList())){
+            List<StatusNoticeSettingDTO> saveList = statusNoticeSettingVO.getUserTypeList()
+                    .stream()
+                    .filter(useType -> !StringUtils.equals(useType, StatusNoticeUserType.SPECIFIER))
+                    .map(useType -> new StatusNoticeSettingDTO(statusNoticeSettingVO, useType))
+                    .collect(Collectors.toList());
+            saveList.addAll(statusNoticeSettingVO.getUserIdList()
+                    .stream()
+                    .map(userId -> new StatusNoticeSettingDTO(statusNoticeSettingVO, userId))
+                    .collect(Collectors.toList()));
+            saveList.forEach(statusNoticeSettingMapper::insertSelective);
+        }
+        organizationConfigService.updateNodeObjectVersionNumber(organizationId,statusNoticeSettingVO.getIssueTypeId(),
+                statusNoticeSettingVO.getStatusId(),statusNoticeSettingVO.getObjectVersionNumber());
+    }
+
+    @Override
+    public List<StatusNoticeSettingVO> listStatusNoticeSetting(Long organizationId, Long issueTypeId, List<Long> statusIdList, String schemeCode) {
+        if (Objects.isNull(organizationId) || Objects.isNull(issueTypeId) || CollectionUtils.isEmpty(statusIdList)){
+            return Collections.emptyList();
+        }
+        List<StatusNoticeSettingDTO> list =
+                statusNoticeSettingMapper.selectByCondition(Condition.builder(StatusNoticeSettingDTO.class)
+                        .andWhere(Sqls.custom().andIn(StatusNoticeSettingDTO.FIELD_STATUS_ID, statusIdList)
+                                .andEqualTo(StatusNoticeSettingDTO.FIELD_PROJECT_ID, 0L)
+                                .andEqualTo(StatusNoticeSettingDTO.FIELD_ORGANIZATION_ID, organizationId)
+                                .andEqualTo(StatusNoticeSettingDTO.FIELD_ISSUE_TYPE_ID, issueTypeId)).build());
+        return statusNoticeSettingAssembler.dto2Vo(organizationId, issueTypeId, list, schemeCode);
+    }
 
     private void receiverType2User(Long projectId, StatusNoticeSettingDTO noticeDTO, IssueDTO issue, Set<Long> userSet) {
         switch (noticeDTO.getUserType()){

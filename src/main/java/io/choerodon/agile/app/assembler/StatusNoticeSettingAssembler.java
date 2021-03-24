@@ -42,6 +42,24 @@ public class StatusNoticeSettingAssembler {
         }).collect(Collectors.toList());
     }
 
+    public List<StatusNoticeSettingVO> dto2Vo(Long organizationId, Long issueTypeId,
+                                                          List<StatusNoticeSettingDTO> list, String schemeCode) {
+        Map<Long, List<StatusNoticeSettingDTO>> group =
+                list.stream().collect(Collectors.groupingBy(StatusNoticeSettingDTO::getStatusId));
+        return group.entrySet().stream().map(entry -> {
+            StatusNoticeSettingVO settingVO = new StatusNoticeSettingVO();
+            settingVO.setProjectId(0L);
+            settingVO.setOrganizationId(organizationId);
+            settingVO.setIssueTypeId(issueTypeId);
+            settingVO.setStatusId(entry.getKey());
+            entry.getValue().forEach(item -> settingVO.addUserWithNotice(item.getUserType(), item.getUserId()));
+            settingVO.setNoticeTypeList(Stream.of(StringUtils.split(entry.getValue().stream().map(StatusNoticeSettingDTO::getNoticeType)
+                    .findFirst().orElse(""), BaseConstants.Symbol.COMMA)).collect(Collectors.toList()));
+            this.addUserInfo(settingVO, schemeCode, issueTypeId);
+            return settingVO;
+        }).collect(Collectors.toList());
+    }
+
     public void addUserInfo(StatusNoticeSettingVO statusNoticeSettingVO, String schemeCode, Long issueTypeId){
         if (CollectionUtils.isNotEmpty(statusNoticeSettingVO.getUserIdList())){
             List<UserDTO> userDTOList = baseFeignClient.listUsersByIds(statusNoticeSettingVO.getUserIdList().toArray(new Long[0]), true).getBody();

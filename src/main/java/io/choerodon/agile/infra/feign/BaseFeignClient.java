@@ -1,12 +1,12 @@
 package io.choerodon.agile.infra.feign;
 
+import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.fallback.BaseFeignClientFallback;
 import io.swagger.annotations.ApiParam;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -212,5 +212,8 @@ public interface BaseFeignClient {
 
     @PostMapping(value = "/choerodon/v1/inner/projects/list_owner")
     ResponseEntity<List<ProjectWithUserVO>> listProjectOwnerByIds(@RequestBody Set<Long> projectIds);
+
+    @GetMapping(value = "/choerodon/v1/organizations/{organization_id}")
+    ResponseEntity<OrganizationInfoVO> query(@PathVariable(name = "organization_id") Long id);
 }
 

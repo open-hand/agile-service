@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
 import io.choerodon.agile.api.vo.StatusTransferSettingVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.app.assembler.StatusTransferSettingAssembler;
+import io.choerodon.agile.app.service.OrganizationConfigService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusTransferSettingService;
 import io.choerodon.agile.app.service.UserService;
@@ -46,6 +47,8 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     private BaseFeignClient baseFeignClient;
     @Autowired
     private ProjectConfigService projectConfigService;
+    @Autowired
+    private OrganizationConfigService organizationConfigService;
 
     @Override
     public void createOrUpdate(Long projectId, Long issueTypeId, Long statusId,Long objectVersionNumber,String applyType,List<StatusTransferSettingCreateVO> list) {
@@ -84,6 +87,16 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO();
         statusTransferSettingDTO.setStatusId(statusId);
         statusTransferSettingDTO.setProjectId(projectId);
+        statusTransferSettingDTO.setIssueTypeId(issueTypeId);
+        statusTransferSettingMapper.delete(statusTransferSettingDTO);
+    }
+
+
+    public void deleteByOrgId(Long organizationId, Long issueTypeId, Long statusId) {
+        StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO();
+        statusTransferSettingDTO.setStatusId(statusId);
+        statusTransferSettingDTO.setProjectId(0L);
+        statusTransferSettingDTO.setOrganizationId(organizationId);
         statusTransferSettingDTO.setIssueTypeId(issueTypeId);
         statusTransferSettingMapper.delete(statusTransferSettingDTO);
     }
@@ -154,7 +167,60 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         return list;
     }
 
-    private void getUserIds(Long projectId,Set<Long> userIds,List<StatusTransferSettingDTO> query){
+    @Override
+    public void saveStatusTransfer(Long organizationId, Long issueTypeId, Long statusId, Long objectVersionNumber, List<StatusTransferSettingCreateVO> list) {
+        List<StatusTransferSettingDTO> query = listByOptions(organizationId, issueTypeId, statusId);
+        if (!CollectionUtils.isEmpty(query)) {
+            deleteByOrgId(organizationId, issueTypeId, statusId);
+        }
+        if (!CollectionUtils.isEmpty(list)) {
+            for (StatusTransferSettingCreateVO settingCreateVO : list) {
+                if (SPECIFIER.equals(settingCreateVO.getType()) && !CollectionUtils.isEmpty(settingCreateVO.getUserIds())) {
+                    for (Long userId : settingCreateVO.getUserIds()) {
+                        StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, 0L, settingCreateVO.getType());
+                        statusTransferSettingDTO.setOrganizationId(organizationId);
+                        statusTransferSettingDTO.setUserId(userId);
+                        baseInsert(statusTransferSettingDTO);
+                    }
+                } else {
+                    StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, 0L, settingCreateVO.getType());
+                    statusTransferSettingDTO.setOrganizationId(organizationId);
+                    baseInsert(statusTransferSettingDTO);
+                }
+            }
+            organizationConfigService.updateNodeObjectVersionNumber(organizationId,issueTypeId,statusId,objectVersionNumber);
+        }
+    }
+
+    @Override
+    public List<StatusTransferSettingDTO> listByOptions(Long organizationId, Long issueTypeId, Long statusId) {
+        StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO();
+        statusTransferSettingDTO.setStatusId(statusId);
+        statusTransferSettingDTO.setProjectId(0L);
+        statusTransferSettingDTO.setOrganizationId(organizationId);
+        statusTransferSettingDTO.setIssueTypeId(issueTypeId);
+        return statusTransferSettingMapper.select(statusTransferSettingDTO);
+    }
+
+    @Override
+    public List<StatusTransferSettingVO> listStatusTransfer(Long organizationId, Long issueTypeId, List<Long> statusIds) {
+        if (CollectionUtils.isEmpty(statusIds)) {
+            throw new CommonException("error.statusIds.null");
+        }
+        List<StatusTransferSettingDTO> dtos = statusTransferSettingMapper.listOptions(organizationId,issueTypeId,statusIds);
+        if(CollectionUtils.isEmpty(dtos)){
+            return new ArrayList<>();
+        }
+        Set<Long> userIds = dtos.stream().filter(v -> !ObjectUtils.isEmpty(v.getUserId())).map(StatusTransferSettingDTO::getUserId).collect(Collectors.toSet());
+        Map<Long,UserDTO> userDTOMap = new HashMap<>();
+        if(!CollectionUtils.isEmpty(userIds)){
+            List<UserDTO> userDTOS = userService.listUsersByIds(userIds.toArray(new Long[userIds.size()]));
+            userDTOMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity())));
+        }
+        return statusTransferSettingAssembler.listDTOToVO(dtos,userDTOMap);
+    }
+
+    private void getUserIds(Long projectId, Set<Long> userIds, List<StatusTransferSettingDTO> query){
         for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
             if (PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
                 List<UserVO> body = baseFeignClient.listProjectOwnerById(projectId).getBody();

@@ -114,4 +114,6 @@ public interface StateMachineSchemeService {
     Boolean updateDeployProgress(Long organizationId, Long schemeId, Integer deployProgress);
 
     void initScheme(String name, String schemeApplyType, ProjectEvent projectEvent);
+
+    Long initOrgDefaultStatusMachineScheme(Long organizationId);
 }

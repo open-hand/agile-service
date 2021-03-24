@@ -59,6 +59,9 @@ public class StatusNoticeSettingVO extends AuditDomain {
 
     private List<ObjectSchemeFieldVO> memberList;
 
+    @ApiModelProperty(value = "组织Id")
+    private Long organizationId;
+
     public Long getIssueTypeId() {
         return issueTypeId;
     }
@@ -121,5 +124,13 @@ public class StatusNoticeSettingVO extends AuditDomain {
 
     public void setMemberList(List<ObjectSchemeFieldVO> memberList) {
         this.memberList = memberList;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

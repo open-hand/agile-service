@@ -30,6 +30,7 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     public static final String FIELD_STATUS_ID = "statusId";
     public static final String FIELD_ISSUE_TYPE_ID = "issueTypeId";
     public static final String FIELD_PROJECT_ID = "projectId";
+    public static final String FIELD_ORGANIZATION_ID = "organizationId";
 
     public StatusNoticeSettingDTO() {
     }
@@ -44,6 +45,7 @@ public class StatusNoticeSettingDTO extends AuditDomain {
         this.issueTypeId = statusNoticeSettingVO.getIssueTypeId();
         this.projectId = statusNoticeSettingVO.getProjectId();
         this.statusId = statusNoticeSettingVO.getStatusId();
+        this.organizationId = statusNoticeSettingVO.getOrganizationId();
         this.noticeType = String.join(BaseConstants.Symbol.COMMA, statusNoticeSettingVO.getNoticeTypeList());
         this.userType = userType;
     }
@@ -79,6 +81,8 @@ public class StatusNoticeSettingDTO extends AuditDomain {
 
     @ApiModelProperty(value = "通知类型",required = true)
     private String noticeType;
+
+    private Long organizationId;
 
     public Long getId() {
         return id;
@@ -138,4 +142,11 @@ public class StatusNoticeSettingDTO extends AuditDomain {
         this.noticeType = noticeType;
     }
 
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 }

@@ -232,4 +232,6 @@ public interface ProjectConfigService {
     List<IssueTypeVO> checkExistStatusIssueType(Long projectId, Long organizationId, Long statusId);
 
     NodeSortVO updateSort(Long projectId, Long statusMachineId, NodeSortVO nodeSortVO, String applyType);
+
+    void transformAll(List<StatusMachineNodeVO> statusMachineNodeVOS, Long organizationId, Long statusId, Long stateMachineId, Long nodeId);
 }
