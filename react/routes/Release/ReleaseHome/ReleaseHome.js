@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Permission, Breadcrumb,
+  TabPage as Page, Header, Content, stores, Permission, Breadcrumb,
 } from '@choerodon/boot';
 import {
   Button, Menu, Icon, Spin, Tooltip,
@@ -117,25 +117,15 @@ class ReleaseHome extends Component {
       });
     }
     if (key === '5') {
-      const { detailProps, detailProps: { open } } = this.props;
-      // versionApi.load(record.versionId).then((res) => {
-      //   // ReleaseStore.setVersionDetail(res);
-      //   // this.setState({
-      //   //   selectItem: record,
-      //   //   editRelease: true,
-      //   // });
-      //   openReleaseDetail(record.versionId);
-      // }).catch(() => {
-      // });
-      console.log('detailProps', detailProps, this.props);
-      open({
-        path: 'version',
-        props: {
-          id: record.versionId,
-        },
-        events: {
-          update: () => this.refresh(pagination),
-        },
+      // const { detailProps, detailProps: { open } } = this.props;
+      versionApi.load(record.versionId).then((res) => {
+        ReleaseStore.setVersionDetail(res);
+        this.setState({
+          selectItem: record,
+          editRelease: true,
+        });
+        // openReleaseDetail(record.versionId);
+      }).catch(() => {
       });
     }
     if (key === '3') {
