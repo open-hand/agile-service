@@ -4,7 +4,7 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import { useHistory } from 'react-router-dom';
 import {
-  Header, Content, Page, Breadcrumb, Choerodon,
+  Header, Content, Page, Breadcrumb, Choerodon, useTheme,
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui';
 import { map } from 'lodash';
@@ -33,6 +33,7 @@ const Issue = observer(() => {
   const {
     dataSet, projectId, issueSearchStore, fields, changeTableListMode, tableListMode,
   } = useContext(Store);
+  const [theme] = useTheme();
   const history = useHistory();
   const params = useQueryString();
   const [urlFilter, setUrlFilter] = useState(null);
@@ -273,7 +274,7 @@ const Issue = observer(() => {
         />
       </Header>
       <Breadcrumb />
-      <Content style={{ paddingTop: 0 }} className="c7nagile-issue-content">
+      <Content style={theme === 'theme4' ? undefined : { paddingTop: 0 }} className="c7nagile-issue-content">
         <IssueSearch
           store={issueSearchStore}
           urlFilter={urlFilter}
