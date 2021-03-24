@@ -116,7 +116,7 @@ const IssueField = observer((props) => {
     // fields.splice(4, 0, { fieldCode: 'programVersion', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {
-    fields = fields.slice(0, 4);
+    fields = fields.slice(0, 8);
   }
   return (
     <div className="c7n-content-wrapper IssueField">
