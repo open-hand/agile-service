@@ -23,4 +23,26 @@
         AND fsfs.field_id = fosf.id
     </select>
 
+    <select id="listOptions" resultType="io.choerodon.agile.api.vo.StatusFieldSettingVO">
+        select
+        fsfs.id,
+        fsfs.project_id,
+        fsfs.issue_type_id,
+        fsfs.status_id,
+        fsfs.field_id,
+        fosf.name as fieldName,
+        fosf.field_type,
+        fosf.code as fieldCode,
+        fosf.is_system
+        from fd_status_field_setting fsfs,fd_object_scheme_field fosf
+        where fsfs.organization_id = #{organizationId}
+        AND fsfs.project_id = 0
+        AND fsfs.issue_type_id = #{issueTypeId}
+        AND fsfs.status_id in
+        <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
+            #{statusId}
+        </foreach>
+        AND fsfs.field_id = fosf.id
+    </select>
+
 </mapper>

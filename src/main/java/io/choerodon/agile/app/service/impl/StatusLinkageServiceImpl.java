@@ -3,10 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.StatusLinkageVO;
 import io.choerodon.agile.api.vo.StatusVO;
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.app.service.IssueService;
-import io.choerodon.agile.app.service.ProjectConfigService;
-import io.choerodon.agile.app.service.StatusLinkageService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusLinkageDTO;
@@ -58,6 +55,15 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
     private StatusMachineTransformMapper statusMachineTransformMapper;
     @Autowired
     private IssueTypeMapper issueTypeMapper;
+
+    @Autowired
+    private OrganizationConfigService organizationConfigService;
+
+    @Autowired
+    private StatusService statusService;
+
+    @Autowired
+    private IssueTypeService issueTypeService;
 
     @Override
     public List<StatusLinkageVO> createOrUpdate(Long projectId, Long issueTypeId, Long statusId, Long objectVersionNumber, String applyType, List<StatusLinkageVO> linkageVOS) {
@@ -220,6 +226,76 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
     @Override
     public List<StatusLinkageVO> listStatusLinkageByProjectId(Long projectId) {
         return statusLinkageMapper.selectWithStatusByProjectId(projectId);
+    }
+
+    @Override
+    public List<StatusLinkageVO> saveStatusLinkage(Long organizationId, Long issueTypeId, Long statusId, Long objectVersionNumber, List<StatusLinkageVO> linkageVOS) {
+        List<StatusLinkageDTO> statusLinkageDTOS = queryByOrg(organizationId, issueTypeId, statusId);
+        if (!CollectionUtils.isEmpty(statusLinkageDTOS)) {
+            StatusLinkageDTO statusLinkageDTO = new StatusLinkageDTO();
+            statusLinkageDTO.setProjectId(0L);
+            statusLinkageDTO.setOrganizationId(organizationId);
+            statusLinkageDTO.setIssueTypeId(issueTypeId);
+            statusLinkageDTO.setStatusId(statusId);
+            statusLinkageMapper.delete(statusLinkageDTO);
+        }
+        if (!CollectionUtils.isEmpty(linkageVOS)) {
+            for (StatusLinkageVO statusLinkageVO : linkageVOS) {
+                StatusLinkageDTO statusLinkageDTO = modelMapper.map(statusLinkageVO, StatusLinkageDTO.class);
+                statusLinkageDTO.setProjectId(0L);
+                statusLinkageDTO.setIssueTypeId(issueTypeId);
+                statusLinkageDTO.setStatusId(statusId);
+                statusLinkageDTO.setOrganizationId(organizationId);
+                statusLinkageDTO.setParentIssueTypeCode("");
+                baseInsert(statusLinkageDTO);
+            }
+        }
+        organizationConfigService.updateNodeObjectVersionNumber(organizationId, issueTypeId, statusId, objectVersionNumber);
+        return listByOptions(organizationId, issueTypeId, statusId);
+    }
+    private List<StatusLinkageDTO> queryByOrg(Long organizationId, Long issueTypeId, Long statusId){
+        StatusLinkageDTO statusLinkageDTO = new StatusLinkageDTO();
+        statusLinkageDTO.setProjectId(0L);
+        statusLinkageDTO.setOrganizationId(organizationId);
+        statusLinkageDTO.setIssueTypeId(issueTypeId);
+        statusLinkageDTO.setStatusId(statusId);
+        return statusLinkageMapper.select(statusLinkageDTO);
+    }
+
+    @Override
+    public List<StatusLinkageVO> listByOptions(Long organizationId, Long issueTypeId, Long statusId) {
+        List<StatusLinkageDTO> statusLinkageDTOS = queryByOrg(organizationId, issueTypeId, statusId);
+        if (CollectionUtils.isEmpty(statusLinkageDTOS)) {
+            return new ArrayList<>();
+        }
+        return modelMapper.map(statusLinkageDTOS, new TypeToken<List<StatusLinkageVO>>() {
+        }.getType());
+    }
+
+    @Override
+    public List<StatusLinkageVO> listStatusLinkage(Long organizationId, Long issueTypeId, List<Long> statusIds) {
+        List<StatusLinkageDTO> statusLinkageDTOS = statusLinkageMapper.listOptions(organizationId, issueTypeId, statusIds);
+        if (CollectionUtils.isEmpty(statusLinkageDTOS)) {
+            return new ArrayList<>();
+        }
+        List<StatusLinkageVO> linkageVOS = modelMapper.map(statusLinkageDTOS, new TypeToken<List<StatusLinkageVO>>() {
+        }.getType());
+        // 获取项目的状态
+        Map<Long, StatusVO> statusVOMap = statusService.queryAllStatusMap(organizationId);
+        if (ObjectUtils.isEmpty(statusVOMap)) {
+            statusVOMap = new HashMap<>();
+        }
+        // 获取项目的问题类型
+        List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, 0L);
+        Map<Long, IssueTypeVO> typeVOMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(statusVOMap)) {
+            typeVOMap.putAll(issueTypeVOS.stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity())));
+        }
+        for (StatusLinkageVO statusLinkageVO : linkageVOS) {
+            statusLinkageVO.setStatusVO(statusVOMap.get(statusLinkageVO.getParentIssueStatusSetting()));
+            statusLinkageVO.setIssueTypeVO(typeVOMap.get(statusLinkageVO.getParentIssueTypeId()));
+        }
+        return linkageVOS;
     }
 
     protected boolean changeParentStatus(Long projectId, String applyType, IssueDTO parentIssue, Long changeStatus, IssueDTO triggerIssue) {

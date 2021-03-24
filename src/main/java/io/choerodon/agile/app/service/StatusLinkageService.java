@@ -18,4 +18,10 @@ public interface StatusLinkageService {
     boolean updateParentStatus(Long projectId, Long issueId, String applyType);
 
     List<StatusLinkageVO> listStatusLinkageByProjectId(Long projectId);
+
+    List<StatusLinkageVO> saveStatusLinkage(Long organizationId, Long issueTypeId, Long statusId, Long objectVersionNumber, List<StatusLinkageVO> linkageVOS);
+
+    List<StatusLinkageVO> listByOptions(Long organizationId, Long issueTypeId, Long statusId);
+
+    List<StatusLinkageVO> listStatusLinkage(Long projectId, Long issueTypeId, List<Long> statusIds);
 }

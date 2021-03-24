@@ -33,6 +33,8 @@ public class StatusFieldSettingDTO extends AuditDomain {
     @Encrypt
     private Long fieldId;
 
+    private Long organizationId;
+
     public Long getId() {
         return id;
     }
@@ -71,5 +73,13 @@ public class StatusFieldSettingDTO extends AuditDomain {
 
     public void setFieldId(Long fieldId) {
         this.fieldId = fieldId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

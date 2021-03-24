@@ -52,4 +52,10 @@ databaseChangeLog(logicalFilePath:'agile_board_column.groovyoovy') {
     changeSet(id: '2018-06-05-agile-board-column-rename-color', author: 'fuqianghuang01@gmail.com') {
         renameColumn(columnDataType: 'VARCHAR(50)', newColumnName: 'color_code', oldColumnName: 'color', remarks: 'color code',tableName: 'agile_board_column')
     }
+
+    changeSet(author: 'ztxemail@163.com',id: '2021-03-23-agile-board-column-add-column'){
+        addColumn(tableName: 'agile_board_column') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
+        }
+    }
 }

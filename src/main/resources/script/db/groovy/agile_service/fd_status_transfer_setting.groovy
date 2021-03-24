@@ -39,4 +39,10 @@ databaseChangeLog(logicalFilePath: 'fd_status_transfer_setting.groovy') {
             column(name: "status_id")
         }
     }
+
+    changeSet(author: 'ztxemail@163.com',id: '2021-03-23-fd-status-transfer-setting-add-column'){
+        addColumn(tableName: 'fd_status_transfer_setting') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
+        }
+    }
 }

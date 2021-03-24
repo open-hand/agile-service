@@ -13,4 +13,6 @@ import java.util.List;
  */
 public interface StatusFieldSettingMapper extends BaseMapper<StatusFieldSettingDTO> {
     List<StatusFieldSettingVO> listByStatusIds(@Param("projectId") Long projectId,@Param("issueTypeId") Long issueTypeId,@Param("statusIds") List<Long> statusIds);
+
+    List<StatusFieldSettingVO> listOptions(@Param("organizationId") Long organizationId,@Param("issueTypeId") Long issueTypeId,@Param("statusIds") List<Long> statusIds);
 }

@@ -52,4 +52,10 @@ databaseChangeLog(logicalFilePath: 'fd_status_linkage.groovy') {
             }
         }
     }
+
+    changeSet(author: 'ztxemail@163.com',id: '2021-03-23-fd-status-linkage-add-column'){
+        addColumn(tableName: 'fd_status_linkage') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
+        }
+    }
 }

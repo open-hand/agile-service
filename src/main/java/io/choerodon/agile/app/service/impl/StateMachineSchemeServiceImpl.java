@@ -1,6 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.infra.utils.SpringBeanUtil;
+import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -14,9 +14,6 @@ import io.choerodon.agile.infra.enums.StateMachineSchemeStatus;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.mapper.StateMachineSchemeMapper;
-import io.choerodon.agile.infra.utils.ConvertUtils;
-import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
@@ -25,6 +22,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -330,6 +328,26 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
             configService.createDefaultConfig(organizationId, scheme.getId(), stateMachineId);
             //创建与项目的关联关系
             projectConfigService.create(projectId, scheme.getId(), SchemeType.STATE_MACHINE, schemeApplyType);
+        }
+    }
+
+    @Override
+    public Long initOrgDefaultStatusMachineScheme(Long organizationId) {
+        StateMachineSchemeDTO scheme = new StateMachineSchemeDTO();
+        scheme.setStatus(StateMachineSchemeStatus.ACTIVE);
+        String name = "组织"+organizationId+"的方案";
+        scheme.setName(name);
+        scheme.setDescription(name);
+        scheme.setOrganizationId(organizationId);
+        List<StateMachineSchemeDTO> stateMachines = schemeMapper.select(scheme);
+        if(CollectionUtils.isEmpty(stateMachines)){
+            int isInsert = schemeMapper.insert(scheme);
+            if (isInsert != 1) {
+                throw new CommonException("error.stateMachineScheme.create");
+            }
+            return scheme.getId();
+        }else {
+            return stateMachines.get(0).getId();
         }
     }
 

@@ -38,4 +38,10 @@ databaseChangeLog(logicalFilePath:'agile_board.groovyoovy') {
             "UPDATE agile_board SET swimlane_based_code = 'parent_child' WHERE swimlane_based_code = 'story';"
         }
     }
+
+    changeSet(author: 'ztxemail@163.com',id: '2021-03-23-agile-board-add-column'){
+        addColumn(tableName: 'agile_board') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
+        }
+    }
 }

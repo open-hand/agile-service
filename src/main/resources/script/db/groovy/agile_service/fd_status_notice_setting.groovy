@@ -42,4 +42,10 @@ databaseChangeLog(logicalFilePath: 'script/db/fd_status_notice_setting.groovy') 
             column(name: "status_id")
         }
     }
+
+    changeSet(author: 'ztxemail@163.com',id: '2021-03-23-fd-status-notice-setting-add-column'){
+        addColumn(tableName: 'fd_status_notice_setting') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
+        }
+    }
 }

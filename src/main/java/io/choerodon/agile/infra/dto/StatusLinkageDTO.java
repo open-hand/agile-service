@@ -37,6 +37,8 @@ public class StatusLinkageDTO extends AuditDomain {
     @Encrypt
     private Long parentIssueTypeId;
 
+    private Long organizationId;
+
     public Long getParentIssueTypeId() {
         return parentIssueTypeId;
     }
@@ -91,5 +93,13 @@ public class StatusLinkageDTO extends AuditDomain {
 
     public void setParentIssueStatusSetting(Long parentIssueStatusSetting) {
         this.parentIssueStatusSetting = parentIssueStatusSetting;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

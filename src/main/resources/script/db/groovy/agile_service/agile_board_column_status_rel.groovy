@@ -36,4 +36,10 @@ databaseChangeLog(logicalFilePath:'agile_board_column_status_rel.groovyoovy') {
             }
         }
     }
+
+    changeSet(author: 'ztxemail@163.com',id: '2021-03-23-agile-board-column-status-rel-add-column'){
+        addColumn(tableName: 'agile_board_column_status_rel') {
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
+        }
+    }
 }

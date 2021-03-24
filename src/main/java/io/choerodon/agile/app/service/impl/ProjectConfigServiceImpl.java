@@ -589,7 +589,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         return modelMapper.map(stateMachineNode, StatusMachineNodeVO.class);
     }
 
-    private void transformAll(List<StatusMachineNodeVO> statusMachineNodeVOS, Long organizationId, Long statusId, Long stateMachineId, Long nodeId) {
+    @Override
+    public void transformAll(List<StatusMachineNodeVO> statusMachineNodeVOS, Long organizationId, Long statusId, Long stateMachineId, Long nodeId) {
         if (!CollectionUtils.isEmpty(statusMachineNodeVOS)) {
             StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
             List<StatusMachineTransformDTO> list = new ArrayList<>();

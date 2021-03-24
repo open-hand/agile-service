@@ -61,4 +61,15 @@
         AND fsl.parent_issue_type_id = #{issueTypeId}
         AND fsl.parent_issue_status_setting = #{statusId}
     </select>
+
+    <select id="listOptions" resultType="io.choerodon.agile.infra.dto.StatusLinkageDTO">
+        select * from fd_status_linkage fsl
+        where  fsl.organization_id = #{organizationId}
+        AND fsl.project_id = 0
+        AND fsl.issue_type_id = #{issueTypeId}
+        AND fsl.status_id in
+        <foreach collection="statusIds" item="statusId" open="(" close=")" separator=",">
+            #{statusId}
+        </foreach>
+    </select>
 </mapper>

@@ -10,4 +10,15 @@
              #{statusId}
          </foreach>
     </select>
+
+    <select id="listOptions" resultType="io.choerodon.agile.infra.dto.StatusTransferSettingDTO">
+        select fsts.* from fd_status_transfer_setting fsts
+        where fsts.organization_id = #{organizationId}
+        AND fsts.project_id = 0
+        AND fsts.issue_type_id = #{issueTypeId}
+        AND fsts.status_id in
+        <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
+            #{statusId}
+        </foreach>
+    </select>
 </mapper>
