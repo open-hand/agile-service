@@ -26,7 +26,9 @@ import CodeQualityVaryReportComponent from './components/code-quality-vary';
 import ServiceCodeQualityReportComponent from './components/service-code-quality';
 
 const { Option } = Select;
-export const defaultCharts = new Map([
+
+export type ChartMap = { component: React.FC<any>, name: string, group: string, available?: () => boolean }
+export const defaultCharts = new Map<string, ChartMap>([
   ['burn_down_report', { component: BurnDownComponent, name: '燃尽图', group: '敏捷' }],
   ['sprint_report', { component: SprintComponent, name: '冲刺报告图', group: '敏捷' }],
   ['cumulative_flow_diagram', { component: AccumulationComponent, name: '累计流量图', group: '敏捷' }],
@@ -40,12 +42,21 @@ export const defaultCharts = new Map([
   ['code_quality_vary', { component: CodeQualityVaryReportComponent, name: '代码质量变化图', group: '质量' }],
   ['service_code_quality', { component: ServiceCodeQualityReportComponent, name: '应用服务代码质量图', group: '质量' }],
 ]);
-type GetOptionalCharts = () => Map<string, { component: React.FC<any>, name: string, group: string }>
+let charts = defaultCharts;
+type GetOptionalCharts = () => Map<string, ChartMap>
 
-let getOptionalCharts: GetOptionalCharts = () => defaultCharts;
+const getOptionalCharts: GetOptionalCharts = () => new Map([...charts.entries()].filter((c) => {
+  if (c[1].available === undefined) {
+    return true;
+  }
+  if (typeof c[1].available === 'function') {
+    return c[1].available();
+  }
+  return true;
+}));
 
-export function setGetOptionalCharts(newGetOptionalCharts: GetOptionalCharts) {
-  getOptionalCharts = newGetOptionalCharts;
+export function addChartsMap(extraCharts: Map<string, ChartMap>) {
+  charts = new Map([...charts, ...extraCharts]);
 }
 
 interface Props {

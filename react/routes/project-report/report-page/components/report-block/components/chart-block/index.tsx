@@ -31,10 +31,9 @@ export const defaultChartBlockMap = new Map<IChartCode, React.FC<any>>([
 ]);
 let chartBlockMap = defaultChartBlockMap;
 
-export function setChartBlockMap(newChartBlockMap: Map<IChartCode, React.FC<any>>) {
-  chartBlockMap = newChartBlockMap;
+export function addChartsBlockMap(extraCharts: Map<IChartCode, React.FC<any>>) {
+  chartBlockMap = new Map([...chartBlockMap, ...extraCharts]);
 }
-
 interface Props {
   data: IReportChartBlock
 }
