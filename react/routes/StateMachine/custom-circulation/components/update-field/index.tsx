@@ -56,7 +56,7 @@ export interface ISettingField {
 type ISelectUserMap = Map<string, { id: null | string, realName: null | string }>
 
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate', 'created_user', 'last_updated_user'];
-const orgExcludeCode: string[] = [];
+const orgExcludeCode: string[] = ['component', 'label', 'fixVersion', 'featureType', 'subProject', 'programVersion'];
 const memberIsNotSpecifier = ['reportor', 'clear', 'operator', 'creator', 'assignee', 'mainResponsible'];
 // @ts-ignore
 const transformUpdateData = (data) => {
@@ -411,8 +411,11 @@ const UpdateField = ({
   }), [isOrganization, numberFields, projectFields, userFields]);
 
   useEffect(() => {
-    pageConfigApi.loadFieldsByType(selectedType).then((res: IField[]) => {
-      const data = res.filter((item) => !find([...excludeCode, ...(isOrganization ? orgExcludeCode : [])], (code) => code === item.code));
+    pageConfigApi[isOrganization ? 'loadByIssueType' : 'loadFieldsByType'](selectedType).then((res: IField[] | { fields: IField[] }) => {
+      // @ts-ignore
+      const data = ((isOrganization ? res.fields.map((item) => ({
+        ...item, code: item.fieldCode, name: item.fieldName, id: item.fieldId,
+      })) : res) || []).filter((item: IField) => !find([...excludeCode, ...(isOrganization ? orgExcludeCode : [])], (code) => code === item.code));
       setFieldData(data);
     });
   }, [isOrganization, selectedType]);
