@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  TabPage as Page, Header, Breadcrumb, Content,
+  TabPage as Page, Header, Breadcrumb, Content, useTheme,
   Permission,
 } from '@choerodon/boot';
 import {
@@ -123,7 +123,7 @@ class BacklogHome extends Component {
 
   render() {
     const arr = BacklogStore.getSprintData;
-    const { isInProgram, isShowFeature } = this.props;
+    const { isInProgram, isShowFeature, theme } = this.props;
     return (
       <>
         <Header title="待办事项">
@@ -159,7 +159,11 @@ class BacklogHome extends Component {
         }}
         />
         <Content style={{
-          padding: 0, paddingTop: 4, display: 'flex', flexDirection: 'column',
+          display: 'flex',
+          flexDirection: 'column',
+          ...theme === 'theme4' ? {} : {
+            padding: 0, paddingTop: 4,
+          },
         }}
         >
           <div
@@ -252,10 +256,13 @@ class BacklogHome extends Component {
 }
 
 // eslint-disable-next-line import/no-anonymous-default-export
-export default (props) => (
-  <Page
-    className="c7n-backlog-page"
-  >
-    <BacklogHome {...props} />
-  </Page>
-);
+export default (props) => {
+  const [theme] = useTheme();
+  return (
+    <Page
+      className="c7n-backlog-page"
+    >
+      <BacklogHome {...props} theme={theme} />
+    </Page>
+  );
+};

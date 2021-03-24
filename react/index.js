@@ -96,6 +96,7 @@ class Agile extends React.Component {
           <IntlProviderAsync>
             <Switch>
               {/* 协作 */}
+              {getRoutes(match)}
               <Route path="*" component={nomatch} />
             </Switch>
             <ModalContainer />
