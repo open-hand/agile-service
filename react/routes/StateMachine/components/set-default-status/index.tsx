@@ -7,6 +7,7 @@ import {
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApi, IStatusCirculation } from '@/api';
 import './index.less';
+import { getIsOrganization } from '@/utils/common';
 
 const key = Modal.key();
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
 const SetDefaultStatus: React.FC<Props> = ({
   modal, onSubmit, issueTypeId, statusList,
 }) => {
+  const isOrganization = getIsOrganization();
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
@@ -40,12 +42,12 @@ const SetDefaultStatus: React.FC<Props> = ({
     if (await dataSet.validate()) {
       const status = dataSet.current?.get('status') as IStatusCirculation;
       const { id, stateMachineId } = status;
-      await statusTransformApi.setDefaultStatus(issueTypeId, id, stateMachineId);
+      await statusTransformApi[isOrganization ? 'orgSetDefaultStatus' : 'setDefaultStatus'](issueTypeId, id, stateMachineId);
       onSubmit();
       modal.close();
     }
     return false;
-  }, [dataSet, onSubmit]);
+  }, [dataSet, isOrganization, issueTypeId, modal, onSubmit]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
   }, [modal, handleSubmit]);

@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import { IStatusCirculation, statusTransformApi } from '@/api';
 import './index.less';
+import { getIsOrganization } from '@/utils/common';
 
 interface Props {
   onSubmit: Function
@@ -13,9 +14,10 @@ interface Props {
 const DeleteStatus: React.FC<Props> = ({
   modal, onSubmit, selectedType, data,
 }) => {
+  const isOrganization = getIsOrganization();
   const handleSubmit = useCallback(async () => {
     try {
-      await statusTransformApi.deleteStatusByIssueType(
+      await statusTransformApi[isOrganization ? 'orgDeleteStatusByIssueType' : 'deleteStatusByIssueType'](
         selectedType,
         data.nodeId,
       );
@@ -24,7 +26,7 @@ const DeleteStatus: React.FC<Props> = ({
     } catch (error) {
       return false;
     }
-  }, [data.nodeId, onSubmit, selectedType]);
+  }, [data.nodeId, isOrganization, onSubmit, selectedType]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
   }, [modal, handleSubmit]);

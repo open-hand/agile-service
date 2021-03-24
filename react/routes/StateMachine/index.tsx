@@ -1,6 +1,6 @@
 import React, { useState, ReactNode } from 'react';
 import { Tabs } from 'choerodon-ui';
-import { find } from 'lodash';
+import { find, includes } from 'lodash';
 import useQueryString from '@/hooks/useQueryString';
 import Status from './status';
 import StatusCirculation from './status-circulation';
@@ -32,7 +32,9 @@ const tabs: ITab[] = [{
 }];
 
 const { TabPane } = Tabs;
-const StateMachine: React.FC = (props) => {
+// @ts-ignore
+const StateMachine: React.FC = ({ defaultTabKeys = ['status', 'status_change', 'custom'], ...otherProps }) => {
+  const defaultTabs = tabs.filter((item) => includes(defaultTabKeys, item.key));
   const params = useQueryString();
   const { issueTypeId, activeKey: paramsActiveKey } = params;
   const [selectedType, handleChangeSelectedType] = useSelectedType(issueTypeId || undefined);
@@ -40,12 +42,12 @@ const StateMachine: React.FC = (props) => {
     if (paramsActiveKey) {
       return paramsActiveKey;
     }
-    return issueTypeId ? tabs[1].key : tabs[0].key;
+    return issueTypeId ? defaultTabs[1].key : defaultTabs[0].key;
   });
-  const Component = find(tabs, { key: activeKey })?.component;
+  const Component = find(defaultTabs, { key: activeKey })?.component;
   const tabComponent = (
     <Tabs className={styles.tabs} activeKey={activeKey} onChange={setActiveKey}>
-      {tabs.map((tab) => <TabPane key={tab.key} tab={tab.name} />)}
+      {defaultTabs.map((tab) => <TabPane key={tab.key} tab={tab.name} />)}
     </Tabs>
   );
   return (
@@ -54,7 +56,7 @@ const StateMachine: React.FC = (props) => {
       setSelectedType: handleChangeSelectedType,
     }}
     >
-      {Component && <Component {...props} tab={tabComponent} />}
+      {Component && <Component {...otherProps} tab={tabComponent} />}
     </StateMachineContext.Provider>
   );
 };

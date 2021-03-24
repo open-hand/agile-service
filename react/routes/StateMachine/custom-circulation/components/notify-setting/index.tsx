@@ -9,7 +9,7 @@ import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApi, IUpdateNotifySetting, statusTransformApiConfig } from '@/api';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getIsOrganization } from '@/utils/common';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { User } from '@/common/types';
 import Loading from '@/components/Loading';
@@ -91,6 +91,7 @@ const NotifySetting = ({
   }, []);
   const ref = useClickOut(handleClickOut);
   const { isProgram } = useIsProgram();
+  const isOrganization = getIsOrganization();
   const userDs = useMemo(() => new DataSet({
     autoQuery: true,
     selection: false,
@@ -175,7 +176,7 @@ const NotifySetting = ({
     const { current } = notifySettingDataSet;
     setLoading(true);
     // @ts-ignore
-    statusTransformApi.getNotifySetting(selectedType, record.get('id')).then((res) => {
+    statusTransformApi[isOrganization ? 'orgGetNotifySetting' : 'getNotifySetting'](selectedType, record.get('id')).then((res) => {
       setLoading(false);
       if (res.userList && res.userList.length) {
         current?.set('specifier', true);
@@ -190,7 +191,7 @@ const NotifySetting = ({
       current?.set('noticeTypeList', (res.noticeTypeList || []).filter((item: string) => item !== 'WEB_HOOK'));
       current?.set('webhook', Boolean((res.noticeTypeList || []).find((item: string) => item === 'WEB_HOOK')));
     });
-  }, [selectedType, record, notifySettingDataSet]);
+  }, [selectedType, record, notifySettingDataSet, isOrganization]);
   useEffect(() => {
     const handleOk = async () => {
       const validate = await notifySettingDataSet.validate();
@@ -219,7 +220,7 @@ const NotifySetting = ({
 
         const updateData: IUpdateNotifySetting = {
           issueTypeId: selectedType,
-          projectId: getProjectId(),
+          projectId: isOrganization ? 0 : getProjectId(),
           statusId: record.get('id'),
           userTypeList,
           noticeTypeList: webhook ? ['WEB_HOOK', ...noticeTypeList] : noticeTypeList,
@@ -227,7 +228,7 @@ const NotifySetting = ({
           objectVersionNumber: record.get('objectVersionNumber'),
         };
         try {
-          await statusTransformApi.updateNotifySetting(updateData);
+          await statusTransformApi[isOrganization ? 'orgUpdateNotifySetting' : 'updateNotifySetting'](updateData);
           customCirculationDataSet.query(customCirculationDataSet.currentPage);
           return true;
         } catch (e) {
@@ -239,7 +240,7 @@ const NotifySetting = ({
     if (modal) {
       modal.handleOk(handleOk);
     }
-  }, [customCirculationDataSet, modal, notifySettingDataSet, record, selectedType]);
+  }, [customCirculationDataSet, isOrganization, modal, notifySettingDataSet, record, selectedType]);
 
   const data = notifySettingDataSet.toData();
   const selected = [];

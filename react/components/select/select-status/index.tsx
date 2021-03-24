@@ -17,11 +17,12 @@ interface Props extends Partial<SelectProps> {
   applyType?: 'program' | 'agile'
   issueTypeIds?: string[]
   selectedIds?: string[]
+  isOrganization?: boolean
 }
 
 const SelectStatus: React.FC<Props> = forwardRef(
   ({
-    request, issueTypeId, expectStatusId, dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, ...otherProps
+    request, issueTypeId, expectStatusId, dataRef, afterLoad, flat, projectId, applyType, issueTypeIds, selectedIds, isOrganization = false, ...otherProps
   }, ref: React.Ref<Select>) => {
     const config = useMemo((): SelectConfig<IStatusCirculation> => ({
       name: 'status',
@@ -29,7 +30,7 @@ const SelectStatus: React.FC<Props> = forwardRef(
       valueField: 'id',
       request: async () => {
         if (issueTypeId) {
-          return statusTransformApi.project(projectId).loadList(issueTypeId, applyType);
+          return isOrganization ? statusTransformApi.orgLoadList(issueTypeId) : statusTransformApi.project(projectId).loadList(issueTypeId, applyType);
         }
         if (request) {
           return request();
@@ -62,7 +63,7 @@ const SelectStatus: React.FC<Props> = forwardRef(
         return data;
       },
       paging: false,
-    }), [applyType, dataRef, expectStatusId, issueTypeId, projectId, request, issueTypeIds, selectedIds]);
+    }), [issueTypeId, request, isOrganization, projectId, applyType, expectStatusId, issueTypeIds, dataRef, afterLoad, selectedIds]);
     const props = useSelect(config);
     const Component = flat ? FlatSelect : Select;
     return (

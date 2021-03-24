@@ -1,5 +1,7 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getApplyType, getOrganizationId } from '@/utils/common';
+import {
+  getProjectId, getApplyType, getOrganizationId, getIsOrganization,
+} from '@/utils/common';
 import { IStatus, IField } from '@/common/types';
 import Api from './Api';
 
@@ -84,6 +86,10 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     return `/agile/v1/projects/${this.projectId}`;
   }
 
+  get orgPrefix() {
+    return `/agile/v1/organizations/${getOrganizationId()}/organization_config`;
+  }
+
   loadList(issueTypeId: string, applyType?: 'program' | 'agile'): Promise<IStatusCirculation[]> {
     return this.request({
       method: 'get',
@@ -95,10 +101,32 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
+  orgLoadList(issueTypeId: string): Promise<IStatusCirculation[]> {
+    return this.request({
+      method: 'get',
+      url: `${this.orgPrefix}/list_transform`,
+      params: {
+        issueTypeId,
+      },
+    });
+  }
+
   setDefaultStatus(issueTypeId: string, statusId: string, stateMachineId: string) {
     return axios({
       method: 'put',
       url: `${this.prefix}/status_transform/setting_default_status`,
+      params: {
+        issueTypeId,
+        statusId,
+        stateMachineId,
+      },
+    });
+  }
+
+  orgSetDefaultStatus(issueTypeId: string, statusId: string, stateMachineId: string) {
+    return axios({
+      method: 'post',
+      url: `${this.orgPrefix}/status_machine_node/default_status`,
       params: {
         issueTypeId,
         statusId,
@@ -119,6 +147,17 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
+  orgBatchUpdate(issueTypeId: string, nodes: IUpdateTransform[]) {
+    return axios({
+      method: 'put',
+      url: `${this.orgPrefix}/status_machine_transform/update`,
+      params: {
+        issueTypeId,
+      },
+      data: nodes,
+    });
+  }
+
   listStatus(page: number, size: number) {
     return this.request({
       method: 'post',
@@ -126,6 +165,27 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       params: {
         page,
         size,
+      },
+    });
+  }
+
+  checkStatusName(name: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/status/project_check_name`,
+      params: {
+        organization_id: getOrganizationId(),
+        name,
+      },
+    });
+  }
+
+  orgCheckStatusName(name: string) {
+    return this.request({
+      method: 'get',
+      url: `/agile/v1/organizations/${getOrganizationId()}/status/check_name`,
+      params: {
+        name,
       },
     });
   }
@@ -142,6 +202,17 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
+  orgCreateStatus(issueTypeIds: string[], status: IStatusCreate) {
+    return this.request({
+      method: 'post',
+      url: `${this.orgPrefix}/status/create`,
+      params: {
+        issueTypeId: issueTypeIds.join(','),
+      },
+      data: status,
+    });
+  }
+
   linkStatus(statusLink: IStatusCreateLink) {
     return this.request({
       method: 'get',
@@ -150,6 +221,17 @@ class StatusTransformApi extends Api<StatusTransformApi> {
         ...statusLink,
         applyType: getApplyType(),
       },
+    });
+  }
+
+  orgLinkStatus(statusLink: IStatusCreateLink) {
+    return this.request({
+      method: 'post',
+      url: `${this.orgPrefix}/status/link_status`,
+      params: {
+        ...statusLink,
+      },
+      data: {},
     });
   }
 
@@ -189,6 +271,17 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
+  orgDeleteStatusByIssueType(issueTypeId: string, nodeId: string) {
+    return this.request({
+      method: 'delete',
+      url: `${this.orgPrefix}/status_machine_node/delete`,
+      params: {
+        issueTypeId,
+        nodeId,
+      },
+    });
+  }
+
   /**
    * 获取自定义状态流转列表
    * @param issueTypeId
@@ -200,7 +293,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
   ) {
     return this.request({
       method: 'get',
-      url: `${this.prefix}/status_transform_setting/list`,
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/status_transform_setting/list`,
       params: {
         issueTypeId,
         applyType: getApplyType(),
@@ -218,7 +311,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
   getCondition(issueTypeId: string, statusId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status_transfer_setting/query_transfer`,
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/status_transfer_setting/query_transfer`,
       params: {
         issueTypeId,
         statusId,
@@ -248,6 +341,21 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
+  orgUpdateCondition(
+    issueTypeId: string, statusId: string, objectVersionNumber: number, data: ICondition[],
+  ) {
+    return axios({
+      method: 'post',
+      url: `${this.orgPrefix}/status_transfer_setting/create`,
+      params: {
+        issueTypeId,
+        statusId,
+        objectVersionNumber,
+      },
+      data,
+    });
+  }
+
   /**
    * 获取状态联动设置
    * @param issueTypeId
@@ -257,7 +365,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
   getLinkage(issueTypeId: string, statusId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status_linkages/list`,
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/status_linkages/list`,
       params: {
         issueTypeId,
         statusId,
@@ -283,6 +391,21 @@ class StatusTransformApi extends Api<StatusTransformApi> {
         statusId,
         objectVersionNumber,
         applyType: getApplyType(),
+      },
+      data,
+    });
+  }
+
+  orgUpdateLinkage(
+    issueTypeId: string, statusId: string, objectVersionNumber: number, data: ILinkage[],
+  ) {
+    return axios({
+      method: 'post',
+      url: `${this.orgPrefix}/status_linkages/save`,
+      params: {
+        issueTypeId,
+        statusId,
+        objectVersionNumber,
       },
       data,
     });
@@ -347,7 +470,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     }
     return this.request({
       method: 'get',
-      url: `${this.prefix}/object_scheme_field/member_list`,
+      url: `${getOrganizationId() ? this.orgPrefix : this.prefix}/object_scheme_field/member_list`,
       params: {
         organizationId: getOrganizationId(),
         issueTypeId,
@@ -375,6 +498,18 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
+  orgGetNotifySetting(issueTypeId: string, statusId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.orgPrefix}/status_notice_settings/detail`,
+      params: {
+        issue_type_id: issueTypeId,
+        status_id: statusId,
+        schemeCode: 'agile_issue',
+      },
+    });
+  }
+
   updateNotifySetting(data: IUpdateNotifySetting) {
     return axios({
       method: 'post',
@@ -386,6 +521,14 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
+  orgUpdateNotifySetting(data: IUpdateNotifySetting) {
+    return axios({
+      method: 'post',
+      url: `${this.orgPrefix}/status_notice_settings/save`,
+      data,
+    });
+  }
+
   /**
    * 获取更新属性信息
    * @param issueTypeId
@@ -394,7 +537,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
   getUpdateFieldInfo(issueTypeId: string, statusId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status_field_settings/list`,
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/status_field_settings/list`,
       params: {
         issueTypeId,
         statusId,
@@ -421,6 +564,21 @@ class StatusTransformApi extends Api<StatusTransformApi> {
         statusId,
         objectVersionNumber,
         applyType: getApplyType(),
+      },
+    });
+  }
+
+  orgUpdateField(
+    issueTypeId: string, statusId: string, objectVersionNumber: number, updateData: IUpdateData[],
+  ) {
+    return axios({
+      method: 'post',
+      url: `${this.orgPrefix}/status_field_settings/save`,
+      data: updateData,
+      params: {
+        issueTypeId,
+        statusId,
+        objectVersionNumber,
       },
     });
   }

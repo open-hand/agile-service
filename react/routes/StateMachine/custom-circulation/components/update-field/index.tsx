@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import {
   DataSet, Select, Form, Button, Row, Col,
 } from 'choerodon-ui/pro';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/common';
 import { find, includes } from 'lodash';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { pageConfigApi, statusTransformApi } from '@/api';
@@ -56,7 +56,7 @@ export interface ISettingField {
 type ISelectUserMap = Map<string, { id: null | string, realName: null | string }>
 
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate', 'created_user', 'last_updated_user'];
-
+const orgExcludeCode: string[] = [];
 const memberIsNotSpecifier = ['reportor', 'clear', 'operator', 'creator', 'assignee', 'mainResponsible'];
 // @ts-ignore
 const transformUpdateData = (data) => {
@@ -276,6 +276,7 @@ const UpdateField = ({
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState<boolean>(false);
   const [selectUserMap, setSelectUserMap] = useState<ISelectUserMap>(new Map());
+  const isOrganization = getIsOrganization();
 
   const userFields = useMemo(() => fieldData.filter((field) => memberTypeList.includes(field.fieldType)).map((field) => ({
     name: field.code,
@@ -309,6 +310,70 @@ const UpdateField = ({
     };
   }), [fieldData]);
 
+  const projectFields = useMemo(() => ([{
+    name: 'label',
+    type: 'array' as FieldType,
+    label: '标签',
+    lookupAxiosConfig: () => ({
+      url: `/agile/v1/projects/${getProjectId()}/issue_labels`,
+      method: 'get',
+      transformResponse: (data: any) => (Array.isArray(data) ? data : [{ labelId: 'clear', labelName: '清空' }, ...JSON.parse(data)]),
+    }),
+    valueField: 'labelId',
+    textField: 'labelName',
+  }, {
+    name: 'component',
+    type: 'array' as FieldType,
+    label: '模块',
+    // @ts-ignore
+    lookupAxiosConfig: ({ dataSet: ds, params }) => ({
+      url: `/agile/v1/projects/${getProjectId()}/component/query_all`,
+      method: 'post',
+      data: {
+        advancedSearchArgs: {},
+        searchArgs: { name: params.name },
+      },
+      params: {
+        size: 999,
+        page: 1,
+      },
+      // @ts-ignore
+      transformResponse: (response) => {
+        try {
+          const data = JSON.parse(response);
+          return [{ componentId: 'clear', name: '清空' }, ...data.content];
+        } catch (error) {
+          return response;
+        }
+      },
+    }),
+    valueField: 'componentId',
+    textField: 'name',
+  }, {
+    name: 'fixVersion',
+    type: 'array' as FieldType,
+    label: '修复的版本',
+    lookupAxiosConfig: () => ({
+      url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
+      method: 'post',
+      data: ['version_planning'],
+      transformResponse: (data) => (Array.isArray(data) ? data : [{ versionId: 'clear', name: '清空' }, ...JSON.parse(data)]),
+    }),
+    valueField: 'versionId',
+    textField: 'name',
+  }, {
+    name: 'version',
+    type: 'array' as FieldType,
+    label: '影响的版本',
+    lookupAxiosConfig: () => ({
+      url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
+      method: 'post',
+      data: [],
+      transformResponse: (data) => (Array.isArray(data) ? data : [{ versionId: 'clear', name: '清空' }, ...JSON.parse(data)]),
+    }),
+    valueField: 'versionId',
+    textField: 'name',
+  }]), []);
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
@@ -317,7 +382,7 @@ const UpdateField = ({
         type: 'string' as FieldType,
         label: '优先级',
         lookupAxiosConfig: () => ({
-          url: `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
+          url: isOrganization ? `/agile/v1/organizations/${getOrganizationId()}/priority` : `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
           method: 'get',
           transformResponse: (response) => {
             try {
@@ -330,68 +395,7 @@ const UpdateField = ({
         }),
         valueField: 'id',
         textField: 'name',
-      }, {
-        name: 'label',
-        type: 'array' as FieldType,
-        label: '标签',
-        lookupAxiosConfig: () => ({
-          url: `/agile/v1/projects/${getProjectId()}/issue_labels`,
-          method: 'get',
-          transformResponse: (data) => (Array.isArray(data) ? data : [{ labelId: 'clear', labelName: '清空' }, ...JSON.parse(data)]),
-        }),
-        valueField: 'labelId',
-        textField: 'labelName',
-      }, {
-        name: 'component',
-        type: 'array' as FieldType,
-        label: '模块',
-        lookupAxiosConfig: ({ dataSet: ds, params }) => ({
-          url: `/agile/v1/projects/${getProjectId()}/component/query_all`,
-          method: 'post',
-          data: {
-            advancedSearchArgs: {},
-            searchArgs: { name: params.name },
-          },
-          params: {
-            size: 999,
-            page: 1,
-          },
-          transformResponse: (response) => {
-            try {
-              const data = JSON.parse(response);
-              return [{ componentId: 'clear', name: '清空' }, ...data.content];
-            } catch (error) {
-              return response;
-            }
-          },
-        }),
-        valueField: 'componentId',
-        textField: 'name',
-      }, {
-        name: 'fixVersion',
-        type: 'array' as FieldType,
-        label: '修复的版本',
-        lookupAxiosConfig: () => ({
-          url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
-          method: 'post',
-          data: ['version_planning'],
-          transformResponse: (data) => (Array.isArray(data) ? data : [{ versionId: 'clear', name: '清空' }, ...JSON.parse(data)]),
-        }),
-        valueField: 'versionId',
-        textField: 'name',
-      }, {
-        name: 'version',
-        type: 'array' as FieldType,
-        label: '影响的版本',
-        lookupAxiosConfig: () => ({
-          url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
-          method: 'post',
-          data: [],
-          transformResponse: (data) => (Array.isArray(data) ? data : [{ versionId: 'clear', name: '清空' }, ...JSON.parse(data)]),
-        }),
-        valueField: 'versionId',
-        textField: 'name',
-      }, ...userFields, ...numberFields],
+      }, ...(isOrganization ? [] : projectFields), ...userFields, ...numberFields],
     events: {
       update: ({
         // @ts-ignore
@@ -404,14 +408,14 @@ const UpdateField = ({
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [numberFields, userFields]);
+  }), [isOrganization, numberFields, projectFields, userFields]);
 
   useEffect(() => {
     pageConfigApi.loadFieldsByType(selectedType).then((res: IField[]) => {
-      const data = res.filter((item) => !find(excludeCode, (code) => code === item.code));
+      const data = res.filter((item) => !find([...excludeCode, ...(isOrganization ? orgExcludeCode : [])], (code) => code === item.code));
       setFieldData(data);
     });
-  }, [selectedType]);
+  }, [isOrganization, selectedType]);
 
   useEffect(() => {
     if (fieldData && fieldData.length) {
@@ -496,14 +500,14 @@ const UpdateField = ({
       if (validate) {
         const data = getData();
         const updateData = transformUpdateData(data);
-        await statusTransformApi.updateField(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+        await statusTransformApi[isOrganization ? 'orgUpdateField' : 'updateField'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
       return false;
     };
     modal.handleOk(submit);
-  }, [customCirculationDataSet, getData, modal, record, selectedType]);
+  }, [customCirculationDataSet, getData, modal, record, selectedType, isOrganization]);
 
   const data = getData();
 
@@ -549,7 +553,7 @@ const UpdateField = ({
                 <Col span={11} key={id}>
                   {
                     // @ts-ignore
-                    renderField(f, data, selectUserMap, isProgram)
+                    renderField(f, data, selectUserMap, isProgram, isOrganization)
                   }
                 </Col>
               )}

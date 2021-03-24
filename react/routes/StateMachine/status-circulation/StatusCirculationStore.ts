@@ -5,8 +5,11 @@ import { findIndex, find } from 'lodash';
 import { statusTransformApi, IStatusCirculation, IUpdateTransform } from '@/api';
 import { IStatus } from '@/common/types';
 import takeLast from '@/utils/takeLast';
+import { getIsOrganization } from '@/utils/common';
 
-const loadList = takeLast(statusTransformApi.loadList, statusTransformApi);
+const isOrganization = getIsOrganization();
+
+const loadList = takeLast(isOrganization ? statusTransformApi.orgLoadList : statusTransformApi.loadList, statusTransformApi);
 
 type ChangeType = 'check' | 'nocheck';
 
@@ -231,7 +234,7 @@ class StatusCirculationStore {
     if (!this.hasAction) {
       return;
     }
-    await statusTransformApi.batchUpdate(issueTypeId, this.needSubmitActions);
+    await statusTransformApi[isOrganization ? 'orgBatchUpdate' : 'batchUpdate'](issueTypeId, this.needSubmitActions);
     this.clearActions();
     this.getStatusList(issueTypeId);
   }

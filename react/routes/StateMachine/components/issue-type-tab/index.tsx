@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { observer } from 'mobx-react-lite';
 import { IIssueType } from '@/common/types';
+import useIssueTypes from '@/hooks/data/useIssueTypes';
 import styles from './index.less';
 
 type ChangeSelected = (code: string)=>void
@@ -13,7 +13,7 @@ interface Props {
 
 const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType }) => {
   const [selected, setSelected] = useState(selectedType || '');
-  const { data: issueTypes } = useProjectIssueTypes();
+  const { data: issueTypes } = useIssueTypes();
   const handleSelectType = useCallback((id: string) => {
     if (setSelectedType) {
       setSelectedType(id);

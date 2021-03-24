@@ -5,13 +5,15 @@ import {
   Form, DataSet, Button, Select, Row, Col,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
+import useIssueTypes from '@/hooks/data/useIssueTypes';
 import SelectStatus from '@/components/select/select-status';
 import { statusTransformApi } from '@/api';
 import Loading from '@/components/Loading';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { getIsOrganization } from '@/utils/common';
+import { IIssueType } from '@/common/types';
 import styles from './index.less';
 
 interface IParentIssueStatusSetting {
@@ -27,7 +29,8 @@ const Linkage = ({
   // @ts-ignore
   modal, record, selectedType, customCirculationDataSet,
 }) => {
-  const { data: issueTypes } = useProjectIssueTypes({ typeCode: ['story', 'task', 'bug'] });
+  const isOrganization = getIsOrganization();
+  const { data: issueTypes } = useIssueTypes({ typeCode: ['story', 'task', 'bug'] });
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
   const linkageDataSet = useMemo(() => new DataSet({
@@ -93,7 +96,7 @@ const Linkage = ({
           });
         });
         // @ts-ignore
-        await statusTransformApi.updateLinkage(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+        await statusTransformApi[isOrganization ? 'orgUpdateLinkage' : 'updateLinkage'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
@@ -102,7 +105,7 @@ const Linkage = ({
     if (modal) {
       modal.handleOk(handleOk);
     }
-  }, [customCirculationDataSet, fields, linkageDataSet, modal, record, selectedType]);
+  }, [customCirculationDataSet, fields, isOrganization, linkageDataSet, modal, record, selectedType]);
   const selectedIssueTypes = (() => {
     const data: any = linkageDataSet.toData()[0];
     return Object.keys(data).reduce((result: string[], key) => {
@@ -133,7 +136,7 @@ const Linkage = ({
                     getField(statusName)?.reset();
                   }}
                 >
-                  {issueTypes?.filter((type) => (issueTypeId && type.id === issueTypeId) || !selectedIssueTypes.includes(type.id)).map((type) => (
+                  {issueTypes?.filter((type: IIssueType) => (issueTypeId && type.id === issueTypeId) || !selectedIssueTypes.includes(type.id)).map((type: IIssueType) => (
                     <Option value={type.id}>
                       {type.name}
                     </Option>
@@ -141,7 +144,13 @@ const Linkage = ({
                 </Select>
               </Col>
               <Col span={11} key={id}>
-                <SelectStatus label="指定状态" key={`${key}-${issueTypeId}`} name={statusName} issueTypeId={issueTypeId} />
+                <SelectStatus
+                  label="指定状态"
+                  key={`${key}-${issueTypeId}`}
+                  name={statusName}
+                  issueTypeId={issueTypeId}
+                  isOrganization={isOrganization}
+                />
               </Col>
               <Col span={2}>
                 <Button

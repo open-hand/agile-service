@@ -7,6 +7,7 @@ import {
 import SelectUser from '@/components/select/select-user';
 import SelectEnvironment from '@/components/select/select-environment';
 import SelectProgramVersion from '@/components/select/select-program-version';
+import { userApi } from '@/api';
 import styles from './index.less';
 
 const { Option } = Select;
@@ -22,7 +23,7 @@ const clearIdMap = new Map([
 const extraOptionsMap = new Map();
 export default function renderField({
   code, fieldType, fieldOptions, required,
-}, data, selectUserMap, isProgram) {
+}, data, selectUserMap, isProgram, isOrganization) {
   switch (code) {
     case 'component': {
       return (
@@ -374,6 +375,7 @@ export default function renderField({
           onOption={({ record }) => ({
             disabled: fieldType === 'multiMember' && data[code].value.length && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
           })}
+          request={({ filter, page }) => (!isOrganization ? userApi.getAllInProject(filter, page) : userApi.getAllInOrg(filter, page))}
         />
       );
     }
