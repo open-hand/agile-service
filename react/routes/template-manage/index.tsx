@@ -5,10 +5,14 @@ import {
 } from '@choerodon/boot';
 
 const KanbanTemplate = withRouter(asyncRouter(() => import('../kanban-template')));
-
+const StatusMachineTemplate = withRouter(asyncRouter(() => import('../statusMachine-template')));
 const TemplateManage = () => (
   <PageWrap
     noHeader={[]}
+    title="状态机模板"
+    route="/agile/template-manage/status"
+    tabKey="choerodon.code.organization.cooperation.work-list.ps.status"
+    component={StatusMachineTemplate}
   >
     <PageTab
       title="看板模板"

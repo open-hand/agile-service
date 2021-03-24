@@ -8,6 +8,7 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApiConfig, IStatusCirculation } from '@/api';
 import SelectStatus from '../select-status';
 import './index.less';
+import { getIsOrganization } from '@/utils/common';
 
 const { Option } = SelectBox;
 const key = Modal.key();
@@ -20,12 +21,13 @@ interface Props {
 const SelectExistStatus: React.FC<Props> = ({
   modal, onSubmit, issueTypeId, statusList = [],
 }) => {
+  const isOrganization = getIsOrganization();
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     transport: {
       create: ({ data: dataArray }) => {
         const data = dataArray[0];
-        return statusTransformApiConfig.linkStatus({
+        return statusTransformApiConfig[isOrganization ? 'orgLinkStatus' : 'linkStatus']({
           issueTypeId,
           statusId: data.statusId,
           defaultStatus: data.default,
@@ -78,7 +80,7 @@ const SelectExistStatus: React.FC<Props> = ({
   return (
     <>
       <Form dataSet={dataSet}>
-        <SelectStatus name="statusId" expectStatusIds={statusList.map((status) => status.id)} />
+        <SelectStatus name="statusId" isOrganization={isOrganization} expectStatusIds={statusList.map((status) => status.id)} />
         <SelectBox name="default" style={{ marginTop: 13 }}>
           <Option value>是</Option>
           <Option value={false}>否</Option>

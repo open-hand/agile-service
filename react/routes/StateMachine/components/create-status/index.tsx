@@ -7,12 +7,12 @@ import {
 import { axios } from '@choerodon/boot';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId, getIsOrganization } from '@/utils/common';
 import { IStatus, IIssueType } from '@/common/types';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import './index.less';
-import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
-import { statusTransformApiConfig } from '@/api';
+import useIssueTypes from '@/hooks/data/useIssueTypes';
+import { statusTransformApi, statusTransformApiConfig } from '@/api';
 import { observer } from 'mobx-react-lite';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 import useIsProgram from '@/hooks/useIsProgram';
@@ -29,8 +29,9 @@ const CreateStatus: React.FC<Props> = ({
 }) => {
   const modalRef = useRef(modal);
   modalRef.current = modal;
+  const isOrganization = getIsOrganization();
   const [type, setType] = useState<IStatus['valueCode'] | null>(null);
-  const { data: issueTypes } = useProjectIssueTypes();
+  const { data: issueTypes } = useIssueTypes();
   // 记录哪些类型下已经有同名状态
   const [hasStatusIssueTypes, setHasStatusIssueTypes] = useState<IIssueType[]>([]);
   const hasStatusIssueTypesRef = useRef<IIssueType[]>([]);
@@ -41,7 +42,7 @@ const CreateStatus: React.FC<Props> = ({
     transport: {
       create: ({ data: dataArray }) => {
         const data = dataArray[0];
-        return statusTransformApiConfig.createStatus(data.issueTypeIds, {
+        return statusTransformApiConfig[isOrganization ? 'orgCreateStatus' : 'createStatus'](data.issueTypeIds, {
           name: data.name,
           type: data.valueCode,
           defaultStatus: data.default,
@@ -149,15 +150,7 @@ const CreateStatus: React.FC<Props> = ({
             // @ts-ignore
             const { value } = e.target;
             if (value) {
-              axios({
-                url: `agile/v1/projects/${getProjectId()}/status/project_check_name`,
-                method: 'GET',
-                params: {
-                  organization_id: getOrganizationId(),
-                  name: value,
-                },
-                data: null,
-              }).then((data: any) => {
+              statusTransformApi[isOrganization ? 'orgCheckStatusName' : 'checkStatusName'](value).then((data: any) => {
                 const { statusExist, type: newType, existIssueTypeVO } = data;
                 if (statusExist) {
                   dataSet.current?.set('valueCode', newType);
@@ -182,7 +175,7 @@ const CreateStatus: React.FC<Props> = ({
           disabled={type !== null}
         />
         <Select name="issueTypeIds" multiple>
-          {(issueTypes || []).map((issueType) => (
+          {(issueTypes || []).map((issueType: IIssueType) => (
             <Option value={issueType.id}>
               {issueType.name}
             </Option>

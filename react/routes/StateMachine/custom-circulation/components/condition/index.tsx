@@ -11,7 +11,7 @@ import { Divider, Icon } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApi } from '@/api';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getIsOrganization } from '@/utils/common';
 import { User } from '@/common/types';
 import styles from './index.less';
 
@@ -97,6 +97,7 @@ const Condition:React.FC<Props> = ({
   modal, record, selectedType, customCirculationDataSet,
 }) => {
   const [hidden, setHidden] = useState(true);
+  const isOrganization = getIsOrganization();
   const handleClickOut = useCallback(() => {
     setHidden(true);
   }, []);
@@ -177,7 +178,7 @@ const Condition:React.FC<Props> = ({
             userIds: assigners,
           });
         }
-        await statusTransformApi.updateCondition(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+        await statusTransformApi[isOrganization ? 'orgUpdateCondition' : 'updateCondition'](selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
         customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
@@ -185,7 +186,7 @@ const Condition:React.FC<Props> = ({
       return false;
     };
     modal.handleOk(handleOk);
-  }, [conditionDataSet, customCirculationDataSet, modal, record, selectedType]);
+  }, [conditionDataSet, customCirculationDataSet, isOrganization, modal, record, selectedType]);
 
   const data = conditionDataSet.toData()[0];
   const selected = [];
