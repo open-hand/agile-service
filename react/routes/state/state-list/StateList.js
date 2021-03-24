@@ -9,7 +9,7 @@ import {
 import { Button as ButtonPro } from 'choerodon-ui/pro';
 import { FormattedMessage } from 'react-intl';
 import {
-  Content, Header, TabPage as Page, Breadcrumb, Choerodon,
+  Content, Header, TabPage as Page, Breadcrumb, Choerodon, useTheme,
 } from '@choerodon/boot';
 import { getStageMap, getStageList } from '@/utils/stateMachine';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
@@ -39,6 +39,7 @@ const stageMap = getStageMap();
 const stageList = getStageList();
 
 function StateList(props) {
+  const [theme] = useTheme();
   const context = useContext(Store);
   const { AppState, stateStore, intl } = context;
   const {
@@ -458,7 +459,7 @@ function StateList(props) {
             )}
         </Header>
         <Breadcrumb />
-        <Content className="issue-state-content" style={{ paddingTop: 0 }}>
+        <Content className="issue-state-content" style={theme === 'theme4' ? undefined : { paddingTop: 0 }}>
           <Table
             dataSource={statesList.list}
             columns={getColumn()}

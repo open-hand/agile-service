@@ -1,27 +1,24 @@
 import React from 'react';
-import {
-  Route,
-  Switch,
-} from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
-import { PermissionRoute } from '@choerodon/master';
+import { PageWrap, PageTab } from '@choerodon/boot';
 
-const StateList = asyncRouter(() => import('./state-list'));
-
-const StateIndex = (res) => {
-  const { match } = res;
-  return (
-    <Switch>
-      <PermissionRoute
-        service={[
-          'choerodon.code.organization.setting.issue.states.ps.state',
-        ]}
-        path={match.url}
-        component={StateList}
-      />
-      <Route path="*" component={nomatch} />
-    </Switch>
-  );
-};
-
-export default StateIndex;
+const KanbanTemplate = React.lazy(() => import('../kanban-template'));
+const StateList = React.lazy(() => import('./state-list'));
+const TemplateManage = () => (
+  <PageWrap
+    noHeader={[]}
+  >
+    <PageTab
+      title="状态机"
+      route="/agile/states/state"
+      tabKey="choerodon.code.organization.setting.issue.states.ps.state"
+      component={StateList}
+    />
+    <PageTab
+      title="看板模板"
+      route="/agile/states/kanban"
+      tabKey="choerodon.code.organization.setting.issue.states.ps.kanban"
+      component={KanbanTemplate}
+    />
+  </PageWrap>
+);
+export default TemplateManage;
