@@ -17,7 +17,7 @@ import './TableDropMenu.less';
 
 const TableDropMenu = (props) => {
   const {
-    menu, isHasMenu = !!menu, text, onClickEdit, className, menuPermissionProps = {}, tooltip,
+    menu, isHasMenu = !!menu, text, onClickEdit, className, menuPermissionProps = {}, tooltip, style,
   } = props;
   const { permission } = props;
   const {
@@ -37,7 +37,7 @@ const TableDropMenu = (props) => {
   return (
     <div
       style={{
-        display: 'flex', justifyContent: 'space-between', lineHeight: '24px', cursor: onClickEdit ? 'pointer' : 'inherit',
+        display: 'flex', justifyContent: 'space-between', lineHeight: '24px', cursor: onClickEdit ? 'pointer' : 'inherit', ...style,
       }}
       className={className || 'table-drop-menu-base'}
     >

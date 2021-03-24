@@ -1,0 +1,63 @@
+.c7n-agile-release-detail-link-service {
+  display: flex;
+  flex-wrap: wrap;
+
+  &-operation {
+      display: flex;
+      align-items: center;
+  }
+  &-tree {
+    width: 100%;
+    .c7n-tree-treenode {
+      width: 100%;
+    }
+    .c7n-tree-node-content-wrapper {
+      width: 100%;
+    }
+     .c7n-tree-switcher-noop {
+       display: none;
+     }
+  }
+  &-item {
+    width: 100%;
+    border-radius: 2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &:hover,
+    &:focus {
+
+      background: #F3F3F3;
+    }
+
+    &:hover {
+      .c7n-agile-release-detail-link-service-item-btn {
+        visibility: visible;
+      }
+    }
+
+    &-left {
+      display: inline-flex;
+      align-items: center;
+      color: #9A9FB0;
+
+      &-text {
+
+        font-size: 13px;
+        font-family: PingFangSC-Regular, PingFang SC;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.87);
+        line-height: 20px;
+      }
+    }
+
+    &-btn {
+      float: right;
+      visibility: hidden;
+      color: #3F51B5;
+      margin-right: .34rem;
+    }
+  }
+}
