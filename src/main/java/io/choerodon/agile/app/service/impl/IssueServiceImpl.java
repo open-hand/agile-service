@@ -23,7 +23,6 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.feign.TestFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.utils.*;
@@ -228,6 +227,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String STAR_BEACON_TYPE_ISSUE = "issue";
     private static final String BUG_TYPE = "bug";
     private static final String TASK_TYPE = "task";
+    private static final List<String> WORK_BENCH_SEARCH_TYPE = Arrays.asList("myBug", "reportedBug", "myStarBeacon", "myReported", "myAssigned");
 
     @Autowired
     private ModelMapper modelMapper;
@@ -2731,6 +2731,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (ObjectUtils.isEmpty(organizationId)) {
             throw new CommonException("error.organizationId.iss.null");
         }
+        checkSearchType(workBenchIssueSearchVO.getType());
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
@@ -2793,6 +2794,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
         return new Page<>(list, pageInfo, parentPage.getTotalElements());
+    }
+
+    private void checkSearchType(String searchType) {
+        if (!Objects.isNull(searchType) && !WORK_BENCH_SEARCH_TYPE.contains(searchType)) {
+            throw new CommonException("error.search.type.is.illegal");
+        }
     }
 
     private void setListStarBeacon(List<IssueListFieldKVVO> issues, Long userId, List<Long> projectIds) {
@@ -2866,5 +2873,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } else {
             return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         }
+    }
+
+    @Override
+    public Page<IssueListFieldKVVO> pagedQueryMyAssigned(Long organizationId, Long projectId, PageRequest pageRequest) {
+        WorkBenchIssueSearchVO workBenchIssueSearchVO = new WorkBenchIssueSearchVO();
+        workBenchIssueSearchVO.setType("myAssigned");
+        return queryBackLogIssuesByPersonal(organizationId, projectId, pageRequest, workBenchIssueSearchVO);
     }
 }

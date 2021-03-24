@@ -406,4 +406,14 @@ public interface IssueService {
      * @param issueId
      */
     void handleUpdateAppVersionIssueRel(List<AppVersionVO> appVersions, Long projectId, Long issueId);
+
+    /**
+     * 工作台查询我经手的
+     *
+     * @param organizationId
+     * @param projectId
+     * @param pageRequest
+     * @return
+     */
+    Page<IssueListFieldKVVO> pagedQueryMyAssigned(Long organizationId, Long projectId, PageRequest pageRequest);
 }
