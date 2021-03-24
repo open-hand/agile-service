@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Switch, RouteChildrenProps } from 'react-router-dom';
 import { nomatch } from '@choerodon/boot';
-import { setGetOptionalCharts, defaultCharts } from './report-page/components/add-chart';
+import { addChartsMap, ChartMap, defaultCharts } from './report-page/components/add-chart';
 
 const ReportList = React.lazy(() => import('./report-list'));
 const CreateReport = React.lazy(() => import('./report-create'));
@@ -17,5 +17,5 @@ const ProjectReport: React.FC<RouteChildrenProps> = ({ match }) => (
     <Route path="*" component={nomatch} />
   </Switch>
 );
-export { setGetOptionalCharts, defaultCharts };
+export { addChartsMap, ChartMap, defaultCharts };
 export default ProjectReport;

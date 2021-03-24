@@ -32,7 +32,47 @@ const UiPreview = React.lazy(() => import('./routes/ui-preview'));
 const TemplateManage = React.lazy(() => import('./routes/template-manage'));
 
 const { AppState } = stores;
-
+export function getRoutes(match) {
+  return [
+    <Route
+      path={`${match.url}/work-list`}
+      component={WorkList}
+    />,
+    <Route path={`${match.url}/storyMap`} component={StoryMap} />,
+    <Route path={`${match.url}/team-performance`} component={TeamPerformance} />,
+    <Route path={`${match.url}/scrumboard`} component={ScrumBoard} />,
+    <Route path={`${match.url}/gantt`} component={GanttPage} />,
+    <Route path={`${match.url}/project-version`} component={VersionList} />,
+    <Route path={`${match.url}/reporthost`} component={ReportHost} />,
+    <PermissionRoute
+      service={(type) => (
+        type === 'project' ? [
+          'choerodon.code.project.setting.page.ps.field',
+          'choerodon.code.project.setting.page.ps.scheme',
+        ] : [
+          'choerodon.code.organization.setting.issue.page.ps.scheme',
+          'choerodon.code.organization.setting.issue.page.ps.filed',
+        ]
+      )}
+      path={`${match.url}/page`}
+      component={PageConfig}
+    />,
+    <Route path={`${match.url}/issue-type`} component={IssueType} />,
+    <Route path={`${match.url}/settings`} component={Settings} />,
+    <Route path={`${match.url}/states`} component={State} />,
+    <Route path={`${match.url}/priorities`} component={Priority} />,
+    <PermissionRoute
+      service={['choerodon.code.project.setting.state.ps.default',
+        'choerodon.code.project.setting.state.ps.master']}
+      path={`${match.url}/state-machine`}
+      component={StateMachine}
+    />,
+    <Route path={`${match.url}/project-report`} component={ProjectReport} />,
+    <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />,
+    <Route path={`${match.url}/outside/ui-preview/:uuid`} component={UiPreview} />,
+    <Route path={`${match.url}/template-manage`} component={TemplateManage} />,
+  ];
+}
 class Agile extends React.Component {
   constructor(props) {
     super(props);
@@ -56,47 +96,6 @@ class Agile extends React.Component {
           <IntlProviderAsync>
             <Switch>
               {/* 协作 */}
-              <Route
-                path={`${match.url}/work-list`}
-                component={WorkList}
-              />
-              <Route path={`${match.url}/storyMap`} component={StoryMap} />
-              <Route path={`${match.url}/team-performance`} component={TeamPerformance} />
-              {/* 开发-迭代计划 */}
-              <Route path={`${match.url}/scrumboard`} component={ScrumBoard} />
-              <Route path={`${match.url}/gantt`} component={GanttPage} />
-              <Route path={`${match.url}/project-version`} component={VersionList} />
-              {/* 运营 */}
-              <Route path={`${match.url}/reporthost`} component={ReportHost} />
-              {/* 设置页面 */}
-              <PermissionRoute
-                service={(type) => (
-                  type === 'project' ? [
-                    'choerodon.code.project.setting.page.ps.field',
-                    'choerodon.code.project.setting.page.ps.scheme',
-                  ] : [
-                    'choerodon.code.organization.setting.issue.page.ps.scheme',
-                    'choerodon.code.organization.setting.issue.page.ps.filed',
-                  ]
-                )}
-                path={`${match.url}/page`}
-                component={PageConfig}
-              />
-              {/* 页面类型 */}
-              <Route path={`${match.url}/issue-type`} component={IssueType} />
-              <Route path={`${match.url}/settings`} component={Settings} />
-              <Route path={`${match.url}/states`} component={State} />
-              <Route path={`${match.url}/priorities`} component={Priority} />
-              <PermissionRoute
-                service={['choerodon.code.project.setting.state.ps.default',
-                  'choerodon.code.project.setting.state.ps.master']}
-                path={`${match.url}/state-machine`}
-                component={StateMachine}
-              />
-              <Route path={`${match.url}/project-report`} component={ProjectReport} />
-              <Route path={`${match.url}/ui-preview/:uuid`} component={UiPreview} />
-              <Route path={`${match.url}/outside/ui-preview/:uuid`} component={UiPreview} />
-              <Route path={`${match.url}/template-manage`} component={TemplateManage} />
               <Route path="*" component={nomatch} />
             </Switch>
             <ModalContainer />
