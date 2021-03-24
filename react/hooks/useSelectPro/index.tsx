@@ -41,7 +41,7 @@ export interface SelectConfig<T = {}> {
   valueField: string
   optionRenderer?: (item: T) => JSX.Element
   renderer?: (item: T) => JSX.Element
-  paging?: boolean
+  paging: boolean
 }
 
 export default function useSelect<T extends { [key: string]: any }>(config: SelectConfig<T>): [SelectProps] {
