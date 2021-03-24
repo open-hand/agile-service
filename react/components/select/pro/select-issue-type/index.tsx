@@ -21,6 +21,7 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
     textField: 'name',
     valueField: valueField || 'id',
     data: issueTypes || [],
+    paging: false,
   });
   const Component = flat ? FlatSelect : Select;
 
