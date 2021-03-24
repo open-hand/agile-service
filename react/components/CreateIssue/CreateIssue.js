@@ -1315,23 +1315,21 @@ class CreateIssue extends Component {
         maskClosable={false}
         keyboard={false}
       >
-        <Content>
-          <Spin spinning={loading}>
-            <Form layout="vertical" className="c7nagile-form">
-              <div className="c7nagile-createIssue-fields" key={newIssueTypeCode}>
-                {['sub_task', 'sub_bug'].includes(mode) && (
-                  <FormItem>
-                    <Input label="父任务概要" value={parentSummary} disabled />
-                  </FormItem>
-                )}
-                {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode))
-                  .map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
-                {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
-              </div>
-              {mode !== 'feature' && mode !== 'sub_task' && !['sub_task', 'issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}
-            </Form>
-          </Spin>
-        </Content>
+        <Spin spinning={loading}>
+          <Form layout="vertical" className="c7nagile-form">
+            <div className="c7nagile-createIssue-fields" key={newIssueTypeCode}>
+              {['sub_task', 'sub_bug'].includes(mode) && (
+              <FormItem>
+                <Input label="父任务概要" value={parentSummary} disabled />
+              </FormItem>
+              )}
+              {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode))
+                .map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
+              {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
+            </div>
+            {mode !== 'feature' && mode !== 'sub_task' && !['sub_task', 'issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}
+          </Form>
+        </Spin>
       </Sidebar>
     );
   }
