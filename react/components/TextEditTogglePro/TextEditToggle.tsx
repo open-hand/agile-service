@@ -63,29 +63,30 @@ const TextEditToggle: React.FC<Props> = ({
     }
   };
   const handleChange = (originOnChange: Function | undefined) => (newValue: any) => {
-    console.log('handleChange', newValue);
     dataRef.current = newValue;
     setValue(newValue);
     if (originOnChange) {
       originOnChange(newValue);
     }
     if (submitTrigger.includes('change')) {
-      submit();
+      submit(newValue);
     }
   };
   const handleEditorBlur = () => {
-    console.log('handleEditorBlur', toJS((editorRef.current as any)?.getValue()));
     if (submitTrigger.includes('blur')) {
       submit();
     }
   };
-  const submit = async () => {
+  const submit = async (newValue?: any) => {
     // 延缓submit，因为有时候blur之后才会onchange，保证拿到的值是最新的
     // setTimeout(async () => {
 
     // });
-    const waitSubmitValue = (editorRef.current as any)?.getValue
+    let waitSubmitValue = (editorRef.current as any)?.getValue
       ? toJS((editorRef.current as any)?.getValue()) : dataRef.current;
+    if (typeof (newValue) !== 'undefined') {
+      waitSubmitValue = newValue;
+    }
     // @ts-ignore
     if (editingRef.current && editorRef.current && await editorRef.current?.validate(waitSubmitValue)) {
       if (containerRef.current) {

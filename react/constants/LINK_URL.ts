@@ -20,6 +20,8 @@ const LINK_URL = {
   workListIssue: '/agile/work-list/issue',
   workListBacklog: '/agile/work-list/backlog',
   workListVersion: '/agile/project-version',
+  versionRelease: '/agile/project-version/release',
+  versionPublish: '/agile/project-version/publish',
   report: '/charts',
   reportBurnDown: '/agile/reporthost/burndownchart',
   reportIssueType: '/agile/reporthost/pieReport/typeCode',

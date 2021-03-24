@@ -23,7 +23,7 @@ const State = React.lazy(() => import('./routes/state'));
 const PageConfig = React.lazy(() => import('./routes/page-config'));
 const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 const TeamPerformance = React.lazy(() => import('./routes/TeamPerformance'));
-const Release = React.lazy(() => (import('./routes/Release')));
+const VersionList = React.lazy(() => (import('./routes/version-list')));
 // 敏捷设置
 const Settings = React.lazy(() => import('./routes/settings'));
 const ProjectReport = React.lazy(() => import('./routes/project-report'));
@@ -65,7 +65,7 @@ class Agile extends React.Component {
               {/* 开发-迭代计划 */}
               <Route path={`${match.url}/scrumboard`} component={ScrumBoard} />
               <Route path={`${match.url}/gantt`} component={GanttPage} />
-              <Route path={`${match.url}/project-version`} component={Release} />
+              <Route path={`${match.url}/project-version`} component={VersionList} />
               {/* 运营 */}
               <Route path={`${match.url}/reporthost`} component={ReportHost} />
               {/* 设置页面 */}
