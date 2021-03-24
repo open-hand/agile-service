@@ -21,7 +21,7 @@
     "echarts-for-react": "^2.0.14",
     "file-saver": "^2.0.2",
     "html2canvas": "^1.0.0-rc.7",
-    "immer": "^7.0.9",
+    "immer": "^8.0.1",
     "immutability-helper": "^2.8.1",
     "jquery": "^3.5.1",
     "mobx-react-lite": "^1.4.1",
