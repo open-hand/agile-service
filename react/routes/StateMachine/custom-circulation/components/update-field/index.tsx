@@ -392,7 +392,7 @@ const UpdateField = ({
               return response;
             }
           },
-        }),
+        } as const),
         valueField: 'id',
         textField: 'name',
       }, ...(isOrganization ? [] : projectFields), ...userFields, ...numberFields],
