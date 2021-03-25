@@ -89,7 +89,7 @@ public class PublishVersionController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @CustomPageRequest
     @ApiOperation(value = "分页查询项目下发布版本")
-    @PostMapping
+    @PostMapping("/list")
     public ResponseEntity<Page<PublishVersionVO>> list(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
                                                        @SortDefault(value = {"service_code", "version"}, direction = Sort.Direction.ASC)
