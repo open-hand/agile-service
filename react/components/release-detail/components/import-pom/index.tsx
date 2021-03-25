@@ -24,7 +24,7 @@ interface IImportPomFunctionProps {
 
 const { Column } = Table;
 const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = ({ modal, handleOk, programMode }) => {
-  const prefixCls = 'c7n-agile-release-detail-import-pom';
+  const prefixCls = 'c7n-agile-publish-version-detail-import-pom';
   const [groupId, setGroupId] = useState<string[] | undefined>();
   const [subProjectId, setSubProjectId] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);

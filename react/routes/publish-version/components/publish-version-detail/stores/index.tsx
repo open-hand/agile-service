@@ -32,7 +32,7 @@ export function useReleaseDetailContext() {
 const Provider: React.FC<ReleaseDetailProps> = ({
   children, disableInitStore, programId, ...restProps
 }) => {
-  const prefixCls = 'c7n-agile-release-detail';
+  const prefixCls = 'c7n-agile-publish-version-detail';
   const { isInProgram, loading } = useIsInProgram();
   const storyTableDataSet = useMemo(() => new DataSet(ReleaseStoryTableDataSet(store.current?.id!)), [store.current?.id]);
   const bugTableDataSet = useMemo(() => new DataSet(ReleaseBugTableDataSet(store.current?.id!)), [store.current?.id]);
