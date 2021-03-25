@@ -384,8 +384,9 @@ const UpdateField = ({
         label: '优先级',
         lookupAxiosConfig: () => ({
           url: isOrganization ? `/agile/v1/organizations/${getOrganizationId()}/priority` : `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
-          method: 'GET' as 'GET',
-          transformResponse: (response:any) => {
+          method: 'get',
+          // @ts-ignore
+          transformResponse: (response) => {
             try {
               const data = JSON.parse(response);
               return data.filter((v: Priority) => v.enable);

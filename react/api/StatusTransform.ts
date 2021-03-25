@@ -470,9 +470,34 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     }
     return this.request({
       method: 'get',
-      url: `${getOrganizationId() ? this.orgPrefix : this.prefix}/object_scheme_field/member_list`,
+      url: `${this.prefix}/object_scheme_field/member_list`,
       params: {
         organizationId: getOrganizationId(),
+        issueTypeId,
+        schemeCode,
+      },
+      transformResponse: (res: IField) => {
+        if (typeof res === 'string') {
+          const data = JSON.parse(res);
+          return [...arr, ...data, { code: 'specifier', name: '指定人' }];
+        }
+        return res;
+      },
+    });
+  }
+
+  orgGetCustomMember(issueTypeId: string, schemeCode: string = 'agile_issue') {
+    const arr = [
+      { code: 'projectOwner', name: '项目所有者' },
+      { code: 'reporter', name: '报告人' },
+    ];
+    if (getApplyType() === 'agile') {
+      arr.push({ code: 'assignee', name: '经办人' });
+    }
+    return this.request({
+      method: 'get',
+      url: `${this.orgPrefix}/member_list`,
+      params: {
         issueTypeId,
         schemeCode,
       },
