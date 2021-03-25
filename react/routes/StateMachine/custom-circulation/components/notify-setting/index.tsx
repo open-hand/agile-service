@@ -108,13 +108,13 @@ const NotifySetting = ({
     autoQuery: true,
     paging: false,
     transport: {
-      read: () => statusTransformApiConfig.getCustomMember(selectedType),
+      read: () => statusTransformApiConfig[isOrganization ? 'orgGetCustomMember' : 'getCustomMember'](selectedType),
     },
     fields: [
       { name: 'code', type: 'string' as FieldType },
       { name: 'name', type: 'string' as FieldType },
     ],
-  }), [selectedType]);
+  }), [isOrganization, selectedType]);
 
   const notifyMethodDataSet = useMemo(() => new DataSet({
     data: [
