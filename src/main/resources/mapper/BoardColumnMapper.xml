@@ -381,4 +381,60 @@
            AND ais.project_id = abcsr.project_id
            AND ais.status_id = abcsr.status_id
     </select>
+
+    <update id="updateMaxAndMinNumTemplate">
+        UPDATE agile_board_column
+        SET max_num               = #{columnInfo.maxNum},
+            min_num               = #{columnInfo.minNum},
+            object_version_number = object_version_number + 1
+        WHERE
+            organization_id = #{organizationId}
+            AND project_id = #{columnInfo.projectId}
+            AND column_id = #{columnInfo.columnId}
+            AND object_version_number = #{columnInfo.objectVersionNumber}
+    </update>
+    <resultMap id="BoardColumnAndStatus" type="io.choerodon.agile.api.vo.BoardColumnVO">
+        <id column="column_id" property="columnId"/>
+        <id column="column_name" property="name"/>
+        <id column="min_num" property="minNum"/>
+        <id column="max_num" property="maxNum"/>
+        <id column="category_code" property="categoryCode"/>
+        <id column="board_id" property="boardId"/>
+        <id column="color_code" property="colorCode"/>
+        <id column="column_ovn" property="objectVersionNumber"/>
+        <id column="sequence" property="sequence"/>
+        <collection property="status" autoMapping="true"  ofType="io.choerodon.agile.api.vo.StatusTemplateVO">
+            <id column="status_name" property="name"/>
+            <id column="status_id" property="statusId"/>
+            <id column="type" property="categoryCode"/>
+            <id column="fs_completed" property="templateCompleted"/>
+            <id column="position" property="position"/>
+        </collection>
+    </resultMap>
+
+    <select id="listColumnAndStatusByBoardId" resultMap="BoardColumnAndStatus">
+         SELECT
+             abc.column_id,
+             abc.name as column_name ,
+             abc.sequence,
+             abc.category_code,
+             abc.max_num,
+             abc.min_num,
+             abc.board_id,
+             abc.object_version_number as column_ovn,
+             fs.id as status_id,
+             fs.name as status_name,
+             fs.type,
+             IFNULL(fst.is_template_completed,0) as fs_completed,
+             abcsr.position
+            FROM
+                agile_board_column abc
+                LEFT JOIN agile_board_column_status_rel abcsr ON abc.column_id = abcsr.column_id
+                LEFT JOIN fd_status fs on fs.id = abcsr.status_id
+                LEFT JOIN fd_status_template fst on abcsr.organization_id = fst.organization_id and abcsr.status_id = fst.status_id
+                WHERE abc.organization_id = #{organizationId}
+                AND abc.project_id = 0
+                AND abc.board_id = #{boardId}
+                order by abc.sequence,abcsr.position
+    </select>
 </mapper>

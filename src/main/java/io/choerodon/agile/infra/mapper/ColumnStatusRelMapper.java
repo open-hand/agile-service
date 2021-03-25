@@ -21,7 +21,7 @@ public interface ColumnStatusRelMapper extends BaseMapper<ColumnStatusRelDTO> {
      */
     List<ColumnStatusRelDTO> queryByIssueIdAndColumnIds(@Param("statusToNullIssueIds") List<Long> statusToNullIssueIds, @Param("columnIds") List<Long> columnIds);
 
-    List<ColumnStatusRelDTO> selectStatusRel(@Param("projectId") Long projectId,@Param("columnId") Long columnId, @Param("statusId") Long statusId);
+    List<ColumnStatusRelDTO> selectStatusRel(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId,@Param("columnId") Long columnId, @Param("statusId") Long statusId);
 
     int updatePosition(@Param("columnStatusRel") ColumnStatusRelDTO columnStatusRelDTO);
 

@@ -23,14 +23,18 @@
 
     <select id="selectStatusRel" resultType="io.choerodon.agile.infra.dto.ColumnStatusRelDTO">
         select * from agile_board_column_status_rel abcsr
-        where abcsr.project_id = #{projectId} and abcsr.column_id = #{columnId}
+        where abcsr.organization_id = #{organizationId}
+        and abcsr.project_id = #{projectId}
+        and abcsr.column_id = #{columnId}
         order by abcsr.position asc
     </select>
 
     <update id="updatePosition">
         update agile_board_column_status_rel abcsr
         set abcsr.position = #{columnStatusRel.position}
-        where abcsr.project_id = #{columnStatusRel.projectId} and abcsr.column_id = #{columnStatusRel.columnId} and abcsr.status_id = #{columnStatusRel.statusId}
+        where abcsr.organization_id = #{columnStatusRel.organizationId}
+        and abcsr.project_id = #{columnStatusRel.projectId}
+        and abcsr.column_id = #{columnStatusRel.columnId}
+        and abcsr.status_id = #{columnStatusRel.statusId}
     </update>
-
 </mapper>

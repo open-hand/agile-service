@@ -169,7 +169,7 @@ public class BoardController {
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "board name", required = true)
                                              @RequestParam String boardName) {
-        return Optional.ofNullable(boardService.checkName(projectId, boardName))
+        return Optional.ofNullable(boardService.checkName(0L, projectId, boardName))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.checkName.get"));
 

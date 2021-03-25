@@ -107,18 +107,21 @@ public class IssueStatusServiceImpl implements IssueStatusService {
         return rel == null;
     }
 
-    public void deleteColumnStatusRel(Long projectId, Long statusId, Long originColumnId) {
+    @Override
+    public void deleteColumnStatusRel(Long organizationId, Long projectId, Long statusId, Long originColumnId) {
         ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
         columnStatusRelDTO.setStatusId(statusId);
         columnStatusRelDTO.setColumnId(originColumnId);
         columnStatusRelDTO.setProjectId(projectId);
+        columnStatusRelDTO.setOrganizationId(organizationId);
         columnStatusRelService.delete(columnStatusRelDTO);
     }
 
-    public void createColumnStatusRel(Long projectId, Long statusId, StatusMoveVO statusMoveVO) {
+    public void createColumnStatusRel(Long organizationId, Long projectId, Long statusId, StatusMoveVO statusMoveVO) {
         ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
         columnStatusRelDTO.setStatusId(statusId);
         columnStatusRelDTO.setProjectId(projectId);
+        columnStatusRelDTO.setOrganizationId(organizationId);
         columnStatusRelDTO.setColumnId(statusMoveVO.getColumnId());
         if (columnStatusRelMapper.select(columnStatusRelDTO).isEmpty()) {
             ColumnStatusRelDTO columnStatusRel = new ColumnStatusRelDTO();
@@ -126,6 +129,7 @@ public class IssueStatusServiceImpl implements IssueStatusService {
             columnStatusRel.setPosition(statusMoveVO.getPosition());
             columnStatusRel.setStatusId(statusId);
             columnStatusRel.setProjectId(projectId);
+            columnStatusRel.setOrganizationId(organizationId);
             columnStatusRelService.create(columnStatusRel);
         }
     }
@@ -134,8 +138,8 @@ public class IssueStatusServiceImpl implements IssueStatusService {
     public IssueStatusVO moveStatusToColumn(Long projectId, Long statusId, StatusMoveVO statusMoveVO) {
         // 判断是否在同一列中操作，更新列中position
         Boolean sameRow = statusMoveVO.getColumnId().equals(statusMoveVO.getOriginColumnId());
-        deleteColumnStatusRel(projectId, statusId, statusMoveVO.getOriginColumnId());
-        updateColumnPosition(projectId, statusId, statusMoveVO,sameRow);
+        deleteColumnStatusRel(0L, projectId, statusId, statusMoveVO.getOriginColumnId());
+        updateColumnPosition(0L, projectId, statusId, statusMoveVO,sameRow);
         return modelMapper.map(issueStatusMapper.selectByStatusId(projectId, statusId), IssueStatusVO.class);
     }
 
@@ -249,26 +253,27 @@ public class IssueStatusServiceImpl implements IssueStatusService {
         issueStatusMapper.batchCreateStatusByProjectIds(addStatusWithProjects, userId);
     }
 
-    private void updateColumnPosition(Long projectId, Long statusId, StatusMoveVO statusMoveVO,Boolean sameRow) {
+    @Override
+    public void updateColumnPosition(Long organizationId, Long projectId, Long statusId, StatusMoveVO statusMoveVO,Boolean sameRow) {
         //查询移动到目的列的已有的所有状态
-        List<ColumnStatusRelDTO> collect = columnStatusRelMapper.selectStatusRel(projectId,statusMoveVO.getColumnId(),statusId);
+        List<ColumnStatusRelDTO> collect = columnStatusRelMapper.selectStatusRel(organizationId, projectId,statusMoveVO.getColumnId(),statusId);
         // 如果不是移动到同一个列，对原列中的状态重新改变position
         if(Boolean.FALSE.equals(sameRow)){
-            updateOlderColumn(projectId,statusId,statusMoveVO);
+            updateOlderColumn(organizationId, projectId,statusId,statusMoveVO);
         }
         // 拥有的所有状态为空，直接接创建一个
         if (CollectionUtils.isEmpty(collect)) {
-            createColumnStatusRel(projectId,statusId,statusMoveVO);
+            createColumnStatusRel(organizationId, projectId,statusId,statusMoveVO);
             return;
         }
         int size = collect.size() + 1;
         // 对指定列进行排序，新增传过来的状态
-        cycleUpdate(projectId,statusId,size,statusMoveVO,collect);
+        cycleUpdate(organizationId, projectId,statusId,size,statusMoveVO,collect);
     }
 
-    private void updateOlderColumn(Long projectId,Long statusId,StatusMoveVO statusMoveVO){
+    private void updateOlderColumn(Long organizationId, Long projectId,Long statusId,StatusMoveVO statusMoveVO){
         // 查询当前列中的状态，按position升序排列
-        List<ColumnStatusRelDTO> columnStatusRelDTOS = columnStatusRelMapper.selectStatusRel(projectId, statusMoveVO.getOriginColumnId(), statusId);
+        List<ColumnStatusRelDTO> columnStatusRelDTOS = columnStatusRelMapper.selectStatusRel(organizationId, projectId, statusMoveVO.getOriginColumnId(), statusId);
         if(!CollectionUtils.isEmpty(columnStatusRelDTOS)){
             for (int i=0;i<columnStatusRelDTOS.size();i++){
                 ColumnStatusRelDTO columnStatusRelDTO = columnStatusRelDTOS.get(i);
@@ -278,7 +283,7 @@ public class IssueStatusServiceImpl implements IssueStatusService {
         }
     }
 
-    private void cycleUpdate(Long projectId,Long statusId,int size,StatusMoveVO statusMoveVO,List<ColumnStatusRelDTO> columnStatusRelDTOS){
+    private void cycleUpdate(Long organizationId, Long projectId,Long statusId,int size,StatusMoveVO statusMoveVO,List<ColumnStatusRelDTO> columnStatusRelDTOS){
         if(CollectionUtils.isEmpty(columnStatusRelDTOS)){
             return;
         }
@@ -286,7 +291,7 @@ public class IssueStatusServiceImpl implements IssueStatusService {
         for(int i= 0; i<size;i++){
             if(statusMoveVO.getPosition() == i){
                 isInsert = true;
-                createColumnStatusRel(projectId,statusId,statusMoveVO);
+                createColumnStatusRel(organizationId, projectId,statusId,statusMoveVO);
             }
             else {
                 int position = i;
@@ -303,6 +308,7 @@ public class IssueStatusServiceImpl implements IssueStatusService {
         }
     }
 
+    @Override
     public void baseUpdatePosition(ColumnStatusRelDTO columnStatusRelDTO){
         if(columnStatusRelMapper.updatePosition(columnStatusRelDTO) != 1){
             throw new CommonException("error.update.position");

@@ -31,6 +31,8 @@ public class ColumnStatusRelDTO extends AuditDomain {
     @Transient
     private Long issueId;
 
+    private Long organizationId;
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -82,5 +84,13 @@ public class ColumnStatusRelDTO extends AuditDomain {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

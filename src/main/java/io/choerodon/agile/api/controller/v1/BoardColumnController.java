@@ -69,7 +69,7 @@ public class BoardColumnController {
                                      @PathVariable(name = "project_id") Long projectId,
                                      @ApiParam(value = "ColumnSort DTO", required = true)
                                      @RequestBody ColumnSortVO columnSortVO) {
-        boardColumnService.columnSort(projectId, columnSortVO);
+        boardColumnService.columnSort(0L, projectId, columnSortVO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

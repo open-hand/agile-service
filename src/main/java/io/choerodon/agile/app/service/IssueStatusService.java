@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.IssueStatusVO;
 import io.choerodon.agile.api.vo.StatusAndIssuesVO;
 import io.choerodon.agile.api.vo.StatusMoveVO;
 import io.choerodon.agile.api.vo.event.AddStatusWithProject;
+import io.choerodon.agile.infra.dto.ColumnStatusRelDTO;
 import io.choerodon.agile.infra.dto.IssueStatusDTO;
 
 import java.util.List;
@@ -41,4 +42,10 @@ public interface IssueStatusService {
     void delete(IssueStatusDTO issueStatusDTO);
 
     void batchCreateStatusByProjectIds(List<AddStatusWithProject> addStatusWithProjects, Long userId);
+
+    void deleteColumnStatusRel(Long organizationId, Long projectId, Long statusId, Long originColumnId);
+
+    void baseUpdatePosition(ColumnStatusRelDTO columnStatusRelDTO);
+
+    void updateColumnPosition(Long organizationId, Long projectId, Long statusId, StatusMoveVO statusMoveVO,Boolean sameRow);
 }

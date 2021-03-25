@@ -40,6 +40,8 @@ public class BoardColumnDTO extends AuditDomain{
 
     private String colorCode;
 
+    private Long organizationId;
+
     public Long getColumnId() {
         return columnId;
     }
@@ -110,5 +112,13 @@ public class BoardColumnDTO extends AuditDomain{
 
     public String getColorCode() {
         return colorCode;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }
