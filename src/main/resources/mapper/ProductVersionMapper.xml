@@ -525,7 +525,7 @@
         LIMIT 1;
     </select>
 
-    <select id="listAppVersionByOption" resultType="io.choerodon.agile.api.vo.AppVersionVO">
+    <select id="listAppVersionByOption" resultType="io.choerodon.agile.api.vo.PublishVersionVO">
         SELECT
             aav.id,
             aav.group_id,
@@ -558,7 +558,7 @@
         </if>
     </select>
 
-    <select id="listUnRelAppVersionByOption" resultType="io.choerodon.agile.api.vo.AppVersionVO">
+    <select id="listUnRelAppVersionByOption" resultType="io.choerodon.agile.api.vo.PublishVersionVO">
         SELECT
             aav.id,
             aav.group_id,

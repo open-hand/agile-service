@@ -1,9 +1,6 @@
 package io.choerodon.agile.infra.dto.business;
 
-import io.choerodon.agile.api.vo.AppVersionVO;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.PriorityVO;
-import io.choerodon.agile.api.vo.StatusVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.utils.StringUtil;
 
@@ -139,14 +136,14 @@ public class IssueDetailDTO {
 
     private Long lastUpdatedBy;
 
-    private List<AppVersionVO> appVersions;
+    private List<TagVO> tags;
 
-    public List<AppVersionVO> getAppVersions() {
-        return appVersions;
+    public List<TagVO> getTags() {
+        return tags;
     }
 
-    public void setAppVersions(List<AppVersionVO> appVersions) {
-        this.appVersions = appVersions;
+    public void setTags(List<TagVO> tags) {
+        this.tags = tags;
     }
 
     public String getParentRelateDescription() {

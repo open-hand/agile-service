@@ -399,13 +399,13 @@ public interface IssueService {
                                                   PageRequest pageRequest);
 
     /**
-     * 处理更新app version
+     * 处理更新tag
      *
-     * @param appVersions
+     * @param tags
      * @param projectId
      * @param issueId
      */
-    void handleUpdateAppVersionIssueRel(List<AppVersionVO> appVersions, Long projectId, Long issueId);
+    void handleUpdateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
 
     /**
      * 工作台查询我经手的

@@ -91,6 +91,26 @@ public class AppServiceRepVO {
     @Encrypt
     private Long sagaInstanceId;
 
+    private String artifactId;
+
+    private String groupId;
+
+    public String getArtifactId() {
+        return artifactId;
+    }
+
+    public void setArtifactId(String artifactId) {
+        this.artifactId = artifactId;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
     public Long getSagaInstanceId() {
         return sagaInstanceId;
     }

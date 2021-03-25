@@ -52,7 +52,6 @@ public class ProductVersionController {
     private static final String REVOKE_ARCHIVED_ERROR = "error.productVersion.revokeArchived";
     private static final String RELATED_APP_VERSION_ERROR = "error.productVersion.related.appVersion.query";
     private static final String UN_RELATED_APP_VERSION_ERROR = "error.productVersion.unrelated.appVersion.query";
-    private static final String RELATE_APP_VERSION_ERROR = "error.productVersion.appVersion.relate";
     private static final String COMPLETED_STORY_ERROR = "error.productVersion.completed.story.query";
     private static final String COMPLETED_BUG_ERROR = "error.productVersion.completed.bug.query";
 
@@ -274,7 +273,7 @@ public class ProductVersionController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询产品版本关联的应用版本")
     @GetMapping(value = "/{versionId}/rel_app_version")
-    public ResponseEntity<List<AppVersionVO>> listAppVersionByOption(
+    public ResponseEntity<List<PublishVersionVO>> listAppVersionByOption(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @ApiParam(value = "产品版本id", required = true)
@@ -289,7 +288,7 @@ public class ProductVersionController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询产品版本项目下未关联的应用版本")
     @GetMapping(value = "/{versionId}/un_rel_app_version")
-    public ResponseEntity<Page<AppVersionVO>> listUnRelAppVersionByOption(
+    public ResponseEntity<Page<PublishVersionVO>> listUnRelAppVersionByOption(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @ApiParam(value = "产品版本id", required = true)
@@ -302,20 +301,6 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(UN_RELATED_APP_VERSION_ERROR));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "产品版本关联应用版本")
-    @PostMapping(value = "/{versionId}/rel_app_version")
-    public ResponseEntity<List<AppVersionVO>> createRelAppVersion(
-            @ApiParam(value = "项目id", required = true)
-            @PathVariable(name = "project_id") Long projectId,
-            @ApiParam(value = "产品版本id", required = true)
-            @Encrypt @PathVariable(name = "versionId") Long versionId,
-            @ApiParam(value = "要关联的应用版本")
-            @RequestBody ProductVersionRelAppVersionVO productRelAppVersion) {
-        return Optional.ofNullable(productVersionService.createRelAppVersion(projectId, versionId, productRelAppVersion))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException(RELATE_APP_VERSION_ERROR));
-    }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询产品版本项目下关联的应用版本下已完成故事")
@@ -349,31 +334,31 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(COMPLETED_BUG_ERROR));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "创建应用版本并关联产品版本")
-    @PostMapping(value = "/{versionId}/create_app_version")
-    public ResponseEntity<List<AppVersionVO>> createAndRelAppVersion(
-            @ApiParam(value = "项目id", required = true)
-            @PathVariable(name = "project_id") Long projectId,
-            @ApiParam(value = "产品版本id", required = true)
-            @Encrypt @PathVariable(name = "versionId") Long versionId,
-            @ApiParam(value = "要创建并关联的应用版本")
-            @RequestBody @Valid List<AppVersionCreateVO> appVersionCreateList) {
-        return Optional.ofNullable(productVersionService.createAndRelAppVersion(projectId, versionId, appVersionCreateList))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException(RELATE_APP_VERSION_ERROR));
-    }
+//    @Permission(level = ResourceLevel.ORGANIZATION)
+//    @ApiOperation(value = "创建应用版本并关联产品版本")
+//    @PostMapping(value = "/{versionId}/create_app_version")
+//    public ResponseEntity<List<PublishVersionVO>> createAndRelAppVersion(
+//            @ApiParam(value = "项目id", required = true)
+//            @PathVariable(name = "project_id") Long projectId,
+//            @ApiParam(value = "产品版本id", required = true)
+//            @Encrypt @PathVariable(name = "versionId") Long versionId,
+//            @ApiParam(value = "要创建并关联的应用版本")
+//            @RequestBody @Valid List<AppVersionCreateVO> appVersionCreateList) {
+//        return Optional.ofNullable(productVersionService.createAndRelAppVersion(projectId, versionId, appVersionCreateList))
+//                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
+//                .orElseThrow(() -> new CommonException(RELATE_APP_VERSION_ERROR));
+//    }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("删除产品版本下所有应用版本与问题关系")
-    @DeleteMapping(value = "/{versionId}/issue/{issueId}")
-    public ResponseEntity<Void> deleteIssueRel(
-            @ApiParam(value = "项目id", required = true)
-            @PathVariable(name = "project_id") Long projectId,
-            @ApiParam(value = "versionId", required = true)
-            @PathVariable @Encrypt Long versionId,
-            @PathVariable @Encrypt Long issueId) {
-        productVersionService.deleteIssueRel(projectId, versionId, issueId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+//    @Permission(level = ResourceLevel.ORGANIZATION)
+//    @ApiOperation("删除产品版本下所有应用版本与问题关系")
+//    @DeleteMapping(value = "/{versionId}/issue/{issueId}")
+//    public ResponseEntity<Void> deleteIssueRel(
+//            @ApiParam(value = "项目id", required = true)
+//            @PathVariable(name = "project_id") Long projectId,
+//            @ApiParam(value = "versionId", required = true)
+//            @PathVariable @Encrypt Long versionId,
+//            @PathVariable @Encrypt Long issueId) {
+//        productVersionService.deleteIssueRel(projectId, versionId, issueId);
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
 }

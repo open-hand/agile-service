@@ -10,18 +10,18 @@ import javax.persistence.Table;
 
 /**
  * @author superlee
- * @since 2021-03-09
+ * @since 2021-03-25
  */
-@Table(name = "agile_app_version_issue_rel")
+@Table(name = "agile_tag_issue_rel")
 @ModifyAudit
 @VersionAudit
-public class AppVersionIssueRelDTO extends AuditDomain {
+public class TagIssueRelDTO extends AuditDomain {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    private Long appVersionId;
+    private Long tagId;
 
     private Long issueId;
 
@@ -37,12 +37,12 @@ public class AppVersionIssueRelDTO extends AuditDomain {
         this.id = id;
     }
 
-    public Long getAppVersionId() {
-        return appVersionId;
+    public Long getTagId() {
+        return tagId;
     }
 
-    public void setAppVersionId(Long appVersionId) {
-        this.appVersionId = appVersionId;
+    public void setTagId(Long tagId) {
+        this.tagId = tagId;
     }
 
     public Long getIssueId() {

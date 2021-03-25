@@ -7,15 +7,16 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * @author superlee
  * @since 2021-03-09
  */
-@Table(name = "agile_app_version")
+@Table(name = "agile_publish_version")
 @ModifyAudit
 @VersionAudit
-public class AppVersionDTO extends AuditDomain {
+public class PublishVersionDTO extends AuditDomain {
 
     @Id
     @GeneratedValue
@@ -37,16 +38,24 @@ public class AppVersionDTO extends AuditDomain {
 
     private Boolean appService;
 
-    private Boolean tag;
+    private Date actualPublishDate;
 
-    private Long parentId;
+    private Long tagId;
 
-    public Long getParentId() {
-        return parentId;
+    public Long getTagId() {
+        return tagId;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
+    public void setTagId(Long tagId) {
+        this.tagId = tagId;
+    }
+
+    public Date getActualPublishDate() {
+        return actualPublishDate;
+    }
+
+    public void setActualPublishDate(Date actualPublishDate) {
+        this.actualPublishDate = actualPublishDate;
     }
 
     public Boolean getAppService() {
@@ -55,14 +64,6 @@ public class AppVersionDTO extends AuditDomain {
 
     public void setAppService(Boolean appService) {
         this.appService = appService;
-    }
-
-    public Boolean getTag() {
-        return tag;
-    }
-
-    public void setTag(Boolean tag) {
-        this.tag = tag;
     }
 
     public Long getId() {

@@ -158,7 +158,7 @@ public interface ProductVersionMapper extends BaseMapper<ProductVersionDTO> {
      * @param appVersionSearchVO 查询条件
      * @return 产品版本关联的应用版本
      */
-    List<AppVersionVO> listAppVersionByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("appVersionSearchVO") AppVersionSearchVO appVersionSearchVO);
+    List<PublishVersionVO> listAppVersionByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("appVersionSearchVO") AppVersionSearchVO appVersionSearchVO);
 
     /**
      * 查询产品版本未关联的应用版本
@@ -168,7 +168,7 @@ public interface ProductVersionMapper extends BaseMapper<ProductVersionDTO> {
      * @param appVersionSearchVO 查询条件
      * @return 产品版本未关联的应用版本
      */
-    List<AppVersionVO> listUnRelAppVersionByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("appVersionSearchVO") AppVersionSearchVO appVersionSearchVO);
+    List<PublishVersionVO> listUnRelAppVersionByOption(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("appVersionSearchVO") AppVersionSearchVO appVersionSearchVO);
 
     /**
      * 查询产品版本关联的应用版本id
