@@ -72,19 +72,22 @@ export default class SwimLaneHeader extends Component {
           style={{ marginRight: 10 }}
           name={statusName}
         />
-        <UserTag
-          style={{ marginRight: 10 }}
-          showText={false}
-          size={24}
-          data={{
-            id: assigneeId,
-            loginName: assigneeLoginName,
-            realName: assigneeRealName,
-            imageUrl,
-            ldap,
-            email,
-          }}
-        />
+        {assigneeId ? (
+          <UserTag
+            style={{ marginRight: 10 }}
+            showText={false}
+            size={24}
+            data={{
+              id: assigneeId,
+              loginName: assigneeLoginName,
+              realName: assigneeRealName,
+              tooltip: assigneeName,
+              imageUrl,
+              ldap,
+              email,
+            }}
+          />
+        ) : null}
         <span
           className="c7n-parentIssue-summary"
           style={JSON.stringify(ScrumBoardStore.getCurrentClickId) !== '{}' ? {
@@ -158,22 +161,22 @@ export default class SwimLaneHeader extends Component {
       >
         {this.renderByMode(mode, subIssueDataLength)}
         {
-            mode === 'parent_child' ? (
-              <Button
-                type="primary"
-                style={{
-                  display: parentIssue.categoryCode !== 'done' && parentIssue.canMoveToComplish ? 'block' : 'none',
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  ScrumBoardStore.setUpdateParent(parentIssue);
-                  ScrumBoardStore.setTransFromData(parentIssue, parentIssue.issueId);
-                }}
-              >
-                移动到done
-              </Button>
-            ) : null
-          }
+          mode === 'parent_child' ? (
+            <Button
+              type="primary"
+              style={{
+                display: parentIssue.categoryCode !== 'done' && parentIssue.canMoveToComplish ? 'block' : 'none',
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                ScrumBoardStore.setUpdateParent(parentIssue);
+                ScrumBoardStore.setTransFromData(parentIssue, parentIssue.issueId);
+              }}
+            >
+              移动到done
+            </Button>
+          ) : null
+        }
       </div>
     );
   }
