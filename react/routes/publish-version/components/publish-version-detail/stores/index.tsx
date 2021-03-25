@@ -57,6 +57,7 @@ const Provider: React.FC<ReleaseDetailProps> = ({
   }), [push]);
   useEffect(() => {
     store.init({ events: { update: updateDetail, selectIssue }, programId, disabled: restProps.disabled });
+    store.select(restProps.id);
   }, []);
   useEffect(() => () => {
     store.clear();

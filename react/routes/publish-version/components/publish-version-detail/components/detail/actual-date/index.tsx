@@ -9,29 +9,29 @@ import { useReleaseDetailContext } from '../../../stores';
 interface Props {
 
 }
-const BusinessValue: React.FC<Props> = () => {
+const ActualDate: React.FC<Props> = () => {
   const { disabled, store } = useReleaseDetailContext();
-  const { expectReleaseDate: originData } = store.getCurrentData;
-  const expectReleaseDate = useMemo(() => (originData ? moment(originData, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD') : undefined), [originData]);
+  const { actualPublishDate: originData } = store.getCurrentData;
+  const actualPublishDate = useMemo(() => (originData ? moment(originData, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD') : undefined), [originData]);
 
   return (
 
     <Field label="实际发布时间">
       <TextEditToggle
         onSubmit={(value: Moment | null) => {
-          store.update('expectReleaseDate', value?.format('YYYY-MM-DD HH:mm:ss'));
+          store.update('actualPublishDate', value?.format('YYYY-MM-DD HH:mm:ss'));
         }}
         disabled={disabled}
-        initValue={expectReleaseDate ? moment(expectReleaseDate, 'YYYY-MM-DD') : undefined}
+        initValue={actualPublishDate ? moment(actualPublishDate, 'YYYY-MM-DD') : undefined}
         submitTrigger={['blur', 'change']}
         editor={() => (
           <DatePicker style={{ width: '100%' }} />
         )}
       >
-        {expectReleaseDate || '无'}
+        {actualPublishDate || '无'}
       </TextEditToggle>
     </Field>
   );
 };
 
-export default observer(BusinessValue);
+export default observer(ActualDate);

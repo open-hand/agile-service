@@ -16,7 +16,7 @@ const Header: React.FC<{}> = () => {
 
       <div className={`${prefixCls}-header-line`}>
         <Summary />
-        <BaseTag color={VERSION_STATUS_TYPE[statusCode]?.color} text={statusName} />
+        <BaseTag color={VERSION_STATUS_TYPE[statusCode as keyof typeof VERSION_STATUS_TYPE]?.color} text={statusName} />
 
       </div>
       <Button

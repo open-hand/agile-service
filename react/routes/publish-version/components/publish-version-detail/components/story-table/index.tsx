@@ -17,7 +17,7 @@ function StoryTable() {
     Modal.confirm({
       title: '是否删除关联',
       children: `确定要删除问题${record.get('issueNum')}与版本的关联？删除后，将移除故事和当前版本下应用版本的关联关系。`,
-      onOk: () => versionApi.deleteLinkIssueId(record.get('issueId'), store.current?.versionId!).then(() => {
+      onOk: () => versionApi.deleteLinkIssueId(record.get('issueId'), store.current?.id!).then(() => {
         storyTableDataSet.query();
       }),
     });

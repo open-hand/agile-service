@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import TextArea from '@/components/TextArea';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
-import { versionApi } from '@/api';
+import { publishVersionApi, versionApi } from '@/api';
 import styles from './index.less';
 import { useReleaseDetailContext } from '../../stores';
 
@@ -11,7 +11,7 @@ const Summary: React.FC = () => {
   const { disabled, store } = useReleaseDetailContext();
   const { name } = store.getCurrentData;
   function handleCheckName(newName: string) {
-    return newName === name ? new Promise((r) => r(true)) : versionApi.checkName(newName).then((res: boolean) => (res ? '版本名称重复' : true));
+    return newName === name ? new Promise((r) => r(true)) : publishVersionApi.check({ ...store.getCurrentData, versionAlias: name }).then((res: boolean) => (res ? '版本名称重复' : true));
   }
   return (
     <div className={styles.summary}>
@@ -19,7 +19,7 @@ const Summary: React.FC = () => {
         className={styles.summary_edit}
         disabled={disabled}
         onSubmit={(value: string) => {
-          store.update('name', value);
+          store.update('versionAlias', value);
         }}
         initValue={name}
         alwaysRender={false}

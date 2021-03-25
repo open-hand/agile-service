@@ -31,6 +31,7 @@ const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> =
   }
   return <Button {...otherProps}>{children}</Button>;
 };
+
 function PublishVersion() {
   const { prefixCls, tableDataSet } = usePublishVersionContext();
   function handleClickMenu(key: string, record: Record) {
@@ -52,9 +53,12 @@ function PublishVersion() {
         break;
     }
   }
+  function handleRefresh() {
+    tableDataSet.query();
+  }
   const renderName = ({ record, text }: RenderProps) => (
     <TableDropMenu
-      text={text}
+      text={record?.get('versionAlias') || record?.get('version')}
       style={{ lineHeight: '32px' }}
       menu={(
         <Menu onClick={({ key }) => handleClickMenu(key, record!)}>
@@ -63,7 +67,7 @@ function PublishVersion() {
           <Menu.Item key="del">删除</Menu.Item>
         </Menu>
       )}
-      onClickEdit={() => openPublishVersionDetail('999')}
+      onClickEdit={() => openPublishVersionDetail(record?.get('id')!)}
     />
   );
   const renderStatus = ({ text }: RenderProps) => (
@@ -90,7 +94,7 @@ function PublishVersion() {
         <TooltipButton
           icon="playlist_add"
           title="无相应权限创建发布版本"
-          onClick={openCreatePublishVersionModal}
+          onClick={() => openCreatePublishVersionModal({ handleOk: handleRefresh })}
         >
           创建发布版本
         </TooltipButton>
@@ -100,7 +104,7 @@ function PublishVersion() {
         <Table dataSet={tableDataSet}>
           <Column name="name" renderer={renderName} />
           <Column name="status" renderer={renderStatus} />
-          <Column name="releaseDate" className="c7n-agile-table-cell" width={110} />
+          <Column name="actualPublishDate" className="c7n-agile-table-cell" width={110} />
           <Column name="artifactId" className="c7n-agile-table-cell" width={100} />
           <Column name="groupId" className="c7n-agile-table-cell" width={120} />
           <Column name="appService" className="c7n-agile-table-cell" width={120} />
