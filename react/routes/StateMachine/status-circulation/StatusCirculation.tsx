@@ -6,6 +6,7 @@ import {
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui/pro';
 import { Divider } from 'choerodon-ui';
+import { getIsOrganization } from '@/utils/common';
 import openSelectExistStatus from '../components/select-exist-status';
 import openCreateStatus from '../components/create-status';
 import openSetDefaultStatus from '../components/set-default-status';
@@ -83,7 +84,11 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         </Button>
       </Header>
       <Breadcrumb />
-      <Divider style={{ margin: 0 }} />
+      {
+        !getIsOrganization() && (
+          <Divider style={{ margin: 0 }} />
+        )
+      }
       <Content style={{ display: 'flex', flexDirection: 'column', paddingBottom: 0 }}>
         <IssueTypeTab
           selectedType={selectedType}

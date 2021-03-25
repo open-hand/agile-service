@@ -16,6 +16,7 @@ import { statusTransformApiConfig } from '@/api';
 import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
 import { Divider, Tooltip } from 'choerodon-ui';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import { getIsOrganization } from '@/utils/common';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
 import FeatureLinkage from './components/linkage/feature-linkage';
@@ -546,8 +547,12 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   return (
     <Page>
       <Breadcrumb />
-      <Divider style={{ margin: 0 }} />
-      <Content>
+      {
+        !getIsOrganization() && (
+          <Divider style={{ margin: 0 }} />
+        )
+      }
+      <Content style={{ borderTop: 'none' }}>
         <IssueTypeTab selectedType={selectedType} setSelectedType={setSelectedType} />
         {tab}
         <div className={`${styles.customCirculation}`}>
