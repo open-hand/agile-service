@@ -16,6 +16,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_publish_version.groovy') {
             }
             column(name: "actual_publish_date", type: "DATETIME", remarks: '实际发布时间')
             column(name: 'tag_id', type: 'BIGINT UNSIGNED', remarks: 'tag id')
+            column(name: 'description', type: 'text', remarks: '描述')
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
                 constraints(nullable: false)
             }

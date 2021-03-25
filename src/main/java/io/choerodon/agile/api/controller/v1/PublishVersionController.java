@@ -116,10 +116,23 @@ public class PublishVersionController {
     @ApiOperation(value = "发布版本是否重复")
     @PostMapping(value = "/existed")
     public ResponseEntity<Boolean> isExisted(@ApiParam(value = "项目id", required = true)
-                                            @PathVariable(name = "project_id") Long projectId,
-                                            @ApiParam(value = "name", required = true)
-                                            @RequestBody @Valid PublishVersionVO publishVersionVO) {
+                                             @PathVariable(name = "project_id") Long projectId,
+                                             @ApiParam(value = "publishVersionVO", required = true)
+                                             @RequestBody @Valid PublishVersionVO publishVersionVO) {
         return Optional.ofNullable(publishVersionService.isExisted(projectId, publishVersionVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.publishVersion.isExisted"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "版本别名是否重复")
+    @GetMapping(value = "/checkAlias")
+    public ResponseEntity<Boolean> checkAlias(@ApiParam(value = "项目id", required = true)
+                                              @PathVariable(name = "project_id") Long projectId,
+                                              @ApiParam(value = "alias", required = true)
+                                              @RequestParam String alias,
+                                              @RequestParam(required = false) Long publishVersionId) {
+        return Optional.ofNullable(publishVersionService.checkAlias(projectId, alias, publishVersionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.publishVersion.isExisted"));
     }
