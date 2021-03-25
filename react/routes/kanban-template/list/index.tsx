@@ -66,7 +66,7 @@ const KanbanTemplateList = () => {
       </Header>
       <Breadcrumb />
       <Content style={{
-        borderTop: '1px solid rgb(216, 216, 216)',
+        borderTop: 'none',
       }}
       >
         <Table dataSet={dataSet}>
