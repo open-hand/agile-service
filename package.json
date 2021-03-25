@@ -2,7 +2,7 @@
   "name": "@choerodon/agile",
   "routeName": "agile",
   "version": "0.25.0",
-  "description": "",
+  "description": " ",
   "main": "./lib/index.js",
   "files": [
     "lib"
