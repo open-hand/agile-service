@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PageWrap, PageTab } from '@choerodon/boot';
 import './index.less';
 
-const KanbanTemplate = React.lazy(() => import('../kanban-template'));
+const KanbanTemplate = React.lazy(() => import('../kanban-template/list'));
 const StateList = React.lazy(() => import('./state-list'));
 const StatusMachineTemplate = React.lazy(() => import('../statusMachine-template'));
 const TemplateManage = () => {
