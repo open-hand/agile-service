@@ -29,6 +29,7 @@ const Settings = React.lazy(() => import('./routes/settings'));
 const ProjectReport = React.lazy(() => import('./routes/project-report'));
 const GanttPage = React.lazy(() => import('./routes/gantt'));
 const UiPreview = React.lazy(() => import('./routes/ui-preview'));
+const KanbanTemplateDetail = React.lazy(() => import('./routes/kanban-template/detail'));
 const { AppState } = stores;
 export function getRoutes(match) {
   return [
@@ -57,6 +58,11 @@ export function getRoutes(match) {
     />,
     <Route path={`${match.url}/issue-type`} component={IssueType} />,
     <Route path={`${match.url}/settings`} component={Settings} />,
+    <PermissionRoute
+      service={[]}
+      path={`${match.url}/kanban-template/detail/:templateId`}
+      component={KanbanTemplateDetail}
+    />,
     <Route path={`${match.url}/states`} component={State} />,
     <Route path={`${match.url}/priorities`} component={Priority} />,
     <PermissionRoute

@@ -4,11 +4,14 @@ import {
 } from '@choerodon/master';
 import { Button } from 'choerodon-ui/pro';
 import { DragDropContext } from 'react-beautiful-dnd';
+import { useParams } from 'react-router';
 import Columns from './components/columns';
 import UnsetColumn from './components/unset-column';
 import styles from './index.less';
 
-const KanbanTemplateCreate = () => {
+const KanbanTemplateDetail = () => {
+  const { templateId } = useParams();
+  console.log(templateId);
   const handleDragEnd = useCallback(() => {
 
   }, []);
@@ -41,4 +44,4 @@ const KanbanTemplateCreate = () => {
   );
 };
 
-export default KanbanTemplateCreate;
+export default KanbanTemplateDetail;
