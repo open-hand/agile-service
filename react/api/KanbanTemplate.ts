@@ -39,6 +39,13 @@ class KanbanTemplateApi extends Api<KanbanTemplateApi> {
       data,
     });
   }
+
+  delete(boardId: string) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}//board_template/board/${boardId}`,
+    });
+  }
 }
 
 const kanbanTemplateApi = new KanbanTemplateApi();

@@ -6,7 +6,7 @@ import {
   Button, Table, DataSet, Modal,
 } from 'choerodon-ui/pro';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
-import { kanbanTemplateApiConfig } from '@/api';
+import { kanbanTemplateApiConfig, kanbanTemplateApi } from '@/api';
 import TableAction from '@/components/TableAction';
 import to from '@/utils/to';
 import openKanbanTemplateModal from './components/modal';
@@ -39,7 +39,7 @@ const KanbanTemplateList = () => {
         Modal.confirm({
           title: `确认删除报告“${record.get('title')}”`,
           onOk: async () => {
-            // await projectReportApi.delete(record.get('id'));
+            await kanbanTemplateApi.delete(record.get('boardId'));
             dataSet.query();
           },
         });
