@@ -1271,9 +1271,6 @@
                         agile_issue_status ais,
                     </if>
                     agile_issue ai
-                    <if test="searchType == 'myAssigned'">
-                        left join agile_data_log adl on ai.issue_id = adl.issue_id and ai.project_id = adl.project_id and adl.field = 'assignee'
-                    </if>
                 where 1=1
                 <if test="searchType != 'myStarBeacon'">
                     AND aisr.project_id IN
@@ -1341,7 +1338,20 @@
                         (
                             ai.assignee_id = #{userId}
                             or
-                            adl.old_value = #{userId}
+                            ai.issue_id in
+                            (
+                                SELECT
+                                adl.issue_id
+                                FROM
+                                agile_data_log adl
+                                WHERE
+                                adl.project_id IN
+                                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                                    #{projectId}
+                                </foreach>
+                                AND adl.field = 'assignee'
+                                AND adl.old_value = concat('',#{userId},'')
+                            )
                         )
                     </when>
                 </choose>
@@ -1354,9 +1364,6 @@
                     ai.project_id,
                     ai.last_update_date
                 from agile_issue ai
-                <if test="searchType == 'myAssigned'">
-                    left join agile_data_log adl on ai.issue_id = adl.issue_id and ai.project_id = adl.project_id and adl.field = 'assignee'
-                </if>
                 where
                 ai.project_id in
                 <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
@@ -1407,7 +1414,20 @@
                             (
                                 ai.assignee_id = #{userId}
                                 or
-                                adl.old_value = #{userId}
+                                ai.issue_id in
+                                (
+                                    SELECT
+                                    adl.issue_id
+                                    FROM
+                                    agile_data_log adl
+                                    WHERE
+                                    adl.project_id IN
+                                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                                        #{projectId}
+                                    </foreach>
+                                    AND adl.field = 'assignee'
+                                    AND adl.old_value = concat('',#{userId},'')
+                                )
                             )
                         </when>
                         <when test=" searchType == 'myStarBeacon'">
@@ -1532,7 +1552,7 @@
                                             #{projectId}
                                         </foreach>
                                         and field = 'assignee'
-                                        and old_value = #{userId}
+                                        and old_value = concat('',#{userId},'')
                                     )
                                 )
                             </if>
