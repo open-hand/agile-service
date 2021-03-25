@@ -38,6 +38,8 @@ public class OrganizationConfigController {
     private StatusLinkageService statusLinkageService;
     @Autowired
     private StatusFieldSettingService statusFieldSettingService;
+    @Autowired
+    private ObjectSchemeFieldService objectSchemeFieldService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "组织层创建问题类型的状态机模板")
@@ -251,5 +253,17 @@ public class OrganizationConfigController {
         return Optional.ofNullable(statusFieldSettingService.listByOptions(organizationId, issueTypeId, statusId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.status.field.setting.get"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "根据方案编码获取人员自定义字段")
+    @GetMapping("/member_list")
+    public ResponseEntity<List<ObjectSchemeFieldVO>> selectMemberList(@ApiParam(value = "组织id", required = true)
+                                                                      @PathVariable("organization_id") Long organizationId,
+                                                                      @ApiParam(value = "issue类型id", required = true)
+                                                                      @RequestParam @Encrypt Long issueTypeId,
+                                                                      @ApiParam(value = "方案编码")
+                                                                      @RequestParam(required = false) String schemeCode) {
+        return new ResponseEntity<>(objectSchemeFieldService.selectMemberList(organizationId, null, schemeCode, issueTypeId, null), HttpStatus.OK);
     }
 }

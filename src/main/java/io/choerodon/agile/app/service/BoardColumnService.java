@@ -1,12 +1,11 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.BoardColumnVO;
-import io.choerodon.agile.api.vo.ColumnSortVO;
-import io.choerodon.agile.api.vo.ColumnWithMaxMinNumVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.RemoveStatusWithProject;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.infra.dto.BoardColumnDTO;
 import io.choerodon.agile.infra.dto.BoardDTO;
+import io.choerodon.agile.infra.dto.ColumnWithStatusRelDTO;
 
 import java.util.List;
 
@@ -26,7 +25,7 @@ public interface BoardColumnService {
 
     void initBoardColumns(Long projectId, Long boardId, List<StatusPayload> statusPayloads);
 
-    void columnSort(Long projectId, ColumnSortVO columnSortVO);
+    void columnSort(Long organizationId, Long projectId, ColumnSortVO columnSortVO);
 
     void createColumnWithRelateStatus(BoardDTO boardResult);
 
@@ -35,5 +34,13 @@ public interface BoardColumnService {
     BoardColumnDTO createBase(BoardColumnDTO boardColumnDTO);
 
     void batchDeleteColumnAndStatusRel(List<RemoveStatusWithProject> removeStatusWithProjects);
+
+    void relate(Long organizationId, Long projectId, Long boardId, String name, String categoryCode, Integer sequence, List<ColumnWithStatusRelDTO> columnWithStatusRelDTOList, String colorCode);
+
+    void setColumnColor(BoardColumnVO boardColumnVO, Boolean checkStatus);
+
+    Boolean checkColumnStatusExist(Long organizationId, Long projectId, Long statusId);
+
+    void createCheck(BoardColumnVO boardColumnVO);
 
 }

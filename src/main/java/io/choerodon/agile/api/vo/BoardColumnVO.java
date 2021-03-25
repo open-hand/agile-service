@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -53,6 +54,8 @@ public class BoardColumnVO {
 
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
+
+    private List<StatusTemplateVO> status;
 
     public Long getColumnId() {
         return columnId;
@@ -148,6 +151,14 @@ public class BoardColumnVO {
 
     public Long getStatusId() {
         return statusId;
+    }
+
+    public List<StatusTemplateVO> getStatus() {
+        return status;
+    }
+
+    public void setStatus(List<StatusTemplateVO> status) {
+        this.status = status;
     }
 
     @Override

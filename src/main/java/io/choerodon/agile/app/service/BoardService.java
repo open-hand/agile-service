@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
+import io.choerodon.agile.infra.dto.BoardDTO;
 
 import java.util.List;
 
@@ -47,7 +48,7 @@ public interface BoardService {
      */
     UserSettingVO updateUserSettingBoard(Long projectId, Long boardId, String swimlaneBasedCode);
 
-    Boolean checkName(Long projectId, String boardName);
+    Boolean checkName(Long organizationId, Long projectId, String boardName);
 
     /**
      * 根据快速筛选id返回查询sql
@@ -74,4 +75,6 @@ public interface BoardService {
      * @return
      */
     Boolean isLinked(Long projectId, Long issueId, Long statusId);
+
+    BoardDTO createBoard(Long organizationId, Long projectId, String boardName);
 }

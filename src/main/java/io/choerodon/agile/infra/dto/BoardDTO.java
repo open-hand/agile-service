@@ -43,6 +43,8 @@ public class BoardDTO extends AuditDomain {
     @Transient
     private String userDefaultBoard;
 
+    private Long organizationId;
+
     public Long getBoardId() {
         return boardId;
     }
@@ -121,5 +123,13 @@ public class BoardDTO extends AuditDomain {
 
     public void setUserDefaultBoard(String userDefaultBoard) {
         this.userDefaultBoard = userDefaultBoard;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

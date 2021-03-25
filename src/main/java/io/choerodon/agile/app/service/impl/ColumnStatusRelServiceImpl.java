@@ -22,7 +22,7 @@ public class ColumnStatusRelServiceImpl implements ColumnStatusRelService {
 
     @Override
     public void create(ColumnStatusRelDTO columnStatusRelDTO) {
-        if (columnStatusRelMapper.insert(columnStatusRelDTO) != 1) {
+        if (columnStatusRelMapper.insertSelective(columnStatusRelDTO) != 1) {
             throw new CommonException("error.ColumnStatus.insert");
         }
         redisUtil.deleteRedisCache(new String[]{"Agile:CumulativeFlowDiagram" + columnStatusRelDTO.getProjectId() + ':' + "*"});

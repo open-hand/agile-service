@@ -115,6 +115,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             StatusFieldSettingDTO map = modelMapper.map(statusFieldSettingVO, StatusFieldSettingDTO.class);
             map.setProjectId(project);
             map.setStatusId(statusId);
+            map.setOrganizationId(0L);
             map.setIssueTypeId(issueType);
             baseInsert(map);
             // 插入field值

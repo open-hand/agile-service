@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.BoardColumnVO;
 import io.choerodon.agile.api.vo.ColumnWithMaxMinNumVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.event.RemoveStatusWithProject;
@@ -97,4 +98,8 @@ public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
     void deleteByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
 
     Set<Long> queryStatusByBoardId(@Param("projectId") Long projectId, @Param("boardId") Long boardId);
+
+    void updateMaxAndMinNumTemplate(@Param("organizationId") Long organizationId , @Param("columnInfo") ColumnWithMaxMinNumVO columnWithMaxMinNumVO);
+
+    List<BoardColumnVO> listColumnAndStatusByBoardId(@Param("organizationId") Long organizationId,  @Param("boardId") Long boardId);
 }

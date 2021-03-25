@@ -44,6 +44,8 @@ public class BoardVO {
     @ApiModelProperty(value = "用户默认看板")
     private String userDefaultBoard;
 
+    private Long organizationId;
+
     public Long getBoardId() {
         return boardId;
     }
@@ -130,5 +132,13 @@ public class BoardVO {
 
     public void setUserDefaultBoard(String userDefaultBoard) {
         this.userDefaultBoard = userDefaultBoard;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

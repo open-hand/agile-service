@@ -106,10 +106,10 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public void create(Long projectId, String boardName) {
-        if (Boolean.TRUE.equals(checkName(projectId, boardName))) {
+        if (Boolean.TRUE.equals(checkName(0L, projectId, boardName))) {
             throw new CommonException("error.boardName.exist");
         }
-        BoardDTO boardResult = createBoard(projectId, boardName);
+        BoardDTO boardResult = createBoard(0L, projectId, boardName);
         boardColumnService.createColumnWithRelateStatus(boardResult);
     }
 
@@ -535,15 +535,17 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
-    protected BoardDTO createBoard(Long projectId, String boardName) {
+    @Override
+    public  BoardDTO createBoard(Long organizationId, Long projectId, String boardName) {
         BoardDTO boardDTO = new BoardDTO();
         boardDTO.setProjectId(projectId);
+        boardDTO.setOrganizationId(organizationId);
         boardDTO.setColumnConstraint(CONTRAINT_NONE);
         boardDTO.setDayInColumn(false);
         boardDTO.setEstimationStatistic(STORY_POINTS);
         boardDTO.setName(boardName);
         boardDTO.setSwimlaneBasedCode(PARENT_CHILD);
-        if (boardMapper.insert(boardDTO) != 1) {
+        if (boardMapper.insertSelective(boardDTO) != 1) {
             throw new CommonException("error.board.insert");
         }
         return boardMapper.selectByPrimaryKey(boardDTO.getBoardId());
@@ -551,7 +553,7 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public void initBoard(Long projectId, String boardName, List<StatusPayload> statusPayloads) {
-        BoardDTO boardResult = createBoard(projectId, boardName);
+        BoardDTO boardResult = createBoard(0L, projectId, boardName);
         boardColumnService.initBoardColumns(projectId, boardResult.getBoardId(), statusPayloads);
     }
 
@@ -712,13 +714,12 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Boolean checkName(Long projectId, String boardName) {
+    public Boolean checkName(Long organizationId, Long projectId, String boardName) {
         BoardDTO boardDTO = new BoardDTO();
         boardDTO.setProjectId(projectId);
         boardDTO.setName(boardName);
+        boardDTO.setOrganizationId(organizationId);
         List<BoardDTO> boardDTOList = boardMapper.select(boardDTO);
         return boardDTOList != null && !boardDTOList.isEmpty();
     }
-
-
 }
