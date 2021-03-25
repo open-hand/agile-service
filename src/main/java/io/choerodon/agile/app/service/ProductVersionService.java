@@ -77,7 +77,7 @@ public interface ProductVersionService {
      * @param appVersionSearchVO 查询条件
      * @return 产品版本关联的应用版本
      */
-    List<AppVersionVO> listAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO);
+    List<PublishVersionVO> listAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO);
 
     /**
      * 查询产品版本未关联的应用版本
@@ -88,16 +88,8 @@ public interface ProductVersionService {
      * @param pageRequest 分页参数
      * @return 产品版本未关联的应用版本
      */
-    Page<AppVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO, PageRequest pageRequest);
+    Page<PublishVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO, PageRequest pageRequest);
 
-    /**
-     * 创建产品版本与应用版本的关联关系
-     * @param projectId 项目id
-     * @param versionId 产品版本id
-     * @param productRelAppVersion 应用版本id
-     * @return 产品版本下关联的应用版本
-     */
-    List<AppVersionVO> createRelAppVersion(Long projectId, Long versionId, ProductVersionRelAppVersionVO productRelAppVersion);
 
     /**
      * 查询产品版本项目下关联的应用版本下已完成故事
@@ -116,22 +108,4 @@ public interface ProductVersionService {
      * @return 产品版本项目下关联的应用版本下已完成缺陷
      */
     List<IssueListFieldKVVO> listRelBugByOption(Long projectId, Long versionId, SearchVO searchVO);
-
-    /**
-     * 创建应用版本并关联产品版本
-     * @param projectId 项目id
-     * @param versionId 版本id
-     * @param appVersionCreateList 创建应用版本并关联产品版本
-     * @return 产品版本关联的应用版本
-     */
-    List<AppVersionVO> createAndRelAppVersion(Long projectId, Long versionId, List<AppVersionCreateVO> appVersionCreateList);
-
-
-    /**
-     * 删除产品版本下应用版本和问题的关系
-     * @param projectId 项目id
-     * @param versionId 应用版本
-     * @param issueId 问题id
-     */
-    void deleteIssueRel(Long projectId, Long versionId, Long issueId);
 }

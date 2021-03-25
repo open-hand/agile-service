@@ -460,9 +460,9 @@ public class EncryptionUtils {
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
-        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("appVersion"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("tags"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
-            search.getOtherArgs().put("appVersion",
+            search.getOtherArgs().put("tags",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
     }

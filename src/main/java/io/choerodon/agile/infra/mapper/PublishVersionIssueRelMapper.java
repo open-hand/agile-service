@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.api.vo.AppVersionWithIssueVO;
-import io.choerodon.agile.infra.dto.AppVersionIssueRelDTO;
+import io.choerodon.agile.api.vo.PublishVersionWithIssueVO;
+import io.choerodon.agile.infra.dto.PublishVersionIssueRelDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -12,11 +12,11 @@ import java.util.Set;
  * @author superlee
  * @since 2021-03-09
  */
-public interface AppVersionIssueRelMapper extends BaseMapper<AppVersionIssueRelDTO> {
+public interface PublishVersionIssueRelMapper extends BaseMapper<PublishVersionIssueRelDTO> {
 
-    List<AppVersionWithIssueVO> selectCompletedBugByAppVersionIds(@Param("projectIds") Set<Long> projectIds,
-                                                                  @Param("organizationId") Long organizationId,
-                                                                  @Param("appVersionIds") Set<Long> appVersionIds);
+    List<PublishVersionWithIssueVO> selectCompletedBugByAppVersionIds(@Param("projectIds") Set<Long> projectIds,
+                                                                      @Param("organizationId") Long organizationId,
+                                                                      @Param("appVersionIds") Set<Long> appVersionIds);
 
     /**
      * 删除问题与应用版本的关系

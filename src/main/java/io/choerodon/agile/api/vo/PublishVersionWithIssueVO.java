@@ -8,7 +8,7 @@ import java.util.List;
  * @author superlee
  * @since 2021-03-15
  */
-public class AppVersionWithIssueVO extends AppVersionVO {
+public class PublishVersionWithIssueVO extends PublishVersionVO {
 
     private List<IssueVO> issues;
 

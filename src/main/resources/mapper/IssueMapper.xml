@@ -62,9 +62,9 @@
         <collection property="subBugDOList" column="issue_id"
                     ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="querySubBugByIssueId"/>
-        <collection property="appVersions" column="issue_id"
-                    ofType="io.choerodon.agile.api.vo.AppVersionVO"
-                    select="queryAppVersionByIssueId"/>
+        <collection property="tags" column="issue_id"
+                    ofType="io.choerodon.agile.api.vo.TagVO"
+                    select="queryTagsByIssueId"/>
     </resultMap>
 
     <resultMap id="issueSearch" type="io.choerodon.agile.infra.dto.business.IssueSearchDTO">
@@ -272,18 +272,11 @@
         WHERE acir.issue_id = #{issueId}
     </select>
 
-    <select id="queryAppVersionByIssueId" resultType="io.choerodon.agile.api.vo.AppVersionVO">
-        select
-        aav.id,
-        aav.group_id,
-        aav.artifact_id,
-        ifnull(aav.version_alias, aav.version) as version,
-        aav.service_code,
-        aav.project_id,
-        aav.organization_id
-        from agile_app_version aav
-        join agile_app_version_issue_rel aavir on aav.id = aavir.app_version_id
-        where aavir.issue_id = #{issueId}
+    <select id="queryTagsByIssueId" resultType="io.choerodon.agile.api.vo.TagVO">
+        select tag.*
+        from agile_tag tag
+        join agile_tag_issue_rel atir on tag.id = atir.tag_id
+        where atir.issue_id = #{issueId}
     </select>
 
     <select id="queryIssueCommentByIssueId" resultType="io.choerodon.agile.infra.dto.IssueCommentDTO">
@@ -391,10 +384,13 @@
             <id property="labelId" column="label_id"/>
             <result property="labelName" column="label_name"/>
         </collection>
-        <collection property="appVersions"
-                    ofType="io.choerodon.agile.api.vo.AppVersionVO">
-            <id property="id" column="app_version_id"/>
-            <result property="version" column="app_version"/>
+        <collection property="tags"
+                    ofType="io.choerodon.agile.api.vo.TagVO">
+            <id property="id" column="tag_id"/>
+            <result property="name" column="tag_name"/>
+            <result property="appServiceCode" column="tag_app_service_code"/>
+            <result property="projectId" column="tag_project_id"/>
+            <result property="organizationId" column="tag_organization_id"/>
         </collection>
     </resultMap>
 
@@ -457,8 +453,11 @@
         ais.is_completed as completed,
         ai.main_responsible_id,
         ai.environment,
-        aav.id as app_version_id,
-        ifnull(aav.version_alias, aav.version) as app_version
+        tag.id as tag_id,
+        tag.name as tag_name,
+        tag.app_service_code as tag_app_service_code,
+        tag.project_id as tag_project_id,
+        tag.organization_id as tag_organization_id
         FROM agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
         left join agile_issue ai3 on ai.epic_id = ai3.issue_id
@@ -472,8 +471,8 @@
         left join agile_issue_component aic on aic.component_id = acir.component_id
         left join agile_label_issue_rel alir on alir.issue_id = ai.issue_id
         left join agile_issue_label ail on ail.label_id = alir.label_id
-        left join agile_app_version_issue_rel aavir on ai.issue_id = aavir.issue_id
-        left join agile_app_version aav on aavir.app_version_id = aav.id
+        left join agile_tag_issue_rel atir on ai.issue_id = atir.issue_id
+        left join agile_tag tag on atir.tag_id = tag.id
         WHERE
         ai.issue_id IN
         (
@@ -1070,15 +1069,15 @@
                 #{userId}
             </foreach>
         </if>
-        <if test='searchVO.otherArgs.appVersion != null and searchVO.otherArgs.appVersion.size > 0'>
+        <if test='searchVO.otherArgs.tags != null and searchVO.otherArgs.tags.size > 0'>
             AND (
             ai.issue_id in (
-                SELECT aavir1.issue_id
-                FROM agile_app_version_issue_rel aavir1
-                WHERE aavir1.app_version_id in
-                <foreach collection="searchVO.otherArgs.appVersion" item="appVersionId" open="(" separator=","
+                SELECT atir.issue_id
+                FROM agile_tag_issue_rel atir
+                WHERE atir.tag_id in
+                <foreach collection="searchVO.otherArgs.tags" item="tagId" open="(" separator=","
                          close=")">
-                    #{appVersionId}
+                    #{tagId}
                 </foreach>
             )
             )

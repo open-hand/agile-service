@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.AppServiceRepVO;
-import io.choerodon.agile.api.vo.AppVersionVO;
+import io.choerodon.agile.api.vo.PublishVersionVO;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -15,9 +15,9 @@ import java.util.List;
  */
 public interface PomService {
 
-    List<AppVersionVO> parse(String groupIds,
-                             InputStream inputStream,
-                             List<AppServiceRepVO> appServiceRepList,
-                             Long organizationId)
+    List<PublishVersionVO> parse(String groupIds,
+                                 InputStream inputStream,
+                                 List<AppServiceRepVO> appServiceRepList,
+                                 PublishVersionVO self)
             throws ParserConfigurationException, IOException, SAXException;
 }

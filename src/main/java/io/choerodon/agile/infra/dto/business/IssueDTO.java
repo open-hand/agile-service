@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.dto.business;
 
-import io.choerodon.agile.api.vo.AppVersionVO;
+import io.choerodon.agile.api.vo.PublishVersionVO;
+import io.choerodon.agile.api.vo.TagVO;
 import io.choerodon.agile.infra.dto.IssueComponentBriefDTO;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.LabelIssueRelDTO;
@@ -211,14 +212,14 @@ public class IssueDTO extends AuditDomain {
     private String environment;
 
     @Transient
-    private List<AppVersionVO> appVersions;
+    private List<TagVO> tags;
 
-    public List<AppVersionVO> getAppVersions() {
-        return appVersions;
+    public List<TagVO> getTags() {
+        return tags;
     }
 
-    public void setAppVersions(List<AppVersionVO> appVersions) {
-        this.appVersions = appVersions;
+    public void setTags(List<TagVO> tags) {
+        this.tags = tags;
     }
 
     public Long getMainResponsibleId() {

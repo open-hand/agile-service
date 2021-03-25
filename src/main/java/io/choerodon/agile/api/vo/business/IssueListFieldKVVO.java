@@ -168,8 +168,8 @@ public class IssueListFieldKVVO {
     private UserMessageDTO createUser;
 
     private UserMessageDTO updateUser;
-
-    private List<AppVersionVO> appVersions;
+    @ApiModelProperty("tags")
+    private List<TagVO> tags;
 
     @ApiModelProperty("已耗费时间")
     private BigDecimal spentWorkTime;
@@ -177,12 +177,12 @@ public class IssueListFieldKVVO {
     @ApiModelProperty("总预估时间")
     private BigDecimal allEstimateTime;
 
-    public List<AppVersionVO> getAppVersions() {
-        return appVersions;
+    public List<TagVO> getTags() {
+        return tags;
     }
 
-    public void setAppVersions(List<AppVersionVO> appVersions) {
-        this.appVersions = appVersions;
+    public void setTags(List<TagVO> tags) {
+        this.tags = tags;
     }
 
     public Boolean getStarBeacon() {

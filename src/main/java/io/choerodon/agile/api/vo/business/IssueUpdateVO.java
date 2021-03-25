@@ -133,14 +133,14 @@ public class IssueUpdateVO {
 
     private String environment;
 
-    private List<AppVersionVO> appVersions;
+    private List<TagVO> tags;
 
-    public List<AppVersionVO> getAppVersions() {
-        return appVersions;
+    public List<TagVO> getTags() {
+        return tags;
     }
 
-    public void setAppVersions(List<AppVersionVO> appVersions) {
-        this.appVersions = appVersions;
+    public void setTags(List<TagVO> tags) {
+        this.tags = tags;
     }
 
     public Boolean getAutoTranferFlag() {
