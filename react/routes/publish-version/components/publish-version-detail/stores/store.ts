@@ -1,6 +1,8 @@
 import { observable, action, computed } from 'mobx';
 import { set, get, pick } from 'lodash';
-import { IAppVersionData, projectApi, versionApi } from '@/api';
+import {
+  IAppVersionData, IPublishVersionData, projectApi, publishVersionApi, versionApi,
+} from '@/api';
 import IReleaseDetailData from '../types';
 
 interface EventsProps {
@@ -21,9 +23,9 @@ class ReleaseDetailStore {
 
   @observable loading: boolean = false;
 
-  @observable currentClickKDetail: IReleaseDetailData | undefined;
+  @observable currentClickKDetail: IPublishVersionData | undefined;
 
-  @observable current: IReleaseDetailData | undefined;
+  @observable current: IPublishVersionData | undefined;
 
   @observable appServiceList: Array<IAppVersionDataItem> = [{
     name: 'agile-test', appService: true, tag: false, artifactId: 'te:',
@@ -59,12 +61,12 @@ class ReleaseDetailStore {
     this.disabled = data;
   }
 
-  @action setCurrentData(data: IReleaseDetailData) {
+  @action setCurrentData(data: IPublishVersionData) {
     this.current = data;
   }
 
   @computed get getCurrentData() {
-    return this.current || this.currentClickKDetail || {} as IReleaseDetailData;
+    return this.current || this.currentClickKDetail || {} as IPublishVersionData;
   }
 
   @action clear() {
@@ -90,14 +92,14 @@ class ReleaseDetailStore {
     this.setDependencyList([]);
   }
 
-  @action async loadData(id: string = this.getCurrentData.id, ignoreLoad: string[] = []) {
+  @action async loadData(id: string = this.getCurrentData.id, ignoreLoad: string[] = ['app']) {
     this.loading = true;
-    const versionData = ignoreLoad.includes('detail') ? this.current : await versionApi.load(id);
+    const versionData: IPublishVersionData = ignoreLoad.includes('detail') ? this.current : await publishVersionApi.load(id);
 
     const versionList = ignoreLoad.includes('app') ? this.getAppServiceList : await versionApi.loadAppVersionList(id);
     this.setAppServiceList(versionList.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` })));
     this.loadDependencyData();
-    this.setCurrentData({ ...versionData, id: versionData.versionId });
+    this.setCurrentData({ ...versionData, name: versionData.versionAlias || versionData.version });
     await this.events.load({ versionData });
     this.loading = false;
   }
@@ -105,21 +107,22 @@ class ReleaseDetailStore {
   @action('更新版本详情')
   async update(key: string, value: any) {
     this.loading = true;
-    const data = pick(this.getCurrentData!, ['description', 'expectReleaseDate', 'name', 'objectVersionNumber', 'projectId', 'startDate']);
+    const data = this.getCurrentData as any;
+    // const data = pick(this.getCurrentData!, ['description', 'expectReleaseDate', 'name', 'objectVersionNumber', 'projectId', 'startDate']);
     set(data, key, value);
-    await versionApi.update(this.getCurrentData.versionId, data);
+    await publishVersionApi.update(this.getCurrentData.id, data);
     await this.loadData();
     await this.events.update(data);
   }
 
-  @action select(data: string | IReleaseDetailData) {
+  @action select(data: string | IPublishVersionData) {
     let waitQueryId = data;
     let newClickDetail = { id: data };
     if (typeof (data) === 'object') {
       waitQueryId = data.id;
       newClickDetail = data;
     }
-    this.currentClickKDetail = newClickDetail as IReleaseDetailData;
+    this.currentClickKDetail = newClickDetail as IPublishVersionData;
     this.loadData(waitQueryId as string);
     this.visible = true;
   }

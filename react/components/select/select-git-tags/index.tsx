@@ -10,7 +10,7 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
   valueField?: string
   afterLoad?: (sprints: ILabel[]) => void
-  applicationId?: string
+  applicationId?: string | null
   flat?: boolean
   projectId?: string
 }

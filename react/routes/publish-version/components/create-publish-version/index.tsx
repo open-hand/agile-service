@@ -17,12 +17,14 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
-import { IAppVersionData, versionApi } from '@/api';
+import {
+  IAppVersionData, publishVersionApi, publishVersionApiConfig, versionApi,
+} from '@/api';
 import { Checkbox } from 'choerodon-ui';
 import SelectTeam from '@/components/select/select-team';
 
 interface ILinkServiceProps {
-    handleOk?: ((data: any) => void) | (() => Promise<any>)
+  handleOk?: ((data: any) => void) | (() => Promise<any>)
 
 }
 const { Option } = Select;
@@ -41,40 +43,46 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps
     //   { appService: '应用1', alias: undefined },
     // ],
     fields: [
-      { name: 'name', label: '发布版本名称', required: true },
-      { name: 'actualDate', label: '实际发布时间' },
+      { name: 'versionAlias', label: '发布版本名称', required: true },
+      { name: 'actualPublishDate', label: '实际发布时间' },
       { name: 'artifactId', label: 'artifactId' },
       { name: 'groupId', label: 'groupId' },
-      { name: 'appService', label: '关联应用服务' },
-      { name: 'tag', label: '关联tag' },
+      { name: 'appService', label: '关联应用服务', defaultValue: true },
+      { name: 'serviceCode', label: '关联应用服务' },
+
+      { name: 'tagId', label: '关联tag' },
     ],
+    transport: {
+      submit: ({ data }) => publishVersionApiConfig.create(data[0]),
+    },
   }), []);
   useEffect(() => {
-        ds.current?.init(versionType, undefined);
+    ds.current?.init(versionType, undefined);
   }, [ds, versionType]);
   const handleSubmit = useCallback(async () => {
     if (!await ds.current?.validate()) {
       return false;
     }
     const data = ds.current?.toData();
+    await ds.submit();
     const result = handleOk && await handleOk(data);
     return typeof (result) !== 'undefined' ? result : true;
   }, [ds, handleOk]);
   useEffect(() => {
-        modal?.handleOk(handleSubmit);
+    modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
   return (
     <Form dataSet={ds}>
-      <TextField name="name" />
-      <DatePicker name="actualDate" />
+      <TextField name="versionAlias" />
+      <DatePicker name="actualPublishDate" />
       <TextField name="artifactId" />
       <TextField name="groupId" />
-      <SelectAppService name="appService" onChange={setApplicationId} />
-      <SelectGitTags name="tag" applicationId={applicationId} />
+      <SelectAppService name="serviceCode" onChange={setApplicationId} />
+      <SelectGitTags name="tagId" applicationId={applicationId} />
     </Form>
   );
 };
-function openCreatePublishVersionModal() {
+function openCreatePublishVersionModal(props: ILinkServiceProps) {
   const key = Modal.key();
   Modal.open({
     key,
@@ -83,7 +91,7 @@ function openCreatePublishVersionModal() {
       width: MODAL_WIDTH.small,
     },
     drawer: true,
-    children: <CreatePublishVersion />,
+    children: <CreatePublishVersion {...props} />,
 
   });
 }
