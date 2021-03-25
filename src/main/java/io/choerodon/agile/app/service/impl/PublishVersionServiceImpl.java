@@ -14,10 +14,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -86,6 +83,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                 && isExisted(projectId, publishVersionVO)) {
             throw new CommonException("error.publish.version.duplicate");
         }
+        if (!StringUtils.isEmpty(publishVersionVO.getVersionAlias())
+                && checkAlias(projectId, publishVersionVO.getVersionAlias(), null)) {
+            throw new CommonException("error.publish.version.alias.duplicate");
+        }
         PublishVersionDTO dto = modelMapper.map(publishVersionVO, PublishVersionDTO.class);
         if (publishVersionMapper.insertSelective(dto) != 1) {
             throw new CommonException("error.publish.version.insert");
@@ -145,6 +146,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             if (isExisted(projectId, example)) {
                 throw new CommonException("error.publish.version.duplicate");
             }
+        }
+        if (!StringUtils.isEmpty(publishVersionVO.getVersionAlias())
+                && checkAlias(projectId, publishVersionVO.getVersionAlias(), publishVersionId)) {
+            throw new CommonException("error.publish.version.alias.duplicate");
         }
         PublishVersionDTO dto = modelMapper.map(publishVersionVO, PublishVersionDTO.class);
         dto.setId(publishVersionId);
@@ -241,6 +246,23 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     @Override
     public Page<PublishVersionVO> list(Long projectId, PublishVersionVO publishVersionVO, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest, () -> publishVersionMapper.listByOptions(projectId, publishVersionVO));
+    }
+
+    @Override
+    public Boolean checkAlias(Long projectId, String alias, Long publishVersionId) {
+        if (StringUtils.isEmpty(alias)) {
+            throw new CommonException("error.publish.version.alias.empty");
+        }
+        PublishVersionDTO dto = new PublishVersionDTO();
+        dto.setProjectId(projectId);
+        dto.setVersionAlias(alias);
+        List<PublishVersionDTO> list = publishVersionMapper.select(dto);
+        if (publishVersionId == null) {
+            return !list.isEmpty();
+        } else {
+            Long id = list.get(0).getId();
+            return !publishVersionId.equals(id);
+        }
     }
 
     private void validateProjectCategories(ProjectVO project) {

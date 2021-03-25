@@ -92,4 +92,14 @@ public interface PublishVersionService {
      * @return 项目下发布版本
      */
     Page<PublishVersionVO> list(Long projectId, PublishVersionVO publishVersionVO, PageRequest pageRequest);
+
+    /**
+     * 别名重名校验
+     *
+     * @param projectId
+     * @param alias
+     * @param publishVersionId
+     * @return
+     */
+    Boolean checkAlias(Long projectId, String alias, Long publishVersionId);
 }
