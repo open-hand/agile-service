@@ -38,5 +38,6 @@ package-lock.json
 **/lib/assets/
 **/lib/fonts/
 .yalc
+yarn.lock
 yalc.lock
 yarn-error.log
