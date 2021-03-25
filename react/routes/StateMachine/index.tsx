@@ -1,4 +1,4 @@
-import React, { useState, ReactNode } from 'react';
+import React, { useState, ReactNode, useLayoutEffect } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { find, includes } from 'lodash';
 import useQueryString from '@/hooks/useQueryString';
@@ -32,18 +32,28 @@ const tabs: ITab[] = [{
 }];
 
 const { TabPane } = Tabs;
+const StateMachine: React.FC = ({
 // @ts-ignore
-const StateMachine: React.FC = ({ defaultTabKeys = ['status', 'status_change', 'custom'], ...otherProps }) => {
+  defaultTabKeys = ['status', 'status_change', 'custom'], activeKey: propActiveKey, setActiveKey: propSetActiveKey, ...otherProps
+}) => {
   const defaultTabs = tabs.filter((item) => includes(defaultTabKeys, item.key));
   const params = useQueryString();
   const { issueTypeId, activeKey: paramsActiveKey } = params;
   const [selectedType, handleChangeSelectedType] = useSelectedType(issueTypeId || undefined);
   const [activeKey, setActiveKey] = useState(() => {
+    if (propActiveKey) {
+      return propActiveKey;
+    }
     if (paramsActiveKey) {
       return paramsActiveKey;
     }
     return issueTypeId ? defaultTabs[1].key : defaultTabs[0].key;
   });
+  useLayoutEffect(() => {
+    if (propSetActiveKey) {
+      propSetActiveKey(activeKey);
+    }
+  }, [activeKey, propSetActiveKey]);
   const Component = find(defaultTabs, { key: activeKey })?.component;
   const tabComponent = (
     <Tabs className={styles.tabs} activeKey={activeKey} onChange={setActiveKey}>
