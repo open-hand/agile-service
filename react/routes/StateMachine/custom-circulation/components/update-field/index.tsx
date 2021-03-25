@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import {
   DataSet, Select, Form, Button, Row, Col,
 } from 'choerodon-ui/pro';
+import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/common';
 import { find, includes } from 'lodash';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
@@ -310,7 +311,7 @@ const UpdateField = ({
     };
   }), [fieldData]);
 
-  const projectFields = useMemo(() => ([{
+  const projectFields = useMemo<FieldProps[]>(() => ([{
     name: 'label',
     type: 'array' as FieldType,
     label: '标签',
@@ -383,8 +384,8 @@ const UpdateField = ({
         label: '优先级',
         lookupAxiosConfig: () => ({
           url: isOrganization ? `/agile/v1/organizations/${getOrganizationId()}/priority` : `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
-          method: 'get',
-          transformResponse: (response) => {
+          method: 'GET' as 'GET',
+          transformResponse: (response:any) => {
             try {
               const data = JSON.parse(response);
               return data.filter((v: Priority) => v.enable);
@@ -392,7 +393,7 @@ const UpdateField = ({
               return response;
             }
           },
-        } as const),
+        }),
         valueField: 'id',
         textField: 'name',
       }, ...(isOrganization ? [] : projectFields), ...userFields, ...numberFields],
