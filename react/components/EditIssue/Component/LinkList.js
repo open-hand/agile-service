@@ -41,7 +41,6 @@ class LinkList extends Component {
     } else {
       deleteTipTitle = '确认要删除该特性关联关系吗?';
     }
-
     return (
       <div
         style={{
@@ -115,7 +114,7 @@ class LinkList extends Component {
           )
         }
         {
-          typeCode !== 'feature' && showAssignee ? (
+          typeCode !== 'feature' && showAssignee && issue.assigneeId ? (
             <Tooltip mouseEnterDelay={0.5} title={`经办人： ${issue.assigneeName}`}>
               <div style={{
                 marginRight: 29, display: 'flex', justifyContent: 'flex-end',
@@ -124,7 +123,7 @@ class LinkList extends Component {
                 <div>
                   <UserTag
                     tooltip={false}
-                    user={{
+                    data={{
                       id: issue.assigneeId,
                       loginName: '',
                       realName: issue.assigneeName,

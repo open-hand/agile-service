@@ -108,14 +108,14 @@ class IssueList extends Component {
           )
         }
         {
-          showAssignee ? (
+          showAssignee && issue.assigneeId ? (
             <div style={{ marginRight: 10, display: 'flex', justifyContent: 'flex-end' }}>
               <div>
                 <UserTag
                   showText={false}
                   data={{
                     id: issue.assigneeId,
-                    name: issue.assigneeName,
+                    tooltip: issue.assigneeName,
                     loginName: issue.loginName,
                     realName: issue.realName,
                     imageUrl: issue.imageUrl,

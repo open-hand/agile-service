@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Button } from 'choerodon-ui/pro';
-import { observer, useObservable } from 'mobx-react-lite';
+import React, { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 import IssueSearch, { IssueSearchStore, useIssueSearchStore } from '@/components/issue-search';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getSystemFields as originGetSystemFields } from '@/stores/project/issue/IssueStore';
 import { transformFilter as originTransformFilter } from '@/routes/Issue/stores/utils';
 import openSaveFilterModal from '@/components/SaveFilterModal';
-import { Tooltip } from 'choerodon-ui';
 import scrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { IChosenFields, ILocalField } from '@/components/issue-search/store';
 import SelectSprint from '@/components/select/select-sprint';
@@ -46,7 +44,7 @@ function getSystemFields() {
 const ObserverSelectSprint: React.FC<any> = observer(({ field, value, ...otherProps }) => (
   <SelectSprint
     key={field.code}
-    value={value || null}
+    value={Array.isArray(value) ? value[0] : value || null} // 缓存内的数据有可能是数组
     flat
     placeholder={field.name}
     maxTagTextLength={10}
@@ -84,7 +82,7 @@ function renderField(field: ILocalField, props: any) {
 }
 function transformFilter(chosenFields: IChosenFields) {
   const filter = originTransformFilter(chosenFields);
-  if (filter.otherArgs.sprint && filter.otherArgs.sprint !== '') {
+  if (filter.otherArgs.sprint && filter.otherArgs.sprint !== '' && !Array.isArray(filter.otherArgs.sprint)) {
     filter.otherArgs.sprint = [filter.otherArgs.sprint];
   }
   return filter;
