@@ -112,10 +112,10 @@ const SelectVersion: React.FC<SelectVersionProps> = observer(({
               )) : <li className="c7n-pro-select-dropdown-menu-item c7n-pro-select-dropdown-menu-item-disabled">无匹配结果。</li>}
             </ul>
             {!programMode ? (
-              <div role="none" className="c7n-agile-release-detail-select-footer">
+              <div role="none" className="c7n-agile-publish-version-detail-select-footer">
                 {
                   inputVisible ? (
-                    <div className="c7n-agile-release-detail-select-footer-input">
+                    <div className="c7n-agile-publish-version-detail-select-footer-input">
                       <TextField ref={inputRef} onInput={(e: any) => handleInput(e.target.value)} validator={handleValidator} onClick={(e) => { e.stopPropagation(); inputRef.current?.focus(); }} autoFocus style={{ width: '100%' }} />
                       <Button
                         color={'primary' as any}
@@ -188,13 +188,12 @@ const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({
     // ],
     fields: [
       { name: 'appService', label: '选择应用服务', required: !programMode },
-      { name: 'subProject', label: '选择子项目', required: !!programMode },
+      // { name: 'subProject', label: '选择子项目', required: !!programMode },
 
       { name: 'tag', label: '选择tag', dynamicProps: { required: ({ record }) => record.get('change') === 'tag' } },
       {
-        name: 'version', label: '选择版本', multiple: true, textField: 'name', valueField: 'value', dynamicProps: { required: ({ record }) => record.get('change') === 'version' },
+        // name: 'version', label: '选择应用版本', multiple: true, textField: 'name', valueField: 'value', dynamicProps: { required: ({ record }) => record.get('change') === 'version' },
       },
-      { name: 'change', defaultValue: 'version' },
     ],
   }), []);
   useEffect(() => {
@@ -213,17 +212,8 @@ const LinkService: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({
   }, [handleSubmit, modal]);
   return (
     <Form dataSet={ds}>
-      {programMode
-        ? <SelectTeam name="subProject" onChange={setApplicationId} />
-        : <SelectAppService name="appService" onChange={setApplicationId} />}
-
-      <RadioGroup>
-        <Radio name="change" value="version" onChange={setVersionType}>选择版本</Radio>
-
-        <Radio name="change" value="tag" onChange={setVersionType}>选择Tag</Radio>
-      </RadioGroup>
-      {versionType === 'tag' ? <SelectGitTags name="tag" applicationId={applicationId} key={`git-tags-${applicationId}`} />
-        : <SelectVersion name="version" disabled={!applicationId} maxTagCount={5} versionId={versionId} serviceCode={applicationId} subProjectId={applicationId} programMode={programMode} multiple />}
+      <SelectAppService name="appService" onChange={setApplicationId} />
+      <SelectGitTags name="tag" applicationId={applicationId} />
 
     </Form>
   );

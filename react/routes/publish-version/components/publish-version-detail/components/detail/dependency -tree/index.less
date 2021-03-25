@@ -1,4 +1,4 @@
-.c7n-agile-publish-version-detail-link-service {
+.c7n-agile-publish-version-detail-dependency-tree {
   display: flex;
   flex-wrap: wrap;
 
@@ -38,8 +38,7 @@
     }
 
     &:hover {
-      .c7n-agile-publish-version-detail-link-service-item-btn {
-        visibility: visible;
+      .c7n-agile-publish-version-detail-dependency-tree-item-btn {
         opacity: 1;
       }
     }
@@ -48,25 +47,26 @@
       display: inline-flex;
       align-items: center;
       color: #9A9FB0;
-      max-width: ~"calc(100% - 70px)";
+
+      &-icon {
+        margin-right: .04rem;
+        color: rgba(15, 19, 88, 0.65);
+      }
 
       &-text {
 
+        line-height: 20px;
         font-size: 13px;
         font-family: PingFangSC-Regular, PingFang SC;
         font-weight: 400;
-        color: rgba(0, 0, 0, 0.87);
-        line-height: 20px;
+        color: #0F1358;
       }
-    }
-
-    & >&-btn {
-      margin-left: .1rem;
     }
 
     &-btn {
       float: left;
       opacity: 0;
+      margin-left: .1rem;
       // visibility: hidden;
       color: rgba(0, 0, 0, 0.87);
       // margin-right: .34rem;
@@ -74,10 +74,6 @@
       &:hover {
         opacity: 1;
       }
-    }
-
-    .c7n-pro-btn +.c7n-pro-btn {
-      margin: 0;
     }
   }
 }

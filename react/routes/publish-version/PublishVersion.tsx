@@ -100,11 +100,11 @@ function PublishVersion() {
         <Table dataSet={tableDataSet}>
           <Column name="name" renderer={renderName} />
           <Column name="status" renderer={renderStatus} />
-          <Column name="releaseDate" className="c7n-agile-table-cell" />
-          <Column name="artifactId" className="c7n-agile-table-cell" />
-          <Column name="groupId" className="c7n-agile-table-cell" />
-          <Column name="appService" className="c7n-agile-table-cell" />
-          <Column name="tag" className="c7n-agile-table-cell" />
+          <Column name="releaseDate" className="c7n-agile-table-cell" width={110} />
+          <Column name="artifactId" className="c7n-agile-table-cell" width={100} />
+          <Column name="groupId" className="c7n-agile-table-cell" width={120} />
+          <Column name="appService" className="c7n-agile-table-cell" width={120} />
+          <Column name="tag" className="c7n-agile-table-cell" width={100} />
 
         </Table>
       </Content>

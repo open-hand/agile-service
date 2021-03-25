@@ -16,6 +16,8 @@ import { versionApi } from '@/api';
 import Loading from '@/components/Loading';
 import { observer } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import SelectAppService from '@/components/select/select-app-service';
+import SelectGitTags from '@/components/select/select-git-tags';
 
 interface IImportPomFunctionProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
@@ -24,7 +26,7 @@ interface IImportPomFunctionProps {
 
 const { Column } = Table;
 const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = ({ modal, handleOk, programMode }) => {
-  const prefixCls = 'c7n-agile-release-detail-import-pom';
+  const prefixCls = 'c7n-agile-publish-version-detail-import-pom';
   const [groupId, setGroupId] = useState<string[] | undefined>();
   const [subProjectId, setSubProjectId] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -48,14 +50,15 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     paging: false,
     selection: false,
 
-    // data: [
-    //   { appService: '应用1', version: '0.18.a', alias: undefined },
-    // ],
+    data: [
+      { artifactId: 'agile-test', version: '0.18.a', versionAlias: undefined },
+    ],
     fields: [
       { name: 'artifactId', label: '应用服务' },
       { name: 'version', label: '版本名称', required: true },
       { name: 'versionAlias', label: '版本别名' },
-      { name: 'appService', label: '主服务' },
+      { name: 'appService', label: '应用服务*', required: true },
+      { name: 'tag', label: 'tag*', required: true },
     ],
   }), []);
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,8 +134,8 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
           <Column name="artifactId" tooltip={'overflow' as any} />
           <Column name="version" editor />
           <Column name="versionAlias" editor renderer={renderAlias} tooltip={'overflow' as any} />
-          <Column name="appService" renderer={({ value }) => (value ? '是' : '否')} width={90} />
-
+          <Column name="appService" editor={() => <SelectAppService />} />
+          <Column name="tag" editor={(record) => <SelectGitTags applicationId={record.get('appService')} />} />
           <Column name="action" renderer={renderAction} width={65} />
         </Table>
       </div>

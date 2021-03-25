@@ -112,10 +112,10 @@ const SelectVersion: React.FC<SelectVersionProps> = observer(({
               )) : <li className="c7n-pro-select-dropdown-menu-item c7n-pro-select-dropdown-menu-item-disabled">无匹配结果。</li>}
             </ul>
             {!programMode ? (
-              <div role="none" className="c7n-agile-release-detail-select-footer">
+              <div role="none" className="c7n-agile-publish-version-detail-select-footer">
                 {
                   inputVisible ? (
-                    <div className="c7n-agile-release-detail-select-footer-input">
+                    <div className="c7n-agile-publish-version-detail-select-footer-input">
                       <TextField ref={inputRef} onInput={(e: any) => handleInput(e.target.value)} validator={handleValidator} onClick={(e) => { e.stopPropagation(); inputRef.current?.focus(); }} autoFocus style={{ width: '100%' }} />
                       <Button
                         color={'primary' as any}

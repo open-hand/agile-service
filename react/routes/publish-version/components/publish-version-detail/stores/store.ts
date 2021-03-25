@@ -8,10 +8,6 @@ interface EventsProps {
   selectIssue: (id: string) => any
   update: ((data: any) => any | Promise<any>)
 }
-interface INoticeMessage {
-  type: 'cancel-feature' | 'select-feature',
-  content?: string,
-}
 
 export interface IAppVersionDataItem extends IAppVersionData {
   name: string,
@@ -29,7 +25,11 @@ class ReleaseDetailStore {
 
   @observable current: IReleaseDetailData | undefined;
 
-  @observable appServiceList: Array<IAppVersionDataItem> = [];
+  @observable appServiceList: Array<IAppVersionDataItem> = [{
+    name: 'agile-test', appService: true, tag: false, artifactId: 'te:',
+  } as any];
+
+  @observable dependencyList: Array<any> = [];
 
   @observable visible: boolean = false;
 
@@ -45,6 +45,10 @@ class ReleaseDetailStore {
 
   @computed get getAppServiceList() {
     return this.appServiceList;
+  }
+
+  @action setDependencyList(data: Array<any>) {
+    this.dependencyList = data;
   }
 
   @action setAppServiceList(data: Array<any>) {
@@ -69,7 +73,7 @@ class ReleaseDetailStore {
     this.currentClickKDetail = undefined;
     this.visible = false;
     this.disabled = false;
-    this.appServiceList = [];
+    // this.appServiceList = [];
   }
 
   @action init(initData?: { disabled?: boolean, events?: Partial<EventsProps>, programId?: string }) {
@@ -82,13 +86,17 @@ class ReleaseDetailStore {
     }
   }
 
+  @action async loadDependencyData() {
+    this.setDependencyList([]);
+  }
+
   @action async loadData(id: string = this.getCurrentData.id, ignoreLoad: string[] = []) {
     this.loading = true;
     const versionData = ignoreLoad.includes('detail') ? this.current : await versionApi.load(id);
 
     const versionList = ignoreLoad.includes('app') ? this.getAppServiceList : await versionApi.loadAppVersionList(id);
     this.setAppServiceList(versionList.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` })));
-
+    this.loadDependencyData();
     this.setCurrentData({ ...versionData, id: versionData.versionId });
     await this.events.load({ versionData });
     this.loading = false;

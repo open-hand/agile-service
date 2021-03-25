@@ -1,4 +1,3 @@
-import CustomIcon from '@/components/custom-icon';
 import {
   Button, Icon, Modal, SelectBox, Tooltip,
 } from 'choerodon-ui/pro/lib';
@@ -9,11 +8,9 @@ import { observer } from 'mobx-react-lite';
 import { IAppVersionData, versionApi } from '@/api';
 import { IAppVersionDataItem } from '@/components/release-detail/stores/store';
 import { useReleaseDetailContext } from '../../../stores';
-import { openImportPomModal } from '../../import-pom';
 import Section from '../../section';
-import { openLinkServiceModal } from '../../link-service-modal';
 import './index.less';
-import { openCreateAppVersionModal, openEditAppVersionModal } from '../link-service/EditAppVersionModal';
+import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
 
 const { TreeNode } = Tree;
 const DependencyTree: React.FC = () => {
@@ -44,21 +41,18 @@ const DependencyTree: React.FC = () => {
       },
     });
   }
-  async function handleImportPom(pomData: any) {
-    await versionApi.createBranchAndLinkAppService(detailData.versionId, pomData);
-    store.loadData();
-    return true;
-  }
+
   function renderTreeNode(item: IAppVersionDataItem) {
     return (
-      <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => openEditAppVersionModal({ data: item, handleOk: () => store.loadData() })}>
-        <span className={`${prefixCls}-link-service-item-left`}>
-          {item.type === 'service' ? <Icon type="local_offer" style={{ fontSize: 15 }} /> : <CustomIcon type="icon-pom" width={17} height={17} />}
-          <span className={`${prefixCls}-link-service-item-left-text`}>{item.name || `${item.artifactId}/${item.versionAlias || item.version}`}</span>
+      <div role="none" className={`${prefixCls}-dependency-tree-item`}>
+        <span className={`${prefixCls}-dependency-tree-item-left`}>
+          <Icon type="folder-o" className={`${prefixCls}-dependency-tree-item-left-icon`} />
+          <span className={`${prefixCls}-dependency-tree-item-left-text`}>{item.name || `${item.artifactId}/${item.versionAlias || item.version}`}</span>
         </span>
+
         <Button
           icon="delete_forever"
-          className={`${prefixCls}-link-service-item-btn`}
+          className={`${prefixCls}-dependency-tree-item-btn`}
           onClick={(e) => {
             e.stopPropagation();
             handleDelete(item);
@@ -69,17 +63,17 @@ const DependencyTree: React.FC = () => {
   }
   return (
     <Section
-      title="层关联发布版本"
+      title="关联发布版本"
       buttons={
         !disabled ? (
-          <div className={`${prefixCls}-link-service-operation`}>
-            <Tooltip placement="topRight" autoAdjustOverflow={false} title="创建应用版本">
+          <div className={`${prefixCls}-dependency-tree-operation`}>
+            <Tooltip placement="topRight" autoAdjustOverflow={false} title="关联发布版本">
               <Button
                 style={{ padding: '0 6px' }}
                 color={'blue' as ButtonColor}
                 icon="playlist_add"
                 onClick={() => {
-                  openCreateAppVersionModal();
+                  openLinkPublishVersionModal({});
                 }}
               />
             </Tooltip>
@@ -87,9 +81,9 @@ const DependencyTree: React.FC = () => {
           </div>
         ) : ''
       }
-      contentClassName={`${prefixCls}-link-service`}
+      contentClassName={`${prefixCls}-dependency-tree`}
     >
-      <Tree className={`${prefixCls}-link-service-tree`}>
+      <Tree className={`${prefixCls}-dependency-tree-tree`}>
         {data.map((item) => (
           <TreeNode title={renderTreeNode(item)} key={item.id}>
             {item.children?.flatMap((k) => <TreeNode title={renderTreeNode(k)} />)}

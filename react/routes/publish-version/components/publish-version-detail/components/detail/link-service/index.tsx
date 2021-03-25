@@ -109,16 +109,33 @@ const LinkService: React.FC = () => {
           </div>
         ) : ''
       }
+      border
       contentClassName={`${prefixCls}-link-service`}
     >
-      <Tree className={`${prefixCls}-link-service-tree`}>
-        {data.map((item) => (
-          <TreeNode title={renderTreeNode(item)} key={item.id}>
-            {item.children?.flatMap((k) => <TreeNode title={renderTreeNode(k)} />)}
-          </TreeNode>
-        ))}
-      </Tree>
-
+      {data.map((item) => (
+        <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => {}}>
+          <span className={`${prefixCls}-link-service-item-left`}>
+            {item.type === 'service' ? <Icon type="local_offer" style={{ fontSize: 15 }} /> : <CustomIcon type="icon-pom" width={17} height={17} />}
+            <span className={`${prefixCls}-link-service-item-left-text`}>{item.name || `${item.artifactId}/${item.versionAlias || item.version}`}</span>
+          </span>
+          <Button
+            icon="mode_edit"
+            className={`${prefixCls}-link-service-item-btn`}
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditAppVersionModal({ data: item, handleOk: () => store.loadData() });
+            }}
+          />
+          <Button
+            icon="delete_forever"
+            className={`${prefixCls}-link-service-item-btn`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(item);
+            }}
+          />
+        </div>
+      ))}
     </Section>
   );
 };
