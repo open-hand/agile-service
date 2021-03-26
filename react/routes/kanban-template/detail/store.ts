@@ -138,7 +138,7 @@ export default class KanbanTemplateDetailStore {
   @action
   async deleteColumn(column: IKanbanTemplateColumn) {
     this.loading = true;
-    await kanbanTemplateApi.deleteColumn(column.boardId, column.columnId);
+    await kanbanTemplateApi.deleteColumn(column.columnId);
     this.refresh();
   }
 

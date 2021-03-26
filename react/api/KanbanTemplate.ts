@@ -179,13 +179,10 @@ class KanbanTemplateApi extends Api<KanbanTemplateApi> {
     });
   }
 
-  deleteColumn(boardId: string, columnId: string) {
+  deleteColumn(columnId: string) {
     return this.request({
       method: 'delete',
-      url: `${this.prefix}/board_template/board_column/${columnId}`,
-      params: {
-        boardId,
-      },
+      url: `${this.prefix}/board_template/board_template_column/${columnId}`,
     });
   }
 
