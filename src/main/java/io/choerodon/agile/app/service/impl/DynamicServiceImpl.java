@@ -14,10 +14,11 @@ import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.DataLogQueryVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.app.service.BacklogExpandService;
-import io.choerodon.agile.app.service.IssueTypeService;
 import io.choerodon.agile.app.service.DynamicService;
+import io.choerodon.agile.app.service.IssueTypeService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
@@ -25,10 +26,8 @@ import io.choerodon.agile.infra.mapper.DataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.utils.PageUtils;
-import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
@@ -89,17 +88,21 @@ public class DynamicServiceImpl implements DynamicService {
         if (containBacklog) {
             backlogExpandService.setDataLogBacklogInfo(result);
         }
-        setDataLogUserInfo(result);
+        setDataLogUserAndProjectInfo(result, projectId);
         return result;
     }
 
-    private void setDataLogUserInfo(List<AllDataLogVO> dataLogList) {
+    private void setDataLogUserAndProjectInfo(List<AllDataLogVO> dataLogList, Long projectId) {
+        ProjectVO project = userService.queryProject(projectId);
         List<Long> createdByIds = dataLogList.stream().map(AllDataLogVO::getCreatedBy).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(createdByIds)) {
             return;
         }
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(createdByIds, true);
-        dataLogList.forEach(dataLog -> dataLog.setCreatedByUser(userMap.get(dataLog.getCreatedBy())));
+        dataLogList.forEach(dataLog -> {
+            dataLog.setCreatedByUser(userMap.get(dataLog.getCreatedBy()));
+            dataLog.setProjectName(project.getName());
+        });
     }
 
     private void setDataLogIssueInfo(List<AllDataLogVO> issueDataLogList, Long projectId) {
