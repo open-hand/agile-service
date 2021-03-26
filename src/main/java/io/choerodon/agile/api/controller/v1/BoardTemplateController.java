@@ -224,4 +224,15 @@ public class BoardTemplateController {
                 .orElseThrow(() -> new CommonException("error.status.template.list"));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("删除看板模板的列")
+    @DeleteMapping(value = "/board_column/{templateColumnId}")
+    public ResponseEntity deleteBoardTemplateColumn(@ApiParam(value = "组织Id", required = true)
+                                            @PathVariable(name = "organization_id") Long organizationId,
+                                            @ApiParam(value = "column id", required = true)
+                                            @PathVariable @Encrypt Long templateColumnId) {
+        boardTemplateService.deleteBoardTemplateColumn(organizationId, templateColumnId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 }

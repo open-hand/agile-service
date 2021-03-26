@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.validator.BoardColumnValidator;
 import io.choerodon.agile.api.validator.BoardValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -365,6 +366,41 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
             statusVO.setCompleted(ObjectUtils.isEmpty(isCompleted) ? Boolean.FALSE : isCompleted);
         }
         return statusVOS;
+    }
+
+    @Override
+    public void deleteBoardTemplateColumn(Long organizationId, Long templateColumnId) {
+        BoardColumnDTO boardColumn = new BoardColumnDTO();
+        boardColumn.setOrganizationId(organizationId);
+        boardColumn.setProjectId(0L);
+        boardColumn.setColumnId(templateColumnId);
+        BoardColumnDTO boardColumnDTO = boardColumnMapper.selectOne(boardColumn);
+        if (ObjectUtils.isEmpty(boardColumnDTO)) {
+            throw new CommonException("error.board.template.column.null");
+        }
+        // 删除列
+        if (boardColumnMapper.deleteByPrimaryKey(templateColumnId) != 1) {
+            throw new CommonException("error.board.template.column.delete");
+        }
+        // 取消列下的状态关联，状态归为未对应的状态
+        ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
+        columnStatusRelDTO.setColumnId(templateColumnId);
+        columnStatusRelDTO.setProjectId(0L);
+        columnStatusRelDTO.setOrganizationId(organizationId);
+        columnStatusRelService.delete(columnStatusRelDTO);
+        updateSequenceWhenDeleteTemplateColumn(organizationId, 0L, boardColumnDTO);
+    }
+
+    public void updateSequenceWhenDeleteTemplateColumn(Long organizationId, Long projectId, BoardColumnDTO boardColumnDTO) {
+        Long boardId = boardColumnDTO.getBoardId();
+        boardColumnMapper.updateSequenceWhenDelete(boardColumnDTO.getBoardId(), boardColumnDTO.getSequence());
+        BoardColumnDTO update = new BoardColumnDTO();
+        update.setProjectId(projectId);
+        update.setOrganizationId(organizationId);
+        update.setBoardId(boardId);
+        Integer size = boardColumnMapper.select(update).size();
+        boardColumnMapper.updateColumnCategory(boardId, size);
+        boardColumnMapper.updateColumnColor(boardId, size);
     }
 
     private void copyBoardTemplate(Long projectId, Long organizationId, List<BoardVO> boardVOS) {
