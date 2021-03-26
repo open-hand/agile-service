@@ -9,6 +9,7 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.enums.InitStatus;
 import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
@@ -57,7 +58,16 @@ public class AgileEventHandler {
     private ObjectSchemeFieldService objectSchemeFieldService;
 
     @Autowired
+    private ProjectConfigService projectConfigService;
+
+    @Autowired
     private TestServiceClientOperator testServiceClientOperator;
+
+    @Autowired
+    private OrganizationConfigService organizationConfigService;
+
+    @Autowired
+    private BoardTemplateService boardTemplateService;
 
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
@@ -121,7 +131,21 @@ public class AgileEventHandler {
                 stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
                 //创建项目时创建默认问题类型方案
                 issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
+                // 同步状态机模板和看板模板
+                handlerOrganizationTemplate(projectEvent);
             }
+        }
+    }
+
+    private void handlerOrganizationTemplate(ProjectEvent projectEvent) {
+        if (!ObjectUtils.isEmpty(projectEvent.getUseTemplate()) && Boolean.TRUE.equals(projectEvent.getUseTemplate())) {
+            // 同步状态机模板
+            organizationConfigService.syncStatusMachineTemplate(projectEvent, SchemeApplyType.AGILE);
+            // 同步看板模板
+            boardTemplateService.syncBoardTemplate(projectEvent, SchemeApplyType.AGILE);
+        } else {
+            // 初始化问题类型状态机
+            projectConfigService.initIssueTypeStatusMachine(projectEvent.getProjectId(), SchemeApplyType.AGILE);
         }
     }
 

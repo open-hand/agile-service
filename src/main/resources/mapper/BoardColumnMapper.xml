@@ -398,7 +398,7 @@
         <id column="column_name" property="name"/>
         <id column="min_num" property="minNum"/>
         <id column="max_num" property="maxNum"/>
-        <id column="category_code" property="categoryCode"/>
+        <id column="column_category_code" property="categoryCode"/>
         <id column="board_id" property="boardId"/>
         <id column="color_code" property="colorCode"/>
         <id column="column_ovn" property="objectVersionNumber"/>
@@ -417,15 +417,16 @@
              abc.column_id,
              abc.name as column_name ,
              abc.sequence,
-             abc.category_code,
+             abc.category_code as column_category_code,
              abc.max_num,
              abc.min_num,
              abc.board_id,
+             abc.color_code,
              abc.object_version_number as column_ovn,
              fs.id as status_id,
              fs.name as status_name,
-             fs.type,
-             IFNULL(fst.is_template_completed,0) as fs_completed,
+             fs.type as category_code,
+             fst.is_template_completed as fs_completed,
              abcsr.position
             FROM
                 agile_board_column abc

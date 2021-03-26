@@ -2,11 +2,13 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.validator.BoardValidator;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.mapper.BoardColumnMapper;
 import io.choerodon.agile.infra.mapper.BoardMapper;
 import io.choerodon.agile.infra.mapper.StatusTemplateMapper;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
@@ -276,5 +278,49 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         issueStatusService.deleteColumnStatusRel(organizationId, 0L, statusId, statusMoveVO.getOriginColumnId());
         issueStatusService.updateColumnPosition(organizationId,0L, statusId, statusMoveVO,sameRow);
         return modelMapper.map(statusService.queryStatusById(organizationId, statusId), StatusVO.class);
+    }
+
+    @Override
+    public void syncBoardTemplate(ProjectEvent projectEvent, String applyType) {
+        // 查询组织的看板
+        Long projectId = projectEvent.getProjectId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectEvent.getProjectId());
+        List<BoardVO> boardVOS = listBoardTemplate(organizationId);
+        if (!CollectionUtils.isEmpty(boardVOS)) {
+           // 复制看看
+           copyBoardTemplate(projectId, organizationId, boardVOS);
+        } else {
+            boardService.create(projectId, "默认看板");
+        }
+    }
+
+    private void copyBoardTemplate(Long projectId, Long organizationId, List<BoardVO> boardVOS) {
+        for (BoardVO boardVO : boardVOS) {
+            BoardDTO board = boardService.createBoard(0L, projectId, boardVO.getName());
+            // 查询列
+            List<BoardColumnVO> boardColumnVOS = listColumnByBoardId(organizationId, boardVO.getBoardId());
+            if (!CollectionUtils.isEmpty(boardColumnVOS)) {
+                for (BoardColumnVO boardColumnVO : boardColumnVOS) {
+                    BoardColumnDTO columnDTO = modelMapper.map(boardColumnVO, BoardColumnDTO.class);
+                    columnDTO.setOrganizationId(0L);
+                    columnDTO.setProjectId(projectId);
+                    columnDTO.setColumnId(null);
+                    columnDTO.setObjectVersionNumber(null);
+                    columnDTO.setBoardId(board.getBoardId());
+                    BoardColumnDTO boardColumnDTO = boardColumnService.createBase(columnDTO);
+                    // 关联状态
+                    List<StatusTemplateVO> status = boardColumnVO.getStatus();
+                    for (StatusTemplateVO statusTemplateVO : status) {
+                        ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
+                        columnStatusRelDTO.setOrganizationId(0L);
+                        columnStatusRelDTO.setProjectId(projectId);
+                        columnStatusRelDTO.setPosition(statusTemplateVO.getPosition());
+                        columnStatusRelDTO.setStatusId(statusTemplateVO.getStatusId());
+                        columnStatusRelDTO.setColumnId(boardColumnDTO.getColumnId());
+                        columnStatusRelService.create(columnStatusRelDTO);
+                    }
+                }
+            }
+        }
     }
 }

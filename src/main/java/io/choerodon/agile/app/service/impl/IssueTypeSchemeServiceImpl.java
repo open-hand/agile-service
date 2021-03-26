@@ -206,8 +206,6 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
         initScheme(projectId, organizationId, projectCode + "默认类型方案【敏捷】", issueTypeMap.get(InitIssueType.STORY.getTypeCode()).getId(), SchemeApplyType.AGILE, issueTypeMap);
         //初始化测试问题类型方案
         initScheme(projectId, organizationId, projectCode + "默认类型方案【测试】", issueTypeMap.get(InitIssueType.TEST.getTypeCode()).getId(), SchemeApplyType.TEST, issueTypeMap);
-        // 初始化问题类型状态机
-        projectConfigService.initIssueTypeStatusMachine(projectId,SchemeApplyType.AGILE);
     }
 
 //    @Override
