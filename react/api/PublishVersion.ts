@@ -39,6 +39,14 @@ export interface IPublishVersionData {
 //   version: null | string
 //   versionAlias: null | string
 // }
+export interface IPublishVersionTreeNode {
+  id: string
+  name?: string
+  version?: string | null
+  versionAlias?: string | null
+  type?: string | 'app'
+  children?: Array<IPublishVersionTreeNode>
+}
 
 class PublishVersionApi extends Api<PublishVersionApi> {
   get prefix() {
@@ -122,6 +130,53 @@ class PublishVersionApi extends Api<PublishVersionApi> {
       method: 'post',
       url: `${this.prefix}/publish_version/${publishVersionId}/parse_pom`,
       data,
+    });
+  }
+
+  /**
+   * 加载版本依赖树
+   */
+  loadDependencyTree(rootId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/publish_version_tree`,
+      params: {
+        rootId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  dependencyTreeAdd(data: IPublishVersionTreeNode) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/publish_version_tree/add`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  dependencyTreeDel(data: IPublishVersionTreeNode) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/publish_version_tree/delete`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  loadDependencyTreeAvailableNode(rootId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/publish_version_tree/available_publish_version`,
+      params: {
+        rootId,
+        organizationId: getOrganizationId(),
+      },
     });
   }
 }

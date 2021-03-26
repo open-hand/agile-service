@@ -17,18 +17,18 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
-import { IAppVersionData, versionApi } from '@/api';
+import { IAppVersionData, publishVersionApiConfig, versionApi } from '@/api';
 import { Checkbox } from 'choerodon-ui';
 import SelectTeam from '@/components/select/select-team';
 
 interface ILinkServiceProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
-
+  publishVersionId: string
 }
 const { Option } = Select;
 
 const LinkPublishVersionModal: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({
-  modal, handleOk,
+  modal, handleOk, publishVersionId,
 }) => {
   const [applicationId, setApplicationId] = useState<string>();
   const [versionType, setVersionType] = useState<string>('version');
@@ -45,10 +45,20 @@ const LinkPublishVersionModal: React.FC<{ modal?: IModalProps } & ILinkServicePr
       // { name: 'subProject', label: '选择子项目', required: !!programMode },
 
       {
-        name: 'version', label: '选择发布版本', multiple: true, textField: 'name', valueField: 'value', dynamicProps: { required: ({ record }) => record.get('change') === 'version' },
+        name: 'version',
+        label: '选择发布版本',
+        multiple: true,
+        textField: 'versionAlias',
+        valueField: 'id',
+        options: new DataSet({
+          autoQuery: true,
+          transport: {
+            read: publishVersionApiConfig.loadDependencyTreeAvailableNode(publishVersionId),
+          },
+        }),
       },
     ],
-  }), []);
+  }), [publishVersionId]);
   useEffect(() => {
     ds.current?.init(versionType, undefined);
   }, [ds, versionType]);

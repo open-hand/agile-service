@@ -1,7 +1,7 @@
 import { observable, action, computed } from 'mobx';
 import { set, get, pick } from 'lodash';
 import {
-  IAppVersionData, IPublishVersionData, projectApi, publishVersionApi, versionApi,
+  IAppVersionData, IPublishVersionData, IPublishVersionTreeNode, projectApi, publishVersionApi, versionApi,
 } from '@/api';
 import IReleaseDetailData from '../types';
 
@@ -31,7 +31,7 @@ class ReleaseDetailStore {
     name: 'agile-test', appService: true, tag: false, artifactId: 'te:',
   } as any];
 
-  @observable dependencyList: Array<any> = [];
+  @observable dependencyList: Array<IPublishVersionTreeNode> = [];
 
   @observable visible: boolean = false;
 
@@ -47,6 +47,10 @@ class ReleaseDetailStore {
 
   @computed get getAppServiceList() {
     return this.appServiceList;
+  }
+
+  @computed get getDependencyList() {
+    return this.dependencyList;
   }
 
   @action setDependencyList(data: Array<any>) {
@@ -88,8 +92,9 @@ class ReleaseDetailStore {
     }
   }
 
-  @action async loadDependencyData() {
-    this.setDependencyList([]);
+  @action async loadDependencyData(id: string = this.getCurrentData.id) {
+    const dependencyList = await publishVersionApi.loadDependencyTree(id);
+    this.setDependencyList(dependencyList);
   }
 
   @action async loadData(id: string = this.getCurrentData.id, ignoreLoad: string[] = ['app']) {
@@ -98,7 +103,7 @@ class ReleaseDetailStore {
 
     const versionList = ignoreLoad.includes('app') ? this.getAppServiceList : await versionApi.loadAppVersionList(id);
     this.setAppServiceList(versionList.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` })));
-    this.loadDependencyData();
+    this.loadDependencyData(id);
     this.setCurrentData({ ...versionData, name: versionData.versionAlias || versionData.version });
     await this.events.load({ versionData });
     this.loading = false;
