@@ -9,7 +9,6 @@ import 'moment/locale/zh-cn';
 import 'moment/locale/en-nz';
 import moment from 'moment';
 import { PermissionRoute } from '@choerodon/master';
-import AgileProvider from '@/components/AgileProvider';
 import { setHistory } from '@/utils/to';
 import './style/index.less';
 
@@ -95,22 +94,19 @@ class Agile extends React.Component {
     const IntlProviderAsync = asyncLocaleProvider(language, () => import(`./locale/${language}`));
     return (
       <div id="agile">
-        <AgileProvider projectId={AppState.currentMenuType.id}>
-          <IntlProviderAsync>
-            <Switch>
-              {/* 协作 */}
-              {getRoutes(match)}
-              <Route path="*" component={nomatch} />
-            </Switch>
-            <ModalContainer />
-          </IntlProviderAsync>
-        </AgileProvider>
+        <IntlProviderAsync>
+          <Switch>
+            {/* 协作 */}
+            {getRoutes(match)}
+            <Route path="*" component={nomatch} />
+          </Switch>
+          <ModalContainer />
+        </IntlProviderAsync>
       </div>
     );
   }
 }
 export * from './exports';
-export * from '@/hooks';
 export * from '@/components';
 
 export default Agile;

@@ -1,12 +1,12 @@
 import React from 'react';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
-import useDefaultPriority from '@/hooks/useDefaultPriority';
+import useDefaultPriority from '@/hooks/data/useDefaultPriority';
 import { IsInProgram } from '@/hooks/useIsInProgram';
 import QuickCreateIssue from './QuickCreateIssue';
 
 const QuickCreateIssueWithProvider = (props) => {
   const { data: issueTypes } = useProjectIssueTypes({ onlyEnabled: true });
-  const [defaultPriority] = useDefaultPriority();
+  const { data: defaultPriority } = useDefaultPriority();
 
   return (
     <IsInProgram>
