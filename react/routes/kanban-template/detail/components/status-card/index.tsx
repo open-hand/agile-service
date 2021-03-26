@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import classNames from 'classnames';
+import { Radio } from 'choerodon-ui/pro';
 import { Draggable, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
+import { IKanbanTemplateStatus } from '@/api';
+import { observer } from 'mobx-react-lite';
+import { useLockFn } from 'ahooks';
+import StatusTypeTag from '@/components/tag/status-type-tag';
 import styles from './index.less';
+import { Context } from '../..';
 
 const grid = 12;
 const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => ({
@@ -12,17 +18,23 @@ const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDr
 interface ColumnProps extends React.HTMLAttributes<HTMLDivElement> {
   index: number
   columnId: string
+  data: IKanbanTemplateStatus
 }
 const StatusCard: React.FC<ColumnProps> = ({
   className,
   index,
   columnId,
+  data,
   ...otherProps
 }) => {
+  const { store } = useContext(Context);
   const draggableId = JSON.stringify({
     type: 'status',
     columnId,
-    statusId: index,
+    statusId: data.statusId,
+  });
+  const handleCheckClick = useLockFn(async () => {
+    await store.setStatusComplete(data, !data.templateCompleted);
   });
   return (
     <Draggable
@@ -41,11 +53,19 @@ const StatusCard: React.FC<ColumnProps> = ({
             provided.draggableProps.style,
           )}
         >
-          StatusCard
+          <StatusTypeTag
+            mode="tag"
+            code={data.categoryCode}
+            name={data.name}
+          />
+          <br />
+          <div role="none" className={styles.radio} onClick={handleCheckClick}>
+            <Radio checked={data.templateCompleted}>设置已完成</Radio>
+          </div>
         </div>
       )}
     </Draggable>
   );
 };
 
-export default StatusCard;
+export default observer(StatusCard);

@@ -65,6 +65,7 @@ export interface IStatus {
   type: 'todo' | 'doing' | 'done' | 'prepare'
   name: string
   code: string
+  complete: boolean
 }
 export interface Priority {
   colour: string,

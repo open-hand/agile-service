@@ -15,32 +15,27 @@ const { Column } = Table;
 
 const KanbanTemplateList = () => {
   const dataSet = useMemo(() => new DataSet({
-    data: [{
-      name: '1',
-      description: 'aa',
-    }],
+    autoQuery: true,
+    selection: false,
     transport: {
       read: ({ params }) => kanbanTemplateApiConfig.list(params.page, params.size),
     },
     fields: [{
       name: 'name',
       label: '看板名称',
-    }, {
-      name: 'description',
-      label: '描述',
     }],
   }), []);
   const handleClick = useCallback(() => {
-    openKanbanTemplateModal({ mode: 'create' });
-  }, []);
+    openKanbanTemplateModal({ mode: 'create', onSubmit: () => dataSet.query() });
+  }, [dataSet]);
   const handleMenuClick = useCallback(async (key, record) => {
     switch (key) {
       case 'delete': {
         Modal.confirm({
-          title: `确认删除报告“${record.get('title')}”`,
+          title: `确认删除看板模板“${record.get('name')}”`,
           onOk: async () => {
             await kanbanTemplateApi.delete(record.get('boardId'));
-            dataSet.query();
+            dataSet.query(dataSet.currentPage);
           },
         });
         break;
@@ -77,11 +72,12 @@ const KanbanTemplateList = () => {
               <TableAction
                 onEditClick={() => record && openKanbanTemplateModal({
                   mode: 'edit',
-                  boardId: record.get('boardId'),
                   data: {
                     name: record.get('name'),
-                    description: record.get('description'),
+                    objectVersionNumber: record.get('objectVersionNumber'),
+                    boardId: record.get('boardId'),
                   },
+                  onSubmit: () => dataSet.query(),
                 })}
                 onMenuClick={({ key }: { key: string }) => handleMenuClick(key, record)}
                 menus={[{
@@ -95,7 +91,6 @@ const KanbanTemplateList = () => {
               />
             )}
           />
-          <Column name="description" />
         </Table>
       </Content>
     </Page>

@@ -1,14 +1,16 @@
 import React from 'react';
 import classNames from 'classnames';
 import { Droppable } from 'react-beautiful-dnd';
+import { IKanbanTemplateColumn } from '@/api';
 import styles from './index.less';
 import Column from '../column';
 
 interface ColumnProps extends React.HTMLAttributes<HTMLDivElement> {
-
+  columns: IKanbanTemplateColumn[]
 }
 const Columns: React.FC<ColumnProps> = ({
   className,
+  columns,
   ...otherProps
 }) => (
   <Droppable droppableId="columndrop" direction="horizontal" type="columndrop">
@@ -19,7 +21,7 @@ const Columns: React.FC<ColumnProps> = ({
         ref={provided.innerRef}
         {...provided.droppableProps}
       >
-        {Array(10).fill(0).map((i, index) => <Column className={styles.column} index={index} />)}
+        {columns.map((column, index) => <Column key={column.columnId} data={column} className={styles.column} index={index} />)}
         {provided.placeholder}
       </div>
     )}

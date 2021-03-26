@@ -7,6 +7,7 @@ import styles from './index.less';
 interface Props {
   mode?: 'inline' | 'tag'
   code: IStatus['valueCode']
+  name?: string
 }
 const renderInlineMode = ({ color, name }: { color: string, name: string }) => (
   <div className={styles.status_type_inline_mode}>
@@ -19,8 +20,10 @@ const renderInlineMode = ({ color, name }: { color: string, name: string }) => (
     {name}
   </div>
 );
-const StatusTypeTag: React.FC<Props> = ({ mode = 'inline', code }) => {
-  const { color, name } = STATUS_TYPE[code];
+const StatusTypeTag: React.FC<Props> = ({ mode = 'inline', code, name: propsName }) => {
+  const type = STATUS_TYPE[code] ?? {};
+  const { color } = type;
+  const name = propsName ?? type.name;
   switch (mode) {
     case 'inline': return renderInlineMode({
       color,

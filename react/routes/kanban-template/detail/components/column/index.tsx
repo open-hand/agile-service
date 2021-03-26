@@ -1,6 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { Draggable, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
+import { IKanbanTemplateColumn } from '@/api';
 import styles from './index.less';
 import Header from '../header';
 import CardList from '../card-list';
@@ -12,16 +13,18 @@ const getItemStyle = (index:number, isDragging: boolean, draggableStyle: Draggin
   ...draggableStyle,
 } as const);
 interface ColumnProps extends React.HTMLAttributes<HTMLDivElement> {
+  data: IKanbanTemplateColumn
   index: number
 }
 const Column: React.FC<ColumnProps> = ({
   className,
   index,
+  data,
   ...otherProps
 }) => {
   const draggableId = JSON.stringify({
     type: 'column',
-    columnId: index,
+    columnId: data.columnId,
   });
   return (
     <Draggable
@@ -40,8 +43,8 @@ const Column: React.FC<ColumnProps> = ({
             provided.draggableProps.style,
           )}
         >
-          <Header className={styles.column__header} provided={provided} />
-          <CardList className={styles.column__content} columnId={draggableId} />
+          <Header column={data} className={styles.column__header} provided={provided} />
+          <CardList columnId={data.columnId} status={data.status} className={styles.column__content} />
         </div>
       )}
     </Draggable>
