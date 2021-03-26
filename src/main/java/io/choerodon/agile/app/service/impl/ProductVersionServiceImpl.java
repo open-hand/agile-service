@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,18 +17,15 @@ import static java.util.stream.Collectors.toMap;
 
 import io.choerodon.agile.api.validator.ProductVersionValidator;
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.app.assembler.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.PublishVersionIssueRelMapper;
 import io.choerodon.agile.infra.mapper.PublishVersionMapper;
 import io.choerodon.agile.infra.mapper.ProductAppVersionRelMapper;
 import io.choerodon.agile.infra.mapper.ProductVersionMapper;
-import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
@@ -529,128 +524,4 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         }
     }
 
-    @Override
-    public List<PublishVersionVO> listAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO) {
-        ProductVersionDTO productVersionDTO = productVersionMapper.selectByPrimaryKey(versionId);
-        if (ObjectUtils.isEmpty(productVersionDTO)) {
-            return new ArrayList<>();
-        }
-        List<PublishVersionVO> list = productVersionMapper.listAppVersionByOption(projectId, versionId, appVersionSearchVO);
-        return list;
-    }
-
-    @Override
-    public Page<PublishVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO, PageRequest pageRequest) {
-        if (StringUtils.isEmpty(appVersionSearchVO.getServiceCode())) {
-            throw new CommonException("error.serviceCode.empty");
-        }
-        ProductVersionDTO productVersionDTO = productVersionMapper.selectByPrimaryKey(versionId);
-        if (ObjectUtils.isEmpty(productVersionDTO)) {
-            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
-        }
-        return PageHelper.doPage(pageRequest, () ->
-            productVersionMapper.listUnRelAppVersionByOption(projectId, versionId, appVersionSearchVO)
-        );
-    }
-
-    @Override
-    public List<IssueListFieldKVVO> listRelStoryByOption(Long projectId, Long versionId, SearchVO searchVO) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        boardAssembler.handleOtherArgs(searchVO);
-        //获取产品版本关联的应用版本关联的所有产品版本中其是最小序列的应用版本
-        List<Long> appVersionIds = getMinSequenceAppVersionIds(projectId, versionId);
-        if (CollectionUtils.isEmpty(appVersionIds)) {
-            return new ArrayList<>();
-        }
-
-        List<IssueDTO> issueDTOList = publishVersionMapper.listRelStoryByOption(projectId, appVersionIds, searchVO);
-        Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
-        List<IssueListFieldKVVO> result = new ArrayList<>(issueDTOList.size());
-        Set<Long> userIds = issueDTOList.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
-        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Lists.newArrayList(userIds), true);
-        issueDTOList.forEach(issueDO -> {
-            UserMessageDTO assigneeUserDO = usersMap.get(issueDO.getAssigneeId());
-            String assigneeName = assigneeUserDO != null ? assigneeUserDO.getName() : null;
-            String assigneeLoginName = assigneeUserDO != null ? assigneeUserDO.getLoginName() : null;
-            String assigneeRealName = assigneeUserDO != null ? assigneeUserDO.getRealName() : null;
-            String assigneeImageUrl = assigneeUserDO != null ? assigneeUserDO.getImageUrl() : null;
-
-            IssueListFieldKVVO issueListField = modelMapper.map(issueDO, IssueListFieldKVVO.class);
-            issueListField.setAssigneeName(assigneeName);
-            issueListField.setAssigneeLoginName(assigneeLoginName);
-            issueListField.setAssigneeRealName(assigneeRealName);
-            issueListField.setAssigneeImageUrl(assigneeImageUrl);
-            issueListField.setStatusVO(statusMap.get(issueDO.getStatusId()));
-//            if (issueDO.getAppVersions() != null) {
-//                List<PublishVersionVO> appVersionList = modelMapper.map(issueDO.getAppVersions(), new TypeToken<List<PublishVersionVO>>() {
-//                }.getType());
-//                issueListField.setAppVersions(appVersionList);
-//            }
-            result.add(issueListField);
-        });
-        AgilePluginService expandBean = SpringBeanUtil.getExpandBean(AgilePluginService.class);
-        if (!ObjectUtils.isEmpty(expandBean) && !CollectionUtils.isEmpty(result)) {
-            expandBean.doToIssueListFieldKVDTO(projectId, result);
-        }
-        return result;
-    }
-
-    @Override
-    public List<IssueListFieldKVVO> listRelBugByOption(Long projectId, Long versionId, SearchVO searchVO) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        boardAssembler.handleOtherArgs(searchVO);
-        //获取产品版本关联的应用版本关联的所有产品版本中其是最小序列的应用版本
-        List<Long> appVersionIds = getMinSequenceAppVersionIds(projectId, versionId);
-        if (CollectionUtils.isEmpty(appVersionIds)) {
-            return new ArrayList<>();
-        }
-
-        List<IssueDTO> issueDTOList = publishVersionMapper.listRelBugByOption(projectId, appVersionIds, searchVO);
-
-        Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
-        List<IssueListFieldKVVO> result = new ArrayList<>(issueDTOList.size());
-        Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Set<Long> userIds = issueDTOList.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
-        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(Lists.newArrayList(userIds), true);
-        issueDTOList.forEach(issueDO -> {
-            UserMessageDTO assigneeUserDO = usersMap.get(issueDO.getAssigneeId());
-            String assigneeName = assigneeUserDO != null ? assigneeUserDO.getName() : null;
-            String assigneeLoginName = assigneeUserDO != null ? assigneeUserDO.getLoginName() : null;
-            String assigneeRealName = assigneeUserDO != null ? assigneeUserDO.getRealName() : null;
-            String assigneeImageUrl = assigneeUserDO != null ? assigneeUserDO.getImageUrl() : null;
-
-            IssueListFieldKVVO issueListField = modelMapper.map(issueDO, IssueListFieldKVVO.class);
-            issueListField.setAssigneeName(assigneeName);
-            issueListField.setAssigneeLoginName(assigneeLoginName);
-            issueListField.setAssigneeRealName(assigneeRealName);
-            issueListField.setAssigneeImageUrl(assigneeImageUrl);
-            List<VersionIssueRelVO> versionList = modelMapper.map(issueDO.getVersionIssueRelDTOS(), new TypeToken<List<VersionIssueRelVO>>(){}.getType());
-            issueListField.setVersionIssueRelVOS(versionList);
-            issueListField.setStatusVO(statusMap.get(issueDO.getStatusId()));
-            issueListField.setPriorityVO(priorityMap.get(issueDO.getPriorityId()));
-            result.add(issueListField);
-        });
-        return result;
-    }
-
-
-    //获取产品版本关联的应用版本关联的所有产品版本中其是最小序列的应用版本
-    private List<Long> getMinSequenceAppVersionIds(Long projectId, Long versionId) {
-        ProductVersionDTO productVersionDTO = productVersionMapper.selectByPrimaryKey(versionId);
-        List<Long> appVersionIds = productVersionMapper.listAppVersionIdByVersionId(projectId, versionId);
-        if (CollectionUtils.isEmpty(appVersionIds) || ObjectUtils.isEmpty(productVersionDTO)) {
-            return new ArrayList<>();
-        }
-        List<AppVersionRelProductSequenceVO> sequenceList = productVersionMapper.listMinSequenceByAppVersion(projectId, appVersionIds);
-        List<Long> resultIds = sequenceList.stream()
-                .filter(sequence ->
-                        productVersionDTO.getSequence().equals(sequence.getSequence()))
-                .map(AppVersionRelProductSequenceVO::getAppVersionId)
-                .collect(toList());
-
-        if (CollectionUtils.isEmpty(resultIds)) {
-            return new ArrayList<>();
-        }
-        return resultIds;
-    }
 }

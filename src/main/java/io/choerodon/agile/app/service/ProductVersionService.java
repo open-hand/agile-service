@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.infra.dto.ProductVersionDTO;
 import io.choerodon.core.domain.Page;
@@ -69,43 +68,4 @@ public interface ProductVersionService {
 
     List<TestVersionFixVO> queryByVersionId();
 
-    /**
-     * 查询产品版本关联的应用版本
-     *
-     * @param versionId 产品版本id
-     * @param projectId 项目id
-     * @param appVersionSearchVO 查询条件
-     * @return 产品版本关联的应用版本
-     */
-    List<PublishVersionVO> listAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO);
-
-    /**
-     * 查询产品版本未关联的应用版本
-     *
-     * @param projectId 项目id
-     * @param versionId 产品版本id
-     * @param appVersionSearchVO 查询条件
-     * @param pageRequest 分页参数
-     * @return 产品版本未关联的应用版本
-     */
-    Page<PublishVersionVO> listUnRelAppVersionByOption(Long projectId, Long versionId, AppVersionSearchVO appVersionSearchVO, PageRequest pageRequest);
-
-
-    /**
-     * 查询产品版本项目下关联的应用版本下已完成故事
-     * @param projectId 项目id
-     * @param versionId 产品版本id
-     * @param searchVO 查询参数
-     * @return 产品版本项目下关联的应用版本下已完成故事
-     */
-    List<IssueListFieldKVVO> listRelStoryByOption(Long projectId, Long versionId, SearchVO searchVO);
-
-    /**
-     * 查询产品版本项目下关联的应用版本下已完成缺陷
-     * @param projectId 项目id
-     * @param versionId 产品版本id
-     * @param searchVO 查询参数
-     * @return 产品版本项目下关联的应用版本下已完成缺陷
-     */
-    List<IssueListFieldKVVO> listRelBugByOption(Long projectId, Long versionId, SearchVO searchVO);
 }
