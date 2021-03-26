@@ -1,5 +1,5 @@
 import React, {
-  useMemo, useImperativeHandle, useCallback, useRef,
+  useMemo, useImperativeHandle, useCallback, useRef, useEffect, useState,
 } from 'react';
 import {
   Form, Select, DataSet, TextField,
@@ -43,17 +43,27 @@ export const defaultCharts = new Map<string, ChartMap>([
   ['service_code_quality', { component: ServiceCodeQualityReportComponent, name: '应用服务代码质量图', group: '质量' }],
 ]);
 let charts = defaultCharts;
-type GetOptionalCharts = () => Map<string, ChartMap>
+type GetOptionalCharts = () => Promise<Map<string, ChartMap>>
 
-const getOptionalCharts: GetOptionalCharts = () => new Map([...charts.entries()].filter((c) => {
-  if (c[1].available === undefined) {
-    return true;
+const getOptionalCharts: GetOptionalCharts = async () => {
+  const map = new Map();
+  const entries = [...charts.entries()];
+  for (let i = 0; i < entries.length; i += 1) {
+    const c = entries[i];
+    let available = true;
+    if (c[1].available === undefined) {
+      available = true;
+    }
+    if (typeof c[1].available === 'function') {
+      // eslint-disable-next-line no-await-in-loop
+      available = await c[1].available();
+    }
+    if (available) {
+      map.set(c[0], c[1]);
+    }
   }
-  if (typeof c[1].available === 'function') {
-    return c[1].available();
-  }
-  return true;
-}));
+  return map;
+};
 
 export function addChartsMap(extraCharts: Map<string, ChartMap>) {
   charts = new Map([...charts, ...extraCharts]);
@@ -69,9 +79,16 @@ export interface ChartRefProps {
 const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const initProject = useMemo(() => editData?.chartSearchVO.projectId, [editData?.chartSearchVO.projectId]);
   const initChartCode = useMemo(() => editData?.chartCode, [editData?.chartCode]);
+  const [optionalCharts, setOptionalCharts] = useState(new Map());
   const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
   const hasDevops = useHasDevops();
   const { isProgram } = useIsProgram();
+  useEffect(() => {
+    (async () => {
+      const data = await getOptionalCharts();
+      setOptionalCharts(data);
+    })();
+  }, []);
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     data: editData ? [{ title: editData.title, chart: editData.chartCode, subProjectId: editData.chartSearchVO.projectId }] : undefined,
@@ -118,7 +135,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);
-  const optionalCharts = getOptionalCharts();
+
   const chart = dataSet.current?.get('chart');
   const subProjectId = dataSet.current?.get('subProjectId');
   const ChartComponent = optionalCharts.get(chart)?.component;
