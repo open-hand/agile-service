@@ -187,37 +187,12 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
     public BoardColumnVO createBoardColumn(Long organizationId, String categoryCode, BoardColumnVO boardColumnVO) {
         // 创建列
         boardColumnService.createCheck(boardColumnVO);
-        StatusVO statusVO = new StatusVO();
-        statusVO.setType(categoryCode);
-        statusVO.setName(boardColumnVO.getName());
-        statusVO = statusService.create(organizationId, statusVO);
-        if (statusVO != null && statusVO.getId() != null) {
-            Long statusId = statusVO.getId();
-            Boolean checkStatus = boardColumnService.checkColumnStatusExist(organizationId,0L, statusId);
-            boardColumnService.setColumnColor(boardColumnVO, checkStatus);
-            BoardColumnDTO columnDTO = modelMapper.map(boardColumnVO, BoardColumnDTO.class);
-            columnDTO.setProjectId(0L);
-            columnDTO.setOrganizationId(organizationId);
-            BoardColumnDTO boardColumnDTO = boardColumnService.createBase(columnDTO);
-            // 创建列与状态关联关系
-            if (Boolean.FALSE.equals(checkStatus)) {
-                ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
-                columnStatusRelDTO.setColumnId(boardColumnDTO.getColumnId());
-                columnStatusRelDTO.setStatusId(statusId);
-                columnStatusRelDTO.setPosition(0);
-                columnStatusRelDTO.setProjectId(0L);
-                columnStatusRelDTO.setOrganizationId(organizationId);
-                columnStatusRelService.create(columnStatusRelDTO);
-            }
-            return boardColumnVO;
-        } else {
-            boardColumnService.setColumnColor(boardColumnVO, true);
-            BoardColumnDTO columnDTO = modelMapper.map(boardColumnVO, BoardColumnDTO.class);
-            columnDTO.setOrganizationId(organizationId);
-            columnDTO.setProjectId(0L);
-            boardColumnService.createBase(columnDTO);
-            return boardColumnVO;
-        }
+        boardColumnService.setColumnColor(boardColumnVO, true);
+        BoardColumnDTO columnDTO = modelMapper.map(boardColumnVO, BoardColumnDTO.class);
+        columnDTO.setOrganizationId(organizationId);
+        columnDTO.setProjectId(0L);
+        boardColumnService.createBase(columnDTO);
+        return boardColumnVO;
     }
 
     @Override
