@@ -85,10 +85,11 @@ class PublishVersionApi extends Api<PublishVersionApi> {
   /**
    * 批量创建
    */
-  createBatch(data: IPublishVersionCreateData) {
+  createBatch(data: IPublishVersionCreateData[]) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/batch`,
+      data,
     });
   }
 
@@ -125,10 +126,13 @@ class PublishVersionApi extends Api<PublishVersionApi> {
    * @param data
    * @returns
    */
-  importPom(publishVersionId: string, data: any) {
+  importPom(data: any, publishVersionId: string, groupIds?: string) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/${publishVersionId}/parse_pom`,
+      params: {
+        groupIds,
+      },
       data,
     });
   }
@@ -169,12 +173,40 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
+  loadDependency(rootId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/publish_version_tree/direct_descendants`,
+      params: {
+        rootId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
   loadDependencyTreeAvailableNode(rootId: string) {
     return this.request({
       method: 'get',
       url: `${this.prefix}/publish_version_tree/available_publish_version`,
       params: {
         rootId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
+   * 检查版本别名是否重复
+   * @param alias
+   * @returns
+   */
+  checkAlias(alias: string, publishVersionId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/publish_version/checkAlias`,
+      params: {
+        alias,
+        publishVersionId,
         organizationId: getOrganizationId(),
       },
     });

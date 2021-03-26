@@ -6,7 +6,9 @@ import { Tree } from 'choerodon-ui';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import React, { useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { IAppVersionData, versionApi } from '@/api';
+import {
+  IAppVersionData, IPublishVersionTreeNode, publishVersionApi, versionApi,
+} from '@/api';
 import { IAppVersionDataItem } from '@/components/release-detail/stores/store';
 import { useReleaseDetailContext } from '../../../stores';
 import { openImportPomModal } from '../../import-pom';
@@ -26,7 +28,7 @@ const LinkService: React.FC = () => {
       store.loadData();
     });
   }
-  function handleDelete(v: IAppVersionData) {
+  function handleDelete(v: IPublishVersionTreeNode) {
     Modal.confirm({
       title: '删除应用版本',
       children: (
@@ -38,35 +40,23 @@ const LinkService: React.FC = () => {
           </SelectBox>
         </div>),
       onOk: () => {
-        (delConfigRef.current === 'only' ? versionApi.deleteLinkAppVersion(detailData.versionId, v.id!) : versionApi.deleteAppVersion(v.id!)).then(() => {
+        (publishVersionApi.dependencyTreeDel({
+          id: detailData.id,
+          children: [
+            { id: v.id },
+          ],
+        })).then(() => {
           store.loadData();
         });
       },
     });
   }
   async function handleImportPom(pomData: any) {
-    await versionApi.createBranchAndLinkAppService(detailData.versionId, pomData);
+    await publishVersionApi.createBatch(pomData);
     store.loadData();
     return true;
   }
-  function renderTreeNode(item: IAppVersionDataItem) {
-    return (
-      <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => openEditAppVersionModal({ data: item, handleOk: () => store.loadData() })}>
-        <span className={`${prefixCls}-link-service-item-left`}>
-          {item.type === 'service' ? <Icon type="local_offer" style={{ fontSize: 15 }} /> : <CustomIcon type="icon-pom" width={17} height={17} />}
-          <span className={`${prefixCls}-link-service-item-left-text`}>{item.name || `${item.artifactId}/${item.versionAlias || item.version}`}</span>
-        </span>
-        <Button
-          icon="delete_forever"
-          className={`${prefixCls}-link-service-item-btn`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDelete(item);
-          }}
-        />
-      </div>
-    );
-  }
+
   return (
     <Section
       title="依赖"
@@ -89,7 +79,7 @@ const LinkService: React.FC = () => {
                 color={'blue' as ButtonColor}
                 //   icon="mode_edit"
                 onClick={() => {
-                  openImportPomModal({ handleOk: handleImportPom });
+                  openImportPomModal({ handleOk: handleImportPom, versionId: detailData.id });
                 }}
               >
                 <CustomIcon type="icon-pom" width={18} height={18} />
@@ -116,14 +106,14 @@ const LinkService: React.FC = () => {
         <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => {}}>
           <span className={`${prefixCls}-link-service-item-left`}>
             {item.type === 'service' ? <Icon type="local_offer" style={{ fontSize: 15 }} /> : <CustomIcon type="icon-pom" width={17} height={17} />}
-            <span className={`${prefixCls}-link-service-item-left-text`}>{item.name || `${item.artifactId}/${item.versionAlias || item.version}`}</span>
+            <span className={`${prefixCls}-link-service-item-left-text`}>{item.versionAlias || item.version}</span>
           </span>
           <Button
             icon="mode_edit"
             className={`${prefixCls}-link-service-item-btn`}
             onClick={(e) => {
               e.stopPropagation();
-              openEditAppVersionModal({ data: item, handleOk: () => store.loadData() });
+              openEditAppVersionModal({ data: item as any, handleOk: () => store.loadData() });
             }}
           />
           <Button

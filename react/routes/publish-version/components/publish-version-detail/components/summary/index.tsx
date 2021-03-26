@@ -9,9 +9,9 @@ import { useReleaseDetailContext } from '../../stores';
 
 const Summary: React.FC = () => {
   const { disabled, store } = useReleaseDetailContext();
-  const { name } = store.getCurrentData;
+  const { name, id } = store.getCurrentData;
   function handleCheckName(newName: string) {
-    return newName === name ? new Promise((r) => r(true)) : publishVersionApi.check({ ...store.getCurrentData, versionAlias: name }).then((res: boolean) => (res ? '版本名称重复' : true));
+    return newName === name ? new Promise((r) => r(true)) : publishVersionApi.checkAlias(name, id).then((res: boolean) => (res ? '版本名称重复' : true));
   }
   return (
     <div className={styles.summary}>
