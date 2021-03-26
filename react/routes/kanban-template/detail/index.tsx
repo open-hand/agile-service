@@ -55,6 +55,7 @@ const KanbanTemplateDetail = () => {
       <Breadcrumb />
       <Content style={{
         borderTop: '1px solid rgb(216, 216, 216)',
+        display: 'flex',
       }}
       >
         <Loading loading={store.loading} />
