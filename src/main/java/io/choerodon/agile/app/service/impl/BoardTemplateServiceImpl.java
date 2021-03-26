@@ -84,6 +84,12 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
     @Autowired
     private ColumnStatusRelMapper columnStatusRelMapper;
 
+    @Autowired
+    private BoardColumnTemplateMapper boardColumnTemplateMapper;
+
+    @Autowired
+    private ColumnStatusRelTemplateMapper columnStatusRelTemplateMapper;
+
     @Override
     public void createBoardTemplate(Long organizationId, String boardName) {
         if (Boolean.TRUE.equals(boardService.checkName(organizationId, 0L, boardName))) {
@@ -227,7 +233,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
     @Override
     public BoardColumnVO updateColumnContraintTemplate(Long organizationId, Long columnId, ColumnWithMaxMinNumVO columnWithMaxMinNumVO) {
         try {
-            boardColumnMapper.updateMaxAndMinNumTemplate(organizationId, columnWithMaxMinNumVO);
+            boardColumnTemplateMapper.updateMaxAndMinNumTemplate(organizationId, columnWithMaxMinNumVO);
         } catch (Exception e) {
             throw new CommonException("error.update.column.contraint", e);
         }
@@ -249,7 +255,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
     public StatusTemplateVO settingStatusTemplate(Long organizationId, Long statusId, Boolean completed) {
         StatusTemplateDTO statusTemplateDTO = new StatusTemplateDTO(organizationId, statusId);
         List<StatusTemplateDTO> statusTemplates = statusTemplateMapper.select(statusTemplateDTO);
-        if (org.springframework.util.CollectionUtils.isEmpty(statusTemplates)) {
+        if (CollectionUtils.isEmpty(statusTemplates)) {
             statusTemplateDTO.setTemplateCompleted(completed);
             if (statusTemplateMapper.insertSelective(statusTemplateDTO) != 1) {
                 throw new CommonException("error.status.template.insert");
@@ -257,7 +263,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         } else {
             StatusTemplateDTO templateDTO = statusTemplates.get(0);
             templateDTO.setTemplateCompleted(completed);
-            if (statusTemplateMapper.updateByPrimaryKeySelective(statusTemplateDTO) != 1) {
+            if (statusTemplateMapper.updateByPrimaryKeySelective(templateDTO) != 1) {
                 throw new CommonException("error.status.template.update");
             }
         }
@@ -270,7 +276,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
 
     @Override
     public List<BoardColumnVO> listColumnByBoardId(Long organizationId, Long boardId) {
-        List<BoardColumnVO> boardColumnVOS = boardColumnMapper.listColumnAndStatusByBoardId(organizationId, boardId);
+        List<BoardColumnVO> boardColumnVOS = boardColumnTemplateMapper.listColumnAndStatusByBoardTemplateId(organizationId, boardId);
         if (org.springframework.util.CollectionUtils.isEmpty(boardColumnVOS)) {
             return new ArrayList<>();
         }
@@ -309,7 +315,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
     }
 
     @Override
-    public List<StatusVO> listUnCorrespondStatus(Long organizationId, Long boardTemplateId) {
+    public List<StatusVO> listUnCorrespondStatusTemplate(Long organizationId, Long boardTemplateId) {
         // 查询组织状态机模板的状态
         OrganizationConfigDTO organizationConfigDTO = new OrganizationConfigDTO();
         organizationConfigDTO.setOrganizationId(organizationId);
@@ -337,7 +343,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
             }
         }
         // 查询看板已有状态
-        List<Long> statusIds = columnStatusRelMapper.queryStatusIds(organizationId, 0L, boardTemplateId);
+        List<Long> statusIds = columnStatusRelTemplateMapper.queryBoardTemplateStatusIds(organizationId, 0L, boardTemplateId);
         if (!CollectionUtils.isEmpty(statusIds)) {
             statusVOS = statusVOS.stream()
                     .filter(v -> !statusIds.contains(v.getId()))

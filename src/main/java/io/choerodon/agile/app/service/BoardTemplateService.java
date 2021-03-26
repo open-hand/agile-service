@@ -64,5 +64,5 @@ public interface BoardTemplateService {
 
     void syncBoardTemplate(ProjectEvent projectEvent, String applyType);
 
-    List<StatusVO> listUnCorrespondStatus(Long organizationId, Long boardTemplateId);
+    List<StatusVO> listUnCorrespondStatusTemplate(Long organizationId, Long boardTemplateId);
 }

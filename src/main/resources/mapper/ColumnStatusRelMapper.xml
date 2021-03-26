@@ -37,15 +37,4 @@
         and abcsr.column_id = #{columnStatusRel.columnId}
         and abcsr.status_id = #{columnStatusRel.statusId}
     </update>
-
-    <select id="queryStatusIds" resultType="java.lang.Long">
-        select abcsr.status_id
-        from agile_board_column_status_rel abcsr
-        where abcsr.organization_id = #{organizationId}
-        and abcsr.project_id = #{projectId}
-        and abcsr.column_id in (
-              select column_id from agile_board_column
-              where board_id = #{boardTemplateId}
-        )
-    </select>
 </mapper>
