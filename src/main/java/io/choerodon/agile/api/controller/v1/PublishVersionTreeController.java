@@ -77,4 +77,17 @@ public class PublishVersionTreeController {
         return ResponseEntity.ok(publishVersionTreeService.availablePublishVersion(projectId, organizationId, rootId));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询树节点的下一级")
+    @GetMapping("/direct_descendants")
+    public ResponseEntity<List<PublishVersionVO>> directDescendants(@ApiParam(value = "项目id", required = true)
+                                                                    @PathVariable(name = "project_id") Long projectId,
+                                                                    @ApiParam(value = "组织id", required = true)
+                                                                    @RequestParam Long organizationId,
+                                                                    @ApiParam(value = "根节点id", required = true)
+                                                                    @RequestParam @Encrypt Long rootId) {
+        return ResponseEntity.ok(publishVersionTreeService.directDescendants(projectId, organizationId, rootId));
+    }
+
+
 }

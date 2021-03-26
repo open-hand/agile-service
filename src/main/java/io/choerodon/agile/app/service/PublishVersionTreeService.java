@@ -47,4 +47,13 @@ public interface PublishVersionTreeService {
      * @return
      */
     List<PublishVersionVO> availablePublishVersion(Long projectId, Long organizationId, Long rootId);
+
+    /**
+     *
+     * @param projectId
+     * @param organizationId
+     * @param rootId
+     * @return
+     */
+    List<PublishVersionVO> directDescendants(Long projectId, Long organizationId, Long rootId);
 }

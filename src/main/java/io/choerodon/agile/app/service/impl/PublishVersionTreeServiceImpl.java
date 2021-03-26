@@ -10,6 +10,8 @@ import io.choerodon.agile.infra.mapper.PublishVersionTreeClosureMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,8 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
     private PublishVersionTreeClosureMapper publishVersionTreeClosureMapper;
     @Autowired
     private PublishVersionMapper publishVersionMapper;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public List<VersionTreeVO> tree(Set<Long> projectIds,
@@ -124,6 +128,26 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
             }
         });
         return result;
+    }
+
+    @Override
+    public List<PublishVersionVO> directDescendants(Long projectId, Long organizationId, Long rootId) {
+        PublishVersionTreeClosureDTO dto = new PublishVersionTreeClosureDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setAncestorId(rootId);
+        dto.setDescendantParent(rootId);
+        Set<Long> publishVersionIds =
+                publishVersionTreeClosureMapper
+                        .select(dto)
+                        .stream()
+                        .map(PublishVersionTreeClosureDTO::getDescendantId)
+                        .collect(Collectors.toSet());
+        if (publishVersionIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<PublishVersionDTO> list = publishVersionMapper.selectByIds(StringUtils.join(publishVersionIds, ","));
+        return modelMapper.map(list, new TypeToken<List<PublishVersionVO>>() {}.getType());
     }
 
     private List<PublishVersionTreeClosureDTO> buildDeleteList(Long projectId,
