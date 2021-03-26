@@ -1,6 +1,8 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.PublishVersionVO;
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -77,18 +79,19 @@ public interface PublishVersionService {
     /**
      * 批量创建发布版本
      *
-     * @param projectId              项目id
+     * @param projectId          项目id
+     * @param publishVersionId
      * @param publishVersionList 要创建的发布版本
      * @return 创建的发布版本
      */
-    List<PublishVersionVO> batchCreate(Long projectId, List<PublishVersionVO> publishVersionList);
+    List<PublishVersionVO> batchCreate(Long projectId, Long publishVersionId, List<PublishVersionVO> publishVersionList);
 
     /**
      * 查询项目下发布版本
      *
-     * @param projectId          项目id
+     * @param projectId        项目id
      * @param publishVersionVO 查询参数
-     * @param pageRequest        分页参数
+     * @param pageRequest      分页参数
      * @return 项目下发布版本
      */
     Page<PublishVersionVO> list(Long projectId, PublishVersionVO publishVersionVO, PageRequest pageRequest);
@@ -102,4 +105,21 @@ public interface PublishVersionService {
      * @return
      */
     Boolean checkAlias(Long projectId, String alias, Long publishVersionId);
+
+    /**
+     * 查询版本关联的故事
+     *
+     * @param projectId
+     * @param publishVersionId
+     * @param searchVO
+     * @return
+     */
+    Page<IssueListFieldKVVO> listRelIssueByOption(Long projectId,
+                                                  Long organizationId,
+                                                  Long publishVersionId,
+                                                  SearchVO searchVO,
+                                                  PageRequest pageRequest,
+                                                  String issueTypeCode);
+
+
 }

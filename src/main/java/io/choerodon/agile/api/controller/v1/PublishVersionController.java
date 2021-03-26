@@ -1,5 +1,9 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -49,12 +53,13 @@ public class PublishVersionController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("批量创建发布版本")
-    @PostMapping("/batch")
+    @PostMapping("/{publish_version_id}/batch")
     public ResponseEntity<List<PublishVersionVO>> batchCreate(@ApiParam(value = "项目id", required = true)
                                                               @PathVariable(name = "project_id") Long projectId,
+                                                              @PathVariable(name = "publish_version_id") Long publishVersionId,
                                                               @ApiParam(value = "新增发布版本", required = true)
                                                               @RequestBody @Valid List<PublishVersionVO> publishVersionList) {
-        return Optional.ofNullable(publishVersionService.batchCreate(projectId, publishVersionList))
+        return Optional.ofNullable(publishVersionService.batchCreate(projectId, publishVersionId, publishVersionList))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.publishVersion.create"));
     }
@@ -151,4 +156,35 @@ public class PublishVersionController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.publishVersion.parsePom"));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询发布版本关联的已完成故事")
+    @PostMapping(value = "/{publish_version_id}/story")
+    public ResponseEntity<Page<IssueListFieldKVVO>> listRelStoryByOption(@ApiParam(value = "项目id", required = true)
+                                                                         @PathVariable(name = "project_id") Long projectId,
+                                                                         @ApiParam(value = "产品版本id", required = true)
+                                                                         @Encrypt @PathVariable(name = "publish_version_id") Long publishVersionId,
+                                                                         @RequestParam Long organizationId,
+                                                                         @ApiParam(value = "筛选条件")
+                                                                         @RequestBody SearchVO searchVO,
+                                                                         @SortDefault(direction = Sort.Direction.ASC) PageRequest pageRequest) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return ResponseEntity.ok(publishVersionService.listRelIssueByOption(projectId, organizationId, publishVersionId, searchVO, pageRequest, IssueTypeCode.STORY.value()));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询发布版本关联的已完成故事")
+    @PostMapping(value = "/{publish_version_id}/bug")
+    public ResponseEntity<Page<IssueListFieldKVVO>> listRelBugByOption(@ApiParam(value = "项目id", required = true)
+                                                                       @PathVariable(name = "project_id") Long projectId,
+                                                                       @ApiParam(value = "产品版本id", required = true)
+                                                                       @Encrypt @PathVariable(name = "publish_version_id") Long publishVersionId,
+                                                                       @RequestParam Long organizationId,
+                                                                       @ApiParam(value = "筛选条件")
+                                                                       @RequestBody SearchVO searchVO,
+                                                                       @SortDefault(direction = Sort.Direction.ASC) PageRequest pageRequest) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return ResponseEntity.ok(publishVersionService.listRelIssueByOption(projectId, organizationId, publishVersionId, searchVO, pageRequest, IssueTypeCode.BUG.value()));
+    }
+
 }

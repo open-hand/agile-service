@@ -1,8 +1,13 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.app.service.PublishVersionTreeService;
+import io.choerodon.agile.infra.dto.IssueStatusDTO;
 import io.choerodon.agile.infra.dto.PublishVersionTreeClosureDTO;
-import io.choerodon.agile.infra.mapper.PublishVersionTreeClosureMapper;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
+import io.choerodon.agile.infra.utils.PageUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +31,6 @@ import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
-import io.choerodon.agile.infra.mapper.PublishVersionIssueRelMapper;
-import io.choerodon.agile.infra.mapper.PublishVersionMapper;
-import io.choerodon.agile.infra.mapper.ProductAppVersionRelMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -48,10 +50,6 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     @Autowired
     private PublishVersionMapper publishVersionMapper;
     @Autowired
-    private PublishVersionIssueRelMapper publishVersionIssueRelMapper;
-    @Autowired
-    private ProductAppVersionRelMapper productAppVersionRelMapper;
-    @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
     private DevopsClientOperator devopsClientOperator;
@@ -59,6 +57,14 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private PomService pomService;
     @Autowired
     private PublishVersionTreeClosureMapper publishVersionTreeClosureMapper;
+    @Autowired
+    private PublishVersionTreeService publishVersionTreeService;
+    @Autowired
+    private IssueService issueService;
+    @Autowired
+    private IssueStatusMapper issueStatusMapper;
+    @Autowired
+    private IssueTypeMapper issueTypeMapper;
 
     private static final String GROUP_ID_EMPTY_EXCEPTION = "error.publish.version.groupId.empty";
     private static final String VERSION_ALIAS_EMPTY_EXCEPTION = "error.publish.version.alias.empty";
@@ -234,10 +240,24 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     }
 
     @Override
-    public List<PublishVersionVO> batchCreate(Long projectId, List<PublishVersionVO> publishVersionList) {
+    public List<PublishVersionVO> batchCreate(Long projectId,
+                                              Long publishVersionId,
+                                              List<PublishVersionVO> publishVersionList) {
         List<PublishVersionVO> result = new ArrayList<>();
-        if(!ObjectUtils.isEmpty(publishVersionList)) {
+        if (!ObjectUtils.isEmpty(publishVersionList)) {
             publishVersionList.forEach(x -> result.add(create(projectId, x)));
+        }
+        if (publishVersionId != null && !result.isEmpty()) {
+            VersionTreeVO vo = new VersionTreeVO();
+            vo.setId(publishVersionId);
+            List<VersionTreeVO> children = new ArrayList<>();
+            vo.setChildren(children);
+            result.forEach(x -> {
+                VersionTreeVO child = new VersionTreeVO();
+                child.setId(x.getId());
+                children.add(child);
+            });
+            publishVersionTreeService.add(projectId, ConvertUtil.getOrganizationId(projectId), vo);
         }
         return result;
     }
@@ -260,8 +280,118 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         if (publishVersionId == null) {
             return !list.isEmpty();
         } else {
-            Long id = list.get(0).getId();
-            return !publishVersionId.equals(id);
+            if (list.isEmpty()) {
+                return false;
+            } else {
+                Long id = list.get(0).getId();
+                return !publishVersionId.equals(id);
+            }
+        }
+    }
+
+    @Override
+    public Page<IssueListFieldKVVO> listRelIssueByOption(Long projectId,
+                                                         Long organizationId,
+                                                         Long publishVersionId,
+                                                         SearchVO searchVO,
+                                                         PageRequest pageRequest,
+                                                         String issueTypeCode) {
+        PublishVersionTreeClosureDTO example = new PublishVersionTreeClosureDTO();
+        example.setProjectId(projectId);
+        example.setOrganizationId(organizationId);
+        example.setAncestorId(publishVersionId);
+        Set<Long> publishVersionIds =
+                publishVersionTreeClosureMapper
+                        .select(example)
+                        .stream()
+                        .map(PublishVersionTreeClosureDTO::getDescendantId)
+                        .collect(Collectors.toSet());
+        Page emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        if (publishVersionIds.isEmpty()) {
+            return emptyPage;
+        }
+        Set<Long> issueIds = publishVersionMapper.selectIssueIds(projectId, organizationId, publishVersionIds);
+        if (issueIds.isEmpty()) {
+            return emptyPage;
+        }
+        addSearchParam(searchVO, issueIds, projectId, issueTypeCode);
+        return issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
+    }
+
+    private void addSearchParam(SearchVO searchVO,
+                                Set<Long> issueIds,
+                                Long projectId,
+                                String typeCode) {
+        Map<String, Object> otherArgs = searchVO.getOtherArgs();
+        if (otherArgs == null) {
+            otherArgs = new HashMap<>();
+            searchVO.setOtherArgs(otherArgs);
+        }
+        List<String> issueIdList = (List<String>) otherArgs.get("issueIds");
+        if (issueIdList == null) {
+            issueIdList = new ArrayList<>();
+            otherArgs.put("issueIds", issueIdList);
+        }
+        for (Long issueId : issueIds) {
+            issueIdList.add(issueId + "");
+        }
+        addCompletedStatus(searchVO, projectId);
+        addIssueType(searchVO, projectId, typeCode);
+        resetTreeParam(searchVO);
+    }
+
+    private void resetTreeParam(SearchVO searchVO) {
+        Map<String, Object> otherArgs = searchVO.getOtherArgs();
+        if (otherArgs == null) {
+            otherArgs = new HashMap<>();
+            searchVO.setOtherArgs(otherArgs);
+        }
+        otherArgs.put("tree", false);
+    }
+
+    private void addIssueType(SearchVO searchVO, Long projectId, String typeCode) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        issueTypeSearchVO.setTypeCodes(Arrays.asList(typeCode));
+        Set<Long> issueTypeIds =
+                issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO)
+                        .stream()
+                        .map(IssueTypeVO::getId)
+                        .collect(Collectors.toSet());
+        if (!issueTypeIds.isEmpty()) {
+            addToAdvancedSearchArgsByKey(searchVO, "issueTypeId", issueTypeIds);
+        }
+    }
+
+    private void addToAdvancedSearchArgsByKey(SearchVO searchVO, String key, Set<Long> valueSet) {
+        Map<String, Object> advancedSearchArgs = searchVO.getAdvancedSearchArgs();
+        if (advancedSearchArgs == null) {
+            advancedSearchArgs = new HashMap<>();
+            searchVO.setAdvancedSearchArgs(advancedSearchArgs);
+        }
+        List<String> list = (List<String>) advancedSearchArgs.get(key);
+        if (list == null) {
+            list = new ArrayList<>();
+            advancedSearchArgs.put(key, list);
+        }
+        for (Long value : valueSet) {
+            list.add(value + "");
+        }
+    }
+
+    private void addCompletedStatus(SearchVO searchVO, Long projectId) {
+        IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
+        issueStatusDTO.setProjectId(projectId);
+        issueStatusDTO.setCompleted(true);
+        issueStatusDTO.setEnable(true);
+        Set<Long> statusIds =
+                issueStatusMapper
+                        .select(issueStatusDTO)
+                        .stream()
+                        .map(IssueStatusDTO::getStatusId)
+                        .collect(Collectors.toSet());
+        if (!statusIds.isEmpty()) {
+            addToAdvancedSearchArgsByKey(searchVO, "statusId", statusIds);
         }
     }
 

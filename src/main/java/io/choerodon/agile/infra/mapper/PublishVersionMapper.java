@@ -1,9 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.PublishVersionVO;
-import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.infra.dto.PublishVersionDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 
 import org.apache.ibatis.annotations.Param;
@@ -30,24 +28,14 @@ public interface PublishVersionMapper extends BaseMapper<PublishVersionDTO> {
                                          @Param("publishVersionVO") PublishVersionVO publishVersionVO);
 
     /**
-     * 查询应用版本关联的故事
+     * 查询publish version关联的issue
      *
-     * @param projectId         项目id
-     * @param publishVersionIds 发布版本ids
-     * @param searchVO          查询参数
-     * @return 应用版本关联的故事
+     * @param projectId
+     * @param organizationId
+     * @param publishVersionIds
+     * @return
      */
-    List<IssueDTO> listRelStoryByOption(@Param("projectId") Long projectId,
-                                        @Param("publishVersionIds") List<Long> publishVersionIds,
-                                        @Param("searchVO") SearchVO searchVO);
-
-    /**
-     * 查询应用版本关联的缺陷
-     *
-     * @param projectId     项目id
-     * @param publishVersionIds 发布版本ids
-     * @param searchVO      查询参数
-     * @return 应用版本关联的故事
-     */
-    List<IssueDTO> listRelBugByOption(@Param("projectId") Long projectId, @Param("publishVersionIds") List<Long> publishVersionIds, @Param("searchVO") SearchVO searchVO);
+    Set<Long> selectIssueIds(@Param("projectId") Long projectId,
+                             @Param("organizationId") Long organizationId,
+                             @Param("publishVersionIds") Set<Long> publishVersionIds);
 }
