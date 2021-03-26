@@ -1,25 +1,53 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/master';
 import { Button } from 'choerodon-ui/pro';
-import { DragDropContext } from 'react-beautiful-dnd';
+import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { useParams } from 'react-router';
+import { Loading } from '@/components';
+import { useCreation } from 'ahooks';
+import { observer } from 'mobx-react-lite';
 import Columns from './components/columns';
 import UnsetColumn from './components/unset-column';
 import styles from './index.less';
+import KanbanTemplateDetailStore from './store';
+import openKanbanTemplateColumnModal from './components/modal';
 
+export interface KanbanTemplateDetailContext {
+  store: KanbanTemplateDetailStore
+}
+export const Context = React.createContext<KanbanTemplateDetailContext>({} as KanbanTemplateDetailContext);
 const KanbanTemplateDetail = () => {
   const { templateId } = useParams();
-  console.log(templateId);
-  const handleDragEnd = useCallback(() => {
-
-  }, []);
+  const store = useCreation(() => new KanbanTemplateDetailStore(templateId), [templateId]);
+  useEffect(() => {
+    store.refresh();
+  }, [store]);
+  const handleDragEnd = useCallback((result: DropResult) => {
+    if (result.destination) {
+      if (result.destination.droppableId === 'columndrop') {
+        store.moveColumn(result);
+      } else {
+        // 移动状态
+        store.moveStatus(result);
+      }
+    }
+  }, [store]);
+  const handleColumnCreateClick = useCallback(() => {
+    openKanbanTemplateColumnModal({
+      boardId: templateId,
+      onSubmit: () => {
+        store.refresh();
+      },
+    });
+  }, [store, templateId]);
   return (
     <Page>
       <Header>
         <Button
           icon="playlist_add"
+          onClick={handleColumnCreateClick}
         >
           创建列
         </Button>
@@ -29,19 +57,22 @@ const KanbanTemplateDetail = () => {
         borderTop: '1px solid rgb(216, 216, 216)',
       }}
       >
+        <Loading loading={store.loading} />
         <DragDropContext
           onDragEnd={handleDragEnd}
         >
-          <div className={styles.container}>
-            <div className={styles.columns_section}>
-              <Columns />
+          <Context.Provider value={{ store }}>
+            <div className={styles.container}>
+              <div className={styles.columns_section}>
+                <Columns columns={store.columns} />
+              </div>
+              <UnsetColumn className={styles.unset} />
             </div>
-            <UnsetColumn className={styles.unset} />
-          </div>
+          </Context.Provider>
         </DragDropContext>
       </Content>
     </Page>
   );
 };
 
-export default KanbanTemplateDetail;
+export default observer(KanbanTemplateDetail);

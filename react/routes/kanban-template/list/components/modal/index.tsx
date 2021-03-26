@@ -5,40 +5,58 @@ import {
 import { IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { MAX_LENGTH_KANBAN_NAME, MAX_LENGTH_KANBAN_DESCRIPTION } from '@/constants/MAX_LENGTH';
-import { kanbanTemplateApiConfig, IKanbanTemplateEdit } from '@/api';
-import { useCreation } from 'ahooks';
+import { kanbanTemplateApiConfig, IKanbanTemplateEdit, kanbanTemplateApi } from '@/api';
+import { useCreation, usePersistFn } from 'ahooks';
 
 type KanbanTemplateModalProps = {
   modal?: IModalProps,
 } & (KanbanTemplateCreateModalProps | KanbanTemplateEditModalProps)
 interface KanbanTemplateCreateModalProps {
   mode: 'create'
+  onSubmit: () => void
 }
 interface KanbanTemplateEditModalProps {
   mode: 'edit'
-  boardId: string
   data: IKanbanTemplateEdit
+  onSubmit: () => void
 }
 const isEdit = (props: KanbanTemplateModalProps): props is KanbanTemplateEditModalProps => props.mode === 'edit';
 const KanbanTemplateModal: React.FC<KanbanTemplateModalProps> = (props) => {
-  const { modal, mode } = props;
+  const { modal, mode, onSubmit } = props;
+  const nameValidator = usePersistFn(async (value) => {
+    if (isEdit(props)) {
+      if (props.data.name === value) {
+        return true;
+      }
+    }
+    const hasSame = await kanbanTemplateApi.checkName(value);
+    return hasSame ? '已经有同名模板' : true;
+  });
   const dataSet = useCreation(() => new DataSet({
     autoCreate: false,
     transport: {
       create: ({ data }) => (isEdit(props)
-        ? kanbanTemplateApiConfig.edit(props.boardId, data)
-        : kanbanTemplateApiConfig.create(data)),
+        ? kanbanTemplateApiConfig.edit(props.data.boardId, {
+          boardId: props.data.boardId,
+          name: data[0].name,
+          objectVersionNumber: props.data.objectVersionNumber,
+        })
+        : kanbanTemplateApiConfig.create(data[0])),
     },
     fields: [{
       name: 'name',
       label: '看板名称',
       required: true,
-    }, {
-      name: 'description',
-      label: '描述',
+      validator: nameValidator,
     }],
   }), []);
-  const handleSubmit = useCallback(async () => dataSet.submit(), [dataSet]);
+  const handleSubmit = useCallback(async () => {
+    if (await dataSet.submit()) {
+      onSubmit();
+      return true;
+    }
+    return false;
+  }, [dataSet, onSubmit]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
@@ -52,7 +70,6 @@ const KanbanTemplateModal: React.FC<KanbanTemplateModalProps> = (props) => {
   return (
     <Form dataSet={dataSet}>
       <TextField name="name" maxLength={MAX_LENGTH_KANBAN_NAME} />
-      <TextArea name="description" maxLength={MAX_LENGTH_KANBAN_DESCRIPTION} />
     </Form>
   );
 };

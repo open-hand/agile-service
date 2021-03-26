@@ -1,23 +1,41 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import classNames from 'classnames';
-import { Icon, TextField } from 'choerodon-ui/pro';
+import { Icon, TextField, Modal } from 'choerodon-ui/pro';
 import { DraggableProvided } from 'react-beautiful-dnd';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { MAX_LENGTH_KANBAN_COLUMN_NAME } from '@/constants/MAX_LENGTH';
+import { IKanbanTemplateColumn } from '@/api';
+import STATUS_COLOR from '@/constants/STATUS_COLOR';
+import { observer } from 'mobx-react-lite';
 import styles from './index.less';
 import StatusLine from '../status-line';
+import { Context } from '../../index';
 
 interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   provided: DraggableProvided
+  column: IKanbanTemplateColumn
 }
 const Header: React.FC<HeaderProps> = ({
   className,
   provided,
+  column,
   ...otherProps
 }) => {
-  const handleSubmit = useCallback(() => {
-
-  }, []);
+  const { store } = useContext(Context);
+  const handleSubmit = useCallback((newValue:string|null) => {
+    if (newValue) {
+      store.updateColumnName(column, newValue);
+    }
+  }, [column, store]);
+  const handleDeleteClick = useCallback(() => {
+    Modal.confirm({
+      title: '确认删除',
+      onOk: () => {
+        store.deleteColumn(column);
+      },
+    });
+  }, [column, store]);
+  const { name, categoryCode } = column;
   return (
     <div className={classNames(styles.header, className)} {...otherProps}>
       <div className={styles.operation}>
@@ -29,20 +47,21 @@ const Header: React.FC<HeaderProps> = ({
         <Icon
           type="delete"
           className={styles.operation__delete}
+          onClick={handleDeleteClick}
         />
       </div>
       <div className={styles.statusName}>
         <TextEditToggle
-          initValue="待处理"
+          initValue={name}
           onSubmit={handleSubmit}
           editor={() => <TextField maxLength={MAX_LENGTH_KANBAN_COLUMN_NAME} />}
         >
-          待处理
+          {name}
         </TextEditToggle>
       </div>
-      <StatusLine color="red" />
+      <StatusLine color={STATUS_COLOR[categoryCode]?.[0]} />
     </div>
   );
 };
 
-export default Header;
+export default observer(Header);
