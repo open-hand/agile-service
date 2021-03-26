@@ -145,6 +145,6 @@ export default class KanbanTemplateDetailStore {
   @action
   async setStatusComplete(status: IKanbanTemplateStatus, complete: boolean) {
     await kanbanTemplateApi.updateStatusComplete(status.statusId, complete);
-    status.templateCompleted = complete;
+    this.refresh();
   }
 }
