@@ -401,6 +401,7 @@
         <id column="column_category_code" property="categoryCode"/>
         <id column="board_id" property="boardId"/>
         <id column="color_code" property="colorCode"/>
+        <id property="color" column="abc_color"/>
         <id column="column_ovn" property="objectVersionNumber"/>
         <id column="sequence" property="sequence"/>
         <collection property="status" autoMapping="true"  ofType="io.choerodon.agile.api.vo.StatusTemplateVO">
@@ -422,6 +423,7 @@
              abc.min_num,
              abc.board_id,
              abc.color_code,
+             alv1.name AS abc_color,
              abc.object_version_number as column_ovn,
              fs.id as status_id,
              fs.name as status_name,
@@ -433,6 +435,7 @@
                 LEFT JOIN agile_board_column_status_rel abcsr ON abc.column_id = abcsr.column_id
                 LEFT JOIN fd_status fs on fs.id = abcsr.status_id
                 LEFT JOIN fd_status_template fst on abcsr.organization_id = fst.organization_id and abcsr.status_id = fst.status_id
+                LEFT JOIN lookup_value alv1 ON abc.color_code = alv1.value_code
                 WHERE abc.organization_id = #{organizationId}
                 AND abc.project_id = 0
                 AND abc.board_id = #{boardId}

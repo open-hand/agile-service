@@ -63,4 +63,6 @@ public interface BoardTemplateService {
     StatusTemplateVO settingStatusTemplate(Long organizationId, Long statusId, Boolean completed);
 
     void syncBoardTemplate(ProjectEvent projectEvent, String applyType);
+
+    List<StatusVO> listUnCorrespondStatus(Long organizationId, Long boardTemplateId);
 }

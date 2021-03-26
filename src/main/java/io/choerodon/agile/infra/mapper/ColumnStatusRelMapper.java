@@ -25,4 +25,5 @@ public interface ColumnStatusRelMapper extends BaseMapper<ColumnStatusRelDTO> {
 
     int updatePosition(@Param("columnStatusRel") ColumnStatusRelDTO columnStatusRelDTO);
 
+    List<Long> queryStatusIds(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("boardTemplateId") Long boardTemplateId);
 }

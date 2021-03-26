@@ -5,19 +5,21 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.mapper.BoardColumnMapper;
-import io.choerodon.agile.infra.mapper.BoardMapper;
-import io.choerodon.agile.infra.mapper.StatusTemplateMapper;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
@@ -69,6 +71,18 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
 
     @Autowired
     private IssueStatusService issueStatusService;
+
+    @Autowired
+    private OrganizationConfigMapper organizationConfigMapper;
+
+    @Autowired
+    private StateMachineSchemeConfigService stateMachineSchemeConfigService;
+
+    @Autowired
+    private IssueTypeService issueTypeService;
+
+    @Autowired
+    private ColumnStatusRelMapper columnStatusRelMapper;
 
     @Override
     public void createBoardTemplate(Long organizationId, String boardName) {
@@ -292,6 +306,59 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         } else {
             boardService.create(projectId, "默认看板");
         }
+    }
+
+    @Override
+    public List<StatusVO> listUnCorrespondStatus(Long organizationId, Long boardTemplateId) {
+        // 查询组织状态机模板的状态
+        OrganizationConfigDTO organizationConfigDTO = new OrganizationConfigDTO();
+        organizationConfigDTO.setOrganizationId(organizationId);
+        OrganizationConfigDTO configDTO = organizationConfigMapper.selectOne(organizationConfigDTO);
+        List<StatusVO> statusVOS = new ArrayList<>();
+        if (ObjectUtils.isEmpty(configDTO)) {
+            List<StatusVO> statusS = statusService.queryAllStatus(organizationId);
+            String[] codes = {"create", "processing", "complete"};
+            List<String> list = Arrays.asList(codes);
+            statusVOS.addAll(statusS.stream().filter(v -> list.contains(v.getCode())).collect(Collectors.toList()));
+        } else {
+            List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, configDTO.getSchemeId());
+            if (!CollectionUtils.isEmpty(statusMachineSchemeConfigVOS)) {
+                // 查询预定义问题类型的状态机模板状态
+                List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, null);
+                String[] issueTypeCodes = {"feature", "backlog"};
+                List<Long> issueTypeIds = issueTypeVOS.stream()
+                        .filter(v -> Objects.equals("system", v.getSource()) && !Arrays.asList(issueTypeCodes).contains(v.getTypeCode()))
+                        .map(IssueTypeVO::getId).collect(Collectors.toList());
+                List<Long> statusMachineIds = statusMachineSchemeConfigVOS.stream()
+                        .filter(v -> issueTypeIds.contains(v.getIssueTypeId()))
+                        .map(StatusMachineSchemeConfigVO::getStateMachineId)
+                        .collect(Collectors.toList());
+                statusVOS.addAll(statusService.queryByStateMachineIds(organizationId, statusMachineIds));
+            }
+        }
+        // 查询看板已有状态
+        List<Long> statusIds = columnStatusRelMapper.queryStatusIds(organizationId, 0L, boardTemplateId);
+        if (!CollectionUtils.isEmpty(statusIds)) {
+            statusVOS = statusVOS.stream()
+                    .filter(v -> !statusIds.contains(v.getId()))
+                    .collect(Collectors.toList());
+        }
+        Map<Long, Boolean> maps = new HashMap<>();
+        List<Long> status = statusVOS.stream().map(StatusVO::getId).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(status)) {
+            Sqls existCondition = Sqls.custom().andEqualTo("organizationId", organizationId).andIn("statusId",status);
+            List<StatusTemplateDTO> statusTemplateDTOS = statusTemplateMapper.selectByCondition(Condition.builder(StatusTemplateDTO.class)
+                    .andWhere(existCondition).build());
+            if (CollectionUtils.isNotEmpty(statusTemplateDTOS)) {
+                maps = statusTemplateDTOS.stream()
+                        .collect(Collectors.toMap(StatusTemplateDTO::getStatusId, StatusTemplateDTO::getTemplateCompleted));
+            }
+        }
+        for (StatusVO statusVO : statusVOS) {
+            Boolean isCompleted = maps.get(statusVO.getId());
+            statusVO.setCompleted(ObjectUtils.isEmpty(isCompleted) ? Boolean.FALSE : isCompleted);
+        }
+        return statusVOS;
     }
 
     private void copyBoardTemplate(Long projectId, Long organizationId, List<BoardVO> boardVOS) {
