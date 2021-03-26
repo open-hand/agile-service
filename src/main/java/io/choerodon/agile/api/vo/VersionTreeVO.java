@@ -2,7 +2,6 @@ package io.choerodon.agile.api.vo;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
@@ -19,7 +18,6 @@ public class VersionTreeVO {
 
     private String name;
 
-    @NotEmpty(message = "error.version.tree.type.empty")
     private String type;
 
     private String version;
