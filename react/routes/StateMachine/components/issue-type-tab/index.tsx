@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { IIssueType } from '@/common/types';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
+import { includes } from 'lodash';
 import styles from './index.less';
 
 type ChangeSelected = (code: string)=>void
@@ -9,9 +10,10 @@ type ChangeSelected = (code: string)=>void
 interface Props {
   selectedType?: string,
   setSelectedType?: ChangeSelected,
+  excludeTypes?: string[]
 }
 
-const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType }) => {
+const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType, excludeTypes = [] }) => {
   const [selected, setSelected] = useState(selectedType || '');
   const { data: issueTypes } = useIssueTypes();
   const handleSelectType = useCallback((id: string) => {
@@ -34,7 +36,7 @@ const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType }) => {
   return (
     <div className={styles.issueTypeTab}>
       {
-        (issueTypes || []).map((item: IIssueType) => (
+        (issueTypes || []).filter((item: IIssueType) => !includes(excludeTypes, item.typeCode)).map((item: IIssueType) => (
           <span
             className={`${styles.issueTypeTabItem} ${item.id === selected ? styles.selected : ''}`}
             role="none"

@@ -544,6 +544,8 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     },
   ];
 
+  const isOrganization = getIsOrganization();
+
   return (
     <Page>
       <Breadcrumb />
@@ -553,7 +555,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         )
       }
       <Content style={{ borderTop: 'none' }}>
-        <IssueTypeTab selectedType={selectedType} setSelectedType={setSelectedType} />
+        <IssueTypeTab selectedType={selectedType} setSelectedType={setSelectedType} excludeTypes={isOrganization ? ['feature', 'issue_epic'] : []} />
         {tab}
         <div className={`${styles.customCirculation}`}>
           <Table
