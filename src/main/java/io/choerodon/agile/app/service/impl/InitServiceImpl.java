@@ -16,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -118,8 +119,10 @@ public class InitServiceImpl implements InitService {
         Long stateMachineId = statusMachine.getId();
 //        stateMachineService.deploy(organizationId, stateMachineId, false);
         //敏捷创建完状态机后需要到敏捷创建列
-        List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
-        boardService.initBoard(projectEvent.getProjectId(), DEFAULT_BOARD, statusPayloads);
+        if (ObjectUtils.isEmpty(projectEvent.getUseTemplate()) || Boolean.FALSE.equals(projectEvent.getUseTemplate())) {
+            List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
+            boardService.initBoard(projectEvent.getProjectId(), DEFAULT_BOARD, statusPayloads);
+        }
         return stateMachineId;
     }
 

@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 
 import java.util.List;
 
@@ -60,4 +61,8 @@ public interface BoardTemplateService {
     List<BoardColumnVO> listColumnByBoardId(Long organizationId, Long boardId);
 
     StatusTemplateVO settingStatusTemplate(Long organizationId, Long statusId, Boolean completed);
+
+    void syncBoardTemplate(ProjectEvent projectEvent, String applyType);
+
+    List<StatusVO> listUnCorrespondStatusTemplate(Long organizationId, Long boardTemplateId);
 }

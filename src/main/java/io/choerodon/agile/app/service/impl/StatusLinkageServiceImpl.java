@@ -86,7 +86,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
     }
 
     private void baseInsert(StatusLinkageDTO statusLinkageDTO) {
-        if (statusLinkageMapper.insert(statusLinkageDTO) != 1) {
+        if (statusLinkageMapper.insertSelective(statusLinkageDTO) != 1) {
             throw new CommonException("error.insert.status.linkage");
         }
     }

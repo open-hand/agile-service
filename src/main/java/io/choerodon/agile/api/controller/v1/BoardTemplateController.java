@@ -212,4 +212,16 @@ public class BoardTemplateController {
                 .orElseThrow(() -> new CommonException("error.status.template.update"));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询看板模板未对应的状态")
+    @GetMapping(value = "/status_template/list_uncorrespond_status")
+    public ResponseEntity<List<StatusVO>> listUnCorrespondStatusTemplate(@ApiParam(value = "组织Id", required = true)
+                                                        @PathVariable(name = "organization_id") Long organizationId,
+                                                        @ApiParam(value = "看板模板Id", required = true)
+                                                        @RequestParam(name = "boardTemplateId") @Encrypt Long boardTemplateId) {
+        return Optional.ofNullable(boardTemplateService.listUnCorrespondStatusTemplate(organizationId, boardTemplateId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.status.template.list"));
+    }
+
 }

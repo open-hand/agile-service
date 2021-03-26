@@ -2,20 +2,24 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.validator.BoardValidator;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.mapper.BoardColumnMapper;
-import io.choerodon.agile.infra.mapper.BoardMapper;
-import io.choerodon.agile.infra.mapper.StatusTemplateMapper;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
@@ -67,6 +71,24 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
 
     @Autowired
     private IssueStatusService issueStatusService;
+
+    @Autowired
+    private OrganizationConfigMapper organizationConfigMapper;
+
+    @Autowired
+    private StateMachineSchemeConfigService stateMachineSchemeConfigService;
+
+    @Autowired
+    private IssueTypeService issueTypeService;
+
+    @Autowired
+    private ColumnStatusRelMapper columnStatusRelMapper;
+
+    @Autowired
+    private BoardColumnTemplateMapper boardColumnTemplateMapper;
+
+    @Autowired
+    private ColumnStatusRelTemplateMapper columnStatusRelTemplateMapper;
 
     @Override
     public void createBoardTemplate(Long organizationId, String boardName) {
@@ -211,7 +233,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
     @Override
     public BoardColumnVO updateColumnContraintTemplate(Long organizationId, Long columnId, ColumnWithMaxMinNumVO columnWithMaxMinNumVO) {
         try {
-            boardColumnMapper.updateMaxAndMinNumTemplate(organizationId, columnWithMaxMinNumVO);
+            boardColumnTemplateMapper.updateMaxAndMinNumTemplate(organizationId, columnWithMaxMinNumVO);
         } catch (Exception e) {
             throw new CommonException("error.update.column.contraint", e);
         }
@@ -233,7 +255,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
     public StatusTemplateVO settingStatusTemplate(Long organizationId, Long statusId, Boolean completed) {
         StatusTemplateDTO statusTemplateDTO = new StatusTemplateDTO(organizationId, statusId);
         List<StatusTemplateDTO> statusTemplates = statusTemplateMapper.select(statusTemplateDTO);
-        if (org.springframework.util.CollectionUtils.isEmpty(statusTemplates)) {
+        if (CollectionUtils.isEmpty(statusTemplates)) {
             statusTemplateDTO.setTemplateCompleted(completed);
             if (statusTemplateMapper.insertSelective(statusTemplateDTO) != 1) {
                 throw new CommonException("error.status.template.insert");
@@ -241,7 +263,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         } else {
             StatusTemplateDTO templateDTO = statusTemplates.get(0);
             templateDTO.setTemplateCompleted(completed);
-            if (statusTemplateMapper.updateByPrimaryKeySelective(statusTemplateDTO) != 1) {
+            if (statusTemplateMapper.updateByPrimaryKeySelective(templateDTO) != 1) {
                 throw new CommonException("error.status.template.update");
             }
         }
@@ -254,7 +276,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
 
     @Override
     public List<BoardColumnVO> listColumnByBoardId(Long organizationId, Long boardId) {
-        List<BoardColumnVO> boardColumnVOS = boardColumnMapper.listColumnAndStatusByBoardId(organizationId, boardId);
+        List<BoardColumnVO> boardColumnVOS = boardColumnTemplateMapper.listColumnAndStatusByBoardTemplateId(organizationId, boardId);
         if (org.springframework.util.CollectionUtils.isEmpty(boardColumnVOS)) {
             return new ArrayList<>();
         }
@@ -276,5 +298,102 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         issueStatusService.deleteColumnStatusRel(organizationId, 0L, statusId, statusMoveVO.getOriginColumnId());
         issueStatusService.updateColumnPosition(organizationId,0L, statusId, statusMoveVO,sameRow);
         return modelMapper.map(statusService.queryStatusById(organizationId, statusId), StatusVO.class);
+    }
+
+    @Override
+    public void syncBoardTemplate(ProjectEvent projectEvent, String applyType) {
+        // 查询组织的看板
+        Long projectId = projectEvent.getProjectId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectEvent.getProjectId());
+        List<BoardVO> boardVOS = listBoardTemplate(organizationId);
+        if (!CollectionUtils.isEmpty(boardVOS)) {
+           // 复制看看
+           copyBoardTemplate(projectId, organizationId, boardVOS);
+        } else {
+            boardService.create(projectId, "默认看板");
+        }
+    }
+
+    @Override
+    public List<StatusVO> listUnCorrespondStatusTemplate(Long organizationId, Long boardTemplateId) {
+        // 查询组织状态机模板的状态
+        OrganizationConfigDTO organizationConfigDTO = new OrganizationConfigDTO();
+        organizationConfigDTO.setOrganizationId(organizationId);
+        OrganizationConfigDTO configDTO = organizationConfigMapper.selectOne(organizationConfigDTO);
+        List<StatusVO> statusVOS = new ArrayList<>();
+        if (ObjectUtils.isEmpty(configDTO)) {
+            List<StatusVO> statusS = statusService.queryAllStatus(organizationId);
+            String[] codes = {"create", "processing", "complete"};
+            List<String> list = Arrays.asList(codes);
+            statusVOS.addAll(statusS.stream().filter(v -> list.contains(v.getCode())).collect(Collectors.toList()));
+        } else {
+            List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, configDTO.getSchemeId());
+            if (!CollectionUtils.isEmpty(statusMachineSchemeConfigVOS)) {
+                // 查询预定义问题类型的状态机模板状态
+                List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, null);
+                String[] issueTypeCodes = {"feature", "backlog"};
+                List<Long> issueTypeIds = issueTypeVOS.stream()
+                        .filter(v -> Objects.equals("system", v.getSource()) && !Arrays.asList(issueTypeCodes).contains(v.getTypeCode()))
+                        .map(IssueTypeVO::getId).collect(Collectors.toList());
+                List<Long> statusMachineIds = statusMachineSchemeConfigVOS.stream()
+                        .filter(v -> issueTypeIds.contains(v.getIssueTypeId()))
+                        .map(StatusMachineSchemeConfigVO::getStateMachineId)
+                        .collect(Collectors.toList());
+                statusVOS.addAll(statusService.queryByStateMachineIds(organizationId, statusMachineIds));
+            }
+        }
+        // 查询看板已有状态
+        List<Long> statusIds = columnStatusRelTemplateMapper.queryBoardTemplateStatusIds(organizationId, 0L, boardTemplateId);
+        if (!CollectionUtils.isEmpty(statusIds)) {
+            statusVOS = statusVOS.stream()
+                    .filter(v -> !statusIds.contains(v.getId()))
+                    .collect(Collectors.toList());
+        }
+        Map<Long, Boolean> maps = new HashMap<>();
+        List<Long> status = statusVOS.stream().map(StatusVO::getId).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(status)) {
+            Sqls existCondition = Sqls.custom().andEqualTo("organizationId", organizationId).andIn("statusId",status);
+            List<StatusTemplateDTO> statusTemplateDTOS = statusTemplateMapper.selectByCondition(Condition.builder(StatusTemplateDTO.class)
+                    .andWhere(existCondition).build());
+            if (CollectionUtils.isNotEmpty(statusTemplateDTOS)) {
+                maps = statusTemplateDTOS.stream()
+                        .collect(Collectors.toMap(StatusTemplateDTO::getStatusId, StatusTemplateDTO::getTemplateCompleted));
+            }
+        }
+        for (StatusVO statusVO : statusVOS) {
+            Boolean isCompleted = maps.get(statusVO.getId());
+            statusVO.setCompleted(ObjectUtils.isEmpty(isCompleted) ? Boolean.FALSE : isCompleted);
+        }
+        return statusVOS;
+    }
+
+    private void copyBoardTemplate(Long projectId, Long organizationId, List<BoardVO> boardVOS) {
+        for (BoardVO boardVO : boardVOS) {
+            BoardDTO board = boardService.createBoard(0L, projectId, boardVO.getName());
+            // 查询列
+            List<BoardColumnVO> boardColumnVOS = listColumnByBoardId(organizationId, boardVO.getBoardId());
+            if (!CollectionUtils.isEmpty(boardColumnVOS)) {
+                for (BoardColumnVO boardColumnVO : boardColumnVOS) {
+                    BoardColumnDTO columnDTO = modelMapper.map(boardColumnVO, BoardColumnDTO.class);
+                    columnDTO.setOrganizationId(0L);
+                    columnDTO.setProjectId(projectId);
+                    columnDTO.setColumnId(null);
+                    columnDTO.setObjectVersionNumber(null);
+                    columnDTO.setBoardId(board.getBoardId());
+                    BoardColumnDTO boardColumnDTO = boardColumnService.createBase(columnDTO);
+                    // 关联状态
+                    List<StatusTemplateVO> status = boardColumnVO.getStatus();
+                    for (StatusTemplateVO statusTemplateVO : status) {
+                        ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
+                        columnStatusRelDTO.setOrganizationId(0L);
+                        columnStatusRelDTO.setProjectId(projectId);
+                        columnStatusRelDTO.setPosition(statusTemplateVO.getPosition());
+                        columnStatusRelDTO.setStatusId(statusTemplateVO.getStatusId());
+                        columnStatusRelDTO.setColumnId(boardColumnDTO.getColumnId());
+                        columnStatusRelService.create(columnStatusRelDTO);
+                    }
+                }
+            }
+        }
     }
 }

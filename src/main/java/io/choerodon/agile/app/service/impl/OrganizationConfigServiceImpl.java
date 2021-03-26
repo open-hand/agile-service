@@ -1,16 +1,15 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.NodeType;
-import io.choerodon.agile.infra.enums.StateMachineStatus;
-import io.choerodon.agile.infra.enums.TransformConditionStrategy;
-import io.choerodon.agile.infra.enums.TransformType;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -87,6 +86,16 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     private StatusLinkageService statusLinkageService;
     @Autowired
     private StatusFieldSettingService statusFieldSettingService;
+    @Autowired
+    private ProjectConfigMapper projectConfigMapper;
+    @Autowired
+    private StateMachineSchemeConfigService stateMachineSchemeConfigService;
+    @Autowired
+    private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
+    @Autowired
+    private StateMachineService stateMachineService;
+    @Autowired
+    private IssueStatusService issueStatusService;
 
     @Override
     public OrganizationConfigDTO initStatusMachineTemplate(Long organizationId, Long issueTypeId) {
@@ -312,6 +321,210 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         }
         page.setContent(list);
         return page;
+    }
+
+    @Override
+    public void syncStatusMachineTemplate(ProjectEvent projectEvent, String applyType) {
+        Long projectId = projectEvent.getProjectId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        ProjectConfigDTO projectConfigDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType);
+        ProjectConfigDTO configDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType);
+        if (ObjectUtils.isEmpty(projectConfigDTO)) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(configDTO)) {
+            return;
+        }
+        Long stateMachineSchemeId = configDTO.getSchemeId();
+        Long schemeId = projectConfigDTO.getSchemeId();
+        IssueTypeSchemeConfigDTO issueTypeSchemeConfigDTO = new IssueTypeSchemeConfigDTO();
+        issueTypeSchemeConfigDTO.setSchemeId(schemeId);
+        issueTypeSchemeConfigDTO.setOrganizationId(organizationId);
+        List<IssueTypeSchemeConfigDTO> issueTypeSchemeConfigDTOS = issueTypeSchemeConfigMapper.select(issueTypeSchemeConfigDTO);
+        if (CollectionUtils.isEmpty(issueTypeSchemeConfigDTOS)) {
+            return;
+        }
+        List<Long> issueTypeIds = issueTypeSchemeConfigDTOS.stream().map(IssueTypeSchemeConfigDTO::getIssueTypeId).collect(Collectors.toList());
+        Map<Long,Long> templateStatusMachineMap = new HashMap<>();
+        handlerTemplateStatusMachineMap(templateStatusMachineMap, organizationId);
+        Set<Long> templateIssueTypes = templateStatusMachineMap.keySet();
+        for (Long issueTypeId : issueTypeIds) {
+            if (templateIssueTypes.contains(issueTypeId)) {
+                copyStatusMachine(projectId, organizationId, issueTypeId, stateMachineSchemeId, templateStatusMachineMap.get(issueTypeId), applyType, issueTypeIds);
+            } else {
+                stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeId);
+            }
+        }
+    }
+
+    private void handlerTemplateStatusMachineMap(Map<Long, Long> templateStatusMachineMap, Long organizationId) {
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", "agile");
+        if (!ObjectUtils.isEmpty(organizationConfigDTO)) {
+            List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, organizationConfigDTO.getSchemeId());
+            if (!CollectionUtils.isEmpty(statusMachineSchemeConfigVOS)) {
+                for (StatusMachineSchemeConfigVO statusMachineSchemeConfig : statusMachineSchemeConfigVOS) {
+                    templateStatusMachineMap.put(statusMachineSchemeConfig.getIssueTypeId(), statusMachineSchemeConfig.getStateMachineId());
+                }
+            }
+        }
+    }
+
+    private void copyStatusMachine(Long projectId, Long organizationId, Long issueTypeId, Long schemeId, Long templateStatusMachine, String applyType, List<Long> issueTypeIds) {
+        // 复制状态机模板
+        Long stateMachine = stateMachineService.copyStateMachine(organizationId, templateStatusMachine, issueTypeId);
+        insertSchemeConfig(organizationId, stateMachine, schemeId, issueTypeId);
+        // 复制状态机模板设置的流转条件
+        PageRequest pageRequest = new PageRequest();
+        pageRequest.setPage(0);
+        pageRequest.setSize(0);
+        Page<StatusSettingVO> statusSettingVOS = statusTransformSettingList(organizationId, issueTypeId, pageRequest, null, "agile_issue");
+        List<StatusSettingVO> content = statusSettingVOS.getContent();
+        if (!CollectionUtils.isEmpty(content)) {
+            // 查询项目下用户
+            Page<UserVO> users = baseFeignClient.queryUsersByProject(projectId, null, 0, 0).getBody();
+            List<Long> userIds = new ArrayList<>();
+            if (!CollectionUtils.isEmpty(users.getContent())) {
+                userIds.addAll(users.getContent().stream().map(UserVO::getId).collect(Collectors.toList()));
+            }
+            List<IssueStatusVO> issueStatusVOS = issueStatusService.queryIssueStatusList(projectId);
+            List<Long> projectStatusIds = new ArrayList<>();
+            if (!CollectionUtils.isEmpty(issueStatusVOS)) {
+                projectStatusIds.addAll(issueStatusVOS.stream().map(IssueStatusVO::getStatusId).collect(Collectors.toList()));
+            }
+            for (StatusSettingVO statusSettingVO : content) {
+                // 状态没有在项目下需要和项目建立关系
+                if (!projectStatusIds.contains(statusSettingVO.getId())) {
+                    IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
+                    issueStatusDTO.setName(statusSettingVO.getName());
+                    issueStatusDTO.setProjectId(projectId);
+                    issueStatusDTO.setCompleted(false);
+                    issueStatusDTO.setEnable(false);
+                    issueStatusDTO.setCategoryCode(statusSettingVO.getType());
+                    issueStatusDTO.setStatusId(statusSettingVO.getId());
+                    issueStatusService.insertIssueStatus(issueStatusDTO);
+                }
+                // 处理状态上设置的流转条件
+                handlerTransfer(statusSettingVO, issueTypeId, projectId, userIds, applyType, issueTypeIds);
+            }
+        }
+    }
+
+    private void handlerTransfer(StatusSettingVO statusSettingVO, Long issueTypeId, Long projectId, List<Long> userIds, String applyType, List<Long> issueTypeIds) {
+        Long statusId = statusSettingVO.getId();
+        Long objectVersionNumber = 1L;
+        // 更新属性
+        List<StatusFieldSettingVO> statusFieldSettingVOS = statusSettingVO.getStatusFieldSettingVOS();
+        if (!CollectionUtils.isEmpty(statusFieldSettingVOS)) {
+            List<StatusFieldSettingVO> statusFieldSetting = new ArrayList<>();
+            filterStatusFieldSetting(statusFieldSettingVOS, statusFieldSetting, userIds);
+            statusFieldSettingService.createOrUpdate(projectId, issueTypeId, statusId, objectVersionNumber, applyType, statusFieldSetting);
+            objectVersionNumber++;
+        }
+        // 状态联动
+        List<StatusLinkageVO> statusLinkageVOS = statusSettingVO.getStatusLinkageVOS();
+        if (!CollectionUtils.isEmpty(statusLinkageVOS)) {
+            List<StatusLinkageVO> statusLinkage = new ArrayList<>();
+            handlerStatusLinkage(statusLinkageVOS, issueTypeIds, statusLinkage);
+            if (!CollectionUtils.isEmpty(statusLinkage)) {
+                statusLinkageService.createOrUpdate(projectId, issueTypeId, statusId, objectVersionNumber, applyType, statusLinkage);
+                objectVersionNumber++;
+            }
+        }
+        // 通知设置
+        List<StatusNoticeSettingVO> statusNoticeSettingVOS = statusSettingVO.getStatusNoticeSettingVOS();
+        if (!CollectionUtils.isEmpty(statusNoticeSettingVOS)) {
+            StatusNoticeSettingVO statusNoticeSettingVO = statusNoticeSettingVOS.get(0);
+            Set<Long> userIdList = statusNoticeSettingVO.getUserIdList();
+            List<String> noticeTypeList = statusNoticeSettingVO.getNoticeTypeList();
+            statusNoticeSettingVO.setObjectVersionNumber(objectVersionNumber);
+            statusNoticeSettingVO.setOrganizationId(null);
+            statusNoticeSettingVO.setProjectId(projectId);
+            if (!CollectionUtils.isEmpty(userIdList)) {
+                Set<Long> users = userIdList.stream()
+                        .filter(v -> userIds.contains(v))
+                        .collect(Collectors.toSet());
+                if (!CollectionUtils.isEmpty(noticeTypeList) || !CollectionUtils.isEmpty(users)) {
+                    statusNoticeSettingVO.setUserIdList(users);
+                    statusNoticeSettingService.save(projectId, statusNoticeSettingVO, applyType);
+                    objectVersionNumber++;
+                }
+            } else {
+                statusNoticeSettingService.save(projectId, statusNoticeSettingVO, applyType);
+                objectVersionNumber++;
+            }
+        }
+        // 状态流转
+        List<StatusTransferSettingVO> statusTransferSettingVOS = statusSettingVO.getStatusTransferSettingVOS();
+        if (!CollectionUtils.isEmpty(statusTransferSettingVOS)) {
+            List<StatusTransferSettingCreateVO> list = new ArrayList<>();
+            handlerTransfer(list, statusTransferSettingVOS, userIds);
+            statusTransferSettingService.createOrUpdate(projectId, issueTypeId, statusId, objectVersionNumber, applyType, list);
+        }
+    }
+
+    private void handlerTransfer(List<StatusTransferSettingCreateVO> list, List<StatusTransferSettingVO> statusTransferSettingVOS, List<Long> userIds) {
+        Map<String, List<StatusTransferSettingVO>> map = statusTransferSettingVOS.stream().collect(Collectors.groupingBy(StatusTransferSettingVO::getUserType));
+        for (Map.Entry<String, List<StatusTransferSettingVO>> entry : map.entrySet()) {
+            StatusTransferSettingCreateVO settingCreateVO = new StatusTransferSettingCreateVO();
+            settingCreateVO.setType(entry.getKey());
+            List<StatusTransferSettingVO> entryValue = entry.getValue();
+            if (Objects.equals(entry.getKey(), "specifier") && !CollectionUtils.isEmpty(entryValue)) {
+                List<Long> ids = entryValue.stream()
+                        .map(StatusTransferSettingVO::getUserId)
+                        .filter(v -> userIds.contains(v))
+                        .collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(ids)) {
+                    settingCreateVO.setUserIds(userIds);
+                    list.add(settingCreateVO);
+                }
+            } else {
+                list.add(settingCreateVO);
+            }
+        }
+    }
+
+    private void handlerStatusLinkage(List<StatusLinkageVO> statusLinkageVOS, List<Long> issueTypeIds, List<StatusLinkageVO> statusLinkage) {
+        for (StatusLinkageVO statusLinkageVO : statusLinkageVOS) {
+            if(issueTypeIds.contains(statusLinkageVO.getParentIssueTypeId())){
+                statusLinkageVO.setId(null);
+                statusLinkage.add(statusLinkageVO);
+            }
+        }
+    }
+
+    private void filterStatusFieldSetting(List<StatusFieldSettingVO> statusFieldSettingVOS, List<StatusFieldSettingVO> statusFieldSetting, List<Long> userIds) {
+        for (StatusFieldSettingVO statusFieldSettingVO : statusFieldSettingVOS) {
+            String fieldType = statusFieldSettingVO.getFieldType();
+            statusFieldSettingVO.setId(null);
+            if (Objects.equals(FieldType.MULTI_MEMBER, fieldType) || Objects.equals(FieldType.MEMBER, fieldType)) {
+                List<StatusFieldValueSettingDTO> fieldValueSettingDTOS = new ArrayList<>();
+                for (StatusFieldValueSettingDTO statusFieldValueSetting : statusFieldSettingVO.getFieldValueList()) {
+                    if (ObjectUtils.isEmpty(statusFieldValueSetting.getUserId()) || (!ObjectUtils.isEmpty(statusFieldValueSetting.getUserId()) && userIds.contains(statusFieldValueSetting.getUserId()))) {
+                        statusFieldValueSetting.setId(null);
+                        fieldValueSettingDTOS.add(statusFieldValueSetting);
+                    }
+                }
+                if(!CollectionUtils.isEmpty(fieldValueSettingDTOS)){
+                    statusFieldSettingVO.setFieldValueList(fieldValueSettingDTOS);
+                    statusFieldSetting.add(statusFieldSettingVO);
+                }
+            } else {
+                statusFieldSetting.add(statusFieldSettingVO);
+            }
+        }
+    }
+
+    private void insertSchemeConfig(Long organizationId, Long stateMachineId, Long stateMachineSchemeId, Long issueTypeId) {
+        StatusMachineSchemeConfigDTO configDTO = new StatusMachineSchemeConfigDTO();
+        configDTO.setOrganizationId(organizationId);
+        configDTO.setSchemeId(stateMachineSchemeId);
+        configDTO.setStateMachineId(stateMachineId);
+        configDTO.setDefault(false);
+        configDTO.setSequence(0);
+        configDTO.setIssueTypeId(issueTypeId);
+        if (statusMachineSchemeConfigMapper.insert(configDTO) != 1) {
+            throw new CommonException("error.insert.state.machine.scheme.config");
+        }
     }
 
     private void changeInitTransform(Long organizationId, Long stateMachineId, Long oldNodeId, Long newNodeId) {

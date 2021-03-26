@@ -30,6 +30,8 @@ public class ProjectEvent {
 
     private List<ProjectEventCategory> projectCategoryVOS;
 
+    private Boolean useTemplate;
+
     public List<ProjectEventCategory> getProjectCategoryVOS() {
         return projectCategoryVOS;
     }
@@ -116,5 +118,13 @@ public class ProjectEvent {
 
     public Long getProgramId() {
         return programId;
+    }
+
+    public Boolean getUseTemplate() {
+        return useTemplate;
+    }
+
+    public void setUseTemplate(Boolean useTemplate) {
+        this.useTemplate = useTemplate;
     }
 }
