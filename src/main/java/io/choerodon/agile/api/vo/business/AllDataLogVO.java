@@ -6,6 +6,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import java.util.Date;
 
 import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 
 /**
@@ -43,14 +44,19 @@ public class AllDataLogVO {
     private UserMessageDTO createdByUser;
     @ApiModelProperty(value = "是否自定义字段日志")
     private Boolean isCusLog;
-    @ApiModelProperty
+    @ApiModelProperty(value = "日志类型")
     private String logType;
-    @ApiModelProperty
+    @ApiModelProperty(value = "问题类型")
     private IssueTypeVO issueTypeVO;
-    @ApiModelProperty
+    @ApiModelProperty(value = "num")
     private String num;
-    @ApiModelProperty
+    @ApiModelProperty(value = "summary")
     private String summary;
+    @ApiModelProperty(value = "项目名称")
+    private String projectName;
+    @ApiModelProperty(value = "状态")
+    private StatusVO statusVO;
+
 
     public Date getCreationDate() {
         return creationDate;
@@ -186,5 +192,21 @@ public class AllDataLogVO {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public StatusVO getStatusVO() {
+        return statusVO;
+    }
+
+    public void setStatusVO(StatusVO statusVO) {
+        this.statusVO = statusVO;
     }
 }
