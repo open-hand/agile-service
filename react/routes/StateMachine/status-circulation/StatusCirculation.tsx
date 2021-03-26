@@ -21,6 +21,7 @@ import Save from './components/save';
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { store } = useStatusCirculationContext();
   const { selectedType, setSelectedType } = useStateMachineContext();
+  const isOrganization = getIsOrganization();
   // const selectedTypeRef = useRef<string>(selectedType);
   // selectedTypeRef.current = selectedType;
   const refresh = useCallback(() => {
@@ -85,7 +86,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       </Header>
       <Breadcrumb />
       {
-        !getIsOrganization() && (
+        !isOrganization && (
           <Divider style={{ margin: 0 }} />
         )
       }
@@ -104,6 +105,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
               setSelectedType(newType);
             }
           }}
+          excludeTypes={isOrganization ? ['feature', 'issue_epic'] : []}
         />
         {tab}
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
