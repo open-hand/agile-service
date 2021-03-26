@@ -86,12 +86,12 @@ import TextEditToggle from '@/components/TextEditTogglePro';
                       <div
                         key={label}
                         style={{
-                          color: '#000',
+                          height: 24,
+                          color: '#fff',
                           borderRadius: '100px',
                           fontSize: '13px',
-                          lineHeight: '24px',
                           padding: '2px 12px',
-                          background: 'rgba(0, 0, 0, 0.08)',
+                          background: '#3f51b5',
                           marginRight: '8px',
                           marginTop: '2px',
                           marginBottom: '2px',
