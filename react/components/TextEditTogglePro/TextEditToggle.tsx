@@ -1,6 +1,7 @@
 import React, {
   useState, useRef, cloneElement, useEffect, Fragment,
 } from 'react';
+import FormField from 'choerodon-ui/pro/lib/field';
 import { toJS } from 'mobx';
 import classNames from 'classnames';
 import useClickOut from '@/hooks/useClickOut';
@@ -33,7 +34,7 @@ const TextEditToggle: React.FC<Props> = ({
   const [value, setValue] = useState(initValue);
   const editingRef = useRef(editing);
   const dataRef = useRef(initValue);
-  const editorRef = useRef<JSX.Element>(null);
+  const editorRef = useRef<JSX.Element | FormField<any>>(null);
   const handleClickOut = () => {
     if (submitTrigger.includes('click')) {
       submit();
@@ -87,6 +88,8 @@ const TextEditToggle: React.FC<Props> = ({
     if (typeof (newValue) !== 'undefined') {
       waitSubmitValue = newValue;
     }
+
+    console.log('submit patternMismatch', editingRef.current, waitSubmitValue, editorRef.current, await (editorRef.current as FormField<any>)?.validate(waitSubmitValue));
     // @ts-ignore
     if (editingRef.current && editorRef.current && await editorRef.current?.validate(waitSubmitValue)) {
       if (containerRef.current) {

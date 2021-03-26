@@ -5,6 +5,7 @@ import { Tree } from 'choerodon-ui/pro';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import React, { useRef } from 'react';
 import { observer } from 'mobx-react-lite';
+import classnames from 'classnames';
 import {
   IPublishVersionTreeNode, IPublishVersionData, publishVersionApi, versionApi,
 } from '@/api';
@@ -74,10 +75,30 @@ const DependencyTree: React.FC = () => {
       </div>
     );
   }
-  function renderTree(item:IPublishVersionTreeNode) {
+  function renderTree(item: IPublishVersionTreeNode, level = 0) {
+    let paddingLeft = level === 0 ? undefined : (28 * level - 20 * (level - 1));
+    if (!!item.children?.length && level > 1 && paddingLeft && paddingLeft > 0) {
+      paddingLeft -= 11;
+    }
     return (
-      <TreeNode title={renderTreeNode(item)} key={item.id}>
-        {item.children?.flatMap((k) => renderTree(k))}
+      <TreeNode
+        title={renderTreeNode(item)}
+        key={item.id}
+        className={classnames({
+          [`${prefixCls}-dependency-tree-tree-root`]: !level,
+          [`${prefixCls}-dependency-tree-tree-leaf`]: !item.children?.length,
+          [`${prefixCls}-dependency-tree-tree-has-leaf`]: !!item.children?.length,
+        })}
+        style={{
+          paddingLeft,
+          marginLeft: level > 1 ? 20 * (level - 1) : undefined,
+        }}
+        switcherIcon={item.children?.length ? (nodeProps: any) => {
+          console.log('nodeProps', nodeProps);
+          return <div className={`${prefixCls}-dependency-tree-tree-expand`}><Icon type="navigate_next" className={`${prefixCls}-dependency-tree-tree-expand-icon`} /></div>;
+        } : undefined}
+      >
+        {item.children?.map((k) => renderTree(k, level + 1))}
       </TreeNode>
     );
   }
@@ -104,7 +125,8 @@ const DependencyTree: React.FC = () => {
       contentClassName={`${prefixCls}-dependency-tree`}
     >
       <Tree className={`${prefixCls}-dependency-tree-tree`}>
-        {data[0]?.children?.map((item) => renderTree(item))}
+
+        {data[0]?.children?.map((item) => renderTree(item, 0))}
       </Tree>
 
     </Section>

@@ -12,7 +12,7 @@ import './index.less';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import SelectTeam from '@/components/select/select-team';
 import { IModalProps } from '@/common/types';
-import { versionApi } from '@/api';
+import { publishVersionApi, versionApi } from '@/api';
 import Loading from '@/components/Loading';
 import { observer } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -21,11 +21,11 @@ import SelectGitTags from '@/components/select/select-git-tags';
 
 interface IImportPomFunctionProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
-  programMode?: boolean
+  versionId:string,
 }
 
 const { Column } = Table;
-const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = ({ modal, handleOk, programMode }) => {
+const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = ({ modal, handleOk, versionId }) => {
   const prefixCls = 'c7n-agile-publish-version-detail-import-pom';
   const [groupId, setGroupId] = useState<string[] | undefined>();
   const [subProjectId, setSubProjectId] = useState<string>();
@@ -34,16 +34,11 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
   const formDs = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
-      { name: 'subProject', label: '所属项目', required: programMode },
+      // { name: 'subProject', label: '所属项目', required: programMode },
       { name: 'groupId', label: 'GroupId' },
     ],
-  }), [programMode]);
-  const disabledUpload = useMemo(() => {
-    if (programMode && formDs.current?.get('subProject')) {
-      return false;
-    }
-    return !!programMode;
-  }, [formDs, formDs.current?.get('subProject')]);
+  }), []);
+  const disabledUpload = useMemo(() => false, [formDs, formDs.current?.get('subProject')]);
 
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
@@ -55,10 +50,10 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     ],
     fields: [
       { name: 'artifactId', label: '应用服务' },
-      { name: 'version', label: '版本名称', required: true },
+      { name: 'version', label: 'version*', required: true },
       { name: 'versionAlias', label: '版本别名' },
-      { name: 'appService', label: '应用服务*', required: true },
-      { name: 'tag', label: 'tag*', required: true },
+      { name: 'serviceCode', label: '应用服务*' },
+      { name: 'tagId', label: 'tag*' },
     ],
   }), []);
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +68,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
       formData.append('file', file);
       setLoading(true);
       const groupIdStr = groupId ? String(groupId) : undefined;
-      (programMode ? versionApi.importProgramPom(formData, groupIdStr!, subProjectId!) : versionApi.importPom(formData, groupIdStr!)).then((res: any) => {
+      (publishVersionApi.importPom(formData, versionId, groupIdStr)).then((res: any) => {
         ds.loadData(res);
         // ds.splice(0,0,)
       }).finally(() => {
@@ -118,24 +113,23 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
   return (
     <div className={prefixCls}>
       <Form dataSet={formDs} style={{ width: '6.2rem' }}>
-        {programMode ? <SelectTeam name="subProject" onChange={setSubProjectId} /> : null}
 
         <TextField name="groupId" onChange={setGroupId} multiple />
       </Form>
       <div className={`${prefixCls}-body`}>
         <div className={`${prefixCls}-upload`}>
           <span>上传pom文件</span>
-          <Tooltip title={disabledUpload ? `请先选择${programMode ? '和所属项目' : ''}` : undefined}>
-            <Button disabled={disabledUpload} funcType="raised" size={'small' as any} type="primary" style={{ color: !disabledUpload ? 'white' : undefined }} icon="file_upload" shape="circle" onClick={() => inputRef.current?.click()} />
-          </Tooltip>
+          {/* <Tooltip title={disabledUpload ? `请先选择${programMode ? '和所属项目' : ''}` : undefined}> */}
+          <Button disabled={disabledUpload} funcType="raised" size={'small' as any} type="primary" style={{ color: !disabledUpload ? 'white' : undefined }} icon="file_upload" shape="circle" onClick={() => inputRef.current?.click()} />
+          {/* </Tooltip> */}
         </div>
 
         <Table dataSet={ds} queryBar={'none' as any}>
           <Column name="artifactId" tooltip={'overflow' as any} />
           <Column name="version" editor />
           <Column name="versionAlias" editor renderer={renderAlias} tooltip={'overflow' as any} />
-          <Column name="appService" editor={() => <SelectAppService />} />
-          <Column name="tag" editor={(record) => <SelectGitTags applicationId={record.get('appService')} />} />
+          <Column name="serviceCode" editor={() => <SelectAppService />} />
+          <Column name="tagId" editor={(record) => <SelectGitTags applicationId={record.get('appService')} />} />
           <Column name="action" renderer={renderAction} width={65} />
         </Table>
       </div>

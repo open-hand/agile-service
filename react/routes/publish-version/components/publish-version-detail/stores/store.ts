@@ -27,9 +27,10 @@ class ReleaseDetailStore {
 
   @observable current: IPublishVersionData | undefined;
 
-  @observable appServiceList: Array<IAppVersionDataItem> = [{
-    name: 'agile-test', appService: true, tag: false, artifactId: 'te:',
-  } as any];
+  @observable appServiceList: Array<IPublishVersionTreeNode> = [];
+  // [{
+  //   name: 'agile-test', appService: true, tag: false, artifactId: 'te:',
+  // } as any];
 
   @observable dependencyList: Array<IPublishVersionTreeNode> = [];
 
@@ -97,11 +98,11 @@ class ReleaseDetailStore {
     this.setDependencyList(dependencyList);
   }
 
-  @action async loadData(id: string = this.getCurrentData.id, ignoreLoad: string[] = ['app']) {
+  @action async loadData(id: string = this.getCurrentData.id, ignoreLoad: string[] = []) {
     this.loading = true;
     const versionData: IPublishVersionData = ignoreLoad.includes('detail') ? this.current : await publishVersionApi.load(id);
 
-    const versionList = ignoreLoad.includes('app') ? this.getAppServiceList : await versionApi.loadAppVersionList(id);
+    const versionList = ignoreLoad.includes('app') ? this.getAppServiceList : await publishVersionApi.loadDependency(id);
     this.setAppServiceList(versionList.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` })));
     this.loadDependencyData(id);
     this.setCurrentData({ ...versionData, name: versionData.versionAlias || versionData.version });

@@ -7,14 +7,15 @@ import {
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import './index.less';
 import { IModalProps } from '@/common/types';
-import { IAppVersionData, versionApiConfig } from '@/api';
+import { IAppVersionData, publishVersionApi, versionApiConfig } from '@/api';
 import { observer } from 'mobx-react-lite';
 import SelectAppService from '@/components/select/select-app-service';
 import SelectGitTags from '@/components/select/select-git-tags';
+import IPublishVersionDetailData from '../../../types';
 
 interface IImportPomFunctionProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
-  data: IAppVersionData
+  data: IPublishVersionDetailData
 }
 
 const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPomFunctionProps>> = ({ modal, handleOk, data }) => {
@@ -27,11 +28,11 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
       { name: 'version', label: 'version' },
       { name: 'artifactId', label: 'artifactId' },
       { name: 'groupId', label: 'groupId' },
-      { name: 'appService', label: '关联应用服务' },
+      { name: 'serviceCode', label: '关联应用服务' },
       { name: 'tag', label: '关联tag' },
     ],
     transport: {
-      submit: data ? ({ data: newData }) => versionApiConfig.updateAppVersion(newData[0], data.id!) : undefined,
+      submit: data ? ({ data: newData }) => publishVersionApi.update(data.id!, newData[0]) : undefined,
     },
   }), [data]);
 
@@ -53,7 +54,7 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
       <TextField name="version" />
       <TextField name="versionAlias" />
 
-      <SelectAppService name="appService" onChange={setApplicationId} />
+      <SelectAppService name="serviceCode" onChange={setApplicationId} />
       <SelectGitTags name="tag" applicationId={applicationId} />
     </Form>
   );
