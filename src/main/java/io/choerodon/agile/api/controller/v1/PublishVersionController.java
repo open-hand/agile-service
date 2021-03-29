@@ -187,4 +187,17 @@ public class PublishVersionController {
         return ResponseEntity.ok(publishVersionService.listRelIssueByOption(projectId, organizationId, publishVersionId, searchVO, pageRequest, IssueTypeCode.BUG.value()));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "删除tag和issue的关系")
+    @DeleteMapping(value = "/{publish_version_id}/issue/{issue_id}")
+    public ResponseEntity<Page<IssueListFieldKVVO>> deleteIssueTagRel(@ApiParam(value = "项目id", required = true)
+                                                                      @PathVariable(name = "project_id") Long projectId,
+                                                                      @ApiParam(value = "产品版本id", required = true)
+                                                                      @Encrypt @PathVariable(name = "publish_version_id") Long publishVersionId,
+                                                                      @Encrypt @PathVariable(name = "issue_id") Long issueId,
+                                                                      @RequestParam Long organizationId) {
+        publishVersionService.deleteIssueTagRel(projectId, organizationId, publishVersionId, issueId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

@@ -122,4 +122,13 @@ public interface PublishVersionService {
                                                   String issueTypeCode);
 
 
+    /**
+     * 删除issue和tag的关系
+     *
+     * @param projectId
+     * @param organizationId
+     * @param publishVersionId
+     * @param issueId
+     */
+    void deleteIssueTagRel(Long projectId, Long organizationId, Long publishVersionId, Long issueId);
 }
