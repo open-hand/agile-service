@@ -5,7 +5,7 @@ import {
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import UserTag from '@/components/tag/user-tag';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { versionApi } from '@/api';
+import { publishVersionApi, versionApi } from '@/api';
 import renderStatus from '@/components/column-renderer/status';
 import { useReleaseDetailContext } from '../../stores';
 
@@ -17,7 +17,7 @@ function StoryTable() {
     Modal.confirm({
       title: '是否删除关联',
       children: `确定要删除问题${record.get('issueNum')}与版本的关联？删除后，将移除故事和当前版本下应用版本的关联关系。`,
-      onOk: () => versionApi.deleteLinkIssueId(record.get('issueId'), store.current?.id!).then(() => {
+      onOk: () => publishVersionApi.deleteLinkIssueId(record.get('issueId'), store.current?.id!).then(() => {
         storyTableDataSet.query();
       }),
     });

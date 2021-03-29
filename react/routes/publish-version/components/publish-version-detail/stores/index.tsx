@@ -34,8 +34,8 @@ const Provider: React.FC<ReleaseDetailProps> = ({
 }) => {
   const prefixCls = 'c7n-agile-publish-version-detail';
   const { isInProgram, loading } = useIsInProgram();
-  const storyTableDataSet = useMemo(() => new DataSet(ReleaseStoryTableDataSet(store.current?.id!)), [store.current?.id]);
-  const bugTableDataSet = useMemo(() => new DataSet(ReleaseBugTableDataSet(store.current?.id!)), [store.current?.id]);
+  const storyTableDataSet = useMemo(() => new DataSet(store.current?.id ? ReleaseStoryTableDataSet(store.current?.id!) : {}), [store.current?.id]);
+  const bugTableDataSet = useMemo(() => new DataSet(store.current?.id ? ReleaseBugTableDataSet(store.current?.id!) : {}), [store.current?.id]);
 
   // const propsEvents = {} as any;
   // const updateDetail = useMemo(() => {

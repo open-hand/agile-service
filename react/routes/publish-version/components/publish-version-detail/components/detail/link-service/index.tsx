@@ -34,10 +34,10 @@ const LinkService: React.FC = () => {
       children: (
         <div>
           <span>{`您确定要删除关联的应用版本【${v.versionAlias || v.version}】？`}</span>
-          <SelectBox mode={'box' as any} defaultValue="only" onChange={(value: any) => { delConfigRef.current = value; }}>
+          {/* <SelectBox mode={'box' as any} defaultValue="only" onChange={(value: any) => { delConfigRef.current = value; }}>
             <SelectBox.Option value="only">仅删除关联关系</SelectBox.Option>
             <SelectBox.Option value="all">删除关联关系及应用版本</SelectBox.Option>
-          </SelectBox>
+          </SelectBox> */}
         </div>),
       onOk: () => {
         (publishVersionApi.dependencyTreeDel({
@@ -52,7 +52,7 @@ const LinkService: React.FC = () => {
     });
   }
   async function handleImportPom(pomData: any) {
-    await publishVersionApi.createBatch(pomData);
+    await publishVersionApi.createBatch(detailData.id, pomData);
     store.loadData();
     return true;
   }

@@ -101,6 +101,7 @@ const ExportIssue: React.FC = () => {
   const checkOptions = useMemo(() => { // checkBokProps
     const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig?.get(option.value) })) || [];
     newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig?.get(option.code) })));
+    console.log('newCheckOptions', newCheckOptions);
     return newCheckOptions;
   }, [choseFieldStore.getOriginalField, propsCheckOptions, store.checkboxOptionsExtraConfig]);
 

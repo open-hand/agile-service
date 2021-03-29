@@ -1,10 +1,10 @@
-import { versionApiConfig } from '@/api';
+import { publishVersionApiConfig, versionApiConfig } from '@/api';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 
 function ReleaseStoryTableDataSet(versionId: string): DataSetProps {
   return {
     autoQuery: true,
-    paging: false,
+    paging: true,
     selection: false,
     data: [{ summary: '测试问题测试问题测试问题测试问题测试问题测试问题测试问题测试问题测试问题' }],
     fields: [
@@ -17,9 +17,9 @@ function ReleaseStoryTableDataSet(versionId: string): DataSetProps {
       { name: 'assigneeId', label: '经办人' },
 
     ],
-    // transport: {
-    //   read: ({ params }) => ({ ...versionApiConfig.loadVersionStory(versionId, {}), params }),
-    // },
+    transport: {
+      read: ({ params }) => ({ ...publishVersionApiConfig.loadStory(versionId, {}, params) }),
+    },
   };
 }
 export default ReleaseStoryTableDataSet;
