@@ -87,6 +87,15 @@ public interface ProjectConfigService {
     List<StatusVO> queryStatusByProjectId(Long projectId, String applyType);
 
     /**
+     * 查询项目下的所有状态
+     *
+     * @param projectId 项目id
+     * @param applyType 类型
+     * @return 项目下的所有状态
+     */
+    List<StatusVO> queryStatusByProjectIdNotType(Long projectId, String applyType);
+
+    /**
      * 根据项目id找到方案返回问题类型对应的状态机
      *
      * @param projectId
