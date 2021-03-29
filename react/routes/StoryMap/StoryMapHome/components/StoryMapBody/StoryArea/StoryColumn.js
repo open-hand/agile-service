@@ -63,15 +63,30 @@ export default DropTarget(
     }),
     canDrop: (props, monitor) => { // props: target, monitor: source
       const item = monitor.getItem();
-      const targetSprint = props.sprint;
-      const sourceSprint = item.sprint;
-      if (targetSprint) { // 冲刺泳道
-        const { sprintId: targetSprintId, statusCode: targetSprintStatusCode } = targetSprint;
-        const { sprintId: sourceSprintId, statusCode: sourceSprintStatusCode } = sourceSprint || {};
-        if (((targetSprintId === 'none' || targetSprintStatusCode !== 'closed') && sourceSprintStatusCode !== 'closed') || sourceSprintId === targetSprintId) { // 移入冲刺时不能是从已完成冲刺移出的，或者在自己冲刺内更改史诗或特性
-          return true;
+      if (StoryMapStore.swimLine === 'version') {
+        const targetVersion = props.version;
+        const sourceVersion = item.version;
+
+        if (targetVersion) { // 版本泳道
+          const { versionId: targetVersionId, statusCode: targetVersionStatusCode } = targetVersion;
+          const { versionId: sourceVersionId, statusCode: sourceVersionStatusCode } = sourceVersion || {};
+          if (((targetVersionId === 'none' || targetVersionStatusCode !== 'released') && sourceVersionStatusCode !== 'released') || sourceVersionId === targetVersionId) { // 移入冲刺时不能是从已完成冲刺移出的，或者在自己冲刺内更改史诗或特性
+            return true;
+          }
+          return false;
         }
-        return false;
+      } else if (StoryMapStore.swimLine === 'sprint') {
+        const targetSprint = props.sprint;
+        const sourceSprint = item.sprint;
+
+        if (targetSprint) { // 冲刺泳道
+          const { sprintId: targetSprintId, statusCode: targetSprintStatusCode } = targetSprint;
+          const { sprintId: sourceSprintId, statusCode: sourceSprintStatusCode } = sourceSprint || {};
+          if (((targetSprintId === 'none' || targetSprintStatusCode !== 'closed') && sourceSprintStatusCode !== 'closed') || sourceSprintId === targetSprintId) { // 移入冲刺时不能是从已完成冲刺移出的，或者在自己冲刺内更改史诗或特性
+            return true;
+          }
+          return false;
+        }
       }
       return true;
     },
