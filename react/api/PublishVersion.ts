@@ -70,6 +70,32 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
+  loadStory(publishVersionId: string, searchVO: any, params = { page: 1, size: 10 }) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/publish_version/${publishVersionId}/story`,
+      data: searchVO,
+      params: {
+        ...params,
+        organizationId: getOrganizationId(),
+
+      },
+    });
+  }
+
+  loadBug(publishVersionId: string, searchVO: any, params = { page: 1, size: 10 }) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/publish_version/${publishVersionId}/bug`,
+      data: searchVO,
+      params: {
+        ...params,
+        organizationId: getOrganizationId(),
+
+      },
+    });
+  }
+
   create(data: IPublishVersionCreateData) {
     return this.request({
       method: 'post',
@@ -85,10 +111,10 @@ class PublishVersionApi extends Api<PublishVersionApi> {
   /**
    * 批量创建
    */
-  createBatch(data: IPublishVersionCreateData[]) {
+  createBatch(publishVersionId: string, data: IPublishVersionCreateData[]) {
     return this.request({
       method: 'post',
-      url: `${this.prefix}/publish_version/batch`,
+      url: `${this.prefix}/publish_version/${publishVersionId}/batch`,
       data,
     });
   }
@@ -207,6 +233,16 @@ class PublishVersionApi extends Api<PublishVersionApi> {
       params: {
         alias,
         publishVersionId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  deleteLinkIssueId(issueId: string, publishVersionId: string) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/publish_version/${publishVersionId}/issue/${issueId}`,
+      params: {
         organizationId: getOrganizationId(),
       },
     });

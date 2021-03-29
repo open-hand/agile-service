@@ -6,7 +6,7 @@ import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import UserTag from '@/components/tag/user-tag';
 import renderStatus from '@/components/column-renderer/status';
 import renderPriority from '@/components/column-renderer/priority';
-import { versionApi } from '@/api';
+import { publishVersionApi, versionApi } from '@/api';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import renderTags from '@/components/column-renderer/tags';
 import { useReleaseDetailContext } from '../../stores';
@@ -18,7 +18,7 @@ function BugTable() {
     Modal.confirm({
       title: '是否删除？',
       children: `确定要删除问题${record.get('issueNum')}与版本的关联？删除后，将移除缺陷和当前版本下应用版本的关联关系。`,
-      onOk: () => versionApi.deleteLinkIssueId(record.get('issueId'), store.current?.id!).then(() => {
+      onOk: () => publishVersionApi.deleteLinkIssueId(record.get('issueId'), store.current?.id!).then(() => {
         bugTableDataSet.query();
       }),
     });

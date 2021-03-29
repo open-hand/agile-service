@@ -84,6 +84,7 @@ const DependencyTree: React.FC = () => {
       <TreeNode
         title={renderTreeNode(item)}
         key={item.id}
+        disabled
         className={classnames({
           [`${prefixCls}-dependency-tree-tree-root`]: !level,
           [`${prefixCls}-dependency-tree-tree-leaf`]: !item.children?.length,
@@ -93,10 +94,8 @@ const DependencyTree: React.FC = () => {
           paddingLeft,
           marginLeft: level > 1 ? 20 * (level - 1) : undefined,
         }}
-        switcherIcon={item.children?.length ? (nodeProps: any) => {
-          console.log('nodeProps', nodeProps);
-          return <div className={`${prefixCls}-dependency-tree-tree-expand`}><Icon type="navigate_next" className={`${prefixCls}-dependency-tree-tree-expand-icon`} /></div>;
-        } : undefined}
+        switcherIcon={item.children?.length ? (nodeProps: any) => <div className={`${prefixCls}-dependency-tree-tree-expand`}><Icon type="navigate_next" className={`${prefixCls}-dependency-tree-tree-expand-icon`} /></div>
+          : undefined}
       >
         {item.children?.map((k) => renderTree(k, level + 1))}
       </TreeNode>
