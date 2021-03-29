@@ -5,6 +5,7 @@ import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.PublishVersionTreeService;
 import io.choerodon.agile.infra.dto.IssueStatusDTO;
 import io.choerodon.agile.infra.dto.PublishVersionTreeClosureDTO;
+import io.choerodon.agile.infra.dto.TagIssueRelDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.PageUtil;
@@ -65,6 +66,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private IssueStatusMapper issueStatusMapper;
     @Autowired
     private IssueTypeMapper issueTypeMapper;
+    @Autowired
+    private TagIssueRelMapper tagIssueRelMapper;
 
     private static final String GROUP_ID_EMPTY_EXCEPTION = "error.publish.version.groupId.empty";
     private static final String VERSION_ALIAS_EMPTY_EXCEPTION = "error.publish.version.alias.empty";
@@ -78,14 +81,12 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         String version = publishVersionVO.getVersion();
         String groupId = publishVersionVO.getGroupId();
         String artifactId = publishVersionVO.getArtifactId();
-        String serviceCode = publishVersionVO.getServiceCode();
-        createValidator(publishVersionVO, version, groupId, artifactId, serviceCode);
+        createValidator(publishVersionVO, version, groupId, artifactId);
         publishVersionVO.setProjectId(projectId);
         publishVersionVO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
         if (!StringUtils.isEmpty(version)
                 && !StringUtils.isEmpty(groupId)
                 && !StringUtils.isEmpty(artifactId)
-                && !StringUtils.isEmpty(serviceCode)
                 && isExisted(projectId, publishVersionVO)) {
             throw new CommonException("error.publish.version.duplicate");
         }
@@ -106,19 +107,16 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         String groupId = publishVersionVO.getGroupId();
         String artifactId = publishVersionVO.getArtifactId();
         String version = publishVersionVO.getVersion();
-        String serviceCode = publishVersionVO.getServiceCode();
         AssertUtilsForCommonException.notNull(projectId, "error.publish.version.projectId.null");
         AssertUtilsForCommonException.notEmpty(groupId, GROUP_ID_EMPTY_EXCEPTION);
         AssertUtilsForCommonException.notEmpty(artifactId, ARTIFACT_ID_EMPTY_EXCEPTION);
         AssertUtilsForCommonException.notEmpty(version, VERSION_EMPTY_EXCEPTION);
-        AssertUtilsForCommonException.notEmpty(serviceCode, SERVICE_CODE_EMPTY_EXCEPTION);
 
         PublishVersionDTO dto = new PublishVersionDTO();
         dto.setProjectId(projectId);
         dto.setGroupId(groupId);
         dto.setArtifactId(artifactId);
         dto.setVersion(version);
-        dto.setServiceCode(serviceCode);
         List<PublishVersionDTO> list = publishVersionMapper.select(dto);
         if (publishVersionVO.getId() == null) {
             return !list.isEmpty();
@@ -137,18 +135,15 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         String groupId = publishVersionVO.getGroupId();
         String version = publishVersionVO.getVersion();
         String artifactId = publishVersionVO.getArtifactId();
-        String serviceCode = publishVersionVO.getServiceCode();
         if (!StringUtils.isEmpty(version)
                 && !StringUtils.isEmpty(groupId)
-                && !StringUtils.isEmpty(artifactId)
-                && !StringUtils.isEmpty(serviceCode)) {
+                && !StringUtils.isEmpty(artifactId)) {
             PublishVersionVO example = new PublishVersionVO();
             example.setProjectId(projectId);
             example.setId(publishVersionId);
             example.setGroupId(groupId);
             example.setVersion(version);
             example.setArtifactId(artifactId);
-            example.setServiceCode(serviceCode);
             if (isExisted(projectId, example)) {
                 throw new CommonException("error.publish.version.duplicate");
             }
@@ -318,6 +313,23 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         return issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
     }
 
+    @Override
+    public void deleteIssueTagRel(Long projectId,
+                                  Long organizationId,
+                                  Long publishVersionId,
+                                  Long issueId) {
+        PublishVersionDTO dto = publishVersionMapper.selectByPrimaryKey(publishVersionId);
+        AssertUtilsForCommonException.notNull(dto, "error.publish.version.not.existed");
+        Long tagId = dto.getTagId();
+        if (tagId != null) {
+            TagIssueRelDTO tagIssueRel = new TagIssueRelDTO();
+            tagIssueRel.setTagId(tagId);
+            tagIssueRel.setProjectId(projectId);
+            tagIssueRel.setOrganizationId(organizationId);
+            tagIssueRelMapper.delete(tagIssueRel);
+        }
+    }
+
     private void addSearchParam(SearchVO searchVO,
                                 Set<Long> issueIds,
                                 Long projectId,
@@ -430,8 +442,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private void createValidator(PublishVersionVO publishVersionVO,
                                  String version,
                                  String groupId,
-                                 String artifactId,
-                                 String serviceCode) {
+                                 String artifactId) {
         boolean isAppService = Boolean.TRUE.equals(publishVersionVO.getAppService());
         if (isAppService) {
             String versionAlias = publishVersionVO.getVersionAlias();
@@ -447,9 +458,6 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             }
             if (StringUtils.isEmpty(artifactId)) {
                 throw new CommonException(ARTIFACT_ID_EMPTY_EXCEPTION);
-            }
-            if (StringUtils.isEmpty(serviceCode)) {
-                throw new CommonException(SERVICE_CODE_EMPTY_EXCEPTION);
             }
         }
     }
