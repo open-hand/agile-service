@@ -430,7 +430,10 @@ public class ExcelServiceImpl implements ExcelService {
         if (col == -1) {
             return null;
         }
-        List<StatusVO> issueStatus = projectConfigService.queryStatusByProjectId(projectId, APPLY_TYPE_AGILE);
+        long start = System.currentTimeMillis();
+        List<StatusVO> issueStatus = projectConfigService.queryStatusByProjectIdNotType(projectId, APPLY_TYPE_AGILE);
+        long end = System.currentTimeMillis();
+        LOGGER.info("status时间：" + (end - start));
         List<String> values = new ArrayList<>();
         issueStatus.forEach(i -> {
             values.add(i.getName());

@@ -255,7 +255,28 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public List<StatusVO> queryStatusByProjectId(Long projectId, String applyType) {
+        List<StatusVO> result = queryStatusByProjectIdNotType(projectId, applyType);
+        //设置状态关联的issueTypeIds
+        List<Long> statusIds = result.stream().map(StatusVO::getId).collect(Collectors.toList());
+        ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
+        StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
+        List<IssueCountDTO> issueCounts = nodeDeployMapper.countIssueTypeByStatusIds(ConvertUtil.getOrganizationId(projectId), stateMachineSchemeVO.getId(), statusIds, applyType);
+        Map<Long, List<Long>> map = new HashMap<>();
+        if (!CollectionUtils.isEmpty(issueCounts)) {
+            map.putAll(issueCounts.stream().collect(Collectors.groupingBy(IssueCountDTO::getId, Collectors.mapping(IssueCountDTO::getIssueTypeId, Collectors.toList()))));
+        }
+        result.forEach(status -> {
+            status.setIssueTypeIds(map.get(status.getId()));
+        });
+        return result;
+    }
+
+    @Override
+    public List<StatusVO> queryStatusByProjectIdNotType(Long projectId, String applyType) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        if (projectVO == null) {
+            return new ArrayList<>();
+        }
         Long organizationId = projectVO.getOrganizationId();
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
         if (stateMachineSchemeId == null) {
@@ -280,22 +301,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 .stream()
                 .filter(v -> !issueTypeIds.contains(v.getIssueTypeId()))
                 .map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
-        List<StatusVO> result = statusService.queryByStateMachineIds(organizationId, stateMachineIds);
-
-        //设置状态关联的issueTypeIds
-        List<Long> statusIds = result.stream().map(StatusVO::getId).collect(Collectors.toList());
-        ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
-        StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
-        List<IssueCountDTO> issueCounts = nodeDeployMapper.countIssueTypeByStatusIds(projectVO.getOrganizationId(), stateMachineSchemeVO.getId(), statusIds, applyType);
-        Map<Long, List<Long>> map = new HashMap<>();
-        if (!CollectionUtils.isEmpty(issueCounts)) {
-            map.putAll(issueCounts.stream().collect(Collectors.groupingBy(IssueCountDTO::getId, Collectors.mapping(IssueCountDTO::getIssueTypeId, Collectors.toList()))));
-        }
-        result.forEach(status -> {
-            status.setIssueTypeIds(map.get(status.getId()));
-        });
-
-        return result;
+        return statusService.queryByStateMachineIds(organizationId, stateMachineIds);
     }
 
     @Override
