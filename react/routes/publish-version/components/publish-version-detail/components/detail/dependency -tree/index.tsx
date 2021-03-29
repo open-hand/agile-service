@@ -10,10 +10,12 @@ import {
   IPublishVersionTreeNode, IPublishVersionData, publishVersionApi, versionApi,
 } from '@/api';
 import { IAppVersionDataItem } from '@/components/release-detail/stores/store';
+import { randomString } from '@/utils/random';
 import { useReleaseDetailContext } from '../../../stores';
 import Section from '../../section';
 import './index.less';
 import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
+import DependencyTreeBase from './DependencyTreeBase';
 
 const { TreeNode } = Tree;
 const DependencyTree: React.FC = () => {
@@ -24,8 +26,8 @@ const DependencyTree: React.FC = () => {
   function handleLinkPublishVersion(linkData: any) {
     publishVersionApi.dependencyTreeAdd({
       id: detailData.id,
-      type: 'app',
-      children: linkData?.version.map((item: any) => ({ id: item, type: 'app' })) || [],
+      type: 'publish',
+      children: linkData?.version.map((item: any) => ({ id: item, type: 'publish' })) || [],
 
     }).then(() => {
       store.loadData();
@@ -45,9 +47,9 @@ const DependencyTree: React.FC = () => {
       onOk: () => {
         publishVersionApi.dependencyTreeDel({
           id: detailData.id,
-          type: 'app',
+          type: 'publish',
           children: [
-            { id: v.id, type: 'app' },
+            { id: v.id, type: 'publish' },
           ],
         }).then(() => {
           store.loadData();
@@ -56,7 +58,7 @@ const DependencyTree: React.FC = () => {
     });
   }
 
-  function renderTreeNode(item: IPublishVersionTreeNode) {
+  function renderTreeNode(item: IPublishVersionTreeNode, level: number) {
     return (
       <div role="none" className={`${prefixCls}-dependency-tree-item`}>
         <span className={`${prefixCls}-dependency-tree-item-left`}>
@@ -64,43 +66,20 @@ const DependencyTree: React.FC = () => {
           <span className={`${prefixCls}-dependency-tree-item-left-text`}>{item.versionAlias || item.version}</span>
         </span>
 
-        <Button
-          icon="delete_forever"
-          className={`${prefixCls}-dependency-tree-item-btn`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDelete(item);
-          }}
-        />
+        {level === 0 ? (
+          <Button
+            icon="delete_forever"
+            className={`${prefixCls}-dependency-tree-item-btn`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(item);
+            }}
+          />
+        ) : null}
       </div>
     );
   }
-  function renderTree(item: IPublishVersionTreeNode, level = 0) {
-    let paddingLeft = level === 0 ? undefined : (28 * level - 20 * (level - 1));
-    if (!!item.children?.length && level > 1 && paddingLeft && paddingLeft > 0) {
-      paddingLeft -= 11;
-    }
-    return (
-      <TreeNode
-        title={renderTreeNode(item)}
-        key={item.id}
-        disabled
-        className={classnames({
-          [`${prefixCls}-dependency-tree-tree-root`]: !level,
-          [`${prefixCls}-dependency-tree-tree-leaf`]: !item.children?.length,
-          [`${prefixCls}-dependency-tree-tree-has-leaf`]: !!item.children?.length,
-        })}
-        style={{
-          paddingLeft,
-          marginLeft: level > 1 ? 20 * (level - 1) : undefined,
-        }}
-        switcherIcon={item.children?.length ? (nodeProps: any) => <div className={`${prefixCls}-dependency-tree-tree-expand`}><Icon type="navigate_next" className={`${prefixCls}-dependency-tree-tree-expand-icon`} /></div>
-          : undefined}
-      >
-        {item.children?.map((k) => renderTree(k, level + 1))}
-      </TreeNode>
-    );
-  }
+
   return (
     <Section
       title="关联发布版本"
@@ -123,10 +102,10 @@ const DependencyTree: React.FC = () => {
       }
       contentClassName={`${prefixCls}-dependency-tree`}
     >
-      <Tree className={`${prefixCls}-dependency-tree-tree`}>
-
-        {data[0]?.children?.map((item) => renderTree(item, 0))}
-      </Tree>
+      <DependencyTreeBase
+        data={data[0].children || []}
+        renderNode={renderTreeNode}
+      />
 
     </Section>
   );
