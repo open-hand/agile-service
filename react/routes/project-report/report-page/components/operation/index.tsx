@@ -15,7 +15,7 @@ import styles from './index.less';
 import { useProjectReportContext } from '../../context';
 import Export, { IExportProps } from '../export';
 
-const htmlTemplate = (images:string[]) => `<!DOCTYPE html>
+const htmlTemplate = (images: { url: String, height: number, width: number }[]) => `<!DOCTYPE html>
   <html lang="en">
   
   <head>
@@ -23,23 +23,10 @@ const htmlTemplate = (images:string[]) => `<!DOCTYPE html>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <style>
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-      }
-      body{
-        padding:20px 155px;
-      }
-      img {
-        max-width: 100%;
-      }
-    </style>
   </head>
   
   <body>
-    ${images.map((url) => `<image src="${url}"/>`).join('\n')}
+    ${images.map((image) => `<image src="${image.url}" height="${image.height}" style="display:block"/>`).join('\n')}
   </body>
   
   </html>`;
@@ -97,14 +84,14 @@ const Operation: React.FC<Props> = () => {
   //   });
   //   return pdf;
   // }, []);
-  const handleExport = useCallback((canvases: HTMLCanvasElement[]) => {
+  const handleExport = useCallback((canvases: { canvas: HTMLCanvasElement, height: number, width: number }[]) => {
     setExporting(false);
     // 导出pdf
     // const pdf = genPdf(canvases);
     // pdf.save(`${store.baseInfo?.title ?? '项目报告'}.pdf`);
     // 导出html
-    const urls = canvases.map((canvas) => canvas.toDataURL('image/png'));
-    const html = htmlTemplate(urls);
+    const urls = canvases.map((canvas) => canvas.canvas.toDataURL('image/png'));
+    const html = htmlTemplate(urls.map((url, i) => ({ url, height: canvases[i].height, width: canvases[i].width })));
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     fileSaver.saveAs(blob, `${store.baseInfo?.title ?? '项目报告'}.html`);
   }, [store.baseInfo?.title]);
@@ -118,15 +105,15 @@ const Operation: React.FC<Props> = () => {
       resolve(file);
     });
   }), [store.baseInfo?.title]);
-  const handleSend = useCallback(async (canvases: HTMLCanvasElement[]) => {
+  const handleSend = useCallback(async (canvases: { canvas: HTMLCanvasElement, height: number, width: number }[]) => {
     if (store.baseInfo?.id) {
       const formData = new FormData();
-      const files = await Promise.all(Array.from(canvases).map((canvas) => toFile(canvas)));
+      const files = await Promise.all(Array.from(canvases).map((canvas) => toFile(canvas.canvas)));
       files.forEach((file) => {
         formData.append('file', file);
       });
-      const urls = await fileApi.uploadImage(formData);
-      const html = htmlTemplate(urls);
+      const urls: string[] = await fileApi.uploadImage(formData);
+      const html = htmlTemplate(urls.map((url, i) => ({ url, height: canvases[i].height, width: canvases[i].width })));
       const { objectVersionNumber } = await projectReportApi.send(store.baseInfo?.id, html);
       store.setObjectVersionNumber(objectVersionNumber);
       setSending(false);

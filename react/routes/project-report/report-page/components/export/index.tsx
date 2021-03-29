@@ -7,7 +7,7 @@ import PreviewReport from '@/routes/project-report/report-preview/Preview';
 import ReactDOM from 'react-dom';
 
 export interface IExportProps {
-  export: (callback: (canvas: HTMLCanvasElement[]) => void) => void
+  export: (callback: (elements: { canvas: HTMLCanvasElement, height: number, width: number }[]) => void) => void
 }
 interface Props {
   innerRef: React.Ref<IExportProps>
@@ -15,7 +15,7 @@ interface Props {
 
 const Export: React.FC<Props> = ({ innerRef }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const callbackRef = useRef<(canvas: HTMLCanvasElement[]) => void>();
+  const callbackRef = useRef<(elements: { canvas: HTMLCanvasElement, height: number, width: number }[]) => void>();
   const task = useMemo(() => generateTask('export', async () => {
     if (containerRef.current) {
       const container = containerRef.current;
@@ -24,17 +24,19 @@ const Export: React.FC<Props> = ({ innerRef }) => {
       const canvases = [];
       for (let i = 0; i < elements.length; i += 1) {
         const element = elements[i];
+        const height = element.scrollHeight;
+        const width = container.scrollWidth;
         // eslint-disable-next-line no-await-in-loop
         const canvas = await html2canvas(element as HTMLElement, {
           allowTaint: true,
           useCORS: true,
           logging: false,
-          height: element.scrollHeight,
-          width: container.scrollWidth,
-          windowHeight: element.scrollHeight,
-          windowWidth: container.scrollWidth,
+          height,
+          width,
+          windowHeight: height,
+          windowWidth: width,
         });
-        canvases.push(canvas);
+        canvases.push({ canvas, height, width });
       }
       setExporting(false);
       task.reset();
