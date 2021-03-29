@@ -27,7 +27,7 @@ import ServiceCodeQualityReportComponent from './components/service-code-quality
 
 const { Option } = Select;
 
-export type ChartMap = { component: React.FC<any>, name: string, group: string, available?: () => boolean }
+export type ChartMap = { component: React.FC<any>, name: string, group: string, available?: () => Promise<boolean> }
 export const defaultCharts = new Map<string, ChartMap>([
   ['burn_down_report', { component: BurnDownComponent, name: '燃尽图', group: '敏捷' }],
   ['sprint_report', { component: SprintComponent, name: '冲刺报告图', group: '敏捷' }],
