@@ -1,11 +1,11 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.validator.BoardColumnValidator;
 import io.choerodon.agile.api.validator.BoardValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
@@ -13,13 +13,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.naturalOrder;
@@ -91,6 +91,9 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
     @Autowired
     private ColumnStatusRelTemplateMapper columnStatusRelTemplateMapper;
 
+    @Autowired
+    private BaseFeignClient baseFeignClient;
+
     @Override
     public void createBoardTemplate(Long organizationId, String boardName) {
         if (Boolean.TRUE.equals(boardService.checkName(organizationId, 0L, boardName))) {
@@ -115,9 +118,21 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
                 columnWithStatusRelDTOList.add(columnWithStatusRelDTO);
             }
         }
-        boardColumnService.relate(organizationId,0L, boardId, TODO, TODO_CODE, SEQUENCE_ONE, columnWithStatusRelDTOList, COLUMN_COLOR_TODO);
-        boardColumnService.relate(organizationId,0L, boardId, DOING, DOING_CODE, SEQUENCE_TWO, columnWithStatusRelDTOList, COLUMN_COLOR_DOING);
-        boardColumnService.relate(organizationId,0L, boardId, DONE, DONE_CODE, SEQUENCE_THREE, columnWithStatusRelDTOList, COLUMN_COLOR_DONE);
+        createBoardTemplateColumn(organizationId,0L, boardId, TODO, TODO_CODE, SEQUENCE_ONE, COLUMN_COLOR_TODO);
+        createBoardTemplateColumn(organizationId,0L, boardId, DOING, DOING_CODE, SEQUENCE_TWO, COLUMN_COLOR_DOING);
+        createBoardTemplateColumn(organizationId,0L, boardId, DONE, DONE_CODE, SEQUENCE_THREE, COLUMN_COLOR_DONE);
+    }
+
+    private void createBoardTemplateColumn(Long organizationId, Long projectId, Long boardId, String name, String categoryCode, Integer sequence, String colorCode) {
+        BoardColumnDTO column = new BoardColumnDTO();
+        column.setBoardId(boardId);
+        column.setName(name);
+        column.setProjectId(projectId);
+        column.setOrganizationId(organizationId);
+        column.setCategoryCode(categoryCode);
+        column.setSequence(sequence);
+        column.setColorCode(colorCode);
+        boardColumnService.createBase(column);
     }
 
     @Override
@@ -180,7 +195,19 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         if (CollectionUtils.isEmpty(boardDTOS)) {
             return new ArrayList<>();
         }
-        return modelMapper.map(boardDTOS, new TypeToken<List<BoardVO>>(){}.getType());
+        List<Long> userIds = boardDTOS.stream().map(BoardDTO::getCreatedBy).collect(Collectors.toList());
+        List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true).getBody();
+        Map<Long, UserDTO> userDTOMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(userDTOS)) {
+            userDTOMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity())));
+        }
+        List<BoardVO> boardVOList = new ArrayList<>();
+        boardDTOS.forEach(boardTemplate -> {
+            BoardVO boardVO = modelMapper.map(boardTemplate, BoardVO.class);
+            boardVO.setCreator(userDTOMap.getOrDefault(boardTemplate.getCreatedBy(), null));
+            boardVOList.add(boardVO);
+        });
+        return boardVOList;
     }
 
     @Override

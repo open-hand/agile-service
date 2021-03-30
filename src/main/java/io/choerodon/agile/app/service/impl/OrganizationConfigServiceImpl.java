@@ -96,6 +96,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     private StateMachineService stateMachineService;
     @Autowired
     private IssueStatusService issueStatusService;
+    @Autowired
+    private  BoardMapper boardMapper;
 
     @Override
     public OrganizationConfigDTO initStatusMachineTemplate(Long organizationId, Long issueTypeId) {
@@ -357,6 +359,55 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         }
     }
 
+    @Override
+    public Boolean checkConfigTemplate(Long organizationId) {
+        // 查询是否配置看板模板
+        Boolean isConfig = false;
+        BoardDTO boardDTO = new BoardDTO();
+        boardDTO.setOrganizationId(organizationId);
+        boardDTO.setProjectId(0L);
+        List<BoardDTO> boardDTOS = boardMapper.select(boardDTO);
+        if (!CollectionUtils.isEmpty(boardDTOS)) {
+            return true;
+        }
+        // 查询是否配置状态机模板
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", SchemeApplyType.AGILE);
+        if (!ObjectUtils.isEmpty(organizationConfigDTO)) {
+            List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, organizationConfigDTO.getSchemeId());
+            if (!CollectionUtils.isEmpty(statusMachineSchemeConfigVOS)) {
+                return true;
+            }
+        } else {
+            initOrganizationConfig(organizationId);
+        }
+        return isConfig;
+    }
+
+    @Override
+    public Boolean checkStatusMachineTemplate(Long organizationId, Long issueTypeId) {
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", SchemeApplyType.AGILE);
+        if (!ObjectUtils.isEmpty(organizationConfigDTO)) {
+            StatusMachineSchemeConfigDTO statusMachineSchemeConfigDTO = queryStatusMachineSchemeConfig(organizationId, issueTypeId, organizationConfigDTO.getSchemeId());
+            return !ObjectUtils.isEmpty(statusMachineSchemeConfigDTO);
+        } else {
+            initOrganizationConfig(organizationId);
+            return false;
+        }
+    }
+
+    private OrganizationConfigDTO initOrganizationConfig(Long organizationId){
+        // 创建状态机方案
+        Long schemeId = stateMachineSchemeService.initOrgDefaultStatusMachineScheme(organizationId);
+        // 组织和方案建立关联
+        OrganizationConfigDTO organizationConfigDTO = new OrganizationConfigDTO();
+        organizationConfigDTO.setOrganizationId(organizationId);
+        organizationConfigDTO.setSchemeId(schemeId);
+        organizationConfigDTO.setSchemeType("scheme_state_machine");
+        organizationConfigDTO.setApplyType("agile");
+        baseInsert(organizationConfigDTO);
+        return organizationConfigDTO;
+    }
+
     private void handlerTemplateStatusMachineMap(Map<Long, Long> templateStatusMachineMap, Long organizationId) {
         OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", "agile");
         if (!ObjectUtils.isEmpty(organizationConfigDTO)) {
@@ -589,7 +640,18 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         return  machineNodeDTO;
     }
     private Long queryStatusMachineId(Long organizationId, Long issueTypeId){
-        OrganizationConfigDTO organizationConfigDTO = initStatusMachineTemplate(organizationId, issueTypeId);
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", SchemeApplyType.AGILE);
+        if (ObjectUtils.isEmpty(organizationConfigDTO)) {
+            Long schemeId = stateMachineSchemeService.initOrgDefaultStatusMachineScheme(organizationId);
+            // 组织和方案建立关联
+            OrganizationConfigDTO organizationConfig = new OrganizationConfigDTO();
+            organizationConfig.setOrganizationId(organizationId);
+            organizationConfig.setSchemeId(schemeId);
+            organizationConfig.setSchemeType("scheme_state_machine");
+            organizationConfig.setApplyType("agile");
+            baseInsert(organizationConfig);
+            organizationConfigDTO = organizationConfig;
+        }
         StatusMachineSchemeConfigDTO statusMachineSchemeConfig = queryStatusMachineSchemeConfig(organizationId, issueTypeId, organizationConfigDTO.getSchemeId());
         if (ObjectUtils.isEmpty(statusMachineSchemeConfig)) {
             throw new CommonException("error.status.machine.scheme.config.null");

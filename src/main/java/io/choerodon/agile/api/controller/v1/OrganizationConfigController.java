@@ -266,4 +266,22 @@ public class OrganizationConfigController {
                                                                       @RequestParam(required = false) String schemeCode) {
         return new ResponseEntity<>(objectSchemeFieldService.selectMemberList(organizationId, null, schemeCode, issueTypeId, null), HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "校验组织是否维护模板")
+    @GetMapping("/check_config_template")
+    public ResponseEntity<Boolean> checkConfigTemplate(@ApiParam(value = "组织id", required = true)
+                                                       @PathVariable("organization_id") Long organizationId) {
+        return new ResponseEntity<>(organizationConfigService.checkConfigTemplate(organizationId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "校验组织层问题类型是否设置状态机模板")
+    @GetMapping("/check_status_machine_template")
+    public ResponseEntity<Boolean> checkStatusMachineTemplate(@ApiParam(value = "组织id", required = true)
+                                                                           @PathVariable("organization_id") Long organizationId,
+                                                                           @ApiParam(value = "issue类型id", required = true)
+                                                                           @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(organizationConfigService.checkStatusMachineTemplate(organizationId, issueTypeId), HttpStatus.OK);
+    }
 }
