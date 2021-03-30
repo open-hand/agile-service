@@ -15,13 +15,11 @@ import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnC
 import WsProgress from '@/components/ws-progress';
 import { getProjectName } from '@/utils/common';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
-import { IModalProps } from '@/common/types';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
 import TemplateSelect from '../template-select/TemplateSelect';
-import openSaveTemplate from '../template-select/components/save/SaveTemplate';
-import { ITemplate } from '../template-select/components/edit/EditTemplate';
+import openSaveTemplate, { ITemplate } from '../template-select/components/save/SaveTemplate';
 
 interface FormPartProps {
   title: string | ReactElement,
@@ -74,6 +72,7 @@ const ExportIssue: React.FC = () => {
   const templateSelectRef = useRef<{
     onOk:(template: ITemplate) => Promise<void>,
     templateList: ITemplate[]
+    template: ITemplate
     setTemplate: (template: ITemplate | undefined) => void
     templateFirstLoaded: boolean
   }>();
@@ -101,7 +100,6 @@ const ExportIssue: React.FC = () => {
   const checkOptions = useMemo(() => { // checkBokProps
     const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig?.get(option.value) })) || [];
     newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig?.get(option.code) })));
-    console.log('newCheckOptions', newCheckOptions);
     return newCheckOptions;
   }, [choseFieldStore.getOriginalField, propsCheckOptions, store.checkboxOptionsExtraConfig]);
 
@@ -116,7 +114,7 @@ const ExportIssue: React.FC = () => {
         return;
       }
     }
-    templateSelectRef?.current?.setTemplate(undefined);
+    // templateSelectRef?.current?.setTemplate(undefined);
   }, [checkOptions, store]);
 
   useEffect(() => {
@@ -210,8 +208,10 @@ const ExportIssue: React.FC = () => {
   };
 
   const handleSaveTemplate = useCallback(() => {
+    openSaveTemplate({
     // @ts-ignore
-    openSaveTemplate({ action, onOk: templateSelectRef.current?.onOk, templateJson: JSON.stringify(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps)) });
+      template: templateSelectRef?.current?.template, action, onOk: templateSelectRef.current?.onOk, templateJson: JSON.stringify(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps)),
+    });
   }, [action, checkBoxDataProps, store]);
 
   const selectTemplateOk = useCallback((fieldCodes) => {
@@ -264,8 +264,6 @@ const ExportIssue: React.FC = () => {
                 // @ts-ignore
                 checkOptions={checkOptions}
                 selectTemplateOk={selectTemplateOk}
-                transformExportFieldCodes={store.transformExportFieldCodes}
-                reverseTransformExportFieldCodes={store.reverseTransformExportFieldCodes}
               />
             </FormPart>
             {/* <Divider className={`${prefixCls}-horizontal`} /> */}
