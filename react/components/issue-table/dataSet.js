@@ -53,7 +53,7 @@ export default ({
     { name: 'issueSprintVOS', type: 'array', label: '冲刺' },
     { name: 'mainResponsibleUser', type: 'object', label: '主要负责人' },
     { name: 'environmentName', type: 'string', label: '环境' },
-    { name: 'appVersion', type: 'string', label: '应用版本' },
+    { name: 'tags', type: 'string', label: 'Tag' },
 
   ],
   queryFields: [

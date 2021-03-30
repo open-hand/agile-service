@@ -186,8 +186,8 @@ export function getSystemFields(excludeCodes = []) {
     fieldType: 'member',
   },
   {
-    code: 'appVersion',
-    name: '应用版本',
+    code: 'tags',
+    name: 'Tag',
     defaultShow: false,
     fieldType: 'multiple',
   },

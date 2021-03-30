@@ -461,10 +461,10 @@ class VersionApi extends Api<VersionApi> {
     });
   }
 
-  importProgramPom(data: any, groupIds: string, subProjectId: string) {
+  importProgramPom(data: any, subProjectId: string, groupIds?: string) {
     return this.request({
       method: 'post',
-      url: `${this.prefix}/version_tree/parse_pom`,
+      url: `${this.prefix}/program_version_tree/parse_pom`,
       params: {
         groupIds,
         subProjectId,
