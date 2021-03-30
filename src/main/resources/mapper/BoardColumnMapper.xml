@@ -18,7 +18,7 @@
             <id property="statusId" column="ais_status_id"/>
             <id property="position" column="ais_position"/>
             <id property="objectVersionNumber" column="ais_object_version_number"/>
-            <collection property="issues" autoMapping="true" columnPrefix="ai_"
+            <collection property="issues" notNullColumn="issue_id" autoMapping="true" columnPrefix="ai_"
                         ofType="io.choerodon.agile.infra.dto.IssueForBoardDO"/>
         </collection>
     </resultMap>
@@ -86,7 +86,7 @@
         ai.estimated_end_time as ai_estimated_end_time,
         ai.object_version_number AS ai_object_version_number,
         ai.relate_issue_id AS ai_relate_issue_id,
-        IF(fsb.instance_id IS NULL, NULL, 1) AS ai_starBeacon,
+        IF(fsb.instance_id IS NULL, NULL, TRUE) AS ai_starBeacon,
         abcsr.position as  ais_position
         FROM
         agile_board_column abc
