@@ -121,8 +121,12 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         if (publishVersionVO.getId() == null) {
             return !list.isEmpty();
         } else {
-            Long id = list.get(0).getId();
-            return !id.equals(publishVersionVO.getId());
+            if (list.isEmpty()) {
+                return false;
+            } else {
+                Long id = list.get(0).getId();
+                return !id.equals(publishVersionVO.getId());
+            }
         }
     }
 
