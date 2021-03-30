@@ -1,12 +1,17 @@
-import React, { useState, ReactNode, useLayoutEffect } from 'react';
+import React, {
+  useState, ReactNode, useLayoutEffect, useEffect,
+} from 'react';
 import { Tabs } from 'choerodon-ui';
 import { find, includes } from 'lodash';
 import useQueryString from '@/hooks/useQueryString';
+import { getIsOrganization } from '@/utils/common';
+import { statusTransformApi } from '@/api';
 import Status from './status';
 import StatusCirculation from './status-circulation';
 import CustomCirculation from './custom-circulation';
 import StateMachineContext from './context';
 import useSelectedType from './useSelectedType';
+import NoTemplate from './no-template';
 import styles from './index.less';
 
 export interface TabComponentProps<Params extends { [K in keyof Params]?: string } = {}> {
@@ -38,8 +43,10 @@ const StateMachine: React.FC = ({
 }) => {
   const defaultTabs = tabs.filter((item) => includes(defaultTabKeys, item.key));
   const params = useQueryString();
+  const isOrganization = getIsOrganization();
   const { issueTypeId, activeKey: paramsActiveKey } = params;
   const [selectedType, handleChangeSelectedType] = useSelectedType(issueTypeId || undefined);
+  const [selectedTypeInited, setSelectedTypeInited] = useState<boolean>(false);
   const [activeKey, setActiveKey] = useState(() => {
     if (propActiveKey) {
       return propActiveKey;
@@ -54,19 +61,41 @@ const StateMachine: React.FC = ({
       propSetActiveKey(activeKey);
     }
   }, [activeKey, propSetActiveKey]);
+
+  useEffect(() => {
+    if (isOrganization && selectedType) {
+      statusTransformApi.hasTemplate(selectedType).then((res: boolean) => {
+        setSelectedTypeInited(res);
+      });
+    }
+  }, [isOrganization, selectedType]);
+
   const Component = find(defaultTabs, { key: activeKey })?.component;
   const tabComponent = (
     <Tabs className={styles.tabs} activeKey={activeKey} onChange={setActiveKey}>
       {defaultTabs.map((tab) => <TabPane key={tab.key} tab={tab.name} />)}
     </Tabs>
   );
+
+  console.log(selectedType);
+
   return (
     <StateMachineContext.Provider value={{
       selectedType,
       setSelectedType: handleChangeSelectedType,
+      selectedTypeInited,
+      setSelectedTypeInited,
     }}
     >
-      {Component && <Component {...otherProps} tab={tabComponent} />}
+      {
+        isOrganization && !selectedTypeInited ? (
+          <NoTemplate />
+        ) : (
+          <>
+            {Component && <Component {...otherProps} tab={tabComponent} />}
+          </>
+        )
+      }
     </StateMachineContext.Provider>
   );
 };

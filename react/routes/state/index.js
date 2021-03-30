@@ -22,7 +22,12 @@ const TemplateManage = () => {
         title="状态机模板"
         route="/agile/states/stateMachine"
         tabKey="choerodon.code.organization.setting.issue.states.ps.stateMachine"
-        component={() => <StatusMachineTemplate activeKey={activeKey} setActiveKey={setActiveKey} />}
+        component={() => (
+          <StatusMachineTemplate
+            activeKey={activeKey}
+            setActiveKey={setActiveKey}
+          />
+        )}
       />
       <PageTab
         title="看板模板"
