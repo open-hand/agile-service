@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Button, DataSet } from 'choerodon-ui/pro';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { uniq } from 'lodash';
 import { TemplateAction } from '@/api';
-import openSaveTemplate from '../template-select/components/save/SaveTemplate';
-import { ITemplate } from '../template-select/components/edit/EditTemplate';
+import openSaveTemplate, { ITemplate } from '../template-select/components/save/SaveTemplate';
 
 export const transformTemplateJson = (templateJson: string) => {
   const templateParse = JSON.parse(templateJson);
