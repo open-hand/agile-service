@@ -182,6 +182,8 @@ public class ExcelServiceImpl implements ExcelService {
     private ObjectSchemeFieldExcelService objectSchemeFieldExcelService;
     @Autowired
     protected WorkLogMapper workLogMapper;
+    @Autowired
+    private StatusMapper statusMapper;
 
     private static final String[] FIELDS_NAMES;
 
@@ -420,24 +422,19 @@ public class ExcelServiceImpl implements ExcelService {
                 .ifPresent(x -> result.add(x));
         Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, Arrays.asList("非生产环境", "生产环境"), FieldCode.ENVIRONMENT))
                 .ifPresent(x -> result.add(x));
-        Optional.ofNullable(processIssueStatusPredefined(projectId, cursor, systemFields))
+        Optional.ofNullable(processIssueStatusPredefined(organizationId, projectId, cursor, systemFields))
                 .ifPresent(x -> result.add(x));
         return result;
     }
 
-    protected PredefinedDTO processIssueStatusPredefined(Long projectId, ExcelImportTemplate.Cursor cursor, List<String> fieldCodes) {
+    protected PredefinedDTO processIssueStatusPredefined(Long organizationId, Long projectId, ExcelImportTemplate.Cursor cursor, List<String> fieldCodes) {
         int col = fieldCodes.indexOf(FieldCode.ISSUE_STATUS);
         if (col == -1) {
             return null;
         }
-        long start = System.currentTimeMillis();
-        List<StatusVO> issueStatus = projectConfigService.queryStatusByProjectIdNotType(projectId, APPLY_TYPE_AGILE);
-        long end = System.currentTimeMillis();
-        LOGGER.info("status时间：" + (end - start));
+        List<ProjectStatusVO> projectStatusVOList = statusMapper.listStatusByProjectId(projectId, organizationId,null);
         List<String> values = new ArrayList<>();
-        issueStatus.forEach(i -> {
-            values.add(i.getName());
-        });
+        projectStatusVOList.forEach(i -> values.add(i.getName()));
         return new PredefinedDTO(values,
                 PREDEFINED_VALUE_START_ROW,
                 PREDEFINED_VALUE_END_ROW,
