@@ -35,6 +35,9 @@
         FROM agile_publish_version apv
         WHERE apv.project_id = #{projectId}
         <if test="publishVersionVO != null ">
+            <if test="publishVersionVO.appService != null">
+                apv.app_service = #{publishVersionVO.appService}
+            </if>
             <if test="publishVersionVO.content != null and !''.equals(publishVersionVO.content)">
                 <bind name="contentLike" value="'%' + publishVersionVO.content + '%'"/>
                 AND (apv.version LIKE #{contentLike}
