@@ -13,6 +13,7 @@ import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
+import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageableHelper;
@@ -69,7 +70,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
-    private MessageClient messageClient;
+    private MessageClientC7n messageClientC7n;
     @Autowired
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired(required = false)
@@ -327,7 +328,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 agilePluginService.handlerFeatureField(projectId,v,programMap);
             }
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-            messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
         });
     }
 
@@ -372,7 +373,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             }
             if (sendMsg) {
                 batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-                messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
             }
         });
     }
