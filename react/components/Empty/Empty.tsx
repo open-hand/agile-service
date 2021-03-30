@@ -7,6 +7,7 @@ interface EmptyProps {
   pic: string,
   border?: boolean,
   style?: React.CSSProperties,
+  imgStyle?: React.CSSProperties,
 }
 const Empty: React.FC<EmptyProps> = ({
   style,
@@ -14,6 +15,7 @@ const Empty: React.FC<EmptyProps> = ({
   pic,
   title,
   description,
+  imgStyle,
 }) => (
   <div
     className="c7nagile-Empty"
@@ -26,7 +28,12 @@ const Empty: React.FC<EmptyProps> = ({
       }}
     >
       <div className="c7nagile-Empty-imgWrap">
-        <img src={pic} alt="" className="c7nagile-Empty-imgWrap-img" />
+        <img
+          src={pic}
+          alt=""
+          className="c7nagile-Empty-imgWrap-img"
+          style={imgStyle}
+        />
       </div>
       <div
         className="c7nagile-Empty-textWrap"

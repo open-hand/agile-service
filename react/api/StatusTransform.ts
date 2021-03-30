@@ -623,6 +623,30 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       },
     });
   }
+
+  hasTemplate(
+    issueTypeId: string,
+  ) {
+    return axios({
+      method: 'get',
+      url: `${this.orgPrefix}/check_status_machine_template`,
+      params: {
+        issueTypeId,
+      },
+    });
+  }
+
+  initTemplate(
+    issueTypeId: string,
+  ) {
+    return axios({
+      method: 'get',
+      url: `${this.orgPrefix}/init_status_machine_template`,
+      params: {
+        issueTypeId,
+      },
+    });
+  }
 }
 
 const statusTransformApi = new StatusTransformApi();
