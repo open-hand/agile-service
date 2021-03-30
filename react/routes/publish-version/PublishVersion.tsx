@@ -13,6 +13,7 @@ import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import TableDropMenu from '@/common/TableDropMenu';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { publishVersionApi, versionApi } from '@/api';
 import { usePublishVersionContext } from './stores';
 import { openCreatePublishVersionModal } from './components/create-publish-version';
 import { openPublishVersionDetail } from './components/publish-version-detail';
@@ -41,10 +42,12 @@ function PublishVersion() {
           title: '删除发布版本',
           children: (
             <div>
-              <span>{`您确定要删除关联的应用版本【${record.get('name')}】？`}</span>
+              <span>{`您确定要删除关联的应用版本【${record.get('versionAlias') || record.get('version')}】？`}</span>
             </div>),
           onOk: () => {
-
+            publishVersionApi.delete(record.get('id')).then(() => {
+              tableDataSet.query();
+            });
           },
         });
         break;

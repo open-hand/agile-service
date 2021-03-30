@@ -56,7 +56,11 @@ const LinkService: React.FC = () => {
     store.loadData();
     return true;
   }
-
+  async function handleCreate(pomData: any) {
+    await publishVersionApi.createBatch(detailData.id, [{ ...pomData, appService: true }]);
+    store.loadData();
+    return true;
+  }
   return (
     <Section
       title="依赖"
@@ -69,7 +73,7 @@ const LinkService: React.FC = () => {
                 color={'blue' as ButtonColor}
                 icon="playlist_add"
                 onClick={() => {
-                  openCreateAppVersionModal();
+                  openCreateAppVersionModal({ handleOk: handleCreate });
                 }}
               />
             </Tooltip>
@@ -103,17 +107,23 @@ const LinkService: React.FC = () => {
       contentClassName={`${prefixCls}-link-service`}
     >
       {data.map((item) => (
-        <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => {}}>
+        <div role="none" className={`${prefixCls}-link-service-item`} onClick={() => { }}>
           <span className={`${prefixCls}-link-service-item-left`}>
             {item.type === 'service' ? <Icon type="local_offer" style={{ fontSize: 15 }} /> : <CustomIcon type="icon-pom" width={17} height={17} />}
-            <span className={`${prefixCls}-link-service-item-left-text`}>{item.versionAlias || item.version}</span>
+            <span className={`${prefixCls}-link-service-item-left-text`}>{item.serviceCode ? `${item.serviceCode}:${item.versionAlias || item.version}` : item.versionAlias || item.version}</span>
           </span>
           <Button
             icon="mode_edit"
             className={`${prefixCls}-link-service-item-btn`}
             onClick={(e) => {
               e.stopPropagation();
-              openEditAppVersionModal({ data: item as any, handleOk: () => store.loadData() });
+              openEditAppVersionModal({
+                data: item as any,
+                handleOk: async () => {
+                  store.loadData();
+                  return true;
+                },
+              });
             }}
           />
           <Button

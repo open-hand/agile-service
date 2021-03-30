@@ -34,7 +34,9 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps
 }) => {
   const [applicationId, setApplicationId] = useState<string>();
   const [versionType, setVersionType] = useState<string>('version');
-
+  function handleCheckName(newName: string) {
+    return publishVersionApi.checkAlias(newName).then((res: boolean) => (res ? '版本名称重复' : true));
+  }
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
     autoCreate: true,
@@ -43,7 +45,9 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps
     //   { appService: '应用1', alias: undefined },
     // ],
     fields: [
-      { name: 'versionAlias', label: '发布版本名称', required: true },
+      {
+        name: 'versionAlias', label: '发布版本名称', required: true, validator: handleCheckName,
+      },
       { name: 'actualPublishDate', label: '实际发布时间' },
       { name: 'artifactId', label: 'artifactId' },
       { name: 'groupId', label: 'groupId' },
