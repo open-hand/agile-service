@@ -78,4 +78,19 @@ public interface OrganizationConfigService {
     Page<StatusSettingVO> statusTransformSettingList(Long organizationId, Long issueTypeId, PageRequest pageRequest, String param, String schemeCode);
 
     void syncStatusMachineTemplate(ProjectEvent projectEvent, String applyType);
+
+    /**
+     * 校验组织层是否配置模板
+     * @param organizationId
+     * @return
+     */
+    Boolean checkConfigTemplate(Long organizationId);
+
+    /**
+     * 校验组织层问题类型是否配置状态机模板
+     * @param organizationId
+     * @param issueTypeId
+     * @return
+     */
+    Boolean checkStatusMachineTemplate(Long organizationId, Long issueTypeId);
 }

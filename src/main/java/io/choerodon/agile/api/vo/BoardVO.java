@@ -1,10 +1,12 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -45,6 +47,10 @@ public class BoardVO {
     private String userDefaultBoard;
 
     private Long organizationId;
+
+    private Date creationDate;
+
+    private UserDTO creator;
 
     public Long getBoardId() {
         return boardId;
@@ -140,5 +146,21 @@ public class BoardVO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public UserDTO getCreator() {
+        return creator;
+    }
+
+    public void setCreator(UserDTO creator) {
+        this.creator = creator;
     }
 }

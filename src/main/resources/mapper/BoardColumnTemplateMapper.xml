@@ -25,7 +25,7 @@
         <id property="color" column="abc_color"/>
         <id column="column_ovn" property="objectVersionNumber"/>
         <id column="sequence" property="sequence"/>
-        <collection property="status" autoMapping="true"  ofType="io.choerodon.agile.api.vo.StatusTemplateVO">
+        <collection property="status" autoMapping="true" notNullColumn="status_id" ofType="io.choerodon.agile.api.vo.StatusTemplateVO">
             <id column="status_name" property="name"/>
             <id column="status_id" property="statusId"/>
             <id column="type" property="categoryCode"/>
