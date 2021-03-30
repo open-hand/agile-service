@@ -27,8 +27,8 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
   const prefixCls = 'c7n-agile-dependency-tree';
   const [data, setData] = useState(propsData || []);
   useEffect(() => {
-    setData(data);
-  }, [data]);
+    setData(propsData);
+  }, [propsData]);
   function renderTreeNodeLine(hasChildren: boolean, level: number, nodeIndex: number) {
     const lineArr = [];
     lineArr.unshift(<span
