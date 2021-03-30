@@ -18,14 +18,18 @@ import { observer } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import SelectAppService from '@/components/select/select-app-service';
 import SelectGitTags from '@/components/select/select-git-tags';
+import SelectSubProject from '@/components/select/select-sub-project';
 
 interface IImportPomFunctionProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
-  versionId:string,
+  versionId: string,
+  programMode?: boolean
 }
 
 const { Column } = Table;
-const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = ({ modal, handleOk, versionId }) => {
+const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = ({
+  modal, handleOk, programMode, versionId,
+}) => {
   const prefixCls = 'c7n-agile-publish-version-detail-import-pom';
   const [groupId, setGroupId] = useState<string[] | undefined>();
   const [subProjectId, setSubProjectId] = useState<string>();
@@ -34,11 +38,16 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
   const formDs = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
-      // { name: 'subProject', label: '所属项目', required: programMode },
+      { name: 'subProject', label: '所属项目', required: programMode },
       { name: 'groupId', label: 'GroupId' },
     ],
   }), []);
-  const disabledUpload = useMemo(() => false, [formDs, formDs.current?.get('subProject')]);
+  const disabledUpload = useMemo(() => {
+    if (programMode) {
+      return !formDs.current?.get('subProject');
+    }
+    return false;
+  }, [formDs, formDs.current?.get('subProject')]);
 
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
@@ -68,7 +77,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
       formData.append('file', file);
       setLoading(true);
       const groupIdStr = groupId ? String(groupId) : undefined;
-      (publishVersionApi.importPom(formData, versionId, groupIdStr)).then((res: any) => {
+      (programMode ? versionApi.importProgramPom(formData, formDs.current?.get('subProject'), groupIdStr) : publishVersionApi.importPom(formData, versionId, groupIdStr)).then((res: any) => {
         ds.loadData(res);
         // ds.splice(0,0,)
       }).finally(() => {
@@ -113,15 +122,15 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
   return (
     <div className={prefixCls}>
       <Form dataSet={formDs} style={{ width: '6.2rem' }}>
-
+        {programMode ? <SelectSubProject name="subProject" /> : null}
         <TextField name="groupId" onChange={setGroupId} multiple />
       </Form>
       <div className={`${prefixCls}-body`}>
         <div className={`${prefixCls}-upload`}>
           <span>上传pom文件</span>
-          {/* <Tooltip title={disabledUpload ? `请先选择${programMode ? '和所属项目' : ''}` : undefined}> */}
-          <Button disabled={disabledUpload} funcType="raised" size={'small' as any} type="primary" style={{ color: !disabledUpload ? 'white' : undefined }} icon="file_upload" shape="circle" onClick={() => inputRef.current?.click()} />
-          {/* </Tooltip> */}
+          <Tooltip title={disabledUpload ? `请先选择${programMode ? '所属项目' : ''}` : undefined}>
+            <Button disabled={disabledUpload} funcType="raised" size={'small' as any} type="primary" style={{ color: !disabledUpload ? 'white' : undefined }} icon="file_upload" shape="circle" onClick={() => inputRef.current?.click()} />
+          </Tooltip>
         </div>
 
         <Table dataSet={ds} queryBar={'none' as any}>
