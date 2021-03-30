@@ -52,7 +52,7 @@ const KanbanTemplateDetail = () => {
           创建列
         </Button>
       </Header>
-      <Breadcrumb />
+      <Breadcrumb title="编辑看板模板" />
       <Content style={{
         borderTop: '1px solid rgb(216, 216, 216)',
         display: 'flex',
