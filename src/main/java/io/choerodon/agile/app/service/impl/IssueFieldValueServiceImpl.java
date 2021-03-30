@@ -10,9 +10,9 @@ import io.choerodon.agile.app.service.IssueFieldValueService;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import io.choerodon.agile.infra.utils.EnumUtil;
+import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.hzero.boot.message.MessageClient;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -40,7 +40,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
     private FieldValueService fieldValueService;
 
     @Autowired
-    private MessageClient messageClient;
+    private MessageClientC7n messageClientC7n;
 
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
@@ -63,7 +63,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             batchUpdateFieldStatusVO.setKey(messageCode);
             batchUpdateFieldStatusVO.setUserId(userId);
             batchUpdateFieldStatusVO.setProcess(0.0);
-            messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             if (Boolean.FALSE.equals(EnumUtil.contain(ObjectSchemeCode.class, schemeCode))) {
                 throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
             }
@@ -97,7 +97,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             throw new CommonException("update field failed, exception: {}", e);
         }
         finally {
-            messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
         }
     }
 

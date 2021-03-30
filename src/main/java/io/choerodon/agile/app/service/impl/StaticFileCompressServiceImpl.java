@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.junrar.Archive;
 import com.github.junrar.exception.RarException;
 import com.github.junrar.rarfile.FileHeader;
+import io.choerodon.core.client.MessageClientC7n;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -13,7 +14,6 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.lang.StringUtils;
 import org.hzero.boot.file.FileClient;
 import org.hzero.boot.file.dto.FileDTO;
-import org.hzero.boot.message.MessageClient;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -97,7 +97,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private MessageClient messageClient;
+    private MessageClientC7n messageClientC7n;
     @Autowired
     private FileClient fileClient;
     @Autowired
@@ -507,7 +507,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         } catch (JsonProcessingException e) {
             LOGGER.error("object to json error", e);
         }
-        messageClient.sendByUserId(userId, messageCode, message);
+        messageClientC7n.sendByUserId(userId, messageCode, message);
     }
 
     private String getSuffix(String fileName) {

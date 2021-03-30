@@ -8,6 +8,7 @@ import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.IssueTypeLinkDTO;
@@ -28,7 +29,6 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
-import org.hzero.boot.message.MessageClient;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,7 +122,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected StateMachineClientService stateMachineClientService;
 
     @Autowired
-    private MessageClient messageClient;
+    private MessageClientC7n messageClientC7n;
 
     @Autowired
     private FileOperationHistoryMapper fileOperationHistoryMapper;
@@ -779,7 +779,7 @@ public class ExcelServiceImpl implements ExcelService {
         } catch (JsonProcessingException e) {
             LOGGER.error("object to json error: {}", e);
         }
-        messageClient.sendByUserId(userId, websocketKey, message);
+        messageClientC7n.sendByUserId(userId, websocketKey, message);
     }
 
     @Override

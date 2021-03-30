@@ -6,9 +6,9 @@ import io.choerodon.agile.app.service.IssueOperateService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.hzero.boot.message.MessageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
     @Autowired
     private IssueService issueService;
     @Autowired
-    private MessageClient messageClient;
+    private MessageClientC7n messageClientC7n;
     @Autowired
     private UserService userService;
     @Autowired
@@ -49,7 +49,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
             if (Boolean.FALSE.equals(projectOwner)) {
                 batchUpdateFieldStatusVO.setStatus("failed");
                 batchUpdateFieldStatusVO.setError("您无删除权限");
-                messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 return;
             }
             Double progress = 0.0;
@@ -57,7 +57,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
             try {
                 batchUpdateFieldStatusVO.setStatus("doing");
                 batchUpdateFieldStatusVO.setProcess(progress);
-                messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 // 查询子任务ids
                 List<Long> subList = new ArrayList<>();
                 subList.addAll(issueMapper.selectSubListByIssueIds(projectId,issueIds));
@@ -71,7 +71,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                     if (i % incremental == 0) {
                         batchUpdateFieldStatusVO.setProcess((i * 1.0) / issueIds.size());
                     }
-                    messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                    messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 }
                 batchUpdateFieldStatusVO.setStatus("success");
                 batchUpdateFieldStatusVO.setProcess(1.0);
@@ -80,7 +80,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                 batchUpdateFieldStatusVO.setError(e.getMessage());
                 throw new CommonException("delete issue failed, exception: {}", e.getMessage());
             } finally {
-                messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             }
         }
     }
