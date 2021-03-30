@@ -150,21 +150,4 @@ public interface ProductVersionMapper extends BaseMapper<ProductVersionDTO> {
 
     List<TestVersionFixVO> queryByVersionId();
 
-    /**
-     * 查询产品版本关联的应用版本id
-     *
-     * @param versionId 产品版本id
-     * @param projectId 项目id
-     * @return 产品版本关联的应用版本
-     */
-    List<Long> listAppVersionIdByVersionId(@Param("projectId") Long projectId, @Param("versionId") Long versionId);
-
-    /**
-     * 查询应用版本关联的产品版本中的最小序列
-     *
-     * @param projectId     项目id
-     * @param appVersionIds 应用版本id
-     * @return 关联的产品版本中的最小序列
-     */
-    List<AppVersionRelProductSequenceVO> listMinSequenceByAppVersion(@Param("projectId") Long projectId, @Param("appVersionIds") List<Long> appVersionIds);
 }

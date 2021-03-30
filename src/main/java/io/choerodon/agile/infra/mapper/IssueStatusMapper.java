@@ -7,6 +7,7 @@ import io.choerodon.agile.infra.dto.IssueStatusDTO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -27,4 +28,7 @@ public interface IssueStatusMapper extends BaseMapper<IssueStatusDTO> {
     void batchCreateStatusByProjectIds(@Param("addStatusWithProjects") List<AddStatusWithProject> addStatusWithProjects, @Param("userId") Long userId);
 
     List<StatusVO> listWithCompleted(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId);
+
+    List<StatusVO> listCompletedStatus(@Param("projectIds") Set<Long> projectIds);
+
 }

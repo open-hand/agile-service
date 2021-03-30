@@ -49,7 +49,10 @@
         from agile_publish_version apv
         join agile_tag_issue_rel atir on apv.tag_id = atir.tag_id
         where apv.organization_id = #{organizationId}
-        and apv.project_id = #{projectId}
+        and apv.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
         and apv.id in
         <foreach collection="publishVersionIds" item="publishVersionId" open="(" separator="," close=")">
             #{publishVersionId}

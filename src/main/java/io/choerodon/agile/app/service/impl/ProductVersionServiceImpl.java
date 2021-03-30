@@ -22,9 +22,6 @@ import io.choerodon.agile.app.assembler.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.mapper.PublishVersionIssueRelMapper;
-import io.choerodon.agile.infra.mapper.PublishVersionMapper;
-import io.choerodon.agile.infra.mapper.ProductAppVersionRelMapper;
 import io.choerodon.agile.infra.mapper.ProductVersionMapper;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
@@ -70,8 +67,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     private ProductVersionValidator productVersionValidator;
     @Autowired
     private ProductVersionMapper productVersionMapper;
-    @Autowired
-    private PublishVersionIssueRelMapper publishVersionIssueRelMapper;
 
     @Autowired
     private IssueService issueService;
@@ -90,15 +85,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     @Autowired
     private StatusService statusService;
     @Autowired
-    private PublishVersionService publishVersionService;
-    @Autowired
-    private PublishVersionMapper publishVersionMapper;
-    @Autowired
-    private ProductAppVersionRelMapper productAppVersionRelMapper;
-    @Autowired
     private UserService userService;
-    @Autowired
-    private BoardAssembler boardAssembler;
 
     private static final String VERSION_PLANNING = "version_planning";
     private static final String NOT_EQUAL_ERROR = "error.projectId.notEqual";
