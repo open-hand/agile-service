@@ -156,7 +156,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         dto.setId(publishVersionId);
         dto.setProjectId(projectId);
         dto.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
-        if (publishVersionMapper.updateByPrimaryKeySelective(dto) != 1) {
+        if (publishVersionMapper.updateByPrimaryKey(dto) != 1) {
             throw new CommonException("error.publish.version.update");
         }
         return modelMapper.map(publishVersionMapper.selectByPrimaryKey(publishVersionDTO.getId()), PublishVersionVO.class);
@@ -305,7 +305,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         if (publishVersionIds.isEmpty()) {
             return emptyPage;
         }
-        Set<Long> issueIds = publishVersionMapper.selectIssueIds(projectId, organizationId, publishVersionIds);
+        Set<Long> issueIds = publishVersionMapper.selectIssueIds(new HashSet<>(Arrays.asList(projectId)), organizationId, publishVersionIds);
         if (issueIds.isEmpty()) {
             return emptyPage;
         }

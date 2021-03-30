@@ -30,12 +30,12 @@ public interface PublishVersionMapper extends BaseMapper<PublishVersionDTO> {
     /**
      * 查询publish version关联的issue
      *
-     * @param projectId
+     * @param projectIds
      * @param organizationId
      * @param publishVersionIds
      * @return
      */
-    Set<Long> selectIssueIds(@Param("projectId") Long projectId,
+    Set<Long> selectIssueIds(@Param("projectIds") Set<Long> projectIds,
                              @Param("organizationId") Long organizationId,
                              @Param("publishVersionIds") Set<Long> publishVersionIds);
 }

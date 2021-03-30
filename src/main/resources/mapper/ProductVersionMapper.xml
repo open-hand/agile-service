@@ -524,28 +524,4 @@
         ORDER BY sequence ASC
         LIMIT 1;
     </select>
-
-    <select id="listAppVersionIdByVersionId" resultType="java.lang.Long">
-        SELECT
-            apavr.app_version_id
-        FROM agile_product_app_version_rel apavr
-        WHERE
-            apavr.project_id = #{projectId}
-        AND apavr.product_version_id = #{versionId}
-    </select>
-
-    <select id="listMinSequenceByAppVersion" resultType="io.choerodon.agile.api.vo.AppVersionRelProductSequenceVO">
-        SELECT
-            apav.app_version_id,
-            MIN(apv.sequence) AS sequence
-        FROM agile_product_version apv
-        LEFT JOIN agile_product_app_version_rel apav ON apv.version_id = apav.product_version_id
-        WHERE
-            apv.project_id = #{projectId}
-        AND apav.app_version_id IN
-            <foreach collection="appVersionIds" item="appVersionId" open="(" separator="," close=")">
-                #{appVersionId}
-            </foreach>
-        GROUP BY apav.app_version_id
-    </select>
 </mapper>

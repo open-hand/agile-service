@@ -310,7 +310,7 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
 
     private VersionTreeVO convertToVersionTree(PublishVersionDTO publishVersionDTO, Long id) {
         VersionTreeVO versionTreeVO = new VersionTreeVO();
-        versionTreeVO.setType("app");
+        versionTreeVO.setType("publish");
         versionTreeVO.setChildren(new ArrayList<>());
         versionTreeVO.setId(id);
         if (publishVersionDTO == null) {
