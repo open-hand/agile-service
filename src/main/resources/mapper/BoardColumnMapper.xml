@@ -18,7 +18,7 @@
             <id property="statusId" column="ais_status_id"/>
             <id property="position" column="ais_position"/>
             <id property="objectVersionNumber" column="ais_object_version_number"/>
-            <collection property="issues" autoMapping="true" columnPrefix="ai_"
+            <collection property="issues" notNullColumn="issue_id" autoMapping="true" columnPrefix="ai_"
                         ofType="io.choerodon.agile.infra.dto.IssueForBoardDO"/>
         </collection>
     </resultMap>
