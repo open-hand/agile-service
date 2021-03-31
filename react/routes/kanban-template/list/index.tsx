@@ -99,7 +99,7 @@ const KanbanTemplateList = () => {
               />
             )}
           />
-          <Column name="creator" renderer={({ record }) => <UserHead user={record?.get('creator')} />} />
+          <Column name="creator" renderer={({ record }) => <UserHead style={{ display: 'inline-flex' }} user={record?.get('creator')} />} />
           <Column name="creationDate" />
         </Table>
       </Content>
