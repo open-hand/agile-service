@@ -440,11 +440,7 @@ public class PageFieldServiceImpl implements PageFieldService {
             if (value != null && !value.isEmpty()) {
                 Set<String> fieldCodes = value.keySet();
                 List<String> instanceFieldCodes = instanceFieldMap.get(entry.getKey());
-                for (String fieldCode : fieldCodes) {
-                    if (!instanceFieldCodes.contains(fieldCode)) {
-                        value.remove(fieldCode);
-                    }
-                }
+                fieldCodes.removeIf(fieldCode -> !instanceFieldCodes.contains(fieldCode));
             }
         }
     }
