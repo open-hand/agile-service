@@ -77,8 +77,6 @@ const StateMachine: React.FC = ({
     </Tabs>
   );
 
-  console.log(selectedType);
-
   return (
     <StateMachineContext.Provider value={{
       selectedType,

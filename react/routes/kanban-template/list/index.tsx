@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import {
-  Page, Header, Content, Breadcrumb,
+  Page, Header, Content, Breadcrumb, useTheme,
 } from '@choerodon/master';
 import {
   Button, Table, DataSet, Modal,
@@ -63,6 +63,7 @@ const KanbanTemplateList = () => {
       default: break;
     }
   }, [dataSet]);
+  const [theme] = useTheme();
   return (
     <Page>
       <Header>
@@ -74,10 +75,7 @@ const KanbanTemplateList = () => {
         </Button>
       </Header>
       <Breadcrumb />
-      <Content style={{
-        borderTop: 'none',
-      }}
-      >
+      <Content style={theme === 'theme4' ? undefined : { paddingTop: 0 }}>
         <Table dataSet={dataSet}>
           <Column
             name="name"
@@ -99,8 +97,8 @@ const KanbanTemplateList = () => {
               />
             )}
           />
-          <Column name="creator" renderer={({ record }) => <UserHead style={{ display: 'inline-flex' }} user={record?.get('creator')} />} />
-          <Column name="creationDate" />
+          <Column className="c7n-agile-table-cell" name="creator" renderer={({ record }) => <UserHead style={{ display: 'inline-flex' }} user={record?.get('creator')} />} />
+          <Column className="c7n-agile-table-cell" name="creationDate" />
         </Table>
       </Content>
     </Page>
