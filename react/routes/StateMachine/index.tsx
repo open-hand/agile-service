@@ -3,6 +3,8 @@ import React, {
 } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { find, includes } from 'lodash';
+import { observable } from 'mobx';
+import { observer } from 'mobx-react-lite';
 import useQueryString from '@/hooks/useQueryString';
 import { getIsOrganization } from '@/utils/common';
 import { statusTransformApi } from '@/api';
@@ -46,7 +48,7 @@ const StateMachine: React.FC = ({
   const isOrganization = getIsOrganization();
   const { issueTypeId, activeKey: paramsActiveKey } = params;
   const [selectedType, handleChangeSelectedType] = useSelectedType(issueTypeId || undefined);
-  const [selectedTypeInited, setSelectedTypeInited] = useState<boolean>(false);
+  const [issueTypeInitedMap, setIssueTypeInitedMap] = useState<Map<string, boolean>>(observable.map());
   const [activeKey, setActiveKey] = useState(() => {
     if (propActiveKey) {
       return propActiveKey;
@@ -63,12 +65,13 @@ const StateMachine: React.FC = ({
   }, [activeKey, propSetActiveKey]);
 
   useEffect(() => {
-    if (isOrganization && selectedType) {
+    if (isOrganization && selectedType && !issueTypeInitedMap.get(selectedType)) {
       statusTransformApi.hasTemplate(selectedType).then((res: boolean) => {
-        setSelectedTypeInited(res);
+        issueTypeInitedMap.set(selectedType, res);
+        setIssueTypeInitedMap(issueTypeInitedMap);
       });
     }
-  }, [isOrganization, selectedType]);
+  }, [isOrganization, issueTypeInitedMap, selectedType]);
 
   const Component = find(defaultTabs, { key: activeKey })?.component;
   const tabComponent = (
@@ -81,12 +84,12 @@ const StateMachine: React.FC = ({
     <StateMachineContext.Provider value={{
       selectedType,
       setSelectedType: handleChangeSelectedType,
-      selectedTypeInited,
-      setSelectedTypeInited,
+      issueTypeInitedMap,
+      setIssueTypeInitedMap,
     }}
     >
       {
-        isOrganization && !selectedTypeInited ? (
+        isOrganization && !issueTypeInitedMap.get(selectedType) ? (
           <NoTemplate />
         ) : (
           <>
@@ -98,4 +101,4 @@ const StateMachine: React.FC = ({
   );
 };
 
-export default StateMachine;
+export default observer(StateMachine);

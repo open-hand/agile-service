@@ -20,15 +20,15 @@ import Save from './components/save';
 
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { store } = useStatusCirculationContext();
-  const { selectedType, setSelectedType } = useStateMachineContext();
+  const { selectedType, setSelectedType, issueTypeInitedMap } = useStateMachineContext();
   const isOrganization = getIsOrganization();
   // const selectedTypeRef = useRef<string>(selectedType);
   // selectedTypeRef.current = selectedType;
   const refresh = useCallback(() => {
-    if (selectedType) {
+    if (selectedType && issueTypeInitedMap.get(selectedType)) {
       store.getStatusList(selectedType);
     }
-  }, [selectedType, store]);
+  }, [issueTypeInitedMap, selectedType, store]);
   useEffect(() => {
     refresh();
   }, [refresh]);
@@ -105,7 +105,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
               setSelectedType(newType);
             }
           }}
-          excludeTypes={isOrganization ? ['feature', 'issue_epic'] : []}
+          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
         />
         {tab}
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>

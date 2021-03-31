@@ -16,17 +16,18 @@ import empty from './empty.png';
 
 const NoTemplate = () => {
   const {
-    selectedType, setSelectedType, selectedTypeInited, setSelectedTypeInited,
+    selectedType, setSelectedType, issueTypeInitedMap, setIssueTypeInitedMap,
   } = useStateMachineContext();
   const isOrganization = getIsOrganization();
 
   const initTemplate = useCallback(() => {
     statusTransformApi.initTemplate(selectedType).then((res: any) => {
       if (!res.failed) {
-        setSelectedTypeInited(true);
+        issueTypeInitedMap.set(selectedType, true);
+        setIssueTypeInitedMap(issueTypeInitedMap);
       }
     });
-  }, [selectedType, setSelectedTypeInited]);
+  }, [issueTypeInitedMap, selectedType, setIssueTypeInitedMap]);
 
   return (
     <Page>
@@ -61,7 +62,7 @@ const NoTemplate = () => {
         <IssueTypeTab
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          excludeTypes={isOrganization ? ['feature', 'issue_epic'] : []}
+          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
         />
         <Empty
           pic={empty}

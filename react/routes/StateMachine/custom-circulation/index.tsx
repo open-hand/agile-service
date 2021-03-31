@@ -225,7 +225,9 @@ const transformFieldValue = (fieldSetting) => {
 
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { data: issueTypes } = useProjectIssueTypes();
-  const { selectedType, setSelectedType } = useStateMachineContext();
+  const {
+    selectedType, setSelectedType, issueTypeInitedMap,
+  } = useStateMachineContext();
 
   const customCirculationDataSet = useMemo(() => new DataSet({
     autoQuery: false,
@@ -509,10 +511,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   };
 
   useEffect(() => {
-    if (selectedType) {
+    if (selectedType && issueTypeInitedMap.get(selectedType)) {
       customCirculationDataSet.query();
     }
-  }, [customCirculationDataSet, selectedType]);
+  }, [customCirculationDataSet, issueTypeInitedMap, selectedType]);
 
   const columns = [
     {
@@ -555,7 +557,11 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         )
       }
       <Content style={{ borderTop: 'none' }}>
-        <IssueTypeTab selectedType={selectedType} setSelectedType={setSelectedType} excludeTypes={isOrganization ? ['feature', 'issue_epic'] : []} />
+        <IssueTypeTab
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+        />
         {tab}
         <div className={`${styles.customCirculation}`}>
           <Table
