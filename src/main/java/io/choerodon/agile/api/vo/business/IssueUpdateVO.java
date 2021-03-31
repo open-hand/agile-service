@@ -133,16 +133,6 @@ public class IssueUpdateVO {
 
     private String environment;
 
-    private List<TagVO> tags;
-
-    public List<TagVO> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<TagVO> tags) {
-        this.tags = tags;
-    }
-
     public Boolean getAutoTranferFlag() {
         return autoTranferFlag;
     }

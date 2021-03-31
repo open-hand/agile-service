@@ -399,15 +399,6 @@ public interface IssueService {
                                                   PageRequest pageRequest);
 
     /**
-     * 处理更新tag
-     *
-     * @param tags
-     * @param projectId
-     * @param issueId
-     */
-    void handleUpdateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
-
-    /**
      * 工作台查询我经手的
      *
      * @param organizationId
