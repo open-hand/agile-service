@@ -15,7 +15,7 @@ import IPublishVersionDetailData from '../../../types';
 
 interface IImportPomFunctionProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
-  data: IPublishVersionDetailData
+  data?: IPublishVersionDetailData
 }
 
 const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPomFunctionProps>> = ({ modal, handleOk, data }) => {
@@ -37,12 +37,13 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
   }), [data]);
 
   const handleSubmit = useCallback(async () => {
-    if (!await formDs.submit()) {
+    if (!data && !await formDs.validate()) {
       return false;
     }
-    const result = handleOk && await handleOk(data);
+    data && await formDs.submit();
+    const result = handleOk && await handleOk(formDs.current?.toData());
     return typeof (result) !== 'undefined' ? result : true;
-  }, [formDs, handleOk]);
+  }, [data, formDs, handleOk]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
@@ -72,7 +73,7 @@ function openEditAppVersionModal(props: IImportPomFunctionProps) {
     children: <ObserverEditAppVersionModal {...props} />,
   });
 }
-function openCreateAppVersionModal() {
+function openCreateAppVersionModal(props: IImportPomFunctionProps) {
   const key = Modal.key();
   Modal.open({
     key,
@@ -81,7 +82,7 @@ function openCreateAppVersionModal() {
       width: MODAL_WIDTH.small,
     },
     drawer: true,
-    children: <ObserverEditAppVersionModal />,
+    children: <ObserverEditAppVersionModal {...props} />,
   });
 }
 export { openEditAppVersionModal, openCreateAppVersionModal };

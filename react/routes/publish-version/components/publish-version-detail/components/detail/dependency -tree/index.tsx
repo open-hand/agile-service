@@ -103,7 +103,7 @@ const DependencyTree: React.FC = () => {
       contentClassName={`${prefixCls}-dependency-tree`}
     >
       <DependencyTreeBase
-        data={data[0].children || []}
+        data={data[0]?.children || []}
         renderNode={renderTreeNode}
       />
 

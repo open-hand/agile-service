@@ -44,6 +44,7 @@ export interface IPublishVersionTreeNode {
   name?: string
   version?: string | null
   versionAlias?: string | null
+  serviceCode?: string | null
   type?: string | 'app'
   children?: Array<IPublishVersionTreeNode>
 }
@@ -102,6 +103,8 @@ class PublishVersionApi extends Api<PublishVersionApi> {
       url: `${this.prefix}/publish_version`,
       data: {
         ...data,
+        // @ts-ignore
+        appService: typeof (data.appService) === 'undefined' ? true : data.appService,
         organizationId: getOrganizationId(),
         projectId: data.projectId || getProjectId(),
       },
@@ -226,7 +229,7 @@ class PublishVersionApi extends Api<PublishVersionApi> {
    * @param alias
    * @returns
    */
-  checkAlias(alias: string, publishVersionId: string) {
+  checkAlias(alias: string, publishVersionId?: string) {
     return this.request({
       method: 'get',
       url: `${this.prefix}/publish_version/checkAlias`,
