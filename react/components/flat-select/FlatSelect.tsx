@@ -3,6 +3,7 @@
 import React, {
   isValidElement, ReactNode, CSSProperties, forwardRef,
 } from 'react';
+import { useTheme } from '@choerodon/master';
 import { observer } from 'mobx-react';
 import { Icon, Animate, Select as SelectPro } from 'choerodon-ui/pro';
 import isString from 'lodash/isString';
@@ -15,7 +16,6 @@ import measureTextWidth from 'choerodon-ui/pro/lib/_util/measureTextWidth';
 import { stopPropagation } from 'choerodon-ui/pro/lib/_util/EventManager';
 import './FlatSelect.less';
 import { Tooltip } from 'choerodon-ui';
-import useTheme from '@/hooks/useTheme';
 
 const { Option, OptGroup } = Select;
 
@@ -184,7 +184,7 @@ class ObserverFlatSelect extends FlatSelect<SelectProps> {
 }
 // @ts-ignore
 const SelectWrapper: typeof ObserverFlatSelect = forwardRef((props: SelectProps, ref: React.Ref<SelectPro>) => {
-  const theme = useTheme();
+  const [theme] = useTheme();
   const Component = theme === '' ? ObserverFlatSelect : SelectPro;
 
   return <Component ref={ref} {...props} />;
