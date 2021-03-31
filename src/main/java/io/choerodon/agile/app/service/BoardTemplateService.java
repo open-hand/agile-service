@@ -67,4 +67,6 @@ public interface BoardTemplateService {
     List<StatusVO> listUnCorrespondStatusTemplate(Long organizationId, Long boardTemplateId);
 
     void deleteBoardTemplateColumn(Long organizationId, Long templateColumnId);
+
+    void deleteBoardTemplateStatus(Long currentStatusId, Long organizationId);
 }

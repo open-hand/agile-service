@@ -98,6 +98,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     private IssueStatusService issueStatusService;
     @Autowired
     private  BoardMapper boardMapper;
+    @Autowired
+    private BoardTemplateService boardTemplateService;
 
     @Override
     public OrganizationConfigDTO initStatusMachineTemplate(Long organizationId, Long issueTypeId) {
@@ -183,6 +185,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         statusMachineNodeDTO.setStatusId(null);
         statusMachineNodeDTO.setId(nodeId);
         statusMachineNodeMapper.delete(statusMachineNodeDTO);
+        // 判断当前状态在其他预定义状态问题类型的状态机模板里面是否存在
+        boardTemplateService.deleteBoardTemplateStatus(currentStatusId, organizationId);
     }
 
     @Override
@@ -360,27 +364,31 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     }
 
     @Override
-    public Boolean checkConfigTemplate(Long organizationId) {
+    public Map<String,Boolean> checkConfigTemplate(Long organizationId) {
+        Map<String,Boolean> configMap = new HashMap<>();
         // 查询是否配置看板模板
-        Boolean isConfig = false;
+        Boolean boardTemplateConfig = false;
         BoardDTO boardDTO = new BoardDTO();
         boardDTO.setOrganizationId(organizationId);
         boardDTO.setProjectId(0L);
         List<BoardDTO> boardDTOS = boardMapper.select(boardDTO);
         if (!CollectionUtils.isEmpty(boardDTOS)) {
-            return true;
+            boardTemplateConfig = true;
         }
+        configMap.put("boardTemplateConfig", boardTemplateConfig);
         // 查询是否配置状态机模板
+        Boolean statusMachineTemplateConfig = false;
         OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", SchemeApplyType.AGILE);
         if (!ObjectUtils.isEmpty(organizationConfigDTO)) {
             List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, organizationConfigDTO.getSchemeId());
             if (!CollectionUtils.isEmpty(statusMachineSchemeConfigVOS)) {
-                return true;
+                statusMachineTemplateConfig  = true;
             }
         } else {
             initOrganizationConfig(organizationId);
         }
-        return isConfig;
+        configMap.put("statusMachineTemplateConfig", statusMachineTemplateConfig);
+        return configMap;
     }
 
     @Override

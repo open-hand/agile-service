@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -270,7 +271,7 @@ public class OrganizationConfigController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验组织是否维护模板")
     @GetMapping("/check_config_template")
-    public ResponseEntity<Boolean> checkConfigTemplate(@ApiParam(value = "组织id", required = true)
+    public ResponseEntity<Map<String,Boolean>> checkConfigTemplate(@ApiParam(value = "组织id", required = true)
                                                        @PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(organizationConfigService.checkConfigTemplate(organizationId), HttpStatus.OK);
     }
