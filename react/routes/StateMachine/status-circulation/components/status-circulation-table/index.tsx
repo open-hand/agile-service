@@ -23,7 +23,7 @@ import styles from './index.less';
 const StatusCirculationTable: React.FC = () => {
   const [height, setHeight] = useState<number>(0);
   const { store } = useStatusCirculationContext();
-  const { selectedType } = useStateMachineContext();
+  const { selectedType, readOnly } = useStateMachineContext();
   const { statusList, loading } = store;
 
   const handleDeleteClick = useCallback((record: IStatusCirculation) => {
@@ -51,6 +51,7 @@ const StatusCirculationTable: React.FC = () => {
             const currentSize = useComputed(() => store.checkedMaps.get(status.id)?.columnCurrentSize, [store.checkedMaps.get(status.id)?.columnCurrentSize]);
             return (
               <CheckboxAll
+                disabled={readOnly}
                 name={`column-${status.name}`}
                 // indeterminate=
                 className={styles.check_all}
@@ -73,9 +74,10 @@ const StatusCirculationTable: React.FC = () => {
         {status.name}
       </span>),
     render: ((text: string, record) => (
-      <Checkbox store={store} status={status} record={record} />
+      <Checkbox store={store} status={status} record={record} disabled={readOnly} />
     )),
-  })), [statusList, store]);
+  })), [readOnly, statusList, store]);
+  // @ts-ignore
   const columns: ColumnsType<IStatusCirculation> = useMemo(() => [{
     dataIndex: 'name',
     width: 150,
@@ -89,6 +91,7 @@ const StatusCirculationTable: React.FC = () => {
             const rowInfo = useComputed(() => store.checkedMaps.get(record.id)!, [store.checkedMaps.get(record.id)]);
             return (
               <CheckboxAll
+                disabled={readOnly}
                 name={`row-${record.name}`}
                 record={record}
                 className={styles.check_all}
@@ -117,13 +120,16 @@ const StatusCirculationTable: React.FC = () => {
     title: () => null,
     render: (() => <span className={styles.table_text}>可流转到</span>),
   },
+  // @ts-ignore
   ...statusColumns,
-  {
+  // @ts-ignore
+  ...(readOnly ? [] : [{
     dataIndex: 'delete',
     width: 60,
     fixed: 'right',
     align: 'center',
     title: null,
+    // @ts-ignore
     render: ((text: string, record) => {
       let disabled: [boolean, null | string] = [false, null];
       if (record.hasIssue) {
@@ -144,9 +150,9 @@ const StatusCirculationTable: React.FC = () => {
         </div>
       );
     }
-
     ),
-  }], [handleDeleteClick, statusColumns]);
+  }]),
+  ], [handleDeleteClick, readOnly, statusColumns, store]);
 
   const components = {
     body: {

@@ -4,12 +4,7 @@ import {
 import { findIndex, find } from 'lodash';
 import { statusTransformApi, IStatusCirculation, IUpdateTransform } from '@/api';
 import { IStatus } from '@/common/types';
-import takeLast from '@/utils/takeLast';
 import { getIsOrganization } from '@/utils/common';
-
-const isOrganization = getIsOrganization();
-
-const loadList = takeLast(isOrganization ? statusTransformApi.orgLoadList : statusTransformApi.loadList, statusTransformApi);
 
 type ChangeType = 'check' | 'nocheck';
 
@@ -41,7 +36,7 @@ class StatusCirculationStore {
   async getStatusList(issueTypeId: string) {
     this.loading = true;
     try {
-      const statusList = await loadList(issueTypeId);
+      const statusList = await statusTransformApi[getIsOrganization() ? 'orgLoadList' : 'loadList'](issueTypeId);
       runInAction(() => {
         this.statusList = statusList.map((item) => {
           const rowChecked = statusList.length === item.canTransformStatus.length;
@@ -234,7 +229,7 @@ class StatusCirculationStore {
     if (!this.hasAction) {
       return;
     }
-    await statusTransformApi[isOrganization ? 'orgBatchUpdate' : 'batchUpdate'](issueTypeId, this.needSubmitActions);
+    await statusTransformApi[getIsOrganization() ? 'orgBatchUpdate' : 'batchUpdate'](issueTypeId, this.needSubmitActions);
     this.clearActions();
     this.getStatusList(issueTypeId);
   }

@@ -8,8 +8,11 @@ interface Props {
   store: StatusCirculationStore
   status: IStatusCirculation
   record: IStatusCirculation
+  disabled?: boolean
 }
-const CheckBoxPart: React.FC<Props> = ({ store, status, record }) => {
+const CheckBoxPart: React.FC<Props> = ({
+  store, status, record, disabled = false,
+}) => {
   let finalChecked = record[status.id];
   const actions = store.actions.get(record.id);
   // 如果有未保存的更改，以更改为准
@@ -25,7 +28,7 @@ const CheckBoxPart: React.FC<Props> = ({ store, status, record }) => {
   }
   return (
     <CheckBox
-      disabled={status.id === record.id}
+      disabled={status.id === record.id || disabled}
       checked={finalChecked}
       name={`path-${status.name}`}
       record={record}
