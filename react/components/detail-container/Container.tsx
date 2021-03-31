@@ -5,7 +5,6 @@ import { Icon } from 'choerodon-ui/pro';
 import EditIssue from '@/components/EditIssue';
 import './Container.less';
 import { useDetailContainerContext } from './context';
-import ReleaseDetail from '../release-detail';
 
 const prefixCls = 'c7nagile-detail-container';
 interface Route {
@@ -18,9 +17,6 @@ const paths: Route[] = [{
 }, {
   path: 'program_issue',
   component: EditIssue,
-}, {
-  path: 'version',
-  component: ReleaseDetail,
 },
 ];
 export function registerPath(route: Route) {

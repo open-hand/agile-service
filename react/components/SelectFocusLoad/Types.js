@@ -600,26 +600,5 @@ export default {
       </OptGroup>
     ),
   },
-  app_version: {
-    request: ({ filter, page }, requestArgs) => versionApi.loadAppService(filter, page),
-    render: (item) => (
-      <Option key={`${item.issueId}`} value={item.id}>{item.name || item.versionAlias || item.version}</Option>
-    ),
-    props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filterOption,
-      loadWhenMount: true,
-    },
-    avoidShowError: (props, List) => new Promise((resolve) => {
-      const { selectedAppService } = props;
-      const extraList = [];
-      const values = selectedAppService instanceof Array ? selectedAppService : [selectedAppService];
-      values.forEach((feature) => {
-        if (feature && !find(List, { issueId: feature.issueId })) {
-          extraList.push(feature);
-        }
-      });
-      resolve(extraList);
-    }),
-  },
+
 };
