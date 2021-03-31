@@ -93,4 +93,12 @@ public interface OrganizationConfigService {
      * @return
      */
     Boolean checkStatusMachineTemplate(Long organizationId, Long issueTypeId);
+
+    /**
+     * 查询组织状态机模板的状态机id
+     * @param organizationId
+     * @param issueTypeId
+     * @return
+     */
+    Long queryIssueTypeStatusMachineId(Long organizationId, Long issueTypeId);
 }
