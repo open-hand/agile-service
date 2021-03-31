@@ -7,6 +7,7 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhaotianxin
@@ -84,7 +85,7 @@ public interface OrganizationConfigService {
      * @param organizationId
      * @return
      */
-    Boolean checkConfigTemplate(Long organizationId);
+    Map<String,Boolean> checkConfigTemplate(Long organizationId);
 
     /**
      * 校验组织层问题类型是否配置状态机模板

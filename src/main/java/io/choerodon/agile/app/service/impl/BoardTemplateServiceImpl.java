@@ -346,11 +346,13 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
             }
         }
         // 查询看板已有状态
-        List<Long> statusIds = columnStatusRelTemplateMapper.queryBoardTemplateStatusIds(organizationId, 0L, boardTemplateId);
-        if (!CollectionUtils.isEmpty(statusIds)) {
-            statusVOS = statusVOS.stream()
-                    .filter(v -> !statusIds.contains(v.getId()))
-                    .collect(Collectors.toList());
+        if (!ObjectUtils.isEmpty(boardTemplateId)) {
+            List<Long> statusIds = columnStatusRelTemplateMapper.queryBoardTemplateStatusIds(organizationId, 0L, boardTemplateId);
+            if (!CollectionUtils.isEmpty(statusIds)) {
+                statusVOS = statusVOS.stream()
+                        .filter(v -> !statusIds.contains(v.getId()))
+                        .collect(Collectors.toList());
+            }
         }
         Map<Long, Boolean> maps = new HashMap<>();
         List<Long> status = statusVOS.stream().map(StatusVO::getId).collect(Collectors.toList());
@@ -391,6 +393,21 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         columnStatusRelDTO.setOrganizationId(organizationId);
         columnStatusRelService.delete(columnStatusRelDTO);
         updateSequenceWhenDeleteTemplateColumn(organizationId, 0L, boardColumnDTO);
+    }
+
+    @Override
+    public void deleteBoardTemplateStatus(Long currentStatusId, Long organizationId) {
+        List<StatusVO> statusVOS = listUnCorrespondStatusTemplate(organizationId, null);
+        if (CollectionUtils.isNotEmpty(statusVOS)) {
+            List<Long> statusIds = statusVOS.stream().map(StatusVO::getId).collect(Collectors.toList());
+            if (!statusIds.contains(currentStatusId)) {
+                ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
+                columnStatusRelDTO.setOrganizationId(organizationId);
+                columnStatusRelDTO.setStatusId(currentStatusId);
+                columnStatusRelDTO.setProjectId(0L);
+                columnStatusRelMapper.delete(columnStatusRelDTO);
+            }
+        }
     }
 
     public void updateSequenceWhenDeleteTemplateColumn(Long organizationId, Long projectId, BoardColumnDTO boardColumnDTO) {
