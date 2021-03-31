@@ -6,6 +6,7 @@ import { ILog } from '@/common/types';
 import UserHead from '../UserHead';
 import './Logs.less';
 import Log from './Log';
+import { UserUniqueTag } from '../tag/user-tag';
 
 interface ILogConfig {
   operation?: string, // 操作名字
@@ -40,27 +41,32 @@ const Logs: React.FC<Props> = ({ datalogs, expand, fieldsMap }) => (
             className="c7n-Logs-log-user"
           >
             {
-                i && log.lastUpdatedBy === arr[i - 1].lastUpdatedBy ? null : (
-                  <UserHead
-                  // @ts-ignore
-                    user={log.user ? {
-                      id: log.user.id,
-                      name: log.user.name,
-                      loginName: log.user.loginName,
-                      realName: log.user.realName,
-                      avatar: log.user.imageUrl,
-                      ldap: log.user.ldap,
-                    } : {
-                      id: log.lastUpdatedBy,
-                      name: log.name,
-                      loginName: log.loginName,
-                      realName: log.realName,
-                      avatar: log.imageUrl,
-                    }}
-                    hiddenText
-                    type="datalog"
-                  />
-                )
+              i && log.lastUpdatedBy === arr[i - 1].lastUpdatedBy ? null : (
+                <UserUniqueTag
+                  data={log.user ? {
+                    id: log.user.id,
+                    tooltip: log.user.name,
+                    loginName: log.user.loginName,
+                    realName: log.user.realName,
+                    imageUrl: log.user.imageUrl,
+                    ldap: log.user.ldap,
+                  } : {
+                    id: log.lastUpdatedBy,
+                    tooltip: log.name,
+                    loginName: log.loginName,
+                    realName: log.realName,
+                    imageUrl: log.imageUrl,
+                  }}
+                  showText={false}
+                  avatarStyle={{
+                    width: 40,
+                    height: 40,
+                    backgroundColor: '#c5cbe8',
+                    color: '#6473c3',
+                    borderRadius: 4,
+                  }}
+                />
+              )
             }
           </div>
           <div className="c7n-Logs-log-right">
@@ -79,7 +85,7 @@ const Logs: React.FC<Props> = ({ datalogs, expand, fieldsMap }) => (
           </div>
         </div>
       ))
-      }
+    }
   </div>
 );
 export default Logs;

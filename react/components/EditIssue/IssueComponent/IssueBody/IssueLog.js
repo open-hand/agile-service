@@ -7,11 +7,18 @@ import EditIssueContext from '../../stores';
 const IssueLog = () => {
   const { store } = useContext(EditIssueContext);
   const renderDataLogs = () => {
+    const issue = store.getIssue;
+    const {
+      typeCode, creationDate, createdBy,
+      createrImageUrl, createrEmail,
+      createrName, createrRealName, createrLoginName, issueTypeVO = {},
+    } = issue;
     const stateDatalogs = store.getDataLogs;
     // 过滤掉影响的版本(bug)
     const datalogs = reverse(filter(stateDatalogs, (v) => v.field !== 'Version'));
     const newDataLogs = [];
     let autoTemp = [];
+    let initialIssueType = issueTypeVO; // 最初的issue类型  在日志中无任务类型更改则是issueTypeVO
     datalogs.forEach((log, i, logs) => {
       if (log.field !== 'Auto Resolution' && log.field !== 'Auto Trigger' && log.field !== 'Auto Status') {
         newDataLogs.push(log);
@@ -31,13 +38,11 @@ const IssueLog = () => {
           autoTemp = [];
         }
       }
+      if (!initialIssueType.isInitial && log.field === 'issuetype') {
+        initialIssueType = { name: log.oldString, isInitial: true };
+      }
     });
-    const issue = store.getIssue;
-    const {
-      typeCode, creationDate, createdBy,
-      createrImageUrl, createrEmail,
-      createrName, createrRealName, createrLoginName, issueTypeVO = {},
-    } = issue;
+
     // 创建Issue日志
     const createLog = {
       email: createrEmail,
@@ -48,7 +53,7 @@ const IssueLog = () => {
       loginName: createrLoginName,
       lastUpdateDate: creationDate,
       lastUpdatedBy: createdBy,
-      newString: issueTypeVO && issueTypeVO.name ? issueTypeVO.name : '',
+      newString: initialIssueType && initialIssueType.name ? initialIssueType.name : '',
       newValue: 'issueNum',
       logId: 'create',
     };

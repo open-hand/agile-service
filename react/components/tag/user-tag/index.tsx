@@ -8,7 +8,7 @@ import './index.less';
 /**
  * 数组内只有一个User 或者User是对象时,显示名字
  */
-type UserTagData = Pick<User, 'loginName' | 'realName' | 'imageUrl'> & Partial<Pick<User, 'ldap'|'email'>> & Pick<HeadTagProps, 'tooltip'>
+type UserTagData = Pick<User, 'loginName' | 'realName' | 'imageUrl'> & Partial<Pick<User, 'ldap' | 'email' | 'id'>> & Pick<HeadTagProps, 'tooltip'>
 interface Props extends HeadTagProps {
   data: UserTagData[] | UserTagData /**   */
   maxTagCount?: number /** @default 3 */
@@ -18,12 +18,13 @@ export const UserUniqueTag: React.FC<{ data: UserTagData, prefixCls?: string } &
   data, size = 18, showText = true, prefixCls = 'c7n-agile-user-tag', style, ...otherProps
 }) => {
   const { realName, email, loginName } = data;
-  return (
+  const text = useMemo(() => realName || loginName, [loginName, realName]);
+  return text ? (
     <HeadTag
       size={size}
       src={data.imageUrl!}
       name={getFistStr(realName)}
-      text={realName || loginName}
+      text={text}
       showText={showText}
       textClassName={`${prefixCls}-text`}
       tooltip={data.tooltip ?? (data.ldap ? `${realName}(${loginName})` : `${realName}(${email})`)}
@@ -35,7 +36,7 @@ export const UserUniqueTag: React.FC<{ data: UserTagData, prefixCls?: string } &
       }}
       {...otherProps}
     />
-  );
+  ) : <span className={`${prefixCls}-no-user`} />;
 };
 const UserTag: React.FC<Props> = ({
   data: propsData, style, maxTagCount = 3, ...otherProps

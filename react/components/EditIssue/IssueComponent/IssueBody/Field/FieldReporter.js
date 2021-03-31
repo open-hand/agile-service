@@ -70,7 +70,7 @@ import { withRouter } from 'react-router-dom';
                         id: reporterId,
                         loginName: reporterLoginName,
                         realName: reporterRealName,
-                        avatar: reporterImageUrl,
+                        imageUrl: reporterImageUrl,
                         name: reporterName,
                       } : undefined}
                     />
@@ -83,7 +83,7 @@ import { withRouter } from 'react-router-dom';
                             id: reporterId,
                             loginName: reporterLoginName,
                             realName: reporterRealName,
-                            avatar: reporterImageUrl,
+                            imageUrl: reporterImageUrl,
                             tooltip: reporterName,
                           }}
                         />
