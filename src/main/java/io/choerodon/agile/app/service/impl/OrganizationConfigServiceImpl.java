@@ -395,6 +395,16 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         }
     }
 
+    @Override
+    public Long queryIssueTypeStatusMachineId(Long organizationId, Long issueTypeId) {
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", "agile");
+        if (ObjectUtils.isEmpty(organizationConfigDTO)) {
+            return null;
+        }
+        StatusMachineSchemeConfigDTO statusMachineSchemeConfigDTO = queryStatusMachineSchemeConfig(organizationId, issueTypeId, organizationConfigDTO.getSchemeId());
+        return ObjectUtils.isEmpty(statusMachineSchemeConfigDTO) ? null : statusMachineSchemeConfigDTO.getStateMachineId();
+    }
+
     private OrganizationConfigDTO initOrganizationConfig(Long organizationId){
         // 创建状态机方案
         Long schemeId = stateMachineSchemeService.initOrgDefaultStatusMachineScheme(organizationId);

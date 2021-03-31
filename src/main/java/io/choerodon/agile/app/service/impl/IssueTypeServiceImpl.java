@@ -77,6 +77,18 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private static final String SYSTEM = "system";
 
+    @Autowired
+    private OrganizationConfigService organizationConfigService;
+
+    @Autowired
+    private StateMachineNodeService stateMachineNodeService;
+    
+    @Autowired
+    private IssueStatusService issueStatusService;
+
+    @Autowired
+    private StatusMapper statusMapper;
+
     private static final List<String> AGILE_CREATE_ISSUE_TYPES =
             Arrays.asList(
                     IssueTypeCode.STORY.value(),
@@ -361,14 +373,66 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         String stateMachineName = projectVO.getCode() + "-状态机-" + issueType.getName();
         Long statusMachineId = null;
         if (Boolean.TRUE.equals(copyStatusMachine)) {
-            // 查询系统问题类型的状态机id
-            IssueTypeDTO issueTypeDTO = querySystemIssueTypeByCode(organizationId, typeCode);
-            // 查询系统问题类型的状态机
-            statusMachineId = stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeDTO.getId());
+            if (Objects.equals(ORGANIZATION, issueType.getSource()) && !ObjectUtils.isEmpty(issueType.getReferenceId())) {
+                Long stateMachineTemplateId = organizationConfigService.queryIssueTypeStatusMachineId(organizationId, issueType.getReferenceId());
+                statusMachineId = !ObjectUtils.isEmpty(stateMachineTemplateId) ? stateMachineTemplateId : defaultHandlerStateMachine(organizationId, typeCode, stateMachineSchemeId);
+                // 处理状态机里面有,而项目没有的状态机
+                handlerStatus(organizationId, projectId, statusMachineId, applyType);
+            } else {
+                defaultHandlerStateMachine(organizationId, typeCode, stateMachineSchemeId);
+            }
         }
         stateMachineSchemeConfigService.initStatusMachineAndSchemeConfig(organizationId, stateMachineName, stateMachineSchemeId, issueTypeId, projectVO, applyType, statusMachineId);
         //初始化问题类型方案配置
         initIssueTypeSchemeConfig(organizationId, projectId, issueTypeId, applyType);
+    }
+
+    private void handlerStatus(Long organizationId, Long projectId, Long statusMachineId, String applyType) {
+        List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, statusMachineId, false);
+        if (!CollectionUtils.isEmpty(statusMachineNodeVOS)) {
+            List<Long> statusIds = statusMachineNodeVOS.stream().map(StatusMachineNodeVO::getStatusId).collect(Collectors.toList());
+            IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
+            issueStatusDTO.setProjectId(projectId);
+            List<IssueStatusVO> issueStatusVOS = issueStatusService.queryIssueStatusList(projectId);
+            List<Long> projectStatusIds = new ArrayList<>();
+            if (!CollectionUtils.isEmpty(issueStatusVOS)) {
+                projectStatusIds.addAll(issueStatusVOS.stream().map(IssueStatusVO::getStatusId).collect(Collectors.toList()));
+            }
+            List<Long> needAddIds = new ArrayList<>();
+            statusIds.forEach(v -> {
+                if (!projectStatusIds.contains(v)) {
+                    needAddIds.add(v);
+                }
+            });
+            if (!CollectionUtils.isEmpty(needAddIds)) {
+                createIssueStatus(needAddIds, projectId, organizationId);
+            }
+        }
+    }
+
+    private void createIssueStatus(List<Long> needAddIds, Long projectId, Long organizationId) {
+        List<StatusWithInfoDTO> statusWithInfoDTOS = statusMapper.queryStatusList(organizationId, needAddIds);
+        Map<Long, StatusWithInfoDTO> infoDTOMap = statusWithInfoDTOS.stream().collect(Collectors.toMap(StatusWithInfoDTO::getId, Function.identity()));
+        for (Long needAddId : needAddIds) {
+            StatusWithInfoDTO statusWithInfoDTO = infoDTOMap.getOrDefault(needAddId, null);
+            if (!ObjectUtils.isEmpty(statusWithInfoDTO)) {
+                IssueStatusDTO issueStatus = new IssueStatusDTO();
+                issueStatus.setName(statusWithInfoDTO.getName());
+                issueStatus.setProjectId(projectId);
+                issueStatus.setCompleted(false);
+                issueStatus.setEnable(false);
+                issueStatus.setCategoryCode(statusWithInfoDTO.getType());
+                issueStatus.setStatusId(statusWithInfoDTO.getId());
+                issueStatusService.insertIssueStatus(issueStatus);
+            }
+        }
+    }
+
+    private Long defaultHandlerStateMachine(Long organizationId, String typeCode, Long stateMachineSchemeId){
+        // 查询系统问题类型的状态机id
+        IssueTypeDTO issueTypeDTO = querySystemIssueTypeByCode(organizationId, typeCode);
+        // 查询系统问题类型的状态机
+        return stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeDTO.getId());
     }
 
     private String getApplyTypeByCategoryCodes(Set<String> categoryCodes, String typeCode) {
@@ -715,6 +779,13 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             issueType.setReferenced(false);
             issueType.setReferenceId(referenceId);
             IssueTypeVO vo = modelMapper.map(issueType, IssueTypeVO.class);
+            if (!ObjectUtils.isEmpty(issueTypeVO.getCopyStatusMachine())) {
+                vo.setCopyStatusMachine(issueTypeVO.getCopyStatusMachine());
+            }
+
+            if (!ObjectUtils.isEmpty(issueTypeVO.getCopyCustomField())) {
+                vo.setCopyCustomField(issueTypeVO.getCopyCustomField());
+            }
             create(organizationId, projectId, vo);
         } else {
             throw new CommonException("error.issue.type.is.already.referenced");
