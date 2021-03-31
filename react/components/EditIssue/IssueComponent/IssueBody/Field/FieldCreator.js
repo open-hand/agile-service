@@ -26,7 +26,7 @@ import UserTag from '@/components/tag/user-tag';
                     id: createdBy,
                     loginName: createrLoginName,
                     realName: createrRealName,
-                    avatar: createrImageUrl,
+                    imageUrl: createrImageUrl,
                     tooltip: createrName,
                   }}
                 />
