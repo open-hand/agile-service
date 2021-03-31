@@ -5,8 +5,8 @@ type ChangeSelected = (code: string)=>void
 interface Context {
   selectedType: string,
   setSelectedType: ChangeSelected,
-  selectedTypeInited: boolean,
-  setSelectedTypeInited: (inited: boolean) => void,
+  issueTypeInitedMap: Map<string, boolean>,
+  setIssueTypeInitedMap: (initedMap: Map<string, boolean>) => void,
 }
 const StateMachineContext = createContext<Context>({} as Context);
 
