@@ -100,6 +100,7 @@ const DependencyTree: React.FC = () => {
           </div>
         ) : ''
       }
+      border={false}
       contentClassName={`${prefixCls}-dependency-tree`}
     >
       <DependencyTreeBase

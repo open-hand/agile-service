@@ -9,11 +9,8 @@ import StoreProvider from './stores';
 
 interface ReleaseDetailProps {
   id: string
-  projectId?: string | number, /** 关联特性时 根据项目id查询特性 projectId = 0  则会有特性筛选项--- 项目select  */
-  programId?: string, /** 项目群id */
   disabled?: boolean,
   modal?:IModalProps,
-  disableInitStore?: boolean, /** @default false */
   events?: {
     loadAfter?: (data: { piAimData: IReleaseDetailData, featureList?: Array<any> }) => void,
     deleteAfter?: (data: IReleaseDetailData) => void,
@@ -33,13 +30,20 @@ export function openPublishVersionDetail(id: string) {
     className: 'c7n-agile-publish-version-detail-modal',
     // className: importStyles.modal,
     // maskClosable: false,
+    title: null,
+    border: false,
     key: Modal.key(),
     // title: '导入字段',
     style: {
-      width: MODAL_WIDTH.middle,
+      height: 'calc(100vh - 48px)',
+      marginTop: 48,
+      width: 850,
     },
-    okText: '导入',
-    cancelText: '关闭',
+    mask: false,
+    maskStyle: {
+      height: 'calc(100vh - 48px)',
+      marginTop: 48,
+    },
     footer: () => null,
     // footer: (okBtn) => okBtn,
     children: <ReleaseDetailIndex id={id} />,

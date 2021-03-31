@@ -1,6 +1,6 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Button, Tabs, Tooltip } from 'choerodon-ui/pro/lib';
+import { Tabs } from 'choerodon-ui/pro/lib';
 import { useReleaseDetailContext } from '../stores';
 import Detail from './detail';
 import './Body.less';
@@ -10,7 +10,7 @@ import BugTable from './bug-table';
 const { TabPane } = Tabs;
 const Body: React.FC = () => {
   const {
-    prefixCls, disabled, store, projectId, events,
+    prefixCls,
   } = useReleaseDetailContext();
 
   return (

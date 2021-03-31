@@ -10,7 +10,7 @@ import { useReleaseDetailContext } from '../../stores';
 
 function Operation() {
   const {
-    disabled, store, projectId, events,
+    disabled,
   } = useReleaseDetailContext();
   const getMenu = () => (
     <Menu onClick={({ key }) => {
