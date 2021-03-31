@@ -11,8 +11,6 @@ import {
 import { withRouter } from 'react-router-dom';
 import { versionApi } from '@/api';
 import DetailContainer from '@/components/detail-container';
-import { Modal } from 'choerodon-ui/pro/lib';
-import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import DragSortingTable from '../ReleaseComponent/DragSortingTable';
 import AddRelease from '../ReleaseComponent/AddRelease';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
@@ -117,14 +115,12 @@ class ReleaseHome extends Component {
       });
     }
     if (key === '5') {
-      // const { detailProps, detailProps: { open } } = this.props;
       versionApi.load(record.versionId).then((res) => {
         ReleaseStore.setVersionDetail(res);
         this.setState({
           selectItem: record,
           editRelease: true,
         });
-        // openReleaseDetail(record.versionId);
       }).catch(() => {
       });
     }
@@ -145,17 +141,6 @@ class ReleaseHome extends Component {
     }
     if (key === '6') {
       openLinkVersionModal(record.versionId, this.props.program.id, record.programVersionInfoVOS ? record.programVersionInfoVOS[0] : undefined, () => this.refresh(pagination));
-    }
-    if (key === '7') {
-      // 导出
-      Modal.open({
-        title: '导出版本',
-        children: '正在。。。',
-        drawer: true,
-        style: {
-          width: MODAL_WIDTH.small,
-        },
-      });
     }
   }
 
@@ -234,13 +219,6 @@ class ReleaseHome extends Component {
               </Menu.Item>
             </Permission>
           )}
-        <Menu.Item key="7">
-          <Tooltip placement="top" title="导出">
-            <span>
-              导出
-            </span>
-          </Tooltip>
-        </Menu.Item>
         {record.statusCode === 'archived'
           ? null
           : (

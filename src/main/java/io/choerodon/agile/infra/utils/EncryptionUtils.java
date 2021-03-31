@@ -3,7 +3,6 @@ package io.choerodon.agile.infra.utils;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -457,12 +456,6 @@ public class EncryptionUtils {
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("updatorIds"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("updatorIds",
-                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
-        }
-
-        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("tags"))).orElse(null);
-        if (CollectionUtils.isNotEmpty(temp)) {
-            search.getOtherArgs().put("tags",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
     }

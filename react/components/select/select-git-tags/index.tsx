@@ -18,7 +18,6 @@ interface Props extends Partial<SelectProps> {
 const SelectGitTags: React.FC<Props> = forwardRef(({
   dataRef, valueField, afterLoad, flat, applicationId, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
-  console.log('applicationId..', applicationId);
   const config = useMemo((): SelectConfig => ({
     name: 'tag',
     textField: 'name',

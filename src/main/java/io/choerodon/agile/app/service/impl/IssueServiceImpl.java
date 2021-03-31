@@ -184,8 +184,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private WikiRelationMapper wikiRelationMapper;
     @Autowired
     private FieldValueMapper fieldValueMapper;
-    @Autowired
-    private TagIssueRelMapper tagIssueRelMapper;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -317,27 +315,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handleCreateComponentIssueRel(issueCreateVO.getComponentIssueRelVOList(), projectInfoDTO.getProjectId(), issueId, projectInfoDTO, issueConvertDTO.getAssigneerCondtiion());
         handleCreateVersionIssueRel(issueCreateVO.getVersionIssueRelVOList(), projectInfoDTO.getProjectId(), issueId);
         handleCreateIssueLink(issueCreateVO.getIssueLinkCreateVOList(), projectInfoDTO.getProjectId(), issueId);
-        handleCreateTagIssueRel(issueCreateVO.getTags(), projectInfoDTO.getProjectId(), issueId);
-    }
-
-    private void handleCreateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId) {
-        if (!ObjectUtils.isEmpty(tags)) {
-            Long organizationId = ConvertUtil.getOrganizationId(projectId);
-            tags.forEach(x -> {
-                Long tagId = x.getId();
-                if (tagId == null) {
-                    throw new CommonException("error.issue.tag.null");
-                }
-                TagIssueRelDTO dto = new TagIssueRelDTO();
-                dto.setIssueId(issueId);
-                dto.setOrganizationId(organizationId);
-                dto.setTagId(tagId);
-                dto.setProjectId(projectId);
-                if (tagIssueRelMapper.select(dto).isEmpty()) {
-                    tagIssueRelMapper.insertSelective(dto);
-                }
-            });
-        }
     }
 
     @Override
@@ -347,7 +324,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueCreateVO.setComponentIssueRelVOList(issueCreateVO.getComponentIssueRelVOList());
         issueCreateVO.setVersionIssueRelVOList(issueCreateVO.getVersionIssueRelVOList());
         issueCreateVO.setIssueLinkCreateVOList(issueCreateVO.getIssueLinkCreateVOList());
-        issueCreateVO.setTags(issueCreateVO.getTags());
         handleCreateIssueRearAction(subIssueConvertDTO, issueId, projectInfoDTO, issueCreateVO);
     }
 
@@ -717,9 +693,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (issueUpdateVO.getVersionIssueRelVOList() != null && issueUpdateVO.getVersionType() != null) {
             this.self().handleUpdateVersionIssueRel(issueUpdateVO.getVersionIssueRelVOList(), projectId, issueId, issueUpdateVO.getVersionType());
-        }
-        if (issueUpdateVO.getTags() != null) {
-            this.self().handleUpdateTagIssueRel(issueUpdateVO.getTags(), projectId, issueId);
         }
         return queryIssueByUpdate(projectId, issueId, fieldList);
     }
@@ -1493,17 +1466,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 componentIssueRelService.batchComponentDelete(issueId);
             }
         }
-    }
-
-    @Override
-    public void handleUpdateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        TagIssueRelDTO dto = new TagIssueRelDTO();
-        dto.setProjectId(projectId);
-        dto.setOrganizationId(organizationId);
-        dto.setIssueId(issueId);
-        tagIssueRelMapper.delete(dto);
-        handleCreateTagIssueRel(tags, projectId, issueId);
     }
 
     private void handleLabelIssue(LabelIssueRelDTO labelIssueRelDTO) {

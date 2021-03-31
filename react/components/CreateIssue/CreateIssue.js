@@ -1185,32 +1185,6 @@ class CreateIssue extends Component {
             </div>
           </FormItem>
         );
-      case 'app_version':
-        return (
-          <FormItem label={field.fieldName} key={`${newIssueTypeCode}-${field.id}`}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              {getFieldDecorator('appVersions', {
-                rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
-              })(
-                <SelectFocusLoad
-                  label={field.fieldName}
-                  type="app_version"
-                  loadWhenMount
-                  mode="multiple"
-                  selectedAppService={field.defaultValue}
-                // afterLoad={(statusList) => {
-                //   const defaultStatus = find(statusList, { defaultStatus: true });
-                //   if (defaultStatus && !form.getFieldValue(`${field.fieldCode}Id`)) {
-                //     form.setFieldsValue({
-                //       [`${field.fieldCode}Id`]: defaultStatus.id,
-                //     });
-                //   }
-                // }}
-                />,
-              )}
-            </div>
-          </FormItem>
-        );
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>
