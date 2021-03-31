@@ -83,7 +83,7 @@ class ReleaseDetailStore {
     // this.appServiceList = [];
   }
 
-  @action init(initData?: { disabled?: boolean, events?: Partial<EventsProps>, programId?: string }) {
+  @action init(initData?: { disabled?: boolean, events?: Partial<EventsProps>}) {
     this.clear();
     this.disabled = initData?.disabled;
     if (initData?.events) {

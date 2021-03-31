@@ -30,7 +30,7 @@ export function useReleaseDetailContext() {
 }
 
 const Provider: React.FC<ReleaseDetailProps> = ({
-  children, disableInitStore, programId, ...restProps
+  children, ...restProps
 }) => {
   const prefixCls = 'c7n-agile-publish-version-detail';
   const { isInProgram, loading } = useIsInProgram();
@@ -56,7 +56,7 @@ const Provider: React.FC<ReleaseDetailProps> = ({
     },
   }), [push]);
   useEffect(() => {
-    store.init({ events: { update: updateDetail, selectIssue }, programId, disabled: restProps.disabled });
+    store.init({ events: { update: updateDetail, selectIssue }, disabled: restProps.disabled });
     store.select(restProps.id);
   }, []);
   useEffect(() => () => {
@@ -69,7 +69,6 @@ const Provider: React.FC<ReleaseDetailProps> = ({
   // const { piAimStore } = usePIAimStore();
   const values = {
     ...restProps,
-    programId,
     disabled: restProps.disabled || store.disabled,
     prefixCls,
     // events: propsEvents,

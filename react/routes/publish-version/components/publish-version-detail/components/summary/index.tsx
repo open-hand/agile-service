@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import TextArea from '@/components/TextArea';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
-import { publishVersionApi, versionApi } from '@/api';
+import { publishVersionApi } from '@/api';
 import styles from './index.less';
 import { useReleaseDetailContext } from '../../stores';
 
