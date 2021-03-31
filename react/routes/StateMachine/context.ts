@@ -7,6 +7,7 @@ interface Context {
   setSelectedType: ChangeSelected,
   issueTypeInitedMap: Map<string, boolean>,
   setIssueTypeInitedMap: (initedMap: Map<string, boolean>) => void,
+  readOnly: boolean
 }
 const StateMachineContext = createContext<Context>({} as Context);
 

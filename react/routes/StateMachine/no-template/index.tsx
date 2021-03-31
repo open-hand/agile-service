@@ -16,7 +16,7 @@ import empty from './empty.png';
 
 const NoTemplate = () => {
   const {
-    selectedType, setSelectedType, issueTypeInitedMap, setIssueTypeInitedMap,
+    selectedType, setSelectedType, issueTypeInitedMap, setIssueTypeInitedMap, readOnly,
   } = useStateMachineContext();
   const isOrganization = getIsOrganization();
 
@@ -31,33 +31,39 @@ const NoTemplate = () => {
 
   return (
     <Page>
-      <Header>
-        <Tooltip title="请先配置模板">
-          <Button
-            icon="playlist_add"
-            disabled
-          >
-            添加已有状态
-          </Button>
-        </Tooltip>
-        <Tooltip title="请先配置模板">
-          <Button
-            icon="playlist_add"
-            disabled
-          >
-            创建新的状态
-          </Button>
-        </Tooltip>
-        <Tooltip title="请先配置模板">
-          <Button
-            icon="settings-o"
-            disabled
-          >
-            设置初始状态
-          </Button>
-        </Tooltip>
-      </Header>
-      <Breadcrumb />
+      {
+        !readOnly && (
+          <>
+            <Header>
+              <Tooltip title="请先配置模板">
+                <Button
+                  icon="playlist_add"
+                  disabled
+                >
+                  添加已有状态
+                </Button>
+              </Tooltip>
+              <Tooltip title="请先配置模板">
+                <Button
+                  icon="playlist_add"
+                  disabled
+                >
+                  创建新的状态
+                </Button>
+              </Tooltip>
+              <Tooltip title="请先配置模板">
+                <Button
+                  icon="settings-o"
+                  disabled
+                >
+                  设置初始状态
+                </Button>
+              </Tooltip>
+            </Header>
+            <Breadcrumb />
+          </>
+        )
+      }
       <Content style={{ borderTop: 'none' }}>
         <IssueTypeTab
           selectedType={selectedType}
@@ -69,16 +75,22 @@ const NoTemplate = () => {
           title="暂无模板"
           description={(
             <>
-              当前问题类型暂未配置状态机模板，点击下方按钮配置模板。
-              <br />
-              <Button
-                style={{ fontSize: '14px', marginTop: 15 }}
-                color={'blue' as ButtonColor}
-                funcType={'raised' as FuncType}
-                onClick={initTemplate}
-              >
-                配置模板
-              </Button>
+              {`当前问题类型暂未配置状态机模板${readOnly ? '请到组织层状态机页面配置模板' : '点击下方按钮配置模板'}。`}
+              {
+                !readOnly && (
+                <>
+                  <br />
+                  <Button
+                    style={{ fontSize: '14px', marginTop: 15 }}
+                    color={'blue' as ButtonColor}
+                    funcType={'raised' as FuncType}
+                    onClick={initTemplate}
+                  >
+                    配置模板
+                  </Button>
+                </>
+                )
+              }
             </>
           )}
           imgStyle={{ width: 300 }}

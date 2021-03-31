@@ -226,8 +226,10 @@ const transformFieldValue = (fieldSetting) => {
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { data: issueTypes } = useProjectIssueTypes();
   const {
-    selectedType, setSelectedType, issueTypeInitedMap,
+    selectedType, setSelectedType, issueTypeInitedMap, readOnly,
   } = useStateMachineContext();
+
+  const isOrganization = getIsOrganization();
 
   const customCirculationDataSet = useMemo(() => new DataSet({
     autoQuery: false,
@@ -511,10 +513,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   };
 
   useEffect(() => {
-    if (selectedType && issueTypeInitedMap.get(selectedType)) {
+    if (selectedType && ((isOrganization && issueTypeInitedMap.get(selectedType)) || !isOrganization)) {
       customCirculationDataSet.query();
     }
-  }, [customCirculationDataSet, issueTypeInitedMap, selectedType]);
+  }, [customCirculationDataSet, isOrganization, issueTypeInitedMap, selectedType]);
 
   const columns = [
     {
@@ -539,21 +541,25 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       name: 'id',
       renderer: renderSetting,
     },
-    {
+    ...(readOnly ? [] : [{
       name: 'action',
       renderer: renderAction,
       width: 200,
-    },
+    }]),
   ];
-
-  const isOrganization = getIsOrganization();
 
   return (
     <Page>
-      <Breadcrumb />
       {
-        !getIsOrganization() && (
-          <Divider style={{ margin: 0 }} />
+        !readOnly && (
+          <>
+            <Breadcrumb />
+            {
+              !isOrganization && (
+                <Divider style={{ margin: 0 }} />
+              )
+            }
+          </>
         )
       }
       <Content style={{ borderTop: 'none' }}>

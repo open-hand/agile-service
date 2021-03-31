@@ -20,15 +20,17 @@ import Save from './components/save';
 
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { store } = useStatusCirculationContext();
-  const { selectedType, setSelectedType, issueTypeInitedMap } = useStateMachineContext();
+  const {
+    selectedType, setSelectedType, issueTypeInitedMap, readOnly,
+  } = useStateMachineContext();
   const isOrganization = getIsOrganization();
   // const selectedTypeRef = useRef<string>(selectedType);
   // selectedTypeRef.current = selectedType;
   const refresh = useCallback(() => {
-    if (selectedType && issueTypeInitedMap.get(selectedType)) {
+    if (selectedType && ((isOrganization && issueTypeInitedMap.get(selectedType)) || !isOrganization)) {
       store.getStatusList(selectedType);
     }
-  }, [issueTypeInitedMap, selectedType, store]);
+  }, [isOrganization, issueTypeInitedMap, selectedType, store]);
   useEffect(() => {
     refresh();
   }, [refresh]);
@@ -43,48 +45,55 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   // }, []);
   return (
     <Page>
-      <Header>
-        <Button
-          icon="playlist_add"
-          onClick={() => {
-            openSelectExistStatus({
-              statusList: store.statusList,
-              issueTypeId: selectedType,
-              onSubmit: () => {
-                refresh();
-              },
-            });
-          }}
-        >
-          添加已有状态
-        </Button>
-        <Button
-          icon="playlist_add"
-          onClick={() => {
-            openCreateStatus({
-              selectedIssueType: [selectedType],
-              onSubmit: () => {
-                refresh();
-              },
-            });
-          }}
-        >
-          创建新的状态
-        </Button>
-        <Button
-          icon="settings-o"
-          onClick={() => {
-            openSetDefaultStatus({
-              issueTypeId: selectedType,
-              statusList: toJS(store.statusList),
-              onSubmit: refresh,
-            });
-          }}
-        >
-          设置初始状态
-        </Button>
-      </Header>
-      <Breadcrumb />
+      {
+        !readOnly && (
+          <>
+            <Header>
+              <Button
+                icon="playlist_add"
+                onClick={() => {
+                  openSelectExistStatus({
+                    statusList: store.statusList,
+                    issueTypeId: selectedType,
+                    onSubmit: () => {
+                      refresh();
+                    },
+                  });
+                }}
+              >
+                添加已有状态
+              </Button>
+              <Button
+                icon="playlist_add"
+                onClick={() => {
+                  openCreateStatus({
+                    selectedIssueType: [selectedType],
+                    onSubmit: () => {
+                      refresh();
+                    },
+                  });
+                }}
+              >
+                创建新的状态
+              </Button>
+              <Button
+                icon="settings-o"
+                onClick={() => {
+                  openSetDefaultStatus({
+                    issueTypeId: selectedType,
+                    statusList: toJS(store.statusList),
+                    onSubmit: refresh,
+                  });
+                }}
+              >
+                设置初始状态
+              </Button>
+            </Header>
+            <Breadcrumb />
+          </>
+        )
+      }
+
       {
         !isOrganization && (
           <Divider style={{ margin: 0 }} />

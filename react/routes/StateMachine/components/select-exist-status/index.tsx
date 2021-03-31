@@ -6,9 +6,9 @@ import {
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApiConfig, IStatusCirculation } from '@/api';
+import { getIsOrganization } from '@/utils/common';
 import SelectStatus from '../select-status';
 import './index.less';
-import { getIsOrganization } from '@/utils/common';
 
 const { Option } = SelectBox;
 const key = Modal.key();
