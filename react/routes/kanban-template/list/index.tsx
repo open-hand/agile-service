@@ -20,7 +20,8 @@ const KanbanTemplateList = () => {
   const [enableCreate, setEnableCreate] = useState(false);
   useEffect(() => {
     (async () => {
-
+      const { statusMachineTemplateConfig } = await kanbanTemplateApi.checkEnableCreate();
+      setEnableCreate(statusMachineTemplateConfig);
     })();
   }, []);
   const dataSet = useMemo(() => new DataSet({

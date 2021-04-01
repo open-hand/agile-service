@@ -74,6 +74,13 @@ class KanbanTemplateApi extends Api<KanbanTemplateApi> {
     });
   }
 
+  checkEnableCreate() {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/organization_config/check_config_template`,
+    });
+  }
+
   create(data: IKanbanTemplateCreate) {
     return this.request({
       method: 'post',
@@ -182,7 +189,7 @@ class KanbanTemplateApi extends Api<KanbanTemplateApi> {
   deleteColumn(columnId: string) {
     return this.request({
       method: 'delete',
-      url: `${this.prefix}/board_template/board_template_column/${columnId}`,
+      url: `${this.prefix}/board_template/board_column/${columnId}`,
     });
   }
 
