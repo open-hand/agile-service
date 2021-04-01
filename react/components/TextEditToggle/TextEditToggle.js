@@ -1,7 +1,9 @@
+/* eslint-disable react/require-default-props */
+/* eslint-disable react/static-property-placement */
 /* eslint-disable react/no-find-dom-node, react/destructuring-assignment */
 import React, { Component, createRef } from 'react';
 import {
-  Form, Icon, Select, DatePicker,
+  Form, Icon, Select, DatePicker, Button,
 } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
 import classNames from 'classnames';
@@ -40,10 +42,12 @@ class TextEditToggle extends Component {
     disabled: PropTypes.bool,
     required: PropTypes.bool,
     noButton: PropTypes.bool,
+    editButtonMode: PropTypes.bool,
     simpleMode: PropTypes.bool,
     formKey: PropTypes.string,
     onSubmit: PropTypes.func,
     onCancel: PropTypes.func,
+    // eslint-disable-next-line react/forbid-prop-types
     originData: PropTypes.any,
     children: PropTypes.node,
   };
@@ -57,7 +61,6 @@ class TextEditToggle extends Component {
       newData: null,
     };
   }
-
 
   componentDidMount() {
     // eslint-disable-next-line no-unused-expressions
@@ -197,14 +200,14 @@ class TextEditToggle extends Component {
     const { editing } = this.state;
     const { children } = this.props;
     return editing
-      ? children.filter(child => child.type === Edit)
-      : children.filter(child => child.type === Text);
+      ? children.filter((child) => child.type === Edit)
+      : children.filter((child) => child.type === Text);
   }
 
   getEditChildrenType = () => {
     const { children } = this.props;
 
-    const EditChildren = children.filter(child => child.type === Edit);
+    const EditChildren = children.filter((child) => child.type === Edit);
     const childrenArray = React.Children.toArray(EditChildren);
     const targetElement = React.Children.toArray(childrenArray[0].props.children)[0];
     // 替换成自动打开的Select
@@ -221,19 +224,18 @@ class TextEditToggle extends Component {
     if (!targetElement) {
       throw new Error('使用Form功能时，Edit的children必须是Component');
     }
-    // 替换成自动打开的Select 
+    // 替换成自动打开的Select
     if (targetElement.type === Select) {
       if (targetElement.props.mode) {
         return <DefaultOpenSelect {...targetElement.props} />;
-      } else {
-        // 单选选择后自动提交
-        return <DefaultOpenSelect {...targetElement.props} onSelect={() => setTimeout(this.handleSubmit)} />;
       }
-    } else if ((targetElement.type === Select || targetElement.type === SelectFocusLoad) && !targetElement.props.mode) {
+      // 单选选择后自动提交
+      return <DefaultOpenSelect {...targetElement.props} onSelect={() => setTimeout(this.handleSubmit)} />;
+    } if ((targetElement.type === Select || targetElement.type === SelectFocusLoad) && !targetElement.props.mode) {
       return React.cloneElement(targetElement, {
         onSelect: () => setTimeout(this.handleSubmit),
       });
-    } else if (
+    } if (
       targetElement.type === DatePicker
       || targetElement.type === MonthPicker
       || targetElement.type === RangePicker
@@ -263,15 +265,14 @@ class TextEditToggle extends Component {
         return React.cloneElement(child, {
           getPopupContainer: () => findDOMNode(this),
         });
-      } else {
-        return child;
       }
+      return child;
     });
   }
 
   renderTextChild = (children) => {
     const childrenArray = React.Children.toArray(children);
-    return childrenArray.map(child => React.cloneElement(child, {
+    return childrenArray.map((child) => React.cloneElement(child, {
       newData: this.state.newData,
       originData: this.props.originData,
     }));
@@ -281,7 +282,7 @@ class TextEditToggle extends Component {
     const { editing, newData } = this.state;
     const { disabled, simpleMode, noButton } = this.props;
     const {
-      originData, formKey, rules, fieldProps,
+      originData, formKey, rules, fieldProps, editButtonMode,
     } = this.props;
     const { getFieldDecorator } = this.props.form;
     // 拿到不同模式下对应的子元素
@@ -297,7 +298,7 @@ class TextEditToggle extends Component {
         { // 采用form模式就进行form包装,否则
           formKey ? (
             <Form layout="vertical">
-              {children.map(child => (
+              {children.map((child) => (
                 <FormItem>
                   {getFieldDecorator(formKey, {
                     rules,
@@ -309,7 +310,7 @@ class TextEditToggle extends Component {
                 </FormItem>
               ))}
             </Form>
-          ) : children.map(child => (this.wrapChildren(child.props.children)))
+          ) : children.map((child) => (this.wrapChildren(child.props.children)))
         }
         {!noButton && !simpleMode && (
           <div>
@@ -331,7 +332,7 @@ class TextEditToggle extends Component {
         ref={this.Edit}
         onMouseDown={() => { this.timer = Date.now(); }}
         onMouseUp={(e) => {
-          if (Date.now() - this.timer <= 200) {
+          if (!editButtonMode && Date.now() - this.timer <= 200) {
             this.enterEditing(e);
           }
         }}
@@ -339,6 +340,15 @@ class TextEditToggle extends Component {
       >
         {this.renderTextChild(children)}
         {!simpleMode && <Icon type="arrow_drop_down" className="c7nagile-TextEditToggle-text-icon" />}
+        {editButtonMode && (
+        <Button
+          className="c7nagile-TextEditToggle-text-edit-button"
+          icon="mode_edit"
+          shape="circle"
+          funcType="flat"
+          onClick={() => { this.enterEditing(); }}
+        />
+        )}
       </div>
     );
   }
