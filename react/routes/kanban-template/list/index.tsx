@@ -1,9 +1,11 @@
-import React, { useCallback, useMemo } from 'react';
+import React, {
+  useCallback, useMemo, useState, useEffect,
+} from 'react';
 import {
   Page, Header, Content, Breadcrumb, useTheme,
 } from '@choerodon/master';
 import {
-  Button, Table, DataSet, Modal,
+  Button, Table, DataSet, Modal, Tooltip,
 } from 'choerodon-ui/pro';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { kanbanTemplateApiConfig, kanbanTemplateApi } from '@/api';
@@ -15,6 +17,12 @@ import openKanbanTemplateModal from './components/modal';
 const { Column } = Table;
 
 const KanbanTemplateList = () => {
+  const [enableCreate, setEnableCreate] = useState(false);
+  useEffect(() => {
+    (async () => {
+
+    })();
+  }, []);
   const dataSet = useMemo(() => new DataSet({
     autoQuery: true,
     selection: false,
@@ -64,16 +72,22 @@ const KanbanTemplateList = () => {
       default: break;
     }
   }, [dataSet]);
+
   const [theme] = useTheme();
   return (
     <Page>
       <Header>
-        <Button
-          icon="playlist_add"
-          onClick={handleClick}
-        >
-          创建看板模板
-        </Button>
+        <Tooltip title={!enableCreate ? '请先初始化状态机模板' : ''}>
+          <span>
+            <Button
+              icon="playlist_add"
+              onClick={handleClick}
+              disabled={!enableCreate}
+            >
+              创建看板模板
+            </Button>
+          </span>
+        </Tooltip>
       </Header>
       <Breadcrumb />
       <Content style={theme === 'theme4' ? undefined : { paddingTop: 0 }}>
