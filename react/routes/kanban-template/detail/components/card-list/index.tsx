@@ -23,6 +23,7 @@ const CardList: React.FC<CardListProps> = ({
         ref={provided.innerRef}
         {...provided.droppableProps}
         style={{
+          width: '100%',
           background: snapshot.isDraggingOver
             ? 'rgba(26,177,111,0.08)'
             : 'unset',
