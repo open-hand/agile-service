@@ -528,7 +528,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         List<StatusFieldSettingVO> statusFieldSettingVOS = statusSettingVO.getStatusFieldSettingVOS();
         if (!CollectionUtils.isEmpty(statusFieldSettingVOS)) {
             List<StatusFieldSettingVO> statusFieldSetting = new ArrayList<>();
-            filterStatusFieldSetting(statusFieldSettingVOS, statusFieldSetting, userIds);
+            filterStatusFieldSetting(projectId, statusFieldSettingVOS, statusFieldSetting, userIds);
             statusFieldSettingService.createOrUpdate(projectId, issueTypeId, statusId, objectVersionNumber, applyType, statusFieldSetting);
             objectVersionNumber++;
         }
@@ -536,7 +536,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         List<StatusLinkageVO> statusLinkageVOS = statusSettingVO.getStatusLinkageVOS();
         if (!CollectionUtils.isEmpty(statusLinkageVOS)) {
             List<StatusLinkageVO> statusLinkage = new ArrayList<>();
-            handlerStatusLinkage(statusLinkageVOS, issueTypeIds, statusLinkage);
+            handlerStatusLinkage(projectId, statusLinkageVOS, issueTypeIds, statusLinkage);
             if (!CollectionUtils.isEmpty(statusLinkage)) {
                 statusLinkageService.createOrUpdate(projectId, issueTypeId, statusId, objectVersionNumber, applyType, statusLinkage);
                 objectVersionNumber++;
@@ -595,24 +595,27 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         }
     }
 
-    private void handlerStatusLinkage(List<StatusLinkageVO> statusLinkageVOS, List<Long> issueTypeIds, List<StatusLinkageVO> statusLinkage) {
+    private void handlerStatusLinkage(Long projectId, List<StatusLinkageVO> statusLinkageVOS, List<Long> issueTypeIds, List<StatusLinkageVO> statusLinkage) {
         for (StatusLinkageVO statusLinkageVO : statusLinkageVOS) {
             if(issueTypeIds.contains(statusLinkageVO.getParentIssueTypeId())){
                 statusLinkageVO.setId(null);
+                statusLinkageVO.setProjectId(projectId);
                 statusLinkage.add(statusLinkageVO);
             }
         }
     }
 
-    private void filterStatusFieldSetting(List<StatusFieldSettingVO> statusFieldSettingVOS, List<StatusFieldSettingVO> statusFieldSetting, List<Long> userIds) {
+    private void filterStatusFieldSetting(Long projectId, List<StatusFieldSettingVO> statusFieldSettingVOS, List<StatusFieldSettingVO> statusFieldSetting, List<Long> userIds) {
         for (StatusFieldSettingVO statusFieldSettingVO : statusFieldSettingVOS) {
             String fieldType = statusFieldSettingVO.getFieldType();
             statusFieldSettingVO.setId(null);
+            statusFieldSettingVO.setProjectId(projectId);
             if (Objects.equals(FieldType.MULTI_MEMBER, fieldType) || Objects.equals(FieldType.MEMBER, fieldType)) {
                 List<StatusFieldValueSettingDTO> fieldValueSettingDTOS = new ArrayList<>();
                 for (StatusFieldValueSettingDTO statusFieldValueSetting : statusFieldSettingVO.getFieldValueList()) {
+                    statusFieldValueSetting.setId(null);
+                    statusFieldValueSetting.setProjectId(projectId);
                     if (ObjectUtils.isEmpty(statusFieldValueSetting.getUserId()) || (!ObjectUtils.isEmpty(statusFieldValueSetting.getUserId()) && userIds.contains(statusFieldValueSetting.getUserId()))) {
-                        statusFieldValueSetting.setId(null);
                         fieldValueSettingDTOS.add(statusFieldValueSetting);
                     }
                 }
@@ -621,6 +624,12 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                     statusFieldSetting.add(statusFieldSettingVO);
                 }
             } else {
+                List<StatusFieldValueSettingDTO> fieldValueSettingDTOS = new ArrayList<>();
+                for (StatusFieldValueSettingDTO statusFieldValueSetting : statusFieldSettingVO.getFieldValueList()) {
+                    statusFieldValueSetting.setId(null);
+                    statusFieldValueSetting.setProjectId(projectId);
+                }
+                statusFieldSettingVO.setFieldValueList(fieldValueSettingDTOS);
                 statusFieldSetting.add(statusFieldSettingVO);
             }
         }

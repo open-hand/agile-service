@@ -180,12 +180,6 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
 
     @Override
     public void deleteBoardTemplate(Long organizationId, Long boardId) {
-        BoardDTO boardDTO = new BoardDTO();
-        boardDTO.setOrganizationId(organizationId);
-        boardDTO.setProjectId(0L);
-        List<BoardDTO> boardDTOS = boardMapper.select(boardDTO);
-        BoardValidator.checkBoardUnique(boardDTOS);
-
         BoardColumnDTO boardColumnDTO = new BoardColumnDTO();
         boardColumnDTO.setBoardId(boardId);
         List<BoardColumnDTO> boardColumnDTOList = boardColumnMapper.select(boardColumnDTO);

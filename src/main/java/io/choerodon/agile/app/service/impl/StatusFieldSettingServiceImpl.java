@@ -84,6 +84,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private LookupValueService lookupValueService;
     @Autowired
     private OrganizationConfigService organizationConfigService;
+    @Autowired
+    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     static {
         FIELD_CODE.put(FieldCode.ASSIGNEE, "assigneeId");
         FIELD_CODE.put(FieldCode.REPORTER, "reporterId");
@@ -148,7 +150,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         List<StatusFieldSettingVO> list = new ArrayList<>();
         for (StatusFieldSettingDTO statusFieldSettingDTO : statusFieldSettingDTOS) {
             StatusFieldSettingVO map = modelMapper.map(statusFieldSettingDTO, StatusFieldSettingVO.class);
-            map.setFieldValueList(listFieldValueSetting(0L, projectId, map.getId()));
+            map.setFieldValueList(listFieldValueSetting(0L, projectId, map.getId(), map.getFieldId()));
             list.add(map);
         }
         return list;
@@ -160,7 +162,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         list.forEach(statusFieldSettingVO -> {
             String fieldType = statusFieldSettingVO.getFieldType();
             List<String> fieldTypes = Arrays.asList(FILTER_FIELD_TYPE);
-            List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(0L, projectId, statusFieldSettingVO.getId());
+            List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(0L, projectId, statusFieldSettingVO.getId(), statusFieldSettingVO.getFieldId());
             if (!CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
                 if (!fieldTypes.contains(fieldType)) {
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
@@ -202,7 +204,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         Class aClass = issueUpdateVO.getClass();
         Map<String,Object> specifyMap = new HashMap<>();
         list.forEach(v -> {
-            List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(0L , projectId, v.getId());
+            List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(0L , projectId, v.getId(), v.getFieldId());
             if (!CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
                 if (Boolean.TRUE.equals(v.getSystem())) {
                     Boolean isVersion = FieldCode.FIX_VERSION.equals(v.getFieldCode()) || FieldCode.INFLUENCE_VERSION.equals(v.getFieldCode());
@@ -262,7 +264,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         List<StatusFieldSettingVO> list = new ArrayList<>();
         for (StatusFieldSettingDTO statusFieldSettingDTO : statusFieldSettingDTOS) {
             StatusFieldSettingVO map = modelMapper.map(statusFieldSettingDTO, StatusFieldSettingVO.class);
-            map.setFieldValueList(listFieldValueSetting(organizationId, 0L, map.getId()));
+            map.setFieldValueList(listFieldValueSetting(organizationId, 0L, map.getId(), map.getFieldId()));
             list.add(map);
         }
         return list;
@@ -274,7 +276,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         list.forEach(statusFieldSettingVO -> {
             String fieldType = statusFieldSettingVO.getFieldType();
             List<String> fieldTypes = Arrays.asList(FILTER_FIELD_TYPE);
-            List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(organizationId, 0L, statusFieldSettingVO.getId());
+            List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS = listFieldValueSetting(organizationId, 0L, statusFieldSettingVO.getId(), statusFieldSettingVO.getFieldId());
             if (!CollectionUtils.isEmpty(statusFieldValueSettingDTOS)) {
                 if (!fieldTypes.contains(fieldType)) {
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
@@ -655,7 +657,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         }
     }
 
-    private List<StatusFieldValueSettingDTO> listFieldValueSetting(Long organizationId, Long projectId, Long fieldSettingId) {
+    private List<StatusFieldValueSettingDTO> listFieldValueSetting(Long organizationId, Long projectId, Long fieldSettingId, Long fieldId) {
         StatusFieldValueSettingDTO statusFieldValueSettingDTO = new StatusFieldValueSettingDTO();
         statusFieldValueSettingDTO.setProjectId(projectId);
         statusFieldValueSettingDTO.setOrganizationId(organizationId);
@@ -669,12 +671,14 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 .filter(v -> !Objects.isNull(v.getOptionId()))
                 .map(StatusFieldValueSettingDTO::getOptionId)
                 .collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(fieldOptionIds)) {
+        ObjectSchemeFieldDTO fieldDTO = objectSchemeFieldMapper.queryById(fieldId);
+        if (Boolean.FALSE.equals(fieldDTO.getSystem()) && !CollectionUtils.isEmpty(fieldOptionIds)) {
             List<StatusFieldValueSettingDTO> result = new ArrayList<>();
             if (ObjectUtils.isEmpty(organizationId) && Objects.equals(0L, organizationId)) {
                 organizationId = ConvertUtil.getOrganizationId(projectId);
             }
-            List<Long> existFieldOptionIds = fieldOptionMapper.selectByOptionIds(organizationId, fieldOptionIds).stream().map(FieldOptionDTO::getId).collect(Collectors.toList());
+            List<Long> existFieldOptionIds = fieldOptionMapper.selectByOptionIds(organizationId, fieldOptionIds)
+                    .stream().filter(v -> fieldId.equals(v.getFieldId())).map(FieldOptionDTO::getId).collect(Collectors.toList());
             select.forEach(v -> {
                 if (Objects.isNull(v.getOptionId()) || existFieldOptionIds.contains(v.getOptionId())) {
                     result.add(v);

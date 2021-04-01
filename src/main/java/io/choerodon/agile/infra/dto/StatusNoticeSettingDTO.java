@@ -56,6 +56,7 @@ public class StatusNoticeSettingDTO extends AuditDomain {
         this.statusId = statusNoticeSettingVO.getStatusId();
         this.noticeType = String.join(BaseConstants.Symbol.COMMA, statusNoticeSettingVO.getNoticeTypeList());
         this.userType = StatusNoticeUserType.SPECIFIER;
+        this.organizationId = statusNoticeSettingVO.getOrganizationId();
         this.userId = userId;
     }
 
