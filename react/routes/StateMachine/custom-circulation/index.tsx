@@ -567,6 +567,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           selectedType={selectedType}
           setSelectedType={setSelectedType}
           excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+          brighter={readOnly}
         />
         {tab}
         <div className={`${styles.customCirculation}`}>

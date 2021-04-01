@@ -69,6 +69,7 @@ const NoTemplate = () => {
           selectedType={selectedType}
           setSelectedType={setSelectedType}
           excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+          brighter={readOnly}
         />
         <Empty
           pic={empty}

@@ -31,7 +31,7 @@ const BodyRow = (props: any) => {
     initialClientOffset,
     ...restProps
   } = props;
-  const style = { ...restProps.style, cursor: 'move' };
+  const style = { ...restProps.style, cursor: props.readOnly ? 'auto' : 'move' };
 
   let { className } = restProps;
   if (isOver && initialClientOffset) {
@@ -67,6 +67,7 @@ const rowSource = {
       index: props.index,
     };
   },
+  canDrag: (props: any) => !props.readOnly,
 };
 
 const rowTarget = {
@@ -89,6 +90,7 @@ const rowTarget = {
     // eslint-disable-next-line no-param-reassign
     monitor.getItem().index = hoverIndex;
   },
+  canDrop: (props: any) => !props.readOnly,
 };
 
 const DragableBodyRow = DropTarget('row', rowTarget, (connect, monitor) => ({
