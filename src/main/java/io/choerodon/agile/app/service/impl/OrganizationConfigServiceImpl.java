@@ -355,6 +355,10 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         handlerTemplateStatusMachineMap(templateStatusMachineMap, organizationId);
         Set<Long> templateIssueTypes = templateStatusMachineMap.keySet();
         for (Long issueTypeId : issueTypeIds) {
+            StatusMachineSchemeConfigDTO config = new StatusMachineSchemeConfigDTO(stateMachineSchemeId,issueTypeId,organizationId);
+            if (!ObjectUtils.isEmpty(config)) {
+                continue;
+            }
             if (templateIssueTypes.contains(issueTypeId)) {
                 copyStatusMachine(projectId, organizationId, issueTypeId, stateMachineSchemeId, templateStatusMachineMap.get(issueTypeId), applyType, issueTypeIds);
             } else {

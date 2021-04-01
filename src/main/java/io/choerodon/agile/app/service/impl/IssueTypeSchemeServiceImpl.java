@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -8,10 +10,6 @@ import io.choerodon.agile.api.vo.IssueTypeSchemeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeSchemeVO;
 import io.choerodon.agile.api.vo.IssueTypeSchemeWithInfoVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.app.service.IssueTypeSchemeService;
-import io.choerodon.agile.app.service.IssueTypeService;
-import io.choerodon.agile.app.service.PriorityService;
-import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.InitIssueType;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
@@ -194,11 +192,8 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
     @Override
     public void initByConsumeCreateProject(Long projectId, String projectCode) {
         Long organizationId = projectUtil.getOrganizationId(projectId);
-        IssueTypeDTO query = new IssueTypeDTO();
-        query.setOrganizationId(organizationId);
-        query.setInitialize(true);
         //查询系统问题类型，typeCode不重复
-        List<IssueTypeDTO> issueTypes = issueTypeMapper.select(query);
+        List<IssueTypeDTO> issueTypes = getIssueTypes(organizationId, projectId);
         //处理老的组织没有创建的数据
         issueTypes = initOrganizationIssueType(organizationId, issueTypes);
         Map<String, IssueTypeDTO> issueTypeMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeDTO::getTypeCode, x -> x));
@@ -206,6 +201,13 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
         initScheme(projectId, organizationId, projectCode + "默认类型方案【敏捷】", issueTypeMap.get(InitIssueType.STORY.getTypeCode()).getId(), SchemeApplyType.AGILE, issueTypeMap);
         //初始化测试问题类型方案
         initScheme(projectId, organizationId, projectCode + "默认类型方案【测试】", issueTypeMap.get(InitIssueType.TEST.getTypeCode()).getId(), SchemeApplyType.TEST, issueTypeMap);
+    }
+
+    private List<IssueTypeDTO> getIssueTypes(Long organizationId, Long projectId) {
+        if (projectId == null) {
+            projectId = 0L;
+        }
+        return modelMapper.map(issueTypeMapper.selectByOptions(organizationId, projectId, null), new TypeToken<List<IssueTypeDTO>>(){}.getType());
     }
 
 //    @Override
@@ -228,13 +230,16 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
             issueTypeService.initIssueTypeByConsumeCreateOrganization(organizationId);
             //注册组织初始化优先级
             priorityService.initProrityByOrganization(Collections.singletonList(organizationId));
-            IssueTypeDTO query = new IssueTypeDTO();
-            query.setOrganizationId(organizationId);
-            query.setInitialize(true);
-            return issueTypeMapper.select(query);
         } else {
-            return issueTypes;
+            AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+            if (agilePluginService != null) {
+                agilePluginService.initFeatureType(organizationId, issueTypes);
+            }
         }
+        IssueTypeDTO query = new IssueTypeDTO();
+        query.setOrganizationId(organizationId);
+        query.setInitialize(true);
+        return issueTypeMapper.select(query);
     }
 
     @Override
