@@ -63,7 +63,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
         <Button icon="playlist_add" onClick={handleCreateStatusClick}>创建状态</Button>
       </Header>
       <Breadcrumb />
-      <Divider className={styles.divider} />
+      <Divider className={styles.divider} style={{ margin: 0 }} />
       <Content>
         {tab}
         <Table
