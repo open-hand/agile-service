@@ -4,8 +4,10 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.BoardColumnService;
 import io.choerodon.agile.app.service.BoardService;
 import io.choerodon.agile.app.service.BoardTemplateService;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -71,9 +73,10 @@ public class BoardTemplateController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询组织下创建的看板模板")
     @GetMapping(value = "/board/list")
-    public ResponseEntity<List<BoardVO>> listBoardTemplate(@ApiParam(value = "组织Id", required = true)
-                                                           @PathVariable(name = "organization_id") Long organizationId) {
-        return Optional.ofNullable(boardTemplateService.listBoardTemplate(organizationId))
+    public ResponseEntity<Page<BoardVO>> listBoardTemplate(@ApiParam(value = "组织Id", required = true)
+                                                           @PathVariable(name = "organization_id") Long organizationId,
+                                                           PageRequest pageRequest) {
+        return Optional.ofNullable(boardTemplateService.listBoardTemplate(organizationId,pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.board.template.query"));
     }

@@ -100,6 +100,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     private  BoardMapper boardMapper;
     @Autowired
     private BoardTemplateService boardTemplateService;
+    @Autowired
+    private IssueTypeService issueTypeService;
 
     @Override
     public OrganizationConfigDTO initStatusMachineTemplate(Long organizationId, Long issueTypeId) {
@@ -355,7 +357,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         handlerTemplateStatusMachineMap(templateStatusMachineMap, organizationId);
         Set<Long> templateIssueTypes = templateStatusMachineMap.keySet();
         for (Long issueTypeId : issueTypeIds) {
-            StatusMachineSchemeConfigDTO config = new StatusMachineSchemeConfigDTO(stateMachineSchemeId,issueTypeId,organizationId);
+            StatusMachineSchemeConfigDTO config = queryStatusMachineSchemeConfig(stateMachineSchemeId,issueTypeId,organizationId);
             if (!ObjectUtils.isEmpty(config)) {
                 continue;
             }
@@ -363,8 +365,37 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                 copyStatusMachine(projectId, organizationId, issueTypeId, stateMachineSchemeId, templateStatusMachineMap.get(issueTypeId), applyType, issueTypeIds);
             } else {
                 stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeId);
+                // 初始化状态和项目的关系
+                initProjectStatusRel(organizationId, issueTypeId, stateMachineSchemeId, projectId);
             }
         }
+    }
+
+    private void initProjectStatusRel(Long organizationId, Long issueTypeId, Long schemeId, Long projectId) {
+        StatusMachineSchemeConfigDTO statusMachineSchemeConfig = queryStatusMachineSchemeConfig(organizationId, issueTypeId, schemeId);
+        List<StatusMachineNodeVO> machineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, statusMachineSchemeConfig.getStateMachineId(), false);
+        List<IssueStatusVO> issueStatusVOS = issueStatusService.queryIssueStatusList(projectId);
+        List<Long> projectStatusIds = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(issueStatusVOS)) {
+            projectStatusIds.addAll(issueStatusVOS.stream().map(IssueStatusVO::getStatusId).collect(Collectors.toList()));
+        }
+        // 状态没有在项目下需要和项目建立关系
+        for (StatusMachineNodeVO machineNodeVO : machineNodeVOS) {
+            if (!projectStatusIds.contains(machineNodeVO.getStatusId())) {
+                StatusDTO statusDTO = statusMapper.queryById(organizationId, machineNodeVO.getStatusId());
+                if (!ObjectUtils.isEmpty(statusDTO)) {
+                    IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
+                    issueStatusDTO.setName(statusDTO.getName());
+                    issueStatusDTO.setProjectId(projectId);
+                    issueStatusDTO.setCompleted(false);
+                    issueStatusDTO.setEnable(false);
+                    issueStatusDTO.setCategoryCode(statusDTO.getType());
+                    issueStatusDTO.setStatusId(statusDTO.getId());
+                    issueStatusService.insertIssueStatus(issueStatusDTO);
+                }
+            }
+        }
+
     }
 
     @Override
@@ -385,6 +416,14 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", SchemeApplyType.AGILE);
         if (!ObjectUtils.isEmpty(organizationConfigDTO)) {
             List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, organizationConfigDTO.getSchemeId());
+            List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, null);
+            String[] issueTypeCodes = {"feature", "backlog"};
+            List<Long> issueTypeIds = issueTypeVOS.stream()
+                    .filter(v -> Objects.equals("system", v.getSource()) && !Arrays.asList(issueTypeCodes).contains(v.getTypeCode()))
+                    .map(IssueTypeVO::getId).collect(Collectors.toList());
+            statusMachineSchemeConfigVOS = statusMachineSchemeConfigVOS.stream()
+                    .filter(v -> issueTypeIds.contains(v.getIssueTypeId()))
+                    .collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(statusMachineSchemeConfigVOS)) {
                 statusMachineTemplateConfig  = true;
             }

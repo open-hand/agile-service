@@ -8,7 +8,11 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -133,6 +137,29 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         column.setSequence(sequence);
         column.setColorCode(colorCode);
         boardColumnService.createBase(column);
+        List<StatusVO> statusVOS = listUnCorrespondStatusTemplate(organizationId, boardId);
+        if (CollectionUtils.isNotEmpty(statusVOS)) {
+            List<StatusVO> list = statusVOS.stream()
+                    .filter(v -> Objects.equals(categoryCode, v.getType()))
+                    .collect(Collectors.toList());
+            int position = 0;
+            for (StatusVO statusVO : list) {
+                ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
+                columnStatusRelDTO.setColumnId(column.getColumnId());
+                columnStatusRelDTO.setStatusId(statusVO.getId());
+                columnStatusRelDTO.setProjectId(projectId);
+                columnStatusRelDTO.setOrganizationId(organizationId);
+                if (columnStatusRelMapper.select(columnStatusRelDTO).isEmpty()) {
+                    ColumnStatusRelDTO columnStatusRel = new ColumnStatusRelDTO();
+                    columnStatusRel.setColumnId(column.getColumnId());
+                    columnStatusRel.setPosition(position++);
+                    columnStatusRel.setStatusId(statusVO.getId());
+                    columnStatusRel.setProjectId(projectId);
+                    columnStatusRel.setOrganizationId(organizationId);
+                    columnStatusRelService.create(columnStatusRel);
+                }
+            }
+        }
     }
 
     @Override
@@ -187,13 +214,14 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
     }
 
     @Override
-    public List<BoardVO> listBoardTemplate(Long organizationId) {
+    public Page<BoardVO> listBoardTemplate(Long organizationId, PageRequest pageRequest) {
         BoardDTO boardDTO = new BoardDTO();
         boardDTO.setProjectId(0L);
         boardDTO.setOrganizationId(organizationId);
-        List<BoardDTO> boardDTOS = boardMapper.select(boardDTO);
+        Page<BoardDTO> page = PageHelper.doPageAndSort(pageRequest, () -> boardMapper.select(boardDTO));
+        List<BoardDTO> boardDTOS = page.getContent();
         if (CollectionUtils.isEmpty(boardDTOS)) {
-            return new ArrayList<>();
+            return new Page<>();
         }
         List<Long> userIds = boardDTOS.stream().map(BoardDTO::getCreatedBy).collect(Collectors.toList());
         List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true).getBody();
@@ -207,7 +235,8 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
             boardVO.setCreator(userDTOMap.getOrDefault(boardTemplate.getCreatedBy(), null));
             boardVOList.add(boardVO);
         });
-        return boardVOList;
+
+        return PageUtil.buildPageInfoWithPageInfoList(page, boardVOList);
     }
 
     @Override
@@ -308,9 +337,9 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         // 查询组织的看板
         Long projectId = projectEvent.getProjectId();
         Long organizationId = ConvertUtil.getOrganizationId(projectEvent.getProjectId());
-        List<BoardVO> boardVOS = listBoardTemplate(organizationId);
+        List<BoardVO> boardVOS = listBoardTemplate(organizationId, new PageRequest(0,0)).getContent();
         if (!CollectionUtils.isEmpty(boardVOS)) {
-           // 复制看看
+           // 复制看板模板
            copyBoardTemplate(projectId, organizationId, boardVOS);
         } else {
             boardService.create(projectId, "默认看板");

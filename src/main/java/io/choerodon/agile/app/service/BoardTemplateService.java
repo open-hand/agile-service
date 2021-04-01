@@ -2,6 +2,8 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -46,7 +48,7 @@ public interface BoardTemplateService {
      * @param organizationId
      * @return
      */
-    List<BoardVO> listBoardTemplate(Long organizationId);
+    Page<BoardVO> listBoardTemplate(Long organizationId, PageRequest pageRequest);
 
     BoardColumnVO createBoardColumn(Long organizationId, String categoryCode, BoardColumnVO boardColumnVO);
 
