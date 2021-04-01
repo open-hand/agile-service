@@ -761,7 +761,8 @@ public class ExcelServiceImpl implements ExcelService {
             throw new CommonException("error.FileOperationHistoryDTO.update");
         }
         FileOperationHistoryDTO result = fileOperationHistoryMapper.selectByPrimaryKey(update.getId());
-        sendProcess(result, result.getUserId(), 1.0, WEBSOCKET_IMPORT_CODE);
+        String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + result.getProjectId();
+        sendProcess(result, result.getUserId(), 1.0, websocketKey);
     }
 
     @Override
@@ -964,14 +965,15 @@ public class ExcelServiceImpl implements ExcelService {
                             Long organizationId,
                             Long userId,
                             Workbook workbook) {
-        FileOperationHistoryDTO history = initFileOperationHistory(projectId, userId, DOING, UPLOAD_FILE, WEBSOCKET_IMPORT_CODE);
-        validateWorkbook(workbook, history, WEBSOCKET_IMPORT_CODE);
-        List<String> headerNames = resolveCodeFromHeader(workbook, history, WEBSOCKET_IMPORT_CODE);
+        String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + projectId;
+        FileOperationHistoryDTO history = initFileOperationHistory(projectId, userId, DOING, UPLOAD_FILE, websocketKey);
+        validateWorkbook(workbook, history, websocketKey);
+        List<String> headerNames = resolveCodeFromHeader(workbook, history, websocketKey);
         Map<Integer, ExcelColumnVO> headerMap = new LinkedHashMap<>();
         boolean withFeature = (agilePluginService != null && withFeature(projectId, organizationId));
         //获取日期类型的列
         Set<Integer> dateTypeColumns = new HashSet<>();
-        processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history, dateTypeColumns, WEBSOCKET_IMPORT_CODE);
+        processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history, dateTypeColumns, websocketKey);
         validateRequiredSystemField(headerMap, withFeature, history);
 
         Sheet dataSheet = workbook.getSheetAt(1);
@@ -1095,7 +1097,7 @@ public class ExcelServiceImpl implements ExcelService {
                     progress.failCountIncrease();
                     progress.processNumIncrease();
                     history.setFailCount(progress.getFailCount());
-                    sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, WEBSOCKET_IMPORT_CODE);
+                    sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
                     continue;
                 }
                 Optional.ofNullable(issueCreateVO.getRelatedIssueVO()).ifPresent(x -> relatedIssueList.add(x));
@@ -1109,7 +1111,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
             history.setFailCount(progress.getFailCount());
             history.setSuccessCount(progress.getSuccessCount());
-            sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, WEBSOCKET_IMPORT_CODE);
+            sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
         }
         updateRelatedIssue(relatedIssueList, rowIssueIdMap, errorRowColMap, headerMap, dataSheet, projectId, progress, parentSonMap, parentCol);
 
@@ -1139,7 +1141,8 @@ public class ExcelServiceImpl implements ExcelService {
             history.setStatus("template_error_missing_required_column");
             fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
             FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
-            sendProcess(errorImport, history.getUserId(), 0.0, WEBSOCKET_IMPORT_CODE);
+            String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + errorImport.getProjectId();
+            sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
             throw e;
         }
     }
@@ -1350,7 +1353,8 @@ public class ExcelServiceImpl implements ExcelService {
         int processNum = progress.getProcessNum() + errorCount;
         progress.setFailCount(failCount);
         progress.addProcessNum(errorCount);
-        sendProcess(history, userId, processNum * 1.0 / dataRowCount, WEBSOCKET_IMPORT_CODE);
+        String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + history.getProjectId();
+        sendProcess(history, userId, processNum * 1.0 / dataRowCount, websocketKey);
     }
 
     private void setErrorMsgToParentSonRow(int rowNum,
@@ -2777,7 +2781,8 @@ public class ExcelServiceImpl implements ExcelService {
                                   HttpServletResponse response, Long organizationId, Sort sort, ServletRequestAttributes requestAttributes) {
         RequestContextHolder.setRequestAttributes(requestAttributes);
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        FileOperationHistoryDTO fileOperationHistoryDTO = initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE, WEBSOCKET_EXPORT_CODE);
+        String websocketKey = WEBSOCKET_EXPORT_CODE + "-" + projectId;
+        FileOperationHistoryDTO fileOperationHistoryDTO = initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE, websocketKey);
         //处理根据界面筛选结果导出的字段
         Map<String, String[]> fieldMap =
                 handleExportFields(searchVO.getExportFieldCodes(), projectId, organizationId, FIELDS_NAMES, FIELDS);
@@ -2910,7 +2915,7 @@ public class ExcelServiceImpl implements ExcelService {
                 ExcelUtil.writeIssue(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, sheetName, Arrays.asList(AUTO_SIZE_WIDTH), workbook, cursor);
                 boolean hasNextPage = (cursor.getPage() + 1) < page.getTotalPages();
                 cursor.clean();
-                sendProcess(fileOperationHistoryDTO, userId, getProcess(cursor.getPage(), page.getTotalPages()), WEBSOCKET_EXPORT_CODE);
+                sendProcess(fileOperationHistoryDTO, userId, getProcess(cursor.getPage(), page.getTotalPages()), websocketKey);
                 if (!hasNextPage) {
                     break;
                 }
@@ -3048,7 +3053,8 @@ public class ExcelServiceImpl implements ExcelService {
             try {
                 fileOperationHistoryDTO.setLastUpdateDate(new Date());
                 fileOperationHistoryMapper.updateByPrimaryKey(fileOperationHistoryDTO);
-                sendProcess(fileOperationHistoryDTO, userId, 100.0, WEBSOCKET_EXPORT_CODE);
+                String websocketKey = WEBSOCKET_EXPORT_CODE + "-" + fileOperationHistoryDTO.getProjectId();
+                sendProcess(fileOperationHistoryDTO, userId, 100.0, websocketKey);
                 workbook.close();
             } catch (IOException e) {
                 LOGGER.warn(EXPORT_ERROR_WORKBOOK_CLOSE, e);
