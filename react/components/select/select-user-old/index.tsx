@@ -18,7 +18,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
   const [text, setText] = useState('');
   const {
     fetchNextPage, data, hasNextPage, isLoading,
-  } = useProjectUsers({ param: text });
+  } = useProjectUsers({ param: text, projectId });
   const options = useMemo(() => {
     if (!extraOption) {
       return data;

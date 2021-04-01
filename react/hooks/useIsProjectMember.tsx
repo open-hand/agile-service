@@ -4,10 +4,10 @@ import { userApi } from '@/api';
 
 const { AppState } = stores;
 
-const useIsProjectMember = () => {
+const useIsProjectMember = (projectId?: string) => {
   const [isProjectMember, setIsProjectMember] = useState<boolean>(false);
   const refresh = useCallback(async () => {
-    const res = await userApi.getById(AppState.userInfo.id);
+    const res = await userApi.project(projectId).getById(AppState.userInfo.id);
     if (res.list && res.list.length > 0) {
       setIsProjectMember(true);
     }
@@ -21,9 +21,10 @@ const useIsProjectMember = () => {
 };
 interface Props {
   children: (isProjectMember: boolean) => React.ReactElement,
+  projectId?: string
 }
-const IsProjectMember: React.FC<Props> = ({ children }) => {
-  const isProjectMember = useIsProjectMember();
+const IsProjectMember: React.FC<Props> = ({ children, projectId }) => {
+  const isProjectMember = useIsProjectMember(projectId);
   return children(isProjectMember);
 };
 export { IsProjectMember };
