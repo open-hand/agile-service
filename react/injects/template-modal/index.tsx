@@ -3,6 +3,7 @@ import { Button, Modal, Tabs } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import StatusMachineTemplate from '../../routes/statusMachine-template';
 import styles from './index.less';
+import KanbanTemplate from './kanban-template';
 
 interface Props {
   templateTabsKey: string[]
@@ -25,7 +26,7 @@ const TemplateContent: React.FC<Props> = ({ templateTabsKey }) => {
     setActiveKey(key);
   }, []);
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Tabs activeKey={activeKey} onChange={handleActiveKeyChange} className={styles.template_tab}>
         {
           templateTabsKey.map((item) => (
@@ -33,14 +34,19 @@ const TemplateContent: React.FC<Props> = ({ templateTabsKey }) => {
           ))
         }
       </Tabs>
-      <div>
+      <div style={{ flex: 1 }}>
         {
-          activeKey === 'statusMachineTemplate' ? (
+          activeKey === 'statusMachineTemplate' && (
             <StatusMachineTemplate readOnly />
-          ) : '看板模板'
+          )
+        }
+        {
+          activeKey === 'boardTemplate' && (
+            <KanbanTemplate />
+          )
         }
       </div>
-    </>
+    </div>
   );
 };
 
