@@ -414,4 +414,11 @@ public interface AgilePluginService {
      * @param statusFieldValueSettingDTOS
      */
     void handlerFeatureFieldValue(StatusFieldSettingVO v, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO);
+
+    /**
+     * 如果是开源版升级到商业版，需要补充feature问题类型
+     * @param organizationId
+     * @param issueTypes
+     */
+    void initFeatureType(Long organizationId, List<IssueTypeDTO> issueTypes);
 }
