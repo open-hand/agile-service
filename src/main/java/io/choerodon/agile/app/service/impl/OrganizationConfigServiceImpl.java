@@ -628,6 +628,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                 for (StatusFieldValueSettingDTO statusFieldValueSetting : statusFieldSettingVO.getFieldValueList()) {
                     statusFieldValueSetting.setId(null);
                     statusFieldValueSetting.setProjectId(projectId);
+                    fieldValueSettingDTOS.add(statusFieldValueSetting);
                 }
                 statusFieldSettingVO.setFieldValueList(fieldValueSettingDTOS);
                 statusFieldSetting.add(statusFieldSettingVO);
