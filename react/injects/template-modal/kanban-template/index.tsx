@@ -12,7 +12,7 @@ const KanbanTemplates = () => {
   }[]>([]);
   useEffect(() => {
     (async () => {
-      const res = await kanbanTemplateApi.list(0, 0);
+      const { content: res } = await kanbanTemplateApi.list(0, 0);
       setTemplates(res);
       setActiveKey(res[0]?.boardId);
     })();
