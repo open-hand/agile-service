@@ -31,6 +31,7 @@
             <id column="type" property="categoryCode"/>
             <id column="fs_completed" property="templateCompleted"/>
             <id column="position" property="position"/>
+            <id column="category_code" property="categoryCode"/>
         </collection>
     </resultMap>
 
