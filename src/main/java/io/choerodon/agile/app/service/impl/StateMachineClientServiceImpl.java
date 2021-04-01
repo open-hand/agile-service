@@ -192,6 +192,12 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (agilePluginService != null) {
             agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO,projectId,issueId,issueCreateVO);
         }
+        //创建问题执行工作流自定义流转
+        IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType);
+        statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
+        if (execResult != null) {
+            return execResult;
+        }
         return issueService.queryIssueCreate(issueCreateVO.getProjectId(), issueId);
     }
 

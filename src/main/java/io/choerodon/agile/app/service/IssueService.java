@@ -85,6 +85,16 @@ public interface IssueService {
                               String applyType, IssueDTO triggerIssue, boolean autoTranferFlag);
 
     /**
+     * 执行状态机自定义流转
+     *
+     * @param projectId
+     * @param issueId
+     * @param applyType
+     * @return
+     */
+    IssueVO doStateMachineCustomFlow(Long projectId, Long issueId, String applyType);
+
+    /**
      * 更新issue自己的字段
      *
      * @param issueUpdateVO
