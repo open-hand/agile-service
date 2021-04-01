@@ -57,12 +57,10 @@ class SelectU<T extends SelectProps> extends Select<T> {
         const validationResult = validationResults.find((error) => error.value === v);
         const className = classNames(
           {
-            [`${prefixCls}-multiple-block-invalid`]: validationResult,
-          },
-          blockClassName,
-          {
+            [`${prefixCls}-multiple-block-invalid`]: !!validationResult,
             [`${prefixCls}-multiple-block-option-disabled`]: optionProps.disabled,
           },
+          blockClassName,
         );
         const validationMessage = validationResult && this.renderValidationMessage(validationResult);
         const closeBtn = !optionProps.disabled && !this.isDisabled() && !this.isReadOnly() && (
