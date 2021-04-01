@@ -16,15 +16,23 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (statusList: IStatus[]) => void
   issueTypeIds?: string[]
   selectedIds?: string[]
+  isBacklog?: boolean
 }
 const SelectStatus: React.FC<Props> = ({
-  issueTypeId, expectStatusId, dataRef, isProgram, afterLoad, issueTypeIds, selectedIds, ...otherProps
+  issueTypeId, expectStatusId, dataRef, isProgram, afterLoad, issueTypeIds, selectedIds, isBacklog = false, ...otherProps
 }) => {
+  let applyType = 'agile';
+  if (isProgram) {
+    applyType = 'program';
+  }
+  if (isBacklog) {
+    applyType = 'backlog';
+  }
   const config = useMemo((): SelectConfig<IStatus> => ({
     name: 'statusId',
     textField: 'name',
     valueField: 'id',
-    request: ({ filter, page }) => statusApi.loadByProject(isProgram ? 'program' : 'agile'),
+    request: ({ filter, page }) => statusApi.loadByProject(applyType),
     middleWare: (statusList) => {
       let data = statusList;
       if (dataRef) {
