@@ -18,6 +18,7 @@ const KanbanTemplateList = () => {
   const dataSet = useMemo(() => new DataSet({
     autoQuery: true,
     selection: false,
+    paging: false,
     transport: {
       read: ({ params }) => kanbanTemplateApiConfig.list(params.page, params.size),
     },
