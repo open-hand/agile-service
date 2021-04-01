@@ -13,7 +13,7 @@ import IssueFilterForm, { useIssueFilterForm } from '@/components/issue-filter-f
 import ChooseField, { useChoseField } from '@/components/chose-field';
 import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
 import WsProgress from '@/components/ws-progress';
-import { getProjectName } from '@/utils/common';
+import { getProjectName, getProjectId } from '@/utils/common';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
@@ -275,7 +275,7 @@ const ExportIssue: React.FC = () => {
         {renderExport()}
       </FormPart>
       <WsProgress
-        messageKey="agile-export-issue"
+        messageKey={`agile-export-issue-${getProjectId()}`}
         onFinish={handleFinish}
         onStart={() => {
           modal?.update({ okProps: { loading: true } });

@@ -9,7 +9,7 @@ import { Modal } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import './ImportIssue.less';
 import { issueApi } from '@/api';
-import { getApplyType } from '@/utils/common';
+import { getApplyType, getProjectId } from '@/utils/common';
 import {
   includes, isEqual, uniq, map,
 } from 'lodash';
@@ -423,7 +423,7 @@ class ImportIssue extends Component {
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         />
         <WSHandler
-          messageKey={getApplyType() === 'program' ? 'agile-import' : 'agile-import-issues'}
+          messageKey={getApplyType() === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`}
           onMessage={this.handleMessage}
         >
           {this.renderProgress()}

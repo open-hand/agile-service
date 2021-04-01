@@ -3,32 +3,39 @@
   position: relative;
   margin-left: 0;
 
-  &-item, &-reply {
+  &-item,
+  &-reply {
     .c7n-quill-editor {
       .ql-toolbar {
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
       }
+
       .ql-container {
         &:focus {
           outline: 0;
         }
       }
+
       .c7n-quill-editor-bottomBar {
         border: none;
         margin-top: 14px;
         margin-bottom: 2px;
-        .c7n-quill-cancelBtn, .c7n-quill-saveBtn {
+
+        .c7n-quill-cancelBtn,
+        .c7n-quill-saveBtn {
           height: 30px;
         }
+
         .c7n-quill-cancelBtn {
           border: 1px solid #D3D3D3;
-          background-color: #ffffff;
+          background-color: #fff;
           margin-right: 10px;
         }
+
         .c7n-quill-saveBtn {
           background-color: #3F51B5;
-          color: #ffffff;
+          color: #fff;
         }
       }
     }
@@ -37,10 +44,15 @@
   &-item {
     padding: 0.1rem;
     border-left: 0.02rem solid transparent;
+
     &:hover {
       background: rgba(0, 0, 0, 0.03);
       transition: all 1s;
       border-left-color: #3F51B5;
+
+      .ck-content {
+        background: transparent;
+      }
 
       // .c7n-action {
       //   opacity: 1;
@@ -53,9 +65,11 @@
     margin-bottom: 12px;
     margin-left: 35px;
   }
+
   &-reply {
     padding: 13px 10px;
     border-top: 1px solid rgba(0, 0, 0, 0.12);
+
     &:last-child {
       border-bottom: 0.01rem solid rgba(0, 0, 0, 0.12);
     }
@@ -75,6 +89,7 @@
     .c7n-title-commit {
       display: flex;
       align-items: center;
+
       &-to {
         display: flex;
         align-items: center;
@@ -85,6 +100,7 @@
     .c7n-action {
       display: flex;
       align-items: center;
+
       .icon {
         margin-left: 5px;
         margin-right: 5px;
