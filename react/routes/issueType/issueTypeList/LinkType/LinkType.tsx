@@ -1,9 +1,9 @@
 import React, {
-  useMemo, useEffect, useCallback, useRef, useState,
+  useMemo, useCallback, useRef, useState,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Modal, DataSet, Form, TextField, Button, IconPicker,
+  Modal, DataSet, Form, TextField, Button, IconPicker, CheckBox,
 } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
@@ -109,6 +109,10 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
       label: '请选择引用的问题类型',
       validator: checkRefrencedType,
     }, {
+      name: 'copyStatusMachine',
+      label: '使用组织预置状态机模板',
+      type: 'boolean' as FieldType,
+    }, {
       name: 'newName',
       label: '请重新设置名称',
       required: true,
@@ -161,7 +165,9 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
       setRerencedLoading(true);
       const newName = linkDataSet.current?.get('newName');
       const newIcon = linkDataSet.current?.get('newIcon');
-      const data = {};
+      const data = {
+        copyStatusMachine: linkDataSet.current?.get('copyStatusMachine'),
+      };
       if (newName) {
         Object.assign(data, {
           name: newName,
@@ -208,6 +214,7 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
       <div className={styles.linkType_content}>
         <Form dataSet={linkDataSet} className={styles.linkType_form}>
           <SelectLinkType name="id" dataRef={linkedTypeRef} />
+          <CheckBox name="copyStatusMachine" />
           {
             renameExist && (
               <div style={{

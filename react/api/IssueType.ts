@@ -276,7 +276,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
-  referenced(typeId: string, data: { name: string } | {}) {
+  referenced(typeId: string, data: { name: string, copyStatusMachine:boolean} | {}) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/issue_type/reference/${typeId}`,
