@@ -10,7 +10,7 @@ import { MAX_NUMBER_VALUE, MAX_NUMBER_STEP, MAX_FLOAT_BITE } from '@/constants/M
 
 const { TextArea } = Input;
 const { Option } = Select;
-export default function renderField(field) {
+export default function renderField(field, projectId) {
   const {
     fieldOptions, fieldType, required, fieldName,
   } = field;
@@ -169,6 +169,7 @@ export default function renderField(field) {
         label={fieldName}
         allowClear
         mode={field.fieldType === 'multiMember' ? 'multiple' : undefined}
+        projectId={projectId}
         extraOption={field.fieldType === 'multiMember' ? field.defaultValueObjs : field.defaultValueObj}
         className="multiMemberSelect"
       />
