@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { IIssueType } from '@/common/types';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import { includes } from 'lodash';
+import classNames from 'classnames';
 import styles from './index.less';
 
 type ChangeSelected = (code: string)=>void
@@ -11,9 +12,12 @@ interface Props {
   selectedType?: string,
   setSelectedType?: ChangeSelected,
   excludeTypes?: string[]
+  brighter?: boolean
 }
 
-const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType, excludeTypes = [] }) => {
+const IssueTypeTab: React.FC<Props> = ({
+  selectedType, setSelectedType, excludeTypes = [], brighter,
+}) => {
   const [selected, setSelected] = useState(selectedType || '');
   const { data: issueTypes } = useIssueTypes();
   const handleSelectType = useCallback((id: string) => {
@@ -39,7 +43,12 @@ const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType, excludeT
       {
         (issueTypes || []).filter((item: IIssueType) => !includes(excludeTypes, item.typeCode)).map((item: IIssueType) => (
           <span
-            className={`${styles.issueTypeTabItem} ${item.id === selected ? styles.selected : ''}`}
+            // className={`${styles.issueTypeTabItem} ${item.id === selected ? styles.selected : ''}`}
+            className={classNames({
+              [styles.issueTypeTabItem]: true,
+              [styles.selected]: item.id === selected,
+              [styles.brighter]: item.id === selected && brighter,
+            })}
             role="none"
             onClick={() => handleSelectType(item.id)}
           >

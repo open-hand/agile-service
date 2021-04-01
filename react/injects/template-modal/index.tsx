@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Button, Modal, Tabs } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import StatusMachineTemplate from '../../routes/statusMachine-template';
-// const StatusMachineTemplate = React.lazy(() => import('../../routes/statusMachine-template'));
+import styles from './index.less';
 
 interface Props {
   templateTabsKey: string[]
@@ -19,7 +19,6 @@ const templateTabMap = new Map([
   }],
 ]);
 
-const Test = () => (<div>test</div>);
 const TemplateContent: React.FC<Props> = ({ templateTabsKey }) => {
   const [activeKey, setActiveKey] = useState<'statusMachineTemplate' | 'boardTemplate'>('statusMachineTemplate');
   const handleActiveKeyChange = useCallback((key) => {
@@ -27,7 +26,7 @@ const TemplateContent: React.FC<Props> = ({ templateTabsKey }) => {
   }, []);
   return (
     <>
-      <Tabs activeKey={activeKey} onChange={handleActiveKeyChange}>
+      <Tabs activeKey={activeKey} onChange={handleActiveKeyChange} className={styles.template_tab}>
         {
           templateTabsKey.map((item) => (
             <TabPane key={item} tab={templateTabMap.get(item)?.name} />
@@ -37,9 +36,7 @@ const TemplateContent: React.FC<Props> = ({ templateTabsKey }) => {
       <div>
         {
           activeKey === 'statusMachineTemplate' ? (
-            // <Test />
             <StatusMachineTemplate readOnly />
-            // <div>状态机看板</div>
           ) : '看板模板'
         }
       </div>

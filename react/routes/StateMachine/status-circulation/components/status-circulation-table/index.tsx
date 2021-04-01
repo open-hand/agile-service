@@ -156,7 +156,7 @@ const StatusCirculationTable: React.FC = () => {
 
   const components = {
     body: {
-      row: DragableBodyRow,
+      row: (props: any) => <DragableBodyRow {...props} readOnly={readOnly} />,
     },
   };
 

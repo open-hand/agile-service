@@ -8,6 +8,8 @@ import { observer } from 'mobx-react-lite';
 import useQueryString from '@/hooks/useQueryString';
 import { getIsOrganization } from '@/utils/common';
 import { statusTransformApi } from '@/api';
+import Loading from '@/components/Loading';
+import classNames from 'classnames';
 import Status from './status';
 import StatusCirculation from './status-circulation';
 import CustomCirculation from './custom-circulation';
@@ -49,6 +51,7 @@ const StateMachine: React.FC = ({
   const { issueTypeId, activeKey: paramsActiveKey } = params;
   const [selectedType, handleChangeSelectedType] = useSelectedType(issueTypeId || undefined);
   const [issueTypeInitedMap, setIssueTypeInitedMap] = useState<Map<string, boolean>>(observable.map());
+  const [loading, setLoading] = useState<boolean>(false);
   const [activeKey, setActiveKey] = useState(() => {
     if (propActiveKey) {
       return propActiveKey;
@@ -66,16 +69,25 @@ const StateMachine: React.FC = ({
 
   useEffect(() => {
     if (isOrganization && selectedType && !issueTypeInitedMap.get(selectedType)) {
+      setLoading(true);
       statusTransformApi.hasTemplate(selectedType).then((res: boolean) => {
         issueTypeInitedMap.set(selectedType, res);
         setIssueTypeInitedMap(issueTypeInitedMap);
+        setLoading(false);
       });
     }
   }, [isOrganization, issueTypeInitedMap, selectedType]);
 
   const Component = find(defaultTabs, { key: activeKey })?.component;
   const tabComponent = (
-    <Tabs className={styles.tabs} activeKey={activeKey} onChange={setActiveKey}>
+    <Tabs
+      className={classNames({
+        [styles.tabs]: true,
+        [styles.brighterTabs]: readOnly,
+      })}
+      activeKey={activeKey}
+      onChange={setActiveKey}
+    >
       {defaultTabs.map((tab) => <TabPane key={tab.key} tab={tab.name} />)}
     </Tabs>
   );
@@ -90,13 +102,24 @@ const StateMachine: React.FC = ({
     }}
     >
       {
-        isOrganization && !issueTypeInitedMap.get(selectedType) ? (
-          <NoTemplate />
-        ) : (
-          <>
-            {Component && <Component {...otherProps} tab={tabComponent} />}
-          </>
+        loading ? <Loading loading={loading} /> : (
+          <div style={{
+            marginLeft: readOnly ? -24 : 0,
+            marginTop: readOnly ? -16 : 0,
+          }}
+          >
+            {
+              isOrganization && !issueTypeInitedMap.get(selectedType) ? (
+                <NoTemplate />
+              ) : (
+                <>
+                  {Component && <Component {...otherProps} tab={tabComponent} />}
+                </>
+              )
+            }
+          </div>
         )
+
       }
     </StateMachineContext.Provider>
   );

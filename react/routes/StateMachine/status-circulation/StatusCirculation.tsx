@@ -115,6 +115,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             }
           }}
           excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+          brighter={readOnly}
         />
         {tab}
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
