@@ -78,7 +78,7 @@ const KanbanTemplateList = () => {
   return (
     <Page>
       <Header>
-        <Tooltip title={!enableCreate ? '请先初始化状态机模板' : ''}>
+        <Tooltip title={!enableCreate ? '请先配置故事、任务、子任务或缺陷的状态机模板' : ''}>
           <span>
             <Button
               icon="playlist_add"
