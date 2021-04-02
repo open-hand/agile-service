@@ -285,4 +285,12 @@ public class OrganizationConfigController {
                                                                            @RequestParam @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(organizationConfigService.checkStatusMachineTemplate(organizationId, issueTypeId), HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询组织层配置状态机模板的问题类型")
+    @GetMapping("/issue_type/list")
+    public ResponseEntity<List<IssueTypeVO>> listIssueType(@ApiParam(value = "组织id", required = true)
+                                                              @PathVariable("organization_id") Long organizationId) {
+        return new ResponseEntity<>(organizationConfigService.listIssueType(organizationId), HttpStatus.OK);
+    }
 }
