@@ -84,7 +84,7 @@ class EpicCard extends Component {
           >
             <div className="top">
               <div className="summary">
-                <Tooltip title={`${epicName || '无史诗'}`} getPopupContainer={() => document.getElementsByClassName('minimap-container-scroll')[0]}>
+                <Tooltip title={`${`史诗名称：${epicName}` || '无史诗'}`} getPopupContainer={() => document.getElementsByClassName('minimap-container-scroll')[0]}>
                   {`${epicName || '无史诗'}`}
                 </Tooltip>
               </div>
