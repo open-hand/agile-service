@@ -42,7 +42,7 @@ const tabs: ITab[] = [{
 
 const { TabPane } = Tabs;
 const StateMachine: React.FC = ({
-// @ts-ignore
+  // @ts-ignore
   defaultTabKeys = ['status', 'status_change', 'custom'], readOnly = false, activeKey: propActiveKey, setActiveKey: propSetActiveKey, ...otherProps
 }) => {
   const defaultTabs = tabs.filter((item) => includes(defaultTabKeys, item.key));
@@ -73,11 +73,18 @@ const StateMachine: React.FC = ({
       statusTransformApi.hasTemplate(selectedType).then((res: boolean) => {
         issueTypeInitedMap.set(selectedType, res);
         setIssueTypeInitedMap(issueTypeInitedMap);
+        // if (!res) {
+        //   propSetActiveKey('status_change');
+        // }
         setLoading(false);
       });
     }
-  }, [isOrganization, issueTypeInitedMap, selectedType]);
-
+  }, [isOrganization, issueTypeInitedMap, propSetActiveKey, selectedType]);
+  // useEffect(() => {
+  //   if (isOrganization && selectedType && issueTypeInitedMap.has(selectedType) && !issueTypeInitedMap.get(selectedType)) {
+  //     propSetActiveKey('status_change');
+  //   }
+  // }, [activeKey, isOrganization, issueTypeInitedMap, propSetActiveKey, selectedType]);
   const Component = find(defaultTabs, { key: activeKey })?.component;
   const tabComponent = (
     <Tabs
@@ -110,7 +117,7 @@ const StateMachine: React.FC = ({
           >
             {
               isOrganization && !issueTypeInitedMap.get(selectedType) ? (
-                <NoTemplate />
+                <NoTemplate activeKey={activeKey} />
               ) : (
                 <>
                   {Component && <Component {...otherProps} tab={tabComponent} />}
