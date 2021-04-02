@@ -59,13 +59,23 @@
       opacity: 1;
       transition: opacity 2s;
     }
-    .ck-content {
-      background: transparent;
+
+    .c7n-ckeditor-viewer {
+      .ck-content:not(.ck-focused) {
+        background: transparent;
+      }
     }
   }
 
   &:last-child {
     border-bottom: none;
+  }
+
+  // 备注样式更改
+  .c7n-ckeditor-viewer {
+    .ck.ck-editor__editable_inline >:first-child {
+      margin-top: 0;
+    }
   }
 }
 

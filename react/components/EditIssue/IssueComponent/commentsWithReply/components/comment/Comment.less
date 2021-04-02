@@ -49,9 +49,10 @@
       background: rgba(0, 0, 0, 0.03);
       transition: all 1s;
       border-left-color: #3F51B5;
-
-      .ck-content {
-        background: transparent;
+      .c7n-ckeditor-viewer {
+        .ck-content:not(.ck-focused) {
+          background: transparent;
+        }
       }
 
       // .c7n-action {
