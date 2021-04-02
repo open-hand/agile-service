@@ -5,10 +5,6 @@ import StatusMachineTemplate from '../../routes/statusMachine-template';
 import styles from './index.less';
 import KanbanTemplate from './kanban-template';
 
-interface Props {
-  templateTabsKey: string[]
-}
-
 const { TabPane } = Tabs;
 
 const templateTabMap = new Map([
@@ -20,7 +16,7 @@ const templateTabMap = new Map([
   }],
 ]);
 
-const TemplateContent: React.FC<Props> = ({ templateTabsKey }) => {
+const TemplateContent = () => {
   const [activeKey, setActiveKey] = useState<'statusMachineTemplate' | 'boardTemplate'>('statusMachineTemplate');
   const handleActiveKeyChange = useCallback((key) => {
     setActiveKey(key);
@@ -29,7 +25,7 @@ const TemplateContent: React.FC<Props> = ({ templateTabsKey }) => {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Tabs activeKey={activeKey} onChange={handleActiveKeyChange} className={styles.template_tab}>
         {
-          templateTabsKey.map((item) => (
+          ['statusMachineTemplate', 'boardTemplate'].map((item) => (
             <TabPane key={item} tab={templateTabMap.get(item)?.name} />
           ))
         }
@@ -52,14 +48,14 @@ const TemplateContent: React.FC<Props> = ({ templateTabsKey }) => {
 
 const ObserverTemplateContent = observer(TemplateContent);
 
-const openTemplate = (props: Props) => {
+const openTemplate = (props: any) => {
   Modal.open({
     drawer: true,
     key: Modal.key(),
     style: {
       width: '1090px',
     },
-    title: '模板',
+    title: '查看模板',
     children: <ObserverTemplateContent {...props} />,
     okText: '关闭',
     footer: (okBtn: Button) => okBtn,
