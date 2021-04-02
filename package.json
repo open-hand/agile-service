@@ -41,6 +41,7 @@
     "react-fast-compare": "^2.0.4",
     "react-gantt-component": "^0.1.0",
     "react-hammerjs": "^1.0.1",
+    "react-html-email": "^3.0.0",
     "react-image-lightbox": "^4.6.0",
     "react-is": "^16.13.1",
     "react-measure": "^2.3.0",
