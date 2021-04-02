@@ -3,9 +3,9 @@ import {
   Button, Icon, Tooltip,
 } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
-import Commits from '@/components/Commits';
 import MergeRequest from '@/components/MergeRequest';
 import { useDetailContainerContext } from '@/components/detail-container/context';
+import LinkedBranch from '../linked-branch';
 
 const IssueBranch = observer(({
   store, disabled, projectId, reloadIssue, otherProject, outside, programId, applyType, issueId,
@@ -14,7 +14,7 @@ const IssueBranch = observer(({
   const mergeRequestRef = useRef();
   const { resizeRef } = useDetailContainerContext();
   const refresh = useCallback(() => {
-    commitsRef.current?.loadCommits();
+    commitsRef.current?.query();
     mergeRequestRef.current?.loadMergeRequest();
   }, []);
   useEffect(() => {
@@ -49,10 +49,7 @@ const IssueBranch = observer(({
           </div>
         )}
       </div>
-      <Commits
-        ref={commitsRef}
-        issueId={issueId}
-      />
+      <LinkedBranch ref={commitsRef} issueId={issueId} />
       <div className="c7n-title-wrapper">
         <div className="c7n-title-left">
           合并请求

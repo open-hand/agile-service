@@ -63,8 +63,11 @@ class DevOpsApi extends Api<DevOpsApi> {
    * 根据issueId加载相关commit
    * @param issueId
    */
-  loadCommit(issueId: number) {
-    return axios.get(`${this.issuePrefix}/issue/${issueId}/commit/list`);
+  loadCommit(issueId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.issuePrefix}/issue/${issueId}/commit/list`,
+    });
   }
 
   /**
@@ -170,4 +173,5 @@ class DevOpsApi extends Api<DevOpsApi> {
 }
 
 const devOpsApi = new DevOpsApi();
-export { devOpsApi };
+const devOpsApiConfig = new DevOpsApi(true);
+export { devOpsApi, devOpsApiConfig };
