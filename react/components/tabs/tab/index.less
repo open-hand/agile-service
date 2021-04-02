@@ -1,0 +1,67 @@
+.c7n-custom-tabs {
+  &-line-tab {
+    cursor: pointer;
+    margin-bottom: 16px;
+
+    &-title {
+      font-weight: 500;
+      height: 22px;
+    }
+
+    &-active {
+      color: currentColor;
+    }
+
+    &-indicator {
+      visibility: hidden;
+      margin-top: 10px;
+      height: 2px;
+    }
+
+    &-active &-indicator {
+      visibility: visible;
+      background: currentColor;
+    }
+
+    &:not(&:last-child) {
+      margin-right: 32px;
+    }
+  }
+
+  // 按钮主题
+  &-button-tab {
+    padding: 7px 16px;
+    line-height: 16px;
+    cursor: pointer;
+    border: 1px solid rgba(232, 232, 232, 1);
+    margin-left: -1px;
+    margin-bottom: 12px;
+
+    &-title {
+      font-weight: 500;
+      color: #000;
+    }
+
+    &-active {
+      background-color: currentColor;
+      border-color: currentColor !important;
+    }
+
+    &-active &-title {
+      color: #FFF;
+    }
+
+    &-active + & {
+      border-left-color: currentColor !important;
+    }
+
+    &-indicator {
+      visibility: hidden;
+    }
+
+    &-active &-indicator {
+      visibility: visible;
+      background: currentColor;
+    }
+  }
+}
