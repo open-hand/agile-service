@@ -83,6 +83,7 @@ const openDeleteStatus = (props: Omit<Props, 'modal'>) => {
       disabled: true,
     },
     children: <DeleteStatus {...props} />,
+    border: false,
   });
 };
 

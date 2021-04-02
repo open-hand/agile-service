@@ -29,11 +29,11 @@ const IssueTypeTab: React.FC<Props> = ({
   }, [setSelectedType]);
 
   useEffect(() => {
-    if (!selectedType) {
-      const newIssueTypes = (issueTypes || []).filter((item: IIssueType) => !includes(excludeTypes, item.typeCode));
+    const newIssueTypes = (issueTypes || []).filter((item: IIssueType) => !includes(excludeTypes, item.typeCode));
+    if (!selectedType || (selectedType && !newIssueTypes.find((item: IIssueType) => item.id === selectedType))) {
       handleSelectType((newIssueTypes && newIssueTypes[0] && newIssueTypes[0].id) as string);
     }
-    if (selectedType && selected !== selectedType) {
+    if (selectedType && selected !== selectedType && newIssueTypes.find((item: IIssueType) => item.id === selectedType)) {
       setSelected(selectedType);
     }
   }, [handleSelectType, selectedType, setSelectedType, issueTypes, selected, excludeTypes]);

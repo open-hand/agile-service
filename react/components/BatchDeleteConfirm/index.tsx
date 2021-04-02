@@ -120,6 +120,7 @@ const openBatchDeleteModal = ({ dataSet, close }: { dataSet: DataSet, close: Fun
     className: styles.batchDeleteModal,
     children: <ObserverBatchDeleteModal dataSet={dataSet} close={close} />,
     footer: () => null,
+    border: false,
   });
 };
 export default openBatchDeleteModal;

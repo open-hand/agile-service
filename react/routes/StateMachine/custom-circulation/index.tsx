@@ -7,7 +7,9 @@ import {
   Table, DataSet, Menu, Dropdown, Icon, Modal,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { find, filter, includes } from 'lodash';
+import {
+  find, filter, includes, map,
+} from 'lodash';
 import moment from 'moment';
 import { IIssueType, User, IStatus } from '@/common/types';
 import { statusTransformApiConfig } from '@/api';
@@ -512,10 +514,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   };
 
   useEffect(() => {
-    if (selectedType && ((isOrganization && issueTypeInitedMap.get(selectedType)) || !isOrganization)) {
+    if (selectedType && issueTypes?.find((item: IIssueType) => item.id === selectedType) && ((isOrganization && issueTypeInitedMap.get(selectedType)) || !isOrganization)) {
       customCirculationDataSet.query();
     }
-  }, [customCirculationDataSet, isOrganization, issueTypeInitedMap, selectedType]);
+  }, [customCirculationDataSet, isOrganization, issueTypeInitedMap, issueTypes, selectedType]);
 
   const columns = [
     {
