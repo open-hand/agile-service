@@ -11,25 +11,29 @@ import { getProjectId } from '@/utils/common';
 // import JsPDF from 'jspdf';
 import fileSaver from 'file-saver';
 import to, { linkUrl } from '@/utils/to';
+import {
+  Box, Email, Image, Item, renderEmail,
+} from 'react-html-email';
 import styles from './index.less';
 import { useProjectReportContext } from '../../context';
 import Export, { IExportProps } from '../export';
 
-const htmlTemplate = (images: { url: String, height: number, width: number }[]) => `<!DOCTYPE html>
-  <html lang="en">
-  
-  <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-  </head>
-  
-  <body>
-    ${images.map((image) => `<image src="${image.url}" height="${image.height}" style="display:block"/>`).join('\n')}
-  </body>
-  
-  </html>`;
+const htmlTemplate = (images: { url: String, height: number, width: number }[]) => renderEmail(
+  <Box width="100%">
+    {images.map((image) => (
+      <Item>
+        <Image
+          src={image.url}
+          style={{
+            maxWidth: 780,
+          }}
+        />
+      </Item>
+    ))}
+  </Box>
+  ,
+);
+
 interface Props {
 
 }
