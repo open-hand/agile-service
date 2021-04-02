@@ -162,7 +162,7 @@ public class OrganizationConfigController {
     @GetMapping(value = "/status_transform_setting/list")
     public ResponseEntity<Page<StatusSettingVO>> statusTransformSettingList(@PathVariable("organization_id") Long organizationId,
                                                                             @SortDefault(value = "smn.rank, smn.id", direction = Sort.Direction.ASC)
-                                                                                    PageRequest pageRequest,
+                                                                            PageRequest pageRequest,
                                                                             @ApiParam(value = "问题类型Id", required = true)
                                                                             @RequestParam @Encrypt Long issueTypeId,
                                                                             @ApiParam(value = "过滤参数:状态名称", required = true)
