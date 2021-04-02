@@ -16,7 +16,7 @@ import empty from './empty.png';
 
 const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
   const {
-    selectedType, setSelectedType, issueTypeInitedMap, setIssueTypeInitedMap, readOnly,
+    selectedType, setSelectedType, issueTypeInitedMap, setIssueTypeInitedMap, readOnly, visibleIssueTypeCategory,
   } = useStateMachineContext();
   const isOrganization = getIsOrganization();
 
@@ -73,6 +73,7 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
           setSelectedType={setSelectedType}
           excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
           brighter={readOnly}
+          visibleIssueTypeCategory={visibleIssueTypeCategory}
         />
         <Empty
           pic={empty}

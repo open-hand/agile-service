@@ -227,7 +227,7 @@ const transformFieldValue = (fieldSetting) => {
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { data: issueTypes } = useIssueTypes();
   const {
-    selectedType, setSelectedType, issueTypeInitedMap, readOnly,
+    selectedType, setSelectedType, issueTypeInitedMap, readOnly, visibleIssueTypeCategory,
   } = useStateMachineContext();
 
   const isOrganization = getIsOrganization();
@@ -569,6 +569,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           setSelectedType={setSelectedType}
           excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
           brighter={readOnly}
+          visibleIssueTypeCategory={visibleIssueTypeCategory}
         />
         {tab}
         <div className={`${styles.customCirculation}`}>
