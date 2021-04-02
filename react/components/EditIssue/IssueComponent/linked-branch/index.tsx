@@ -63,8 +63,7 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
       label: '状态',
     }],
   }), [issueId]);
-  const handleCreateMergeRequest = (r) => {
-    const record = r.toData();
+  const handleCreateMergeRequest = (record) => {
     const win = window.open('');
     const { appServiceId, projectId } = record;
     devOpsApi.project(projectId).loadGitUrl(appServiceId)
@@ -75,7 +74,8 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
       .catch((error) => {
       });
   };
-  const handleMenuClick = useCallback(async (key, record) => {
+  const handleMenuClick = useCallback(async (key, r) => {
+    const record = r.toData();
     switch (key) {
       case 'delete': {
         Modal.confirm({
