@@ -1,7 +1,7 @@
 // https://github.com/fex-team/webuploader
 /* eslint-disable */
 import webUploader from 'webuploader';
-import $ from 'jquery';
+import $, { type } from 'jquery';
 import Cookies from 'universal-cookie';
 
 const cookies = new Cookies();
@@ -20,9 +20,9 @@ class WebUploader {
     this.combine = {};
   }
 
-  async init({prefixPatch, organizationId, projectId, combine}) {
+  async init({ prefixPatch, organizationId, projectId, combine }) {
     getCurrentOrganizationId = organizationId;
-    getCurrentProjectId= projectId;
+    getCurrentProjectId = projectId;
     this.combine = combine;
     this.checkUrl = `${API_HOST}${prefixPatch}/v1/${getCurrentOrganizationId}/upload/check-block`;
     this.uploadUrl = `${API_HOST}${prefixPatch}/v1/${getCurrentOrganizationId}/upload/save`;
@@ -200,6 +200,12 @@ class WebUploader {
       }),
       dataType: 'json',
       success: (data) => {
+        if (data && typeof data === 'object' && data.failed) {
+          this.emitUploadResult({
+            success: false,
+            msg: data.message,
+          });
+        }
         this.emitUploadResult({
           success: true,
           data,

@@ -94,7 +94,7 @@ const FragmentUpload = inject('AppState')(observer((props) => {
   const onThisChange = async (info) => {
     const { file, event } = info;
     if (event) {
-      message.error('上传失败');
+      message.error(file?.error?.message ?? '上传失败');
       setFileList((list) => list.map((item) => {
         if (!item.url && item.uid === file.uid) {
           return {
@@ -107,7 +107,7 @@ const FragmentUpload = inject('AppState')(observer((props) => {
       return;
     }
     if (file.status === 'error') {
-      message.error('上传失败');
+      message.error(file?.error?.message ?? '上传失败');
       setFileList((list) => list.map((item) => {
         if (!item.url && item.uid === file.uid) {
           return {
