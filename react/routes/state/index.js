@@ -13,7 +13,7 @@ const TemplateManage = () => {
       className="c7n-status-pageWrap"
     >
       <PageTab
-        title="状态机"
+        title="状态"
         route="/agile/states/state"
         tabKey="choerodon.code.organization.setting.issue.states.ps.state"
         component={StateList}

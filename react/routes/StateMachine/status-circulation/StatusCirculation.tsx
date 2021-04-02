@@ -7,6 +7,8 @@ import {
 import { Button } from 'choerodon-ui/pro';
 import { Divider } from 'choerodon-ui';
 import { getIsOrganization } from '@/utils/common';
+import useIssueTypes from '@/hooks/data/useIssueTypes';
+import { IIssueType } from '@/common/types';
 import openSelectExistStatus from '../components/select-exist-status';
 import openCreateStatus from '../components/create-status';
 import openSetDefaultStatus from '../components/set-default-status';
@@ -20,6 +22,7 @@ import Save from './components/save';
 
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { store } = useStatusCirculationContext();
+  const { data: issueTypes } = useIssueTypes();
   const {
     selectedType, setSelectedType, issueTypeInitedMap, readOnly,
   } = useStateMachineContext();
@@ -27,10 +30,10 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   // const selectedTypeRef = useRef<string>(selectedType);
   // selectedTypeRef.current = selectedType;
   const refresh = useCallback(() => {
-    if (selectedType && ((isOrganization && issueTypeInitedMap.get(selectedType)) || !isOrganization)) {
+    if (selectedType && issueTypes?.find((item: IIssueType) => item.id === selectedType) && ((isOrganization && issueTypeInitedMap.get(selectedType)) || !isOrganization)) {
       store.getStatusList(selectedType);
     }
-  }, [isOrganization, issueTypeInitedMap, selectedType, store]);
+  }, [isOrganization, issueTypeInitedMap, issueTypes, selectedType, store]);
   useEffect(() => {
     refresh();
   }, [refresh]);

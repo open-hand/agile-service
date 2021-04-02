@@ -128,6 +128,7 @@ function IssueTypeList() {
             title: '删除问题类型',
             children: <span>{`确定要删除“${record?.get('name')}”问题类型？删除后，该问题类型的页面字段方案和状态机方案将一并删除。`}</span>,
             onOk: handleDelete,
+            border: false,
           });
           break;
         }
