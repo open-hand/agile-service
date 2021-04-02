@@ -6,7 +6,9 @@ import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -159,7 +161,8 @@ public class OrganizationConfigController {
     @ApiOperation(value = "自定义流转列表")
     @GetMapping(value = "/status_transform_setting/list")
     public ResponseEntity<Page<StatusSettingVO>> statusTransformSettingList(@PathVariable("organization_id") Long organizationId,
-                                                                            PageRequest pageRequest,
+                                                                            @SortDefault(value = "smn.rank, smn.id", direction = Sort.Direction.ASC)
+                                                                                    PageRequest pageRequest,
                                                                             @ApiParam(value = "问题类型Id", required = true)
                                                                             @RequestParam @Encrypt Long issueTypeId,
                                                                             @ApiParam(value = "过滤参数:状态名称", required = true)
