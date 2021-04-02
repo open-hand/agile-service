@@ -130,6 +130,13 @@ class IssueTypeApi extends Api<IssueTypeApi> {
     });
   }
 
+  orghasTemplateList() {
+    return this.request({
+      method: 'get',
+      url: `/agile/v1/organizations/${getOrganizationId()}/organization_config/issue_type/list`,
+    });
+  }
+
   orgCreate(data: ICreate) {
     return this.request({
       method: 'post',

@@ -31,7 +31,7 @@ const CreateStatus: React.FC<Props> = ({
   modalRef.current = modal;
   const isOrganization = getIsOrganization();
   const [type, setType] = useState<IStatus['valueCode'] | null>(null);
-  const { data: issueTypes } = useIssueTypes();
+  const { data: issueTypes } = useIssueTypes({ hasTemplate: true, excludeTypes: ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] });
   // 记录哪些类型下已经有同名状态
   const [hasStatusIssueTypes, setHasStatusIssueTypes] = useState<IIssueType[]>([]);
   const hasStatusIssueTypesRef = useRef<IIssueType[]>([]);
