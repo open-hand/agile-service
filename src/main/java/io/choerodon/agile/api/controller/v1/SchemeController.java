@@ -8,7 +8,9 @@ import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.exception.CommonException;
@@ -258,6 +260,7 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "自定义流转列表")
     @GetMapping(value = "/status_transform_setting/list")
     public ResponseEntity<Page<StatusSettingVO>> statusTransformSettingList(@PathVariable("project_id") Long projectId,
+                                                                            @SortDefault(value = "smn.rank, smn.id", direction = Sort.Direction.ASC)
                                                                             PageRequest pageRequest,
                                                                             @RequestParam @Encrypt Long issueTypeId,
                                                                             @RequestParam(required = false) String param,
