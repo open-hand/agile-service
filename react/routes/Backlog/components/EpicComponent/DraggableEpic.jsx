@@ -170,7 +170,7 @@ class DraggableEpic extends Component {
                   maxLength={20}
                 />
               ) : (
-                <Tooltip title={`史诗名称:${item.epicName}`}>
+                <Tooltip title={`史诗名称：${item.epicName}`}>
                   <p>{item.epicName}</p>
                 </Tooltip>
               )}
