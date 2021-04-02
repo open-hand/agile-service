@@ -16,7 +16,9 @@ import { statusTransformApiConfig } from '@/api';
 import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
 import { Divider, Tooltip } from 'choerodon-ui';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import { getIsOrganization } from '@/utils/common';
+import {
+  getIsOrganization, getOrganizationId, getProjectId, getApplyType,
+} from '@/utils/common';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
@@ -241,6 +243,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           selectedType, data.name, params.page, params.size,
         )
       ),
+    },
+    feedback: {
+      // @ts-ignore
+      loadFailed() {},
     },
     selection: false,
     fields: [

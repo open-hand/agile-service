@@ -98,6 +98,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
         applyType: applyType || getApplyType(),
         issueTypeId,
       },
+      noPrompt: true,
     });
   }
 
