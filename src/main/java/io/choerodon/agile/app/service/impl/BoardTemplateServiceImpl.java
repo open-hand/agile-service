@@ -1,10 +1,12 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.validator.BoardValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.enums.SchemeType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -97,6 +99,12 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
 
     @Autowired
     private BaseFeignClient baseFeignClient;
+
+    @Autowired
+    private StatusMachineMapper statusMachineMapper;
+
+    @Autowired
+    private ProjectConfigMapper projectConfigMapper;
 
     @Override
     public void createBoardTemplate(Long organizationId, String boardName) {
@@ -336,8 +344,18 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
            // 复制看板模板
            copyBoardTemplate(projectId, organizationId, boardVOS);
         } else {
-            boardService.create(projectId, "默认看板");
+            Long stateMachineId = queryDefaultStatusMachineId(organizationId, projectId);
+            List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectId, stateMachineId);
+            boardService.initBoard(projectId, "默认看板", statusPayloads);
         }
+    }
+
+    private Long queryDefaultStatusMachineId(Long organizationId, Long projectId) {
+        ProjectConfigDTO configDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, SchemeApplyType.AGILE);
+        if (ObjectUtils.isEmpty(configDTO)) {
+            throw new CommonException("error.project.config.null");
+        }
+        return stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, configDTO.getSchemeId(), 0L);
     }
 
     @Override
