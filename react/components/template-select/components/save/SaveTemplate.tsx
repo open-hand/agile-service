@@ -1,37 +1,28 @@
-import React, {
-  useCallback, useEffect, useMemo, useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  DataSet, Form, Modal, TextField, CheckBox,
+  DataSet, Form, Modal, TextField,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Choerodon, stores } from '@choerodon/boot';
 import { TemplateAction, templateApi } from '@/api';
 import { IModalProps } from '@/common/types';
 import { getOrganizationId, getProjectId } from '@/utils/common';
+import { ITemplate } from '../edit/EditTemplate';
 import styles from './SaveTemplate.less';
 
-export interface ITemplate {
-  id: string
-  name: string
-  objectVersionNumber: number,
-  templateJson: string
-}
 interface Props {
   modal?: IModalProps,
   onOk: (template: ITemplate) => void
   templateJson: string,
   action: TemplateAction
-  template: ITemplate | undefined
 }
 
 const { AppState } = stores;
 
 const SaveTemplate: React.FC<Props> = ({
-  modal, onOk, templateJson, action, template,
+  modal, onOk, templateJson, action,
 }) => {
-  const [checked, setChecked] = useState<'old' | 'new'>(template ? 'old' : 'new');
   const checkName = useCallback(async (value: string) => {
     const data: boolean = await templateApi.checkName(value, action);
     if (data) {
@@ -50,21 +41,13 @@ const SaveTemplate: React.FC<Props> = ({
       required: true,
       validator: checkName,
     }],
-    data: [{
-      filterName: template?.name,
-    }],
-  }), [checkName, template?.name]);
-
+  }), [checkName]);
   const handleSubmit = useCallback(async () => {
     if (!await dataSet.current?.validate()) {
       return false;
     }
     const value = dataSet.toData()[0] as any;
-    const data = checked === 'old' ? {
-      ...template,
-      name: value.filterName,
-      templateJson,
-    } : {
+    const data = {
       name: value.filterName,
       templateJson,
       userId: AppState.userInfo.id,
@@ -74,12 +57,7 @@ const SaveTemplate: React.FC<Props> = ({
       organizationId: getOrganizationId(),
     };
     try {
-      let res = {} as ITemplate;
-      if (checked === 'old' && template?.id) {
-        res = await templateApi.edit(template?.id, data);
-      } else {
-        res = await templateApi.create(data);
-      }
+      const res: ITemplate = await templateApi.create(data);
       onOk(res);
       Choerodon.prompt('保存成功');
       return true;
@@ -87,59 +65,14 @@ const SaveTemplate: React.FC<Props> = ({
       Choerodon.prompt('保存失败');
       return false;
     }
-  }, [dataSet, checked, template, templateJson, action, onOk]);
+  }, [action, dataSet, templateJson, onOk]);
 
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
 
-  const handleCheckboxChange = useCallback((value, oldValue) => {
-    if (value) {
-      setChecked(value);
-      if (value === 'old') {
-        dataSet?.current?.set('filterName', template?.name);
-      } else {
-        dataSet?.current?.set('filterName', undefined);
-      }
-    } else if (oldValue === 'old') {
-      setChecked('new');
-      dataSet?.current?.set('filterName', undefined);
-    } else {
-      setChecked('old');
-      dataSet?.current?.set('filterName', template?.name);
-    }
-  }, [dataSet, template?.name]);
-
   return (
-    <Form
-      dataSet={dataSet}
-      className={styles.form}
-    >
-      {
-        template && (
-        <div>
-          <CheckBox
-            name="option"
-            value="old"
-            checked={checked === 'old'}
-            onChange={handleCheckboxChange}
-          >
-            更新旧模板
-          </CheckBox>
-          <CheckBox
-            name="option"
-            value="new"
-            checked={checked === 'new'}
-            onChange={handleCheckboxChange}
-            style={{
-              marginLeft: 30,
-            }}
-          >
-            保存为新模板
-          </CheckBox>
-        </div>
-        )
-      }
+    <Form dataSet={dataSet}>
       <TextField
         name="filterName"
       />

@@ -8,10 +8,12 @@ import { Icon } from 'choerodon-ui';
 import { Dropdown } from 'choerodon-ui/pro';
 
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
+import useIsProgram from '@/hooks/useIsProgram';
 import { TemplateAction, templateApi } from '@/api';
 import styles from './TemplateSelect.less';
 import TemplateList from './components/list';
-import { ITemplate } from './components/save/SaveTemplate';
+import { IFieldOption, ITemplate } from './components/edit/EditTemplate';
+import { ITableColumnCheckBoxesDataProps } from '../table-column-check-boxes';
 
 const templateItemNameCls = 'c7n-templateItem-name';
 // @ts-ignore
@@ -41,15 +43,6 @@ function useClickOut(onClickOut) {
   return ref;
 }
 
-export interface IFieldOption {
-  label: string
-  value: string
-  system: boolean
-  disabled?: boolean,
-  defaultChecked?: boolean,
-  name?: string
-}
-
 interface Props {
   action: TemplateAction
   checkOptions: IFieldOption[]
@@ -60,10 +53,13 @@ interface Props {
     templateFirstLoaded: boolean,
   } | undefined>
   selectTemplateOk: (codes: string[]) => void
+  transformExportFieldCodes: (data: Array<string>, otherData: ITableColumnCheckBoxesDataProps) => Array<string>
+  reverseTransformExportFieldCodes: (data: string[]) => string[]
+  defaultInitCodes: string[]
 }
 const TemplateSelect: React.FC<Props> = (props) => {
   const {
-    action, templateSelectRef, selectTemplateOk,
+    action, templateSelectRef, selectTemplateOk, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
   } = props;
   const [templateList, setTemplateList] = useState<ITemplate[]>([]);
   const [selected, setSelected] = useState<ITemplate | undefined>();
@@ -97,10 +93,17 @@ const TemplateSelect: React.FC<Props> = (props) => {
   useImperativeHandle(templateSelectRef, () => ({
     onOk: handleCreateOk,
     templateList,
-    template: selected,
     setTemplate: setSelected,
     templateFirstLoaded: firstLoaded,
   }));
+
+  const handleEditOk = useCallback(async (template) => {
+    await getTemplates();
+    if (selected?.id === template.id) {
+      setSelected(template);
+      selectTemplateOk(JSON.parse(template.templateJson));
+    }
+  }, [getTemplates, selectTemplateOk, selected?.id]);
 
   const handleDeleteOk = useCallback(async (id) => {
     await getTemplates();
@@ -130,8 +133,12 @@ const TemplateSelect: React.FC<Props> = (props) => {
               templateList={templateList}
               setSelected={setSelected}
               templateItemNameCls={templateItemNameCls}
+              onEdit={handleEditOk}
               onDelete={handleDeleteOk}
               selectTemplateOk={selectTemplateOk}
+              transformExportFieldCodes={transformExportFieldCodes}
+              reverseTransformExportFieldCodes={reverseTransformExportFieldCodes}
+              defaultInitCodes={defaultInitCodes}
             />
           </div>
           )}

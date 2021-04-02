@@ -19,7 +19,8 @@ import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
 import TemplateSelect from '../template-select/TemplateSelect';
-import openSaveTemplate, { ITemplate } from '../template-select/components/save/SaveTemplate';
+import openSaveTemplate from '../template-select/components/save/SaveTemplate';
+import { ITemplate } from '../template-select/components/edit/EditTemplate';
 
 interface FormPartProps {
   title: string | ReactElement,
@@ -72,7 +73,6 @@ const ExportIssue: React.FC = () => {
   const templateSelectRef = useRef<{
     onOk:(template: ITemplate) => Promise<void>,
     templateList: ITemplate[]
-    template: ITemplate
     setTemplate: (template: ITemplate | undefined) => void
     templateFirstLoaded: boolean
   }>();
@@ -114,7 +114,7 @@ const ExportIssue: React.FC = () => {
         return;
       }
     }
-    // templateSelectRef?.current?.setTemplate(undefined);
+    templateSelectRef?.current?.setTemplate(undefined);
   }, [checkOptions, store]);
 
   useEffect(() => {
@@ -208,10 +208,8 @@ const ExportIssue: React.FC = () => {
   };
 
   const handleSaveTemplate = useCallback(() => {
-    openSaveTemplate({
     // @ts-ignore
-      template: templateSelectRef?.current?.template, action, onOk: templateSelectRef.current?.onOk, templateJson: JSON.stringify(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps)),
-    });
+    openSaveTemplate({ action, onOk: templateSelectRef.current?.onOk, templateJson: JSON.stringify(store.transformExportFieldCodes(checkBoxDataProps.checkedOptions, checkBoxDataProps)) });
   }, [action, checkBoxDataProps, store]);
 
   const selectTemplateOk = useCallback((fieldCodes) => {
@@ -264,6 +262,8 @@ const ExportIssue: React.FC = () => {
                 // @ts-ignore
                 checkOptions={checkOptions}
                 selectTemplateOk={selectTemplateOk}
+                transformExportFieldCodes={store.transformExportFieldCodes}
+                reverseTransformExportFieldCodes={store.reverseTransformExportFieldCodes}
               />
             </FormPart>
             {/* <Divider className={`${prefixCls}-horizontal`} /> */}
@@ -289,16 +289,6 @@ const ExportIssue: React.FC = () => {
         } : undefined}
       />
       <div className={`${prefixCls}-btns`}>
-        {/* <Button
-          icon="unarchive"
-          funcType={'flat' as FuncType}
-          onClick={exportExcel}
-          color={'primary' as ButtonColor}
-          loading={store.exportButtonConfig?.buttonProps?.loading}
-          className="c7n-exportIssue-btn"
-        >
-          {exportBtnText || '导出问题'}
-        </Button> */}
         {
           !templateIsExist && (
             <Button
