@@ -98,7 +98,7 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
               }
             </>
           )}
-          imgStyle={{ width: 300 }}
+          imgStyle={{ width: readOnly ? 175 : 300 }}
         />
       </Content>
     </Page>
