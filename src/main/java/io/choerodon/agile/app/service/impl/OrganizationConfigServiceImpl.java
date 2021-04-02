@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.google.common.reflect.TypeToken;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
@@ -454,6 +455,25 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         }
         StatusMachineSchemeConfigDTO statusMachineSchemeConfigDTO = queryStatusMachineSchemeConfig(organizationId, issueTypeId, organizationConfigDTO.getSchemeId());
         return ObjectUtils.isEmpty(statusMachineSchemeConfigDTO) ? null : statusMachineSchemeConfigDTO.getStateMachineId();
+    }
+
+    @Override
+    public List<IssueTypeVO> listIssueType(Long organizationId) {
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", "agile");
+        if (ObjectUtils.isEmpty(organizationConfigDTO)) {
+            return new ArrayList<>();
+        }
+        StatusMachineSchemeConfigDTO statusMachineSchemeConfigDTO = new StatusMachineSchemeConfigDTO();
+        statusMachineSchemeConfigDTO.setSchemeId(organizationConfigDTO.getSchemeId());
+        statusMachineSchemeConfigDTO.setOrganizationId(organizationId);
+        List<StatusMachineSchemeConfigDTO> schemeConfigDTOList = statusMachineSchemeConfigMapper.select(statusMachineSchemeConfigDTO);
+        if (CollectionUtils.isEmpty(schemeConfigDTOList)) {
+            return new ArrayList<>();
+        }
+        List<Long> issueTypeIds = schemeConfigDTOList.stream().map(StatusMachineSchemeConfigDTO::getIssueTypeId).collect(Collectors.toList());
+        List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectByCondition(Condition.builder(IssueTypeDTO.class)
+                .where(Sqls.custom().andIn("id", issueTypeIds)).build());
+        return modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeVO>>(){}.getType());
     }
 
     private OrganizationConfigDTO initOrganizationConfig(Long organizationId){

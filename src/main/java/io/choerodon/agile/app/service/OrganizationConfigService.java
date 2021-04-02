@@ -102,4 +102,11 @@ public interface OrganizationConfigService {
      * @return
      */
     Long queryIssueTypeStatusMachineId(Long organizationId, Long issueTypeId);
+
+    /**
+     * 查询组织层配置状态机模板的问题类型
+     * @param organizationId
+     * @return
+     */
+    List<IssueTypeVO> listIssueType(Long organizationId);
 }
