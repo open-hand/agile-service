@@ -43,7 +43,7 @@ const tabs: ITab[] = [{
 const { TabPane } = Tabs;
 const StateMachine: React.FC = ({
   // @ts-ignore
-  defaultTabKeys = ['status', 'status_change', 'custom'], readOnly = false, activeKey: propActiveKey, setActiveKey: propSetActiveKey, ...otherProps
+  defaultTabKeys = ['status', 'status_change', 'custom'], readOnly = false, activeKey: propActiveKey, setActiveKey: propSetActiveKey, visibleIssueTypeCategory, ...otherProps
 }) => {
   const defaultTabs = tabs.filter((item) => includes(defaultTabKeys, item.key));
   const params = useQueryString();
@@ -106,6 +106,7 @@ const StateMachine: React.FC = ({
       issueTypeInitedMap,
       setIssueTypeInitedMap,
       readOnly,
+      visibleIssueTypeCategory,
     }}
     >
       {

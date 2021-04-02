@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-type ChangeSelected = (code: string)=>void
+type ChangeSelected = (code: string) => void
 
 interface Context {
   selectedType: string,
@@ -8,6 +8,7 @@ interface Context {
   issueTypeInitedMap: Map<string, boolean>,
   setIssueTypeInitedMap: (initedMap: Map<string, boolean>) => void,
   readOnly: boolean
+  visibleIssueTypeCategory?: 'all' | 'custom' | 'initial'
 }
 const StateMachineContext = createContext<Context>({} as Context);
 

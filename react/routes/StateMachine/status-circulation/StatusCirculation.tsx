@@ -24,7 +24,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { store } = useStatusCirculationContext();
   const { data: issueTypes } = useIssueTypes();
   const {
-    selectedType, setSelectedType, issueTypeInitedMap, readOnly,
+    selectedType, setSelectedType, issueTypeInitedMap, readOnly, visibleIssueTypeCategory,
   } = useStateMachineContext();
   const isOrganization = getIsOrganization();
   // const selectedTypeRef = useRef<string>(selectedType);
@@ -119,6 +119,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           }}
           excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
           brighter={readOnly}
+          visibleIssueTypeCategory={visibleIssueTypeCategory}
         />
         {tab}
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>

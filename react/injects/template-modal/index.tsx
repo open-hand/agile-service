@@ -37,7 +37,7 @@ const TemplateContent: React.FC<Props> = ({ templateTabsKey }) => {
       <div style={{ flex: 1 }}>
         {
           activeKey === 'statusMachineTemplate' && (
-            <StatusMachineTemplate readOnly />
+            <StatusMachineTemplate readOnly visibleIssueTypeCategory="initial" />
           )
         }
         {
