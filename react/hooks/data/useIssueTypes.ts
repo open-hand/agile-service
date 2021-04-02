@@ -14,6 +14,7 @@ export interface IssueTypeConfig {
 }
 export default function useIssueTypes(config?: IssueTypeConfig, options?: UseQueryOptions<IIssueType[]>) {
   const isOrganization = getIsOrganization();
+  console.log(isOrganization);
   const { isProgram } = useIsProgram();
   const applyType = isProgram ? 'program' : 'agile';
   const key = useKey({ key: [isOrganization ? 'orgIssueTypes' : 'projectIssueTypes', { onlyEnabled: config?.onlyEnabled }], id: config?.id });

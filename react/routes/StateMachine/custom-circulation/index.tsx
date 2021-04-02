@@ -7,16 +7,15 @@ import {
   Table, DataSet, Menu, Dropdown, Icon, Modal,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { find, filter, includes } from 'lodash';
 import moment from 'moment';
-import STATUS from '@/constants/STATUS';
 import { IIssueType, User, IStatus } from '@/common/types';
 import { statusTransformApiConfig } from '@/api';
 import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
 import { Divider, Tooltip } from 'choerodon-ui';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { getIsOrganization } from '@/utils/common';
+import useIssueTypes from '@/hooks/data/useIssueTypes';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
 import FeatureLinkage from './components/linkage/feature-linkage';
@@ -224,7 +223,7 @@ const transformFieldValue = (fieldSetting) => {
 };
 
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
-  const { data: issueTypes } = useProjectIssueTypes();
+  const { data: issueTypes } = useIssueTypes();
   const {
     selectedType, setSelectedType, issueTypeInitedMap, readOnly,
   } = useStateMachineContext();
