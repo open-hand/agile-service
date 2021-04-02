@@ -3,7 +3,7 @@ import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import {
-  Dropdown, Menu, Input, Icon,
+  Dropdown, Menu, Input, Icon, Tooltip,
 } from 'choerodon-ui';
 import _ from 'lodash';
 import { epicApi, issueApi } from '@/api';
@@ -49,11 +49,12 @@ class DraggableEpic extends Component {
   getmenu = () => {
     const { item, refresh } = this.props;
     return (
+      // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={this.clickMenu.bind(this)}>
         <div style={{ padding: '5px 12px' }}>
           颜色
           <div className="c7n-backlog-epicColor">
-            {BacklogStore.getColorLookupValue.map(color => (
+            {BacklogStore.getColorLookupValue.map((color) => (
               <div
                 key={color.name}
                 style={{ background: color.name }}
@@ -169,9 +170,11 @@ class DraggableEpic extends Component {
                   maxLength={20}
                 />
               ) : (
-                <p>{item.epicName}</p>
+                <Tooltip title={`史诗名称:${item.epicName}`}>
+                  <p>{item.epicName}</p>
+                </Tooltip>
               )}
-              <Dropdown onClick={e => e.stopPropagation()} overlay={this.getmenu()} trigger={['click']}>
+              <Dropdown onClick={(e) => e.stopPropagation()} overlay={this.getmenu()} trigger={['click']}>
                 <Icon
                   style={{
                     width: 12,
