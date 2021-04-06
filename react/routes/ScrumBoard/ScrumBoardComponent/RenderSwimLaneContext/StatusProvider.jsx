@@ -27,25 +27,34 @@ export default class StatusProvider extends Component {
           droppableId={`${statusId}/${columnId}`}
           isDropDisabled={ScrumBoardStore.getCanDragOn.get(statusId)}
           renderClone={(provided, snapshot, rubric) => {
-            const { index } = rubric.source;            
+            const { index } = rubric.source;
             const issueObj = data[index];
+            if (!issueObj) {
+              return (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                />
+              );
+            }
             return (
               <Card
                 isDragging={snapshot.isDragging}
                 provided={provided}
-                key={issueObj.issueId}            
+                key={issueObj.issueId}
                 index={index}
                 issue={issueObj}
                 completed={completed}
                 statusName={statusName}
-                categoryCode={categoryCode}      
+                categoryCode={categoryCode}
                 style={{ margin: 0 }}
               />
             );
           }}
         >
           {(provided, snapshot) => (
-            <React.Fragment>
+            <>
               <StatusCouldDragOn statusId={statusId} swimlaneId={keyId} />
               <div
                 ref={provided.innerRef}
@@ -66,8 +75,8 @@ export default class StatusProvider extends Component {
                 {children(keyId, statusId, completed, statusName, categoryCode, snapshot)}
                 {mode !== 'virtual' && provided.placeholder}
               </div>
-            </React.Fragment>
-          )}          
+            </>
+          )}
         </Droppable>
       </div>
     );
@@ -79,6 +88,6 @@ export default class StatusProvider extends Component {
 
   render() {
     const { statusData } = this.props;
-    return statusData.map(status => this.getStatus(status));
+    return statusData.map((status) => this.getStatus(status));
   }
 }
