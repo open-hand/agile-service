@@ -1,34 +1,20 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.choerodon.agile.api.vo.business.ExportIssuesVO;
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.core.client.MessageClientC7n;
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.infra.dto.IssueTypeLinkDTO;
-import io.choerodon.agile.infra.dto.PredefinedDTO;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.core.utils.PageableHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,17 +31,35 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.ExportIssuesVO;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.*;
+import io.choerodon.core.client.MessageClientC7n;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.core.utils.PageableHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -117,6 +121,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private static final int PREDEFINED_VALUE_START_ROW = 1;
     private static final int PREDEFINED_VALUE_END_ROW = 500;
+    private static final String INSERT = "insert";
 
     @Autowired
     protected StateMachineClientService stateMachineClientService;
@@ -1884,7 +1889,7 @@ public class ExcelServiceImpl implements ExcelService {
         Cell cell = row.getCell(col);
         if (!isCellEmpty(cell)) {
             String value = cell.toString();
-            issueCreateVO.setDescription("[{\"insert\":\"" + StringUtil.replaceChar(value) + "\\n\"}]");
+            issueCreateVO.setDescription("<p>"+ value + "</p>");
         }
     }
 
@@ -3353,18 +3358,63 @@ public class ExcelServiceImpl implements ExcelService {
 
     public String getDes(String str) {
         StringBuilder result = new StringBuilder();
-        if (!"".equals(str) && str != null) {
-            String[] arrayLine = str.split(("\\},\\{"));
-            String regEx = "\"insert\":\"(.*)\"";
-            Pattern pattern = Pattern.compile(regEx);
-            for (String s : arrayLine) {
-                Matcher matcher = pattern.matcher(s);
-                if (matcher.find()) {
-                    result.append(StringEscapeUtils.unescapeJava(matcher.group(1)));
+        try {
+            JSONArray root = JSON.parseArray(str);
+            for (Object o : root) {
+                JSONObject object = (JSONObject) o;
+                if (!(object.get(INSERT) instanceof JSONObject)) {
+                    result.append(StringEscapeUtils.unescapeJava(object.getString(INSERT)));
                 }
             }
+        } catch (Exception e){
+            Document doc = Jsoup.parse(str);
+            doc.body().children().forEach(element -> {
+                String tagName = element.tag().getName();
+                if(tagName == null){
+                    result.append(element.text()).append("\n");
+                    return;
+                }
+                switch (tagName){
+                    case "figure":
+                        break;
+                    case "ol":
+                    case "ul":
+                        setListElementStr(result, element);
+                        break;
+                    default:
+                        result.append(element.text()).append("\n");
+                        break;
+                }
+            });
         }
-        return result.toString();
+        return result.toString().trim();
+    }
+
+    private String setListElementStr(StringBuilder result, Element element) {
+        element.children().forEach(childElement -> {
+            result.append(getLiText(childElement)).append("\n");
+        });
+        return element.text();
+    }
+
+    private String getLiText(Element element) {
+        StringBuilder result = new StringBuilder();
+        String liAllText = element.text();
+        StringBuilder childListText = new StringBuilder();
+        StringBuilder childRelText = new StringBuilder();
+        element.children().forEach(childElement -> {
+            String tagName = childElement.tag().getName();
+            if("ol".equals(tagName) || "ul".equals(tagName)){
+                childListText.append(" ").append(setListElementStr(childRelText, childElement));
+            }
+        });
+        if (childListText.length() > 0) {
+            result.append(liAllText.split(childListText.toString())[0]);
+            result.append("\n").append(childRelText.toString());
+        } else {
+            result.append(liAllText);
+        }
+        return result.toString().trim();
     }
 
     protected String exportIssuesSprintName(ExportIssuesVO exportIssuesVO) {
