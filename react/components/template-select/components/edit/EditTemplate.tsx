@@ -5,12 +5,13 @@ import {
   Modal, TextField, Form, Button, DataSet,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
+import { observer } from 'mobx-react-lite';
 import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
 import { IModalProps } from '@/common/types';
 import { TemplateAction, templateApi } from '@/api';
 import classnames from 'classnames';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { map, uniq } from 'lodash';
+import { map, uniq, update } from 'lodash';
 import { Divider } from 'choerodon-ui';
 import styles from './EditTemplate.less';
 
@@ -89,12 +90,14 @@ export const transformTemplateJsonToArr = (templateJson: string) => {
 const EditTemplate: React.FC<Props> = ({
   modal, template, checkOptions, action, onEdit, transformExportFieldCodes, reverseTransformExportFieldCodes, defaultInitCodes,
 }) => {
+  const [, setUpdateCount] = useState(0);
   const templateFieldsRef = useRef();
 
   useEffect(() => {
     Object.assign(templateFieldsRef, {
       current: reverseTransformExportFieldCodes(transformTemplateJsonToArr(template.templateJson)),
     });
+    setUpdateCount((count) => count + 1);
   }, [reverseTransformExportFieldCodes, template.templateJson]);
 
   const checkName = useCallback(async (value, name, record) => {
@@ -180,8 +183,6 @@ const EditTemplate: React.FC<Props> = ({
     return true;
   };
 
-  console.log('render');
-
   return (
     <div className={styles.template_edit}>
       <FormPart title="修改名称">
@@ -201,6 +202,8 @@ const EditTemplate: React.FC<Props> = ({
   );
 };
 
+const ObserverEditTemplate = observer(EditTemplate);
+
 const openEditTemplate = (props: Props) => {
   Modal.open({
     drawer: true,
@@ -210,7 +213,7 @@ const openEditTemplate = (props: Props) => {
       width: 380,
     },
     className: styles.editTemplateModal,
-    children: <EditTemplate {...props} />,
+    children: <ObserverEditTemplate {...props} />,
   });
 };
 
