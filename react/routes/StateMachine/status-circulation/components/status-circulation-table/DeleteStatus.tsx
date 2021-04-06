@@ -2,7 +2,6 @@ import React, {
   useEffect, useCallback,
 } from 'react';
 import { IStatusCirculation, statusTransformApi } from '@/api';
-import './index.less';
 import { getIsOrganization } from '@/utils/common';
 
 interface Props {
