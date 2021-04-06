@@ -240,7 +240,7 @@ const ExportIssue: React.FC = () => {
       }
     }
     setTemplateIsExist(false);
-  }, [checkBoxDataProps, checkOptions, store, templateSelectRef?.current?.templateList]);
+  }, [checkBoxDataProps, checkBoxDataProps.checkedOptions, checkOptions, store, templateSelectRef?.current?.templateList]);
 
   return (
     <div>
