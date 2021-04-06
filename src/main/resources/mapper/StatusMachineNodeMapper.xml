@@ -178,6 +178,28 @@
         group by fsmn.status_id,fit.name,fit.id
     </select>
 
+    <select id="selectStatusIdsByIssueTypeIds" resultType="java.lang.Long">
+        select fsmn.status_id
+        from fd_status_machine_scheme_config fsmsc
+        join fd_status_machine_node fsmn on fsmsc.state_machine_id = fsmn.state_machine_id
+        where fsmsc.organization_id = #{organizationId}
+        and fsmsc.scheme_id = #{schemeId}
+        and fsmsc.issue_type_id in (
+            select fit.id
+            from fd_issue_type fit
+            where fit.id in
+            <foreach item="item" index="index" collection="issueTypeIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="applyType == 'agile'">
+                and fit.type_code != 'feature'
+            </if>
+            and fit.type_code not in ('issue_auto_test','issue_auto_test')
+        )
+        and fsmn.status_id != 0
+    </select>
+
+
     <select id="selectInitNode" resultType="io.choerodon.agile.infra.dto.StatusMachineNodeDTO">
         select fsmn.* from fd_status_machine_scheme_config fsmsc
         ,fd_status_machine_node fsmn

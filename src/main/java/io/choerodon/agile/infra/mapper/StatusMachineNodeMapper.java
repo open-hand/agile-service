@@ -6,6 +6,7 @@ import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -64,4 +65,9 @@ public interface StatusMachineNodeMapper extends BaseMapper<StatusMachineNodeDTO
     String queryMaxRank(@Param("organizationId") Long organizationId, @Param("statusMachineId") Long statusMachineId);
 
     String queryMinRank(@Param("organizationId") Long organizationId, @Param("statusMachineId") Long statusMachineId);
+
+    List<Long> selectStatusIdsByIssueTypeIds(@Param("organizationId") Long organizationId,
+                                             @Param("schemeId") Long schemeId,
+                                             @Param("issueTypeIds") Set<Long> issueTypeIds,
+                                             @Param("applyType") String applyType);
 }
