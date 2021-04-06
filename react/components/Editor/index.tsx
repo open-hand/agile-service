@@ -40,6 +40,7 @@ class Editor<T extends TestProps> extends FormField<T> {
             style={{
               width: '100%',
               height: 200,
+              ...this.props.style,
             }}
           />
           {this.renderFloatLabel()}

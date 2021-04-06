@@ -1,6 +1,8 @@
+/* eslint-disable no-nested-ternary */
 import React, { useEffect, useRef } from 'react';
 import { Modal } from 'choerodon-ui/pro';
 import { IModalProps, IReportContentType } from '@/common/types';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import AddChart from '../add-chart';
 import AddText from '../add-text';
 import AddIssueList from '../add-issue-list';
@@ -72,7 +74,7 @@ const openAddModal = (props: Props) => {
     key: 'modal',
     title: isEdit ? `编辑${TEXTS[type as string] || ''}` : `添加${TEXTS[type as string] || ''}`,
     style: {
-      width: type === 'text' || type === 'dynamic_list' ? 380 : 1088,
+      width: type === 'text' ? MODAL_WIDTH.middle : type === 'dynamic_list' ? 380 : 1088,
     },
     drawer: true,
     children: <AddModal {...props} />,
