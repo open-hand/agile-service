@@ -89,6 +89,13 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Autowired
     private StatusMapper statusMapper;
 
+    @Autowired
+    private ProjectConfigService projectConfigService;
+    @Autowired
+    private StatusMachineNodeMapper nodeDeployMapper;
+    @Autowired
+    private StatusService statusService;
+
     private static final List<String> AGILE_CREATE_ISSUE_TYPES =
             Arrays.asList(
                     IssueTypeCode.STORY.value(),
@@ -522,7 +529,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (Boolean.FALSE.equals(vo.getDeleted())) {
             throw new CommonException("error.issue.type.not.deleted");
         }
-        issueTypeMapper.deleteByPrimaryKey(result.getId());
         if (!ZERO.equals(projectId)) {
             deleteIssueTypeExtend(organizationId, projectId, issueTypeId);
             deleteIssueTypeAndFieldRel(organizationId, projectId, issueTypeId);
@@ -530,13 +536,17 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         } else {
             deleteIssueTypeAndFieldRel(organizationId, null, issueTypeId);
         }
+        issueTypeMapper.deleteByPrimaryKey(result.getId());
     }
 
     private void deleteStateMachineAndIssueTypeConfig(Long organizationId,
                                                       Long projectId,
                                                       IssueTypeDTO issueTypeDTO) {
-        String typeCode = issueTypeDTO.getTypeCode();
+        //如果是状态关联的最后一个问题类型，同时把问题类型和项目的关联删除
         Long issueTypeId = issueTypeDTO.getId();
+        deleteIssueStatusIfLastOne(organizationId, projectId, issueTypeId);
+
+        String typeCode = issueTypeDTO.getTypeCode();
         Set<String> codes = getProjectCategoryCodes(projectId);
         String applyType = getApplyTypeByCategoryCodes(codes, typeCode);
         Long stateMachineSchemeId = getSchemeIdByOption(projectId, applyType, SchemeType.STATE_MACHINE);
@@ -552,6 +562,35 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         issueTypeSchemeConfig.setIssueTypeId(issueTypeId);
         issueTypeSchemeConfig.setSchemeId(issueTypeSchemeId);
         issueTypeSchemeConfigMapper.delete(issueTypeSchemeConfig);
+    }
+
+    private void deleteIssueStatusIfLastOne(Long organizationId,
+                                            Long projectId,
+                                            Long issueTypeId) {
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
+        ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
+        StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
+        Long schemeId = stateMachineSchemeVO.getId();
+        Set<Long> issueTypeList = new HashSet<>();
+        issueTypeList.add(issueTypeId);
+        List<Long> statusIds =
+                nodeDeployMapper.selectStatusIdsByIssueTypeIds(organizationId, schemeId, issueTypeList, applyType);
+        if (!statusIds.isEmpty()) {
+            Map<Long, Set<Long>> statusIssueTypeMap = new HashMap<>();
+            nodeDeployMapper.countIssueTypeByStatusIds(organizationId, schemeId, statusIds, applyType)
+                    .forEach(x -> {
+                        Long statusId = x.getId();
+                        Long thisIssueTypeId = x.getIssueTypeId();
+                        Set<Long> issueTypeIds = statusIssueTypeMap.computeIfAbsent(statusId, y -> new HashSet<>());
+                        issueTypeIds.add(thisIssueTypeId);
+                    });
+            statusIssueTypeMap.forEach((x, y) -> {
+                if (y.size() == 1 && y.contains(issueTypeId)) {
+                    statusService.deleteStatus(projectId, x, applyType, new ArrayList<>());
+                }
+            });
+        }
     }
 
     private Long getSchemeIdByOption(Long projectId,
