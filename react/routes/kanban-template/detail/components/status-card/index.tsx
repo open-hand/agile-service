@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import classNames from 'classnames';
 import { Radio } from 'choerodon-ui/pro';
 import { Draggable, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
@@ -33,8 +33,9 @@ const StatusCard: React.FC<ColumnProps> = ({
     columnId,
     statusId: data.statusId,
   });
+  const completed = useMemo(() => data.templateCompleted ?? data.completed, [data.completed, data.templateCompleted]);
   const handleCheckClick = useLockFn(async () => {
-    await store.setStatusComplete(data, !data.templateCompleted);
+    await store.setStatusComplete(data, !completed);
   });
   return (
     <Draggable
@@ -60,7 +61,7 @@ const StatusCard: React.FC<ColumnProps> = ({
           />
           <br />
           <div role="none" className={styles.radio} onClick={handleCheckClick}>
-            <Radio checked={data.templateCompleted}>设置已完成</Radio>
+            <Radio checked={completed}>设置已完成</Radio>
           </div>
         </div>
       )}
