@@ -89,7 +89,6 @@ const TextEditToggle: React.FC<Props> = ({
       waitSubmitValue = newValue;
     }
 
-    console.log('submit patternMismatch', editingRef.current, waitSubmitValue, editorRef.current, await (editorRef.current as FormField<any>)?.validate(waitSubmitValue));
     // @ts-ignore
     if (editingRef.current && editorRef.current && await editorRef.current?.validate(waitSubmitValue)) {
       if (containerRef.current) {
