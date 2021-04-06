@@ -138,7 +138,7 @@ const getReverseExportFieldCodes = (data: Array<any>) => {
     //  "remainingTime":
     fixVersionName: 'fixVersion',
     influenceVersionName: 'influenceVersion',
-
+    mainResponsibleName: 'mainResponsibleUser',
     epicName: 'epic',
     labelName: 'label',
     storyPoints: 'storyPoints',
