@@ -529,7 +529,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (Boolean.FALSE.equals(vo.getDeleted())) {
             throw new CommonException("error.issue.type.not.deleted");
         }
-        issueTypeMapper.deleteByPrimaryKey(result.getId());
         if (!ZERO.equals(projectId)) {
             deleteIssueTypeExtend(organizationId, projectId, issueTypeId);
             deleteIssueTypeAndFieldRel(organizationId, projectId, issueTypeId);
@@ -537,6 +536,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         } else {
             deleteIssueTypeAndFieldRel(organizationId, null, issueTypeId);
         }
+        issueTypeMapper.deleteByPrimaryKey(result.getId());
     }
 
     private void deleteStateMachineAndIssueTypeConfig(Long organizationId,
