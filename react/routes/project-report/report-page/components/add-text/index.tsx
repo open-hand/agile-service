@@ -45,7 +45,7 @@ const AddText: React.FC<Props> = ({ innerRef, data: editData }) => {
   return (
     <Form dataSet={dataSet}>
       <TextField name="title" />
-      <Editor name="description" placeholder="输入文本" />
+      <Editor name="description" placeholder="输入文本" style={{ height: 400 }} />
     </Form>
   );
 };
