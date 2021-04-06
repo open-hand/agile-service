@@ -15,6 +15,7 @@ export interface IKanbanTemplateStatus {
   categoryCode: IStatus['valueCode'];
   position: number;
   templateCompleted: boolean;
+  completed?: boolean;
   organizationId?: string;
 }
 
