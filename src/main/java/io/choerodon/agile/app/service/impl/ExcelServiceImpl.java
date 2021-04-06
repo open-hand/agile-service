@@ -3357,6 +3357,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     public String getDes(String str) {
+        if (str == null) {
+            return "";
+        }
         StringBuilder result = new StringBuilder();
         try {
             JSONArray root = JSON.parseArray(str);
