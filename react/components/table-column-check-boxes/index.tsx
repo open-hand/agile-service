@@ -72,7 +72,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
       newOptions = events.initOptions({ options: newOptions, checkedOptions, dataSet: form.dataSet }) || newOptions;
     }
     setOptions(handleOptions(newOptions));
-  }, [checkedOptions, config?.options, events, form.dataSet]);
+  }, [checkedOptions, config?.options, events, form.dataSet, handleOptions]);
   const minCheckOptionArr = useMemo(() => {
     const willCheckOptions = options.filter((option) => option.optionConfig?.disabled && checkedOptions.includes(option.value)).map((item) => item.value);
     return willCheckOptions;
@@ -119,7 +119,7 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
   }, [config?.options, loadData]);
   useEffect(() => {
     config?.options && setOptions(handleOptions(config?.options));
-  }, [config?.options]);
+  }, [config?.options, handleOptions]);
   const dataProps: ITableColumnCheckBoxesDataProps = {
     checkedOptions,
     setCheckedOptions,
