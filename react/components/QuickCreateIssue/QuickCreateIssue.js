@@ -94,6 +94,7 @@ class QuickCreateIssue extends Component {
             const fieldsMap = fields2Map(fields);
 
             const issue = getQuickCreateDefaultObj({
+              epicId,
               versionIssueRelVOList: propsVersionIssueRelVOList,
               sprintId,
               summary,
