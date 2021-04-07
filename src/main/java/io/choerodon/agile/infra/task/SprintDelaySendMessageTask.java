@@ -117,9 +117,9 @@ public class SprintDelaySendMessageTask {
         if(!messageSenders.isEmpty()) {
             int step = 500;
             for (int i = 0; i < messageSenders.size(); i += step) {
-                int end = (i + 1) * step;
-                if(end >= messageSenders.size()){
-                    end = messageSenders.size() - 1;
+                int end = i + step;
+                if (end >= messageSenders.size()) {
+                    end = messageSenders.size();
                 }
                 List<MessageSender> messageSenderList = messageSenders.subList(i, end);
                 notifyFeignClient.batchSendMessage(messageSenderList);
