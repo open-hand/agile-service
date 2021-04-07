@@ -45,7 +45,6 @@ class QuickCreateIssue extends Component {
   loadInitValue = async (currentIssueTypeId) => {
     const { form } = this.props;
     const defaultSummary = await fieldApi.getSummaryDefaultValue(currentIssueTypeId);
-    console.log('this.', this.currentTemplate, form.getFieldValue('summary'), form.getFieldValue('summary') !== this.currentTemplate);
     if (form.getFieldValue('summary') === this.currentTemplate) {
       this.currentTemplate = defaultSummary;
       form.setFieldsValue({

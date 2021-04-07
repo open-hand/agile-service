@@ -78,27 +78,25 @@ const TextEditToggle: React.FC<Props> = ({
       submit();
     }
   };
-  const submit = async (newValue?: any) => {
-    // 延缓submit，因为有时候blur之后才会onchange，保证拿到的值是最新的
-    // setTimeout(async () => {
-
-    // });
+  const submit = (newValue?: any) => {
     let waitSubmitValue = (editorRef.current as any)?.getValue
       ? toJS((editorRef.current as any)?.getValue()) : dataRef.current;
     if (typeof (newValue) !== 'undefined') {
       waitSubmitValue = newValue;
     }
-
-    // @ts-ignore
-    if (editingRef.current && editorRef.current && await editorRef.current?.validate(waitSubmitValue)) {
-      if (containerRef.current) {
-        containerRef.current.blur();
+    // 延缓submit，因为有时候blur之后才会onchange，保证拿到的值是最新的
+    setTimeout(async () => {
+      // @ts-ignore
+      if (editingRef.current && editorRef.current && await editorRef.current?.validate(waitSubmitValue)) {
+        if (containerRef.current) {
+          containerRef.current.blur();
+        }
+        hideEditor();
+        if (waitSubmitValue !== initValue) {
+          onSubmit(waitSubmitValue);
+        }
       }
-      hideEditor();
-      if (waitSubmitValue !== initValue) {
-        onSubmit(waitSubmitValue);
-      }
-    }
+    });
   };
   const renderEditor = () => {
     const editorElement = typeof editor === 'function' ? editor({ submit }) : editor;
