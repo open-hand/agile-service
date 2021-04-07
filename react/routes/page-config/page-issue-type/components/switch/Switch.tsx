@@ -1,6 +1,7 @@
 import React, {
-  useState, useEffect, ReactElement, MouseEventHandler, useCallback,
+  useState, useEffect, useCallback,
 } from 'react';
+import classnames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import styles from './index.less';
 
@@ -49,10 +50,11 @@ function Switch({
       setValue(propsValue);
     }
   }, [propsValue]);
+
   return (
-    <ul className={styles.switch}>
+    <div className={styles.switch}>
       {options.map((option, index) => (
-        <li
+        <span
           role="none"
           onKeyDown={(e: React.KeyboardEvent<HTMLLIElement>) => {
             // e.preventDefault();
@@ -63,12 +65,14 @@ function Switch({
             const { value: currentValue, ...otherProps } = option;
             onClick(currentValue, otherProps);
           }}
-          className={value === option.value ? styles.active : ''}
+          className={classnames(styles.switch_wrap, { [styles.active]: value === option.value })}
         >
-          {option.text || option}
-        </li>
+          <span className={styles.switch_inner} />
+          <span className={styles.switch_label}>{option.text || option}</span>
+
+        </span>
       ))}
-    </ul>
+    </div>
   );
 }
 export default observer(Switch);

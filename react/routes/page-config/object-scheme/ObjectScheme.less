@@ -2,45 +2,58 @@
 
 .issue-object-scheme-detail {
   &-content {
-    // padding-top: 0;
+    padding-top: 0;
+
     .c7n-table-header {
       background: transparent !important;
     }
 
     &-table {
+      .@{c7n-pro-prefix}-table {
+        border-top: none;
+      }
+
       .@{c7n-pro-prefix}-table-tbody {
         color: rgba(0, 0, 0, 0.65);
       }
     }
+
     .c7n-table-cell-drop-menu {
       margin-top: 4px;
     }
   }
+
   &-prompt {
     .c7n-pro-modal-header {
       padding-bottom: 0;
     }
+
     .c7n-pro-modal-body {
       padding-top: .2rem;
       padding-bottom: .2rem;
     }
   }
+
   &-sync {
     .c7n-pro-modal-body {
       padding-top: 0;
       padding-bottom: 0;
     }
+
     &-form {
       display: inline-flex;
       align-items: center;
+
       & >span:first-child {
         white-space: nowrap;
         display: inline-block;
         margin-right: .05rem;
       }
+
       & >div:first-child {
         min-width: 2rem;
       }
+
       .c7n-pro-select-wrapper {
         background-color: #fff !important;
       }
