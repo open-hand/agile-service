@@ -1,11 +1,14 @@
 package io.choerodon.agile.api.vo;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * @author zhaotianxin
  * @date 2021-03-25 10:50
  */
 public class StatusTemplateVO {
 
+    @Encrypt
     private Long statusId;
 
     private String name;
