@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { issueCommentApi, IComment } from '@/api/IssueComment';
 import Comment from './components/comment';
@@ -17,6 +17,25 @@ interface Props {
 const Comments: React.FC<Props> = ({
   projectId, reloadIssue, disabled, outside,
 }) => {
+  const addingRef = useRef<{
+    adding: boolean,
+    setAdding:(adding: boolean) => void
+    setAddValue: (v: string) => void
+      } | null>(null);
+
+  const editingRef = useRef<{
+    editing: boolean,
+    setEditing:(editing: boolean) => void
+    setEditValue: (v: string) => void
+    initValue: string
+      } | null>(null);
+
+  const replyingRef = useRef<{
+      replying: boolean,
+      setReplying:(replying: boolean) => void
+      setReplyValue: (v: string) => void
+        } | null>(null);
+
   const { store, applyType } = useContext(EditIssueContext);
   const { issueId, issueCommentVOList = [] } = store.issue;
   const comments = issueCommentVOList;
@@ -52,6 +71,9 @@ const Comments: React.FC<Props> = ({
               comment={comment}
               reload={reload}
               readonly={readonly}
+              addingRef={addingRef}
+              editingRef={editingRef}
+              replyingRef={replyingRef}
             />
           ))
         }
@@ -59,7 +81,7 @@ const Comments: React.FC<Props> = ({
       {
         (!disabled || !readonly) && (
           <div className={styles.add}>
-            <AddComment onSubmit={handleCreateCommit} />
+            <AddComment onSubmit={handleCreateCommit} addingRef={addingRef} editingRef={editingRef} replyingRef={replyingRef} />
           </div>
         )
       }
