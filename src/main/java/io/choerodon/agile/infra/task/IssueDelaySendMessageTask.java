@@ -153,9 +153,9 @@ public class IssueDelaySendMessageTask {
         if (!messageSenders.isEmpty()) {
             int step = 500;
             for (int i = 0; i < messageSenders.size(); i += step) {
-                int end = (i + 1) * step;
+                int end = i + step;
                 if (end >= messageSenders.size()) {
-                    end = messageSenders.size() - 1;
+                    end = messageSenders.size();
                 }
                 List<MessageSender> messageSenderList = messageSenders.subList(i, end);
                 notifyFeignClient.batchSendMessage(messageSenderList);
