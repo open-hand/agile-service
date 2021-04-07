@@ -347,7 +347,7 @@ class ImportIssue extends Component {
                     label: item.title,
                     value: item.code,
                     system: item.system,
-                    checkBoxProps: includes(requiredFields, item.code) ? {
+                    optionConfig: includes(requiredFields, item.code) ? {
                       disabled: includes(requiredFields, item.code),
                       defaultChecked: includes(requiredFields, item.code),
                       name: 'required-option',

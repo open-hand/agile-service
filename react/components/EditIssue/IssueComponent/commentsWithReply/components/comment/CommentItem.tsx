@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+  useCallback, useEffect, useState, useImperativeHandle,
+} from 'react';
 import { Icon } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
@@ -30,11 +32,27 @@ interface Props {
   parentId: string
   reload: Function
   readonly: boolean
+  addingRef: React.MutableRefObject<{
+    adding: boolean,
+    setAdding: (adding: boolean) => void
+    setAddValue: (v: string) => void
+  } | null>
+  editingRef: React.MutableRefObject<{
+    editing: boolean,
+    setEditing: (editing: boolean) => void
+    setEditValue: (v: string) => void
+    initValue: string
+  } | null>
+  replyingRef: React.MutableRefObject<{
+    replying: boolean,
+    setReplying:(replying: boolean) => void
+    setReplyValue: (v: string) => void
+      } | null>
 }
 const { AppState } = stores;
 
 const CommentItem: React.FC<Props> = ({
-  hasPermission, comment, onDelete, onUpdate, onReply, projectId, isReply, parentId, reload, readonly,
+  hasPermission, comment, onDelete, onUpdate, onReply, projectId, isReply, parentId, reload, readonly, addingRef, editingRef, replyingRef,
 }) => {
   const loginUserId = AppState.userInfo.id;
   const isSelf = String(comment.userId) === String(loginUserId);
@@ -122,12 +140,30 @@ const CommentItem: React.FC<Props> = ({
       setValue(delta);
     }
 
+    if (addingRef?.current?.adding) {
+      addingRef?.current?.setAddValue('');
+      addingRef?.current?.setAdding(false);
+    }
+
     setReplying(true);
-  }, [comment.commentText, editing]);
+  }, [addingRef, comment.commentText, editing]);
 
   const handleReplyChange = useCallback((delta: string) => {
     setReplyValue(delta);
   }, []);
+
+  useImperativeHandle(editingRef, () => ({
+    editing,
+    setEditing,
+    setEditValue: setValue,
+    initValue: comment.commentText,
+  }));
+
+  useImperativeHandle(replyingRef, () => ({
+    replying,
+    setReplyValue,
+    setReplying,
+  }));
 
   return (
     <>
@@ -188,6 +224,10 @@ const CommentItem: React.FC<Props> = ({
                       if (replying) {
                         setReplying(false);
                         setReplyValue('');
+                      }
+                      if (addingRef?.current?.adding) {
+                        addingRef?.current?.setAddValue('');
+                        addingRef?.current?.setAdding(false);
                       }
                       setEditing(true);
                     }

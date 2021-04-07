@@ -1,11 +1,29 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useImperativeHandle } from 'react';
 import WYSIWYGEditor from '@/components/CKEditor';
 import './AddComment.less';
 
 interface Props {
   onSubmit: (data: string) => Promise<any>
+  addingRef: React.MutableRefObject<{
+    adding: boolean,
+    setAdding: (adding: boolean) => void
+    setAddValue: (v: string) => void
+  } | null>
+  editingRef: React.MutableRefObject<{
+    editing: boolean,
+    setEditing: (editing: boolean) => void
+    setEditValue: (v: string) => void
+    initValue: string
+  } | null>
+  replyingRef: React.MutableRefObject<{
+    replying: boolean,
+    setReplying:(replying: boolean) => void
+    setReplyValue: (v: string) => void
+      } | null>
 }
-const Comments: React.FC<Props> = ({ onSubmit }) => {
+const Comments: React.FC<Props> = ({
+  onSubmit, addingRef, editingRef, replyingRef,
+}) => {
   const [adding, setAdding] = useState(false);
   const [value, setValue] = useState<string>('');
   const cancel = () => {
@@ -33,6 +51,24 @@ const Comments: React.FC<Props> = ({ onSubmit }) => {
     }
   };
 
+  const handleAdding = useCallback(() => {
+    setAdding(true);
+    if (editingRef?.current?.editing) {
+      editingRef?.current?.setEditValue(editingRef?.current?.initValue);
+      editingRef?.current?.setEditing(false);
+    }
+    if (replyingRef?.current?.replying) {
+      replyingRef?.current?.setReplyValue('');
+      replyingRef?.current?.setReplying(false);
+    }
+  }, [editingRef, replyingRef]);
+
+  useImperativeHandle(addingRef, () => ({
+    adding,
+    setAdding,
+    setAddValue: setValue,
+  }));
+
   return adding ? (
     <div className="line-start mt-10 c7n-editIssue-addComment" style={{ width: '100%' }}>
       <WYSIWYGEditor
@@ -50,7 +86,7 @@ const Comments: React.FC<Props> = ({ onSubmit }) => {
   ) : (
     <div
       role="none"
-      onClick={() => setAdding(true)}
+      onClick={handleAdding}
       style={{
         background: 'rgba(0,0,0,0.03)',
         border: '1px solid rgba(0,0,0,0.20)',

@@ -104,6 +104,7 @@ class QuickCreateIssue extends Component {
               issueTypeId: currentType.id,
               typeCode: currentType.typeCode,
               priorityId: defaultPriority.id,
+              epicId,
             }, fieldsMap);
 
             issueApi.create(issue).then((res) => {

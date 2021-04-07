@@ -13,9 +13,9 @@ import { userApi, componentApi } from '@/api';
 import UserTag from '@/components/tag/user-tag';
 
 import './component.less';
+import { useLockFn } from 'ahooks';
 
 const { Option } = Select;
-const { AppState } = stores;
 const FormItem = Form.Item;
 let sign = false;
 
@@ -36,9 +36,9 @@ const EditComponent = (props) => {
 
   const { getFieldDecorator, getFieldsValue } = props.form;
 
-  const handleOk = () => {
-    props.form.validateFields((err, values, modify) => {
-      if (!err && modify) {
+  const handleOk = useLockFn(async () => new Promise((resolve, reject) => props.form.validateFields(async (err, values, modify) => {
+    if (!err && modify) {
+      try {
         const {
           defaultAssigneeRole, description, managerId, name, sequence,
         } = values;
@@ -52,20 +52,21 @@ const EditComponent = (props) => {
           sequence,
         };
         setCreateLoading(true);
-        componentApi.update(component.componentId, editComponent)
-          .then((res) => {
-            setCreateLoading(false);
-            props.modal.close();
-            props.onOk();
-          })
-          .catch((error) => {
-            setCreateLoading(false);
-            Choerodon.prompt('修改模块失败');
-          });
+        modal?.update({ okProps: { loading: true } });
+        await componentApi.update(component.componentId, editComponent);
+        setCreateLoading(false);
+        props.modal.close();
+        props.onOk();
+        modal?.update({ okProps: { loading: false } });
+        resolve();
+      } catch (e) {
+        setCreateLoading(false);
+        Choerodon.prompt('修改模块失败');
+        modal?.update({ okProps: { loading: false } });
+        reject();
       }
-    });
-    return false;
-  };
+    }
+  })));
   modal.handleOk(handleOk);
   const debounceFilterIssues = _.debounce((text) => {
     setSelectLoading(true);

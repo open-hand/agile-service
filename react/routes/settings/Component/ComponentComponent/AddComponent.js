@@ -1,15 +1,17 @@
 /* eslint-disable */
-import React, { Component, Fragment, useState, useImperativeHandle, forwardRef } from 'react';
+import React, { Component, Fragment, useState, forwardRef } from 'react';
 import {
   Form, Input, Select, message, Button, InputNumber
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import { Content, stores, Choerodon } from '@choerodon/boot';
 import { componentApi } from '@/api';
-import _ from 'lodash';
+import { debounce } from 'lodash';
+import { useLockFn  } from 'ahooks';
 import './component.less';
 import { userApi } from '@/api';
 import UserTag from '@/components/tag/user-tag';
+import { useCallback } from 'react';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -27,31 +29,35 @@ function AddComponent(props) {
   const [input, setInput] = useState('');
 
   const { getFieldDecorator, getFieldsValue } = props.form;
-  const handleSubmit = () => {
-    props.form.validateFields((err, values) => {
-      if (!err) {
-        const {
-          defaultAssigneeRole, description, managerId, name, sequence
-        } = values;
-        const component = {
-          defaultAssigneeRole,
-          description,
-          managerId: managerId ? JSON.parse(managerId).id || 0 : 0,
-          name: name.trim(),
-          sequence
-        };
-        componentApi.create(component)
-          .then((res) => {
-            props.modal.close();
-            props.onOk();
-          })
-          .catch((error) => {
-            Choerodon.prompt('创建模块失败');
-          });
+  const handleSubmit = useLockFn(async () => {
+     return new Promise((resolve,reject) =>props.form.validateFields(async (err, values) => {
+      if (!err && values && JSON.stringify(values) !== '{}') {
+        try {
+          modal?.update({ okProps: { loading: true } });
+          const {
+            defaultAssigneeRole, description, managerId, name, sequence
+          } = values;
+          const component = {
+            defaultAssigneeRole,
+            description,
+            managerId: managerId ? JSON.parse(managerId).id || 0 : 0,
+            name: name.trim(),
+            sequence
+          };
+          await componentApi.create(component)
+          props.modal.close();
+          props.onOk();
+          modal?.update({ okProps: { loading: false } });
+          resolve()
+        } catch(error) {
+          Choerodon.prompt('创建模块失败');
+          modal?.update({ okProps: { loading: false } });
+          reject()
+        }
       }
-    });
-    return false;
-  };
+    }));
+  });
+
   modal.handleOk(handleSubmit)
   const onFilterChange = (input) => {
     if (!sign) {
@@ -68,7 +74,7 @@ function AddComponent(props) {
     }
   };
 
-  const debounceFilterIssues = _.debounce((input) => {
+  const debounceFilterIssues = debounce((input) => {
     setSelectLoading(true);
     setPage(1);
     userApi.getAllInProject(input, page).then((res) => {
