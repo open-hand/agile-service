@@ -47,17 +47,11 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
     return defaultValue;
   }, [record]);
   const ds = useMemo(() => {
-    let defaultValue = record.get('defaultValue');
+    const defaultValue = initValue;
+    // if (dateList.includes(record.get('fieldType')) && defaultValue) {
+    //   defaultValue = defaultValue === 'current' ? '当前时间' : moment(defaultValue, dateFormat.datetime).format(dateFormat[record.get('fieldType') as 'date' | 'datetime' | 'time']);
+    // }
 
-    if (defaultValue === '') {
-      defaultValue = undefined;
-    }
-    if (dateList.includes(record.get('fieldType')) && defaultValue) {
-      defaultValue = moment(defaultValue, dateFormat.datetime).format(dateFormat[record.get('fieldType') as 'date' | 'datetime' | 'time']);
-    }
-    if (defaultValue && ['checkbox', 'multiple', 'radio', 'single', 'multiMember'].includes(record.get('fieldType'))) {
-      defaultValue = String(defaultValue).split(',');
-    }
     return new DataSet({
       autoCreate: true,
       autoQuery: false,
@@ -77,7 +71,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
         },
       ],
     });
-  }, [defaultTypes, record]);
+  }, [defaultTypes, initValue]);
 
   const handleOk = useCallback(async () => {
     if (await ds.validate()) {
@@ -86,8 +80,10 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
       if (['date', 'datetime', 'time'].includes(record.get('fieldType')) && defaultValue && typeof (defaultValue) === 'object') {
         if (defaultValue.value === 'current') {
           record.set('check', true);
+          defaultValue = moment();
+        } else {
+          defaultValue = defaultValue.meaning;
         }
-        defaultValue = defaultValue.meaning;
       }
       record.set('defaultValue', defaultValue);
       const newData = beforeSubmitProcessData(record);
