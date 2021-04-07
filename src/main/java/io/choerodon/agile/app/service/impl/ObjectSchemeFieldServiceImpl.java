@@ -599,13 +599,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         field.setContext(String.join(",", typeCodes));
         field.setOrganizationId(organizationId);
         field.setProjectId(projectId);
-
-        if (Objects.equals(FieldType.MULTI_MEMBER, field.getFieldType()) && !ObjectUtils.isEmpty(field.getDefaultValue())) {
-            String defaultValue = tryDecryptDefaultValue(field.getFieldType(), field.getDefaultValue());
-            if (defaultValue != null) {
-                field.setDefaultValue(defaultValue);
-            }
-        }
+        decryptMemberFieldDefaultValue(field);
         field = baseCreate(field, issueTypes, issueTypeIdForRank);
         //处理字段选项
         if (fieldCreateDTO.getFieldOptions() != null) {
@@ -804,17 +798,21 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         Set<String> typeCodes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO)
                 .stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toSet());
         update.setContext(String.join(",", typeCodes));
-        boolean isMember = Objects.equals(FieldType.MULTI_MEMBER, update.getFieldType()) || Objects.equals(FieldType.MEMBER, update.getFieldType());
-        if (isMember && !ObjectUtils.isEmpty(update.getDefaultValue())) {
-            String defaultValue = tryDecryptDefaultValue(update.getFieldType(), update.getDefaultValue());
-            if (defaultValue != null) {
-                update.setDefaultValue(defaultValue);
-            }
-        }
+        decryptMemberFieldDefaultValue(update);
         updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, update.getDefaultValue(), updateDTO);
         update.setId(fieldId);
         baseUpdate(update);
         return queryById(organizationId, projectId, fieldId);
+    }
+
+    private void decryptMemberFieldDefaultValue(ObjectSchemeFieldDTO field) {
+        boolean isMember = Objects.equals(FieldType.MULTI_MEMBER, field.getFieldType()) || Objects.equals(FieldType.MEMBER, field.getFieldType());
+        if (isMember && !ObjectUtils.isEmpty(field.getDefaultValue())) {
+            String defaultValue = tryDecryptDefaultValue(field.getFieldType(), field.getDefaultValue());
+            if (defaultValue != null) {
+                field.setDefaultValue(defaultValue);
+            }
+        }
     }
 
     private void updateFieldIssueTypeAndDefaultValue(Long organizationId,
