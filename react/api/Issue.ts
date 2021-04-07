@@ -170,7 +170,7 @@ class IssueApi extends Api<IssueApi> {
       if (error.code === 'error.dataLogEpic.methodExecute') {
         Choerodon.prompt('该问题项详情信息已被锁定，请重新打开问题详情进行编辑。', 'error');
       } else {
-        Choerodon.prompt(error.code);
+        Choerodon.prompt(error.message);
       }
       throw error;
     }
