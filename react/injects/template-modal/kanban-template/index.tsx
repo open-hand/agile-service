@@ -24,7 +24,7 @@ const KanbanTemplates = () => {
   }, []);
   const tabs = useMemo(() => templates.map((template) => ({ key: template.boardId, title: template.name })), [templates]);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div>
       {
         !loading && (
         <>
@@ -32,9 +32,9 @@ const KanbanTemplates = () => {
             templates.length > 0 ? (
               <>
                 <Tabs activeKey={activeKey} onChange={setActiveKey} tabs={tabs} color="#5365EA" />
-                <div style={{ flex: 1, overflow: 'hidden' }}>
-                  {activeKey && <Detail templateId={activeKey} />}
-                </div>
+                {/* <div style={{ flex: 1, overflow: 'hidden' }}> */}
+                {activeKey && <Detail templateId={activeKey} />}
+                {/* </div> */}
               </>
             ) : (
               <Empty

@@ -19,7 +19,7 @@ const KanbanTemplateDetail: React.FC<KanbanTemplateDetailProps> = ({ templateId 
     store.refresh();
   }, [store]);
   return (
-    <div style={{ height: '100%', display: 'flex' }}>
+    <div>
       <Loading loading={store.loading} />
       <Context.Provider value={{ store }}>
         <div className={styles.container}>
