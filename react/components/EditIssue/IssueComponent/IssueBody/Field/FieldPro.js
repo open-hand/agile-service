@@ -87,7 +87,12 @@ const EditorMap = new Map([
                   </Editor.Option>
               ));
           return (
-            <Editor vertical searchable required={required} multiple={fieldType === 'multiple' || fieldType === 'checkbox'}>
+            <Editor
+              vertical
+              searchable={fieldType === 'multiple' || fieldType === 'single'}
+              required={required}
+              multiple={fieldType === 'multiple' || fieldType === 'checkbox'}
+            >
               {options}
             </Editor>
           );
