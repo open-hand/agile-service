@@ -196,13 +196,14 @@ class IssueTypeApi extends Api<IssueTypeApi> {
    * 加载全部问题类型（带关联的状态机id)
    * @param applyType
    */
-  loadAllWithStateMachineId(applyType: string = 'agile', projectId?: string, onlyEnabled?: boolean): Promise<IIssueType[]> {
+  loadAllWithStateMachineId(applyType: string = 'agile', projectId?: string, onlyEnabled?: boolean, programId?: string | number): Promise<IIssueType[]> {
     return this.request({
       method: 'get',
-      url: `/agile/v1/projects/${projectId || getProjectId()}/schemes/query_issue_types_with_sm_id`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}${programId ? '/project_invoke_program' : ''}/schemes/query_issue_types_with_sm_id`,
       params: {
         apply_type: applyType,
         only_enabled: onlyEnabled,
+        programId,
       },
       // cache: true,
     });
