@@ -15,7 +15,7 @@ class FieldStartTime extends Component {
     const obj = {
       issueId,
       objectVersionNumber,
-      estimatedStartTime: value && value.format('YYYY-MM-DD HH:mm:ss'),
+      estimatedStartTime: value ? value.format('YYYY-MM-DD HH:mm:ss') : null,
     };
     issueApi.update(obj)
       .then(() => {
