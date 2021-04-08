@@ -204,8 +204,8 @@ class CreateIssue extends Component {
   };
 
   checkSameDescription = (origin, current) => {
-    if (!origin) {
-      return !current || JSON.stringify(current) === JSON.stringify([{ insert: '\n' }]);
+    if (!origin || origin === '') {
+      return !current || current === '' || JSON.stringify(current) === JSON.stringify([{ insert: '\n' }]);
     }
     if (current) {
       return origin === JSON.stringify(current);
@@ -219,17 +219,20 @@ class CreateIssue extends Component {
       return;
     }
     const currentDes = form.getFieldValue('description');
-    pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
-      const { template } = res || {};
-      form.setFieldsValue({
-        description: template,
-      });
-      if (!template) {
+    if (this.checkSameDescription(this.originDescription, currentDes)) {
+      pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
+        const { template } = res || {};
         form.setFieldsValue({
-          description: currentDes,
+          description: template,
         });
-      }
-    });
+        this.originDescription = template;
+        if (!template) {
+          form.setFieldsValue({
+            description: currentDes,
+          });
+        }
+      });
+    }
   }
 
   setDefaultValue = (fields) => {
@@ -1293,9 +1296,9 @@ class CreateIssue extends Component {
           <Form layout="vertical" className="c7nagile-form">
             <div className="c7nagile-createIssue-fields" key={newIssueTypeCode}>
               {['sub_task', 'sub_bug'].includes(mode) && (
-              <FormItem>
-                <Input label="父任务概要" value={parentSummary} disabled />
-              </FormItem>
+                <FormItem>
+                  <Input label="父任务概要" value={parentSummary} disabled />
+                </FormItem>
               )}
               {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode))
                 .map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}

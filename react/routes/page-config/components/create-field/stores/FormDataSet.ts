@@ -160,7 +160,7 @@ const FormDataSet = ({
       },
       {
         name: 'context',
-        // type: 'string' as FieldType,
+        type: 'string' as FieldType,
         label: formatMessage({ id: 'field.context' }),
         required: true,
         multiple: true,

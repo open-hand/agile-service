@@ -3,6 +3,7 @@ import {
 } from 'react';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
+import moment from 'moment';
 import renderEditor from '../../../components/renderEditor';
 import {
   transformDefaultValue, orgDisabledEditDefaultFields, disabledEditDefaultFields,
@@ -53,7 +54,7 @@ function useTextEditTogglePropsWithPage(record: Record, isProject: boolean, { cl
       const { meaning, value: dateValue } = newValue || {};
       extraConfig = dateValue === 'current';
       // newValue = currentData.defaultValue;
-      newValue = extraConfig ? currentData.defaultValue || meaning : dateValue;
+      newValue = extraConfig ? currentData.defaultValue || moment().format('YYYY-MM-DD HH:mm:ss') : dateValue;
       extraConfig && record.init('defaultValue', newValue);
       record.set('extraConfig', extraConfig);
     }
