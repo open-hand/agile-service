@@ -42,7 +42,7 @@ function transformDefaultValue({
       return selectOptions.length > 0 ? selectOptions.join(',') : '';
     }
     case 'member': {
-      const { realName } = defaultValueObj || {};
+      const { realName } = Array.isArray(toJS(defaultValueObj)) ? defaultValueObj[0] : defaultValueObj || {};
       return realName || defaultValue;
     }
     case 'multiMember': {
