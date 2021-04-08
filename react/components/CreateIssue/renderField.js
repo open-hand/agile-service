@@ -150,7 +150,7 @@ export default function renderField(field, projectId) {
     return (
       <InputNumber
         label={fieldName}
-        step={1}
+        step={field.extraConfig ? 0.01 : 1}
         precision={field.extraConfig ? MAX_FLOAT_BITE : 0}
         max={MAX_NUMBER_VALUE}
       />
