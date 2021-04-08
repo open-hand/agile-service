@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Icon, Row, Col, Tooltip,
+  Icon, Row, Col,
 } from 'choerodon-ui';
 import {
   Issue, IField, User, IIssueType,
@@ -14,7 +14,7 @@ import {
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import TypeTag from '@/components/TypeTag';
-import { DataSet } from 'choerodon-ui/pro/lib';
+import { DataSet, Tooltip } from 'choerodon-ui/pro';
 import {
   fieldApi, moveIssueApi, issueApi, userApi,
 } from '@/api';
