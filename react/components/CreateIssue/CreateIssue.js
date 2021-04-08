@@ -698,13 +698,13 @@ class CreateIssue extends Component {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {getFieldDecorator('assigneedId', {
                 rules: [{ required: field.required, message: '请选择经办人' }],
-                initialValue: this.props.chosenAssignee,
+                initialValue: typeof (this.props.chosenAssignee) === 'object' ? this.props.chosenAssignee.id : this.props.chosenAssignee,
               })(
                 <SelectUser
                   label="经办人"
                   style={{ flex: 1 }}
                   allowClear
-                  extraOption={form.getFieldValue('assigneedId') === AppState.userInfo.id ? [AppState.userInfo, field.defaultValueObj] : field.defaultValueObj}
+                  extraOption={form.getFieldValue('assigneedId') === AppState.userInfo.id ? [AppState.userInfo, field.defaultValueObj, this.props.chosenAssignee].filter((o) => typeof (o) !== 'string' && o) : [field.defaultValueObj, this.props.chosenAssignee].filter((o) => typeof (o) !== 'string' && o)}
                 />,
               )}
               <IsProjectMember>
