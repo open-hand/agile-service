@@ -176,29 +176,31 @@ public class PageFieldServiceImpl implements PageFieldService {
             pageFields =
                     objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueTypeId, created, edited);
         }
-
-        addNotSyncField(organizationId, projectId, pageFields, issueType, created, edited, issueTypeId);
+        addNotSyncField(organizationId, projectId, pageFields, issueTypeId, created, edited);
         if (agilePluginService != null) {
             pageFields = agilePluginService.handlerProgramPageField(projectId,issueTypeId,pageFields);
         }
         return pageFields;
     }
 
-    private void addNotSyncField(Long organizationId, Long projectId, List<PageFieldDTO> pageFields, String issueType,Boolean created, Boolean edited, Long issueTypeId) {
-        List<Long> existFields = pageFields.stream().filter(v -> Boolean.TRUE.equals(v.getSystem())).map(PageFieldDTO::getFieldId).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(existFields)) {
-            return;
-        }
-        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectNotSyncFieldByFieldConfig(organizationId, issueType, existFields);
+    private void addNotSyncField(Long organizationId,
+                                 Long projectId,
+                                 List<PageFieldDTO> pageFields,
+                                 Long issueTypeId,
+                                 Boolean created,
+                                 Boolean edited) {
+        //查询没有在fd_object_scheme_field_extend表配置的系统字段
+        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectNotSyncFieldByFieldConfig(organizationId, projectId, issueTypeId);
         if (CollectionUtils.isEmpty(objectSchemeFieldDTOS)) {
             return;
         }
+        String issueTypeCode = issueTypeService.getIssueTypeById(issueTypeId);
         String endRank = pageFields.get(pageFields.size() - 1).getRank();
         for (ObjectSchemeFieldDTO objectSchemeFieldDTO : objectSchemeFieldDTOS) {
             String fieldContext = objectSchemeFieldService.getFieldContext(objectSchemeFieldDTO.getCode());
             List<String> context = Arrays.asList(fieldContext.split(","));
-            if (context.contains(issueType)) {
-                boolean checkFieldPageConfig = checkFieldPageConfig(projectId, issueTypeId, objectSchemeFieldDTO.getId(), issueType, objectSchemeFieldDTO.getCode() ,created ,edited);
+            if (context.contains(issueTypeCode)) {
+                boolean checkFieldPageConfig = checkFieldPageConfig(projectId, issueTypeId, objectSchemeFieldDTO.getId(), issueTypeCode, objectSchemeFieldDTO.getCode() ,created ,edited);
                 if (Boolean.FALSE.equals(checkFieldPageConfig)) {
                     continue;
                 }

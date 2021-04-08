@@ -483,30 +483,55 @@
 
     <select id="selectNotSyncFieldByFieldConfig" resultMap="objectSchemeFieldWithExtends">
         select
-        t4.id,
-        t4.code,
-        t4.default_value,
-        t4.description,
-        t4.field_type,
+        fosf.id,
+        fosf.code,
+        fosf.default_value,
+        fosf.description,
+        fosf.field_type,
         flv.name as field_type_name,
-        t4.name,
-        t4.object_version_number,
-        t4.organization_id,
-        t4.project_id,
-        t4.is_system,
-        t4.is_required,
-        t4.extra_config,
+        fosf.name,
+        fosf.object_version_number,
+        fosf.organization_id,
+        fosf.project_id,
+        fosf.is_system,
+        fosf.is_required,
+        fosf.extra_config,
         'system' as created_level
-        from fd_object_scheme_field t4
-        left join lookup_value flv on flv.value_code = t4.field_type and flv.type_code = 'field_type'
-        where
-        t4.organization_id = 0
-        AND t4.project_id = 0
-        AND t4.is_system = 1
-        AND t4.id NOT IN
-        <foreach collection="existIds" item="existId" open="(" close=")" separator=",">
-            #{existId}
-        </foreach>
+        from fd_object_scheme_field fosf
+        left join lookup_value flv on flv.value_code = fosf.field_type and flv.type_code = 'field_type'
+        where fosf.organization_id = 0
+        and fosf.project_id = 0
+        and fosf.is_system = 1
+        and fosf.id not in (
+            select
+            t1.field_id
+            from fd_object_scheme_field_extend t1
+            where t1.organization_id = #{organizationId}
+            and t1.project_id is null
+            <if test="issueTypeId != null">
+                and t1.issue_type_id = #{issueTypeId}
+            </if>
+            <if test="projectId != null">
+                and t1.field_id not in (
+                select t3.field_id
+                from fd_object_scheme_field_extend t3
+                where t3.organization_id = #{organizationId}
+                and t3.project_id = #{projectId}
+                <if test="issueTypeId != null">
+                    and t3.issue_type_id = #{issueTypeId}
+                </if>
+                )
+                union
+                select
+                t2.field_id
+                from fd_object_scheme_field_extend t2
+                where t2.organization_id = #{organizationId}
+                and t2.project_id = #{projectId}
+                <if test="issueTypeId != null">
+                    and t2.issue_type_id = #{issueTypeId}
+                </if>
+            </if>
+        )
     </select>
 
     <select id="filterNotExistFields" resultType="java.lang.Long">
