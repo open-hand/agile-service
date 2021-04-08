@@ -49,7 +49,7 @@ class CommonApi extends Api<CommonApi> {
       params: {
         only_select_enable: onlySelectEnableSubProject || false,
       },
-    });
+    }).then((res:any[]) => res?.map((item:any) => ({ ...item, projectId: String(item.projectId) })));
   }
 
   /**
