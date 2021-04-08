@@ -21,8 +21,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.math.BigDecimal.ROUND_FLOOR;
-
 import io.choerodon.agile.api.vo.FieldOptionUpdateVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
