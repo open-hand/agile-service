@@ -734,7 +734,8 @@ class AddComponent extends Component {
           if (deleteItem.indexOf(i) !== -1) {
             return;
           }
-          const field = quickFilterFiled.find((item) => item.fieldCode === v.fieldCode) || {};
+          const fieldCode = values[`filter-${i}-prop`];
+          const field = quickFilterFiled.find((item) => item.fieldCode === fieldCode) || {};
           const a = {
             fieldCode: values[`filter-${i}-prop`],
             operation: this.transformOperation2(values[`filter-${i}-rule`]),
