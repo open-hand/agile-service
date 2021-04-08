@@ -6,7 +6,7 @@ import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { MAX_LENGTH_FIELD_CODE, MAX_LENGTH_FIELD_NAME } from '@/constants/MAX_LENGTH';
-import { MAX_NUMBER_STEP, MAX_NUMBER_VALUE } from '@/constants/MAX_VALUE';
+import { MAX_NUMBER_VALUE } from '@/constants/MAX_VALUE';
 import { Store } from './useStore';
 
 interface Props {
@@ -184,7 +184,7 @@ const FormDataSet = ({
           step: ({ record }: { record: Record }) => {
             const fieldType = record.get('fieldType');
             if (fieldType === 'number') {
-              return MAX_NUMBER_STEP;
+              return 1;
             }
             return undefined;
           },
