@@ -54,7 +54,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
             onSubmit={this.updateIssueField}
             initValue={value ? String(value) : undefined}
             editor={({ submit }) => (
-              <SelectNumber required={required} />
+              <SelectNumber required={required} onChange={submit} />
             )}
           >
             <div style={{ whiteSpace: 'nowrap' }}>
