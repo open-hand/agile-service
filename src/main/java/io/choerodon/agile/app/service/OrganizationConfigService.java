@@ -109,4 +109,6 @@ public interface OrganizationConfigService {
      * @return
      */
     List<IssueTypeVO> listIssueType(Long organizationId);
+
+    Boolean checkConfigured(Long organizationId, Long projectId);
 }

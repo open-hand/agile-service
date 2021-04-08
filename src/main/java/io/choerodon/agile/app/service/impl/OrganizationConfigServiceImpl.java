@@ -483,6 +483,13 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         return modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeVO>>(){}.getType());
     }
 
+    @Override
+    public Boolean checkConfigured(Long organizationId, Long projectId) {
+        ProjectConfigDTO projectConfigDTO = new ProjectConfigDTO();
+        projectConfigDTO.setProjectId(projectId);
+        return projectConfigMapper.select(projectConfigDTO).isEmpty();
+    }
+
     private OrganizationConfigDTO initOrganizationConfig(Long organizationId){
         // 创建状态机方案
         Long schemeId = stateMachineSchemeService.initOrgDefaultStatusMachineScheme(organizationId);
