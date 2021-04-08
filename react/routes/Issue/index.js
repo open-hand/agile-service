@@ -124,9 +124,8 @@ const Issue = observer(() => {
     // 单个任务跳转 => otherArgs 设置 issueId，将任务设定为展开模式
     if (paramIssueId) {
       let id = paramOpenIssueId || paramIssueId;
-      // 数字，说明没加密
-      // eslint-disable-next-line no-restricted-globals
-      if (!isNaN(id)) {
+      // 都是数字，说明没加密
+      if (!/^[0-9]+$/.test(id)) {
         try {
           id = await issueApi.encryptIssueId(id);
         } catch (error) {
