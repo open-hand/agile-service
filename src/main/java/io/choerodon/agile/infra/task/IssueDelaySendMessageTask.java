@@ -86,7 +86,7 @@ public class IssueDelaySendMessageTask {
             oneExecution = false,
             params = {},
             triggerType = TriggerTypeEnum.CRON_TRIGGER,
-            cronExpression = "0 0 2 * * ? "
+            cronExpression = "0 30 2 * * ? "
     )
     public void run(Map<String, Object> map) {
         LOGGER.info("===> 开始执行问题延期发送消息定时任务");
