@@ -22,29 +22,25 @@ const TemplateContent = () => {
     setActiveKey(key);
   }, []);
   return (
-  // <div style={{ display: 'flex' }}>
-    <div>
+    <>
       <Tabs activeKey={activeKey} onChange={handleActiveKeyChange} className={styles.template_tab}>
         {
-            ['statusMachineTemplate', 'boardTemplate'].map((item) => (
-              <TabPane key={item} tab={templateTabMap.get(item)?.name} />
-            ))
-          }
+          ['statusMachineTemplate', 'boardTemplate'].map((item) => (
+            <TabPane key={item} tab={templateTabMap.get(item)?.name} />
+          ))
+        }
       </Tabs>
-      {/* <div style={{ flex: 1 }}> */}
       {
-            activeKey === 'statusMachineTemplate' && (
-              <StatusMachineTemplate readOnly visibleIssueTypeCategory="initial" />
-            )
-          }
+        activeKey === 'statusMachineTemplate' && (
+          <StatusMachineTemplate readOnly visibleIssueTypeCategory="initial" />
+        )
+      }
       {
-            activeKey === 'boardTemplate' && (
-              <KanbanTemplate />
-            )
-          }
-      {/* </div> */}
-    </div>
-  // </div>
+        activeKey === 'boardTemplate' && (
+          <KanbanTemplate />
+        )
+      }
+    </>
   );
 };
 
@@ -58,7 +54,7 @@ const openTemplate = (props: any) => {
       width: '1090px',
     },
     title: '查看模板',
-    className: 'c7nagile-template-modal',
+    className: styles['c7nagile-template-modal'],
     children: <ObserverTemplateContent {...props} />,
     okText: '关闭',
     footer: (okBtn: Button) => okBtn,
