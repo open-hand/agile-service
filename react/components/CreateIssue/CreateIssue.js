@@ -208,7 +208,7 @@ class CreateIssue extends Component {
       return !current || current === '' || JSON.stringify(current) === JSON.stringify([{ insert: '\n' }]);
     }
     if (current) {
-      return origin === JSON.stringify(current);
+      return origin === current || origin === JSON.stringify(current);
     }
     return true;
   };
@@ -232,6 +232,9 @@ class CreateIssue extends Component {
           });
         }
       });
+    } else {
+      // 如果不一致 则将原描模版述置为初始值
+      this.originDescription = true;
     }
   }
 
