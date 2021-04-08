@@ -2485,9 +2485,14 @@ public class ExcelServiceImpl implements ExcelService {
             if (CollectionUtils.isEmpty(issueStatusList)) {
                 return;
             }
+            String typeCode = issueTypeVO.getTypeCode();
             issueStatusList.forEach(status -> {
                 String key = issueTypeVO.getName() + "-" + status.getName();
                 issueStatusMap.put(key, status);
+                if (IssueTypeCode.BUG.value().equals(typeCode)) {
+                    String subBugKey = SUB_BUG_CN + "-" + status.getName();
+                    issueStatusMap.put(subBugKey, status);
+                }
             });
         });
         excelColumnVO.setIssueStatusMap(issueStatusMap);
