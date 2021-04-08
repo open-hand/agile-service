@@ -30,6 +30,22 @@ public enum IssueTypeCode {
         return BUG.value.equals(value);
     }
 
+    public static boolean isFeature(String value) {
+        return FEATURE.value.equals(value);
+    }
+
+    public static boolean isEpic(String value) {
+        return ISSUE_EPIC.value.equals(value);
+    }
+
+    public static boolean isStory(String value) {
+        return STORY.value.equals(value);
+    }
+
+    public static boolean isTask(String value) {
+        return TASK.value.equals(value);
+    }
+
     public static boolean isSubTask(String value) {
         return SUB_TASK.value.equals(value);
     }
