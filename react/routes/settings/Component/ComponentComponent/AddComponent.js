@@ -7,7 +7,7 @@ import { Modal } from 'choerodon-ui/pro';
 import { Content, stores, Choerodon } from '@choerodon/boot';
 import { componentApi } from '@/api';
 import { debounce } from 'lodash';
-import { useLockFn  } from 'ahooks';
+import { useLockFn } from 'ahooks';
 import './component.less';
 import { userApi } from '@/api';
 import UserTag from '@/components/tag/user-tag';
@@ -30,7 +30,7 @@ function AddComponent(props) {
 
   const { getFieldDecorator, getFieldsValue } = props.form;
   const handleSubmit = useLockFn(async () => {
-     return new Promise((resolve,reject) =>props.form.validateFields(async (err, values) => {
+    return new Promise((resolve, reject) => props.form.validateFields(async (err, values) => {
       if (!err && values && JSON.stringify(values) !== '{}') {
         try {
           modal?.update({ okProps: { loading: true } });
@@ -49,11 +49,13 @@ function AddComponent(props) {
           props.onOk();
           modal?.update({ okProps: { loading: false } });
           resolve()
-        } catch(error) {
+        } catch (error) {
           Choerodon.prompt('创建模块失败');
           modal?.update({ okProps: { loading: false } });
           reject()
         }
+      } else {
+        resolve(false)
       }
     }));
   });
