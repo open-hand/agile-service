@@ -213,7 +213,7 @@
             </if>
             )
         </if>
-        order by osf.id DESC
+        order by osf.id DESC, ffo.sequence ASC
     </select>
 
     <select id="selectByExtendIds" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO">
