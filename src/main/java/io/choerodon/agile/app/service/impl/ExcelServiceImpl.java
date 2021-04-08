@@ -14,7 +14,6 @@ import org.hzero.boot.file.FileClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,15 +106,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected static final String EPIC_CN = "史诗";
 
-    protected static final String STORY_CN = "故事";
-
-    protected static final String BUG_CN = "缺陷";
-
     private static final String SUB_BUG_CN = "子缺陷";
-
-    protected static final String TASK_CN = "任务";
-
-    protected static final String SUB_TASK_CN = "子任务";
 
     private static final String COLON_CN = "：";
 
@@ -989,7 +980,7 @@ public class ExcelServiceImpl implements ExcelService {
         Set<Integer> withoutParentRows = new HashSet<>();
         int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
         int parentCol = getColIndexByFieldCode(headerMap, ExcelImportTemplate.IssueHeader.PARENT);
-        processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, dataSheet, dataRowCount, columnNum, issueTypeCol, parentCol);
+        processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, dataSheet, dataRowCount, columnNum, issueTypeCol, parentCol, headerMap);
         ExcelImportTemplate.Progress progress = new ExcelImportTemplate.Progress();
         //key为错误的行数，value为错误的列
         Map<Integer, List<Integer>> errorRowColMap = new HashMap<>();
@@ -1022,11 +1013,13 @@ public class ExcelServiceImpl implements ExcelService {
             } else {
                 issueType = issueTypeCell.toString();
             }
+            String issueTypeCode = getIssueTypeCode(headerMap, issueType);
             Set<Integer> sonSet = parentSonMap.get(rowNum);
             boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
-            if ((STORY_CN.equals(issueType)
-                    || TASK_CN.equals(issueType)
-                    || BUG_CN.equals(issueType))
+
+            if ((IssueTypeCode.isStory(issueTypeCode)
+                    || IssueTypeCode.isTask(issueTypeCode)
+                    || IssueTypeCode.isBug(issueTypeCode))
                     && hasSonNodes) {
                 List<Long> insertIds = new ArrayList<>();
                 try {
@@ -1414,8 +1407,9 @@ public class ExcelServiceImpl implements ExcelService {
             addErrorColumn(rowNum, issueTypeCol, errorRowColMap);
             return;
         }
+        String issueTypeCode = getIssueTypeCode(headerMap, value);
         if (parentIssue == null
-                && (SUB_TASK_CN.equals(value)
+                && (IssueTypeCode.isSubTask(issueTypeCode)
                 || SUB_BUG_CN.equals(value))) {
             Cell parentCell = row.getCell(parentCol);
             if (parentCell == null) {
@@ -1592,6 +1586,7 @@ public class ExcelServiceImpl implements ExcelService {
         String fieldCode = excelColumn.getFieldCode();
         int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
         String issueType = row.getCell(issueTypeCol).toString();
+        String issueTypeCode = getIssueTypeCode(headerMap, issueType);
         switch (fieldCode) {
             case FieldCode.ISSUE_TYPE:
                 validateAndSetIssueType(row, col, excelColumn, errorRowColMap, issueCreateVO);
@@ -1615,31 +1610,31 @@ public class ExcelServiceImpl implements ExcelService {
                 validateAndSetInfluenceVersion(row, col, excelColumn, errorRowColMap, issueCreateVO);
                 break;
             case FieldCode.STORY_POINTS:
-                validateAndSetStoryPoint(row, col, errorRowColMap, issueCreateVO, issueType);
+                validateAndSetStoryPoint(row, col, errorRowColMap, issueCreateVO, issueTypeCode);
                 break;
             case FieldCode.EPIC_NAME:
-                validateAndSetEpicName(row, col, errorRowColMap, issueCreateVO, issueType, projectId, headerMap);
+                validateAndSetEpicName(row, col, errorRowColMap, issueCreateVO, issueTypeCode, projectId, headerMap);
                 break;
             case FieldCode.FEATURE:
-                validateAndSetFeature(row, col, excelColumn, errorRowColMap, issueCreateVO, issueType);
+                validateAndSetFeature(row, col, excelColumn, errorRowColMap, issueCreateVO, issueTypeCode);
                 break;
             case FieldCode.EPIC:
-                validateAndSetEpic(row, col, excelColumn, errorRowColMap, issueCreateVO, issueType, parentIssue);
+                validateAndSetEpic(row, col, excelColumn, errorRowColMap, issueCreateVO, issueTypeCode, parentIssue, issueType);
                 break;
             case FieldCode.SUMMARY:
                 validateAndSetSummary(row, col, errorRowColMap, issueCreateVO);
                 break;
             case ExcelImportTemplate.IssueHeader.PARENT:
-                setParent(row, col, issueCreateVO, errorRowColMap, parentIssue, issueType);
+                setParent(row, col, issueCreateVO, errorRowColMap, parentIssue, issueType, issueTypeCode);
                 break;
             case FieldCode.DESCRIPTION:
                 setDescription(row, col, issueCreateVO);
                 break;
             case FieldCode.COMPONENT:
-                validateAndSetComponent(row, col, excelColumn, parentIssue, issueType, issueCreateVO, errorRowColMap);
+                validateAndSetComponent(row, col, excelColumn, parentIssue, issueType, issueTypeCode, issueCreateVO, errorRowColMap);
                 break;
             case FieldCode.SPRINT:
-                validateAndSetSprint(row, col, excelColumn, parentIssue, issueType, issueCreateVO, errorRowColMap);
+                validateAndSetSprint(row, col, excelColumn, parentIssue, issueType, issueTypeCode, issueCreateVO, errorRowColMap);
                 break;
             case FieldCode.LABEL:
                 validateAndSetLabel(row, col, excelColumn, issueCreateVO, errorRowColMap, projectId);
@@ -1657,7 +1652,7 @@ public class ExcelServiceImpl implements ExcelService {
                 validateAndSetMainResponsible(row, col, issueCreateVO, errorRowColMap, excelColumn);
                 break;
             case FieldCode.ENVIRONMENT:
-                validateAndSetEnvironment(row, col, issueCreateVO, errorRowColMap, excelColumn, issueType);
+                validateAndSetEnvironment(row, col, issueCreateVO, errorRowColMap, excelColumn, issueTypeCode);
                 break;
             case FieldCode.ISSUE_STATUS:
                 validateAndSetIssueStatus(row, col, excelColumn, errorRowColMap, issueCreateVO, issueType);
@@ -1667,7 +1662,28 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    protected void validateAndSetIssueStatus(Row row, Integer col, ExcelColumnVO excelColumn, Map<Integer, List<Integer>> errorRowColMap, IssueCreateVO issueCreateVO, String issueType) {
+    private String getIssueTypeCode(Map<Integer, ExcelColumnVO> headerMap,
+                                    String issueType) {
+        if (!ObjectUtils.isEmpty(headerMap)) {
+            for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
+                if (FieldCode.ISSUE_TYPE.equals(entry.getValue().getFieldCode())) {
+                    Map<String, IssueTypeVO> issueTypeMap = entry.getValue().getIssueTypeMap();
+                    IssueTypeVO vo = issueTypeMap.get(issueType);
+                    if (vo != null) {
+                        return vo.getTypeCode();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    protected void validateAndSetIssueStatus(Row row,
+                                             Integer col,
+                                             ExcelColumnVO excelColumn,
+                                             Map<Integer, List<Integer>> errorRowColMap,
+                                             IssueCreateVO issueCreateVO,
+                                             String issueType) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
         Map<String, StatusVO> issueStatusMap = excelColumn.getIssueStatusMap();
@@ -1688,10 +1704,10 @@ public class ExcelServiceImpl implements ExcelService {
                                            IssueCreateVO issueCreateVO,
                                            Map<Integer, List<Integer>> errorRowColMap,
                                            ExcelColumnVO excelColumnVO,
-                                           String issueType) {
+                                           String issueTypeCode) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
-        if (!isCellEmpty(cell) && BUG_CN.equals(issueType)) {
+        if (!isCellEmpty(cell) && IssueTypeCode.isBug(issueTypeCode)) {
             String value = cell.toString();
             List<String> values = excelColumnVO.getPredefinedValues();
             if (!values.contains(value)) {
@@ -1826,10 +1842,11 @@ public class ExcelServiceImpl implements ExcelService {
                                       ExcelColumnVO excelColumn,
                                       IssueVO parentIssue,
                                       String issueType,
+                                      String issueTypeCode,
                                       IssueCreateVO issueCreateVO,
                                       Map<Integer, List<Integer>> errorRowColMap) {
         if (SUB_BUG_CN.equals(issueType)
-                || SUB_TASK_CN.equals(issueType)) {
+                || IssueTypeCode.isSubTask(issueTypeCode)) {
             Long sprintId = parentIssue.getSprintId();
             if (sprintId != null && !Objects.equals(0L, sprintId)) {
                 issueCreateVO.setSprintId(sprintId);
@@ -1856,10 +1873,11 @@ public class ExcelServiceImpl implements ExcelService {
                                          ExcelColumnVO excelColumn,
                                          IssueVO parentIssue,
                                          String issueType,
+                                         String issueTypeCode,
                                          IssueCreateVO issueCreateVO,
                                          Map<Integer, List<Integer>> errorRowColMap) {
         if (SUB_BUG_CN.equals(issueType)
-                || SUB_TASK_CN.equals(issueType)) {
+                || IssueTypeCode.isSubTask(issueTypeCode)) {
             List<ComponentIssueRelVO> components = parentIssue.getComponentIssueRelVOList();
             if (!ObjectUtils.isEmpty(components)) {
                 issueCreateVO.setComponentIssueRelVOList(parentIssue.getComponentIssueRelVOList());
@@ -1898,14 +1916,15 @@ public class ExcelServiceImpl implements ExcelService {
                            IssueCreateVO issueCreateVO,
                            Map<Integer, List<Integer>> errorRowColMap,
                            IssueVO parentIssue,
-                           String issueType) {
+                           String issueType,
+                           String issueTypeCode) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
         if(isCellEmpty(cell)) {
             cell = row.createCell(col);
         }
         String value = cell.toString();
-        if (SUB_TASK_CN.equals(issueType)) {
+        if (IssueTypeCode.isSubTask(issueTypeCode)) {
             Long parentId = parentIssue.getIssueId();
             issueCreateVO.setParentIssueId(parentId);
         } else if (SUB_BUG_CN.equals(issueType)) {
@@ -1946,10 +1965,11 @@ public class ExcelServiceImpl implements ExcelService {
                                     ExcelColumnVO excelColumn,
                                     Map<Integer, List<Integer>> errorRowColMap,
                                     IssueCreateVO issueCreateVO,
-                                    String issueType,
-                                    IssueVO parentIssue) {
-        if(!SUB_TASK_CN.equals(issueType)
-                && !EPIC_CN.equals(issueType)) {
+                                    String issueTypeCode,
+                                    IssueVO parentIssue,
+                                    String issueType) {
+        if(!IssueTypeCode.isSubTask(issueTypeCode)
+                && !IssueTypeCode.isEpic(issueTypeCode)) {
             if (SUB_BUG_CN.equals(issueType) && parentIssue != null) {
                 issueCreateVO.setEpicId(parentIssue.getEpicId());
             } else {
@@ -1976,8 +1996,8 @@ public class ExcelServiceImpl implements ExcelService {
                                        ExcelColumnVO excelColumn,
                                        Map<Integer, List<Integer>> errorRowColMap,
                                        IssueCreateVO issueCreateVO,
-                                       String issueType) {
-        if (STORY_CN.equals(issueType)) {
+                                       String issueTypeCode) {
+        if (IssueTypeCode.isStory(issueTypeCode)) {
             Cell cell = row.getCell(col);
             if (!isCellEmpty(cell)) {
                 int rowNum = row.getRowNum();
@@ -2002,13 +2022,13 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void validateAndSetEpicName(Row row,
-                                        Integer col,
-                                        Map<Integer, List<Integer>> errorRowColMap,
-                                        IssueCreateVO issueCreateVO,
-                                        String issueType,
-                                        Long projectId,
-                                        Map<Integer, ExcelColumnVO> headerMap) {
-        if (EPIC_CN.equals(issueType)) {
+                                          Integer col,
+                                          Map<Integer, List<Integer>> errorRowColMap,
+                                          IssueCreateVO issueCreateVO,
+                                          String issueTypeCode,
+                                          Long projectId,
+                                          Map<Integer, ExcelColumnVO> headerMap) {
+        if (IssueTypeCode.isEpic(issueTypeCode)) {
             int rowNum = row.getRowNum();
             Cell cell = row.getCell(col);
             String value = "";
@@ -2067,8 +2087,8 @@ public class ExcelServiceImpl implements ExcelService {
                                           Integer col,
                                           Map<Integer, List<Integer>> errorRowColMap,
                                           IssueCreateVO issueCreateVO,
-                                          String issueType) {
-        if (STORY_CN.equals(issueType)) {
+                                          String issueTypeCode) {
+        if (IssueTypeCode.isStory(issueTypeCode)) {
             Cell cell = row.getCell(col);
             Integer rowNum = row.getRowNum();
             if (!isCellEmpty(cell)) {
@@ -2259,7 +2279,8 @@ public class ExcelServiceImpl implements ExcelService {
                                               Integer dataRowCount,
                                               Integer columnNum,
                                               int issueTypeCol,
-                                              int parentCol) {
+                                              int parentCol,
+                                              Map<Integer, ExcelColumnVO> headerMap) {
         Map<Integer, String> rowIssueTypeMap = new LinkedHashMap<>();
         List<IssueTypeLinkDTO> issueTypeLinks = new ArrayList<>();
         for (int i = 1; i <= dataRowCount; i++) {
@@ -2283,13 +2304,14 @@ public class ExcelServiceImpl implements ExcelService {
             }
             rowIssueTypeMap.put(i, issueType);
         }
-        parentSonMap.putAll(getParentSonMap(issueTypeLinks));
+        parentSonMap.putAll(getParentSonMap(issueTypeLinks, headerMap));
         sonParentMap.putAll(getSonParentMap(parentSonMap));
 
         for (Map.Entry<Integer, String> entry : rowIssueTypeMap.entrySet()) {
             Integer rowNum = entry.getKey();
             String issueType = entry.getValue();
-            if (SUB_TASK_CN.equals(issueType)
+            String issueTypeCode = getIssueTypeCode(headerMap, issueType);
+            if (IssueTypeCode.isSubTask(issueTypeCode)
                     || SUB_BUG_CN.equals(issueType)) {
                 Integer parentRow = sonParentMap.get(rowNum);
                 if (parentRow == null) {
@@ -2642,19 +2664,21 @@ public class ExcelServiceImpl implements ExcelService {
         return map;
     }
 
-    protected Map<Integer, Set<Integer>> getParentSonMap(List<IssueTypeLinkDTO> issueTypeLinks) {
+    protected Map<Integer, Set<Integer>> getParentSonMap(List<IssueTypeLinkDTO> issueTypeLinks,
+                                                         Map<Integer, ExcelColumnVO> headerMap) {
         Map<Integer, Set<Integer>> map = new HashMap<>();
         for (IssueTypeLinkDTO issueTypeLink : issueTypeLinks) {
             Integer rowNum = issueTypeLink.getRow();
             String type = issueTypeLink.getType();
+            String issueTypeCode = getIssueTypeCode(headerMap, type);
             //故事和任务下有子任务子缺陷
-            if (STORY_CN.equals(type)
-                    || TASK_CN.equals(type)) {
-                storyRecursive(map, issueTypeLink, rowNum);
+            if (IssueTypeCode.isStory(issueTypeCode)
+                    || IssueTypeCode.isTask(issueTypeCode)) {
+                storyRecursive(map, issueTypeLink, rowNum, headerMap);
             }
             //缺陷下只有子任务
-            if (BUG_CN.equals(type)) {
-                bugRecursive(map, issueTypeLink, rowNum);
+            if (IssueTypeCode.isBug(issueTypeCode)) {
+                bugRecursive(map, issueTypeLink, rowNum, headerMap);
             }
         }
         return map;
@@ -2662,14 +2686,16 @@ public class ExcelServiceImpl implements ExcelService {
 
     private void bugRecursive(Map<Integer, Set<Integer>> map,
                               IssueTypeLinkDTO issueTypeLink,
-                              Integer rowNum) {
+                              Integer rowNum,
+                              Map<Integer, ExcelColumnVO> headerMap) {
         if (issueTypeLink.hasNext()) {
             IssueTypeLinkDTO next = issueTypeLink.getNext();
             String nextType = next.getType();
+            String nextIssueTypeCode = getIssueTypeCode(headerMap, nextType);
             Integer nextRowNum = next.getRow();
-            if (SUB_TASK_CN.equals(nextType)) {
+            if (IssueTypeCode.isSubTask(nextIssueTypeCode)) {
                 processSonRow(map, rowNum, nextRowNum);
-                bugRecursive(map, next, rowNum);
+                bugRecursive(map, next, rowNum, headerMap);
             }
         }
     }
@@ -2687,15 +2713,17 @@ public class ExcelServiceImpl implements ExcelService {
 
     private void storyRecursive(Map<Integer, Set<Integer>> map,
                                 IssueTypeLinkDTO issueTypeLink,
-                                Integer rowNum) {
+                                Integer rowNum,
+                                Map<Integer, ExcelColumnVO> headerMap) {
         if (issueTypeLink.hasNext()) {
             IssueTypeLinkDTO next = issueTypeLink.getNext();
             String nextType = next.getType();
+            String nextIssueTypeCode = getIssueTypeCode(headerMap, nextType);
             Integer nextRowNum = next.getRow();
-            if (SUB_TASK_CN.equals(nextType)
+            if (IssueTypeCode.isSubTask(nextIssueTypeCode)
                     || SUB_BUG_CN.equals(nextType)) {
                 processSonRow(map, rowNum, nextRowNum);
-                storyRecursive(map, next, rowNum);
+                storyRecursive(map, next, rowNum, headerMap);
             }
         }
     }
