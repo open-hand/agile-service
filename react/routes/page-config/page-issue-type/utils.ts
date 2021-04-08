@@ -67,6 +67,8 @@ function beforeSubmitTransform(item: Record, optionKey = 'id') {
       }
       return ({ ...option, isDefault: false });
     });
+  } else if (fieldOptions && ['member', 'multiMember'].includes(fieldType)) {
+    fieldOptions = undefined;
   }
   if (['datetime', 'time', 'date'].includes(fieldType)) {
     defaultValue = moment(defaultValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).isValid() ? moment(defaultValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).format('YYYY-MM-DD HH:mm:ss') : defaultValue;
