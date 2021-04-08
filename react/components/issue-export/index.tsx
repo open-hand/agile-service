@@ -55,9 +55,6 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     okText: store.exportButtonConfig?.buttonChildren ?? '导出',
     // okProps: { ...store.exportButtonConfig?.buttonProps },
     cancelText: '关闭',
-    cancelProps: {
-      color: 'primary',
-    },
     ...otherProps,
   });
 }
