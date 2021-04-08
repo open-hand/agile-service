@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -299,13 +300,20 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         String defaultValue;
         if (CellType.NUMERIC.equals(cell.getCellTypeEnum())) {
             DecimalFormat df = new DecimalFormat("#");
-            defaultValue = df.format(cell.getNumericCellValue());
+            BigDecimal defaultNum = BigDecimal.valueOf(cell.getNumericCellValue());
+            cell.setCellType(CellType.STRING);
+            if (defaultNum.compareTo(defaultNum.setScale(0, RoundingMode.FLOOR)) != 0) {
+                row.getCell(4).setCellValue(buildWithErrorMsg(defaultNum.toPlainString(), "当前字段类型默认值只能为整数"));
+                addErrorColumn(row.getRowNum(), 4, errorRowColMap);
+                return;
+            }
+            defaultValue = df.format(defaultNum);
         } else {
             cell.setCellType(CellType.STRING);
             defaultValue = cell.toString();
         }
         if (!Pattern.matches("^[0-9]*$", defaultValue)) {
-            row.getCell(4).setCellValue(buildWithErrorMsg(defaultValue, "当前字段类型默认值只能为数字"));
+            row.getCell(4).setCellValue(buildWithErrorMsg(defaultValue, "当前字段类型默认值只能为整数"));
             addErrorColumn(row.getRowNum(), 4, errorRowColMap);
             return;
         }
