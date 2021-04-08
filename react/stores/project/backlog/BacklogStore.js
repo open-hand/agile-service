@@ -427,7 +427,7 @@ class BacklogStore {
       // 如果以后想利用 ctrl 从多个冲刺中选取 issue，可以把判断条件2直接挪到 shift 上
       // 但是请考虑清楚操作多个数组可能带来的性能开销问题
       if (type === 'shift') {
-        this.dealWithShift(data, currentIndex);
+        this.dealWithShift(data, currentIndex, sprintId);
       } else if (type === 'ctrl') {
         this.dealWithCtrl(data, currentIndex, currentClick);
       }
@@ -436,13 +436,20 @@ class BacklogStore {
     }
   }
 
-  @action dealWithShift(data, currentIndex) {
+  @action dealWithShift(data, currentIndex, sprintId) {
     const [startIndex, endIndex] = this.checkStartAndEnd(this.prevClickedIssue.index, currentIndex);
+
+    const filterAssignId = this.filterSprintAssign.get(sprintId);
+
     for (let i = startIndex; i <= endIndex; i += 1) {
       // if (this.whichVisible === 'feature' && data[i].issueTypeVO.typeCode === 'story') {
       // this.multiSelected.set(data[i].issueId, data[i]);
       // } else {
-      this.multiSelected.set(data[i].issueId, data[i]);
+      // (issue) => String(issue.assigneeId) === String(filterAssignId)
+      // 有过滤，则只选过滤后的问题
+      if (!filterAssignId || String(data[i].assigneeId) === String(filterAssignId)) {
+        this.multiSelected.set(data[i].issueId, data[i]);
+      }
       // }
     }
   }
