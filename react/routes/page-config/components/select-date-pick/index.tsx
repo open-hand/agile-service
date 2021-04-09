@@ -101,7 +101,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
   return (
     <Select
       ref={handleBindRef}
-      value={value?.format(SelectDatePickDateFormat[dateType])}
+      value={optionValue === 'custom' ? value?.format(SelectDatePickDateFormat[dateType]) : optionValue}
       trigger={['click'] as any}
       primitiveValue={false}
       // @ts-ignore
