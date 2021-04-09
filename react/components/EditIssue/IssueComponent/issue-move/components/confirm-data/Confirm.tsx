@@ -189,11 +189,6 @@ const Confirm: React.FC<Props> = ({
       const customFieldsRequestArr: Promise<IFieldWithValue>[] = [];
       subIssueVOList.forEach((subTask: any) => {
         detailRequestArr.push(issueApi.load(subTask.issueId));
-        customFieldsRequestArr.push(fieldApi.getFieldAndValue(subTask.issueId, {
-          schemeCode: 'agile_issue',
-          issueTypeId: subTaskTypeId as string,
-          pageCode: 'agile_issue_edit',
-        }));
       });
       let subTaskSelectedUserIds: any[] = [...store.selectedUserIds];
       Promise.all(detailRequestArr).then((res: Issue[]) => {
@@ -205,18 +200,27 @@ const Confirm: React.FC<Props> = ({
           const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
           store.setSelectUserIds(uniqUserIds);
         });
-      });
-      Promise.all(customFieldsRequestArr).then((res: IFieldWithValue[]) => {
-        res.forEach((fieldWidthValue, i) => {
-          batchedUpdates(() => {
-            fieldsWithValue.forEach((item) => {
-              if (!item.system && item.fieldType === 'member' && !item.projectId) {
-                subTaskSelectedUserIds = [...subTaskSelectedUserIds, item.value];
-              }
+        return res;
+      }).then((issueDetails) => {
+        subIssueVOList.forEach((subTask: any, index: number) => {
+          customFieldsRequestArr.push(fieldApi.getFieldAndValue(subTask.issueId, {
+            schemeCode: 'agile_issue',
+            issueTypeId: issueDetails[index].issueTypeId as string,
+            pageCode: 'agile_issue_edit',
+          }));
+        });
+        Promise.all(customFieldsRequestArr).then((res: IFieldWithValue[]) => {
+          res.forEach((fieldWidthValue, i) => {
+            batchedUpdates(() => {
+              fieldsWithValue.forEach((item) => {
+                if (!item.system && item.fieldType === 'member' && !item.projectId) {
+                  subTaskSelectedUserIds = [...subTaskSelectedUserIds, item.value];
+                }
+              });
+              const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
+              store.setSelectUserIds(uniqUserIds);
+              subTaskDetailMap.set(`${subIssueVOList[i].issueId}%fields`, fieldWidthValue);
             });
-            const uniqUserIds = uniq(compact(subTaskSelectedUserIds));
-            store.setSelectUserIds(uniqUserIds);
-            subTaskDetailMap.set(`${subIssueVOList[i].issueId}%fields`, fieldWidthValue);
           });
         });
       });
@@ -229,11 +233,6 @@ const Confirm: React.FC<Props> = ({
       const customFieldsRequestArr: Promise<IFieldWithValue>[] = [];
       subBugVOList.forEach((subBug: any) => {
         detailRequestArr.push(issueApi.load(subBug.issueId));
-        customFieldsRequestArr.push(fieldApi.getFieldAndValue(subBug.issueId, {
-          schemeCode: 'agile_issue',
-          issueTypeId: subBugTypeId as string,
-          pageCode: 'agile_issue_edit',
-        }));
       });
       let subBugSelectedUserIds: any[] = [...store.selectedUserIds];
       Promise.all(detailRequestArr).then((res: Issue[]) => {
@@ -245,23 +244,32 @@ const Confirm: React.FC<Props> = ({
           const uniqUserIds = uniq(compact(subBugSelectedUserIds));
           store.setSelectUserIds(uniqUserIds);
         });
-      });
-      Promise.all(customFieldsRequestArr).then((res: IFieldWithValue[]) => {
-        res.forEach((fieldWidthValue, i) => {
-          batchedUpdates(() => {
-            fieldsWithValue.forEach((item) => {
-              if (!item.system && item.fieldType === 'member' && !item.projectId) {
-                subBugSelectedUserIds = [...subBugSelectedUserIds, item.value];
-              }
+        return res;
+      }).then((issueDetails) => {
+        subIssueVOList.forEach((subBug: any, index: number) => {
+          customFieldsRequestArr.push(fieldApi.getFieldAndValue(subBug.issueId, {
+            schemeCode: 'agile_issue',
+            issueTypeId: issueDetails[index].issueTypeId as string,
+            pageCode: 'agile_issue_edit',
+          }));
+        });
+        Promise.all(customFieldsRequestArr).then((res: IFieldWithValue[]) => {
+          res.forEach((fieldWidthValue, i) => {
+            batchedUpdates(() => {
+              fieldsWithValue.forEach((item) => {
+                if (!item.system && item.fieldType === 'member' && !item.projectId) {
+                  subBugSelectedUserIds = [...subBugSelectedUserIds, item.value];
+                }
+              });
+              const uniqUserIds = uniq(compact(subBugSelectedUserIds));
+              store.setSelectUserIds(uniqUserIds);
+              subBugDetailMap.set(`${subBugVOList[i].issueId}%fields`, fieldWidthValue);
             });
-            const uniqUserIds = uniq(compact(subBugSelectedUserIds));
-            store.setSelectUserIds(uniqUserIds);
-            subBugDetailMap.set(`${subBugVOList[i].issueId}%fields`, fieldWidthValue);
           });
         });
       });
     }
-  }, [fieldsWithValue, subBugDetailMap, subBugTypeId, subBugVOList]);
+  }, [fieldsWithValue, subBugDetailMap, subBugTypeId, subBugVOList, subIssueVOList]);
 
   const targetProject = moveToProjectList.find((item: any) => item.id === targetProjectId) || { name: '' };
 
