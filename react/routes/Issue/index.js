@@ -125,7 +125,7 @@ const Issue = observer(() => {
     if (paramIssueId) {
       let id = paramOpenIssueId || paramIssueId;
       // 都是数字，说明没加密
-      if (!/^[0-9]+$/.test(id)) {
+      if (/^[0-9]+$/.test(id)) {
         try {
           id = await issueApi.encryptIssueId(id);
         } catch (error) {
