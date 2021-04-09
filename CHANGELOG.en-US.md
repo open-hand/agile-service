@@ -4,6 +4,7 @@ All notable changes about agile-service will be documented in this file.
 ## [0.25.0] - 2021-04-09
 
 ### Added
+
 - The problem details support uploading UI&UX compressed files and support online viewing (support zip, rar4, tar, tar.gz).
 - "Report to me" is added to the personal workbench.
 - Add "My Handling" to the personal workbench.
@@ -25,7 +26,9 @@ All notable changes about agile-service will be documented in this file.
 - Increase the organization level Kanban template.
 - Added organization layer state machine template.
 - All personnel type fields support pinyin search matching.
+
 ### Changed
+
 - Module setting page can adjust the order and load more.
 - Single-selection and multiple-selection value lists for custom fields support searching.
 - Attachment upload supports multi-part upload.
@@ -35,12 +38,15 @@ All notable changes about agile-service will be documented in this file.
 - The rich text editor adjusts and adds support for table operations.
 - Some page style optimizations.
 - Partial report optimization.
+
 ### Fixed
+
 - Fix the inconsistency of issue data when dragging the to-do list quickly.
 - Fix the problem that the custom flow of the initial state setting of the state machine does not take effect.
 - Fixed the issue of notification and email being triggered when the dashboard only drags and does not change the status.
 - Fixed the problem that multiple duplicate problem items were created by clicking quickly when creating a problem quickly.
 - Fix the status change of the Gantt chart problem, and the postponement information is wrong.
+
 
 ## [0.24.0] - 2020-12-24
 
