@@ -1,6 +1,15 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
 
+## [0.25.0] - 2021-04-09
+
+### Added
+
+### Changed
+
+### Fixed
+
+
 ## [0.24.0] - 2020-12-24
 
 ### Added
