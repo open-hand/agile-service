@@ -6,7 +6,6 @@ class FileApi {
     return `/agile/v1/projects/${getProjectId()}`;
   }
 
-
   /**
     * 上传issue的附件
     * @param {*} data
@@ -25,18 +24,21 @@ class FileApi {
       },
     });
   }
-  
+
   /**
     * 上传图片
     * @param {any} data
     */
-  uploadImage(data:FormData) {
+  uploadImage(data: FormData, outside?: boolean, projectId?: string) {
     const headers = { 'content-type': 'multipart/form-data' };
     return axios({
       headers,
       method: 'post',
-      url: `${this.prefix}/issue_attachment/upload_for_address`,
+      url: outside ? '/agile/v1/backlog_external/attachment/upload_for_address' : `${this.prefix}/issue_attachment/upload_for_address`,
       data,
+      params: {
+        project_id: projectId,
+      },
     });
   }
 
@@ -44,7 +46,7 @@ class FileApi {
     * 删除文件
     * @param {number} resourceId 文件资源id
     */
-  deleteFile(fileId:number) {
+  deleteFile(fileId: number) {
     return axios.delete(`${this.prefix}/issue_attachment/${fileId}`);
   }
 }
