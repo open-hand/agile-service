@@ -246,7 +246,7 @@ const Confirm: React.FC<Props> = ({
         });
         return res;
       }).then((issueDetails) => {
-        subIssueVOList.forEach((subBug: any, index: number) => {
+        subBugVOList.forEach((subBug: any, index: number) => {
           customFieldsRequestArr.push(fieldApi.getFieldAndValue(subBug.issueId, {
             schemeCode: 'agile_issue',
             issueTypeId: issueDetails[index].issueTypeId as string,
