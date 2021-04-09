@@ -802,7 +802,23 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, update.getDefaultValue(), updateDTO);
         update.setId(fieldId);
         baseUpdate(update);
+        updateNumberTypeExtraConfig(organizationId, projectId, fieldId, updateDTO);
         return queryById(organizationId, projectId, fieldId);
+    }
+
+    private void updateNumberTypeExtraConfig(Long organizationId, Long projectId, Long fieldId, ObjectSchemeFieldUpdateVO updateDTO) {
+        if (FieldType.NUMBER.equals(updateDTO.getFieldType())) {
+            //数字类型字段，额外配置关联到所有问题类型
+            ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
+            dto.setProjectId(projectId);
+            dto.setOrganizationId(organizationId);
+            dto.setFieldId(fieldId);
+            boolean extraConfig = Boolean.TRUE.equals(updateDTO.getExtraConfig());
+            objectSchemeFieldExtendMapper.select(dto).forEach(x -> {
+                x.setExtraConfig(extraConfig);
+                objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(x);
+            });
+        }
     }
 
     private void decryptMemberFieldDefaultValue(ObjectSchemeFieldDTO field) {
@@ -888,6 +904,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                           String defaultValue,
                                           List<Long> issueTypeIds,
                                           Boolean extraConfig) {
+        ObjectSchemeFieldDTO field = objectSchemeFieldMapper.selectByPrimaryKey(fieldId);
+        if (FieldType.NUMBER.equals(field.getFieldType())) {
+            //数字类型，不更新extraConfig，只能通过update字段更新
+            extraConfig = field.getExtraConfig();
+        }
         if (!CollectionUtils.isEmpty(issueTypeIds)) {
             //判断需要在组织层或项目层增加的扩展字段
             List<Long> existIssueTypeIds = objectSchemeFieldExtendMapper.selectExtendFieldByOptions(null, organizationId, fieldId, projectId)
@@ -900,28 +921,28 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             });
             //增加扩展字段
             if (!CollectionUtils.isEmpty(insertSet)) {
-//                List<String> context = issueTypeMapper.queryIssueTypeList(organizationId, new ArrayList<>(insertSet)).stream().map(IssueTypeWithInfoDTO::getTypeCode).collect(Collectors.toList());
                 List<IssueTypeVO> issueTypeVOList = getIssueTypeByIds(organizationId, projectId, new ArrayList<>(insertSet), true);
                 Map<Long, String> issueTypeMap =
                         issueTypeVOList.stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getTypeCode));
-                insertSet.forEach(i ->
-                        insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, false, issueTypeMap, i, true, true, defaultValue, extraConfig)
-                );
+                for (Long i : insertSet) {
+                    insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, false, issueTypeMap, i, true, true, defaultValue, extraConfig);
+                }
             }
             //同步默认值
-            objectSchemeFieldExtendMapper.selectExtendFieldByOptions(null, organizationId, fieldId, projectId)
-                    .forEach(i -> {
-                        if (issueTypeIds.contains(i.getIssueTypeId())) {
-                            i.setDefaultValue(defaultValue);
-                            //同步修改默认值时，同步修改额外配置
-                            i.setExtraConfig(extraConfig);
-                            if (insertSet.contains(i.getIssueTypeId())) {
-                                //获取原来引用的组织层或系统内的扩展字段rank值
-                                setNewExtendDtoOldRank(organizationId, projectId, fieldId, i);
-                            }
-                            objectSchemeFieldExtendMapper.updateByPrimaryKey(i);
-                        }
-                    });
+            List<ObjectSchemeFieldExtendDTO> dtoList =
+                    objectSchemeFieldExtendMapper.selectExtendFieldByOptions(null, organizationId, fieldId, projectId);
+            for (ObjectSchemeFieldExtendDTO i : dtoList) {
+                if (issueTypeIds.contains(i.getIssueTypeId())) {
+                    i.setDefaultValue(defaultValue);
+                    //同步修改默认值时，同步修改额外配置
+                    i.setExtraConfig(extraConfig);
+                    if (insertSet.contains(i.getIssueTypeId())) {
+                        //获取原来引用的组织层或系统内的扩展字段rank值
+                        setNewExtendDtoOldRank(organizationId, projectId, fieldId, i);
+                    }
+                    objectSchemeFieldExtendMapper.updateByPrimaryKey(i);
+                }
+            }
             //如果修改了标签，则启动标签垃圾回收
             ObjectSchemeFieldDTO objectSchemeFieldDTO = getObjectSchemeFieldDTO(FieldCode.LABEL);
             if (Objects.equals(fieldId, objectSchemeFieldDTO.getId())) {
@@ -953,7 +974,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public void syncDefaultValue(Long organizationId, Long projectId, Long fieldId, ObjectSchemeFieldUpdateVO updateDTO) {
-
         String defaultValue;
         List<Long> issueTypeIds = updateDTO.getIssueTypeIds();
         ObjectSchemeFieldDTO field = new ObjectSchemeFieldDTO();
