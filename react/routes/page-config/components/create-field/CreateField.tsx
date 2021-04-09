@@ -241,11 +241,7 @@ function CreateField() {
               step={isCheck ? 0.1 : 1}
               className="form-field-full-row"
             />
-            <CheckBox
-              name="check"
-            >
-              {formatMessage({ id: 'field.decimal' })}
-            </CheckBox>
+
           </div>
         );
       case 'input':
@@ -343,11 +339,24 @@ function CreateField() {
         <TextField
           name="name"
         />
-        <Select
-          name="fieldType"
-          disabled={isEdit}
-          optionRenderer={fieldTypeOptionRender}
-        />
+        <div>
+          <Select
+            name="fieldType"
+            disabled={isEdit}
+            style={{ width: '100%' }}
+            optionRenderer={fieldTypeOptionRender}
+          />
+          {formDataSet.current?.get('fieldType') === 'number' ? (
+            <CheckBox
+              name="check"
+              style={{
+                paddingTop: '.1rem', paddingLeft: '.02rem', display: 'flex', alignItems: 'center',
+              }}
+            >
+              {formatMessage({ id: 'field.decimal' })}
+            </CheckBox>
+        ) : null}
+        </div>
         <Select
           name="context"
           onChange={(val) => {
