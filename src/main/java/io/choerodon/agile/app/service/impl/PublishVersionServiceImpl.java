@@ -1,11 +1,9 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
-import io.choerodon.agile.app.service.IssueService;
-import io.choerodon.agile.app.service.PublishVersionTreeService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.IssueStatusDTO;
 import io.choerodon.agile.infra.dto.PublishVersionTreeClosureDTO;
-import io.choerodon.agile.infra.dto.TagIssueRelDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.PageUtil;
@@ -25,8 +23,6 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.PublishVersionService;
-import io.choerodon.agile.app.service.PomService;
 import io.choerodon.agile.infra.dto.PublishVersionDTO;
 import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
@@ -66,8 +62,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private IssueStatusMapper issueStatusMapper;
     @Autowired
     private IssueTypeMapper issueTypeMapper;
-    @Autowired
-    private TagIssueRelMapper tagIssueRelMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     private static final String GROUP_ID_EMPTY_EXCEPTION = "error.publish.version.groupId.empty";
     private static final String VERSION_ALIAS_EMPTY_EXCEPTION = "error.publish.version.alias.empty";
@@ -182,8 +178,11 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         if (publishVersionMapper.selectOne(record) == null) {
             throw new CommonException(PUBLISH_VERSION_NOT_EXIST_EXCEPTION);
         }
+        publishVersionTreeClosureMapper.deleteAssociatedData(publishVersionId, projectId, ConvertUtil.getOrganizationId(projectId));
+        if (agilePluginService != null) {
+            agilePluginService.deleteAssociatedPublishVersion(publishVersionId);
+        }
         publishVersionMapper.deleteByPrimaryKey(publishVersionId);
-        publishVersionTreeClosureMapper.delete(buildTreeClosureSelf(publishVersionId, projectId, ConvertUtil.getOrganizationId(projectId)));
     }
 
     @Override

@@ -36,6 +36,12 @@
             #{item.descendantParent}
         </foreach>
     </delete>
+    <delete id="deleteAssociatedData">
+        delete from agile_publish_version_tree_closure
+        where organization_id = #{organizationId}
+        and proejct_id = #{projectId}
+        and (ancestor_id = #{publishVersionId} or descendant_id = #{publishVersionId})
+    </delete>
 
     <select id="selectAncestors" resultType="io.choerodon.agile.infra.dto.PublishVersionTreeClosureDTO">
         select apvtc.*

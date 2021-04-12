@@ -81,4 +81,8 @@ public interface PublishVersionTreeClosureMapper extends BaseMapper<PublishVersi
     void batchDelete(@Param("deleteSet") Set<PublishVersionTreeClosureDTO> deleteSet,
                      @Param("projectId") Long projectId,
                      @Param("organizationId") Long organizationId);
+
+    void deleteAssociatedData(@Param("publishVersionId") Long publishVersionId,
+                              @Param("projectId") Long projectId,
+                              @Param("organizationId") Long organizationId);
 }
