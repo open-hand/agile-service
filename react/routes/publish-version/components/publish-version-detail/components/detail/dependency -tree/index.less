@@ -1,0 +1,58 @@
+.c7n-agile-publish-version-detail-dependency-tree {
+  display: flex;
+  flex-wrap: wrap;
+
+  &-operation {
+    display: flex;
+    align-items: center;
+  }
+
+  &-item {
+    width: 100%;
+    min-height: .3rem;
+    border-radius: 2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    &:hover {
+      .c7n-agile-publish-version-detail-dependency-tree-item-btn {
+        opacity: 1;
+      }
+    }
+
+    &-left {
+      display: inline-flex;
+      align-items: center;
+      color: #9A9FB0;
+
+      &-icon {
+        margin-right: .04rem;
+        color: rgba(15, 19, 88, 0.65);
+      }
+
+      &-text {
+
+        line-height: 20px;
+        font-size: 13px;
+        font-family: PingFangSC-Regular, PingFang SC;
+        font-weight: 400;
+        color: #0F1358;
+      }
+    }
+
+    &-btn {
+      float: left;
+      opacity: 0;
+      margin-left: .1rem;
+      // visibility: hidden;
+      color: rgba(0, 0, 0, 0.87);
+      // margin-right: .34rem;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}

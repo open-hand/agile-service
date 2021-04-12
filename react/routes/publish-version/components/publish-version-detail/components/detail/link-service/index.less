@@ -1,0 +1,83 @@
+.c7n-agile-publish-version-detail-link-service {
+  display: flex;
+  flex-wrap: wrap;
+
+  &-operation {
+    display: flex;
+    align-items: center;
+  }
+
+  &-tree {
+    width: 100%;
+
+    .c7n-tree-treenode {
+      width: 100%;
+    }
+
+    .c7n-tree-node-content-wrapper {
+      width: 100%;
+    }
+
+    .c7n-tree-switcher-noop {
+      display: none;
+    }
+  }
+
+  &-item {
+    width: 100%;
+    border-radius: 2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    &:hover,
+    &:focus {
+
+      background: #F3F3F3;
+    }
+
+    &:hover {
+      .c7n-agile-publish-version-detail-link-service-item-btn {
+        visibility: visible;
+        opacity: 1;
+      }
+    }
+
+    &-left {
+      display: inline-flex;
+      align-items: center;
+      color: #9A9FB0;
+      max-width: ~"calc(100% - 70px)";
+
+      &-text {
+
+        font-size: 13px;
+        font-family: PingFangSC-Regular, PingFang SC;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.87);
+        line-height: 20px;
+      }
+    }
+
+    & >&-btn {
+      margin-left: .1rem;
+    }
+
+    &-btn {
+      float: left;
+      opacity: 0;
+      // visibility: hidden;
+      color: rgba(0, 0, 0, 0.87);
+      // margin-right: .34rem;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .c7n-pro-btn +.c7n-pro-btn {
+      margin: 0;
+    }
+  }
+}
