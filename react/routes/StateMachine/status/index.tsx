@@ -36,6 +36,11 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
         label: '阶段',
       },
       {
+        name: 'completed',
+        type: 'boolean' as FieldType,
+        label: '是否为已解决',
+      },
+      {
         name: 'usage',
         type: 'string' as FieldType,
         label: '使用情况',
@@ -57,6 +62,15 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
     });
   };
 
+  const handleEditStatus = useCallback(({ record }) => {
+    openCreateStatus({
+      onSubmit: () => {
+        dataSet.query();
+      },
+      record,
+    });
+  }, [dataSet]);
+
   return (
     <Page>
       <Header>
@@ -76,7 +90,18 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
           }}
           filterBarFieldName="param"
         >
-          <Column name="name" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
+          <Column
+            name="name"
+            renderer={({ record, value }) => (
+              <span
+                role="none"
+                className={styles.cellClick}
+                onClick={() => handleEditStatus({ record })}
+              >
+                {value}
+              </span>
+            )}
+          />
           <Column
             name="type"
             renderer={({ record }) => (
@@ -86,6 +111,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
               />
             )}
           />
+          <Column name="completed" renderer={({ value }) => <span className={styles.gray}>{value ? '是' : '否'}</span>} />
           <Column name="usage" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
           <Column
             name="operate"
