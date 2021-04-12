@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.PublishVersionMapper">
+
+    <select id="selectByProjectIds" resultType="io.choerodon.agile.api.vo.PublishVersionVO">
+        select
+        apv.id,
+        apv.group_id,
+        apv.artifact_id,
+        ifnull(apv.version_alias, apv.version) as version,
+        apv.service_code,
+        apv.project_id,
+        apv.organization_id,
+        apv.object_version_number
+        from agile_publish_version apv
+        where apv.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
+    </select>
+
+    <select id="listByOptions" resultType="io.choerodon.agile.api.vo.PublishVersionVO">
+        SELECT
+        apv.id,
+        apv.group_id,
+        apv.artifact_id,
+        apv.version_alias,
+        apv.version,
+        apv.service_code,
+        apv.project_id,
+        apv.organization_id,
+        apv.description,
+        apv.tag_name,
+        apv.object_version_number
+        FROM agile_publish_version apv
+        WHERE apv.project_id = #{projectId}
+        <if test="publishVersionVO != null ">
+            <if test="publishVersionVO.appService != null">
+                apv.app_service = #{publishVersionVO.appService}
+            </if>
+            <if test="publishVersionVO.content != null and !''.equals(publishVersionVO.content)">
+                <bind name="contentLike" value="'%' + publishVersionVO.content + '%'"/>
+                AND (apv.version LIKE #{contentLike}
+                OR apv.version_alias LIKE #{contentLike}
+                OR apv.service_code LIKE #{contentLike})
+            </if>
+        </if>
+    </select>
+
+    <select id="selectIssueIds" resultType="java.lang.Long">
+        select atir.issue_id
+        from agile_publish_version apv
+        join agile_tag_issue_rel atir
+        on (apv.service_code = atir.app_service_code and apv.tag_name = atir.tag_name)
+        where apv.organization_id = #{organizationId}
+        and apv.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and apv.id in
+        <foreach collection="publishVersionIds" item="publishVersionId" open="(" separator="," close=")">
+            #{publishVersionId}
+        </foreach>
+        and (apv.service_code is not null and apv.tag_name is not null)
+    </select>
+</mapper>
