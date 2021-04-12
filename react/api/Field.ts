@@ -48,7 +48,7 @@ class FieldApi extends Api<FieldApi> {
     return axios({
       method: 'post',
       url: `${this.prefix}/field_value/quick_create/${issueId}`,
-      data: { ...dto, context: 'story' },
+      data: { ...dto },
       params: {
         organizationId,
       },
@@ -66,7 +66,7 @@ class FieldApi extends Api<FieldApi> {
       params: {
         organizationId: this.orgId,
       },
-      data: { ...dto, context: 'story' },
+      data: { ...dto },
     });
   }
 
@@ -82,7 +82,7 @@ class FieldApi extends Api<FieldApi> {
         projectId: this.projectId,
         organizationId: this.orgId,
       },
-      data: { ...dto, context: 'story' },
+      data: { ...dto },
     }) : this.request({
       method: 'post',
       url: `/agile/v1/projects/${getProjectId()}/${sameProject(this.projectId) ? '' : 'project_invoke_agile/'}field_value/list/${issueId}`,
@@ -90,7 +90,7 @@ class FieldApi extends Api<FieldApi> {
         organizationId: this.orgId,
         instanceProjectId: this.projectId,
       },
-      data: { ...dto, context: 'story' },
+      data: { ...dto },
     });
   }
 

@@ -45,7 +45,6 @@ class QuickCreateIssue extends Component {
   loadInitValue = async (currentIssueTypeId) => {
     const { form } = this.props;
     const defaultSummary = await fieldApi.getSummaryDefaultValue(currentIssueTypeId);
-    console.log('this.', this.currentTemplate, form.getFieldValue('summary'), form.getFieldValue('summary') !== this.currentTemplate);
     if (form.getFieldValue('summary') === this.currentTemplate) {
       this.currentTemplate = defaultSummary;
       form.setFieldsValue({
@@ -94,12 +93,18 @@ class QuickCreateIssue extends Component {
             const fieldsMap = fields2Map(fields);
 
             const issue = getQuickCreateDefaultObj({
+              epicName: currentTypeId === 'issue_epic' ? summary.trim() : undefined,
+              featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
+              assigneeId: defaultAssignee,
+              reporterId: defaultAssignee,
+              epicId,
               versionIssueRelVOList: propsVersionIssueRelVOList,
               sprintId,
               summary,
               issueTypeId: currentType.id,
               typeCode: currentType.typeCode,
               priorityId: defaultPriority.id,
+              epicId,
             }, fieldsMap);
 
             issueApi.create(issue).then((res) => {

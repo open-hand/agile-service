@@ -14,6 +14,7 @@ export interface IssueTypeConfig {
   onlyEnabled?: boolean
   hasTemplate?: boolean
   excludeTypes?: string[]
+  programId?: string | number
 }
 export default function useIssueTypes(config?: IssueTypeConfig, options?: UseQueryOptions<IIssueType[]>) {
   const isOrganization = getIsOrganization();
@@ -23,7 +24,7 @@ export default function useIssueTypes(config?: IssueTypeConfig, options?: UseQue
   const key = useKey({ key: [isOrganization ? (config?.hasTemplate ? 'orgHasTemplateIssueTypes' : 'orgIssueTypes') : 'projectIssueTypes', { onlyEnabled: config?.onlyEnabled }], id: config?.id });
 
   // eslint-disable-next-line no-nested-ternary
-  return useQuery(key, () => (isOrganization ? (config?.hasTemplate ? issueTypeApi.orghasTemplateList() : issueTypeApi.orgLoad({ params: { page: 0, size: 0 }, data: {} })) : issueTypeApi.loadAllWithStateMachineId(config?.applyType ?? applyType, config?.id, config?.onlyEnabled)), {
+  return useQuery(key, () => (isOrganization ? (config?.hasTemplate ? issueTypeApi.orghasTemplateList() : issueTypeApi.orgLoad({ params: { page: 0, size: 0 }, data: {} })) : issueTypeApi.loadAllWithStateMachineId(config?.applyType ?? applyType, config?.id, config?.onlyEnabled, config?.programId)), {
     select: (res) => {
       let issueTypes = [];
       if (isOrganization) {

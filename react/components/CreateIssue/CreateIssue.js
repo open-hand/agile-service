@@ -204,11 +204,11 @@ class CreateIssue extends Component {
   };
 
   checkSameDescription = (origin, current) => {
-    if (!origin) {
-      return !current || JSON.stringify(current) === JSON.stringify([{ insert: '\n' }]);
+    if (!origin || origin === '') {
+      return !current || current === '' || JSON.stringify(current) === JSON.stringify([{ insert: '\n' }]);
     }
     if (current) {
-      return origin === JSON.stringify(current);
+      return origin === current || origin === JSON.stringify(current);
     }
     return true;
   };
@@ -219,17 +219,23 @@ class CreateIssue extends Component {
       return;
     }
     const currentDes = form.getFieldValue('description');
-    pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
-      const { template } = res || {};
-      form.setFieldsValue({
-        description: template,
-      });
-      if (!template) {
+    if (this.checkSameDescription(this.originDescription, currentDes)) {
+      pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
+        const { template } = res || {};
         form.setFieldsValue({
-          description: currentDes,
+          description: template,
         });
-      }
-    });
+        this.originDescription = template;
+        if (!template) {
+          form.setFieldsValue({
+            description: currentDes,
+          });
+        }
+      });
+    } else {
+      // 如果不一致 则将原描模版述置为初始值
+      this.originDescription = true;
+    }
   }
 
   setDefaultValue = (fields) => {
@@ -695,13 +701,13 @@ class CreateIssue extends Component {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {getFieldDecorator('assigneedId', {
                 rules: [{ required: field.required, message: '请选择经办人' }],
-                initialValue: this.props.chosenAssignee,
+                initialValue: typeof (this.props.chosenAssignee) === 'object' ? this.props.chosenAssignee.id : this.props.chosenAssignee,
               })(
                 <SelectUser
                   label="经办人"
                   style={{ flex: 1 }}
                   allowClear
-                  extraOption={form.getFieldValue('assigneedId') === AppState.userInfo.id ? [AppState.userInfo, field.defaultValueObj] : field.defaultValueObj}
+                  extraOption={form.getFieldValue('assigneedId') === AppState.userInfo.id ? [AppState.userInfo, field.defaultValueObj, this.props.chosenAssignee].filter((o) => typeof (o) !== 'string' && o) : [field.defaultValueObj, this.props.chosenAssignee].filter((o) => typeof (o) !== 'string' && o)}
                 />,
               )}
               <IsProjectMember>
@@ -1293,9 +1299,9 @@ class CreateIssue extends Component {
           <Form layout="vertical" className="c7nagile-form">
             <div className="c7nagile-createIssue-fields" key={newIssueTypeCode}>
               {['sub_task', 'sub_bug'].includes(mode) && (
-              <FormItem>
-                <Input label="父任务概要" value={parentSummary} disabled />
-              </FormItem>
+                <FormItem>
+                  <Input label="父任务概要" value={parentSummary} disabled />
+                </FormItem>
               )}
               {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode))
                 .map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}

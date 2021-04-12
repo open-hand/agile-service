@@ -24,7 +24,12 @@ const KanbanTemplates = () => {
   }, []);
   const tabs = useMemo(() => templates.map((template) => ({ key: template.boardId, title: template.name })), [templates]);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{
+      height: 'calc(100% - 41px)',
+      display: 'flex',
+      flexDirection: 'column',
+    }}
+    >
       {
         !loading && (
         <>

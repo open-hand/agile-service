@@ -103,6 +103,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     private BoardTemplateService boardTemplateService;
     @Autowired
     private IssueTypeService issueTypeService;
+    @Autowired
+    private StatusTemplateMapper statusTemplateMapper;
 
     @Override
     public OrganizationConfigDTO initStatusMachineTemplate(Long organizationId, Long issueTypeId) {
@@ -385,6 +387,10 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
             if (!projectStatusIds.contains(machineNodeVO.getStatusId())) {
                 StatusDTO statusDTO = statusMapper.queryById(organizationId, machineNodeVO.getStatusId());
                 if (!ObjectUtils.isEmpty(statusDTO)) {
+                    StatusTemplateDTO statusTemplateDTO = new StatusTemplateDTO(organizationId, statusDTO.getId());
+                    StatusTemplateDTO templateDTO = statusTemplateMapper.selectOne(statusTemplateDTO);
+                    Boolean doneStatus = !ObjectUtils.isEmpty(statusDTO.getCode()) && Objects.equals("done", statusDTO.getType());
+                    Boolean isCompleted = ObjectUtils.isEmpty(templateDTO) ? doneStatus : templateDTO.getTemplateCompleted();
                     IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
                     issueStatusDTO.setName(statusDTO.getName());
                     issueStatusDTO.setProjectId(projectId);
@@ -392,6 +398,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                     issueStatusDTO.setEnable(false);
                     issueStatusDTO.setCategoryCode(statusDTO.getType());
                     issueStatusDTO.setStatusId(statusDTO.getId());
+                    issueStatusDTO.setCompleted(isCompleted);
                     issueStatusService.insertIssueStatus(issueStatusDTO);
                 }
             }
@@ -476,6 +483,13 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         return modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeVO>>(){}.getType());
     }
 
+    @Override
+    public Boolean checkConfigured(Long organizationId, Long projectId) {
+        ProjectConfigDTO projectConfigDTO = new ProjectConfigDTO();
+        projectConfigDTO.setProjectId(projectId);
+        return projectConfigMapper.select(projectConfigDTO).isEmpty();
+    }
+
     private OrganizationConfigDTO initOrganizationConfig(Long organizationId){
         // 创建状态机方案
         Long schemeId = stateMachineSchemeService.initOrgDefaultStatusMachineScheme(organizationId);
@@ -529,10 +543,12 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                     IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
                     issueStatusDTO.setName(statusSettingVO.getName());
                     issueStatusDTO.setProjectId(projectId);
-                    issueStatusDTO.setCompleted(false);
                     issueStatusDTO.setEnable(false);
                     issueStatusDTO.setCategoryCode(statusSettingVO.getType());
                     issueStatusDTO.setStatusId(statusSettingVO.getId());
+                    StatusTemplateDTO statusTemplateDTO = new StatusTemplateDTO(organizationId, statusSettingVO.getId());
+                    StatusTemplateDTO templateDTO = statusTemplateMapper.selectOne(statusTemplateDTO);
+                    issueStatusDTO.setCompleted(ObjectUtils.isEmpty(templateDTO) ? false : templateDTO.getTemplateCompleted());
                     issueStatusService.insertIssueStatus(issueStatusDTO);
                 }
                 // 处理状态上设置的流转条件

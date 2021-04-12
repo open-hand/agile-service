@@ -8,7 +8,7 @@
             and link_type_id != #{issueLinkTypeId}
         </if>
         <if test='linkName != null and linkName != "" '>
-            and link_name = #{linkName}
+            and link_name LIKE CONCAT(CONCAT('%' ,#{linkName}) ,'%')
         </if>
         <if test='contents != null and contents.size != 0'>
             <foreach collection="contents" item="content" index="index">

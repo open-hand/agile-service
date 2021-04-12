@@ -127,6 +127,8 @@ const EditTemplate: React.FC<Props> = ({
     templateDataSet?.current?.set('templateName', template.name);
   }, [template.name, templateDataSet]);
 
+  console.log('checkOptions：');
+  console.log(checkOptions);
   // 选择字段框配置 数据
   const [checkBoxDataProps, checkBoxComponentProps] = useTableColumnCheckBoxes({
     name: 'templateCodes',

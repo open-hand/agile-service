@@ -2,10 +2,11 @@
   &-line-tab {
     cursor: pointer;
     margin-bottom: 16px;
+    margin-right: 32px;
 
     &-title {
-      font-weight: 500;
-      color: #000;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.87);
     }
 
     &-active &-title {
@@ -21,10 +22,6 @@
     &-active &-indicator {
       visibility: visible;
       background: currentColor;
-    }
-
-    &:not(&:last-child) {
-      margin-right: 32px;
     }
   }
 

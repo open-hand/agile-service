@@ -296,4 +296,14 @@ public class OrganizationConfigController {
                                                               @PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(organizationConfigService.listIssueType(organizationId), HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "修改项目类型判断项目是否已经初始化过状态机")
+    @GetMapping("/check_configured")
+    public ResponseEntity<Boolean> checkConfigured(@ApiParam(value = "组织id", required = true)
+                                               @PathVariable("organization_id") Long organizationId,
+                                               @ApiParam(value = "项目Id", required = true)
+                                               @RequestParam Long projectId) {
+        return new ResponseEntity<>(organizationConfigService.checkConfigured(organizationId,projectId), HttpStatus.OK);
+    }
 }

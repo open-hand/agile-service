@@ -1,6 +1,53 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
 
+## [0.25.0] - 2021-04-09
+
+### Added
+
+- The problem details support uploading UI&UX compressed files and support online viewing (support zip, rar4, tar, tar.gz).
+- "Report to me" is added to the personal workbench.
+- Add "My Handling" to the personal workbench.
+- Moving issues support forwarding items.
+- The problem list supports tiled list viewing.
+- You can view the source branch of the problem related branch.
+- The problem details development item supports viewing the associated branch and its commit.
+- Add multi-select personnel controls for custom fields.
+- Platform project types support association restrictions based on background services.
+- Custom and pre-defined fields support the maintenance of default values, and support the synchronization of default values.
+- Requests/issues/features support replies and send notifications to related parties.
+- Import and export support to save frequently used templates.
+- Add devops report for project report.
+- Issue status supports sorting.
+- Regularly notify relevant personnel of issues/sprint overdue information.
+- Issue import supports importing custom fields.
+- Added "operation dynamics" to the project overview.
+- Menu access API supports menu dimension control.
+- Increase the organization level Kanban template.
+- Added organization layer state machine template.
+- All personnel type fields support pinyin search matching.
+
+### Changed
+
+- Module setting page can adjust the order and load more.
+- Single-selection and multiple-selection value lists for custom fields support searching.
+- Attachment upload supports multi-part upload.
+- New questions support setting status.
+- Iterative planning kanban adds multiple screening fields.
+- The notification object is not required when sending a webhook notification.
+- The rich text editor adjusts and adds support for table operations.
+- Some page style optimizations.
+- Partial report optimization.
+
+### Fixed
+
+- Fix the inconsistency of issue data when dragging the to-do list quickly.
+- Fix the problem that the custom flow of the initial state setting of the state machine does not take effect.
+- Fixed the issue of notification and email being triggered when the dashboard only drags and does not change the status.
+- Fixed the problem that multiple duplicate problem items were created by clicking quickly when creating a problem quickly.
+- Fix the status change of the Gantt chart problem, and the postponement information is wrong.
+
+
 ## [0.24.0] - 2020-12-24
 
 ### Added

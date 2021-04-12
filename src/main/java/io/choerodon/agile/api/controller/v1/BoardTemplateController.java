@@ -7,7 +7,9 @@ import io.choerodon.agile.app.service.BoardTemplateService;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -75,6 +77,7 @@ public class BoardTemplateController {
     @GetMapping(value = "/board/list")
     public ResponseEntity<Page<BoardVO>> listBoardTemplate(@ApiParam(value = "组织Id", required = true)
                                                            @PathVariable(name = "organization_id") Long organizationId,
+                                                           @SortDefault(value= "creationDate", direction = Sort.Direction.DESC)
                                                            PageRequest pageRequest) {
         return Optional.ofNullable(boardTemplateService.listBoardTemplate(organizationId,pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

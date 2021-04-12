@@ -43,7 +43,7 @@ const DateViews = {
 };
 
 type DateViewsKey = 'dateTime' | 'date' | 'time';
-const dateFormat = {
+const SelectDatePickDateFormat = {
   date: 'YYYY-MM-DD',
   datetime: 'YYYY-MM-DD HH:mm:ss',
   time: 'HH:mm:ss',
@@ -81,15 +81,15 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
     if (code === 'custom') {
       setVisible(true);
     } else {
-      // onChange && onChange(code);
-      innerRef.current?.choose(new Record({ meaning: moment().format(dateFormat[dateType]), value: 'current' }));
+      // onChange && onChange(code);moment().format(dateFormat[dateType])
+      innerRef.current?.choose(new Record({ meaning: '当前时间', value: 'current' }));
     }
   }
   function handleChangeDate(date: Moment) {
     setValue(date);
     setVisible(false);
     // onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
-    innerRef.current?.choose(new Record({ meaning: date.format(dateFormat[dateType]), value: date.format(dateFormat[dateType]) }));
+    innerRef.current?.choose(new Record({ meaning: date.format(SelectDatePickDateFormat[dateType]), value: date.format(SelectDatePickDateFormat[dateType]) }));
   }
   const DateView = DateViews[mode as DateViewsKey];
   const handleBindRef = useCallback((newRef) => {
@@ -101,7 +101,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
   return (
     <Select
       ref={handleBindRef}
-      value={value?.format(dateFormat[dateType])}
+      value={optionValue === 'custom' ? value?.format(SelectDatePickDateFormat[dateType]) : optionValue}
       trigger={['click'] as any}
       primitiveValue={false}
       // @ts-ignore
@@ -151,7 +151,9 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
 
         </div>
       )}
-    />
+    >
+      <Select.Option value="current">当前时间</Select.Option>
+    </Select>
   );
 });
 

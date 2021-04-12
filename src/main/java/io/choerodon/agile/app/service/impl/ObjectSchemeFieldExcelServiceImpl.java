@@ -13,6 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -57,6 +60,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
 
     private static final int HEADER_LENGTH = 8;
     private static final int NOT_KEY_HEADER_LENGTH = 5;
+    private static final BigDecimal MAX_NUM = BigDecimal.valueOf(99999999L);
 
     private static final String PRO = "pro_";
     private static final String ORG = "org_";
@@ -186,19 +190,17 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
                 validateMemberDefaultValue(objectSchemeFieldCreate, fieldType, cell.toString(), row, userNameMap, errorRowColMap);
                 break;
             case FieldType.NUMBER:
-                cell.setCellType(CellType.STRING);
-                objectSchemeFieldCreate.setDefaultValue(cell.toString());
-                validateNumberDefaultValue(objectSchemeFieldCreate.getDefaultValue(), row, errorRowColMap);
+                validateNumberDefaultValue(objectSchemeFieldCreate, row, cell, errorRowColMap);
                 break;
             case FieldType.DATETIME:
             case FieldType.TIME:
             case FieldType.DATE:
                 validateDateDefaultValue(objectSchemeFieldCreate, fieldType, row, cell, errorRowColMap);
                 break;
-            case FieldType.TEXT:
-                validateTextDefaultValue(objectSchemeFieldCreate, row, cell, errorRowColMap);
-                break;
             case FieldType.INPUT:
+                validateInputDefaultValue(objectSchemeFieldCreate, row, cell, errorRowColMap);
+                break;
+            case FieldType.TEXT:
                 cell.setCellType(CellType.STRING);
                 objectSchemeFieldCreate.setDefaultValue(cell.toString());
                 break;
@@ -207,7 +209,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         }
     }
 
-    private void validateTextDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Row row, Cell cell, Map<Integer, List<Integer>> errorRowColMap) {
+    private void validateInputDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Row row, Cell cell, Map<Integer, List<Integer>> errorRowColMap) {
         cell.setCellType(CellType.STRING);
         String txt = cell.toString();
         if (txt != null && txt.contains("\n")) {
@@ -294,11 +296,32 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         objectSchemeFieldCreate.setDefaultValue(BASE_SDF.format(cell.getDateCellValue()));
     }
 
-    private void validateNumberDefaultValue(String defaultValue, Row row, Map<Integer, List<Integer>> errorRowColMap) {
+    private void validateNumberDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Row row, Cell cell, Map<Integer, List<Integer>> errorRowColMap) {
+        String defaultValue;
+        if (CellType.NUMERIC.equals(cell.getCellTypeEnum())) {
+            DecimalFormat df = new DecimalFormat("#");
+            BigDecimal defaultNum = BigDecimal.valueOf(cell.getNumericCellValue());
+            cell.setCellType(CellType.STRING);
+            if (defaultNum.compareTo(defaultNum.setScale(0, RoundingMode.FLOOR)) != 0) {
+                row.getCell(4).setCellValue(buildWithErrorMsg(defaultNum.toPlainString(), "当前字段类型默认值只能为整数"));
+                addErrorColumn(row.getRowNum(), 4, errorRowColMap);
+                return;
+            }
+            defaultValue = df.format(defaultNum);
+        } else {
+            cell.setCellType(CellType.STRING);
+            defaultValue = cell.toString();
+        }
         if (!Pattern.matches("^[0-9]*$", defaultValue)) {
-            row.getCell(4).setCellValue(buildWithErrorMsg(defaultValue, "当前字段类型默认值只能为数字"));
+            row.getCell(4).setCellValue(buildWithErrorMsg(defaultValue, "当前字段类型默认值只能为整数"));
+            addErrorColumn(row.getRowNum(), 4, errorRowColMap);
+            return;
+        }
+        if (MAX_NUM.compareTo(new BigDecimal(defaultValue)) < 0){
+            row.getCell(4).setCellValue(buildWithErrorMsg(defaultValue, "默认值必须小于或等于99999999"));
             addErrorColumn(row.getRowNum(), 4, errorRowColMap);
         }
+        objectSchemeFieldCreate.setDefaultValue(defaultValue);
     }
 
     private void validateOptionDefaultValue(String fieldType, List<FieldOptionUpdateVO> fieldOptions, String defaultValue, Map<String, Integer> keyRowMap, Row row, Map<Integer, List<Integer>> errorRowColMap) {

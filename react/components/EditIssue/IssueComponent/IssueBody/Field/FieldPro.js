@@ -7,7 +7,7 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
 import moment from 'moment';
-import { MAX_NUMBER_STEP, MAX_NUMBER_VALUE } from '@/constants/MAX_VALUE';
+import { MAX_NUMBER_VALUE, MAX_NUMBER_STEP } from '@/constants/MAX_VALUE';
 import React, { Component } from 'react';
 
 const EditorMap = new Map([
@@ -66,7 +66,7 @@ const EditorMap = new Map([
   renderEditor = () => {
     const { field } = this.props;
     const {
-      value, fieldType, required, valueStr,
+      value, fieldType, required, valueStr, extraConfig,
     } = field;
     const Editor = EditorMap.get(fieldType);
     if (Editor) {
@@ -87,7 +87,12 @@ const EditorMap = new Map([
                   </Editor.Option>
               ));
           return (
-            <Editor vertical searchable required={required} multiple={fieldType === 'multiple' || fieldType === 'checkbox'}>
+            <Editor
+              vertical
+              searchable={fieldType === 'multiple' || fieldType === 'single'}
+              required={required}
+              multiple={fieldType === 'multiple' || fieldType === 'checkbox'}
+            >
               {options}
             </Editor>
           );
@@ -102,7 +107,7 @@ const EditorMap = new Map([
           return <Editor required={required} selectedUser={valueStr} />;
         }
         case 'number': {
-          return <Editor required={required} max={MAX_NUMBER_VALUE} step={MAX_NUMBER_STEP} />;
+          return <Editor required={required} max={MAX_NUMBER_VALUE} step={extraConfig ? MAX_NUMBER_STEP : 1} />;
         }
         default: return <Editor required={required} />;
       }

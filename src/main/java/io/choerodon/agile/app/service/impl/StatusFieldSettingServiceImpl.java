@@ -40,7 +40,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatusFieldSettingServiceImpl.class);
 
     private static final String[] FILTER_FIELD_TYPE = {"checkbox", "multiple", "member", "radio", "single"};
-    private static final String[] FEATURE_FIELD = {FieldCode.ACCEPTANCE_CRITERA, FieldCode.BENFIT_HYPOTHESIS, FieldCode.PROGRAM_VERSION};
+    private static final String[] FEATURE_FIELD = {FieldCode.ACCEPTANCE_CRITERA, FieldCode.BENFIT_HYPOTHESIS, FieldCode.PROGRAM_VERSION, FieldCode.SUB_PROJECT};
     protected static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
     protected static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
     private static final String CLEAR = "clear";
@@ -674,7 +674,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         ObjectSchemeFieldDTO fieldDTO = objectSchemeFieldMapper.queryById(fieldId);
         if (Boolean.FALSE.equals(fieldDTO.getSystem()) && !CollectionUtils.isEmpty(fieldOptionIds)) {
             List<StatusFieldValueSettingDTO> result = new ArrayList<>();
-            if (ObjectUtils.isEmpty(organizationId) && Objects.equals(0L, organizationId)) {
+            if (ObjectUtils.isEmpty(organizationId) || Objects.equals(0L, organizationId)) {
                 organizationId = ConvertUtil.getOrganizationId(projectId);
             }
             List<Long> existFieldOptionIds = fieldOptionMapper.selectByOptionIds(organizationId, fieldOptionIds)

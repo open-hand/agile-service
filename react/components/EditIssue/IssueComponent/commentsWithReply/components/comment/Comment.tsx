@@ -13,6 +13,22 @@ interface Props {
   onDelete?: Function
   reload: Function
   readonly: boolean
+  addingRef: React.MutableRefObject<{
+    adding: boolean,
+    setAdding: (adding: boolean) => void
+    setAddValue: (v: string) => void
+  } | null>
+  editingRef: React.MutableRefObject<{
+    editing: boolean,
+    setEditing: (editing: boolean) => void
+    setEditValue: (v: string) => void
+    initValue: string
+  } | null>
+  replyingRef: React.MutableRefObject<{
+    replying: boolean,
+    setReplying:(replying: boolean) => void
+    setReplyValue: (v: string) => void
+      } | null>
 }
 
 const { AppState } = stores;

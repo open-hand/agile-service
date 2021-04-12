@@ -15,7 +15,7 @@ class FieldEndTime extends Component {
     const obj = {
       issueId,
       objectVersionNumber,
-      estimatedEndTime: value && value.format('YYYY-MM-DD HH:mm:ss'),
+      estimatedEndTime: value ? value.format('YYYY-MM-DD HH:mm:ss') : null,
     };
     issueApi.update(obj)
       .then(() => {

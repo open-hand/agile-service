@@ -1,6 +1,7 @@
 import React, { useContext, Fragment } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import {
   FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
   FieldReporter, FieldPriority, FieldLabel, FieldFixVersion, FieldPI,
@@ -23,6 +24,7 @@ const IssueField = observer((props) => {
   const {
     store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled,
   } = useContext(EditIssueContext);
+  const { isShowFeature } = useIsInProgram();
   const renderNormalField = (field) => (<FieldPro {...props} field={field} />);
   const getFieldComponent = (field) => {
     const issue = store.getIssue;
@@ -113,7 +115,8 @@ const IssueField = observer((props) => {
     // fields.splice(4, 0, { fieldCode: 'programVersion', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {
-    fields = fields.slice(0, 8);
+    const isFeatureVisible = isShowFeature && typeCode === 'story';
+    fields = fields.slice(0, isFeatureVisible ? 9 : 10);
   }
   return (
     <div className="c7n-content-wrapper IssueField">

@@ -23,9 +23,9 @@ public enum FieldTypeCnName {
     //数字输入框
     NUMBER("数字输入框", "number"),
     //文本框（单行）
-    TEXT("文本框（单行）", "text"),
+    TEXT("文本框（多行）", "text"),
     //文本框（多行）
-    INPUT("文本框（多行）", "input"),
+    INPUT("文本框（单行）", "input"),
     //选择器（单选）
     SINGLE("选择器（单选）", "single"),
     //选择器（多选）
