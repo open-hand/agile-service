@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import { stores } from '@choerodon/boot';
 import _ from 'lodash';
 import { Modal, Form, Select } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
 import TypeTag from '../TypeTag';
 import './ChangeParent.less';
 
-const { AppState } = stores;
 const FormItem = Form.Item;
 const { Option } = Select;
 let sign = false;
@@ -97,7 +96,7 @@ class ChangeParent extends Component {
                 filterOption={false}
                 onFilterChange={this.handleFilterChange.bind(this)}
               >
-                {originIssues.map(issue => (
+                {originIssues.map((issue) => (
                   <Option
                     key={issue.issueId}
                     value={issue.issueId}
@@ -112,9 +111,12 @@ class ChangeParent extends Component {
                         {issue.issueNum}
                       </a>
                       <div className="issueSummary-wrap">
-                        <p className="issueSummary text-overflow-hidden">
-                          {issue.summary}
-                        </p>
+                        <Tooltip title={issue.summary}>
+                          <p className="issueSummary text-overflow-hidden">
+                            {issue.summary}
+                          </p>
+                        </Tooltip>
+
                       </div>
                     </div>
                   </Option>
