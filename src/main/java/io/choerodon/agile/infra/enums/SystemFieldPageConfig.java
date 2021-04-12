@@ -38,6 +38,7 @@ public class SystemFieldPageConfig {
         environment(FieldCode.ENVIRONMENT, true, true),
         CREATER(FieldCode.CREATOR, false, true),
         UPDATER(FieldCode.UPDATOR, false, true),
+        TAG(FieldCode.TAG, true, true),
         ;
 
 

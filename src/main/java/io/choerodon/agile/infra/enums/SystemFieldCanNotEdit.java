@@ -83,6 +83,7 @@ public class SystemFieldCanNotEdit {
         storyMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(true, false, true));
         storyMap.put(FieldCode.CREATOR, new PageConfigFieldEditedVO(true, true, true));
         storyMap.put(FieldCode.UPDATOR, new PageConfigFieldEditedVO(true, true, true));
+        storyMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
 //        storyMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
 //        storyMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
 //        storyMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));
@@ -104,6 +105,7 @@ public class SystemFieldCanNotEdit {
         taskMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(true, false, true));
         taskMap.put(FieldCode.CREATOR, new PageConfigFieldEditedVO(true, true, true));
         taskMap.put(FieldCode.UPDATOR, new PageConfigFieldEditedVO(true, true, true));
+        taskMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
 //        taskMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
 //        taskMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
 //        taskMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));
@@ -124,6 +126,7 @@ public class SystemFieldCanNotEdit {
         bugMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(true, false, true));
         bugMap.put(FieldCode.CREATOR, new PageConfigFieldEditedVO(true, true, true));
         bugMap.put(FieldCode.UPDATOR, new PageConfigFieldEditedVO(true, true, true));
+        bugMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
 //        bugMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
 //        bugMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
 //        bugMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));

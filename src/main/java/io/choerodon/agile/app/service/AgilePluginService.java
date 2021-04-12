@@ -421,4 +421,11 @@ public interface AgilePluginService {
      * @param issueTypes
      */
     void initFeatureType(Long organizationId, List<IssueTypeDTO> issueTypes);
+
+    /**
+     * 删除publishVersion关联数据
+     *
+     * @param publishVersionId
+     */
+    void deleteAssociatedPublishVersion(Long publishVersionId);
 }
