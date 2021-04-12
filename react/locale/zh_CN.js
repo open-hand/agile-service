@@ -89,7 +89,6 @@ const zh_CN = {
   field: '字段',
   'field.origin': '字段来源',
   'field.range': '字段范围',
-  'field.type': '字段类型',
   'field.required': '必填项',
   'field.delete.title': '删除自定义字段：{name}',
   'field.delete.msg': '注意：将会从所有使用的问题中删除此字段，并且字段数据会清空。你确定要删除此字段吗？',

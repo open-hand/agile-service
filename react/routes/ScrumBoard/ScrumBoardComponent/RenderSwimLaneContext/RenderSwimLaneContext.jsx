@@ -95,7 +95,7 @@ class SwimLaneContext extends React.Component {
     const {
       children, mode, fromEpic, parentIssueArr,
     } = this.props;
-    const panelKey = getPanelKey(mode, parentIssue, key);
+    const panelKey = getPanelKey(mode, parentIssue);
     return (
       <Panel
         showArrow={mode !== 'swimlane_none'}
