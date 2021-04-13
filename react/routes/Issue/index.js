@@ -152,7 +152,7 @@ const Issue = observer(() => {
           },
         },
       });
-      await IssueStore.query();
+      await IssueStore.query.flush();
     } else {
       const { pageInfo = {} } = localPageCacheStore.getItem('issues.table') || {};
 
