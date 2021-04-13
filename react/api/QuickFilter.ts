@@ -121,4 +121,5 @@ class QuickFilterApi extends Api<QuickFilterApi> {
 }
 
 const quickFilterApi = new QuickFilterApi();
-export { quickFilterApi };
+const quickFilterApiConfig = new QuickFilterApi(true);
+export { quickFilterApi, quickFilterApiConfig };
