@@ -156,10 +156,20 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         dto.setId(publishVersionId);
         dto.setProjectId(projectId);
         dto.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
+        resetTagByServiceCode(dto, publishVersionDTO.getServiceCode());
         if (publishVersionMapper.updateByPrimaryKey(dto) != 1) {
             throw new CommonException("error.publish.version.update");
         }
         return modelMapper.map(publishVersionMapper.selectByPrimaryKey(publishVersionDTO.getId()), PublishVersionVO.class);
+    }
+
+    private void resetTagByServiceCode(PublishVersionDTO dto,
+                                       String originalServiceCode) {
+        String serviceCode = dto.getServiceCode();
+        if (StringUtils.isEmpty(serviceCode)
+                || !Objects.equals(serviceCode, originalServiceCode)) {
+            dto.setTagName(null);
+        }
     }
 
     @Override
@@ -263,7 +273,17 @@ public class PublishVersionServiceImpl implements PublishVersionService {
 
     @Override
     public Page<PublishVersionVO> list(Long projectId, PublishVersionVO publishVersionVO, PageRequest pageRequest) {
-        return PageHelper.doPageAndSort(pageRequest, () -> publishVersionMapper.listByOptions(projectId, publishVersionVO));
+        Page<PublishVersionVO> result =
+                PageHelper.doPageAndSort(pageRequest, () -> publishVersionMapper.listByOptions(projectId, publishVersionVO));
+        List<PublishVersionVO> content = result.getContent();
+        if (!ObjectUtils.isEmpty(content)) {
+            Map<String, String> codeNameMap =
+                    devopsClientOperator.listActiveAppService(projectId)
+                            .stream()
+                            .collect(Collectors.toMap(AppServiceRepVO::getCode, AppServiceRepVO::getName));
+            content.forEach(x -> x.setAppServiceName(codeNameMap.getOrDefault(x.getServiceCode(), null)));
+        }
+        return result;
     }
 
     @Override

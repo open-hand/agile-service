@@ -48,6 +48,36 @@ public class PublishVersionVO {
 
     private String content;
 
+    private Date creationDate;
+
+    private Date lastUpdateDate;
+
+    private String appServiceName;
+
+    public String getAppServiceName() {
+        return appServiceName;
+    }
+
+    public void setAppServiceName(String appServiceName) {
+        this.appServiceName = appServiceName;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public Date getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
+    }
+
     public String getDescription() {
         return description;
     }

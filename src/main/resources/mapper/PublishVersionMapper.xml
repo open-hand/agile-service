@@ -36,7 +36,7 @@
         WHERE apv.project_id = #{projectId}
         <if test="publishVersionVO != null ">
             <if test="publishVersionVO.appService != null">
-                apv.app_service = #{publishVersionVO.appService}
+                and apv.app_service = #{publishVersionVO.appService}
             </if>
             <if test="publishVersionVO.content != null and !''.equals(publishVersionVO.content)">
                 <bind name="contentLike" value="'%' + publishVersionVO.content + '%'"/>
