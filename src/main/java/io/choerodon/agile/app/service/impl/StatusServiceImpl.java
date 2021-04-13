@@ -184,6 +184,11 @@ public class StatusServiceImpl implements StatusService {
                 Optional.ofNullable(issueStatusDTO)
                         .map(x -> x.getCompleted())
                         .orElse(false);
+        Long issueStatusId =
+                Optional.ofNullable(issueStatusDTO)
+                        .map(x -> x.getId())
+                        .orElse(null);
+        statusVO.setIssueStatusId(issueStatusId);
         statusVO.setCompleted(completed);
         return statusVO;
     }
