@@ -7,7 +7,6 @@ import CreateDate from './create-date';
 import ActualDate from './actual-date';
 import CreateUser from './create-user';
 import Description from './description';
-import LinkService from './link-service';
 import GroupId from './groupId';
 import AppService from './app-service';
 import TagField from './tag-field';
@@ -28,7 +27,6 @@ const Detail: React.FC = () => (
       <TagField />
     </Section>
     <Description />
-    <LinkService />
     <DependencyTree />
   </>
 );

@@ -42,7 +42,7 @@ const SelectGitTags: React.FC<Props> = forwardRef(({
   return (
     <Component
       ref={ref}
-      disabled={!applicationId}
+      help={!applicationId ? '请先选择应用服务' : undefined}
       {...props}
       {...otherProps}
     />

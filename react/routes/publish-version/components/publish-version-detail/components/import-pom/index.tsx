@@ -138,7 +138,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
           <Column name="version" editor />
           <Column name="versionAlias" editor renderer={renderAlias} tooltip={'overflow' as any} />
           <Column name="serviceCode" editor={() => <SelectAppService />} />
-          <Column name="tagId" editor={(record) => <SelectGitTags applicationId={record.get('appService')} />} />
+          <Column name="tagId" editor={(record) => <SelectGitTags applicationId={record.get('serviceCode')} />} />
           <Column name="action" renderer={renderAction} width={65} />
         </Table>
       </div>

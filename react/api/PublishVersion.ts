@@ -64,10 +64,11 @@ class PublishVersionApi extends Api<PublishVersionApi> {
   /**
    *加载发布版本列表
    */
-  loadList() {
+  loadList(appService = true) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/list`,
+      data: { appService },
     });
   }
 
