@@ -1,25 +1,18 @@
 import React, {
   useCallback,
-  useEffect, useMemo, useRef, useState,
+  useEffect, useMemo, useState,
 } from 'react';
 import {
-  Button,
-  DataSet, Form, Modal, Radio, Select, TextField, Tooltip,
+  DataSet, Form, Modal, Select,
 } from 'choerodon-ui/pro/lib';
-import { debounce, isEmpty } from 'lodash';
-import classnames from 'classnames';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import SelectAppService from '@/components/select/select-app-service';
-import SelectGitTags from '@/components/select/select-git-tags';
-import RadioGroup from 'choerodon-ui/lib/radio/group';
 // import './index.less';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
-import { IAppVersionData, publishVersionApiConfig, versionApi } from '@/api';
-import { Checkbox } from 'choerodon-ui';
-import SelectTeam from '@/components/select/select-team';
+import { publishVersionApiConfig } from '@/api';
+// @ts-ignore
+import JSONbig from 'json-bigint';
+
+const JSONbigString = JSONbig({ storeAsString: true });
 
 interface ILinkServiceProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
@@ -48,12 +41,18 @@ const LinkPublishVersionModal: React.FC<{ modal?: IModalProps } & ILinkServicePr
         name: 'version',
         label: '选择发布版本',
         multiple: true,
-        textField: 'versionAlias',
+        textField: 'name',
         valueField: 'id',
         options: new DataSet({
           autoQuery: true,
           transport: {
-            read: publishVersionApiConfig.loadDependencyTreeAvailableNode(publishVersionId),
+            read: {
+              ...publishVersionApiConfig.loadDependencyTreeAvailableNode(publishVersionId),
+              transformResponse: (res: any) => {
+                const data = JSONbigString.parse(res);
+                return data.map((item: any) => ({ ...item, name: item.serviceCode ? `${item.serviceCode}:${item.versionAlias || item.version}` : item.versionAlias || item.version }));
+              },
+            },
           },
         }),
       },

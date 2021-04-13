@@ -103,7 +103,12 @@ function PublishVersion() {
         </TooltipButton>
       </Header>
       <Breadcrumb />
-      <Content className={`${prefixCls}-content`} style={{ overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <Content
+        className={`${prefixCls}-content`}
+        style={{
+          overflowY: 'hidden', display: 'flex', flexDirection: 'column', paddingTop: 0,
+        }}
+      >
         <Table dataSet={tableDataSet}>
           <Column name="name" renderer={renderName} />
           <Column name="status" renderer={renderStatus} />

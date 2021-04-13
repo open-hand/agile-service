@@ -106,11 +106,11 @@ class PublicRelease extends Component {
                   </div>
                 ) : ''
               }
-              <Form>
+              <Form className="c7n-agile-release-public-release">
                 {
                   ReleaseStore.getPublicVersionDetail.fixIssueCount ? (
                     <div>
-                      <FormItem>
+                      <FormItem style={{ marginBottom: '.13rem' }}>
                         {getFieldDecorator('chose', {
                           initialValue: 1,
                           rules: [{
@@ -120,11 +120,10 @@ class PublicRelease extends Component {
                           <RadioGroup
                             label="未解决的问题"
                           >
-                            <Radio style={{ display: 'block', height: 20, marginTop: 10 }} value={1}>
+                            <Radio style={{ marginRight: '.12rem' }} value={1}>
                               忽略并继续发布
                             </Radio>
                             <Radio
-                              style={{ display: 'block', height: 20, marginTop: 10 }}
                               value={2}
                               disabled={this.renderRadioDisabled()}
                             >

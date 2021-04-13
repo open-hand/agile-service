@@ -8,10 +8,14 @@ import { observer } from 'mobx-react-lite';
 import {
   IPublishVersionTreeNode, publishVersionApi,
 } from '@/api';
+import CustomIcon from '@/components/custom-icon';
 import { useReleaseDetailContext } from '../../../stores';
 import Section from '../../section';
 import './index.less';
 import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
+import { openLinkServiceModal } from '../../link-service-modal';
+import { openImportPomModal } from '../../import-pom';
+import { openEditAppVersionModal, openCreateAppVersionModal } from './EditAppVersionModal';
 import DependencyTreeBase from './DependencyTreeBase';
 
 const { TreeNode } = Tree;
@@ -56,11 +60,13 @@ const DependencyTree: React.FC = () => {
   }
 
   function renderTreeNode(item: IPublishVersionTreeNode, level: number) {
+    let name = item.versionAlias || item.version;
+    name = item.name ? `${item.name}:${name}` : name;
     return (
       <div role="none" className={`${prefixCls}-dependency-tree-item`}>
         <span className={`${prefixCls}-dependency-tree-item-left`}>
           <Icon type="folder-o" className={`${prefixCls}-dependency-tree-item-left-icon`} />
-          <span className={`${prefixCls}-dependency-tree-item-left-text`}>{item.versionAlias || item.version}</span>
+          <span className={`${prefixCls}-dependency-tree-item-left-text`}>{name}</span>
         </span>
 
         {level === 0 ? (
@@ -76,13 +82,50 @@ const DependencyTree: React.FC = () => {
       </div>
     );
   }
-
+  function handleLinkAppService(linkData: any) {
+    // publishVersionApi.linkAppVersions(detailData.versionId, linkData.version).then(() => {
+    //   store.loadData();
+    // });
+  }
+  async function handleImportPom(pomData: any) {
+    await publishVersionApi.createBatch(detailData.id, pomData);
+    store.loadData();
+    return true;
+  }
+  async function handleCreate(pomData: any) {
+    await publishVersionApi.createBatch(detailData.id, [{ ...pomData, appService: true }]);
+    store.loadData();
+    return true;
+  }
   return (
     <Section
       title="关联发布版本"
       buttons={
         !disabled ? (
           <div className={`${prefixCls}-dependency-tree-operation`}>
+            {/* <Tooltip placement="topRight" autoAdjustOverflow={false} title="创建发布版本">
+              <Button
+                style={{ padding: '0 6px' }}
+                color={'blue' as ButtonColor}
+                icon="playlist_add"
+                onClick={() => {
+                  openCreateAppVersionModal({ handleOk: handleCreate });
+                }}
+              />
+            </Tooltip> */}
+            <Tooltip placement="topRight" autoAdjustOverflow={false} title="导入pom文件">
+              <Button
+                style={{ padding: '0 6px' }}
+                color={'blue' as ButtonColor}
+                //   icon="mode_edit"
+                onClick={() => {
+                  openImportPomModal({ handleOk: handleImportPom, versionId: detailData.id });
+                }}
+              >
+                <CustomIcon type="icon-pom" width={18} height={18} />
+                {/* {svg} */}
+              </Button>
+            </Tooltip>
             <Tooltip placement="topRight" autoAdjustOverflow={false} title="关联发布版本">
               <Button
                 style={{ padding: '0 6px' }}
@@ -93,7 +136,16 @@ const DependencyTree: React.FC = () => {
                 }}
               />
             </Tooltip>
-
+            <Tooltip placement="topRight" autoAdjustOverflow={false} title="关联应用版本">
+              <Button
+                style={{ padding: '0 6px' }}
+                color={'blue' as ButtonColor}
+                icon="local_offer"
+                onClick={() => {
+                  openLinkServiceModal({ versionId: detailData.id || detailData.versionId, handleOk: handleLinkAppService });
+                }}
+              />
+            </Tooltip>
           </div>
         ) : ''
       }
