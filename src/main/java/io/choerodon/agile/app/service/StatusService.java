@@ -129,12 +129,4 @@ public interface StatusService {
      */
     StatusVO queryProjectStatusById(Long projectId, Long statusId);
 
-    /**
-     * 更新项目层的问题类型
-     *
-     * @param projectId
-     * @param statusId
-     * @param statusVO
-     */
-    void updateProjectStatus(Long projectId, Long statusId, StatusVO statusVO);
 }

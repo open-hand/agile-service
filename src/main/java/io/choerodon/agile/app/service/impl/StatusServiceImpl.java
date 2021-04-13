@@ -189,16 +189,6 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public void updateProjectStatus(Long projectId, Long statusId, StatusVO statusVO) {
-        Boolean completed = statusVO.getCompleted();
-        AssertUtilsForCommonException.notNull(completed, "error.status.completed.null");
-        IssueStatusDTO dto = issueStatusMapper.selectByStatusId(projectId, statusId);
-        AssertUtilsForCommonException.notNull(dto, "error.issue.status.null");
-        dto.setCompleted(completed);
-        issueStatusMapper.updateByPrimaryKeySelective(dto);
-    }
-
-    @Override
     public List<StatusVO> queryAllStatus(Long organizationId) {
         StatusDTO status = new StatusDTO();
         status.setOrganizationId(organizationId);

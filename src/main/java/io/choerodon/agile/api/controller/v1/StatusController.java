@@ -162,16 +162,6 @@ public class StatusController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "更新项目下的状态")
-    @PutMapping(value = "/projects/{project_id}/status/{status_id}")
-    public ResponseEntity updateStatus(@PathVariable("project_id") Long projectId,
-                                       @PathVariable("status_id") @Encrypt Long statusId,
-                                       @RequestBody StatusVO statusVO) {
-        statusService.updateProjectStatus(projectId, statusId, statusVO);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除项目的状态")
     @DeleteMapping(value = "/projects/{project_id}/status/delete_status")
     public ResponseEntity deleteStatus(@PathVariable("project_id") Long projectId,
