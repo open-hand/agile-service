@@ -648,6 +648,34 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       },
     });
   }
+
+  updateAutoTransform(issueTypeId: string, statusId: string, autoTransform: boolean) {
+    return axios({
+      method: 'put',
+      url: `${getIsOrganization() ? this.orgPrefix : this.prefix}/status_linkages/list`,
+      data: {
+        autoTransform,
+      },
+    });
+  }
+
+  getStatus(statusId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/status_linkages/list`,
+      params: {
+        statusId,
+      },
+    });
+  }
+
+  updateStatus(statusId: string, data: any) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/status_linkages/list`,
+      data,
+    });
+  }
 }
 
 const statusTransformApi = new StatusTransformApi();

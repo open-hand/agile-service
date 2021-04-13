@@ -244,7 +244,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         //获取状态机
         Long stateMachineId = stateMachineSchemeConfigService.queryStateMachineIdBySchemeIdAndIssueTypeId(false, organizationId, stateMachineSchemeId, issueTypeId);
-        List<StatusAndTransformVO> statuses = statusService.queryStatusByStateMachineId(organizationId, stateMachineId);
+        List<StatusAndTransformVO> statuses = statusService.queryStatusByStateMachineId(organizationId, projectId, stateMachineId);
         if(CollectionUtils.isEmpty(statuses)){
             return new ArrayList<>();
         }
@@ -429,7 +429,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         // 处理rank值
         stateMachineNodeService.handlerNullRankNode(organizationId, stateMachineId, applyType);
         // 查询当前状态机有哪些状态
-        List<StatusAndTransformVO> statusVOS = statusService.queryStatusByStateMachineId(organizationId, stateMachineId);
+        List<StatusAndTransformVO> statusVOS = statusService.queryStatusByStateMachineId(organizationId, projectId, stateMachineId);
         if (CollectionUtils.isEmpty(statusVOS)) {
             return new ArrayList<>();
         }
@@ -542,15 +542,23 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         // 关联状态机
         if (!CollectionUtils.isEmpty(issueTypeIds)) {
+            statusVO.setId(status.getId());
             for (Long issueTypeId:issueTypeIds) {
-                linkStatus(projectId,issueTypeId,applyType,status.getId(),statusVO.getDefaultStatus(), statusVO.getTransferAll());
+                linkStatus(projectId, issueTypeId, applyType, statusVO);
             }
         }
         return status;
     }
 
     @Override
-    public StatusMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus, Boolean transferAll) {
+    public StatusMachineNodeVO linkStatus(Long projectId,
+                                          Long issueTypeId,
+                                          String applyType,
+                                          StatusVO status) {
+        Long statusId = status.getId();
+        Boolean defaultStatus = status.getDefaultStatus();
+        Boolean transferAll = status.getTransferAll();
+        boolean completed = Boolean.TRUE.equals(status.getCompleted());
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         IssueStatusDTO issueStatusDTO = issueStatusMapper.selectByStatusId(projectId, statusId);
         StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
@@ -558,7 +566,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             issueStatusDTO = new IssueStatusDTO();
             issueStatusDTO.setProjectId(projectId);
             issueStatusDTO.setStatusId(statusId);
-            issueStatusDTO.setCompleted(false);
+            issueStatusDTO.setCompleted(completed);
             issueStatusDTO.setName(statusVO.getName());
             issueStatusDTO.setCategoryCode(statusVO.getType());
             issueStatusDTO.setEnable(false);

@@ -130,12 +130,22 @@
            smn.id as nodeId,
            smn.state_machine_id,
            IF(smn.type = 'node_init',1,0) as defaultStatus
-         from fd_status fs,fd_status_machine_node smn
+           <if test="projectId != null">
+               ,
+               ais.is_completed as completed
+           </if>
+         from fd_status fs
+         join fd_status_machine_node smn
+         on (
+             fs.organization_id = smn.organization_id
+             and fs.id = smn.status_id
+             and smn.state_machine_id = #{stateMachineId}
+         )
+         <if test="projectId != null">
+             left join agile_issue_status ais on ais.project_id = #{projectId} and fs.id = ais.status_id
+         </if>
          where fs.organization_id = #{organizationId}
-         AND smn.organization_id = fs.organization_id
-         AND smn.status_id = fs.id
-         AND smn.state_machine_id = #{stateMachineId}
-         order by smn.rank , smn.id
+         order by smn.rank, smn.id
     </select>
 
     <select id="listStatusTransferByStateMachineId" resultType="io.choerodon.agile.api.vo.StatusSettingVO">
@@ -157,31 +167,31 @@
 
     <select id="listStatusByProjectId" resultType="io.choerodon.agile.api.vo.ProjectStatusVO">
         select
-           fs.id,
-           fs.name,
-           fs.code,
-           fs.description,
-           fs.type,
-           fs.object_version_number
-         from fd_status fs,agile_issue_status ais
-         where fs.organization_id = #{organizationId}
-         AND ais.project_id = #{projectId}
-         AND fs.id = ais.status_id
-         <if test="statusSearchVO != null">
-             <if test="statusSearchVO.name != null">
-                 AND fs.name LIKE concat('%',#{statusSearchVO.name},'%')
-             </if>
-             <if test="statusSearchVO.type != null">
-                 AND fs.type LIKE concat('%',#{statusSearchVO.type},'%')
-             </if>
-             <if test="statusSearchVO.description != null">
-                 AND fs.description LIKE concat('%',#{statusSearchVO.description},'%')
-             </if>
-             <if test="statusSearchVO.param != null">
-                 AND ( fs.name LIKE concat('%',#{statusSearchVO.param},'%')
-                 OR fs.description LIKE concat('%',#{statusSearchVO.param},'%')
-                 )
-             </if>
-         </if>
+            fs.id,
+            fs.name,
+            fs.code,
+            fs.description,
+            fs.type,
+            fs.object_version_number,
+            ais.is_completed as completed
+        from fd_status fs
+        join agile_issue_status ais on (ais.project_id = #{projectId} and fs.id = ais.status_id)
+        where fs.organization_id = #{organizationId}
+        <if test="statusSearchVO != null">
+            <if test="statusSearchVO.name != null">
+                AND fs.name LIKE concat('%',#{statusSearchVO.name},'%')
+            </if>
+            <if test="statusSearchVO.type != null">
+                AND fs.type LIKE concat('%',#{statusSearchVO.type},'%')
+            </if>
+            <if test="statusSearchVO.description != null">
+                AND fs.description LIKE concat('%',#{statusSearchVO.description},'%')
+            </if>
+            <if test="statusSearchVO.param != null">
+                AND ( fs.name LIKE concat('%',#{statusSearchVO.param},'%')
+                OR fs.description LIKE concat('%',#{statusSearchVO.param},'%')
+                )
+            </if>
+        </if>
     </select>
 </mapper>

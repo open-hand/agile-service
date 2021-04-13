@@ -61,7 +61,7 @@ const IssueDropDown = ({
     if (e.key === '0') {
       store.setWorkLogShow(true);
     } else if (e.key === 'item_1') {
-      handleDeleteIssue(issueId);
+      handleDeleteIssue();
     } else if (e.key === '2') {
       store.setCreateSubTaskShow(true);
     } else if (e.key === '3') {

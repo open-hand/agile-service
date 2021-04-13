@@ -30,4 +30,14 @@ public class DevopsClientOperator {
             return new ArrayList<>();
         }
     }
+
+    public List<AppServiceRepVO> listActiveAppService(Long projectId) {
+        try {
+            return FeignClientUtils.doRequest(() ->
+                    devopsFeignClient.listActiveAppService(projectId), new TypeReference<Page<AppServiceRepVO>>() {
+            }).getContent();
+        } catch (ServiceUnavailableException e) {
+            return new ArrayList<>();
+        }
+    }
 }

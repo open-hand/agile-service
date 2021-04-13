@@ -22,7 +22,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
     ),
     middleWare: (data) => {
       const newData = [...data];
-      const currentStatus = (newData || []).find((item) => item.endStatusId === statusId);
+      const currentStatus = (newData).find((item) => item.endStatusId === statusId);
       if (!currentStatus) {
         newData.unshift({
           id: 'current',

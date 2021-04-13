@@ -77,7 +77,7 @@ class ImportIssue extends Component {
     importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system));
     issueApi.downloadTemplateForImport(importFieldsData).then((excel) => {
       const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const fileName = '问题导入模板.xlsx';
+      const fileName = `${this.props.name || '问题'}导入模板.xlsx`;
       FileSaver.saveAs(blob, fileName);
     });
   };
@@ -185,7 +185,7 @@ class ImportIssue extends Component {
           <span className="c7n-importIssue-text">
             导入失败
             <span style={{ color: '#FF0000' }}>{failCount}</span>
-            问题
+            {`${this.props.name || '问题'}`}
             <a href={fileUrl}>
               点击下载失败详情
             </a>
@@ -198,7 +198,7 @@ class ImportIssue extends Component {
           <span className="c7n-importIssue-text">
             导入成功
             <span style={{ color: '#0000FF' }}>{successCount}</span>
-            问题
+            {`${this.props.name || '问题'}`}
           </span>
         </div>
       );
@@ -323,7 +323,9 @@ class ImportIssue extends Component {
     const {
       uploading, latestInfo, wsData, templateIsExist,
     } = this.state;
-    const { action } = this.props;
+    const {
+      action, requires, systems, fields,
+    } = this.props;
     const {
       successCount, failCount, fileUrl, id,
     } = latestInfo;
@@ -389,13 +391,20 @@ class ImportIssue extends Component {
             </>
           )}
         >
-          您必须使用模板文件，录入问题信息。
-          <ImportFields importFieldsRef={this.importFieldsRef} setReRender={this.handleSetReRender} checkBoxChangeOk={this.handleCheckBoxChangeOk} />
+          {`您必须使用模板文件，录入${this.props.name || '问题'}信息。`}
+          <ImportFields
+            importFieldsRef={this.importFieldsRef}
+            setReRender={this.handleSetReRender}
+            checkBoxChangeOk={this.handleCheckBoxChangeOk}
+            requires={requires}
+            systems={systems}
+            fields={fields}
+          />
         </ImportIssueForm>
         {id && <Divider />}
         {id && (
           <ImportIssueForm
-            title="导入问题"
+            title={`导入${this.props.name || '问题'}`}
           >
             <div style={{ marginTop: 10 }}>
               上次导入共导入
@@ -441,7 +450,7 @@ const handleOpenImport = (props) => {
     className: 'c7n-importIssue',
     maskClosable: false,
     key: Modal.key(),
-    title: '导入问题',
+    title: `导入${props.name || '问题'}`,
     style: {
       width: 380,
     },
