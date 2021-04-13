@@ -182,7 +182,7 @@ const OPERATION_FILTER = {
   single: arrOperation5,
   multiple: arrOperation6,
   member: arrOperation2,
-  multiMember: arrOperation2,
+  multiMember: arrOperation6,
   date: arrOperation3,
 };
 
