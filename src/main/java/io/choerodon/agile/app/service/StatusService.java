@@ -1,7 +1,6 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -101,7 +100,7 @@ public interface StatusService {
 
     Page<StatusVO> pagedQueryByStateMachineIds(PageRequest pageRequest, Long organizationId, List<Long> stateMachineIds);
 
-    List<StatusAndTransformVO> queryStatusByStateMachineId(Long organizationId, Long stateMachineId);
+    List<StatusAndTransformVO> queryStatusByStateMachineId(Long organizationId, Long projectId, Long stateMachineId);
 
     Page<ProjectStatusVO> listStatusByProjectId(Long projectId, PageRequest pageRequest, StatusSearchVO statusSearchVO);
 
@@ -120,4 +119,22 @@ public interface StatusService {
     StatusCheckVO projectCheckName(Long projectId , Long organizationId, String name);
 
     List<Long> filterIssueType(Long projectId, String applyType);
+
+    /**
+     * 项目层查询状态
+     *
+     * @param projectId
+     * @param statusId
+     * @return
+     */
+    StatusVO queryProjectStatusById(Long projectId, Long statusId);
+
+    /**
+     * 更新项目层的问题类型
+     *
+     * @param projectId
+     * @param statusId
+     * @param statusVO
+     */
+    void updateProjectStatus(Long projectId, Long statusId, StatusVO statusVO);
 }

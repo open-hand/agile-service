@@ -6,6 +6,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.infra.cache.InstanceCache;
@@ -156,6 +157,45 @@ public class StatusServiceImpl implements StatusService {
             throw new CommonException("error.queryStatusById.notExist");
         }
         return modelMapper.map(status, StatusVO.class);
+    }
+
+    @Override
+    public StatusVO queryProjectStatusById(Long projectId, Long statusId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        StatusDTO example = new StatusDTO();
+        example.setOrganizationId(organizationId);
+        example.setId(statusId);
+        StatusDTO result = statusMapper.selectOne(example);
+        AssertUtilsForCommonException.notNull(result, "error.status.not.existed");
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        AssertUtilsForCommonException.notNull(projectVO, "error.project.not.existed");
+        String applyType =
+                ProjectCategory.checkContainProjectCategory(projectVO.getCategories(),ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
+        Long schemeId = projectConfigService.queryById(projectId).getStateMachineSchemeMap().get(applyType).getId();
+        Set<Long> issueTypeIdSet=
+                nodeDeployMapper.countIssueTypeByStatusIds(organizationId, schemeId, Arrays.asList(statusId), applyType)
+                        .stream()
+                        .map(IssueCountDTO::getIssueTypeId)
+                        .collect(Collectors.toSet());
+        StatusVO statusVO = modelMapper.map(result, StatusVO.class);
+        statusVO.setIssueTypeIds(new ArrayList<>(issueTypeIdSet));
+        IssueStatusDTO issueStatusDTO = issueStatusMapper.selectByStatusId(projectId, statusId);
+        boolean completed =
+                Optional.ofNullable(issueStatusDTO)
+                        .map(x -> x.getCompleted())
+                        .orElse(false);
+        statusVO.setCompleted(completed);
+        return statusVO;
+    }
+
+    @Override
+    public void updateProjectStatus(Long projectId, Long statusId, StatusVO statusVO) {
+        Boolean completed = statusVO.getCompleted();
+        AssertUtilsForCommonException.notNull(completed, "error.status.completed.null");
+        IssueStatusDTO dto = issueStatusMapper.selectByStatusId(projectId, statusId);
+        AssertUtilsForCommonException.notNull(dto, "error.issue.status.null");
+        dto.setCompleted(completed);
+        issueStatusMapper.updateByPrimaryKeySelective(dto);
     }
 
     @Override
@@ -391,7 +431,7 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public List<StatusAndTransformVO> queryStatusByStateMachineId(Long organizationId, Long stateMachineId) {
-        return statusMapper.queryByStateMachineId(organizationId,stateMachineId);
+    public List<StatusAndTransformVO> queryStatusByStateMachineId(Long organizationId, Long projectId, Long stateMachineId) {
+        return statusMapper.queryByStateMachineId(organizationId, projectId, stateMachineId);
     }
 }
