@@ -77,7 +77,7 @@ class VersionApi extends Api<VersionApi> {
    *
    */
   loadVersionList(page: number = 1, size: number = 20, filters: AdvancedSearch) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/product_version/versions`,
       data: filters,

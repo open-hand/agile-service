@@ -8,6 +8,7 @@ import {
 import {
   Button, Menu, Icon, Spin, Tooltip,
 } from 'choerodon-ui';
+import { Table } from 'choerodon-ui/pro';
 import { withRouter } from 'react-router-dom';
 import { versionApi } from '@/api';
 import DetailContainer from '@/components/detail-container';
@@ -21,6 +22,7 @@ import TableDropMenu from '../../../common/TableDropMenu';
 import DeleteReleaseWithIssues from '../ReleaseComponent/DeleteReleaseWithIssues';
 import { openLinkVersionModal } from '../ReleaseComponent/link-program-vesion';
 
+const { Column } = Table;
 const { AppState } = stores;
 const COLOR_MAP = {
   规划中: '#ffb100',
@@ -239,8 +241,10 @@ class ReleaseHome extends Component {
       <TableDropMenu
         menu={menu}
         text={text}
+        style={{ lineHeight: 'inherit' }}
         onClickEdit={this.handleClickMenu.bind(this, record, '5')}
         type={type}
+        tooltip
         projectId={id}
         menuPermissionProps={{
           service:
@@ -260,7 +264,7 @@ class ReleaseHome extends Component {
   };
 
   renderProgramVersion({ text }) {
-    if (text && Array.isArray(text)) {
+    if (text && [...(text || undefined)].length > 0) {
       const versionTags = [
         <Tooltip title={text[0].name}><div className="c7n-release-progress-version">{text[0].name}</div></Tooltip>,
       ];
@@ -281,7 +285,7 @@ class ReleaseHome extends Component {
       publicVersion,
       release,
     } = this.state;
-    const { isInProgram, detailProps } = this.props;
+    const { isInProgram, tableDataSet, detailProps } = this.props;
     const deleteReleaseVisible = ReleaseStore.getDeleteReleaseVisible;
     const versionData = ReleaseStore.getVersionList.length > 0 ? ReleaseStore.getVersionList : [];
     const versionColumn = [{
@@ -385,7 +389,78 @@ class ReleaseHome extends Component {
         </Permission>
         <Breadcrumb />
         <Content style={{ paddingTop: 0 }}>
-          <Spin spinning={loading}>
+          <Table
+            dataSet={tableDataSet}
+            rowDraggable
+            onDragEndBefore={(ds, columns, resultDrag) => {
+              const currentRecord = ds.findRecordById(resultDrag.draggableId);
+              if (!resultDrag.destination || !currentRecord) {
+                return false;
+              }
+              let beforeSequence = null;
+              let afterSequence = null;
+              if (resultDrag.destination.index > resultDrag.source.index) {
+                beforeSequence = ds.get(resultDrag.destination.index).get('sequence');
+                afterSequence = ds.get(resultDrag.destination.index + 1)?.get('sequence');
+              } else {
+                afterSequence = ds.get(resultDrag.destination.index).get('sequence');
+                beforeSequence = ds.get(resultDrag.destination.index - 1)?.get('sequence');
+              }
+              versionApi.drag({
+                afterSequence,
+                beforeSequence,
+                versionId: currentRecord.get('versionId'),
+                objectVersionNumber: currentRecord?.get('objectVersionNumber'),
+              })
+                .then(() => {
+                  ds.query(ds.currentPage);
+                  // this.refresh(pagination);
+                }).catch((error) => {
+                  ds.query(ds.currentPage);
+
+                  // this.refresh(pagination);
+                });
+              return true;
+            }}
+          >
+            <Column name="name" renderer={({ text, record }) => this.renderMenu(text, record.toData())} width={180} />
+            {isInProgram ? <Column name="programVersionInfoVOS" width={180} renderer={({ value }) => this.renderProgramVersion({ text: value })} /> : null}
+            <Column
+              name="status"
+              width={100}
+              renderer={({ text }) => (
+                <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                  <span
+                    style={{
+                      color: '#fff',
+                      background: COLOR_MAP[text],
+                      display: 'inline-block',
+                      lineHeight: '16px',
+                      height: '16px',
+                      borderRadius: '2px',
+                      padding: '0 2px',
+                      fontSize: '13px',
+                    }}
+                  >
+                    <div style={{ transform: 'scale(.8)' }}>{text === '归档' ? '已归档' : text}</div>
+                  </span>
+                </div>
+              )}
+            />
+            <Column name="startDate" className="c7n-agile-table-cell" width={100} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+            <Column name="expectReleaseDate" className="c7n-agile-table-cell" width={105} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+            <Column name="releaseDate" className="c7n-agile-table-cell" width={105} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+            <Column
+              name="description"
+              className="c7n-agile-table-cell"
+              renderer={({ text }) => (text ? (
+                <Tooltip mouseEnterDelay={0.5} title={`描述：${text}`}>
+                  {text}
+                </Tooltip>
+              ) : null)}
+            />
+          </Table>
+          {/* <Spin spinning={loading}>
             <DragSortingTable
               handleDrag={this.handleDrag}
               columns={versionColumn}
@@ -393,7 +468,7 @@ class ReleaseHome extends Component {
               pagination={pagination}
               onChange={this.handleChangeTable.bind(this)}
             />
-          </Spin>
+          </Spin> */}
           {addRelease
             ? (
               <AddRelease
