@@ -139,7 +139,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         // 处理rank值
         stateMachineNodeService.handlerNullRankNode(organizationId, stateMachineId, "");
         // 查询当前状态机有哪些状态
-        List<StatusAndTransformVO> statusVOS = statusService.queryStatusByStateMachineId(organizationId, stateMachineId);
+        List<StatusAndTransformVO> statusVOS = statusService.queryStatusByStateMachineId(organizationId, null, stateMachineId);
         if (CollectionUtils.isEmpty(statusVOS)) {
             return new ArrayList<>();
         }
