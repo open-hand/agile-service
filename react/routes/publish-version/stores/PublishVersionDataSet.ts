@@ -3,13 +3,13 @@ import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { publishVersionApiConfig } from '@/api';
 
 const PublishVersionDataSet = (): DataSetProps => ({
-  autoQuery: false,
+  autoQuery: true,
   // dataKey: 'content',
   paging: true,
   selection: undefined,
-  data: [{
-    name: '0.4', status: '规划中', releaseDate: '2020-01-01', artifactId: 'agile-service', groupId: 'IO.Agile', AppService: 'agile-service', tag: '0.1',
-  }],
+  // data: [{
+  //   name: '0.4', status: '规划中', releaseDate: '2020-01-01', artifactId: 'agile-service', groupId: 'IO.Agile', AppService: 'agile-service', tag: '0.1',
+  // }],
   fields: [
     { name: 'name', type: 'string' as FieldType, label: '版本名称' },
     { name: 'status', type: 'string' as FieldType, label: '状态' },
