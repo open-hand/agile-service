@@ -30,6 +30,7 @@ export interface IStatusCreate {
   type: IStatus['valueCode']
   defaultStatus: boolean
   transferAll: boolean
+  completed: boolean
 }
 export interface IStatusCreateLink {
   issueTypeId: string
@@ -662,10 +663,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
   getStatus(statusId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status_linkages/list`,
-      params: {
-        statusId,
-      },
+      url: `${this.prefix}/status/${statusId}`,
     });
   }
 

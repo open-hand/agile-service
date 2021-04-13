@@ -13,7 +13,7 @@ import { IStatus, IIssueType } from '@/common/types';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import './index.less';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
-import { statusTransformApi, statusTransformApiConfig } from '@/api';
+import { boardApi, statusTransformApi, statusTransformApiConfig } from '@/api';
 import { observer } from 'mobx-react-lite';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 import useIsProgram from '@/hooks/useIsProgram';
@@ -45,14 +45,18 @@ const CreateStatus: React.FC<Props> = ({
     transport: {
       submit: ({ data: dataArray }) => {
         const data = dataArray[0];
-        return statusRecord ? statusTransformApi.updateStatus(statusRecord?.get('id'), {
+        return statusRecord ? boardApi.updateStatus(statusRecord?.get('transformId'), {
           objectVersionNumber: editStatus?.objectVersionNumber,
-          completed: true,
+          completed: data.completed,
+          statusId: editStatus?.id,
+          id: editStatus?.transformId,
+          projectId: getProjectId(),
         }) : statusTransformApiConfig[isOrganization ? 'orgCreateStatus' : 'createStatus'](data.issueTypeIds, {
           name: data.name,
           type: data.valueCode,
           defaultStatus: data.default,
           transferAll: data.transferAll,
+          completed: data.completed,
         });
       },
     },
@@ -112,7 +116,7 @@ const CreateStatus: React.FC<Props> = ({
         required: true,
       },
     ],
-  }), [editStatus?.objectVersionNumber, isOrganization, statusRecord]);
+  }), [editStatus?.id, editStatus?.objectVersionNumber, editStatus?.transformId, isOrganization, statusRecord]);
   useEffect(() => {
     if (selectedIssueType?.length > 0) {
       dataSet.current?.set('issueTypeIds', selectedIssueType);
@@ -152,10 +156,10 @@ const CreateStatus: React.FC<Props> = ({
     if (statusRecord) {
       statusTransformApi.getStatus(statusRecord.get('id')).then((res: any) => {
         setEditStatus(res);
-        dataSet.current?.set('name', statusRecord?.get('name'));
-        dataSet.current?.set('type', statusRecord?.get('valueCode'));
-        dataSet.current?.set('issueTypeIds', statusRecord?.get('issueTypeIds'));
-        dataSet.current?.set('completed', statusRecord?.get('completed'));
+        dataSet.current?.set('name', res.name);
+        dataSet.current?.set('valueCode', res.type);
+        dataSet.current?.set('issueTypeIds', res.issueTypeIds);
+        dataSet.current?.set('completed', res.completed);
       });
     }
   }, [dataSet, statusRecord]);
