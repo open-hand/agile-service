@@ -91,29 +91,36 @@ interface Props {
   }>,
   setReRender: Function,
   checkBoxChangeOk: (data: string[]) => void
+  requires?: string[]
+  systems?:{code: string, title: string}[]
+  fields?: {code: string, title: string, system: boolean}[]
 }
 
-const ImportFields: React.FC<Props> = ({ importFieldsRef, setReRender, checkBoxChangeOk }) => {
+const ImportFields: React.FC<Props> = ({
+  importFieldsRef, setReRender, checkBoxChangeOk, requires, systems, fields: fs,
+}) => {
   const { isInProgram, loading } = useIsInProgram();
   const [updateCount, setUpdateCount] = useState<number>(0);
-  const [requiredFields, setRequiredFields] = useState<string[]>([]);
+  const [requiredFields, setRequiredFields] = useState<string[]>(requires || []);
   const [btnStatus, setBtnStatus] = useState<'ALL' | 'NONE'>();
-  const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>([]);
+  const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>(systems || []);
   const applyType = getApplyType();
   useEffect(() => {
-    if (!loading) {
-      if (applyType === 'program') {
-        setRequiredFields(programImportRequiresFields);
-        setSystemFields(programSystemFields);
-      } else if (isInProgram) {
-        setRequiredFields(subProjectImportRequiredFields);
-        setSystemFields(subProjectSystemFields);
-      } else {
-        setRequiredFields(projectImportRequiresFields);
-        setSystemFields(projectSystemFields);
+    if (!systems && !requires) {
+      if (!loading) {
+        if (applyType === 'program') {
+          setRequiredFields(programImportRequiresFields);
+          setSystemFields(programSystemFields);
+        } else if (isInProgram) {
+          setRequiredFields(subProjectImportRequiredFields);
+          setSystemFields(subProjectSystemFields);
+        } else {
+          setRequiredFields(projectImportRequiresFields);
+          setSystemFields(projectSystemFields);
+        }
       }
     }
-  }, [applyType, isInProgram, loading]);
+  }, [applyType, isInProgram, loading, requires, systems]);
 
   const fieldsOptionDataSet = useMemo(() => new DataSet({
     paging: false,
@@ -150,14 +157,14 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef, setReRender, checkBoxC
 
   useEffect(() => {
     const loadData = async () => {
-      const fields = await fieldApi.getFoundationHeader();
+      const fields = fs || await fieldApi.getFoundationHeader();
       fieldsOptionDataSet.loadData([...(systemFields.map((item) => ({ ...item, system: true }))), ...fields]);
     };
 
-    if (systemFields && systemFields.length) {
+    if ((systemFields && systemFields.length) || fs?.length) {
       loadData();
     }
-  }, [chooseDataSet, fieldsOptionDataSet, systemFields]);
+  }, [fieldsOptionDataSet, fs, systemFields]);
 
   useImperativeHandle(importFieldsRef, () => ({
     fields: (chooseDataSet?.current?.get('fields') || requiredFields).filter((code: string) => !includes(['linkIssue', 'parentIssue'], code)),
@@ -177,6 +184,7 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef, setReRender, checkBoxC
     }
     result && setBtnStatus(nextBtnStatus);
   }
+
   return (
     <div className={styles.importFields}>
       <div className={styles.importFields_title}>
