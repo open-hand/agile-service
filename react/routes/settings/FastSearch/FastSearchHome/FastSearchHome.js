@@ -13,6 +13,7 @@ import EditFilter from './Component/EditFilter';
 import DeleteFilter from './Component/DeleteFilter';
 import FastSearchTable from '../components/table';
 import './FastSearchHome.less';
+import openCreateFastSearch from '../components/create-fast-search';
 
 @observer
 class Search extends Component {
@@ -120,6 +121,10 @@ class Search extends Component {
           <Button funcType="flat" onClick={this.openCreateModal}>
             <Icon type="playlist_add icon" />
             <span>创建快速筛选</span>
+          </Button>
+          <Button funcType="flat" onClick={openCreateFastSearch}>
+            <Icon type="playlist_add icon" />
+            <span>创建快速筛选 new</span>
           </Button>
         </Header>
         <Breadcrumb />
