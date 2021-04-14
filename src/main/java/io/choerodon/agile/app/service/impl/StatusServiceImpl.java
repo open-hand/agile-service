@@ -180,16 +180,17 @@ public class StatusServiceImpl implements StatusService {
         StatusVO statusVO = modelMapper.map(result, StatusVO.class);
         statusVO.setIssueTypeIds(new ArrayList<>(issueTypeIdSet));
         IssueStatusDTO issueStatusDTO = issueStatusMapper.selectByStatusId(projectId, statusId);
-        boolean completed =
-                Optional.ofNullable(issueStatusDTO)
-                        .map(x -> x.getCompleted())
-                        .orElse(false);
-        Long issueStatusId =
-                Optional.ofNullable(issueStatusDTO)
-                        .map(x -> x.getId())
-                        .orElse(null);
+        boolean completed = false;
+        Long issueStatusId = null;
+        Long issueStatusObjectVersionNumber = null;
+        if (issueStatusDTO != null) {
+            completed = issueStatusDTO.getCompleted();
+            issueStatusId = issueStatusDTO.getId();
+            issueStatusObjectVersionNumber = issueStatusDTO.getObjectVersionNumber();
+        }
         statusVO.setIssueStatusId(issueStatusId);
         statusVO.setCompleted(completed);
+        statusVO.setIssueStatusObjectVersionNumberId(issueStatusObjectVersionNumber);
         return statusVO;
     }
 

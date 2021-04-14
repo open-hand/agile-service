@@ -44,6 +44,8 @@ public class StatusVO {
     @Encrypt
     private Long issueStatusId;
 
+    private Long issueStatusObjectVersionNumberId;
+
     public StatusVO() {
     }
 
@@ -52,6 +54,14 @@ public class StatusVO {
         this.description = description;
         this.type = type;
         this.organizationId = organizationId;
+    }
+
+    public Long getIssueStatusObjectVersionNumberId() {
+        return issueStatusObjectVersionNumberId;
+    }
+
+    public void setIssueStatusObjectVersionNumberId(Long issueStatusObjectVersionNumberId) {
+        this.issueStatusObjectVersionNumberId = issueStatusObjectVersionNumberId;
     }
 
     public Long getIssueStatusId() {
