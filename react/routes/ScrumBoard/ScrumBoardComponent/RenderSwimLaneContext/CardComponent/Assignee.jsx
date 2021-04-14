@@ -18,8 +18,9 @@ function Assignee({
           assigneeId ? (
             <UserTag
               showText={false}
-              size={28}
+              size={24}
               style={{ marginLeft: 0 }}
+              avatarStyle={{ fontSize: '13px' }}
               data={{
                 id: assigneeId,
                 tooltip: assigneeName,
@@ -30,8 +31,8 @@ function Assignee({
             />
           ) : (
             <div style={{
-              width: 28,
-              height: 28,
+              width: 24,
+              height: 24,
               flexShrink: 0,
               marginLeft: 8,
               marginBottom: 4,

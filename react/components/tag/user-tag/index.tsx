@@ -15,7 +15,7 @@ interface Props extends HeadTagProps {
   style?: React.CSSProperties
 }
 export const UserUniqueTag: React.FC<{ data: UserTagData, prefixCls?: string } & HeadTagProps> = ({
-  data, size = 18, showText = true, prefixCls = 'c7n-agile-user-tag', style, ...otherProps
+  data, size = 18, showText = true, prefixCls = 'c7n-agile-user-tag', style, avatarStyle, ...otherProps
 }) => {
   const { realName, email, loginName } = data;
   const text = useMemo(() => realName || loginName, [loginName, realName]);
@@ -33,6 +33,7 @@ export const UserUniqueTag: React.FC<{ data: UserTagData, prefixCls?: string } &
         color: '#6473c3',
         borderRadius: '50%',
         backgroundColor: '#c5cbe8',
+        ...avatarStyle,
       }}
       {...otherProps}
     />

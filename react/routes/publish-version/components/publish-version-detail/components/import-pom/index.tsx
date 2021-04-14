@@ -54,9 +54,9 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     paging: false,
     selection: false,
 
-    data: [
-      { artifactId: 'agile-test', version: '0.18.a', versionAlias: undefined },
-    ],
+    // data: [
+    //   { artifactId: 'agile-test', version: '0.18.a', versionAlias: undefined },
+    // ],
     fields: [
       { name: 'artifactId', label: '应用服务' },
       { name: 'version', label: 'version*', required: true },

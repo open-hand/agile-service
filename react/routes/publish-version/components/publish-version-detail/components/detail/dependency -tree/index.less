@@ -11,7 +11,7 @@
     width: 100%;
     min-height: .3rem;
     border-radius: 2px;
-    cursor: pointer;
+    // cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
@@ -45,7 +45,10 @@
     &-btn {
       float: left;
       opacity: 0;
-      margin-left: .1rem;
+      & +& {
+        margin-left: .1rem;
+      }
+
       // visibility: hidden;
       color: rgba(0, 0, 0, 0.87);
       // margin-right: .34rem;
@@ -53,6 +56,9 @@
       &:hover {
         opacity: 1;
       }
+    }
+    .c7n-pro-btn +.c7n-pro-btn {
+      margin: 0;
     }
   }
 }

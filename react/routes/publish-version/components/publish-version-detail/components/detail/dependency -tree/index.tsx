@@ -70,14 +70,30 @@ const DependencyTree: React.FC = () => {
         </span>
 
         {level === 0 ? (
-          <Button
-            icon="delete_forever"
-            className={`${prefixCls}-dependency-tree-item-btn`}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete(item);
-            }}
-          />
+          <>
+            <Button
+              icon="mode_edit"
+              className={`${prefixCls}-dependency-tree-item-btn`}
+              onClick={(e) => {
+                e.stopPropagation();
+                openEditAppVersionModal({
+                  data: item as any,
+                  handleOk: async () => {
+                    store.loadData();
+                    return true;
+                  },
+                });
+              }}
+            />
+            <Button
+              icon="delete_forever"
+              className={`${prefixCls}-dependency-tree-item-btn`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(item);
+              }}
+            />
+          </>
         ) : null}
       </div>
     );
@@ -103,7 +119,7 @@ const DependencyTree: React.FC = () => {
       buttons={
         !disabled ? (
           <div className={`${prefixCls}-dependency-tree-operation`}>
-            {/* <Tooltip placement="topRight" autoAdjustOverflow={false} title="创建发布版本">
+            <Tooltip placement="topRight" autoAdjustOverflow={false} title="创建应用版本">
               <Button
                 style={{ padding: '0 6px' }}
                 color={'blue' as ButtonColor}
@@ -112,7 +128,7 @@ const DependencyTree: React.FC = () => {
                   openCreateAppVersionModal({ handleOk: handleCreate });
                 }}
               />
-            </Tooltip> */}
+            </Tooltip>
             <Tooltip placement="topRight" autoAdjustOverflow={false} title="导入pom文件">
               <Button
                 style={{ padding: '0 6px' }}
@@ -136,7 +152,7 @@ const DependencyTree: React.FC = () => {
                 }}
               />
             </Tooltip>
-            <Tooltip placement="topRight" autoAdjustOverflow={false} title="关联应用版本">
+            {/* <Tooltip placement="topRight" autoAdjustOverflow={false} title="关联应用版本">
               <Button
                 style={{ padding: '0 6px' }}
                 color={'blue' as ButtonColor}
@@ -145,7 +161,7 @@ const DependencyTree: React.FC = () => {
                   openLinkServiceModal({ versionId: detailData.id || detailData.versionId, handleOk: handleLinkAppService });
                 }}
               />
-            </Tooltip>
+            </Tooltip> */}
           </div>
         ) : ''
       }
