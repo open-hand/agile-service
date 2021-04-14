@@ -6,6 +6,7 @@ import io.choerodon.agile.infra.feign.DevopsFeignClient;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.ServiceUnavailableException;
 import io.choerodon.core.utils.FeignClientUtils;
+import org.hzero.core.util.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,9 +34,12 @@ public class DevopsClientOperator {
 
     public List<AppServiceRepVO> listActiveAppService(Long projectId) {
         try {
-            return FeignClientUtils.doRequest(() ->
-                    devopsFeignClient.listActiveAppService(projectId), new TypeReference<Page<AppServiceRepVO>>() {
-            }).getContent();
+            return
+                    ResponseUtils.getResponse(
+                            devopsFeignClient.listActiveAppService(projectId),
+                            new TypeReference<List<AppServiceRepVO>>() {
+                            }
+                    );
         } catch (ServiceUnavailableException e) {
             return new ArrayList<>();
         }
