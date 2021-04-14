@@ -128,7 +128,7 @@ class ImportIssue extends Component {
       if (!modal.okProps || !modal.okProps.loading) {
         modal?.update({ okProps: { loading: true } });
       }
-      if (data.status === 'success') {
+      if (data.status === 'success' || data.status === 'template_error_missing_required_column' || data.status === 'template_error' || data.status === 'empty_data_sheet' || data.status?.startsWith('error_custom_field_header')) {
         modal?.update({ okProps: { loading: false } });
       }
       if (data.status === 'failed') {

@@ -167,9 +167,6 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
       </Tooltip>
     );
   }
-
-  console.log('options:');
-  console.log(options);
   return (
     <Form dataSet={dataSet} {...formProps}>
       <SelectBox name={name} onChange={handleChange}>
