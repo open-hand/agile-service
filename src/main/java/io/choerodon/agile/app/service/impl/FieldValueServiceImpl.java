@@ -301,7 +301,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             issueUpdateVO.setIssueId(v.getIssueId());
             issueUpdateVO.setObjectVersionNumber(v.getObjectVersionNumber());
             handlerEstimatedTime(v, issueUpdateVO, fieldList);
-            boolean doCheck = v.getTypeCode().equals(IssueTypeCode.FEATURE.value()) && !Objects.isNull(issueUpdateVO.getEpicId());
+            boolean doCheck = IssueTypeCode.FEATURE.value().equals(v.getTypeCode()) && fieldList.contains("epicId");
             if (doCheck && agilePluginService.checkFeatureSummaryAndReturn(issueUpdateVO, projectId)) {
                 fieldList.remove("epicId");
                 issueUpdateVO.setEpicId(null);
