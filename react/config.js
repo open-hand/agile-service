@@ -1,11 +1,12 @@
 module.exports = {
   modules: [
     '.',
+    '@choerodon/testmanager',
   ],
   webpackConfig(config) {
     config.module.rules.push({
       test: /\.(js|jsx|ts|tsx)$/,
-      include: /node_modules\\@choerodon\\testmanager\\lib/,
+      include: /\\@choerodon\\testmanager\\lib/,
       loader: 'babel-loader',
       options: {
         plugins: [
