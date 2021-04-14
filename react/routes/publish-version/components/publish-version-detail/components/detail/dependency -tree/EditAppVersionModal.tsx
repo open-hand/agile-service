@@ -50,10 +50,11 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
 
   return (
     <Form dataSet={formDs}>
+      <TextField name="versionAlias" />
+
       <TextField name="artifactId" />
 
       <TextField name="version" />
-      <TextField name="versionAlias" />
 
       <SelectAppService name="serviceCode" onChange={setApplicationId} />
       <SelectGitTags name="tag" applicationId={applicationId} />
@@ -77,7 +78,7 @@ function openCreateAppVersionModal(props: IImportPomFunctionProps) {
   const key = Modal.key();
   Modal.open({
     key,
-    title: '创建发布版本',
+    title: '创建应用版本',
     style: {
       width: MODAL_WIDTH.small,
     },

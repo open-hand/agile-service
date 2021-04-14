@@ -20,7 +20,7 @@ const PublishVersionDataSet = (): DataSetProps => ({
     { name: 'tag', type: 'string' as FieldType, label: '关联tag' },
   ],
   transport: {
-    read: ({ params }) => ({ ...publishVersionApiConfig.loadList(), params }),
+    read: ({ params }) => ({ ...publishVersionApiConfig.loadList(), params, data: { appService: true } }),
   },
 });
 export default PublishVersionDataSet;
