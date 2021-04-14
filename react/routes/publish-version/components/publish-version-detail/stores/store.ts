@@ -102,8 +102,8 @@ class ReleaseDetailStore {
     this.loading = true;
     const versionData: IPublishVersionData = ignoreLoad.includes('detail') ? this.current : await publishVersionApi.load(id);
 
-    const versionList = ignoreLoad.includes('app') ? this.getAppServiceList : await publishVersionApi.loadDependency(id);
-    this.setAppServiceList(versionList.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` })));
+    // const versionList = ignoreLoad.includes('app') ? this.getAppServiceList : await publishVersionApi.loadDependency(id);
+    // this.setAppServiceList(versionList.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` })));
     this.loadDependencyData(id);
     this.setCurrentData({ ...versionData, name: versionData.versionAlias || versionData.version });
     await this.events.load({ versionData });
