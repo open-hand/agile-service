@@ -4,6 +4,7 @@
 
     <resultMap id="IssueTypeDistribute" type="io.choerodon.agile.infra.dto.IssueTypeDistributeDTO">
         <id property="typeCode" column="type_code"/>
+        <id property="name" column="name"/>
         <collection property="issueStatus" autoMapping="true" ofType="io.choerodon.agile.infra.dto.IssueStatus">
             <id property="issueNum" column="issue_num"/>
             <id property="categoryCode" column="category_code"/>
@@ -75,16 +76,17 @@
 
     <select id="queryIssueTypeDistribute" resultMap="IssueTypeDistribute">
         SELECT count(1) AS issue_num,
-            ai.type_code,
+            fit.name,
             ais.status_id
-        FROM agile_issue ai, agile_issue_status ais,agile_issue_sprint_rel aisr
+        FROM agile_issue ai, agile_issue_status ais,agile_issue_sprint_rel aisr, fd_issue_type fit
         WHERE aisr.project_id = #{projectId}
         AND aisr.sprint_id =  #{sprintId}
         AND ai.issue_id = aisr.issue_id
         AND ai.status_id = ais.status_id
         and ais.project_id = #{projectId}
+        AND ai.issue_type_id = fit.id
         AND ai.type_code IN ('story','task','bug','sub_task')
-        GROUP BY ai.type_code, ais.status_id
+        GROUP BY fit.name, ais.status_id
     </select>
 
 </mapper>
