@@ -2,6 +2,7 @@
 import React, { Fragment, useContext, useRef } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
+import { mount, has } from '@choerodon/inject';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
@@ -50,7 +51,6 @@ function IssueBody(props) {
   const workLogShow = store.getWorkLogShow;
   const hasTest = useHasTest();
   const testLinkStoreRef = useRef();
-
   return (
     <section className={`${prefixCls}-body`} id="scroll-area" style={{ position: 'relative' }}>
       <div style={{ paddingRight: 20 }}>
@@ -119,6 +119,7 @@ function IssueBody(props) {
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
           {!outside && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
+          {mount('testmanager:IssueLinkedTestCase')}
         </TabPane>
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'

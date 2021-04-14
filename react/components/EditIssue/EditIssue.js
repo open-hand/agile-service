@@ -88,9 +88,18 @@ function EditIssue() {
       store.setIssue({});
     }
     try {
+      let issue;
+      try {
+        issue = await (programId
+          ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).load(id));
+      } catch (error) {
+        if (error.code === 'error.issue.null') {
+          close();
+          return;
+        }
+      }
       // 1. 加载详情
-      let issue = await (programId
-        ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).load(id));
+
       if (idRef.current !== id) {
         return;
       }
