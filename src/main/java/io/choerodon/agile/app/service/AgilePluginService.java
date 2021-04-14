@@ -428,4 +428,12 @@ public interface AgilePluginService {
      * @param publishVersionId
      */
     void deleteAssociatedPublishVersion(Long publishVersionId);
+
+    /**
+     * 批量修改特性时，判断关联史诗的特性名称是否重复并返回判断标识
+     * @param issueUpdateVO
+     * @param projectId
+     * @return
+     */
+    boolean checkFeatureSummaryAndReturn(IssueUpdateVO issueUpdateVO, Long projectId);
 }
