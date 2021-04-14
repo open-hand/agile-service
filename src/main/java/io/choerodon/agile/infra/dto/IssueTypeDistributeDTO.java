@@ -12,6 +12,8 @@ public class IssueTypeDistributeDTO {
 
     private List<IssueStatus> issueStatus;
 
+    private String name;
+
     public String getTypeCode() {
         return typeCode;
     }
@@ -26,5 +28,13 @@ public class IssueTypeDistributeDTO {
 
     public void setIssueStatus(List<IssueStatus> issueStatus) {
         this.issueStatus = issueStatus;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
