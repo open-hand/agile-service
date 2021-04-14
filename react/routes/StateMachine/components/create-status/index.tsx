@@ -45,11 +45,11 @@ const CreateStatus: React.FC<Props> = ({
     transport: {
       submit: ({ data: dataArray }) => {
         const data = dataArray[0];
-        return statusRecord ? boardApi.updateStatus(statusRecord?.get('transformId'), {
+        return statusRecord ? boardApi.updateStatus(editStatus?.issueStatusId, {
           objectVersionNumber: editStatus?.objectVersionNumber,
           completed: data.completed,
           statusId: editStatus?.id,
-          id: editStatus?.transformId,
+          id: editStatus?.issueStatusId,
           projectId: getProjectId(),
         }) : statusTransformApiConfig[isOrganization ? 'orgCreateStatus' : 'createStatus'](data.issueTypeIds, {
           name: data.name,
