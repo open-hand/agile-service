@@ -4,16 +4,17 @@ import React, {
 import {
   Modal, Form, DataSet, TextField, Select, SelectBox,
 } from 'choerodon-ui/pro';
-import { axios } from '@choerodon/boot';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
-import { getProjectId, getOrganizationId, getIsOrganization } from '@/utils/common';
+import { getProjectId, getIsOrganization } from '@/utils/common';
 import { IStatus, IIssueType } from '@/common/types';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import './index.less';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
-import { boardApi, statusTransformApi, statusTransformApiConfig } from '@/api';
+import {
+  boardApiConfig, statusTransformApi, statusTransformApiConfig,
+} from '@/api';
 import { observer } from 'mobx-react-lite';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 import useIsProgram from '@/hooks/useIsProgram';
@@ -45,8 +46,8 @@ const CreateStatus: React.FC<Props> = ({
     transport: {
       submit: ({ data: dataArray }) => {
         const data = dataArray[0];
-        return statusRecord ? boardApi.updateStatus(editStatus?.issueStatusId, {
-          objectVersionNumber: editStatus?.objectVersionNumber,
+        return statusRecord ? boardApiConfig.updateStatus(editStatus?.issueStatusId, {
+          objectVersionNumber: editStatus?.issueStatusObjectVersionNumberId,
           completed: data.completed,
           statusId: editStatus?.id,
           id: editStatus?.issueStatusId,
@@ -116,7 +117,7 @@ const CreateStatus: React.FC<Props> = ({
         required: true,
       },
     ],
-  }), [editStatus?.id, editStatus?.objectVersionNumber, editStatus?.transformId, isOrganization, statusRecord]);
+  }), [editStatus?.id, editStatus?.issueStatusId, editStatus?.issueStatusObjectVersionNumberId, isOrganization, statusRecord]);
   useEffect(() => {
     if (selectedIssueType?.length > 0) {
       dataSet.current?.set('issueTypeIds', selectedIssueType);
