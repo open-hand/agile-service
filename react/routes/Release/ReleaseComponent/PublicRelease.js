@@ -192,4 +192,4 @@ class PublicRelease extends Component {
   }
 }
 
-export default Form.create()(withRouter(PublicRelease));
+export default Form.create()((PublicRelease));
