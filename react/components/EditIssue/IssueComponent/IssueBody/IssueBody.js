@@ -2,7 +2,7 @@
 import React, { Fragment, useContext, useRef } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
-import { mount, has } from '@choerodon/inject';
+import { mount } from '@choerodon/inject';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
@@ -32,8 +32,6 @@ import './IssueBody.less';
 import IssueUI from './Issue-UI';
 
 const { TabPane } = Tabs;
-// eslint-disable-next-line no-undef
-const TestLink = C7NTryImport('@choerodon/testmanager/lib/components/test-case-link-list', Fragment);
 
 function IssueBody(props) {
   const {
@@ -115,11 +113,14 @@ function IssueBody(props) {
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
             ? <SubBug {...props} /> : ''}
           {hasTest && issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
-            ? <TestLink {...props} testLinkStoreRef={testLinkStoreRef} noCreateLink /> : ''}
+            ? mount('testmanager:IssueLinkedTestCase', {
+              testLinkStoreRef,
+              noCreateLink: true,
+              ...props,
+            }) : ''}
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
           {!outside && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
-          {mount('testmanager:IssueLinkedTestCase')}
         </TabPane>
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
