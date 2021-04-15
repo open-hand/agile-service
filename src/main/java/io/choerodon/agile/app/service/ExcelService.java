@@ -71,4 +71,12 @@ public interface ExcelService {
      * @param requestAttributes 请求头
      */
     void batchImportObjectSchemeField(Long organizationId, Long projectId, Workbook workbookFromMultipartFile, RequestAttributes requestAttributes);
+
+    /**
+     * 导出发布版本
+     *
+     * @param projectId
+     * @param publishVersionId
+     */
+    void exportPublishVersion(Long projectId, Long publishVersionId);
 }

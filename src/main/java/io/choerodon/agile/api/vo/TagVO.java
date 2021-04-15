@@ -1,7 +1,11 @@
 package io.choerodon.agile.api.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.choerodon.agile.infra.dto.PublishVersionDTO;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -18,6 +22,17 @@ public class TagVO {
     private Long projectId;
 
     private String appServiceName;
+
+    @JsonIgnore
+    private List<PublishVersionDTO> publishVersionList;
+
+    public List<PublishVersionDTO> getPublishVersionList() {
+        return publishVersionList;
+    }
+
+    public void setPublishVersionList(List<PublishVersionDTO> publishVersionList) {
+        this.publishVersionList = publishVersionList;
+    }
 
     public String getAppServiceCode() {
         return appServiceCode;
