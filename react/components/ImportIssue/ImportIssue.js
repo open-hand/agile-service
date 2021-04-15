@@ -45,11 +45,10 @@ class ImportIssue extends Component {
   };
 
   loadLatestImport = () => {
-    issueApi.loadLastImportOrExport('upload_file').then((res) => {
+    issueApi.loadLastImportOrExport(this.props.lastAction || 'upload_file').then((res) => {
       if (res) {
         this.setState({
           latestInfo: res,
-
         });
       }
     });
@@ -151,7 +150,7 @@ class ImportIssue extends Component {
       }
       if (data.status === 'success') {
         modal?.update({ okProps: { loading: false } });
-        if (this.props.onSuccess) {
+        if (this.props.onSuccess && data?.successCount) {
           this.props.onSuccess();
         }
       }
@@ -348,8 +347,9 @@ class ImportIssue extends Component {
       uploading, latestInfo, wsData, templateIsExist,
     } = this.state;
     const {
-      action, requires, systems, fields,
+      action, requires, systems, fields, messageKey,
     } = this.props;
+
     const {
       successCount, failCount, fileUrl, id,
     } = latestInfo;
@@ -456,7 +456,7 @@ class ImportIssue extends Component {
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         />
         <WSHandler
-          messageKey={getApplyType() === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`}
+          messageKey={messageKey || (getApplyType() === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`)}
           onMessage={this.handleMessage}
         >
           {this.renderProgress()}

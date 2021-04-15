@@ -350,7 +350,7 @@ class IssueApi extends Api<IssueApi> {
  * 查询最新的导入导出记录
  * @returns {V|*}
  */
-  loadLastImportOrExport(action: 'upload_file' | 'download_file' | 'upload_file_customer_field'):Promise<IImportOrExportRecord> {
+  loadLastImportOrExport(action: 'upload_file' | 'download_file' | 'upload_file_customer_field' | 'upload_file_backlog'):Promise<IImportOrExportRecord> {
     return axios({
       url: `${this.prefix}/excel/latest`,
       method: 'get',
