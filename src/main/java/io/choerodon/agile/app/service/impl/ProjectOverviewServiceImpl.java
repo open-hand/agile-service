@@ -99,6 +99,28 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         return sprintStatisticsVO;
     }
 
+    @Override
+    public List<OneJobVO> selectOneJobsBySprint(Long projectId, Long sprintId) {
+        SprintDTO sprint = safeSelectSprint(projectId,sprintId);
+        Assert.notNull(sprint.getStartDate(), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(sprint.getEndDate(), BaseConstants.ErrorCode.DATA_INVALID);
+        if (Objects.isNull(sprint.getActualEndDate())){
+            sprint.setActualEndDate(sprint.getEndDate());
+        }
+        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
+        if (CollectionUtils.isEmpty(issueList)){
+            return Collections.emptyList();
+        }
+        List<WorkLogDTO> workLogList = workLogMapper.selectWorkTimeBySpring(projectId, sprintId,
+                sprint.getStartDate(), sprint.getActualEndDate());
+        Set<Long> issueIdList = issueList.stream().map(IssueOverviewVO::getIssueId).collect(Collectors.toSet());
+        List<DataLogDTO> resolutionLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
+                issueIdList, "resolution", sprint.getStartDate(), sprint.getActualEndDate());
+        List<DataLogDTO> assigneeLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
+                issueIdList, "assignee", sprint.getStartDate(), sprint.getActualEndDate());
+        return issueAssembler.issueToOneJob(sprint, issueList, workLogList, resolutionLogList, assigneeLogList);
+    }
+
     private List<IssueOverviewVO> selectIssueBysprint(Long projectId, Long sprintId) {
         Set<String> statusSet = new HashSet<>();
         statusSet.add(InitIssueType.BUG.getTypeCode());
