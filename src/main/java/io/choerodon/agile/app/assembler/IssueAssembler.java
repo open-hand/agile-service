@@ -19,6 +19,7 @@ import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
 
+import io.choerodon.agile.infra.utils.DateUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -791,7 +792,9 @@ public class IssueAssembler extends AbstractAssembler {
         if (startDate.after(endDate)){
             throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
         }
-        while (startDate.before(endDate) || startDate.equals(endDate)){
+
+        int days = DateUtil.differentDays(startDate, endDate);
+        for (int i= 0; i <= days; i++){
             timeUserLine.put(startDate, new HashSet<>(userSet));
             startDate = DateUtils.addDays(startDate, 1);
         }
