@@ -164,7 +164,7 @@ const EditTemplate: React.FC<Props> = ({
     const data = {
       ...template,
       name: templateName,
-      templateJson: action === 'agile_import_issue' || action === 'program_import_feature' ? JSON.stringify(fieldCodesObj) : JSON.stringify(newFieldCodesArr),
+      templateJson: action === 'agile_import_issue' || action === 'program_import_feature' || action === 'program_import_backlog' || action === 'agile_import_backlog' ? JSON.stringify(fieldCodesObj) : JSON.stringify(newFieldCodesArr),
     };
     const newTemplate: ITemplate = await templateApi.edit(template.id, data);
     onEdit(newTemplate);
