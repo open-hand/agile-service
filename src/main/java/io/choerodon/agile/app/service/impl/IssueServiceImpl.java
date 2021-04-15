@@ -320,10 +320,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public void afterCreateSubIssue(Long issueId, IssueConvertDTO subIssueConvertDTO, IssueSubCreateVO issueSubCreateVO, ProjectInfoDTO projectInfoDTO) {
         IssueCreateVO issueCreateVO = new IssueCreateVO();
-        issueCreateVO.setLabelIssueRelVOList(issueCreateVO.getLabelIssueRelVOList());
-        issueCreateVO.setComponentIssueRelVOList(issueCreateVO.getComponentIssueRelVOList());
-        issueCreateVO.setVersionIssueRelVOList(issueCreateVO.getVersionIssueRelVOList());
-        issueCreateVO.setIssueLinkCreateVOList(issueCreateVO.getIssueLinkCreateVOList());
+        issueCreateVO.setLabelIssueRelVOList(issueSubCreateVO.getLabelIssueRelVOList());
+        issueCreateVO.setComponentIssueRelVOList(issueSubCreateVO.getComponentIssueRelVOList());
+        issueCreateVO.setVersionIssueRelVOList(issueSubCreateVO.getVersionIssueRelVOList());
+        issueCreateVO.setIssueLinkCreateVOList(issueSubCreateVO.getIssueLinkCreateVOList());
         handleCreateIssueRearAction(subIssueConvertDTO, issueId, projectInfoDTO, issueCreateVO);
     }
 
