@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.choerodon.agile.infra.mapper.TagIssueRelMapper">
 
-    <select id="selectByTagIdsAndIssueType" resultType="java.lang.Long">
+    <select id="selectByTagAndIssueType" resultType="java.lang.Long">
         select atir.issue_id
         from agile_tag_issue_rel atir
         join agile_issue ai on atir.issue_id = ai.issue_id
@@ -17,5 +17,186 @@
             #{tag.tagName}
         </foreach>
         and ai.type_code = #{issueTypeCode}
+    </select>
+
+    <resultMap id="tagWithIssue" type="io.choerodon.agile.api.vo.TagWithIssueVO">
+        <id property="projectId" column="project_id"/>
+        <id property="appServiceCode" column="app_service_code"/>
+        <id property="tagName" column="tag_name"/>
+        <collection property="issues" ofType="io.choerodon.agile.api.vo.business.IssueVO">
+            <id property="issueId" column="issue_id"/>
+            <result property="issueNum" column="issue_num"/>
+            <result property="summary" column="summary"/>
+            <result property="assigneeId" column="assignee_id"/>
+            <result property="featureName" column="feature_name"/>
+            <result property="issueEpicName" column="issue_epic_name"/>
+            <association property="statusMapVO" javaType="io.choerodon.agile.api.vo.StatusVO">
+                <id property="id" column="status_id"/>
+                <result property="name" column="status_name"/>
+            </association>
+            <association property="priorityVO" javaType="io.choerodon.agile.api.vo.PriorityVO">
+                <id property="id" column="priority_id"/>
+                <result property="name" column="priority_name"/>
+            </association>
+            <collection property="closeSprint" ofType="io.choerodon.agile.api.vo.SprintNameVO">
+                <id property="sprintId" column="sprint_id"/>
+                <result property="sprintName" column="sprint_name"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="selectCompletedStoryByTags" resultMap="tagWithIssue">
+        select
+        atir.project_id,
+        atir.app_service_code,
+        atir.tag_name,
+        ai.issue_id,
+        concat_ws( '-', api.project_code, ai.issue_num) AS issue_num,
+        ai.summary,
+        ai.assignee_id,
+        ai.status_id,
+        fs.name as status_name,
+        fp.id as priority_id,
+        fp.name as priority_name,
+        sprint.sprint_id,
+        sprint.sprint_name
+        <if test="withFeature == true">
+            ,
+            ai1.summary as feature_name
+        </if>
+        <if test="withFeature == false">
+            ,
+            ai2.summary as issue_epic_name
+        </if>
+        from agile_tag_issue_rel atir
+        left join agile_issue ai on (
+            ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            and ai.issue_id = atir.issue_id
+            and ai.type_code = 'story'
+            and ai.status_id in (
+                select status_id
+                from agile_issue_status
+                where project_id in
+                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                </foreach>
+                and is_completed = 1
+            )
+        )
+        left join agile_project_info api on ai.project_id = api.project_id
+        left join fd_status fs on ai.status_id = fs.id
+        left join agile_issue_sprint_rel aisr on (ai.project_id = aisr.project_id and ai.issue_id = aisr.issue_id)
+        left join agile_sprint sprint on (ai.project_id = sprint.project_id and aisr.sprint_id = sprint.sprint_id)
+        left join fd_priority fp on (fp.organization_id = #{organizationId} and ai.priority_id = fp.id)
+        <if test="withFeature == true">
+            left join agile_issue ai1 on ai.feature_id = ai1.issue_id
+        </if>
+        <if test="withFeature == false">
+            left join agile_issue ai2 on ai.epic_id = ai2.issue_id
+        </if>
+        where atir.organization_id = #{organizationId}
+        and atir.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and atir.app_service_code in
+        <foreach collection="tags" item="tag" open="(" separator="," close=")">
+            #{tag.appServiceCode}
+        </foreach>
+        and atir.tag_name in
+        <foreach collection="tags" item="tag" open="(" separator="," close=")">
+            #{tag.tagName}
+        </foreach>
+        and concat_ws( '-', api.project_code, ai.issue_num) != ''
+    </select>
+
+
+    <resultMap id="tagWithBugOrTask" type="io.choerodon.agile.api.vo.TagWithIssueVO">
+        <id property="projectId" column="project_id"/>
+        <id property="appServiceCode" column="app_service_code"/>
+        <id property="tagName" column="tag_name"/>
+        <collection property="issues" ofType="io.choerodon.agile.api.vo.business.IssueVO">
+            <id property="issueId" column="issue_id"/>
+            <result property="issueNum" column="issue_num"/>
+            <result property="summary" column="summary"/>
+            <result property="assigneeId" column="assignee_id"/>
+            <association property="statusMapVO" javaType="io.choerodon.agile.api.vo.StatusVO">
+                <id property="id" column="status_id"/>
+                <result property="name" column="status_name"/>
+            </association>
+            <association property="priorityVO" javaType="io.choerodon.agile.api.vo.PriorityVO">
+                <id property="id" column="priority_id"/>
+                <result property="name" column="priority_name"/>
+            </association>
+            <collection property="versionIssueRelVOList" ofType="io.choerodon.agile.api.vo.VersionIssueRelVO">
+                <id property="versionId" column="version_id"/>
+                <result property="name" column="version_name"/>
+            </collection>
+            <collection property="closeSprint" ofType="io.choerodon.agile.api.vo.SprintNameVO">
+                <id property="sprintId" column="sprint_id"/>
+                <result property="sprintName" column="sprint_name"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="selectCompletedBugOrTaskByTags" resultMap="tagWithBugOrTask">
+        select
+        atir.project_id,
+        atir.app_service_code,
+        atir.tag_name,
+        ai.issue_id,
+        concat_ws( '-', api.project_code, ai.issue_num ) AS issue_num,
+        ai.summary,
+        ai.assignee_id,
+        ai.status_id,
+        fs.name as status_name,
+        ai.priority_id,
+        fp.name as priority_name,
+        sprint.sprint_id,
+        sprint.sprint_name,
+        apv.version_id as version_id,
+        apv.name as version_name
+        from agile_tag_issue_rel atir
+        left join agile_issue ai on (
+        ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.issue_id = atir.issue_id
+        and ai.type_code = #{issueTypeCode}
+        and ai.status_id in (
+        select status_id
+        from agile_issue_status
+        where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and is_completed = 1
+        )
+        )
+        left join agile_project_info api on ai.project_id = api.project_id
+        left join fd_status fs on ai.status_id = fs.id
+        left join fd_priority fp on (fp.organization_id = #{organizationId} and ai.priority_id = fp.id)
+        left join agile_version_issue_rel avir on (ai.project_id = avir.project_id and avir.relation_type = 'influence' and ai.issue_id = avir.issue_id)
+        left join agile_product_version apv on (ai.project_id = apv.project_id and avir.version_id = apv.version_id)
+        left join agile_issue_sprint_rel aisr on (ai.project_id = aisr.project_id and ai.issue_id = aisr.issue_id)
+        left join agile_sprint sprint on (ai.project_id = sprint.project_id and aisr.sprint_id = sprint.sprint_id)
+        where atir.organization_id = #{organizationId}
+        and atir.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and atir.app_service_code in
+        <foreach collection="tags" item="tag" open="(" separator="," close=")">
+            #{tag.appServiceCode}
+        </foreach>
+        and atir.tag_name in
+        <foreach collection="tags" item="tag" open="(" separator="," close=")">
+            #{tag.tagName}
+        </foreach>
+        and concat_ws( '-', api.project_code, ai.issue_num) != ''
     </select>
 </mapper>

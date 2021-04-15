@@ -6,9 +6,9 @@ import java.util.List;
 
 /**
  * @author superlee
- * @since 2021-03-15
+ * @since 2021-04-14
  */
-public class PublishVersionWithIssueVO extends PublishVersionVO {
+public class TagWithIssueVO extends TagVO {
 
     private List<IssueVO> issues;
 
