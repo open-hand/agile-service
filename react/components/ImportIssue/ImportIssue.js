@@ -75,6 +75,14 @@ class ImportIssue extends Component {
     const fields = this.importFieldsRef.current?.fields || [];
     importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system));
     importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system));
+    if (this.props.downloadTemplateRequest) {
+      this.props.downloadTemplateRequest(importFieldsData).then((excel) => {
+        const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const fileName = `${this.props.name || '问题'}导入模板.xlsx`;
+        FileSaver.saveAs(blob, fileName);
+      });
+      return;
+    }
     issueApi.downloadTemplateForImport(importFieldsData).then((excel) => {
       const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const fileName = `${this.props.name || '问题'}导入模板.xlsx`;
@@ -103,16 +111,29 @@ class ImportIssue extends Component {
     this.setState({
       uploading: true,
     });
-    issueApi.import(formData).then((res) => {
-      this.setState({
-        uploading: false,
+    if (this.props.importRequest) {
+      this.props.importRequest(formData).then((res) => {
+        this.setState({
+          uploading: false,
+        });
+      }).catch((e) => {
+        this.setState({
+          uploading: false,
+        });
+        Choerodon.prompt('网络错误');
       });
-    }).catch((e) => {
-      this.setState({
-        uploading: false,
+    } else {
+      issueApi.import(formData).then((res) => {
+        this.setState({
+          uploading: false,
+        });
+      }).catch((e) => {
+        this.setState({
+          uploading: false,
+        });
+        Choerodon.prompt('网络错误');
       });
-      Choerodon.prompt('网络错误');
-    });
+    }
   };
 
   handleMessage = (message) => {
@@ -130,6 +151,9 @@ class ImportIssue extends Component {
       }
       if (data.status === 'success') {
         modal?.update({ okProps: { loading: false } });
+        if (this.props.onSuccess) {
+          this.props.onSuccess();
+        }
       }
       if (data.status === 'failed') {
         if (data.fileUrl) {
