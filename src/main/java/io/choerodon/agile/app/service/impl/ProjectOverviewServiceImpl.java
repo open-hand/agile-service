@@ -104,9 +104,13 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         SprintDTO sprint = safeSelectSprint(projectId,sprintId);
         Assert.notNull(sprint.getStartDate(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(sprint.getEndDate(), BaseConstants.ErrorCode.DATA_INVALID);
-        if (Objects.isNull(sprint.getActualEndDate())){
+        if(!Objects.equals("closed", sprint.getStatusCode())){
+            sprint.setActualEndDate(new Date());
+        } else {
+            Assert.notNull(sprint.getActualEndDate(), BaseConstants.ErrorCode.DATA_INVALID);
             sprint.setActualEndDate(sprint.getEndDate());
         }
+
         List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
         if (CollectionUtils.isEmpty(issueList)){
             return Collections.emptyList();
