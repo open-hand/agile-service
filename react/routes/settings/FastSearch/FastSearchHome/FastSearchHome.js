@@ -13,7 +13,7 @@ import EditFilter from './Component/EditFilter';
 import DeleteFilter from './Component/DeleteFilter';
 import FastSearchTable from '../components/table';
 import './FastSearchHome.less';
-import openCreateFastSearch from '../components/create-fast-search';
+import { openCreateFastSearch, openEditFastSearch } from '../components/create-edit-fast-search';
 
 @observer
 class Search extends Component {
@@ -102,6 +102,7 @@ class Search extends Component {
       editFilterShow: true,
       currentFilterId: record.get('filterId'),
     });
+    // openEditFastSearch(record.get('filterId'));
   }
 
   render() {

@@ -31,8 +31,8 @@ const singleList = ['radio', 'single'];
 const userMaps = new Map<string, User>();
 const stacks = new Array<string>();
 const finishStack = new Array<string>();
-export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, otherComponentProps: T | Partial<DatePickerProps>, { dataSet }: {
-  dataSet: DataSet,
+export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, otherComponentProps: T | Partial<DatePickerProps> | any, { dataSet }: {
+  dataSet: DataSet, useSelectUserForceRefreshHook?: [any, React.Dispatch<React.SetStateAction<any>>]
 }) {
   const {
     code, fieldType, name, fieldOptions, value, id,
@@ -166,6 +166,8 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             name={code}
             label={name}
             style={{ width: '100%' }}
+            // @ts-ignore
+            {...otherComponentProps}
           // step={isCheck ? 0.1 : 1}
           />
         </div>
@@ -177,6 +179,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           maxLength={100}
           label={name}
           style={{ width: '100%' }}
+          {...otherComponentProps}
         />
       );
     case 'text':
@@ -187,6 +190,8 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           maxLength={255}
           label={name}
           style={{ width: '100%' }}
+          // @ts-ignore
+          {...otherComponentProps}
         />
       );
     case 'url':
@@ -194,6 +199,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         <UrlField
           label={name}
           name={code}
+          {...otherComponentProps}
         />
       );
     case 'radio': case 'single': case 'checkbox': case 'multiple':
@@ -203,6 +209,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           label={name}
           style={{ width: '100%' }}
           multiple
+          {...otherComponentProps}
         >
           {fieldOptions
             && fieldOptions.length > 0
@@ -249,6 +256,14 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       );
     }
     default:
-      return null;
+      return (
+        <TextField
+          name={code}
+          maxLength={100}
+          label={name}
+          style={{ width: '100%' }}
+          {...otherComponentProps}
+        />
+      );
   }
 }
