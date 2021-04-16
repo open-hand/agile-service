@@ -35,7 +35,7 @@ const CreateStatus: React.FC<Props> = ({
   const isOrganization = getIsOrganization();
   const [type, setType] = useState<IStatus['valueCode'] | null>(null);
   const [editStatus, setEditStatus] = useState<any>(null);
-  const { data: issueTypes } = useIssueTypes({ hasTemplate: true, excludeTypes: ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] });
+  const { data: issueTypes } = useIssueTypes({ hasTemplate: true, excludeTypes: ['feature', 'issue_auto_test', 'issue_test', ...(isOrganization ? ['issue_epic'] : [])] });
   // 记录哪些类型下已经有同名状态
   const [hasStatusIssueTypes, setHasStatusIssueTypes] = useState<IIssueType[]>([]);
   const hasStatusIssueTypesRef = useRef<IIssueType[]>([]);
