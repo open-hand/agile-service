@@ -3,12 +3,13 @@ import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
+import { Divider } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApiConfig, ITotalStatus } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
-import { Divider } from 'choerodon-ui';
-import { TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
+
+import { TableAutoHeightType, ColumnAlign } from 'choerodon-ui/pro/lib/table/enum';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
 import openDeleteStatus from './DeleteStatus';
@@ -111,7 +112,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
               />
             )}
           />
-          <Column name="completed" renderer={({ value }) => <span className={styles.gray}>{value ? '是' : '否'}</span>} />
+          <Column name="completed" align={'left' as ColumnAlign} renderer={({ value }) => <span className={styles.gray}>{value ? '是' : '否'}</span>} />
           <Column name="usage" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
           <Column
             name="operate"
