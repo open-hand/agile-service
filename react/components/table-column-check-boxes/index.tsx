@@ -2,7 +2,7 @@ import React, {
   useMemo, useState, useEffect, useCallback,
 } from 'react';
 import {
-  DataSet, Form, SelectBox, Tooltip,
+  DataSet, Form, SelectBox, Tooltip, TextField,
 } from 'choerodon-ui/pro/lib';
 import { set, uniq } from 'lodash';
 import { observer } from 'mobx-react-lite';
@@ -141,6 +141,8 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
 const TableColumnCheckBoxes: React.FC<Props> = ({
   dataSet: propsDataSet, name = 'exportCodes', options, defaultValue, formProps = {}, handleChange,
 }) => {
+  const [filter, setFilter] = useState<string>('');
+
   const dataSet = useMemo(() => {
     if (propsDataSet) {
       set(formProps, 'dataSet', propsDataSet);
@@ -168,13 +170,23 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
     );
   }
 
-  console.log('options:');
-  console.log(options);
+  const handleSearch = useCallback((value) => {
+    setFilter(value);
+  }, []);
+
+  const filteredOptions = options.filter((option) => option.label.indexOf(filter || '') > -1);
   return (
     <Form dataSet={dataSet} {...formProps}>
-      <SelectBox name={name} onChange={handleChange}>
-        {options.map((option) => <SelectBox.Option value={option.value} {...option.optionConfig}>{renderOptionLabel(option.label)}</SelectBox.Option>)}
-      </SelectBox>
+      <TextField placeholder="请输入搜索内容" style={{ height: 34 }} onChange={handleSearch} clearButton />
+      {
+        filter && !filteredOptions.length ? (
+          <div style={{ color: 'rgba(0, 0, 0, 0.65)' }}>暂无搜索结果</div>
+        ) : (
+          <SelectBox name={name} onChange={handleChange}>
+            {filteredOptions.map((option) => <SelectBox.Option value={option.value} {...option.optionConfig}>{renderOptionLabel(option.label)}</SelectBox.Option>)}
+          </SelectBox>
+        )
+      }
     </Form>
   );
 };

@@ -1,10 +1,10 @@
 import React, {
-  useMemo, useEffect, useImperativeHandle, useState,
+  useMemo, useEffect, useImperativeHandle, useState, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  SelectBox, CheckBox, DataSet, Button,
-} from 'choerodon-ui/pro';
+  SelectBox, DataSet, Button, TextField,
+} from 'choerodon-ui/pro/lib';
 import { fieldApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { includes } from 'lodash';
@@ -104,6 +104,7 @@ const ImportFields: React.FC<Props> = ({
   const [requiredFields, setRequiredFields] = useState<string[]>(requires || []);
   const [btnStatus, setBtnStatus] = useState<'ALL' | 'NONE'>();
   const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>(systems || []);
+  const [allFields, setAllFields] = useState<{code: string, title: string, system: boolean}[]>([]);
   const applyType = getApplyType();
   useEffect(() => {
     if (!systems && !requires) {
@@ -158,7 +159,9 @@ const ImportFields: React.FC<Props> = ({
   useEffect(() => {
     const loadData = async () => {
       const fields = fs || await fieldApi.getFoundationHeader();
-      fieldsOptionDataSet.loadData([...(systemFields.map((item) => ({ ...item, system: true }))), ...fields]);
+      const allFs = [...(systemFields.map((item) => ({ ...item, system: true }))), ...fields];
+      setAllFields(allFs);
+      fieldsOptionDataSet.loadData(allFs);
     };
 
     if ((systemFields && systemFields.length) || fs?.length) {
@@ -184,6 +187,10 @@ const ImportFields: React.FC<Props> = ({
     }
     result && setBtnStatus(nextBtnStatus);
   }
+  const handleSearch = useCallback((value) => {
+    // @ts-ignore
+    fieldsOptionDataSet.loadData(allFields.filter((item) => item.title.indexOf(value || '') > -1));
+  }, [allFields, fieldsOptionDataSet]);
 
   return (
     <div className={styles.importFields}>
@@ -192,6 +199,12 @@ const ImportFields: React.FC<Props> = ({
         <Button className={styles.importFields_btn} onClick={handleClick}>{btnStatus !== 'NONE' ? '全选' : '全不选'}</Button>
       </div>
       <div className={styles.importFields_content}>
+        <TextField
+          placeholder="请输入搜索内容"
+          style={{ height: 34, width: '100%', marginBottom: 8 }}
+          onChange={handleSearch}
+          clearButton
+        />
         <SelectBox
           dataSet={chooseDataSet}
           name="fields"

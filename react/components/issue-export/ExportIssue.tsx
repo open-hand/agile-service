@@ -6,7 +6,6 @@ import { observer } from 'mobx-react-lite';
 import {
   find, findIndex, isEqual, map, uniq,
 } from 'lodash';
-import { Divider } from 'choerodon-ui';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
 import IssueFilterForm, { useIssueFilterForm } from '@/components/issue-filter-form';
@@ -45,6 +44,7 @@ const FormPart: React.FC<FormPartProps> = memo((props) => {
   return (
     <div className={classnames(`${prefixCls}-form`, props.className)}>
       <div className={`${prefixCls}-form-title`}>
+        <div className={`${prefixCls}-form-block`} />
         <span>{title}</span>
         {!!btnOnClick && (
           <Button
@@ -251,7 +251,6 @@ const ExportIssue: React.FC = () => {
           </div>
         </IssueFilterForm>
       </FormPart>
-      <Divider className={`${prefixCls}-horizontal`} />
       {
         action && (
           <>
@@ -266,7 +265,6 @@ const ExportIssue: React.FC = () => {
                 reverseTransformExportFieldCodes={store.reverseTransformExportFieldCodes}
               />
             </FormPart>
-            {/* <Divider className={`${prefixCls}-horizontal`} /> */}
           </>
         )
       }
@@ -274,20 +272,6 @@ const ExportIssue: React.FC = () => {
         <TableColumnCheckBoxes {...checkBoxComponentProps} />
         {renderExport()}
       </FormPart>
-      <WsProgress
-        messageKey={`agile-export-issue-${getProjectId()}`}
-        onFinish={handleFinish}
-        onStart={() => {
-          modal?.update({ okProps: { loading: true } });
-          store.setExportBtnHidden(true);
-        }}
-        autoDownload={{ fileName: `${getProjectName()}.xlsx` }}
-        downloadInfo={store.downloadInfo.id ? {
-          url: store.downloadInfo.fileUrl!,
-          lastUpdateDate: store.downloadInfo.lastUpdateDate!,
-          createDate: store.downloadInfo.creationDate!,
-        } : undefined}
-      />
       <div className={`${prefixCls}-btns`}>
         {
           !templateIsExist && (
@@ -306,6 +290,21 @@ const ExportIssue: React.FC = () => {
           )
         }
       </div>
+      <WsProgress
+        className={`${prefixCls}-wsProgress-area`}
+        messageKey={`agile-export-issue-${getProjectId()}`}
+        onFinish={handleFinish}
+        onStart={() => {
+          modal?.update({ okProps: { loading: true } });
+          store.setExportBtnHidden(true);
+        }}
+        autoDownload={{ fileName: `${getProjectName()}.xlsx` }}
+        downloadInfo={store.downloadInfo.id ? {
+          url: store.downloadInfo.fileUrl!,
+          lastUpdateDate: store.downloadInfo.lastUpdateDate!,
+          createDate: store.downloadInfo.creationDate!,
+        } : undefined}
+      />
     </div>
   );
 };
