@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import {
-  DataSet, Form, Select, Button, Row, Col,
+  DataSet, Form, Select, Button, Row, Col, Tooltip,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -21,6 +21,7 @@ function FastSearchFormItemOrigin({ record, onDelete }: FastSearchFormItemProps)
     }
     return spanList;
   }, [record.index]);
+  const renderOption = useCallback(({ text }: any) => <Tooltip title={text}>{text}</Tooltip>, []);
 
   return (
     <div className={styles.form_item}>
@@ -35,12 +36,12 @@ function FastSearchFormItemOrigin({ record, onDelete }: FastSearchFormItemProps)
             </Col>
           )}
           <Col span={colSpanList[1]} style={{ paddingRight: '.1rem' }}>
-            <Select name="attribute" style={{ width: '100%' }} clearButton={false} searchable searchMatcher={({ record: attributeRecord, text }) => String(attributeRecord.get('name')).toLocaleLowerCase().indexOf(text.toLocaleLowerCase()) !== -1} />
+            <Select name="attribute" optionRenderer={renderOption} style={{ width: '100%' }} clearButton={false} searchable searchMatcher={({ record: attributeRecord, text }) => String(attributeRecord.get('name')).toLocaleLowerCase().indexOf(text.toLocaleLowerCase()) !== -1} />
           </Col>
-          <Col span={colSpanList[2]} style={{ paddingRight: '.1rem' }}>
-            <Select name="relation" clearButton={false} />
+          <Col span={colSpanList[2]} style={{ paddingRight: '.05rem' }}>
+            <Select name="relation" clearButton={false} dropdownMatchSelectWidth={false} dropdownMenuStyle={{ minWidth: '1rem' }} />
           </Col>
-          <Col span={colSpanList[3]}>
+          <Col span={colSpanList[3]} style={{ paddingLeft: '.05rem' }}>
             <FastSearchFormItemField name="value" record={record} />
           </Col>
         </Row>
@@ -53,7 +54,6 @@ const FastSearchFormItem = memo(FastSearchFormItemOrigin);
 
 function FastSearchForm({ dataSet }: { dataSet: DataSet }) {
   const handleDelete = useCallback((record: Record) => { dataSet.delete(record, false); }, [dataSet]);
-  // const handleCreate = useCallback(() => { dataSet.create(); }, [dataSet]);
 
   return (
     <div className={styles.form}>

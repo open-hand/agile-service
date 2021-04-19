@@ -1,9 +1,7 @@
 import { omit, pick, merge } from 'lodash';
 // @ts-ignore
 import JSONbig from 'json-bigint';
-import {
-  DataSet, Form, TextField,
-} from 'choerodon-ui/pro';
+import { DataSet } from 'choerodon-ui/pro';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { getProjectId } from '@/utils/common';
 import moment from 'moment';
@@ -42,8 +40,8 @@ const CustomFieldType = {
   multiMember: 'option',
   date: 'date',
 };
-/** 优先级excludeCode > excludeType > includeCode > includeType */
 
+/** 优先级excludeCode > excludeType > includeCode > includeType */
 const FastSearchAttributeRelations: Array<FastSearchAttributeRelationItem> = [
   {
     name: '等于', value: 'equal', escapeCharacter: '=', excludeType: ['date', 'datetime', 'time'],
@@ -139,28 +137,41 @@ export function transformFieldToRenderProps({ fieldCode, ...otherProps }: FastFi
     code: FieldTransformCodeRenderFieldObj[fieldCode as keyof typeof FieldTransformCodeRenderFieldObj] || fieldCode,
     ...omit(otherProps, 'defaultValue', 'value'),
   };
-  // 人员有分页数据，需要value
-  if (['member', 'multiMember'].includes(otherProps.fieldType)) {
+  // 人员有分页数据，需要value feature是分页 需要value
+  if (['member', 'multiMember'].includes(otherProps.fieldType) || baseProps.code === 'feature') {
     value = Array.isArray(otherProps.value) ? otherProps.value : [otherProps.value].filter(Boolean);
   } else {
     value = undefined;
   }
   return omit.apply(this, [merge(baseProps, { value }), ...omitProps]);
 }
+/**
+ * 得到关系-->操作符 map集
+ * @returns
+ */
 export function getTransformRelationRuleMap() {
   return new Map<string, string>(FastSearchAttributeRelations.map((relation) => [relation.value, relation.escapeCharacter]));
 }
+/**
+ * 得到操作符-->关系 map集
+ * @returns
+ */
 export function getTransformOperatorToRelationRuleMap() {
   return new Map<string, string>(FastSearchAttributeRelations.map((relation) => [relation.escapeCharacter, relation.value]));
 }
-export function processDateValue(value: any, condition: Pick<IFastSearchCondition, 'fieldCode' | 'fieldType' | 'isCustomField'>): any {
-  let newValue = value;
+/**
+ * 处理时间类型的value 返回一个可靠的时间字符串
+ * @param value
+ * @param condition
+ * @returns
+ */
+export function processDateValue(value: any, condition: Pick<IFastSearchCondition, 'fieldCode' | 'fieldType' | 'isCustomField'>): string {
+  const newValue = value;
   if (['creation_date', 'last_update_date'].includes(condition.fieldCode) || condition.fieldType === 'datetime') {
-    newValue = moment(newValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
-  } else if (['date', 'time'].includes(condition.fieldType)) {
-    newValue = moment(newValue, 'YYYY-MM-DD HH:mm:ss').format(DateFormatString[condition.fieldType as 'date' | 'time']);
+    return moment(newValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
+  } if (['date', 'time'].includes(condition.fieldType)) {
+    return moment(newValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).format(DateFormatString[condition.fieldType as 'date' | 'time']);
   }
-  console.log('newValue..', newValue, condition);
   return newValue;
 }
 /**
@@ -172,6 +183,11 @@ export function processDateValue(value: any, condition: Pick<IFastSearchConditio
 export function transformRelationValueToOperation(value: string, ruleMap: Map<string, string> = getTransformRelationRuleMap()) {
   return ruleMap.get(value) || value;
 }
+/**
+ * 将查询的详情转换为组件内部所需的数据格式
+ * @param data
+ * @returns
+ */
 export function transformDataToEditData(data: any): IFastSearchEditData | undefined {
   if (!data || !data.description) {
     return undefined;
@@ -196,20 +212,26 @@ export function transformDataToEditData(data: any): IFastSearchEditData | undefi
         relation,
         bothRelation: bothRelationArr[index - 1],
         isCustomField: !condition.predefined,
-        _editData: true,
+        _editData: true, // 编辑数据标记，用以编辑数据加载对应select组件后 DataSet字段value 进行重新赋值
       };
       return searchConditionItem;
     }),
   };
 }
+/**
+ * 将转换过的查询的详情数据中的筛选条件进行 的值 字段进行处理，保证再次保存的时候能够获取到显示值
+ * @param searchConditionList
+ * @param fieldData
+ * @returns
+ */
 export function transformSearchConditionListToEditData(searchConditionList: IFastSearchEditConditionWithEditStatus[], fieldData: ReturnType<typeof getFastSearchAttribute>[]) {
   return searchConditionList.map((item) => {
     const attribute = fieldData.find((i) => i.fieldCode === item.fieldCode);
     let { value } = item;
-    // 含有选项的自定义字段处理 'null' 值 处理
+    // 关系为 是/不是，  'null' 值 处理
     if (['is', 'notIs'].includes(item.relation)) {
       value = { value: "'null'", meaning: '空' };
-    } else if (item.isCustomField && attribute?.fieldOptions) {
+    } else if (item.isCustomField && attribute?.fieldOptions) { // 含有选项的自定义字段处理
       const valueArr = Array.isArray(value) ? value : [value].filter(Boolean);
       const valueOptions = attribute.fieldOptions.filter((i: any) => valueArr.includes(i.id))
         .map((i: any) => ({ ...i, meaning: i.value, value: i.id }));

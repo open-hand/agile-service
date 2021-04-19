@@ -122,13 +122,13 @@ class Search extends Component {
         ]}
       >
         <Header title="快速筛选">
-          <Button funcType="flat" onClick={this.openCreateModal}>
+          <Button funcType="flat" onClick={() => openCreateFastSearch(() => this.loadFilters())}>
             <Icon type="playlist_add icon" />
             <span>创建快速筛选</span>
           </Button>
-          <Button funcType="flat" onClick={() => openCreateFastSearch(() => this.loadFilters())}>
+          <Button funcType="flat" onClick={this.openCreateModal}>
             <Icon type="playlist_add icon" />
-            <span>创建快速筛选 new</span>
+            <span>创建快速筛选 old</span>
           </Button>
         </Header>
         <Breadcrumb />

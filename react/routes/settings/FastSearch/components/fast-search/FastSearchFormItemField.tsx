@@ -18,9 +18,8 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
    * 编辑进入的数据转换为对象选项
    */
   const handleBindOptions = useCallback((list: any[]) => {
-    if (['member', 'multiMember'].includes(record.get('fieldType'))) {
-      console.log('handleBindOptions', list);
-    } else if (componentRef.current?.options) {
+    // 用户，多用户类型的字段 此刻不进行options 绑定， 在额外用户加载完毕后再绑定
+    if (!['member', 'multiMember'].includes(record.get('fieldType')) && componentRef.current?.options) {
       optionDataSet.options = componentRef.current?.options;
     }
   }, [optionDataSet, record]);
@@ -35,10 +34,10 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
         defaultValueRecordArr = defaultValueArr.map((i) => new Record({ meaning: i, value: i }));
       }
       typeof (defaultValue) === 'string' && record.set('value', defaultValueRecordArr[0]?.toData() || defaultValue);
+      console.log('useEffect', defaultValueArr, defaultValueRecordArr.map((i) => i.toData()));
       Array.isArray(defaultValue) && defaultValueArr.length > 0 && record.set('value', defaultValueRecordArr.map((i) => i.toData()) || defaultValue);
       record.setState('init_edit_data', true);
     }
-    console.log('useEffect optionDataSet.options', record.toData(), optionDataSet.options.length);
   }, [optionDataSet.options, record]);
   const selectUserAutoQueryConfig = useMemo(() => {
     const defaultValue: string[] | string = toJS(record.get('value'));
@@ -64,7 +63,7 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     afterLoad: record.get('_editData') ? handleBindOptions : undefined,
     ...otherProps,
   }), [handleBindOptions, otherProps, record, selectUserAutoQueryConfig]);
-  const chosenField = useMemo(() => transformFieldToRenderProps(record.toData(), renderComponentProps.afterLoad ? [] : undefined), [record, renderComponentProps.afterLoad, record.get('fieldCode')]);
+  const chosenField = useMemo(() => transformFieldToRenderProps(record.toData(), record.get('_editData') ? [] : undefined), [record, record.get('fieldCode')]);
   const render = useCallback(() => {
     if (isRenderNullSelect) {
       return (
