@@ -456,4 +456,6 @@ public interface AgilePluginService {
      * @param tagName
      */
     void addTagToFeature(Long issueId, Long programId, Long organizationId, String appServiceCode, String tagName);
+
+    void deleteProgramTagRel(Long projectId, Long organizationId, String appServiceCode, String tagName);
 }

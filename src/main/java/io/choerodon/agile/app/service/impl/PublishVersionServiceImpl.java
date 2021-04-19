@@ -377,6 +377,62 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         }
     }
 
+    @Override
+    public void deleteTag(Long projectId, String appServiceCode, String tagName) {
+        if (ObjectUtils.isEmpty(projectId)
+                || ObjectUtils.isEmpty(appServiceCode)
+                || ObjectUtils.isEmpty(tagName)) {
+            return;
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        deleteTagIssueRel(projectId, organizationId, appServiceCode, tagName);
+        deletePublishVersionTag(projectId, organizationId, appServiceCode, tagName);
+        deleteTagCompareHistory(projectId, organizationId, appServiceCode, tagName);
+        if (agilePluginService != null) {
+            agilePluginService.deleteProgramTagRel(projectId, organizationId, appServiceCode, tagName);
+        }
+    }
+
+    private void deleteTagCompareHistory(Long projectId,
+                                         Long organizationId,
+                                         String appServiceCode,
+                                         String tagName) {
+        TagCompareHistoryDTO dto = new TagCompareHistoryDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setAppServiceCode(appServiceCode);
+        dto.setSource(tagName);
+        tagCompareHistoryMapper.delete(dto);
+    }
+
+    private void deletePublishVersionTag(Long projectId,
+                                         Long organizationId,
+                                         String appServiceCode,
+                                         String tagName) {
+        PublishVersionDTO dto = new PublishVersionDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setServiceCode(appServiceCode);
+        dto.setTagName(tagName);
+        publishVersionMapper.select(dto).forEach(x -> {
+            x.setServiceCode(null);
+            x.setTagName(null);
+            publishVersionMapper.updateByPrimaryKey(x);
+        });
+    }
+
+    private void deleteTagIssueRel(Long projectId,
+                                   Long organizationId,
+                                   String appServiceCode,
+                                   String tagName) {
+        TagIssueRelDTO dto = new TagIssueRelDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setAppServiceCode(appServiceCode);
+        dto.setTagName(tagName);
+        tagIssueRelMapper.delete(dto);
+    }
+
     private void getIssueIdsByTagsFromDevops(List<TagVO> tags,
                                              Set<Long> allIssueIds,
                                              List<TagCompareVO> tagCompareList,

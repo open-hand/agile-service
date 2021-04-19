@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.eventhandler;
 
 import com.alibaba.fastjson.JSON;
-import io.choerodon.agile.api.vo.ProjectInfoVO;
+import io.choerodon.agile.api.vo.event.DevopsGitlabTagPayload;
 import io.choerodon.agile.api.vo.event.OrganizationCreateEventPayload;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.ProjectEventCategory;
@@ -68,6 +68,8 @@ public class AgileEventHandler {
 
     @Autowired
     private BoardTemplateService boardTemplateService;
+    @Autowired
+    private PublishVersionService publishVersionService;
 
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
@@ -172,4 +174,17 @@ public class AgileEventHandler {
         }
         return message;
     }
+
+    @SagaTask(code = TASK_GIT_TAG_DELETE, sagaCode = GIT_TAG_DELETE, seq = 1,
+            description = "agile消费tag删除事件")
+    public String handleTagDeleteEvent(String message) {
+        DevopsGitlabTagPayload devopsGitlabTagPayload = JSON.parseObject(message, DevopsGitlabTagPayload.class);
+        LOGGER.info("删除tag同时删除相关tag数据，{}", message);
+        Long projectId = devopsGitlabTagPayload.getProjectId();
+        String appServiceCode = devopsGitlabTagPayload.getServiceCode();
+        String tagName = devopsGitlabTagPayload.getTag();
+        publishVersionService.deleteTag(projectId, appServiceCode, tagName);
+        return message;
+    }
+
 }

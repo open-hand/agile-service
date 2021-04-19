@@ -123,4 +123,13 @@ public interface PublishVersionService {
                                                   String issueTypeCode);
 
     void compareTag(Long projectId, Long organizationId, Long publishVersionId, List<TagCompareVO> tagCompareList);
+
+    /**
+     * 删除tag相关数据
+     *
+     * @param projectId
+     * @param appServiceCode
+     * @param tagName
+     */
+    void deleteTag(Long projectId, String appServiceCode, String tagName);
 }

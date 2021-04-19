@@ -27,6 +27,14 @@ public final class SagaTopic {
          * 更新项目SagaTaskCode
          */
         public static final String TASK_PROJECT_UPDATE = "agile-update-project";
+
+        /**
+         * devops删除tag
+         */
+        public static final String GIT_TAG_DELETE = "devops-git-tag-delete";
+
+        public static final String TASK_GIT_TAG_DELETE = "agile-git-tag-delete";
+
     }
 
     public static class Organization {
