@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.PublishVersionVO;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.TagCompareVO;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -121,4 +122,5 @@ public interface PublishVersionService {
                                                   PageRequest pageRequest,
                                                   String issueTypeCode);
 
+    void compareTag(Long projectId, Long organizationId, Long publishVersionId, List<TagCompareVO> tagCompareList);
 }

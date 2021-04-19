@@ -20,4 +20,8 @@ public class DevopsFeignClientFallback implements DevopsFeignClient {
     public ResponseEntity<String> listActiveAppService(Long projectId) {
         throw new CommonException("error.devops.listActiveAppService");
     }
+
+    @Override
+    public ResponseEntity<String> getIssueIdsBetweenTags(Long projectId, Long appServiceId, String from, String to) {
+        throw new CommonException("error.devops.getIssueIdsBetweenTags");    }
 }

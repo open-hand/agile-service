@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author superlee
@@ -44,4 +46,18 @@ public class DevopsClientOperator {
             return new ArrayList<>();
         }
     }
+
+    public Set<Long> getIssueIdsBetweenTags(Long projectId, Long appServiceId, String source, String target) {
+        try {
+            return
+                    ResponseUtils.getResponse(
+                            devopsFeignClient.getIssueIdsBetweenTags(projectId, appServiceId, target, source),
+                            new TypeReference<Set<Long>>() {
+                            }
+                    );
+        } catch (ServiceUnavailableException e) {
+            return new HashSet<>();
+        }
+    }
+
 }

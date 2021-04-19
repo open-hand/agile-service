@@ -7,6 +7,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author superlee
@@ -25,6 +26,26 @@ public class TagVO {
 
     @JsonIgnore
     private List<PublishVersionDTO> publishVersionList;
+    @JsonIgnore
+    private Set<Long> issueIds;
+    @JsonIgnore
+    private TagCompareVO tagCompareVO;
+
+    public TagCompareVO getTagCompareVO() {
+        return tagCompareVO;
+    }
+
+    public void setTagCompareVO(TagCompareVO tagCompareVO) {
+        this.tagCompareVO = tagCompareVO;
+    }
+
+    public Set<Long> getIssueIds() {
+        return issueIds;
+    }
+
+    public void setIssueIds(Set<Long> issueIds) {
+        this.issueIds = issueIds;
+    }
 
     public List<PublishVersionDTO> getPublishVersionList() {
         return publishVersionList;

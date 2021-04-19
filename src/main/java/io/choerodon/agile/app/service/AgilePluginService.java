@@ -436,4 +436,24 @@ public interface AgilePluginService {
      * @return
      */
     boolean checkFeatureSummaryAndReturn(IssueUpdateVO issueUpdateVO, Long projectId);
+
+    /**
+     * 获取项目群
+     *
+     * @param projectId
+     * @param organizationId
+     * @return
+     */
+    ProjectVO getProgram(Long projectId, Long organizationId);
+
+    /**
+     * 特性添加tag
+     *
+     * @param issueId
+     * @param programId
+     * @param organizationId
+     * @param appServiceCode
+     * @param tagName
+     */
+    void addTagToFeature(Long issueId, Long programId, Long organizationId, String appServiceCode, String tagName);
 }
