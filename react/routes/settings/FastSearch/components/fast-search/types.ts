@@ -1,15 +1,19 @@
+import { IFieldType } from '@/common/types';
+
+export type IFieldTypeWithSystemType = IFieldType | 'long' | 'decimal' | 'date'
+
 export interface IFastSearchCondition {
     name: string
     fieldCode: string
     relation: string
     valueBindValue?: string | string[]
     value: any
-    fieldType: string
+    fieldType: IFieldTypeWithSystemType
     valueText?: string | string[]
     isCustomField: boolean
     bothRelation?: string
 }
-interface IFastSearchConditionWithEditStatus extends Omit<IFastSearchCondition, 'valueText' | 'valueBindValue' | 'name'> {
+export interface IFastSearchEditConditionWithEditStatus extends Omit<IFastSearchCondition, 'valueText' | 'valueBindValue' | 'name' | 'fieldType'> {
     _editData: true
 }
 export interface IFastSearchEditData {
@@ -19,5 +23,5 @@ export interface IFastSearchEditData {
     objectVersionNumber: number
     projectId: string
     childIncluded: boolean
-    searchConditionList: IFastSearchConditionWithEditStatus[]
+    searchConditionList: IFastSearchEditConditionWithEditStatus[]
 }

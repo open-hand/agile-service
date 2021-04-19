@@ -98,11 +98,14 @@ class Search extends Component {
   }
 
   handleClickEdit = (record) => {
-    this.setState({
-      editFilterShow: true,
-      currentFilterId: record.get('filterId'),
+    // this.setState({
+    //   editFilterShow: true,
+    //   currentFilterId: record.get('filterId'),
+    // });
+
+    openEditFastSearch(record.get('filterId'), () => {
+      this.loadFilters();
     });
-    // openEditFastSearch(record.get('filterId'));
   }
 
   render() {
@@ -123,7 +126,7 @@ class Search extends Component {
             <Icon type="playlist_add icon" />
             <span>创建快速筛选</span>
           </Button>
-          <Button funcType="flat" onClick={openCreateFastSearch}>
+          <Button funcType="flat" onClick={() => openCreateFastSearch(() => this.loadFilters())}>
             <Icon type="playlist_add icon" />
             <span>创建快速筛选 new</span>
           </Button>

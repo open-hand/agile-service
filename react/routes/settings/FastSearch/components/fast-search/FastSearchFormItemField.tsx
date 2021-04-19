@@ -9,12 +9,8 @@ import renderField from '@/components/issue-filter-form/components/renderField';
 import './index.less';
 import { transformFieldToRenderProps } from './utils';
 
-interface FastSearchFormItemProps {
-  record: Record
-  onDelete: (record: Record) => void
-}
 const { Option } = Select;
-const FastSearchFormItemField: React.FC<{ record: Record, name: string, colSpan: number }> = ({ record, ...otherProps }) => {
+const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ record, ...otherProps }) => {
   const isRenderNullSelect = useMemo(() => !!['is', 'notIs'].includes(record.get('relation')), [record, record.get('relation')]);
   const optionDataSet = useObservable({ dataSet: null, options: [] });
   const componentRef = useRef<any>();
@@ -32,16 +28,28 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string, colSpan:
   useEffect(() => {
     if (optionDataSet.options.length > 0 && record.get('_editData') && !record.getState('init_edit_data')) {
       const defaultValue: string[] | string = toJS(record.get('value'));
-      let defaultValueArr: string[] | Record[] = Array.isArray(defaultValue) ? defaultValue : [defaultValue].filter(Boolean);
-      defaultValueArr = optionDataSet.options.filter((optionRecord: any) => defaultValueArr.includes(optionRecord.get('value')));
-      typeof (defaultValue) === 'string' && record.set('value', (defaultValueArr as Record[])[0]?.toData() || defaultValue);
-      Array.isArray(defaultValue) && record.set('value', (defaultValueArr as Record[]).map((i) => i.toData()) || defaultValue);
-
-      console.log('useEffect', defaultValueArr, optionDataSet.options.length);
+      const defaultValueArr: string[] = Array.isArray(defaultValue) ? defaultValue : [defaultValue].filter(Boolean);
+      let defaultValueRecordArr: Record[] = optionDataSet.options.filter((optionRecord: any) => defaultValueArr.includes(optionRecord.get('value')));
+      // 如果没有匹配的数据，则显示值与value相同
+      if (defaultValueRecordArr.length === 0) {
+        defaultValueRecordArr = defaultValueArr.map((i) => new Record({ meaning: i, value: i }));
+      }
+      typeof (defaultValue) === 'string' && record.set('value', defaultValueRecordArr[0]?.toData() || defaultValue);
+      Array.isArray(defaultValue) && defaultValueArr.length > 0 && record.set('value', defaultValueRecordArr.map((i) => i.toData()) || defaultValue);
       record.setState('init_edit_data', true);
     }
     console.log('useEffect optionDataSet.options', record.toData(), optionDataSet.options.length);
   }, [optionDataSet.options, record]);
+  const selectUserAutoQueryConfig = useMemo(() => {
+    const defaultValue: string[] | string = toJS(record.get('value'));
+    function onFinish() {
+      optionDataSet.options = componentRef.current?.options;
+    }
+    return {
+      selectedUserIds: Array.isArray(defaultValue) ? defaultValue : [defaultValue].filter(Boolean),
+      events: { onFinish },
+    };
+  }, [optionDataSet, record]);
   const renderComponentProps = useMemo(() => ({
     ref: componentRef,
     label: undefined,
@@ -51,10 +59,12 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string, colSpan:
     unassignedEpic: undefined,
     clearButton: true,
     primitiveValue: false,
+    autoQueryConfig: selectUserAutoQueryConfig,
+    style: { width: '100%' },
     afterLoad: record.get('_editData') ? handleBindOptions : undefined,
     ...otherProps,
-  }), [handleBindOptions, otherProps, record]);
-  const chosenField = useMemo(() => transformFieldToRenderProps(record.toData(), renderComponentProps.afterLoad ? [] : undefined), [record, renderComponentProps.afterLoad]);
+  }), [handleBindOptions, otherProps, record, selectUserAutoQueryConfig]);
+  const chosenField = useMemo(() => transformFieldToRenderProps(record.toData(), renderComponentProps.afterLoad ? [] : undefined), [record, renderComponentProps.afterLoad, record.get('fieldCode')]);
   const render = useCallback(() => {
     if (isRenderNullSelect) {
       return (

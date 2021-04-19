@@ -6,26 +6,25 @@ import {
 } from 'choerodon-ui/pro';
 import { pick, merge } from 'lodash';
 import { fieldApi, quickFilterApi } from '@/api';
-import './index.less';
 import { IModalProps } from '@/common/types';
-import { getProjectId } from '@/utils/common';
 import {
-  getAttributeRelation, getFastSearchAttribute, transformRelationValueToOperation, getCustomFieldType,
+  getAttributeRelation, getFastSearchAttribute, transformRelationValueToOperation, getCustomFieldType, processWaitSubmitData, transformSearchConditionListToEditData,
 } from './utils';
 import FastSearchForm from './FastSearchForm';
-import { IFastSearchCondition, IFastSearchEditData } from './types';
+import { IFastSearchEditData } from './types';
+import styles from './index.less';
 
 interface FastSearchProps {
   modal?: IModalProps,
-  prefixCls?: string,
   isInProgram?: boolean
   data?: IFastSearchEditData
+  onOK?: () => void
 }
 
 const FastSearch: React.FC<FastSearchProps> = ({
-  modal, prefixCls = 'c7n-agile-fast-search-modal', data: originData, isInProgram,
+  modal, data: originData, isInProgram, onOK,
 }) => {
-  const [isEditMode] = useState(() => !!originData);
+  const isEditMode = !!originData;
   const ds = useMemo(() => new DataSet({
     autoCreate: false,
     autoQuery: false,
@@ -39,12 +38,6 @@ const FastSearch: React.FC<FastSearchProps> = ({
     ],
   }), []);
 
-  const searchConditionBothRelationDs = useMemo(() => new DataSet({
-    autoCreate: false,
-    autoQuery: false,
-    paging: false,
-    data: [{ name: '且', value: 'and' }, { name: '或', value: 'or' }],
-  }), []);
   const searchConditionAttributeDs = useMemo(() => new DataSet({
     autoCreate: false,
     autoQuery: false,
@@ -70,30 +63,11 @@ const FastSearch: React.FC<FastSearchProps> = ({
         options: searchConditionAttributeDs,
         ignore: 'always' as any, // 忽略提交 不需要的字段
       },
-      {
-        name: 'name',
-        bind: 'attribute.name',
-      },
-      {
-        name: 'fieldCode',
-        type: 'string' as any,
-        bind: 'attribute.fieldCode',
-      },
-      {
-        name: 'isCustomField',
-        type: 'boolean' as any,
-        bind: 'attribute.id',
-      },
-      {
-        name: 'fieldType',
-        type: 'string' as any,
-        bind: 'attribute.type',
-      },
-      {
-        name: 'fieldOptions',
-        bind: 'attribute.fieldOptions',
-        ignore: 'always' as any,
-      },
+      { name: 'name', bind: 'attribute.name' },
+      { name: 'fieldCode', type: 'string' as any, bind: 'attribute.fieldCode' },
+      { name: 'isCustomField', type: 'boolean' as any, bind: 'attribute.id' },
+      { name: 'fieldType', type: 'string' as any, bind: 'attribute.fieldType' },
+      { name: 'fieldOptions', bind: 'attribute.fieldOptions', ignore: 'always' as any },
       {
         name: 'relation',
         label: '关系',
@@ -117,12 +91,9 @@ const FastSearch: React.FC<FastSearchProps> = ({
       {
         name: 'bothRelation',
         label: '关系',
-        textField: 'name',
-        valueField: 'value',
         dynamicProps: {
           required: ({ record }) => !!record.index,
         },
-        options: searchConditionBothRelationDs,
       },
       {
         name: 'value',
@@ -134,16 +105,8 @@ const FastSearch: React.FC<FastSearchProps> = ({
         },
         // ignore: 'always' as any, // 忽略提交 不需要的字段
       },
-      {
-        name: 'valueBindValue',
-        label: '值',
-        bind: 'value.value',
-      },
-      {
-        name: 'valueText',
-        // type: 'string' as any,
-        bind: 'value.meaning',
-      },
+      { name: 'valueBindValue', label: '值', bind: 'value.value' },
+      { name: 'valueText', type: 'string' as any, bind: 'value.meaning' },
     ],
     events: {
       update: ({ record, name, value }: any) => {
@@ -155,83 +118,34 @@ const FastSearch: React.FC<FastSearchProps> = ({
         }
       },
     },
-  }), [searchConditionAttributeDs, searchConditionBothRelationDs]);
+  }), [searchConditionAttributeDs]);
   useEffect(() => {
     // 初始化名称 描述 主体的dataSet
     ds.create(originData);
     !isEditMode && searchConditionDs.create();
     loadAttributeData().then((data) => {
-      searchConditionAttributeDs.loadData(data);
+      searchConditionAttributeDs.loadData(data);// 属性列加载数据
       // 有编辑数据则初始化 筛选条件
-      isEditMode && searchConditionDs.loadData(originData?.searchConditionList.map((item) => {
-        const attribute = data.find((i) => i.fieldCode === item.fieldCode);
-        let { value } = item;
-        // 含有选项的自定义字段处理 'null' 值 处理
-        if (['is', 'notIs'].includes(item.relation)) {
-          value = { value: "'null'", meaning: '空' };
-        } else if (item.isCustomField && attribute?.fieldOptions) {
-          const valueArr = Array.isArray(value) ? value : [value].filter(Boolean);
-          const valueOptions = attribute.fieldOptions.filter((i: any) => valueArr.includes(i.id))
-            .map((i: any) => ({ ...i, meaning: i.value, value: i.id }));
-          value = typeof (value) === 'string' ? valueOptions[0] || value : valueOptions;
-        }
-        return ({ ...item, attribute, value });
-      }).filter((item) => item.attribute));
+      isEditMode && searchConditionDs.loadData(transformSearchConditionListToEditData(originData?.searchConditionList!, data));
     });
   }, [ds, isEditMode, loadAttributeData, originData, searchConditionAttributeDs, searchConditionDs]);
   const handleSubmit = useCallback(async () => {
     if (!await ds.validate() || !await searchConditionDs.validate()) {
       return false;
     }
-    const bothRelationArr: string[] = []; //  两个相邻筛选条件关系
-    const expressQueryArr: any[] = [];
-    const searchConditionArr = searchConditionDs.toJSONData().map((condition: IFastSearchCondition) => {
-      const value = condition.valueBindValue || condition.value;
-      const operation = transformRelationValueToOperation(condition.relation);
-      if (condition.bothRelation) {
-        bothRelationArr.push(condition.bothRelation);
-        expressQueryArr.push(condition.bothRelation.toUpperCase());
-      }
-      // 属性名
-      expressQueryArr.push(condition.name);
-      // 关系
-      expressQueryArr.push(operation);
-      // 显示的值
-      expressQueryArr.push(Array.isArray(condition.valueText) ? `[${condition.valueText.join(',')}]` : condition.valueText || value);
-      return {
-        fieldCode: condition.fieldCode,
-        operation,
-        value: Array.isArray(value) ? `(${value.join(',')})` : `${value}`,
-        predefined: !condition.isCustomField,
-        customFieldType: condition.isCustomField ? getCustomFieldType(condition.fieldType) : undefined,
-      };
-    });
-
-    const filterJson = JSON.stringify({
-      arr: searchConditionArr,
-      o: bothRelationArr,
-    });
-    let submitData: any = pick(ds.current?.toData(), ['name', 'description']);
-    submitData = merge(submitData, {
-      childIncluded: true,
-      description: `${submitData.description || ''}+++${filterJson}`,
-      expressQuery: expressQueryArr.join(' '),
-      projectId: getProjectId(),
-      quickFilterValueVOList: searchConditionArr,
-      relationOperations: bothRelationArr,
-    });
+    const submitData = processWaitSubmitData(ds, searchConditionDs);
     console.log('handleSubmit', submitData, searchConditionDs.toJSONData());
-    !originData && quickFilterApi.create(submitData).then(() => {
-      modal?.close();
-    });
+    // return false;
+    originData ? quickFilterApi.update(originData.filterId, { ...submitData, objectVersionNumber: originData.objectVersionNumber }) : quickFilterApi.create(submitData);
     // quickFilterApi.update()
-    return false;
-  }, [ds, modal, originData, searchConditionDs]);
+    onOK && onOK();
+    return true;
+  }, [ds, onOK, originData, searchConditionDs]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
   return (
-    <Form dataSet={ds} className={`${prefixCls}-form`}>
+    <Form dataSet={ds} className={styles.form}>
       <TextField name="name" maxLength={10} />
       <FastSearchForm dataSet={searchConditionDs} />
       <TextField name="description" maxLength={30} />
