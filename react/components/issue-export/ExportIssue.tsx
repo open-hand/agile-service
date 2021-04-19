@@ -234,7 +234,7 @@ const ExportIssue: React.FC = () => {
 
     const templateList = templateSelectRef?.current?.templateList || [];
     for (let i = 0; i < templateList.length; i += 1) {
-      if (isEqual(JSON.parse(templateList[i].templateJson), store.transformExportFieldCodes(reverseFieldCodes, checkBoxDataProps))) {
+      if (isEqual(JSON.parse(templateList[i].templateJson).sort(), store.transformExportFieldCodes(reverseFieldCodes, checkBoxDataProps).sort())) {
         setTemplateIsExist(true);
         return;
       }
