@@ -359,6 +359,14 @@ class PublishVersionApi extends Api<PublishVersionApi> {
       return newData;
     });
   }
+
+  compareTag(versionId: string, data: any[]) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/publish_version/${versionId}/compare`,
+      data: data.map((i) => ({ ...i, projectId: i.projectId || getProjectId() })),
+    });
+  }
 }
 
 const publishVersionApi = new PublishVersionApi();
