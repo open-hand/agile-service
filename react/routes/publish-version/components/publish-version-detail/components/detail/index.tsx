@@ -19,12 +19,12 @@ const Detail: React.FC = () => (
       {/* <ArtifactId /> */}
       {/* <ExpectReleaseDate /> */}
       <ActualDate />
-      <CreateDate />
-      <CreateUser />
       <ArtifactId />
       <GroupId />
       <AppService />
       <TagField />
+      <CreateDate />
+      <CreateUser />
     </Section>
     <Description />
     <DependencyTree />

@@ -24,7 +24,7 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
     autoCreate: true,
     data: data ? [data] : undefined,
     fields: [
-      { name: 'versionAlias', label: '版本别名' },
+      { name: 'versionAlias', label: '版本名称' },
       { name: 'version', label: 'version' },
       { name: 'artifactId', label: 'artifactId' },
       { name: 'groupId', label: 'groupId' },
