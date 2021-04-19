@@ -10,13 +10,20 @@ import { IIssueType } from '@/common/types';
 
 interface Props extends Partial<SelectProps> {
   featureIds?: number[],
+  afterLoad?: (features: any[]) => void
 }
-const FeatureProjectField: React.FC<Props> = forwardRef(({ featureIds, ...otherProps }, ref: React.Ref<Select>) => {
+const FeatureProjectField: React.FC<Props> = forwardRef(({ featureIds, afterLoad, ...otherProps }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'featureId',
     textField: 'summary',
     valueField: 'issueId',
     request: ({ filter, page }) => featureApi.queryAllInSubProject(featureIds || [], filter!, page, 10),
+    middleWare: (data) => {
+      if (afterLoad) {
+        afterLoad(data);
+      }
+      return data;
+    },
   }), []);
   const props = useSelect(config);
   return (

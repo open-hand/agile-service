@@ -1,14 +1,15 @@
 import React, {
-  useCallback, useEffect, useMemo, useState,
+  useCallback, useEffect, useMemo,
 } from 'react';
 import {
   DataSet, Form, TextField,
 } from 'choerodon-ui/pro';
-import { pick, merge } from 'lodash';
+import { isEqual } from 'lodash';
 import { fieldApi, quickFilterApi } from '@/api';
 import { IModalProps } from '@/common/types';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import {
-  getAttributeRelation, getFastSearchAttribute, transformRelationValueToOperation, getCustomFieldType, processWaitSubmitData, transformSearchConditionListToEditData,
+  getAttributeRelation, getFastSearchAttribute, processWaitSubmitData, transformSearchConditionListToEditData,
 } from './utils';
 import FastSearchForm from './FastSearchForm';
 import { IFastSearchEditData } from './types';
@@ -25,18 +26,30 @@ const FastSearch: React.FC<FastSearchProps> = ({
   modal, data: originData, isInProgram, onOK,
 }) => {
   const isEditMode = !!originData;
+  const handleCheckName = useCallback(async (value:any) => {
+    if (originData?.name === value) {
+      return true;
+    }
+    return quickFilterApi.checkName(value.trim()).then((res: boolean) => (res ? '快速搜索名称重复' : true));
+  }, [originData?.name]);
   const ds = useMemo(() => new DataSet({
     autoCreate: false,
     autoQuery: false,
     fields: [
       {
-        name: 'name', type: 'string' as any, label: '名称', maxLength: 10, required: true, trim: 'both' as any,
+        name: 'name',
+        type: 'string' as any,
+        label: '名称',
+        maxLength: 10,
+        required: true,
+        trim: 'both' as any,
+        validator: (value) => handleCheckName(value),
       },
       {
         name: 'description', type: 'string' as any, label: '描述', maxLength: 30,
       },
     ],
-  }), []);
+  }), [handleCheckName]);
 
   const searchConditionAttributeDs = useMemo(() => new DataSet({
     autoCreate: false,
@@ -103,17 +116,18 @@ const FastSearch: React.FC<FastSearchProps> = ({
           disabled: ({ record }) => !record.get('relation'),
           multiple: ({ record }) => !['text', 'input'].includes(record.get('fieldType')) && ['include', 'exclude'].includes(record.get('relation')),
         },
-        // ignore: 'always' as any, // 忽略提交 不需要的字段
       },
       { name: 'valueBindValue', label: '值', bind: 'value.value' },
       { name: 'valueText', type: 'string' as any, bind: 'value.meaning' },
     ],
     events: {
-      update: ({ record, name, value }: any) => {
-        if (name === 'attribute') {
+      update: ({
+        record, name, value, oldValue,
+      }: any) => {
+        if (name === 'attribute' && !isEqual(value?.fieldCode, oldValue?.fieldCode)) {
           record.init('relation', undefined);
           record.init('value', undefined);
-        } else if (name === 'relation') {
+        } else if (name === 'relation' && !isEqual(value, oldValue)) {
           record.init('value', undefined);
         }
       },
@@ -135,9 +149,7 @@ const FastSearch: React.FC<FastSearchProps> = ({
     }
     const submitData = processWaitSubmitData(ds, searchConditionDs);
     console.log('handleSubmit', submitData, searchConditionDs.toJSONData());
-    // return false;
     originData ? quickFilterApi.update(originData.filterId, { ...submitData, objectVersionNumber: originData.objectVersionNumber }) : quickFilterApi.create(submitData);
-    // quickFilterApi.update()
     onOK && onOK();
     return true;
   }, [ds, onOK, originData, searchConditionDs]);
@@ -152,5 +164,8 @@ const FastSearch: React.FC<FastSearchProps> = ({
     </Form>
   );
 };
-
-export default FastSearch;
+const FastSearchHoc: React.FC<FastSearchProps> = (props) => {
+  const { isInProgram, loading } = useIsInProgram();
+  return !loading ? <FastSearch {...props} isInProgram={isInProgram} /> : null;
+};
+export default FastSearchHoc;
