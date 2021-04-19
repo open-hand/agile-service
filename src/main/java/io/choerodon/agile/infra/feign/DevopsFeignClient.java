@@ -28,4 +28,11 @@ public interface DevopsFeignClient {
     @GetMapping({"/v1/projects/{project_id}/app_service/list_by_active"})
     ResponseEntity<String> listActiveAppService(@PathVariable("project_id") Long projectId);
 
+
+    @GetMapping({"/v1/projects/{project_id}/app_service/{app_service_id}/git/tags/issue_ids"})
+    ResponseEntity<String> getIssueIdsBetweenTags(@PathVariable(value = "project_id") Long projectId,
+                                                  @PathVariable(value = "app_service_id") Long appServiceId,
+                                                  @RequestParam String from,
+                                                  @RequestParam String to);
+
 }

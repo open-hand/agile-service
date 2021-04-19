@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.TagCompareVO;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
@@ -10,6 +11,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -185,6 +187,19 @@ public class PublishVersionController {
                                                                        @SortDefault(direction = Sort.Direction.ASC) PageRequest pageRequest) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return ResponseEntity.ok(publishVersionService.listRelIssueByOption(projectId, organizationId, publishVersionId, searchVO, pageRequest, IssueTypeCode.BUG.value()));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "发布版本tag对比")
+    @PostMapping(value = "/{publish_version_id}/compare")
+    public ResponseEntity compareTag(@ApiParam(value = "项目id", required = true)
+                                     @PathVariable(name = "project_id") Long projectId,
+                                     @ApiParam(value = "产品版本id", required = true)
+                                     @Encrypt @PathVariable(name = "publish_version_id") Long publishVersionId,
+                                     @RequestParam Long organizationId,
+                                     @RequestBody @Validated List<TagCompareVO> tagCompareList) {
+        publishVersionService.compareTag(projectId, organizationId, publishVersionId, tagCompareList);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
 }
