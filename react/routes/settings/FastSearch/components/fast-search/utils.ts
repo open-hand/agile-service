@@ -1,13 +1,18 @@
 import { omit, pick, merge } from 'lodash';
 // @ts-ignore
 import JSONbig from 'json-bigint';
-import { IFieldType } from '@/common/types';
+import {
+  DataSet, Form, TextField,
+} from 'choerodon-ui/pro';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import { IFastSearchEditData } from './types';
+import { getProjectId } from '@/utils/common';
+import moment from 'moment';
+import {
+  IFastSearchCondition, IFastSearchEditData, IFastSearchEditConditionWithEditStatus, IFieldTypeWithSystemType,
+} from './types';
 
 const JSONbigString = JSONbig({ storeAsString: true });
 
-type IFieldTypeWithSystemType = IFieldType | 'long' | 'decimal' | 'date'
 interface FastSearchAttributeRelationItem {
   name: string
   value: string
@@ -18,7 +23,11 @@ interface FastSearchAttributeRelationItem {
   includeType?: string[]
 
 }
-
+const DateFormatString = {
+  datetime: 'YYYY-MM-DD HH:mm:ss',
+  date: 'YYYY-MM-DD',
+  time: 'HH:mm:ss',
+};
 const CustomFieldType = {
   radio: 'option',
   checkbox: 'option',
@@ -95,14 +104,14 @@ export function getAttributeRelation(code: string, fieldType: IFieldTypeWithSyst
  */
 export function getFastSearchAttribute({
   code, fieldCode, fieldType, type, ...otherData
-}: { code?: string, fieldCode?: string, fieldType?: string, type?: string, [propsName: string]: any }): { fieldCode: string, type: string, [propsName: string]: any } {
+}: { code?: string, fieldCode?: string, fieldType?: string, type?: string, [propsName: string]: any }): { fieldCode: string, fieldType: IFieldTypeWithSystemType, [propsName: string]: any } {
   if (code === 'story_point' || fieldCode === 'story_point') {
-    return { fieldCode: 'story_point', type: 'number', ...otherData };
+    return { fieldCode: 'story_point', fieldType: 'number', ...otherData };
   }
   if (['last_updated_user', 'assignee', 'created_user', 'reporter'].includes(fieldCode || code!)) {
-    return { fieldCode: code || fieldCode!, type: 'member', ...otherData };
+    return { fieldCode: code || fieldCode!, fieldType: 'member', ...otherData };
   }
-  return { fieldCode: code || fieldCode!, type: (fieldType || type)!, ...otherData };
+  return { fieldCode: code || fieldCode!, fieldType: (fieldType || type) as IFieldTypeWithSystemType, ...otherData };
 }
 
 const FieldTransformCodeRenderFieldObj = {
@@ -144,6 +153,16 @@ export function getTransformRelationRuleMap() {
 export function getTransformOperatorToRelationRuleMap() {
   return new Map<string, string>(FastSearchAttributeRelations.map((relation) => [relation.escapeCharacter, relation.value]));
 }
+export function processDateValue(value: any, condition: Pick<IFastSearchCondition, 'fieldCode' | 'fieldType' | 'isCustomField'>): any {
+  let newValue = value;
+  if (['creation_date', 'last_update_date'].includes(condition.fieldCode) || condition.fieldType === 'datetime') {
+    newValue = moment(newValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
+  } else if (['date', 'time'].includes(condition.fieldType)) {
+    newValue = moment(newValue, 'YYYY-MM-DD HH:mm:ss').format(DateFormatString[condition.fieldType as 'date' | 'time']);
+  }
+  console.log('newValue..', newValue, condition);
+  return newValue;
+}
 /**
  *转换关系为对应的操作符
  * @param value
@@ -183,6 +202,25 @@ export function transformDataToEditData(data: any): IFastSearchEditData | undefi
     }),
   };
 }
+export function transformSearchConditionListToEditData(searchConditionList: IFastSearchEditConditionWithEditStatus[], fieldData: ReturnType<typeof getFastSearchAttribute>[]) {
+  return searchConditionList.map((item) => {
+    const attribute = fieldData.find((i) => i.fieldCode === item.fieldCode);
+    let { value } = item;
+    // 含有选项的自定义字段处理 'null' 值 处理
+    if (['is', 'notIs'].includes(item.relation)) {
+      value = { value: "'null'", meaning: '空' };
+    } else if (item.isCustomField && attribute?.fieldOptions) {
+      const valueArr = Array.isArray(value) ? value : [value].filter(Boolean);
+      const valueOptions = attribute.fieldOptions.filter((i: any) => valueArr.includes(i.id))
+        .map((i: any) => ({ ...i, meaning: i.value, value: i.id }));
+      value = typeof (value) === 'string' ? valueOptions[0] || value : valueOptions;
+    }
+    if (attribute) {
+      value = processDateValue(value, { ...item, fieldType: attribute.fieldType! });
+    }
+    return ({ ...item, attribute, value });
+  }).filter((item) => item.attribute);
+}
 /**
  * 自定义字段根据类型得到反馈到后端类型
  * @param fieldType
@@ -190,4 +228,50 @@ export function transformDataToEditData(data: any): IFastSearchEditData | undefi
  */
 export function getCustomFieldType(fieldType: string) {
   return CustomFieldType[fieldType as keyof typeof CustomFieldType] || fieldType;
+}
+
+/**
+ * 处理待提交的数据
+ * @param mainDataSet 主体DS
+ * @param searchConditionDataSet 筛选条件DS
+ * @returns
+ */
+export function processWaitSubmitData(mainDataSet: DataSet, searchConditionDataSet: DataSet) {
+  const bothRelationArr: string[] = []; //  两个相邻筛选条件关系
+  const expressQueryArr: any[] = [];
+  const searchConditionArr = searchConditionDataSet.toJSONData().map((condition: IFastSearchCondition) => {
+    const value = condition.valueBindValue || condition.value;
+    const operation = transformRelationValueToOperation(condition.relation);
+    if (condition.bothRelation) {
+      bothRelationArr.push(condition.bothRelation);
+      expressQueryArr.push(condition.bothRelation.toUpperCase());
+    }
+    // 属性名
+    expressQueryArr.push(condition.name);
+    // 关系
+    expressQueryArr.push(operation);
+    // 显示的值
+    expressQueryArr.push(Array.isArray(condition.valueText) ? `[${condition.valueText.join(',')}]` : condition.valueText || value);
+    return {
+      fieldCode: condition.fieldCode,
+      operation,
+      value: Array.isArray(value) ? `(${value.join(',')})` : `${value}`,
+      predefined: !condition.isCustomField,
+      customFieldType: condition.isCustomField ? getCustomFieldType(condition.fieldType) : undefined,
+    };
+  });
+  const mainData = mainDataSet.current?.toData();
+  const filterJson = JSON.stringify({
+    arr: searchConditionArr,
+    o: bothRelationArr,
+  });
+  return {
+    ...pick(mainData, 'name'),
+    childIncluded: true,
+    description: `${mainData.description || ''}+++${filterJson}`,
+    expressQuery: expressQueryArr.join(' '),
+    projectId: getProjectId(),
+    quickFilterValueVOList: searchConditionArr,
+    relationOperations: bothRelationArr,
+  };
 }

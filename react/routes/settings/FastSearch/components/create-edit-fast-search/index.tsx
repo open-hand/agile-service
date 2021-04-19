@@ -6,7 +6,7 @@ import { quickFilterApi } from '@/api';
 import FastSearch from '../fast-search';
 import { transformDataToEditData } from '../fast-search/utils';
 
-export const openCreateFastSearch = () => {
+export const openCreateFastSearch = (onOK: () => void) => {
   const prefixCls = 'c7n-agile-fast-search-modal';
   Modal.open({
     key: Modal.key(),
@@ -19,11 +19,11 @@ export const openCreateFastSearch = () => {
     okText: '创建',
     cancelText: '取消',
     children: (
-      <FastSearch />
+      <FastSearch onOK={onOK} />
     ),
   });
 };
-export const openEditFastSearch = async (id: string) => {
+export const openEditFastSearch = async (id: string, onOK: () => void) => {
   const prefixCls = 'c7n-agile-fast-search-modal';
   const data = await quickFilterApi.load(id).then((res: any) => transformDataToEditData(res));
   console.log('edit...', data);
@@ -38,7 +38,7 @@ export const openEditFastSearch = async (id: string) => {
     okText: '修改',
     cancelText: '取消',
     children: (
-      <FastSearch data={data} />
+      <FastSearch data={data} onOK={onOK} />
     ),
   });
 };
