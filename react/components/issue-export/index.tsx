@@ -38,7 +38,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     key,
     title: '导出问题',
     style: {
-      width: 380,
+      width: 740,
     },
     className: classnames('c7n-agile-export-issue-modal', className),
     drawer: true,

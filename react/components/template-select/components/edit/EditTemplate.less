@@ -1,6 +1,7 @@
 .part {
   &_title {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     height: .24rem;
     font-weight: 500;
     color: rgba(0, 0, 0, 0.87);
@@ -21,6 +22,15 @@
         }
       }
     }
+  }
+  &_block {
+    display: inline-block;
+    margin-top: 3px;
+    margin-right: 6px;
+    width: 3px;
+    height: 16px;
+    background: #798DFB;
+    border-radius: 2px;
   }
   &_content {
     :global {
@@ -54,7 +64,7 @@
   &_btn {
     color: #3F51B5;
     font-size: .13rem;
-    margin-top: -1px;
+    margin-top: 5px;
 
     span {
       font-weight: 500;
@@ -68,8 +78,12 @@
   }
 }
 .template_edit {
-  &_divider {
-    margin: 0 0 16px -24px;
-    width: calc(~"100% + 48px");
+  &_name {
+    margin-bottom: 35px;
+  }
+  :global {
+    .c7n-pro-form-float-label .c7n-pro-field-wrapper {
+      margin-bottom: 0;
+    }
   }
 }

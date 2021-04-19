@@ -38,6 +38,7 @@ const FormPart: React.FC<FormPartProps> = memo((props) => {
   return (
     <div className={classnames(styles.part, props.className)}>
       <div className={styles.part_title}>
+        <div className={styles.part_block} />
         <span>{title}</span>
         {!!btnOnClick && (
           <Button
@@ -127,8 +128,6 @@ const EditTemplate: React.FC<Props> = ({
     templateDataSet?.current?.set('templateName', template.name);
   }, [template.name, templateDataSet]);
 
-  console.log('checkOptions：');
-  console.log(checkOptions);
   // 选择字段框配置 数据
   const [checkBoxDataProps, checkBoxComponentProps] = useTableColumnCheckBoxes({
     name: 'templateCodes',
@@ -187,14 +186,13 @@ const EditTemplate: React.FC<Props> = ({
 
   return (
     <div className={styles.template_edit}>
-      <FormPart title="修改名称">
+      <FormPart title="修改名称" className={styles.template_edit_name}>
         <div className={styles.template_edit_name}>
           <Form dataSet={templateDataSet}>
             <TextField name="templateName" />
           </Form>
         </div>
       </FormPart>
-      <Divider className={styles.template_edit_divider} />
       <FormPart title="修改模板选择字段" btnOnClick={handleChangeFieldStatus}>
         <div className={styles.template_edit_fields}>
           <TableColumnCheckBoxes {...checkBoxComponentProps} />
@@ -212,7 +210,7 @@ const openEditTemplate = (props: Props) => {
     key: Modal.key(),
     title: '编辑模板',
     style: {
-      width: 380,
+      width: 740,
     },
     className: styles.editTemplateModal,
     children: <ObserverEditTemplate {...props} />,

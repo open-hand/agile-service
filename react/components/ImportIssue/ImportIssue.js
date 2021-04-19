@@ -7,6 +7,7 @@ import {
 import { observer } from 'mobx-react';
 import { Modal } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
+import classnames from 'classnames';
 import './ImportIssue.less';
 import { issueApi } from '@/api';
 import { getApplyType, getProjectId } from '@/utils/common';
@@ -19,10 +20,19 @@ import openSaveTemplate from '../template-select/components/save/SaveTemplate';
 import SaveTemplateBtn, { transformTemplateJson } from './SaveTemplateBtn';
 
 const ImportIssueForm = (formProps) => {
-  const { title, children, bottom } = formProps;
+  const {
+    title, children, bottom, className,
+  } = formProps;
   return (
-    <div className="c7n-importIssue-form-one">
-      <span className="c7n-importIssue-form-one-title">{title}</span>
+    <div className={classnames('c7n-importIssue-form-one', className)}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+      >
+        <span className="c7n-importIssue-form-one-block" />
+        <span className="c7n-importIssue-form-one-title">{title}</span>
+      </div>
       <span className="c7n-importIssue-form-one-content">{children}</span>
       {bottom}
     </div>
@@ -361,32 +371,30 @@ class ImportIssue extends Component {
       <div>
         {
           action && (
-            <>
-              <ImportIssueForm
-                title="选择常用模板"
-                bottom={null}
-              >
-                <TemplateSelect
-                  templateSelectRef={this.templateSelectRef}
-                  action={action}
-                  checkOptions={allFields.map((item) => ({
-                    label: item.title,
-                    value: item.code,
-                    system: item.system,
-                    optionConfig: includes(requiredFields, item.code) ? {
-                      disabled: includes(requiredFields, item.code),
-                      defaultChecked: includes(requiredFields, item.code),
-                      name: 'required-option',
-                    } : undefined,
-                  }))}
-                  selectTemplateOk={this.selectTemplateOk}
-                  transformExportFieldCodes={(data) => data}
-                  reverseTransformExportFieldCodes={(data) => data}
-                  defaultInitCodes={requiredFields}
-                />
-              </ImportIssueForm>
-              <Divider />
-            </>
+          <ImportIssueForm
+            title="选择常用模板"
+            bottom={null}
+            className="c7n-importIssue-templateSelect"
+          >
+            <TemplateSelect
+              templateSelectRef={this.templateSelectRef}
+              action={action}
+              checkOptions={allFields.map((item) => ({
+                label: item.title,
+                value: item.code,
+                system: item.system,
+                optionConfig: includes(requiredFields, item.code) ? {
+                  disabled: includes(requiredFields, item.code),
+                  defaultChecked: includes(requiredFields, item.code),
+                  name: 'required-option',
+                } : undefined,
+              }))}
+              selectTemplateOk={this.selectTemplateOk}
+              transformExportFieldCodes={(data) => data}
+              reverseTransformExportFieldCodes={(data) => data}
+              defaultInitCodes={requiredFields}
+            />
+          </ImportIssueForm>
           )
         }
         <ImportIssueForm
@@ -476,7 +484,7 @@ const handleOpenImport = (props) => {
     key: Modal.key(),
     title: `导入${props.name || '问题'}`,
     style: {
-      width: 380,
+      width: 740,
     },
     okText: '导入',
     cancelText: '关闭',
