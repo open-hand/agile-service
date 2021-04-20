@@ -1036,7 +1036,9 @@ class CreateIssue extends Component {
                 initialValue: this.props.defaultDescription,
               })(
                 <DebounceEditor
-                  style={{ width: '100%', overflow: 'hidden' }}
+                  style={{
+                    width: '100%', height: 'auto', minHeight: 280, overflow: 'hidden',
+                  }}
                 />,
               )}
             </FormItem>
