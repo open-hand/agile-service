@@ -17,6 +17,7 @@ import { publishVersionApi, versionApi } from '@/api';
 import { usePublishVersionContext } from './stores';
 import { openCreatePublishVersionModal } from './components/create-publish-version';
 import { openPublishVersionDetail } from './components/publish-version-detail';
+import openExportPublishVersionModal from './components/export';
 
 const COLOR_MAP = {
   规划中: '#ffb100',
@@ -42,7 +43,7 @@ function PublishVersion() {
           title: '删除发布版本',
           children: (
             <div>
-              <span>{`您确定要删除关联的应用版本【${record.get('versionAlias') || record.get('version')}】？`}</span>
+              <span>{`您确定要删除发布版本【${record.get('versionAlias') || record.get('version')}】？`}</span>
             </div>),
           onOk: () => {
             publishVersionApi.delete(record.get('id')).then(() => {
@@ -66,11 +67,10 @@ function PublishVersion() {
       menu={(
         <Menu onClick={({ key }) => handleClickMenu(key, record!)}>
           <Menu.Item key="publish">发布</Menu.Item>
-          <Menu.Item key="export">导出</Menu.Item>
           <Menu.Item key="del">删除</Menu.Item>
         </Menu>
       )}
-      onClickEdit={() => openPublishVersionDetail(record?.get('id')!)}
+      onClickEdit={() => openPublishVersionDetail(record?.get('id')!, handleRefresh)}
     />
   );
   const renderStatus = ({ text }: RenderProps) => (
@@ -101,6 +101,7 @@ function PublishVersion() {
         >
           创建发布版本
         </TooltipButton>
+        <Button icon="unarchive" onClick={openExportPublishVersionModal}>导出版本</Button>
       </Header>
       <Breadcrumb />
       <Content
@@ -115,8 +116,8 @@ function PublishVersion() {
           <Column name="actualPublishDate" className="c7n-agile-table-cell" width={110} />
           <Column name="artifactId" className="c7n-agile-table-cell" width={100} />
           <Column name="groupId" className="c7n-agile-table-cell" width={120} />
-          <Column name="appService" className="c7n-agile-table-cell" width={120} />
-          <Column name="tag" className="c7n-agile-table-cell" width={100} />
+          <Column name="appServiceName" className="c7n-agile-table-cell" width={120} />
+          <Column name="tagName" className="c7n-agile-table-cell" width={100} />
 
         </Table>
       </Content>

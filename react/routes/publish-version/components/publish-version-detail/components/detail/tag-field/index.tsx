@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectGitTags from '@/components/select/select-git-tags';
@@ -10,20 +10,21 @@ interface Props {
 }
 const TagField: React.FC<Props> = () => {
   const { disabled, store } = useReleaseDetailContext();
-  const { tagId, serviceCode } = store.getCurrentData;
+  const { tagName, serviceCode } = store.getCurrentData;
+  const applicationId = useMemo(() => store.getAppServiceList.find((i) => i.code === serviceCode)?.id, [serviceCode, store.getAppServiceList]);
   return (
     <Field label="Tag">
       <TextEditToggle
         onSubmit={(value: string | null) => {
-          store.update('tagId', value);
+          store.update('tagName', value);
         }}
         disabled={disabled}
-        initValue={tagId || undefined}
+        initValue={tagName || undefined}
         submitTrigger={['blur', 'change']}
-        editor={() => (<SelectGitTags applicationId={serviceCode} help={!serviceCode ? '请先选择应用服务' : undefined} />
+        editor={() => (<SelectGitTags key={`select-git-tag-${applicationId}`} applicationId={applicationId} help={!applicationId ? '请先选择应用服务' : undefined} />
         )}
       >
-        {null || '无'}
+        {tagName || '无'}
       </TextEditToggle>
     </Field>
 

@@ -17,18 +17,18 @@ interface Props extends Partial<SelectProps> {
   flat?: boolean
   hasUnassign?: boolean
 }
-const SelectAppVersion: React.FC<Props> = forwardRef(({
+const SelectPublishVersion: React.FC<Props> = forwardRef(({
   request, projectId, valueField, dataRef = { current: null }, afterLoad, statusArr = [], flat, hasUnassign, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IAppVersionData> => ({
-    name: 'version',
-    textField: 'name',
+    name: 'publishVersion',
+    textField: 'versionAlias',
     valueField: valueField || 'id',
     request: ({ filter, page }) => {
       if (request) {
         return request();
       }
-      return publishVersionApi.project(projectId || getProjectId()).loadAppService(filter, page);
+      return publishVersionApi.project(projectId || getProjectId()).loadList(page, 20, true);
     },
     middleWare: (versions: IAppVersionData[]) => {
       if (dataRef) {
@@ -53,7 +53,7 @@ const SelectAppVersion: React.FC<Props> = forwardRef(({
 
   return (
     <Component
-      multiple
+      // multiple
       ref={ref}
       clearButton
       {...props}
@@ -61,4 +61,4 @@ const SelectAppVersion: React.FC<Props> = forwardRef(({
     />
   );
 });
-export default SelectAppVersion;
+export default SelectPublishVersion;
