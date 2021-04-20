@@ -908,8 +908,9 @@ public class ExcelServiceImpl implements ExcelService {
     public void exportPublishVersion(Long projectId, Long publishVersionId) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        String websocketKey = WEBSOCKET_EXPORT_PUBLISH_VERSION + "-" + projectId;
         FileOperationHistoryDTO history =
-                initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE_PUBLISH_VERSION, WEBSOCKET_EXPORT_PUBLISH_VERSION);
+                initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE_PUBLISH_VERSION, websocketKey);
         try {
             boolean withFeature = (agilePluginService != null && withFeature(projectId, organizationId));
             PublishVersionDTO publishVersionDTO = validatePublishVersion(projectId, publishVersionId, userId, history);
@@ -929,28 +930,28 @@ public class ExcelServiceImpl implements ExcelService {
                     );
             String sheetName = "普通敏捷项目发布版本";
             int endRow = ExcelUtil.writeSubProjectVersionHeader(workbook, sheetName, headDataMap, cellRangeAddresses);
-            sendProcess(history, userId, 30D, WEBSOCKET_EXPORT_PUBLISH_VERSION);
+            sendProcess(history, userId, 30D, websocketKey);
 
             Map<String, List<IssueVO>> versionStoryMap = new LinkedHashMap<>();
             Set<Long> userIds = new HashSet<>();
             listRelatedStories(organizationId, tags, versionStoryMap, userIds, new HashSet<>(Arrays.asList(projectId)), withFeature);
             processAssigneeName(userIds, versionStoryMap);
             endRow = ExcelUtil.writePublishVersionStory(workbook, sheetName, versionStoryMap, endRow, withFeature);
-            sendProcess(history, userId, 50D, WEBSOCKET_EXPORT_PUBLISH_VERSION);
+            sendProcess(history, userId, 50D, websocketKey);
 
             Map<String, List<IssueVO>> versionBugMap = new LinkedHashMap<>();
             userIds.clear();
             listRelatedBugOrTask(organizationId, tags, versionBugMap, userIds, new HashSet<>(Arrays.asList(projectId)), IssueTypeCode.BUG.value());
             processAssigneeName(userIds, versionBugMap);
             endRow = ExcelUtil.writePublishVersionBug(workbook, sheetName, versionBugMap, endRow);
-            sendProcess(history, userId, 60D, WEBSOCKET_EXPORT_PUBLISH_VERSION);
+            sendProcess(history, userId, 60D, websocketKey);
 
             Map<String, List<IssueVO>> versionTaskMap = new LinkedHashMap<>();
             userIds.clear();
             listRelatedBugOrTask(organizationId, tags, versionBugMap, userIds, new HashSet<>(Arrays.asList(projectId)), IssueTypeCode.TASK.value());
             processAssigneeName(userIds, versionTaskMap);
             ExcelUtil.writePublishVersionTask(workbook, sheetName, versionBugMap, endRow);
-            sendProcess(history, userId, 70D, WEBSOCKET_EXPORT_PUBLISH_VERSION);
+            sendProcess(history, userId, 70D, websocketKey);
 
             String fileName = sheetName + FILESUFFIX;
             //把workbook上传到对象存储服务中
@@ -959,7 +960,7 @@ public class ExcelServiceImpl implements ExcelService {
             history.setStatus(FAILED);
             fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
             history.setMsg(e.getMessage());
-            sendProcess(history, userId, 0D, WEBSOCKET_EXPORT_PUBLISH_VERSION);
+            sendProcess(history, userId, 0D, websocketKey);
             LOGGER.error("export publish version failed, exception: {}", e);
         }
     }
@@ -1131,7 +1132,8 @@ public class ExcelServiceImpl implements ExcelService {
             String msg = "error.publish.version.not.existed." + publishVersionId;
             history.setMsg(msg);
             fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
-            sendProcess(history, userId, 1D, WEBSOCKET_EXPORT_PUBLISH_VERSION);
+            String websocketKey = WEBSOCKET_EXPORT_PUBLISH_VERSION + "-" + projectId;
+            sendProcess(history, userId, 1D, websocketKey);
             throw new CommonException(msg);
         }
         return result;
