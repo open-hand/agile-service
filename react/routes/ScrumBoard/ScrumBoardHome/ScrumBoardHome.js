@@ -266,6 +266,9 @@ class ScrumBoardHome extends Component {
       statusApi.loadAllTransformForAllIssueType(defaultBoard.boardId),
       ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId),
       epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
+      if (!this.dataConverter) {
+        return;
+      }
       this.dataConverter.setSourceData(epicData, defaultBoardData);
       const renderDataMap = new Map([
         ['parent_child', this.dataConverter.getParentWithSubData],
@@ -418,14 +421,14 @@ class ScrumBoardHome extends Component {
                 <div className="c7n-scrumboard-header">
                   <StatusColumn />
                 </div>
-                {this.issueSearchStore && (!ScrumBoardStore.didCurrentSprintExist
+                {(!ScrumBoardStore.didCurrentSprintExist
                   || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
                     && (!ScrumBoardStore.interconnectedData
                       || ScrumBoardStore.interconnectedData.size === 0))) ? (
                         <NoneSprint
                           doingSprintExist={ScrumBoardStore.didCurrentSprintExist}
-                          hasSetFilter={this.issueSearchStore.isHasFilter}
-                          filterItems={this.issueSearchStore.currentFlatFilter}
+                          hasSetFilter={this.issueSearchStore?.isHasFilter}
+                          filterItems={this.issueSearchStore?.currentFlatFilter ?? {}}
                         />
                   )
                   : (
