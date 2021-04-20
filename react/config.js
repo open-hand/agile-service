@@ -1,7 +1,6 @@
 module.exports = {
   modules: [
     '.',
-    '@choerodon/testmanager',
   ],
   webpackConfig(config) {
     config.module.rules.push({
