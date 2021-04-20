@@ -7,6 +7,7 @@ import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.core.util.Results;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -200,6 +201,18 @@ public class PublishVersionController {
                                      @RequestBody @Validated List<TagCompareVO> tagCompareList) {
         publishVersionService.compareTag(projectId, organizationId, publishVersionId, tagCompareList);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("更新发布版本状态")
+    @PutMapping(value = "/{publish_version_id}/update_status")
+    public ResponseEntity updateStatus(@ApiParam(value = "项目id", required = true)
+                                       @PathVariable(name = "project_id") Long projectId,
+                                       @ApiParam(value = "publish_version_id", required = true)
+                                       @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
+                                       @RequestParam String statusCode) {
+        publishVersionService.updateStatus(projectId, publishVersionId, statusCode);
+        return Results.success();
     }
 
 }

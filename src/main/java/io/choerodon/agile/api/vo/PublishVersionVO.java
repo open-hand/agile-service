@@ -54,6 +54,16 @@ public class PublishVersionVO {
 
     private String appServiceName;
 
+    private String statusCode;
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
     public String getAppServiceName() {
         return appServiceName;
     }

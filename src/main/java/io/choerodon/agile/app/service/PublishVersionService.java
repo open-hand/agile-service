@@ -132,4 +132,13 @@ public interface PublishVersionService {
      * @param tagName
      */
     void deleteTag(Long projectId, String appServiceCode, String tagName);
+
+    /**
+     * 更新发布版本状态
+     *
+     * @param projectId
+     * @param publishVersionId
+     * @param statusCode
+     */
+    void updateStatus(Long projectId, Long publishVersionId, String statusCode);
 }

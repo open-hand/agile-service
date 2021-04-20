@@ -18,6 +18,10 @@ import java.util.Date;
 @VersionAudit
 public class PublishVersionDTO extends AuditDomain {
 
+    public static final String RELEASED = "released";
+
+    public static final String VERSION_PLANNING = "version_planning";
+
     @Id
     @GeneratedValue
     private Long id;
@@ -43,6 +47,16 @@ public class PublishVersionDTO extends AuditDomain {
     private String description;
 
     private String tagName;
+
+    private String statusCode;
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
 
     public String getTagName() {
         return tagName;

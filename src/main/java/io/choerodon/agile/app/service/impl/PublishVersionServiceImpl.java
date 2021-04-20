@@ -393,6 +393,25 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         }
     }
 
+    @Override
+    public void updateStatus(Long projectId, Long publishVersionId, String statusCode) {
+        if (!PublishVersionDTO.VERSION_PLANNING.equals(statusCode)
+                || !PublishVersionDTO.RELEASED.equals(statusCode)) {
+            throw new CommonException("error.illegal.publishVersion.statusCode");
+        }
+        PublishVersionDTO example = new PublishVersionDTO();
+        example.setId(publishVersionId);
+        example.setProjectId(projectId);
+        PublishVersionDTO dto = publishVersionMapper.selectOne(example);
+        AssertUtilsForCommonException.notNull(dto, "error.publishVersion.not.existed");
+        if (!statusCode.equals(dto.getStatusCode())) {
+            dto.setStatusCode(statusCode);
+            if (publishVersionMapper.updateByPrimaryKeySelective(dto) != 1) {
+                throw new CommonException("error.publishVersion.update.status");
+            }
+        }
+    }
+
     private void deleteTagCompareHistory(Long projectId,
                                          Long organizationId,
                                          String appServiceCode,

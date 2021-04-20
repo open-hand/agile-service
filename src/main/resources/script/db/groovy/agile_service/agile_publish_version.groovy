@@ -31,4 +31,10 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_publish_version.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(id: '2021-04-20-agile-publish-version-add-column', author: 'kaiwen.li@hand-china.com') {
+        addColumn(tableName: 'agile_publish_version') {
+            column(name: 'status_code', type: 'VARCHAR(255)', remarks: '版本状态', defaultValue: 'version_planning', afterColumn: 'actual_publish_date')
+        }
+    }
 }
