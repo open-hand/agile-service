@@ -56,10 +56,10 @@ const FastSearchAttributeRelations: Array<FastSearchAttributeRelationItem> = [
     name: '不包含', value: 'exclude', escapeCharacter: 'not in', excludeType: ['date', 'datetime', 'time', 'number', 'decimal', 'radio', 'single', 'text', 'input'],
   },
   {
-    name: '包含', value: 'like', escapeCharacter: 'like', includeType: ['text', 'input'], // 文字类专署
+    name: '包含', value: 'like', escapeCharacter: 'like', includeType: ['text', 'input'], // 文字类专属
   },
   {
-    name: '不包含', value: 'notLike', escapeCharacter: 'notLike', includeType: ['text', 'input'], // 文字类专署
+    name: '不包含', value: 'notLike', escapeCharacter: 'notLike', includeType: ['text', 'input'], // 文字类专属
   },
   {
     name: '是', value: 'is', escapeCharacter: 'is', excludeType: ['date', 'datetime', 'time', 'multiMember', 'text', 'input'], excludeCode: ['issue_type', 'priority', 'status'],
@@ -101,15 +101,19 @@ export function getAttributeRelation(code: string, fieldType: IFieldTypeWithSyst
  * @returns
  */
 export function getFastSearchAttribute({
-  code, fieldCode, fieldType, type, ...otherData
+  code, fieldCode: propsFieldCode, fieldType, type, ...otherData
 }: { code?: string, fieldCode?: string, fieldType?: string, type?: string, [propsName: string]: any }): { fieldCode: string, fieldType: IFieldTypeWithSystemType, [propsName: string]: any } {
-  if (code === 'story_point' || fieldCode === 'story_point') {
+  const fieldCode = (propsFieldCode || code)!;
+  if (fieldCode === 'story_point') {
     return { fieldCode: 'story_point', fieldType: 'number', ...otherData };
   }
-  if (['last_updated_user', 'assignee', 'created_user', 'reporter'].includes(fieldCode || code!)) {
-    return { fieldCode: code || fieldCode!, fieldType: 'member', ...otherData };
+  if (['creation_date', 'last_update_date'].includes(fieldCode)) {
+    return { fieldCode, fieldType: 'datetime', ...otherData };
   }
-  return { fieldCode: code || fieldCode!, fieldType: (fieldType || type) as IFieldTypeWithSystemType, ...otherData };
+  if (['last_updated_user', 'assignee', 'created_user', 'reporter'].includes(fieldCode)) {
+    return { fieldCode, fieldType: 'member', ...otherData };
+  }
+  return { fieldCode, fieldType: (fieldType || type) as IFieldTypeWithSystemType, ...otherData };
 }
 
 const FieldTransformCodeRenderFieldObj = {
@@ -160,16 +164,14 @@ export function getTransformOperatorToRelationRuleMap() {
   return new Map<string, string>(FastSearchAttributeRelations.map((relation) => [relation.escapeCharacter, relation.value]));
 }
 /**
- * 处理时间类型的value 返回一个可靠的时间字符串
+ * 处理值value 时间类型返回一个可靠的时间字符串,若不是时间类型value 则返回原值
  * @param value
  * @param condition
  * @returns
  */
-export function processDateValue(value: any, condition: Pick<IFastSearchCondition, 'fieldCode' | 'fieldType' | 'isCustomField'>): string {
+export function processDataValue(value: any, condition: Pick<IFastSearchCondition, 'fieldCode' | 'fieldType' | 'isCustomField'>): string {
   const newValue = value;
-  if (['creation_date', 'last_update_date'].includes(condition.fieldCode) || condition.fieldType === 'datetime') {
-    return moment(newValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
-  } if (['date', 'time'].includes(condition.fieldType)) {
+  if (['date', 'time', 'datetime'].includes(condition.fieldType)) {
     return moment(newValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).format(DateFormatString[condition.fieldType as 'date' | 'time']);
   }
   return newValue;
@@ -238,7 +240,7 @@ export function transformSearchConditionListToEditData(searchConditionList: IFas
       value = typeof (value) === 'string' ? valueOptions[0] || value : valueOptions;
     }
     if (attribute) {
-      value = processDateValue(value, { ...item, fieldType: attribute.fieldType! });
+      value = processDataValue(value, { ...item, fieldType: attribute.fieldType! });
     }
     return ({ ...item, attribute, value });
   }).filter((item) => item.attribute);
@@ -262,7 +264,7 @@ export function processWaitSubmitData(mainDataSet: DataSet, searchConditionDataS
   const bothRelationArr: string[] = []; //  两个相邻筛选条件关系
   const expressQueryArr: any[] = [];
   const searchConditionArr = searchConditionDataSet.toJSONData().map((condition: IFastSearchCondition) => {
-    const value = condition.valueBindValue || condition.value;
+    const value = processDataValue(condition.valueBindValue || condition.value, condition);
     const operation = transformRelationValueToOperation(condition.relation);
     if (condition.bothRelation) {
       bothRelationArr.push(condition.bothRelation);
