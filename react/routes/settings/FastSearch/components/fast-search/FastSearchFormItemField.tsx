@@ -58,6 +58,8 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     unassignedEpic: undefined,
     clearButton: true,
     primitiveValue: false,
+    selectAllButton: false,
+    reverse: false,
     autoQueryConfig: selectUserAutoQueryConfig,
     style: { width: '100%' },
     afterLoad: record.get('_editData') ? handleBindOptions : undefined,
