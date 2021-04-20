@@ -393,6 +393,51 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         }
     }
 
+    @Override
+    public void updateStatus(Long projectId, Long publishVersionId, String statusCode) {
+        if (!PublishVersionDTO.VERSION_PLANNING.equals(statusCode)
+                || !PublishVersionDTO.RELEASED.equals(statusCode)) {
+            throw new CommonException("error.illegal.publishVersion.statusCode");
+        }
+        PublishVersionDTO example = new PublishVersionDTO();
+        example.setId(publishVersionId);
+        example.setProjectId(projectId);
+        PublishVersionDTO dto = publishVersionMapper.selectOne(example);
+        AssertUtilsForCommonException.notNull(dto, "error.publishVersion.not.existed");
+        if (!statusCode.equals(dto.getStatusCode())) {
+            dto.setStatusCode(statusCode);
+            if (publishVersionMapper.updateByPrimaryKeySelective(dto) != 1) {
+                throw new CommonException("error.publishVersion.update.status");
+            }
+        }
+    }
+
+    @Override
+    public List<TagCompareHistoryDTO> tagCompareHistory(Long projectId,
+                                                        Long organizationId,
+                                                        Long publishVersionId) {
+        Set<Long> publishVersionIds =
+                publishVersionTreeClosureMapper.selectDescendants(
+                        new HashSet<>(Arrays.asList(projectId)),
+                        organizationId,
+                        new HashSet<>(Arrays.asList(publishVersionId)),
+                        null)
+                        .stream()
+                        .map(PublishVersionTreeClosureDTO::getDescendantId)
+                        .collect(Collectors.toSet());
+        Set<String> appServiceCodes =
+                publishVersionMapper.selectByIds(StringUtils.join(publishVersionIds, ","))
+                        .stream()
+                        .filter(x -> !StringUtils.isEmpty(x.getServiceCode()))
+                        .map(PublishVersionDTO::getServiceCode)
+                        .collect(Collectors.toSet());
+        if (!appServiceCodes.isEmpty()) {
+            return tagCompareHistoryMapper.selectByAppServiceCodes(projectId, organizationId, appServiceCodes);
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
     private void deleteTagCompareHistory(Long projectId,
                                          Long organizationId,
                                          String appServiceCode,

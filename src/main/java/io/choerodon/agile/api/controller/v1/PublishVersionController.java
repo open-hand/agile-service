@@ -3,10 +3,12 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.TagCompareVO;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.agile.infra.dto.TagCompareHistoryDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.core.util.Results;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,7 +60,7 @@ public class PublishVersionController {
     @PostMapping("/{publish_version_id}/batch")
     public ResponseEntity<List<PublishVersionVO>> batchCreate(@ApiParam(value = "项目id", required = true)
                                                               @PathVariable(name = "project_id") Long projectId,
-                                                              @PathVariable(name = "publish_version_id") Long publishVersionId,
+                                                              @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
                                                               @ApiParam(value = "新增发布版本", required = true)
                                                               @RequestBody @Valid List<PublishVersionVO> publishVersionList) {
         return Optional.ofNullable(publishVersionService.batchCreate(projectId, publishVersionId, publishVersionList))
@@ -138,7 +140,7 @@ public class PublishVersionController {
                                               @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "alias", required = true)
                                               @RequestParam String alias,
-                                              @RequestParam(required = false) Long publishVersionId) {
+                                              @RequestParam(required = false) @Encrypt Long publishVersionId) {
         return Optional.ofNullable(publishVersionService.checkAlias(projectId, alias, publishVersionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.publishVersion.isExisted"));
@@ -152,7 +154,7 @@ public class PublishVersionController {
                                                            @ApiParam(value = "groupIds", required = true)
                                                            @RequestParam(required = false) String groupIds,
                                                            @RequestParam(required = false, defaultValue = "false") Boolean writeBack,
-                                                           @PathVariable(name = "publish_version_id") Long publishVersionId,
+                                                           @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
                                                            @RequestBody MultipartFile file) {
         return Optional.ofNullable(publishVersionService.parsePom(projectId, groupIds, file, publishVersionId, writeBack))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -165,7 +167,7 @@ public class PublishVersionController {
     public ResponseEntity<Page<IssueListFieldKVVO>> listRelStoryByOption(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable(name = "project_id") Long projectId,
                                                                          @ApiParam(value = "产品版本id", required = true)
-                                                                         @Encrypt @PathVariable(name = "publish_version_id") Long publishVersionId,
+                                                                         @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
                                                                          @RequestParam Long organizationId,
                                                                          @ApiParam(value = "筛选条件")
                                                                          @RequestBody SearchVO searchVO,
@@ -180,7 +182,7 @@ public class PublishVersionController {
     public ResponseEntity<Page<IssueListFieldKVVO>> listRelBugByOption(@ApiParam(value = "项目id", required = true)
                                                                        @PathVariable(name = "project_id") Long projectId,
                                                                        @ApiParam(value = "产品版本id", required = true)
-                                                                       @Encrypt @PathVariable(name = "publish_version_id") Long publishVersionId,
+                                                                       @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
                                                                        @RequestParam Long organizationId,
                                                                        @ApiParam(value = "筛选条件")
                                                                        @RequestBody SearchVO searchVO,
@@ -195,11 +197,33 @@ public class PublishVersionController {
     public ResponseEntity compareTag(@ApiParam(value = "项目id", required = true)
                                      @PathVariable(name = "project_id") Long projectId,
                                      @ApiParam(value = "产品版本id", required = true)
-                                     @Encrypt @PathVariable(name = "publish_version_id") Long publishVersionId,
+                                     @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
                                      @RequestParam Long organizationId,
                                      @RequestBody @Validated List<TagCompareVO> tagCompareList) {
         publishVersionService.compareTag(projectId, organizationId, publishVersionId, tagCompareList);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("更新发布版本状态")
+    @PutMapping(value = "/{publish_version_id}/update_status")
+    public ResponseEntity updateStatus(@ApiParam(value = "项目id", required = true)
+                                       @PathVariable(name = "project_id") Long projectId,
+                                       @ApiParam(value = "publish_version_id", required = true)
+                                       @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
+                                       @RequestParam String statusCode) {
+        publishVersionService.updateStatus(projectId, publishVersionId, statusCode);
+        return Results.success();
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询tag对比历史")
+    @PostMapping(value = "/{publish_version_id}/tag_compare_history")
+    public ResponseEntity<List<TagCompareHistoryDTO>> tagCompareHistory(@ApiParam(value = "项目id", required = true)
+                                                                        @PathVariable(name = "project_id") Long projectId,
+                                                                        @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
+                                                                        @RequestParam Long organizationId) {
+        return ResponseEntity.ok(publishVersionService.tagCompareHistory(projectId, organizationId, publishVersionId));
     }
 
 }
