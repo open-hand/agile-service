@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.StatusBranchMergeSettingMapper">
+
+    <select id="listByOptions" resultType="io.choerodon.agile.infra.dto.StatusBranchMergeSettingDTO">
+        select * from fd_status_branch_merge_setting
+        where organization_id = #{organizationId}
+        and project_id = #{projectId}
+        and issue_type_id = #{issueTypeId}
+        and status_id in
+        <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
+            #{statusId}
+        </foreach>
+    </select>
+</mapper>

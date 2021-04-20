@@ -105,6 +105,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     private IssueTypeService issueTypeService;
     @Autowired
     private StatusTemplateMapper statusTemplateMapper;
+    @Autowired
+    private StatusBranchMergeSettingService statusBranchMergeSettingService;
 
     @Override
     public OrganizationConfigDTO initStatusMachineTemplate(Long organizationId, Long issueTypeId) {
@@ -312,6 +314,11 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         List<StatusFieldSettingVO> statusFieldSettingVOS = statusFieldSettingService.listStatusFieldSetting(organizationId, issueTypeId, statusIds);
         List<StatusNoticeSettingVO> statusNoticeSettingVOS = statusNoticeSettingService.listStatusNoticeSetting(organizationId, issueTypeId, statusIds, schemeCode);
         List<StatusLinkageVO> linkageVOS = statusLinkageService.listStatusLinkage(organizationId , issueTypeId, statusIds);
+        Map<Long, List<StatusBranchMergeSettingVO>> statusBranchMergeSettingMap =
+                statusBranchMergeSettingService.listByOptions(0L, organizationId, issueTypeId, statusIds)
+                        .stream()
+                        .collect(Collectors.groupingBy(StatusBranchMergeSettingVO::getStatusId));
+
         Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();
         Map<Long, List<StatusFieldSettingVO>> statusFieldSettingMap = new HashMap<>();
         Map<Long, List<StatusNoticeSettingVO>> statusNoticSettingMap = statusNoticeSettingVOS.stream()
@@ -329,6 +336,10 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
             statusSettingVO.setStatusFieldSettingVOS(statusFieldSettingMap.get(statusSettingVO.getId()));
             statusSettingVO.setStatusNoticeSettingVOS(statusNoticSettingMap.get(statusSettingVO.getId()));
             statusSettingVO.setStatusLinkageVOS(statusLinkageMap.get(statusSettingVO.getId()));
+            List<StatusBranchMergeSettingVO> statusBranchMergeSettingList = statusBranchMergeSettingMap.get(statusSettingVO.getId());
+            if (!ObjectUtils.isEmpty(statusBranchMergeSettingList)) {
+                statusSettingVO.setStatusBranchMergeSettingVO(statusBranchMergeSettingList.get(0));
+            }
         }
         page.setContent(list);
         return page;
@@ -490,6 +501,16 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         return projectConfigMapper.select(projectConfigDTO).isEmpty();
     }
 
+    @Override
+    public StatusBranchMergeSettingVO queryStatusBranchMergeSetting(Long organizationId, Long issueTypeId, Long statusId) {
+        return statusBranchMergeSettingService.query(0L, organizationId, issueTypeId, statusId);
+    }
+
+    @Override
+    public void updateAutoTransform(Long organizationId, Long issueTypeId, Long statusId, Boolean autoTransform) {
+        statusBranchMergeSettingService.updateAutoTransform(0L, organizationId, issueTypeId, statusId, autoTransform);
+    }
+
     private OrganizationConfigDTO initOrganizationConfig(Long organizationId){
         // 创建状态机方案
         Long schemeId = stateMachineSchemeService.initOrgDefaultStatusMachineScheme(organizationId);
@@ -607,6 +628,16 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
             List<StatusTransferSettingCreateVO> list = new ArrayList<>();
             handlerTransfer(list, statusTransferSettingVOS, userIds);
             statusTransferSettingService.createOrUpdate(projectId, issueTypeId, statusId, objectVersionNumber, applyType, list);
+        }
+        // 分支合并状态流转
+        StatusBranchMergeSettingVO statusBranchMergeSetting = statusSettingVO.getStatusBranchMergeSettingVO();
+        if (statusBranchMergeSetting != null) {
+            statusBranchMergeSettingService.updateAutoTransform(
+                    projectId,
+                    ConvertUtil.getOrganizationId(projectId),
+                    statusBranchMergeSetting.getIssueTypeId(),
+                    statusBranchMergeSetting.getStatusId(),
+                    statusBranchMergeSetting.getAutoTransform());
         }
     }
 
