@@ -64,11 +64,15 @@ class PublishVersionApi extends Api<PublishVersionApi> {
   /**
    *加载发布版本列表
    */
-  loadList(appService = true) {
+  loadList(page = 0, size = 10, appService = true) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/list`,
       data: { appService },
+      params: {
+        page,
+        size,
+      },
     });
   }
 
@@ -341,30 +345,19 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  /**
-   * 加载应用版本列表
-   */
-  loadAppService(content?: string, page = 1, size = 20) {
-    return this.request({
-      method: 'get',
-      url: `${this.prefix}/app_version`,
-      params: {
-        content,
-        page,
-        size,
-      },
-    }).then((res: any) => {
-      const newList = res.content.map((i: any) => ({ ...i, name: `${i.artifactId}/${i.versionAlias || i.version}` }));
-      const newData = ({ ...res, content: newList, list: newList });
-      return newData;
-    });
-  }
-
   compareTag(versionId: string, data: any[]) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/${versionId}/compare`,
       data: data.map((i) => ({ ...i, projectId: i.projectId || getProjectId() })),
+    });
+  }
+
+  export(publishVersionId: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/excel/export_publish_version`,
+      params: { publishVersionId },
     });
   }
 }

@@ -30,7 +30,7 @@ export function useReleaseDetailContext() {
 }
 
 const Provider: React.FC<ReleaseDetailProps> = ({
-  children, ...restProps
+  children, onUpdate, ...restProps
 }) => {
   const prefixCls = 'c7n-agile-publish-version-detail';
   const { isInProgram, loading } = useIsInProgram();
@@ -45,7 +45,7 @@ const Provider: React.FC<ReleaseDetailProps> = ({
   //   }
   //   return undefined;
   // }, [propsEvents?.update]);
-  const updateDetail = () => true;
+  const updateDetail = () => onUpdate && onUpdate();
   const push = (d: any) => { };
   const selectIssue = useMemo(() => (id: string) => push({
     path: 'issue',

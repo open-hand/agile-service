@@ -10,7 +10,8 @@ import StoreProvider from './stores';
 interface ReleaseDetailProps {
   id: string
   disabled?: boolean,
-  modal?:IModalProps,
+  modal?: IModalProps,
+  onUpdate?: () => void,
   events?: {
     loadAfter?: (data: { piAimData: IReleaseDetailData, featureList?: Array<any> }) => void,
     deleteAfter?: (data: IReleaseDetailData) => void,
@@ -23,7 +24,7 @@ const ReleaseDetailIndex: React.FC<ReleaseDetailProps> = (props) => (
   </StoreProvider>
 );
 
-export function openPublishVersionDetail(id: string) {
+export function openPublishVersionDetail(id: string, onOk: () => void) {
   // store.select(id);
   Modal.open({
     drawer: true,
@@ -46,7 +47,7 @@ export function openPublishVersionDetail(id: string) {
     },
     footer: () => null,
     // footer: (okBtn) => okBtn,
-    children: <ReleaseDetailIndex id={id} />,
+    children: <ReleaseDetailIndex id={id} onUpdate={onOk} />,
   });
 }
 export { ReleaseDetailProps, useReleaseDetailStore };

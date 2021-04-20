@@ -16,8 +16,8 @@ const PublishVersionDataSet = (): DataSetProps => ({
     { name: 'actualPublishDate', type: 'string' as FieldType, label: '发布日期' },
     { name: 'artifactId', type: 'string' as FieldType, label: 'artifactId' },
     { name: 'groupId', type: 'string' as FieldType, label: 'groupId' },
-    { name: 'appService', type: 'string' as FieldType, label: '关联的应用服务' },
-    { name: 'tag', type: 'string' as FieldType, label: '关联tag' },
+    { name: 'appServiceName', type: 'string' as FieldType, label: '关联的应用服务' },
+    { name: 'tagName', type: 'string' as FieldType, label: '关联tag' },
   ],
   transport: {
     read: ({ params }) => ({ ...publishVersionApiConfig.loadList(), params, data: { appService: true } }),
