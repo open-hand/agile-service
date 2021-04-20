@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.PublishVersionVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.TagCompareVO;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.agile.infra.dto.TagCompareHistoryDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -141,4 +142,14 @@ public interface PublishVersionService {
      * @param statusCode
      */
     void updateStatus(Long projectId, Long publishVersionId, String statusCode);
+
+    /**
+     * 查询tag 对比历史
+     *
+     * @param projectId
+     * @param organizationId
+     * @param publishVersionId
+     * @return
+     */
+    List<TagCompareHistoryDTO> tagCompareHistory(Long projectId, Long organizationId, Long publishVersionId);
 }
