@@ -9,7 +9,7 @@ import FlatSelect from '@/components/flat-select';
 interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
   valueField?: string
-  afterLoad?: (sprints: ILabel[]) => void
+  afterLoad?: (list: any[]) => void
   flat?: boolean
   programMode?: string /** 是否为项目群访问模式  */
   projectId?: string
@@ -26,8 +26,8 @@ const SelectAppService: React.FC<Props> = forwardRef(({
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
     textField: 'name',
-    valueField: 'code',
-    optionRenderer: (appService:any) => (
+    valueField: valueField || 'code',
+    optionRenderer: (appService: any) => (
       <FragmentForSearch name={`${appService.name}(${appService.code})`}>
         {renderService(appService)}
       </FragmentForSearch>

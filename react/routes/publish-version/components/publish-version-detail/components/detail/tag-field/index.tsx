@@ -20,7 +20,7 @@ const TagField: React.FC<Props> = () => {
         }}
         disabled={disabled}
         initValue={tagName || undefined}
-        submitTrigger={['blur', 'change']}
+        submitTrigger={['blur', 'change']} //
         editor={() => (<SelectGitTags key={`select-git-tag-${applicationId}`} applicationId={applicationId} help={!applicationId ? '请先选择应用服务' : undefined} />
         )}
       >
