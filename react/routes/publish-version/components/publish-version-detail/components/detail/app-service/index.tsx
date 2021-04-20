@@ -17,7 +17,7 @@ const AppService: React.FC<Props> = () => {
     <Field label="应用服务">
       <TextEditToggle
         onSubmit={(value: string | null) => {
-          store.update('serviceCode', value);
+          store.update({ serviceCode: value, tagName: null });
         }}
         disabled={disabled}
         initValue={serviceCode || undefined}

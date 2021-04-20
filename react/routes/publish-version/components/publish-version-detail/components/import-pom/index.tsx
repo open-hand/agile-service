@@ -60,9 +60,9 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     fields: [
       { name: 'artifactId', label: '应用服务' },
       { name: 'version', label: 'version*', required: true },
-      { name: 'versionAlias', label: '版本别名' },
-      { name: 'serviceCode', label: '应用服务*' },
-      { name: 'tagId', label: 'tag*' },
+      { name: 'versionAlias', label: '版本名称' },
+      { name: 'serviceCode', label: '应用服务' },
+      { name: 'tagId', label: 'tag' },
     ],
   }), []);
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

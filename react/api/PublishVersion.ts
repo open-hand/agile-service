@@ -24,7 +24,7 @@ export interface IPublishVersionData {
   organizationId: string
   projectId: string
   serviceCode: string | null
-  tagId: string | null
+  tagName: string | null
   version: string | null
   versionAlias: string | null
   [propsName: string]: any
@@ -48,7 +48,10 @@ export interface IPublishVersionTreeNode {
   type?: string | 'app'
   children?: Array<IPublishVersionTreeNode>
 }
-
+interface IPublishVersionListSearchData{
+  appService?:boolean
+  content?:string
+}
 class PublishVersionApi extends Api<PublishVersionApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -64,15 +67,12 @@ class PublishVersionApi extends Api<PublishVersionApi> {
   /**
    *加载发布版本列表
    */
-  loadList(page = 0, size = 10, appService = true) {
+  loadList(params = { page: 0, size: 10 }, data:IPublishVersionListSearchData = { appService: true, content: '' }) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/list`,
-      data: { appService },
-      params: {
-        page,
-        size,
-      },
+      data,
+      params,
     });
   }
 
@@ -314,7 +314,7 @@ class PublishVersionApi extends Api<PublishVersionApi> {
   importProgramPom(data: any, subProjectId: string, groupIds?: string) {
     return this.request({
       method: 'post',
-      url: `${this.prefix}/version_tree/parse_pom`,
+      url: `${this.prefix}/program_version_tree/parse_pom`,
       params: {
         groupIds,
         subProjectId,
@@ -326,7 +326,7 @@ class PublishVersionApi extends Api<PublishVersionApi> {
   loadProgramAppService(programVersionId: string, subProjectId?: string) {
     return this.request({
       method: 'get',
-      url: `${this.prefix}/version_tree/available_app_version`,
+      url: `${this.prefix}/program_version_tree/available_app_version`,
       params: {
         programVersionId,
         subProjectId,

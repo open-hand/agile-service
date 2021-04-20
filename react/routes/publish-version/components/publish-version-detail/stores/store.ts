@@ -1,5 +1,7 @@
 import { observable, action, computed } from 'mobx';
-import { set, get, pick } from 'lodash';
+import {
+  set, get, pick, merge,
+} from 'lodash';
 import {
   devOpsApi,
   IAppVersionData, IPublishVersionData, IPublishVersionTreeNode, projectApi, publishVersionApi, versionApi,
@@ -113,11 +115,17 @@ class ReleaseDetailStore {
   }
 
   @action('更新版本详情')
-  async update(key: string, value: any) {
+  async update(keyValues: { [key: string]: any } | string, value?: any) {
     this.loading = true;
     const data = this.getCurrentData as any;
     // const data = pick(this.getCurrentData!, ['description', 'expectReleaseDate', 'name', 'objectVersionNumber', 'projectId', 'startDate']);
-    set(data, key, value);
+    if (typeof (keyValues) === 'string') {
+      set(data, keyValues, value);
+    } else {
+      Object.entries(keyValues).forEach(([key, v]) => {
+        set(data, key, v);
+      });
+    }
     await publishVersionApi.update(this.getCurrentData.id, data);
     await this.loadData();
     await this.events.update(data);

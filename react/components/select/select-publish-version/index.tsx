@@ -28,7 +28,7 @@ const SelectPublishVersion: React.FC<Props> = forwardRef(({
       if (request) {
         return request();
       }
-      return publishVersionApi.project(projectId || getProjectId()).loadList(page, 20, true);
+      return publishVersionApi.project(projectId || getProjectId()).loadList({ page: page!, size: 20 }, { appService: true, content: filter });
     },
     middleWare: (versions: IAppVersionData[]) => {
       if (dataRef) {
