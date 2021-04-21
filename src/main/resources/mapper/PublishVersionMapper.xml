@@ -20,18 +20,7 @@
     </select>
 
     <select id="listByOptions" resultType="io.choerodon.agile.api.vo.PublishVersionVO">
-        SELECT
-        apv.id,
-        apv.group_id,
-        apv.artifact_id,
-        apv.version_alias,
-        apv.version,
-        apv.service_code,
-        apv.project_id,
-        apv.organization_id,
-        apv.description,
-        apv.tag_name,
-        apv.object_version_number
+        SELECT apv.*
         FROM agile_publish_version apv
         WHERE apv.project_id = #{projectId}
         <if test="publishVersionVO != null ">

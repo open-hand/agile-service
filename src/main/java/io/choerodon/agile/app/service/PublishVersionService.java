@@ -140,8 +140,9 @@ public interface PublishVersionService {
      * @param projectId
      * @param publishVersionId
      * @param statusCode
+     * @param objectVersionNumber
      */
-    void updateStatus(Long projectId, Long publishVersionId, String statusCode);
+    void updateStatus(Long projectId, Long publishVersionId, String statusCode, Long objectVersionNumber);
 
     /**
      * 查询tag 对比历史
