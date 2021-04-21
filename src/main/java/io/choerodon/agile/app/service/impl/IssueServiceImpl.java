@@ -2681,7 +2681,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //连表查询需要设置主表别名
         Map<String, String> orders = new HashMap<>();
         orders.put("issueNum","issue_num_convert");
-        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", orders);
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), null, orders);
         pageRequest.setSort(sort);
         Page<IssueDTO> pageInfo = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryStoryAndTaskByProjectId(projectId, searchVO));
         List<IssueDTO> list = pageInfo.getContent();
