@@ -171,7 +171,8 @@ public class PublishVersionController {
                                                                          @RequestParam Long organizationId,
                                                                          @ApiParam(value = "筛选条件")
                                                                          @RequestBody SearchVO searchVO,
-                                                                         @SortDefault(direction = Sort.Direction.ASC) PageRequest pageRequest) {
+                                                                         @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
+                                                                                     PageRequest pageRequest) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return ResponseEntity.ok(publishVersionService.listRelIssueByOption(projectId, organizationId, publishVersionId, searchVO, pageRequest, IssueTypeCode.STORY.value()));
     }
@@ -186,7 +187,8 @@ public class PublishVersionController {
                                                                        @RequestParam Long organizationId,
                                                                        @ApiParam(value = "筛选条件")
                                                                        @RequestBody SearchVO searchVO,
-                                                                       @SortDefault(direction = Sort.Direction.ASC) PageRequest pageRequest) {
+                                                                       @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
+                                                                                   PageRequest pageRequest) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return ResponseEntity.ok(publishVersionService.listRelIssueByOption(projectId, organizationId, publishVersionId, searchVO, pageRequest, IssueTypeCode.BUG.value()));
     }

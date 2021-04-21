@@ -321,8 +321,8 @@ public class OrganizationConfigController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/status_branch_merge_setting/update")
     public ResponseEntity updateAutoTransform(@PathVariable("organization_id") Long organizationId,
-                                              @RequestParam("issue_type_id") @Encrypt Long issueTypeId,
-                                              @RequestParam("status_id") @Encrypt Long statusId,
+                                              @RequestParam @Encrypt Long issueTypeId,
+                                              @RequestParam @Encrypt Long statusId,
                                               @RequestParam Boolean autoTransform) {
         organizationConfigService.updateAutoTransform(organizationId, issueTypeId, statusId, autoTransform);
         return Results.success();
