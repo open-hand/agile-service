@@ -781,7 +781,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<StatusNoticeSettingVO> statusNoticeSettingVOS = statusNoticeSettingService.list(projectId, issueTypeId, statusIds, schemeCode);
         List<StatusLinkageVO> linkageVOS = statusLinkageService.listByStatusIds(projectId, issueTypeId, statusIds, applyType);
         Map<Long, List<StatusBranchMergeSettingVO>> statusBranchMergeSettingMap =
-                statusBranchMergeSettingService.listByOptions(0L, organizationId, issueTypeId, statusIds)
+                statusBranchMergeSettingService.listByOptions(projectId, organizationId, issueTypeId, statusIds)
                         .stream()
                         .collect(Collectors.groupingBy(StatusBranchMergeSettingVO::getStatusId));
         Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();

@@ -46,7 +46,11 @@ public class StatusBranchMergeSettingServiceImpl implements StatusBranchMergeSet
     @Override
     public StatusBranchMergeSettingVO query(Long projectId, Long organizationId, Long issueTypeId, Long statusId) {
         StatusBranchMergeSettingDTO result = queryByIssueTypeIdAndStatusId(projectId, organizationId, issueTypeId, statusId);
-        return modelMapper.map(result, StatusBranchMergeSettingVO.class);
+        if (result != null) {
+            return modelMapper.map(result, StatusBranchMergeSettingVO.class);
+        } else {
+            return null;
+        }
     }
 
     private StatusBranchMergeSettingDTO queryByIssueTypeIdAndStatusId(Long projectId, Long organizationId, Long issueTypeId, Long statusId) {
