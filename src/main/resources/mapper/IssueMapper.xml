@@ -675,30 +675,34 @@
     </select>
 
     <select id="queryStoryAndTaskByProjectId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
-        select
-        ai.issue_id as issue_id,
-        ai.summary,
-        CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
-        CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
-        ai.reporter_id,
-        ai.last_update_date,
-        ai.priority_id,
-        ai.assignee_id,
-        ai.issue_type_id,
-        ai.status_id,
-        ai.apply_type
-        from agile_issue ai
-        LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
-        where ai.project_id = #{projectId}
-        AND ai.type_code in ('story','task')
+        select search.*
+        from (
+            select
+                ai.issue_id as issue_id,
+                ai.summary,
+                CONVERT(ai.issue_num,UNSIGNED) as issue_num_convert,
+                CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
+                ai.reporter_id,
+                ai.last_update_date,
+                ai.priority_id,
+                ai.assignee_id,
+                ai.issue_type_id,
+                ai.status_id,
+                ai.apply_type
+                from agile_issue ai
+            LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
+            where ai.project_id = #{projectId}
+            AND ai.type_code in ('story','task')
+        ) search
+        where 1=1
         <if test="searchVO != null and searchVO.advancedSearchArgs != null and searchVO.advancedSearchArgs.size > 0">
-             <if test="searchVO.advancedSearchArgs.summary != null">
+            <if test="searchVO.advancedSearchArgs.summary != null">
                 AND (
-                 ai.summary LIKE CONCAT(CONCAT('%', #{searchVO.advancedSearchArgs.summary}), '%')
-                 OR
-                 ai.issue_num LIKE CONCAT(CONCAT('%', #{searchVO.advancedSearchArgs.summary}), '%')
-                 )
-             </if>
+                search.summary LIKE CONCAT(CONCAT('%', #{searchVO.advancedSearchArgs.summary}), '%')
+                OR
+                search.issue_num LIKE CONCAT(CONCAT('%', #{searchVO.advancedSearchArgs.summary}), '%')
+                )
+            </if>
         </if>
     </select>
 
