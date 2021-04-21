@@ -32,7 +32,7 @@ const SelectAppService: React.FC<Props> = forwardRef(({
         {renderService(appService)}
       </FragmentForSearch>
     ),
-    request: () => devOpsApi.loadActiveService(),
+    request: () => devOpsApi.project(projectId).loadActiveService(),
     middleWare: (data: any) => {
       if (dataRef) {
         Object.assign(dataRef, {

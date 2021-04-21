@@ -139,6 +139,20 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
+  updateStatus(publishVersionId: string, statusCode: 'released'|'version_planning') {
+    return this.request({
+      method: 'put',
+      url: `${this.prefix}/publish_version/update/${publishVersionId}`,
+      params: {
+        statusCode,
+      },
+      data: {
+        organizationId: getOrganizationId(),
+        projectId: getProjectId(),
+      },
+    });
+  }
+
   delete(publishVersionId: string) {
     return this.request({
       method: 'delete',
@@ -345,10 +359,23 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
+  loadCompareHistory(versionId:string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/publish_version/${versionId}/tag_compare_history`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
   compareTag(versionId: string, data: any[]) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/${versionId}/compare`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
       data: data.map((i) => ({ ...i, projectId: i.projectId || getProjectId() })),
     });
   }
