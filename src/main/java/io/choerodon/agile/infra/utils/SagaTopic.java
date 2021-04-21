@@ -35,6 +35,13 @@ public final class SagaTopic {
 
         public static final String TASK_GIT_TAG_DELETE = "agile-git-tag-delete";
 
+        /**
+         * 分支合并
+         */
+        public static final String BRANCH_MERGE_REQUEST_PASS = "devops-merge-request-pass";
+
+        public static final String TASK_BRANCH_MERGE_REQUEST_PASS = "agile-branch-merge-request-pass";
+
     }
 
     public static class Organization {

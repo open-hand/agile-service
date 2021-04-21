@@ -121,6 +121,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private BaseFeignClient baseFeignClient;
     @Autowired
     private StatusMachineNodeMapper nodeDeployMapper;
+    @Autowired
+    private StatusBranchMergeSettingService statusBranchMergeSettingService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -778,6 +780,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<StatusFieldSettingVO> statusFieldSettingVOS = statusFieldSettingService.listByStatusIds(projectId, issueTypeId, statusIds);
         List<StatusNoticeSettingVO> statusNoticeSettingVOS = statusNoticeSettingService.list(projectId, issueTypeId, statusIds, schemeCode);
         List<StatusLinkageVO> linkageVOS = statusLinkageService.listByStatusIds(projectId, issueTypeId, statusIds, applyType);
+        Map<Long, List<StatusBranchMergeSettingVO>> statusBranchMergeSettingMap =
+                statusBranchMergeSettingService.listByOptions(0L, organizationId, issueTypeId, statusIds)
+                        .stream()
+                        .collect(Collectors.groupingBy(StatusBranchMergeSettingVO::getStatusId));
         Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();
         Map<Long, List<StatusFieldSettingVO>> statusFieldSettingMap = new HashMap<>();
         Map<Long, List<StatusNoticeSettingVO>> statusNoticSettingMap = statusNoticeSettingVOS.stream()
@@ -796,6 +802,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             statusSettingVO.setStatusFieldSettingVOS(statusFieldSettingMap.get(statusSettingVO.getId()));
             statusSettingVO.setStatusNoticeSettingVOS(statusNoticSettingMap.get(statusSettingVO.getId()));
             statusSettingVO.setStatusLinkageVOS(statusLinkageMap.get(statusSettingVO.getId()));
+            List<StatusBranchMergeSettingVO> statusBranchMergeSettingList = statusBranchMergeSettingMap.get(statusSettingVO.getId());
+            if (!ObjectUtils.isEmpty(statusBranchMergeSettingList)) {
+                statusSettingVO.setStatusBranchMergeSettingVO(statusBranchMergeSettingList.get(0));
+            }
         }
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {

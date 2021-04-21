@@ -1,10 +1,7 @@
 package io.choerodon.agile.app.eventhandler;
 
 import com.alibaba.fastjson.JSON;
-import io.choerodon.agile.api.vo.event.DevopsGitlabTagPayload;
-import io.choerodon.agile.api.vo.event.OrganizationCreateEventPayload;
-import io.choerodon.agile.api.vo.event.ProjectEvent;
-import io.choerodon.agile.api.vo.event.ProjectEventCategory;
+import io.choerodon.agile.api.vo.event.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.enums.InitStatus;
@@ -70,6 +67,8 @@ public class AgileEventHandler {
     private BoardTemplateService boardTemplateService;
     @Autowired
     private PublishVersionService publishVersionService;
+    @Autowired
+    private StatusBranchMergeSettingService statusBranchMergeSettingService;
 
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
@@ -184,6 +183,17 @@ public class AgileEventHandler {
         String appServiceCode = devopsGitlabTagPayload.getServiceCode();
         String tagName = devopsGitlabTagPayload.getTag();
         publishVersionService.deleteTag(projectId, appServiceCode, tagName);
+        return message;
+    }
+
+    @SagaTask(code = TASK_BRANCH_MERGE_REQUEST_PASS, sagaCode = BRANCH_MERGE_REQUEST_PASS, seq = 1,
+            description = "agile消费分支合并事件")
+    public String handleBranchMergeEvent(String message) {
+        DevopsMergeRequestPayload devopsMergeRequestPayload = JSON.parseObject(message, DevopsMergeRequestPayload.class);
+        LOGGER.info("分支合并变更issue状态，{}", message);
+        Long projectId = devopsMergeRequestPayload.getProjectId();
+        Long issueId = devopsMergeRequestPayload.getIssueId();
+        statusBranchMergeSettingService.handleBranchMergeEvent(projectId, issueId);
         return message;
     }
 
