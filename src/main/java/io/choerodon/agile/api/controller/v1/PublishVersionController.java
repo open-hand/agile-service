@@ -211,14 +211,15 @@ public class PublishVersionController {
                                        @PathVariable(name = "project_id") Long projectId,
                                        @ApiParam(value = "publish_version_id", required = true)
                                        @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
-                                       @RequestParam String statusCode) {
-        publishVersionService.updateStatus(projectId, publishVersionId, statusCode);
+                                       @RequestParam String statusCode,
+                                       @RequestParam Long objectVersionNumber) {
+        publishVersionService.updateStatus(projectId, publishVersionId, statusCode, objectVersionNumber);
         return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询tag对比历史")
-    @PostMapping(value = "/{publish_version_id}/tag_compare_history")
+    @GetMapping(value = "/{publish_version_id}/tag_compare_history")
     public ResponseEntity<List<TagCompareHistoryDTO>> tagCompareHistory(@ApiParam(value = "项目id", required = true)
                                                                         @PathVariable(name = "project_id") Long projectId,
                                                                         @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,

@@ -361,14 +361,16 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         getIssueIdsByTagsFromDevops(tags, allIssueIds, tagCompareList, projectId);
 
         if (!tags.isEmpty()) {
-            ProjectVO program = agilePluginService.getProgram(projectId, organizationId);
+            Map<Long, IssueDTO> issueMap =
+                    issueMapper.selectByIds(StringUtils.join(allIssueIds, ","))
+                            .stream()
+                            .collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity()));
             Long programId = null;
-            Map<Long, IssueDTO> issueMap = new HashMap<>();
-            if (program != null) {
-                programId = program.getId();
-                issueMap.putAll(issueMapper.selectByIds(StringUtils.join(allIssueIds, ","))
-                        .stream()
-                        .collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity())));
+            if (agilePluginService != null) {
+                ProjectVO program = agilePluginService.getProgram(projectId, organizationId);
+                if (program != null) {
+                    programId = program.getId();
+                }
             }
             for (TagVO tag : tags) {
                 addTagToIssue(tag, projectId, organizationId, programId, issueMap);
@@ -394,9 +396,12 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     }
 
     @Override
-    public void updateStatus(Long projectId, Long publishVersionId, String statusCode) {
+    public void updateStatus(Long projectId,
+                             Long publishVersionId,
+                             String statusCode,
+                             Long objectVersionNumber) {
         if (!PublishVersionDTO.VERSION_PLANNING.equals(statusCode)
-                || !PublishVersionDTO.RELEASED.equals(statusCode)) {
+                && !PublishVersionDTO.RELEASED.equals(statusCode)) {
             throw new CommonException("error.illegal.publishVersion.statusCode");
         }
         PublishVersionDTO example = new PublishVersionDTO();
@@ -406,6 +411,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         AssertUtilsForCommonException.notNull(dto, "error.publishVersion.not.existed");
         if (!statusCode.equals(dto.getStatusCode())) {
             dto.setStatusCode(statusCode);
+            dto.setObjectVersionNumber(objectVersionNumber);
             if (publishVersionMapper.updateByPrimaryKeySelective(dto) != 1) {
                 throw new CommonException("error.publishVersion.update.status");
             }
@@ -544,10 +550,11 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             if (tagIssueRelMapper.select(dto).isEmpty()) {
                 tagIssueRelMapper.insert(dto);
             }
-            if (IssueTypeCode.isStory(issueTypeCode)
+            if (agilePluginService != null
+                    && IssueTypeCode.isStory(issueTypeCode)
                     && programId != null
                     && issue.getFeatureId() != null
-                    && Objects.equals(0L, issue.getFeatureId() )) {
+                    && !Objects.equals(0L, issue.getFeatureId() )) {
                 agilePluginService.addTagToFeature(issue.getFeatureId(), programId, organizationId, appServiceCode, tagName);
             }
         });
