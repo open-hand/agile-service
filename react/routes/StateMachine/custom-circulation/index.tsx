@@ -497,7 +497,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     return (
       <div className={styles.setting}>
         {
-          selectedTypeCode !== 'feature' && selectedTypeCode !== 'epic' && record.get('autoTransform') && (
+          selectedTypeCode !== 'feature' && selectedTypeCode !== 'epic' && record.get('statusBranchMergeSettingVO')?.autoTransform && (
             <div className={styles.settingItem}>
               {`分支合并后自动将状态流转到${record.get('name')}`}
             </div>

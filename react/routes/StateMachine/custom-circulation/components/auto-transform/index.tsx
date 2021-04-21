@@ -23,6 +23,14 @@ const AutoTransform: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
+    const getAutoTransform = async () => {
+      const res = await statusTransformApi.getAutoTransform(selectedType, record.get('id'));
+      setChecked(res?.autoTransform);
+    };
+    getAutoTransform();
+  }, [record, selectedType]);
+
+  useEffect(() => {
     const handleOk = async () => {
       try {
         await statusTransformApi.updateAutoTransform(selectedType, record.get('id'), checked);
