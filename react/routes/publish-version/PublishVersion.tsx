@@ -14,16 +14,12 @@ import TableDropMenu from '@/common/TableDropMenu';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { publishVersionApi, versionApi } from '@/api';
+import VERSION_STATUS_TYPE from '@/constants/VERSION_STATUS_TYPE';
 import { usePublishVersionContext } from './stores';
 import { openCreatePublishVersionModal } from './components/create-publish-version';
 import { openPublishVersionDetail } from './components/publish-version-detail';
 import openExportPublishVersionModal from './components/export';
 
-const COLOR_MAP = {
-  规划中: '#ffb100',
-  已发布: '#00bfa5',
-  归档: 'rgba(0, 0, 0, 0.3)',
-};
 const { Column } = Table;
 const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> = ({
   title, children, disabled, ...otherProps
@@ -52,11 +48,14 @@ function PublishVersion() {
           },
         });
         break;
-      case 'publish': {
-        publishVersionApi.updateStatus(record.get('id'), 'released').then(() => tableDataSet.query(tableDataSet.currentPage));
+      case 'version_planning':
+      case 'released': {
+        publishVersionApi.update(record.get('id'), {
+          ...record.toData(),
+          statusCode: key,
+        }, key).then(() => tableDataSet.query(tableDataSet.currentPage));
         break;
       }
-
       default:
         break;
     }
@@ -70,31 +69,35 @@ function PublishVersion() {
       style={{ lineHeight: '32px' }}
       menu={(
         <Menu onClick={({ key }) => handleClickMenu(key, record!)}>
-          <Menu.Item key="publish">发布</Menu.Item>
+          {record?.get('statusCode') === 'version_planning' ? <Menu.Item key="released">发布</Menu.Item>
+            : <Menu.Item key="version_planning">撤销发布</Menu.Item>}
           <Menu.Item key="del">删除</Menu.Item>
         </Menu>
       )}
       onClickEdit={() => openPublishVersionDetail(record?.get('id')!, handleRefresh)}
     />
   );
-  const renderStatus = ({ text }: RenderProps) => (
-    <p style={{ marginBottom: 0, minWidth: 60 }}>
-      <span
-        style={{
-          color: '#fff',
-          background: COLOR_MAP[text as keyof typeof COLOR_MAP],
-          display: 'inline-block',
-          lineHeight: '16px',
-          height: '16px',
-          borderRadius: '2px',
-          padding: '0 2px',
-          fontSize: '13px',
-        }}
-      >
-        <div style={{ transform: 'scale(.8)' }}>{text === '归档' ? '已归档' : text}</div>
-      </span>
-    </p>
-  );
+  const renderStatus = ({ text }: RenderProps) => {
+    const status = VERSION_STATUS_TYPE[text as keyof typeof VERSION_STATUS_TYPE] || {};
+    return (
+      <p style={{ marginBottom: 0, minWidth: 60 }}>
+        <span
+          style={{
+            color: '#fff',
+            background: status.color,
+            display: 'inline-block',
+            lineHeight: '16px',
+            height: '16px',
+            borderRadius: '2px',
+            padding: '0 2px',
+            fontSize: '13px',
+          }}
+        >
+          <div style={{ transform: 'scale(.8)' }}>{status.name}</div>
+        </span>
+      </p>
+    );
+  };
   return (
     <Page>
       <Header>
@@ -116,7 +119,7 @@ function PublishVersion() {
       >
         <Table dataSet={tableDataSet}>
           <Column name="name" renderer={renderName} />
-          <Column name="status" renderer={renderStatus} />
+          <Column name="statusCode" renderer={renderStatus} />
           <Column name="actualPublishDate" className="c7n-agile-table-cell" width={110} />
           <Column name="artifactId" className="c7n-agile-table-cell" width={100} />
           <Column name="groupId" className="c7n-agile-table-cell" width={120} />

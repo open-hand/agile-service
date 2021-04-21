@@ -8,7 +8,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
 
 @inject('AppState')
 @observer class FieldTag extends Component {
-  updateIssueAssignee = (newTags) => {
+  updateIssueTag = (newTags) => {
     const { store, onUpdate, reloadIssue } = this.props;
     const issue = store.getIssue;
     const { issueId, objectVersionNumber } = issue;
@@ -30,7 +30,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
   };
 
   render() {
-    const { store, loginUserId, disabled } = this.props;
+    const { store, disabled } = this.props;
     const issue = store.getIssue;
     const {
       tags,
@@ -48,7 +48,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
           <TextEditToggle
             disabled={disabled}
             submitTrigger={['change']}
-            onSubmit={this.updateIssueAssignee}
+            onSubmit={this.updateIssueTag}
             initValue={tags}
             editor={({ submit }) => (
               <SelectMultiServiceTag onChange={submit} />

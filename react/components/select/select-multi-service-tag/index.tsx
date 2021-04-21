@@ -1,5 +1,5 @@
 import React, {
-  useMemo, forwardRef, useEffect, useRef, useCallback,
+  useMemo, forwardRef, useEffect, useRef, useCallback, useState,
 } from 'react';
 import {
   Select, DataSet, Form, Progress, Button,
@@ -26,9 +26,17 @@ interface Props extends Partial<SelectProps> {
   projectId?: string
 
 }
-const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void }> = observer(({ onOK }) => {
+const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?: string, onCancel: () => void }> = observer(({ onOK, onCancel, projectId }) => {
+  const [serviceOptions, setServiceOptions] = useState([] as any[]);
+  const selectedIdSets = useMemo(() => new Set<string>(), []);
+  const serviceOptionDs = useMemo(() => new DataSet({
+    primaryKey: 'id',
+    paging: false,
+  }), []);
   const ds = useMemo(() => new DataSet({
-    autoCreate: true,
+    autoCreate: false,
+    autoQuery: false,
+    paging: false,
     fields: [
       {
         name: 'appService', label: '应用服务', type: 'object' as any, ignore: 'always' as any,
@@ -38,22 +46,63 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void }> = observe
 
       { name: 'tagName', label: 'Tag', parentField: 'appService' },
     ],
+    events: {
+      update: ({ value, name, oldValue }: any) => {
+        console.log('update..', value, name);
+        if (name === 'appService') {
+          const paramId = value?.id || oldValue?.id;
+          console.log('paramId', serviceOptionDs.find((item) => item.get('id') === paramId));
+          // value.id && console.log('service record', serviceOptionDs.findRecordById(value.id));
+          // value && serviceOptionDs.remove();
+          // oldValue && selectedIdSets.delete(oldValue?.id);
+        }
+      },
+    },
   }), []);
   function handleSave() {
     const data = ds.toJSONData();
     console.log('save..', data);
     onOK(ds.records);
   }
+  const handleCreate = useCallback(() => {
+    ds.create();
+  }, [ds]);
+  function handleCancel() {
+    onCancel();
+  }
+  const loadAppServiceData = useCallback(async (record: Record) => {
+    const appServiceId = record.get('appServiceId');
+    const newData = serviceOptions.filter((i) => !selectedIdSets.has(i.id) || appServiceId === i.id);
+    console.log('newData', newData, selectedIdSets, appServiceId);
+    return newData;
+  }, [selectedIdSets, serviceOptions]);
+  useEffect(() => {
+    function loadData() {
+      devOpsApi.project(projectId).loadActiveService().then((data: any) => {
+        serviceOptionDs.loadData(data.map((item:any) => ({ ...item, meaning: item.name, value: item.id })));
+        setServiceOptions(data);
+        ds.create();
+        console.log('data...', data);
+      });
+    }
+    loadData();
+  }, [ds, projectId, serviceOptionDs]);
   return (
     <div role="none" className={`${prefixCls}-content`} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-      <Form dataSet={ds} columns={2}>
+      <Form dataSet={ds}>
         {ds.records.flatMap((record) => (
-          [<SelectAppService name="appService" record={record} primitiveValue getPopupContainer={(node) => document.getElementsByClassName(`${prefixCls}-content`)[0] as any} />,
+          [<SelectAppService name="appService" options={serviceOptionDs} record={record} primitiveValue getPopupContainer={(node) => document.getElementsByClassName(`${prefixCls}-content`)[0] as any} />,
             <SelectGitTags key={`select-tag-${record.get('appServiceId')}`} applicationId={record.get('appServiceId')} name="tagName" multiple record={record} getPopupContainer={(node) => document.getElementsByClassName(`${prefixCls}-content`)[0] as any} />]
         ))}
+        {ds.length > 0 && <Button icon="add" color={'primary' as any} onClick={handleCreate}>添加筛选</Button>}
       </Form>
-      <Button funcType={'raised' as any} color={'primary' as any} onClick={handleSave}>确定</Button>
+      <div className={`${prefixCls}-btns`}>
+        <Button funcType={'raised' as any} color={'primary' as any} onClick={handleSave}>确定</Button>
+        <Button funcType={'raised' as any} onClick={handleCancel}>取消</Button>
+
+      </div>
     </div>
+
   );
 });
 const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
@@ -73,7 +122,7 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
   const Component = flat ? FlatSelect : Select;
   function handleSave(data: Record[]) {
     innerRef.current?.choose(data);
-    const changeData:any[] = [];
+    const changeData: any[] = [];
     data.map((i) => i.toJSONData()).forEach((item) => {
       changeData.push(...item.tagName.map((tag: string) => ({ tagName: tag, appServiceCode: item.appServiceCode, projectId: projectId || getProjectId() })));
     });
@@ -90,7 +139,7 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
       }}
       {...otherProps}
       dropdownMatchSelectWidth={false}
-      popupContent={<MultiServiceTag onOK={handleSave} />}
+      popupContent={<MultiServiceTag onOK={handleSave} onCancel={() => innerRef.current?.collapse()} projectId={projectId} />}
     />
   );
 });

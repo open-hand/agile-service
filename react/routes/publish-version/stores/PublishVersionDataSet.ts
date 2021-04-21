@@ -12,7 +12,7 @@ const PublishVersionDataSet = (): DataSetProps => ({
   // }],
   fields: [
     { name: 'name', type: 'string' as FieldType, label: '版本名称' },
-    { name: 'status', type: 'string' as FieldType, label: '状态' },
+    { name: 'statusCode', type: 'string' as FieldType, label: '状态' },
     { name: 'actualPublishDate', type: 'string' as FieldType, label: '发布日期' },
     { name: 'artifactId', type: 'string' as FieldType, label: 'artifactId' },
     { name: 'groupId', type: 'string' as FieldType, label: 'groupId' },
