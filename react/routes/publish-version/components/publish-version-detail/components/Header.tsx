@@ -11,12 +11,13 @@ import './Header.less';
 const Header: React.FC<{}> = () => {
   const { prefixCls, store, modal } = useReleaseDetailContext();
   const { statusCode, statusName } = store.getCurrentData;
+  const { color, name } = VERSION_STATUS_TYPE[statusCode as keyof typeof VERSION_STATUS_TYPE] || {};
   return (
     <div className={`${prefixCls}-header`}>
 
       <div className={`${prefixCls}-header-line`}>
         <Summary />
-        <BaseTag color={VERSION_STATUS_TYPE[statusCode as keyof typeof VERSION_STATUS_TYPE]?.color} text={statusName} />
+        <BaseTag color={color} text={name} />
 
       </div>
       <Button

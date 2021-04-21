@@ -3,6 +3,7 @@ import {
   Button, Modal, Table, Tooltip, Form, DataSet,
 } from 'choerodon-ui/pro';
 import classnames from 'classnames';
+import { observer } from 'mobx-react-lite';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import UserTag from '@/components/tag/user-tag';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -35,8 +36,9 @@ function IssueDiffArea() {
   const [expand, setExpand] = useState(true);
   const { storyTableDataSet, isInProgram, store } = useReleaseDetailContext();
   const ds = useMemo(() => new DataSet({
-    autoCreate: true,
-    autoQuery: false,
+    // autoCreate: true,
+    autoQuery: true,
+    paging: false,
     fields: [
       // {
       //   name: 'lastAppService', label: '选择应用服务', type: 'string' as any, required: true,
@@ -52,9 +54,11 @@ function IssueDiffArea() {
       },
     ],
     transport: {
+      read: () => ({ ...publishVersionApiConfig.loadCompareHistory(store.getCurrentData.id) }),
       submit: ({ data }) => ({ ...publishVersionApiConfig.compareTag(store.getCurrentData.id, data) }),
     },
   }), [store.getCurrentData.id]);
+  const applicationId = useMemo(() => ds.current?.get('appServiceCode'), [ds, ds.current?.get('appServiceCode')]);
   const handleSubmit = async () => {
     if (await ds.submit()) {
       storyTableDataSet.query();
@@ -62,13 +66,14 @@ function IssueDiffArea() {
     }
     return false;
   };
+  console.log('applicationId17', applicationId);
   return (
     <div className={styles.wrap}>
       <Form dataSet={ds} columns={3} className={classnames(styles.form, { [styles.form_hidden]: !expand })}>
         {/* <SelectAppService name="lastAppService" /> */}
-        <SelectAppService name="appServiceCode" />
-        <SelectGitTags name="sourceTag" help={undefined} />
-        <SelectGitTags name="targetTag" help={undefined} />
+        <SelectAppService name="appServiceCode" valueField="id" onChange={() => ds.current?.init('sourceTag', undefined).init('targetTag', undefined)} />
+        <SelectGitTags name="sourceTag" help={undefined} applicationId={applicationId} key={`select-sourceTag-${applicationId}`} />
+        <SelectGitTags name="targetTag" help={undefined} applicationId={applicationId} key={`select-targetTag-${applicationId}`} />
         <div className={styles.compare} hidden={!expand}>
           <Button funcType={'raised' as any} color={'primary' as any} onClick={handleSubmit}>对比</Button>
           <span>版本对比后，自动更新issue的tag信息。</span>
@@ -78,4 +83,4 @@ function IssueDiffArea() {
     </div>
   );
 }
-export default IssueDiffArea;
+export default observer(IssueDiffArea);

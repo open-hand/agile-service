@@ -61,7 +61,16 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
       { name: 'artifactId', label: '应用服务' },
       { name: 'version', label: 'version*', required: true },
       { name: 'versionAlias', label: '版本名称' },
-      { name: 'serviceCode', label: '应用服务' },
+      {
+        name: 'appServiceObject',
+        type: 'object' as any,
+        label: '应用服务',
+        textField: 'name',
+        valueField: 'serviceCode',
+        ignore: 'always' as any,
+      },
+      { name: 'serviceCode', bind: 'appServiceObject.code' },
+      // { name: 'serviceName', bind: 'appServiceObject.name' },
       { name: 'tagId', label: 'tag' },
     ],
   }), []);
@@ -137,8 +146,18 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
           <Column name="artifactId" tooltip={'overflow' as any} />
           <Column name="version" editor />
           <Column name="versionAlias" editor renderer={renderAlias} tooltip={'overflow' as any} />
-          <Column name="serviceCode" editor={() => <SelectAppService />} />
-          <Column name="tagId" editor={(record) => <SelectGitTags applicationId={record.get('serviceCode')} />} />
+          <Column
+            name="appServiceObject"
+            editor={(record, name) => <SelectAppService record={record} name={name} projectId={record.get('projectId')} primitiveValue onChange={() => record.init('tagId', undefined)} />}
+          />
+          <Column
+            name="tagId"
+            editor={(record) => {
+              const appService = record.get('appServiceObject');
+              // console.log('record.', appService?.id, record.toData(), record.get('projectId'), record.get('appServiceObject'));
+              return <SelectGitTags key={`import-pom-select-tag-${appService?.id}`} projectId={record.get('projectId')} applicationId={appService?.id} />;
+            }}
+          />
           <Column name="action" renderer={renderAction} width={65} />
         </Table>
       </div>
@@ -162,7 +181,6 @@ function openImportPomModal(props: IImportPomFunctionProps) {
     style: {
       width: MODAL_WIDTH.middle,
     },
-    className: classnames('c7n-agile-export-issue-modal'),
     drawer: true,
     children: <ObserverImportPom {...props} />,
   });

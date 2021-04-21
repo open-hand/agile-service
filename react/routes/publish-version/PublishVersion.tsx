@@ -52,6 +52,10 @@ function PublishVersion() {
           },
         });
         break;
+      case 'publish': {
+        publishVersionApi.updateStatus(record.get('id'), 'released').then(() => tableDataSet.query(tableDataSet.currentPage));
+        break;
+      }
 
       default:
         break;

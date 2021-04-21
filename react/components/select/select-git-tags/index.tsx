@@ -24,7 +24,7 @@ const SelectGitTags: React.FC<Props> = forwardRef(({
     name: 'tag',
     textField: 'name',
     valueField: 'name',
-    request: ({ page }) => (applicationId ? devOpsApi.loadTagsByService(applicationId, page, 20, {}) : (() => new Promise([] as any))),
+    request: ({ page }) => (applicationId ? devOpsApi.project(projectId).loadTagsByService(applicationId, page, 20, {}) : (() => new Promise([] as any))),
     middleWare: (data: any) => {
       if (dataRef) {
         Object.assign(dataRef, {
@@ -37,7 +37,7 @@ const SelectGitTags: React.FC<Props> = forwardRef(({
       return data;
     },
     paging: true,
-  }), [applicationId]);
+  }), [applicationId, projectId]);
   const props = useSelect(config);
   useEffect(() => {
     console.log('Component useEffect into');
