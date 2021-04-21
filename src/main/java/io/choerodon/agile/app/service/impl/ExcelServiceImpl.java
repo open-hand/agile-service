@@ -93,8 +93,6 @@ public class ExcelServiceImpl implements ExcelService {
     private static final String EXCELCONTENTTYPE = "application/vnd.ms-excel";
     private static final String FILESUFFIX = ".xlsx";
     protected static final String DOWNLOAD_FILE = "download_file";
-    protected static final String DOWNLOAD_FILE_PI = "download_file_pi";
-    protected static final String DOWNLOAD_FILE_ISSUE_ANALYSIS = "download_file_issue_analysis";
     private static final String DOWNLOAD_FILE_PUBLISH_VERSION = "download_file_publish_version";
     private static final String EXPORT_ERROR_WORKBOOK_CLOSE = "error.issue.close.workbook";
     private static final String PROJECT_ERROR = "error.project.notFound";
@@ -3338,7 +3336,17 @@ public class ExcelServiceImpl implements ExcelService {
             try {
                 fileOperationHistoryDTO.setLastUpdateDate(new Date());
                 fileOperationHistoryMapper.updateByPrimaryKey(fileOperationHistoryDTO);
-                String websocketKey = WEBSOCKET_EXPORT_CODE + "-" + fileOperationHistoryDTO.getProjectId();
+                String websocketKey = "";
+                switch (fileOperationHistoryDTO.getAction()) {
+                    case DOWNLOAD_FILE:
+                        websocketKey = WEBSOCKET_EXPORT_CODE + "-" + fileOperationHistoryDTO.getProjectId();
+                        break;
+                    case DOWNLOAD_FILE_PUBLISH_VERSION:
+                        websocketKey = WEBSOCKET_EXPORT_PUBLISH_VERSION + "-" + fileOperationHistoryDTO.getProjectId();;
+                        break;
+                    default:
+                        break;
+                }
                 sendProcess(fileOperationHistoryDTO, userId, 100.0, websocketKey);
                 workbook.close();
             } catch (IOException e) {
