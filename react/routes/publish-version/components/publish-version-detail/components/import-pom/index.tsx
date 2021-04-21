@@ -54,7 +54,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     paging: false,
     selection: false,
 
-    // data: [
+    // data:
     //   { artifactId: 'agile-test', version: '0.18.a', versionAlias: undefined },
     // ],
     fields: [
@@ -71,7 +71,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
       },
       { name: 'serviceCode', bind: 'appServiceObject.code' },
       // { name: 'serviceName', bind: 'appServiceObject.name' },
-      { name: 'tagId', label: 'tag' },
+      { name: 'tagName', label: 'tag' },
     ],
   }), []);
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,7 +151,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
             editor={(record, name) => <SelectAppService record={record} name={name} projectId={record.get('projectId')} primitiveValue onChange={() => record.init('tagId', undefined)} />}
           />
           <Column
-            name="tagId"
+            name="tagName"
             editor={(record) => {
               const appService = record.get('appServiceObject');
               // console.log('record.', appService?.id, record.toData(), record.get('projectId'), record.get('appServiceObject'));

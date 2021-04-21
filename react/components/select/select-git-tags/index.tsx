@@ -40,9 +40,9 @@ const SelectGitTags: React.FC<Props> = forwardRef(({
   }), [applicationId, projectId]);
   const props = useSelect(config);
   useEffect(() => {
-    console.log('Component useEffect into');
+    console.log('Component useEffect into', applicationId);
     return () => console.log('leave Component');
-  }, []);
+  }, [applicationId]);
   const Component = flat ? FlatSelect : Select;
   return (
     <Component

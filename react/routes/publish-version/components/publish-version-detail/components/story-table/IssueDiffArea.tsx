@@ -44,8 +44,18 @@ function IssueDiffArea() {
       //   name: 'lastAppService', label: '选择应用服务', type: 'string' as any, required: true,
       // },
       {
-        name: 'appServiceCode', label: '选择应用服务', type: 'string' as any, required: true,
+        name: 'appServiceObject',
+        type: 'object' as any,
+        label: '选择应用服务',
+        textField: 'name',
+        valueField: 'appServiceCode',
+        ignore: 'always' as any,
       },
+      { name: 'appServiceCode', bind: 'appServiceObject.code' },
+      { name: 'appServiceId', bind: 'appServiceObject.id' },
+      // {
+      //   name: 'appServiceCode', label: '选择应用服务', type: 'string' as any, required: true,
+      // },
       {
         name: 'sourceTag', label: 'sourceTag', type: 'string' as any, required: true,
       },
@@ -58,7 +68,7 @@ function IssueDiffArea() {
       submit: ({ data }) => ({ ...publishVersionApiConfig.compareTag(store.getCurrentData.id, data) }),
     },
   }), [store.getCurrentData.id]);
-  const applicationId = useMemo(() => ds.current?.get('appServiceCode'), [ds, ds.current?.get('appServiceCode')]);
+  const applicationId = useMemo(() => ds.current?.get('appServiceId'), [ds, ds.current?.get('appServiceId')]);
   const handleSubmit = async () => {
     if (await ds.submit()) {
       storyTableDataSet.query();
@@ -71,7 +81,7 @@ function IssueDiffArea() {
     <div className={styles.wrap}>
       <Form dataSet={ds} columns={3} className={classnames(styles.form, { [styles.form_hidden]: !expand })}>
         {/* <SelectAppService name="lastAppService" /> */}
-        <SelectAppService name="appServiceCode" valueField="id" onChange={() => ds.current?.init('sourceTag', undefined).init('targetTag', undefined)} />
+        <SelectAppService name="appServiceObject" onChange={() => ds.current?.init('sourceTag', undefined).init('targetTag', undefined)} />
         <SelectGitTags name="sourceTag" help={undefined} applicationId={applicationId} key={`select-sourceTag-${applicationId}`} />
         <SelectGitTags name="targetTag" help={undefined} applicationId={applicationId} key={`select-targetTag-${applicationId}`} />
         <div className={styles.compare} hidden={!expand}>
