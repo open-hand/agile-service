@@ -113,7 +113,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private static final String SUB_BUG_CN = "子缺陷";
 
-    private static final String COLON_CN = "：";
+    protected static final String COLON_CN = "：";
 
     private static final int PREDEFINED_VALUE_START_ROW = 1;
     private static final int PREDEFINED_VALUE_END_ROW = 500;
@@ -906,6 +906,10 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     @Async
     public void exportPublishVersion(Long projectId, Long publishVersionId) {
+        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        String projectCode = project.getCode();
+        Map<Long, String> projectCodeMap = new HashMap<>();
+        projectCodeMap.put(projectId, projectCode);
         Long userId = DetailsHelper.getUserDetails().getUserId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         String websocketKey = WEBSOCKET_EXPORT_PUBLISH_VERSION + "-" + projectId;
@@ -934,23 +938,23 @@ public class ExcelServiceImpl implements ExcelService {
 
             Map<String, List<IssueVO>> versionStoryMap = new LinkedHashMap<>();
             Set<Long> userIds = new HashSet<>();
-            listRelatedStories(organizationId, tags, versionStoryMap, userIds, new HashSet<>(Arrays.asList(projectId)), withFeature);
+            listRelatedStories(organizationId, tags, versionStoryMap, userIds, new HashSet<>(Arrays.asList(projectId)), withFeature, projectCodeMap);
             processAssigneeName(userIds, versionStoryMap);
             endRow = ExcelUtil.writePublishVersionStory(workbook, sheetName, versionStoryMap, endRow, withFeature);
             sendProcess(history, userId, 50D, websocketKey);
 
             Map<String, List<IssueVO>> versionBugMap = new LinkedHashMap<>();
             userIds.clear();
-            listRelatedBugOrTask(organizationId, tags, versionBugMap, userIds, new HashSet<>(Arrays.asList(projectId)), IssueTypeCode.BUG.value());
+            listRelatedBugOrTask(organizationId, tags, versionBugMap, userIds, new HashSet<>(Arrays.asList(projectId)), IssueTypeCode.BUG.value(), projectCodeMap);
             processAssigneeName(userIds, versionBugMap);
             endRow = ExcelUtil.writePublishVersionBug(workbook, sheetName, versionBugMap, endRow);
             sendProcess(history, userId, 60D, websocketKey);
 
             Map<String, List<IssueVO>> versionTaskMap = new LinkedHashMap<>();
             userIds.clear();
-            listRelatedBugOrTask(organizationId, tags, versionBugMap, userIds, new HashSet<>(Arrays.asList(projectId)), IssueTypeCode.TASK.value());
+            listRelatedBugOrTask(organizationId, tags, versionTaskMap, userIds, new HashSet<>(Arrays.asList(projectId)), IssueTypeCode.TASK.value(), projectCodeMap);
             processAssigneeName(userIds, versionTaskMap);
-            ExcelUtil.writePublishVersionTask(workbook, sheetName, versionBugMap, endRow);
+            ExcelUtil.writePublishVersionTask(workbook, sheetName, versionTaskMap, endRow);
             sendProcess(history, userId, 70D, websocketKey);
 
             String fileName = sheetName + FILESUFFIX;
@@ -966,15 +970,16 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void listRelatedBugOrTask(Long organizationId,
-                                      Set<TagVO> tags,
-                                      Map<String, List<IssueVO>> versionBugMap,
-                                      Set<Long> userIds,
-                                      Set<Long> projectIds,
-                                      String issueTypeCode) {
+                                        Set<TagVO> tags,
+                                        Map<String, List<IssueVO>> versionBugMap,
+                                        Set<Long> userIds,
+                                        Set<Long> projectIds,
+                                        String issueTypeCode,
+                                        Map<Long, String> projectCodeMap) {
         if (!tags.isEmpty()) {
             List<TagWithIssueVO> tagWithIssueList =
                     tagIssueRelMapper.selectCompletedBugOrTaskByTags(projectIds, organizationId, tags, issueTypeCode);
-            fillInVersionMapAndUserSet(versionBugMap, userIds, tagWithIssueList);
+            fillInVersionMapAndUserSet(versionBugMap, userIds, tagWithIssueList, projectCodeMap);
         }
     }
 
@@ -1016,7 +1021,7 @@ public class ExcelServiceImpl implements ExcelService {
         String tagName = publishVersionDTO.getTagName();
         String tag = "";
         if (!StringUtils.isEmpty(appServiceCode) && !StringUtils.isEmpty(tagName)) {
-            tag = appServiceCode + ":" + tagName;
+            tag = appServiceCode + COLON_CN + tagName;
         }
         result.put("关联应用服务tag", tag);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -1047,7 +1052,7 @@ public class ExcelServiceImpl implements ExcelService {
             if (StringUtils.isEmpty(version)) {
                 version = dto.getVersion();
             }
-            builder.append(artifactId).append(":").append(version);
+            builder.append(artifactId).append(COLON_CN).append(version);
             if (iterator.hasNext()) {
                 builder.append("，");
             }
@@ -1056,26 +1061,29 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void listRelatedStories(Long organizationId,
-                                    Set<TagVO> tags,
-                                    Map<String, List<IssueVO>> versionStoryMap,
-                                    Set<Long> userIds,
-                                    Set<Long> projectIds,
-                                    Boolean withFeature) {
+                                      Set<TagVO> tags,
+                                      Map<String, List<IssueVO>> versionStoryMap,
+                                      Set<Long> userIds,
+                                      Set<Long> projectIds,
+                                      Boolean withFeature,
+                                      Map<Long, String> projectCodeMap) {
         if (!tags.isEmpty()) {
             List<TagWithIssueVO> tagWithIssueList =
                     tagIssueRelMapper.selectCompletedStoryByTags(projectIds, organizationId, tags, withFeature);
-            fillInVersionMapAndUserSet(versionStoryMap, userIds, tagWithIssueList);
+            fillInVersionMapAndUserSet(versionStoryMap, userIds, tagWithIssueList, projectCodeMap);
         }
     }
 
     private void fillInVersionMapAndUserSet(Map<String, List<IssueVO>> versionIssueMap,
                                             Set<Long> userIds,
-                                            List<TagWithIssueVO> tagWithIssueList) {
+                                            List<TagWithIssueVO> tagWithIssueList,
+                                            Map<Long, String> projectCodeMap) {
         tagWithIssueList.forEach(x -> {
             Long projectId = x.getProjectId();
+            String projectCode = projectCodeMap.get(projectId);
             String appServiceCode = x.getAppServiceCode();
             String tagName = x.getTagName();
-            String key = projectId + ":" + appServiceCode + ":" + tagName;
+            String key = projectCode + COLON_CN + appServiceCode + COLON_CN + tagName;
             List<IssueVO> issues = versionIssueMap.computeIfAbsent(key, y -> new ArrayList<>());
             if (!ObjectUtils.isEmpty(x.getIssues())) {
                 issues.addAll(x.getIssues());
