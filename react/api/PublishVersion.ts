@@ -361,7 +361,7 @@ class PublishVersionApi extends Api<PublishVersionApi> {
 
   loadCompareHistory(versionId:string) {
     return this.request({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/publish_version/${versionId}/tag_compare_history`,
       params: {
         organizationId: getOrganizationId(),

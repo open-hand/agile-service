@@ -6,7 +6,7 @@ function ReleaseStoryTableDataSet(versionId: string): DataSetProps {
     autoQuery: true,
     paging: true,
     selection: false,
-    data: [{ summary: '测试问题测试问题测试问题测试问题测试问题测试问题测试问题测试问题测试问题', statusVO: {} }],
+    // data: [{ summary: '测试问题测试问题测试问题测试问题测试问题测试问题测试问题测试问题测试问题', statusVO: {} }],
     fields: [
       { name: 'summary', label: '概要' },
       { name: 'issueNum', label: '编号' },
