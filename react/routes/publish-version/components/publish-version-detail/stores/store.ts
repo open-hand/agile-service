@@ -87,7 +87,7 @@ class ReleaseDetailStore {
   }
 
   @action init(initData?: { disabled?: boolean, events?: Partial<EventsProps> }) {
-    this.clear();
+    // this.clear();
     this.disabled = initData?.disabled;
     if (initData?.events) {
       Object.entries<any>(initData.events).forEach(([key, event]) => {

@@ -25,7 +25,6 @@ const ReleaseDetailIndex: React.FC<ReleaseDetailProps> = (props) => (
 );
 
 export function openPublishVersionDetail(id: string, onOk: () => void) {
-  // store.select(id);
   Modal.open({
     drawer: true,
     className: 'c7n-agile-publish-version-detail-modal',
@@ -33,7 +32,7 @@ export function openPublishVersionDetail(id: string, onOk: () => void) {
     // maskClosable: false,
     title: null,
     border: false,
-    key: Modal.key(),
+    key: 'publish-version-detail-modal',
     // title: '导入字段',
     style: {
       height: 'calc(100vh - 48px)',
