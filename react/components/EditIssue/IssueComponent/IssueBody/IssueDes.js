@@ -7,11 +7,13 @@ import {
 import { Choerodon } from '@choerodon/master';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
 import WYSIWYGEditor from '@/components/CKEditor';
+import { useDetailContainerContext } from '@/components/detail-container/context';
 import { issueApi } from '@/api';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const IssueDes = ({ reloadIssue, setIssueLoading }) => {
+  const { setDescriptionChanged } = useDetailContainerContext();
   const [editDesShow, setEditDesShow] = useState(false);
   const [editDes, setEditDes] = useState('');
   const { store, disabled, descriptionEditRef } = useContext(EditIssueContext);
@@ -33,6 +35,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
         description: text,
       };
       await issueApi.update(obj);
+      setDescriptionChanged(false);
       setEditDesShow(false);
       if (reloadIssue) {
         reloadIssue(issueId);
@@ -63,6 +66,8 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
               }}
               onChange={(value) => {
                 setEditDes(value);
+                store.setIssue({ ...store.getIssue, hasChanged: true, newDes: value });
+                setDescriptionChanged(value !== description);
               }}
               onCancel={() => {
                 setEditDesShow(false);
