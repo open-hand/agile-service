@@ -24,7 +24,37 @@ public class VersionTreeVO {
 
     private String versionAlias;
 
+    private Long projectId;
+
+    private String appServiceCode;
+
+    private String tagName;
+
     private List<VersionTreeVO> children;
+
+    public String getAppServiceCode() {
+        return appServiceCode;
+    }
+
+    public void setAppServiceCode(String appServiceCode) {
+        this.appServiceCode = appServiceCode;
+    }
+
+    public String getTagName() {
+        return tagName;
+    }
+
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
 
     public String getVersionAlias() {
         return versionAlias;
