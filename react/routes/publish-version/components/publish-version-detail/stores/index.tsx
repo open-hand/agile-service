@@ -1,9 +1,11 @@
 import React, {
-  createContext, useContext, useEffect, useMemo,
+  createContext, useCallback, useContext, useEffect, useMemo,
 } from 'react';
 import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { useDetailContainerContext } from '@/components/detail-container/context';
+import { useDetail } from '@/components/detail-container';
+
 import { DataSet } from 'choerodon-ui/pro/lib';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { getProjectId, getOrganizationId } from '@/utils/common';
@@ -19,6 +21,7 @@ interface Context extends ReleaseDetailProps {
   storyTableDataSet: DataSet,
   bugTableDataSet: DataSet,
   isInProgram: boolean,
+  detailProps: any,
   topAnnouncementHeight: number,
 
 }
@@ -36,7 +39,11 @@ const Provider: React.FC<ReleaseDetailProps> = ({
   const { isInProgram, loading } = useIsInProgram();
   const storyTableDataSet = useMemo(() => new DataSet(store.current?.id ? ReleaseStoryTableDataSet(store.current?.id!) : {}), [store.current?.id]);
   const bugTableDataSet = useMemo(() => new DataSet(store.current?.id ? ReleaseBugTableDataSet(store.current?.id!) : {}), [store.current?.id]);
-
+  const handleRefresh = useCallback(() => {
+    console.log('update.... handleRefresh');
+    storyTableDataSet.query();
+    bugTableDataSet.query();
+  }, [bugTableDataSet, storyTableDataSet]);
   // const propsEvents = {} as any;
   // const updateDetail = useMemo(() => {
   //   if (propsEvents?.update) {
@@ -45,30 +52,39 @@ const Provider: React.FC<ReleaseDetailProps> = ({
   //   }
   //   return undefined;
   // }, [propsEvents?.update]);
-  const updateDetail = () => onUpdate && onUpdate();
-  const push = (d: any) => { };
-  const selectIssue = useMemo(() => (id: string) => push({
+  const [detailProps] = useDetail();
+  const updateDetail = useMemo(() => () => onUpdate && onUpdate(), []);
+  const { open } = detailProps;
+  const selectIssue = useMemo(() => (id: string) => open({
     path: 'issue',
     props: {
       issueId: id,
       projectId: getProjectId(),
       organizationId: getOrganizationId(),
     },
-  }), [push]);
+    events: {
+      update: () => {
+        handleRefresh();
+      },
+    },
+  }), [handleRefresh, open]);
   useEffect(() => {
     store.init({ events: { update: updateDetail, selectIssue }, disabled: restProps.disabled });
-    store.select(restProps.id);
-  }, []);
-  useEffect(() => () => {
+  }, [restProps.disabled, selectIssue, updateDetail]);
+  useEffect(() => {
     store.clear();
-  },
-  []);
+    store.select(restProps.id);
+    return () => {
+      store.clear();
+    };
+  }, []);
   useEffect(() => {
     store.setDisabled(!!restProps.disabled);
   }, [restProps.disabled]);
   // const { piAimStore } = usePIAimStore();
   const values = {
     ...restProps,
+    detailProps,
     disabled: restProps.disabled || store.disabled,
     prefixCls,
     // events: propsEvents,

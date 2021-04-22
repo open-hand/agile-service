@@ -80,11 +80,11 @@ function StoryTable() {
         <Column name="issueNum" width={120} tooltip={'overflow' as any} className="c7n-agile-table-cell" />
         <Column name="status" renderer={({ record }) => (record?.get('statusVO') ? renderStatus({ record }) : undefined)} />
         <Column
-          name="appVersions"
+          name="tags"
           className="c7n-agile-table-cell"
           tooltip={'overflow' as any}
           width={120}
-          renderer={({ value }) => (value ? value.map((i: any) => `${i.artifactId}/${i.versionAlias || i.version}`).join('、') : undefined)}
+          renderer={({ value }) => (value ? value.map((i: any) => `${i.appServiceCode}:${i.tagName}`).join('、') : undefined)}
         />
         <Column name={isInProgram ? 'featureVO' : 'epic'} renderer={renderEpicOrFeature} className="c7n-agile-table-cell" />
         <Column

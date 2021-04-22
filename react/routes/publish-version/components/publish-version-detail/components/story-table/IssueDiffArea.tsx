@@ -5,10 +5,8 @@ import {
 import classnames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
-import UserTag from '@/components/tag/user-tag';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { publishVersionApi, publishVersionApiConfig, versionApi } from '@/api';
-import renderStatus from '@/components/column-renderer/status';
 // @ts-ignore
 import JSONbig from 'json-bigint';
 import SelectAppService from '@/components/select/select-app-service';
@@ -35,7 +33,6 @@ function ButtonExpandCollapse({ defaultExpand, onClick }: { defaultExpand?: bool
   );
 }
 ButtonExpandCollapse.defaultProps = { defaultExpand: false, onClick: undefined };
-const { Column } = Table;
 function IssueDiffArea() {
   const [expand, setExpand] = useState(true);
   const { storyTableDataSet, isInProgram, store } = useReleaseDetailContext();
@@ -47,19 +44,10 @@ function IssueDiffArea() {
       // {
       //   name: 'lastAppService', label: '选择应用服务', type: 'string' as any, required: true,
       // },
+
       {
-        name: 'appServiceObject',
-        // type: 'object' as any,
-        label: '选择应用服务',
-        textField: 'name',
-        valueField: 'appServiceCode',
-        ignore: 'always' as any,
+        name: 'appServiceCode', label: '选择应用服务', type: 'string' as any, required: true,
       },
-      { name: 'appServiceCode', bind: 'appServiceObject.code' },
-      { name: 'appServiceId', bind: 'appServiceObject.id' },
-      // {
-      //   name: 'appServiceCode', label: '选择应用服务', type: 'string' as any, required: true,
-      // },
       {
         name: 'sourceTag', label: 'sourceTag', type: 'string' as any, required: true,
       },
@@ -72,15 +60,26 @@ function IssueDiffArea() {
         ...publishVersionApiConfig.loadCompareHistory(store.getCurrentData.id),
         transformResponse: (res) => {
           const data = JSONbigString.parse(res);
-          console.log('data', data);
 
-          return data.map((item: any) => ({ appServiceObject: store.getAppServiceList.find((service) => service.code === item.appServiceCode) || item.appServiceCode, sourceTag: item.source, targetTag: item.target }));
+          return data.map((item: any) => {
+            const appServiceObject = store.getAppServiceList.find((service) => service.code === item.appServiceCode) || item.appServiceCode;
+            console.log('appServiceObject', appServiceObject);
+            return ({
+              appServiceObject, applicationId: appServiceObject?.id, appServiceCode: item.appServiceCode, sourceTag: item.source, targetTag: item.target,
+            });
+          });
         },
       }),
       submit: ({ data }) => ({ ...publishVersionApiConfig.compareTag(store.getCurrentData.id, data) }),
     },
-  }), [store.getCurrentData.id]);
-  const applicationId = useMemo(() => ds.current?.get('appServiceId'), [ds, ds.current?.get('appServiceId')]);
+  }), [store.getAppServiceList, store.getCurrentData.id]);
+  const applicationId = useMemo(() => {
+    const appServiceCode = ds.current?.get('appServiceCode');
+    if (appServiceCode) {
+      return store.getAppServiceList.find((service) => service.code === appServiceCode)?.id;
+    }
+    return appServiceCode;
+  }, [ds, ds.current?.get('appServiceCode')]);
   const handleSubmit = async () => {
     if (await ds.submit()) {
       storyTableDataSet.query();
@@ -88,7 +87,6 @@ function IssueDiffArea() {
     }
     return false;
   };
-  console.log('applicationId17', applicationId);
   return (
     <div className={styles.wrap}>
       <Form dataSet={ds} columns={3} className={classnames(styles.form, { [styles.form_hidden]: !expand })}>

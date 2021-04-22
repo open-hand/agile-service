@@ -14,7 +14,7 @@ interface IPublishVersionCreateData {
 }
 export interface IPublishVersionData {
   actualPublishDate: string | null
-  appService: string | true
+  appService: boolean | true
   artifactId: string | null
   children: string | null
   content: string | null
