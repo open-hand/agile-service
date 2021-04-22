@@ -4,6 +4,7 @@ import React, {
 
 import { Animate } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
+import { usePersistFn } from 'ahooks';
 import Container, { registerPath } from './Container';
 import PreviewIssueFile from './PreviewIssueFile';
 import DetailContainerContext, { IPreview, IRoute, IRouteWithKey } from './context';
@@ -27,7 +28,7 @@ export const useDetail = (): [DetailContainerProps] => {
     }
   }, []);
   const match = routes[routes.length - 1];
-  const push = useCallback((nextRoute: IRoute) => {
+  const push = usePersistFn((nextRoute: IRoute) => {
     const pushDetail = () => {
       const routeWithKey = { ...nextRoute, key: Math.random() };
       setRoutes((r) => ([...r, routeWithKey]));
@@ -42,8 +43,8 @@ export const useDetail = (): [DetailContainerProps] => {
         onOk: pushDetail,
       });
     }
-  }, [descriptionChanged, updateEventsMap]);
-  const open = useCallback((route: IRoute) => {
+  });
+  const open = usePersistFn((route: IRoute) => {
     const openDetail = () => {
       const routeWithKey = { ...route, key: Math.random() };
       setRoutes([routeWithKey]);
@@ -58,8 +59,8 @@ export const useDetail = (): [DetailContainerProps] => {
         onOk: openDetail,
       });
     }
-  }, [descriptionChanged, updateEventsMap]);
-  const pop = useCallback(() => {
+  });
+  const pop = usePersistFn(() => {
     if (!descriptionChanged) {
       setRoutes((r) => {
         const clone = [...r];
@@ -78,8 +79,8 @@ export const useDetail = (): [DetailContainerProps] => {
         },
       });
     }
-  }, [descriptionChanged]);
-  const close = useCallback(() => {
+  });
+  const close = usePersistFn(() => {
     // setRoutes([]);
     if (!descriptionChanged) {
       if (filePreview) {
@@ -99,7 +100,7 @@ export const useDetail = (): [DetailContainerProps] => {
         },
       });
     }
-  }, [descriptionChanged, filePreview]);
+  });
 
   const clear = useCallback(() => {
     eventsMap.current.forEach((events) => {
@@ -128,7 +129,7 @@ export const useDetail = (): [DetailContainerProps] => {
     // setVisible,
   }];
 };
-interface DetailContainerProps {
+export interface DetailContainerProps {
   descriptionChanged: boolean
   setDescriptionChanged: (changed: boolean) => void
   visible: boolean
