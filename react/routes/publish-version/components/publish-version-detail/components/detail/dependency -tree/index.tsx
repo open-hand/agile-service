@@ -109,7 +109,7 @@ const DependencyTree: React.FC = () => {
     return true;
   }
   async function handleCreate(pomData: any) {
-    await publishVersionApi.create({ ...pomData, appService: false });
+    await publishVersionApi.createBatch(detailData.id, [{ ...pomData, appService: false }]);
     store.loadData();
     return true;
   }
