@@ -72,7 +72,6 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     @Autowired
     private TagCompareHistoryMapper tagCompareHistoryMapper;
 
-
     private static final String GROUP_ID_EMPTY_EXCEPTION = "error.publish.version.groupId.empty";
     private static final String VERSION_ALIAS_EMPTY_EXCEPTION = "error.publish.version.alias.empty";
     private static final String VERSION_EMPTY_EXCEPTION = "error.publish.version.version.empty";
@@ -97,6 +96,9 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         if (!StringUtils.isEmpty(publishVersionVO.getVersionAlias())
                 && checkAlias(projectId, publishVersionVO.getVersionAlias(), null)) {
             throw new CommonException("error.publish.version.alias.duplicate");
+        }
+        if (StringUtils.isEmpty(publishVersionVO.getStatusCode())) {
+            publishVersionVO.setStatusCode(PublishVersionDTO.VERSION_PLANNING);
         }
         PublishVersionDTO dto = modelMapper.map(publishVersionVO, PublishVersionDTO.class);
         if (publishVersionMapper.insertSelective(dto) != 1) {
