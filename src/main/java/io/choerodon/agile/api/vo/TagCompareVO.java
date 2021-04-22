@@ -20,7 +20,7 @@ public class TagCompareVO {
     private String appServiceCode;
     @NotEmpty(message = "error.sourceTag.empty")
     private String sourceTag;
-    @NotEmpty(message = "error.targetTag.empty")
+
     private String targetTag;
 
     public Long getProjectId() {
