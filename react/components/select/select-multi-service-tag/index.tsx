@@ -13,6 +13,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
 import FlatSelect from '@/components/flat-select';
 import { getProjectId } from '@/utils/common';
+import { randomString } from '@/utils/random';
 import SelectAppService from '../select-app-service';
 import SelectGitTags from '../select-git-tags';
 import './index.less';
@@ -92,12 +93,14 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
     }
     loadData();
   }, [ds, originData, projectId, serviceOptionDs]);
+  const componentId = useMemo(() => `select-multi-service-tag-${randomString(5)}`, []);
+  console.log('dom.', document.getElementById(componentId));
   return (
-    <div role="none" className={`${prefixCls}-content`} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+    <div role="none" id={componentId} className={`${prefixCls}-content`} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
       <Form dataSet={ds}>
         {ds.records.flatMap((record) => (
-          [<SelectAppService name="appService" options={serviceOptionDs} record={record} primitiveValue onClick={(e) => e.stopPropagation()} />,
-            <SelectGitTags key={`select-tag-${record.get('appServiceId')}`} applicationId={record.get('appServiceId')} name="tagName" multiple record={record} />]
+          [<SelectAppService name="appService" options={serviceOptionDs} record={record} primitiveValue getPopupContainer={() => document.getElementById(componentId) as any} />,
+            <SelectGitTags key={`select-tag-${record.get('appServiceId')}`} applicationId={record.get('appServiceId')} name="tagName" multiple record={record} getPopupContainer={() => document.getElementById(componentId) as any} />]
         ))}
         {ds.length > 0 && <Button icon="add" color={'primary' as any} onClick={handleCreate}>添加筛选</Button>}
       </Form>
