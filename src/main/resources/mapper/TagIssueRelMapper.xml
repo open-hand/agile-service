@@ -199,4 +199,13 @@
         </foreach>
         and concat_ws( '-', api.project_code, ai.issue_num) != ''
     </select>
+
+    <select id="selectByOptions" resultType="io.choerodon.agile.infra.dto.TagIssueRelDTO">
+        select * from agile_tag_issue_rel
+        where project_id = #{projectId}
+        and issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
+            #{issueId}
+        </foreach>
+    </select>
 </mapper>
