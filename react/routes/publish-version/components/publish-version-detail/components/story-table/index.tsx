@@ -9,6 +9,7 @@ import { publishVersionApi, versionApi } from '@/api';
 import renderStatus from '@/components/column-renderer/status';
 import { useReleaseDetailContext } from '../../stores';
 import IssueDiffArea from './IssueDiffArea';
+import './index.less';
 
 const { Column } = Table;
 function StoryTable() {
@@ -68,6 +69,7 @@ function StoryTable() {
           name="summary"
           lock={'left' as any}
           width={210}
+          className="c7n-agile-table-cell-click"
           onCell={({ record }) => ({
             onClick: () => {
               store.selectIssue(record.get('issueId'));
