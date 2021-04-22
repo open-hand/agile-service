@@ -123,8 +123,11 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
                 (httpStatus, response) -> {
                 }, exceptionResponse -> {
                     LOGGER.error("combine fragment failed: {}", exceptionResponse.getMessage());
-                    throw new CommonException("error.attachment.combine.failed");
+                    throw new CommonException(exceptionResponse.getMessage());
                 });
+        if (url == null) {
+            throw new CommonException("error.attachment.combine.failed");
+        }
         IssueAttachmentDTO result = dealIssue(projectId, issueAttachmentCombineVO.getIssueId(),
                 issueAttachmentCombineVO.getFileName(), dealUrl(url));
         IssueAttachmentVO issueAttachmentVO = new IssueAttachmentVO();
