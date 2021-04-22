@@ -44,7 +44,9 @@ function IssueDiffArea() {
       // {
       //   name: 'lastAppService', label: '选择应用服务', type: 'string' as any, required: true,
       // },
-
+      {
+        name: 'appServiceId',
+      },
       {
         name: 'appServiceCode', label: '选择应用服务', type: 'string' as any, required: true,
       },
@@ -65,7 +67,7 @@ function IssueDiffArea() {
             const appServiceObject = store.getAppServiceList.find((service) => service.code === item.appServiceCode) || item.appServiceCode;
             console.log('appServiceObject', appServiceObject);
             return ({
-              appServiceObject, applicationId: appServiceObject?.id, appServiceCode: item.appServiceCode, sourceTag: item.source, targetTag: item.target,
+              appServiceObject, appServiceId: appServiceObject?.id, appServiceCode: item.appServiceCode, sourceTag: item.source, targetTag: item.target,
             });
           });
         },
@@ -76,7 +78,9 @@ function IssueDiffArea() {
   const applicationId = useMemo(() => {
     const appServiceCode = ds.current?.get('appServiceCode');
     if (appServiceCode) {
-      return store.getAppServiceList.find((service) => service.code === appServiceCode)?.id;
+      const newId = store.getAppServiceList.find((service) => service.code === appServiceCode)?.id;
+      ds.current?.set('appServiceId', newId);
+      return newId;
     }
     return appServiceCode;
   }, [ds, ds.current?.get('appServiceCode')]);
