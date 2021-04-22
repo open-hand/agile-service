@@ -63,6 +63,7 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
       <TextField name="artifactId" />
 
       <TextField name="version" />
+      <TextField name="groupId" />
 
       <SelectAppService
         name="serviceCode"

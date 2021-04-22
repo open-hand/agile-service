@@ -11,6 +11,7 @@ interface Props extends Partial<SelectProps> {
   valueField?: string
   afterLoad?: (list: any[]) => void
   flat?: boolean
+  request?: SelectConfig['request'],
   programMode?: string /** 是否为项目群访问模式  */
   projectId?: string
 }
@@ -21,7 +22,7 @@ const renderService = (appService: any) => {
   return null;
 };
 const SelectAppService: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, projectId, programMode, ...otherProps
+  dataRef, valueField, afterLoad, flat, projectId, request, programMode, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
@@ -32,7 +33,7 @@ const SelectAppService: React.FC<Props> = forwardRef(({
         {renderService(appService)}
       </FragmentForSearch>
     ),
-    request: () => devOpsApi.project(projectId).loadActiveService(),
+    request: request || (() => devOpsApi.project(projectId).loadActiveService()),
     middleWare: (data: any) => {
       if (dataRef) {
         Object.assign(dataRef, {

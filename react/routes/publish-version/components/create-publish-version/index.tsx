@@ -51,10 +51,12 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps
       { name: 'actualPublishDate', label: '实际发布时间' },
       { name: 'artifactId', label: 'artifactId' },
       { name: 'groupId', label: 'groupId' },
+      { name: 'versionId', label: 'versionId' },
       { name: 'appService', label: '关联应用服务', defaultValue: true },
-      { name: 'serviceCode', label: '关联应用服务' },
+      { name: 'service', label: '关联应用服务', type: 'object' as any },
+      { name: 'serviceCode', bind: 'service.code' },
 
-      { name: 'tagId', label: '关联tag' },
+      { name: 'tagName', label: '关联tag' },
     ],
     transport: {
       submit: ({ data }) => publishVersionApiConfig.create(data[0]),
@@ -81,8 +83,14 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps
       <DatePicker name="actualPublishDate" />
       <TextField name="artifactId" />
       <TextField name="groupId" />
-      <SelectAppService name="serviceCode" onChange={setApplicationId} />
-      <SelectGitTags name="tagId" applicationId={applicationId} />
+      <TextField name="versionId" />
+      <SelectAppService
+        name="service"
+        onChange={(v) => {
+          setApplicationId(v ? v.id : undefined);
+        }}
+      />
+      <SelectGitTags key={`select-git-tag-${applicationId}`} name="tagName" applicationId={applicationId} />
     </Form>
   );
 };

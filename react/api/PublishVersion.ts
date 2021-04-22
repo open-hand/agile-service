@@ -48,9 +48,9 @@ export interface IPublishVersionTreeNode {
   type?: string | 'app'
   children?: Array<IPublishVersionTreeNode>
 }
-interface IPublishVersionListSearchData{
-  appService?:boolean
-  content?:string
+interface IPublishVersionListSearchData {
+  appService?: boolean
+  content?: string
 }
 class PublishVersionApi extends Api<PublishVersionApi> {
   get prefix() {
@@ -67,7 +67,7 @@ class PublishVersionApi extends Api<PublishVersionApi> {
   /**
    *加载发布版本列表
    */
-  loadList(params = { page: 0, size: 10 }, data:IPublishVersionListSearchData = { appService: true, content: '' }) {
+  loadList(params = { page: 0, size: 10 }, data: IPublishVersionListSearchData = { appService: true, content: '' }) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/list`,
@@ -127,19 +127,7 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  update(publishVersionId: string, data: any) {
-    return this.request({
-      method: 'put',
-      url: `${this.prefix}/publish_version/update/${publishVersionId}`,
-      data: {
-        ...data,
-        organizationId: getOrganizationId(),
-        projectId: data.projectId || getProjectId(),
-      },
-    });
-  }
-
-  updateStatus(publishVersionId: string, statusCode: 'released'|'version_planning') {
+  update(publishVersionId: string, data: any, statusCode?:'released' | 'version_planning') {
     return this.request({
       method: 'put',
       url: `${this.prefix}/publish_version/update/${publishVersionId}`,
@@ -147,8 +135,9 @@ class PublishVersionApi extends Api<PublishVersionApi> {
         statusCode,
       },
       data: {
+        ...data,
         organizationId: getOrganizationId(),
-        projectId: getProjectId(),
+        projectId: data.projectId || getProjectId(),
       },
     });
   }
@@ -359,9 +348,9 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  loadCompareHistory(versionId:string) {
+  loadCompareHistory(versionId: string) {
     return this.request({
-      method: 'post',
+      method: 'get',
       url: `${this.prefix}/publish_version/${versionId}/tag_compare_history`,
       params: {
         organizationId: getOrganizationId(),
