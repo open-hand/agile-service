@@ -51,7 +51,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
             onSubmit={this.updateIssueTag}
             initValue={tags}
             editor={({ submit }) => (
-              <SelectMultiServiceTag onChange={submit} />
+              <SelectMultiServiceTag onChange={submit} multiple />
             )}
           >
             {

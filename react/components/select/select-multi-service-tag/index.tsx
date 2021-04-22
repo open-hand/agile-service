@@ -6,6 +6,7 @@ import {
 } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer, useForceUpdate } from 'mobx-react-lite';
+import { toJS } from 'mobx';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { devOpsApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
@@ -27,7 +28,6 @@ interface Props extends Partial<SelectProps> {
 
 }
 const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?: string, onCancel: () => void }> = observer(({ onOK, onCancel, projectId }) => {
-  const [serviceOptions, setServiceOptions] = useState([] as any[]);
   const selectedIdSets = useMemo(() => new Set<string>(), []);
   const serviceOptionDs = useMemo(() => new DataSet({
     primaryKey: 'id',
@@ -70,23 +70,16 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
   function handleCancel() {
     onCancel();
   }
-  const loadAppServiceData = useCallback(async (record: Record) => {
-    const appServiceId = record.get('appServiceId');
-    const newData = serviceOptions.filter((i) => !selectedIdSets.has(i.id) || appServiceId === i.id);
-    console.log('newData', newData, selectedIdSets, appServiceId);
-    return newData;
-  }, [selectedIdSets, serviceOptions]);
   useEffect(() => {
     function loadData() {
       devOpsApi.project(projectId).loadActiveService().then((data: any) => {
-        serviceOptionDs.loadData(data.map((item:any) => ({ ...item, meaning: item.name, value: item.id })));
-        setServiceOptions(data);
+        serviceOptionDs.loadData(data.map((item: any) => ({ ...item, meaning: item.name, value: item.id })));
         ds.create();
-        console.log('data...', data);
       });
     }
     loadData();
   }, [ds, projectId, serviceOptionDs]);
+  console.log('ds', ds.length);
   return (
     <div role="none" className={`${prefixCls}-content`} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
       <Form dataSet={ds}>
@@ -106,7 +99,7 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
   );
 });
 const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, applicationId, projectId, onBlur, onChange, ...otherProps
+  dataRef, valueField, afterLoad, flat, applicationId, projectId, onBlur, onChange, value: propsValue, ...otherProps
 }, ref: React.Ref<Select>) => {
   const innerRef = useRef<Select | null>();
   const handleBindRef = useCallback((newRef) => {
@@ -129,9 +122,15 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
     console.log('handleSave...', changeData);
     onChange && onChange(changeData, []);
   }
+  const value = useMemo(() => {
+    console.log('value...', propsValue);
+    return toJS(propsValue)?.map((item: any) => (item.appServiceCode ? `${item.appServiceCode}:${item.tagName}` : item.tagName));
+  }, [propsValue]);
+
   return (
     <Component
       ref={handleBindRef}
+      value={value}
       getPopupContainer={(node) => node.parentNode as any}
       trigger={['click'] as any}
       onChange={(v) => {
