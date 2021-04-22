@@ -7,6 +7,8 @@ import {
 } from 'mobx';
 import { GanttRef, Gantt } from 'react-gantt-component';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import { DetailContainerProps } from '@/components/detail-container';
+import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
 // 视图日视图、周视图、月视图、季视图、年视图
 export const units = [
   {
@@ -48,7 +50,21 @@ class GanttStore {
 
   @action
   setIssueId(issueId: string | null) {
-    this.issueId = issueId;
+    const setData = () => {
+      this.issueId = issueId;
+    };
+    if (!this.detailProps.descriptionChanged) {
+      setData();
+    } else {
+      openDescriptionConfirm({
+        onOk: () => {
+          setData();
+          if (this.detailProps.setDescriptionChanged) {
+            this.detailProps.setDescriptionChanged(false);
+          }
+        },
+      });
+    }
   }
 
   @action
@@ -60,6 +76,12 @@ class GanttStore {
   @action
   setCreateIssueVisible(createIssueVisible: boolean) {
     this.createIssueVisible = createIssueVisible;
+  }
+
+  @observable detailProps = {} as DetailContainerProps;
+
+  @action setDetailProps = (data: DetailContainerProps) => {
+    this.detailProps = data;
   }
 }
 
