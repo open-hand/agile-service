@@ -596,7 +596,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                     && programId != null
                     && issue.getFeatureId() != null
                     && !Objects.equals(0L, issue.getFeatureId() )) {
-                agilePluginService.addTagToFeature(issue.getFeatureId(), programId, organizationId, appServiceCode, tagName);
+                agilePluginService.addTagToFeature(issue.getFeatureId(), projectId, organizationId, appServiceCode, tagName);
             }
         });
     }
