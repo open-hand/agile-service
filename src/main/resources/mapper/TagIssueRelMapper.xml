@@ -202,7 +202,10 @@
 
     <select id="selectByOptions" resultType="io.choerodon.agile.infra.dto.TagIssueRelDTO">
         select * from agile_tag_issue_rel
-        where project_id = #{projectId}
+        where organization_id = #{organizationId}
+        <if test="projectId != null">
+            and project_id = #{projectId}
+        </if>
         and issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}

@@ -188,7 +188,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     private PublishVersionTreeClosureMapper publishVersionTreeClosureMapper;
     @Autowired
-    private TagIssueRelMapper tagIssueRelMapper;
+    protected TagIssueRelMapper tagIssueRelMapper;
 
     private static final String[] FIELDS_NAMES;
 

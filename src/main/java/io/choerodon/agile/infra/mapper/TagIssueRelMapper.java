@@ -30,6 +30,7 @@ public interface TagIssueRelMapper extends BaseMapper<TagIssueRelDTO> {
                                                         @Param("tags") Set<TagVO> tags,
                                                         @Param("issueTypeCode") String issueTypeCode);
 
-    List<TagIssueRelDTO> selectByOptions(@Param("projectId") Long projectId,
+    List<TagIssueRelDTO> selectByOptions(@Param("organizationId") Long organizationId,
+                                         @Param("projectId") Long projectId,
                                          @Param("issueIds") List<Long> issueIds);
 }
