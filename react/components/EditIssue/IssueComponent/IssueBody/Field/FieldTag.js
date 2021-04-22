@@ -11,13 +11,18 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
   updateIssueTag = (newTags) => {
     const { store, onUpdate, reloadIssue } = this.props;
     const issue = store.getIssue;
-    const { issueId, objectVersionNumber } = issue;
+    const { issueId, tags, objectVersionNumber } = issue;
 
     const obj = {
       issueId,
       objectVersionNumber,
       tags: newTags || [],
     };
+    if (typeof (obj.tags[0]) === 'string') { //  为字符串 则为blur触发， 后续需要更换此处
+      return;
+    }
+    // if(tags.map((i) => `${i.appServiceCode}:${i.tagName}`).join('，')===)
+    console.log('newTags', newTags);
     issueApi.update(obj)
       .then(() => {
         if (onUpdate) {
@@ -47,7 +52,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
         <div className="c7n-value-wrapper" style={{ display: 'flex', flexWrap: 'nowrap' }}>
           <TextEditToggle
             disabled={disabled}
-            submitTrigger={['change']}
+            submitTrigger={['change', 'blur']}
             onSubmit={this.updateIssueTag}
             initValue={tags}
             editor={({ submit }) => (

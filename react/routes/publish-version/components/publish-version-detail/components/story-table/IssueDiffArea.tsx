@@ -91,7 +91,7 @@ function IssueDiffArea() {
     <div className={styles.wrap}>
       <Form dataSet={ds} columns={3} className={classnames(styles.form, { [styles.form_hidden]: !expand })}>
         {/* <SelectAppService name="lastAppService" /> */}
-        <SelectAppService name="appServiceObject" onChange={() => ds.current?.init('sourceTag', undefined).init('targetTag', undefined)} />
+        <SelectAppService name="appServiceCode" onChange={() => ds.current?.init('sourceTag', undefined).init('targetTag', undefined)} />
         <SelectGitTags name="sourceTag" help={undefined} applicationId={applicationId} key={`select-sourceTag-${applicationId}`} />
         <SelectGitTags name="targetTag" help={undefined} applicationId={applicationId} key={`select-targetTag-${applicationId}`} />
         <div className={styles.compare} hidden={!expand}>
