@@ -64,7 +64,7 @@
       top: 4px;
     }
 
-    
+
 
     .c7n-pro-@{type}-trigger {
       transform: none;
@@ -86,11 +86,13 @@
       max-width: 100%;
     }
   }
+
   .flat-@{type}.c7n-pro-@{type}-expand {
     .c7n-pro-@{type}-placeholder {
       color: rgba(0, 0, 0, 0.3);
     }
   }
+
   // 没有值间距小一点
   .flat-@{type}.c7n-pro-@{type}-empty {
     .c7n-pro-@{type} {
@@ -109,5 +111,24 @@
     .c7n-pro-@{type}-no-clearButton {
       padding-right: 0 !important;
     }
+  }
+
+
+  body[data-theme='theme4'] {
+
+    .flat-@{type} {    
+      height: 32px;
+      
+      .c7n-pro-@{type}-clear-button {
+        right: 15px;
+        top: -2px;
+      }
+
+
+      .c7n-pro-@{type}-suffix {
+        top: -2px;
+      }
+    }
+
   }
 }

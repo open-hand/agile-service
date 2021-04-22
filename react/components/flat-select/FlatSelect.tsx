@@ -1,11 +1,10 @@
 /* eslint-disable react/static-property-placement */
 /* eslint-disable max-classes-per-file */
 import React, {
-  isValidElement, ReactNode, CSSProperties, forwardRef,
+  isValidElement, ReactNode, CSSProperties,
 } from 'react';
-import { useTheme } from '@choerodon/master';
 import { observer } from 'mobx-react';
-import { Icon, Animate, Select as SelectPro } from 'choerodon-ui/pro';
+import { Icon, Animate } from 'choerodon-ui/pro';
 import isString from 'lodash/isString';
 import noop from 'lodash/noop';
 import isNil from 'lodash/isNil';
@@ -175,27 +174,10 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
 }
 
 @observer
-class ObserverFlatSelect extends FlatSelect<SelectProps> {
+export default class ObserverFlatSelect extends FlatSelect<SelectProps> {
   static defaultProps = FlatSelect.defaultProps;
 
   static Option = Option;
 
   static OptGroup = OptGroup;
 }
-// @ts-ignore
-const SelectWrapper: typeof ObserverFlatSelect = forwardRef((props: SelectProps, ref: React.Ref<SelectPro>) => {
-  const [theme] = useTheme();
-  const Component = theme === '' ? ObserverFlatSelect : SelectPro;
-
-  return <Component ref={ref} {...props} />;
-});
-
-SelectWrapper.Option = Option;
-
-SelectWrapper.OptGroup = OptGroup;
-SelectWrapper.defaultProps = FlatSelect.defaultProps;
-SelectWrapper.displayName = FlatSelect.displayName;
-SelectWrapper.propTypes = FlatSelect.propTypes;
-SelectWrapper.contextType = FlatSelect.contextType;
-
-export default SelectWrapper;
