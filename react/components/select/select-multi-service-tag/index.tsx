@@ -27,7 +27,9 @@ interface Props extends Partial<SelectProps> {
   projectId?: string
 
 }
-const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?: string, onCancel: () => void }> = observer(({ onOK, onCancel, projectId }) => {
+const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?: string, onCancel: () => void, originData: any[] }> = observer(({
+  onOK, onCancel, projectId, originData,
+}) => {
   const selectedIdSets = useMemo(() => new Set<string>(), []);
   const serviceOptionDs = useMemo(() => new DataSet({
     primaryKey: 'id',
@@ -61,7 +63,6 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
   }), []);
   function handleSave() {
     const data = ds.toJSONData();
-    console.log('save..', data);
     onOK(ds.records);
   }
   const handleCreate = useCallback(() => {
@@ -72,20 +73,31 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
   }
   useEffect(() => {
     function loadData() {
-      devOpsApi.project(projectId).loadActiveService().then((data: any) => {
-        serviceOptionDs.loadData(data.map((item: any) => ({ ...item, meaning: item.name, value: item.id })));
-        ds.create();
+      devOpsApi.project(projectId).loadActiveService().then((res: any) => {
+        const data = res.map((item: any) => ({ ...item, meaning: item.name, value: item.id }));
+        serviceOptionDs.loadData(data);
+        if (originData && originData.length > 0) {
+          console.log(originData.map((item) => {
+            const appService = data.find((i: any) => i.code === item.appServiceCode);
+            return { ...item, appService };
+          }));
+          ds.loadData(originData.map((item) => {
+            const appService = data.find((i: any) => i.code === item.appServiceCode);
+            return { ...item, appService };
+          }));
+        } else {
+          ds.create();
+        }
       });
     }
     loadData();
-  }, [ds, projectId, serviceOptionDs]);
-  console.log('ds', ds.length);
+  }, [ds, originData, projectId, serviceOptionDs]);
   return (
     <div role="none" className={`${prefixCls}-content`} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
       <Form dataSet={ds}>
         {ds.records.flatMap((record) => (
-          [<SelectAppService name="appService" options={serviceOptionDs} record={record} primitiveValue getPopupContainer={(node) => document.getElementsByClassName(`${prefixCls}-content`)[0] as any} />,
-            <SelectGitTags key={`select-tag-${record.get('appServiceId')}`} applicationId={record.get('appServiceId')} name="tagName" multiple record={record} getPopupContainer={(node) => document.getElementsByClassName(`${prefixCls}-content`)[0] as any} />]
+          [<SelectAppService name="appService" options={serviceOptionDs} record={record} primitiveValue onClick={(e) => e.stopPropagation()} />,
+            <SelectGitTags key={`select-tag-${record.get('appServiceId')}`} applicationId={record.get('appServiceId')} name="tagName" multiple record={record} />]
         ))}
         {ds.length > 0 && <Button icon="add" color={'primary' as any} onClick={handleCreate}>添加筛选</Button>}
       </Form>
@@ -94,6 +106,7 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
         <Button funcType={'raised' as any} onClick={handleCancel}>取消</Button>
 
       </div>
+
     </div>
 
   );
@@ -131,14 +144,24 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
     <Component
       ref={handleBindRef}
       value={value}
-      getPopupContainer={(node) => node.parentNode as any}
+      // onBlur={() => {
+      //   console.log('blur..');
+      //   innerRef.current?.collapse();
+      // }}
+      onPopupHiddenChange={(hidden) => {
+        console.log('blur..', onBlur);
+        // onChange();
+        hidden && onBlur && onBlur({} as any);
+        // setMode(dateType === 'datetime' ? 'dateTime' : dateType);
+      }}
+      // getPopupContainer={(node) => node.parentNode as any}
       trigger={['click'] as any}
       onChange={(v) => {
         console.log('onChange', v);
       }}
       {...otherProps}
       dropdownMatchSelectWidth={false}
-      popupContent={<MultiServiceTag onOK={handleSave} onCancel={() => innerRef.current?.collapse()} projectId={projectId} />}
+      popupContent={<MultiServiceTag onOK={handleSave} originData={propsValue} onCancel={() => innerRef.current?.collapse()} projectId={projectId} />}
     />
   );
 });

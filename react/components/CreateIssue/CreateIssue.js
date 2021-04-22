@@ -41,6 +41,7 @@ import FieldStartTime from './FieldStartTime';
 import FieldEndTime from './FieldEndTime';
 import { OldSelectProgramVersion as SelectProgramVersion } from '../select/select-program-version';
 import { OldSelectEnvironment as SelectEnvironment } from '../select/select-environment';
+import SelectMultiServiceTag from '../select/select-multi-service-tag-old';
 
 const DebounceInput = reactComponentDebounce({
   valuePropName: 'value',
@@ -385,6 +386,7 @@ class CreateIssue extends Component {
           programVersion,
           environment,
           appVersions,
+          tags,
           mainResponsibleId,
           testResponsibleId,
         } = values;
@@ -476,6 +478,7 @@ class CreateIssue extends Component {
             environment, // 缺陷有的字段
             mainResponsibleId,
             testResponsibleId,
+            tags,
             estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
             estimatedStartTime: estimatedStartTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
           };
@@ -1189,6 +1192,18 @@ class CreateIssue extends Component {
                     }
                   }}
                 />,
+              )}
+            </div>
+          </FormItem>
+        );
+      case 'tag':
+        return (
+          <FormItem label={field.fieldName} key={`${newIssueTypeCode}-${field.id}`}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {getFieldDecorator('tags', {
+                rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
+              })(
+                <SelectMultiServiceTag label={field.fieldName} multiple labelLayout="float" style={{ width: '100%' }} />,
               )}
             </div>
           </FormItem>
