@@ -11,6 +11,7 @@ import { getFileSuffix } from '@/utils/common';
 import Preview from '@/components/Preview';
 import './SingleFileUpload.less';
 import FileSaver from 'file-saver';
+import { useDetailContainerContext } from '../detail-container/context';
 
 const previewSuffix = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'pdf', 'jpg', 'jpeg', 'gif', 'png'];
 const modalKey = Modal.key();
@@ -18,7 +19,8 @@ function SingleFileUplaod(props) {
   const {
     url, fileService, fileName, hasDeletePermission, onDeleteFile, percent, error, onPreview, isUI,
   } = props;
-
+  // 可能在详情内，也可能不在
+  const { setFilePreview } = useDetailContainerContext();
   const handleDownLoadFile = () => {
     FileSaver.saveAs(`${fileService || ''}${url}`, fileName);
   };
@@ -27,6 +29,14 @@ function SingleFileUplaod(props) {
     if (onPreview) {
       onPreview();
     } else {
+      // 可能在详情内，也可能不在，不在详情，这个函数是undefined
+      if (setFilePreview) {
+        setFilePreview({
+          url: `${fileService || ''}${fileUrl}`,
+          name,
+        });
+        return;
+      }
       Modal.open({
         key: modalKey,
         title: '预览',
@@ -34,7 +44,10 @@ function SingleFileUplaod(props) {
         className: 'c7n-agile-preview-Modal',
         cancelText: '关闭',
         fullScreen: true,
-        children: <Preview service={service} fileName={name} fileUrl={fileUrl} handleDownLoadFile={handleDownLoadFile} />,
+        children: <Preview
+          fileName={name}
+          url={`${fileService || ''}${fileUrl}`}
+        />,
       });
     }
   };

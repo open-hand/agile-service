@@ -72,6 +72,7 @@ const propTypes = {
     minWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   }),
   onResizeEnd: PropTypes.func,
+  disabled: PropTypes.bool,
 };
 class ResizeAble extends Component {
   constructor(props) {
@@ -229,7 +230,7 @@ class ResizeAble extends Component {
   }
 
   render() {
-    const { modes, children, defaultSize } = this.props;
+    const { modes, children, defaultSize, disabled } = this.props;
     const { resizing, mode } = this.state;
     return (
       <div
@@ -252,7 +253,7 @@ class ResizeAble extends Component {
         )}
         {children}
         {
-          modes.map((position) => (
+          !disabled && modes.map((position) => (
             <div role="none" key={position} className={`resizable-${position}`} style={{ position: 'absolute', zIndex: 10, ...MODES[position] }} onMouseDown={this.handleMouseDown.bind(this, position)}>
               <div className={`resizable-line-${position} ${resizing && position === mode ? 'active' : ''}`} />
             </div>
