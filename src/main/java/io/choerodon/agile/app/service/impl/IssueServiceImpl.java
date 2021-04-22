@@ -738,6 +738,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         dto.setIssueId(issueId);
         tagIssueRelMapper.delete(dto);
         handleCreateTagIssueRel(tags, projectId, issueId);
+        if (agilePluginService != null) {
+            agilePluginService.handleProgramUpdateTag(tags, projectId, issueId);
+        }
     }
 
     @Override
