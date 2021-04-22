@@ -29,7 +29,7 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
     data: data ? [data] : undefined,
     fields: [
       { name: 'versionAlias', label: '版本名称' },
-      { name: 'version', label: 'version' },
+      { name: 'version', label: 'version', required: true },
       { name: 'artifactId', label: 'artifactId' },
       { name: 'groupId', label: 'groupId' },
       { name: 'serviceCode', label: '关联应用服务' },

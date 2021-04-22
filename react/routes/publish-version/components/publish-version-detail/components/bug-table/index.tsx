@@ -10,6 +10,7 @@ import { publishVersionApi, versionApi } from '@/api';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import renderTags from '@/components/column-renderer/tags';
 import { useReleaseDetailContext } from '../../stores';
+import './index.less';
 
 const { Column } = Table;
 function BugTable() {
@@ -38,6 +39,7 @@ function BugTable() {
     <Table dataSet={bugTableDataSet}>
       <Column
         name="summary"
+        className="c7n-agile-table-cell-click"
         onCell={({ record }) => ({
           onClick: () => {
             store.selectIssue(record.get('issueId'));

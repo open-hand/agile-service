@@ -9,10 +9,14 @@ import UserTag from '@/components/tag/user-tag';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { publishVersionApi, publishVersionApiConfig, versionApi } from '@/api';
 import renderStatus from '@/components/column-renderer/status';
+// @ts-ignore
+import JSONbig from 'json-bigint';
 import SelectAppService from '@/components/select/select-app-service';
 import SelectGitTags from '@/components/select/select-git-tags';
 import { useReleaseDetailContext } from '../../stores';
 import styles from './IssueDiffArea.less';
+
+const JSONbigString = JSONbig({ storeAsString: true });
 
 function ButtonExpandCollapse({ defaultExpand, onClick }: { defaultExpand?: boolean, onClick?: (isExpand: boolean, oldIsExpand: boolean) => void | boolean }) {
   const [expand, setExpand] = useState(defaultExpand);
@@ -45,7 +49,7 @@ function IssueDiffArea() {
       // },
       {
         name: 'appServiceObject',
-        type: 'object' as any,
+        // type: 'object' as any,
         label: '选择应用服务',
         textField: 'name',
         valueField: 'appServiceCode',
@@ -60,11 +64,19 @@ function IssueDiffArea() {
         name: 'sourceTag', label: 'sourceTag', type: 'string' as any, required: true,
       },
       {
-        name: 'targetTag', label: 'targetTag', type: 'string' as any, required: true,
+        name: 'targetTag', label: 'targetTag', type: 'string' as any,
       },
     ],
     transport: {
-      read: () => ({ ...publishVersionApiConfig.loadCompareHistory(store.getCurrentData.id) }),
+      read: () => ({
+        ...publishVersionApiConfig.loadCompareHistory(store.getCurrentData.id),
+        transformResponse: (res) => {
+          const data = JSONbigString.parse(res);
+          console.log('data', data);
+
+          return data.map((item: any) => ({ appServiceObject: store.getAppServiceList.find((service) => service.code === item.appServiceCode) || item.appServiceCode, sourceTag: item.source, targetTag: item.target }));
+        },
+      }),
       submit: ({ data }) => ({ ...publishVersionApiConfig.compareTag(store.getCurrentData.id, data) }),
     },
   }), [store.getCurrentData.id]);
