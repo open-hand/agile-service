@@ -13,7 +13,6 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -201,7 +200,7 @@ public class PublishVersionController {
                                      @ApiParam(value = "产品版本id", required = true)
                                      @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
                                      @RequestParam Long organizationId,
-                                     @RequestBody @Validated List<TagCompareVO> tagCompareList) {
+                                     @RequestBody List<TagCompareVO> tagCompareList) {
         publishVersionService.compareTag(projectId, organizationId, publishVersionId, tagCompareList);
         return new ResponseEntity(HttpStatus.OK);
     }

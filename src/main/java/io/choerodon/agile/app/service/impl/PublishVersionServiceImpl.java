@@ -89,9 +89,23 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         publishVersionVO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
         if (!StringUtils.isEmpty(version)
                 && !StringUtils.isEmpty(groupId)
-                && !StringUtils.isEmpty(artifactId)
-                && isExisted(projectId, publishVersionVO)) {
-            throw new CommonException("error.publish.version.duplicate");
+                && !StringUtils.isEmpty(artifactId)) {
+            boolean isExisted = isExisted(projectId, publishVersionVO);
+            if (isExisted) {
+                PublishVersionDTO dto =
+                        queryByGroupIdAndArtifactIdAndVersion(projectId, groupId, artifactId, version);
+                //把导入的发布版本战事到列表页
+                if (dto.getAppService()) {
+                    throw new CommonException("error.publish.version.duplicate");
+                } else {
+                    dto.setAppService(publishVersionVO.getAppService());
+                    dto.setVersionAlias(publishVersionVO.getVersionAlias());
+                    if (publishVersionMapper.updateByPrimaryKeySelective(dto) != 1) {
+                        throw new CommonException("error.publish.version.update");
+                    }
+                    return modelMapper.map(publishVersionMapper.selectByPrimaryKey(dto.getId()), PublishVersionVO.class);
+                }
+            }
         }
         if (!StringUtils.isEmpty(publishVersionVO.getVersionAlias())
                 && checkAlias(projectId, publishVersionVO.getVersionAlias(), null)) {
@@ -108,11 +122,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         return modelMapper.map(publishVersionMapper.selectByPrimaryKey(dto.getId()), PublishVersionVO.class);
     }
 
-    @Override
-    public Boolean isExisted(Long projectId, PublishVersionVO publishVersionVO) {
-        String groupId = publishVersionVO.getGroupId();
-        String artifactId = publishVersionVO.getArtifactId();
-        String version = publishVersionVO.getVersion();
+    private PublishVersionDTO queryByGroupIdAndArtifactIdAndVersion(Long projectId,
+                                                                    String groupId,
+                                                                    String artifactId,
+                                                                    String version) {
         AssertUtilsForCommonException.notNull(projectId, "error.publish.version.projectId.null");
         AssertUtilsForCommonException.notEmpty(groupId, GROUP_ID_EMPTY_EXCEPTION);
         AssertUtilsForCommonException.notEmpty(artifactId, ARTIFACT_ID_EMPTY_EXCEPTION);
@@ -124,14 +137,27 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         dto.setArtifactId(artifactId);
         dto.setVersion(version);
         List<PublishVersionDTO> list = publishVersionMapper.select(dto);
+        PublishVersionDTO result = null;
+        if (!ObjectUtils.isEmpty(list)) {
+            result = list.get(0);
+        }
+        return result;
+    }
+
+    @Override
+    public Boolean isExisted(Long projectId, PublishVersionVO publishVersionVO) {
+        String groupId = publishVersionVO.getGroupId();
+        String artifactId = publishVersionVO.getArtifactId();
+        String version = publishVersionVO.getVersion();
+        PublishVersionDTO dto =
+                queryByGroupIdAndArtifactIdAndVersion(projectId, groupId, artifactId, version);
         if (publishVersionVO.getId() == null) {
-            return !list.isEmpty();
+            return dto != null;
         } else {
-            if (list.isEmpty()) {
-                return false;
+            if (dto != null) {
+                return !dto.getId().equals(publishVersionVO.getId());
             } else {
-                Long id = list.get(0).getId();
-                return !id.equals(publishVersionVO.getId());
+                return false;
             }
         }
     }
@@ -342,7 +368,9 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         if (issueIds.isEmpty()) {
             return emptyPage;
         }
-        addSearchParam(searchVO, issueIds, projectId, issueTypeCode);
+        if (!addSearchParam(searchVO, issueIds, projectId, issueTypeCode)) {
+            return emptyPage;
+        }
         return issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
     }
 
@@ -357,6 +385,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         PublishVersionDTO publishVersion = publishVersionMapper.selectOne(dto);
         AssertUtilsForCommonException.notNull(publishVersion, "error.publish.version.null");
         AssertUtilsForCommonException.notEmpty(tagCompareList, "error.tagCompareList.empty");
+        validateTagCompareList(tagCompareList);
 
         List<TagVO> tags = new ArrayList<>();
         Set<Long> allIssueIds = new HashSet<>();
@@ -379,6 +408,16 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                 addTagCompareHistory(tag.getTagCompareVO(), projectId, organizationId);
             }
         }
+    }
+
+    private void validateTagCompareList(List<TagCompareVO> tagCompareList) {
+        tagCompareList.forEach(x -> {
+            //targetTag为null时，处理第一次打tag的情况
+            AssertUtilsForCommonException.notNull(x.getProjectId(), "error.tagCompare.projectId.null");
+            AssertUtilsForCommonException.notNull(x.getAppServiceId(), "error.tagCompare.appServiceId.null");
+            AssertUtilsForCommonException.notEmpty(x.getAppServiceCode(), "error.tagCompare.appServiceCode.empty");
+            AssertUtilsForCommonException.notEmpty(x.getSourceTag(), "error.tagCompare.sourceTag.empty");
+        });
     }
 
     @Override
@@ -562,10 +601,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         });
     }
 
-    private void addSearchParam(SearchVO searchVO,
-                                Set<Long> issueIds,
-                                Long projectId,
-                                String typeCode) {
+    private boolean addSearchParam(SearchVO searchVO,
+                                   Set<Long> issueIds,
+                                   Long projectId,
+                                   String typeCode) {
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
         if (otherArgs == null) {
             otherArgs = new HashMap<>();
@@ -579,9 +618,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         for (Long issueId : issueIds) {
             issueIdList.add(issueId + "");
         }
-        addCompletedStatus(searchVO, projectId);
+        boolean ok = addCompletedStatus(searchVO, projectId);
         addIssueType(searchVO, projectId, typeCode);
         resetTreeParam(searchVO);
+        return ok;
     }
 
     private void resetTreeParam(SearchVO searchVO) {
@@ -623,11 +663,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         }
     }
 
-    private void addCompletedStatus(SearchVO searchVO, Long projectId) {
+    private boolean addCompletedStatus(SearchVO searchVO, Long projectId) {
         IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
         issueStatusDTO.setProjectId(projectId);
         issueStatusDTO.setCompleted(true);
-        issueStatusDTO.setEnable(true);
         Set<Long> statusIds =
                 issueStatusMapper
                         .select(issueStatusDTO)
@@ -636,6 +675,9 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                         .collect(Collectors.toSet());
         if (!statusIds.isEmpty()) {
             addToAdvancedSearchArgsByKey(searchVO, "statusId", statusIds);
+            return true;
+        } else {
+            return false;
         }
     }
 
