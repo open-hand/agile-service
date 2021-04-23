@@ -226,7 +226,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String BUG_TYPE = "bug";
     private static final String TASK_TYPE = "task";
     private static final List<String> WORK_BENCH_SEARCH_TYPE = Arrays.asList("myBug", "reportedBug", "myStarBeacon", "myReported", "myAssigned");
-    private static final String[] FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
+    private static final String[] UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
+    private static final String[] TRANSFORMED_TASK_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, STATUS_ID};
 
     @Autowired
     private ModelMapper modelMapper;
@@ -1184,7 +1185,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public synchronized IssueVO updateIssueTypeCode(IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO, Long organizationId) {
-        List<String> fieldList = Arrays.asList(FIELD_LIST_NO_RANK);
+        List<String> fieldList = Arrays.asList(UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK);
         String originType = issueConvertDTO.getTypeCode();
         if (originType.equals(SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
@@ -2128,7 +2129,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public synchronized IssueVO transformedTask(IssueConvertDTO issueConvertDTO, IssueTransformTask issueTransformTask, Long organizationId) {
         String originType = issueConvertDTO.getTypeCode();
-        List<String> fieldList = Arrays.asList(FIELD_LIST_NO_RANK);
+        List<String> fieldList = Arrays.asList(TRANSFORMED_TASK_FIELD_LIST_NO_RANK);
         if (originType.equals(SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
         }
