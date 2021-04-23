@@ -44,10 +44,10 @@ const CustomFieldType = {
 /** 优先级excludeCode > excludeType > includeCode > includeType */
 const FastSearchAttributeRelations: Array<FastSearchAttributeRelationItem> = [
   {
-    name: '等于', value: 'equal', escapeCharacter: '=', excludeType: ['date', 'datetime', 'time'],
+    name: '等于', value: 'equal', escapeCharacter: '=', excludeType: ['date', 'datetime', 'time', 'multiMember'],
   },
   {
-    name: '不等于', value: 'notEqual', escapeCharacter: '!=', excludeType: ['date', 'datetime', 'time', 'number', 'decimal'],
+    name: '不等于', value: 'notEqual', escapeCharacter: '!=', excludeType: ['date', 'datetime', 'time', 'number', 'decimal', 'multiMember'],
   },
   {
     name: '包含', value: 'include', escapeCharacter: 'in', excludeType: ['date', 'datetime', 'time', 'number', 'decimal', 'radio', 'single', 'text', 'input'],
@@ -62,10 +62,10 @@ const FastSearchAttributeRelations: Array<FastSearchAttributeRelationItem> = [
     name: '不包含', value: 'notLike', escapeCharacter: 'notLike', includeType: ['text', 'input'], // 文字类专属
   },
   {
-    name: '是', value: 'is', escapeCharacter: 'is', excludeType: ['date', 'datetime', 'time', 'multiMember', 'text', 'input'], excludeCode: ['issue_type', 'priority', 'status'],
+    name: '是', value: 'is', escapeCharacter: 'is', excludeType: ['date', 'datetime', 'time', 'text', 'input'], excludeCode: ['issue_type', 'priority', 'status'],
   },
   {
-    name: '不是', value: 'notIs', escapeCharacter: 'is not', excludeType: ['date', 'datetime', 'time', 'multiMember', 'text', 'input'], excludeCode: ['issue_type', 'priority', 'status'],
+    name: '不是', value: 'notIs', escapeCharacter: 'is not', excludeType: ['date', 'datetime', 'time', 'text', 'input'], excludeCode: ['issue_type', 'priority', 'status'],
   },
   {
     name: '大于', value: 'greater', escapeCharacter: '>', includeType: ['date', 'datetime', 'time', 'number', 'decimal'],
@@ -237,7 +237,7 @@ export function transformSearchConditionListToEditData(searchConditionList: IFas
       const valueArr = Array.isArray(value) ? value : [value].filter(Boolean);
       const valueOptions = attribute.fieldOptions.filter((i: any) => valueArr.includes(i.id))
         .map((i: any) => ({ ...i, meaning: i.value, value: i.id }));
-      value = typeof (value) === 'string' ? valueOptions[0] || value : valueOptions;
+      value = typeof (value) === 'string' || valueOptions.length === 0 ? valueOptions[0] || value : valueOptions;
     }
     if (attribute) {
       value = processDataValue(value, { ...item, fieldType: attribute.fieldType! });
