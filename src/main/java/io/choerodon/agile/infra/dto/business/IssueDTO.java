@@ -29,7 +29,6 @@ public class IssueDTO extends AuditDomain {
      */
     private String issueNum;
 
-    @Column(name = "`rank`")
     private String rank;
 
     /**
