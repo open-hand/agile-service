@@ -42,6 +42,7 @@ import FieldEndTime from './FieldEndTime';
 import { OldSelectProgramVersion as SelectProgramVersion } from '../select/select-program-version';
 import { OldSelectEnvironment as SelectEnvironment } from '../select/select-environment';
 import SelectMultiServiceTag from '../select/select-multi-service-tag-old';
+import FieldFeatureSprint from './FieldFeatureSprint';
 
 const DebounceInput = reactComponentDebounce({
   valuePropName: 'value',
@@ -762,7 +763,7 @@ class CreateIssue extends Component {
 
         );
       case 'sprint':
-        return (
+        return newIssueTypeCode === 'feature' ? <FieldFeatureSprint form={form} field={field || {}} /> : (
           <FormItem label="冲刺" key={`${newIssueTypeCode}-sprint`}>
             {getFieldDecorator('sprintId', {
               rules: [{ required: field.required, message: '请选择冲刺' }],
