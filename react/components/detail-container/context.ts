@@ -14,6 +14,8 @@ export interface IPreview {
   name: string
 }
 interface DetailContainerContext {
+  descriptionChanged: boolean
+  setDescriptionChanged: (changed: boolean) => void
   outside: boolean
   topAnnouncementHeight: number
   routes: IRouteWithKey[]
