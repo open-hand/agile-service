@@ -2737,7 +2737,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
         }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);
+        Map<Long, List<IssueTypeVO>> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, ProjectVO> projectVOMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
         List<IssueListFieldKVVO> list = new ArrayList<>();
@@ -2745,7 +2745,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         allIssue.forEach(v -> {
             IssueListFieldKVVO issueListFieldKVVO = new IssueListFieldKVVO();
             modelMapper.map(v,issueListFieldKVVO);
-            issueListFieldKVVO.setIssueTypeVO(issueTypeDTOMap.get(v.getIssueTypeId()));
+            setIssueTypeVO(issueListFieldKVVO, issueTypeDTOMap.get(v.getIssueTypeId()));
             issueListFieldKVVO.setStatusVO(statusMapDTOMap.get(v.getStatusId()));
             issueListFieldKVVO.setPriorityVO(priorityMap.get(v.getPriorityId()));
             issueListFieldKVVO.setProjectVO(projectVOMap.get(v.getProjectId()));
@@ -2777,6 +2777,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
         return new Page<>(list, pageInfo, parentPage.getTotalElements());
+    }
+
+    private void setIssueTypeVO(IssueListFieldKVVO issueListFieldKVVO, List<IssueTypeVO> issueTypeVOList) {
+        if (!CollectionUtils.isEmpty(issueTypeVOList)) {
+            Map<Long, IssueTypeVO> issueTypeVOMap = issueTypeVOList.stream().collect(Collectors.toMap(IssueTypeVO::getProjectId, Function.identity()));
+            if (issueTypeVOMap.containsKey(issueListFieldKVVO.getProjectId())) {
+                issueListFieldKVVO.setIssueTypeVO(issueTypeVOMap.get(issueListFieldKVVO.getProjectId()));
+            } else {
+                //未项目自定义的系统问题类型
+                issueListFieldKVVO.setIssueTypeVO(issueTypeVOMap.get(0L));
+            }
+        }
     }
 
     private void checkSearchType(String searchType) {
