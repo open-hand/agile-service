@@ -45,6 +45,7 @@ const LinkPublishVersionModal: React.FC<{ modal?: IModalProps } & ILinkServicePr
         valueField: 'id',
         options: new DataSet({
           autoQuery: true,
+          paging: false,
           transport: {
             read: {
               ...publishVersionApiConfig.loadDependencyTreeAvailableNode(publishVersionId),
