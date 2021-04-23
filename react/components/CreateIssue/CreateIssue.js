@@ -189,6 +189,16 @@ class CreateIssue extends Component {
       if (newIssueTypeCode === 'feature' && data.programVersion) {
         featureApi.updateVersions(res.issueId, data.programVersion);
       }
+      if (newIssueTypeCode === 'feature' && data.subProjectSprintId) {
+        featureApi.updateTeamAndSprint({
+          piId: data.piId || null,
+          deleteSprintIds: [],
+          featureId: res.issueId,
+          sprintIds: data.subProjectSprintId,
+          teamProjectIds: [],
+          deleteTeamProjectIds: [],
+        });
+      }
       form.resetFields();
       this.setState({
         createLoading: false,
@@ -387,6 +397,7 @@ class CreateIssue extends Component {
           environment,
           appVersions,
           tags,
+          subProjectSprintId,
           mainResponsibleId,
           testResponsibleId,
         } = values;
@@ -479,6 +490,7 @@ class CreateIssue extends Component {
             mainResponsibleId,
             testResponsibleId,
             tags,
+            subProjectSprintId, // 特性冲刺字段 创建issue完成后提交
             estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
             estimatedStartTime: estimatedStartTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
           };
