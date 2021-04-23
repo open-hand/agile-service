@@ -333,7 +333,7 @@ const IssueTable: React.FC<Props> = ({
         <Column hidden={columnHidden('issueSprintVOS')} name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />
         <Column name="mainResponsibleUser" className="c7n-agile-table-cell" hidden={columnHidden('mainResponsibleUser')} renderer={({ value }) => value && <UserTag data={value} />} />
         <Column name="environmentName" className="c7n-agile-table-cell" hidden={columnHidden('environmentName')} />
-        <Column name="tags" className="c7n-agile-table-cell" hidden={columnHidden('tags')} />
+        <Column name="tags" className="c7n-agile-table-cell" hidden={columnHidden('tags')} renderer={({ value }) => (value && value.length > 0 ? value.map((i) => `${i.appServiceCode}:${i.tagName}`).join('、') : '')} />
 
         {fields.map((field) => (
           <Column
