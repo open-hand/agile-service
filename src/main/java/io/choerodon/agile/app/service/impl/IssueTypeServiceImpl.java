@@ -1096,9 +1096,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public Map<Long, IssueTypeVO> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds) {
+    public Map<Long, List<IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds) {
         return issueTypeMapper.selectByProjectIds(organizationId, projectIds)
-                .stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
+                .stream().collect(Collectors.groupingBy(IssueTypeVO::getId));
     }
 
     @Override
