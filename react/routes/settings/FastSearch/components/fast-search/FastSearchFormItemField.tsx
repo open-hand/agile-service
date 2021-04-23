@@ -1,7 +1,7 @@
 import React, {
   useCallback, useEffect, useMemo, useRef,
 } from 'react';
-import { Select } from 'choerodon-ui/pro';
+import { Select, DataSet } from 'choerodon-ui/pro';
 import { observer, useObservable } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -12,29 +12,35 @@ import { transformFieldToRenderProps } from './utils';
 const { Option } = Select;
 const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ record, ...otherProps }) => {
   const isRenderNullSelect = useMemo(() => !!['is', 'notIs'].includes(record.get('relation')), [record, record.get('relation')]);
-  const optionDataSet = useObservable({ dataSet: null, options: [] });
+  const optionDataSet = useObservable<{ dataSet: null, options?: DataSet }>({ dataSet: null, options: undefined });
   const componentRef = useRef<any>();
   /**
    * 编辑进入的数据转换为对象选项
    */
   const handleBindOptions = useCallback((list: any[]) => {
-    // 用户，多用户类型的字段 此刻不进行options 绑定， 在额外用户加载完毕后再绑定
-    if (!['member', 'multiMember'].includes(record.get('fieldType')) && componentRef.current?.options) {
+    if (componentRef.current?.options) {
       optionDataSet.options = componentRef.current?.options;
     }
-  }, [optionDataSet, record]);
+  }, [optionDataSet]);
   // 保证再次提交时 能够获取到value显示值
   useEffect(() => {
-    if (optionDataSet.options.length > 0 && record.get('_editData') && !record.getState('init_edit_data')) {
+    if (optionDataSet.options && optionDataSet.options.length > 0 && record.get('_editData') && !record.getState('init_edit_data')) {
       const defaultValue: string[] | string = toJS(record.get('value'));
       const defaultValueArr: string[] = Array.isArray(defaultValue) ? defaultValue : [defaultValue].filter(Boolean);
-      let defaultValueRecordArr: Record[] = optionDataSet.options.filter((optionRecord: any) => defaultValueArr.includes(optionRecord.get('value')));
-      // 如果没有匹配的数据，则显示值与value相同
-      if (defaultValueRecordArr.length === 0) {
-        defaultValueRecordArr = defaultValueArr.map((i) => new Record({ meaning: i, value: i }));
+      const misMatchDefaultValueSets = new Set<string>(defaultValueArr);
+      const defaultValueRecordArr: Record[] = optionDataSet.options.filter((optionRecord: any) => {
+        if (defaultValueArr.includes(optionRecord.get('value'))) {
+          misMatchDefaultValueSets.delete(optionRecord.get('value'));
+          return true;
+        }
+        return false;
+      });
+      // 如果没有匹配的数据或只有部分数据匹配到，则显示值与value相同
+      if (misMatchDefaultValueSets.size > 0) {
+        defaultValueRecordArr.push(...Array.from(misMatchDefaultValueSets).map((i) => new Record({ meaning: i, value: i })));
       }
+      console.log('useEffect', record.toData(), defaultValue, defaultValueArr, optionDataSet.options.map((i) => i.toData()), defaultValueRecordArr.map((i) => i.toData()));
       typeof (defaultValue) === 'string' && record.set('value', defaultValueRecordArr[0]?.toData() || defaultValue);
-      console.log('useEffect', defaultValueArr, defaultValueRecordArr.map((i) => i.toData()));
       Array.isArray(defaultValue) && defaultValueArr.length > 0 && record.set('value', defaultValueRecordArr.map((i) => i.toData()) || defaultValue);
       record.setState('init_edit_data', true);
     }
@@ -42,7 +48,9 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
   const selectUserAutoQueryConfig = useMemo(() => {
     const defaultValue: string[] | string = toJS(record.get('value'));
     function onFinish() {
+      // 用户，多用户类型的字段 在额外用户加载完毕后再绑定 并且重新初始化
       optionDataSet.options = componentRef.current?.options;
+      record.setState('init_edit_data', false);
     }
     return {
       selectedUserIds: Array.isArray(defaultValue) ? defaultValue : [defaultValue].filter(Boolean),
