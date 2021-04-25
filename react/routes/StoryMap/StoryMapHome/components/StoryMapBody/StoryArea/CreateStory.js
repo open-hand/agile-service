@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-  Input, Menu, Dropdown, Icon,
+  Input, Menu, Dropdown, Icon, Tooltip,
 } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
 import { isEmpty } from 'lodash';
@@ -242,7 +242,9 @@ class CreateStory extends Component {
             )
             : (
               <div className="c7nagile-StoryMap-CreateStory-btn">
-                <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleAddStoryClick}>新建问题</span>
+                {issueTypes.length > 0 ? <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleAddStoryClick}>新建问题</span>
+                  : <Tooltip title="问题类型中所有故事类型被禁用，无法新建问题"><span role="none" style={{ color: 'rgba(0, 0, 0, 0.26)' }}>新建问题</span></Tooltip>}
+
                 {' '}
                 或
                 {' '}
