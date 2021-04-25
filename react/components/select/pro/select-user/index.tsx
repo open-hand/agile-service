@@ -2,7 +2,7 @@ import React, { forwardRef, useState } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import useSelect from '@/hooks/useSelectPro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import useProjectUsers from '@/hooks/data/useProjectUsers';
 
 export interface SelectUserProps extends Partial<SelectProps> {

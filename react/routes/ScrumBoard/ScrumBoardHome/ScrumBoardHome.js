@@ -6,7 +6,7 @@ import {
 import {
   Button, Spin, Select, Icon, Modal, Form, Tooltip,
 } from 'choerodon-ui';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import Loading from '@/components/Loading';
 import { set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';

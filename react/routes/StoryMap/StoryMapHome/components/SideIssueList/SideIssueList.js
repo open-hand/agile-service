@@ -5,7 +5,7 @@ import {
 import { Select } from 'choerodon-ui/pro';
 import { observer, inject } from 'mobx-react';
 import { configTheme } from '@/utils/common';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import FiltersProvider from '../../../../../components/FiltersProvider';
 import ClickOutSide from '../../../../../components/CommonComponent/ClickOutSide';

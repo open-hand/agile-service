@@ -2,7 +2,7 @@ import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import useSelect, { SelectConfig, FragmentForSearch, LoadConfig } from '@/hooks/useSelect';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import { piApi } from '@/api';
 import type { PI } from '@/common/types';
 import styles from './index.less';
