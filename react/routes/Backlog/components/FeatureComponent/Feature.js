@@ -79,15 +79,16 @@ class Feature extends Component {
             {
               [...notDonePiList, { id: '0' }].map((pi) => (
                 <Option key={pi.id} value={pi.id}>
-                  {pi.id === '0' ? '未分配PI' : pi.fullName || `${pi.code}-${pi.name}`}
+                  <span>{pi.id === '0' ? '未分配PI' : pi.fullName || `${pi.code}-${pi.name}`}</span>
                   {pi.id === (BacklogStore.piInfo && BacklogStore.piInfo.id) && (
                     <div
                       style={{
                         marginLeft: '0.08rem',
+                        paddingTop: '0.02rem',
+                        display: 'inline-block',
                       }}
-                      className="c7n-agile-sprintSearchSelect-option-active"
                     >
-                      当前
+                      <span className="c7n-agile-sprintSearchSelect-option-active">当前</span>
                     </div>
                   )}
                 </Option>
