@@ -18,9 +18,9 @@ interface Props extends Partial<SelectProps> {
   selectedIds?: string[]
   isBacklog?: boolean
 }
-const SelectStatus: React.FC<Props> = ({
+const SelectStatus: React.FC<Props> = forwardRef(({
   issueTypeId, expectStatusId, dataRef, isProgram, afterLoad, issueTypeIds, selectedIds, isBacklog = false, ...otherProps
-}) => {
+}, ref: React.Ref<Select>) => {
   let applyType = 'agile';
   if (isProgram) {
     applyType = 'program';
@@ -63,9 +63,10 @@ const SelectStatus: React.FC<Props> = ({
   const props = useSelect(config);
   return (
     <Select
+      ref={ref}
       {...props}
       {...otherProps}
     />
   );
-};
+});
 export default SelectStatus;

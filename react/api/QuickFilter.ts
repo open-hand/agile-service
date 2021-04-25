@@ -78,7 +78,9 @@ class QuickFilterApi extends Api<QuickFilterApi> {
    * @param data
    */
   create(data: IQuickFilter) {
-    return axios.post(`${this.prefix}/quick_filter`, data);
+    return axios.post(`${this.prefix}/quick_filter`, data, {
+      noPrompt: true,
+    });
   }
 
   /**
@@ -86,7 +88,9 @@ class QuickFilterApi extends Api<QuickFilterApi> {
    * @param data
    */
   update(filterId: number | string, data: UQuickFilter) {
-    return axios.put(`${this.prefix}/quick_filter/${filterId}`, data);
+    return axios.put(`${this.prefix}/quick_filter/${filterId}`, data, {
+      noPrompt: true,
+    });
   }
 
   /**

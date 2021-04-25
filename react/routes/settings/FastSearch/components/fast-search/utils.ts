@@ -242,7 +242,9 @@ export function transformSearchConditionListToEditData(searchConditionList: IFas
     if (attribute) {
       value = processDataValue(value, { ...item, fieldType: attribute.fieldType! });
     }
-    return ({ ...item, attribute, value });
+    return ({
+      ...item, attribute, value, _editDataCode: attribute?.fieldCode,
+    });
   }).filter((item) => item.attribute);
 }
 /**
