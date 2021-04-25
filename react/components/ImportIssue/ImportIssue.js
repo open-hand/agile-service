@@ -2,10 +2,10 @@
 import React, { Component } from 'react';
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import {
-  Button, Progress, Divider,
+  Progress, Divider,
 } from 'choerodon-ui';
 import { observer } from 'mobx-react';
-import { Modal } from 'choerodon-ui/pro';
+import { Modal, Button } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import classnames from 'classnames';
 import './ImportIssue.less';
