@@ -15,6 +15,7 @@ export interface IFastSearchCondition {
 }
 export interface IFastSearchEditConditionWithEditStatus extends Omit<IFastSearchCondition, 'valueText' | 'valueBindValue' | 'name' | 'fieldType'> {
     _editData: true
+    _editDataCode?: IFastSearchEditConditionWithEditStatus['fieldCode']
 }
 export interface IFastSearchEditData {
     filterId: string

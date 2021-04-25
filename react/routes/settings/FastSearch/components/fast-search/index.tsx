@@ -4,6 +4,7 @@ import React, {
 import {
   DataSet, Form, TextField,
 } from 'choerodon-ui/pro';
+import { Choerodon } from '@choerodon/boot';
 import { isEqual } from 'lodash';
 import { fieldApi, quickFilterApi } from '@/api';
 import { IModalProps } from '@/common/types';
@@ -26,7 +27,7 @@ const FastSearch: React.FC<FastSearchProps> = ({
   modal, data: originData, isInProgram, onOK,
 }) => {
   const isEditMode = !!originData;
-  const handleCheckName = useCallback(async (value:any) => {
+  const handleCheckName = useCallback(async (value: any) => {
     if (originData?.name === value) {
       return true;
     }
@@ -124,6 +125,7 @@ const FastSearch: React.FC<FastSearchProps> = ({
       update: ({
         record, name, value, oldValue,
       }: any) => {
+        record.init('_editData', false);
         if (name === 'attribute' && !isEqual(value?.fieldCode, oldValue?.fieldCode)) {
           record.init('relation', undefined);
           record.init('value', undefined);
@@ -149,7 +151,17 @@ const FastSearch: React.FC<FastSearchProps> = ({
     }
     const submitData = processWaitSubmitData(ds, searchConditionDs);
     console.log('handleSubmit', submitData, searchConditionDs.toJSONData());
-    originData ? quickFilterApi.update(originData.filterId, { ...submitData, objectVersionNumber: originData.objectVersionNumber }) : quickFilterApi.create(submitData);
+    try {
+      originData ? await quickFilterApi.update(originData.filterId, { ...submitData, objectVersionNumber: originData.objectVersionNumber }) : await quickFilterApi.create(submitData);
+    } catch (requestRes) {
+      if (requestRes?.failed && String(requestRes?.exception || '').indexOf('Data too long') !== -1) {
+        Choerodon.prompt('该筛选器筛选条件超出最大限度，请您删减筛选属性或值。', 'error');
+        return false;
+      } if (requestRes?.failed) {
+        Choerodon.prompt(requestRes?.message, 'error');
+      }
+    }
+
     onOK && onOK();
     return true;
   }, [ds, onOK, originData, searchConditionDs]);

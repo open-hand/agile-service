@@ -13,6 +13,11 @@ const { Option } = Select;
 const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ record, ...otherProps }) => {
   const isRenderNullSelect = useMemo(() => !!['is', 'notIs'].includes(record.get('relation')), [record, record.get('relation')]);
   const optionDataSet = useObservable<{ dataSet: null, options?: DataSet }>({ dataSet: null, options: undefined });
+  const editDefaultValue = useMemo(() => {
+    const defaultValue: string[] | string = toJS(record.get('value'));
+    const defaultValueArr: string[] = Array.isArray(defaultValue) ? defaultValue : [defaultValue].filter(Boolean);
+    return { defaultValue, defaultValueArr };
+  }, []);
   const componentRef = useRef<any>();
   /**
    * 编辑进入的数据转换为对象选项
@@ -25,8 +30,7 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
   // 保证再次提交时 能够获取到value显示值
   useEffect(() => {
     if (optionDataSet.options && optionDataSet.options.length > 0 && record.get('_editData') && !record.getState('init_edit_data')) {
-      const defaultValue: string[] | string = toJS(record.get('value'));
-      const defaultValueArr: string[] = Array.isArray(defaultValue) ? defaultValue : [defaultValue].filter(Boolean);
+      const { defaultValue, defaultValueArr } = editDefaultValue;
       const misMatchDefaultValueSets = new Set<string>(defaultValueArr);
       const defaultValueRecordArr: Record[] = optionDataSet.options.filter((optionRecord: any) => {
         if (defaultValueArr.includes(optionRecord.get('value'))) {
@@ -44,35 +48,37 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
       Array.isArray(defaultValue) && defaultValueArr.length > 0 && record.set('value', defaultValueRecordArr.map((i) => i.toData()) || defaultValue);
       record.setState('init_edit_data', true);
     }
-  }, [optionDataSet.options, record]);
+  }, [editDefaultValue, optionDataSet.options, record]);
   const selectUserAutoQueryConfig = useMemo(() => {
-    const defaultValue: string[] | string = toJS(record.get('value'));
     function onFinish() {
       // 用户，多用户类型的字段 在额外用户加载完毕后再绑定 并且重新初始化
       optionDataSet.options = componentRef.current?.options;
       record.setState('init_edit_data', false);
     }
     return {
-      selectedUserIds: Array.isArray(defaultValue) ? defaultValue : [defaultValue].filter(Boolean),
+      selectedUserIds: editDefaultValue.defaultValueArr,
       events: { onFinish },
     };
-  }, [optionDataSet, record]);
+  }, [editDefaultValue.defaultValueArr, optionDataSet, record]);
+  const selectStatusConfig = useMemo(() => ({
+    issueTypeIds: undefined,
+    selectedIds: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? editDefaultValue.defaultValueArr : undefined,
+  }), [editDefaultValue.defaultValueArr, record]);
   const renderComponentProps = useMemo(() => ({
     ref: componentRef,
     label: undefined,
     hasUnassign: undefined,
-    issueTypeIds: undefined,
-    selectedIds: undefined,
+    ...selectStatusConfig,
     unassignedEpic: undefined,
     clearButton: true,
     primitiveValue: false,
     selectAllButton: false,
     reverse: false,
-    autoQueryConfig: selectUserAutoQueryConfig,
+    autoQueryConfig: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? selectUserAutoQueryConfig : undefined,
     style: { width: '100%' },
-    afterLoad: record.get('_editData') ? handleBindOptions : undefined,
+    afterLoad: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? handleBindOptions : undefined,
     ...otherProps,
-  }), [handleBindOptions, otherProps, record, selectUserAutoQueryConfig]);
+  }), [handleBindOptions, otherProps, record, selectStatusConfig, selectUserAutoQueryConfig]);
   const chosenField = useMemo(() => transformFieldToRenderProps(record.toData(), record.get('_editData') ? [] : undefined), [record, record.get('fieldCode')]);
   const render = useCallback(() => {
     if (isRenderNullSelect) {
