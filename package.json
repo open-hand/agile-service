@@ -10,7 +10,6 @@
   ],
   "dependencies": {
     "@babel/helper-regex": "^7.10.5",
-    "@choerodon/components": "^0.0.1",
     "@choerodon/react-component-debounce": "^0.0.4",
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
