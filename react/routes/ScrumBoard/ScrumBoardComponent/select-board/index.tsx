@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Permission } from '@choerodon/boot';
 import { Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import useSelectFooter from '@/hooks/useSelectFooter';
 

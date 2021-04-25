@@ -1,10 +1,9 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select, Tooltip } from 'choerodon-ui/pro';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
-import { devOpsApi, versionApi } from '@/api';
+import { devOpsApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { ILabel } from '@/common/types';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>

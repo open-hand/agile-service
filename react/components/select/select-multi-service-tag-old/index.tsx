@@ -12,7 +12,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { devOpsApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import { getProjectId } from '@/utils/common';
 import SelectAppService from '../select-app-service';
 import SelectGitTags from '../select-git-tags';

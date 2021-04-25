@@ -4,7 +4,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { issueLabelApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import { MAX_LENGTH_LABEL } from '@/constants/MAX_LENGTH';
 
 interface Props extends Partial<SelectProps> {
