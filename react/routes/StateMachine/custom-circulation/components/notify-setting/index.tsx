@@ -317,6 +317,7 @@ const NotifySetting = ({
                 top: selected.length ? '-12px' : '7px',
                 left: '6px',
                 fontSize: selected.length ? '12px' : '13px',
+                lineHeight: '23px',
               }}
             >
               通知人员
