@@ -104,7 +104,7 @@ class TransformFromSubIssue extends Component {
       .then((data) => {
         this.setState({
           selectLoading: false,
-          originTypes: data.filter((type) => !(isInProgram ? ['issue_epic', 'feature'] : ['feature']).includes(type.typeCode)),
+          originTypes: data.filter((type) => type.enabled && !(isInProgram ? ['issue_epic', 'feature'] : ['feature']).includes(type.typeCode)),
         });
       });
   }
@@ -170,37 +170,37 @@ class TransformFromSubIssue extends Component {
                 loading={selectLoading}
               >
                 {
-                    originStatus.map((status) => (
-                      <Option key={status.id} value={status.id}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center' }}>
-                          <div
-                            style={{
-                              width: 15,
-                              height: 15,
-                              background: STATUS_COLOR[status.type],
-                              marginRight: 6,
-                              borderRadius: '2px',
-                            }}
-                          />
-                          {status.name}
-                        </div>
-                      </Option>
-                    ))
-                  }
+                  originStatus.map((status) => (
+                    <Option key={status.id} value={status.id}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                        <div
+                          style={{
+                            width: 15,
+                            height: 15,
+                            background: STATUS_COLOR[status.type],
+                            marginRight: 6,
+                            borderRadius: '2px',
+                          }}
+                        />
+                        {status.name}
+                      </div>
+                    </Option>
+                  ))
+                }
               </Select>,
             )}
           </FormItem>
           {
-              isEpicType && (
-                <FormItem label="史诗名称">
-                  {getFieldDecorator('epicName', {
-                    rules: [{ required: true, message: '史诗名称为必输项' }],
-                  })(
-                    <Input label="史诗名称" maxLength={44} />,
-                  )}
-                </FormItem>
-              )
-            }
+            isEpicType && (
+              <FormItem label="史诗名称">
+                {getFieldDecorator('epicName', {
+                  rules: [{ required: true, message: '史诗名称为必输项' }],
+                })(
+                  <Input label="史诗名称" maxLength={44} />,
+                )}
+              </FormItem>
+            )
+          }
         </Form>
       </Sidebar>
     );

@@ -141,5 +141,5 @@ public interface IssueTypeService {
      * @param projectIds
      * @return
      */
-    Map<Long, IssueTypeVO> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds);
+    Map<Long, List<IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds);
 }

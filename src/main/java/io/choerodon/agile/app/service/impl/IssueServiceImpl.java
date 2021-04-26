@@ -228,6 +228,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String BUG_TYPE = "bug";
     private static final String TASK_TYPE = "task";
     private static final List<String> WORK_BENCH_SEARCH_TYPE = Arrays.asList("myBug", "reportedBug", "myStarBeacon", "myReported", "myAssigned");
+    private static final String[] UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
+    private static final String[] TRANSFORMED_TASK_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, STATUS_ID};
 
     @Autowired
     private ModelMapper modelMapper;
@@ -394,7 +396,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     protected void calculationRank(Long projectId, IssueConvertDTO issueConvertDTO) {
         if (sprintValidator.hasIssue(projectId, issueConvertDTO.getSprintId())) {
             String rank = sprintMapper.queryMaxRank(projectId, issueConvertDTO.getSprintId());
-            issueConvertDTO.setRank(RankUtil.genNext(rank));
+            //处理rank为null的脏数据
+            if (StringUtils.isEmpty(rank)) {
+                issueConvertDTO.setRank(RankUtil.mid());
+            } else {
+                issueConvertDTO.setRank(RankUtil.genNext(rank));
+            }
         } else {
             issueConvertDTO.setRank(RankUtil.mid());
         }
@@ -1224,6 +1231,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public synchronized IssueVO updateIssueTypeCode(IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO, Long organizationId) {
+        List<String> fieldList = Arrays.asList(UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK);
         String originType = issueConvertDTO.getTypeCode();
         if (originType.equals(SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
@@ -1240,6 +1248,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (issueUpdateTypeVO.getTypeCode().equals(ISSUE_EPIC)) {
             issueConvertDTO.setRank(null);
+            fieldList.add(RANK_FIELD);
             issueConvertDTO.setTypeCode(issueUpdateTypeVO.getTypeCode());
             issueConvertDTO.setEpicName(issueUpdateTypeVO.getEpicName());
             List<LookupValueDTO> colorList = lookupValueMapper.queryLookupValueByCode(EPIC_COLOR_TYPE).getLookupValues();
@@ -1258,11 +1267,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueConvertDTO.setEpicSequence(null);
             //rank值重置
             calculationRank(issueConvertDTO.getProjectId(), issueConvertDTO);
+            fieldList.add(RANK_FIELD);
         } else {
             issueConvertDTO.setTypeCode(issueUpdateTypeVO.getTypeCode());
         }
         issueConvertDTO.setIssueTypeId(issueUpdateTypeVO.getIssueTypeId());
-        issueAccessDataService.update(issueConvertDTO, new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, RANK_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID});
+        issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
         // 查看目标问题类型的状态机是否含有当前状态，没有就是用默认状态
         handlerStatus(issueConvertDTO.getProjectId(),issueUpdateTypeVO);
         return queryIssue(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), organizationId);
@@ -2128,7 +2138,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 issueConvertDTO.setIssueTypeId(issueTransformSubTask.getIssueTypeId());
                 issueConvertDTO.setParentIssueId(issueTransformSubTask.getParentIssueId());
                 List<String> fieldList = new ArrayList<>();
-                List<String> list = Arrays.asList(TYPE_CODE_FIELD, ISSUE_TYPE_ID, RANK_FIELD, STATUS_ID, PARENT_ISSUE_ID, EPIC_SEQUENCE, STORY_POINTS_FIELD);
+                List<String> list = Arrays.asList(TYPE_CODE_FIELD, ISSUE_TYPE_ID, STATUS_ID, PARENT_ISSUE_ID, EPIC_SEQUENCE, STORY_POINTS_FIELD);
                 fieldList.addAll(list);
                 //如果为Bug类型,就删除与原来问题的关联
                 if (!Objects.isNull(issueConvertDTO.getRelateIssueId())) {
@@ -2165,6 +2175,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public synchronized IssueVO transformedTask(IssueConvertDTO issueConvertDTO, IssueTransformTask issueTransformTask, Long organizationId) {
         String originType = issueConvertDTO.getTypeCode();
+        List<String> fieldList = Arrays.asList(TRANSFORMED_TASK_FIELD_LIST_NO_RANK);
         if (originType.equals(SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
         }
@@ -2173,6 +2184,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (issueTransformTask.getTypeCode().equals(ISSUE_EPIC)) {
             issueConvertDTO.setRank(null);
+            fieldList.add(RANK_FIELD);
             issueConvertDTO.setTypeCode(issueTransformTask.getTypeCode());
             issueConvertDTO.setEpicName(issueTransformTask.getEpicName());
             List<LookupValueDTO> colorList = lookupValueMapper.queryLookupValueByCode(EPIC_COLOR_TYPE).getLookupValues();
@@ -2190,6 +2202,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueConvertDTO.setEpicName(null);
             issueConvertDTO.setEpicSequence(null);
             //rank值重置
+            fieldList.add(RANK_FIELD);
             calculationRank(issueConvertDTO.getProjectId(), issueConvertDTO);
         } else {
             issueConvertDTO.setTypeCode(issueTransformTask.getTypeCode());
@@ -2198,7 +2211,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueConvertDTO.setStatusId(issueTransformTask.getStatusId());
         }
         issueConvertDTO.setIssueTypeId(issueTransformTask.getIssueTypeId());
-        issueAccessDataService.update(issueConvertDTO, new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, RANK_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, STATUS_ID});
+        issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
         return queryIssue(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), organizationId);
     }
 
@@ -2770,7 +2783,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
         }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
-        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);
+        Map<Long, List<IssueTypeVO>> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, ProjectVO> projectVOMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
         List<IssueListFieldKVVO> list = new ArrayList<>();
@@ -2778,7 +2791,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         allIssue.forEach(v -> {
             IssueListFieldKVVO issueListFieldKVVO = new IssueListFieldKVVO();
             modelMapper.map(v,issueListFieldKVVO);
-            issueListFieldKVVO.setIssueTypeVO(issueTypeDTOMap.get(v.getIssueTypeId()));
+            setIssueTypeVO(issueListFieldKVVO, issueTypeDTOMap.get(v.getIssueTypeId()));
             issueListFieldKVVO.setStatusVO(statusMapDTOMap.get(v.getStatusId()));
             issueListFieldKVVO.setPriorityVO(priorityMap.get(v.getPriorityId()));
             issueListFieldKVVO.setProjectVO(projectVOMap.get(v.getProjectId()));
@@ -2810,6 +2823,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
         return new Page<>(list, pageInfo, parentPage.getTotalElements());
+    }
+
+    private void setIssueTypeVO(IssueListFieldKVVO issueListFieldKVVO, List<IssueTypeVO> issueTypeVOList) {
+        if (!CollectionUtils.isEmpty(issueTypeVOList)) {
+            Map<Long, IssueTypeVO> issueTypeVOMap = issueTypeVOList.stream().collect(Collectors.toMap(IssueTypeVO::getProjectId, Function.identity()));
+            if (issueTypeVOMap.containsKey(issueListFieldKVVO.getProjectId())) {
+                issueListFieldKVVO.setIssueTypeVO(issueTypeVOMap.get(issueListFieldKVVO.getProjectId()));
+            } else {
+                //未项目自定义的系统问题类型
+                issueListFieldKVVO.setIssueTypeVO(issueTypeVOMap.get(0L));
+            }
+        }
     }
 
     private void checkSearchType(String searchType) {

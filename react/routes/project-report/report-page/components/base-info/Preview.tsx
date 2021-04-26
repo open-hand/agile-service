@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
+import { useTaskContext } from '@/routes/project-report/report-preview/taskContext';
 import { useProjectReportContext } from '../../context';
 import styles from './Preview.less';
 
 const BaseInfoPreview: React.FC = () => {
   const { store } = useProjectReportContext();
   const { baseInfo } = store;
-
+  const { register, finish } = useTaskContext();
+  register('baseInfo');
+  const onFinish = useCallback(() => {
+    finish('baseInfo');
+  }, [finish]);
+  useEffect(() => {
+    onFinish();
+  }, [onFinish]);
   return (
     <div className={`${styles.container} c7n-project-report-block`}>
       <div className={styles.title}>
