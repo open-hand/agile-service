@@ -26,6 +26,9 @@ export function registerPath(route: Route) {
 }
 function getStoredWidth() {
   const stored = localStorage.getItem('agile.EditIssue.width');
+  if (stored === null) {
+    return undefined;
+  }
   const width = Number(stored);
   return Number.isNaN(width) ? undefined : width;
 }
