@@ -195,10 +195,7 @@ public class SendMsgUtil {
             } else {
                 url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getIssueId() + URL_TEMPLATE5 + result.getIssueId());
             }
-            Long[] ids = new Long[1];
-            ids[0] = result.getAssigneeId();
-            List<UserDTO> userDTOList = baseFeignClient.listUsersByIds(ids, false).getBody();
-            String userName = !userDTOList.isEmpty() && userDTOList.get(0) != null ? userDTOList.get(0).getRealName() + "(" + userDTOList.get(0).getLoginName() + ")" : "";
+            String userName = result.getAssigneeName();
             String summary = result.getIssueNum() + "-" + result.getSummary();
             siteMsgUtil.issueSolve(userIds, userName, summary, url.toString(), projectId, getOperatorNameFromUserDetail(), operatorId);
         }
