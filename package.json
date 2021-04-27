@@ -1,7 +1,7 @@
 {
   "name": "@choerodon/agile",
   "routeName": "agile",
-  "version": "0.25.2",
+  "version": "0.25.3",
   "description": " ",
   "main": "./lib/index.js",
   "install": "./lib/install.js",
@@ -54,9 +54,9 @@
     "wolfy87-eventemitter": "^5.2.8"
   },
   "devDependencies": {
-    "@choerodon/boot": "0.23.0",
+    "@choerodon/boot": "0.23.1",
     "@choerodon/compiler": "^0.0.1",
-    "@choerodon/master": "0.25.0",
+    "@choerodon/master": "0.25.5",
     "@choerodon/testmanager": "0.25.0",
     "@types/classnames": "^2.2.10",
     "@types/echarts": "^4.6.5",
