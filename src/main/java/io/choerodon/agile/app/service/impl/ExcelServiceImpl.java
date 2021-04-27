@@ -2177,11 +2177,12 @@ public class ExcelServiceImpl implements ExcelService {
                                     Cell cell,
                                     Integer rowNum,
                                     String value) {
-        if (value.length() > 3) {
-            cell.setCellValue(buildWithErrorMsg(value, "最大支持3位整数"));
-            addErrorColumn(rowNum, col, errorRowColMap);
-        } else if (!NumberUtil.isNumeric(value)) {
+
+        if (!NumberUtil.isNumeric(value)) {
             cell.setCellValue(buildWithErrorMsg(value, "请输入数字"));
+            addErrorColumn(rowNum, col, errorRowColMap);
+        } else if (value.indexOf(".") > 3) {
+            cell.setCellValue(buildWithErrorMsg(value, "最大支持3位整数"));
             addErrorColumn(rowNum, col, errorRowColMap);
         } else {
             if (NumberUtil.isInteger(value) || NumberUtil.canParseInteger(value)) {
@@ -2189,11 +2190,20 @@ public class ExcelServiceImpl implements ExcelService {
                     cell.setCellValue(buildWithErrorMsg(value, "请输入正确的数字"));
                     addErrorColumn(rowNum, col, errorRowColMap);
                 }
-            } else if (!"0.5".equals(value)) {
-                cell.setCellValue(buildWithErrorMsg(value, "小数只支持0.5"));
-                addErrorColumn(rowNum, col, errorRowColMap);
+            } else {
+                BigDecimal values = new BigDecimal(value);
+                if (getNumberOfDecimalPlaces(values) > 1) {
+                    cell.setCellValue(buildWithErrorMsg(value, "小数点后只支持一位小数"));
+                    addErrorColumn(rowNum, col, errorRowColMap);
+                }
             }
         }
+    }
+
+    private int getNumberOfDecimalPlaces(BigDecimal bigDecimal) {
+        String string = bigDecimal.stripTrailingZeros().toPlainString();
+        int index = string.indexOf(".");
+        return index < 0 ? 0 : string.length() - index - 1;
     }
 
     private void validateAndSetPriority(Row row,
