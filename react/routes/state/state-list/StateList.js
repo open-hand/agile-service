@@ -140,7 +140,11 @@ function StateList(props) {
         list: data.list,
         total: data.total,
       });
-
+      setPagination({
+        page,
+        pageSize: size,
+        total: data.total,
+      });
       if (isSetInitialTotal) {
         setInitialTotal(data.total);
       }
@@ -436,9 +440,9 @@ function StateList(props) {
     );
 
     const pageInfo = {
-      defaultCurrent: pagination.page,
-      defaultPageSize: pagination.pageSize,
-      total: statesList.total,
+      current: pagination.page,
+      pageSize: pagination.pageSize,
+      total: pagination.total,
     };
 
     return (

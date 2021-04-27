@@ -183,7 +183,9 @@ public class IssueAssembler extends AbstractAssembler {
             issueListFieldKVVO.setReporterLoginName(reporterLoginName);
             issueListFieldKVVO.setReporterRealName(reporterRealName);
             issueListFieldKVVO.setPriorityVO(priorityMap.get(issueDO.getPriorityId()));
-            issueListFieldKVVO.setIssueTypeVO(issueTypeDTOMap.get(issueDO.getIssueTypeId()));
+            if (!ObjectUtils.isEmpty(issueTypeDTOMap)) {
+                issueListFieldKVVO.setIssueTypeVO(issueTypeDTOMap.get(issueDO.getIssueTypeId()));
+            }
             issueListFieldKVVO.setStatusVO(statusMapDTOMap.get(issueDO.getStatusId()));
             issueListFieldKVVO.setAssigneeImageUrl(assigneeImageUrl);
             issueListFieldKVVO.setReporterImageUrl(reporterImageUrl);

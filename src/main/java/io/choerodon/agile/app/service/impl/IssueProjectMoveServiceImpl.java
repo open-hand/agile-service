@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -62,6 +63,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     private static final String ISSUE_NULL = "error.issue.is.null";
     private static final String AGILE_SCHEME_CODE = "agile_issue";
     private static final String FEATURE = "feature";
+    private static final String[] FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
 
     @Autowired
     private BaseFeignClient baseFeignClient;
@@ -263,6 +265,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     }
 
     private void handlerChangeIssueType(Long issueId, JSONObject jsonObject, IssueTypeVO issueTypeVO) {
+        List<String> fieldList = Arrays.asList(FIELD_LIST_NO_RANK);
         if (ObjectUtils.isEmpty(issueTypeVO)) {
             return;
         }
@@ -279,6 +282,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             }
             if (issueTypeVO.getTypeCode().equals(ISSUE_EPIC)) {
                 issueConvertDTO.setRank(null);
+                fieldList.add(RANK_FIELD);
                 issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
                 issueConvertDTO.setEpicName(jsonObject.getString(EPIC_NAME_FIELD));
                 List<LookupValueDTO> colorList = lookupValueMapper.queryLookupValueByCode(EPIC_COLOR_TYPE).getLookupValues();
@@ -297,18 +301,25 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
                 issueConvertDTO.setEpicSequence(null);
                 //rank值重置
                 calculationRank(issueConvertDTO.getProjectId(), issueConvertDTO);
+                fieldList.add(RANK_FIELD);
             } else {
                 issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
             }
         }
         issueConvertDTO.setIssueTypeId(issueTypeVO.getId());
         issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
-        issueAccessDataService.update(issueConvertDTO, new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, RANK_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID});
+        issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
 
     private void calculationRank(Long projectId, IssueConvertDTO issueConvertDTO) {
         if (sprintValidator.hasIssue(projectId, issueConvertDTO.getSprintId())) {
             String rank = sprintMapper.queryMaxRank(projectId, issueConvertDTO.getSprintId());
+            //处理rank值为null的脏数据
+            if (StringUtils.isEmpty(rank)) {
+                issueConvertDTO.setRank(RankUtil.mid());
+            } else {
+                issueConvertDTO.setRank(RankUtil.genNext(rank));
+            }
             issueConvertDTO.setRank(RankUtil.genNext(rank));
         } else {
             issueConvertDTO.setRank(RankUtil.mid());

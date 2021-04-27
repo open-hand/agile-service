@@ -317,6 +317,7 @@ class BacklogStore {
   @action setSprintData({ backlogData, sprintData }) {
     this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
     const { backLogIssue, backlogIssueCount } = backlogData;
+    const previousExpand = new Map(this.sprintData.map((s) => ([s.sprintId.toString(), s.expand])));
     this.sprintData = sprintData.map((sprint) => {
       const { issueSearchVOList } = sprint;
       this.issueMap.set(sprint.sprintId.toString(), issueSearchVOList);
@@ -326,13 +327,13 @@ class BacklogStore {
         // issueSearchVOList: null,
         type: 'sprint',
         sprintType: sprint.type, // 冲刺类型 用于辨别ip冲刺
-        expand: true,
+        expand: previousExpand.get(sprint.sprintId.toString()) ?? true,
       };
     }).concat({
       type: 'backlog',
       sprintId: 0,
       sprintName: '待办事项',
-      expand: true,
+      expand: previousExpand.get('0') ?? true,
       issueCount: backlogIssueCount,
       issueSearchVOList: backLogIssue,
     });
