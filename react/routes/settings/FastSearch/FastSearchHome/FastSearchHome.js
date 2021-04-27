@@ -126,10 +126,6 @@ class Search extends Component {
             <Icon type="playlist_add icon" />
             <span>创建快速筛选</span>
           </Button>
-          <Button funcType="flat" onClick={this.openCreateModal}>
-            <Icon type="playlist_add icon" />
-            <span>创建快速筛选 old</span>
-          </Button>
         </Header>
         <Breadcrumb />
         <Content>
