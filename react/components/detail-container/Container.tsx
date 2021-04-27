@@ -36,7 +36,7 @@ const Container: React.FC = () => {
   const container = useRef<HTMLDivElement>(null);
   const maxWidth = window.innerWidth * 0.6;
   const minWidth = 440;
-  const defaultWidth = getStoredWidth() ?? 640;
+  const defaultWidth = Math.max(minWidth, Math.min(maxWidth, getStoredWidth() ?? 640));
   useEffect(() => {
     setQuery();
   }, []);
