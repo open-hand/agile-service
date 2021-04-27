@@ -215,7 +215,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
         </Header>
       </Permission>
       <Breadcrumb />
-      <Content style={{ paddingTop: 0 }}>
+      <Content className="c7n-release-content">
         <Table
           dataSet={tableDataSet}
           rowDraggable

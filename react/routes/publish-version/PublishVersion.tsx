@@ -19,6 +19,7 @@ import { usePublishVersionContext } from './stores';
 import { openCreatePublishVersionModal } from './components/create-publish-version';
 import { openPublishVersionDetail } from './components/publish-version-detail';
 import openExportPublishVersionModal from './components/export';
+import './PublishVersion.less';
 
 const { Column } = Table;
 const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> = ({
@@ -113,9 +114,7 @@ function PublishVersion() {
       <Breadcrumb />
       <Content
         className={`${prefixCls}-content`}
-        style={{
-          overflowY: 'hidden', display: 'flex', flexDirection: 'column', paddingTop: 0,
-        }}
+
       >
         <Table dataSet={tableDataSet}>
           <Column name="name" renderer={renderName} />
