@@ -265,7 +265,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     }
 
     private void handlerChangeIssueType(Long issueId, JSONObject jsonObject, IssueTypeVO issueTypeVO) {
-        List<String> fieldList = Arrays.asList(FIELD_LIST_NO_RANK);
+        List<String> fieldList = new ArrayList<>(Arrays.asList(FIELD_LIST_NO_RANK));
         if (ObjectUtils.isEmpty(issueTypeVO)) {
             return;
         }
