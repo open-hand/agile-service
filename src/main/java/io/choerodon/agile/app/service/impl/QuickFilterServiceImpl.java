@@ -95,7 +95,8 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         }
     }
 
-    private String inSql(String operation,String value){
+    @Override
+    public String inSql(String operation,String value){
         String sql = null;
         if (NULL_STR.equals(value)) {
             sql = value;
