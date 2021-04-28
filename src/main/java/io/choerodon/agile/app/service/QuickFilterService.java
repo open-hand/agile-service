@@ -42,6 +42,4 @@ public interface QuickFilterService {
     QuickFilterVO dragFilter(Long projectId, QuickFilterSequenceVO quickFilterSequenceVO);
 
     Boolean checkName(Long projectId, String quickFilterName);
-
-    String inSql(String operation,String value);
 }
