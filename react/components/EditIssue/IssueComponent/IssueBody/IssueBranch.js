@@ -4,16 +4,13 @@ import {
 } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import MergeRequest from '@/components/MergeRequest';
-import { useDetailContainerContext } from '@/components/detail-container/context';
 import LinkedBranch from '../linked-branch';
 
 const IssueBranch = observer(({
   store, disabled, projectId, reloadIssue, otherProject, outside, programId, applyType, issueId,
 }) => {
   const commitsRef = useRef();
-  const originWidthRef = useRef();
   const mergeRequestRef = useRef();
-  const { resizeRef } = useDetailContainerContext();
   const refresh = useCallback(() => {
     commitsRef.current?.query();
     mergeRequestRef.current?.loadMergeRequest();
@@ -21,22 +18,7 @@ const IssueBranch = observer(({
   useEffect(() => {
     store.setRefreshBranch(refresh);
   }, [refresh, store]);
-  const { tab } = store;
-  const isDevelopTab = tab === 'development';
-  useEffect(() => {
-    if (isDevelopTab && resizeRef.current) {
-      const maxWidth = window.innerWidth * 0.6;
-      if (resizeRef.current.resizable.clientWidth < maxWidth) {
-        originWidthRef.current = resizeRef.current.resizable.clientWidth;
-        resizeRef.current.setWidth(maxWidth);
-      }
-    }
-    return () => {
-      if (isDevelopTab && resizeRef.current) {
-        resizeRef.current.setWidth(originWidthRef.current);
-      }
-    };
-  }, [resizeRef, isDevelopTab]);
+
   return (
     <div id="branch">
       <div className="c7n-title-wrapper">
