@@ -63,7 +63,7 @@ class QuickCreateIssue extends Component {
   handleCreate = debounce(() => {
     const { currentTypeId } = this.state;
     const {
-      form, issueTypes, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram,
+      form, issueTypes, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram, cantCreateEvent,
     } = this.props;
     form.validateFields(async (err, values) => {
       const { summary } = values;
@@ -74,10 +74,28 @@ class QuickCreateIssue extends Component {
           });
           const currentType = issueTypes.find((t) => t.id === currentTypeId);
           if (!await checkCanQuickCreate(currentType.id)) { //
-            Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
-            this.setState({
-              loading: false,
-            });
+            if (!cantCreateEvent) {
+              Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
+              this.setState({
+                loading: false,
+              });
+            } else {
+              Choerodon.prompt('请填写标注的必填字段');
+              if (this.props.summaryChange) {
+                this.props.summaryChange(summary);
+              }
+              if (this.props.typeIdChange) {
+                this.props.typeIdChange(currentType.id);
+              }
+              if (this.props.setDefaultSprint) {
+                this.props.setDefaultSprint(sprintId);
+              }
+              this.setState({
+                loading: false,
+                create: false,
+              });
+              cantCreateEvent();
+            }
             return;
           }
           const {
@@ -133,6 +151,21 @@ class QuickCreateIssue extends Component {
   }, 500, {
     leading: true,
   });
+
+  handleCancel = () => {
+    this.setState({
+      create: false,
+    });
+    if (this.props.typeIdChange) {
+      this.props.typeIdChange(undefined);
+    }
+    if (this.props.summaryChange) {
+      this.props.summaryChange(undefined);
+    }
+    if (this.props.setDefaultSprint) {
+      this.props.setDefaultSprint(undefined);
+    }
+  };
 
   render() {
     const {
@@ -218,11 +251,7 @@ class QuickCreateIssue extends Component {
                   </Button>
                   <Button
                     funcType="raised"
-                    onClick={() => {
-                      this.setState({
-                        create: false,
-                      });
-                    }}
+                    onClick={this.handleCancel}
                   >
                     取消
                   </Button>
