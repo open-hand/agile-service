@@ -585,7 +585,7 @@ class CreateIssue extends Component {
 
   getFieldComponent = (field) => {
     const {
-      form, mode, hiddenIssueType, teamProjectIds, applyType,
+      form, mode, hiddenIssueType, teamProjectIds, applyType, defaultFeatureType,
     } = this.props;
     const { getFieldDecorator } = form;
     const {
@@ -692,7 +692,7 @@ class CreateIssue extends Component {
               <FormItem>
                 {getFieldDecorator('featureType', {
                   rules: [{ required: true, message: '特性类型为必输项' }],
-                  initialValue: 'business',
+                  initialValue: defaultFeatureType || 'business',
                 })(
                   <Select
                     label="特性类型"
@@ -1121,6 +1121,11 @@ class CreateIssue extends Component {
                     label="PI"
                     type="pi"
                     optionArgs={!hasPermission}
+                    afterLoad={(sprints) => {
+                      this.props.defaultPi && form.setFieldsValue({
+                        pi: this.props.defaultPi,
+                      });
+                    }}
                   >
                     {field.defaultValueObjs?.map((pi) => (
                       <Option
