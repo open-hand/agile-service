@@ -3,7 +3,7 @@ import React, {
   useState, useEffect,
 } from 'react';
 import {
-  Form, Input, Select, Button, InputNumber,
+  Form, Input, Select, Button, InputNumber, Tooltip, Icon,
 } from 'choerodon-ui';
 import {
   Content, stores, Choerodon,
@@ -177,12 +177,30 @@ const EditComponent = (props) => {
             <Input label="模块描述" autosize maxLength={30} />,
           )}
         </FormItem>
-        <FormItem style={{ marginBottom: 20 }}>
+        <FormItem style={{ marginBottom: 20 }} className="c7n-component-component-sequenceItem">
           {getFieldDecorator('sequence', {
             initialValue: sequence,
           })(
-            <InputNumber label="模块顺序" min={1} max={100000} />,
+            <InputNumber
+              label="模块顺序"
+              min={1}
+              max={100000}
+              suffix={(
+                <Tooltip title="顺序值越大，越靠前。无序列值排在最后，顺序值相同时，按照创建时间倒序排列。">
+                  <Icon type="help" />
+                </Tooltip>
+            )}
+              className="c7n-component-component-sequenceInput"
+            />,
           )}
+          <div className="c7n-component-component-sequenceTip">
+            <Tooltip
+              title="顺序值越大，越靠前。无序列值排在最后，顺序值相同时，按照创建时间倒序排列。"
+              placement="topRight"
+            >
+              <Icon type="help" />
+            </Tooltip>
+          </div>
         </FormItem>
         <FormItem style={{ marginBottom: 20 }}>
           {getFieldDecorator('defaultAssigneeRole', {

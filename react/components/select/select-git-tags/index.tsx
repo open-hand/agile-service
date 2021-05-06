@@ -56,10 +56,8 @@ const SelectGitTags: React.FC<Props> = forwardRef(({
 const SelectGitTagsHOC: React.FC<Props> = forwardRef(({
   applicationId, ...otherProps
 }, ref: React.Ref<Select>) => {
-  console.log('ref.....applicationId', applicationId);
   const forceUpdate = useForceUpdate();
   useEffect(() => {
-    console.log('...', applicationId);
     forceUpdate();
   }, []);
   const component = (

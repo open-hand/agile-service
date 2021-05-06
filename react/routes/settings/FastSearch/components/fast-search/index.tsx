@@ -150,7 +150,6 @@ const FastSearch: React.FC<FastSearchProps> = ({
       return false;
     }
     const submitData = processWaitSubmitData(ds, searchConditionDs);
-    console.log('handleSubmit', submitData, searchConditionDs.toJSONData());
     try {
       originData ? await quickFilterApi.update(originData.filterId, { ...submitData, objectVersionNumber: originData.objectVersionNumber }) : await quickFilterApi.create(submitData);
     } catch (requestRes) {
