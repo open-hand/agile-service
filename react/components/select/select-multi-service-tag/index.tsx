@@ -51,7 +51,6 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
     ],
     events: {
       update: ({ value, name, oldValue }: any) => {
-        console.log('update..', value, name);
         if (name === 'appService') {
           const paramId = value?.id || oldValue?.id;
           console.log('paramId', serviceOptionDs.find((item) => item.get('id') === paramId));
@@ -78,10 +77,6 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
         const data = res.map((item: any) => ({ ...item, meaning: item.name, value: item.id }));
         serviceOptionDs.loadData(data);
         if (originData && originData.length > 0) {
-          console.log(originData.map((item) => {
-            const appService = data.find((i: any) => i.code === item.appServiceCode);
-            return { ...item, appService };
-          }));
           ds.loadData(originData.map((item) => {
             const appService = data.find((i: any) => i.code === item.appServiceCode);
             return { ...item, appService };
@@ -94,7 +89,6 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
     loadData();
   }, [ds, originData, projectId, serviceOptionDs]);
   const componentId = useMemo(() => `select-multi-service-tag-${randomString(5)}`, []);
-  console.log('dom.', document.getElementById(componentId));
   return (
     <div role="none" id={componentId} className={`${prefixCls}-content`} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
       <Form dataSet={ds}>

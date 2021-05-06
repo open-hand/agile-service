@@ -43,7 +43,6 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
       if (misMatchDefaultValueSets.size > 0) {
         defaultValueRecordArr.push(...Array.from(misMatchDefaultValueSets).map((i) => new Record({ meaning: i, value: i })));
       }
-      console.log('useEffect', record.toData(), defaultValue, defaultValueArr, optionDataSet.options.map((i) => i.toData()), defaultValueRecordArr.map((i) => i.toData()));
       typeof (defaultValue) === 'string' && record.set('value', defaultValueRecordArr[0]?.toData() || defaultValue);
       Array.isArray(defaultValue) && defaultValueArr.length > 0 && record.set('value', defaultValueRecordArr.map((i) => i.toData()) || defaultValue);
       record.setState('init_edit_data', true);
