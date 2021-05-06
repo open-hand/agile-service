@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
+import io.choerodon.agile.api.vo.TagVO;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -7,7 +8,9 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author superlee
@@ -46,9 +49,18 @@ public class PublishVersionDTO extends AuditDomain {
 
     private String description;
 
-    private String tagName;
-
     private String statusCode;
+
+    @Transient
+    private List<TagVO> tags;
+
+    public List<TagVO> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<TagVO> tags) {
+        this.tags = tags;
+    }
 
     public String getStatusCode() {
         return statusCode;
@@ -56,14 +68,6 @@ public class PublishVersionDTO extends AuditDomain {
 
     public void setStatusCode(String statusCode) {
         this.statusCode = statusCode;
-    }
-
-    public String getTagName() {
-        return tagName;
-    }
-
-    public void setTagName(String tagName) {
-        this.tagName = tagName;
     }
 
     public String getDescription() {

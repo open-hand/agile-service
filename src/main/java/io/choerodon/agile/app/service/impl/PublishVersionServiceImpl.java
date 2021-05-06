@@ -1,5 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
@@ -8,9 +11,15 @@ import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.core.client.MessageClientC7n;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -19,6 +28,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -71,6 +81,14 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private TagIssueRelMapper tagIssueRelMapper;
     @Autowired
     private TagCompareHistoryMapper tagCompareHistoryMapper;
+    @Autowired
+    private PublishVersionTagRelMapper publishVersionTagRelMapper;
+    @Autowired
+    private MessageClientC7n messageClientC7n;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    protected static final Logger logger = LoggerFactory.getLogger(PublishVersionServiceImpl.class);
 
     private static final String GROUP_ID_EMPTY_EXCEPTION = "error.publish.version.groupId.empty";
     private static final String VERSION_ALIAS_EMPTY_EXCEPTION = "error.publish.version.alias.empty";
@@ -78,6 +96,16 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private static final String ARTIFACT_ID_EMPTY_EXCEPTION = "error.publish.version.artifactId.empty";
     private static final String SERVICE_CODE_EMPTY_EXCEPTION = "error.publish.version.serviceCode.empty";
     private static final String PUBLISH_VERSION_NOT_EXIST_EXCEPTION = "error.publish.version.not.existed";
+
+    private static final String WEBSOCKET_PREVIEW_TAG_COMPARE = "agile-preview-tag-compare-issues";
+
+    private static final String WEBSOCKET_GENERATE_TAG_COMPARE = "agile-generate-tag-compare-issues";
+
+    private static final String DOING = "doing";
+
+    private static final String DONE = "done";
+
+    private static final String FAILED = "failed";
 
     @Override
     public PublishVersionVO create(Long projectId, PublishVersionVO publishVersionVO) {
@@ -192,20 +220,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         dto.setId(publishVersionId);
         dto.setProjectId(projectId);
         dto.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
-        resetTagByServiceCode(dto, publishVersionDTO.getServiceCode());
         if (publishVersionMapper.updateByPrimaryKey(dto) != 1) {
             throw new CommonException("error.publish.version.update");
         }
         return modelMapper.map(publishVersionMapper.selectByPrimaryKey(publishVersionDTO.getId()), PublishVersionVO.class);
-    }
-
-    private void resetTagByServiceCode(PublishVersionDTO dto,
-                                       String originalServiceCode) {
-        String serviceCode = dto.getServiceCode();
-        if (StringUtils.isEmpty(serviceCode)
-                || !Objects.equals(serviceCode, originalServiceCode)) {
-            dto.setTagName(null);
-        }
     }
 
     @Override
@@ -429,7 +447,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         }
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         deleteTagIssueRel(projectId, organizationId, appServiceCode, tagName);
-        deletePublishVersionTag(projectId, organizationId, appServiceCode, tagName);
+        deletePublishVersionTagRel(projectId, organizationId, appServiceCode, tagName);
         deleteTagCompareHistory(projectId, organizationId, appServiceCode, tagName);
         if (agilePluginService != null) {
             agilePluginService.deleteProgramTagRel(projectId, organizationId, appServiceCode, tagName);
@@ -485,6 +503,103 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         }
     }
 
+    @Override
+    @Async
+    public void previewIssueFromTag(Long projectId,
+                                    Long organizationId,
+                                    Long publishVersionId,
+                                    SearchVO searchVO,
+                                    PageRequest pageRequest) {
+        String tagCompareListKey = "tagCompareList";
+        String websocketKey = WEBSOCKET_PREVIEW_TAG_COMPARE + projectId;
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        pageRequest.setSize(0);
+        try {
+            Object obj = searchVO.getSearchArgs().get(tagCompareListKey);
+            AssertUtilsForCommonException.notNull(obj, "error.tagCompareList.empty");
+            List<TagCompareVO> tagCompareList;
+            try {
+                tagCompareList =
+                        objectMapper.readValue(objectMapper.writeValueAsString(obj), new TypeReference<List<TagCompareVO>>() {
+                        });
+            } catch (IOException e) {
+                throw new CommonException("error.parse.to.string");
+            }
+            validateTagCompareList(tagCompareList);
+            int total = tagCompareList.size();
+            double current = 1D;
+            for (TagCompareVO tagCompareVO : tagCompareList) {
+                Set<Long> issueIds;
+                try {
+                    issueIds =
+                            devopsClientOperator.getIssueIdsBetweenTags(projectId,
+                                    tagCompareVO.getAppServiceId(),
+                                    tagCompareVO.getSourceTag(),
+                                    tagCompareVO.getTargetTag());
+                } catch (Exception e) {
+                    throw new CommonException("error.getIssue.from.devops", e);
+                }
+                TagCompareVO tagCompare = new TagCompareVO();
+                BeanUtils.copyProperties(tagCompareVO, tagCompare);
+                tagCompare.setAction(DOING);
+                double progress = getProgress(current, total);
+                tagCompare.setProgress(progress);
+                if (!ObjectUtils.isEmpty(issueIds)) {
+                    List<IssueListFieldKVVO> issues =
+                            issueService.listIssueWithSub(projectId, buildSearchVO(searchVO, issueIds), pageRequest, organizationId)
+                                    .getContent();
+                    tagCompare.setData(objectMapper.writeValueAsString(issues));
+                }
+                sendProgress(tagCompareVO, userId, websocketKey);
+                current++;
+            }
+            TagCompareVO tagCompareVO = new TagCompareVO();
+            tagCompareVO.setAction(DONE);
+            tagCompareVO.setProgress(1D);
+            sendProgress(tagCompareVO, userId, websocketKey);
+        } catch (Exception e) {
+            TagCompareVO tagCompareVO = new TagCompareVO();
+            tagCompareVO.setAction(FAILED);
+            tagCompareVO.setProgress(0D);
+            tagCompareVO.setMsg(e.getMessage());
+            sendProgress(tagCompareVO, userId, websocketKey);
+            throw new CommonException("error.preview.tag.issue", e);
+        }
+    }
+
+    private double getProgress(double current, int total) {
+        BigDecimal num1 = new BigDecimal(current);
+        BigDecimal num2 = new BigDecimal(total + 1);
+        return num1.divide(num2, 2, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    private SearchVO buildSearchVO(SearchVO searchVO, Set<Long> issueIds) {
+        SearchVO result = new SearchVO();
+        BeanUtils.copyProperties(searchVO, result);
+        Map<String, Object> searchArgs = result.getSearchArgs();
+        if (searchArgs == null) {
+            searchArgs = new LinkedHashMap<>();
+            result.setSearchArgs(searchArgs);
+        }
+        searchArgs.put("tree", false);
+        Map<String, Object> otherArgs =  result.getOtherArgs();
+        if (otherArgs == null) {
+            otherArgs = new LinkedHashMap<>();
+            result.setOtherArgs(otherArgs);
+        }
+        otherArgs.put("issueIds", new ArrayList<>(issueIds));
+        return result;
+    }
+
+    private void sendProgress(TagCompareVO tagCompareVO, Long userId, String websocketKey) {
+        try {
+            String message = objectMapper.writeValueAsString(tagCompareVO);
+            messageClientC7n.sendByUserId(userId, websocketKey, message);
+        } catch (JsonProcessingException e) {
+            logger.error("parse object to string error: {}", e);
+        }
+    }
+
     private void deleteTagCompareHistory(Long projectId,
                                          Long organizationId,
                                          String appServiceCode,
@@ -497,20 +612,17 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         tagCompareHistoryMapper.delete(dto);
     }
 
-    private void deletePublishVersionTag(Long projectId,
-                                         Long organizationId,
-                                         String appServiceCode,
-                                         String tagName) {
-        PublishVersionDTO dto = new PublishVersionDTO();
+    private void deletePublishVersionTagRel(Long projectId,
+                                            Long organizationId,
+                                            String appServiceCode,
+                                            String tagName) {
+
+        PublishVersionTagRelDTO dto = new PublishVersionTagRelDTO();
         dto.setProjectId(projectId);
-        dto.setOrganizationId(organizationId);
-        dto.setServiceCode(appServiceCode);
         dto.setTagName(tagName);
-        publishVersionMapper.select(dto).forEach(x -> {
-            x.setServiceCode(null);
-            x.setTagName(null);
-            publishVersionMapper.updateByPrimaryKey(x);
-        });
+        dto.setOrganizationId(organizationId);
+        dto.setAppServiceCode(appServiceCode);
+        publishVersionTagRelMapper.delete(dto);
     }
 
     private void deleteTagIssueRel(Long projectId,

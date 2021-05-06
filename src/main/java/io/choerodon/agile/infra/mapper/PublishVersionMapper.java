@@ -38,4 +38,16 @@ public interface PublishVersionMapper extends BaseMapper<PublishVersionDTO> {
     Set<Long> selectIssueIds(@Param("projectIds") Set<Long> projectIds,
                              @Param("organizationId") Long organizationId,
                              @Param("publishVersionIds") Set<Long> publishVersionIds);
+
+    /**
+     * 查询发布版本，附带tag数据
+     *
+     * @param publishVersionIds
+     * @param projectIds
+     * @param organizationId
+     * @return
+     */
+    List<PublishVersionDTO> selectWithTag(@Param("publishVersionIds") Set<Long> publishVersionIds,
+                                          @Param("projectIds") Set<Long> projectIds,
+                                          @Param("organizationId") Long organizationId);
 }

@@ -153,4 +153,19 @@ public interface PublishVersionService {
      * @return
      */
     List<TagCompareHistoryDTO> tagCompareHistory(Long projectId, Long organizationId, Long publishVersionId);
+
+    /**
+     * 查看tag对比的issue
+     *
+     * @param projectId
+     * @param organizationId
+     * @param publishVersionId
+     * @param searchVO
+     * @return
+     */
+    void previewIssueFromTag(Long projectId,
+                             Long organizationId,
+                             Long publishVersionId,
+                             SearchVO searchVO,
+                             PageRequest pageRequest);
 }
