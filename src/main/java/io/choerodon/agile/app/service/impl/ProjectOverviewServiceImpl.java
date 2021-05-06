@@ -49,7 +49,8 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     @Override
     public UncompletedCountVO selectUncompletedBySprint(Long projectId, Long sprintId) {
         UncompletedCountVO uncompletedCount = new UncompletedCountVO();
-        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId).stream()
+        List<IssueOverviewVO> totalIssueList = selectIssueBysprint(projectId, sprintId);
+        List<IssueOverviewVO> remainingIssueList = totalIssueList.stream()
                 .filter(issue -> BooleanUtils.isFalse(issue.getCompleted())).collect(Collectors.toList());
         SprintDTO sprint = safeSelectSprint(projectId, sprintId);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -64,15 +65,25 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
                     workCalendarRefMapper.queryHolidayBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()),
                     workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), organizationId));
         }
-        if (CollectionUtils.isEmpty(issueList)){
+        if (CollectionUtils.isEmpty(totalIssueList)){
             return uncompletedCount;
         }
-        uncompletedCount.setStoryPoints(issueList.stream()
+
+        if (!CollectionUtils.isEmpty(remainingIssueList)) {
+            uncompletedCount.setRemainingStoryPoints(remainingIssueList.stream()
+                    .filter(issue -> Objects.equals(issue.getTypeCode(), InitIssueType.STORY.getTypeCode()))
+                    .map(IssueOverviewVO::getStoryPoints).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
+            uncompletedCount.setRemainingEstimatedTime(remainingIssueList.stream()
+                    .map(IssueOverviewVO::getRemainingTime).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
+            uncompletedCount.setRemainingIssueCount(remainingIssueList.size());
+        }
+
+        uncompletedCount.setTotalStoryPoints(totalIssueList.stream()
                 .filter(issue -> Objects.equals(issue.getTypeCode(), InitIssueType.STORY.getTypeCode()))
                 .map(IssueOverviewVO::getStoryPoints).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
-        uncompletedCount.setRemainingEstimatedTime(issueList.stream()
+        uncompletedCount.setTotalEstimatedTime(totalIssueList.stream()
                 .map(IssueOverviewVO::getRemainingTime).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
-        uncompletedCount.setIssueCount(issueList.size());
+        uncompletedCount.setTotalIssueCount(totalIssueList.size());
         return uncompletedCount;
     }
 

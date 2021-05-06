@@ -10,18 +10,21 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UncompletedCountVO {
 
-    private BigDecimal storyPoints = BigDecimal.ZERO;
+    private BigDecimal remainingStoryPoints = BigDecimal.ZERO;
     private BigDecimal remainingEstimatedTime = BigDecimal.ZERO;
-    private Integer issueCount = 0;
+    private Integer remainingIssueCount = 0;
     private Integer remainingDays = 0;
     private Integer totalDays = 0;
+    private Integer totalIssueCount = 0;
+    private BigDecimal totalStoryPoints = BigDecimal.ZERO;
+    private BigDecimal totalEstimatedTime = BigDecimal.ZERO;
 
-    public BigDecimal getStoryPoints() {
-        return storyPoints;
+    public BigDecimal getRemainingStoryPoints() {
+        return remainingStoryPoints;
     }
 
-    public void setStoryPoints(BigDecimal storyPoints) {
-        this.storyPoints = storyPoints;
+    public void setRemainingStoryPoints(BigDecimal remainingStoryPoints) {
+        this.remainingStoryPoints = remainingStoryPoints;
     }
 
     public BigDecimal getRemainingEstimatedTime() {
@@ -32,12 +35,12 @@ public class UncompletedCountVO {
         this.remainingEstimatedTime = remainingEstimatedTime;
     }
 
-    public Integer getIssueCount() {
-        return issueCount;
+    public Integer getRemainingIssueCount() {
+        return remainingIssueCount;
     }
 
-    public void setIssueCount(Integer issueCount) {
-        this.issueCount = issueCount;
+    public void setRemainingIssueCount(Integer remainingIssueCount) {
+        this.remainingIssueCount = remainingIssueCount;
     }
 
     public Integer getRemainingDays() {
@@ -54,5 +57,29 @@ public class UncompletedCountVO {
 
     public void setTotalDays(Integer totalDays) {
         this.totalDays = totalDays;
+    }
+
+    public Integer getTotalIssueCount() {
+        return totalIssueCount;
+    }
+
+    public void setTotalIssueCount(Integer totalIssueCount) {
+        this.totalIssueCount = totalIssueCount;
+    }
+
+    public BigDecimal getTotalStoryPoints() {
+        return totalStoryPoints;
+    }
+
+    public void setTotalStoryPoints(BigDecimal totalStoryPoints) {
+        this.totalStoryPoints = totalStoryPoints;
+    }
+
+    public BigDecimal getTotalEstimatedTime() {
+        return totalEstimatedTime;
+    }
+
+    public void setTotalEstimatedTime(BigDecimal totalEstimatedTime) {
+        this.totalEstimatedTime = totalEstimatedTime;
     }
 }
