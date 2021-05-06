@@ -151,6 +151,9 @@ class CreateIssue extends Component {
   // eslint-disable-next-line react/destructuring-assignment
   getDefaultType = (issueTypes = this.state.originIssueTypes) => {
     const { defaultTypeCode } = this.props;
+    if (this.props.defaultTypeId) {
+      return find(issueTypes, { id: this.props.defaultTypeId }) || issueTypes[0];
+    }
     return find(issueTypes, { typeCode: defaultTypeCode }) || issueTypes[0];
   }
 
@@ -298,6 +301,15 @@ class CreateIssue extends Component {
     form.setFieldsValue(setFields);
   }
 
+  setDefaultSummary = () => {
+    if (this.props.defaultSummary) {
+      const { form: { setFieldsValue } } = this.props;
+      setFieldsValue({
+        summary: this.props.defaultSummary,
+      });
+    }
+  }
+
   loadIssueTypes = () => {
     const { applyType, form } = this.props;
 
@@ -320,6 +332,7 @@ class CreateIssue extends Component {
             newIssueTypeCode: defaultType.typeCode,
           }, () => {
             this.setDefaultSprint();
+            this.setDefaultSummary();
             this.setDefaultValue(fields);
           });
         });
