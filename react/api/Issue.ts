@@ -533,6 +533,18 @@ class IssueApi extends Api<IssueApi> {
       data: issueIds,
     });
   }
+
+  loadIssues(page: number, size: number, search: SearchVO) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issues/include_sub`,
+      params: {
+        page,
+        size,
+      },
+      data: search,
+    });
+  }
 }
 const issueApi = new IssueApi();
 

@@ -41,3 +41,4 @@ export * from './RdqamApi';
 export * from './ExportImportTemplate';
 export * from './KanbanTemplate';
 export * from './PublishVersion';
+export * from './CacheColumn';
