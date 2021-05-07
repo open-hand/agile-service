@@ -792,7 +792,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         }
         StatusMachineSchemeConfigDTO statusMachineSchemeConfig = queryStatusMachineSchemeConfig(organizationId, issueTypeId, organizationConfigDTO.getSchemeId());
         if (ObjectUtils.isEmpty(statusMachineSchemeConfig)) {
-            throw new CommonException("error.status.machine.scheme.config.null");
+            throw new CommonException("error.status.machine.template.scheme.config.null");
         }
         return statusMachineSchemeConfig.getStateMachineId();
     }
