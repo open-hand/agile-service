@@ -70,7 +70,6 @@ const SaveTemplateBtn: React.FC<Props> = ({
           onClick={handleSaveTemplate}
           className="c7n-importIssue-btn"
           style={{
-            marginTop: -6,
             marginLeft: 16,
           }}
         >

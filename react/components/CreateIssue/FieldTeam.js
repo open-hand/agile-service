@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Form } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
+import SelectTeamSprints from '@/components/select/select-teamSprint';
 
 const FormItem = Form.Item;
 function FieldTeam({ form: { getFieldDecorator, setFieldsValue }, teamProjectIds, field }) {
@@ -28,6 +29,7 @@ function FieldTeam({ form: { getFieldDecorator, setFieldsValue }, teamProjectIds
         />,
       )}
     </FormItem>
+
   );
 }
 

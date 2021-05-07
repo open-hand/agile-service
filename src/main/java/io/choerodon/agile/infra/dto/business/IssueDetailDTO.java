@@ -136,6 +136,16 @@ public class IssueDetailDTO {
 
     private Long lastUpdatedBy;
 
+    private List<TagVO> tags;
+
+    public List<TagVO> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<TagVO> tags) {
+        this.tags = tags;
+    }
+
     public String getParentRelateDescription() {
         return parentRelateDescription;
     }

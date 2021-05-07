@@ -80,7 +80,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             Long operatorId = DetailsHelper.getUserDetails().getUserId();
             if (issueCommentVO.getReplyToUserId() == null){
                 sendMsgUtil.sendMsgByIssueComment(projectId, issue, issueCommentVO, operatorId);
-            } else {
+            } else if(!issueCommentVO.getReplyToUserId().equals(operatorId)){
                 sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO, operatorId);
             }
             return issueCommentVO;
@@ -152,7 +152,9 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         issueCommentDTO.setProjectId(projectId);
         IssueCommentVO issueCommentVO = queryByProjectIdAndCommentId(projectId, iIssueCommentService.createBase(issueCommentDTO).getCommentId());
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueCommentVO.getIssueId());
-        sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO, DetailsHelper.getUserDetails().getUserId());
+        if (!issueCommentVO.getReplyToUserId().equals(customUserDetails.getUserId())) {
+            sendMsgUtil.sendMsgByIssueCommentReply(projectId, issue, issueCommentVO, customUserDetails.getUserId());
+        }
         return issueCommentVO;
     }
 

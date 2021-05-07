@@ -4,7 +4,7 @@ import { componentApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IComponent } from '@/common/types';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import { find, toArray, uniqBy } from 'lodash';
 
 interface Props extends Partial<SelectProps> {

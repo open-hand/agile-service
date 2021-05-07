@@ -3,12 +3,13 @@ import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
+import { Divider } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApiConfig, ITotalStatus } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
-import { Divider } from 'choerodon-ui';
-import { TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
+
+import { TableAutoHeightType, ColumnAlign } from 'choerodon-ui/pro/lib/table/enum';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
 import openDeleteStatus from './DeleteStatus';
@@ -36,6 +37,11 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
         label: '阶段',
       },
       {
+        name: 'completed',
+        type: 'boolean' as FieldType,
+        label: '是否为已解决',
+      },
+      {
         name: 'usage',
         type: 'string' as FieldType,
         label: '使用情况',
@@ -57,6 +63,15 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
     });
   };
 
+  const handleEditStatus = useCallback(({ record }) => {
+    openCreateStatus({
+      onSubmit: () => {
+        dataSet.query();
+      },
+      record,
+    });
+  }, [dataSet]);
+
   return (
     <Page>
       <Header>
@@ -76,7 +91,18 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
           }}
           filterBarFieldName="param"
         >
-          <Column name="name" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
+          <Column
+            name="name"
+            renderer={({ record, value }) => (
+              <span
+                role="none"
+                className={styles.cellClick}
+                onClick={() => handleEditStatus({ record })}
+              >
+                {value}
+              </span>
+            )}
+          />
           <Column
             name="type"
             renderer={({ record }) => (
@@ -86,6 +112,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
               />
             )}
           />
+          <Column name="completed" align={'left' as ColumnAlign} renderer={({ value }) => <span className={styles.gray}>{value ? '是' : '否'}</span>} />
           <Column name="usage" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
           <Column
             name="operate"

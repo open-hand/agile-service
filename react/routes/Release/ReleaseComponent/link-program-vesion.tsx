@@ -51,6 +51,7 @@ const LinkProgramVersion: React.FC<Props> = (props) => {
       <SelectProgramVersion
         name="programVersion"
         teamProjectIds={[getProjectId()]}
+        clearButton
         optionFlat
         afterLoad={() => {
           props.defaultValue && ds.current?.init('programVersion', props.defaultValue);

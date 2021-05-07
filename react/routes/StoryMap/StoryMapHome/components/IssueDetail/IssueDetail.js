@@ -7,6 +7,11 @@ import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore'
 const IssueDetail = (props) => {
   const { refresh, isFullScreen, onChangeWidth } = props;
   const [detailProps] = useDetail();
+
+  useEffect(() => {
+    StoryMapStore.setDetailProps(detailProps);
+  }, [detailProps]);
+
   const { open, close } = detailProps;
   const handleCancel = () => {
     StoryMapStore.setClickIssue(null);

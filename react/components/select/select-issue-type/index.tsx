@@ -6,7 +6,7 @@ import { issueTypeApi, sprintApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IIssueType, ISprint } from '@/common/types';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 
 interface Props extends Partial<SelectProps> {
   filterList?: string[]

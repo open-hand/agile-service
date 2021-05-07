@@ -1,5 +1,10 @@
 package io.choerodon.agile.infra.utils;
 
+import io.choerodon.agile.api.vo.PriorityVO;
+import io.choerodon.agile.api.vo.SprintNameVO;
+import io.choerodon.agile.api.vo.StatusVO;
+import io.choerodon.agile.api.vo.VersionIssueRelVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
 import io.choerodon.core.exception.CommonException;
@@ -245,6 +250,214 @@ public class ExcelUtil {
             }
         }
     }
+
+    public static int writeSubProjectVersionHeader(Workbook workbook,
+                                                   String sheetName,
+                                                   Map<String, String> headDataMap,
+                                                   List<CellRangeAddress> cellRangeAddresses) {
+        Sheet sheet = workbook.createSheet(sheetName);
+        sheet.setDefaultColumnWidth(13);
+        sheet.setColumnWidth(1, 8000);
+        sheet.setColumnWidth(5, 8000);
+        if (!ObjectUtils.isEmpty(cellRangeAddresses)) {
+            cellRangeAddresses.forEach(x -> sheet.addMergedRegion(x));
+        }
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setAlignment(CellStyle.ALIGN_LEFT);
+        cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        Font font = workbook.createFont();
+        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        font.setFontHeightInPoints((short) 13);
+        cellStyle.setFont(font);
+        int startRow = 0;
+        for (Map.Entry<String, String> entry : headDataMap.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            createHeaderRow(cellStyle, sheet.createRow(startRow++), key, value);
+        }
+        return startRow;
+    }
+
+    public static int writePublishVersionStory(Workbook workbook,
+                                                String sheetName,
+                                                Map<String, List<IssueVO>> versionStoryMap,
+                                                int startRow,
+                                                Boolean withFeature) {
+        Sheet sheet = workbook.getSheet(sheetName);
+        startRow++;
+        String belongTo = "所属史诗";
+        if (Boolean.TRUE.equals(withFeature)) {
+            belongTo = "所属特性";
+        }
+        String[] headers = {"编号", "概要", "状态", "优先级", "冲刺", belongTo, "经办人", "tag"};
+        int num = 0;
+        for (Map.Entry<String, List<IssueVO>> entry : versionStoryMap.entrySet()) {
+            num += entry.getValue().size();
+        }
+        startRow = initVersionTitleAndHeader(sheet, startRow, headers, "完成的故事（" + num + "）", workbook);
+        for (Map.Entry<String, List<IssueVO>> entry : versionStoryMap.entrySet()) {
+            String tag = entry.getKey();
+            for (IssueVO issueVO : entry.getValue()) {
+                Row dataRow = sheet.createRow(startRow++);
+                int col = 0;
+                dataRow.createCell(col++).setCellValue(issueVO.getIssueNum());
+                dataRow.createCell(col++).setCellValue(issueVO.getSummary());
+                dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getStatusVO()).map(StatusVO::getName).orElse(""));
+                dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getPriorityVO()).map(PriorityVO::getName).orElse(""));
+                dataRow.createCell(col++).setCellValue(getSprintName(issueVO));
+                if (Boolean.TRUE.equals(withFeature)) {
+                    dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getFeatureName()).orElse(""));
+                } else {
+                    dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getEpicName()).orElse(""));
+                }
+                dataRow.createCell(col++).setCellValue(issueVO.getAssigneeName());
+                dataRow.createCell(col++).setCellValue(tag);
+            }
+        }
+        return startRow;
+    }
+
+    public static int writePublishVersionBug(Workbook workbook,
+                                             String sheetName,
+                                             Map<String, List<IssueVO>> versionBugMap,
+                                             int startRow) {
+        Sheet sheet = workbook.getSheet(sheetName);
+        startRow++;
+        String[] headers = {"编号", "概要", "状态", "优先级", "冲刺", "影响的版本", "经办人", "tag"};
+        int num = 0;
+        for (Map.Entry<String, List<IssueVO>> entry : versionBugMap.entrySet()) {
+            num += entry.getValue().size();
+        }
+        startRow = initVersionTitleAndHeader(sheet, startRow, headers, "解决的缺陷（" + num + "）", workbook);
+        for (Map.Entry<String, List<IssueVO>> entry : versionBugMap.entrySet()) {
+            String tag = entry.getKey();
+            for (IssueVO issueVO : entry.getValue()) {
+                Row dataRow = sheet.createRow(startRow++);
+                int col = 0;
+                dataRow.createCell(col++).setCellValue(issueVO.getIssueNum());
+                dataRow.createCell(col++).setCellValue(issueVO.getSummary());
+                dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getStatusVO()).map(StatusVO::getName).orElse(""));
+                dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getPriorityVO()).map(PriorityVO::getName).orElse(""));
+                dataRow.createCell(col++).setCellValue(getSprintName(issueVO));
+                dataRow.createCell(col++).setCellValue(getVersion(issueVO));
+                dataRow.createCell(col++).setCellValue(issueVO.getAssigneeName());
+                dataRow.createCell(col++).setCellValue(tag);
+            }
+        }
+        return startRow;
+    }
+
+    public static int writePublishVersionTask(Workbook workbook,
+                                              String sheetName,
+                                              Map<String, List<IssueVO>> versionBugMap,
+                                              int startRow) {
+        Sheet sheet = workbook.getSheet(sheetName);
+        startRow++;
+        String[] headers = {"编号", "概要", "状态", "优先级", "冲刺", "经办人", "tag"};
+        int num = 0;
+        for (Map.Entry<String, List<IssueVO>> entry : versionBugMap.entrySet()) {
+            num += entry.getValue().size();
+        }
+        startRow = initVersionTitleAndHeader(sheet, startRow, headers, "完成的任务（" + num + "）", workbook);
+        for (Map.Entry<String, List<IssueVO>> entry : versionBugMap.entrySet()) {
+            String tag = entry.getKey();
+            for (IssueVO issueVO : entry.getValue()) {
+                Row dataRow = sheet.createRow(startRow++);
+                int col = 0;
+                dataRow.createCell(col++).setCellValue(issueVO.getIssueNum());
+                dataRow.createCell(col++).setCellValue(issueVO.getSummary());
+                dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getStatusVO()).map(StatusVO::getName).orElse(""));
+                dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getPriorityVO()).map(PriorityVO::getName).orElse(""));
+                dataRow.createCell(col++).setCellValue(getSprintName(issueVO));
+                dataRow.createCell(col++).setCellValue(issueVO.getAssigneeName());
+                dataRow.createCell(col++).setCellValue(tag);
+            }
+        }
+        return startRow;
+    }
+
+    private static String getVersion(IssueVO vo) {
+        List<VersionIssueRelVO> versions = vo.getVersionIssueRelVOList();
+        if (ObjectUtils.isEmpty(versions)) {
+            return "";
+        }
+        Iterator<VersionIssueRelVO> iterator = versions.iterator();
+        StringBuilder builder = new StringBuilder();
+        while (iterator.hasNext()) {
+            VersionIssueRelVO version = iterator.next();
+            builder.append(version.getName());
+            if (iterator.hasNext()) {
+                builder.append("，");
+            }
+        }
+        return builder.toString();
+    }
+
+    private static String getSprintName(IssueVO vo) {
+        List<SprintNameVO> sprints = vo.getCloseSprint();
+        if (ObjectUtils.isEmpty(sprints)) {
+            return "";
+        }
+        Iterator<SprintNameVO> iterator = sprints.iterator();
+        StringBuilder builder = new StringBuilder();
+        while (iterator.hasNext()) {
+            SprintNameVO sprint = iterator.next();
+            String name = sprint.getSprintName();
+            builder.append(name);
+            if (iterator.hasNext()) {
+                builder.append("，");
+            }
+        }
+        return builder.toString();
+    }
+
+    protected static int initVersionTitleAndHeader(Sheet sheet,
+                                                 int startRow,
+                                                 String[] headers,
+                                                 String title,
+                                                 Workbook workbook) {
+        CellStyle headerStyle = createCellStyle(workbook, (short) 13, CellStyle.ALIGN_LEFT, true);
+        headerStyle.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        //合并单元格
+        sheet.addMergedRegion(new CellRangeAddress(startRow, startRow, 0, headers.length - 1));
+        //title居中加粗
+        CellStyle titleStyle = workbook.createCellStyle();
+        //水平居中
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        Font font = workbook.createFont();
+        //加粗
+        font.setBold(true);
+        titleStyle.setFont(font);
+
+        Row titleRow = sheet.createRow(startRow++);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellStyle(titleStyle);
+        titleCell.setCellValue(title);
+        Row headerRow = sheet.createRow(startRow++);
+        int colNum = headers.length;
+        for (int i = 0; i < colNum; i++) {
+            Cell headerCell = headerRow.createCell(i);
+            headerCell.setCellStyle(headerStyle);
+            headerCell.setCellValue(headers[i]);
+        }
+        return startRow;
+    }
+
+
+    private static void createHeaderRow(CellStyle cellStyle,
+                                        Row row,
+                                        String key,
+                                        String value) {
+        int startCell = 0;
+        Cell cell = row.createCell(startCell);
+        cell.setCellStyle(cellStyle);
+        cell.setCellValue(key);
+        startCell++;
+        cell = row.createCell(startCell);
+        cell.setCellValue(value);
+    }
+
 
     protected static CellStyle createForegroundColor(Workbook workbook, IndexedColors colors) {
         CellStyle cellStyle = workbook.createCellStyle();

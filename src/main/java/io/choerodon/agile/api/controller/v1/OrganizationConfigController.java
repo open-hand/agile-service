@@ -306,4 +306,26 @@ public class OrganizationConfigController {
                                                @RequestParam Long projectId) {
         return new ResponseEntity<>(organizationConfigService.checkConfigured(organizationId,projectId), HttpStatus.OK);
     }
+
+
+    @ApiOperation(value = "分支合并状态流转配置")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/status_branch_merge_setting/query")
+    public ResponseEntity<StatusBranchMergeSettingVO> queryStatusBranchMergeSetting(@PathVariable("organization_id") Long organizationId,
+                                                                                    @RequestParam @Encrypt Long issueTypeId,
+                                                                                    @RequestParam @Encrypt Long statusId) {
+        return Results.success(organizationConfigService.queryStatusBranchMergeSetting(organizationId, issueTypeId, statusId));
+    }
+
+    @ApiOperation(value = "分支合并状态流转配置")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/status_branch_merge_setting/update")
+    public ResponseEntity updateAutoTransform(@PathVariable("organization_id") Long organizationId,
+                                              @RequestParam @Encrypt Long issueTypeId,
+                                              @RequestParam @Encrypt Long statusId,
+                                              @RequestParam Boolean autoTransform) {
+        organizationConfigService.updateAutoTransform(organizationId, issueTypeId, statusId, autoTransform);
+        return Results.success();
+    }
+
 }

@@ -2,11 +2,12 @@
 import React, { Component } from 'react';
 import { WSHandler, Choerodon } from '@choerodon/boot';
 import {
-  Button, Progress, Divider,
+  Progress, Divider,
 } from 'choerodon-ui';
 import { observer } from 'mobx-react';
-import { Modal } from 'choerodon-ui/pro';
+import { Modal, Button } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
+import classnames from 'classnames';
 import './ImportIssue.less';
 import { issueApi } from '@/api';
 import { getApplyType, getProjectId } from '@/utils/common';
@@ -19,10 +20,19 @@ import openSaveTemplate from '../template-select/components/save/SaveTemplate';
 import SaveTemplateBtn, { transformTemplateJson } from './SaveTemplateBtn';
 
 const ImportIssueForm = (formProps) => {
-  const { title, children, bottom } = formProps;
+  const {
+    title, children, bottom, className,
+  } = formProps;
   return (
-    <div className="c7n-importIssue-form-one">
-      <span className="c7n-importIssue-form-one-title">{title}</span>
+    <div className={classnames('c7n-importIssue-form-one', className)}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+      >
+        <span className="c7n-importIssue-form-one-block" />
+        <span className="c7n-importIssue-form-one-title">{title}</span>
+      </div>
       <span className="c7n-importIssue-form-one-content">{children}</span>
       {bottom}
     </div>
@@ -45,11 +55,10 @@ class ImportIssue extends Component {
   };
 
   loadLatestImport = () => {
-    issueApi.loadLastImportOrExport('upload_file').then((res) => {
+    issueApi.loadLastImportOrExport(this.props.lastAction || 'upload_file').then((res) => {
       if (res) {
         this.setState({
           latestInfo: res,
-
         });
       }
     });
@@ -75,9 +84,17 @@ class ImportIssue extends Component {
     const fields = this.importFieldsRef.current?.fields || [];
     importFieldsData.systemFields = fields.filter((code) => allFields.find((item) => item.code === code && item.system));
     importFieldsData.customFields = fields.filter((code) => allFields.find((item) => item.code === code && !item.system));
+    if (this.props.downloadTemplateRequest) {
+      this.props.downloadTemplateRequest(importFieldsData).then((excel) => {
+        const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const fileName = `${this.props.name || '问题'}导入模板.xlsx`;
+        FileSaver.saveAs(blob, fileName);
+      });
+      return;
+    }
     issueApi.downloadTemplateForImport(importFieldsData).then((excel) => {
       const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const fileName = '问题导入模板.xlsx';
+      const fileName = `${this.props.name || '问题'}导入模板.xlsx`;
       FileSaver.saveAs(blob, fileName);
     });
   };
@@ -103,16 +120,29 @@ class ImportIssue extends Component {
     this.setState({
       uploading: true,
     });
-    issueApi.import(formData).then((res) => {
-      this.setState({
-        uploading: false,
+    if (this.props.importRequest) {
+      this.props.importRequest(formData).then((res) => {
+        this.setState({
+          uploading: false,
+        });
+      }).catch((e) => {
+        this.setState({
+          uploading: false,
+        });
+        Choerodon.prompt('网络错误');
       });
-    }).catch((e) => {
-      this.setState({
-        uploading: false,
+    } else {
+      issueApi.import(formData).then((res) => {
+        this.setState({
+          uploading: false,
+        });
+      }).catch((e) => {
+        this.setState({
+          uploading: false,
+        });
+        Choerodon.prompt('网络错误');
       });
-      Choerodon.prompt('网络错误');
-    });
+    }
   };
 
   handleMessage = (message) => {
@@ -130,6 +160,9 @@ class ImportIssue extends Component {
       }
       if (data.status === 'success' || data.status === 'template_error_missing_required_column' || data.status === 'template_error' || data.status === 'empty_data_sheet' || data.status?.startsWith('error_custom_field_header')) {
         modal?.update({ okProps: { loading: false } });
+        if (this.props.onSuccess && data?.successCount) {
+          this.props.onSuccess();
+        }
       }
       if (data.status === 'failed') {
         if (data.fileUrl) {
@@ -185,7 +218,7 @@ class ImportIssue extends Component {
           <span className="c7n-importIssue-text">
             导入失败
             <span style={{ color: '#FF0000' }}>{failCount}</span>
-            问题
+            {`${this.props.name || '问题'}`}
             <a href={fileUrl}>
               点击下载失败详情
             </a>
@@ -198,7 +231,7 @@ class ImportIssue extends Component {
           <span className="c7n-importIssue-text">
             导入成功
             <span style={{ color: '#0000FF' }}>{successCount}</span>
-            问题
+            {`${this.props.name || '问题'}`}
           </span>
         </div>
       );
@@ -323,7 +356,10 @@ class ImportIssue extends Component {
     const {
       uploading, latestInfo, wsData, templateIsExist,
     } = this.state;
-    const { action } = this.props;
+    const {
+      action, requires, systems, fields, messageKey,
+    } = this.props;
+
     const {
       successCount, failCount, fileUrl, id,
     } = latestInfo;
@@ -335,32 +371,30 @@ class ImportIssue extends Component {
       <div>
         {
           action && (
-            <>
-              <ImportIssueForm
-                title="选择常用模板"
-                bottom={null}
-              >
-                <TemplateSelect
-                  templateSelectRef={this.templateSelectRef}
-                  action={action}
-                  checkOptions={allFields.map((item) => ({
-                    label: item.title,
-                    value: item.code,
-                    system: item.system,
-                    optionConfig: includes(requiredFields, item.code) ? {
-                      disabled: includes(requiredFields, item.code),
-                      defaultChecked: includes(requiredFields, item.code),
-                      name: 'required-option',
-                    } : undefined,
-                  }))}
-                  selectTemplateOk={this.selectTemplateOk}
-                  transformExportFieldCodes={(data) => data}
-                  reverseTransformExportFieldCodes={(data) => data}
-                  defaultInitCodes={requiredFields}
-                />
-              </ImportIssueForm>
-              <Divider />
-            </>
+          <ImportIssueForm
+            title="选择常用模板"
+            bottom={null}
+            className="c7n-importIssue-templateSelect"
+          >
+            <TemplateSelect
+              templateSelectRef={this.templateSelectRef}
+              action={action}
+              checkOptions={allFields.map((item) => ({
+                label: item.title,
+                value: item.code,
+                system: item.system,
+                optionConfig: includes(requiredFields, item.code) ? {
+                  disabled: includes(requiredFields, item.code),
+                  defaultChecked: includes(requiredFields, item.code),
+                  name: 'required-option',
+                } : undefined,
+              }))}
+              selectTemplateOk={this.selectTemplateOk}
+              transformExportFieldCodes={(data) => data}
+              reverseTransformExportFieldCodes={(data) => data}
+              defaultInitCodes={requiredFields}
+            />
+          </ImportIssueForm>
           )
         }
         <ImportIssueForm
@@ -389,13 +423,20 @@ class ImportIssue extends Component {
             </>
           )}
         >
-          您必须使用模板文件，录入问题信息。
-          <ImportFields importFieldsRef={this.importFieldsRef} setReRender={this.handleSetReRender} checkBoxChangeOk={this.handleCheckBoxChangeOk} />
+          {`您必须使用模板文件，录入${this.props.name || '问题'}信息。`}
+          <ImportFields
+            importFieldsRef={this.importFieldsRef}
+            setReRender={this.handleSetReRender}
+            checkBoxChangeOk={this.handleCheckBoxChangeOk}
+            requires={requires}
+            systems={systems}
+            fields={fields}
+          />
         </ImportIssueForm>
         {id && <Divider />}
         {id && (
           <ImportIssueForm
-            title="导入问题"
+            title={`导入${this.props.name || '问题'}`}
           >
             <div style={{ marginTop: 10 }}>
               上次导入共导入
@@ -423,7 +464,7 @@ class ImportIssue extends Component {
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         />
         <WSHandler
-          messageKey={getApplyType() === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`}
+          messageKey={messageKey || (getApplyType() === 'program' ? `agile-import-${getProjectId()}` : `agile-import-issues-${getProjectId()}`)}
           onMessage={this.handleMessage}
         >
           {this.renderProgress()}
@@ -441,9 +482,9 @@ const handleOpenImport = (props) => {
     className: 'c7n-importIssue',
     maskClosable: false,
     key: Modal.key(),
-    title: '导入问题',
+    title: `导入${props.name || '问题'}`,
     style: {
-      width: 380,
+      width: 740,
     },
     okText: '导入',
     cancelText: '关闭',

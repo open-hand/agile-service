@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React, { Component, Fragment, useState, forwardRef } from 'react';
 import {
-  Form, Input, Select, message, Button, InputNumber
+  Form, Input, Select, message, Button, InputNumber, Tooltip, Icon,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import { Content, stores, Choerodon } from '@choerodon/boot';
@@ -148,10 +148,18 @@ function AddComponent(props) {
           <Input label="模块描述" maxLength={30} />,
         )}
       </FormItem>
-      <FormItem style={{ marginBottom: 20 }}>
+      <FormItem style={{ marginBottom: 20 }} className="c7n-component-component-sequenceItem">
         {getFieldDecorator('sequence', {})(
-          <InputNumber label="模块顺序" min={1} max={100000} />,
+          <InputNumber label="模块顺序" min={1} max={100000} className="c7n-component-component-sequenceInput" />,
         )}
+        <div className="c7n-component-component-sequenceTip">
+          <Tooltip 
+            title="顺序值越大，越靠前。无序列值排在最后，顺序值相同时，按照创建时间倒序排列。"
+            placement="topRight"
+          >
+              <Icon type="help" />
+          </Tooltip>
+        </div>
       </FormItem>
       <FormItem style={{ marginBottom: 20 }}>
         {getFieldDecorator('defaultAssigneeRole', {

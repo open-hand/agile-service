@@ -121,6 +121,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private BaseFeignClient baseFeignClient;
     @Autowired
     private StatusMachineNodeMapper nodeDeployMapper;
+    @Autowired
+    private StatusBranchMergeSettingService statusBranchMergeSettingService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -244,7 +246,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         //获取状态机
         Long stateMachineId = stateMachineSchemeConfigService.queryStateMachineIdBySchemeIdAndIssueTypeId(false, organizationId, stateMachineSchemeId, issueTypeId);
-        List<StatusAndTransformVO> statuses = statusService.queryStatusByStateMachineId(organizationId, stateMachineId);
+        List<StatusAndTransformVO> statuses = statusService.queryStatusByStateMachineId(organizationId, projectId, stateMachineId);
         if(CollectionUtils.isEmpty(statuses)){
             return new ArrayList<>();
         }
@@ -429,7 +431,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         // 处理rank值
         stateMachineNodeService.handlerNullRankNode(organizationId, stateMachineId, applyType);
         // 查询当前状态机有哪些状态
-        List<StatusAndTransformVO> statusVOS = statusService.queryStatusByStateMachineId(organizationId, stateMachineId);
+        List<StatusAndTransformVO> statusVOS = statusService.queryStatusByStateMachineId(organizationId, projectId, stateMachineId);
         if (CollectionUtils.isEmpty(statusVOS)) {
             return new ArrayList<>();
         }
@@ -542,15 +544,23 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         // 关联状态机
         if (!CollectionUtils.isEmpty(issueTypeIds)) {
+            statusVO.setId(status.getId());
             for (Long issueTypeId:issueTypeIds) {
-                linkStatus(projectId,issueTypeId,applyType,status.getId(),statusVO.getDefaultStatus(), statusVO.getTransferAll());
+                linkStatus(projectId, issueTypeId, applyType, statusVO);
             }
         }
         return status;
     }
 
     @Override
-    public StatusMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus, Boolean transferAll) {
+    public StatusMachineNodeVO linkStatus(Long projectId,
+                                          Long issueTypeId,
+                                          String applyType,
+                                          StatusVO status) {
+        Long statusId = status.getId();
+        Boolean defaultStatus = status.getDefaultStatus();
+        Boolean transferAll = status.getTransferAll();
+        boolean completed = Boolean.TRUE.equals(status.getCompleted());
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         IssueStatusDTO issueStatusDTO = issueStatusMapper.selectByStatusId(projectId, statusId);
         StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
@@ -558,7 +568,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             issueStatusDTO = new IssueStatusDTO();
             issueStatusDTO.setProjectId(projectId);
             issueStatusDTO.setStatusId(statusId);
-            issueStatusDTO.setCompleted(false);
+            issueStatusDTO.setCompleted(completed);
             issueStatusDTO.setName(statusVO.getName());
             issueStatusDTO.setCategoryCode(statusVO.getType());
             issueStatusDTO.setEnable(false);
@@ -770,6 +780,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<StatusFieldSettingVO> statusFieldSettingVOS = statusFieldSettingService.listByStatusIds(projectId, issueTypeId, statusIds);
         List<StatusNoticeSettingVO> statusNoticeSettingVOS = statusNoticeSettingService.list(projectId, issueTypeId, statusIds, schemeCode);
         List<StatusLinkageVO> linkageVOS = statusLinkageService.listByStatusIds(projectId, issueTypeId, statusIds, applyType);
+        Map<Long, List<StatusBranchMergeSettingVO>> statusBranchMergeSettingMap =
+                statusBranchMergeSettingService.listByOptions(projectId, organizationId, issueTypeId, statusIds)
+                        .stream()
+                        .collect(Collectors.groupingBy(StatusBranchMergeSettingVO::getStatusId));
         Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();
         Map<Long, List<StatusFieldSettingVO>> statusFieldSettingMap = new HashMap<>();
         Map<Long, List<StatusNoticeSettingVO>> statusNoticSettingMap = statusNoticeSettingVOS.stream()
@@ -788,6 +802,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             statusSettingVO.setStatusFieldSettingVOS(statusFieldSettingMap.get(statusSettingVO.getId()));
             statusSettingVO.setStatusNoticeSettingVOS(statusNoticSettingMap.get(statusSettingVO.getId()));
             statusSettingVO.setStatusLinkageVOS(statusLinkageMap.get(statusSettingVO.getId()));
+            List<StatusBranchMergeSettingVO> statusBranchMergeSettingList = statusBranchMergeSettingMap.get(statusSettingVO.getId());
+            if (!ObjectUtils.isEmpty(statusBranchMergeSettingList)) {
+                statusSettingVO.setStatusBranchMergeSettingVO(statusBranchMergeSettingList.get(0));
+            }
         }
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {

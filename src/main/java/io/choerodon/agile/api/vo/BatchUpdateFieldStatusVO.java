@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
 
+import java.util.Map;
+
 /**
  * @author zhaotianxin
  * @date 2020-05-08 10:44
@@ -18,6 +20,8 @@ public class BatchUpdateFieldStatusVO {
     private String error;
 
     private Double incrementalValue;
+
+    private Map<Object, Object> errorMsgMap;
 
     public String getStatus() {
         return status;
@@ -65,5 +69,13 @@ public class BatchUpdateFieldStatusVO {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Map<Object, Object> getErrorMsgMap() {
+        return errorMsgMap;
+    }
+
+    public void setErrorMsgMap(Map<Object, Object> errorMsgMap) {
+        this.errorMsgMap = errorMsgMap;
     }
 }

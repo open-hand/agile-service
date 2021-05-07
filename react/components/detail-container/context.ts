@@ -9,7 +9,13 @@ export interface IRoute {
 export interface IRouteWithKey extends IRoute {
   key: React.Key
 }
+export interface IPreview {
+  url: string
+  name: string
+}
 interface DetailContainerContext {
+  descriptionChanged: boolean
+  setDescriptionChanged: (changed: boolean) => void
   outside: boolean
   topAnnouncementHeight: number
   routes: IRouteWithKey[]
@@ -21,6 +27,10 @@ interface DetailContainerContext {
   eventsMap: Map<string, DetailEvents>
   fullPage?: boolean
   resizeRef: React.MutableRefObject<any>
+  filePreview?: IPreview
+  setFilePreview: (filePreview?: IPreview) => void
+  hidden: boolean
+  setHidden: (hidden: boolean) => void
 }
 const DetailContainerContext = createContext({} as DetailContainerContext);
 

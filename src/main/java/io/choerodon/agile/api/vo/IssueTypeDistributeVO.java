@@ -18,6 +18,9 @@ public class IssueTypeDistributeVO {
     @ApiModelProperty(value = "该问题类型下的状态类别")
     private List<IssueStatus> issueStatus;
 
+    @ApiModelProperty("问题类型名称")
+    private String name;
+
     public String getTypeCode() {
         return typeCode;
     }
@@ -32,5 +35,13 @@ public class IssueTypeDistributeVO {
 
     public void setIssueStatus(List<IssueStatus> issueStatus) {
         this.issueStatus = issueStatus;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -20,7 +20,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import TypeTag from '@/components/TypeTag';
 import Loading from '@/components/Loading';
 import SelectSprint from '@/components/select/select-sprint';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import useFullScreen from '@/common/useFullScreen';
 import { ILocalField } from '@/components/issue-search/store';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';

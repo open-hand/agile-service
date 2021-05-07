@@ -417,4 +417,13 @@ public interface IssueService {
      * @return
      */
     Page<IssueListFieldKVVO> pagedQueryMyAssigned(Long organizationId, Long projectId, PageRequest pageRequest);
+
+    /**
+     * 处理更新tag
+     *
+     * @param tags
+     * @param projectId
+     * @param issueId
+     */
+    void handleUpdateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
 }

@@ -184,6 +184,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private WikiRelationMapper wikiRelationMapper;
     @Autowired
     private FieldValueMapper fieldValueMapper;
+    @Autowired
+    private TagIssueRelMapper tagIssueRelMapper;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -317,15 +319,39 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handleCreateComponentIssueRel(issueCreateVO.getComponentIssueRelVOList(), projectInfoDTO.getProjectId(), issueId, projectInfoDTO, issueConvertDTO.getAssigneerCondtiion());
         handleCreateVersionIssueRel(issueCreateVO.getVersionIssueRelVOList(), projectInfoDTO.getProjectId(), issueId);
         handleCreateIssueLink(issueCreateVO.getIssueLinkCreateVOList(), projectInfoDTO.getProjectId(), issueId);
+        handleCreateTagIssueRel(issueCreateVO.getTags(), projectInfoDTO.getProjectId(), issueId);
+    }
+
+    private void handleCreateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId) {
+        if (!ObjectUtils.isEmpty(tags)) {
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            tags.forEach(x -> {
+                String tagName = x.getTagName();
+                String appServiceCode = x.getAppServiceCode();
+                if (!StringUtils.hasText(tagName) || !StringUtils.hasText(appServiceCode)) {
+                    throw new CommonException("error.issue.tag.null");
+                }
+                TagIssueRelDTO dto = new TagIssueRelDTO();
+                dto.setIssueId(issueId);
+                dto.setOrganizationId(organizationId);
+                dto.setTagName(tagName);
+                dto.setAppServiceCode(appServiceCode);
+                dto.setProjectId(projectId);
+                if (tagIssueRelMapper.select(dto).isEmpty()) {
+                    tagIssueRelMapper.insertSelective(dto);
+                }
+            });
+        }
     }
 
     @Override
     public void afterCreateSubIssue(Long issueId, IssueConvertDTO subIssueConvertDTO, IssueSubCreateVO issueSubCreateVO, ProjectInfoDTO projectInfoDTO) {
         IssueCreateVO issueCreateVO = new IssueCreateVO();
-        issueCreateVO.setLabelIssueRelVOList(issueSubCreateVO.getLabelIssueRelVOList());
-        issueCreateVO.setComponentIssueRelVOList(issueSubCreateVO.getComponentIssueRelVOList());
-        issueCreateVO.setVersionIssueRelVOList(issueSubCreateVO.getVersionIssueRelVOList());
-        issueCreateVO.setIssueLinkCreateVOList(issueSubCreateVO.getIssueLinkCreateVOList());
+        issueCreateVO.setLabelIssueRelVOList(issueCreateVO.getLabelIssueRelVOList());
+        issueCreateVO.setComponentIssueRelVOList(issueCreateVO.getComponentIssueRelVOList());
+        issueCreateVO.setVersionIssueRelVOList(issueCreateVO.getVersionIssueRelVOList());
+        issueCreateVO.setIssueLinkCreateVOList(issueCreateVO.getIssueLinkCreateVOList());
+        issueCreateVO.setTags(issueCreateVO.getTags());
         handleCreateIssueRearAction(subIssueConvertDTO, issueId, projectInfoDTO, issueCreateVO);
     }
 
@@ -399,6 +425,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public IssueVO queryIssue(Long projectId, Long issueId, Long organizationId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
+        if (Objects.isNull(issue)) {
+            throw new CommonException("error.issue.null");
+        }
         issue.setSameParentIssueDTOList(Objects.nonNull(issue.getParentIssueId()) && !Objects.equals(issue.getParentIssueId(), 0L)?
                 issueMapper.querySubIssueByIssueId(issue.getParentIssueId()): null);
         issue.setSameParentBugDOList(Objects.nonNull(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)?
@@ -701,7 +730,24 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueUpdateVO.getVersionIssueRelVOList() != null && issueUpdateVO.getVersionType() != null) {
             this.self().handleUpdateVersionIssueRel(issueUpdateVO.getVersionIssueRelVOList(), projectId, issueId, issueUpdateVO.getVersionType());
         }
+        if (issueUpdateVO.getTags() != null) {
+            this.self().handleUpdateTagIssueRel(issueUpdateVO.getTags(), projectId, issueId);
+        }
         return queryIssueByUpdate(projectId, issueId, fieldList);
+    }
+
+    @Override
+    public void handleUpdateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        TagIssueRelDTO dto = new TagIssueRelDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setIssueId(issueId);
+        tagIssueRelMapper.delete(dto);
+        handleCreateTagIssueRel(tags, projectId, issueId);
+        if (agilePluginService != null) {
+            agilePluginService.handleProgramUpdateTag(tags, projectId, issueId);
+        }
     }
 
     @Override
@@ -2651,7 +2697,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //连表查询需要设置主表别名
         Map<String, String> orders = new HashMap<>();
         orders.put("issueNum","issue_num_convert");
-        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", orders);
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), null, orders);
         pageRequest.setSort(sort);
         Page<IssueDTO> pageInfo = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryStoryAndTaskByProjectId(projectId, searchVO));
         List<IssueDTO> list = pageInfo.getContent();

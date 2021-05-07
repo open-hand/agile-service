@@ -13,6 +13,7 @@ import { IField, IIssueColumnName } from '@/common/types';
 import { TableMode, ColumnAlign, ColumnLock } from 'choerodon-ui/pro/lib/table/enum';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
+import { useCallback } from 'react';
 import UserTag from '../tag/user-tag';
 
 const { Column } = Table;
@@ -65,6 +66,9 @@ const IssueTable: React.FC<Props> = ({
   selectedIssue,
   createIssue = true,
   visibleColumns = defaultVisibleColumns,
+  typeIdChange = () => {},
+  summaryChange = () => {},
+  IssueStore,
   ...otherProps
 }) => {
   const { isInProgram } = useIsInProgram();
@@ -123,13 +127,26 @@ const IssueTable: React.FC<Props> = ({
     ) : null;
   }
 
+  const handleOpenCreateIssue = useCallback(() => {
+    IssueStore?.createQuestion(true);
+  }, [IssueStore]);
+
   return (
     <div className="c7nagile-issue-table">
       <Table
         mode={'tree' as TableMode}
         ref={tableRef}
         dataSet={dataSet}
-        footer={createIssue && <div style={{ paddingTop: 5 }}><QuickCreateIssue onCreate={onCreateIssue} /></div>}
+        footer={createIssue && (
+        <div style={{ paddingTop: 5 }}>
+          <QuickCreateIssue
+            cantCreateEvent={handleOpenCreateIssue}
+            typeIdChange={typeIdChange}
+            summaryChange={summaryChange}
+            onCreate={onCreateIssue}
+          />
+        </div>
+        )}
         onRow={({ record }) => ({
           className: selectedIssue && record.get('issueId') === selectedIssue ? 'c7nagile-row-selected' : null,
         })}
@@ -333,6 +350,8 @@ const IssueTable: React.FC<Props> = ({
         <Column hidden={columnHidden('issueSprintVOS')} name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />
         <Column name="mainResponsibleUser" className="c7n-agile-table-cell" hidden={columnHidden('mainResponsibleUser')} renderer={({ value }) => value && <UserTag data={value} />} />
         <Column name="environmentName" className="c7n-agile-table-cell" hidden={columnHidden('environmentName')} />
+        <Column name="tags" className="c7n-agile-table-cell" hidden={columnHidden('tags')} renderer={({ value }) => (value && value.length > 0 ? value.map((i) => `${i.appServiceCode}:${i.tagName}`).join('、') : '')} />
+
         {fields.map((field) => (
           <Column
             hidden={columnHidden(field.code)}

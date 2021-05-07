@@ -3,7 +3,7 @@ import { Select } from 'choerodon-ui/pro';
 import { IStatusCirculation, statusTransformApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import { includes, intersection } from 'lodash';
 
 interface Props extends Partial<SelectProps> {

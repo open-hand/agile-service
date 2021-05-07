@@ -1,0 +1,54 @@
+.wrap {
+  position: relative;
+  padding-right: .2rem;
+  margin-top: .13rem;
+
+  .expand_btn {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    position: absolute;
+    padding-right: 0;
+    top: .1rem;
+    right: .2rem;
+    color: #5365EA;
+    border: 1px solid #D9E6F2;
+    font-weight: 500;
+    border-radius: 6px;
+
+    span {
+      white-space: nowrap;
+    }
+  }
+
+  .compare {
+    & >span:last-child {
+      display: inline-block;
+      width: 100%;
+      white-space: nowrap;
+      margin-top: .1rem;
+      font-size: 13px;
+      font-family: PingFangSC-Regular, PingFang SC;
+      font-weight: 400;
+      color: #666;
+      line-height: 18px;
+    }
+  }
+
+  .form {
+    width: 7.04rem;
+
+    &_hidden {
+
+      .compare {
+        visibility: hidden;
+      }
+
+      table >tbody {
+        tr:nth-child(n+2) {
+          display: none;
+        }
+      }
+    }
+  }
+}

@@ -73,7 +73,6 @@
     display: inline-block;
     vertical-align: top;
     margin-top: 0.07rem;
-    font-family: PingFangSC-Regular;
     font-size: 13px;
     color: rgba(0, 0, 0, 0.65);
     line-height: 18px;
@@ -126,10 +125,18 @@
     }
 
     &-one {
+      &-block {
+        display: inline-block;
+        margin-right: 6px;
+        width: 3px;
+        height: 16px;
+        background: #798DFB;
+        border-radius: 2px;
+      }
       &-title {
-        font-size: 16px;
+        font-size: 14px;
         color: rgba(0, 0, 0, 0.87);
-        line-height: 24px;
+        line-height: 16px;
       }
 
       &-content {
@@ -154,10 +161,14 @@
     // }
 
   }
+  &-templateSelect {
+    margin-bottom: 35px;
+  }
   .c7n-importIssue-btn {
     background: rgba(83, 101, 234, 0.14);
     border-radius: 4px;
     padding-left: 8px;
+    color: #3f51b5;
     & > i.icon + span, & > span + i.icon {
       margin-left: 0;
     }

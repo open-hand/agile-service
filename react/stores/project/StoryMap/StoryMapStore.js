@@ -1,7 +1,6 @@
 import {
   observable, action, computed, set, toJS,
 } from 'mobx';
-import { Choerodon } from '@choerodon/boot';
 import {
   cloneDeep,
   find, findIndex, remove, sortBy,
@@ -11,6 +10,7 @@ import {
   storyMapApi, versionApi, issueTypeApi, priorityApi, sprintApi,
 } from '@/api';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
 
 class StoryMapStore {
   @observable swimLine = localStorage.getItem('agile.StoryMap.SwimLine') || 'none';
@@ -733,10 +733,25 @@ class StoryMapStore {
   }
 
   @action setClickIssue(clickIssue) {
-    this.selectedIssueMap.clear();
-    if (clickIssue) {
-      this.sideIssueListVisible = false;
-      this.selectedIssueMap.set(clickIssue.issueId, clickIssue);
+    const setData = () => {
+      this.selectedIssueMap.clear();
+      if (clickIssue) {
+        this.sideIssueListVisible = false;
+        this.selectedIssueMap.set(clickIssue.issueId, clickIssue);
+      }
+    };
+
+    if (!this.detailProps.descriptionChanged) {
+      setData();
+    } else {
+      openDescriptionConfirm({
+        onOk: () => {
+          setData();
+          if (this.detailProps.setDescriptionChanged) {
+            this.detailProps.setDescriptionChanged(false);
+          }
+        },
+      });
     }
   }
 
@@ -837,6 +852,12 @@ class StoryMapStore {
   }
 
   @observable pageDataMap = observable.map();
+
+  @observable detailProps = {};
+
+  @action setDetailProps = (data) => {
+    this.detailProps = data;
+  }
 }
 
 export default new StoryMapStore();

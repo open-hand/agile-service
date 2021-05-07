@@ -14,6 +14,7 @@ import {
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
 import { isInProgram } from '@/utils/program';
+import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
 
 const moment = extendMoment(Moment);
 function randomItem(array) {
@@ -419,6 +420,12 @@ class BacklogStore {
     return this.whichVisible;
   }
 
+  @observable detailProps = {};
+
+  @action setDetailProps = (data) => {
+    this.detailProps = data;
+  }
+
   checkStartAndEnd = (prevIndex, currentIndex) => (prevIndex > currentIndex ? [currentIndex, prevIndex] : [prevIndex, currentIndex]);
 
   @action dealWithMultiSelect(sprintId, currentClick, type) {
@@ -477,26 +484,56 @@ class BacklogStore {
   }
 
   @action clickedOnce(sprintId, currentClick, hasExtraKey) {
-    const index = this.issueMap.get(sprintId.toString()).findIndex((issue) => issue.issueId === currentClick.issueId);
-    this.multiSelected = observable.map();
-    this.multiSelected.set(currentClick.issueId, currentClick);
-    this.prevClickedIssue = {
-      ...currentClick,
-      index,
+    const setData = () => {
+      const index = this.issueMap.get(sprintId.toString()).findIndex((issue) => issue.issueId === currentClick.issueId);
+      this.multiSelected = observable.map();
+      this.multiSelected.set(currentClick.issueId, currentClick);
+      this.prevClickedIssue = {
+        ...currentClick,
+        index,
+      };
+      if (!hasExtraKey) {
+        this.setClickIssueDetail(currentClick, false);
+      }
     };
-    if (!hasExtraKey) {
-      this.setClickIssueDetail(currentClick);
+
+    if (!this.detailProps.descriptionChanged) {
+      setData();
+    } else {
+      openDescriptionConfirm({
+        onOk: () => {
+          setData();
+          if (this.detailProps.setDescriptionChanged) {
+            this.detailProps.setDescriptionChanged(false);
+          }
+        },
+      });
     }
   }
 
-  @action setClickIssueDetail(data) {
-    if (!this.multiSelected.get(data.issueId)) {
-      this.multiSelected.clear();
-      this.multiSelected.set(data.issueId, data);
-    }
-    this.clickIssueDetail = data;
-    if (this.clickIssueDetail) {
-      this.clickIssueId = data.issueId;
+  @action setClickIssueDetail(data, confirm = true) {
+    const setData = () => {
+      if (!this.multiSelected.get(data.issueId)) {
+        this.multiSelected.clear();
+        this.multiSelected.set(data.issueId, data);
+      }
+      this.clickIssueDetail = data;
+      if (this.clickIssueDetail) {
+        this.clickIssueId = data.issueId;
+      }
+    };
+
+    if (!confirm || !this.detailProps.descriptionChanged) {
+      setData();
+    } else {
+      openDescriptionConfirm({
+        onOk: () => {
+          setData();
+          if (this.detailProps.setDescriptionChanged) {
+            this.detailProps.setDescriptionChanged(false);
+          }
+        },
+      });
     }
   }
 
@@ -1213,6 +1250,24 @@ class BacklogStore {
     return this.isRange(startDate, endDate) && this.isRangeInPi({ startDate, endDate, pi }) && !this.isRangeOverlapWithOtherSprints({
       startDate, endDate, sprintId, sprints,
     });
+  }
+
+  @observable defaultTypeId = '';
+
+  @action setDefaultTypeId = (data) => {
+    this.defaultTypeId = data;
+  }
+
+  @observable defaultSummary = '';
+
+  @action setDefaultSummary = (data) => {
+    this.defaultSummary = data;
+  }
+
+  @observable defaultSprint = '';
+
+  @action setDefaultSprint = (data) => {
+    this.defaultSprint = data;
   }
 }
 

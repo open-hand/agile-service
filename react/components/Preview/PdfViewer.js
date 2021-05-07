@@ -1,10 +1,10 @@
 import pdfjs from 'pdfjs-dist/build/pdf';
-import { PDFPageView, DefaultTextLayerFactory, DefaultAnnotationLayerFactory } from 'pdfjs-dist/web/pdf_viewer';
+import { PDFPageView } from 'pdfjs-dist/web/pdf_viewer';
 import 'pdfjs-dist/web/pdf_viewer.css';
 import React, {
-  useState, useEffect, useRef, useMemo, Fragment,
+  useState, useEffect, useRef, useMemo,
 } from 'react';
-import { Button } from 'choerodon-ui';
+import { useUnmountedRef } from 'ahooks';
 import Loading from '../Loading';
 import './PdfViewer.less';
 
@@ -20,7 +20,8 @@ export const usePdf = ({
   withCredentials = false,
 }) => {
   const [pdf, setPdf] = useState();
-
+  const unmountRef = useUnmountedRef();
+  const rafRef = useRef(null);
   useEffect(() => {
     pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
   }, []);
@@ -34,24 +35,19 @@ export const usePdf = ({
     pdfjs.getDocument(config).promise.then(setPdf);
   }, [file, withCredentials]);
   // 渲染一页
-  const drawPDF = (pageContent) => {  
-    // eslint-disable-next-line no-param-reassign
-    // container.current.innerHTML = '';
-
+  const drawPDF = (pageContent) => {
+    if (unmountRef.current) {
+      return null;
+    }
     const pdfPageView = new PDFPageView({
       container: container.current,
       id: page,
       scale,
       defaultViewport: pageContent.getViewport({ scale }),
-
-      // 启用字可选
-      // textLayerFactory: new DefaultTextLayerFactory(),
-      // annotationLayerFactory: new DefaultAnnotationLayerFactory(),
     });
     pdfPageView.setPdfPage(pageContent);
     return pdfPageView.draw();
   };
-
 
   const loading = useMemo(() => !pdf, [pdf]);
   // eslint-disable-next-line no-underscore-dangle
@@ -59,7 +55,6 @@ export const usePdf = ({
 
   useEffect(() => {
     if (pdf) {
-      // console.log('render');
       // eslint-disable-next-line no-param-reassign
       container.current.innerHTML = '';
       // eslint-disable-next-line no-inner-declarations
@@ -67,14 +62,17 @@ export const usePdf = ({
         if (curTotal <= 0) {
           return false;
         }
-        window.requestAnimationFrame(() => {
-          pdf.getPage(curIndex).then(p => drawPDF(p));
+        rafRef.current = window.requestAnimationFrame(() => {
+          pdf.getPage(curIndex).then((p) => drawPDF(p));
           renderPdf(curTotal - 1, curIndex + 1);
         });
         return null;
       }
       renderPdf(numPages, 1);
     }
+    return () => {
+      window.cancelAnimationFrame(rafRef.current);
+    };
   }, [pdf, scale, rotate]);
 
   return [loading, numPages];
@@ -111,33 +109,7 @@ const Pdf = ({
   return (
     <div className="c7n-pdf-viewer">
       <div className="c7n-pdf-viewer-content" ref={container} />
-      {loading ? <div><Loading /></div> : (
-        <Fragment>
-          {/* <div className="c7n-pdf-viewer-prePage">
-            <Button
-              icon="navigate_before"
-              shape="circle"
-              disabled={page === 1}
-              onClick={() => {
-                setPage(page - 1);
-              }}
-            />
-          </div> */}
-          {/* <div className="c7n-pdf-viewer-pagination">
-            {`${page}/${numPages || 1}`}
-          </div> */}
-          {/* <div className="c7n-pdf-viewer-nextPage">
-            <Button
-              icon="navigate_next"
-              shape="circle"
-              disabled={page === numPages}
-              onClick={() => {
-                setPage(page + 1);
-              }}
-            />
-          </div> */}
-        </Fragment>
-      )}
+      {loading && <div><Loading /></div>}
     </div>
   );
 };

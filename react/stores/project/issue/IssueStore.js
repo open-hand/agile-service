@@ -418,6 +418,18 @@ class IssueStore {
   query = debounce((page) => {
     this.dataSet.query(page);
   }, 300);
+
+  @observable defaultTypeId = '';
+
+  @action setDefaultTypeId = (data) => {
+    this.defaultTypeId = data;
+  }
+
+  @observable defaultSummary = '';
+
+  @action setDefaultSummary = (data) => {
+    this.defaultSummary = data;
+  }
 }
 
 export default new IssueStore();

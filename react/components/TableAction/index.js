@@ -23,14 +23,14 @@ const TableAction = (props) => {
         {clickable ? (
           <a
             className="c7n-agile-table-cell-click"
-            style={{ overflow: 'hidden', lineHeight: '32px' }}
+            style={{ overflow: 'hidden' }}
             role="none"
             onClick={onEditClick}
             onKeyDown={null}
           >
             {text}
           </a>
-        ) : <span className="c7n-agile-table-cell" style={{ lineHeight: '32px' }}>{text}</span>}
+        ) : <span className="c7n-agile-table-cell">{text}</span>}
       </span>
       {
         menus.length > 0 ? (

@@ -335,7 +335,7 @@ class IssueApi extends Api<IssueApi> {
  * 取消导入
  * @param id 导入id
  */
-  cancelImport(id: number|string, objectVersionNumber: number) {
+  cancelImport(id: number | string, objectVersionNumber: number) {
     return axios({
       method: 'put',
       url: `${this.prefix}/excel/cancel`,
@@ -350,7 +350,7 @@ class IssueApi extends Api<IssueApi> {
  * 查询最新的导入导出记录
  * @returns {V|*}
  */
-  loadLastImportOrExport(action: 'upload_file' | 'download_file' | 'upload_file_customer_field'):Promise<IImportOrExportRecord> {
+  loadLastImportOrExport(action: 'upload_file' | 'download_file' | 'upload_file_customer_field' | 'upload_file_backlog' | 'download_file_publish_version'): Promise<IImportOrExportRecord> {
     return axios({
       url: `${this.prefix}/excel/latest`,
       method: 'get',

@@ -6,9 +6,9 @@ import { observer, useObservable } from 'mobx-react-lite';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { Row, Col } from 'choerodon-ui';
 import moment from 'moment';
-import { DataSet, Form, Icon } from 'choerodon-ui/pro';
-import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import {
+  DataSet, Form, Icon,
+} from 'choerodon-ui/pro';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import renderField from './components/renderField';
 import IssueFilterFormDataSet from './IssueFilterFormDataSet';
@@ -157,7 +157,7 @@ const IssueFilterForm: React.FC = () => {
   }, { dataSet });
   return (
     <>
-      <Form dataSet={dataSet}>
+      <Form dataSet={dataSet} columns={2}>
         {props.extraFormItems?.map((item) => render(item))}
         {props.chosenFields?.map((item, index) => (typeof (item.immutableCheck) === 'boolean' || typeof (props.onDelete) === 'undefined'
           ? render(item)

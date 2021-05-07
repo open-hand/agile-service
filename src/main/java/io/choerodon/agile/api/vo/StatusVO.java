@@ -41,6 +41,10 @@ public class StatusVO {
     @ApiModelProperty("关联的问题类型")
     @Encrypt
     private List<Long> issueTypeIds;
+    @Encrypt
+    private Long issueStatusId;
+
+    private Long issueStatusObjectVersionNumberId;
 
     public StatusVO() {
     }
@@ -50,6 +54,22 @@ public class StatusVO {
         this.description = description;
         this.type = type;
         this.organizationId = organizationId;
+    }
+
+    public Long getIssueStatusObjectVersionNumberId() {
+        return issueStatusObjectVersionNumberId;
+    }
+
+    public void setIssueStatusObjectVersionNumberId(Long issueStatusObjectVersionNumberId) {
+        this.issueStatusObjectVersionNumberId = issueStatusObjectVersionNumberId;
+    }
+
+    public Long getIssueStatusId() {
+        return issueStatusId;
+    }
+
+    public void setIssueStatusId(Long issueStatusId) {
+        this.issueStatusId = issueStatusId;
     }
 
     public Boolean getCompleted() {

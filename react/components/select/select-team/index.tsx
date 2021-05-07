@@ -3,7 +3,7 @@ import { Select } from 'choerodon-ui/pro';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { commonApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 
 interface Props extends Partial<SelectProps> {
   projectDataRef?: React.RefObject<Array<any>>,

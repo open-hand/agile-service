@@ -10,6 +10,11 @@ const IssueDetail = ({ refresh, innerRef }) => {
   const refreshIssueDetail = () => {
     close();
   };
+
+  useEffect(() => {
+    BacklogStore.setDetailProps(detailProps);
+  }, [detailProps]);
+
   useImperativeHandle(innerRef, () => ({
     refreshIssueDetail,
   }));

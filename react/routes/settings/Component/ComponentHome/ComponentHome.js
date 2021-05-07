@@ -71,6 +71,7 @@ function ComponentHome() {
       style: {
         width: 520,
       },
+      className: 'c7n-component-deleteModal',
       children: (
         <DeleteComponent
           component={component}
@@ -153,6 +154,7 @@ function ComponentHome() {
       />
       <Column name="description" className="c7n-agile-table-cell" />
       <Column name="defaultAssigneeRole" className="c7n-agile-table-cell" />
+      <Column name="sequence" className="c7n-agile-table-cell" />
     </Table>
   );
   return (

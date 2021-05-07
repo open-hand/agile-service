@@ -34,7 +34,7 @@ function getStoredWidth() {
 }
 const Container: React.FC = () => {
   const {
-    outside, topAnnouncementHeight, match, routes, close, pop, push, fullPage, resizeRef,
+    outside, topAnnouncementHeight, match, routes, close, pop, push, fullPage, resizeRef, filePreview,
   } = useDetailContainerContext();
   const container = useRef<HTMLDivElement>(null);
   const maxWidth = window.innerWidth * 0.6;
@@ -76,7 +76,7 @@ const Container: React.FC = () => {
         paddingTop: routes.length > 1 ? 34 : 0,
       }}
     >
-      <div className={`${prefixCls}-divider`} />
+      {filePreview ? <div className={`${prefixCls}-border`} /> : <div className={`${prefixCls}-divider`} />}
       {routes.length > 1 && (
         <div
           role="none"
@@ -98,6 +98,7 @@ const Container: React.FC = () => {
       }}
     >
       <ResizeAble
+        disabled={!!filePreview}
         ref={resizeRef}
         modes={['left']}
         size={{
@@ -105,7 +106,7 @@ const Container: React.FC = () => {
           minWidth,
         }}
         defaultSize={{
-          width: defaultWidth,
+          width: filePreview ? 440 : localStorage.getItem('agile.EditIssue.width') || 640,
           height: '100%',
         }}
         onResizeEnd={handleResizeEnd}

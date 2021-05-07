@@ -421,4 +421,43 @@ public interface AgilePluginService {
      * @param issueTypes
      */
     void initFeatureType(Long organizationId, List<IssueTypeDTO> issueTypes);
+
+    /**
+     * 删除publishVersion关联数据
+     *
+     * @param publishVersionId
+     */
+    void deleteAssociatedPublishVersion(Long publishVersionId);
+
+    /**
+     * 批量修改特性时，判断关联史诗的特性名称是否重复并返回判断标识
+     * @param issueUpdateVO
+     * @param projectId
+     * @return
+     */
+    boolean checkFeatureSummaryAndReturn(IssueUpdateVO issueUpdateVO, Long projectId);
+
+    /**
+     * 获取项目群
+     *
+     * @param projectId
+     * @param organizationId
+     * @return
+     */
+    ProjectVO getProgram(Long projectId, Long organizationId);
+
+    /**
+     * 特性添加tag
+     *
+     * @param issueId
+     * @param programId
+     * @param organizationId
+     * @param appServiceCode
+     * @param tagName
+     */
+    void addTagToFeature(Long issueId, Long programId, Long organizationId, String appServiceCode, String tagName);
+
+    void deleteProgramTagRel(Long projectId, Long organizationId, String appServiceCode, String tagName);
+
+    void handleProgramUpdateTag(List<TagVO> tags, Long projectId, Long issueId);
 }

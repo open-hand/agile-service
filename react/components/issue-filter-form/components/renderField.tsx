@@ -2,7 +2,7 @@ import React from 'react';
 import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField, DataSet, CheckBox,
 } from 'choerodon-ui/pro';
-import { toJS } from 'mobx';
+import { toJS, observable } from 'mobx';
 import { find } from 'lodash';
 import SelectUser from '@/components/select/select-user';
 import SelectSprint from '@/components/select/select-sprint';
@@ -27,13 +27,17 @@ import QuickFilterField from './field/quick-filter-field';
 import { useIssueFilterFormStore } from '../stores';
 
 const { Option } = Select;
-const singleList = ['radio', 'single'];
 const userMaps = new Map<string, User>();
 const stacks = new Array<string>();
 const finishStack = new Array<string>();
-export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, otherComponentProps: T | Partial<DatePickerProps>, { dataSet }: {
-  dataSet: DataSet,
-}) {
+const forceUpdate = observable.box(false);
+function noticeForceUpdate() {
+  forceUpdate.set(true);
+}
+export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, otherComponentProps: T | Partial<DatePickerProps> | any,
+  { dataSet, useSelectUserForceRefreshHook }: {
+    dataSet: DataSet, useSelectUserForceRefreshHook?: [any, React.Dispatch<React.SetStateAction<any>>]
+  }) {
   const {
     code, fieldType, name, fieldOptions, value, id,
   } = field;
@@ -166,6 +170,8 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             name={code}
             label={name}
             style={{ width: '100%' }}
+            // @ts-ignore
+            {...otherComponentProps}
           // step={isCheck ? 0.1 : 1}
           />
         </div>
@@ -177,6 +183,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           maxLength={100}
           label={name}
           style={{ width: '100%' }}
+          {...otherComponentProps}
         />
       );
     case 'text':
@@ -187,6 +194,8 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           maxLength={255}
           label={name}
           style={{ width: '100%' }}
+          // @ts-ignore
+          {...otherComponentProps}
         />
       );
     case 'url':
@@ -194,6 +203,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         <UrlField
           label={name}
           name={code}
+          {...otherComponentProps}
         />
       );
     case 'radio': case 'single': case 'checkbox': case 'multiple':
@@ -203,6 +213,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           label={name}
           style={{ width: '100%' }}
           multiple
+          {...otherComponentProps}
         >
           {fieldOptions
             && fieldOptions.length > 0
@@ -223,7 +234,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
     case 'member':
     {
       // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { noMemberLoadFinish, setNoMemberLoadFinish } = useIssueFilterFormStore();
+      // const { noMemberLoadFinish, setNoMemberLoadFinish } = useSelectUserForceRefreshHook();
       return (
         <SelectUser
           label="user"
@@ -235,11 +246,11 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             // }))} value.map((item: string) => (String(item)))
           autoQueryConfig={defaultValue ? {
             selectedUserIds: defaultValue.map((item: any) => String(item)),
-            userMaps,
-            finishStack,
-            taskStacks: stacks,
-            forceRefresh: noMemberLoadFinish,
-            events: { onFinish: () => setNoMemberLoadFinish(true) },
+            // userMaps,
+            // finishStack,
+            // taskStacks: stacks,
+            // forceRefresh: forceUpdate,
+            // events: { onFinish: () => { noticeForceUpdate(); console.log('usermm', forceUpdate, userMaps); } },
           } : undefined}
           style={{ width: '100%' }}
           name={code}
@@ -249,6 +260,14 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       );
     }
     default:
-      return null;
+      return (
+        <TextField
+          name={code}
+          maxLength={100}
+          label={name}
+          style={{ width: '100%' }}
+          {...otherComponentProps}
+        />
+      );
   }
 }

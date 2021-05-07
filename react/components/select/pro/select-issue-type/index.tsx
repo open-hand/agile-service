@@ -3,7 +3,7 @@ import { Select } from 'choerodon-ui/pro';
 import useSelectPro from '@/hooks/useSelectPro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IIssueType } from '@/common/types';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useProjectIssueTypes';
 
 interface Props extends Partial<SelectProps> {

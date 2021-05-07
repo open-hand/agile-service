@@ -447,5 +447,45 @@ public class DateUtil {
         return (int) ((endDate.getTime() - startdate.getTime()) / (1000 * 3600 * 24));
     }
 
+    /**
+     * 计算两个日期的日期差
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public static int differentDays(Date startDate, Date endDate) {
+        if (startDate.after(endDate)) {
+            return 0;
+        }
+        Calendar startCal = Calendar.getInstance();
+        startCal.setTime(startDate);
+
+        Calendar endCal = Calendar.getInstance();
+        endCal.setTime(endDate);
+        int startDay = startCal.get(Calendar.DAY_OF_YEAR);
+        int endDay = endCal.get(Calendar.DAY_OF_YEAR);
+
+        int startYear = startCal.get(Calendar.YEAR);
+        int endYear = endCal.get(Calendar.YEAR);
+        if (startYear != endYear)   //不同年
+        {
+            int timeDistance = 0;
+            for (int i = startYear; i < endYear; i++) {
+                if (i % 4 == 0 && i % 100 != 0 || i % 400 == 0)    //闰年
+                {
+                    timeDistance += 366;
+                } else    //不是闰年
+                {
+                    timeDistance += 365;
+                }
+            }
+            return endDay - startDay > 0 ? timeDistance + (endDay - startDay) : 0;
+        } else    //同年
+        {
+            return endDay - startDay>0 ? endDay-startDay : 0;
+        }
+
+    }
+
 
 }

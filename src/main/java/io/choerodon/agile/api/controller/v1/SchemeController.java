@@ -240,8 +240,12 @@ public class SchemeController extends BaseController {
                                                           @RequestParam String applyType,
                                                           @RequestParam @Encrypt Long statusId,
                                                           @RequestParam Boolean defaultStatus,
-                                                          @RequestParam(required = false,defaultValue = "true") Boolean transferAll) {
-        return new ResponseEntity(projectConfigService.linkStatus(projectId, issueTypeId,applyType, statusId,defaultStatus,transferAll), HttpStatus.OK);
+                                                          @RequestParam(required = false, defaultValue = "true") Boolean transferAll) {
+        StatusVO status = new StatusVO();
+        status.setId(statusId);
+        status.setDefaultStatus(defaultStatus);
+        status.setTransferAll(transferAll);
+        return new ResponseEntity(projectConfigService.linkStatus(projectId, issueTypeId, applyType, status), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

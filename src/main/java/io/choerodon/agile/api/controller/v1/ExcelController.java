@@ -19,7 +19,6 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +30,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -142,6 +140,16 @@ public class ExcelController {
                 ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file),
                 RequestContextHolder.getRequestAttributes());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("导出发布版本")
+    @PostMapping(value = "/export_publish_version")
+    public void exportPublishVersion(@ApiParam(value = "项目id", required = true)
+                                     @PathVariable(name = "project_id") Long projectId,
+                                     @ApiParam(value = "项目群版本id", required = true)
+                                     @RequestParam @Encrypt Long publishVersionId) {
+        excelService.exportPublishVersion(projectId, publishVersionId);
     }
 
 }

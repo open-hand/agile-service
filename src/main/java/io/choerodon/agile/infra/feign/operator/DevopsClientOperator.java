@@ -6,11 +6,14 @@ import io.choerodon.agile.infra.feign.DevopsFeignClient;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.ServiceUnavailableException;
 import io.choerodon.core.utils.FeignClientUtils;
+import org.hzero.core.util.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author superlee
@@ -30,4 +33,31 @@ public class DevopsClientOperator {
             return new ArrayList<>();
         }
     }
+
+    public List<AppServiceRepVO> listActiveAppService(Long projectId) {
+        try {
+            return
+                    ResponseUtils.getResponse(
+                            devopsFeignClient.listActiveAppService(projectId),
+                            new TypeReference<List<AppServiceRepVO>>() {
+                            }
+                    );
+        } catch (ServiceUnavailableException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    public Set<Long> getIssueIdsBetweenTags(Long projectId, Long appServiceId, String source, String target) {
+        try {
+            return
+                    ResponseUtils.getResponse(
+                            devopsFeignClient.getIssueIdsBetweenTags(projectId, appServiceId, target, source),
+                            new TypeReference<Set<Long>>() {
+                            }
+                    );
+        } catch (ServiceUnavailableException e) {
+            return new HashSet<>();
+        }
+    }
+
 }

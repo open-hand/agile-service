@@ -11,6 +11,7 @@ const IssueBranch = observer(({
 }) => {
   const commitsRef = useRef();
   const mergeRequestRef = useRef();
+  const { resizeRef, filePreview } = useDetailContainerContext();
   const refresh = useCallback(() => {
     commitsRef.current?.query();
     mergeRequestRef.current?.loadMergeRequest();
@@ -18,7 +19,14 @@ const IssueBranch = observer(({
   useEffect(() => {
     store.setRefreshBranch(refresh);
   }, [refresh, store]);
-
+  useEffect(() => {
+    if (!filePreview && resizeRef.current) {
+      const maxWidth = window.innerWidth * 0.6;
+      if (resizeRef.current.resizable.clientWidth < maxWidth) {
+        resizeRef.current.setWidth(maxWidth);
+      }
+    }
+  }, [filePreview, resizeRef]);
   return (
     <div id="branch">
       <div className="c7n-title-wrapper">

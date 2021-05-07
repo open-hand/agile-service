@@ -152,7 +152,7 @@ const Issue = observer(() => {
           },
         },
       });
-      await IssueStore.query();
+      await IssueStore.query.flush();
     } else {
       const { pageInfo = {} } = localPageCacheStore.getItem('issues.table') || {};
 
@@ -181,6 +181,8 @@ const Issue = observer(() => {
   }, [hasUrlFilter, params]);
   const handleCreateIssue = useCallback((issue) => {
     IssueStore.createQuestion(false);
+    IssueStore.setDefaultSummary(undefined);
+    IssueStore.setDefaultTypeId(undefined);
     dataSet.query();
   }, [dataSet]);
   const handleRowClick = useCallback((record) => {
@@ -291,6 +293,9 @@ const Issue = observer(() => {
           visibleColumns={visibleColumns}
           onCreateIssue={handleCreateIssue}
           onRowClick={handleRowClick}
+          typeIdChange={IssueStore.setDefaultTypeId}
+          summaryChange={IssueStore.setDefaultSummary}
+          IssueStore={IssueStore}
         />
         <FilterManage
           visible={IssueStore.filterListVisible}
@@ -301,8 +306,14 @@ const Issue = observer(() => {
         {IssueStore.getCreateQuestion && (
           <CreateIssue
             visible={IssueStore.getCreateQuestion}
-            onCancel={() => { IssueStore.createQuestion(false); }}
+            onCancel={() => {
+              IssueStore.createQuestion(false);
+              IssueStore.setDefaultSummary(undefined);
+              IssueStore.setDefaultTypeId(undefined);
+            }}
             onOk={handleCreateIssue}
+            defaultTypeId={IssueStore.defaultTypeId}
+            defaultSummary={IssueStore.defaultSummary}
           />
         )}
         <DetailContainer {...props} />

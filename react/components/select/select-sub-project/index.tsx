@@ -43,12 +43,13 @@ const SelectSubProject: React.FC<Props> = forwardRef(({
     <Select
       ref={ref}
       {...props}
-      {...otherProps}
       optionRenderer={({ record, text, value }) => (
         <Tooltip title={text}>
           <span>{text}</span>
         </Tooltip>
       )}
+      {...otherProps}
+
     />
   );
 });
