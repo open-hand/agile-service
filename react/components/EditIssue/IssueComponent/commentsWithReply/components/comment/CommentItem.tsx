@@ -6,7 +6,6 @@ import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import WYSIWYGEditor from '@/components/CKEditor';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
-import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
 import './Comment.less';
 import { IComment } from '@/common/types';
 import { issueCommentApi, UComment, IReplyCreate } from '@/api/IssueComment';
@@ -204,9 +203,7 @@ const CommentItem: React.FC<Props> = ({
               )
             }
             <div style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
-              <DatetimeAgo
-                date={comment.lastUpdateDate}
-              />
+              {comment.lastUpdateDate}
             </div>
           </div>
           <div className="c7n-action">

@@ -6,7 +6,6 @@ import UserTag from '@/components/tag/user-tag';
 
 import WYSIWYGEditor from '../../CKEditor';
 import WYSIWYGViewer from '../../CKEditorViewer';
-import { DatetimeAgo } from '../../CommonComponent';
 import './Log.less';
 
 class Log extends Component {
@@ -126,9 +125,7 @@ class Log extends Component {
               />
             </div>
             <span style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
-              <DatetimeAgo
-                date={worklog.lastUpdateDate}
-              />
+              {worklog.lastUpdateDate}
             </span>
           </div>
           <div className="c7n-action">
