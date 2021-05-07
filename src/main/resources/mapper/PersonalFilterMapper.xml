@@ -13,4 +13,13 @@
         </if>
     </select>
 
+    <update id="updateDefault">
+        update agile_personal_filter set is_default = #{isDefault}
+        where project_id = #{projectId}
+        and user_id = #{userId}
+        <if test="filterId != null">
+            and filter_id = #{filterId}
+        </if>
+    </update>
+
 </mapper>

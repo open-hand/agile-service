@@ -103,4 +103,16 @@ public class PersonalFilterController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.checkName.get"));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("设置默认筛选")
+    @PutMapping(value = "/set_default")
+    public ResponseEntity<Boolean> setDefault(@ApiParam(value = "项目id", required = true)
+                                             @PathVariable(name = "project_id") Long projectId,
+                                             @ApiParam(value = "filter Id", required = true)
+                                             @RequestParam @Encrypt Long filterId) {
+        return Optional.ofNullable(personalFilterService.setDefault(projectId, filterId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.personal.filter.set.default"));
+    }
 }

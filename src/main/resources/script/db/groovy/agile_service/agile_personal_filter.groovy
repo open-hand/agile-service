@@ -28,4 +28,12 @@ databaseChangeLog(logicalFilePath:'script/db/agile_personal_filter.groovy') {
             column(name: "project_id", type: "BIGINT UNSIGNED")
         }
     }
+
+    changeSet(id: '2021-05-07-agile-personal-filter-add-column', author: 'ztxemail@163.com') {
+        addColumn(tableName: 'agile_personal_filter') {
+            column(name: 'is_default', type: 'TINYINT UNSIGNED', defaultValue: "0", remarks: '是否默认') {
+                constraints(nullable: 'false')
+            }
+        }
+    }
 }
