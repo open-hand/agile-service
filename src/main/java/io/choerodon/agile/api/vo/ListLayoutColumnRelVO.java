@@ -1,0 +1,112 @@
+package io.choerodon.agile.api.vo;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
+/**
+ * @author zhaotianxin
+ * @date 2021-05-07 14:13
+ */
+public class ListLayoutColumnRelVO {
+    @Encrypt
+    private Long id;
+
+    @Encrypt
+    private Long layoutId;
+
+    @Encrypt
+    private Long fieldId;
+
+    private String columnCode;
+
+    private Integer width;
+
+    private Integer sort;
+
+    private Boolean display;
+
+    private Long projectId;
+
+    private Long organizationId;
+
+    private Long objectVersionNumber;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getLayoutId() {
+        return layoutId;
+    }
+
+    public void setLayoutId(Long layoutId) {
+        this.layoutId = layoutId;
+    }
+
+    public String getColumnCode() {
+        return columnCode;
+    }
+
+    public void setColumnCode(String columnCode) {
+        this.columnCode = columnCode;
+    }
+
+    public Integer getWidth() {
+        return width;
+    }
+
+    public void setWidth(Integer width) {
+        this.width = width;
+    }
+
+    public Integer getSort() {
+        return sort;
+    }
+
+    public void setSort(Integer sort) {
+        this.sort = sort;
+    }
+
+    public Boolean getDisplay() {
+        return display;
+    }
+
+    public void setDisplay(Boolean display) {
+        this.display = display;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public Long getFieldId() {
+        return fieldId;
+    }
+
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
+    }
+}
