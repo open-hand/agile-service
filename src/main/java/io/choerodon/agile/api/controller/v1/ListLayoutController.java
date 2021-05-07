@@ -43,14 +43,14 @@ public class ListLayoutController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据列表编码查询展示列配置")
-    @GetMapping("/{type_code}")
-    public ResponseEntity<ListLayoutVO> queryByTypeCode(@ApiParam(value = "项目id", required = true)
+    @GetMapping("/{apply_type}")
+    public ResponseEntity<ListLayoutVO> queryByApplyType(@ApiParam(value = "项目id", required = true)
                                                         @PathVariable(name = "project_id") Long projectId,
                                                         @ApiParam(value = "列表类型编码", required = true)
-                                                        @PathVariable(name = "type_code") String typeCode,
+                                                        @PathVariable(name = "apply_type") String applyType,
                                                         @ApiParam(value = "组织id", required = true)
                                                         @RequestParam Long organizationId) {
-        return Optional.ofNullable(listLayoutService.queryByTypeCode(organizationId, projectId, typeCode))
+        return Optional.ofNullable(listLayoutService.queryByApplyType(organizationId, projectId, applyType))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.list.layout.query"));
     }

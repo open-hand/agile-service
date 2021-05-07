@@ -12,7 +12,7 @@ public class ListLayoutVO {
     @Encrypt
     private Long id;
 
-    private String typeCode;
+    private String applyType;
 
     @Encrypt
     private Long userId;
@@ -33,12 +33,12 @@ public class ListLayoutVO {
         this.id = id;
     }
 
-    public String getTypeCode() {
-        return typeCode;
+    public String getApplyType() {
+        return applyType;
     }
 
-    public void setTypeCode(String typeCode) {
-        this.typeCode = typeCode;
+    public void setApplyType(String applyType) {
+        this.applyType = applyType;
     }
 
     public Long getUserId() {

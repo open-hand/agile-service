@@ -13,6 +13,9 @@ public class ListLayoutColumnRelVO {
     @Encrypt
     private Long layoutId;
 
+    @Encrypt
+    private Long fieldId;
+
     private String columnCode;
 
     private Integer width;
@@ -97,5 +100,13 @@ public class ListLayoutColumnRelVO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public Long getFieldId() {
+        return fieldId;
+    }
+
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
     }
 }

@@ -22,7 +22,7 @@ public class ListLayoutDTO extends AuditDomain {
     @Encrypt
     private Long id;
 
-    private String typeCode;
+    private String applyType;
 
     @Encrypt
     private Long userId;
@@ -34,8 +34,8 @@ public class ListLayoutDTO extends AuditDomain {
     public ListLayoutDTO() {
     }
 
-    public ListLayoutDTO(String typeCode, Long userId, Long projectId, Long organizationId) {
-        this.typeCode = typeCode;
+    public ListLayoutDTO(String applyType, Long userId, Long projectId, Long organizationId) {
+        this.applyType = applyType;
         this.userId = userId;
         this.projectId = projectId;
         this.organizationId = organizationId;
@@ -49,12 +49,12 @@ public class ListLayoutDTO extends AuditDomain {
         this.id = id;
     }
 
-    public String getTypeCode() {
-        return typeCode;
+    public String getApplyType() {
+        return applyType;
     }
 
-    public void setTypeCode(String typeCode) {
-        this.typeCode = typeCode;
+    public void setApplyType(String applyType) {
+        this.applyType = applyType;
     }
 
     public Long getUserId() {

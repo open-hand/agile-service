@@ -11,10 +11,10 @@ databaseChangeLog(logicalFilePath:'fd_list_layout.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'type_code', type: 'VARCHAR(30)', remarks: '列表编码') {
+            column(name: 'apply_type', type: 'VARCHAR(30)', remarks: '应用类型') {
                 constraints(nullable: false)
             }
-            column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: '用户Id') {
+            column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: '用户id') {
                 constraints(nullable: false)
             }
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {

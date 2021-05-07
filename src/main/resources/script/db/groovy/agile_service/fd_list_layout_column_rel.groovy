@@ -6,7 +6,7 @@ package script.db.groovy.agile_service
  * @date 2021-05-07 11:48
  * */
 databaseChangeLog(logicalFilePath:'fd_list_layout_column_rel.groovy') {
-    changeSet(id: '2021-05-07-fd-list-layout-column-re', author: 'ztxemail@163.com') {
+    changeSet(id: '2021-05-07-fd-list-layout-column-rel', author: 'ztxemail@163.com') {
         createTable(tableName: "fd_list_layout_column_rel") {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
@@ -14,16 +14,19 @@ databaseChangeLog(logicalFilePath:'fd_list_layout_column_rel.groovy') {
             column(name: 'layout_id', type: 'BIGINT UNSIGNED', remarks: 'layout id') {
                 constraints(nullable: false)
             }
+
+            column(name: 'field_id', type: 'BIGINT UNSIGNED', remarks: '字段id')
+
             column(name: 'column_code', type: 'VARCHAR(100)', remarks: '列编码') {
                 constraints(nullable: false)
             }
-            column(name: 'display', type: 'tinyint(1)', remarks: '是否显示') {
+            column(name: 'display', type: 'TINYINT UNSIGNED', remarks: '是否显示') {
                 constraints(nullable: false)
             }
-            column(name: 'width', type: 'int(10)', remarks: '列的宽度') {
+            column(name: 'width', type: 'int', remarks: '列的宽度') {
                 constraints(nullable: false)
             }
-            column(name: 'sort', type: 'int(10)', remarks: '排序') {
+            column(name: 'sort', type: 'int', remarks: '排序') {
                 constraints(nullable: false)
             }
 

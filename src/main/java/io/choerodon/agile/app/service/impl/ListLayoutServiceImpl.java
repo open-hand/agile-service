@@ -35,11 +35,11 @@ public class ListLayoutServiceImpl implements ListLayoutService {
 
     @Override
     public ListLayoutVO save(Long organizationId, Long projectId, ListLayoutVO listLayoutVO) {
-        if (ObjectUtils.isEmpty(listLayoutVO.getTypeCode())) {
-            throw new CommonException("error.list.layout.type.code.null");
+        if (ObjectUtils.isEmpty(listLayoutVO.getApplyType())) {
+            throw new CommonException("error.list.layout.apply.type.null");
         }
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        ListLayoutDTO layoutDTO = new ListLayoutDTO(listLayoutVO.getTypeCode(), userId, projectId, organizationId);
+        ListLayoutDTO layoutDTO = new ListLayoutDTO(listLayoutVO.getApplyType(), userId, projectId, organizationId);
         List<ListLayoutDTO> layoutDTOS = listLayoutMapper.select(layoutDTO);
         if (CollectionUtils.isEmpty(layoutDTOS)) {
             baseInsert(layoutDTO);
@@ -47,7 +47,7 @@ public class ListLayoutServiceImpl implements ListLayoutService {
             layoutDTO = layoutDTOS.get(0);
         }
         saveColumnRel(organizationId, projectId, layoutDTO.getId(), listLayoutVO.getListLayoutColumnRelVOS());
-        return queryByTypeCode(organizationId, projectId, listLayoutVO.getTypeCode());
+        return queryByApplyType(organizationId, projectId, listLayoutVO.getApplyType());
     }
 
     private void saveColumnRel(Long organizationId, Long projectId, Long layoutId, List<ListLayoutColumnRelVO> listLayoutColumnRelVOS) {
@@ -78,9 +78,9 @@ public class ListLayoutServiceImpl implements ListLayoutService {
     }
 
     @Override
-    public ListLayoutVO queryByTypeCode(Long organizationId, Long projectId, String typeCode) {
+    public ListLayoutVO queryByApplyType(Long organizationId, Long projectId, String applyType) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        ListLayoutDTO listLayoutDTO = new ListLayoutDTO(typeCode, userId, projectId, organizationId);
+        ListLayoutDTO listLayoutDTO = new ListLayoutDTO(applyType, userId, projectId, organizationId);
         List<ListLayoutDTO> listLayoutDTOS = listLayoutMapper.select(listLayoutDTO);
         if (CollectionUtils.isEmpty(listLayoutDTOS)) {
             return null;

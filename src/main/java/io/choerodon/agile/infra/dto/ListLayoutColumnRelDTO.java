@@ -25,6 +25,9 @@ public class ListLayoutColumnRelDTO extends AuditDomain {
     @Encrypt
     private Long layoutId;
 
+    @Encrypt
+    private Long fieldId;
+
     private String columnCode;
 
     private Integer width;
@@ -108,5 +111,13 @@ public class ListLayoutColumnRelDTO extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getFieldId() {
+        return fieldId;
+    }
+
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
     }
 }

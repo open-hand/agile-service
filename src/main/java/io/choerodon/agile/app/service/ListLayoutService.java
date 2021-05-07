@@ -9,5 +9,5 @@ import io.choerodon.agile.api.vo.ListLayoutVO;
 public interface ListLayoutService {
    ListLayoutVO save(Long organizationId, Long projectId, ListLayoutVO listLayoutVO);
 
-   ListLayoutVO queryByTypeCode(Long organizationId, Long projectId, String typeCode);
+   ListLayoutVO queryByApplyType(Long organizationId, Long projectId, String applyType);
 }
