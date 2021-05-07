@@ -1231,7 +1231,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public synchronized IssueVO updateIssueTypeCode(IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO, Long organizationId) {
-        List<String> fieldList = Arrays.asList(UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK);
+        List<String> fieldList = new ArrayList<>(Arrays.asList(UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK));
         String originType = issueConvertDTO.getTypeCode();
         if (originType.equals(SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
@@ -2175,7 +2175,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public synchronized IssueVO transformedTask(IssueConvertDTO issueConvertDTO, IssueTransformTask issueTransformTask, Long organizationId) {
         String originType = issueConvertDTO.getTypeCode();
-        List<String> fieldList = Arrays.asList(TRANSFORMED_TASK_FIELD_LIST_NO_RANK);
+        List<String> fieldList = new ArrayList<>(Arrays.asList(TRANSFORMED_TASK_FIELD_LIST_NO_RANK));
         if (originType.equals(SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
         }

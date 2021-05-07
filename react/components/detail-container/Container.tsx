@@ -24,11 +24,22 @@ export function registerPath(route: Route) {
     paths.push(route);
   }
 }
+function getStoredWidth() {
+  const stored = localStorage.getItem('agile.EditIssue.width');
+  if (stored === null) {
+    return undefined;
+  }
+  const width = Number(stored);
+  return Number.isNaN(width) ? undefined : width;
+}
 const Container: React.FC = () => {
   const {
     outside, topAnnouncementHeight, match, routes, close, pop, push, fullPage, resizeRef, filePreview,
   } = useDetailContainerContext();
   const container = useRef<HTMLDivElement>(null);
+  const maxWidth = window.innerWidth * 0.6;
+  const minWidth = 440;
+  const defaultWidth = Math.max(minWidth, Math.min(maxWidth, getStoredWidth() ?? 640));
   useEffect(() => {
     setQuery();
   }, []);
@@ -43,7 +54,7 @@ const Container: React.FC = () => {
   };
   // @ts-ignore
   const handleResizeEnd = ({ width }) => {
-    localStorage.setItem('agile.EditIssue.width', `${width}px`);
+    localStorage.setItem('agile.EditIssue.width', width);
   };
   // @ts-ignore
   const handleResize = ({ width }) => {
@@ -91,8 +102,8 @@ const Container: React.FC = () => {
         ref={resizeRef}
         modes={['left']}
         size={{
-          maxWidth: window.innerWidth * 0.6,
-          minWidth: 440,
+          maxWidth,
+          minWidth,
         }}
         defaultSize={{
           width: filePreview ? 440 : localStorage.getItem('agile.EditIssue.width') || 640,

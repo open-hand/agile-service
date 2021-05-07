@@ -4,7 +4,6 @@ import {
 } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import MergeRequest from '@/components/MergeRequest';
-import { useDetailContainerContext } from '@/components/detail-container/context';
 import LinkedBranch from '../linked-branch';
 
 const IssueBranch = observer(({
