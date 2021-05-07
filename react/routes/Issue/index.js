@@ -24,6 +24,7 @@ import DetailContainer, { useDetail } from '@/components/detail-container';
 import TableModeSwitch from '@/components/tree-list-switch';
 import handleOpenImport from '@/components/ImportIssue/ImportIssue';
 import TableCache from '@/components/table-cache';
+import ColumnManage from '@/components/column-manage';
 import useTable from '@/hooks/useTable';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';

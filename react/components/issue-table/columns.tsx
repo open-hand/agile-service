@@ -32,9 +32,27 @@ export const checkBoxColumn = ({
     />
   ),
 });
-const normalColumn = (code) => ({
+const normalColumn = (field) => (field && {
   title: '概要',
-  dataIndex: code,
+  dataIndex: field?.code,
+  render: ({ rowData, dataIndex, rowIndex }) => {
+    const { fieldType, code } = field;
+    const value = get(rowData, 'foundationFieldValue')[code];
+    if (['member', 'multiMember'].includes(fieldType)) {
+      return value && (
+        <div style={{ display: 'inline-flex' }}>
+          <UserTag
+            data={value}
+          />
+        </div>
+      );
+    }
+    return (
+      <Tooltip title={value || ''}>
+        <span>{value || ''}</span>
+      </Tooltip>
+    );
+  },
 });
 const renderTag = (listField, nameField) => ({ rowData }) => {
   const list = get(rowData, listField);
@@ -195,7 +213,7 @@ const columns = ({ onSummaryClick }) => new Map([
       </Tooltip>
     ),
   }],
-  ['reporterId', {
+  ['reporter', {
     title: '报告人',
     dataIndex: 'reporterId',
     render: ({ rowData }) => (
@@ -228,6 +246,11 @@ const columns = ({ onSummaryClick }) => new Map([
     title: '预计开始时间',
     width: 170,
     dataIndex: 'estimatedStartTime',
+  }],
+  ['estimatedEndTime', {
+    title: '预计结束时间',
+    width: 170,
+    dataIndex: 'estimatedEndTime',
   }],
   ['remainingTime', {
     title: '剩余预估时间',
@@ -264,7 +287,7 @@ const columns = ({ onSummaryClick }) => new Map([
     dataIndex: 'influenceVersion',
     render: renderTag('influenceVersionIssueRelVOS', 'name'),
   }],
-  ['issueSprintVOS', {
+  ['sprint', {
     title: '冲刺',
     dataIndex: 'issueSprintVOS',
     render: renderTag('issueSprintVOS', 'sprintName'),

@@ -4,13 +4,14 @@ import { observer } from 'mobx-react-lite';
 import {
   DataSet, PerformanceTable, Pagination,
 } from 'choerodon-ui/pro';
+import { find } from 'lodash';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { IField, IIssueColumnName } from '@/common/types';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
+import ColumnManage from '@/components/column-manage';
 import getColumnsMap, { normalColumn, checkBoxColumn } from './columns';
-import ColumnFilter from './ColumnFilter';
 import transverseTreeData from './utils/transverseTreeData';
 
 interface Props extends Partial<TableProps> {
@@ -85,24 +86,27 @@ const IssueTable: React.FC<Props> = ({
   const props = tableProps;
   const { pagination, visibleColumns, setVisibleColumns } = props;
   const { isInProgram } = useIsInProgram();
-  const getColumn = useCallback((code) => getColumnsMap({ onSummaryClick }).get(code) ?? normalColumn(code), [onSummaryClick]);
+  const getColumn = useCallback((code) => getColumnsMap({ onSummaryClick }).get(code) ?? normalColumn(find(fields, { code })), [fields, onSummaryClick]);
   const columns = [checkBoxColumn({
     data: props.data,
     checkValues: props.checkValues,
     handleCheckChange: props.handleCheckChange,
     handleCheckAllChange: props.handleCheckAllChange,
-  })].concat(visibleColumns.map((code) => getColumn(code)));
+  })].concat(visibleColumns.map((code) => {
+    const column = getColumn(code);
+    return column ? { ...getColumn(code), resizable: true } : undefined;
+  }).filter(Boolean));
   const treeData = useMemo(() => transverseTreeData(props.data), [props.data]);
   return (
     <div className="c7nagile-issue-table">
-      <ColumnFilter
+      <ColumnManage
         value={visibleColumns}
         onChange={setVisibleColumns}
         options={columnCodes.map((code) => {
           const column = getColumn(code);
           return {
             code,
-            title: column.title,
+            title: column?.title,
           };
         })}
       />
