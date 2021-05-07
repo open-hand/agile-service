@@ -208,7 +208,7 @@ public class SprintDelaySendMessageTask {
                 .append(projectId)
                 .append("&name=")
                 .append(projectName)
-                .append("&category=AGILE&organizationId=")
+                .append("&organizationId=")
                 .append(organizationId);
         return builder.toString();
     }
