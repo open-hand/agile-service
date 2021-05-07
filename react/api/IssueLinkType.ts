@@ -6,7 +6,7 @@ interface ILinkTypeQuery {
   size?: number,
   issueLinkTypeId?: number,
   filter?: {
-    contents: string[],
+    params: string,
     linkName: string,
   },
 }
@@ -20,15 +20,15 @@ class IssueLinkTypeApi extends Api<IssueLinkTypeApi> {
     page = 1,
     size = 999,
     issueLinkTypeId,
-    filter = {
-      contents: [],
-      linkName: '',
-    },
+    filter,
   }: ILinkTypeQuery = {}, projectId?: number) {
     return this.request({
       url: `/agile/v1/projects/${projectId || getProjectId()}/issue_link_types/query_all`,
       method: 'POST',
-      data: filter,
+      data: {
+        linkName: filter?.linkName,
+        contents: filter?.params ? [filter.params] : undefined,
+      },
       params: {
         page,
         size,
