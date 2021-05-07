@@ -29,6 +29,9 @@ public class IssueLinkTypeVO {
     @ApiModelProperty(value = "项目id")
     private Long projectId;
 
+    @ApiModelProperty(value = "链接的问题数量")
+    private Integer issueCount;
+
     public Long getLinkTypeId() {
         return linkTypeId;
     }
@@ -75,6 +78,14 @@ public class IssueLinkTypeVO {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
+    }
+
+    public Integer getIssueCount() {
+        return issueCount;
+    }
+
+    public void setIssueCount(Integer issueCount) {
+        this.issueCount = issueCount;
     }
 
     @Override

@@ -3,17 +3,28 @@
 <mapper namespace="io.choerodon.agile.infra.mapper.IssueLinkTypeMapper">
 
     <select id="queryIssueLinkTypeByProjectId" resultType="io.choerodon.agile.infra.dto.IssueLinkTypeDTO">
-        select * from agile_issue_link_type where project_id = #{projectId}
+        select
+            ailt.*,
+            case when aa.issue_count is null then 0 else aa.issue_count end as issue_count
+        from agile_issue_link_type ailt
+        left join (
+            select ail.link_type_id,count(*) as issue_count from agile_issue_link ail
+            LEFT JOIN agile_issue ai ON ai.issue_id = ail.issue_id
+            where ail.project_id = #{projectId}
+            GROUP BY
+            ail.link_type_id
+        )aa on ailt.link_type_id = aa.link_type_id
+        where ailt.project_id = #{projectId}
         <if test='issueLinkTypeId != null'>
-            and link_type_id != #{issueLinkTypeId}
+            and ailt.link_type_id != #{issueLinkTypeId}
         </if>
         <if test='linkName != null and linkName != "" '>
-            and link_name LIKE CONCAT(CONCAT('%' ,#{linkName}) ,'%')
+            and ailt.link_name LIKE CONCAT(CONCAT('%' ,#{linkName}) ,'%')
         </if>
         <if test='contents != null and contents.size != 0'>
             <foreach collection="contents" item="content" index="index">
-                AND (link_name LIKE CONCAT(CONCAT('%', #{content}), '%') OR in_ward LIKE
-                CONCAT(CONCAT('%', #{content}), '%') OR out_ward LIKE
+                AND (ailt.link_name LIKE CONCAT(CONCAT('%', #{content}), '%') OR ailt.in_ward LIKE
+                CONCAT(CONCAT('%', #{content}), '%') OR ailt.out_ward LIKE
                 CONCAT(CONCAT('%', #{content}), '%') )
             </foreach>
         </if>
