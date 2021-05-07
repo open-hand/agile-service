@@ -50,7 +50,7 @@ const zh_CN = {
   'issue_link.outWard': '链出描述',
   'issue_link.inWard': '链入描述',
   'issue_link.checkName.repet': '问题链接名称重复',
-  'issue_link.delete.only': '删除链接{name}',
+  'issue_link.delete.only': '删除链接',
   'issue_link.delete.link.other': '删除链接，相关问题关联到其他链接',
   'issue_link.other': '其他链接',
   'issue_link.msg': '将会从所有相关的任务中删除此链接，相关的问题可以选择关联到其他链接，或者不关联。',

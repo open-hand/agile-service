@@ -19,7 +19,7 @@ export default ({ id, intl }) => {
         method: 'post',
         transformRequest: (data) => {
           const {
-            defaultAssigneeRole, name, description, manager,
+            defaultAssigneeRole, name, description, manager, params,
           } = data;
           const searchDTO = {
             searchArgs: { name, description, manager },
@@ -27,6 +27,7 @@ export default ({ id, intl }) => {
               defaultAssigneeRole: defaultAssigneeRole ? [defaultAssigneeRole] : [],
               contents: '',
             },
+            contents: params ? [params] : undefined,
           };
           return JSON.stringify(searchDTO);
         },
