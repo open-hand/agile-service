@@ -30,8 +30,8 @@ export default function Index(props: IExportIssueProps) {
 }
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
-  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, action?: TemplateAction, otherModalProps?: ModalProps, exportBtnText?: string) {
-  const checkOptions = [...tableDataSet.fields.values()].map((option) => ({ value: option.props.name!, label: option.props.label as string, order: option.order }));
+  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, action?: TemplateAction, otherModalProps?: ModalProps, exportBtnText?: string, extraOptions?: {value: string, label: '描述'}[]) {
+  const checkOptions = [...[...tableDataSet.fields.values()].map((option) => ({ value: option.props.name!, label: option.props.label as string, order: option.order })), ...(extraOptions || [])];
   const { className, ...otherProps } = otherModalProps || {};
   const key = Modal.key();
   Modal.open({
