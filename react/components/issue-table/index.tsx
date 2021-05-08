@@ -7,10 +7,12 @@ import {
 import { difference, find } from 'lodash';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
 import { IField, IIssueColumnName } from '@/common/types';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
 import ColumnManage from '@/components/column-manage';
+import { usePersistFn } from 'ahooks';
 import getColumnsMap, { normalColumn, checkBoxColumn } from './columns';
 import transverseTreeData from './utils/transverseTreeData';
 
@@ -87,6 +89,18 @@ const IssueTable: React.FC<Props> = ({
   const {
     pagination, visibleColumns, setVisibleColumns, ...restProps
   } = props;
+  const mutation = useUpdateColumnMutation('issues.table');
+  const handleColumnResize = usePersistFn((columnWidth, dataKey) => {
+    mutation.mutate({
+      applyType: 'agile',
+      listLayoutColumnRelVOS: listLayoutColumns.map((listLayoutColumn, i) => ({
+        ...listLayoutColumn,
+        ...listLayoutColumn.columnCode === dataKey ? {
+          width: columnWidth,
+        } : {},
+      })),
+    });
+  });
   const { isInProgram } = useIsInProgram();
   const getColumn = useCallback((code) => getColumnsMap({ onSummaryClick }).get(code) ?? normalColumn(find(fields, { code })), [fields, onSummaryClick]);
   // 后端保存了用后端的，没保存，使用默认的
@@ -98,7 +112,10 @@ const IssueTable: React.FC<Props> = ({
     handleCheckAllChange: props.handleCheckAllChange,
   })].concat(visibleColumnCodes.map((code) => {
     const column = getColumn(code);
-    return column ? { ...getColumn(code), resizable: true } : undefined;
+    const saved = find(listLayoutColumns, { columnCode: code });
+    return column ? {
+      ...getColumn(code), resizable: true, onResize: handleColumnResize, ...saved && saved.width > 0 ? { width: saved.width } : {},
+    } : undefined;
   }).filter(Boolean));
   const totalColumnCodes = useMemo(() => [...columnCodes, ...fields.map((f) => f.code)], [columnCodes, fields]);
 

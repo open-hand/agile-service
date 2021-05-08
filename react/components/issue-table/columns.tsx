@@ -148,7 +148,7 @@ const columns = ({ onSummaryClick }) => new Map([
   }],
   ['assign', {
     title: '经办人',
-    dataIndex: 'assigneeId',
+    dataIndex: 'assign',
     sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex' }}>
@@ -200,7 +200,7 @@ const columns = ({ onSummaryClick }) => new Map([
   }],
   ['status', {
     title: '状态',
-    dataIndex: 'statusId',
+    dataIndex: 'status',
     sortable: true,
     render: ({ rowData }) => (
       <Tooltip title={get(rowData, 'statusVO')?.name}>
@@ -219,7 +219,7 @@ const columns = ({ onSummaryClick }) => new Map([
   }],
   ['reporter', {
     title: '报告人',
-    dataIndex: 'reporterId',
+    dataIndex: 'reporter',
     sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex' }}>
@@ -295,7 +295,7 @@ const columns = ({ onSummaryClick }) => new Map([
   }],
   ['sprint', {
     title: '冲刺',
-    dataIndex: 'issueSprintVOS',
+    dataIndex: 'sprint',
     render: renderTag('issueSprintVOS', 'sprintName'),
   }],
   ['storyPoints', {

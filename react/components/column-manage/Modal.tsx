@@ -27,7 +27,7 @@ const ColumnManageModal: React.FC<ColumnManageProps> = (props) => {
   const { modal } = props;
 
   const { options } = props;
-  const [columns, setColumns] = useState(options);
+  const [columns, setColumns] = useState([...options]);
   const allKeys = useMemo(() => columns.map((c) => c.code), [columns]);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(props.value ?? []);
   const mutation = useUpdateColumnMutation('issues.table');
@@ -73,7 +73,7 @@ const ColumnManageModal: React.FC<ColumnManageProps> = (props) => {
         columnCode: column.code,
         display: selectedKeys.includes(column.code),
         sort: i,
-        width: 100,
+        width: 0,
       })),
     });
     return true;
