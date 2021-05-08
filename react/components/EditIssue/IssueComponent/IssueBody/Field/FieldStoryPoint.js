@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
+import { Tooltip } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
 import SelectNumber from '@/components/select/select-number';
 import TextEditToggle from '@/components/TextEditTogglePro';
@@ -72,7 +73,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
                   </>
                 )
               }
-              {completed && fieldCode === 'remainingTime' ? '0' : ''}
+              {completed && fieldCode === 'remainingTime' ? <Tooltip title="问题已到已解决状态,无剩余预估时间">0</Tooltip> : ''}
             </div>
           </TextEditToggle>
         </div>

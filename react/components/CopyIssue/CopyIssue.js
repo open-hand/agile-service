@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { stores } from '@choerodon/boot';
 import _ from 'lodash';
 import {
-  Modal, Form, Input, Checkbox,
+  Form, Input, Checkbox,
 } from 'choerodon-ui';
 
 import './CopyIssue.less';
@@ -14,15 +14,13 @@ const FormItem = Form.Item;
 class CopyIssue extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      loading: false,
-    };
   }
 
   componentDidMount() {
     setTimeout(() => {
       this.textInput.focus();
     });
+    this.props.modal.handleOk(this.handleCopyIssue);
   }
 
   handleCopyIssue = () => {
@@ -44,14 +42,9 @@ class CopyIssue extends Component {
           summary: issueSummary || false,
           epicName: issueName || false,
         };
-        this.setState({
-          loading: true,
-        });
+
         issueApi.clone(issueId, applyType, copyConditionVO)
           .then((res) => {
-            this.setState({
-              loading: false,
-            });
             this.props.onOk(res);
           });
       }
@@ -80,32 +73,32 @@ class CopyIssue extends Component {
     const { getFieldDecorator } = this.props.form;
 
     return (
-      <Modal
-        className="c7n-copyIssue"
-        title={`复制问题${issueNum}`}
-        visible={visible || false}
-        onOk={this.handleCopyIssue}
-        onCancel={onCancel}
-        okText="复制"
-        cancelText="取消"
-        confirmLoading={this.state.loading}
-        maskClosable={false}
-        keyboard={false}
-      >
-        <Form layout="vertical" style={{ width: 472 }}>
-          <FormItem style={{ marginTop: 20 }}>
-            {getFieldDecorator('issueSummary', {
-              rules: [{ required: true, message: '请输入概要' }],
-              initialValue: issueSummary,
-            })(
-              <Input
-                ref={(input) => { this.textInput = input; }}
-                label="概要"
-                maxLength={44}
-              />,
-            )}
-          </FormItem>
-          {
+    // <Modal
+    //   className="c7n-copyIssue"
+    //   title={`复制问题${issueNum}`}
+    //   visible={visible || false}
+    //   onOk={this.handleCopyIssue}
+    //   onCancel={onCancel}
+    //   okText="复制"
+    //   cancelText="取消"
+    //   confirmLoading={this.state.loading}
+    //   maskClosable={false}
+    //   keyboard={false}
+    // >
+      <Form layout="vertical" style={{ width: 472 }}>
+        <FormItem style={{ marginTop: 20 }}>
+          {getFieldDecorator('issueSummary', {
+            rules: [{ required: true, message: '请输入概要' }],
+            initialValue: issueSummary,
+          })(
+            <Input
+              ref={(input) => { this.textInput = input; }}
+              label="概要"
+              maxLength={44}
+            />,
+          )}
+        </FormItem>
+        {
             issue.typeCode === 'issue_epic' && (
             <FormItem style={{ marginTop: 20 }}>
               {getFieldDecorator('issueName', {
@@ -122,9 +115,9 @@ class CopyIssue extends Component {
             </FormItem>
             )
           }
-          {
+        {
             this.props.issue.closeSprint.length || this.props.issue.activeSprint ? (
-              <FormItem>
+              <FormItem style={{ marginBottom: 0 }}>
                 {getFieldDecorator('sprint', {})(
                   <Checkbox>
                     是否复制冲刺
@@ -133,9 +126,9 @@ class CopyIssue extends Component {
               </FormItem>
             ) : null
           }
-          {
+        {
             this.props.issue.subIssueVOList.length ? (
-              <FormItem>
+              <FormItem style={{ marginBottom: 0 }}>
                 {getFieldDecorator('copySubIssue', {})(
                   <Checkbox>
                     是否复制子任务
@@ -144,7 +137,7 @@ class CopyIssue extends Component {
               </FormItem>
             ) : null
           }
-          {
+        {
             this.props.issueLink.length ? (
               <FormItem>
                 {getFieldDecorator('copyLinkIssue', {})(
@@ -155,8 +148,8 @@ class CopyIssue extends Component {
               </FormItem>
             ) : null
           }
-        </Form>
-      </Modal>
+      </Form>
+    // </Modal>
     );
   }
 }

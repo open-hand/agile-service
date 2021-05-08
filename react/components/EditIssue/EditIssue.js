@@ -14,7 +14,7 @@ import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import { sameProject } from '@/utils/detail';
 import RelateStory from '../RelateStory';
-import CopyIssue from '../CopyIssue';
+import CopyIssue, { openEditIssueCopyIssue } from '../CopyIssue';
 import TransformSubIssue from '../TransformSubIssue';
 import TransformFromSubIssue from '../TransformFromSubIssue';
 import ChangeParent from '../ChangeParent';
@@ -172,14 +172,6 @@ function EditIssue() {
     setQuery();
   }, [currentIssueId]);
 
-  const handleCopyIssue = (issue) => {
-    store.setCopyIssueShow(false);
-    loadIssueDetail(issue.issueId);
-    if (onIssueCopy) {
-      onIssueCopy(issue);
-    }
-  };
-
   const handleRelateStory = () => {
     store.setRelateStoryShow(false);
     if (onUpdate) {
@@ -271,6 +263,7 @@ function EditIssue() {
           programId={programId}
           reloadIssue={loadIssueDetail}
           onUpdate={onUpdate}
+          onIssueCopy={onIssueCopy}
           onDeleteSubIssue={onDeleteSubIssue}
           loginUserId={AppState.userInfo.id}
           applyType={applyType}
@@ -280,21 +273,6 @@ function EditIssue() {
           otherProject={otherProject}
         />
       </div>
-      {
-        copyIssueShow ? (
-          <CopyIssue
-            issueId={issueId}
-            issueNum={issueNum}
-            issue={issue}
-            issueLink={linkIssues}
-            issueSummary={summary}
-            visible={copyIssueShow}
-            onCancel={() => store.setCopyIssueShow(false)}
-            onOk={handleCopyIssue.bind(this)}
-            applyType={applyType}
-          />
-        ) : null
-      }
       {
         relateStoryShow ? (
           <RelateStory

@@ -99,7 +99,7 @@ class StoryCard extends Component {
 
   render() {
     const {
-      story, index, rowIndex, canBeOperated,
+      story, index, rowIndex, canBeOperated, isDragging,
     } = this.props;
     const {
       issueId, summary, statusVO = {},
@@ -107,7 +107,7 @@ class StoryCard extends Component {
     const { selectedIssueMap } = StoryMapStore;
     return (
       <Card
-        className={`c7nagile-StoryMap-StoryCard ${index === 0 && rowIndex === 0 ? 'minimapCard' : ''} ${statusVO && statusVO.completed ? 'completedCard' : undefined} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`}
+        className={`c7nagile-StoryMap-StoryCard ${isDragging ? 'c7nagile-StoryMap-StoryCard-dragging' : ''} ${index === 0 && rowIndex === 0 ? 'minimapCard' : ''} ${statusVO && statusVO.completed ? 'completedCard' : undefined} ${selectedIssueMap.has(issueId) ? 'selected' : ''}`}
         saveRef={this.saveRef}
         onClick={this.handleClick}
         onMouseDown={this.handleMouseDown}
