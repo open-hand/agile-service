@@ -17,7 +17,6 @@ import openSaveFilterModal from '@/components/SaveFilterModal';
 import { linkUrl } from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import useQueryString from '@/hooks/useQueryString';
-import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import FilterManage from '@/components/FilterManage';
 import DetailContainer, { useDetail } from '@/components/detail-container';
@@ -25,6 +24,7 @@ import TableModeSwitch from '@/components/tree-list-switch';
 import handleOpenImport from '@/components/ImportIssue/ImportIssue';
 import { TableCache } from '@/components/issue-table/Component';
 import useTable from '@/hooks/useTable';
+import IssueTable from './components/issue-table';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
@@ -303,6 +303,7 @@ const Issue = observer(({ cached, updateCache }) => {
           onClickSaveFilter={handleClickSaveFilter}
         />
         <IssueTable
+          isTree={!tableListMode}
           tableProps={tableProps}
           fields={fields}
           listLayoutColumns={cached?.listLayoutColumns}

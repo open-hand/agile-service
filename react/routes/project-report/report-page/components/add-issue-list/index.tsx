@@ -18,6 +18,10 @@ import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { IIssueColumnName } from '@/common/types';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import { issueApi } from '@/api';
+import { set } from 'lodash';
+import useTable from '@/hooks/useTable';
+import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { IReportListBlock } from '../../store';
 import { RefProps } from '../add-modal';
 
@@ -202,6 +206,16 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
     submit: handleSubmit,
   }), [handleSubmit]);
   const { isInProgram } = useIsInProgram();
+  const getTableData = useCallback(({ page, sort, size }) => {
+    const search = issueSearchStore.getCustomFieldFilters();
+    set(search, 'searchArgs.tree', false);
+    return issueApi.loadIssues(page, size, sort, search);
+  }, [issueSearchStore]);
+  const tableProps = useTable(getTableData);
+  const { data } = useIssueTableFields();
+  if (!data) {
+    return null;
+  }
   return (
     <div className="agile-portal">
       <Form dataSet={formDataSet} style={{ width: 512 }}>
@@ -251,12 +265,17 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       />
       {/* @ts-ignore */}
       <IssueTable
+        isTree={false}
+        tableProps={tableProps}
         style={{ marginTop: 10 }}
         queryBar={'none' as TableQueryBarType}
         dataSet={dataSet}
-        fields={issueSearchStore.fields}
+        fields={data}
         createIssue={false}
-        visibleColumns={formDataSet.current?.get('visibleColumns') || []}
+        listLayoutColumns={formDataSet.current?.get('visibleColumns').map((code: string) => ({
+          columnCode: code,
+          display: true,
+        })) || []}
       />
     </div>
   );

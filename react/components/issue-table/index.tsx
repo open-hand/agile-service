@@ -3,17 +3,13 @@ import { observer } from 'mobx-react-lite';
 import {
   DataSet, PerformanceTable, Pagination,
 } from 'choerodon-ui/pro';
-import { difference, find } from 'lodash';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
-import useIsInProgram from '@/hooks/useIsInProgram';
-import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
 import { IField, IIssueColumnName } from '@/common/types';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
 import { usePersistFn } from 'ahooks';
 import { ListLayoutColumnVO } from '@/api';
 import useTable from '@/hooks/useTable';
-import { ColumnManage } from './Component';
 import { checkBoxColumn, getTableColumns } from './columns';
 import transverseTreeData from './utils/transverseTreeData';
 import getListLayoutColumns from './utils/getListLayoutColumns';
@@ -21,7 +17,7 @@ import getListLayoutColumns from './utils/getListLayoutColumns';
 export interface IssueTableProps extends Partial<TableProps> {
   tableRef?: React.RefObject<any>
   onCreateIssue?: () => void
-  dataSet: DataSet
+  // dataSet: DataSet
   fields: IField[]
   onRowClick?: (record: any) => void
   selectedIssue?: string
@@ -33,6 +29,8 @@ export interface IssueTableProps extends Partial<TableProps> {
   summaryChange?: (summary: string) => void
   IssueStore?: any
   tableProps: ReturnType<typeof useTable>
+  onColumnResize?: (columnWidth: number, dataKey: string) => void
+  isTree?: boolean
 }
 // const mapper = (key: IIssueColumnName): string => ({
 //   summary: 'issueId',
@@ -68,6 +66,8 @@ const IssueTable: React.FC<IssueTableProps> = ({
   summaryChange = () => { },
   IssueStore,
   tableProps,
+  onColumnResize,
+  isTree = true,
   ...otherProps
 }) => {
   const handleOpenCreateIssue = useCallback(() => {
@@ -76,33 +76,16 @@ const IssueTable: React.FC<IssueTableProps> = ({
   const props = tableProps;
   const {
     pagination,
-    //  visibleColumns,
     setVisibleColumns, ...restProps
   } = props;
-  const mutation = useUpdateColumnMutation('issues.table');
 
   const listLayoutColumns = useMemo(() => getListLayoutColumns(savedListLayoutColumns, fields), [fields, savedListLayoutColumns]);
 
-  const handleColumnResize = usePersistFn((columnWidth, dataKey) => {
-    mutation.mutate({
-      applyType: 'agile',
-      listLayoutColumnRelVOS: listLayoutColumns.map((listLayoutColumn, i) => ({
-        ...listLayoutColumn,
-        ...listLayoutColumn.columnCode === dataKey ? {
-          width: columnWidth,
-        } : {},
-      })),
-    });
-  });
-  const { isInProgram } = useIsInProgram();
-
-  const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
   const columns = useMemo(() => getTableColumns({
-    listLayoutColumns, fields, onSummaryClick, handleColumnResize,
-  }), [fields, handleColumnResize, listLayoutColumns, onSummaryClick]);
+    listLayoutColumns, fields, onSummaryClick, handleColumnResize: onColumnResize,
+  }), [fields, listLayoutColumns, onColumnResize, onSummaryClick]);
   const visibleColumns = useMemo(() => columns.filter((column) => column.display), [columns]);
-
-  const treeData = useMemo(() => transverseTreeData(props.data), [props.data]);
+  const data = useMemo(() => (isTree ? transverseTreeData(props.data) : props.data), [isTree, props.data]);
   const checkboxColumn = useMemo(() => checkBoxColumn({
     data: props.data,
     checkValues: props.checkValues,
@@ -112,14 +95,6 @@ const IssueTable: React.FC<IssueTableProps> = ({
 
   return (
     <div className="c7nagile-issue-table">
-      <ColumnManage
-        value={visibleColumnCodes}
-        onChange={setVisibleColumns}
-        options={listLayoutColumns.map(((c) => ({
-          code: c.columnCode,
-          title: c.columnCode,
-        })))}
-      />
       <PerformanceTable
         {...restProps}
         isTree
@@ -129,7 +104,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
         columns={[checkboxColumn, ...visibleColumns]}
         // autoHeight
         height={400}
-        data={treeData}
+        data={data}
       />
       {createIssue && (
         <div style={{ paddingTop: 5 }}>
