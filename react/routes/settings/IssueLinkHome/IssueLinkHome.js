@@ -65,6 +65,8 @@ function IssueLinkHome() {
     const values = {
       id,
       linkTypeId: record.get('linkTypeId'),
+      issueCount: record.get('issueCount'),
+      name: record.get('linkName'),
       formatMessage,
       handleRefresh: () => {
         issueLinkTableDs.query();
@@ -73,7 +75,7 @@ function IssueLinkHome() {
 
     Modal.open({
       key: deleteKey,
-      title: formatMessage({ id: 'issue_link.delete.only' }, { name: `: ${record.get('linkName')}` }),
+      title: formatMessage({ id: 'issue_link.delete.only' }),
       children: <DeleteModal {...values} />,
       cancelText: formatMessage({ id: 'cancel' }),
       okText: formatMessage({ id: 'delete' }),

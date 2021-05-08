@@ -1251,6 +1251,24 @@ class BacklogStore {
       startDate, endDate, sprintId, sprints,
     });
   }
+
+  @observable defaultTypeId = '';
+
+  @action setDefaultTypeId = (data) => {
+    this.defaultTypeId = data;
+  }
+
+  @observable defaultSummary = '';
+
+  @action setDefaultSummary = (data) => {
+    this.defaultSummary = data;
+  }
+
+  @observable defaultSprint = '';
+
+  @action setDefaultSprint = (data) => {
+    this.defaultSprint = data;
+  }
 }
 
 const backlogStore = new BacklogStore();

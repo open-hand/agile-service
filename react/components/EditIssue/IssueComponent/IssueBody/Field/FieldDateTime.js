@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { DatetimeAgo } from '../../../../CommonComponent';
 
 @observer class FieldDateTime extends Component {
   render() {
@@ -16,9 +15,7 @@ import { DatetimeAgo } from '../../../../CommonComponent';
           </span>
         </div>
         <div className="c7n-value-wrapper" style={{ padding: '0 0.05rem' }}>
-          <DatetimeAgo
-            date={value}
-          />
+          {value}
         </div>
       </div>
     );

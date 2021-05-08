@@ -151,6 +151,9 @@ class CreateIssue extends Component {
   // eslint-disable-next-line react/destructuring-assignment
   getDefaultType = (issueTypes = this.state.originIssueTypes) => {
     const { defaultTypeCode } = this.props;
+    if (this.props.defaultTypeId) {
+      return find(issueTypes, { id: this.props.defaultTypeId }) || issueTypes[0];
+    }
     return find(issueTypes, { typeCode: defaultTypeCode }) || issueTypes[0];
   }
 
@@ -250,7 +253,7 @@ class CreateIssue extends Component {
     }
   }
 
-  setDefaultValue = (fields) => {
+  setDefaultValue = (fields, ignoreFields = []) => {
     const { form } = this.props;
     const defaultScope = new Map([
       ['assignee', 'assigneedId'],
@@ -272,7 +275,7 @@ class CreateIssue extends Component {
     ]);
     const setFields = fields.reduce((result, field) => {
       const name = defaultScope.get(field.fieldCode);
-      if (name && field.defaultValue) {
+      if (name && !ignoreFields.includes(name) && field.defaultValue) {
         if (!form.getFieldValue(name)) {
           if (name === 'componentIssueRel') {
             Object.assign(result, {
@@ -298,6 +301,15 @@ class CreateIssue extends Component {
     form.setFieldsValue(setFields);
   }
 
+  setDefaultSummary = () => {
+    if (this.props.defaultSummary) {
+      const { form: { setFieldsValue } } = this.props;
+      setFieldsValue({
+        summary: this.props.defaultSummary,
+      });
+    }
+  }
+
   loadIssueTypes = () => {
     const { applyType, form } = this.props;
 
@@ -320,6 +332,7 @@ class CreateIssue extends Component {
             newIssueTypeCode: defaultType.typeCode,
           }, () => {
             this.setDefaultSprint();
+            this.setDefaultSummary();
             this.setDefaultValue(fields);
           });
         });
@@ -572,7 +585,7 @@ class CreateIssue extends Component {
 
   getFieldComponent = (field) => {
     const {
-      form, mode, hiddenIssueType, teamProjectIds, applyType,
+      form, mode, hiddenIssueType, teamProjectIds, applyType, defaultFeatureType,
     } = this.props;
     const { getFieldDecorator } = form;
     const {
@@ -612,18 +625,28 @@ class CreateIssue extends Component {
                               issueTypeId: id,
                               pageCode: 'agile_issue_create',
                             };
+                            const { parentIssueId, relateIssueId } = this.props;
+                            const ignoreResetFields = [];
+                            // 同类型更改  子任务、缺陷 类型有父问题则进行sprintId忽略更新
+                            if (typeCode === newIssueTypeCode && (parentIssueId || relateIssueId || form.getFieldValue('subTaskParent') || form.getFieldValue('subBugParent'))) {
+                              ignoreResetFields.push('sprintId');
+                            }
                             fieldApi.getFields(param).then((res) => {
                               const { fields } = this.state;
-                              form.resetFields(['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
+                              let resetFields = ['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
                                 'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel', 'statusId',
-                                ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary', 'description'].some((i) => i === code))]);
+                                ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary', 'description'].some((i) => i === code))];
+                              if (ignoreResetFields.length > 0) {
+                                resetFields = resetFields.filter((resetField) => !ignoreResetFields.includes(resetField));
+                              }
+                              form.resetFields(resetFields);
                               this.setState({
                                 fields: res,
                                 newIssueTypeId: id,
                                 newIssueTypeCode: typeCode,
                               });
                               this.loadDefaultTemplate(id);
-                              this.setDefaultValue(res);
+                              this.setDefaultValue(res, ignoreResetFields);
                             });
                           })}
                         >
@@ -679,7 +702,7 @@ class CreateIssue extends Component {
               <FormItem>
                 {getFieldDecorator('featureType', {
                   rules: [{ required: true, message: '特性类型为必输项' }],
-                  initialValue: 'business',
+                  initialValue: defaultFeatureType || 'business',
                 })(
                   <Select
                     label="特性类型"
@@ -766,7 +789,7 @@ class CreateIssue extends Component {
         return newIssueTypeCode === 'feature' ? <FieldFeatureSprint form={form} field={field || {}} /> : (
           <FormItem label="冲刺" key={`${newIssueTypeCode}-sprint`}>
             {getFieldDecorator('sprintId', {
-              rules: [{ required: field.required, message: '请选择冲刺' }],
+              rules: [{ required: ['sub_task', 'sub_bug'].includes(mode) || newIssueTypeCode === 'sub_task' || (newIssueTypeCode === 'bug' && form.getFieldValue('subBugParent')) ? false : field.required, message: '请选择冲刺' }],
             })(
               <SelectFocusLoad
                 label="冲刺"
@@ -1108,6 +1131,11 @@ class CreateIssue extends Component {
                     label="PI"
                     type="pi"
                     optionArgs={!hasPermission}
+                    afterLoad={(sprints) => {
+                      this.props.defaultPi && form.setFieldsValue({
+                        pi: this.props.defaultPi,
+                      });
+                    }}
                   >
                     {field.defaultValueObjs?.map((pi) => (
                       <Option

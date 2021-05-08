@@ -2380,7 +2380,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public synchronized IssueVO transformedTask(IssueConvertDTO issueConvertDTO, IssueTransformTask issueTransformTask, Long organizationId) {
         String originType = issueConvertDTO.getTypeCode();
-        List<String> fieldList = Arrays.asList(TRANSFORMED_TASK_FIELD_LIST_NO_RANK);
+        List<String> fieldList = new ArrayList<>(Arrays.asList(TRANSFORMED_TASK_FIELD_LIST_NO_RANK));
         if (originType.equals(SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
         }
