@@ -269,15 +269,36 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     }
                 });
                 vo.setContexts(contexts);
-                vo.setIssueTypeVOList(issueTypeVOList);
             } else {
                 return;
             }
-            vo.setContextName(String.join(",", issueTypeNames));
+            sortIssueTypeList(issueTypeVOList);
+            vo.setIssueTypeVOList(issueTypeVOList);
+            vo.setContextName(issueTypeVOList.stream().map(IssueTypeVO::getName).collect(Collectors.joining(",")));
             vo.setRequiredScope(requiredScope);
             fieldViews.add(vo);
         });
         return fieldViews;
+    }
+
+    private void sortIssueTypeList(List<IssueTypeVO> issueTypeVOList) {
+        if(CollectionUtils.isEmpty(issueTypeVOList)){
+            return;
+        }
+        Collections.sort(issueTypeVOList, (o1,o2) -> o2.getId().compareTo(o1.getId()));
+        List<IssueTypeVO> list = new ArrayList<>();
+        IssueTypeVO backlog = null;
+        for (IssueTypeVO typeVO : issueTypeVOList) {
+            if(Objects.equals("backlog" ,typeVO.getTypeCode())){
+                backlog = typeVO;
+            } else {
+                list.add(typeVO);
+            }
+        }
+        if (!ObjectUtils.isEmpty(backlog)) {
+            list.add(backlog);
+        }
+        issueTypeVOList = list;
     }
 
     @Override
