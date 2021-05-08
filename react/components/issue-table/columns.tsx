@@ -33,7 +33,7 @@ export const checkBoxColumn = ({
   ),
 });
 const normalColumn = (field) => (field && {
-  title: '概要',
+  title: field.name,
   dataIndex: field?.code,
   render: ({ rowData, dataIndex, rowIndex }) => {
     const { fieldType, code } = field;
@@ -130,11 +130,13 @@ const columns = ({ onSummaryClick }) => new Map([
     dataIndex: 'issueNum',
     width: 120,
     className: 'c7n-agile-table-cell',
+    sortable: true,
   }],
   ['priority', {
     title: '优先级',
     dataIndex: 'priority',
     className: 'c7n-agile-table-cell',
+    sortable: true,
     render: ({ rowData }) => (
       <Tooltip mouseEnterDelay={0.5} title={`优先级： ${get(rowData, 'priorityDTO') ? get(rowData, 'priorityDTO').name : ''}`}>
         <PriorityTag
@@ -147,6 +149,7 @@ const columns = ({ onSummaryClick }) => new Map([
   ['assign', {
     title: '经办人',
     dataIndex: 'assigneeId',
+    sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex' }}>
         {
@@ -198,6 +201,7 @@ const columns = ({ onSummaryClick }) => new Map([
   ['status', {
     title: '状态',
     dataIndex: 'statusId',
+    sortable: true,
     render: ({ rowData }) => (
       <Tooltip title={get(rowData, 'statusVO')?.name}>
         <div style={{
@@ -216,6 +220,7 @@ const columns = ({ onSummaryClick }) => new Map([
   ['reporter', {
     title: '报告人',
     dataIndex: 'reporterId',
+    sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex' }}>
         {get('reporterId') && get(rowData, 'reporterId') !== '0' && (
@@ -236,6 +241,7 @@ const columns = ({ onSummaryClick }) => new Map([
     title: '最近更新时间',
     width: 170,
     dataIndex: 'lastUpdateDate',
+    sortable: true,
   }],
   ['creationDate', {
     title: '创建时间',

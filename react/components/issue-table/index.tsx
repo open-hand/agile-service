@@ -84,7 +84,9 @@ const IssueTable: React.FC<Props> = ({
     IssueStore?.createQuestion(true);
   }, [IssueStore]);
   const props = tableProps;
-  const { pagination, visibleColumns, setVisibleColumns } = props;
+  const {
+    pagination, visibleColumns, setVisibleColumns, ...restProps
+  } = props;
   const { isInProgram } = useIsInProgram();
   const getColumn = useCallback((code) => getColumnsMap({ onSummaryClick }).get(code) ?? normalColumn(find(fields, { code })), [fields, onSummaryClick]);
   const columns = [checkBoxColumn({
@@ -111,9 +113,9 @@ const IssueTable: React.FC<Props> = ({
         })}
       />
       <PerformanceTable
+        {...restProps}
         isTree
         rowKey="issueId"
-        loading={props.loading}
         virtualized
         bordered={false}
         columns={columns}

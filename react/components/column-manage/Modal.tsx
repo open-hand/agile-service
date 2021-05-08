@@ -10,6 +10,7 @@ import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { intersection } from 'lodash';
 import { IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
 import ColumnList from './components/column-list';
 
 export interface Option {
@@ -29,7 +30,7 @@ const ColumnManageModal: React.FC<ColumnManageProps> = (props) => {
   const [columns, setColumns] = useState(options);
   const allKeys = useMemo(() => columns.map((c) => c.code), [columns]);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(props.value ?? []);
-
+  const mutation = useUpdateColumnMutation('issues.table');
   const updateSelectKeys = usePersistFn((keys: string[]) => {
     setSelectedKeys(keys);
   });
@@ -60,9 +61,21 @@ const ColumnManageModal: React.FC<ColumnManageProps> = (props) => {
     }
   });
   const handleSubmit = usePersistFn(async () => {
-    console.log(intersection(allKeys, selectedKeys));
     // 保证选择列之后，列不会到最后一个
-    props.onChange && props.onChange(intersection(allKeys, selectedKeys));
+    // props.onChange && props.onChange(intersection(allKeys, selectedKeys));
+    const codes = intersection(allKeys, selectedKeys);
+
+    await mutation.mutateAsync({
+      applyType: 'agile',
+      listLayoutColumnRelVOS: codes.map((code, i) => ({
+        // TODO: 字段id
+        // fieldId:
+        columnCode: code,
+        display: true,
+        sort: i,
+        width: 100,
+      })),
+    });
     return true;
   });
   useEffect(() => {

@@ -1,12 +1,14 @@
 import { useUpdateEffect, usePersistFn, useMount } from 'ahooks';
 import { useCallback, useState } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+import useControlledDefaultValue from './useControlledDefaultValue';
 
 interface PaginatedParams {
   page: number
   size: number
+  sort?: string
 }
-type TableRequest = ({ page, size }: PaginatedParams) => Promise<any>
+type TableRequest = ({ page, size, sort }: PaginatedParams) => Promise<any>
 interface Options {
   autoQuery?: boolean
   defaultPage?: number
@@ -19,11 +21,12 @@ export default function useTable(getData: TableRequest, options?: Options) {
   } = options ?? {};
   const [pageSize, setPageSize] = useState(defaultPageSize ?? 10);
   const [current, setCurrent] = useState(defaultPage ?? 1);
-  const [visibleColumns, setVisibleColumns] = useState(defaultVisibleColumns ?? []);
+  const [visibleColumns, setVisibleColumns] = useControlledDefaultValue(defaultVisibleColumns ?? []);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [checkValues, setCheckValues] = useState<string[]>([]);
+  const [sort, setSort] = useState({ sortType: undefined, sortColumn: undefined });
   const handleCheckChange = usePersistFn((value) => {
     if (value) {
       checkValues.push(value);
@@ -45,6 +48,7 @@ export default function useTable(getData: TableRequest, options?: Options) {
     const res = await getData({
       page: newPage ?? 1,
       size: pageSize,
+      sort: sort.sortColumn && sort.sortType ? `${sort.sortColumn},${sort.sortType}` : undefined,
     });
     batchedUpdates(() => {
       setData(res.list);
@@ -61,7 +65,7 @@ export default function useTable(getData: TableRequest, options?: Options) {
   });
   useUpdateEffect(() => {
     query(current);
-  }, [current, pageSize]);
+  }, [current, pageSize, sort]);
   const onPaginationChange = useCallback((page: number, size: number) => {
     setCurrent(page);
     setPageSize(size);
@@ -69,9 +73,19 @@ export default function useTable(getData: TableRequest, options?: Options) {
   const onShowSizeChange = useCallback((page: number, size: number) => {
     setPageSize(size);
   }, [setPageSize]);
+  const handleSortColumn = usePersistFn((sortColumn, sortType) => {
+    setSort({
+      sortColumn,
+      sortType,
+    });
+  });
+
   return {
     query,
     data,
+    sortColumn: sort.sortColumn,
+    sortType: sort.sortType,
+    onSortColumn: handleSortColumn,
     loading,
     checkValues,
     handleCheckChange,

@@ -54,10 +54,10 @@ const Issue = observer(({ cached, updateCache }) => {
   const tableRef = useRef();
   const [props] = useDetail();
   const { open } = props;
-  const getTableData = useCallback(({ page, size }) => {
+  const getTableData = useCallback(({ page, sort, size }) => {
     const search = issueSearchStore.getCustomFieldFilters();
     set(search, 'searchArgs.tree', !tableListMode);
-    return issueApi.loadIssues(page, size, search);
+    return issueApi.loadIssues(page, size, sort, search);
   }, [issueSearchStore, tableListMode]);
   const tableProps = useTable(getTableData, {
     defaultPage: cached?.pagination?.current,
@@ -340,7 +340,7 @@ const Issue = observer(({ cached, updateCache }) => {
 
 export default (props) => (
   <StoreProvider {...props}>
-    <TableCache code="issues.table">
+    <TableCache type="issues.table">
       {(cacheProps) => <Issue {...cacheProps} />}
     </TableCache>
   </StoreProvider>

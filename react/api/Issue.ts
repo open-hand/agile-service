@@ -534,13 +534,14 @@ class IssueApi extends Api<IssueApi> {
     });
   }
 
-  loadIssues(page: number, size: number, search: SearchVO) {
+  loadIssues(page: number, size: number, sort: string | undefined, search: SearchVO) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/issues/include_sub`,
       params: {
         page,
         size,
+        sort,
       },
       data: search,
     });

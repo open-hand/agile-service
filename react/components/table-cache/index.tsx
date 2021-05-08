@@ -1,10 +1,8 @@
-import useProjectKey from '@/hooks/data/useProjectKey';
 import React from 'react';
-import { useQuery } from 'react-query';
 import { usePersistFn, useUnmount } from 'ahooks';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import { cacheColumnApi } from '@/api';
 import Loading from '@/components/Loading';
+import useTableColumns from '@/hooks/data/useTableColumns';
 
 interface Cache {
   pagination: {
@@ -18,17 +16,16 @@ interface TableCacheRenderProps {
   updateCache: (cache: Cache) => void
 }
 export interface TableCacheProps {
-  cacheKey: string
+  type: string
   children: (props: TableCacheRenderProps) => React.ReactElement<any, any> | null
 }
 const TableCache: React.FC<TableCacheProps> = ({
-  cacheKey, children,
+  type, children,
 }) => {
-  const key = useProjectKey({ key: [cacheKey] });
-  const cached = localPageCacheStore.getItem(cacheKey);
-  const { isLoading, data } = useQuery(key, () => cacheColumnApi.getDefault(cacheKey));
+  const cached = localPageCacheStore.getItem(type);
+  const { isLoading, data } = useTableColumns({ type });
   const updateCache = usePersistFn(({ pagination, visibleColumns }) => {
-    localPageCacheStore.setItem(cacheKey, {
+    localPageCacheStore.setItem(type, {
       pagination,
       visibleColumns,
     });
@@ -37,7 +34,10 @@ const TableCache: React.FC<TableCacheProps> = ({
     return <Loading loading />;
   }
   return children({
-    cached,
+    cached: {
+      visibleColumns: data?.listLayoutColumnRelVOS.map((c) => c.columnCode),
+      ...cached,
+    },
     updateCache,
   });
 };
