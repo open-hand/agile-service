@@ -15,10 +15,13 @@ import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { publishVersionApi, versionApi } from '@/api';
 import VERSION_STATUS_TYPE from '@/constants/VERSION_STATUS_TYPE';
+import SideNav from '@/components/side-nav';
 import { usePublishVersionContext } from './stores';
 import { openCreatePublishVersionModal } from './components/create-publish-version';
 import { openPublishVersionDetail } from './components/publish-version-detail';
 import openExportPublishVersionModal from './components/export';
+import PublishVersionList from './components/list';
+import PublishVersionHeader from './components/header';
 import './PublishVersion.less';
 
 const { Column } = Table;
@@ -64,41 +67,7 @@ function PublishVersion() {
   function handleRefresh() {
     tableDataSet.query();
   }
-  const renderName = ({ record, text }: RenderProps) => (
-    <TableDropMenu
-      text={record?.get('versionAlias') || record?.get('version')}
-      style={{ lineHeight: '32px' }}
-      menu={(
-        <Menu onClick={({ key }) => handleClickMenu(key, record!)}>
-          {record?.get('statusCode') === 'version_planning' ? <Menu.Item key="released">发布</Menu.Item>
-            : <Menu.Item key="version_planning">撤销发布</Menu.Item>}
-          <Menu.Item key="del">删除</Menu.Item>
-        </Menu>
-      )}
-      onClickEdit={() => openPublishVersionDetail(record?.get('id')!, handleRefresh)}
-    />
-  );
-  const renderStatus = ({ text }: RenderProps) => {
-    const status = VERSION_STATUS_TYPE[text as keyof typeof VERSION_STATUS_TYPE] || {};
-    return (
-      <p style={{ marginBottom: 0, minWidth: 60 }}>
-        <span
-          style={{
-            color: '#fff',
-            background: status.color,
-            display: 'inline-block',
-            lineHeight: '16px',
-            height: '16px',
-            borderRadius: '2px',
-            padding: '0 2px',
-            fontSize: '13px',
-          }}
-        >
-          <div style={{ transform: 'scale(.8)' }}>{status.name}</div>
-        </span>
-      </p>
-    );
-  };
+
   return (
     <Page>
       <Header>
@@ -116,16 +85,19 @@ function PublishVersion() {
         className={`${prefixCls}-content`}
 
       >
-        <Table dataSet={tableDataSet}>
-          <Column name="name" renderer={renderName} />
-          <Column name="statusCode" renderer={renderStatus} />
-          <Column name="actualPublishDate" className="c7n-agile-table-cell" width={110} />
-          <Column name="artifactId" className="c7n-agile-table-cell" width={100} />
-          <Column name="groupId" className="c7n-agile-table-cell" width={120} />
-          <Column name="appServiceName" className="c7n-agile-table-cell" width={120} />
-          <Column name="tagName" className="c7n-agile-table-cell" width={100} />
+        <SideNav>
+          <SideNav.Panel
+            key="version"
+            tabKey="version"
+            title="版本列表"
+            active={false}
 
-        </Table>
+          >
+            <PublishVersionList />
+          </SideNav.Panel>
+        </SideNav>
+        <PublishVersionHeader />
+
       </Content>
     </Page>
   );
