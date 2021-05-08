@@ -2185,7 +2185,7 @@ public class ExcelServiceImpl implements ExcelService {
         if (!NumberUtil.isNumeric(value)) {
             cell.setCellValue(buildWithErrorMsg(value, "请输入数字"));
             addErrorColumn(rowNum, col, errorRowColMap);
-        } else if (value.indexOf(".") > 3) {
+        } else if (getNumberOfIntegerPlace(value) > 3) {
             cell.setCellValue(buildWithErrorMsg(value, "最大支持3位整数"));
             addErrorColumn(rowNum, col, errorRowColMap);
         } else {
@@ -2202,6 +2202,14 @@ public class ExcelServiceImpl implements ExcelService {
                 }
             }
         }
+    }
+
+    private int getNumberOfIntegerPlace(String value) {
+        int index = value.indexOf(".");
+        if (index < 0) {
+            index = value.length();
+        }
+        return index;
     }
 
     private int getNumberOfDecimalPlaces(BigDecimal bigDecimal) {
