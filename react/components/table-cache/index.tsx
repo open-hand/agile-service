@@ -3,6 +3,7 @@ import { usePersistFn, useUnmount } from 'ahooks';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import Loading from '@/components/Loading';
 import useTableColumns from '@/hooks/data/useTableColumns';
+import { ListLayoutColumnVO } from '@/api';
 
 interface Cache {
   pagination: {
@@ -10,6 +11,7 @@ interface Cache {
     pageSize: number
   }
   visibleColumns: string[]
+  listLayoutColumns?: ListLayoutColumnVO[]
 }
 interface TableCacheRenderProps {
   cached: Cache
@@ -35,7 +37,7 @@ const TableCache: React.FC<TableCacheProps> = ({
   }
   return children({
     cached: {
-      visibleColumns: data?.listLayoutColumnRelVOS.map((c) => c.columnCode),
+      listLayoutColumns: data?.listLayoutColumnRelVOS,
       ...cached,
     },
     updateCache,

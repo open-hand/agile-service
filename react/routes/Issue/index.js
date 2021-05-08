@@ -306,6 +306,7 @@ const Issue = observer(({ cached, updateCache }) => {
         <IssueTable
           tableProps={tableProps}
           fields={fields}
+          listLayoutColumns={cached?.listLayoutColumns}
           tableRef={tableRef}
           onCreateIssue={handleCreateIssue}
           onRowClick={handleRowClick}

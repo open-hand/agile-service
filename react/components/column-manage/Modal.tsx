@@ -67,11 +67,11 @@ const ColumnManageModal: React.FC<ColumnManageProps> = (props) => {
 
     await mutation.mutateAsync({
       applyType: 'agile',
-      listLayoutColumnRelVOS: codes.map((code, i) => ({
+      listLayoutColumnRelVOS: columns.map((column, i) => ({
         // TODO: 字段id
         // fieldId:
-        columnCode: code,
-        display: true,
+        columnCode: column.code,
+        display: selectedKeys.includes(column.code),
         sort: i,
         width: 100,
       })),

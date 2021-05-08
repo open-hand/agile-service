@@ -33,7 +33,7 @@ export const checkBoxColumn = ({
   ),
 });
 const normalColumn = (field) => (field && {
-  title: field.name,
+  title: field.title,
   dataIndex: field?.code,
   render: ({ rowData, dataIndex, rowIndex }) => {
     const { fieldType, code } = field;

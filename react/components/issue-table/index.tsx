@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import {
   DataSet, PerformanceTable, Pagination,
 } from 'choerodon-ui/pro';
-import { find } from 'lodash';
+import { difference, find } from 'lodash';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { IField, IIssueColumnName } from '@/common/types';
@@ -50,6 +50,7 @@ const IssueTable: React.FC<Props> = ({
   onCreateIssue,
   dataSet,
   fields,
+  listLayoutColumns,
   onSummaryClick,
   selectedIssue,
   createIssue = true,
@@ -88,22 +89,35 @@ const IssueTable: React.FC<Props> = ({
   } = props;
   const { isInProgram } = useIsInProgram();
   const getColumn = useCallback((code) => getColumnsMap({ onSummaryClick }).get(code) ?? normalColumn(find(fields, { code })), [fields, onSummaryClick]);
+  // 后端保存了用后端的，没保存，使用默认的
+  const visibleColumnCodes = useMemo(() => (listLayoutColumns ? listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode) : visibleColumns), [listLayoutColumns, visibleColumns]);
   const columns = [checkBoxColumn({
     data: props.data,
     checkValues: props.checkValues,
     handleCheckChange: props.handleCheckChange,
     handleCheckAllChange: props.handleCheckAllChange,
-  })].concat(visibleColumns.map((code) => {
+  })].concat(visibleColumnCodes.map((code) => {
     const column = getColumn(code);
     return column ? { ...getColumn(code), resizable: true } : undefined;
   }).filter(Boolean));
+  const totalColumnCodes = useMemo(() => [...columnCodes, ...fields.map((f) => f.code)], [columnCodes, fields]);
+
+  const orderedCodes = useMemo(() => {
+    if (listLayoutColumns) {
+      const listLayoutColumnCodes = listLayoutColumns.map((c) => c.columnCode);
+      // 保存在后端的在前面，但是后端保存的不一定全，所以把不在后端的补在后面
+      return [...listLayoutColumnCodes, ...difference(totalColumnCodes, listLayoutColumnCodes)];
+    }
+    return totalColumnCodes;
+  }, [listLayoutColumns, totalColumnCodes]);
   const treeData = useMemo(() => transverseTreeData(props.data), [props.data]);
+
   return (
     <div className="c7nagile-issue-table">
       <ColumnManage
-        value={visibleColumns}
+        value={visibleColumnCodes}
         onChange={setVisibleColumns}
-        options={columnCodes.map((code) => {
+        options={orderedCodes.map((code) => {
           const column = getColumn(code);
           return {
             code,
