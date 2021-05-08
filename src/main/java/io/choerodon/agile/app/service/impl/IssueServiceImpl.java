@@ -186,6 +186,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private FieldValueMapper fieldValueMapper;
     @Autowired
     private TagIssueRelMapper tagIssueRelMapper;
+    @Autowired
+    private ModelMapper modelMapper;
+    @Autowired
+    private WorkLogService workLogService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -231,8 +235,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String[] UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
     private static final String[] TRANSFORMED_TASK_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, STATUS_ID};
 
-    @Autowired
-    private ModelMapper modelMapper;
 //
 //    private static final String[] FIELDS_NAME;
 //
@@ -751,6 +753,107 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
+    public List<PageFieldViewVO> listRequiredFieldByIssueType(Long projectId,
+                                                              Long organizationId,
+                                                              Long issueId,
+                                                              Long issueTypeId) {
+        String schemeCode = "agile_issue";
+        IssueVO issue = queryIssue(projectId, issueId, organizationId);
+        Map<String, Object> customFieldMap =
+                pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, Arrays.asList(issueId), false, "agile_issue")
+                        .get(issueId);
+        AssertUtilsForCommonException.notNull(issue, "error.issue.null");
+        PageFieldViewParamVO param = new PageFieldViewParamVO();
+        param.setIssueTypeId(issueTypeId);
+        param.setSchemeCode(schemeCode);
+        param.setPageCode("agile_issue_create");
+        List<PageFieldViewVO> createPageFields =
+                pageFieldService.queryPageFieldViewList(organizationId, projectId, param);
+        List<PageFieldViewVO> requiredSystemFields = new ArrayList<>();
+        List<PageFieldViewVO> requiredCustomFields = new ArrayList<>();
+        createPageFields.forEach(x -> {
+            if (Boolean.TRUE.equals(x.getRequired())) {
+                if (Boolean.TRUE.equals(x.getSystem())) {
+                    //系统字段
+                    if (isSystemFieldEmpty(x.getFieldCode(), issue)) {
+                        requiredSystemFields.add(x);
+                    }
+                } else {
+                    if (ObjectUtils.isEmpty(customFieldMap.get(x.getFieldCode()))) {
+                        requiredCustomFields.add(x);
+                    }
+                }
+            }
+        });
+        requiredSystemFields.addAll(requiredCustomFields);
+        return requiredSystemFields;
+    }
+
+    private boolean isSystemFieldEmpty(String fieldCode, IssueVO issue) {
+        Object value;
+        switch (fieldCode) {
+            case FieldCode.DESCRIPTION:
+                value = issue.getDescription();
+                break;
+            case FieldCode.COMPONENT:
+                value = issue.getComponentIssueRelVOList();
+                break;
+            case FieldCode.LABEL:
+                value = issue.getLabelIssueRelVOList();
+                break;
+            case FieldCode.FIX_VERSION:
+            case FieldCode.INFLUENCE_VERSION:
+                value = issue.getVersionIssueRelVOList();
+                break;
+            case FieldCode.SPRINT:
+                List<SprintNameVO> sprints = issue.getCloseSprint();
+                if (sprints == null) {
+                    sprints = new ArrayList<>();
+                }
+                if (issue.getActiveSprint() != null) {
+                    sprints.add(issue.getActiveSprint());
+                }
+                value = sprints;
+                break;
+            case FieldCode.EPIC_NAME:
+                value = issue.getEpicName();
+                break;
+            case FieldCode.ASSIGNEE:
+                value = issue.getAssigneeId();
+                break;
+            case FieldCode.ESTIMATED_START_TIME:
+                value = issue.getEstimatedStartTime();
+                break;
+            case FieldCode.ESTIMATED_END_TIME:
+                value = issue.getEstimatedEndTime();
+                break;
+            case FieldCode.REMAINING_TIME:
+                value = issue.getRemainingTime();
+                break;
+            case FieldCode.STORY_POINTS:
+                value = issue.getStoryPoints();
+                break;
+            case FieldCode.TIME_TRACE:
+                Long issueId = issue.getIssueId();
+                Long projectId = issue.getProjectId();
+                value = workLogService.queryWorkLogListByIssueId(projectId, issueId);
+                break;
+            case FieldCode.MAIN_RESPONSIBLE:
+                value = issue.getMainResponsible();
+                break;
+            case FieldCode.TAG:
+                value = issue.getTags();
+                break;
+            case FieldCode.ENVIRONMENT:
+                value = issue.getEnvironment();
+                break;
+            default:
+                value = new Object();
+        }
+        return ObjectUtils.isEmpty(value);
+    }
+
+    @Override
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType) {
         return this.self().updateIssueStatus(projectId, issueId, transformId, objectVersionNumber, applyType, null, false);
     }
@@ -1230,8 +1333,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public synchronized IssueVO updateIssueTypeCode(IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO, Long organizationId) {
-        List<String> fieldList = new ArrayList<>(Arrays.asList(UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK));
+    public synchronized IssueVO updateIssueTypeCode(IssueConvertDTO issueConvertDTO,
+                                                    IssueUpdateTypeVO issueUpdateTypeVO,
+                                                    Long organizationId,
+                                                    Long projectId) {
+        List<String> fieldList = Arrays.asList(UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK);
         String originType = issueConvertDTO.getTypeCode();
         if (originType.equals(SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
@@ -1275,7 +1381,106 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
         // 查看目标问题类型的状态机是否含有当前状态，没有就是用默认状态
         handlerStatus(issueConvertDTO.getProjectId(),issueUpdateTypeVO);
+        //更新字段值
+        updateIssueFieldValue(issueUpdateTypeVO, issueUpdateTypeVO.getIssueId(), projectId, organizationId);
         return queryIssue(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), organizationId);
+    }
+
+    private void updateIssueFieldValue(IssueUpdateTypeVO issueUpdateTypeVO,
+                                       Long issueId,
+                                       Long projectId,
+                                       Long organizationId) {
+        validateRequiredFields(issueUpdateTypeVO, issueId, projectId, organizationId);
+        BatchUpdateFieldsValueVo batchUpdateFieldsValueVo = issueUpdateTypeVO.getBatchUpdateFieldsValueVo();
+        List<Long> issueIds = Arrays.asList(issueId);
+        JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
+        BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
+        if (!ObjectUtils.isEmpty(predefinedFields)) {
+            fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields, batchUpdateFieldStatusVO, "agile", false);
+        }
+        List<PageFieldViewUpdateVO> customFields = batchUpdateFieldsValueVo.getCustomFields();
+        if (!ObjectUtils.isEmpty(customFields)) {
+            fieldValueService.handlerCustomFields(projectId, customFields, "agile_issue", issueIds, batchUpdateFieldStatusVO, false);
+        }
+        if(!ObjectUtils.isEmpty(batchUpdateFieldStatusVO.getErrorMsgMap())) {
+            throw new CommonException("error.update.field.value");
+        }
+    }
+
+    private void validateRequiredFields(IssueUpdateTypeVO issueUpdateTypeVO,
+                                        Long issueId,
+                                        Long projectId,
+                                        Long organizationId) {
+        List<PageFieldViewVO> pageFieldViewList =
+                listRequiredFieldByIssueType(projectId, organizationId, issueId, issueUpdateTypeVO.getIssueTypeId());
+        if (pageFieldViewList.isEmpty()) {
+            return;
+        }
+        Set<String> systemFieldCodes = new HashSet<>();
+        Set<Long> customFieldIds = new HashSet<>();
+        pageFieldViewList.forEach(x -> {
+            if (x.getSystem()) {
+                systemFieldCodes.add(x.getFieldCode());
+            } else {
+                customFieldIds.add(x.getFieldId());
+            }
+        });
+        BatchUpdateFieldsValueVo batchUpdateFieldsValueVo = issueUpdateTypeVO.getBatchUpdateFieldsValueVo();
+        if (batchUpdateFieldsValueVo == null && !pageFieldViewList.isEmpty()) {
+            throw new CommonException("error.required.field.empty");
+        }
+        JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
+        boolean allFieldEmpty = true;
+        if (predefinedFields != null) {
+            Set<String> systemFields = predefinedFields.keySet();
+            Set<String> fieldCodes = convertToFieldCodes(systemFields);
+            systemFieldCodes.forEach(x -> {
+                if (!fieldCodes.contains(x)) {
+                    throw new CommonException("error.required.field.empty." + x);
+                }
+            });
+            allFieldEmpty = false;
+        }
+        List<PageFieldViewUpdateVO> customFields = batchUpdateFieldsValueVo.getCustomFields();
+        if (!ObjectUtils.isEmpty(customFields)) {
+            Set<Long> inputCustomFields = new HashSet<>();
+            customFields.forEach(x -> inputCustomFields.add(x.getFieldId()));
+            customFieldIds.forEach(x -> {
+                if (inputCustomFields.contains(x)) {
+                    throw new CommonException("error.required.field.empty." + x);
+                }
+            });
+            allFieldEmpty=false;
+        }
+        if (allFieldEmpty) {
+            throw new CommonException("error.required.field.empty");
+        }
+    }
+
+    private Set<String> convertToFieldCodes(Set<String> systemFields) {
+        Map<String, String> map = new HashMap<>();
+        map.put("assigneeId", FieldCode.ASSIGNEE);
+        map.put("componentIssueRelVOList", FieldCode.COMPONENT);
+        map.put("environment", FieldCode.ENVIRONMENT);
+        map.put("estimatedEndTime", FieldCode.ESTIMATED_END_TIME);
+        map.put("estimatedStartTime", FieldCode.ESTIMATED_START_TIME);
+        map.put("fixVersion", FieldCode.FIX_VERSION);
+        map.put("influenceVersion", FieldCode.INFLUENCE_VERSION);
+        map.put("labelIssueRelVOList", FieldCode.LABEL);
+        map.put("mainResponsibleId", FieldCode.MAIN_RESPONSIBLE);
+        map.put("priorityId", FieldCode.PRIORITY);
+        map.put("remainingTime", FieldCode.REMAINING_TIME);
+        map.put("reporterId", FieldCode.REPORTER);
+        map.put("sprintId", FieldCode.SPRINT);
+        map.put("statusId", FieldCode.STATUS);
+        map.put("storyPoints", FieldCode.STORY_POINTS);
+        Set<String> result = new HashSet<>();
+        systemFields.forEach(x -> {
+            if (map.get(x) != null) {
+                result.add(map.get(x));
+            }
+        });
+        return result;
     }
 
     private void handlerStatus(Long projectId, IssueUpdateTypeVO issueUpdateTypeVO) {

@@ -253,7 +253,8 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                                         List<Long> issueIds,
                                         JSONObject predefinedFields,
                                         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
-                                        String appleType) {
+                                        String appleType,
+                                        boolean sendMsg) {
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
@@ -332,8 +333,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             if (agilePluginService != null) {
                 agilePluginService.handlerFeatureField(projectId,v,programMap);
             }
-            batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-            messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            if (sendMsg) {
+                batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
+                messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            }
         });
     }
 
