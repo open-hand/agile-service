@@ -23,8 +23,7 @@ import FilterManage from '@/components/FilterManage';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import TableModeSwitch from '@/components/tree-list-switch';
 import handleOpenImport from '@/components/ImportIssue/ImportIssue';
-import TableCache from '@/components/table-cache';
-import ColumnManage from '@/components/column-manage';
+import { TableCache } from '@/components/issue-table/Component';
 import useTable from '@/hooks/useTable';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
@@ -341,7 +340,7 @@ const Issue = observer(({ cached, updateCache }) => {
 
 export default (props) => (
   <StoreProvider {...props}>
-    <TableCache type="issues.table">
+    <TableCache>
       {(cacheProps) => <Issue {...cacheProps} />}
     </TableCache>
   </StoreProvider>

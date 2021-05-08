@@ -249,6 +249,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
         onChange={refresh}
         onClickSaveFilter={() => { }}
       />
+      {/* @ts-ignore */}
       <IssueTable
         style={{ marginTop: 10 }}
         queryBar={'none' as TableQueryBarType}

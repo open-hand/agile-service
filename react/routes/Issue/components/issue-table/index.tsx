@@ -1,5 +1,10 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, {
+  useContext, Fragment,
+  useState, useMemo, useCallback,
+} from 'react';
 import { observer } from 'mobx-react-lite';
+import IssueTable, { IssueTableProps } from '@/components/issue-table';
+
 import {
   DataSet, PerformanceTable, Pagination,
 } from 'choerodon-ui/pro';
@@ -18,61 +23,22 @@ import { checkBoxColumn, getTableColumns } from './columns';
 import transverseTreeData from './utils/transverseTreeData';
 import getListLayoutColumns from './utils/getListLayoutColumns';
 
-export interface IssueTableProps extends Partial<TableProps> {
-  tableRef?: React.RefObject<any>
-  onCreateIssue?: () => void
-  dataSet: DataSet
-  fields: IField[]
-  onRowClick?: (record: any) => void
-  selectedIssue?: string
-  createIssue?: boolean
-  visibleColumns?: IIssueColumnName[]
-  listLayoutColumns: ListLayoutColumnVO[] | null
-  onSummaryClick: () => void
-  typeIdChange?: (id: string) => void
-  summaryChange?: (summary: string) => void
-  IssueStore?: any
-  tableProps: ReturnType<typeof useTable>
-}
-// const mapper = (key: IIssueColumnName): string => ({
-//   summary: 'issueId',
-//   issueNum: 'issueNum',
-//   priority: 'priorityId',
-//   sprint: 'issueSprintVOS',
-//   reporter: 'reporterId',
-//   creationDate: 'creationDate',
-//   assign: 'assigneeId',
-//   status: 'statusId',
-//   lastUpdateDate: 'lastUpdateDate',
-//   estimatedStartTime: 'estimatedStartTime',
-//   estimatedEndTime: 'estimatedEndTime',
-//   label: 'label',
-//   component: 'component',
-//   storyPoints: 'storyPoints',
-//   fixVersion: 'fixVersion',
-//   influenceVersion: 'influenceVersion',
-//   epic: 'epic',
-//   feature: 'feature',
-// }[key] || key);
+export interface IssueTableMainProps extends IssueTableProps {
 
-const IssueTable: React.FC<IssueTableProps> = ({
-  tableRef,
-  onCreateIssue,
-  dataSet,
-  fields,
+}
+
+const IssueTableMain: React.FC<IssueTableMainProps> = ({
   listLayoutColumns: savedListLayoutColumns,
+  fields,
   onSummaryClick,
-  selectedIssue,
-  createIssue = true,
-  typeIdChange = () => { },
-  summaryChange = () => { },
-  IssueStore,
   tableProps,
-  ...otherProps
+  onCreateIssue,
+  onRowClick,
+  tableRef,
+  typeIdChange,
+  summaryChange,
+  IssueStore,
 }) => {
-  const handleOpenCreateIssue = useCallback(() => {
-    IssueStore?.createQuestion(true);
-  }, [IssueStore]);
   const props = tableProps;
   const {
     pagination,
@@ -111,7 +77,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
   }), [props.checkValues, props.data, props.handleCheckAllChange, props.handleCheckChange]);
 
   return (
-    <div className="c7nagile-issue-table">
+    <div>
       <ColumnManage
         value={visibleColumnCodes}
         onChange={setVisibleColumns}
@@ -120,34 +86,19 @@ const IssueTable: React.FC<IssueTableProps> = ({
           title: c.columnCode,
         })))}
       />
-      <PerformanceTable
-        {...restProps}
-        isTree
-        rowKey="issueId"
-        virtualized
-        bordered={false}
-        columns={[checkboxColumn, ...visibleColumns]}
-        // autoHeight
-        height={400}
-        data={treeData}
-      />
-      {createIssue && (
-        <div style={{ paddingTop: 5 }}>
-          <QuickCreateIssue
-            onCreate={onCreateIssue}
-            cantCreateEvent={handleOpenCreateIssue}
-            typeIdChange={typeIdChange}
-            summaryChange={summaryChange}
-          />
-        </div>
-      )}
-      <Pagination
-        total={pagination.total}
-        page={pagination.current}
-        pageSize={pagination.pageSize}
-        onChange={pagination.onChange}
+      <IssueTable
+        tableProps={tableProps}
+        fields={fields}
+        tableRef={tableRef}
+        onCreateIssue={onCreateIssue}
+        onRowClick={onRowClick}
+        typeIdChange={typeIdChange}
+        summaryChange={summaryChange}
+        IssueStore={IssueStore}
+        onSummaryClick={onSummaryClick}
       />
     </div>
+
   );
 };
-export default observer(IssueTable);
+export default observer(IssueTableMain);

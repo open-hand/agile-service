@@ -180,6 +180,20 @@ class FieldApi extends Api<FieldApi> {
   }
 
   /**
+   * 项目层，获取自定义字段表头
+   */
+  getTableFields(issueTypeList?: 'agileIssueType' | 'programIssueType') {
+    return axios.get(`${this.prefix}/field_value/list/get_fields`, {
+      params: {
+        project_id: getProjectId(),
+        organizationId: getOrganizationId(),
+        schemeCode: 'agile_issue',
+        issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
+      },
+    });
+  }
+
+  /**
    *获取概要默认值
    * @param issueTypeId
    */
