@@ -43,7 +43,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
     }, [tableListMode]);
     useEffect(() => {
       const loadData = async () => {
-        const Fields = await fieldApi.getFoundationHeader();
+        const Fields = await fieldApi.getTableFields();
         setFields(Fields);
       };
       loadData();

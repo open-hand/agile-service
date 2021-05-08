@@ -1,56 +1,64 @@
-// @ts-nocheck
 import React, { useState, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   DataSet, PerformanceTable, Pagination,
 } from 'choerodon-ui/pro';
-import { difference, find } from 'lodash';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import { IField, IIssueColumnName } from '@/common/types';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
-import ColumnManage from '@/components/column-manage';
-import getColumnsMap, { normalColumn, checkBoxColumn } from './columns';
+import { usePersistFn } from 'ahooks';
+import { ListLayoutColumnVO } from '@/api';
+import useTable from '@/hooks/useTable';
+import { checkBoxColumn, getTableColumns } from './columns';
 import transverseTreeData from './utils/transverseTreeData';
+import getListLayoutColumns from './utils/getListLayoutColumns';
 
-interface Props extends Partial<TableProps> {
+export interface IssueTableProps extends Partial<TableProps> {
   tableRef?: React.RefObject<any>
   onCreateIssue?: () => void
-  dataSet: DataSet
+  // dataSet: DataSet
   fields: IField[]
   onRowClick?: (record: any) => void
   selectedIssue?: string
   createIssue?: boolean
   visibleColumns?: IIssueColumnName[]
+  listLayoutColumns: ListLayoutColumnVO[] | null
+  onSummaryClick: () => void
+  typeIdChange?: (id: string) => void
+  summaryChange?: (summary: string) => void
+  IssueStore?: any
+  tableProps: ReturnType<typeof useTable>
+  onColumnResize?: (columnWidth: number, dataKey: string) => void
+  isTree?: boolean
 }
-const mapper = (key: IIssueColumnName): string => ({
-  summary: 'issueId',
-  issueNum: 'issueNum',
-  priority: 'priorityId',
-  sprint: 'issueSprintVOS',
-  reporter: 'reporterId',
-  creationDate: 'creationDate',
-  assign: 'assigneeId',
-  status: 'statusId',
-  lastUpdateDate: 'lastUpdateDate',
-  estimatedStartTime: 'estimatedStartTime',
-  estimatedEndTime: 'estimatedEndTime',
-  label: 'label',
-  component: 'component',
-  storyPoints: 'storyPoints',
-  fixVersion: 'fixVersion',
-  influenceVersion: 'influenceVersion',
-  epic: 'epic',
-  feature: 'feature',
-}[key] || key);
+// const mapper = (key: IIssueColumnName): string => ({
+//   summary: 'issueId',
+//   issueNum: 'issueNum',
+//   priority: 'priorityId',
+//   sprint: 'issueSprintVOS',
+//   reporter: 'reporterId',
+//   creationDate: 'creationDate',
+//   assign: 'assigneeId',
+//   status: 'statusId',
+//   lastUpdateDate: 'lastUpdateDate',
+//   estimatedStartTime: 'estimatedStartTime',
+//   estimatedEndTime: 'estimatedEndTime',
+//   label: 'label',
+//   component: 'component',
+//   storyPoints: 'storyPoints',
+//   fixVersion: 'fixVersion',
+//   influenceVersion: 'influenceVersion',
+//   epic: 'epic',
+//   feature: 'feature',
+// }[key] || key);
 
-const IssueTable: React.FC<Props> = ({
+const IssueTable: React.FC<IssueTableProps> = ({
   tableRef,
   onCreateIssue,
   dataSet,
   fields,
-  listLayoutColumns,
+  listLayoutColumns: savedListLayoutColumns,
   onSummaryClick,
   selectedIssue,
   createIssue = true,
@@ -58,93 +66,55 @@ const IssueTable: React.FC<Props> = ({
   summaryChange = () => { },
   IssueStore,
   tableProps,
+  onColumnResize,
+  isTree = true,
   ...otherProps
 }) => {
-  const columnCodes = useMemo(() => [
-    'summary',
-    'issueNum',
-    'priority',
-    'sprint',
-    'reporter',
-    'creationDate',
-    'assign',
-    'status',
-    'lastUpdateDate',
-    'estimatedStartTime',
-    'estimatedEndTime',
-    'label',
-    'component',
-    'storyPoints',
-    'fixVersion',
-    'influenceVersion',
-    'epic',
-    'feature',
-  ], []);
   const handleOpenCreateIssue = useCallback(() => {
     IssueStore?.createQuestion(true);
   }, [IssueStore]);
   const props = tableProps;
   const {
-    pagination, visibleColumns, setVisibleColumns, ...restProps
+    pagination,
+    setVisibleColumns, ...restProps
   } = props;
-  const { isInProgram } = useIsInProgram();
-  const getColumn = useCallback((code) => getColumnsMap({ onSummaryClick }).get(code) ?? normalColumn(find(fields, { code })), [fields, onSummaryClick]);
-  // 后端保存了用后端的，没保存，使用默认的
-  const visibleColumnCodes = useMemo(() => (listLayoutColumns ? listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode) : visibleColumns), [listLayoutColumns, visibleColumns]);
-  const columns = [checkBoxColumn({
+
+  const listLayoutColumns = useMemo(() => getListLayoutColumns(savedListLayoutColumns, fields), [fields, savedListLayoutColumns]);
+
+  const columns = useMemo(() => getTableColumns({
+    listLayoutColumns, fields, onSummaryClick, handleColumnResize: onColumnResize,
+  }), [fields, listLayoutColumns, onColumnResize, onSummaryClick]);
+  const visibleColumns = useMemo(() => columns.filter((column) => column.display), [columns]);
+  const data = useMemo(() => (isTree ? transverseTreeData(props.data) : props.data), [isTree, props.data]);
+  const checkboxColumn = useMemo(() => checkBoxColumn({
     data: props.data,
     checkValues: props.checkValues,
     handleCheckChange: props.handleCheckChange,
     handleCheckAllChange: props.handleCheckAllChange,
-  })].concat(visibleColumnCodes.map((code) => {
-    const column = getColumn(code);
-    return column ? { ...getColumn(code), resizable: true } : undefined;
-  }).filter(Boolean));
-  const totalColumnCodes = useMemo(() => [...columnCodes, ...fields.map((f) => f.code)], [columnCodes, fields]);
-
-  const orderedCodes = useMemo(() => {
-    if (listLayoutColumns) {
-      const listLayoutColumnCodes = listLayoutColumns.map((c) => c.columnCode);
-      // 保存在后端的在前面，但是后端保存的不一定全，所以把不在后端的补在后面
-      return [...listLayoutColumnCodes, ...difference(totalColumnCodes, listLayoutColumnCodes)];
-    }
-    return totalColumnCodes;
-  }, [listLayoutColumns, totalColumnCodes]);
-  const treeData = useMemo(() => transverseTreeData(props.data), [props.data]);
+  }), [props.checkValues, props.data, props.handleCheckAllChange, props.handleCheckChange]);
 
   return (
     <div className="c7nagile-issue-table">
-      <ColumnManage
-        value={visibleColumnCodes}
-        onChange={setVisibleColumns}
-        options={orderedCodes.map((code) => {
-          const column = getColumn(code);
-          return {
-            code,
-            title: column?.title,
-          };
-        })}
-      />
       <PerformanceTable
         {...restProps}
         isTree
         rowKey="issueId"
         virtualized
         bordered={false}
-        columns={columns}
+        columns={[checkboxColumn, ...visibleColumns]}
         // autoHeight
         height={400}
-        data={treeData}
+        data={data}
       />
       {createIssue && (
-      <div style={{ paddingTop: 5 }}>
-        <QuickCreateIssue
-          onCreate={onCreateIssue}
-          cantCreateEvent={handleOpenCreateIssue}
-          typeIdChange={typeIdChange}
-          summaryChange={summaryChange}
-        />
-      </div>
+        <div style={{ paddingTop: 5 }}>
+          <QuickCreateIssue
+            onCreate={onCreateIssue}
+            cantCreateEvent={handleOpenCreateIssue}
+            typeIdChange={typeIdChange}
+            summaryChange={summaryChange}
+          />
+        </div>
       )}
       <Pagination
         total={pagination.total}

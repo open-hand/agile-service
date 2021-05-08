@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { map, get } from 'lodash';
+import { map, get, find } from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
 import { CheckBox } from 'choerodon-ui/pro';
 import PriorityTag from '@/components/PriorityTag';
@@ -32,8 +32,8 @@ export const checkBoxColumn = ({
     />
   ),
 });
-const normalColumn = (field) => (field && {
-  title: field.title,
+export const getCustomColumn = (field) => (field && {
+  title: field.name,
   dataIndex: field?.code,
   render: ({ rowData, dataIndex, rowIndex }) => {
     const { fieldType, code } = field;
@@ -107,7 +107,7 @@ function renderEpicOrFeature({ rowData, dataIndex: fieldName }) {
     </Tooltip>
   ) : null;
 }
-const columns = ({ onSummaryClick }) => new Map([
+const getColumnsMap = ({ onSummaryClick }) => new Map([
   ['summary', {
     title: '概要',
     dataIndex: 'summary',
@@ -148,7 +148,7 @@ const columns = ({ onSummaryClick }) => new Map([
   }],
   ['assign', {
     title: '经办人',
-    dataIndex: 'assigneeId',
+    dataIndex: 'assign',
     sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex' }}>
@@ -200,7 +200,7 @@ const columns = ({ onSummaryClick }) => new Map([
   }],
   ['status', {
     title: '状态',
-    dataIndex: 'statusId',
+    dataIndex: 'status',
     sortable: true,
     render: ({ rowData }) => (
       <Tooltip title={get(rowData, 'statusVO')?.name}>
@@ -219,7 +219,7 @@ const columns = ({ onSummaryClick }) => new Map([
   }],
   ['reporter', {
     title: '报告人',
-    dataIndex: 'reporterId',
+    dataIndex: 'reporter',
     sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex' }}>
@@ -295,7 +295,7 @@ const columns = ({ onSummaryClick }) => new Map([
   }],
   ['sprint', {
     title: '冲刺',
-    dataIndex: 'issueSprintVOS',
+    dataIndex: 'sprint',
     render: renderTag('issueSprintVOS', 'sprintName'),
   }],
   ['storyPoints', {
@@ -323,5 +323,26 @@ const columns = ({ onSummaryClick }) => new Map([
     dataIndex: 'environmentName',
   }],
 ]);
-export { normalColumn };
-export default columns;
+
+export function getTableColumns({
+  listLayoutColumns, fields, onSummaryClick, handleColumnResize,
+}) {
+  const res = [];
+  listLayoutColumns.forEach((layoutColumn) => {
+    const { columnCode: code, width } = layoutColumn;
+    const field = find(fields, { code });
+    if (field) {
+      const columnsMap = getColumnsMap({ onSummaryClick });
+      // 系统字段和自定义字段处理
+      const column = columnsMap.has(code) ? columnsMap.get(code) : getCustomColumn(field);
+      res.push({
+        ...column,
+        display: layoutColumn.display,
+        resizable: true,
+        onResize: handleColumnResize,
+        width: width && width > 0 ? width : column.width,
+      });
+    }
+  });
+  return res;
+}
