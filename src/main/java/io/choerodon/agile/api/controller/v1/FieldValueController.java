@@ -174,4 +174,19 @@ public class FieldValueController {
                                                               @RequestParam @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(objectSchemeFieldService.getIssueSummaryDefaultValue(organizationId, projectId, issueTypeId), HttpStatus.OK);
     }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "界面获取字段表头(包含系统字段和自定义字段)")
+    @GetMapping("/list/get_fields")
+    public ResponseEntity<List<ObjectSchemeFieldVO>> getFields(@ApiParam(value = "项目id", required = true)
+                                                                       @PathVariable("project_id") Long projectId,
+                                                                       @ApiParam(value = "组织id", required = true)
+                                                                       @RequestParam Long organizationId,
+                                                                       @ApiParam(value = "方案编码", required = true)
+                                                                       @RequestParam String schemeCode,
+                                                                       @ApiParam(value = "字段类型", required = true)
+                                                                       @RequestParam String issueTypeList) {
+        return new ResponseEntity<>(objectSchemeFieldService.getAllField(organizationId, projectId, schemeCode, issueTypeList), HttpStatus.OK);
+    }
 }

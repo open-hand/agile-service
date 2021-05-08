@@ -25,6 +25,7 @@ public class PersonalFilterDTO extends AuditDomain {
     private Long userId;
     private String name;
     private String filterJson;
+    private Boolean isDefault;
 
     public Long getFilterId() {
         return filterId;
@@ -64,6 +65,14 @@ public class PersonalFilterDTO extends AuditDomain {
 
     public void setFilterJson(String filterJson) {
         this.filterJson = filterJson;
+    }
+
+    public Boolean getDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(Boolean aDefault) {
+        isDefault = aDefault;
     }
 }
 

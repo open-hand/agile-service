@@ -21,4 +21,6 @@ public interface PersonalFilterService {
     List<PersonalFilterVO> listByProjectId(Long projectId, Long userId, String searchStr);
 
     Boolean checkName(Long projectId, Long userId, String name);
+
+    Boolean setDefault(Long projectId, Long filterId);
 }

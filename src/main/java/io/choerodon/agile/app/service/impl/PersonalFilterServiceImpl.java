@@ -14,6 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
@@ -61,6 +62,9 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         if (checkName(projectId, userId, personalFilterVO.getName())) {
             throw new CommonException(NAME_EXIST);
         }
+        if (!ObjectUtils.isEmpty(personalFilterVO.getDefault()) && Boolean.TRUE.equals(personalFilterVO.getDefault())) {
+            personalFilterMapper.updateDefault(projectId, userId, false, null);
+        }
         personalFilterVO.setUserId(userId);
         personalFilterVO.setProjectId(projectId);
         personalFilterVO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterVO.getFilterJson(),false));
@@ -76,6 +80,10 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         personalFilterVO.setFilterId(filterId);
         PersonalFilterDTO personalFilterDTO = modelMapper.map(personalFilterVO, PersonalFilterDTO.class);
         personalFilterDTO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterDTO.getFilterJson(),false));
+        if (!ObjectUtils.isEmpty(personalFilterVO.getDefault()) && Boolean.TRUE.equals(personalFilterVO.getDefault())) {
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            personalFilterMapper.updateDefault(projectId, userId, false, null);
+        }
         if (personalFilterMapper.updateByPrimaryKeySelective(personalFilterDTO) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }
@@ -109,5 +117,13 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         personalFilterDTO.setName(name);
         List<PersonalFilterDTO> list = personalFilterMapper.select(personalFilterDTO);
         return list != null && !list.isEmpty();
+    }
+
+    @Override
+    public Boolean setDefault(Long projectId, Long filterId) {
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        personalFilterMapper.updateDefault(projectId, userId, false, null);
+        int result = personalFilterMapper.updateDefault(projectId, userId, true, filterId);
+        return result > 0;
     }
 }
