@@ -45,6 +45,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     protected static final String ISSUE_TYPE_SOURCE_SYSTEM = "system";
     protected static final String ISSUE_TYPE_SOURCE_ORGANIZATION = "organization";
     protected static final String ISSUE_TYPE_SOURCE_PROJECT = "project";
+    private static final  String[] AGILE_ISSUE_TYPE_LIST = {"story", "issue_epic", "task", "sub_task", "bug"};
+    private static final  String[] PROGRAM_ISSUE_TYPE_LIST = {"issue_epic", "feature"};
+
 
     @Autowired
     protected ObjectSchemeFieldMapper objectSchemeFieldMapper;
@@ -1557,6 +1560,49 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
            return agilePluginService.queryProgramPageConfigFields(projectId,issueTypeId,pageConfigFieldVOS);
         }
         return pageConfigFieldVOS;
+    }
+
+    @Override
+    public List<ObjectSchemeFieldVO> getAllField(Long organizationId, Long projectId, String schemeCode, String issueTypeList) {
+        List<ObjectSchemeFieldVO> objectSchemeFieldVOS = generateFieldViews(organizationId, projectId, schemeCode);
+        objectSchemeFieldVOS = filterByIssueTypeList(objectSchemeFieldVOS, issueTypeList);
+        return objectSchemeFieldVOS;
+    }
+
+    private List<ObjectSchemeFieldVO> filterByIssueTypeList(List<ObjectSchemeFieldVO> objectSchemeFieldVOS, String issueTypeList) {
+        if (CollectionUtils.isEmpty(objectSchemeFieldVOS)) {
+            return new ArrayList<>();
+        }
+
+        List<ObjectSchemeFieldVO> list = new ArrayList<>();
+        List<String> issueTypes = new ArrayList<>();
+        if (Objects.equals("agileIssueType", issueTypeList)) {
+            issueTypes.addAll(Arrays.asList(AGILE_ISSUE_TYPE_LIST));
+        } else if (Objects.equals("programIssueType", issueTypeList)) {
+            issueTypes.addAll(Arrays.asList(PROGRAM_ISSUE_TYPE_LIST));
+        } else if (Objects.equals("backlogIssueType", issueTypeList)) {
+            issueTypes.add("backlog");
+        }
+        objectSchemeFieldVOS.forEach(v -> {
+            Boolean needAdd = false;
+            List<String> contexts = v.getContexts();
+            if (!CollectionUtils.isEmpty(contexts)) {
+                contexts.retainAll(issueTypes);
+                if (issueTypes.size() > 0) {
+                    needAdd = true;
+                }
+            }
+            if (needAdd) {
+                ObjectSchemeFieldVO objectSchemeFieldVO = new ObjectSchemeFieldVO();
+                objectSchemeFieldVO.setId(v.getId());
+                objectSchemeFieldVO.setFieldType(v.getFieldType());
+                objectSchemeFieldVO.setCode(v.getCode());
+                objectSchemeFieldVO.setName(v.getName());
+                objectSchemeFieldVO.setSystem(v.getSystem());
+                list.add(objectSchemeFieldVO);
+            }
+        });
+        return list;
     }
 
     private void addPageFieldVOS(List<PageConfigFieldVO> pageConfigFieldVOS, Long organizationId, Long projectId, Long issueTypeId) {

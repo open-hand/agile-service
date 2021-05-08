@@ -50,8 +50,6 @@ public class ListLayoutController {
                                                         @PathVariable(name = "apply_type") String applyType,
                                                         @ApiParam(value = "组织id", required = true)
                                                         @RequestParam Long organizationId) {
-        return Optional.ofNullable(listLayoutService.queryByApplyType(organizationId, projectId, applyType))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.list.layout.query"));
+        return new ResponseEntity<>(listLayoutService.queryByApplyType(organizationId, projectId, applyType), HttpStatus.OK);
     }
 }
