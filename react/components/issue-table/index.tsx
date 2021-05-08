@@ -53,7 +53,6 @@ const IssueTable: React.FC<Props> = ({
   onSummaryClick,
   selectedIssue,
   createIssue = true,
-  visibleColumns = defaultVisibleColumns,
   typeIdChange = () => { },
   summaryChange = () => { },
   IssueStore,
