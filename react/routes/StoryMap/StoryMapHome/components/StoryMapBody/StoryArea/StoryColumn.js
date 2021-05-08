@@ -35,6 +35,7 @@ class StoryColumn extends Component {
     return (
       <Column
         width={width}
+        className="c7nagile-StoryMap-StoryColumn"
         saveRef={connectDropTarget}
         style={{ background: isOver ? 'rgb(240,240,240)' : 'white', position: 'relative', minHeight: storys ? (storys.length + 1) * CardHeight : undefined }}
       >

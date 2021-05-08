@@ -15,8 +15,8 @@ const WorkList = ({ match }) => (
         <PageWrap
           noHeader={!loading && permission ? [] : ['choerodon.code.project.cooperation.version-list.ps.release']}
         >
-          <PageTab title="规划版本" route={LINK_URL.versionRelease} tabKey="choerodon.code.project.cooperation.version-list.ps.release" component={Release} />
           <PageTab title="发布版本" route={LINK_URL.versionPublish} tabKey="choerodon.code.project.cooperation.version-list.ps.publish" component={Publish} />
+          <PageTab title="规划版本" route={LINK_URL.versionRelease} tabKey="choerodon.code.project.cooperation.version-list.ps.release" component={Release} />
 
         </PageWrap>
       )

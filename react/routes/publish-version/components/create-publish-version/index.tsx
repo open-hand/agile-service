@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import {
   Button,
-  DataSet, DatePicker, Form, Modal, Radio, Select, TextField, Tooltip,
+  DataSet, DatePicker, Form, Modal, Radio, Select, TextField, Tooltip, TextArea,
 } from 'choerodon-ui/pro/lib';
 import { debounce, isEmpty } from 'lodash';
 import classnames from 'classnames';
@@ -48,7 +48,9 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps
       {
         name: 'versionAlias', label: '发布版本名称', required: true, validator: handleCheckName,
       },
-      { name: 'actualPublishDate', label: '实际发布时间' },
+      { name: 'actualPublishDate', label: '发布时间' },
+      { name: 'description', label: '描述' },
+
       { name: 'artifactId', label: 'artifactId' },
       { name: 'groupId', label: 'groupId' },
       { name: 'versionId', label: 'versionId' },
@@ -81,7 +83,9 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps
     <Form dataSet={ds}>
       <TextField name="versionAlias" />
       <DatePicker name="actualPublishDate" />
-      <TextField name="artifactId" />
+      <TextArea name="description" />
+
+      {/* <TextField name="artifactId" />
       <TextField name="groupId" />
       <TextField name="versionId" />
       <SelectAppService
@@ -90,7 +94,7 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps
           setApplicationId(v ? v.id : undefined);
         }}
       />
-      <SelectGitTags key={`select-git-tag-${applicationId}`} name="tagName" applicationId={applicationId} />
+      <SelectGitTags key={`select-git-tag-${applicationId}`} name="tagName" applicationId={applicationId} /> */}
     </Form>
   );
 };

@@ -1,0 +1,65 @@
+@activeColor: rgba(15, 19, 88, 0.06);
+
+.list {
+  padding-top: .18rem;
+  height: 100%;
+
+  .search {
+    margin-left: .1rem;
+    margin-right: .1rem;
+    margin-bottom: .11rem;
+  }
+
+  .scroll {
+
+    // height: ~"calc(100% - 60px )";
+    // overflow-y: auto;
+    &_bottom {
+      color: rgba(58, 52, 95, 0.65);
+      text-align: center;
+      width: 100%;
+      display: inline-block;
+    }
+
+    // &-spin {
+    // }
+  }
+  .version_item {
+    overflow: hidden;
+    padding: .09rem 0;
+    padding-left: .1rem;
+    padding-right: .1rem;
+    font-size: 13px;
+    font-family: PingFangSC-Regular, PingFang SC;
+    font-weight: 400;
+    color: #0F1358;
+    line-height: 18px;
+    cursor: pointer;
+
+    &:hover {
+      background: @activeColor;
+    }
+
+    &_active {
+      font-weight: 500;
+      background: @activeColor;
+    }
+
+    // .c7n-agile-projects-head-portrait,
+    // .c7n-agile-projects-head-portrait-item {
+    //   width: 100%;
+    // }
+
+    &_text {
+      color: #0F1358;
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .infinite-scroll-component__outerdiv {
+    height: ~"calc(100% - .43rem)";
+  }
+}
