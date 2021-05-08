@@ -423,7 +423,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             }
             for (TagVO tag : tags) {
                 addTagToIssue(tag, projectId, organizationId, programId, issueMap);
-                addTagCompareHistory(tag.getTagCompareVO(), projectId, organizationId);
+                addTagCompareHistory(tag.getTagCompareVO(), projectId, organizationId, publishVersionId);
             }
         }
     }
@@ -668,10 +668,11 @@ public class PublishVersionServiceImpl implements PublishVersionService {
 
     private void addTagCompareHistory(TagCompareVO tagCompareVO,
                                       Long projectId,
-                                      Long organizationId) {
-
+                                      Long organizationId,
+                                      Long publishVersionId) {
         TagCompareHistoryDTO dto = new TagCompareHistoryDTO();
         dto.setProjectId(projectId);
+        dto.setPublishVersionId(publishVersionId);
         dto.setOrganizationId(organizationId);
         dto.setSource(tagCompareVO.getSourceTag());
         dto.setTarget(tagCompareVO.getTargetTag());

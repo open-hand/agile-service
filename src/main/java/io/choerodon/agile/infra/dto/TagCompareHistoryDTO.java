@@ -21,6 +21,8 @@ public class TagCompareHistoryDTO extends AuditDomain {
     @GeneratedValue
     private Long id;
 
+    private Long publishVersionId;
+
     private String appServiceCode;
 
     private String source;
@@ -30,6 +32,14 @@ public class TagCompareHistoryDTO extends AuditDomain {
     private Long projectId;
 
     private Long organizationId;
+
+    public Long getPublishVersionId() {
+        return publishVersionId;
+    }
+
+    public void setPublishVersionId(Long publishVersionId) {
+        this.publishVersionId = publishVersionId;
+    }
 
     public Long getId() {
         return id;

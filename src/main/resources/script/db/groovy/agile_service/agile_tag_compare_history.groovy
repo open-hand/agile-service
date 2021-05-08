@@ -5,15 +5,16 @@ databaseChangeLog(logicalFilePath:'agile_tag_compare_history.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
+            column(name: 'publish_version_id', type: 'BIGINT UNSIGNED', remarks: '发布版本id') {
+                constraints(nullable: false)
+            }
             column(name: 'app_service_code', type: 'VARCHAR(255)', remarks: '应用服务code') {
                 constraints(nullable: false)
             }
             column(name: 'source', type: 'VARCHAR(255)', remarks: 'tag对比的源，一般是比较新的tag') {
                 constraints(nullable: false)
             }
-            column(name: 'target', type: 'VARCHAR(255)', remarks: 'tag对比的目标，source是从target中切出来的') {
-                constraints(nullable: false)
-            }
+            column(name: 'target', type: 'VARCHAR(255)', remarks: 'tag对比的目标，source是从target中切出来的，为空则拿source的所有commit')
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
                 constraints(nullable: false)
             }

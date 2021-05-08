@@ -31,6 +31,16 @@ public class TagCompareVO {
 
     private String data;
 
+    private Long publishVersionId;
+
+    public Long getPublishVersionId() {
+        return publishVersionId;
+    }
+
+    public void setPublishVersionId(Long publishVersionId) {
+        this.publishVersionId = publishVersionId;
+    }
+
     public String getData() {
         return data;
     }
