@@ -1009,6 +1009,10 @@ public class ExcelServiceImpl implements ExcelService {
             if (isCellEmpty(issueTypeCell)) {
                 errorRowColMap.put(rowNum, Arrays.asList(issueTypeCol));
                 issueTypeCell.setCellValue(buildWithErrorMsg("", "问题类型为空"));
+                progress.failCountIncrease();
+                progress.processNumIncrease();
+                history.setFailCount(progress.getFailCount());
+                sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
                 continue;
             } else {
                 issueType = issueTypeCell.toString();
