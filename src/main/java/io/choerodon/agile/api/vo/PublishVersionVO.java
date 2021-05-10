@@ -41,8 +41,6 @@ public class PublishVersionVO {
     private List<PublishVersionVO> children;
     @ApiModelProperty(value = "实际发布时间")
     private Date actualPublishDate;
-    @ApiModelProperty(value = "tag名称")
-    private String tagName;
     @ApiModelProperty(value = "描述")
     private String description;
 
@@ -102,14 +100,6 @@ public class PublishVersionVO {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public String getTagName() {
-        return tagName;
-    }
-
-    public void setTagName(String tagName) {
-        this.tagName = tagName;
     }
 
     public Date getActualPublishDate() {

@@ -23,6 +23,56 @@ public class TagCompareVO {
 
     private String targetTag;
 
+    private Double progress;
+
+    private String action;
+
+    private String msg;
+
+    private String data;
+
+    private Long publishVersionId;
+
+    public Long getPublishVersionId() {
+        return publishVersionId;
+    }
+
+    public void setPublishVersionId(Long publishVersionId) {
+        this.publishVersionId = publishVersionId;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public Double getProgress() {
+        return progress;
+    }
+
+    public void setProgress(Double progress) {
+        this.progress = progress;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
     public Long getProjectId() {
         return projectId;
     }

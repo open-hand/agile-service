@@ -1016,7 +1016,9 @@ public class ExcelServiceImpl implements ExcelService {
         result.put("groupId", publishVersionDTO.getGroupId());
         result.put("artifactId", publishVersionDTO.getArtifactId());
         String appServiceCode = publishVersionDTO.getServiceCode();
-        String tagName = publishVersionDTO.getTagName();
+        //todo tag
+        String tagName = "tag";
+//        String tagName = publishVersionDTO.getTagName();
         String tag = "";
         if (!StringUtils.isEmpty(appServiceCode) && !StringUtils.isEmpty(tagName)) {
             tag = appServiceCode + COLON_CN + tagName;
@@ -1097,7 +1099,9 @@ public class ExcelServiceImpl implements ExcelService {
         Set<TagVO> tags = new HashSet<>();
         publishVersions.forEach(x -> {
             String serviceCode = x.getServiceCode();
-            String tagName = x.getTagName();
+            //todo tag
+            String tagName = "";
+//            String tagName = x.getTagName();
             if (!StringUtils.isEmpty(serviceCode)
                     && !StringUtils.isEmpty(tagName)) {
                 TagVO tag = new TagVO();

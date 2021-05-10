@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.PublishVersionVO;
+import io.choerodon.agile.api.vo.TagVO;
 import io.choerodon.agile.api.vo.VersionTreeVO;
 import io.choerodon.agile.app.service.PublishVersionTreeService;
 import io.choerodon.core.iam.ResourceLevel;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author superlee
@@ -89,5 +91,30 @@ public class PublishVersionTreeController {
         return ResponseEntity.ok(publishVersionTreeService.directDescendants(projectId, organizationId, rootId));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "发布版本树添加tag")
+    @PostMapping(value = "/add_tag")
+    public ResponseEntity addTag(@ApiParam(value = "项目id", required = true)
+                                 @PathVariable(name = "project_id") Long projectId,
+                                 @ApiParam(value = "组织id", required = true)
+                                 @RequestParam Long organizationId,
+                                 @RequestParam @Encrypt Long publishVersionId,
+                                 @RequestBody @Validated Set<TagVO> tags) {
+        publishVersionTreeService.addTag(projectId, organizationId, publishVersionId, tags);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "发布版本树删除tag")
+    @DeleteMapping(value = "/delete_tag")
+    public ResponseEntity deleteTag(@ApiParam(value = "项目id", required = true)
+                                    @PathVariable(name = "project_id") Long projectId,
+                                    @ApiParam(value = "组织id", required = true)
+                                    @RequestParam Long organizationId,
+                                    @RequestParam @Encrypt Long publishVersionId,
+                                    @RequestBody @Validated Set<TagVO> tags) {
+        publishVersionTreeService.deleteTag(projectId, organizationId, publishVersionId, tags);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
 }

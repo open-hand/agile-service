@@ -10,12 +10,12 @@ import javax.persistence.Table;
 
 /**
  * @author superlee
- * @since 2021-04-18
+ * @since 2021-04-29
  */
-@Table(name = "agile_tag_compare_history")
 @ModifyAudit
 @VersionAudit
-public class TagCompareHistoryDTO extends AuditDomain {
+@Table(name = "agile_publish_version")
+public class PublishVersionTagRelDTO extends AuditDomain {
 
     @Id
     @GeneratedValue
@@ -23,23 +23,13 @@ public class TagCompareHistoryDTO extends AuditDomain {
 
     private Long publishVersionId;
 
+    private String tagName;
+
     private String appServiceCode;
-
-    private String source;
-
-    private String target;
 
     private Long projectId;
 
     private Long organizationId;
-
-    public Long getPublishVersionId() {
-        return publishVersionId;
-    }
-
-    public void setPublishVersionId(Long publishVersionId) {
-        this.publishVersionId = publishVersionId;
-    }
 
     public Long getId() {
         return id;
@@ -49,28 +39,28 @@ public class TagCompareHistoryDTO extends AuditDomain {
         this.id = id;
     }
 
+    public Long getPublishVersionId() {
+        return publishVersionId;
+    }
+
+    public void setPublishVersionId(Long publishVersionId) {
+        this.publishVersionId = publishVersionId;
+    }
+
+    public String getTagName() {
+        return tagName;
+    }
+
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
+    }
+
     public String getAppServiceCode() {
         return appServiceCode;
     }
 
     public void setAppServiceCode(String appServiceCode) {
         this.appServiceCode = appServiceCode;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public String getTarget() {
-        return target;
-    }
-
-    public void setTarget(String target) {
-        this.target = target;
     }
 
     public Long getProjectId() {

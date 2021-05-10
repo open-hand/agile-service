@@ -1,12 +1,18 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.PublishVersionVO;
+import io.choerodon.agile.api.vo.TagVO;
 import io.choerodon.agile.api.vo.VersionTreeVO;
 import io.choerodon.agile.app.service.PublishVersionTreeService;
 import io.choerodon.agile.infra.dto.PublishVersionDTO;
+import io.choerodon.agile.infra.dto.PublishVersionTagRelDTO;
 import io.choerodon.agile.infra.dto.PublishVersionTreeClosureDTO;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.PublishVersionMapper;
+import io.choerodon.agile.infra.mapper.PublishVersionTagRelMapper;
 import io.choerodon.agile.infra.mapper.PublishVersionTreeClosureMapper;
+import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +42,10 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
     private PublishVersionMapper publishVersionMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private PublishVersionTagRelMapper publishVersionTagRelMapper;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     @Override
     public List<VersionTreeVO> tree(Set<Long> projectIds,
@@ -51,13 +61,18 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
         Map<Long, PublishVersionDTO> publishVersionMap = new HashMap<>();
         if (!childrenIds.isEmpty()) {
             publishVersionMap.putAll(
-                    publishVersionMapper.selectByIds(StringUtils.join(childrenIds, ","))
+                    publishVersionMapper.selectWithTag(childrenIds, projectIds, organizationId)
                             .stream()
                             .collect(Collectors.toMap(PublishVersionDTO::getId, Function.identity()))
             );
         }
+        Map<Long, String> projectCodeMap =
+                baseFeignClient.queryByIds(projectIds)
+                        .getBody()
+                        .stream()
+                        .collect(Collectors.toMap(ProjectVO::getId, ProjectVO::getCode));
         List<VersionTreeVO> result = new ArrayList<>();
-        rootIds.forEach(x -> result.add(toTree(versionTreeClosureSet, publishVersionMap, x)));
+        rootIds.forEach(x -> result.add(toTree(versionTreeClosureSet, publishVersionMap, x, projectCodeMap)));
         return result;
     }
 
@@ -148,6 +163,54 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
         }
         List<PublishVersionDTO> list = publishVersionMapper.selectByIds(StringUtils.join(publishVersionIds, ","));
         return modelMapper.map(list, new TypeToken<List<PublishVersionVO>>() {}.getType());
+    }
+
+    @Override
+    public void addTag(Long projectId,
+                       Long organizationId,
+                       Long publishVersionId,
+                       Set<TagVO> tags) {
+        PublishVersionDTO publishVersion = publishVersionMapper.selectByPrimaryKey(publishVersionId);
+        AssertUtilsForCommonException.notNull(publishVersion, "error.publish.version.not.existed.", publishVersionId);
+        if (!ObjectUtils.isEmpty(tags)) {
+            tags.forEach(x -> {
+                PublishVersionTagRelDTO dto = buildPublishVersionTagRel(organizationId, publishVersionId, x);
+                if (publishVersionTagRelMapper.select(dto).isEmpty()) {
+                    publishVersionTagRelMapper.insert(dto);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void deleteTag(Long projectId,
+                          Long organizationId,
+                          Long publishVersionId,
+                          Set<TagVO> tags) {
+        PublishVersionDTO publishVersion = publishVersionMapper.selectByPrimaryKey(publishVersionId);
+        AssertUtilsForCommonException.notNull(publishVersion, "error.publish.version.not.existed.", publishVersionId);
+        if (!ObjectUtils.isEmpty(tags)) {
+            tags.forEach(x -> {
+                PublishVersionTagRelDTO dto = buildPublishVersionTagRel(organizationId, publishVersionId, x);
+                publishVersionTagRelMapper.delete(dto);
+            });
+        }
+    }
+
+    private PublishVersionTagRelDTO buildPublishVersionTagRel(Long organizationId, Long publishVersionId, TagVO x) {
+        Long thisProjectId = x.getProjectId();
+        String appServiceCode = x.getAppServiceCode();
+        String tagName = x.getTagName();
+        AssertUtilsForCommonException.notNull(thisProjectId, "error.tag.projectId.null");
+        AssertUtilsForCommonException.notEmpty(appServiceCode, "error.tag.appServiceCode.empty");
+        AssertUtilsForCommonException.notEmpty(tagName, "error.tag.tagName.empty");
+        PublishVersionTagRelDTO dto = new PublishVersionTagRelDTO();
+        dto.setOrganizationId(organizationId);
+        dto.setProjectId(thisProjectId);
+        dto.setAppServiceCode(appServiceCode);
+        dto.setTagName(tagName);
+        dto.setPublishVersionId(publishVersionId);
+        return dto;
     }
 
     private List<PublishVersionTreeClosureDTO> buildDeleteList(Long projectId,
@@ -282,28 +345,59 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
 
     private VersionTreeVO toTree(Set<PublishVersionTreeClosureDTO> versionTreeClosureSet,
                                  Map<Long, PublishVersionDTO> publishVersionMap,
-                                 Long rootId) {
+                                 Long rootId,
+                                 Map<Long, String> projectCodeMap) {
         PublishVersionDTO publishVersionDTO = publishVersionMap.get(rootId);
         if (publishVersionDTO == null) {
-            throw new CommonException("error.program.version.not.existed." + rootId);
+            throw new CommonException("error.publish.version.not.existed." + rootId);
         }
         VersionTreeVO root = convertToVersionTree(publishVersionDTO, rootId);
-        processChildNodes(root, versionTreeClosureSet, publishVersionMap);
+        addPublishVersionTag(root, publishVersionDTO.getTags(), projectCodeMap);
+        processChildNodes(root, versionTreeClosureSet, publishVersionMap, projectCodeMap);
         return root;
+    }
+
+    private void addPublishVersionTag(VersionTreeVO root,
+                                      List<TagVO> tags,
+                                      Map<Long, String> projectCodeMap) {
+        if (!ObjectUtils.isEmpty(tags)) {
+            tags.forEach(x -> {
+                StringBuilder builder = new StringBuilder();
+                Long projectId = x.getProjectId();
+                String appServiceCode = x.getAppServiceCode();
+                String tagName = x.getTagName();
+                builder
+                        .append(projectCodeMap.get(projectId))
+                        .append(":")
+                        .append(appServiceCode)
+                        .append(":")
+                        .append(tagName);
+                VersionTreeVO child = new VersionTreeVO();
+                child.setType("tag");
+                child.setName(builder.toString());
+                child.setProjectId(projectId);
+                child.setAppServiceCode(appServiceCode);
+                child.setTagName(tagName);
+                root.getChildren().add(child);
+            });
+        }
     }
 
     private void processChildNodes(VersionTreeVO root,
                                    Set<PublishVersionTreeClosureDTO> versionTreeClosureSet,
-                                   Map<Long, PublishVersionDTO> publishVersionMap) {
+                                   Map<Long, PublishVersionDTO> publishVersionMap,
+                                   Map<Long, String> projectCodeMap) {
         Long rootId = root.getId();
         List<VersionTreeVO> children = root.getChildren();
         versionTreeClosureSet.forEach(x -> {
             Long parentId = x.getDescendantParent();
             Long childId = x.getDescendantId();
             if (Objects.equals(rootId, parentId)) {
-                VersionTreeVO child = convertToVersionTree(publishVersionMap.get(childId), childId);
+                PublishVersionDTO publishVersionDTO = publishVersionMap.get(childId);
+                VersionTreeVO child = convertToVersionTree(publishVersionDTO, childId);
+                addPublishVersionTag(child, publishVersionDTO.getTags(), projectCodeMap);
                 children.add(child);
-                processChildNodes(child, versionTreeClosureSet, publishVersionMap);
+                processChildNodes(child, versionTreeClosureSet, publishVersionMap, projectCodeMap);
             }
         });
     }

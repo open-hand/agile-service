@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.PublishVersionVO;
+import io.choerodon.agile.api.vo.TagVO;
 import io.choerodon.agile.api.vo.VersionTreeVO;
 
 import java.util.List;
@@ -49,11 +50,30 @@ public interface PublishVersionTreeService {
     List<PublishVersionVO> availablePublishVersion(Long projectId, Long organizationId, Long rootId);
 
     /**
-     *
      * @param projectId
      * @param organizationId
      * @param rootId
      * @return
      */
     List<PublishVersionVO> directDescendants(Long projectId, Long organizationId, Long rootId);
+
+    /**
+     * 发布版本树添加tag
+     *
+     * @param projectId
+     * @param organizationId
+     * @param publishVersionId
+     * @param tags
+     */
+    void addTag(Long projectId, Long organizationId, Long publishVersionId, Set<TagVO> tags);
+
+    /**
+     * 发布版本树删除tag
+     *
+     * @param projectId
+     * @param organizationId
+     * @param publishVersionId
+     * @param tags
+     */
+    void deleteTag(Long projectId, Long organizationId, Long publishVersionId, Set<TagVO> tags);
 }

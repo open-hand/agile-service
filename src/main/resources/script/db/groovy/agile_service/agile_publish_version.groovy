@@ -37,4 +37,10 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_publish_version.groovy') {
             column(name: 'status_code', type: 'VARCHAR(255)', remarks: '版本状态', defaultValue: 'version_planning', afterColumn: 'actual_publish_date')
         }
     }
+
+    changeSet(id: '2021-04-29-agile-publish-version-delete-column', author: 'kaiwen.li@hand-china.com') {
+        dropColumn(tableName: 'agile_publish_version') {
+            column(name: 'tag_name')
+        }
+    }
 }
