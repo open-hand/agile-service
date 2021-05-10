@@ -1,16 +1,9 @@
-import React, {
-  useContext, Fragment,
-  useState, useMemo, useCallback,
-} from 'react';
+import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import IssueTable, { IssueTableProps } from '@/components/issue-table';
-import { difference, find } from 'lodash';
-import QuickCreateIssue from '@/components/QuickCreateIssue';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
-import { IField, IIssueColumnName } from '@/common/types';
 import { usePersistFn } from 'ahooks';
-import { ListLayoutColumnVO } from '@/api';
 import { ColumnManage } from '@/components/issue-table/Component';
 import getListLayoutColumns from './utils/getListLayoutColumns';
 
@@ -58,14 +51,21 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
 
   return (
     <div>
-      <ColumnManage
-        value={visibleColumnCodes}
-        onChange={setVisibleColumns}
-        options={listLayoutColumns.map(((c) => ({
-          code: c.columnCode,
-          title: c.columnCode,
-        })))}
-      />
+      <div style={{
+        position: 'absolute',
+        top: '77px',
+        right: '21px',
+      }}
+      >
+        <ColumnManage
+          value={visibleColumnCodes}
+          onChange={setVisibleColumns}
+          options={listLayoutColumns.map(((c) => ({
+            code: c.columnCode,
+            title: c.columnCode,
+          })))}
+        />
+      </div>
       <IssueTable
         isTree={isTree}
         listLayoutColumns={listLayoutColumns}

@@ -111,12 +111,15 @@ const IssueTable: React.FC<IssueTableProps> = ({
           />
         </div>
       )}
-      <Pagination
-        total={pagination.total}
-        page={pagination.current}
-        pageSize={pagination.pageSize}
-        onChange={pagination.onChange}
-      />
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Pagination
+          total={pagination.total}
+          page={pagination.current}
+          pageSize={pagination.pageSize}
+          onChange={pagination.onChange}
+        />
+      </div>
+
     </div>
   );
 };
