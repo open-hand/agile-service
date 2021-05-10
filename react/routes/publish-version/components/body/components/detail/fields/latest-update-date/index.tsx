@@ -9,12 +9,12 @@ interface Props {
 }
 const LatestUpdateDate: React.FC<Props> = () => {
   const { store } = usePublishVersionContext();
-  const { creationDate: originData } = store.getCurrentData;
-  const creationDate = useMemo(() => (originData ? moment(originData, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD') : undefined), [originData]);
+  const { lastUpdateDate: originData } = store.getCurrentData;
+  const lastUpdateDate = useMemo(() => (originData ? moment(originData, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss') : undefined), [originData]);
 
   return (
     <Field label="最近更新时间">
-      {creationDate || '无'}
+      {lastUpdateDate || '无'}
     </Field>
 
   );

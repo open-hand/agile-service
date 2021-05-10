@@ -37,11 +37,11 @@ const LinkAppServiceTagModal: React.FC<{ modal?: IModalProps } & ILinkServicePro
     // ],
     fields: [
       {
-        name: 'appService', label: '选择应用服务', type: 'object' as any, required: true,
+        name: 'appService', label: '选择应用服务', type: 'object' as any, required: true, ignore: 'always' as any,
       },
       { name: 'tagName', label: '选择tag', required: true },
       { name: 'versionAlias', label: '版本别名' },
-      { name: 'serviceCode', bind: 'service.code' },
+      { name: 'serviceCode', bind: 'appService.code' },
       // { name: 'subProject', label: '选择子项目', required: !!programMode },
 
     ],
@@ -53,7 +53,7 @@ const LinkAppServiceTagModal: React.FC<{ modal?: IModalProps } & ILinkServicePro
     if (!await ds.current?.validate()) {
       return false;
     }
-    const data = ds.current?.toData();
+    const data = ds.current?.toJSONData();
     const result = handleOk && await handleOk(data);
     return typeof (result) !== 'undefined' ? result : true;
   }, [ds, handleOk]);

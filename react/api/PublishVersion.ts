@@ -28,6 +28,7 @@ export interface IPublishVersionData {
   version: string | null
   versionAlias: string | null
   statusCode: 'version_planning' | 'released' | 'archived'
+  description: string | null
   [propsName: string]: any
 }
 // export interface IAppVersionData {
@@ -53,6 +54,7 @@ interface IPublishVersionListSearchData {
   appService?: boolean
   content?: string
 }
+type IPublishVersionTreeTagNode = Pick<IPublishVersionTreeNode, 'versionAlias' | 'serviceCode'> & { tagName: string }
 class PublishVersionApi extends Api<PublishVersionApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -200,10 +202,33 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
+  dependencyTreeAddTag(publishVersionId: string, data: IPublishVersionTreeTagNode) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/publish_version_tree/add_tag`,
+      params: {
+        publishVersionId,
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
   dependencyTreeDel(data: IPublishVersionTreeNode) {
     return this.request({
       method: 'delete',
       url: `${this.prefix}/publish_version_tree/delete`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
+    });
+  }
+
+  dependencyTreeDelTag(data: IPublishVersionTreeNode) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/publish_version_tree/delete_tag`,
       params: {
         organizationId: getOrganizationId(),
       },

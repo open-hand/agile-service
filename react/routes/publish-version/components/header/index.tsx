@@ -18,6 +18,7 @@ import { publishVersionApi, versionApi } from '@/api';
 import VERSION_STATUS_TYPE from '@/constants/VERSION_STATUS_TYPE';
 import SideNav from '@/components/side-nav';
 import { usePublishVersionContext } from '../../stores';
+import Summary from './components/summary';
 import styles from './index.less';
 
 const { Column } = Table;
@@ -29,8 +30,8 @@ function PublishVersionHeader() {
   return (
     <div className={styles.header}>
       <div className={styles.left}>
-        {store.getCurrentData.versionAlias || ''}
-
+        {/* {store.getCurrentData.versionAlias || ''} */}
+        <Summary />
         <p style={{ marginBottom: 0, marginLeft: '.12rem', minWidth: 60 }}>
           <span
             style={{
@@ -52,7 +53,6 @@ function PublishVersionHeader() {
         customType="default"
         data={[{ name: '详情', value: 'detail' }, { name: '版本对比', value: 'diff' }, { name: '查看版本信息', value: 'info' }]}
         onChange={(e, name, v) => {
-          console.log('tab', v, name);
           store.setCurrentMenu(v);
         }}
       />

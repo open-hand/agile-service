@@ -10,7 +10,7 @@ interface Props {
 const CreateDate: React.FC<Props> = () => {
   const { store } = usePublishVersionContext();
   const { creationDate: originData } = store.getCurrentData;
-  const creationDate = useMemo(() => (originData ? moment(originData, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD') : undefined), [originData]);
+  const creationDate = useMemo(() => (originData ? moment(originData, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss') : undefined), [originData]);
 
   return (
     <Field label="创建时间">
