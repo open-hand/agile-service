@@ -38,6 +38,8 @@ import java.util.Optional;
 @RequestMapping(value = "/v1/projects/{project_id}/component")
 public class IssueComponentController {
 
+    private final static String SEQUENCE_FIELD_NAME = "sequence";
+
     @Autowired
     private IssueComponentService issueComponentService;
     @Autowired
@@ -65,6 +67,7 @@ public class IssueComponentController {
                                                             @ApiParam(value = "components对象", required = true)
                                                              @RequestBody JSONObject jsonObject) {
         IssueComponentVO issueComponentVO = new IssueComponentVO();
+        jsonObject.putIfAbsent(SEQUENCE_FIELD_NAME, null);
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(jsonObject, issueComponentVO);
         return Optional.ofNullable(issueComponentService.update(projectId, id, issueComponentVO, fieldList))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
