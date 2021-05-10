@@ -529,7 +529,7 @@ public class IssueAssembler extends AbstractAssembler {
     public IssueSubCreateVO issueDtoToSubIssueCreateDto(IssueDetailDTO subIssueDetailDTO, Long parentIssueId) {
         IssueSubCreateVO issueCreateDTO = new IssueSubCreateVO();
         BeanUtils.copyProperties(subIssueDetailDTO, issueCreateDTO);
-        String subSummary = "CLONE-" + subIssueDetailDTO.getSummary();
+        String subSummary = "【复制】" + subIssueDetailDTO.getSummary();
         issueCreateDTO.setSummary(subSummary);
         issueCreateDTO.setSprintId(null);
         issueCreateDTO.setIssueNum(null);
