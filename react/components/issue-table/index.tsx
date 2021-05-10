@@ -29,6 +29,7 @@ export interface IssueTableProps extends Partial<TableProps> {
   tableProps: ReturnType<typeof useTable>
   onColumnResize?: (columnWidth: number, dataKey: string) => void
   isTree?: boolean
+  height?:number
 }
 // const mapper = (key: IIssueColumnName): string => ({
 //   summary: 'issueId',
@@ -66,6 +67,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
   tableProps,
   onColumnResize,
   isTree = true,
+  height,
   ...otherProps
 }) => {
   const handleOpenCreateIssue = useCallback(() => {
@@ -98,8 +100,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
         virtualized
         bordered={false}
         columns={[checkboxColumn, ...visibleColumns]}
-        // autoHeight
-        height={400}
+        height={height ?? 400}
       />
       {createIssue && (
         <div style={{ paddingTop: 5 }}>
