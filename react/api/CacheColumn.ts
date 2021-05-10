@@ -20,7 +20,7 @@ class CacheColumnApi extends Api<CacheColumnApi> {
   getDefault(code: string): Promise<IListLayout> {
     return axios({
       method: 'get',
-      url: `${this.prefix}/list_layout/${'agile'}`,
+      url: `${this.prefix}/list_layout/${code}`,
       params: {
         organizationId: this.orgId,
       },

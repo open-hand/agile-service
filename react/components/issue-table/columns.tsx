@@ -146,9 +146,9 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
       </Tooltip>
     ),
   }],
-  ['assign', {
+  ['assignee', {
     title: '经办人',
-    dataIndex: 'assign',
+    dataIndex: 'assignee',
     sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex' }}>
@@ -342,6 +342,8 @@ export function getTableColumns({
         onResize: handleColumnResize,
         width: width && width > 0 ? width : column.width,
       });
+    } else if (fields.length > 0) {
+      console.log(code);
     }
   });
   return res;

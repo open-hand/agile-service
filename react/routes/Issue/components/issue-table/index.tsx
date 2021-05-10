@@ -28,8 +28,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
   const props = tableProps;
   const {
     pagination,
-    //  visibleColumns,
-    setVisibleColumns, ...restProps
+    ...restProps
   } = props;
   const mutation = useUpdateColumnMutation('issues.table');
 
@@ -60,7 +59,6 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
       >
         <ColumnManage
           value={visibleColumnCodes}
-          onChange={setVisibleColumns}
           options={listLayoutColumns.map(((c) => ({
             code: c.columnCode,
             title: c.columnCode,

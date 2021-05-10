@@ -10,7 +10,6 @@ import './index.less';
 import { ListLayoutColumnVO } from '@/api';
 import useTable from '@/hooks/useTable';
 import { checkBoxColumn, getTableColumns } from './columns';
-import getListLayoutColumns from './utils/getListLayoutColumns';
 
 export interface IssueTableProps extends Partial<TableProps> {
   tableRef?: React.RefObject<any>
@@ -57,7 +56,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
   onCreateIssue,
   dataSet,
   fields,
-  listLayoutColumns: savedListLayoutColumns,
+  listLayoutColumns,
   onSummaryClick,
   selectedIssue,
   createIssue = true,
@@ -76,10 +75,8 @@ const IssueTable: React.FC<IssueTableProps> = ({
   const props = tableProps;
   const {
     pagination,
-    setVisibleColumns, ...restProps
+    ...restProps
   } = props;
-
-  const listLayoutColumns = useMemo(() => getListLayoutColumns(savedListLayoutColumns, fields), [fields, savedListLayoutColumns]);
 
   const columns = useMemo(() => getTableColumns({
     listLayoutColumns, fields, onSummaryClick, handleColumnResize: onColumnResize,

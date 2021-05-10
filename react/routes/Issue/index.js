@@ -38,12 +38,16 @@ const defaultVisibleColumns = [
   'summary',
   'issueNum',
   'priority',
-  'assign',
+  'assignee',
   'status',
   'sprint',
   'reporter',
   'lastUpdateDate',
 ];
+const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
+  columnCode: code,
+  display: true,
+}));
 const Issue = observer(({ cached, updateCache }) => {
   const {
     projectId, issueSearchStore, fields, changeTableListMode, tableListMode, hasBatchDeletePermission,
@@ -64,7 +68,7 @@ const Issue = observer(({ cached, updateCache }) => {
     isTree: !tableListMode,
     defaultPage: cached?.pagination?.current,
     defaultPageSize: cached?.pagination?.pageSize,
-    defaultVisibleColumns: cached?.visibleColumns ?? defaultVisibleColumns,
+    // defaultVisibleColumns: cached?.visibleColumns ?? defaultVisibleColumns,
     autoQuery: false,
   });
   useUnmount(() => updateCache({
@@ -314,7 +318,7 @@ const Issue = observer(({ cached, updateCache }) => {
         <IssueTable
           tableProps={tableProps}
           fields={fields}
-          listLayoutColumns={cached?.listLayoutColumns}
+          listLayoutColumns={cached?.listLayoutColumns ?? defaultListLayoutColumns}
           onCreateIssue={handleCreateIssue}
           onRowClick={handleRowClick}
           typeIdChange={IssueStore.setDefaultTypeId}
