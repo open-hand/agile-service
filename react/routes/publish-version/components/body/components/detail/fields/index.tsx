@@ -9,7 +9,7 @@ import { observer } from 'mobx-react-lite';
 import {
   omit,
 } from 'lodash';
-import './PublishVersion.less';
+// import './PublishVersion.less';
 import ReleaseDate from './release-date';
 
 const { Column } = Table;

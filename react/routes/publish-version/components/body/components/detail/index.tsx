@@ -17,7 +17,7 @@ import { publishVersionApi, versionApi } from '@/api';
 import VERSION_STATUS_TYPE from '@/constants/VERSION_STATUS_TYPE';
 import { usePublishVersionContext } from '../../../../stores';
 
-import './PublishVersion.less';
+// import './PublishVersion.less';
 import PublishVersionSection from '../section';
 import Fields from './fields';
 
@@ -28,7 +28,6 @@ function PublishVersionDetail() {
 
   return (
     <PublishVersionSection>
-      详情
       <Fields />
     </PublishVersionSection>
   );

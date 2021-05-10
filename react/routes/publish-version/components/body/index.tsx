@@ -18,7 +18,9 @@ import VERSION_STATUS_TYPE from '@/constants/VERSION_STATUS_TYPE';
 import SideNav from '@/components/side-nav';
 import { usePublishVersionContext } from '../../stores';
 
-import './PublishVersion.less';
+import Detail from './components/detail';
+import LinkVersion from './components/link-version';
+import styles from './index.less';
 
 const { Column } = Table;
 const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> = ({
@@ -31,12 +33,22 @@ const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> =
 };
 
 function PublishVersionBody() {
-  const { prefixCls, tableDataSet } = usePublishVersionContext();
-
-  return (
-    <div>
-      Body
-    </div>
-  );
+  const { prefixCls, store } = usePublishVersionContext();
+  const menu = store.getCurrentMenu;
+  switch (menu) {
+    case 'detail':
+      return (
+        <div className={styles.body}>
+          <Detail />
+          <LinkVersion />
+        </div>
+      );
+    case 'diff':
+      return <div>对比</div>;
+    case 'info':
+      return <div>版本信息</div>;
+    default:
+      return <div>00</div>;
+  }
 }
 export default observer(PublishVersionBody);
