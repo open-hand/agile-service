@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTheme } from '@choerodon/master';
 import { observer } from 'mobx-react-lite';
 import IssueTable, { IssueTableProps } from '@/components/issue-table';
 import useIsInProgram from '@/hooks/useIsInProgram';
@@ -48,12 +49,12 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
   const { isInProgram } = useIsInProgram();
 
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
-
+  const [theme] = useTheme();
   return (
-    <div>
+    <>
       <div style={{
         position: 'absolute',
-        top: '77px',
+        top: theme === 'theme4' ? '77px' : '10px',
         right: '21px',
       }}
       >
@@ -80,8 +81,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
         onSummaryClick={onSummaryClick}
         onColumnResize={handleColumnResize}
       />
-    </div>
-
+    </>
   );
 };
 export default observer(IssueTableMain);

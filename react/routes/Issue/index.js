@@ -1,5 +1,5 @@
 import React, {
-  useContext, useRef, useEffect, useState, useCallback,
+  useContext, useEffect, useState, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useHistory } from 'react-router-dom';
@@ -46,13 +46,12 @@ const defaultVisibleColumns = [
 ];
 const Issue = observer(({ cached, updateCache }) => {
   const {
-    dataSet, projectId, issueSearchStore, fields, changeTableListMode, tableListMode, hasBatchDeletePermission,
+    projectId, issueSearchStore, fields, changeTableListMode, tableListMode, hasBatchDeletePermission,
   } = useContext(Store);
   const [theme] = useTheme();
   const history = useHistory();
   const params = useQueryString();
   const [urlFilter, setUrlFilter] = useState(null);
-  const tableRef = useRef();
   const [props] = useDetail();
   const { open } = props;
   const getTableData = useCallback(({ page, sort, size }) => {
@@ -73,7 +72,6 @@ const Issue = observer(({ cached, updateCache }) => {
     visibleColumns: tableProps.visibleColumns,
   }));
   const { query } = tableProps;
-  IssueStore.setTableRef(tableRef);
   /**
    * 默认此次操作不是删除操作
    * 防止删除此页一条数据时页时停留当前页时出现无数据清空
@@ -200,8 +198,8 @@ const Issue = observer(({ cached, updateCache }) => {
     IssueStore.createQuestion(false);
     IssueStore.setDefaultSummary(undefined);
     IssueStore.setDefaultTypeId(undefined);
-    dataSet.query();
-  }, [dataSet]);
+    refresh();
+  }, [refresh]);
   const handleRowClick = useCallback((record) => {
     query();
   }, [query]);
@@ -280,7 +278,7 @@ const Issue = observer(({ cached, updateCache }) => {
             openExportIssueModal(
               issueSearchStore.getAllFields,
               issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
-              dataSet, tableRef, tableListMode,
+              tableListMode,
               'agile_export_issue',
             );
           }}
@@ -317,7 +315,6 @@ const Issue = observer(({ cached, updateCache }) => {
           tableProps={tableProps}
           fields={fields}
           listLayoutColumns={cached?.listLayoutColumns}
-          tableRef={tableRef}
           onCreateIssue={handleCreateIssue}
           onRowClick={handleRowClick}
           typeIdChange={IssueStore.setDefaultTypeId}
@@ -355,9 +352,12 @@ const Issue = observer(({ cached, updateCache }) => {
             closeBatchModal();
           }}
           onClickDelete={() => {
-            // modal.close();
             issueSearchStore.setBatchAction('delete');
-            openBatchDeleteModal({ dataSet, close: closeBatchModal });
+            openBatchDeleteModal({
+              selected: tableProps.checkValues,
+              close: closeBatchModal,
+              onDelete: () => refresh(true),
+            });
           }}
           onCancel={() => {
             closeBatchModal();

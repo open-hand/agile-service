@@ -411,14 +411,6 @@ class IssueStore {
     return toJS(this.expand);
   }
 
-  setTableRef(tableRef) {
-    this.tableRef = tableRef;
-  }
-
-  query = debounce((page) => {
-    this.dataSet.query(page);
-  }, 300);
-
   @observable defaultTypeId = '';
 
   @action setDefaultTypeId = (data) => {
