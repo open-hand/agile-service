@@ -1474,6 +1474,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         map.put("sprintId", FieldCode.SPRINT);
         map.put("statusId", FieldCode.STATUS);
         map.put("storyPoints", FieldCode.STORY_POINTS);
+        map.put("description", FieldCode.DESCRIPTION);
         Set<String> result = new HashSet<>();
         systemFields.forEach(x -> {
             if (map.get(x) != null) {
