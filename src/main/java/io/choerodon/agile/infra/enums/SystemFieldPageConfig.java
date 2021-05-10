@@ -13,7 +13,7 @@ public class SystemFieldPageConfig {
         EPIC_NAME(FieldCode.EPIC_NAME, true, true),
         SUMMARY(FieldCode.SUMMARY, true, true),
         DESCRIPTION(FieldCode.DESCRIPTION, true, true),
-        REMAINING_TIME(FieldCode.REMAINING_TIME, true, false),
+        REMAINING_TIME(FieldCode.REMAINING_TIME, true, true),
         STORY_POINTS(FieldCode.STORY_POINTS, true, true),
         ASSIGNEE(FieldCode.ASSIGNEE, true, true),
         EPIC(FieldCode.EPIC, true, true),
