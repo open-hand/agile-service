@@ -24,12 +24,9 @@ import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
 import PIField from './field/pi-field';
 import QuickFilterField from './field/quick-filter-field';
-import { useIssueFilterFormStore } from '../stores';
 
 const { Option } = Select;
-const userMaps = new Map<string, User>();
-const stacks = new Array<string>();
-const finishStack = new Array<string>();
+
 const forceUpdate = observable.box(false);
 function noticeForceUpdate() {
   forceUpdate.set(true);

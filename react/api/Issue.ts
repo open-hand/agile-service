@@ -35,13 +35,23 @@ interface UIssue {
   [propName: string]: any,
 }
 interface UTypeAndStatus {
-  issueId: number,
-  issueTypeId: number, // 问题类型id
+  issueId: string,
+  issueTypeId: string, // 问题类型id
   objectVersionNumber: number,
-  projectId: number | string,
+  projectId?: string,
   typeCode: string,
-  statusId?: number, // 状态id
-  parentIssueId?: number// 父id
+  statusId?: string, // 状态id
+  parentIssueId?: string// 父id
+  epicName?: string
+  batchUpdateFieldsValueVo?: {
+    issueIds: string[],
+    predefinedFields: object
+    customFields: {
+      fieldId: string,
+      fieldType: string,
+      value: any,
+    }[]
+  }
 }
 interface UIssueParent {
   issueId: number,
@@ -199,6 +209,18 @@ class IssueApi extends Api<IssueApi> {
         errorMsg && Choerodon.prompt(errorMsg, 'error');
       }
       return res;
+    });
+  }
+
+  getRequiredField(issueId: string, issueTypeId: string) {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/issues/${issueId}/list_required_field`,
+      params: {
+        organizationId,
+        issueTypeId,
+      },
     });
   }
 
