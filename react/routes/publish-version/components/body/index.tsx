@@ -44,9 +44,9 @@ function PublishVersionBody() {
         </div>
       );
     case 'diff':
-      return <div>对比</div>;
+      return <div className={styles.body_border}>对比</div>;
     case 'info':
-      return <div>版本信息</div>;
+      return <div className={styles.body_border}>版本信息</div>;
     default:
       return <div>00</div>;
   }
