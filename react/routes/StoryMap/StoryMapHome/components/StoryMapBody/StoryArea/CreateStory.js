@@ -7,9 +7,9 @@ import { isEmpty } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
 import { issueApi, fieldApi } from '@/api';
-import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { TypeTag } from '@/components';
 import { fields2Map } from '@/utils/defaultValue';
+import { useStoryMapContext } from '@/routes/StoryMap/StoryMapHome';
 import Card from '../Card';
 import './CreateStory.less';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
@@ -262,10 +262,10 @@ CreateStory.propTypes = {
 };
 const ClickOutSideCreateStory = clickOutSide(CreateStory);
 const WrapCreateStory = (props) => {
-  const { data: issueTypes } = useProjectIssueTypes({ onlyEnabled: true });
+  const { issueTypes } = useStoryMapContext();
   return (
     <ClickOutSideCreateStory
-      issueTypes={(issueTypes || []).filter(({ typeCode }) => typeCode === 'story')}
+      issueTypes={issueTypes}
       {...props}
     />
   );
