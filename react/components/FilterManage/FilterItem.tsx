@@ -94,7 +94,7 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
               inputRef.current.validate(e.target.value);
             }}
             onBlur={() => {
-              setTimeout(handleCancel, 200);
+              // setTimeout(handleCancel, 200);
             }}
             maxLength={10}
           />
