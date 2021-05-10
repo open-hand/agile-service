@@ -7,6 +7,7 @@ import {
 import {
   includes, find, pick, assign,
 } from 'lodash';
+import { observer } from 'mobx-react-lite';
 import { usePersistFn } from 'ahooks';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import Field from 'choerodon-ui/pro/lib/data-set/Field';
@@ -414,13 +415,13 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
         }
         </Select>
       </Form>
-
-      <Form dataSet={changeTypeDataSet}>
-        {
+      {
         !loading && requiredFields.length > 0 && (
-          <div className={styles.part_title} style={{ marginTop: 3 }}>补全必输字段</div>
+          <div className={styles.part_title} style={{ marginTop: 10, marginBottom: 13 }}>补全必输字段</div>
         )
       }
+      <Form dataSet={changeTypeDataSet} columns={2}>
+        
         {
         (loading ? [] : requiredFields).map((item) => (renderField({
           field: item, otherComponentProps: {}, dataSet: changeTypeDataSet, isInProgram,
@@ -431,15 +432,18 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
   );
 };
 
+const ObserverChangeTypeModal = observer(ChangeTypeModal);
+
 const openRequiredFieldsModal = (props: ChangeTypeModalProps) => {
   Modal.open({
     key: 'changeTypeModal',
+    className: styles.changeTypeModal,
     title: '修改问题类型',
     drawer: true,
     style: {
-      width: MODAL_WIDTH.small,
+      width: MODAL_WIDTH.middle,
     },
-    children: <ChangeTypeModal {...props} />,
+    children: <ObserverChangeTypeModal {...props} />,
   });
 };
 export default openRequiredFieldsModal;

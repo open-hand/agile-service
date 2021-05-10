@@ -8,6 +8,7 @@ import {
   IField,
 } from '@/common/types';
 import SelectUser from '@/components/select/select-user';
+import Editor from '@/components/Editor';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 
@@ -56,6 +57,9 @@ export default function renderField<T extends Partial<SelectProps>>({
       case 'environment': {
         return <SelectEnvironment name={fieldCode} clearButton placeholder={fieldName} {...otherComponentProps} />;
       }
+      case 'description': {
+        return <Editor name={fieldCode} placeholder={fieldName} colSpan={2} style={{ height: 280 }} />;
+      }
       default:
         break;
     }
@@ -65,7 +69,6 @@ export default function renderField<T extends Partial<SelectProps>>({
     case 'time': {
       return (
         <TimePicker
-          label={fieldName}
           name={fieldCode}
           style={{ width: '100%' }}
           {...otherComponentProps}
@@ -78,7 +81,6 @@ export default function renderField<T extends Partial<SelectProps>>({
       return (
         <DateTimePicker
           name={fieldCode}
-          label={fieldName}
           style={{ width: '100%' }}
           {...otherComponentProps}
         />
@@ -88,7 +90,6 @@ export default function renderField<T extends Partial<SelectProps>>({
       return (
         <DatePicker
           name={fieldCode}
-          label={fieldName}
           style={{ width: '100%' }}
           {...otherComponentProps}
         />
@@ -98,7 +99,6 @@ export default function renderField<T extends Partial<SelectProps>>({
         <div>
           <NumberField
             name={fieldCode}
-            label={fieldName}
             style={{ width: '100%' }}
             // @ts-ignore
             {...otherComponentProps}
@@ -111,7 +111,6 @@ export default function renderField<T extends Partial<SelectProps>>({
         <TextField
           name={fieldCode}
           maxLength={100}
-          label={fieldName}
           style={{ width: '100%' }}
           {...otherComponentProps}
         />
@@ -122,7 +121,6 @@ export default function renderField<T extends Partial<SelectProps>>({
           name={fieldCode}
           rows={3}
           maxLength={255}
-          label={fieldName}
           style={{ width: '100%' }}
           // @ts-ignore
           {...otherComponentProps}
@@ -131,7 +129,6 @@ export default function renderField<T extends Partial<SelectProps>>({
     case 'url':
       return (
         <UrlField
-          label={fieldName}
           name={fieldCode}
           {...otherComponentProps}
         />
@@ -140,7 +137,6 @@ export default function renderField<T extends Partial<SelectProps>>({
       return (
         <Select
           name={fieldCode}
-          label={fieldName}
           style={{ width: '100%' }}
           multiple={fieldType === 'checkbox' || fieldType === 'multiple'}
           {...otherComponentProps}
@@ -162,7 +158,6 @@ export default function renderField<T extends Partial<SelectProps>>({
     {
       return (
         <SelectUser
-          label={fieldName}
           multiple={fieldType === 'multiMember'}
           autoQueryConfig={defaultValue ? {
             selectedUserIds: (typeof defaultValue === 'string' ? [defaultValue] : defaultValue).map((item: any) => String(item)),
@@ -178,7 +173,6 @@ export default function renderField<T extends Partial<SelectProps>>({
         <TextField
           name={fieldCode}
           maxLength={100}
-          label={fieldName}
           style={{ width: '100%' }}
           {...otherComponentProps}
         />
