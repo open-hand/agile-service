@@ -18,28 +18,27 @@ import { publishVersionApi, versionApi } from '@/api';
 import VERSION_STATUS_TYPE from '@/constants/VERSION_STATUS_TYPE';
 import SideNav from '@/components/side-nav';
 import { usePublishVersionContext } from '../../stores';
-import styles from './header.less';
+import styles from './index.less';
 
 const { Column } = Table;
 
 function PublishVersionHeader() {
-  const { prefixCls, tableDataSet } = usePublishVersionContext();
-  const text = '' as any;
-  const status = VERSION_STATUS_TYPE[text as keyof typeof VERSION_STATUS_TYPE] || {};
-
+  const { prefixCls, store } = usePublishVersionContext();
+  const text = store.getCurrentData.statusCode;
+  const status = VERSION_STATUS_TYPE[text] || {};
   return (
     <div className={styles.header}>
       <div className={styles.left}>
-        版本一
+        {store.getCurrentData.versionAlias || ''}
 
-        <p style={{ marginBottom: 0, minWidth: 60 }}>
+        <p style={{ marginBottom: 0, marginLeft: '.12rem', minWidth: 60 }}>
           <span
             style={{
               color: '#fff',
               background: status.color,
               display: 'inline-block',
-              lineHeight: '16px',
-              height: '16px',
+              lineHeight: '20px',
+              height: '20px',
               borderRadius: '2px',
               padding: '0 2px',
               fontSize: '13px',
@@ -49,7 +48,14 @@ function PublishVersionHeader() {
           </span>
         </p>
       </div>
-      <CustomTabs customType="default" data={[{ name: '详情', value: 'detail' }, { name: '版本对比', value: 'diff' }, { name: '查看版本信息', value: 'info' }]} />
+      <CustomTabs
+        customType="default"
+        data={[{ name: '详情', value: 'detail' }, { name: '版本对比', value: 'diff' }, { name: '查看版本信息', value: 'info' }]}
+        onChange={(e, name, v) => {
+          console.log('tab', v, name);
+          store.setCurrentMenu(v);
+        }}
+      />
     </div>
   );
 }

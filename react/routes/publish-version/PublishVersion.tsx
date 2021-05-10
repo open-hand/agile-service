@@ -21,7 +21,9 @@ import { openCreatePublishVersionModal } from './components/create-publish-versi
 import { openPublishVersionDetail } from './components/publish-version-detail';
 import openExportPublishVersionModal from './components/export';
 import PublishVersionList from './components/list';
-import PublishVersionHeader from './components/header';
+import PublishVersionHeader from './components/Header';
+import PublishVersionBody from './components/Body';
+import Container from './Container';
 import './PublishVersion.less';
 
 const { Column } = Table;
@@ -96,8 +98,7 @@ function PublishVersion() {
             <PublishVersionList />
           </SideNav.Panel>
         </SideNav>
-        <PublishVersionHeader />
-
+        <Container />
       </Content>
     </Page>
   );

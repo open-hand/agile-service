@@ -24,16 +24,21 @@
     // &-spin {
     // }
   }
+
   .version_item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
     overflow: hidden;
-    padding: .09rem 0;
-    padding-left: .1rem;
-    padding-right: .1rem;
+    width: 100%;
+    padding: .1rem;
+    // padding-left: .1rem;
+    // padding-right: .1rem;
+    line-height: 18px;
     font-size: 13px;
     font-family: PingFangSC-Regular, PingFang SC;
     font-weight: 400;
-    color: #0F1358;
-    line-height: 18px;
+    color: rgba(0, 0, 0, 0.87);
     cursor: pointer;
 
     &:hover {
@@ -58,8 +63,11 @@
       text-overflow: ellipsis;
     }
   }
-
-  .infinite-scroll-component__outerdiv {
-    height: ~"calc(100% - .43rem)";
+  :global {
+    .infinite-scroll-component__outerdiv {
+      // height: 200px;
+      overflow: auto;
+      height: ~"calc(100% - .43rem)";
+    }
   }
 }

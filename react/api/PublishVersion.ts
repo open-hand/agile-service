@@ -27,6 +27,7 @@ export interface IPublishVersionData {
   tagName: string | null
   version: string | null
   versionAlias: string | null
+  statusCode: 'version_planning' | 'released' | 'archived'
   [propsName: string]: any
 }
 // export interface IAppVersionData {
@@ -127,7 +128,7 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  update(publishVersionId: string, data: any, statusCode?:'released' | 'version_planning') {
+  update(publishVersionId: string, data: any, statusCode?: 'released' | 'version_planning') {
     return this.request({
       method: 'put',
       url: `${this.prefix}/publish_version/update/${publishVersionId}`,

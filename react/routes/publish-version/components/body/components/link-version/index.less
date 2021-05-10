@@ -1,0 +1,63 @@
+.operation {
+  font-size: .13rem;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .16rem;
+}
+
+.wrap {
+  margin-top: .3rem;
+}
+
+.node {
+  width: 100%;
+  min-height: .3rem;
+  border-radius: 2px;
+  // cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &_left {
+    display: inline-flex;
+    align-items: center;
+    color: #9A9FB0;
+
+    &_icon {
+      margin-right: .04rem;
+      color: rgba(15, 19, 88, 0.65);
+    }
+
+    &_text {
+
+      line-height: 20px;
+      font-size: 13px;
+      font-family: PingFangSC-Regular, PingFang SC;
+      font-weight: 400;
+      color: #0F1358;
+    }
+  }
+
+  &_btn {
+    float: left;
+    opacity: 1;
+
+    & +& {
+      margin-left: .1rem;
+    }
+
+    // visibility: hidden;
+    color: rgba(0, 0, 0, 0.87);
+    // margin-right: .34rem;
+  }
+
+  :global {
+    .c7n-pro-btn +.c7n-pro-btn {
+      margin: 0;
+    }
+  }
+}
