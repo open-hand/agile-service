@@ -6,6 +6,7 @@ import useIsInProgram from '@/hooks/useIsInProgram';
 import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
 import { usePersistFn } from 'ahooks';
 import { ColumnManage } from '@/components/issue-table/Component';
+import { getTableColumns } from '@/components/issue-table/columns';
 import getListLayoutColumns from './utils/getListLayoutColumns';
 
 export interface IssueTableMainProps extends IssueTableProps {
@@ -49,6 +50,9 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
 
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
   const [theme] = useTheme();
+  const columns = useMemo(() => getTableColumns({
+    listLayoutColumns, fields, onSummaryClick, handleColumnResize: () => {},
+  }), [fields, listLayoutColumns, onSummaryClick]);
   return (
     <>
       <div style={{
@@ -59,9 +63,9 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
       >
         <ColumnManage
           value={visibleColumnCodes}
-          options={listLayoutColumns.map(((c) => ({
-            code: c.columnCode,
-            title: c.columnCode,
+          options={columns.map(((c) => ({
+            code: c.dataIndex,
+            title: c.title,
           })))}
         />
       </div>
