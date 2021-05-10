@@ -3,15 +3,15 @@ import { observer } from 'mobx-react-lite';
 import { DatePicker } from 'choerodon-ui/pro/lib';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import moment, { Moment } from 'moment';
+import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import Field from '../field';
-// import { useReleaseDetailContext } from '../../../stores';
 
 interface Props {
 
 }
 const BusinessValue: React.FC<Props> = () => {
-  // const { disabled, store } = useReleaseDetailContext();
-  const { expectReleaseDate: originData } = {}as any; // store.getCurrentData;
+  const { store } = usePublishVersionContext();
+  const { expectReleaseDate: originData } = store.getCurrentData;
   const expectReleaseDate = useMemo(() => (originData ? moment(originData, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD') : undefined), [originData]);
 
   return (

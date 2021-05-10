@@ -2,8 +2,8 @@ import React from 'react';
 import { Observer } from 'mobx-react-lite';
 import Loading from '@/components/Loading';
 import DetailContainer, { useDetail } from '@/components/detail-container';
-import Header from './components/Header';
-import Body from './components/Body';
+import Header from './components/header';
+import Body from './components/body';
 import { usePublishVersionContext } from './stores';
 import styles from './Container.less';
 
