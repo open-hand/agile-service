@@ -21,6 +21,8 @@ import { usePublishVersionContext } from '../../stores';
 import Detail from './components/detail';
 import LinkVersion from './components/link-version';
 import styles from './index.less';
+import IssueInfoTable from './components/issue-info-table';
+import IssueDiffArea from './components/issue-diff-area';
 
 const { Column } = Table;
 const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> = ({
@@ -44,9 +46,17 @@ function PublishVersionBody() {
         </div>
       );
     case 'diff':
-      return <div className={styles.body_border}>对比</div>;
+      return (
+        <div className={styles.body_border}>
+          <IssueDiffArea />
+        </div>
+      );
     case 'info':
-      return <div className={styles.body_border}>版本信息</div>;
+      return (
+        <div className={styles.body_border}>
+          <IssueInfoTable />
+        </div>
+      );
     default:
       return <div>00</div>;
   }

@@ -100,6 +100,13 @@ function PublishVersionLinkVersion() {
     store.loadData();
     return true;
   }
+  async function handleLinkTag(linkData: any) {
+    console.log('linkData', linkData);
+    publishVersionApi.dependencyTreeAddTag(detailData.id, linkData).then(() => {
+      store.loadData();
+    });
+    return false;
+  }
   return (
     <PublishVersionSection
       className={styles.wrap}
@@ -112,7 +119,7 @@ function PublishVersionLinkVersion() {
               color={'blue' as ButtonColor}
               icon="local_offer"
               onClick={() => {
-                openLinkAppServiceTagModal({ publishVersionId: detailData.id, handleOk: handleLinkPublishVersion });
+                openLinkAppServiceTagModal({ publishVersionId: detailData.id, handleOk: handleLinkTag });
               }}
             >
               关联tag
@@ -120,7 +127,7 @@ function PublishVersionLinkVersion() {
             <Button
               style={{ padding: '0 6px' }}
               color={'blue' as ButtonColor}
-              icon="playlist_add"
+              icon="version"
               onClick={() => {
                 openLinkPublishVersionModal({ publishVersionId: detailData.id, handleOk: handleLinkPublishVersion });
               }}

@@ -3,7 +3,7 @@ import {
   TabPage as Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import {
-  Button, Tooltip,
+  Button, Tooltip, Dropdown, Menu,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import {
@@ -33,7 +33,27 @@ function PublishVersion() {
   function handleRefresh() {
     tableDataSet.query();
   }
+  function handleClickMenu(key: string) {
+    switch (key) {
+      case 'excel':
+        openExportPublishVersionModal();
+        break;
+      case 'preview':
 
+        break;
+      default:
+        break;
+    }
+  }
+  function renderMenu() {
+    return (
+      <Menu onClick={({ key }) => handleClickMenu(key)}>
+        <Menu.Item key="excel">导出Excel</Menu.Item>
+        <Menu.Item key="preview">在线预览</Menu.Item>
+
+      </Menu>
+    );
+  }
   return (
     <Page>
       <Header>
@@ -44,7 +64,10 @@ function PublishVersion() {
         >
           创建发布版本
         </TooltipButton>
-        <Button icon="unarchive" onClick={openExportPublishVersionModal}>导出版本</Button>
+        <Dropdown overlay={renderMenu()}>
+
+          <Button icon="unarchive">导出版本</Button>
+        </Dropdown>
       </Header>
       <Breadcrumb />
       <Content

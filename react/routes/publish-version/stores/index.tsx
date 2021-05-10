@@ -7,9 +7,11 @@ import { DataSet } from 'choerodon-ui/pro/lib';
 import { useDetail } from '@/components/detail-container';
 import PublishVersionDataSet from './PublishVersionDataSet';
 import store, { PublishDetailStore } from './store';
+import IssueInfoTableDataSet from './IssueInfoTableDataSet';
 
 interface Context {
   tableDataSet: DataSet
+  issueInfoTableDataSet:DataSet
   detailProps: any
   store: PublishDetailStore
   prefixCls: string
@@ -21,7 +23,7 @@ export function usePublishVersionContext() {
 const PublishVersionProvider = injectIntl(inject('AppState')(
   (props: any) => {
     const [detailProps] = useDetail();
-
+    const issueInfoTableDataSet = useMemo(() => new DataSet(IssueInfoTableDataSet(store.getCurrentData.id)), [store.getCurrentData.id]);
     const tableDataSet = useMemo(() => new DataSet(PublishVersionDataSet()), []);
     useEffect(() => {
       async function init() {
@@ -40,6 +42,7 @@ const PublishVersionProvider = injectIntl(inject('AppState')(
       detailProps,
       prefixCls: 'c7n-agile-publish-version',
       tableDataSet,
+      issueInfoTableDataSet,
     };
     return (
       <PublishVersionContext.Provider value={value}>

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DatePicker } from 'choerodon-ui/pro/lib';
+import { DatePicker, TextArea } from 'choerodon-ui/pro/lib';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import moment, { Moment } from 'moment';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
@@ -11,24 +11,23 @@ interface Props {
 }
 const BusinessValue: React.FC<Props> = () => {
   const { store } = usePublishVersionContext();
-  const { actualPublishDate: originData } = store.getCurrentData;
-  const actualPublishDate = useMemo(() => (originData ? moment(originData, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss') : undefined), [originData]);
+  const { description } = store.getCurrentData;
 
   return (
 
-    <Field label="发布时间">
+    <Field label="描述">
       <TextEditToggle
         onSubmit={(value: Moment | null) => {
-          store.update('actualPublishDate', value?.format('YYYY-MM-DD HH:mm:ss'));
+          // store.update('expectReleaseDate', value?.format('YYYY-MM-DD HH:mm:ss'));
         }}
         // disabled={disabled}
-        initValue={actualPublishDate ? moment(actualPublishDate, 'YYYY-MM-DD') : undefined}
-        submitTrigger={['blur', 'change']}
+        initValue={description}
+        submitTrigger={['blur']}
         editor={() => (
-          <DatePicker style={{ width: '100%' }} />
+          <TextArea style={{ width: '100%' }} />
         )}
       >
-        {actualPublishDate || '无'}
+        {description || '无'}
       </TextEditToggle>
     </Field>
   );

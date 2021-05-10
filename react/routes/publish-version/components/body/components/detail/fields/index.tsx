@@ -11,6 +11,12 @@ import {
 } from 'lodash';
 // import './PublishVersion.less';
 import ReleaseDate from './release-date';
+import LatestUpdateUser from './latest-update-user';
+import LatestUpdateDate from './latest-update-date';
+import CreateUser from './create-user';
+import CreateDate from './create-date';
+import Description from './description';
+import styles from './index.less';
 
 const { Column } = Table;
 
@@ -18,9 +24,14 @@ function PublishVersionDetail() {
 //   const { prefixCls, tableDataSet } = usePublishVersionContext();
 
   return (
-    <>
+    <div className={styles.fields}>
       <ReleaseDate />
-    </>
+      <LatestUpdateUser />
+      <LatestUpdateDate />
+      <CreateUser />
+      <CreateDate />
+      <Description />
+    </div>
   );
 }
 export default observer(PublishVersionDetail);
