@@ -15,20 +15,23 @@ import styles from './index.less';
 
 interface Props {
   modal?: IModalProps,
-  dataSet: DataSet,
+  selected: string[]
+  onDelete: () => void
   close: Function,
 }
 
 const BatchDeleteModal: React.FC<Props> = (props) => {
-  const { modal, dataSet: tableDataSet, close } = props;
+  const {
+    modal, selected, close, onDelete,
+  } = props;
   const [loading, setLoading] = useState<boolean | string>(false);
   const [progress, setProgress] = useState(0);
 
   const handleDelete = useCallback(async () => {
-    const issueIds = tableDataSet.selected.map((record) => record.get('issueId'));
+    const issueIds = selected;
     await issueApi.batchDelete(issueIds);
     setLoading(true);
-  }, [tableDataSet]);
+  }, [selected]);
 
   const handleCancel = useCallback(() => {
     close();
@@ -46,7 +49,7 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
             Choerodon.prompt('删除成功');
             close();
             modal?.close();
-            tableDataSet.query();
+            onDelete();
           }, 2000);
           break;
         }
@@ -66,7 +69,7 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
 
   return (
     <div>
-      {`确定要删除选中的${tableDataSet.selected.length}个问题项吗？删除后，问题下的关联项将一并删除${getApplyType() === 'program' ? '' : '，包括子任务'}。`}
+      {`确定要删除选中的${selected.length}个问题项吗？删除后，问题下的关联项将一并删除${getApplyType() === 'program' ? '' : '，包括子任务'}。`}
       <span style={{ color: '#F44336' }}>
         请谨慎操作！
       </span>
@@ -74,7 +77,7 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
         messageKey={`agile-batch-delete-issue-${getProjectId()}`}
         onMessage={handleMessage}
       >
-        { loading && (
+        {loading && (
           <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
             {loading === 'success' ? '删除成功' : ['正在删除，请稍等片刻', <span className={styles.dot}>…</span>]}
             <Progress status={'success' as ProgressStatus} value={Math.round(progress * 100)} />
@@ -110,7 +113,7 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
 };
 
 const ObserverBatchDeleteModal = observer(BatchDeleteModal);
-const openBatchDeleteModal = ({ dataSet, close }: { dataSet: DataSet, close: Function}) => {
+const openBatchDeleteModal = (props: Props) => {
   Modal.open({
     key: 'BatchDeleteModal',
     title: '删除问题',
@@ -118,7 +121,7 @@ const openBatchDeleteModal = ({ dataSet, close }: { dataSet: DataSet, close: Fun
       width: 520,
     },
     className: styles.batchDeleteModal,
-    children: <ObserverBatchDeleteModal dataSet={dataSet} close={close} />,
+    children: <ObserverBatchDeleteModal {...props} />,
     footer: () => null,
     border: false,
   });
