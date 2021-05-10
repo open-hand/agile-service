@@ -52,7 +52,7 @@ export default function useTable(getData: TableRequest, options: Options) {
   } = options ?? {};
   const [pageSize, setPageSize] = useState(defaultPageSize ?? 10);
   const [current, setCurrent] = useState(defaultPage ?? 1);
-  const [visibleColumns, setVisibleColumns] = useControlledDefaultValue(defaultVisibleColumns ?? []);
+  // const [visibleColumns, setVisibleColumns] = useControlledDefaultValue(defaultVisibleColumns ?? []);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -127,6 +127,7 @@ export default function useTable(getData: TableRequest, options: Options) {
     }
   });
   const isExpandAll = useMemo(() => intersection(expandAbleKeys, expandedRowKeys).length === expandAbleKeys.length, [expandAbleKeys, expandedRowKeys]);
+
   return {
     query,
     rowKey,
@@ -144,8 +145,6 @@ export default function useTable(getData: TableRequest, options: Options) {
     isExpandAll,
     expandedRowKeys,
     onExpandChange,
-    visibleColumns,
-    setVisibleColumns,
     pagination: {
       pageSize,
       current,

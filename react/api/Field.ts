@@ -1,6 +1,7 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
 import { sameProject } from '@/utils/detail';
+import { IField } from '@/common/types';
 import Api from './Api';
 
 interface IFiled {
@@ -190,6 +191,14 @@ class FieldApi extends Api<FieldApi> {
         schemeCode: 'agile_issue',
         issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
       },
+    }).then((res: IField[]) => {
+      const issueNum = {
+        code: 'issueNum',
+      };
+      // @ts-ignore
+      res.splice(1, 0, issueNum);
+
+      return res;
     });
   }
 
