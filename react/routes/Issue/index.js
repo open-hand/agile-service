@@ -61,6 +61,7 @@ const Issue = observer(({ cached, updateCache }) => {
     return issueApi.loadIssues(page, size, sort, search);
   }, [issueSearchStore, tableListMode]);
   const tableProps = useTable(getTableData, {
+    rowKey: 'issueId',
     defaultPage: cached?.pagination?.current,
     defaultPageSize: cached?.pagination?.pageSize,
     defaultVisibleColumns: cached?.visibleColumns ?? defaultVisibleColumns,
@@ -286,7 +287,11 @@ const Issue = observer(({ cached, updateCache }) => {
           导出问题
         </Button>
         <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
-        <CollapseAll dataSet={dataSet} tableRef={tableRef} />
+        <CollapseAll
+          expandAll={tableProps.expandAll}
+          isExpandAll={tableProps.isExpandAll}
+          expandAbleKeys={tableProps.expandAbleKeys}
+        />
         <div style={{ flex: 1, visibility: 'hidden' }} />
         <TableModeSwitch
           data={tableListMode ? 'list' : 'tree'}

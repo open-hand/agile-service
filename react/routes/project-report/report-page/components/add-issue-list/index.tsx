@@ -211,7 +211,10 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
     set(search, 'searchArgs.tree', false);
     return issueApi.loadIssues(page, size, sort, search);
   }, [issueSearchStore]);
-  const tableProps = useTable(getTableData);
+  const tableProps = useTable(getTableData, {
+    isTree: false,
+    rowKey: 'issueId',
+  });
   const { data } = useIssueTableFields();
   if (!data) {
     return null;
@@ -265,7 +268,6 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       />
       {/* @ts-ignore */}
       <IssueTable
-        isTree={false}
         tableProps={tableProps}
         style={{ marginTop: 10 }}
         queryBar={'none' as TableQueryBarType}
