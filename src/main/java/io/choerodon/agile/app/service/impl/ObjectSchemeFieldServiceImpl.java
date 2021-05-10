@@ -1669,6 +1669,15 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 PageConfigFieldEditedVO fieldEdited = map.get(fieldCode);
                 if (!ObjectUtils.isEmpty(fieldCode)) {
                     p.setPageConfigFieldEdited(fieldEdited);
+                    SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(fieldCode);
+                    if (!ObjectUtils.isEmpty(commonField) && !ObjectUtils.isEmpty(fieldEdited)) {
+                        if (Boolean.TRUE.equals(fieldEdited.getCreatedFieldCanNotEdit())) {
+                            p.setCreated(commonField.created());
+                        }
+                        if (Boolean.TRUE.equals(fieldEdited.getEditedFieldCanNotEdit())) {
+                            p.setEdited(commonField.edited());
+                        }
+                    }
                 }
             });
         }
