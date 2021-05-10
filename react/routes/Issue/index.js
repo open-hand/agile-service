@@ -24,6 +24,8 @@ import TableModeSwitch from '@/components/tree-list-switch';
 import handleOpenImport from '@/components/ImportIssue/ImportIssue';
 import { TableCache } from '@/components/issue-table/Component';
 import useTable from '@/hooks/useTable';
+import openBatchDeleteModal from '@/components/BatchDeleteConfirm';
+import BatchModal from './components/BatchModal';
 import IssueTable from './components/issue-table';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
@@ -44,7 +46,7 @@ const defaultVisibleColumns = [
 ];
 const Issue = observer(({ cached, updateCache }) => {
   const {
-    dataSet, projectId, issueSearchStore, fields, changeTableListMode, tableListMode,
+    dataSet, projectId, issueSearchStore, fields, changeTableListMode, tableListMode, hasBatchDeletePermission,
   } = useContext(Store);
   const [theme] = useTheme();
   const history = useHistory();
@@ -59,6 +61,7 @@ const Issue = observer(({ cached, updateCache }) => {
     return issueApi.loadIssues(page, size, sort, search);
   }, [issueSearchStore, tableListMode]);
   const tableProps = useTable(getTableData, {
+    rowKey: 'issueId',
     defaultPage: cached?.pagination?.current,
     defaultPageSize: cached?.pagination?.pageSize,
     defaultVisibleColumns: cached?.visibleColumns ?? defaultVisibleColumns,
@@ -239,6 +242,9 @@ const Issue = observer(({ cached, updateCache }) => {
   const handleClickSaveFilter = () => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
+  const closeBatchModal = useCallback(() => {
+    tableProps.handleCheckAllChange(false);
+  }, [tableProps]);
   return (
     <Page
       className="c7nagile-issue"
@@ -281,7 +287,11 @@ const Issue = observer(({ cached, updateCache }) => {
           导出问题
         </Button>
         <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
-        <CollapseAll dataSet={dataSet} tableRef={tableRef} />
+        <CollapseAll
+          expandAll={tableProps.expandAll}
+          isExpandAll={tableProps.isExpandAll}
+          expandAbleKeys={tableProps.expandAbleKeys}
+        />
         <div style={{ flex: 1, visibility: 'hidden' }} />
         <TableModeSwitch
           data={tableListMode ? 'list' : 'tree'}
@@ -332,6 +342,32 @@ const Issue = observer(({ cached, updateCache }) => {
             defaultTypeId={IssueStore.defaultTypeId}
             defaultSummary={IssueStore.defaultSummary}
           />
+        )}
+        {tableProps.checkValues.length > 0 && (
+        <BatchModal
+          issueSearchStore={issueSearchStore}
+          fields={issueSearchStore.fields}
+          selected={tableProps.checkValues}
+          onClickEdit={() => {
+            issueSearchStore.setBatchAction('edit');
+          }}
+          close={() => {
+            closeBatchModal();
+          }}
+          onClickDelete={() => {
+            // modal.close();
+            issueSearchStore.setBatchAction('delete');
+            openBatchDeleteModal({ dataSet, close: closeBatchModal });
+          }}
+          onCancel={() => {
+            closeBatchModal();
+          }}
+          onEdit={() => {
+            closeBatchModal();
+            refresh();
+          }}
+          hasBatchDeletePermission={hasBatchDeletePermission}
+        />
         )}
         <DetailContainer {...props} />
       </Content>

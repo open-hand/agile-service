@@ -1,17 +1,15 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  DataSet, PerformanceTable, Pagination,
+  PerformanceTable, Pagination,
 } from 'choerodon-ui/pro';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import { IField, IIssueColumnName } from '@/common/types';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
-import { usePersistFn } from 'ahooks';
 import { ListLayoutColumnVO } from '@/api';
 import useTable from '@/hooks/useTable';
 import { checkBoxColumn, getTableColumns } from './columns';
-import transverseTreeData from './utils/transverseTreeData';
 import getListLayoutColumns from './utils/getListLayoutColumns';
 
 export interface IssueTableProps extends Partial<TableProps> {
@@ -85,7 +83,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
     listLayoutColumns, fields, onSummaryClick, handleColumnResize: onColumnResize,
   }), [fields, listLayoutColumns, onColumnResize, onSummaryClick]);
   const visibleColumns = useMemo(() => columns.filter((column) => column.display), [columns]);
-  const data = useMemo(() => (isTree ? transverseTreeData(props.data) : props.data), [isTree, props.data]);
+
   const checkboxColumn = useMemo(() => checkBoxColumn({
     data: props.data,
     checkValues: props.checkValues,
@@ -97,14 +95,11 @@ const IssueTable: React.FC<IssueTableProps> = ({
     <div className="c7nagile-issue-table">
       <PerformanceTable
         {...restProps}
-        isTree
-        rowKey="issueId"
         virtualized
         bordered={false}
         columns={[checkboxColumn, ...visibleColumns]}
         // autoHeight
         height={400}
-        data={data}
       />
       {createIssue && (
         <div style={{ paddingTop: 5 }}>

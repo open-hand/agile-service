@@ -91,6 +91,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
 
     const value = {
       ...props,
+      hasBatchDeletePermission,
       tableListMode,
       changeTableListMode,
       issueSearchStore,
