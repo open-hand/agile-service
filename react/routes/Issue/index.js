@@ -1,5 +1,5 @@
 import React, {
-  useContext, useRef, useEffect, useState, useCallback, useMemo,
+  useContext, useRef, useEffect, useState, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useHistory } from 'react-router-dom';
@@ -62,6 +62,7 @@ const Issue = observer(({ cached, updateCache }) => {
   }, [issueSearchStore, tableListMode]);
   const tableProps = useTable(getTableData, {
     rowKey: 'issueId',
+    isTree: !tableListMode,
     defaultPage: cached?.pagination?.current,
     defaultPageSize: cached?.pagination?.pageSize,
     defaultVisibleColumns: cached?.visibleColumns ?? defaultVisibleColumns,
@@ -313,7 +314,6 @@ const Issue = observer(({ cached, updateCache }) => {
           onClickSaveFilter={handleClickSaveFilter}
         />
         <IssueTable
-          isTree={!tableListMode}
           tableProps={tableProps}
           fields={fields}
           listLayoutColumns={cached?.listLayoutColumns}
