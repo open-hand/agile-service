@@ -63,7 +63,7 @@ class QuickCreateIssue extends Component {
   handleCreate = debounce(() => {
     const { currentTypeId } = this.state;
     const {
-      form, issueTypes, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram, cantCreateEvent,
+      form, issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram, cantCreateEvent,
     } = this.props;
     form.validateFields(async (err, values) => {
       const { summary } = values;
@@ -116,6 +116,7 @@ class QuickCreateIssue extends Component {
               assigneeId: defaultAssignee,
               reporterId: defaultAssignee,
               epicId,
+              relateIssueId,
               versionIssueRelVOList: propsVersionIssueRelVOList,
               sprintId,
               summary,
@@ -171,7 +172,7 @@ class QuickCreateIssue extends Component {
     const {
       create, loading, currentTypeId,
     } = this.state;
-    const { issueTypes, form: { getFieldDecorator } } = this.props;
+    const { issueTypes, buttonShowText, form: { getFieldDecorator } } = this.props;
     const currentType = issueTypes.find((t) => t.id === currentTypeId);
 
     const typeList = (
@@ -271,7 +272,7 @@ class QuickCreateIssue extends Component {
                 });
               }}
             >
-              创建问题
+              {buttonShowText || '创建问题'}
             </Button>
           )
         }
