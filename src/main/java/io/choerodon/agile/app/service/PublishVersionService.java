@@ -1,8 +1,6 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.PublishVersionVO;
-import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.TagCompareVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.infra.dto.TagCompareHistoryDTO;
 import io.choerodon.core.domain.Page;
@@ -120,8 +118,7 @@ public interface PublishVersionService {
                                                   Long organizationId,
                                                   Long publishVersionId,
                                                   SearchVO searchVO,
-                                                  PageRequest pageRequest,
-                                                  String issueTypeCode);
+                                                  PageRequest pageRequest);
 
     void compareTag(Long projectId, Long organizationId, Long publishVersionId, List<TagCompareVO> tagCompareList);
 
@@ -168,4 +165,22 @@ public interface PublishVersionService {
                              Long publishVersionId,
                              SearchVO searchVO,
                              PageRequest pageRequest);
+
+    /**
+     * 查询发布版本可用的appService
+     *
+     * @param projectId
+     * @param publishVersionId
+     * @return
+     */
+    List<AppServiceRepVO> activeAppService(Long projectId, Long publishVersionId);
+
+    /**
+     * 发布版本关联的tag关联的问题类型统计
+     *
+     * @param projectId
+     * @param publishVersionId
+     * @return
+     */
+    List<IssueTypeCountVO> issueTypeCount(Long projectId, Long publishVersionId);
 }

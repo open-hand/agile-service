@@ -70,8 +70,6 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     @Autowired
     private IssueService issueService;
     @Autowired
-    private IssueStatusMapper issueStatusMapper;
-    @Autowired
     private IssueTypeMapper issueTypeMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
@@ -125,15 +123,17 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                 PublishVersionDTO dto =
                         queryByGroupIdAndArtifactIdAndVersion(projectId, groupId, artifactId, version);
                 //把导入的发布版本战事到列表页
-                if (dto.getAppService()) {
-                    throw new CommonException("error.publish.version.duplicate");
-                } else {
-                    dto.setAppService(publishVersionVO.getAppService());
-                    dto.setVersionAlias(publishVersionVO.getVersionAlias());
-                    if (publishVersionMapper.updateByPrimaryKeySelective(dto) != 1) {
-                        throw new CommonException("error.publish.version.update");
+                if (dto != null) {
+                    if (dto.getAppService()) {
+                        throw new CommonException("error.publish.version.duplicate");
+                    } else {
+                        dto.setAppService(publishVersionVO.getAppService());
+                        dto.setVersionAlias(publishVersionVO.getVersionAlias());
+                        if (publishVersionMapper.updateByPrimaryKeySelective(dto) != 1) {
+                            throw new CommonException("error.publish.version.update");
+                        }
+                        return modelMapper.map(publishVersionMapper.selectByPrimaryKey(dto.getId()), PublishVersionVO.class);
                     }
-                    return modelMapper.map(publishVersionMapper.selectByPrimaryKey(dto.getId()), PublishVersionVO.class);
                 }
             }
         }
@@ -378,8 +378,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                                                          Long organizationId,
                                                          Long publishVersionId,
                                                          SearchVO searchVO,
-                                                         PageRequest pageRequest,
-                                                         String issueTypeCode) {
+                                                         PageRequest pageRequest) {
         PublishVersionTreeClosureDTO example = new PublishVersionTreeClosureDTO();
         example.setProjectId(projectId);
         example.setOrganizationId(organizationId);
@@ -398,9 +397,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         if (issueIds.isEmpty()) {
             return emptyPage;
         }
-        if (!addSearchParam(searchVO, issueIds, projectId, issueTypeCode)) {
-            return emptyPage;
-        }
+        addSearchParam(searchVO, issueIds);
         return issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
     }
 
@@ -579,9 +576,88 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         }
     }
 
+    @Override
+    public List<AppServiceRepVO> activeAppService(Long projectId, Long publishVersionId) {
+        List<AppServiceRepVO> appServiceList = devopsClientOperator.listActiveAppService(projectId);
+        if (appServiceList.isEmpty()) {
+            return appServiceList;
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Set<Long> projectIds = new HashSet<>(Arrays.asList(projectId));
+        Set<TagVO> tags = queryTagList(new HashSet<>(Arrays.asList(publishVersionId)), organizationId, projectIds);
+        Set<String> appServiceCodes = tags.stream().map(TagVO::getAppServiceCode).collect(Collectors.toSet());
+        List<AppServiceRepVO> result = new ArrayList<>();
+        appServiceList.forEach(x -> {
+            String code = x.getCode();
+            if (appServiceCodes.contains(code)) {
+                result.add(x);
+            }
+        });
+        return result;
+    }
+
+    private Set<TagVO> queryTagList(Set<Long> publishVersionIdSet, Long organizationId, Set<Long> projectIds) {
+        Set<Long> publishVersionIds =
+                publishVersionTreeClosureMapper
+                        .selectDescendants(
+                                projectIds,
+                                organizationId,
+                                publishVersionIdSet,
+                                null)
+                        .stream()
+                        .map(PublishVersionTreeClosureDTO::getDescendantId)
+                        .collect(Collectors.toSet());
+        Set<TagVO> tags = new HashSet<>();
+        publishVersionMapper.selectWithTag(publishVersionIds, projectIds, organizationId)
+                .forEach(x -> {
+                    List<TagVO> tagList = x.getTags();
+                    if (!ObjectUtils.isEmpty(tagList)) {
+                        tags.addAll(tagList);
+
+                    }
+                });
+        return tags;
+    }
+
+    @Override
+    public List<IssueTypeCountVO> issueTypeCount(Long projectId, Long publishVersionId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Set<Long> projectIds = new HashSet<>(Arrays.asList(projectId));
+        Set<TagVO> tags = queryTagList(new HashSet<>(Arrays.asList(publishVersionId)), organizationId, projectIds);
+        List<IssueTypeCountVO> result = new ArrayList<>();
+        if (!tags.isEmpty()) {
+            List<IssueTypeCountVO> issueTypeCountList =
+                    tagIssueRelMapper.statisticsByIssueType(organizationId, projectId, tags);
+            if (issueTypeCountList.isEmpty()) {
+                return result;
+            }
+            Map<Long, Integer> countMap =
+                    issueTypeCountList
+                            .stream()
+                            .collect(Collectors.toMap(IssueTypeCountVO::getIssueTypeId, IssueTypeCountVO::getCount));
+            IssueTypeSearchVO issueTypeSearch = new IssueTypeSearchVO();
+            issueTypeSearch.setIssueTypeIds(new ArrayList<>(countMap.keySet()));
+            List<IssueTypeVO> issueTypeList = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearch);
+            issueTypeList.forEach(x -> {
+                Long issueTypeId = x.getId();
+                Integer count = countMap.get(issueTypeId);
+                if (count == null) {
+                    return;
+                }
+                IssueTypeCountVO vo = new IssueTypeCountVO();
+                vo.setIssueTypeId(issueTypeId);
+                vo.setIssueTypeName(x.getName());
+                vo.setCount(count);
+                result.add(vo);
+            });
+        }
+        return result;
+    }
+
     private double getProgress(double current, int total) {
-        BigDecimal num1 = new BigDecimal(current);
-        BigDecimal num2 = new BigDecimal(total + 1);
+
+        BigDecimal num1 = BigDecimal.valueOf(current);
+        BigDecimal num2 = BigDecimal.valueOf(total + 1);
         return num1.divide(num2, 2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
@@ -594,7 +670,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             result.setSearchArgs(searchArgs);
         }
         searchArgs.put("tree", false);
-        Map<String, Object> otherArgs =  result.getOtherArgs();
+        Map<String, Object> otherArgs = result.getOtherArgs();
         if (otherArgs == null) {
             otherArgs = new LinkedHashMap<>();
             result.setOtherArgs(otherArgs);
@@ -720,16 +796,14 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                     && IssueTypeCode.isStory(issueTypeCode)
                     && programId != null
                     && issue.getFeatureId() != null
-                    && !Objects.equals(0L, issue.getFeatureId() )) {
+                    && !Objects.equals(0L, issue.getFeatureId())) {
                 agilePluginService.addTagToFeature(issue.getFeatureId(), projectId, organizationId, appServiceCode, tagName);
             }
         });
     }
 
-    private boolean addSearchParam(SearchVO searchVO,
-                                   Set<Long> issueIds,
-                                   Long projectId,
-                                   String typeCode) {
+    private void addSearchParam(SearchVO searchVO,
+                                Set<Long> issueIds) {
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
         if (otherArgs == null) {
             otherArgs = new HashMap<>();
@@ -743,10 +817,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         for (Long issueId : issueIds) {
             issueIdList.add(issueId + "");
         }
-        boolean ok = addCompletedStatus(searchVO, projectId);
-        addIssueType(searchVO, projectId, typeCode);
         resetTreeParam(searchVO);
-        return ok;
     }
 
     private void resetTreeParam(SearchVO searchVO) {
@@ -756,54 +827,6 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             searchVO.setOtherArgs(otherArgs);
         }
         otherArgs.put("tree", false);
-    }
-
-    private void addIssueType(SearchVO searchVO, Long projectId, String typeCode) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
-        issueTypeSearchVO.setTypeCodes(Arrays.asList(typeCode));
-        Set<Long> issueTypeIds =
-                issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO)
-                        .stream()
-                        .map(IssueTypeVO::getId)
-                        .collect(Collectors.toSet());
-        if (!issueTypeIds.isEmpty()) {
-            addToAdvancedSearchArgsByKey(searchVO, "issueTypeId", issueTypeIds);
-        }
-    }
-
-    private void addToAdvancedSearchArgsByKey(SearchVO searchVO, String key, Set<Long> valueSet) {
-        Map<String, Object> advancedSearchArgs = searchVO.getAdvancedSearchArgs();
-        if (advancedSearchArgs == null) {
-            advancedSearchArgs = new HashMap<>();
-            searchVO.setAdvancedSearchArgs(advancedSearchArgs);
-        }
-        List<String> list = (List<String>) advancedSearchArgs.get(key);
-        if (list == null) {
-            list = new ArrayList<>();
-            advancedSearchArgs.put(key, list);
-        }
-        for (Long value : valueSet) {
-            list.add(value + "");
-        }
-    }
-
-    private boolean addCompletedStatus(SearchVO searchVO, Long projectId) {
-        IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
-        issueStatusDTO.setProjectId(projectId);
-        issueStatusDTO.setCompleted(true);
-        Set<Long> statusIds =
-                issueStatusMapper
-                        .select(issueStatusDTO)
-                        .stream()
-                        .map(IssueStatusDTO::getStatusId)
-                        .collect(Collectors.toSet());
-        if (!statusIds.isEmpty()) {
-            addToAdvancedSearchArgsByKey(searchVO, "statusId", statusIds);
-            return true;
-        } else {
-            return false;
-        }
     }
 
     private void validateProjectCategories(ProjectVO project) {
