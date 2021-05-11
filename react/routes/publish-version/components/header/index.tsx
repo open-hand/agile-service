@@ -30,8 +30,8 @@ function PublishVersionHeader() {
   return (
     <div className={styles.header}>
       <div className={styles.left}>
-        {/* {store.getCurrentData.versionAlias || ''} */}
-        <Summary />
+        {store.getCurrentData.versionAlias || ''}
+        {/* <Summary /> */}
         <p style={{ marginBottom: 0, marginLeft: '.12rem', minWidth: 60 }}>
           <span
             style={{

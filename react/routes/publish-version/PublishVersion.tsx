@@ -12,7 +12,7 @@ import {
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import SideNav from '@/components/side-nav';
 import { usePublishVersionContext } from './stores';
-import { openCreatePublishVersionModal } from './components/create-publish-version';
+import { openCreatePublishVersionModal } from './components/create-edit-publish-version';
 import openExportPublishVersionModal from './components/export';
 import PublishVersionList from './components/list';
 import Container from './Container';
@@ -31,7 +31,7 @@ function PublishVersion() {
   const { prefixCls, tableDataSet } = usePublishVersionContext();
 
   function handleRefresh() {
-    tableDataSet.query();
+    tableDataSet.queryMore();
   }
   function handleClickMenu(key: string) {
     switch (key) {

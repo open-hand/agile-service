@@ -23,23 +23,26 @@ import {
 import { Checkbox } from 'choerodon-ui';
 import SelectTeam from '@/components/select/select-team';
 
-interface ILinkServiceProps {
+interface PublishVersionModalProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
 
 }
+interface PublishVersionModalWithEditProps extends PublishVersionModalProps {
+  editData: any
+}
 const { Option } = Select;
 
-const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({
-  modal, handleOk,
+const CreatePublishVersion: React.FC<{ modal?: IModalProps } & Partial<PublishVersionModalWithEditProps>> = ({
+  modal, handleOk, editData,
 }) => {
   const [applicationId, setApplicationId] = useState<string>();
   const [versionType, setVersionType] = useState<string>('version');
   function handleCheckName(newName: string) {
-    return publishVersionApi.checkAlias(newName).then((res: boolean) => (res ? '版本名称重复' : true));
+    return publishVersionApi.checkAlias(newName, editData?.id).then((res: boolean) => (res ? '版本名称重复' : true));
   }
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
-    autoCreate: true,
+    autoCreate: false,
     paging: false,
     // data: [
     //   { appService: '应用1', alias: undefined },
@@ -61,12 +64,12 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps
       { name: 'tagName', label: '关联tag' },
     ],
     transport: {
-      submit: ({ data }) => publishVersionApiConfig.create(data[0]),
+      submit: ({ data }) => (editData ? publishVersionApiConfig.update(editData.id, data[0]) : publishVersionApiConfig.create(data[0])),
     },
-  }), []);
+  }), [editData]);
   useEffect(() => {
-    ds.current?.init(versionType, undefined);
-  }, [ds, versionType]);
+    editData ? ds.loadData([editData]) : ds.create();
+  }, [ds, editData]);
   const handleSubmit = useCallback(async () => {
     if (!await ds.current?.validate()) {
       return false;
@@ -98,7 +101,7 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & ILinkServiceProps
     </Form>
   );
 };
-function openCreatePublishVersionModal(props: ILinkServiceProps) {
+function openCreatePublishVersionModal(props: PublishVersionModalProps) {
   const key = Modal.key();
   Modal.open({
     key,
@@ -111,4 +114,17 @@ function openCreatePublishVersionModal(props: ILinkServiceProps) {
 
   });
 }
-export { openCreatePublishVersionModal };
+function openEditPublishVersionModal(props: PublishVersionModalWithEditProps) {
+  const key = Modal.key();
+  Modal.open({
+    key,
+    title: '编辑发布版本',
+    style: {
+      width: MODAL_WIDTH.small,
+    },
+    drawer: true,
+    children: <CreatePublishVersion {...props} />,
+
+  });
+}
+export { openCreatePublishVersionModal, openEditPublishVersionModal };

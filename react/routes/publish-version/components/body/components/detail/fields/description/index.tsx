@@ -16,19 +16,7 @@ const BusinessValue: React.FC<Props> = () => {
   return (
 
     <Field label="描述">
-      <TextEditToggle
-        onSubmit={(value: Moment | null) => {
-          // store.update('expectReleaseDate', value?.format('YYYY-MM-DD HH:mm:ss'));
-        }}
-        // disabled={disabled}
-        initValue={description}
-        submitTrigger={['blur']}
-        editor={() => (
-          <TextArea style={{ width: '100%' }} />
-        )}
-      >
-        {description || '无'}
-      </TextEditToggle>
+      {description || '无'}
     </Field>
   );
 };
