@@ -14,7 +14,7 @@ import javax.persistence.Table;
  */
 @ModifyAudit
 @VersionAudit
-@Table(name = "agile_publish_version")
+@Table(name = "agile_publish_version_tag_rel")
 public class PublishVersionTagRelDTO extends AuditDomain {
 
     @Id

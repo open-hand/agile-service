@@ -87,6 +87,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private MessageClientC7n messageClientC7n;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private UserService userService;
 
     protected static final Logger logger = LoggerFactory.getLogger(PublishVersionServiceImpl.class);
 
@@ -231,7 +233,17 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         PublishVersionDTO dto = new PublishVersionDTO();
         dto.setId(publishVersionId);
         dto.setProjectId(projectId);
-        return modelMapper.map(publishVersionMapper.selectOne(dto), PublishVersionVO.class);
+        PublishVersionVO result = modelMapper.map(publishVersionMapper.selectOne(dto), PublishVersionVO.class);
+        Long creatorId = dto.getCreatedBy();
+        Long updaterId = dto.getLastUpdatedBy();
+        Set<Long> userIds = new HashSet<>();
+        userIds.add(creatorId);
+        userIds.add(updaterId);
+        Map<Long, UserMessageDTO> userMessageMap =
+                userService.queryUsersMap(new ArrayList<>(userIds), true);
+        result.setCreator(userMessageMap.get(creatorId));
+        result.setUpdater(userMessageMap.get(updaterId));
+        return result;
     }
 
     @Override

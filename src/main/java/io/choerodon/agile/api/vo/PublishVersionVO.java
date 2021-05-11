@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -53,6 +54,26 @@ public class PublishVersionVO {
     private String appServiceName;
 
     private String statusCode;
+
+    private UserMessageDTO creator;
+
+    private UserMessageDTO updater;
+
+    public UserMessageDTO getCreator() {
+        return creator;
+    }
+
+    public void setCreator(UserMessageDTO creator) {
+        this.creator = creator;
+    }
+
+    public UserMessageDTO getUpdater() {
+        return updater;
+    }
+
+    public void setUpdater(UserMessageDTO updater) {
+        this.updater = updater;
+    }
 
     public String getStatusCode() {
         return statusCode;
