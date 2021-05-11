@@ -115,7 +115,6 @@ public class SendMsgUtil {
     public String getFeatureUrl(IssueVO result, ProjectVO projectVO, Long paramIssueId) {
         return FEATURE_URL_TEMPLATE1 + projectVO.getId()
                 + FEATURE_URL_TEMPLATE2 + convertProjectName(projectVO)
-                + FEATURE_URL_TEMPLATE3 + projectVO.getCategory()
                 + FEATURE_URL_TEMPLATE4 + projectVO.getOrganizationId()
                 + URL_TEMPLATE3 + result.getIssueNum()
                 + URL_TEMPLATE4 + paramIssueId
