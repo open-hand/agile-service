@@ -27,7 +27,6 @@
     "mobx-react-lite": "^1.4.1",
     "moment": "^2.22.2",
     "moment-range": "^4.0.2",
-    "pdfjs-dist": "2.2.228",
     "quill-delta": "^4.2.2",
     "quill-delta-to-html": "^0.8.4",
     "quill-image-drop-and-paste": "^1.1.1",
