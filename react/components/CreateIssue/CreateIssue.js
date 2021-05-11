@@ -97,6 +97,7 @@ class CreateIssue extends Component {
       newIssueTypeId: '',
       fields: [],
       previousFormValue: new Map(),
+      uploading: false,
     };
     this.originDescription = true;
   }
@@ -1068,6 +1069,11 @@ class CreateIssue extends Component {
                 initialValue: this.props.defaultDescription,
               })(
                 <DebounceEditor
+                  onUploadChange={(uploading) => {
+                    this.setState({
+                      uploading,
+                    });
+                  }}
                   style={{ width: '100%', overflow: 'hidden' }}
                 />,
               )}
@@ -1310,7 +1316,7 @@ class CreateIssue extends Component {
       hiddenFields,
     } = this.props;
     const {
-      createLoading, fields, loading, newIssueTypeCode,
+      createLoading, fields, loading, newIssueTypeCode, uploading,
     } = this.state;
 
     return (
@@ -1320,9 +1326,9 @@ class CreateIssue extends Component {
         visible={visible && !loading}
         onOk={this.handleCreateIssue}
         onCancel={this.handleCancel}
-        okText="创建"
+        okText={<Tooltip title={uploading ? '正在上传图片' : null}>创建</Tooltip>}
         cancelText="取消"
-        confirmLoading={createLoading}
+        confirmLoading={createLoading || uploading}
         width={MODAL_WIDTH.middle}
         maskClosable={false}
         keyboard={false}
