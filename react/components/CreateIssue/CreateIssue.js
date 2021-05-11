@@ -358,9 +358,14 @@ class CreateIssue extends Component {
       originComponents,
       originLabels,
       originIssueTypes,
+      uploading,
     } = this.state;
     form.validateFieldsAndScroll(async (err, values) => {
       if (!err) {
+        if (uploading) {
+          Choerodon.prompt('请等待图片上传完成');
+          return;
+        }
         const {
           typeId,
           reporterId,
@@ -1316,7 +1321,7 @@ class CreateIssue extends Component {
       hiddenFields,
     } = this.props;
     const {
-      createLoading, fields, loading, newIssueTypeCode, uploading,
+      createLoading, fields, loading, newIssueTypeCode,
     } = this.state;
 
     return (
@@ -1326,9 +1331,9 @@ class CreateIssue extends Component {
         visible={visible && !loading}
         onOk={this.handleCreateIssue}
         onCancel={this.handleCancel}
-        okText={<Tooltip title={uploading ? '正在上传图片' : null}>创建</Tooltip>}
+        okText="创建"
         cancelText="取消"
-        confirmLoading={createLoading || uploading}
+        confirmLoading={createLoading}
         width={MODAL_WIDTH.middle}
         maskClosable={false}
         keyboard={false}

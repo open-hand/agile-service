@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-bind */
 import React, { Component } from 'react';
-import { stores } from '@choerodon/boot';
+import { stores, Choerodon } from '@choerodon/boot';
 import moment from 'moment';
 import {
   Select, DatePicker, Modal, Radio,
@@ -66,10 +66,14 @@ class DailyLog extends Component {
 
   handleCreateDailyLog = async () => {
     const {
-      dissipate, startTime, radio, delta,
+      dissipate, startTime, radio, delta, uploading,
     } = this.state;
     const { issueId } = this.props;
     if ((!await this.selectRef.current.checkValidity())) {
+      return;
+    }
+    if (uploading) {
+      Choerodon.prompt('请等待图片上传完成');
       return;
     }
     if (!startTime) {
@@ -257,8 +261,8 @@ class DailyLog extends Component {
         visible={visible || false}
         cancelText="取消"
         footer={[
-          <Button key="submit" color="primary" funcType="raised" loading={loading || uploading} disabled={loading} onClick={this.handleCreateDailyLog}>
-            <Tooltip title={uploading ? '正在上传图片' : null}>确定</Tooltip>
+          <Button key="submit" color="primary" funcType="raised" loading={loading} disabled={loading} onClick={this.handleCreateDailyLog}>
+            确定
           </Button>,
           <Button key="back" onClick={onCancel} funcType="raised">取消</Button>,
         ]}
