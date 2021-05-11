@@ -57,7 +57,8 @@
             </foreach>
         ) t
         on (
-            atir.project_id = t.project_id
+            atir.tag_project_id = t.project_id
+            and atir.project_id = t.project_id
             and atir.tag_name = t.tag_name
             and atir.app_service_code = t.app_service_code
         )

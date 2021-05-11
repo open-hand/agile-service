@@ -120,7 +120,11 @@ public interface PublishVersionService {
                                                   SearchVO searchVO,
                                                   PageRequest pageRequest);
 
-    void compareTag(Long projectId, Long organizationId, Long publishVersionId, List<TagCompareVO> tagCompareList);
+    void compareTag(Long projectId,
+                    Long organizationId,
+                    Long publishVersionId,
+                    List<TagCompareVO> tagCompareList,
+                    String action);
 
     /**
      * 删除tag相关数据

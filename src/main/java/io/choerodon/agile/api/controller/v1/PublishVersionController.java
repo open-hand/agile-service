@@ -198,8 +198,9 @@ public class PublishVersionController {
                                      @ApiParam(value = "产品版本id", required = true)
                                      @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
                                      @RequestParam Long organizationId,
+                                     @RequestParam String action,
                                      @RequestBody List<TagCompareVO> tagCompareList) {
-        publishVersionService.compareTag(projectId, organizationId, publishVersionId, tagCompareList);
+        publishVersionService.compareTag(projectId, organizationId, publishVersionId, tagCompareList, action);
         return new ResponseEntity(HttpStatus.OK);
     }
 

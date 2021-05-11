@@ -27,9 +27,19 @@ public class TagIssueRelDTO extends AuditDomain {
 
     private Long issueId;
 
+    private Long tagProjectId;
+
     private Long projectId;
 
     private Long organizationId;
+
+    public Long getTagProjectId() {
+        return tagProjectId;
+    }
+
+    public void setTagProjectId(Long tagProjectId) {
+        this.tagProjectId = tagProjectId;
+    }
 
     public Long getId() {
         return id;

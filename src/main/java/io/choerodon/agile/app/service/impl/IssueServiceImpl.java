@@ -338,6 +338,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 dto.setOrganizationId(organizationId);
                 dto.setTagName(tagName);
                 dto.setAppServiceCode(appServiceCode);
+                dto.setTagProjectId(x.getProjectId());
                 dto.setProjectId(projectId);
                 if (tagIssueRelMapper.select(dto).isEmpty()) {
                     tagIssueRelMapper.insertSelective(dto);
@@ -1390,8 +1391,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                        Long issueId,
                                        Long projectId,
                                        Long organizationId) {
-        validateRequiredFields(issueUpdateTypeVO, issueId, projectId, organizationId);
         BatchUpdateFieldsValueVo batchUpdateFieldsValueVo = issueUpdateTypeVO.getBatchUpdateFieldsValueVo();
+        if (batchUpdateFieldsValueVo == null) {
+            return;
+        }
+        validateRequiredFields(issueUpdateTypeVO, issueId, projectId, organizationId);
         List<Long> issueIds = Arrays.asList(issueId);
         JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();

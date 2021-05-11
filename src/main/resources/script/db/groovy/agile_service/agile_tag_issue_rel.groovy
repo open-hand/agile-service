@@ -14,6 +14,9 @@ databaseChangeLog(logicalFilePath:'agile_tag_issue_rel.groovy') {
             column(name: 'tag_name', type: 'VARCHAR(255)', remarks: 'tag名称') {
                 constraints(nullable: false)
             }
+            column(name: 'tag_project_id', type: 'BIGINT UNSIGNED', remarks: 'tag的项目id') {
+                constraints(nullable: false)
+            }
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
                 constraints(nullable: false)
             }

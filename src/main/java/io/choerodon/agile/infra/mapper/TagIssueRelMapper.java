@@ -38,4 +38,8 @@ public interface TagIssueRelMapper extends BaseMapper<TagIssueRelDTO> {
     List<IssueTypeCountVO> statisticsByIssueType(@Param("organizationId") Long organizationId,
                                                  @Param("projectId") Long projectId,
                                                  @Param("tags") Set<TagVO> tags);
+
+    void deleteByIssueIds(@Param("projectId") Long projectId,
+                          @Param("organizationId") Long organizationId,
+                          @Param("issueIds") Set<Long> issueIds);
 }
