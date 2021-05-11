@@ -64,7 +64,7 @@ const Comments: React.FC<Props> = ({
     <div className={styles.comments}>
       <div className={styles.list}>
         {
-          comments.reverse().map((comment: any) => (
+          comments.map((comment: any) => (
             <Comment
               projectId={projectId}
               key={comment.commentId}
