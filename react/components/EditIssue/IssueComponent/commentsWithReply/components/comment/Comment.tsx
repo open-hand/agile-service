@@ -81,7 +81,7 @@ const Comment: React.FC<Props> = (props) => {
                   commentExpandMap.get(comment.commentId) && (
                     <div className="c7n-comment-replys">
                       {
-                        (commentReplysMap.get(comment.commentId) || []).map((item: IComment) => (
+                        (commentReplysMap.get(comment.commentId) || []).reverse().map((item: IComment) => (
                           <CommentItem
                             isReply
                             {...props}
