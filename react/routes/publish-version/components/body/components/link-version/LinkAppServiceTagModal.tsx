@@ -13,6 +13,7 @@ import { publishVersionApiConfig } from '@/api';
 import JSONbig from 'json-bigint';
 import SelectAppService from '@/components/select/select-app-service';
 import SelectGitTags from '@/components/select/select-git-tags';
+import { getProjectId } from '@/utils/common';
 
 const JSONbigString = JSONbig({ storeAsString: true });
 
@@ -41,7 +42,8 @@ const LinkAppServiceTagModal: React.FC<{ modal?: IModalProps } & ILinkServicePro
       },
       { name: 'tagName', label: '选择tag', required: true },
       { name: 'versionAlias', label: '版本别名' },
-      { name: 'serviceCode', bind: 'appService.code' },
+      { name: 'appServiceCode', bind: 'appService.code' },
+      { name: 'projectId', defaultValue: getProjectId() },
       // { name: 'subProject', label: '选择子项目', required: !!programMode },
 
     ],
@@ -53,7 +55,7 @@ const LinkAppServiceTagModal: React.FC<{ modal?: IModalProps } & ILinkServicePro
     if (!await ds.current?.validate()) {
       return false;
     }
-    const data = ds.current?.toJSONData();
+    const data = ds?.toJSONData();
     const result = handleOk && await handleOk(data);
     return typeof (result) !== 'undefined' ? result : true;
   }, [ds, handleOk]);

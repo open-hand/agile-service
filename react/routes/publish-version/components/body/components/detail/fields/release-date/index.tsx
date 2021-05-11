@@ -17,19 +17,7 @@ const BusinessValue: React.FC<Props> = () => {
   return (
 
     <Field label="发布时间">
-      <TextEditToggle
-        onSubmit={(value: Moment | null) => {
-          store.update('actualPublishDate', value?.format('YYYY-MM-DD HH:mm:ss'));
-        }}
-        // disabled={disabled}
-        initValue={actualPublishDate ? moment(actualPublishDate, 'YYYY-MM-DD') : undefined}
-        submitTrigger={['blur', 'change']}
-        editor={() => (
-          <DatePicker style={{ width: '100%' }} />
-        )}
-      >
-        {actualPublishDate || '无'}
-      </TextEditToggle>
+      {actualPublishDate || '无'}
     </Field>
   );
 };

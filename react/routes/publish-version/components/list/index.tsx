@@ -24,6 +24,7 @@ import { useSize } from 'ahooks';
 import { usePublishVersionContext } from '../../stores';
 
 import styles from './index.less';
+import { openEditPublishVersionModal } from '../create-edit-publish-version';
 
 interface VersionItemProps {
   name: string
@@ -51,6 +52,9 @@ const VersionItem = observer<VersionItemProps>(({
           },
         });
         break;
+      case 'edit':
+        openEditPublishVersionModal({ editData: record.toData() });
+        break;
       case 'version_planning':
       case 'released': {
         publishVersionApi.update(record.get('id'), {
@@ -77,6 +81,7 @@ const VersionItem = observer<VersionItemProps>(({
             <Menu onClick={({ key }) => handleClickMenu(key, data!)}>
               {data?.get('statusCode') === 'version_planning' ? <Menu.Item key="released">发布</Menu.Item>
                 : <Menu.Item key="version_planning">撤销发布</Menu.Item>}
+              <Menu.Item key="edit">编辑</Menu.Item>
               <Menu.Item key="del">删除</Menu.Item>
             </Menu>
           )}
