@@ -52,10 +52,10 @@ public class SendMsgUtil {
     private static final String INSERT = "insert";
     private static final String IMAGE = "image";
 
-    private static final String FEATURE_URL_TEMPLATE1 = "#/agile/feature?type=project&id=";
-    private static final String FEATURE_URL_TEMPLATE2 = "&name=";
-    private static final String FEATURE_URL_TEMPLATE3 = "&category=";
-    private static final String FEATURE_URL_TEMPLATE4 = "&organizationId=";
+    protected static final String FEATURE_URL_TEMPLATE1 = "#/agile/feature?type=project&id=";
+    protected static final String FEATURE_URL_TEMPLATE2 = "&name=";
+    protected static final String FEATURE_URL_TEMPLATE3 = "&category=";
+    protected static final String FEATURE_URL_TEMPLATE4 = "&organizationId=";
 
     protected static final String BACKLOG_URL_TEMPLATE1 = "#/agile/demand?type=project&id=";
     protected static final String BACKLOG_URL_TEMPLATE2 = "&name=";
@@ -64,6 +64,8 @@ public class SendMsgUtil {
     protected static final String BACKLOG_URL_TEMPLATE5 = "&paramBacklogName=";
 
     protected static final String BACKLOG = "backlog";
+    protected static final String FEATURE = "feature";
+    protected static final String ISSUE_EPIC = "issue_epic";
     @Autowired
     private SiteMsgUtil siteMsgUtil;
 
@@ -381,7 +383,7 @@ public class SendMsgUtil {
         String issueType;
 
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
-        if ("feature".equals(issueVO.getTypeCode())) {
+        if (FEATURE.equals(issueVO.getTypeCode())) {
             issueType = "特性";
             url = getFeatureUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         } else {
@@ -423,7 +425,7 @@ public class SendMsgUtil {
         String issueType;
 
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
-        if ("feature".equals(issueVO.getTypeCode())) {
+        if (FEATURE.equals(issueVO.getTypeCode())) {
             issueType = "特性";
             url = getFeatureUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         } else {
