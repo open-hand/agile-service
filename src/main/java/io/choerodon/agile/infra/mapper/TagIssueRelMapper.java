@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.IssueTypeCountVO;
 import io.choerodon.agile.api.vo.TagVO;
 import io.choerodon.agile.api.vo.TagWithIssueVO;
 import io.choerodon.agile.infra.dto.TagIssueRelDTO;
@@ -33,4 +34,8 @@ public interface TagIssueRelMapper extends BaseMapper<TagIssueRelDTO> {
     List<TagIssueRelDTO> selectByOptions(@Param("organizationId") Long organizationId,
                                          @Param("projectId") Long projectId,
                                          @Param("issueIds") List<Long> issueIds);
+
+    List<IssueTypeCountVO> statisticsByIssueType(@Param("organizationId") Long organizationId,
+                                                 @Param("projectId") Long projectId,
+                                                 @Param("tags") Set<TagVO> tags);
 }

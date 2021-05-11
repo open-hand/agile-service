@@ -1,10 +1,8 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.TagCompareVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.infra.dto.TagCompareHistoryDTO;
-import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -19,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 
-import io.choerodon.agile.api.vo.PublishVersionVO;
 import io.choerodon.agile.app.service.PublishVersionService;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -162,8 +159,8 @@ public class PublishVersionController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询发布版本关联的已完成故事")
-    @PostMapping(value = "/{publish_version_id}/story")
-    public ResponseEntity<Page<IssueListFieldKVVO>> listRelStoryByOption(@ApiParam(value = "项目id", required = true)
+    @PostMapping(value = "/{publish_version_id}/issues")
+    public ResponseEntity<Page<IssueListFieldKVVO>> listRelIssueByOption(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable(name = "project_id") Long projectId,
                                                                          @ApiParam(value = "产品版本id", required = true)
                                                                          @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
@@ -171,26 +168,11 @@ public class PublishVersionController {
                                                                          @ApiParam(value = "筛选条件")
                                                                          @RequestBody SearchVO searchVO,
                                                                          @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
-                                                                                     PageRequest pageRequest) {
+                                                                                 PageRequest pageRequest) {
         EncryptionUtils.decryptSearchVO(searchVO);
-        return ResponseEntity.ok(publishVersionService.listRelIssueByOption(projectId, organizationId, publishVersionId, searchVO, pageRequest, IssueTypeCode.STORY.value()));
+        return ResponseEntity.ok(publishVersionService.listRelIssueByOption(projectId, organizationId, publishVersionId, searchVO, pageRequest));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "查询发布版本关联的已完成故事")
-    @PostMapping(value = "/{publish_version_id}/bug")
-    public ResponseEntity<Page<IssueListFieldKVVO>> listRelBugByOption(@ApiParam(value = "项目id", required = true)
-                                                                       @PathVariable(name = "project_id") Long projectId,
-                                                                       @ApiParam(value = "产品版本id", required = true)
-                                                                       @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
-                                                                       @RequestParam Long organizationId,
-                                                                       @ApiParam(value = "筛选条件")
-                                                                       @RequestBody SearchVO searchVO,
-                                                                       @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
-                                                                                   PageRequest pageRequest) {
-        EncryptionUtils.decryptSearchVO(searchVO);
-        return ResponseEntity.ok(publishVersionService.listRelIssueByOption(projectId, organizationId, publishVersionId, searchVO, pageRequest, IssueTypeCode.BUG.value()));
-    }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "发布版本tag对比")
@@ -201,7 +183,7 @@ public class PublishVersionController {
                                               @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
                                               @RequestParam Long organizationId,
                                               @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
-                                                          PageRequest pageRequest,
+                                                      PageRequest pageRequest,
                                               @RequestBody(required = false) SearchVO searchVO) {
         publishVersionService.previewIssueFromTag(projectId, organizationId, publishVersionId, searchVO, pageRequest);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -244,4 +226,22 @@ public class PublishVersionController {
         return ResponseEntity.ok(publishVersionService.tagCompareHistory(projectId, organizationId, publishVersionId));
     }
 
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "根据发布版本查询项目下所有已经启用的服务")
+    @GetMapping("/{publish_version_id}/active_app_service")
+    public ResponseEntity<List<AppServiceRepVO>> activeAppService(@ApiParam(value = "项目 ID", required = true)
+                                                                  @PathVariable(value = "project_id") Long projectId,
+                                                                  @PathVariable(value = "publish_version_id") Long publishVersionId) {
+        return ResponseEntity.ok(publishVersionService.activeAppService(projectId, publishVersionId));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "发布版本关联的问题类型数量统计")
+    @GetMapping("/{publish_version_id}/issue_detail/issue_type")
+    public ResponseEntity<List<IssueTypeCountVO>> issueTypeCount(@ApiParam(value = "项目 ID", required = true)
+                                                                 @PathVariable(value = "project_id") Long projectId,
+                                                                 @PathVariable(value = "publish_version_id") Long publishVersionId) {
+        return ResponseEntity.ok(publishVersionService.issueTypeCount(projectId, publishVersionId));
+    }
 }

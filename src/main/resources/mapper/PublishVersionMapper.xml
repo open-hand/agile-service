@@ -37,20 +37,30 @@
     </select>
 
     <select id="selectIssueIds" resultType="java.lang.Long">
-        select atir.issue_id
-        from agile_publish_version apv
-        join agile_tag_issue_rel atir
-        on (apv.service_code = atir.app_service_code and apv.tag_name = atir.tag_name)
-        where apv.organization_id = #{organizationId}
-        and apv.project_id in
-        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-            #{projectId}
-        </foreach>
-        and apv.id in
-        <foreach collection="publishVersionIds" item="publishVersionId" open="(" separator="," close=")">
-            #{publishVersionId}
-        </foreach>
-        and (apv.service_code is not null and apv.tag_name is not null)
+        select
+        distinct atir.issue_id
+        from agile_tag_issue_rel atir
+        join (
+            select distinct
+            apvtr.project_id,
+            apvtr.tag_name,
+            apvtr.app_service_code
+            from agile_publish_version_tag_rel apvtr
+            where apvtr.organization_id = #{organizationId}
+            and apvtr.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            and apvtr.publish_version_id in
+            <foreach collection="publishVersionIds" item="publishVersionId" open="(" separator="," close=")">
+                #{publishVersionId}
+            </foreach>
+        ) t
+        on (
+            atir.project_id = t.project_id
+            and atir.tag_name = t.tag_name
+            and atir.app_service_code = t.app_service_code
+        )
     </select>
 
     <resultMap id="publishVersionWithTag" type="io.choerodon.agile.infra.dto.PublishVersionDTO">
