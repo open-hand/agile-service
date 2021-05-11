@@ -2,10 +2,11 @@ import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { Tooltip } from 'choerodon-ui';
 import { sprintApi } from '@/api';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ISprint } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
+import './index.less';
 
 interface Props extends Partial<SelectProps> {
   hasUnassign?: boolean,
@@ -36,6 +37,14 @@ const SelectSprint: React.FC<Props> = forwardRef(({
     textField: 'sprintName',
     valueField: 'sprintId',
     afterLoad,
+    optionRenderer: (sprint) => (
+      <FragmentForSearch name={sprint.sprintName}>
+        <div style={{ display: 'inline-block' }}>
+          {sprint.sprintName}
+          {sprint.statusCode === 'started' && <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>}
+        </div>
+      </FragmentForSearch>
+    ),
     request: ({ filter, page }) => (isProgram ? sprintApi.loadSubProjectSprints(filter || '', page!, selectSprints)
       : sprintApi.project(projectId).loadSprints(statusList)),
     middleWare: (sprints) => {
