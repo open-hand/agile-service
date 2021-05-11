@@ -3,7 +3,6 @@ package io.choerodon.agile.infra.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.api.vo.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.entity.MessageSender;
@@ -15,6 +14,10 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 
+import io.choerodon.agile.api.vo.IssueCommentVO;
+import io.choerodon.agile.api.vo.IssueMoveVO;
+import io.choerodon.agile.api.vo.IssueSubVO;
+import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.app.service.UserService;
@@ -38,34 +41,24 @@ import io.choerodon.core.oauth.DetailsHelper;
 @Component
 public class SendMsgUtil {
 
-    protected static final String URL_TEMPLATE1 = "#/agile/work-list/issue?type=project&id=";
-    protected static final String URL_TEMPLATE2 = "&name=";
-    protected static final String URL_TEMPLATE3 = "&paramName=";
-    protected static final String URL_TEMPLATE4 = "&paramIssueId=";
-    protected static final String URL_TEMPLATE5 = "&paramOpenIssueId=";
-    protected static final String URL_TEMPLATE6 = "&organizationId=";
-    protected static final String URL_TEMPLATE7 = "&orgId=";
+    private static final String URL_TEMPLATE1 = "#/agile/work-list/issue?type=project&id=";
+    private static final String URL_TEMPLATE2 = "&name=";
+    private static final String URL_TEMPLATE3 = "&paramName=";
+    private static final String URL_TEMPLATE4 = "&paramIssueId=";
+    private static final String URL_TEMPLATE5 = "&paramOpenIssueId=";
+    private static final String URL_TEMPLATE6 = "&organizationId=";
+    private static final String URL_TEMPLATE7 = "&orgId=";
     private static final String URL_TEMPLATE8 = "&detailTab=comment";
     private static final String ERROR_PROJECT_NOTEXIST = "error.project.notExist";
-    protected static final String SUB_TASK = "sub_task";
+    private static final String SUB_TASK = "sub_task";
     private static final String STATUS_ID = "statusId";
     private static final String INSERT = "insert";
     private static final String IMAGE = "image";
 
-    protected static final String FEATURE_URL_TEMPLATE1 = "#/agile/feature?type=project&id=";
-    protected static final String FEATURE_URL_TEMPLATE2 = "&name=";
-    protected static final String FEATURE_URL_TEMPLATE3 = "&category=";
-    protected static final String FEATURE_URL_TEMPLATE4 = "&organizationId=";
-
-    protected static final String BACKLOG_URL_TEMPLATE1 = "#/agile/demand?type=project&id=";
-    protected static final String BACKLOG_URL_TEMPLATE2 = "&name=";
-    protected static final String BACKLOG_URL_TEMPLATE3 = "&organizationId=";
-    protected static final String BACKLOG_URL_TEMPLATE4 = "&paramBacklogId=";
-    protected static final String BACKLOG_URL_TEMPLATE5 = "&paramBacklogName=";
-
-    protected static final String BACKLOG = "backlog";
-    protected static final String FEATURE = "feature";
-    protected static final String ISSUE_EPIC = "issue_epic";
+    private static final String FEATURE_URL_TEMPLATE1 = "#/agile/feature?type=project&id=";
+    private static final String FEATURE_URL_TEMPLATE2 = "&name=";
+    private static final String FEATURE_URL_TEMPLATE3 = "&category=";
+    private static final String FEATURE_URL_TEMPLATE4 = "&organizationId=";
     @Autowired
     private SiteMsgUtil siteMsgUtil;
 
@@ -86,7 +79,7 @@ public class SendMsgUtil {
     @Autowired
     private ModelMapper modelMapper;
 
-    protected String convertProjectName(ProjectVO projectVO) {
+    private String convertProjectName(ProjectVO projectVO) {
         String projectName = projectVO.getName();
         return projectName.replaceAll(" ", "%20");
     }
@@ -383,7 +376,7 @@ public class SendMsgUtil {
         String issueType;
 
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
-        if (FEATURE.equals(issueVO.getTypeCode())) {
+        if ("feature".equals(issueVO.getTypeCode())) {
             issueType = "特性";
             url = getFeatureUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         } else {
@@ -425,7 +418,7 @@ public class SendMsgUtil {
         String issueType;
 
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
-        if (FEATURE.equals(issueVO.getTypeCode())) {
+        if ("feature".equals(issueVO.getTypeCode())) {
             issueType = "特性";
             url = getFeatureUrl(issueVO, projectVO, issueVO.getIssueId()) + URL_TEMPLATE8;
         } else {
