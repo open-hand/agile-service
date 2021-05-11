@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -787,6 +788,51 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         });
         requiredSystemFields.addAll(requiredCustomFields);
         return requiredSystemFields;
+    }
+
+    @Override
+    public void executionUpdateStatus(Long projectId, Long issueId, ExecutionUpdateIssueVO executionUpdateIssueVO) {
+        Long sprintId = executionUpdateIssueVO.getSprintId();
+        String appleType = getApplyType(projectId);
+        if (StringUtils.isEmpty(appleType)) {
+            return;
+        }
+        Map<Long, Long> map = executionUpdateIssueVO.getIssueTypeStatusMap();
+        IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
+        Long issueTypeId = issueDetailDTO.getIssueTypeId();
+        Long currentStatusId = issueDetailDTO.getStatusId();
+        Long targetStatusId = map.get(issueDetailDTO.getIssueTypeId());
+        IssueSprintRelDTO issueSprintRelDTO = new IssueSprintRelDTO();
+        issueSprintRelDTO.setProjectId(projectId);
+        issueSprintRelDTO.setSprintId(sprintId);
+        issueSprintRelDTO.setIssueId(issueId);
+        List<IssueSprintRelDTO> sprintRelDTOS = issueSprintRelMapper.select(issueSprintRelDTO);
+        if (CollectionUtils.isEmpty(sprintRelDTOS)) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(targetStatusId) || Objects.equals(currentStatusId, targetStatusId)) {
+            return;
+        }
+        List<TransformVO> transformVOS = projectConfigService.queryTransformsByProjectId(projectId, currentStatusId, issueId, issueTypeId, appleType);
+        if (!CollectionUtils.isEmpty(transformVOS)) {
+            Map<Long, TransformVO> transformVOMap = transformVOS.stream().collect(Collectors.toMap(TransformVO::getEndStatusId, Function.identity()));
+            TransformVO transformVO = transformVOMap.get(targetStatusId);
+            if (!ObjectUtils.isEmpty(transformVO)) {
+                updateIssueStatus(projectId, issueId, transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), appleType);
+            }
+        }
+    }
+
+    private String getApplyType(Long projectId) {
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        List<String> projectCodes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+        if (projectCodes.contains(ProjectCategory.MODULE_PROGRAM)) {
+            return SchemeApplyType.PROGRAM;
+        } else if (projectCodes.contains(ProjectCategory.MODULE_AGILE)) {
+            return SchemeApplyType.AGILE;
+        } else {
+            return null;
+        }
     }
 
     private boolean isSystemFieldEmpty(String fieldCode, IssueVO issue) {

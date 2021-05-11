@@ -33,6 +33,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -683,6 +684,19 @@ public class IssueController {
                                            @ApiParam(value = "issueIds", required = true)
                                            @RequestBody @Encrypt List<Long> issueIds) {
         issueOperateService.batchDeleteIssue(projectId, issueIds);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("测试专用-执行状态变更去修改issue状态")
+    @PostMapping(value = "/execution_update_status")
+    public ResponseEntity executionUpdateStatus(@ApiParam(value = "项目id", required = true)
+                                                @PathVariable(name = "project_id") Long projectId,
+                                                @ApiParam(value = "issueId", required = true)
+                                                @RequestParam @Encrypt Long issueId,
+                                                @RequestBody ExecutionUpdateIssueVO executionUpdateIssueVO) {
+        issueService.executionUpdateStatus(projectId, issueId, executionUpdateIssueVO);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

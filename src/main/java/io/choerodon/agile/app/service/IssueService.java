@@ -442,4 +442,6 @@ public interface IssueService {
                                                        Long organizationId,
                                                        Long issueId,
                                                        Long issueTypeId);
+
+    void executionUpdateStatus(Long projectId, Long issueId, ExecutionUpdateIssueVO executionUpdateIssueVO);
 }
