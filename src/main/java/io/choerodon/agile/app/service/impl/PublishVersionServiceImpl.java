@@ -107,6 +107,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
 
     private static final String FAILED = "failed";
 
+    private static final String TAG_COMPARE_ADD = "add";
+
+    private static final String TAG_COMPARE_UPDATE = "update";
+
     @Override
     public PublishVersionVO create(Long projectId, PublishVersionVO publishVersionVO) {
         String version = publishVersionVO.getVersion();
@@ -402,38 +406,67 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     }
 
     @Override
+    @Async
     public void compareTag(Long projectId,
                            Long organizationId,
                            Long publishVersionId,
-                           List<TagCompareVO> tagCompareList) {
-        PublishVersionDTO dto = new PublishVersionDTO();
-        dto.setProjectId(projectId);
-        dto.setId(publishVersionId);
-        PublishVersionDTO publishVersion = publishVersionMapper.selectOne(dto);
-        AssertUtilsForCommonException.notNull(publishVersion, "error.publish.version.null");
-        AssertUtilsForCommonException.notEmpty(tagCompareList, "error.tagCompareList.empty");
-        validateTagCompareList(tagCompareList);
+                           List<TagCompareVO> tagCompareList,
+                           String action) {
+        String websocketKey = WEBSOCKET_GENERATE_TAG_COMPARE + projectId;
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        try {
+            PublishVersionDTO dto = new PublishVersionDTO();
+            dto.setProjectId(projectId);
+            dto.setId(publishVersionId);
+            PublishVersionDTO publishVersion = publishVersionMapper.selectOne(dto);
+            AssertUtilsForCommonException.notNull(publishVersion, "error.publish.version.null");
+            AssertUtilsForCommonException.notEmpty(tagCompareList, "error.tagCompareList.empty");
+            validateTagCompareList(tagCompareList);
+            if (!TAG_COMPARE_ADD.equals(action)
+                    && !TAG_COMPARE_UPDATE.equals(action)) {
+                throw new CommonException("error.illegal.action." + action);
+            }
+            boolean doUpdate = TAG_COMPARE_UPDATE.equals(action);
 
-        List<TagVO> tags = new ArrayList<>();
-        Set<Long> allIssueIds = new HashSet<>();
-        getIssueIdsByTagsFromDevops(tags, allIssueIds, tagCompareList, projectId);
+            List<TagVO> tags = new ArrayList<>();
+            Set<Long> allIssueIds = new HashSet<>();
+            getIssueIdsByTagsFromDevops(tags, allIssueIds, tagCompareList, projectId);
 
-        if (!tags.isEmpty()) {
-            Map<Long, IssueDTO> issueMap =
-                    issueMapper.selectByIds(StringUtils.join(allIssueIds, ","))
-                            .stream()
-                            .collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity()));
-            Long programId = null;
-            if (agilePluginService != null) {
-                ProjectVO program = agilePluginService.getProgram(projectId, organizationId);
-                if (program != null) {
-                    programId = program.getId();
+            if (!tags.isEmpty()) {
+                Map<Long, IssueDTO> issueMap =
+                        issueMapper.selectByIds(StringUtils.join(allIssueIds, ","))
+                                .stream()
+                                .collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity()));
+                Long programId = null;
+                if (agilePluginService != null) {
+                    ProjectVO program = agilePluginService.getProgram(projectId, organizationId);
+                    if (program != null) {
+                        programId = program.getId();
+                    }
+                }
+                int total = tags.size();
+                double current = 1D;
+                for (TagVO tag : tags) {
+                    addTagToIssue(tag, projectId, organizationId, programId, issueMap, doUpdate);
+                    TagCompareVO tagCompareVO = tag.getTagCompareVO();
+                    addTagCompareHistory(tagCompareVO, projectId, organizationId, publishVersionId);
+                    tagCompareVO.setAction(DOING);
+                    tagCompareVO.setProgress(getProgress(current, total));
+                    sendProgress(tagCompareVO, userId, websocketKey);
+                    current++;
                 }
             }
-            for (TagVO tag : tags) {
-                addTagToIssue(tag, projectId, organizationId, programId, issueMap);
-                addTagCompareHistory(tag.getTagCompareVO(), projectId, organizationId, publishVersionId);
-            }
+            TagCompareVO tagCompareVO = new TagCompareVO();
+            tagCompareVO.setAction(DONE);
+            tagCompareVO.setProgress(1D);
+            sendProgress(tagCompareVO, userId, websocketKey);
+        } catch (Exception e) {
+            TagCompareVO tagCompareVO = new TagCompareVO();
+            tagCompareVO.setAction(FAILED);
+            tagCompareVO.setProgress(0D);
+            tagCompareVO.setMsg(e.getMessage());
+            sendProgress(tagCompareVO, userId, websocketKey);
+            throw new CommonException("error.compare.tag", e);
         }
     }
 
@@ -522,6 +555,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         String tagCompareListKey = "tagCompareList";
         String websocketKey = WEBSOCKET_PREVIEW_TAG_COMPARE + projectId;
         Long userId = DetailsHelper.getUserDetails().getUserId();
+        pageRequest.setPage(1);
         pageRequest.setSize(0);
         try {
             Object obj = searchVO.getSearchArgs().get(tagCompareListKey);
@@ -774,32 +808,40 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                                Long projectId,
                                Long organizationId,
                                Long programId,
-                               Map<Long, IssueDTO> issueMap) {
+                               Map<Long, IssueDTO> issueMap,
+                               boolean doUpdate) {
         String appServiceCode = tag.getAppServiceCode();
         String tagName = tag.getTagName();
-        tag.getIssueIds().forEach(x -> {
-            IssueDTO issue = issueMap.get(x);
-            String issueTypeCode = issue.getTypeCode();
-            if (issueTypeCode == null) {
-                return;
+        Set<Long> issueIds = tag.getIssueIds();
+        if (!ObjectUtils.isEmpty(issueIds)) {
+            if (doUpdate) {
+                //删除旧数据
+                tagIssueRelMapper.deleteByIssueIds(projectId, organizationId, issueIds);
             }
-            TagIssueRelDTO dto = new TagIssueRelDTO();
-            dto.setIssueId(x);
-            dto.setProjectId(projectId);
-            dto.setOrganizationId(organizationId);
-            dto.setAppServiceCode(appServiceCode);
-            dto.setTagName(tagName);
-            if (tagIssueRelMapper.select(dto).isEmpty()) {
-                tagIssueRelMapper.insert(dto);
-            }
-            if (agilePluginService != null
-                    && IssueTypeCode.isStory(issueTypeCode)
-                    && programId != null
-                    && issue.getFeatureId() != null
-                    && !Objects.equals(0L, issue.getFeatureId())) {
-                agilePluginService.addTagToFeature(issue.getFeatureId(), projectId, organizationId, appServiceCode, tagName);
-            }
-        });
+            issueIds.forEach(x -> {
+                IssueDTO issue = issueMap.get(x);
+                String issueTypeCode = issue.getTypeCode();
+                if (issueTypeCode == null) {
+                    return;
+                }
+                TagIssueRelDTO dto = new TagIssueRelDTO();
+                dto.setIssueId(x);
+                dto.setProjectId(projectId);
+                dto.setOrganizationId(organizationId);
+                dto.setAppServiceCode(appServiceCode);
+                dto.setTagName(tagName);
+                if (tagIssueRelMapper.select(dto).isEmpty()) {
+                    tagIssueRelMapper.insert(dto);
+                }
+                if (agilePluginService != null
+                        && IssueTypeCode.isStory(issueTypeCode)
+                        && programId != null
+                        && issue.getFeatureId() != null
+                        && !Objects.equals(0L, issue.getFeatureId())) {
+                    agilePluginService.addTagToFeature(issue.getFeatureId(), programId, organizationId, tag);
+                }
+            });
+        }
     }
 
     private void addSearchParam(SearchVO searchVO,

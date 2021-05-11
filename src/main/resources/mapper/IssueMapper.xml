@@ -281,7 +281,7 @@
     <select id="queryTagsByIssueId" resultType="io.choerodon.agile.api.vo.TagVO">
         select
         distinct
-        atir.project_id,
+        atir.tag_project_id as project_id,
         atir.app_service_code,
         atir.tag_name
         from agile_tag_issue_rel atir
@@ -454,7 +454,7 @@
         ais.is_completed as completed,
         ai.main_responsible_id,
         ai.environment,
-        atir.project_id as tag_project_id,
+        atir.tag_project_id,
         atir.app_service_code as app_service_code,
         atir.tag_name as tag_name
         FROM agile_issue ai
@@ -1076,7 +1076,8 @@
             ai.issue_id in (
             SELECT atir.issue_id
             FROM agile_tag_issue_rel atir
-            WHERE atir.project_id in
+            WHERE atir.project_id = #{projectId}
+            and atir.tag_project_id in
             <foreach collection="searchVO.otherArgs.tags" item="tag" open="(" separator="," close=")">
                 #{tag.projectId}
             </foreach>
