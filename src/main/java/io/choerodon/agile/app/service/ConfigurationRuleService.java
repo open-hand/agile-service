@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.TriggerInstanceVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.UserTypeToReceiverParamDTO;
 import io.choerodon.core.domain.Page;
@@ -69,7 +70,7 @@ public interface ConfigurationRuleService {
 
     List<ConfigurationRuleVO> selectByProjectId(ConfigurationRuleVO configurationRuleVO);
 
-    List<MessageSender> generateAutoRuleTriggerSender(Long userId, String summary, Collection<ConfigurationRuleVO> values, Supplier<Boolean> operator);
+    List<MessageSender> generateAutoRuleTriggerSender(TriggerInstanceVO instanceVO, Collection<ConfigurationRuleVO> values, Supplier<Boolean> operator);
 
     List<Long> selectReceiverByRuleIds(List<Long> ruleIdList, List<String> types);
 
