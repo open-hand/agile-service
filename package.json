@@ -50,7 +50,8 @@
     "timeago-react": "2.0.0",
     "use-immer": "^0.4.1",
     "webuploader": "^0.1.8",
-    "wolfy87-eventemitter": "^5.2.8"
+    "wolfy87-eventemitter": "^5.2.8",
+    "copy-to-clipboard": "^3.2.0"
   },
   "devDependencies": {
     "@choerodon/boot": "0.23.1",

@@ -2,13 +2,18 @@ import React, { useContext, useState, useCallback } from 'react';
 import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
-import { Permission } from '@choerodon/boot';
+import { Permission, Choerodon } from '@choerodon/boot';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
-import { includes } from 'lodash';
+import { includes, merge, get } from 'lodash';
+import copy from 'copy-to-clipboard';
+import queryString from 'query-string';
 import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
 import { openEditIssueCopyIssue } from '@/components/CopyIssue';
+import { getProjectId, getProjectName, getOrganizationId } from '@/utils/common';
+import { linkUrl } from '@/utils/to';
+import useIsProgram from '@/hooks/useIsProgram';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
@@ -23,6 +28,7 @@ const IssueDropDown = ({
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
+  const { isProgram } = useIsProgram();
 
   const handleCopyIssue = (issue) => {
     store.setCopyIssueShow(false);
@@ -65,7 +71,7 @@ const IssueDropDown = ({
       okType: 'danger',
     });
   };
-  const handleClickMenu = (e) => {
+  const handleClickMenu = async (e) => {
     if (e.key === '0') {
       store.setWorkLogShow(true);
     } else if (e.key === 'item_11') {
@@ -127,6 +133,23 @@ const IssueDropDown = ({
           linkIssue: store.getLinkIssues && store.getLinkIssues.length,
         },
       });
+    } else if (e.key === 'link') {
+      let decryptIssueId = issueId;
+      if (!/^[0-9]+$/.test(issueId)) {
+        decryptIssueId = await issueApi.decrypt(issueId);
+      }
+      const queryData = {
+        params: {
+          paramIssueId: decryptIssueId, paramName: issueNum,
+        },
+      };
+
+      if (!isProgram) {
+        copy(`${window.location.host}/#/${linkUrl('agile/work-list/issue', queryData)}`);
+      } else {
+        copy(`${window.location.host}/#/${linkUrl('agile/feature', queryData)}`);
+      }
+      Choerodon.prompt('复制成功！');
     }
   };
   const getMenu = () => (
@@ -198,7 +221,9 @@ const IssueDropDown = ({
           复制问题
         </Menu.Item>
       )}
-
+      <Menu.Item key="link">
+        复制链接
+      </Menu.Item>
       {
         (includes(['story', 'task', 'bug'], typeCode) && !parentRelateSummary) && ( // 故事、任务、缺陷能移 子缺陷不能移
           <Permission

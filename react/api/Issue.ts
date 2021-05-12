@@ -568,6 +568,16 @@ class IssueApi extends Api<IssueApi> {
       data: search,
     });
   }
+
+  decrypt(issueId: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/decrypt`,
+      params: {
+        issueId,
+      },
+    });
+  }
 }
 const issueApi = new IssueApi();
 
