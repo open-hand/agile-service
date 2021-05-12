@@ -3,7 +3,7 @@ import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 
 function IssueInfoTableDataSet(versionId: string): DataSetProps {
   return {
-    autoQuery: true,
+    autoQuery: false,
     paging: true,
     selection: false,
     // data: [{ summary: '测试问题测试问题测试问题测试问题测试问题测试问题测试问题测试问题测试问题', statusVO: {} }],
@@ -20,10 +20,10 @@ function IssueInfoTableDataSet(versionId: string): DataSetProps {
 
     ],
     transport: {
-    //   read: ({ params }) => {
-    //     console.log('params bug', params);
-    //     return ({ ...publishVersionApiConfig.loadBug(versionId, {}, params) });
-    //   },
+      read: ({ params }) => {
+        console.log('params bug', params);
+        return ({ ...publishVersionApiConfig.loadIssues(versionId, {}, params) });
+      },
     },
   };
 }

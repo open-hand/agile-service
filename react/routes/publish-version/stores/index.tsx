@@ -8,10 +8,12 @@ import { useDetail } from '@/components/detail-container';
 import PublishVersionDataSet from './PublishVersionDataSet';
 import store, { PublishDetailStore } from './store';
 import IssueInfoTableDataSet from './IssueInfoTableDataSet';
+import IssueDiffDataSet from './IssueDiffDataSet';
 
 interface Context {
   tableDataSet: DataSet
   issueInfoTableDataSet:DataSet
+  issueDiffDataSet:DataSet
   detailProps: any
   store: PublishDetailStore
   prefixCls: string
@@ -23,8 +25,14 @@ export function usePublishVersionContext() {
 const PublishVersionProvider = injectIntl(inject('AppState')(
   (props: any) => {
     const [detailProps] = useDetail();
+    const issueDiffDataSet = useMemo(() => new DataSet(IssueDiffDataSet()), []);
     const issueInfoTableDataSet = useMemo(() => new DataSet(IssueInfoTableDataSet(store.getCurrentData.id)), [store.getCurrentData.id]);
     const tableDataSet = useMemo(() => new DataSet(PublishVersionDataSet()), []);
+    useEffect(() => {
+      if (store.getCurrentData.id) {
+        issueInfoTableDataSet.query();
+      }
+    }, [store.getCurrentData.id]);
     useEffect(() => {
       async function init() {
         await tableDataSet.query().then((res) => {
@@ -43,6 +51,7 @@ const PublishVersionProvider = injectIntl(inject('AppState')(
       prefixCls: 'c7n-agile-publish-version',
       tableDataSet,
       issueInfoTableDataSet,
+      issueDiffDataSet,
     };
     return (
       <PublishVersionContext.Provider value={value}>

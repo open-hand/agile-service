@@ -1,3 +1,4 @@
-import DependencyTreeBase from './DependencyTreeBase';
+import DependencyTreeBase, { DependencyTreeNode } from './DependencyTreeBase';
 
+export { DependencyTreeNode };
 export default DependencyTreeBase;

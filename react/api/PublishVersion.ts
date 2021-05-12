@@ -46,15 +46,23 @@ export interface IPublishVersionTreeNode {
   name?: string
   version?: string | null
   versionAlias?: string | null
-  serviceCode?: string | null
-  type?: string | 'app'
+  type?: string | 'app' | 'publish' | 'tag'
   children?: Array<IPublishVersionTreeNode>
+  appServiceCode?: string | null
+  artifactId?: string | null
+  groupId?: string | null
+  projectId?: string | null
+  tagName?: string | null
 }
 interface IPublishVersionListSearchData {
   appService?: boolean
   content?: string
 }
-type IPublishVersionTreeTagNode = Pick<IPublishVersionTreeNode, 'versionAlias' | 'serviceCode'> & { tagName: string }
+interface IPublishVersionTreeTagNode extends Pick<IPublishVersionTreeNode, 'versionAlias'> {
+  tagName: string
+  appServiceCode: string
+  projectId: string
+}
 class PublishVersionApi extends Api<PublishVersionApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
@@ -99,6 +107,43 @@ class PublishVersionApi extends Api<PublishVersionApi> {
       data: searchVO,
       params: {
         ...params,
+        organizationId: getOrganizationId(),
+
+      },
+    });
+  }
+
+  loadIssues(publishVersionId: string, searchVO: any, params = { page: 1, size: 10 }) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/publish_version/${publishVersionId}/issues`,
+      data: searchVO,
+      params: {
+        ...params,
+        organizationId: getOrganizationId(),
+
+      },
+    });
+  }
+
+  /** 版本对比处加载应用服务列表 */
+  loadAppServiceList(publishVersionId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/publish_version/${publishVersionId}/active_app_service`,
+      params: {
+        organizationId: getOrganizationId(),
+
+      },
+    });
+  }
+
+  /** 版本信息查看处加载问题类型列表 */
+  loadIssueTypeList(publishVersionId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/publish_version/${publishVersionId}/issue_detail/issue_type`,
+      params: {
         organizationId: getOrganizationId(),
 
       },
@@ -202,7 +247,7 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  dependencyTreeAddTag(publishVersionId: string, data: IPublishVersionTreeTagNode) {
+  dependencyTreeAddTag(publishVersionId: string, data: IPublishVersionTreeTagNode[]) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version_tree/add_tag`,
@@ -225,11 +270,12 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  dependencyTreeDelTag(data: IPublishVersionTreeNode) {
+  dependencyTreeDelTag(publishVersionId: string, data: IPublishVersionTreeTagNode[]) {
     return this.request({
       method: 'delete',
       url: `${this.prefix}/publish_version_tree/delete_tag`,
       params: {
+        publishVersionId,
         organizationId: getOrganizationId(),
       },
       data,
@@ -384,14 +430,30 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  compareTag(versionId: string, data: any[]) {
+  compareTag(versionId: string, data: any[], action?: 'add'|'update') {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/${versionId}/compare`,
       params: {
+        action,
         organizationId: getOrganizationId(),
       },
       data: data.map((i) => ({ ...i, projectId: i.projectId || getProjectId() })),
+    });
+  }
+
+  comparePreviewTag(versionId: string, data: any[]) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/publish_version/${versionId}/compare/preview_issue`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data: {
+        advancedSearchArgs: {},
+        otherArgs: {},
+        searchArgs: { tagCompareList: data.map((i) => ({ ...i, projectId: i.projectId || getProjectId() })) },
+      },
     });
   }
 
