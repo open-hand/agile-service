@@ -5,7 +5,7 @@
     <delete id="deleteByIssueIds">
         delete from agile_tag_issue_rel
         where organization_id = #{organizationId}
-        and project_id = {projectId}
+        and project_id = #{projectId}
         and issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}

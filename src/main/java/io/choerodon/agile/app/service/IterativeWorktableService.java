@@ -19,4 +19,6 @@ public interface IterativeWorktableService {
     List<AssigneeDistributeVO> queryAssigneeDistribute(Long projectId, Long sprintId);
 
     List<IssueTypeDistributeVO> queryIssueTypeDistribute(Long projectId, Long sprintId, Long organizationId);
+
+    List<AssigneeIssueVO> queryPersonWorkload(Long projectId, Long sprintId, Long organizationId);
 }
