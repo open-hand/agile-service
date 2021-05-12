@@ -17,7 +17,6 @@ export default Store;
 export const StoreProvider = inject('AppState')(injectIntl(
   (props) => {
     const { intl, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
-    const [fields, setFields] = useState([]);
     const [hasBatchDeletePermission, setHasBatchDeletePermission] = useState(false);
     const permissionRef = useRef(false);
     permissionRef.current = hasBatchDeletePermission;
@@ -32,14 +31,6 @@ export const StoreProvider = inject('AppState')(injectIntl(
       }
       return undefined;
     });/** 类型为boolean 时 则为用户操作  类型为string 即值为list时为缓存数据 */
-
-    useEffect(() => {
-      const loadData = async () => {
-        const Fields = await fieldApi.getTableFields();
-        setFields(Fields);
-      };
-      loadData();
-    }, []);
 
     useEffect(() => {
       const getBatchDeletePermission = async () => {
@@ -67,7 +58,6 @@ export const StoreProvider = inject('AppState')(injectIntl(
       tableListMode,
       changeTableListMode,
       issueSearchStore,
-      fields,
       projectId,
       organizationId,
       userId,

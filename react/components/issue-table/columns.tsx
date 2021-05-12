@@ -33,8 +33,8 @@ export const checkBoxColumn = ({
   ),
 });
 export const getCustomColumn = (field) => (field && {
-  title: field.name,
-  dataIndex: field?.code,
+  title: field.title,
+  dataIndex: field.code,
   render: ({ rowData, dataIndex, rowIndex }) => {
     const { fieldType, code } = field;
     const value = get(rowData, 'foundationFieldValue')[code];

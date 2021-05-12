@@ -11,6 +11,7 @@ import { map, set, get } from 'lodash';
 import { useUnmount, usePersistFn } from 'ahooks';
 import CreateIssue from '@/components/CreateIssue';
 import { projectApi } from '@/api/Project';
+import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { issueApi } from '@/api';
 import IssueSearch from '@/components/issue-search';
 import openSaveFilterModal from '@/components/SaveFilterModal';
@@ -50,7 +51,7 @@ const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
 }));
 const Issue = observer(({ cached, updateCache }) => {
   const {
-    projectId, issueSearchStore, fields, changeTableListMode, tableListMode, hasBatchDeletePermission,
+    projectId, issueSearchStore, changeTableListMode, tableListMode, hasBatchDeletePermission,
   } = useContext(Store);
   const [theme] = useTheme();
   const history = useHistory();
@@ -58,6 +59,7 @@ const Issue = observer(({ cached, updateCache }) => {
   const [urlFilter, setUrlFilter] = useState(null);
   const [props] = useDetail();
   const { open } = props;
+  const { data: tableFields } = useIssueTableFields();
   const getTableData = useCallback(({ page, sort, size }) => {
     const search = issueSearchStore.getCustomFieldFilters();
     set(search, 'searchArgs.tree', !tableListMode);
@@ -317,7 +319,7 @@ const Issue = observer(({ cached, updateCache }) => {
         />
         <IssueTable
           tableProps={tableProps}
-          fields={fields}
+          fields={tableFields}
           listLayoutColumns={cached?.listLayoutColumns ?? defaultListLayoutColumns}
           onCreateIssue={handleCreateIssue}
           onRowClick={handleRowClick}
