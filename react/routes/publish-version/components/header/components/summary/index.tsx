@@ -20,7 +20,7 @@ const Summary: React.FC = () => {
         className={styles.summary_edit}
         disabled={false}
         onSubmit={(value: string) => {
-          store.update('versionAlias', value);
+          // store.update('versionAlias', value);
         }}
         initValue={name}
         alwaysRender={false}

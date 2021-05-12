@@ -19,9 +19,10 @@ import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import TableDropMenu from '@/common/TableDropMenu';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-
+import { Tag } from '@choerodon/components';
 import VERSION_STATUS_TYPE from '@/constants/VERSION_STATUS_TYPE';
 import SideNav from '@/components/side-nav';
+import { getProjectId } from '@/utils/common';
 import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
 import { openLinkAppServiceTagModal } from './LinkAppServiceTagModal';
 import { usePublishVersionContext } from '../../../../stores';
@@ -56,42 +57,89 @@ function PublishVersionLinkVersion() {
       store.loadData();
     });
   }
+  function handleDelete(v: IPublishVersionTreeNode) {
+    Modal.confirm({
+      title: '删除关联版本',
+      children: (
+        <div>
+          <span>{`您确定要删除关联的版本【${v.versionAlias || v.version}】？`}</span>
+          {/* <SelectBox mode={'box' as any} defaultValue="only" onChange={(value: any) => { delConfigRef.current = value; }}>
+            <SelectBox.Option value="only">仅删除关联关系</SelectBox.Option>
+            <SelectBox.Option value="all">删除关联关系及应用版本</SelectBox.Option>
+          </SelectBox> */}
+        </div>),
+      onOk: () => {
+        (v.type === 'tag' ? publishVersionApi.dependencyTreeDelTag(detailData.id, [v as any])
+          : publishVersionApi.dependencyTreeDel({
+            id: detailData.id,
+            type: 'publish',
+            children: [
+              { id: v.id, type: v.type },
+            ],
+          })).then(() => {
+          store.loadData();
+        });
+      },
+    });
+  }
   function renderTreeNode(item: IPublishVersionTreeNode, level: number) {
     let name = item.versionAlias || item.version;
+    const showAdditionalLine = !!(item.groupId || item.artifactId || item.version);
+    const appService = item.appServiceCode ? store.findAppServiceByCode(item.appServiceCode)! : undefined;
     name = item.name ? `${item.name}:${name}` : name;
     return (
-      <div role="none" className={styles.node}>
-        <span className={styles.node_left}>
-          <Icon type="folder-o" className={styles.node_left_icon} />
-          <span className={styles.node_left_text}>{name}</span>
-        </span>
+      <div role="none" className={styles.node} style={{ height: 54 }}>
+        <div className={styles.top}>
+          <span className={styles.node_left}>
+            {!!item.children?.length && <Icon type="folder-o" className={styles.node_left_icon} />}
+            <span className={styles.node_left_text}>
+              {item.versionAlias && (
+                <span className={styles.node_left_alias}>
+                  {item.versionAlias}
+                  &nbsp;
+                </span>
+              )}
+              {appService && <span>{`${appService.name}（${appService.code}）`}</span>}
 
-        {level === 0 ? (
-          <span>
-            <Button
-              icon="mode_edit"
-              className={styles.node_btn}
-              onClick={(e) => {
-                e.stopPropagation();
-                // openEditAppVersionModal({
-                //   data: item as any,
-                //   handleOk: async () => {
-                //     store.loadData();
-                //     return true;
-                //   },
-                // });
-              }}
-            />
-            <Button
-              icon="delete_forever"
-              className={styles.node_btn}
-              onClick={(e) => {
-                e.stopPropagation();
-                // handleDelete(item);
-              }}
-            />
+            </span>
+            {item.tagName && (
+              <span className={styles.tag}>
+                {item.tagName}
+              </span>
+            )}
           </span>
-        ) : null}
+
+          {level === 0 ? (
+            <span>
+              <Button
+                icon="mode_edit"
+                className={styles.node_btn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // openEditAppVersionModal({
+                  //   data: item as any,
+                  //   handleOk: async () => {
+                  //     store.loadData();
+                  //     return true;
+                  //   },
+                  // });
+                }}
+              />
+              <Button
+                icon="delete_forever"
+                className={styles.node_btn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(item);
+                }}
+              />
+            </span>
+          ) : null}
+        </div>
+        <div className={styles.bottom}>
+          ar:
+        </div>
+
       </div>
     );
   }

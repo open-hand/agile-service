@@ -6,7 +6,7 @@ import {
   Button,
   DataSet, DatePicker, Form, Modal, Radio, Select, TextField, Tooltip, TextArea,
 } from 'choerodon-ui/pro/lib';
-import { debounce, isEmpty } from 'lodash';
+import { debounce, isEmpty, pick } from 'lodash';
 import classnames from 'classnames';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectAppService from '@/components/select/select-app-service';
@@ -37,9 +37,7 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & Partial<PublishVe
 }) => {
   const [applicationId, setApplicationId] = useState<string>();
   const [versionType, setVersionType] = useState<string>('version');
-  function handleCheckName(newName: string) {
-    return publishVersionApi.checkAlias(newName, editData?.id).then((res: boolean) => (res ? '版本名称重复' : true));
-  }
+  const handleCheckName = useCallback((newName: string) => publishVersionApi.checkAlias(newName, editData?.id).then((res: boolean) => (res ? '版本名称重复' : true)), [editData?.id]);
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
     autoCreate: false,
@@ -64,9 +62,9 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & Partial<PublishVe
       { name: 'tagName', label: '关联tag' },
     ],
     transport: {
-      submit: ({ data }) => (editData ? publishVersionApiConfig.update(editData.id, data[0]) : publishVersionApiConfig.create(data[0])),
+      // submit: ({ data }) => (editData ? publishVersionApiConfig.update(editData.id, data[0]) : publishVersionApiConfig.create(data[0])),
     },
-  }), [editData]);
+  }), [handleCheckName]);
   useEffect(() => {
     editData ? ds.loadData([editData]) : ds.create();
   }, [ds, editData]);
@@ -74,11 +72,12 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & Partial<PublishVe
     if (!await ds.current?.validate()) {
       return false;
     }
-    const data = ds.current?.toData();
-    await ds.submit();
-    const result = handleOk && await handleOk(data);
+    const data = pick(ds.current?.toData(), ['versionAlias', 'actualPublishDate', 'description']);
+
+    // await ds.submit();
+    const result = handleOk && await handleOk({ ...editData, ...data });
     return typeof (result) !== 'undefined' ? result : true;
-  }, [ds, handleOk]);
+  }, [ds, editData, handleOk]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);

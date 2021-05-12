@@ -1,5 +1,5 @@
 import React, {
-  memo, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useRef, useState,
 } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb,
@@ -30,12 +30,15 @@ interface VersionItemProps {
   name: string
   activeId: number | undefined
   onClick: Function
-  onRefresh: Function
   data: Record
 }
 const VersionItem = observer<VersionItemProps>(({
-  name, activeId, onClick, data, onRefresh,
+  name, activeId, onClick, data,
 }) => {
+  const { store } = usePublishVersionContext();
+  function handleUpdate(updateData: any, record: any, statusCode?: any) {
+    store.update(updateData, record, statusCode);
+  }
   function handleClickMenu(key: string, record: Record) {
     switch (key) {
       case 'del':
@@ -46,21 +49,17 @@ const VersionItem = observer<VersionItemProps>(({
               <span>{`您确定要删除发布版本【${record.get('versionAlias') || record.get('version')}】？`}</span>
             </div>),
           onOk: () => {
-            publishVersionApi.delete(record.get('id')).then(() => {
-              onRefresh();
-            });
+            store.delete(record.get('id'));
           },
         });
         break;
       case 'edit':
-        openEditPublishVersionModal({ editData: record.toData() });
+        openEditPublishVersionModal({ editData: record.toData(), handleOk: (updateData: any) => handleUpdate(updateData, record) });
         break;
       case 'version_planning':
       case 'released': {
-        publishVersionApi.update(record.get('id'), {
-          ...record.toData(),
-          statusCode: key,
-        }, key).then(() => onRefresh());
+        handleUpdate(record.toData(), record, key);
+
         break;
       }
       default:
@@ -76,23 +75,26 @@ const VersionItem = observer<VersionItemProps>(({
         onClick={() => onClick(data)}
       >
         <span className={styles.version_item_text}>{name}</span>
-        <Dropdown
-          overlay={(
-            <Menu onClick={({ key }) => handleClickMenu(key, data!)}>
-              {data?.get('statusCode') === 'version_planning' ? <Menu.Item key="released">发布</Menu.Item>
-                : <Menu.Item key="version_planning">撤销发布</Menu.Item>}
-              <Menu.Item key="edit">编辑</Menu.Item>
-              <Menu.Item key="del">删除</Menu.Item>
-            </Menu>
-          )}
-          trigger={['click'] as any}
-        >
-          <Icon
-            // @ts-ignore
-            shape="circle"
-            type="more_vert"
-          />
-        </Dropdown>
+        <span role="none" onClick={(e) => e.stopPropagation()}>
+          <Dropdown
+            overlay={(
+              <Menu onClick={({ key }) => handleClickMenu(key, data!)}>
+                {data?.get('statusCode') === 'version_planning' ? <Menu.Item key="released">发布</Menu.Item>
+                  : <Menu.Item key="version_planning">撤销发布</Menu.Item>}
+                <Menu.Item key="edit">编辑</Menu.Item>
+                <Menu.Item key="del">删除</Menu.Item>
+              </Menu>
+            )}
+            trigger={['click'] as any}
+          >
+
+            <Icon
+              // @ts-ignore
+              shape="circle"
+              type="more_vert"
+            />
+          </Dropdown>
+        </span>
       </div>
     </Tooltip>
   );
@@ -117,8 +119,8 @@ function PublishVersionList() {
   function handleRefresh() {
 
   }
-  useEffect(() => { console.log('selected', tableDataSet.selected, tableDataSet.selected.length); }, [tableDataSet.selected, tableDataSet.selected.length]);
-  useEffect(() => {
+  /** 初始化滚动加载数据 */
+  const handleInitResizeData = useCallback(() => {
     const scrollHeight = (scrollSize.height || 0) - 43 - tableDataSet.length * 38;
     console.log('scrollHeight', scrollSize, scrollHeight);
 
@@ -130,6 +132,26 @@ function PublishVersionList() {
       }
     }
   }, [scrollSize, tableDataSet]);
+  // 注册发布版本更新 创建事件
+  useEffect(() => {
+    function registerCreateAfter() {
+      tableDataSet.query().then(() => {
+        tableDataSet.select(tableDataSet.records[0]);
+        store.select(tableDataSet.records[0].toData());
+        handleInitResizeData();
+      });
+    }
+    function registerUpdate(newData: any, record: Record) {
+      record.set(newData);
+      console.log('registerUpdate', newData, record.toData());
+    }
+
+    store.init({ events: { update: registerUpdate, createAfter: registerCreateAfter, delete: registerCreateAfter } });
+  }, [handleInitResizeData, store, tableDataSet]);
+  useEffect(() => { console.log('selected', tableDataSet.selected, tableDataSet.selected.length); }, [tableDataSet.selected, tableDataSet.selected.length]);
+  useEffect(() => {
+    handleInitResizeData();
+  }, [handleInitResizeData]);
   return (
     <div className={styles.list} ref={scrollRef}>
       <TextField
@@ -150,7 +172,7 @@ function PublishVersionList() {
           <span className={styles.scroll_bottom}>{tableDataSet.totalPage !== 1 ? '到底了' : ''}</span>
         )}
       >
-        {tableDataSet.map((record) => <VersionItem data={record} name={record.get('versionAlias')} onClick={handleChange} onRefresh={handleRefresh} activeId={tableDataSet.currentIndex} />)}
+        {tableDataSet.map((record) => <VersionItem data={record} name={record.get('versionAlias')} onClick={handleChange} activeId={tableDataSet.currentIndex} />)}
       </ScrollContext>
     </div>
   );

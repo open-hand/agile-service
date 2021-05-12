@@ -1,7 +1,10 @@
-import { observable, action, computed } from 'mobx';
 import {
-  set, get, pick, merge,
+  observable, action, computed, toJS,
+} from 'mobx';
+import {
+  set, get, pick, merge, cloneDeep,
 } from 'lodash';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import {
   devOpsApi,
   IAppVersionData, IPublishVersionData, IPublishVersionTreeNode, projectApi, publishVersionApi, versionApi,
@@ -9,8 +12,10 @@ import {
 
 interface EventsProps {
   load: (data: any) => any | Promise<any>
+  createAfter: (data: any) => any /** 创建完发布版本事件 */
+  delete: (data: any) => any
   selectIssue: (id: string) => any
-  update: ((data: any) => any | Promise<any>)
+  update: ((data: any, record: Record) => any | Promise<any>)
 }
 
 export interface IAppVersionDataItem extends IAppVersionData {
@@ -21,7 +26,9 @@ export interface IAppVersionDataItem extends IAppVersionData {
   children?: IAppVersionDataItem[],
 }
 class PublishDetailStore {
-  events: EventsProps = { update: () => true, load: () => true, selectIssue: () => { } };
+  events: EventsProps = {
+    update: () => true, load: () => true, selectIssue: () => { }, createAfter: () => { }, delete: () => { },
+  };
 
   @observable loading: boolean = false;
 
@@ -52,6 +59,10 @@ class PublishDetailStore {
 
   @computed get getAppServiceList() {
     return this.appServiceList;
+  }
+
+  findAppServiceByCode(code:string) {
+    return this.getAppServiceList.find((service) => service.code === code);
   }
 
   @computed get getDependencyList() {
@@ -124,20 +135,36 @@ class PublishDetailStore {
   }
 
   @action('更新版本详情')
-  async update(keyValues: { [key: string]: any } | string, value?: any) {
+  async update(keyValues: { [key: string]: any } | string, record: Record, statusCode?: 'version_planning' | 'released') {
     this.loading = true;
-    const data = this.getCurrentData as any;
+    const data = cloneDeep(toJS(this.getCurrentData)) as any;
     // const data = pick(this.getCurrentData!, ['description', 'expectReleaseDate', 'name', 'objectVersionNumber', 'projectId', 'startDate']);
-    if (typeof (keyValues) === 'string') {
-      set(data, keyValues, value);
-    } else {
-      Object.entries(keyValues).forEach(([key, v]) => {
-        set(data, key, v);
-      });
-    }
-    await publishVersionApi.update(this.getCurrentData.id, data);
-    await this.loadData();
-    await this.events.update(data);
+
+    Object.entries(keyValues).forEach(([key, v]) => {
+      set(data, key, v);
+    });
+
+    const newData = await publishVersionApi.update(data.id, data, statusCode);
+    data.id === this.getCurrentData.id && await this.loadData();
+    await this.events.update(newData, record);
+    this.loading = false;
+  }
+
+  @action('创建版本')
+  async create(data: any) {
+    this.loading = true;
+    const res = await publishVersionApi.create(data);
+    // this.select(res);
+    await this.events.createAfter(res);
+    this.loading = false;
+  }
+
+  @action('删除版本')
+  async delete(publishVersionId: string) {
+    this.loading = true;
+    await publishVersionApi.delete(publishVersionId);
+    await this.events.delete(publishVersionId);
+    this.loading = false;
   }
 
   @action select(data: string | IPublishVersionData) {

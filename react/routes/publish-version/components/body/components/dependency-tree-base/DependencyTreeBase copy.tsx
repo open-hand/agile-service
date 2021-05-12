@@ -29,7 +29,7 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
   useEffect(() => {
     setData(propsData);
   }, [propsData]);
-  function renderTreeNodeLine(hasChildren: boolean, nodeIndex: number, level: number, needLineLevelList: number[], height = 30) {
+  function renderTreeNodeLine(hasChildren: boolean, nodeIndex: number, level: number, needLineLevelList: number[]) {
     const lineArr = [];
     lineArr.push(<span
       className={`${prefixCls}-expand-line`}
@@ -38,7 +38,7 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
         bottom: hasChildren ? 5 : undefined,
         width: hasChildren ? 16 : undefined,
         // height: 30,
-        height: nodeIndex !== 0 ? height : undefined,
+        height: nodeIndex !== 0 ? 30 : undefined,
       }}
     />);
     needLineLevelList.forEach((item) => {
@@ -54,7 +54,7 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
           // right: hasChildren ? 16 * level : undefined,
           // bottom: hasChildren ? 10 - 5 * level : undefined,
           right,
-          height,
+          height: 30,
           bottom: hasChildren ? 5 : undefined,
           width,
         }}
@@ -88,8 +88,8 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
       ...node.props,
       style: {
         ...nodeStyle,
-        // minHeight: 30,
-        // height: 30,
+        minHeight: 30,
+        height: 30,
       },
     });
   }
@@ -98,11 +98,9 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
     // if (!!item.children?.length && level > 1 && paddingLeft && paddingLeft > 0) {
     //   paddingLeft -= 11;
     // }
-    const node = renderNode(item, level);
-    const { style: nodeStyle } = pick(node.props, 'style') || {};
     return (
       <TreeNode
-        title={node}
+        title={renderTreeNode(item, level)}
         key={`${randomString(5)}-level-${level}-${item.id}`}
         disabled
         className={classnames({
@@ -116,7 +114,7 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
         }}
         switcherIcon={(nodeProps: any) => (
           <div className={`${prefixCls}-expand`}>
-            {level !== 0 && renderTreeNodeLine(!!item.children?.length, index, level, needLineLevelList, nodeStyle.height)}
+            {level !== 0 && renderTreeNodeLine(!!item.children?.length, index, level, needLineLevelList)}
             {item.children?.length ? <Icon type="navigate_next" className={`${prefixCls}-expand-icon`} /> : null}
           </div>
         )}

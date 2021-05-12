@@ -28,10 +28,10 @@ const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> =
 };
 
 function PublishVersion() {
-  const { prefixCls, tableDataSet } = usePublishVersionContext();
+  const { prefixCls, store, tableDataSet } = usePublishVersionContext();
 
-  function handleRefresh() {
-    tableDataSet.queryMore();
+  function handleCreate(data:any) {
+    store.create(data);
   }
   function handleClickMenu(key: string) {
     switch (key) {
@@ -55,12 +55,12 @@ function PublishVersion() {
     );
   }
   return (
-    <Page>
+    <Page className={prefixCls}>
       <Header>
         <TooltipButton
           icon="playlist_add"
           title="无相应权限创建发布版本"
-          onClick={() => openCreatePublishVersionModal({ handleOk: handleRefresh })}
+          onClick={() => openCreatePublishVersionModal({ handleOk: handleCreate })}
         >
           创建发布版本
         </TooltipButton>
