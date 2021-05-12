@@ -12,6 +12,8 @@ import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
 import { openEditIssueCopyIssue } from '@/components/CopyIssue';
 import { getProjectId, getProjectName, getOrganizationId } from '@/utils/common';
+import { linkUrl } from '@/utils/to';
+import useIsProgram from '@/hooks/useIsProgram';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
@@ -26,6 +28,7 @@ const IssueDropDown = ({
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
+  const { isProgram } = useIsProgram();
 
   const handleCopyIssue = (issue) => {
     store.setCopyIssueShow(false);
@@ -69,7 +72,6 @@ const IssueDropDown = ({
     });
   };
   const handleClickMenu = async (e) => {
-    console.log(e.key);
     if (e.key === '0') {
       store.setWorkLogShow(true);
     } else if (e.key === 'item_11') {
@@ -137,17 +139,15 @@ const IssueDropDown = ({
         decryptIssueId = await issueApi.decrypt(issueId);
       }
       const queryData = {
-        id: getProjectId(),
-        name: getProjectName(),
-        organizationId: getOrganizationId(),
-        type: 'project',
+        params: {
+          paramIssueId: decryptIssueId, paramName: issueNum,
+        },
       };
-      if (typeCode !== 'feature') {
-        merge(queryData, { paramIssueId: decryptIssueId, paramName: issueNum });
-        copy(`${window.location.host}/#/agile/work-list/issue?${queryString.stringify(queryData)}`);
+
+      if (!isProgram) {
+        copy(`${window.location.host}/#/${linkUrl('agile/work-list/issue', queryData)}`);
       } else {
-        merge(queryData, { paramIssueId: decryptIssueId, paramName: issueNum, category: 'PROGRAM' });
-        copy(`${window.location.host}/#/agile/feature?${queryString.stringify(queryData)}`);
+        copy(`${window.location.host}/#/${linkUrl('agile/feature', queryData)}`);
       }
       Choerodon.prompt('复制成功！');
     }
