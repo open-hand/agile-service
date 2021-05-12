@@ -31,7 +31,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
     pagination,
     ...restProps
   } = props;
-  const mutation = useUpdateColumnMutation('issues.table');
+  const mutation = useUpdateColumnMutation('agile');
 
   const listLayoutColumns = useMemo(() => getListLayoutColumns(savedListLayoutColumns, fields), [fields, savedListLayoutColumns]);
 
