@@ -226,9 +226,6 @@ public class IssueValidator {
         if (issueUpdateTypeVO.getTypeCode() == null) {
             throw new CommonException("error.IssueRule.typeCode");
         }
-        if (issueUpdateTypeVO.getTypeCode().equals(ISSUE_EPIC) && issueUpdateTypeVO.getEpicName() == null) {
-            throw new CommonException("error.IssueRule.epicName");
-        }
         IssueConvertDTO issueConvertDTO = issueService.queryIssueByProjectIdAndIssueId(projectId, issueUpdateTypeVO.getIssueId());
         if (issueConvertDTO == null) {
             throw new CommonException("error.IssueUpdateTypeVO.issueDO");

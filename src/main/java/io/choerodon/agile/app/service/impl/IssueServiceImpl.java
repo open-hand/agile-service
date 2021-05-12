@@ -1384,7 +1384,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                                     IssueUpdateTypeVO issueUpdateTypeVO,
                                                     Long organizationId,
                                                     Long projectId) {
-        List<String> fieldList = Arrays.asList(UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK);
+        List<String> fieldList = new ArrayList<>(Arrays.asList(UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK));
         String originType = issueConvertDTO.getTypeCode();
         if (originType.equals(SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
@@ -1525,6 +1525,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         map.put("statusId", FieldCode.STATUS);
         map.put("storyPoints", FieldCode.STORY_POINTS);
         map.put("description", FieldCode.DESCRIPTION);
+        map.put("epicName", FieldCode.EPIC_NAME);
         Set<String> result = new HashSet<>();
         systemFields.forEach(x -> {
             if (map.get(x) != null) {
