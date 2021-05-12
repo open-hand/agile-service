@@ -593,7 +593,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                                     .getContent();
                     tagCompare.setData(objectMapper.writeValueAsString(issues));
                 }
-                sendProgress(tagCompareVO, userId, websocketKey);
+                sendProgress(tagCompare, userId, websocketKey);
                 current++;
             }
             TagCompareVO tagCompareVO = new TagCompareVO();
@@ -830,6 +830,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                 dto.setOrganizationId(organizationId);
                 dto.setAppServiceCode(appServiceCode);
                 dto.setTagName(tagName);
+                dto.setTagProjectId(tag.getProjectId());
                 if (tagIssueRelMapper.select(dto).isEmpty()) {
                     tagIssueRelMapper.insert(dto);
                 }
