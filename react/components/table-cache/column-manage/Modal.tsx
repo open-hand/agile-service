@@ -65,9 +65,8 @@ const ColumnManageModal: React.FC<ColumnManageProps> = (props) => {
     // 保证选择列之后，列不会到最后一个
     // props.onChange && props.onChange(intersection(allKeys, selectedKeys));
     const codes = intersection(allKeys, selectedKeys);
-
     await mutation.mutateAsync({
-      applyType: 'agile',
+      applyType: type,
       listLayoutColumnRelVOS: columns.map((column, i) => ({
         // TODO: 字段id
         // fieldId:

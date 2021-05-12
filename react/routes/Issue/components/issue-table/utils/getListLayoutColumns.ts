@@ -12,6 +12,7 @@ export default function getListLayoutColumns(listLayoutColumns: ListLayoutColumn
   fields.forEach(((field) => {
     if (!find(res, { columnCode: field.code })) {
       res.push({
+        width: 0,
         sort: 0,
         columnCode: field.code,
         display: false,

@@ -342,8 +342,6 @@ export function getTableColumns({
         onResize: handleColumnResize,
         width: width && width > 0 ? width : column.width,
       });
-    } else if (fields.length > 0) {
-      console.log(code);
     }
   });
   return res;

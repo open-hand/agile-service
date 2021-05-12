@@ -9,7 +9,7 @@ export interface ListLayoutColumnVO {
   sort: number
 }
 export interface IListLayout {
-  applyType: 'agile',
+  applyType: string,
   listLayoutColumnRelVOS: ListLayoutColumnVO[]
 }
 class CacheColumnApi extends Api<CacheColumnApi> {
