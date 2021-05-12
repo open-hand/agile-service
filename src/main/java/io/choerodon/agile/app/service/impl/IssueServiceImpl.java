@@ -894,6 +894,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             case FieldCode.ENVIRONMENT:
                 value = issue.getEnvironment();
                 break;
+            case FieldCode.EPIC:
+                Long epicId = issue.getEpicId();
+                if (Objects.equals(0L, epicId)) {
+                    value = null;
+                } else {
+                    value = epicId;
+                }
+                break;
             default:
                 value = new Object();
         }
