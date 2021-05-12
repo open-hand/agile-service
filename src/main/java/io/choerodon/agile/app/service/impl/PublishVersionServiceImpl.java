@@ -591,7 +591,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                     List<IssueListFieldKVVO> issues =
                             issueService.listIssueWithSub(projectId, buildSearchVO(searchVO, issueIds), pageRequest, organizationId)
                                     .getContent();
-                    tagCompare.setData(objectMapper.writeValueAsString(issues));
+                    tagCompare.setData(issues);
                 }
                 sendProgress(tagCompare, userId, websocketKey);
                 current++;
