@@ -1,9 +1,11 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author superlee
@@ -29,7 +31,7 @@ public class TagCompareVO {
 
     private String msg;
 
-    private String data;
+    private List<IssueListFieldKVVO> data;
 
     private Long publishVersionId;
 
@@ -41,11 +43,11 @@ public class TagCompareVO {
         this.publishVersionId = publishVersionId;
     }
 
-    public String getData() {
+    public List<IssueListFieldKVVO> getData() {
         return data;
     }
 
-    public void setData(String data) {
+    public void setData(List<IssueListFieldKVVO> data) {
         this.data = data;
     }
 
