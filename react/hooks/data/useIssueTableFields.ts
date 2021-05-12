@@ -1,6 +1,7 @@
 import { fieldApi } from '@/api';
 import { IFoundationHeader } from '@/common/types';
 import { useQuery, UseQueryOptions } from 'react-query';
+import useIsInProgram from '../useIsInProgram';
 import useProjectKey from './useProjectKey';
 
 export interface IssueTableFieldsConfig {
@@ -35,9 +36,15 @@ const systemFields = [
 ] as IFoundationHeader[];
 export default function useIssueTableFields(config?: IssueTableFieldsConfig, options?: UseQueryOptions<IFoundationHeader[]>) {
   const key = useProjectKey({ key: ['IssueTableFields'] });
-  return useQuery(key, () => fieldApi.getFoundationHeader(), {
+  const { isInProgram } = useIsInProgram();
+  const { data, ...others } = useQuery(key, () => fieldApi.getFoundationHeader(), {
     initialData: systemFields,
     select: (res) => systemFields.concat(res),
     ...options,
   });
+
+  return {
+    ...others,
+    data: !isInProgram ? data?.filter((f) => f.code !== 'feature') : data,
+  };
 }
