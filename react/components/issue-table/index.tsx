@@ -4,7 +4,7 @@ import {
   PerformanceTable, Pagination,
 } from 'choerodon-ui/pro';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
-import { IField, IIssueColumnName } from '@/common/types';
+import { IFoundationHeader, IIssueColumnName } from '@/common/types';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
 import { ListLayoutColumnVO } from '@/api';
@@ -15,7 +15,7 @@ export interface IssueTableProps extends Partial<TableProps> {
   tableRef?: React.RefObject<any>
   onCreateIssue?: () => void
   // dataSet: DataSet
-  fields: IField[]
+  fields: IFoundationHeader[]
   onRowClick?: (record: any) => void
   selectedIssue?: string
   createIssue?: boolean

@@ -1,8 +1,8 @@
 import { ListLayoutColumnVO } from '@/api';
-import { IField } from '@/common/types';
+import { IFoundationHeader } from '@/common/types';
 import { find } from 'lodash';
 
-export default function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fields: IField[]): ListLayoutColumnVO[] {
+export default function getListLayoutColumns(listLayoutColumns: ListLayoutColumnVO[] | null, fields: IFoundationHeader[]): ListLayoutColumnVO[] {
   let res:ListLayoutColumnVO[] = [];
 
   if (listLayoutColumns) {
@@ -15,7 +15,7 @@ export default function getListLayoutColumns(listLayoutColumns: ListLayoutColumn
         sort: 0,
         columnCode: field.code,
         display: false,
-        fieldId: field.id,
+        // fieldId: field.id,
       });
     }
   }));
