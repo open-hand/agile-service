@@ -74,7 +74,7 @@ export default class SwimLaneHeader extends Component {
         <span
           style={{ cursor: 'pointer', minWidth: 70, marginRight: 10 }}
         >
-          {`#${issueNum}`}
+          {`${issueNum}`}
         </span>
         <StatusTag
           categoryCode={categoryCode}

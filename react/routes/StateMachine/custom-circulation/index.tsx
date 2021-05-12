@@ -347,7 +347,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     return settings[key];
   };
 
-  const handleMenuClick = (record: any, e: { key: 'condition' | 'linkage' | 'updateField' | 'notifySetting' }) => {
+  const handleMenuClick = (record: any, e: { key: 'condition' | 'linkage' | 'updateField' | 'notifySetting' | 'autoTransform' }) => {
     const { title, width, children } = getModalSetting(e.key, record);
     Modal.open({
       className: `${styles[`customCirculation_${e.key}Modal`]}`,
@@ -496,6 +496,13 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     const transferRender = (isProjectOwnerExist || (assigners && assigners.length > 0)) && `移到工作项到此状态需为：${isProjectOwnerExist ? '项目所有者' : ''}${isProjectOwnerExist && assigners.length > 0 ? '、' : ''}${assigners.join('、')}`;
     return (
       <div className={styles.setting}>
+        {
+          selectedTypeCode !== 'feature' && selectedTypeCode !== 'epic' && record.get('executionCaseStatusChangeSettingVO')?.testStatusVO && (
+            <div className={styles.settingItem}>
+              {`问题关联的测试用例的执行到${record.get('executionCaseStatusChangeSettingVO')?.testStatusVO.statusName}状态，将自动流转到${record.get('name')}状态`}
+            </div>
+          )
+        }
         {
           selectedTypeCode !== 'feature' && selectedTypeCode !== 'epic' && record.get('statusBranchMergeSettingVO')?.autoTransform && (
             <div className={styles.settingItem}>
