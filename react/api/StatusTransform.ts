@@ -662,7 +662,7 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       method: 'put',
       url: getIsOrganization() ? `${this.orgPrefix}/status_branch_merge_setting/update?issueTypeId=${issueTypeId}&statusId=${statusId}` : `${this.prefix}/status_branch_merge_setting/issue_type/${issueTypeId}/status/${statusId}/update_auto_transform`,
       params: {
-        autoTransform,
+        autoTransform: autoTransform || false,
       },
     });
   }
