@@ -7,6 +7,9 @@ import {
   DataSet, DatePicker, Form, Modal, Radio, Select, TextField, Tooltip, TextArea,
 } from 'choerodon-ui/pro/lib';
 import { debounce, isEmpty, pick } from 'lodash';
+// @ts-ignore
+import JSONbig from 'json-bigint';
+import { WSHandler } from '@choerodon/boot';
 import classnames from 'classnames';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectAppService from '@/components/select/select-app-service';
@@ -27,12 +30,17 @@ import {
 } from '@/api';
 import { Checkbox } from 'choerodon-ui';
 import SelectTeam from '@/components/select/select-team';
+import { getProjectId } from '@/utils/common';
+
+const JSONbigString = JSONbig({ storeAsString: true });
 
 const { Column } = Table;
 interface PreviewResultModalProps {
-    tableData: any[]
-    handleOk?: () => any
-    selectIssue:(issueId:string)=>void
+  publishVersionId: string
+  tableData: any[]
+  handleOk?: () => any
+  onChangeIssueTag: (action: 'add' | 'update') => void
+  selectIssue: (issueId: string) => void
 }
 const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps> = ({
   modal, tableData, handleOk, selectIssue,
@@ -44,6 +52,7 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
     autoCreate: false,
     paging: false,
     selection: false,
+    data: tableData,
     // data: [
     //   { appService: '应用1', alias: undefined },
     // ],
@@ -61,7 +70,7 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
     transport: {
       // submit: ({ data }) => (editData ? publishVersionApiConfig.update(editData.id, data[0]) : publishVersionApiConfig.create(data[0])),
     },
-  }), []);
+  }), [tableData]);
 
   const handleSubmit = useCallback(async () => {
     if (!await ds.current?.validate()) {
@@ -74,7 +83,7 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
     return typeof (result) !== 'undefined' ? result : true;
   }, [ds, handleOk]);
   useEffect(() => {
-        modal?.handleOk(handleSubmit);
+    modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
   function renderSummary({ value }: RenderProps) {
     return (
@@ -131,6 +140,9 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
 };
 function openPreviewResultModal(props: PreviewResultModalProps) {
   const key = Modal.key();
+  function handleChangeIssueTag(action: 'add' | 'update') {
+    props.onChangeIssueTag(action);
+  }
   Modal.open({
     key,
     title: '预览结果',
@@ -139,14 +151,21 @@ function openPreviewResultModal(props: PreviewResultModalProps) {
     },
     drawer: true,
     cancelText: '关闭',
-    footer: (okBtn:React.ReactNode, cancelBtn:React.ReactNode) => {
+    footer: (okBtn: React.ReactNode, cancelBtn: React.ReactNode) => {
       const footer = '';
       return (
         <div>
           {/* {okBtn} */}
-          <Button funcType={'raised' as any} color={'primary' as any}>替换问题tag信息</Button>
-
-          <Button funcType={'raised' as any} color={'primary' as any}>增加问题tag信息</Button>
+          <WSHandler
+            messageKey={`agile-preview-tag-compare-issues${getProjectId()}`}
+            onMessage={(data: any) => {
+              const newData = JSONbigString.parse(data);
+              console.log('Json...', newData);
+            }}
+          >
+            <Button funcType={'raised' as any} color={'primary' as any} onClick={() => handleChangeIssueTag('update')}>替换问题tag信息</Button>
+          </WSHandler>
+          <Button funcType={'raised' as any} color={'primary' as any} onClick={() => handleChangeIssueTag('add')}>增加问题tag信息</Button>
           {cancelBtn}
         </div>
       );

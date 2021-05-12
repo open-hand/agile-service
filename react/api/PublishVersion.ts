@@ -430,7 +430,7 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  compareTag(versionId: string, data: any[], action?: string) {
+  compareTag(versionId: string, data: any[], action?: 'add'|'update') {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/${versionId}/compare`,

@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import {
   DataSet, Form, Modal, Select, Spin, Table, TextField, Tooltip,
-} from 'choerodon-ui/pro/lib';
+} from 'choerodon-ui/pro';
 import { Button } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
 import classnames from 'classnames';

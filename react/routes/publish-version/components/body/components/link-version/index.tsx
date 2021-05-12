@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
@@ -29,7 +29,7 @@ import { usePublishVersionContext } from '../../../../stores';
 import PublishVersionSection from '../section';
 
 import styles from './index.less';
-import DependencyTreeBase from '../dependency-tree-base';
+import DependencyTreeBase, { DependencyTreeNode } from '../dependency-tree-base';
 import { openImportPomModal } from '../../../publish-version-detail/components/import-pom';
 
 const { Column } = Table;
@@ -44,9 +44,9 @@ const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> =
 
 function PublishVersionLinkVersion() {
   const { prefixCls, store } = usePublishVersionContext();
-  const dependencyList = store.getDependencyList[0]?.children || [];
+  const dependencyList = useMemo(() => store.getDependencyList[0]?.children || [], [store.getDependencyList]);
   const detailData = store.getCurrentData;
-
+  console.log('dependencyList', dependencyList);
   function handleLinkPublishVersion(linkData: any) {
     publishVersionApi.dependencyTreeAdd({
       id: detailData.id,
@@ -88,59 +88,65 @@ function PublishVersionLinkVersion() {
     const appService = item.appServiceCode ? store.findAppServiceByCode(item.appServiceCode)! : undefined;
     name = item.name ? `${item.name}:${name}` : name;
     return (
-      <div role="none" className={styles.node} style={{ height: 54 }}>
-        <div className={styles.top}>
-          <span className={styles.node_left}>
-            {!!item.children?.length && <Icon type="folder-o" className={styles.node_left_icon} />}
-            <span className={styles.node_left_text}>
-              {item.versionAlias && (
-                <span className={styles.node_left_alias}>
-                  {item.versionAlias}
-                  &nbsp;
+      <DependencyTreeNode offsetBottom={10} style={{ height: showAdditionalLine ? 54 : 30 }}>
+        <div className={styles.node}>
+          <div className={styles.top} style={{ height: showAdditionalLine ? undefined : 30 }}>
+            <span className={styles.node_left}>
+              {!!item.children?.length && <Icon type="folder-o" className={styles.node_left_icon} />}
+              <span className={styles.node_text}>
+                {item.versionAlias && (
+                  <span className={styles.node_left_alias}>
+                    {item.versionAlias}
+                    &nbsp;
+                  </span>
+                )}
+                {appService ? <span>{`${appService.name}（${appService.code}）`}</span> : <span>{item.name}</span>}
+
+              </span>
+              {item.tagName && (
+                <span className={styles.tag}>
+                  {item.tagName}
                 </span>
               )}
-              {appService && <span>{`${appService.name}（${appService.code}）`}</span>}
-
             </span>
-            {item.tagName && (
-              <span className={styles.tag}>
-                {item.tagName}
+
+            {level === 0 ? (
+              <span>
+                <Button
+                  icon="mode_edit"
+                  className={styles.node_btn}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // openEditAppVersionModal({
+                    //   data: item as any,
+                    //   handleOk: async () => {
+                    //     store.loadData();
+                    //     return true;
+                    //   },
+                    // });
+                  }}
+                />
+                <Button
+                  icon="delete_forever"
+                  className={styles.node_btn}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(item);
+                  }}
+                />
               </span>
-            )}
-          </span>
+            ) : null}
+          </div>
+          {showAdditionalLine && (
+            <div className={styles.bottom}>
+              {item.artifactId && <span className={styles.node_text}>{`artifactID：${item.artifactId}`}</span>}
+              {item.groupId && <span className={styles.node_text}>{`groupID：${item.groupId}`}</span>}
+              {item.version && <span className={styles.node_text}>{`versionID：${item.version}`}</span>}
+            </div>
+          )}
 
-          {level === 0 ? (
-            <span>
-              <Button
-                icon="mode_edit"
-                className={styles.node_btn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // openEditAppVersionModal({
-                  //   data: item as any,
-                  //   handleOk: async () => {
-                  //     store.loadData();
-                  //     return true;
-                  //   },
-                  // });
-                }}
-              />
-              <Button
-                icon="delete_forever"
-                className={styles.node_btn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(item);
-                }}
-              />
-            </span>
-          ) : null}
         </div>
-        <div className={styles.bottom}>
-          ar:
-        </div>
-
-      </div>
+      </DependencyTreeNode>
     );
   }
   async function handleImportPom(pomData: any) {

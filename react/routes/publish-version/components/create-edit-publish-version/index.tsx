@@ -5,7 +5,7 @@ import React, {
 import {
   Button,
   DataSet, DatePicker, Form, Modal, Radio, Select, TextField, Tooltip, TextArea,
-} from 'choerodon-ui/pro/lib';
+} from 'choerodon-ui/pro';
 import { debounce, isEmpty, pick } from 'lodash';
 import classnames from 'classnames';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';

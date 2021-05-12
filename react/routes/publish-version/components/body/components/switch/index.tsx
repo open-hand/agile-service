@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { pageConfigApi, PageConfigIssueType, publishVersionApi } from '@/api';
 import { Modal } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import useQueryString from '@/hooks/useQueryString';
 import { IIssueType } from '@/common/types';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import Switch from './Switch';
 
 interface IssueOption {
@@ -16,20 +16,35 @@ interface IssueOption {
 
 function IssueTypeSwitch() {
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
-  const params = useQueryString();
-  const { store } = usePublishVersionContext();
-  const handleSelectBox = (val: any, { valueObj }: { valueObj: any }) => true;
+
+  const { data: issueTypes = [] } = useProjectIssueTypes({ onlyEnabled: true, typeCode: ['story', 'task', 'bug'] });
+
+  const { store, issueInfoTableDataSet } = usePublishVersionContext();
+  const issueTypesWithCountMaps = useMemo(() => {
+    issueInfoTableDataSet.setState('currentIssueTypeValue', issueTypes[0]?.id); /** 当前选项 */
+    return new Map<string, number>(issueTypes?.map((i) => [i.id, 0]));
+  }, [issueInfoTableDataSet, issueTypes]);
+  const handleSelectBox = (val: any, { valueObj }: { valueObj: any }) => {
+    issueInfoTableDataSet.setState('currentIssueTypeValue', val);
+    return true;
+  };
 
   // 加载全部字段 用于增添已有字段
   useEffect(() => {
     // store.setLoading(true);
-    // publishVersionApi.loadIssueTypeList()
-  }, []);
+    if (store.getCurrentData.id) {
+      publishVersionApi.loadIssueTypeList(store.getCurrentData.id).then((res: any) => {
+        res.forEach((issueType: any) => {
+
+        });
+      });
+    }
+  }, [store.getCurrentData.id]);
 
   return (
     <Switch
-      // value={pageIssueTypeStore.currentIssueType.id}
-      options={switchOptions || []}
+      value={issueInfoTableDataSet.getState('currentIssueTypeValue')}
+      options={issueTypes?.map((i) => ({ value: i.id, text: `${i.name}(0)` })) || []}
       onChange={handleSelectBox}
     />
   );

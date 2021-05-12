@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, {
+  useEffect, useMemo, useReducer, useState,
+} from 'react';
 import {
   Button, Modal, Table, Tooltip, Form, DataSet,
 } from 'choerodon-ui/pro';
@@ -23,7 +25,7 @@ import { openPreviewResultModal } from './PreviewResultModal';
 const JSONbigString = JSONbig({ storeAsString: true });
 
 function IssueDiffArea() {
-  const [disablePreview, setDisablePreview] = useState(true);
+  const [tableData, setTableData] = useState<any[] | false | undefined>();
   const [generateBtnLoading, setGenerateBtnLoading] = useState(false);
   const [publishVersionId, setPublishVersionId] = useState<string>();
   const { store, issueDiffDataSet } = usePublishVersionContext();
@@ -40,6 +42,7 @@ function IssueDiffArea() {
   // }, [ds, ds.current?.get('appServiceCode')]);
   const handleSubmit = async () => {
     if (await issueDiffDataSet.validate()) {
+      setTableData(false);
       // storyTableDataSet.query();
       await publishVersionApi.comparePreviewTag(store.getCurrentData.id, issueDiffDataSet.toData());
       return true;
@@ -48,15 +51,20 @@ function IssueDiffArea() {
   };
   function handleMessage(data: any) {
     const newData = JSONbigString.parse(data);
+    const oneTableData = newData.data ? JSONbigString.parse(newData.data) : [];
+    console.log('oneTableData', oneTableData);
     setGenerateBtnLoading(true);
-    setDisablePreview(true);
+    setTableData((oldData) => (!oldData ? [] : oldData.concat(...oneTableData)));
 
     if (newData.action === 'done') {
       setGenerateBtnLoading(false);
-      setDisablePreview(false);
+      // setTableData(false);
     }
     console.log('newDATA', newData);
   }
+  useEffect(() => {
+    publishVersionApi.loadCompareHistory(store.getCurrentData.id); // .....
+  }, []);
   useEffect(() => {
     if (dependencyList.length === 0) {
       issueDiffDataSet.loadData([{}]);
@@ -74,8 +82,13 @@ function IssueDiffArea() {
       <SelectGitTags record={record} name="sourceTag" applicationId={appServiceId} key={`select-sourceTag-${appServiceId}`} />,
       <SelectGitTags record={record} name="targetTag" applicationId={appServiceId} key={`select-targetTag-${appServiceId}`} />];
   }
+  function handleChangeIssueTag(action: 'add' | 'update') {
+    publishVersionApi.compareTag(store.getCurrentData.id, issueDiffDataSet.toData(), action);
+  }
   function handleOpenPreview() {
-    openPreviewResultModal({ tableData: [], selectIssue: (issueId) => store.selectIssue(issueId) });
+    openPreviewResultModal({
+      publishVersionId: store.getCurrentData.id, onChangeIssueTag: handleChangeIssueTag, tableData: tableData || [], selectIssue: (issueId) => store.selectIssue(issueId),
+    });
   }
   return (
     <div className={styles.wrap}>
@@ -101,7 +114,7 @@ function IssueDiffArea() {
 
               <Button loading={generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleSubmit}>生成预览信息</Button>
             </WSHandler>
-            <Button disabled={disablePreview} funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
+            <Button disabled={!tableData || generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
 
           </div>
         </Form>
