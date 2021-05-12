@@ -130,9 +130,10 @@ function formatFields(fieldData: IField[], data: object, dataSet: DataSet, isInP
     customFields: [],
   };
   for (const key of Object.keys(data)) {
-    if (systemFields.get(key)) {
+    const field = fieldData.find((item: IField) => item.fieldCode === key);
+    if (systemFields.get(key) || field?.system) {
       // @ts-ignore
-      temp.predefinedFields[key === 'epic' && isInProgram ? 'featureId' : systemFields.get(key)?.id] = transformValue(dataSet, key, data[key], systemFields.get(key === 'epic' && isInProgram ? 'featureId' : key).format);
+      temp.predefinedFields[key === 'epic' && isInProgram ? 'featureId' : (systemFields.get(key)?.id || field?.fieldCode)] = transformValue(dataSet, key, data[key], systemFields.get(key === 'epic' && isInProgram ? 'featureId' : key)?.format);
     } else {
       const customField = find(fieldData, { fieldCode: key });
       if (customField) {
@@ -421,7 +422,6 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
         )
       }
       <Form dataSet={changeTypeDataSet} columns={2}>
-        
         {
         (loading ? [] : requiredFields).map((item) => (renderField({
           field: item, otherComponentProps: {}, dataSet: changeTypeDataSet, isInProgram,
