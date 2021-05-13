@@ -78,5 +78,5 @@ public interface ExcelService {
      * @param projectId
      * @param publishVersionId
      */
-    void exportPublishVersion(Long projectId, Long publishVersionId);
+    void exportPublishVersion(Long projectId, Long publishVersionId, Boolean withSubVersion);
 }

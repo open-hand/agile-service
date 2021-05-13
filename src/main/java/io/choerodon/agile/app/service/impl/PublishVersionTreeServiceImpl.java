@@ -221,10 +221,10 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
         }
     }
 
-    private PublishVersionTagRelDTO buildPublishVersionTagRel(Long organizationId, Long publishVersionId, TagVO x) {
-        Long thisProjectId = x.getProjectId();
-        String appServiceCode = x.getAppServiceCode();
-        String tagName = x.getTagName();
+    private PublishVersionTagRelDTO buildPublishVersionTagRel(Long organizationId, Long publishVersionId, TagVO tag) {
+        Long thisProjectId = tag.getProjectId();
+        String appServiceCode = tag.getAppServiceCode();
+        String tagName = tag.getTagName();
         AssertUtilsForCommonException.notNull(thisProjectId, "error.tag.projectId.null");
         AssertUtilsForCommonException.notEmpty(appServiceCode, "error.tag.appServiceCode.empty");
         AssertUtilsForCommonException.notEmpty(tagName, "error.tag.tagName.empty");
@@ -234,6 +234,7 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
         dto.setAppServiceCode(appServiceCode);
         dto.setTagName(tagName);
         dto.setPublishVersionId(publishVersionId);
+        dto.setTagAlias(tag.getAlias());
         return dto;
     }
 

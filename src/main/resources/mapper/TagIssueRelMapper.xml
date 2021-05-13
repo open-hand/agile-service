@@ -256,4 +256,24 @@
         </foreach>
         group by ai.issue_type_id
     </select>
+
+    <select id="selectByTags" resultType="io.choerodon.agile.infra.dto.TagIssueRelDTO">
+        select * from agile_tag_issue_rel
+        where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and tag_name in
+        <foreach collection="tags" item="tag" open="(" separator="," close=")">
+            #{tag.tagName}
+        </foreach>
+        and app_service_code in
+        <foreach collection="tags" item="tag" open="(" separator="," close=")">
+            #{tag.appServiceCode}
+        </foreach>
+        and tag_project_id in
+        <foreach collection="tags" item="tag" open="(" separator="," close=")">
+            #{tag.projectId}
+        </foreach>
+    </select>
 </mapper>
