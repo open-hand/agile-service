@@ -3,12 +3,13 @@ import { getProjectId } from '@/utils/common';
 import Api from './Api';
 
 interface IPersonalFilter {
-    filterJson: string, // 搜索条件json字符串
-    name: string,
+  filterJson: string, // 搜索条件json字符串
+  name: string,
 }
-interface UPersonalFilter{
-    name: string,
-    objectVersionNumber: number,
+export interface UPersonalFilter {
+  name?: string,
+  objectVersionNumber: number,
+  default?: boolean
 }
 const { AppState } = stores;
 class PersonalFilterApi extends Api<PersonalFilterApi> {
@@ -41,7 +42,7 @@ class PersonalFilterApi extends Api<PersonalFilterApi> {
            * @param filterId
            * @param updateData
            */
-  update(filterId: string, updateData: UPersonalFilter) {
+  update(filterId: string, updateData: UPersonalFilter):Promise<any> {
     return axios.put(`${this.prefix}/personal_filter/${filterId}`, updateData);
   }
 

@@ -9,6 +9,7 @@ import { personalFilterApi } from '@/api';
 import { IPersonalFilter } from '@/components/quick-search';
 import ObserverTextField from 'choerodon-ui/pro/lib/text-field/TextField';
 import IssueStore from '@/stores/project/issue/IssueStore';
+import { useLockFn } from 'ahooks';
 
 interface Props {
   data: IPersonalFilter
@@ -69,20 +70,21 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
     });
   }, [filterId, name, onDelete]);
 
-  const handleSetDefault = useCallback(() => {
+  const handleSetDefault = useLockFn(async () => {
     const updateData = {
       objectVersionNumber,
       name,
-      default: true,
+      default: !isDefault,
     };
-    personalFilterApi.update(filterId, updateData).then(() => {
-      onSubmit();
+    try {
+      await personalFilterApi.update(filterId, updateData);
+      await onSubmit();
       Choerodon.prompt('修改成功');
-    }).catch(() => {
+    } catch (error) {
       IssueStore.setLoading(false);
       Choerodon.prompt('修改失败');
-    });
-  }, []);
+    }
+  });
   const checkName = useCallback(async (value: string) => {
     if (name === value) {
       return true;
@@ -135,14 +137,12 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
           </>
         ) : (
           <>
-            {!isDefault && (
-              <Tooltip title="设为默认">
-                <Icon
-                  type="mode_edit"
-                  onClick={handleSetDefault}
-                />
-              </Tooltip>
-            )}
+            <Tooltip title={isDefault ? '取消默认' : '设为默认'}>
+              <Icon
+                type={isDefault ? 'block' : 'playlist_add_check'}
+                onClick={handleSetDefault}
+              />
+            </Tooltip>
             <Tooltip title="修改">
               <Icon
                 type="mode_edit"

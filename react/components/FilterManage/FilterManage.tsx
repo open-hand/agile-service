@@ -40,8 +40,8 @@ const FilterManage: React.FC<Props> = ({ visible, setVisible, issueSearchStore }
                 <FilterItem
                   key={filter.filterId}
                   data={filter}
-                  onSubmit={() => {
-                    issueSearchStore.loadMyFilterList();
+                  onSubmit={async () => {
+                    await issueSearchStore.loadMyFilterList();
                   }}
                   onDelete={async () => {
                     await issueSearchStore.loadMyFilterList();
