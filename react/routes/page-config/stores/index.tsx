@@ -2,6 +2,8 @@ import React, { createContext, useState, useContext } from 'react';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import { getMenuType, getApplyType } from '@/utils/common';
+
 import { disabledEditDefaultFields } from '../page-issue-type/utils';
 
 interface Context {
@@ -22,8 +24,10 @@ const PageConfigProvider = injectIntl(inject('AppState')(
     const { isInProgram, loading } = useIsInProgram();
     if (isInProgram) {
       disabledEditDefaultFields.push('epic');
+    } else if (getApplyType() === 'program') {
+      disabledEditDefaultFields.push('sprint');
     } else {
-      const newDisabledEditDefaultFields = disabledEditDefaultFields.filter((item) => item !== 'epic');
+      const newDisabledEditDefaultFields = disabledEditDefaultFields.filter((item) => ['epic', 'sprint'].includes(item));
       if (newDisabledEditDefaultFields.length !== disabledEditDefaultFields.length) {
         disabledEditDefaultFields.length = 0;
         disabledEditDefaultFields.push(...newDisabledEditDefaultFields);

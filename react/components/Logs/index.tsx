@@ -1,9 +1,6 @@
 import React from 'react';
-import { Tooltip } from 'choerodon-ui';
-import TimeAgo from 'timeago-react';
 import _ from 'lodash';
 import { ILog } from '@/common/types';
-import UserHead from '../UserHead';
 import './Logs.less';
 import Log from './Log';
 import { UserUniqueTag } from '../tag/user-tag';
@@ -75,12 +72,7 @@ const Logs: React.FC<Props> = ({ datalogs, expand, fieldsMap }) => (
               <Log log={log} fieldsMap={fieldsMap} />
             </div>
             <div className="c7n-Logs-log-lastUpdateDate">
-              <Tooltip placement="top" title={log.lastUpdateDate || ''}>
-                <TimeAgo
-                  datetime={log.lastUpdateDate || ''}
-                  locale="zh_CN"
-                />
-              </Tooltip>
+              {log.lastUpdateDate || ''}
             </div>
           </div>
         </div>

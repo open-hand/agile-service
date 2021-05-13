@@ -150,9 +150,11 @@ public interface IssueService {
      *
      * @param issueConvertDTO             issueConvertDTO
      * @param issueUpdateTypeVO issueUpdateTypeVO
+     * @param organizationId
+     * @param projectId
      * @return IssueVO
      */
-    IssueVO updateIssueTypeCode(IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO, Long organizationId);
+    IssueVO updateIssueTypeCode(IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO, Long organizationId, Long projectId);
 
     /**
      * 通过项目id和issueId查询issueE
@@ -417,4 +419,29 @@ public interface IssueService {
      * @return
      */
     Page<IssueListFieldKVVO> pagedQueryMyAssigned(Long organizationId, Long projectId, PageRequest pageRequest);
+
+    /**
+     * 处理更新tag
+     *
+     * @param tags
+     * @param projectId
+     * @param issueId
+     */
+    void handleUpdateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
+
+    /**
+     * 查询issue在issueType下必填字段为空的字段
+     *
+     * @param projectId
+     * @param organizationId
+     * @param issueId
+     * @param issueTypeId
+     * @return
+     */
+    List<PageFieldViewVO> listRequiredFieldByIssueType(Long projectId,
+                                                       Long organizationId,
+                                                       Long issueId,
+                                                       Long issueTypeId);
+
+    void executionUpdateStatus(Long projectId, Long issueId, ExecutionUpdateIssueVO executionUpdateIssueVO);
 }

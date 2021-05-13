@@ -5,7 +5,7 @@ import { find } from 'lodash';
 import { Select } from 'choerodon-ui/pro';
 import { sprintApi } from '@/api';
 import { Tooltip } from 'choerodon-ui';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 
 const { OptGroup, Option } = Select;
 interface Props {

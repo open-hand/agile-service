@@ -27,6 +27,10 @@ function IssueList({ data, sprintId }) {
     );
   }, [data]);
 
+  const handleOpenCreateIssue = useCallback(() => {
+    BacklogStore.setNewIssueVisible(true);
+  }, []);
+
   return (
     <Droppable
       droppableId={String(sprintId)}
@@ -91,6 +95,16 @@ function IssueList({ data, sprintId }) {
                 onCreate={(res) => {
                   BacklogStore.handleCreateIssue(res, String(sprintId));
                   BacklogStore.refresh(false, false); // 更新侧边框
+                }}
+                cantCreateEvent={handleOpenCreateIssue}
+                typeIdChange={(id) => {
+                  BacklogStore.setDefaultTypeId(id);
+                }}
+                summaryChange={(summary) => {
+                  BacklogStore.setDefaultSummary(summary);
+                }}
+                setDefaultSprint={(value) => {
+                  BacklogStore.setDefaultSprint(value);
                 }}
               />
             </div>

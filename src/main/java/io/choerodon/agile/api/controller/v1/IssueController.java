@@ -33,6 +33,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -341,17 +342,31 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssueEpicList"));
     }
 
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询当前项目下的epic，提供给列表下拉")
+    @GetMapping(value = "/{issueId}/list_required_field")
+    public ResponseEntity<List<PageFieldViewVO>> listRequiredFieldByIssueType(@ApiParam(value = "项目id", required = true)
+                                                                              @PathVariable(name = "project_id") Long projectId,
+                                                                              @PathVariable @Encrypt Long issueId,
+                                                                              @ApiParam(value = "组织id", required = true)
+                                                                              @RequestParam Long organizationId,
+                                                                              @RequestParam @Encrypt Long issueTypeId) {
+        return ResponseEntity.ok(issueService.listRequiredFieldByIssueType(projectId, organizationId, issueId, issueTypeId));
+    }
+
+
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更改issue类型")
     @PostMapping("/update_type")
     public ResponseEntity<IssueVO> updateIssueTypeCode(@ApiParam(value = "项目id", required = true)
-                                                        @PathVariable(name = "project_id") Long projectId,
+                                                       @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "组织id", required = true)
-                                                        @RequestParam Long organizationId,
+                                                       @RequestParam Long organizationId,
                                                        @ApiParam(value = "修改类型信息", required = true)
-                                                        @RequestBody IssueUpdateTypeVO issueUpdateTypeVO) {
+                                                       @RequestBody IssueUpdateTypeVO issueUpdateTypeVO) {
         IssueConvertDTO issueConvertDTO = issueValidator.verifyUpdateTypeData(projectId, issueUpdateTypeVO);
-        return Optional.ofNullable(issueService.updateIssueTypeCode(issueConvertDTO, issueUpdateTypeVO, organizationId))
+        return Optional.ofNullable(issueService.updateIssueTypeCode(issueConvertDTO, issueUpdateTypeVO, organizationId, projectId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issue.updateIssueTypeCode"));
     }
@@ -669,6 +684,19 @@ public class IssueController {
                                            @ApiParam(value = "issueIds", required = true)
                                            @RequestBody @Encrypt List<Long> issueIds) {
         issueOperateService.batchDeleteIssue(projectId, issueIds);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("测试专用-执行状态变更去修改issue状态")
+    @PostMapping(value = "/execution_update_status")
+    public ResponseEntity executionUpdateStatus(@ApiParam(value = "项目id", required = true)
+                                                @PathVariable(name = "project_id") Long projectId,
+                                                @ApiParam(value = "issueId", required = true)
+                                                @RequestParam @Encrypt Long issueId,
+                                                @RequestBody ExecutionUpdateIssueVO executionUpdateIssueVO) {
+        issueService.executionUpdateStatus(projectId, issueId, executionUpdateIssueVO);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

@@ -8,13 +8,14 @@ import useIsInProgram from '@/hooks/useIsInProgram';
 import TypeTag from '../../TypeTag';
 import EditIssueContext from '../stores';
 import './IssueComponent.less';
+import openRequiredFieldsModal from './required-fields';
 
 const IssueType = observer(({
   reloadIssue, onUpdate,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
   let { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true }, { enabled: !disabled });
-  const handleChangeType = (type) => {
+  const handleChangeType = async (type) => {
     const issue = store.getIssue;
     const {
       issueId, objectVersionNumber, summary, featureVO = {}, issueTypeVO = {},
@@ -43,23 +44,40 @@ const IssueType = observer(({
           }
         });
     } else {
-      const issueUpdateTypeVO = {
-        epicName: type.item.props.typeCode === 'issue_epic' ? summary : undefined,
-        issueId,
-        objectVersionNumber,
-        typeCode: type.item.props.typeCode,
-        issueTypeId: value,
-        featureType,
-      };
-      issueApi.updateType(issueUpdateTypeVO)
-        .then(() => {
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
-          if (onUpdate) {
-            onUpdate();
-          }
+      const res = await issueApi.getRequiredField(issueId, value);
+      if (res && res.length) {
+        openRequiredFieldsModal({
+          requiredFields: res,
+          issueVO: {
+            summary,
+            issueId,
+            issueTypeVO,
+            objectVersionNumber,
+            typeCode: type.item.props.typeCode,
+            issueTypeId: value,
+          },
+          reloadIssue,
+          onUpdate,
         });
+      } else {
+        const issueUpdateTypeVO = {
+          epicName: type.item.props.typeCode === 'issue_epic' ? summary : undefined,
+          issueId,
+          objectVersionNumber,
+          typeCode: type.item.props.typeCode,
+          issueTypeId: value,
+          featureType,
+        };
+        issueApi.updateType(issueUpdateTypeVO)
+          .then(() => {
+            if (reloadIssue) {
+              reloadIssue(issueId);
+            }
+            if (onUpdate) {
+              onUpdate();
+            }
+          });
+      }
     }
   };
   const issue = store.getIssue;

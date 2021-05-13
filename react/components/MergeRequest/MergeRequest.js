@@ -5,7 +5,6 @@ import {
 import {
   Choerodon,
 } from '@choerodon/boot';
-import TimeAgo from 'timeago-react';
 import { devOpsApi } from '@/api';
 import './MergeRequest.less';
 import UserTag from '../tag/user-tag';
@@ -161,10 +160,7 @@ class MergeRequest extends Component {
               content={updatedAt}
               placement="left"
             >
-              <TimeAgo
-                datetime={updatedAt}
-                locale={Choerodon.getMessage('zh_CN', 'en')}
-              />
+              {updatedAt}
             </Popover>
           </div>
         ),

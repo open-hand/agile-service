@@ -8,13 +8,13 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { FlatSelect } from '@choerodon/components';
 import { flattenObject, isFilterSame } from './utils';
 import IssueSearchContext from './context';
 import SummaryField from './custom-fields/field/SummaryField';
 import CustomFields from './custom-fields';
 import useQuickFilters from './useQuickFilters';
 import ListenSearchSize from './ListenSearchSize';
-import FlatSelect from '../flat-select';
 
 const { AppState } = stores;
 const { Option, OptGroup } = FlatSelect;
@@ -205,7 +205,7 @@ const SearchArea: React.FC = () => {
                     <Option value={`quick|${filter.filterId}`}>{filter.name}</Option>
                   ))}
                 </OptGroup>
-                <OptGroup key="my" label="我的筛选">
+                <OptGroup key="my" label="个人筛选">
                   {
                     myFilters.map((filter) => (
                       <Option value={`my|${filter.filterId}`}>{filter.name}</Option>

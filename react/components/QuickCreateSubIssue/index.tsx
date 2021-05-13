@@ -24,9 +24,10 @@ interface QuickCreateSubIssueProps extends FormProps {
   parentIssueId: string
   sprintId: string
   onCreate?: () => void
+  onOpen: (issueId: string) => void
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
-  form, priorityId, parentIssueId, sprintId, onCreate,
+  form, priorityId, parentIssueId, sprintId, onCreate, onOpen,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: 'sub_task', onlyEnabled: true });
   const [expand, setExpand] = useState(false);
@@ -70,11 +71,12 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           }, fieldsMap);
 
           const res = await issueApi.createSubtask(issue);
-          fieldApi.quickCreateDefault(res.issueId, {
+          await fieldApi.quickCreateDefault(res.issueId, {
             schemeCode: 'agile_issue',
             issueTypeId: currentType.id,
             pageCode: 'agile_issue_create',
           });
+          onOpen(res.issueId);
           setLoading(false);
           handleCancel();
           onCreate && onCreate();

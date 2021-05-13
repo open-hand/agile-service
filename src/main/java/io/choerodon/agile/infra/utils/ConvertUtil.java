@@ -6,7 +6,9 @@ import io.choerodon.agile.app.service.PriorityService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.core.exception.CommonException;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -85,6 +87,16 @@ public class ConvertUtil {
                 throw new CommonException("error.queryProject.notFound");
             }
         }
+    }
+
+    public static Boolean hasModule(Long projectId, String code) {
+        ProjectVO projectVO= ConvertUtil.queryProject(projectId);
+        List<ProjectCategoryDTO> categories = projectVO.getCategories();
+        if(CollectionUtils.isEmpty(categories)){
+            return false;
+        }
+        List<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+        return codes.contains(code);
     }
 
     public static ProjectVO queryProjectWithoutAgile(Long projectId) {

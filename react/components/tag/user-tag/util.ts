@@ -8,5 +8,5 @@ export function getFistStr(str?:string) {
       return str[i];
     }
   }
-  return str[0];
+  return String(str[0]).toLocaleUpperCase();
 }

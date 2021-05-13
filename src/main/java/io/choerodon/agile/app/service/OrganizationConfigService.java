@@ -111,4 +111,8 @@ public interface OrganizationConfigService {
     List<IssueTypeVO> listIssueType(Long organizationId);
 
     Boolean checkConfigured(Long organizationId, Long projectId);
+
+    StatusBranchMergeSettingVO queryStatusBranchMergeSetting(Long organizationId, Long issueTypeId, Long statusId);
+
+    void updateAutoTransform(Long organizationId, Long issueTypeId, Long statusId, Boolean autoTransform);
 }

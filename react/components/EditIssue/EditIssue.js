@@ -14,7 +14,7 @@ import useIsInProgram from '@/hooks/useIsInProgram';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import { sameProject } from '@/utils/detail';
 import RelateStory from '../RelateStory';
-import CopyIssue from '../CopyIssue';
+import CopyIssue, { openEditIssueCopyIssue } from '../CopyIssue';
 import TransformSubIssue from '../TransformSubIssue';
 import TransformFromSubIssue from '../TransformFromSubIssue';
 import ChangeParent from '../ChangeParent';
@@ -88,9 +88,18 @@ function EditIssue() {
       store.setIssue({});
     }
     try {
+      let issue;
+      try {
+        issue = await (programId
+          ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).load(id));
+      } catch (error) {
+        if (error.code === 'error.issue.null') {
+          close();
+          return;
+        }
+      }
       // 1. 加载详情
-      let issue = await (programId
-        ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.org(organizationId).outside(outside).project(projectId).load(id));
+
       if (idRef.current !== id) {
         return;
       }
@@ -162,14 +171,6 @@ function EditIssue() {
     loadIssueDetail(currentIssueId);
     setQuery();
   }, [currentIssueId]);
-
-  const handleCopyIssue = (issue) => {
-    store.setCopyIssueShow(false);
-    loadIssueDetail(issue.issueId);
-    if (onIssueCopy) {
-      onIssueCopy(issue);
-    }
-  };
 
   const handleRelateStory = () => {
     store.setRelateStoryShow(false);
@@ -262,6 +263,7 @@ function EditIssue() {
           programId={programId}
           reloadIssue={loadIssueDetail}
           onUpdate={onUpdate}
+          onIssueCopy={onIssueCopy}
           onDeleteSubIssue={onDeleteSubIssue}
           loginUserId={AppState.userInfo.id}
           applyType={applyType}
@@ -271,21 +273,6 @@ function EditIssue() {
           otherProject={otherProject}
         />
       </div>
-      {
-        copyIssueShow ? (
-          <CopyIssue
-            issueId={issueId}
-            issueNum={issueNum}
-            issue={issue}
-            issueLink={linkIssues}
-            issueSummary={summary}
-            visible={copyIssueShow}
-            onCancel={() => store.setCopyIssueShow(false)}
-            onOk={handleCopyIssue.bind(this)}
-            applyType={applyType}
-          />
-        ) : null
-      }
       {
         relateStoryShow ? (
           <RelateStory

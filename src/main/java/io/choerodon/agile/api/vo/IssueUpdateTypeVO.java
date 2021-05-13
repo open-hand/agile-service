@@ -31,6 +31,16 @@ public class IssueUpdateTypeVO {
     @Encrypt
     private Long issueTypeId;
 
+    private BatchUpdateFieldsValueVo batchUpdateFieldsValueVo;
+
+    public BatchUpdateFieldsValueVo getBatchUpdateFieldsValueVo() {
+        return batchUpdateFieldsValueVo;
+    }
+
+    public void setBatchUpdateFieldsValueVo(BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
+        this.batchUpdateFieldsValueVo = batchUpdateFieldsValueVo;
+    }
+
     public Long getIssueId() {
         return issueId;
     }

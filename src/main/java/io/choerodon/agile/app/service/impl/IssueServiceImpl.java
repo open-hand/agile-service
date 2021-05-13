@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -184,6 +185,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private WikiRelationMapper wikiRelationMapper;
     @Autowired
     private FieldValueMapper fieldValueMapper;
+    @Autowired
+    private TagIssueRelMapper tagIssueRelMapper;
+    @Autowired
+    private ModelMapper modelMapper;
+    @Autowired
+    private WorkLogService workLogService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -229,8 +236,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String[] UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
     private static final String[] TRANSFORMED_TASK_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, STATUS_ID};
 
-    @Autowired
-    private ModelMapper modelMapper;
 //
 //    private static final String[] FIELDS_NAME;
 //
@@ -317,15 +322,40 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handleCreateComponentIssueRel(issueCreateVO.getComponentIssueRelVOList(), projectInfoDTO.getProjectId(), issueId, projectInfoDTO, issueConvertDTO.getAssigneerCondtiion());
         handleCreateVersionIssueRel(issueCreateVO.getVersionIssueRelVOList(), projectInfoDTO.getProjectId(), issueId);
         handleCreateIssueLink(issueCreateVO.getIssueLinkCreateVOList(), projectInfoDTO.getProjectId(), issueId);
+        handleCreateTagIssueRel(issueCreateVO.getTags(), projectInfoDTO.getProjectId(), issueId);
+    }
+
+    private void handleCreateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId) {
+        if (!ObjectUtils.isEmpty(tags)) {
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            tags.forEach(x -> {
+                String tagName = x.getTagName();
+                String appServiceCode = x.getAppServiceCode();
+                if (!StringUtils.hasText(tagName) || !StringUtils.hasText(appServiceCode)) {
+                    throw new CommonException("error.issue.tag.null");
+                }
+                TagIssueRelDTO dto = new TagIssueRelDTO();
+                dto.setIssueId(issueId);
+                dto.setOrganizationId(organizationId);
+                dto.setTagName(tagName);
+                dto.setAppServiceCode(appServiceCode);
+                dto.setTagProjectId(x.getProjectId());
+                dto.setProjectId(projectId);
+                if (tagIssueRelMapper.select(dto).isEmpty()) {
+                    tagIssueRelMapper.insertSelective(dto);
+                }
+            });
+        }
     }
 
     @Override
     public void afterCreateSubIssue(Long issueId, IssueConvertDTO subIssueConvertDTO, IssueSubCreateVO issueSubCreateVO, ProjectInfoDTO projectInfoDTO) {
         IssueCreateVO issueCreateVO = new IssueCreateVO();
-        issueCreateVO.setLabelIssueRelVOList(issueSubCreateVO.getLabelIssueRelVOList());
-        issueCreateVO.setComponentIssueRelVOList(issueSubCreateVO.getComponentIssueRelVOList());
-        issueCreateVO.setVersionIssueRelVOList(issueSubCreateVO.getVersionIssueRelVOList());
-        issueCreateVO.setIssueLinkCreateVOList(issueSubCreateVO.getIssueLinkCreateVOList());
+        issueCreateVO.setLabelIssueRelVOList(issueCreateVO.getLabelIssueRelVOList());
+        issueCreateVO.setComponentIssueRelVOList(issueCreateVO.getComponentIssueRelVOList());
+        issueCreateVO.setVersionIssueRelVOList(issueCreateVO.getVersionIssueRelVOList());
+        issueCreateVO.setIssueLinkCreateVOList(issueCreateVO.getIssueLinkCreateVOList());
+        issueCreateVO.setTags(issueCreateVO.getTags());
         handleCreateIssueRearAction(subIssueConvertDTO, issueId, projectInfoDTO, issueCreateVO);
     }
 
@@ -399,6 +429,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public IssueVO queryIssue(Long projectId, Long issueId, Long organizationId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
+        if (Objects.isNull(issue)) {
+            throw new CommonException("error.issue.null");
+        }
         issue.setSameParentIssueDTOList(Objects.nonNull(issue.getParentIssueId()) && !Objects.equals(issue.getParentIssueId(), 0L)?
                 issueMapper.querySubIssueByIssueId(issue.getParentIssueId()): null);
         issue.setSameParentBugDOList(Objects.nonNull(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)?
@@ -701,7 +734,178 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueUpdateVO.getVersionIssueRelVOList() != null && issueUpdateVO.getVersionType() != null) {
             this.self().handleUpdateVersionIssueRel(issueUpdateVO.getVersionIssueRelVOList(), projectId, issueId, issueUpdateVO.getVersionType());
         }
+        if (issueUpdateVO.getTags() != null) {
+            this.self().handleUpdateTagIssueRel(issueUpdateVO.getTags(), projectId, issueId);
+        }
         return queryIssueByUpdate(projectId, issueId, fieldList);
+    }
+
+    @Override
+    public void handleUpdateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        TagIssueRelDTO dto = new TagIssueRelDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setIssueId(issueId);
+        tagIssueRelMapper.delete(dto);
+        handleCreateTagIssueRel(tags, projectId, issueId);
+        if (agilePluginService != null) {
+            agilePluginService.handleProgramUpdateTag(tags, projectId, issueId);
+        }
+    }
+
+    @Override
+    public List<PageFieldViewVO> listRequiredFieldByIssueType(Long projectId,
+                                                              Long organizationId,
+                                                              Long issueId,
+                                                              Long issueTypeId) {
+        String schemeCode = "agile_issue";
+        IssueVO issue = queryIssue(projectId, issueId, organizationId);
+        Map<String, Object> customFieldMap =
+                pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, Arrays.asList(issueId), false, "agile_issue")
+                        .get(issueId);
+        AssertUtilsForCommonException.notNull(issue, "error.issue.null");
+        PageFieldViewParamVO param = new PageFieldViewParamVO();
+        param.setIssueTypeId(issueTypeId);
+        param.setSchemeCode(schemeCode);
+        param.setPageCode("agile_issue_create");
+        List<PageFieldViewVO> createPageFields =
+                pageFieldService.queryPageFieldViewList(organizationId, projectId, param);
+        List<PageFieldViewVO> requiredSystemFields = new ArrayList<>();
+        List<PageFieldViewVO> requiredCustomFields = new ArrayList<>();
+        createPageFields.forEach(x -> {
+            if (Boolean.TRUE.equals(x.getRequired())) {
+                if (Boolean.TRUE.equals(x.getSystem())) {
+                    //系统字段
+                    if (isSystemFieldEmpty(x.getFieldCode(), issue)) {
+                        requiredSystemFields.add(x);
+                    }
+                } else {
+                    if (ObjectUtils.isEmpty(customFieldMap.get(x.getFieldCode()))) {
+                        requiredCustomFields.add(x);
+                    }
+                }
+            }
+        });
+        requiredSystemFields.addAll(requiredCustomFields);
+        return requiredSystemFields;
+    }
+
+    @Override
+    public void executionUpdateStatus(Long projectId, Long issueId, ExecutionUpdateIssueVO executionUpdateIssueVO) {
+        Long sprintId = executionUpdateIssueVO.getSprintId();
+        String appleType = getApplyType(projectId);
+        if (StringUtils.isEmpty(appleType)) {
+            return;
+        }
+        Map<Long, Long> map = executionUpdateIssueVO.getIssueTypeStatusMap();
+        IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
+        Long issueTypeId = issueDetailDTO.getIssueTypeId();
+        Long currentStatusId = issueDetailDTO.getStatusId();
+        Long targetStatusId = map.get(issueDetailDTO.getIssueTypeId());
+        IssueSprintRelDTO issueSprintRelDTO = new IssueSprintRelDTO();
+        issueSprintRelDTO.setProjectId(projectId);
+        issueSprintRelDTO.setSprintId(sprintId);
+        issueSprintRelDTO.setIssueId(issueId);
+        List<IssueSprintRelDTO> sprintRelDTOS = issueSprintRelMapper.select(issueSprintRelDTO);
+        if (CollectionUtils.isEmpty(sprintRelDTOS)) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(targetStatusId) || Objects.equals(currentStatusId, targetStatusId)) {
+            return;
+        }
+        List<TransformVO> transformVOS = projectConfigService.queryTransformsByProjectId(projectId, currentStatusId, issueId, issueTypeId, appleType);
+        if (!CollectionUtils.isEmpty(transformVOS)) {
+            Map<Long, TransformVO> transformVOMap = transformVOS.stream().collect(Collectors.toMap(TransformVO::getEndStatusId, Function.identity()));
+            TransformVO transformVO = transformVOMap.get(targetStatusId);
+            if (!ObjectUtils.isEmpty(transformVO)) {
+                updateIssueStatus(projectId, issueId, transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), appleType);
+            }
+        }
+    }
+
+    private String getApplyType(Long projectId) {
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        List<String> projectCodes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
+        if (projectCodes.contains(ProjectCategory.MODULE_PROGRAM)) {
+            return SchemeApplyType.PROGRAM;
+        } else if (projectCodes.contains(ProjectCategory.MODULE_AGILE)) {
+            return SchemeApplyType.AGILE;
+        } else {
+            return null;
+        }
+    }
+
+    private boolean isSystemFieldEmpty(String fieldCode, IssueVO issue) {
+        Object value;
+        switch (fieldCode) {
+            case FieldCode.DESCRIPTION:
+                value = issue.getDescription();
+                break;
+            case FieldCode.COMPONENT:
+                value = issue.getComponentIssueRelVOList();
+                break;
+            case FieldCode.LABEL:
+                value = issue.getLabelIssueRelVOList();
+                break;
+            case FieldCode.FIX_VERSION:
+            case FieldCode.INFLUENCE_VERSION:
+                value = issue.getVersionIssueRelVOList();
+                break;
+            case FieldCode.SPRINT:
+                List<SprintNameVO> sprints = issue.getCloseSprint();
+                if (sprints == null) {
+                    sprints = new ArrayList<>();
+                }
+                if (issue.getActiveSprint() != null) {
+                    sprints.add(issue.getActiveSprint());
+                }
+                value = sprints;
+                break;
+            case FieldCode.EPIC_NAME:
+                value = issue.getEpicName();
+                break;
+            case FieldCode.ASSIGNEE:
+                value = issue.getAssigneeId();
+                break;
+            case FieldCode.ESTIMATED_START_TIME:
+                value = issue.getEstimatedStartTime();
+                break;
+            case FieldCode.ESTIMATED_END_TIME:
+                value = issue.getEstimatedEndTime();
+                break;
+            case FieldCode.REMAINING_TIME:
+                value = issue.getRemainingTime();
+                break;
+            case FieldCode.STORY_POINTS:
+                value = issue.getStoryPoints();
+                break;
+            case FieldCode.TIME_TRACE:
+                Long issueId = issue.getIssueId();
+                Long projectId = issue.getProjectId();
+                value = workLogService.queryWorkLogListByIssueId(projectId, issueId);
+                break;
+            case FieldCode.MAIN_RESPONSIBLE:
+                value = issue.getMainResponsible();
+                break;
+            case FieldCode.TAG:
+                value = issue.getTags();
+                break;
+            case FieldCode.ENVIRONMENT:
+                value = issue.getEnvironment();
+                break;
+            case FieldCode.EPIC:
+                Long epicId = issue.getEpicId();
+                if (Objects.equals(0L, epicId)) {
+                    value = null;
+                } else {
+                    value = epicId;
+                }
+                break;
+            default:
+                value = new Object();
+        }
+        return ObjectUtils.isEmpty(value);
     }
 
     @Override
@@ -1184,7 +1388,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public synchronized IssueVO updateIssueTypeCode(IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO, Long organizationId) {
+    public synchronized IssueVO updateIssueTypeCode(IssueConvertDTO issueConvertDTO,
+                                                    IssueUpdateTypeVO issueUpdateTypeVO,
+                                                    Long organizationId,
+                                                    Long projectId) {
         List<String> fieldList = new ArrayList<>(Arrays.asList(UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK));
         String originType = issueConvertDTO.getTypeCode();
         if (originType.equals(SUB_TASK)) {
@@ -1229,7 +1436,111 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
         // 查看目标问题类型的状态机是否含有当前状态，没有就是用默认状态
         handlerStatus(issueConvertDTO.getProjectId(),issueUpdateTypeVO);
+        //更新字段值
+        updateIssueFieldValue(issueUpdateTypeVO, issueUpdateTypeVO.getIssueId(), projectId, organizationId);
         return queryIssue(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), organizationId);
+    }
+
+    private void updateIssueFieldValue(IssueUpdateTypeVO issueUpdateTypeVO,
+                                       Long issueId,
+                                       Long projectId,
+                                       Long organizationId) {
+        BatchUpdateFieldsValueVo batchUpdateFieldsValueVo = issueUpdateTypeVO.getBatchUpdateFieldsValueVo();
+        if (batchUpdateFieldsValueVo == null) {
+            return;
+        }
+        validateRequiredFields(issueUpdateTypeVO, issueId, projectId, organizationId);
+        List<Long> issueIds = Arrays.asList(issueId);
+        JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
+        BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
+        if (!ObjectUtils.isEmpty(predefinedFields)) {
+            fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields, batchUpdateFieldStatusVO, "agile", false);
+        }
+        List<PageFieldViewUpdateVO> customFields = batchUpdateFieldsValueVo.getCustomFields();
+        if (!ObjectUtils.isEmpty(customFields)) {
+            fieldValueService.handlerCustomFields(projectId, customFields, "agile_issue", issueIds, batchUpdateFieldStatusVO, false);
+        }
+        if(!ObjectUtils.isEmpty(batchUpdateFieldStatusVO.getErrorMsgMap())) {
+            throw new CommonException("error.update.field.value");
+        }
+    }
+
+    private void validateRequiredFields(IssueUpdateTypeVO issueUpdateTypeVO,
+                                        Long issueId,
+                                        Long projectId,
+                                        Long organizationId) {
+        List<PageFieldViewVO> pageFieldViewList =
+                listRequiredFieldByIssueType(projectId, organizationId, issueId, issueUpdateTypeVO.getIssueTypeId());
+        if (pageFieldViewList.isEmpty()) {
+            return;
+        }
+        Set<String> systemFieldCodes = new HashSet<>();
+        Set<Long> customFieldIds = new HashSet<>();
+        pageFieldViewList.forEach(x -> {
+            if (x.getSystem()) {
+                systemFieldCodes.add(x.getFieldCode());
+            } else {
+                customFieldIds.add(x.getFieldId());
+            }
+        });
+        BatchUpdateFieldsValueVo batchUpdateFieldsValueVo = issueUpdateTypeVO.getBatchUpdateFieldsValueVo();
+        if (batchUpdateFieldsValueVo == null && !pageFieldViewList.isEmpty()) {
+            throw new CommonException("error.required.field.empty");
+        }
+        JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
+        boolean allFieldEmpty = true;
+        if (predefinedFields != null) {
+            Set<String> systemFields = predefinedFields.keySet();
+            Set<String> fieldCodes = convertToFieldCodes(systemFields);
+            systemFieldCodes.forEach(x -> {
+                if (!fieldCodes.contains(x)) {
+                    throw new CommonException("error.required.field.empty." + x);
+                }
+            });
+            allFieldEmpty = false;
+        }
+        List<PageFieldViewUpdateVO> customFields = batchUpdateFieldsValueVo.getCustomFields();
+        if (!ObjectUtils.isEmpty(customFields)) {
+            Set<Long> inputCustomFields = new HashSet<>();
+            customFields.forEach(x -> inputCustomFields.add(x.getFieldId()));
+            customFieldIds.forEach(x -> {
+                if (inputCustomFields.contains(x)) {
+                    throw new CommonException("error.required.field.empty." + x);
+                }
+            });
+            allFieldEmpty=false;
+        }
+        if (allFieldEmpty) {
+            throw new CommonException("error.required.field.empty");
+        }
+    }
+
+    private Set<String> convertToFieldCodes(Set<String> systemFields) {
+        Map<String, String> map = new HashMap<>();
+        map.put("assigneeId", FieldCode.ASSIGNEE);
+        map.put("componentIssueRelVOList", FieldCode.COMPONENT);
+        map.put("environment", FieldCode.ENVIRONMENT);
+        map.put("estimatedEndTime", FieldCode.ESTIMATED_END_TIME);
+        map.put("estimatedStartTime", FieldCode.ESTIMATED_START_TIME);
+        map.put("fixVersion", FieldCode.FIX_VERSION);
+        map.put("influenceVersion", FieldCode.INFLUENCE_VERSION);
+        map.put("labelIssueRelVOList", FieldCode.LABEL);
+        map.put("mainResponsibleId", FieldCode.MAIN_RESPONSIBLE);
+        map.put("priorityId", FieldCode.PRIORITY);
+        map.put("remainingTime", FieldCode.REMAINING_TIME);
+        map.put("reporterId", FieldCode.REPORTER);
+        map.put("sprintId", FieldCode.SPRINT);
+        map.put("statusId", FieldCode.STATUS);
+        map.put("storyPoints", FieldCode.STORY_POINTS);
+        map.put("description", FieldCode.DESCRIPTION);
+        map.put("epicName", FieldCode.EPIC_NAME);
+        Set<String> result = new HashSet<>();
+        systemFields.forEach(x -> {
+            if (map.get(x) != null) {
+                result.add(map.get(x));
+            }
+        });
+        return result;
     }
 
     private void handlerStatus(Long projectId, IssueUpdateTypeVO issueUpdateTypeVO) {
@@ -2651,7 +2962,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //连表查询需要设置主表别名
         Map<String, String> orders = new HashMap<>();
         orders.put("issueNum","issue_num_convert");
-        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", orders);
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), null, orders);
         pageRequest.setSort(sort);
         Page<IssueDTO> pageInfo = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryStoryAndTaskByProjectId(projectId, searchVO));
         List<IssueDTO> list = pageInfo.getContent();

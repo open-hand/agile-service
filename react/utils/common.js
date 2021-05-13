@@ -57,7 +57,7 @@ export function configTheme({
 
 // 获取文件名后缀
 export function getFileSuffix(fileName) {
-  return fileName.replace(/.+\./, '').toLowerCase();
+  return (fileName || '').replace(/.+\./, '').toLowerCase();
 }
 /**
  * 时间（毫秒）转文字显示

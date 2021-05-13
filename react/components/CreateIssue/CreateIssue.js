@@ -41,6 +41,8 @@ import FieldStartTime from './FieldStartTime';
 import FieldEndTime from './FieldEndTime';
 import { OldSelectProgramVersion as SelectProgramVersion } from '../select/select-program-version';
 import { OldSelectEnvironment as SelectEnvironment } from '../select/select-environment';
+import SelectMultiServiceTag from '../select/select-multi-service-tag-old';
+import FieldFeatureSprint from './FieldFeatureSprint';
 
 const DebounceInput = reactComponentDebounce({
   valuePropName: 'value',
@@ -163,6 +165,9 @@ class CreateIssue extends Component {
   // eslint-disable-next-line react/destructuring-assignment
   getDefaultType = (issueTypes = this.state.originIssueTypes) => {
     const { defaultTypeCode } = this.props;
+    if (this.props.defaultTypeId) {
+      return find(issueTypes, { id: this.props.defaultTypeId }) || issueTypes[0];
+    }
     return find(issueTypes, { typeCode: defaultTypeCode }) || issueTypes[0];
   }
 
@@ -201,6 +206,16 @@ class CreateIssue extends Component {
       }
       if (newIssueTypeCode === 'feature' && data.programVersion) {
         featureApi.updateVersions(res.issueId, data.programVersion);
+      }
+      if (newIssueTypeCode === 'feature' && data.subProjectSprintId) {
+        featureApi.updateTeamAndSprint({
+          piId: data.piId || null,
+          deleteSprintIds: [],
+          featureId: res.issueId,
+          sprintIds: data.subProjectSprintId,
+          teamProjectIds: [],
+          deleteTeamProjectIds: [],
+        });
       }
       form.resetFields();
       this.setState({
@@ -300,6 +315,15 @@ class CreateIssue extends Component {
     form.setFieldsValue(setFields);
   }
 
+  setDefaultSummary = () => {
+    if (this.props.defaultSummary) {
+      const { form: { setFieldsValue } } = this.props;
+      setFieldsValue({
+        summary: this.props.defaultSummary,
+      });
+    }
+  }
+
   loadIssueTypes = () => {
     const { applyType, form } = this.props;
 
@@ -322,6 +346,7 @@ class CreateIssue extends Component {
             newIssueTypeCode: defaultType.typeCode,
           }, () => {
             this.setDefaultSprint();
+            this.setDefaultSummary();
             this.setDefaultValue(fields);
           });
         });
@@ -404,6 +429,8 @@ class CreateIssue extends Component {
           programVersion,
           environment,
           appVersions,
+          tags,
+          subProjectSprintId,
           mainResponsibleId,
           testResponsibleId,
         } = values;
@@ -495,6 +522,8 @@ class CreateIssue extends Component {
             environment, // 缺陷有的字段
             mainResponsibleId,
             testResponsibleId,
+            tags,
+            subProjectSprintId, // 特性冲刺字段 创建issue完成后提交
             estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
             estimatedStartTime: estimatedStartTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
           };
@@ -575,7 +604,7 @@ class CreateIssue extends Component {
 
   getFieldComponent = (field) => {
     const {
-      form, mode, hiddenIssueType, teamProjectIds, applyType,
+      form, mode, hiddenIssueType, teamProjectIds, applyType, defaultFeatureType,
     } = this.props;
     const { getFieldDecorator } = form;
     const {
@@ -697,7 +726,7 @@ class CreateIssue extends Component {
               <FormItem>
                 {getFieldDecorator('featureType', {
                   rules: [{ required: true, message: '特性类型为必输项' }],
-                  initialValue: 'business',
+                  initialValue: defaultFeatureType || 'business',
                 })(
                   <Select
                     label="特性类型"
@@ -781,7 +810,7 @@ class CreateIssue extends Component {
 
         );
       case 'sprint':
-        return (
+        return newIssueTypeCode === 'feature' ? <FieldFeatureSprint form={form} field={field || {}} /> : (
           <FormItem label="冲刺" key={`${newIssueTypeCode}-sprint`}>
             {getFieldDecorator('sprintId', {
               rules: [{ required: ['sub_task', 'sub_bug'].includes(mode) || newIssueTypeCode === 'sub_task' || (newIssueTypeCode === 'bug' && form.getFieldValue('subBugParent')) ? false : field.required, message: '请选择冲刺' }],
@@ -1133,6 +1162,11 @@ class CreateIssue extends Component {
                     label="PI"
                     type="pi"
                     optionArgs={!hasPermission}
+                    afterLoad={(sprints) => {
+                      this.props.defaultPi && form.setFieldsValue({
+                        pi: this.props.defaultPi,
+                      });
+                    }}
                   >
                     {field.defaultValueObjs?.map((pi) => (
                       <Option
@@ -1230,6 +1264,18 @@ class CreateIssue extends Component {
                     }
                   }}
                 />,
+              )}
+            </div>
+          </FormItem>
+        );
+      case 'tag':
+        return (
+          <FormItem label={field.fieldName} key={`${newIssueTypeCode}-${field.id}`}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {getFieldDecorator('tags', {
+                rules: [{ required: field.required, message: `请选择${field.fieldName}` }],
+              })(
+                <SelectMultiServiceTag label={field.fieldName} multiple labelLayout="float" style={{ width: '100%' }} />,
               )}
             </div>
           </FormItem>

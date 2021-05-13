@@ -19,17 +19,18 @@ export default ({ id, intl }) => {
         method: 'post',
         transformRequest: (data) => {
           const {
-            defaultAssigneeRole, name, description, manager,
+            defaultAssigneeRole, name, description, manager, params,
           } = data;
-          const searchDTO = { 
+          const searchDTO = {
             searchArgs: { name, description, manager },
             advancedSearchArgs: {
               defaultAssigneeRole: defaultAssigneeRole ? [defaultAssigneeRole] : [],
               contents: '',
-            }, 
+            },
+            contents: params ? [params] : undefined,
           };
           return JSON.stringify(searchDTO);
-        },      
+        },
       },
     },
     fields: [
@@ -58,13 +59,18 @@ export default ({ id, intl }) => {
         type: 'string',
         label: '默认经办人',
       },
+      {
+        name: 'sequence',
+        type: 'string',
+        label: '模块顺序',
+      },
     ],
     queryFields: [
       {
         name: 'name',
         type: 'string',
         label: '模块',
-      },    
+      },
       {
         name: 'manager',
         type: 'string',

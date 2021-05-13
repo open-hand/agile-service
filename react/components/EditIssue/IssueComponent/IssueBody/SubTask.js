@@ -110,6 +110,11 @@ const SubTask = observer(({
             sprintId={sprintId}
             parentIssueId={parentIssueId}
             onCreate={handleCreateSubIssue}
+            onOpen={(issueId) => {
+              if (reloadIssue) {
+                reloadIssue(issueId);
+              }
+            }}
           />
         )}
         {

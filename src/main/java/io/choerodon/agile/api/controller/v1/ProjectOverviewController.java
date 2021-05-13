@@ -67,4 +67,15 @@ public class ProjectOverviewController {
                                                            @PathVariable @Encrypt Long sprintId) {
         return Results.success(reportService.selectBugBysprint(projectId, sprintId));
     }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查看每人每日工作量")
+    @GetMapping("/{sprintId}/one_jobs")
+    public ResponseEntity<List<OneJobVO>> selectOneJobsBySprint(@ApiParam(value = "项目id", required = true)
+                                                               @PathVariable(name = "project_id") Long projectId,
+                                                                @ApiParam(value = "冲刺Id", required = true)
+                                                               @PathVariable @Encrypt Long sprintId) {
+        return Results.success(projectOverviewService.selectOneJobsBySprint(projectId, sprintId));
+    }
 }

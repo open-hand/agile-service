@@ -5,10 +5,7 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @author dinghuang123@gmail.com
@@ -31,6 +28,9 @@ public class IssueLinkTypeDTO extends AuditDomain {
     private String outWard;
 
     private Long projectId;
+
+    @Transient
+    private Integer issueCount;
 
     public Long getLinkTypeId() {
         return linkTypeId;
@@ -91,6 +91,14 @@ public class IssueLinkTypeDTO extends AuditDomain {
         this.inWard = "关联";
         this.outWard = "关联";
         this.linkName = "关联";
+    }
+
+    public Integer getIssueCount() {
+        return issueCount;
+    }
+
+    public void setIssueCount(Integer issueCount) {
+        this.issueCount = issueCount;
     }
 
     @Override

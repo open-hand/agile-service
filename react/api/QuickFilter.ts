@@ -30,7 +30,7 @@ class QuickFilterApi extends Api<QuickFilterApi> {
    * 根据快速过滤id加载
    * @param filterId
    */
-  load(filterId: number) {
+  load(filterId: number | string) {
     return axios.get(`${this.prefix}/quick_filter/${filterId}`);
   }
 
@@ -78,15 +78,19 @@ class QuickFilterApi extends Api<QuickFilterApi> {
    * @param data
    */
   create(data: IQuickFilter) {
-    return axios.post(`${this.prefix}/quick_filter`, data);
+    return axios.post(`${this.prefix}/quick_filter`, data, {
+      noPrompt: true,
+    });
   }
 
   /**
    * 更新快速筛选
    * @param data
    */
-  update(filterId: number, data: UQuickFilter) {
-    return axios.put(`${this.prefix}/quick_filter/${filterId}`, data);
+  update(filterId: number | string, data: UQuickFilter) {
+    return axios.put(`${this.prefix}/quick_filter/${filterId}`, data, {
+      noPrompt: true,
+    });
   }
 
   /**
@@ -121,4 +125,5 @@ class QuickFilterApi extends Api<QuickFilterApi> {
 }
 
 const quickFilterApi = new QuickFilterApi();
-export { quickFilterApi };
+const quickFilterApiConfig = new QuickFilterApi(true);
+export { quickFilterApi, quickFilterApiConfig };

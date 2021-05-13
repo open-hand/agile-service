@@ -411,13 +411,17 @@ class IssueStore {
     return toJS(this.expand);
   }
 
-  setTableRef(tableRef) {
-    this.tableRef = tableRef;
+  @observable defaultTypeId = '';
+
+  @action setDefaultTypeId = (data) => {
+    this.defaultTypeId = data;
   }
 
-  query = debounce((page) => {
-    this.dataSet.query(page);
-  }, 300);
+  @observable defaultSummary = '';
+
+  @action setDefaultSummary = (data) => {
+    this.defaultSummary = data;
+  }
 }
 
 export default new IssueStore();

@@ -1,7 +1,9 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { map, includes } from 'lodash';
 import STATUS from '@/constants/STATUS';
 import { Tooltip } from 'choerodon-ui';
+import { stores } from '@choerodon/boot';
+import { toJS } from 'mobx';
 import {
   IField, IStatus, User, ILabel, IIssueType,
 } from '@/common/types';
@@ -19,9 +21,10 @@ import SelectProgramVersion from '@/components/select/select-program-version';
 import SelectFeature from '@/components/select/select-feature';
 import { DataSet, TextField } from 'choerodon-ui/pro/lib';
 import { epicApi } from '@/api';
-import Item from 'choerodon-ui/lib/list/Item';
 import UserTag from '@/components/tag/user-tag';
+import store from '../../store';
 
+const { AppState } = stores;
 export interface IFieldWithValue extends IField {
   value: any,
   valueStr: any,
@@ -366,6 +369,8 @@ const renderField = ({
                 selectedUserIds: issue.assigneeId,
               }}
               afterLoad={(data: any) => {
+                console.log('data：');
+                console.log(data);
                 dataMap.set('assignee', data);
               }}
             />
@@ -572,7 +577,7 @@ const renderField = ({
     }
     case 'reporter': {
       const fieldValue = getFieldValue(dataSet, `${issueId}-reporter`);
-      const fieldValueItem = [...selectedUsers, ...(dataMap.get('reporter') || [])].find((item: any) => fieldValue === item.id);
+      const fieldValueItem = [...selectedUsers, ...(dataMap.get('reporter') || []), AppState.userInfo].find((item: any) => fieldValue === item.id);
       return (
         <TextEditToggle
           disabled={disabled}
@@ -589,7 +594,7 @@ const renderField = ({
                 dataMap.set('reporter', data);
               }}
               autoQueryConfig={{
-                selectedUserIds: issue.reporterId,
+                selectedUserIds: fieldValue,
               }}
             />
           )}
@@ -634,6 +639,7 @@ const renderField = ({
     if (fieldItem && fieldItem.fieldCode) {
       const fieldValue = getFieldValue(dataSet, `${issueId}-${fieldItem.fieldCode}`);
       const fieldValueItem = [...selectedUsers, ...(dataMap.get(fieldItem.fieldCode) || [])].find((item: any) => fieldValue === item.id);
+
       return (
         <TextEditToggle
           disabled={disabled}

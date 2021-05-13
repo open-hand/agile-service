@@ -1,0 +1,46 @@
+.c7n-agile-table-cell-click {
+  color: #3F51B5;
+  cursor: pointer;
+  vertical-align: top;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.info {
+  padding-top: .2rem;
+}
+
+.body {
+  margin-top: .2rem;
+  // position: relative;
+}
+
+.table {
+  position: relative;
+  top: -.31rem;
+
+  :global {
+    .c7n-pro-table-filter-select-wrapper {
+
+      input,
+      .c7n-pro-table-filter-select-placeholder,
+      .c7n-pro-table-filter-select-prefix,
+      .c7n-pro-table-filter-select,
+      .c7n-pro-table-filter-select-inner-button {
+        display: none;
+      }
+
+      .c7n-pro-table-filter-select-suffix {
+
+        height: .5rem;
+      }
+
+      .c7n-pro-table-filter-select-suffix,
+      .c7n-pro-table-columns-chooser {
+        width: .5rem;
+      }
+    }
+  }
+}

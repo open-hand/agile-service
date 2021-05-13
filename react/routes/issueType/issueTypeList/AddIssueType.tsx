@@ -100,6 +100,7 @@ const AddIssueType: React.FC<Props> = ({
         name: 'description',
         type: 'string' as FieldType,
         label: '问题类型描述',
+        maxLength: 255,
       },
       {
         name: 'typeCode',

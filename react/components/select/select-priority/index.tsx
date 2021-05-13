@@ -4,7 +4,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { priorityApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { Priority } from '@/common/types';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 
 interface Props extends Partial<SelectProps> {
   priorityId?: number

@@ -30,6 +30,7 @@ export interface IStatusCreate {
   type: IStatus['valueCode']
   defaultStatus: boolean
   transferAll: boolean
+  completed: boolean
 }
 export interface IStatusCreateLink {
   issueTypeId: string
@@ -646,6 +647,38 @@ class StatusTransformApi extends Api<StatusTransformApi> {
       params: {
         issueTypeId,
       },
+    });
+  }
+
+  getAutoTransform(issueTypeId: string, statusId: string) {
+    return axios({
+      method: 'get',
+      url: getIsOrganization() ? `${this.orgPrefix}/status_branch_merge_setting/query?issueTypeId=${issueTypeId}&statusId=${statusId}` : `${this.prefix}/status_branch_merge_setting/issue_type/${issueTypeId}/status/${statusId}`,
+    });
+  }
+
+  updateAutoTransform(issueTypeId: string, statusId: string, autoTransform: boolean) {
+    return axios({
+      method: 'put',
+      url: getIsOrganization() ? `${this.orgPrefix}/status_branch_merge_setting/update?issueTypeId=${issueTypeId}&statusId=${statusId}` : `${this.prefix}/status_branch_merge_setting/issue_type/${issueTypeId}/status/${statusId}/update_auto_transform`,
+      params: {
+        autoTransform: autoTransform || false,
+      },
+    });
+  }
+
+  getStatus(statusId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/status/${statusId}`,
+    });
+  }
+
+  updateStatus(statusId: string, data: any) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/status_linkages/list`,
+      data,
     });
   }
 }

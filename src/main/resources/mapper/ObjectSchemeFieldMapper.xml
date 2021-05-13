@@ -144,7 +144,7 @@
         <id property="required" column="required"/>
         <id property="system" column="is_system"/>
         <id property="extraConfig" column="extra_config"/>
-        <collection property="fieldOptions"  ofType="io.choerodon.agile.api.vo.FieldOptionVO">
+        <collection property="fieldOptions" notNullColumn="ffo_id"  ofType="io.choerodon.agile.api.vo.FieldOptionVO">
             <id property="id" column="ffo_id"/>
             <result property="fieldId" column="ffo_field_id"/>
             <result property="code" column="ffo_code"/>

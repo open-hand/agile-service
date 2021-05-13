@@ -192,6 +192,7 @@ export interface IField {
   fieldName?: string
   projectId?: string | number
   required: boolean
+  defaultValue: any
 }
 export interface IComment {
   commentId: string

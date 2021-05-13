@@ -1,33 +1,18 @@
 import React from 'react';
 import { Icon } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
-import { getFileSuffix } from '@/utils/common';
+import FileSaver from 'file-saver';
+import FilePreview from './FilePreview';
 import './index.less';
-import PdfViewer from './PdfViewer';
 
-const officeSuffix = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
 const prefixCls = 'c7n-agile-preview';
 const Preview = ({
-  fileService, fileName, fileUrl, modal, handleDownLoadFile,
+  url, fileName, modal,
 }) => {
-  const renderPreviewContent = () => {
-    if (officeSuffix.includes(getFileSuffix(fileUrl))) {
-      return (
-        <div className={`${prefixCls}-content-iframeWrap`}>
-          <iframe title="附件预览" width="100%" height="100%" src={`https://view.officeapps.live.com/op/view.aspx?src=${fileService || ''}${encodeURIComponent(fileUrl)}`} />
-        </div>
-      );
-    } if (getFileSuffix(fileUrl) === 'pdf') {
-      return (
-        <PdfViewer file={`${fileService || ''}${fileUrl}`} />
-      );
-    }
-    return (
-      <div className={`${prefixCls}-content-imageWrap`}>
-        <img className={`${prefixCls}-content-image`} src={`${fileService || ''}${fileUrl}`} alt="图片附件" />
-      </div>
-    );
+  const handleDownLoadFile = () => {
+    FileSaver.saveAs(url, fileName);
   };
+
   const handleClose = () => {
     modal.close();
   };
@@ -45,7 +30,7 @@ const Preview = ({
         <Icon type="close" style={{ fontSize: 20, marginLeft: 20, cursor: 'pointer' }} onClick={handleClose} />
       </div>
       <div className={`${prefixCls}-content`}>
-        {renderPreviewContent()}
+        <FilePreview url={url} />
       </div>
     </div>
   );

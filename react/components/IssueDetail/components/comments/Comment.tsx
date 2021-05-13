@@ -3,7 +3,6 @@ import { Icon, Popconfirm } from 'choerodon-ui';
 import { text2Delta } from '@/utils/richText';
 import WYSIWYGEditor from '@/components/CKEditor';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
-import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
 import './Comment.less';
 import { IComment } from '@/common/types';
 import UserTag from '@/components/tag/user-tag';
@@ -52,9 +51,7 @@ const Comment: React.FC<Props> = ({
             color="#3f51b5"
           />
           <div style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
-            <DatetimeAgo
-              date={comment.lastUpdateDate}
-            />
+            {comment.lastUpdateDate}
           </div>
         </div>
         <div className="c7n-action">

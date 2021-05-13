@@ -51,7 +51,7 @@ const ReportPage: React.FC<Props> = ({
         </Menu>
       )}
     >
-      <Button icon="add" color={'blue' as ButtonColor}>
+      <Button icon="add">
         添加报告内容
       </Button>
     </Dropdown>

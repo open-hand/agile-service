@@ -7,6 +7,10 @@ const IssueDetail = ({ refresh }) => {
   const [detailProps] = useDetail();
   const { open, close } = detailProps;
 
+  useEffect(() => {
+    ScrumBoardStore.setDetailProps(detailProps);
+  }, [detailProps]);
+
   const handleIssueCopy = ({ issueId }) => {
     refresh();
     ScrumBoardStore.clickedOnce('0', {

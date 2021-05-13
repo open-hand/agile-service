@@ -1,20 +1,26 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
-import { Permission } from '@choerodon/boot';
+import { Permission, Choerodon } from '@choerodon/boot';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
-import { includes } from 'lodash';
+import { includes, merge, get } from 'lodash';
+import copy from 'copy-to-clipboard';
+import queryString from 'query-string';
 import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
+import { openEditIssueCopyIssue } from '@/components/CopyIssue';
+import { getProjectId, getProjectName, getOrganizationId } from '@/utils/common';
+import { linkUrl } from '@/utils/to';
+import useIsProgram from '@/hooks/useIsProgram';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
 
 const { confirm } = Modal;
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef,
+  onDeleteIssue, loginUserId, reloadIssue, testLinkStoreRef, onIssueCopy,
 }) => {
   const {
     store, onUpdate, applyType,
@@ -22,7 +28,15 @@ const IssueDropDown = ({
   const docs = store.getDoc;
   const hasDevops = useHasDevops();
   const hasTest = useHasTest();
+  const { isProgram } = useIsProgram();
 
+  const handleCopyIssue = (issue) => {
+    store.setCopyIssueShow(false);
+    reloadIssue(issue.issueId);
+    if (onIssueCopy) {
+      onIssueCopy(issue);
+    }
+  };
   const issue = store.getIssue;
   const {
     issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi, issueTypeVO, parentRelateSummary,
@@ -57,14 +71,24 @@ const IssueDropDown = ({
       okType: 'danger',
     });
   };
-  const handleClickMenu = (e) => {
+  const handleClickMenu = async (e) => {
     if (e.key === '0') {
       store.setWorkLogShow(true);
-    } else if (e.key === 'item_1') {
-      handleDeleteIssue(issueId);
+    } else if (e.key === 'item_11') {
+      handleDeleteIssue();
     } else if (e.key === '2') {
       store.setCreateSubTaskShow(true);
     } else if (e.key === '3') {
+      openEditIssueCopyIssue({
+        issueId,
+        issueNum,
+        issue,
+        issueLink: store.getLinkIssues,
+        issueSummary: issue.summary,
+        // onCancel: () => store.setCopyIssueShow(false),
+        onOk: handleCopyIssue.bind(this),
+        applyType,
+      });
       store.setCopyIssueShow(true);
     } else if (e.key === '4') {
       store.setTransformSubIssueShow(true);
@@ -97,7 +121,7 @@ const IssueDropDown = ({
       store.setCreateSubBugShow(true);
     } else if (e.key === '10') {
       store.setRelateStoryShow(true);
-    } else if (e.key === 'item_11') {
+    } else if (e.key === 'item_10') {
       openIssueMove({
         issue,
         customFields: store.customFields,
@@ -109,6 +133,23 @@ const IssueDropDown = ({
           linkIssue: store.getLinkIssues && store.getLinkIssues.length,
         },
       });
+    } else if (e.key === 'link') {
+      let decryptIssueId = issueId;
+      if (!/^[0-9]+$/.test(issueId)) {
+        decryptIssueId = await issueApi.decrypt(issueId);
+      }
+      const queryData = {
+        params: {
+          paramIssueId: decryptIssueId, paramName: issueNum,
+        },
+      };
+
+      if (!isProgram) {
+        copy(`${window.location.host}/#/${linkUrl('agile/work-list/issue', queryData)}`);
+      } else {
+        copy(`${window.location.host}/#/${linkUrl('agile/feature', queryData)}`);
+      }
+      Choerodon.prompt('复制成功！');
     }
   };
   const getMenu = () => (
@@ -118,25 +159,6 @@ const IssueDropDown = ({
           登记工作日志
         </Menu.Item>
       )}
-      {
-        <Permission
-          service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
-          noAccessChildren={(
-            <Menu.Item
-              key="1"
-              disabled={disableFeatureDeleteWhilePiDoing || (loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
-            >
-              删除
-            </Menu.Item>
-          )}
-        >
-          <Menu.Item
-            key="1"
-          >
-            删除
-          </Menu.Item>
-        </Permission>
-      }
       {
         ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && !(typeCode === 'bug' && issue.relateIssueId) ? (
           <Menu.Item key="2">
@@ -151,22 +173,17 @@ const IssueDropDown = ({
           </Menu.Item>
         )
       }
-      {['feature'].indexOf(typeCode) === -1 && (
-        <Menu.Item key="3">
-          复制问题
-        </Menu.Item>
-      )}
       {
-        ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && subIssueVOList.length === 0 && (
-          <Menu.Item key="4">
-            转化为子任务
+        (typeCode !== 'feature' && typeCode !== 'issue_epic') && (
+          <Menu.Item key="7">
+            分配问题
           </Menu.Item>
         )
       }
       {
-        typeCode === 'sub_task' && (
-          <Menu.Item key="5">
-            类型转换
+        typeCode === 'bug' && !subIssueVOList.length > 0 && (
+          <Menu.Item key="10">
+            关联问题
           </Menu.Item>
         )
       }
@@ -178,9 +195,9 @@ const IssueDropDown = ({
         )
       }
       {
-        (typeCode !== 'feature' && typeCode !== 'issue_epic') && (
-          <Menu.Item key="7">
-            分配问题
+        ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && subIssueVOList.length === 0 && (
+          <Menu.Item key="4">
+            转化为子任务
           </Menu.Item>
         )
       }
@@ -191,13 +208,22 @@ const IssueDropDown = ({
           </Menu.Item>
         )
       }
+
       {
-        typeCode === 'bug' && !subIssueVOList.length > 0 && (
-          <Menu.Item key="10">
-            关联问题
+        typeCode === 'sub_task' && (
+          <Menu.Item key="5">
+            类型转换
           </Menu.Item>
         )
       }
+      {['feature'].indexOf(typeCode) === -1 && (
+        <Menu.Item key="3">
+          复制问题
+        </Menu.Item>
+      )}
+      <Menu.Item key="link">
+        复制链接
+      </Menu.Item>
       {
         (includes(['story', 'task', 'bug'], typeCode) && !parentRelateSummary) && ( // 故事、任务、缺陷能移 子缺陷不能移
           <Permission
@@ -219,6 +245,26 @@ const IssueDropDown = ({
           </Permission>
         )
       }
+      {
+        <Permission
+          service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+          noAccessChildren={(
+            <Menu.Item
+              key="1"
+              disabled={disableFeatureDeleteWhilePiDoing || (loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
+            >
+              删除
+            </Menu.Item>
+          )}
+        >
+          <Menu.Item
+            key="1"
+          >
+            删除
+          </Menu.Item>
+        </Permission>
+      }
+
     </Menu>
   );
   return (

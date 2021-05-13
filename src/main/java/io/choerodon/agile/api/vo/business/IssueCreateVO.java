@@ -133,6 +133,16 @@ public class IssueCreateVO {
     @Encrypt
     private Long statusId;
 
+    private List<TagVO> tags;
+
+    public List<TagVO> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<TagVO> tags) {
+        this.tags = tags;
+    }
+
     public List<Long> getProgramVersionIds() {
         return programVersionIds;
     }

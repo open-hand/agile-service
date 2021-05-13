@@ -6,7 +6,7 @@ import { Select } from 'choerodon-ui/pro';
 import { SelectProps as OldSelectProps } from 'choerodon-ui/lib/select';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { usePersistFn } from 'ahooks';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import { commonApi } from '@/api';
 
 interface Props extends Partial<SelectProps> {

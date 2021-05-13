@@ -1,7 +1,7 @@
 {
   "name": "@choerodon/agile",
   "routeName": "agile",
-  "version": "0.25.4",
+  "version": "0.26.0",
   "description": "",
   "main": "./lib/index.js",
   "install": "./lib/install.js",
@@ -49,12 +49,13 @@
     "timeago-react": "2.0.0",
     "use-immer": "^0.4.1",
     "webuploader": "^0.1.8",
-    "wolfy87-eventemitter": "^5.2.8"
+    "wolfy87-eventemitter": "^5.2.8",
+    "copy-to-clipboard": "^3.2.0"
   },
   "devDependencies": {
     "@choerodon/boot": "0.23.1",
     "@choerodon/compiler": "^0.0.1",
-    "@choerodon/master": "0.25.6",
+    "@choerodon/master": "0.26.0",
     "@choerodon/testmanager": "0.25.0",
     "@types/classnames": "^2.2.10",
     "@types/echarts": "^4.6.5",
@@ -75,7 +76,7 @@
     "@typescript-eslint/eslint-plugin": "^3.7.1",
     "@typescript-eslint/parser": "^3.7.1",
     "babel-eslint": "8.x",
-    "babel-preset-c7n": "^0.0.1",
+    "babel-preset-c7n": "0.0.2",
     "eslint": "^7.6.0",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-c7n-app": "^0.0.2",

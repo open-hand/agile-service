@@ -5,12 +5,14 @@ import { observer } from 'mobx-react-lite';
 import {
   Icon, Row, Col,
 } from 'choerodon-ui';
+import { stores } from '@choerodon/boot';
 import {
   Issue, IField, User, IIssueType,
 } from '@/common/types';
 import {
-  includes, map, uniq, compact, flatten, find,
+  includes, map, uniq, compact, flatten, find, keyBy,
 } from 'lodash';
+import { toJS } from 'mobx';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import TypeTag from '@/components/TypeTag';
@@ -44,6 +46,8 @@ interface Props {
   loseItems: ILoseItems,
 }
 
+const { AppState } = stores;
+
 const Confirm: React.FC<Props> = ({
   issue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, targetSubTaskType, targetSubBugType, loseItems,
 }) => {
@@ -51,6 +55,7 @@ const Confirm: React.FC<Props> = ({
     dataMap, selfFields, subTaskFields, subBugFields, moveToProjectList, subTaskDetailMap, subBugDetailMap, subTaskTypeId, subBugTypeId, selectedUserIds, selectedUsers,
   } = store;
   const [fieldsLosed, setFieldsLosed] = useState<IField[]>([]);
+  const [, setUpdateCount] = useState<number>(0);
   const {
     issueId, issueNum, summary, typeCode, subIssueVOList, subBugVOList, epicName,
   } = issue;
@@ -275,12 +280,13 @@ const Confirm: React.FC<Props> = ({
 
   useEffect(() => {
     const selectedUserRequestArr: Promise<any[]>[] = [];
-    if (selectedUserIds && selectedUserIds.length) {
+    if (selectedUserIds && selectedUserIds.length && targetProjectId) {
       selectedUserIds.forEach((id) => {
         selectedUserRequestArr.push(userApi.project(targetProjectId).getById(id));
       });
       Promise.all(selectedUserRequestArr).then((res) => {
-        store.setSelectedUsers(flatten(flatten(res).map((item) => item.list)));
+        const users = flatten(flatten(res).map((item) => item.list));
+        store.setSelectedUsers(users);
       });
     }
   }, [selectedUserIds, targetProjectId]);
@@ -340,8 +346,11 @@ const Confirm: React.FC<Props> = ({
       for (const [k, v] of memberFieldsCodeAndValue.entries()) {
         if (v && selectedUsers.find((user) => user.id === v)) {
           dataSet.current?.set(k, v);
+        } else if (k.indexOf('reporter') > -1) {
+            dataSet.current?.set(k, AppState.userInfo.id);
+            setUpdateCount((count) => count + 1);
         } else {
-          dataSet.current?.set(k, undefined);
+            dataSet.current?.set(k, undefined);
         }
       }
     });
@@ -388,7 +397,6 @@ const Confirm: React.FC<Props> = ({
   } else {
     tipText += '。';
   }
-
   return (
     <div className={styles.confirm}>
       <div className={styles.tip}>

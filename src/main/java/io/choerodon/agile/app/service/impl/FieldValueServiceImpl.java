@@ -21,7 +21,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.lang3.StringUtils;
-import org.hzero.boot.message.MessageClient;
 import org.hzero.core.base.AopProxy;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -254,7 +253,8 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                                         List<Long> issueIds,
                                         JSONObject predefinedFields,
                                         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,
-                                        String appleType) {
+                                        String appleType,
+                                        boolean sendMsg) {
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
@@ -302,6 +302,12 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             issueUpdateVO.setIssueId(v.getIssueId());
             issueUpdateVO.setObjectVersionNumber(v.getObjectVersionNumber());
             handlerEstimatedTime(v, issueUpdateVO, fieldList);
+            boolean doCheck = IssueTypeCode.FEATURE.value().equals(v.getTypeCode()) && fieldList.contains("epicId");
+            if (doCheck && agilePluginService.checkFeatureSummaryAndReturn(issueUpdateVO, projectId)) {
+                fieldList.remove("epicId");
+                issueUpdateVO.setEpicId(null);
+                addErrMessage(v, batchUpdateFieldStatusVO, "epicId");
+            }
             IssueVO issueVO = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
             if ("bug".equals(v.getTypeCode())) {
                 IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
@@ -327,9 +333,25 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             if (agilePluginService != null) {
                 agilePluginService.handlerFeatureField(projectId,v,programMap);
             }
-            batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-            messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            if (sendMsg) {
+                batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
+                messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            }
         });
+    }
+
+    private void addErrMessage(IssueDTO issueDTO, BatchUpdateFieldStatusVO batchUpdateFieldStatusVO, String field) {
+        if (Objects.isNull(batchUpdateFieldStatusVO.getErrorMsgMap())) {
+            batchUpdateFieldStatusVO.setErrorMsgMap(new HashMap<>());
+        }
+        StringBuilder issueNums = new StringBuilder();
+        if (batchUpdateFieldStatusVO.getErrorMsgMap().containsKey(field)) {
+            issueNums.append(batchUpdateFieldStatusVO.getErrorMsgMap().get(field));
+            issueNums.append("," + issueDTO.getIssueNum());
+        } else {
+            issueNums.append(issueDTO.getIssueNum());
+        }
+        batchUpdateFieldStatusVO.getErrorMsgMap().put(field, issueNums);
     }
 
     private void handlerEstimatedTime(IssueDTO issueDTO, IssueUpdateVO issueUpdateVO, List<String> fieldList) {

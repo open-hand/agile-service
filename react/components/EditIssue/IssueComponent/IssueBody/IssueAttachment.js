@@ -26,21 +26,6 @@ const IssueAttachment = observer((props) => {
     }
   };
 
-  /**
-   * 上传附件
-   * @param arr
-   */
-  const onChangeFileList = (arr) => {
-    if (arr.length > 0 && arr.some((one) => !one.url)) {
-      const config = {
-        issueId,
-        fileName: arr[0].name || 'AG_ATTACHMENT',
-        projectId: getProjectId(),
-      };
-      handleFileUpload(arr, refresh, config);
-    }
-  };
-
   return (
     <div id="attachment">
       <Divider />

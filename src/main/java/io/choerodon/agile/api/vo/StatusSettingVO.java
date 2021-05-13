@@ -28,6 +28,18 @@ public class StatusSettingVO {
 
     private List<StatusLinkageVO> statusLinkageVOS;
 
+    private StatusBranchMergeSettingVO statusBranchMergeSettingVO;
+
+    private ExecutionCaseStatusChangeSettingVO executionCaseStatusChangeSettingVO;
+
+    public StatusBranchMergeSettingVO getStatusBranchMergeSettingVO() {
+        return statusBranchMergeSettingVO;
+    }
+
+    public void setStatusBranchMergeSettingVO(StatusBranchMergeSettingVO statusBranchMergeSettingVO) {
+        this.statusBranchMergeSettingVO = statusBranchMergeSettingVO;
+    }
+
     public Long getId() {
         return id;
     }
@@ -98,5 +110,13 @@ public class StatusSettingVO {
 
     public void setStatusLinkageVOS(List<StatusLinkageVO> statusLinkageVOS) {
         this.statusLinkageVOS = statusLinkageVOS;
+    }
+
+    public ExecutionCaseStatusChangeSettingVO getExecutionCaseStatusChangeSettingVO() {
+        return executionCaseStatusChangeSettingVO;
+    }
+
+    public void setExecutionCaseStatusChangeSettingVO(ExecutionCaseStatusChangeSettingVO executionCaseStatusChangeSettingVO) {
+        this.executionCaseStatusChangeSettingVO = executionCaseStatusChangeSettingVO;
     }
 }

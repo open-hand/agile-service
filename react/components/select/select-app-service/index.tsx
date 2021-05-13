@@ -1,28 +1,38 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Select } from 'choerodon-ui/pro';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { devOpsApi, versionApi } from '@/api';
+import { Select, Tooltip } from 'choerodon-ui/pro';
+import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
+import { devOpsApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { ILabel } from '@/common/types';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
   valueField?: string
-  afterLoad?: (sprints: ILabel[]) => void
+  afterLoad?: (list: any[]) => void
   flat?: boolean
+  request?: SelectConfig['request'],
   programMode?: string /** 是否为项目群访问模式  */
   projectId?: string
 }
-
+const renderService = (appService: any) => {
+  if (appService) {
+    return <Tooltip title={appService.code}>{`${appService.name}(${appService.code})`}</Tooltip>;
+  }
+  return null;
+};
 const SelectAppService: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, projectId, programMode, ...otherProps
+  dataRef, valueField, afterLoad, flat, projectId, request, programMode, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
     textField: 'name',
-    valueField: 'code',
-    request: () => devOpsApi.loadActiveService(),
+    valueField: valueField || 'code',
+    optionRenderer: (appService: any) => (
+      <FragmentForSearch name={`${appService.name}(${appService.code})`}>
+        {renderService(appService)}
+      </FragmentForSearch>
+    ),
+    request: request || (() => devOpsApi.project(projectId).loadActiveService()),
     middleWare: (data: any) => {
       if (dataRef) {
         Object.assign(dataRef, {

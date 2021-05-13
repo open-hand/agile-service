@@ -1,5 +1,5 @@
 import React, {
-  useContext, useRef, useEffect, useState, useCallback, useMemo,
+  useContext, useEffect, useState, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useHistory } from 'react-router-dom';
@@ -7,21 +7,27 @@ import {
   Header, Content, Page, Breadcrumb, Choerodon, useTheme,
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui';
-import { map } from 'lodash';
+import { map, set, get } from 'lodash';
+import { useUnmount, usePersistFn } from 'ahooks';
 import CreateIssue from '@/components/CreateIssue';
 import { projectApi } from '@/api/Project';
+import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { issueApi } from '@/api';
 import IssueSearch from '@/components/issue-search';
 import openSaveFilterModal from '@/components/SaveFilterModal';
 import { linkUrl } from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import useQueryString from '@/hooks/useQueryString';
-import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import FilterManage from '@/components/FilterManage';
 import DetailContainer, { useDetail } from '@/components/detail-container';
 import TableModeSwitch from '@/components/tree-list-switch';
 import handleOpenImport from '@/components/ImportIssue/ImportIssue';
+import { TableCache } from '@/components/issue-table/Component';
+import useTable from '@/hooks/useTable';
+import openBatchDeleteModal from '@/components/BatchDeleteConfirm';
+import BatchModal from './components/BatchModal';
+import IssueTable from './components/issue-table';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
@@ -29,49 +35,66 @@ import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
 
-const Issue = observer(() => {
+const defaultVisibleColumns = [
+  'summary',
+  'issueNum',
+  'priority',
+  'assignee',
+  'status',
+  'sprint',
+  'reporter',
+  'lastUpdateDate',
+];
+const defaultListLayoutColumns = defaultVisibleColumns.map((code) => ({
+  columnCode: code,
+  display: true,
+}));
+const Issue = observer(({ cached, updateCache }) => {
   const {
-    dataSet, projectId, issueSearchStore, fields, changeTableListMode, tableListMode,
+    projectId, issueSearchStore, changeTableListMode, tableListMode, hasBatchDeletePermission,
   } = useContext(Store);
   const [theme] = useTheme();
   const history = useHistory();
   const params = useQueryString();
   const [urlFilter, setUrlFilter] = useState(null);
-  const tableRef = useRef();
   const [props] = useDetail();
   const { open } = props;
-  IssueStore.setTableRef(tableRef);
-  const visibleColumns = useMemo(() => {
-    if (localPageCacheStore.getItem('issues.table')) {
-      const { columProps } = localPageCacheStore.getItem('issues.table');
-      if (Array.isArray(columProps)) {
-        return columProps.length > 0 ? columProps.map((item) => item.name) : [];
-      }
-    }
-    return undefined;
-  }, []);
+  const { data: tableFields } = useIssueTableFields();
+  const getTableData = useCallback(({ page, sort, size }) => {
+    const search = issueSearchStore.getCustomFieldFilters();
+    set(search, 'searchArgs.tree', !tableListMode);
+    return issueApi.loadIssues(page, size, sort, search);
+  }, [issueSearchStore, tableListMode]);
+  const tableProps = useTable(getTableData, {
+    rowKey: 'issueId',
+    isTree: !tableListMode,
+    defaultPage: cached?.pagination?.current,
+    defaultPageSize: cached?.pagination?.pageSize,
+    // defaultVisibleColumns: cached?.visibleColumns ?? defaultVisibleColumns,
+    autoQuery: false,
+  });
+  useUnmount(() => updateCache({
+    pagination: tableProps.pagination,
+    visibleColumns: tableProps.visibleColumns,
+  }));
+  const { query } = tableProps;
   /**
    * 默认此次操作不是删除操作
    * 防止删除此页一条数据时页时停留当前页时出现无数据清空
    * @param {Boolean} isDelete  用于标记是否为删除操作
    */
-  const refresh = useCallback((isDelete = false) => dataSet.query(
+  const refresh = useCallback((isDelete = false) => query(
     isDelete
-      && dataSet.length === 1
-      && dataSet.totalCount > 1
-      ? dataSet.currentPage - 1
-      : dataSet.currentPage,
-  ), [dataSet]);
-  useEffect(() => () => {
-    const columProps = tableRef.current
-      ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden) : null;
-    localPageCacheStore.mergeSetItem('issues.table', { pageInfo: { currentPage: dataSet.currentPage }, columProps });
-  }, [dataSet]);
+      && tableProps.data.length === 1
+      && tableProps.total > 1
+      ? tableProps.current - 1
+      : tableProps.curren,
+  ), [query, tableProps]);
   const hasUrlFilter = useCallback((obj) => {
     const whiteList = ['type', 'category', 'id', 'name', 'organizationId'];
     return Object.keys(obj).some((key) => !whiteList.includes(key));
   }, []);
-  const initFilter = async () => {
+  const initFilter = usePersistFn(async () => {
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
       paramType, paramIssueId, paramName, paramOpenIssueId, detailTab, ...searchArgs
@@ -152,13 +175,11 @@ const Issue = observer(() => {
           },
         },
       });
-      await IssueStore.query();
+      query();
     } else {
-      const { pageInfo = {} } = localPageCacheStore.getItem('issues.table') || {};
-
-      await IssueStore.query(pageInfo.currentPage);
+      query(tableProps.pagination.current);
     }
-  };
+  });
   const getProjectInfo = () => {
     projectApi.loadInfo().then((res) => {
       IssueStore.setProjectInfo(res);
@@ -181,13 +202,18 @@ const Issue = observer(() => {
   }, [hasUrlFilter, params]);
   const handleCreateIssue = useCallback((issue) => {
     IssueStore.createQuestion(false);
-    dataSet.query();
-  }, [dataSet]);
+    IssueStore.setDefaultSummary(undefined);
+    IssueStore.setDefaultTypeId(undefined);
+    refresh();
+  }, [refresh]);
   const handleRowClick = useCallback((record) => {
+    query();
+  }, [query]);
+  const handleSummaryClick = useCallback((record) => {
     open({
       path: 'issue',
       props: {
-        issueId: record.get('issueId'),
+        issueId: get(record, 'issueId'),
         // store: detailStore,
       },
       events: {
@@ -215,12 +241,15 @@ const Issue = observer(() => {
     if (paramOpenIssueId || paramIssueId || paramChoose || paramType) {
       history.replace(linkUrl(LINK_URL.workListIssue));
     }
-    IssueStore.query();
-  }, []);
+    query();
+  }, [history, params, query]);
 
   const handleClickSaveFilter = () => {
     openSaveFilterModal({ searchVO: issueSearchStore.getCustomFieldFilters(), onOk: issueSearchStore.loadMyFilterList });
   };
+  const closeBatchModal = useCallback(() => {
+    tableProps.handleCheckAllChange(false);
+  }, [tableProps]);
   return (
     <Page
       className="c7nagile-issue"
@@ -255,7 +284,7 @@ const Issue = observer(() => {
             openExportIssueModal(
               issueSearchStore.getAllFields,
               issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
-              dataSet, tableRef, tableListMode,
+              tableListMode,
               'agile_export_issue',
             );
           }}
@@ -263,7 +292,11 @@ const Issue = observer(() => {
           导出问题
         </Button>
         <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
-        <CollapseAll dataSet={dataSet} tableRef={tableRef} />
+        <CollapseAll
+          expandAll={tableProps.expandAll}
+          isExpandAll={tableProps.isExpandAll}
+          expandAbleKeys={tableProps.expandAbleKeys}
+        />
         <div style={{ flex: 1, visibility: 'hidden' }} />
         <TableModeSwitch
           data={tableListMode ? 'list' : 'tree'}
@@ -280,30 +313,67 @@ const Issue = observer(() => {
           onClear={handleClear}
           onChange={() => {
             localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
-            IssueStore.query();
+            query();
           }}
           onClickSaveFilter={handleClickSaveFilter}
         />
         <IssueTable
-          dataSet={dataSet}
-          fields={fields}
-          tableRef={tableRef}
-          visibleColumns={visibleColumns}
+          tableProps={tableProps}
+          fields={tableFields}
+          listLayoutColumns={cached?.listLayoutColumns ?? defaultListLayoutColumns}
           onCreateIssue={handleCreateIssue}
           onRowClick={handleRowClick}
+          typeIdChange={IssueStore.setDefaultTypeId}
+          summaryChange={IssueStore.setDefaultSummary}
+          IssueStore={IssueStore}
+          onSummaryClick={handleSummaryClick}
         />
         <FilterManage
           visible={IssueStore.filterListVisible}
           setVisible={IssueStore.setFilterListVisible}
           issueSearchStore={issueSearchStore}
         />
-        {/* <ExportIssue issueSearchStore={issueSearchStore} dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} /> */}
         {IssueStore.getCreateQuestion && (
           <CreateIssue
             visible={IssueStore.getCreateQuestion}
-            onCancel={() => { IssueStore.createQuestion(false); }}
+            onCancel={() => {
+              IssueStore.createQuestion(false);
+              IssueStore.setDefaultSummary(undefined);
+              IssueStore.setDefaultTypeId(undefined);
+            }}
             onOk={handleCreateIssue}
+            defaultTypeId={IssueStore.defaultTypeId}
+            defaultSummary={IssueStore.defaultSummary}
           />
+        )}
+        {tableProps.checkValues.length > 0 && (
+        <BatchModal
+          issueSearchStore={issueSearchStore}
+          fields={issueSearchStore.fields}
+          selected={tableProps.checkValues}
+          onClickEdit={() => {
+            issueSearchStore.setBatchAction('edit');
+          }}
+          close={() => {
+            closeBatchModal();
+          }}
+          onClickDelete={() => {
+            issueSearchStore.setBatchAction('delete');
+            openBatchDeleteModal({
+              selected: tableProps.checkValues,
+              close: closeBatchModal,
+              onDelete: () => refresh(true),
+            });
+          }}
+          onCancel={() => {
+            closeBatchModal();
+          }}
+          onEdit={() => {
+            closeBatchModal();
+            refresh();
+          }}
+          hasBatchDeletePermission={hasBatchDeletePermission}
+        />
         )}
         <DetailContainer {...props} />
       </Content>
@@ -313,6 +383,8 @@ const Issue = observer(() => {
 
 export default (props) => (
   <StoreProvider {...props}>
-    <Issue />
+    <TableCache>
+      {(cacheProps) => <Issue {...cacheProps} />}
+    </TableCache>
   </StoreProvider>
 );
