@@ -4,6 +4,8 @@ import io.choerodon.agile.api.vo.FieldOptionUpdateVO;
 import io.choerodon.agile.api.vo.FieldOptionVO;
 import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.infra.dto.FieldOptionDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -65,4 +67,14 @@ public interface FieldOptionService {
      * @param pageFieldViews
      */
     void fillOptions(Long organizationId, Long projectId, List<PageFieldViewVO> pageFieldViews);
+
+    /**
+     * 分页查询自定义字段下的选项
+     * @param organizationId 组织id
+     * @param filedId 自定义字段id
+     * @param value 搜索参数值
+     * @param pageRequest 分页参数
+     * @return 自定义字段下的选项
+     */
+    Page<FieldOptionVO> getOptionsPageByFieldId(Long organizationId, Long filedId, String value, PageRequest pageRequest);
 }

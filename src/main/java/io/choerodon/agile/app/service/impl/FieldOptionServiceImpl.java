@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.FieldOptionUpdateVO;
 import io.choerodon.agile.api.vo.FieldOptionVO;
@@ -8,6 +9,10 @@ import io.choerodon.agile.app.service.FieldOptionService;
 import io.choerodon.agile.app.service.FieldValueService;
 import io.choerodon.agile.infra.dto.FieldOptionDTO;
 import io.choerodon.agile.infra.mapper.FieldOptionMapper;
+import io.choerodon.core.utils.PageUtils;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -162,5 +167,13 @@ public class FieldOptionServiceImpl implements FieldOptionService {
                 }
             });
         }
+    }
+
+    @Override
+    public Page<FieldOptionVO> getOptionsPageByFieldId(Long organizationId, Long fieldId, String value, PageRequest pageRequest) {
+        Page<FieldOptionDTO> optionPage = PageHelper.doPage(pageRequest, () -> fieldOptionMapper.selectByFieldIdAndValue(organizationId, fieldId, value));
+        return PageUtils.copyPropertiesAndResetContent(
+                optionPage,
+                modelMapper.map(optionPage.getContent(), new TypeToken<List<FieldOptionVO>>() {}.getType()));
     }
 }

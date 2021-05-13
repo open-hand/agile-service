@@ -43,4 +43,14 @@
         </foreach>
     </select>
 
+    <select id="selectByFieldIdAndValue" resultMap="fieldOptionMap">
+        SELECT * FROM fd_field_option
+        WHERE organization_id = #{organizationId}
+        AND field_id = #{fieldId}
+        <if test="value != null and value != ''">
+            <bind name="valueLike" value="'%' + value + '%'"/>
+            AND value LIKE #{valueLike}
+        </if>
+        ORDER BY sequence ASC
+    </select>
 </mapper>
