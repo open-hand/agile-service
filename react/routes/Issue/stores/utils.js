@@ -8,10 +8,10 @@ function transformSystemFilter(data) {
     priorityId,
     issueIds,
     quickFilterIds,
-    createDate = [],
-    updateDate = [],
-    estimatedStartTime = [],
-    estimatedEndTime = [],
+    createDate,
+    updateDate,
+    estimatedStartTime,
+    estimatedEndTime,
     contents,
     component,
     epic,
@@ -61,14 +61,14 @@ function transformSystemFilter(data) {
       appVersion,
     },
     searchArgs: {
-      estimatedStartTimeScopeStart: estimatedStartTime[0],
-      estimatedStartTimeScopeEnd: estimatedStartTime[1],
-      estimatedEndTimeScopeStart: estimatedEndTime[0],
-      estimatedEndTimeScopeEnd: estimatedEndTime[1],
-      createStartDate: createDate[0],
-      createEndDate: createDate[1],
-      updateStartDate: updateDate[0],
-      updateEndDate: updateDate[1],
+      estimatedStartTimeScopeStart: estimatedStartTime ? estimatedStartTime[0] ?? null : undefined,
+      estimatedStartTimeScopeEnd: estimatedStartTime ? estimatedStartTime[1] ?? null : undefined,
+      estimatedEndTimeScopeStart: estimatedEndTime ? estimatedEndTime[0] ?? null : undefined,
+      estimatedEndTimeScopeEnd: estimatedEndTime ? estimatedEndTime[1] ?? null : undefined,
+      createStartDate: createDate ? createDate[0] ?? null : undefined,
+      createEndDate: createDate ? createDate[1] ?? null : undefined,
+      updateStartDate: updateDate ? updateDate[0] ?? null : undefined,
+      updateEndDate: updateDate ? updateDate[1] ?? null : undefined,
     },
     quickFilterIds,
     contents,
@@ -87,7 +87,7 @@ export function transformFilter(chosenFields) {
   for (const [code, field] of chosenFields) {
     const { fieldType, id } = field;
     const value = toJS(field.value);
-    if (value === undefined || value === null || value === '') {
+    if (value === undefined) {
       // eslint-disable-next-line no-continue
       continue;
     }
@@ -105,7 +105,7 @@ export function transformFilter(chosenFields) {
       case 'multiMember':
       case 'member': {
         const v = Array.isArray(value) ? value : [value];
-        if (v.length > 0) {
+        if (v) {
           customField.option.push({
             fieldId: id,
             value: v,
@@ -141,18 +141,18 @@ export function transformFilter(chosenFields) {
       case 'time':
       case 'datetime':
       case 'date': {
-        if (value && value.length > 0) {
+        if (Array.isArray(value)) {
           if (fieldType === 'time') {
             customField.date_hms.push({
               fieldId: id,
-              startDate: value[0],
-              endDate: value[1],
+              startDate: value[0] ?? null,
+              endDate: value[1] ?? null,
             });
           } else {
             customField.date.push({
               fieldId: id,
-              startDate: value[0],
-              endDate: value[1],
+              startDate: value[0] ?? null,
+              endDate: value[1] ?? null,
             });
           }
         }

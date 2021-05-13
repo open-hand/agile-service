@@ -7,7 +7,7 @@ import { IField, ISearchVO } from '@/common/types';
 import { getProjectId } from '@/utils/common';
 import { IPersonalFilter } from '../quick-search';
 import {
-  flattenObject, isFilterSame, SearchVOToFilter, filterInvalidAttribute,
+  flattenObject, isFilterSame, SearchVOToFilter, filterInvalidAttribute, getEmptyValue,
 } from './utils';
 
 export type ILocalField = {
@@ -140,7 +140,8 @@ class IssueSearchStore {
   @action handleChosenFieldChange = (select: boolean, field: IField) => {
     const { code } = field;
     if (select) {
-      this.chosenFields.set(code, observable({ ...field, value: undefined }));
+      console.log(field, getEmptyValue(field.fieldType));
+      this.chosenFields.set(code, observable({ ...field, value: getEmptyValue(field.fieldType) }));
     } else {
       const { value } = this.chosenFields.get(code) as IChosenField;
       this.chosenFields.delete(code);

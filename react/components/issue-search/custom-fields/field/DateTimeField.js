@@ -4,7 +4,7 @@ import { TimePicker, DatePicker, DateTimePicker } from 'choerodon-ui/pro';
 import moment from 'moment';
 
 const getSelectedDate = (field, value) => {
-  if (!value || value.length === 0) {
+  if (!value || value.length === 0 || (!value[0] && !value[1])) {
     return { start: undefined, end: undefined };
   }
   if (field.fieldType === 'time') {
