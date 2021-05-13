@@ -16,7 +16,7 @@ export default Store;
 
 export const StoreProvider = inject('AppState')(injectIntl(
   (props) => {
-    const { intl, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
+    const { defaultMyFilter, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
     const [hasBatchDeletePermission, setHasBatchDeletePermission] = useState(false);
     const permissionRef = useRef(false);
     permissionRef.current = hasBatchDeletePermission;
@@ -43,6 +43,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
     const issueSearchStore = useIssueSearchStore({
       getSystemFields,
       transformFilter,
+      defaultSearchVO: defaultMyFilter ? JSON.parse(defaultMyFilter.filterJson) : undefined,
       defaultChosenFields: Array.isArray(localPageCacheStore.getItem('issues')) ? new Map(localPageCacheStore.getItem('issues').map((item) => [item.code, item])) : undefined,
     });
 

@@ -10,6 +10,7 @@ import { Button } from 'choerodon-ui';
 import { map, set, get } from 'lodash';
 import { useUnmount, usePersistFn } from 'ahooks';
 import CreateIssue from '@/components/CreateIssue';
+import Loading from '@/components/Loading';
 import { projectApi } from '@/api/Project';
 import useIssueTableFields from '@/hooks/data/useIssueTableFields';
 import { issueApi } from '@/api';
@@ -25,6 +26,7 @@ import TableModeSwitch from '@/components/tree-list-switch';
 import handleOpenImport from '@/components/ImportIssue/ImportIssue';
 import { TableCache } from '@/components/issue-table/Component';
 import useTable from '@/hooks/useTable';
+import useDefaultMyFilter from '@/hooks/useDefaultMyFilter';
 import openBatchDeleteModal from '@/components/BatchDeleteConfirm';
 import BatchModal from './components/BatchModal';
 import IssueTable from './components/issue-table';
@@ -381,10 +383,16 @@ const Issue = observer(({ cached, updateCache }) => {
   );
 });
 
-export default (props) => (
-  <StoreProvider {...props}>
-    <TableCache>
-      {(cacheProps) => <Issue {...cacheProps} />}
-    </TableCache>
-  </StoreProvider>
-);
+export default (props) => {
+  const { data, isLoading } = useDefaultMyFilter();
+  if (isLoading) {
+    return <Loading loading />;
+  }
+  return (
+    <StoreProvider {...props} defaultMyFilter={data}>
+      <TableCache>
+        {(cacheProps) => <Issue {...cacheProps} />}
+      </TableCache>
+    </StoreProvider>
+  );
+};
