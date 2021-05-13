@@ -149,78 +149,72 @@ const EditComponent = (props) => {
   useEffect(() => localLoadComponent(props.componentId), []);
 
   return (
-    <Content
-      style={{
-        padding: 0,
-      }}
-      className="c7n-component-component"
-    >
-      <Form>
-        <FormItem style={{ marginBottom: 20 }}>
-          {getFieldDecorator('name', {
-            initialValue: name,
-            rules: [{
-              required: true,
-              message: '模块名称必填',
-              whitespace: true,
-            }, {
-              validator: checkComponentNameRepeat,
-            }],
-          })(
-            <Input label="模块名称" maxLength={100} />,
-          )}
-        </FormItem>
-        <FormItem style={{ marginBottom: 20 }}>
-          {getFieldDecorator('description', {
-            initialValue: description,
-          })(
-            <Input label="模块描述" autosize maxLength={30} />,
-          )}
-        </FormItem>
-        <FormItem style={{ marginBottom: 20 }} className="c7n-component-component-sequenceItem">
-          {getFieldDecorator('sequence', {
-            initialValue: sequence,
-          })(
-            <InputNumber
-              label="模块顺序"
-              min={1}
-              max={100000}
-              suffix={(
-                <Tooltip title="顺序值越大，越靠前。无序列值排在最后，顺序值相同时，按照创建时间倒序排列。">
-                  <Icon type="help" />
-                </Tooltip>
+    <Form className="c7n-component-component">
+      <FormItem style={{ marginBottom: 20 }}>
+        {getFieldDecorator('name', {
+          initialValue: name,
+          rules: [{
+            required: true,
+            message: '模块名称必填',
+            whitespace: true,
+          }, {
+            validator: checkComponentNameRepeat,
+          }],
+        })(
+          <Input label="模块名称" maxLength={100} />,
+        )}
+      </FormItem>
+      <FormItem style={{ marginBottom: 20 }}>
+        {getFieldDecorator('description', {
+          initialValue: description,
+        })(
+          <Input label="模块描述" autosize maxLength={30} />,
+        )}
+      </FormItem>
+      <FormItem style={{ marginBottom: 20 }} className="c7n-component-component-sequenceItem">
+        {getFieldDecorator('sequence', {
+          initialValue: sequence,
+        })(
+          <InputNumber
+            label="模块顺序"
+            min={1}
+            max={100000}
+            suffix={(
+              <Tooltip title="顺序值越大，越靠前。无序列值排在最后，顺序值相同时，按照创建时间倒序排列。">
+                <Icon type="help" />
+              </Tooltip>
             )}
-              className="c7n-component-component-sequenceInput"
-            />,
-          )}
-          <div className="c7n-component-component-sequenceTip">
-            <Tooltip
-              title="顺序值越大，越靠前。无序列值排在最后，顺序值相同时，按照创建时间倒序排列。"
-              placement="topRight"
-            >
-              <Icon type="help" />
-            </Tooltip>
-          </div>
-        </FormItem>
-        <FormItem style={{ marginBottom: 20 }}>
-          {getFieldDecorator('defaultAssigneeRole', {
-            initialValue: defaultAssigneeRole,
-            rules: [{
-              required: true,
-              message: '默认经办人必填',
-            }],
-          })(
-            <Select label="默认经办人">
-              {['模块负责人', '无'].map((defaultAssigneeRole) => (
-                <Option key={defaultAssigneeRole} value={defaultAssigneeRole}>
-                  {defaultAssigneeRole}
-                </Option>
-              ))}
-            </Select>,
-          )}
-        </FormItem>
+            className="c7n-component-component-sequenceInput"
+          />,
+        )}
+        <div className="c7n-component-component-sequenceTip">
+          <Tooltip
+            title="顺序值越大，越靠前。无序列值排在最后，顺序值相同时，按照创建时间倒序排列。"
+            placement="topRight"
+          >
+            <Icon type="help" />
+          </Tooltip>
+        </div>
+      </FormItem>
+      <FormItem style={{ marginBottom: 20 }}>
+        {getFieldDecorator('defaultAssigneeRole', {
+          initialValue: defaultAssigneeRole,
+          rules: [{
+            required: true,
+            message: '默认经办人必填',
+          }],
+        })(
+          <Select label="默认经办人">
+            {['模块负责人', '无'].map((defaultAssigneeRole) => (
+              <Option key={defaultAssigneeRole} value={defaultAssigneeRole}>
+                {defaultAssigneeRole}
+              </Option>
+            ))}
+          </Select>,
+        )}
+      </FormItem>
 
-        {
+      {
           getFieldsValue(['defaultAssigneeRole']).defaultAssigneeRole && getFieldsValue(['defaultAssigneeRole']).defaultAssigneeRole === '模块负责人' && (
             <FormItem style={{ marginBottom: 20 }}>
               {getFieldDecorator('managerId', {
@@ -256,8 +250,7 @@ const EditComponent = (props) => {
             </FormItem>
           )
         }
-      </Form>
-    </Content>
+    </Form>
   );
 };
 

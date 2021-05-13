@@ -299,12 +299,14 @@ const GanttPage: React.FC = () => {
         />
       </Header>
       <Breadcrumb />
-      <Content style={{
-        borderTop: '1px solid rgb(216, 216, 216)',
-        display: 'flex',
-        paddingTop: 7,
-        flexDirection: 'column',
-      }}
+      <Content
+        className="c7n-gantt-content"
+        style={{
+          borderTop: '1px solid rgb(216, 216, 216)',
+          display: 'flex',
+          paddingTop: 7,
+          flexDirection: 'column',
+        }}
       >
         <Context.Provider value={{ store }}>
           <div style={{ display: 'flex' }}>

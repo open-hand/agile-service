@@ -534,6 +534,7 @@ const UpdateField = ({
                 <Select
                   style={{ width: '100%' }}
                   placeholder="字段"
+                  label="字段"
                   value={f.id}
                   onChange={(value) => {
                     const field = find(fieldData, { id: value });

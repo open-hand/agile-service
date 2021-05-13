@@ -34,6 +34,7 @@ const StoryMapSearch: React.FC<Props> = ({ issueSearchStore }) => {
           StoryMapStore.clearData();
           StoryMapStore.getStoryMap();
         }}
+        foldedHeight={42}
         // onClickSaveFilter={handleClickSaveFilter}
       />
       <div style={{

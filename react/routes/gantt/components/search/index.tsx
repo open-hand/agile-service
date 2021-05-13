@@ -22,6 +22,7 @@ const GanttIssueSearch: React.FC<Props> = ({ issueSearchStore, loadData }) => {
       onClear={loadData}
       onChange={loadData}
       onClickSaveFilter={handleSaveFilter}
+      foldedHeight={42}
     />
   );
 };
