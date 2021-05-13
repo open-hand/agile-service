@@ -1,9 +1,7 @@
 package io.choerodon.agile.infra.utils;
 
-import io.choerodon.agile.api.vo.PriorityVO;
-import io.choerodon.agile.api.vo.SprintNameVO;
-import io.choerodon.agile.api.vo.StatusVO;
-import io.choerodon.agile.api.vo.VersionIssueRelVO;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
@@ -251,10 +249,11 @@ public class ExcelUtil {
         }
     }
 
-    public static int writeSubProjectVersionHeader(Workbook workbook,
-                                                   String sheetName,
-                                                   Map<String, String> headDataMap,
-                                                   List<CellRangeAddress> cellRangeAddresses) {
+
+    public static int writeSheetVersionHeader(Workbook workbook,
+                                              String sheetName,
+                                              Map<String, String> headDataMap,
+                                              List<CellRangeAddress> cellRangeAddresses) {
         Sheet sheet = workbook.createSheet(sheetName);
         sheet.setDefaultColumnWidth(13);
         sheet.setColumnWidth(1, 8000);
@@ -278,44 +277,70 @@ public class ExcelUtil {
         return startRow;
     }
 
-    public static int writePublishVersionStory(Workbook workbook,
-                                                String sheetName,
-                                                Map<String, List<IssueVO>> versionStoryMap,
-                                                int startRow,
-                                                Boolean withFeature) {
+    public static int writePublishVersionData(Workbook workbook,
+                                              String sheetName,
+                                              List<IssueListFieldKVVO> issues,
+                                              int startRow,
+                                              Map<Long, Set<TagVO>> issueTagMap,
+                                              Map<Long, String> projectCodeMap,
+                                              Map<TagVO, String> tagAliasMap) {
         Sheet sheet = workbook.getSheet(sheetName);
         startRow++;
-        String belongTo = "所属史诗";
-        if (Boolean.TRUE.equals(withFeature)) {
-            belongTo = "所属特性";
-        }
-        String[] headers = {"编号", "概要", "状态", "优先级", "冲刺", belongTo, "经办人", "tag"};
-        int num = 0;
-        for (Map.Entry<String, List<IssueVO>> entry : versionStoryMap.entrySet()) {
-            num += entry.getValue().size();
-        }
-        startRow = initVersionTitleAndHeader(sheet, startRow, headers, "完成的故事（" + num + "）", workbook);
-        for (Map.Entry<String, List<IssueVO>> entry : versionStoryMap.entrySet()) {
-            String tag = entry.getKey();
-            for (IssueVO issueVO : entry.getValue()) {
-                Row dataRow = sheet.createRow(startRow++);
-                int col = 0;
-                dataRow.createCell(col++).setCellValue(issueVO.getIssueNum());
-                dataRow.createCell(col++).setCellValue(issueVO.getSummary());
-                dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getStatusVO()).map(StatusVO::getName).orElse(""));
-                dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getPriorityVO()).map(PriorityVO::getName).orElse(""));
-                dataRow.createCell(col++).setCellValue(getSprintName(issueVO));
-                if (Boolean.TRUE.equals(withFeature)) {
-                    dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getFeatureName()).orElse(""));
-                } else {
-                    dataRow.createCell(col++).setCellValue(Optional.ofNullable(issueVO.getEpicName()).orElse(""));
-                }
-                dataRow.createCell(col++).setCellValue(issueVO.getAssigneeName());
-                dataRow.createCell(col++).setCellValue(tag);
-            }
+        String[] headers = {"编号", "问题类型", "概要", "状态", "经办人", "tag", "创建时间"};
+        int num = issues.size();
+        issues.sort(Comparator.comparing(IssueListFieldKVVO::getIssueId));
+        startRow = initVersionTitleAndHeader(sheet, startRow, headers, "问题详情（" + num + "）", workbook);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for (IssueListFieldKVVO issue : issues) {
+            Row dataRow = sheet.createRow(startRow++);
+            int col = 0;
+            dataRow.createCell(col++).setCellValue(issue.getIssueNum());
+            dataRow.createCell(col++).setCellValue(Optional.ofNullable(issue.getIssueTypeVO()).map(IssueTypeVO::getName).orElse(""));
+            dataRow.createCell(col++).setCellValue(Optional.ofNullable(issue.getSummary()).orElse(""));
+            dataRow.createCell(col++).setCellValue(Optional.ofNullable(issue.getStatusVO()).map(StatusVO::getName).orElse(""));
+            dataRow.createCell(col++).setCellValue(issue.getAssigneeName());
+            dataRow.createCell(col++).setCellValue(getTag(issue.getIssueId(), issueTagMap, projectCodeMap, tagAliasMap));
+            dataRow.createCell(col++).setCellValue(sdf.format(issue.getCreationDate()));
         }
         return startRow;
     }
+
+    private static String getTag(Long issueId,
+                                 Map<Long, Set<TagVO>> issueTagMap,
+                                 Map<Long, String> projectCodeMap,
+                                 Map<TagVO, String> tagAliasMap) {
+        Set<TagVO> tags = issueTagMap.get(issueId);
+        if (ObjectUtils.isEmpty(tags)) {
+            return "";
+        }
+        List<TagVO> tagList = new ArrayList<>(tags);
+        tagList.sort(
+                Comparator.comparing(TagVO::getProjectId)
+                        .thenComparing(TagVO::getAppServiceCode)
+                        .thenComparing(TagVO::getTagName));
+        StringBuilder builder = new StringBuilder();
+        Iterator<TagVO> tagIterator = tagList.iterator();
+        String colon = ":";
+        while (tagIterator.hasNext()) {
+            TagVO vo = tagIterator.next();
+            Long projectId = vo.getProjectId();
+            builder
+                    .append(projectCodeMap.get(projectId))
+                    .append(colon)
+                    .append(vo.getAppServiceCode())
+                    .append(colon)
+                    .append(vo.getTagName());
+            String alias = tagAliasMap.get(vo);
+            if (StringUtils.hasText(alias)) {
+                builder.append("（").append(alias).append("）");
+            }
+            if (tagIterator.hasNext()) {
+                builder.append("，");
+            }
+        }
+        return builder.toString();
+    }
+
 
     public static int writePublishVersionBug(Workbook workbook,
                                              String sheetName,

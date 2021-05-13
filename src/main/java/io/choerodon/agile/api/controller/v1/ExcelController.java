@@ -148,8 +148,9 @@ public class ExcelController {
     public void exportPublishVersion(@ApiParam(value = "项目id", required = true)
                                      @PathVariable(name = "project_id") Long projectId,
                                      @ApiParam(value = "项目群版本id", required = true)
-                                     @RequestParam @Encrypt Long publishVersionId) {
-        excelService.exportPublishVersion(projectId, publishVersionId);
+                                     @RequestParam @Encrypt Long publishVersionId,
+                                     @RequestParam(required = false, defaultValue = "false") Boolean withSubVersion) {
+        excelService.exportPublishVersion(projectId, publishVersionId, withSubVersion);
     }
 
 }
