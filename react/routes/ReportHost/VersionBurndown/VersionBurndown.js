@@ -212,7 +212,7 @@ class VersionBurndown extends Component {
           let res = `<span className="primary">${params[0].name}</span>`;
           res += `<span style="display:block; margin-top: 0px; margin-bottom: 2px; color: rgba(0,0,0,0.54); font-size: 11px;">${sprint.startDate && sprint.startDate.split(' ')[0].split('-').join('/')}-${sprint.endDate && sprint.endDate.split(' ')[0].split('-').join('/')}</span>`;
           res += `本迭代开始时故事点数：${sprint.start}`;
-          res += `<br/>工作已完成: ${(params[1].value === '-' ? 0 : params[1].value) + (params[4].value === '-' ? 0 : params[4].value)}`;
+          res += `<br/>工作已完成: ${Number((params[1].value === '-' ? 0 : params[1].value) + (params[4].value === '-' ? 0 : params[4].value))}`;
           res += `<br/>工作增加: ${sprint.add}`;
           res += `<br/>本迭代结束时剩余故事点数: ${(params[2].value === '-' ? 0 : params[2].value) + (params[3].value === '-' ? 0 : params[3].value)}`;
           return res;
@@ -898,22 +898,22 @@ class VersionBurndown extends Component {
                 pic={pic}
                 title="当前项目无可用版本"
                 des={(
-                    // eslint-disable-next-line react/jsx-indent
-                    <div>
-                      <span>请在</span>
-                      <span
-                        className="primary"
-                        style={{ margin: '0 5px', cursor: 'pointer' }}
-                        role="none"
-                        onClick={() => {
-                          to(LINK_URL.workListVersion);
-                        }}
-                      >
-                        版本列表
-                      </span>
-                      <span>中创建一个版本</span>
-                    </div>
-                  )}
+                  // eslint-disable-next-line react/jsx-indent
+                  <div>
+                    <span>请在</span>
+                    <span
+                      className="primary"
+                      style={{ margin: '0 5px', cursor: 'pointer' }}
+                      role="none"
+                      onClick={() => {
+                        to(LINK_URL.workListVersion);
+                      }}
+                    >
+                      版本列表
+                    </span>
+                    <span>中创建一个版本</span>
+                  </div>
+                )}
               />
             )
           }

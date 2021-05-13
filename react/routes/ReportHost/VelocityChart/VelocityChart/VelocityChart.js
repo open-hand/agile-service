@@ -246,6 +246,9 @@ class VelocityChart extends Component {
     time -= 40 * w;
     const d = Math.floor(time / 8);
     time -= 8 * d;
+    if (time % 1 > 0) {
+      time = time.toFixed(1);
+    }
     return `${w ? `${w}周 ` : ''}${d ? `${d}天 ` : ''}${time ? `${time}小时 ` : ''}`;
   }
 

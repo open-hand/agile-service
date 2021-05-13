@@ -89,6 +89,7 @@ const SubBug = observer(({
         issueTypes={issueTypeData || []}
         relateIssueId={relateIssueId}
         buttonShowText="快速创建缺陷"
+        onCreate={handleCreateSubIssue}
       />
       )}
       {

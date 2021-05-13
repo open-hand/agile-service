@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
+import { debounce } from 'lodash';
 import {
   CheckBox, Button, TextField, Icon, Tooltip,
 } from 'choerodon-ui/pro';
@@ -21,6 +22,9 @@ function FieldList() {
   const filter = (field) => (search ? field.name.indexOf(search) > -1 : true);
   const filteredFields = fields.filter(filter);
   const filteredSystemFields = selectableSystemFields.filter(filter);
+  const handleInput = debounce((v) => {
+    setSearch(v);
+  }, 540);
   return (
     <div
       className={prefix}
@@ -29,6 +33,7 @@ function FieldList() {
         <TextField
           style={{ flex: 1 }}
           value={search}
+          onInput={(e) => handleInput(e.target.value)}
           onChange={(v) => {
             setSearch(v);
           }}

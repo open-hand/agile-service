@@ -379,7 +379,7 @@ class EpicReport extends Component {
             yAxisIndex: 0,
             data: ES.getChartDataYCompleted,
             itemStyle: {
-              color: '#4e90fe',
+              color: '#00BFA5',
             },
             areaStyle: {
               color: 'rgba(77, 144, 254, 0.1)',
@@ -596,7 +596,6 @@ class EpicReport extends Component {
            ?type=${urlParams.type}&id=${urlParams.id}&n
            ame=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
            */
-
           backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
