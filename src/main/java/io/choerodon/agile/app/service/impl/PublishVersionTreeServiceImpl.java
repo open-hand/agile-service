@@ -197,6 +197,30 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
         }
     }
 
+    @Override
+    public void updateTagAlias(Long projectId,
+                               Long tagId,
+                               Long publishVersionId,
+                               Long objectVersionNumber,
+                               String alias) {
+        if(alias.length() > 16) {
+            throw new CommonException("error.tag.alias.length.more.than.16");
+        }
+        if (StringUtils.isEmpty(alias)) {
+            throw new CommonException("error.tag.alias.empty");
+        }
+        PublishVersionTagRelDTO dto = new PublishVersionTagRelDTO();
+        dto.setId(tagId);
+        dto.setPublishVersionId(publishVersionId);
+        PublishVersionTagRelDTO result = publishVersionTagRelMapper.selectOne(dto);
+        AssertUtilsForCommonException.notNull(result, "error.publish.version.tag.null");
+        result.setObjectVersionNumber(objectVersionNumber);
+        result.setTagAlias(alias);
+        if (publishVersionTagRelMapper.updateByPrimaryKey(result) != 1) {
+            throw new CommonException("error.update.publish.version.tag");
+        }
+    }
+
     private PublishVersionTagRelDTO buildPublishVersionTagRel(Long organizationId, Long publishVersionId, TagVO x) {
         Long thisProjectId = x.getProjectId();
         String appServiceCode = x.getAppServiceCode();
@@ -378,6 +402,9 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
                 child.setProjectId(projectId);
                 child.setAppServiceCode(appServiceCode);
                 child.setTagName(tagName);
+                child.setId(x.getId());
+                child.setTagAlias(x.getAlias());
+                child.setObjectVersionNumber(x.getObjectVersionNumber());
                 root.getChildren().add(child);
             });
         }
