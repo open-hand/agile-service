@@ -16,7 +16,9 @@ interface Props {
   onDelete: () => void
 }
 const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
-  const { filterId, name, objectVersionNumber } = data;
+  const {
+    filterId, name, objectVersionNumber, default: isDefault,
+  } = data;
   const [isEditing, setIsEditing] = useState(false);
   const valueRef = useRef<string>(name);
   const inputRef = useRef() as MutableRefObject<ObserverTextField>;
@@ -66,6 +68,21 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
       okType: 'danger',
     });
   }, [filterId, name, onDelete]);
+
+  const handleSetDefault = useCallback(() => {
+    const updateData = {
+      objectVersionNumber,
+      name,
+      default: true,
+    };
+    personalFilterApi.update(filterId, updateData).then(() => {
+      onSubmit();
+      Choerodon.prompt('修改成功');
+    }).catch(() => {
+      IssueStore.setLoading(false);
+      Choerodon.prompt('修改失败');
+    });
+  }, []);
   const checkName = useCallback(async (value: string) => {
     if (name === value) {
       return true;
@@ -118,6 +135,14 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
           </>
         ) : (
           <>
+            {!isDefault && (
+              <Tooltip title="设为默认">
+                <Icon
+                  type="mode_edit"
+                  onClick={handleSetDefault}
+                />
+              </Tooltip>
+            )}
             <Tooltip title="修改">
               <Icon
                 type="mode_edit"

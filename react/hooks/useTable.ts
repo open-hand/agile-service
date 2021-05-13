@@ -2,7 +2,6 @@ import { useUpdateEffect, usePersistFn, useMount } from 'ahooks';
 import { intersection, get } from 'lodash';
 import { useCallback, useMemo, useState } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-import useControlledDefaultValue from './useControlledDefaultValue';
 
 interface TreeShape {
   children?: TreeShape[]
@@ -59,11 +58,11 @@ export default function useTable(getData: TableRequest, options: Options) {
   const [checkValues, setCheckValues] = useState<string[]>([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
   const [sort, setSort] = useState({ sortType: undefined, sortColumn: undefined });
-  const handleCheckChange = usePersistFn((value) => {
+  const handleCheckChange = usePersistFn((value, key) => {
     if (value) {
-      checkValues.push(value);
+      checkValues.push(key);
     } else {
-      checkValues.splice(checkValues.indexOf(value), 1);
+      checkValues.splice(checkValues.indexOf(key), 1);
     }
     setCheckValues([...checkValues]);
   });
@@ -132,6 +131,7 @@ export default function useTable(getData: TableRequest, options: Options) {
     query,
     rowKey,
     data: treeData,
+    flattenData: data,
     isTree,
     sortColumn: sort.sortColumn,
     sortType: sort.sortType,

@@ -13,7 +13,7 @@ interface Cache {
   visibleColumns: string[]
   listLayoutColumns?: ListLayoutColumnVO[]
 }
-interface TableCacheRenderProps {
+export interface TableCacheRenderProps {
   cached: Cache
   updateCache: (cache: Cache) => void
 }
