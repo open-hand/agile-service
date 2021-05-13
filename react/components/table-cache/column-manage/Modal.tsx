@@ -14,7 +14,7 @@ import { useUpdateColumnMutation } from '@/hooks/data/useTableColumns';
 import ColumnList from './components/column-list';
 
 export interface Option {
-  code: string, title: string
+  code: string, title: string, disabled?: boolean
 }
 export interface ColumnManageProps {
   type: string

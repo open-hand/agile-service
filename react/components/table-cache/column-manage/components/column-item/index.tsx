@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { Checkbox, Icon } from 'choerodon-ui';
 import { Draggable, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
@@ -6,7 +6,6 @@ import { observer } from 'mobx-react-lite';
 import { useLockFn } from 'ahooks';
 import { Option } from '../../Modal';
 import styles from './index.less';
-// import { Context } from '../..';
 
 const grid = 0;
 const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => ({
@@ -20,7 +19,22 @@ interface ColumnProps extends React.HTMLAttributes<HTMLDivElement> {
   selected: boolean
   onSelectChange: (key: string, value: boolean) => void
 }
-const ColumnItem: React.FC<ColumnProps> = ({
+const ColumnItem: React.FC<Pick<ColumnProps, 'data' | 'selected' | 'onSelectChange'>> = ({
+  data,
+  selected,
+  onSelectChange,
+}) => {
+  const handleCheckChange = useLockFn(async (e) => {
+    onSelectChange(data.code, e.target.checked);
+  });
+  return (
+    <>
+      <div className={styles.title}>{data.title}</div>
+      <Checkbox className={styles.checkbox} checked={selected} onChange={handleCheckChange} />
+    </>
+  );
+};
+const DragableColumnItem: React.FC<ColumnProps> = ({
   className,
   index,
   data,
@@ -28,12 +42,16 @@ const ColumnItem: React.FC<ColumnProps> = ({
   onSelectChange,
   ...otherProps
 }) => {
-  // const { store } = useContext(Context);
   const draggableId = data.code;
-
-  const handleCheckChange = useLockFn(async (e) => {
-    onSelectChange(data.code, e.target.checked);
-  });
+  const item = <ColumnItem data={data} selected={selected} onSelectChange={onSelectChange} />;
+  if (data.disabled) {
+    return (null
+    // <div className={classNames(styles.item, className)}>
+    //   <Icon style={{ visibility: 'hidden' }} type="baseline-drag_indicator" className={styles.handle} />
+    //   {item}
+    // </div>
+    );
+  }
   return (
     <Draggable
       index={index}
@@ -51,12 +69,11 @@ const ColumnItem: React.FC<ColumnProps> = ({
           )}
         >
           <Icon {...provided.dragHandleProps} type="baseline-drag_indicator" className={styles.handle} />
-          <div className={styles.title}>{data.title}</div>
-          <Checkbox className={styles.checkbox} checked={selected} onChange={handleCheckChange} />
+          {item}
         </div>
       )}
     </Draggable>
   );
 };
 
-export default observer(ColumnItem);
+export default observer(DragableColumnItem);

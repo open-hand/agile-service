@@ -66,6 +66,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
           options={columns.map(((c) => ({
             code: c.dataIndex,
             title: c.title,
+            disabled: c.dataIndex === 'summary',
           })))}
         />
       </div>
