@@ -98,12 +98,26 @@ class CreateIssue extends Component {
       newIssueTypeCode: '',
       newIssueTypeId: '',
       fields: [],
+      previousFormValue: new Map(),
+      uploading: false,
     };
     this.originDescription = true;
   }
 
   componentDidMount() {
     this.loadIssueTypes();
+  }
+
+  restoreFieldValue(code) {
+    const { previousFormValue } = this.state;
+    const { form: { setFieldsValue } } = this.props;
+    if (previousFormValue.has(code)) {
+      const value = previousFormValue.get(code);
+      value && setFieldsValue({
+        [code]: value,
+      });
+      previousFormValue.delete(code);
+    }
   }
 
   /**
@@ -369,9 +383,14 @@ class CreateIssue extends Component {
       originComponents,
       originLabels,
       originIssueTypes,
+      uploading,
     } = this.state;
     form.validateFieldsAndScroll(async (err, values) => {
       if (!err) {
+        if (uploading) {
+          Choerodon.prompt('请等待图片上传完成');
+          return;
+        }
         const {
           typeId,
           reporterId,
@@ -629,21 +648,23 @@ class CreateIssue extends Component {
                             const ignoreResetFields = [];
                             // 同类型更改  子任务、缺陷 类型有父问题则进行sprintId忽略更新
                             if (typeCode === newIssueTypeCode && (parentIssueId || relateIssueId || form.getFieldValue('subTaskParent') || form.getFieldValue('subBugParent'))) {
-                              ignoreResetFields.push('sprintId');
+                              // ignoreResetFields.push('sprintId');
                             }
                             fieldApi.getFields(param).then((res) => {
                               const { fields } = this.state;
-                              let resetFields = ['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
+                              let resetFields = ['subTaskParent', 'assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
                                 'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel', 'statusId',
                                 ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary', 'description'].some((i) => i === code))];
                               if (ignoreResetFields.length > 0) {
                                 resetFields = resetFields.filter((resetField) => !ignoreResetFields.includes(resetField));
                               }
+                              const values = form.getFieldsValue(['sprintId', 'subTaskParent']);
                               form.resetFields(resetFields);
                               this.setState({
                                 fields: res,
                                 newIssueTypeId: id,
                                 newIssueTypeCode: typeCode,
+                                previousFormValue: new Map(Object.entries(values)),
                               });
                               this.loadDefaultTemplate(id);
                               this.setDefaultValue(res, ignoreResetFields);
@@ -679,6 +700,9 @@ class CreateIssue extends Component {
                     onChange={((value) => {
                       this.autoSetSprint(value);
                     })}
+                    afterLoad={() => {
+                      this.restoreFieldValue('subTaskParent');
+                    }}
                   />,
                 )}
               </FormItem>
@@ -797,9 +821,13 @@ class CreateIssue extends Component {
                 type="sprint"
                 disabled={['sub_task', 'sub_bug'].includes(mode) || newIssueTypeCode === 'sub_task' || (newIssueTypeCode === 'bug' && form.getFieldValue('subBugParent'))}
                 afterLoad={(sprints) => {
-                  this.props.chosenSprint && form.setFieldsValue({
-                    sprintId: this.props.chosenSprint,
-                  });
+                  if (this.props.chosenSprint) {
+                    form.setFieldsValue({
+                      sprintId: this.props.chosenSprint,
+                    });
+                  } else {
+                    this.restoreFieldValue('sprintId');
+                  }
                 }}
               />,
             )}
@@ -1075,9 +1103,12 @@ class CreateIssue extends Component {
                 initialValue: this.props.defaultDescription,
               })(
                 <DebounceEditor
-                  style={{
-                    width: '100%', height: 'auto', minHeight: 280, overflow: 'hidden',
+                  onUploadChange={(uploading) => {
+                    this.setState({
+                      uploading,
+                    });
                   }}
+                  style={{ width: '100%', overflow: 'hidden' }}
                 />,
               )}
             </FormItem>

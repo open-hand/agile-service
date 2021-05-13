@@ -29,7 +29,7 @@ class FileApi {
     * 上传图片
     * @param {any} data
     */
-  uploadImage(data: FormData, outside?: boolean, projectId?: string) {
+  uploadImage(data: FormData, outside?: boolean, projectId?: string, onUploadProgress?: (progressEvent: ProgressEvent) => void) {
     const headers = { 'content-type': 'multipart/form-data' };
     return axios({
       headers,
@@ -38,6 +38,9 @@ class FileApi {
       data,
       params: {
         project_id: projectId,
+      },
+      onUploadProgress: (progressEvent: ProgressEvent) => {
+        onUploadProgress && onUploadProgress(progressEvent);
       },
     });
   }

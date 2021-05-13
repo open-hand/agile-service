@@ -3,10 +3,10 @@ import { CKEditor } from '@choerodon/components';
 import { EditorProps as CKEditorProps } from '@choerodon/components/lib/ck-editor';
 import { fileApi } from '@/api';
 
-async function handleImageUpload(file: File, outside?: boolean, projectId?: string) {
+async function handleImageUpload(file: File, outside?: boolean, projectId?: string, onUploadProgress?: (progressEvent: ProgressEvent) => void) {
   const formData = new FormData();
   formData.append('file', file);
-  const urls = await fileApi.uploadImage(formData, outside, projectId);
+  const urls = await fileApi.uploadImage(formData, outside, projectId, onUploadProgress);
   return urls[0];
 }
 type EditorProps = Omit<CKEditorProps, 'onImageUpload'> & {
@@ -16,7 +16,7 @@ type EditorProps = Omit<CKEditorProps, 'onImageUpload'> & {
 const Editor: React.FC<EditorProps> = (props) => (
   <CKEditor
     {...props}
-    onImageUpload={(file) => handleImageUpload(file, props.outside, props.projectId)}
+    onImageUpload={(file, onUploadProgress) => handleImageUpload(file, props.outside, props.projectId, onUploadProgress)}
   />
 );
 

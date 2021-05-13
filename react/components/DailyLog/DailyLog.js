@@ -1,11 +1,11 @@
 /* eslint-disable react/jsx-no-bind */
 import React, { Component } from 'react';
-import { stores } from '@choerodon/boot';
+import { stores, Choerodon } from '@choerodon/boot';
 import moment from 'moment';
 import {
   Select, DatePicker, Modal, Radio,
 } from 'choerodon-ui';
-import { Button } from 'choerodon-ui/pro';
+import { Button, Tooltip } from 'choerodon-ui/pro';
 import { workLogApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectNumber from '@/components/select/select-number';
@@ -42,6 +42,7 @@ class DailyLog extends Component {
       dissipateNull: false,
       startTimeNull: false,
       loading: false,
+      uploading: false,
     };
     this.selectRef = React.createRef();
   }
@@ -65,10 +66,14 @@ class DailyLog extends Component {
 
   handleCreateDailyLog = async () => {
     const {
-      dissipate, startTime, radio, delta,
+      dissipate, startTime, radio, delta, uploading,
     } = this.state;
     const { issueId } = this.props;
     if ((!await this.selectRef.current.checkValidity())) {
+      return;
+    }
+    if (uploading) {
+      Choerodon.prompt('请等待图片上传完成');
       return;
     }
     if (!startTime) {
@@ -238,7 +243,7 @@ class DailyLog extends Component {
     const {
       createLoading, dissipate, dissipateUnit,
       startTime, radio, time, timeUnit, reduce,
-      reduceUnit, delta, edit, startTimeNull, loading, dissipateNull,
+      reduceUnit, delta, edit, startTimeNull, loading, dissipateNull, uploading,
     } = this.state;
     const radioStyle = {
       display: 'block',
@@ -254,9 +259,7 @@ class DailyLog extends Component {
         className="c7n-dailyLog"
         title="登记工作日志"
         visible={visible || false}
-        okText="创建"
         cancelText="取消"
-        confirmLoading={createLoading}
         footer={[
           <Button key="submit" color="primary" funcType="raised" loading={loading} disabled={loading} onClick={this.handleCreateDailyLog}>
             确定
@@ -408,6 +411,11 @@ class DailyLog extends Component {
                       style={{ width: '100%' }}
                       onChange={(value) => {
                         this.setState({ delta: value });
+                      }}
+                      onUploadChange={(v) => {
+                        this.setState({
+                          uploading: v,
+                        });
                       }}
                     />
                   </div>
