@@ -430,7 +430,7 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  compareTag(versionId: string, data: any[], action?: 'add'|'update') {
+  compareTag(versionId: string, data: any[], action?: 'add' | 'update') {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/${versionId}/compare`,
@@ -442,18 +442,19 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  comparePreviewTag(versionId: string, data: any[]) {
+  comparePreviewTag(versionId: string, data: any) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/publish_version/${versionId}/compare/preview_issue`,
       params: {
         organizationId: getOrganizationId(),
       },
-      data: {
-        advancedSearchArgs: {},
-        otherArgs: {},
-        searchArgs: { tagCompareList: data.map((i) => ({ ...i, projectId: i.projectId || getProjectId() })) },
-      },
+      data: { ...data, projectId: data.projectId || getProjectId() },
+      // data: {
+      //   advancedSearchArgs: {},
+      //   otherArgs: {},
+      //   searchArgs: { tagCompareList: data.map((i) => ({ ...i, projectId: i.projectId || getProjectId() })) },
+      // },
     });
   }
 
