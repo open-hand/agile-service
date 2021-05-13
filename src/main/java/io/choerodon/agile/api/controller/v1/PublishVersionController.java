@@ -177,16 +177,13 @@ public class PublishVersionController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "发布版本tag对比")
     @PostMapping(value = "/{publish_version_id}/compare/preview_issue")
-    public ResponseEntity previewIssueFromTag(@ApiParam(value = "项目id", required = true)
-                                              @PathVariable(name = "project_id") Long projectId,
-                                              @ApiParam(value = "产品版本id", required = true)
-                                              @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
-                                              @RequestParam Long organizationId,
-                                              @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
-                                                      PageRequest pageRequest,
-                                              @RequestBody(required = false) SearchVO searchVO) {
-        publishVersionService.previewIssueFromTag(projectId, organizationId, publishVersionId, searchVO, pageRequest);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<List<IssueListFieldKVVO>> previewIssueFromTag(@ApiParam(value = "项目id", required = true)
+                                                                        @PathVariable(name = "project_id") Long projectId,
+                                                                        @ApiParam(value = "产品版本id", required = true)
+                                                                        @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
+                                                                        @RequestParam Long organizationId,
+                                                                        @RequestBody TagCompareVO tagCompareVO) {
+        return ResponseEntity.ok(publishVersionService.previewIssueFromTag(projectId, organizationId, publishVersionId, tagCompareVO));
     }
 
 
