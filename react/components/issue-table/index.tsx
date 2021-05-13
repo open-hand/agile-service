@@ -84,11 +84,11 @@ const IssueTable: React.FC<IssueTableProps> = ({
   const visibleColumns = useMemo(() => columns.filter((column) => column.display), [columns]);
 
   const checkboxColumn = useMemo(() => checkBoxColumn({
-    data: props.data,
+    data: props.flattenData,
     checkValues: props.checkValues,
     handleCheckChange: props.handleCheckChange,
     handleCheckAllChange: props.handleCheckAllChange,
-  }), [props.checkValues, props.data, props.handleCheckAllChange, props.handleCheckChange]);
+  }), [props.checkValues, props.flattenData, props.handleCheckAllChange, props.handleCheckChange]);
 
   return (
     <div className="c7nagile-issue-table">

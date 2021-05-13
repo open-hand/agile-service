@@ -1,6 +1,8 @@
 // @ts-nocheck
 import React from 'react';
-import { map, get, find } from 'lodash';
+import {
+  map, get, find, intersection,
+} from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
 import { CheckBox } from 'choerodon-ui/pro';
 import PriorityTag from '@/components/PriorityTag';
@@ -11,27 +13,34 @@ import UserTag from '../tag/user-tag';
 
 export const checkBoxColumn = ({
   checkValues, data, handleCheckChange, handleCheckAllChange,
-}) => ({
-  title: (
-    <CheckBox
-      indeterminate={checkValues.length > 0 && checkValues.length < data.length}
-      checked={checkValues.length > 0 && checkValues.length === data.length}
-      onChange={handleCheckAllChange}
-    />
-  ),
-  dataIndex: 'issueId',
-  key: 'issueId',
-  width: 40,
-  fixed: true,
-  render: ({ rowData, dataIndex, rowIndex }) => (
-    <CheckBox
-      key={rowIndex}
-      value={rowData.issueId}
-      checked={checkValues.indexOf(rowData.issueId) !== -1}
-      onChange={handleCheckChange}
-    />
-  ),
-});
+}) => {
+  const keys = data.map((i) => i.issueId);
+  const pageCheckedKeys = intersection(keys, checkValues);
+  const checked = pageCheckedKeys.length > 0;
+  const allChecked = pageCheckedKeys.length === keys.length;
+  const indeterminate = checked && !allChecked;
+  return ({
+    title: (
+      <CheckBox
+        indeterminate={indeterminate}
+        checked={checked}
+        onChange={handleCheckAllChange}
+      />
+    ),
+    dataIndex: 'issueId',
+    key: 'issueId',
+    width: 40,
+    fixed: true,
+    render: ({ rowData, dataIndex, rowIndex }) => (
+      <CheckBox
+        key={rowIndex}
+        value={rowData.issueId}
+        checked={checkValues.includes(rowData.issueId)}
+        onChange={(value) => handleCheckChange(value, rowData.issueId)}
+      />
+    ),
+  });
+};
 export const getCustomColumn = (field) => (field && {
   title: field.title,
   dataIndex: field.code,

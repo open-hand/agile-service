@@ -28,6 +28,7 @@ export interface IPersonalFilter {
   objectVersionNumber: number
   projectId: number
   userId: string
+  default: boolean
 }
 interface Props extends Partial<SelectProps> {
   projectId?: string
