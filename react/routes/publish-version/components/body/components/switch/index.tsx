@@ -1,10 +1,8 @@
 import React, {
   useState, useEffect, useMemo, useCallback,
 } from 'react';
-import { pageConfigApi, PageConfigIssueType, publishVersionApi } from '@/api';
-import { Modal } from 'choerodon-ui/pro';
+import { publishVersionApi } from '@/api';
 import { observer, useForceUpdate } from 'mobx-react-lite';
-import { IIssueType } from '@/common/types';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import Switch from './Switch';
@@ -17,8 +15,6 @@ interface IssueOption {
 }
 
 function IssueTypeSwitch() {
-  const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
-
   const { data: issueTypes = [] } = useProjectIssueTypes({ onlyEnabled: true, typeCode: ['story', 'task', 'bug'] });
   const { store, issueInfoTableDataSet } = usePublishVersionContext();
   const forceUpdate = useForceUpdate();

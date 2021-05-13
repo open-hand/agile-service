@@ -1,10 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { memo } from 'react';
 import {
   Button, Modal, Icon,
 } from 'choerodon-ui/pro';
-import {
-  observer, useComputed, Observer, useObservable,
-} from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import {
   IPublishVersionTreeNode, publishVersionApi,
 } from '@/api';
@@ -19,9 +17,88 @@ import styles from './index.less';
 import DependencyTreeBase, { DependencyTreeNode } from '../dependency-tree-base';
 import { openImportPomModal } from '../../../publish-version-detail/components/import-pom';
 
+function useEditModeSectionConfig(preview: boolean) {
+  const { store } = usePublishVersionContext();
+  if (preview) {
+    return { className: styles.preview };
+  }
+  const detailData = store.getCurrentData;
+
+  function handleLinkPublishVersion(linkData: any) {
+    publishVersionApi.dependencyTreeAdd({
+      id: detailData.id,
+      type: 'publish',
+      children: linkData?.version.map((item: any) => ({ id: item, type: 'publish' })) || [],
+
+    }).then(() => {
+      store.loadData();
+    });
+  }
+  async function handleImportPom(pomData: any) {
+    await publishVersionApi.createBatch(detailData.id, pomData);
+    store.loadData();
+    return true;
+  }
+  async function handleLinkTag(linkData: any) {
+    publishVersionApi.dependencyTreeAddTag(detailData.id, linkData).then(() => {
+      store.loadData();
+    });
+    return true;
+  }
+  const Title = memo(() => (
+    <div className={styles.title}>
+      <span>关联版本</span>
+      <div className={styles.operation}>
+        <Button
+          style={{ padding: '0 6px' }}
+          color={'blue' as ButtonColor}
+          icon="local_offer"
+          onClick={() => {
+            openLinkAppServiceTagModal({ publishVersionId: detailData.id, handleOk: handleLinkTag });
+          }}
+        >
+          关联tag
+        </Button>
+        <Button
+          style={{ padding: '0 6px' }}
+          color={'blue' as ButtonColor}
+          icon="version"
+          onClick={() => {
+            openLinkPublishVersionModal({ publishVersionId: detailData.id, handleOk: handleLinkPublishVersion });
+          }}
+        >
+          关联发布版本
+        </Button>
+
+        <Button
+          style={{ padding: '0 6px' }}
+          color={'blue' as ButtonColor}
+          //   icon="mode_edit"
+          onClick={() => {
+            openImportPomModal({ handleOk: handleImportPom, versionId: detailData.id });
+          }}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <CustomIcon type="icon-pom" width={18} height={18} />
+            导入POM依赖
+          </span>
+
+        </Button>
+
+      </div>
+    </div>
+  ));
+  return {
+    className: styles.wrap,
+    title: <Title />,
+
+  };
+}
 function PublishVersionLinkVersion() {
   const { store, preview } = usePublishVersionContext();
   const detailData = store.getCurrentData;
+  const sectionProps = useEditModeSectionConfig(preview);
+  const dependencyList = store.getDependencyList;
   console.log('dependencyList', store.getDependencyList);
   function handleDelete(v: IPublishVersionTreeNode) {
     let versionName = v.versionAlias || v.name;
@@ -122,97 +199,11 @@ function PublishVersionLinkVersion() {
       </DependencyTreeNode>
     );
   }
-
-  return <Observer>{() => <div>{store.getDependencyList?.map((i) => <DependencyTreeBase data={[i]} renderNode={renderTreeNode} />)}</div>}</Observer>;
-}
-function PublishVersionLinkVersionWrap({ children }: { children: any }) {
-  const { store } = usePublishVersionContext();
-  const detailData = store.getCurrentData;
-
-  function handleLinkPublishVersion(linkData: any) {
-    publishVersionApi.dependencyTreeAdd({
-      id: detailData.id,
-      type: 'publish',
-      children: linkData?.version.map((item: any) => ({ id: item, type: 'publish' })) || [],
-
-    }).then(() => {
-      store.loadData();
-    });
-  }
-  async function handleImportPom(pomData: any) {
-    await publishVersionApi.createBatch(detailData.id, pomData);
-    store.loadData();
-    return true;
-  }
-  async function handleLinkTag(linkData: any) {
-    console.log('linkData', linkData);
-    publishVersionApi.dependencyTreeAddTag(detailData.id, linkData).then(() => {
-      store.loadData();
-    });
-    return true;
-  }
   return (
-    <PublishVersionSection
-      className={styles.wrap}
-      title={(
-        <div className={styles.title}>
-          <span>关联版本</span>
-          <div className={styles.operation}>
-            <Button
-              style={{ padding: '0 6px' }}
-              color={'blue' as ButtonColor}
-              icon="local_offer"
-              onClick={() => {
-                openLinkAppServiceTagModal({ publishVersionId: detailData.id, handleOk: handleLinkTag });
-              }}
-            >
-              关联tag
-            </Button>
-            <Button
-              style={{ padding: '0 6px' }}
-              color={'blue' as ButtonColor}
-              icon="version"
-              onClick={() => {
-                openLinkPublishVersionModal({ publishVersionId: detailData.id, handleOk: handleLinkPublishVersion });
-              }}
-            >
-              关联发布版本
-            </Button>
-
-            <Button
-              style={{ padding: '0 6px' }}
-              color={'blue' as ButtonColor}
-              //   icon="mode_edit"
-              onClick={() => {
-                openImportPomModal({ handleOk: handleImportPom, versionId: detailData.id });
-              }}
-            >
-              <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                <CustomIcon type="icon-pom" width={18} height={18} />
-                导入POM依赖
-              </span>
-
-            </Button>
-
-          </div>
-        </div>
-      )}
-    >
-
-      {children}
+    <PublishVersionSection {...sectionProps}>
+      {dependencyList.map((i) => <DependencyTreeBase data={[i]} renderNode={renderTreeNode} />)}
     </PublishVersionSection>
   );
 }
-const Index = () => {
-  const { preview } = usePublishVersionContext();
-  return preview ? (
-    <PublishVersionSection className={styles.preview}>
-      <PublishVersionLinkVersion />
-    </PublishVersionSection>
-  ) : (
-    <PublishVersionLinkVersionWrap>
-      <PublishVersionLinkVersion />
-    </PublishVersionLinkVersionWrap>
-  );
-};
-export default observer(Index);
+
+export default observer(PublishVersionLinkVersion);

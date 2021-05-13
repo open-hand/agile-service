@@ -1,23 +1,19 @@
 import React, {
-  useEffect, useMemo, useReducer, useState,
+  useEffect, useState,
 } from 'react';
 import {
-  Button, Modal, Table, Tooltip, Form, DataSet,
+  Button, Form,
 } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import { observer } from 'mobx-react-lite';
-import { WSHandler } from '@choerodon/boot';
-import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { publishVersionApi, publishVersionApiConfig, versionApi } from '@/api';
+import { publishVersionApi } from '@/api';
 // @ts-ignore
 import JSONbig from 'json-bigint';
 import SelectAppService from '@/components/select/select-app-service';
 import SelectGitTags from '@/components/select/select-git-tags';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import SelectPublishVersion from '@/components/select/select-publish-version';
-import wsProgress from '@/components/ws-progress';
-import { getProjectId } from '@/utils/common';
 import styles from './index.less';
 import PublishVersionSection from '../section';
 import { openPreviewResultModal } from './PreviewResultModal';
@@ -32,25 +28,14 @@ function IssueDiffArea() {
   const { store, issueDiffDataSet } = usePublishVersionContext();
   const dependencyList = store.getDependencyList;
 
-  // const applicationId = useMemo(() => {
-  //   const appServiceCode = ds.current?.get('appServiceCode');
-  //   if (appServiceCode) {
-  //     const newId = store.getAppServiceList.find((service) => service.code === appServiceCode)?.id;
-  //     ds.current?.set('appServiceId', newId);
-  //     return newId;
-  //   }
-  //   return appServiceCode;
-  // }, [ds, ds.current?.get('appServiceCode')]);
   const handleSubmit = async () => {
     if (await issueDiffDataSet.validate()) {
       setTableData(false);
       setGenerateBtnLoading(true);
-      // storyTableDataSet.query();
       const newData = await requestPreviewData(store.getCurrentData.id, issueDiffDataSet.toData());
       setGenerateBtnLoading(false);
 
       setTableData(newData);
-      // await publishVersionApi.comparePreviewTag(store.getCurrentData.id, issueDiffDataSet.toData());
       return true;
     }
     return false;
@@ -59,7 +44,6 @@ function IssueDiffArea() {
     const newData = JSONbigString.parse(data);
     const oneTableData = newData.data ? JSONbigString.parse(newData.data) : [];
     console.log('newDATA', newData);
-    console.log('oneTableData', oneTableData);
     setGenerateBtnLoading(true);
     setTableData((oldData) => (!oldData ? [] : oldData.concat(...oneTableData)));
 
@@ -113,15 +97,8 @@ function IssueDiffArea() {
           {issueDiffDataSet.records.map((r) => renderTags(r))}
 
           <div className={styles.compare}>
-            {/* <WSHandler
-              messageKey={`agile-preview-tag-compare-issues${getProjectId()}`}
-              onMessage={handleMessage}
-            > */}
-
             <Button loading={generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleSubmit}>生成预览信息</Button>
-            {/* </WSHandler> */}
             <Button disabled={!tableData || generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
-            {/* disabled={!tableData || generateBtnLoading} */}
           </div>
         </Form>
       </PublishVersionSection>

@@ -1,13 +1,11 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import {
-  set, get, pick, merge, cloneDeep,
-} from 'lodash';
+import { set, cloneDeep } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import {
   devOpsApi,
-  IAppVersionData, IPublishVersionData, IPublishVersionTreeNode, projectApi, publishVersionApi, versionApi,
+  IAppVersionData, IPublishVersionData, IPublishVersionTreeNode, publishVersionApi,
 } from '@/api';
 
 interface EventsProps {
@@ -37,9 +35,6 @@ class PublishDetailStore {
   @observable current: IPublishVersionData | undefined;
 
   @observable appServiceList: Array<{ id: string, name: string, code: string }> = [];
-  // [{
-  //   name: 'agile-test', appService: true, tag: false, artifactId: 'te:',
-  // } as any];
 
   @observable currentMenu: 'detail' | 'diff' | 'info' = 'detail';
 

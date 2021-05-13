@@ -2,16 +2,14 @@ import React, {
   useEffect, useCallback, useState, useMemo,
 } from 'react';
 import {
-  Button, DataSet, Form, Modal, CheckBox,
+  DataSet, Form, Modal, CheckBox,
 } from 'choerodon-ui/pro';
-import { findIndex } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
 import WsProgress from '@/components/ws-progress';
 import { getProjectId, getProjectName } from '@/utils/common';
 import { issueApi, publishVersionApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import SelectPublishVersion from '@/components/select/select-publish-version';
 
 interface Props {
   modal?: IModalProps,

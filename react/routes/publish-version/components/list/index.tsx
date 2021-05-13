@@ -1,28 +1,16 @@
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  useCallback, useEffect, useRef,
 } from 'react';
 import {
-  TabPage as Page, Header, Content, Breadcrumb,
-} from '@choerodon/boot';
-import {
-  Button, Menu, Table, Tooltip, TextField, Icon, Spin, Dropdown, Modal,
+  Menu, Tooltip, TextField, Icon, Spin, Dropdown, Modal,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import ScrollContext from 'react-infinite-scroll-component';
-import {
-  omit, debounce,
-} from 'lodash';
+import { debounce } from 'lodash';
 import classnames from 'classnames';
-import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
-import TableDropMenu from '@/common/TableDropMenu';
-import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { publishVersionApi, versionApi } from '@/api';
-import VERSION_STATUS_TYPE from '@/constants/VERSION_STATUS_TYPE';
-import SideNav from '@/components/side-nav';
 import { useSize } from 'ahooks';
 import { usePublishVersionContext } from '../../stores';
-
 import styles from './index.less';
 import { openEditPublishVersionModal } from '../create-edit-publish-version';
 
@@ -103,22 +91,17 @@ function PublishVersionList() {
   const { prefixCls, tableDataSet, store } = usePublishVersionContext();
   const scrollRef = useRef(null);
   const scrollSize = useSize(scrollRef);
-  const handleFilterChange = debounce((val) => {
-    // pIAimProjectStore.setSearchVal(val);
-  }, 300);
+
   function handleChange(data: Record) {
     // data.dataSet?.select(data);
     tableDataSet.select(data);
     store.select(data.toData());
-    console.log('data...1', data, data.index, data.isSelected);
   }
   function handleLoadMore() {
     console.log('load more...');
     tableDataSet.queryMore(tableDataSet.currentPage + 1);
   }
-  function handleRefresh() {
 
-  }
   /** 初始化滚动加载数据 */
   const handleInitResizeData = useCallback(() => {
     const scrollHeight = (scrollSize.height || 0) - 43 - tableDataSet.length * 38;
@@ -148,7 +131,12 @@ function PublishVersionList() {
 
     store.init({ events: { update: registerUpdate, createAfter: registerCreateAfter, delete: registerCreateAfter } });
   }, [handleInitResizeData, store, tableDataSet]);
-  useEffect(() => { console.log('selected', tableDataSet.selected, tableDataSet.selected.length); }, [tableDataSet.selected, tableDataSet.selected.length]);
+
+  const handleFilterChange = debounce((val) => {
+    tableDataSet.setQueryParameter('content', val);
+    handleInitResizeData();
+    // pIAimProjectStore.setSearchVal(val);
+  }, 500);
   useEffect(() => {
     handleInitResizeData();
   }, [handleInitResizeData]);

@@ -6,12 +6,9 @@ import {
   Button, Tooltip, Dropdown, Menu,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import {
-  omit,
-} from 'lodash';
+import { omit } from 'lodash';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import SideNav from '@/components/side-nav';
-import { useHistory } from 'react-router';
 import { linkUrl } from '@/utils/to';
 import Provider, { usePublishVersionContext } from './stores';
 import { openCreatePublishVersionModal } from './components/create-edit-publish-version';
@@ -30,8 +27,7 @@ const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> =
 };
 
 function PublishVersion() {
-  const { prefixCls, store, tableDataSet } = usePublishVersionContext();
-  const history = useHistory();
+  const { prefixCls, store } = usePublishVersionContext();
   function handleCreate(data: any) {
     store.create(data);
   }

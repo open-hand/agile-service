@@ -1,14 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
-  Button, Modal, Table, Tooltip,
+  Table,
 } from 'choerodon-ui/pro';
-import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import UserTag from '@/components/tag/user-tag';
 import renderStatus from '@/components/column-renderer/status';
 import renderPriority from '@/components/column-renderer/priority';
-import { publishVersionApi, versionApi } from '@/api';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import renderTags from '@/components/column-renderer/tags';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
 import classnames from 'classnames';
@@ -21,24 +17,10 @@ import IssueTypeSwitch from '../switch';
 const { Column } = Table;
 function IssueInfoTable() {
   const { issueInfoTableDataSet, store, preview } = usePublishVersionContext();
-  console.log('table preview', preview);
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields().filter((i) => i.code !== 'issueTypeId') as any,
     transformFilter,
-    // defaultChosenFields: Array.isArray(localPageCacheStore.getItem('issues')) ? new Map(localPageCacheStore.getItem('issues').map((item) => [item.code, item])) : undefined,
   });
-  function handleDelete(record: Record) {
-    Modal.confirm({
-      title: '是否删除？',
-      children: `确定要删除问题${record.get('issueNum')}与版本的关联？删除后，将移除缺陷和当前版本下应用版本的关联关系。`,
-      onOk: () => publishVersionApi.deleteLinkIssueId(record.get('issueId'), store.current?.id!).then(() => {
-        issueInfoTableDataSet.query();
-      }),
-    });
-  }
-  function renderAction({ record }: RenderProps) {
-    return <Button icon="delete_forever" onClick={() => handleDelete(record!)} />;
-  }
 
   return (
     <div className={classnames(styles.info, styles.preview)}>
@@ -51,10 +33,7 @@ function IssueInfoTable() {
             const search = issueSearchStore.getCustomFieldFilters();
             issueInfoTableDataSet.setQueryParameter('search', search);
             issueInfoTableDataSet.query();
-            // localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
-            // query();
           }}
-        // onClickSaveFilter={handleClickSaveFilter}
         />
         <Table dataSet={issueInfoTableDataSet} className={styles.table}>
           <Column
@@ -93,7 +72,6 @@ function IssueInfoTable() {
             renderer={({ value }) => value?.
               map((i: any) => (`${i.appServiceCode}${i.tagName}`)).join('、')}
           />
-
           <Column name="creationDate" className="c7n-agile-table-cell" width={120} renderer={({ value }) => (value ? String(value).split(' ')[0] : '')} />
         </Table>
       </div>

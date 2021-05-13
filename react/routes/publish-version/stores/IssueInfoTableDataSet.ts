@@ -1,4 +1,4 @@
-import { publishVersionApiConfig, versionApiConfig } from '@/api';
+import { publishVersionApiConfig } from '@/api';
 import { set } from 'lodash';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { transformFilter } from '@/routes/Issue/stores/utils';
@@ -8,7 +8,6 @@ function IssueInfoTableDataSet(): DataSetProps {
     autoQuery: false,
     paging: true,
     selection: false,
-    // data: [{ summary: '测试问题测试问题测试问题测试问题测试问题测试问题测试问题测试问题测试问题', statusVO: {} }],
     fields: [
       { name: 'summary', label: '概要' },
       { name: 'issueNum', label: '编号' },
