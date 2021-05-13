@@ -1,12 +1,11 @@
 import React, {
   useCallback,
-  useEffect, useMemo, useState,
+  useEffect, useMemo,
 } from 'react';
 import {
   DataSet, Form, Modal, Select,
 } from 'choerodon-ui/pro/lib';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-// import './index.less';
 import { IModalProps } from '@/common/types';
 import { publishVersionApiConfig } from '@/api';
 // @ts-ignore
@@ -18,25 +17,16 @@ interface ILinkServiceProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
   publishVersionId: string
 }
-const { Option } = Select;
 
 const LinkPublishVersionModal: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({
   modal, handleOk, publishVersionId,
 }) => {
-  const [applicationId, setApplicationId] = useState<string>();
-  const [versionType, setVersionType] = useState<string>('version');
-
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
     autoCreate: true,
     paging: false,
-    // data: [
-    //   { appService: '应用1', alias: undefined },
-    // ],
-    fields: [
-      // { name: 'appService', label: '选择应用服务', required: !programMode },
-      // { name: 'subProject', label: '选择子项目', required: !!programMode },
 
+    fields: [
       {
         name: 'version',
         label: '选择发布版本',
@@ -59,9 +49,7 @@ const LinkPublishVersionModal: React.FC<{ modal?: IModalProps } & ILinkServicePr
       },
     ],
   }), [publishVersionId]);
-  useEffect(() => {
-    ds.current?.init(versionType, undefined);
-  }, [ds, versionType]);
+
   const handleSubmit = useCallback(async () => {
     if (!await ds.current?.validate()) {
       return false;

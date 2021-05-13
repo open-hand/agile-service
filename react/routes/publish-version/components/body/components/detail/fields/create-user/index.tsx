@@ -1,7 +1,5 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { DatePicker } from 'choerodon-ui/pro/lib';
-import TextEditToggle from '@/components/TextEditTogglePro';
 import UserTag from '@/components/tag/user-tag';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import Field from '../field';

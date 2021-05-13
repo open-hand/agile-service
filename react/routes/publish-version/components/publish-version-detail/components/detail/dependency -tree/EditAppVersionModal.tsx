@@ -13,7 +13,6 @@ import {
 import { observer } from 'mobx-react-lite';
 import SelectAppService from '@/components/select/select-app-service';
 import SelectGitTags from '@/components/select/select-git-tags';
-import IPublishVersionDetailData from '../../../types';
 
 interface IImportPomFunctionProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)

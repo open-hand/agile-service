@@ -1,20 +1,7 @@
 import React from 'react';
-
-import {
-  Button, Tooltip, Dropdown, Menu,
-} from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import {
-  omit,
-} from 'lodash';
-import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
-import SideNav from '@/components/side-nav';
 import { useParams } from 'react-router';
-import Provider, { usePublishVersionContext } from './stores';
-import { openCreatePublishVersionModal } from './components/create-edit-publish-version';
-import openExportPublishVersionModal from './components/export';
-import PublishVersionList from './components/list';
-import Container from './Container';
+import Provider from './stores';
 import styles from './PublishVersionPreview.less';
 import Header from './components/header';
 import Detail from './components/body/components/detail';
@@ -34,8 +21,6 @@ const PreviewSection: React.FC<{ title: string }> = ({ title, children }) => (
 );
 
 function PublishVersion() {
-  const { prefixCls, store, tableDataSet } = usePublishVersionContext();
-
   return (
     <div className={styles.wrap}>
       <Header />
@@ -56,7 +41,6 @@ function PublishVersion() {
 const ObserverPublishVersion = observer(PublishVersion);
 export default function Index(props: any) {
   const params = useParams() as any;
-  console.log('params..', params);
   return (
     <Provider {...props} publishVersionId={params.id} preview>
       <ObserverPublishVersion />

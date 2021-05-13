@@ -3,39 +3,29 @@ import React, {
   useEffect, useMemo, useState,
 } from 'react';
 import {
-  DataSet, Form, Modal, Select, TextField,
+  DataSet, Form, Modal, TextField,
 } from 'choerodon-ui/pro';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-// import './index.less';
 import { IModalProps } from '@/common/types';
-import { publishVersionApiConfig } from '@/api';
-// @ts-ignore
-import JSONbig from 'json-bigint';
 import SelectAppService from '@/components/select/select-app-service';
 import SelectGitTags from '@/components/select/select-git-tags';
 import { getProjectId } from '@/utils/common';
-
-const JSONbigString = JSONbig({ storeAsString: true });
 
 interface ILinkServiceProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
   publishVersionId: string
 }
-const { Option } = Select;
 
 const LinkAppServiceTagModal: React.FC<{ modal?: IModalProps } & ILinkServiceProps> = ({
   modal, handleOk, publishVersionId,
 }) => {
   const [applicationId, setApplicationId] = useState<string>();
-  const [versionType, setVersionType] = useState<string>('version');
 
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
     autoCreate: true,
     paging: false,
-    // data: [
-    //   { appService: '应用1', alias: undefined },
-    // ],
+
     fields: [
       {
         name: 'appService', label: '选择应用服务', type: 'object' as any, required: true, ignore: 'always' as any,
@@ -44,13 +34,10 @@ const LinkAppServiceTagModal: React.FC<{ modal?: IModalProps } & ILinkServicePro
       { name: 'versionAlias', label: '版本别名', maxLength: 16 },
       { name: 'appServiceCode', bind: 'appService.code' },
       { name: 'projectId', defaultValue: getProjectId() },
-      // { name: 'subProject', label: '选择子项目', required: !!programMode },
 
     ],
   }), []);
-  useEffect(() => {
-    ds.current?.init(versionType, undefined);
-  }, [ds, versionType]);
+
   const handleSubmit = useCallback(async () => {
     if (!await ds.current?.validate()) {
       return false;

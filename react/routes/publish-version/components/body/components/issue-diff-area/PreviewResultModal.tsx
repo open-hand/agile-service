@@ -1,37 +1,22 @@
 import React, {
   useCallback,
-  useEffect, useMemo, useRef, useState,
+  useEffect, useMemo,
 } from 'react';
 import {
   Button, Table,
-  DataSet, DatePicker, Form, Modal, Radio, Select, TextField, Tooltip, TextArea,
+  DataSet, Modal, Tooltip,
 } from 'choerodon-ui/pro/lib';
-import { debounce, isEmpty, pick } from 'lodash';
 // @ts-ignore
 import JSONbig from 'json-bigint';
 import { WSHandler } from '@choerodon/boot';
-import classnames from 'classnames';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import DetailContainer, { useDetail } from '@/components/detail-container';
-
-import SelectAppService from '@/components/select/select-app-service';
-import SelectGitTags from '@/components/select/select-git-tags';
-import RadioGroup from 'choerodon-ui/lib/radio/group';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
-// import './index.less';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
 import UserTag from '@/components/tag/user-tag';
 import renderStatus from '@/components/column-renderer/status';
 import renderPriority from '@/components/column-renderer/priority';
 import renderTags from '@/components/column-renderer/tags';
-import {
-  IAppVersionData, publishVersionApi, publishVersionApiConfig, versionApi,
-} from '@/api';
-import { Checkbox } from 'choerodon-ui';
-import SelectTeam from '@/components/select/select-team';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
@@ -53,23 +38,18 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
 }) => {
   const [detailProps] = useDetail();
 
-  const [applicationId, setApplicationId] = useState<string>();
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields()
       .filter((i) => ['contents', 'issueTypeId', 'priorityId', 'statusId', 'assigneeId'].includes(i.code)) as any,
     transformFilter,
-    // defaultChosenFields: Array.isArray(localPageCacheStore.getItem('issues')) ? new Map(localPageCacheStore.getItem('issues').map((item) => [item.code, item])) : undefined,
   });
-  const [versionType, setVersionType] = useState<string>('version');
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
     autoCreate: false,
     paging: true,
     selection: false,
     data: tableData,
-    // data: [
-    //   { appService: '应用1', alias: undefined },
-    // ],
+
     fields: [
       { name: 'summary', label: '概要' },
       { name: 'issueNum', label: '编号' },
@@ -81,16 +61,13 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
       { name: 'creationDate', label: '创建时间' },
 
     ],
-    transport: {
-      // submit: ({ data }) => (editData ? publishVersionApiConfig.update(editData.id, data[0]) : publishVersionApiConfig.create(data[0])),
-    },
+
   }), [tableData]);
 
   const handleSubmit = useCallback(async () => {
     if (!await ds.current?.validate()) {
       return false;
     }
-    const data = pick(ds.current?.toData(), ['versionAlias', 'actualPublishDate', 'description']);
 
     // await ds.submit();
     const result = handleOk && await handleOk();
@@ -114,10 +91,7 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
         onChange={() => {
           console.log('change', issueSearchStore.getCustomFieldFilters());
           ds.loadData(issuesFilter(tableData, issueSearchStore.getCustomFieldFilters()));
-          // localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
-          // query();
         }}
-      // onClickSaveFilter={handleClickSaveFilter}
       />
       <Table dataSet={ds} className={styles.table}>
         <Column
@@ -196,25 +170,22 @@ function openPreviewResultModal(props: PreviewResultModalProps) {
     },
     drawer: true,
     cancelText: '关闭',
-    footer: (okBtn: React.ReactNode, cancelBtn: React.ReactNode) => {
-      const footer = '';
-      return (
-        <div>
-          {/* {okBtn} */}
-          <WSHandler
-            messageKey={`agile-preview-tag-compare-issues${getProjectId()}`}
-            onMessage={(data: any) => {
-              const newData = JSONbigString.parse(data);
-              console.log('Json...', newData);
-            }}
-          >
-            <Button funcType={'raised' as any} color={'primary' as any} onClick={() => handleChangeIssueTag('update')}>替换问题tag信息</Button>
-          </WSHandler>
-          <Button funcType={'raised' as any} color={'primary' as any} onClick={() => handleChangeIssueTag('add')}>增加问题tag信息</Button>
-          {cancelBtn}
-        </div>
-      );
-    },
+    footer: (okBtn: React.ReactNode, cancelBtn: React.ReactNode) => (
+      <div>
+        {/* {okBtn} */}
+        <WSHandler
+          messageKey={`agile-preview-tag-compare-issues${getProjectId()}`}
+          onMessage={(data: any) => {
+            const newData = JSONbigString.parse(data);
+            console.log('Json...', newData);
+          }}
+        >
+          <Button funcType={'raised' as any} color={'primary' as any} onClick={() => handleChangeIssueTag('update')}>替换问题tag信息</Button>
+        </WSHandler>
+        <Button funcType={'raised' as any} color={'primary' as any} onClick={() => handleChangeIssueTag('add')}>增加问题tag信息</Button>
+        {cancelBtn}
+      </div>
+    ),
     children: <PreviewResult {...props} />,
 
   });
