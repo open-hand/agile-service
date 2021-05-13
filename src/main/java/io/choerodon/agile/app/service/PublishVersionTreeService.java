@@ -76,4 +76,19 @@ public interface PublishVersionTreeService {
      * @param tags
      */
     void deleteTag(Long projectId, Long organizationId, Long publishVersionId, Set<TagVO> tags);
+
+    /**
+     * 更新发布版本tag关系的tag别名
+     *
+     * @param projectId
+     * @param tagId
+     * @param publishVersionId
+     * @param objectVersionNumber
+     * @param alias
+     */
+    void updateTagAlias(Long projectId,
+                        Long tagId,
+                        Long publishVersionId,
+                        Long objectVersionNumber,
+                        String alias);
 }

@@ -262,6 +262,11 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         if (agilePluginService != null) {
             agilePluginService.deleteAssociatedPublishVersion(publishVersionId);
         }
+        PublishVersionTagRelDTO publishVersionTagRelDTO = new PublishVersionTagRelDTO();
+        publishVersionTagRelDTO.setProjectId(projectId);
+        publishVersionTagRelDTO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
+        publishVersionTagRelDTO.setPublishVersionId(publishVersionId);
+        publishVersionTagRelMapper.delete(publishVersionTagRelDTO);
         publishVersionMapper.deleteByPrimaryKey(publishVersionId);
     }
 
@@ -686,9 +691,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
 
     private void sendProgress(TagCompareVO tagCompareVO, Long userId, String websocketKey) {
         try {
-            logger.info("tag detail: {}", tagCompareVO);
             String message = objectMapper.writeValueAsString(tagCompareVO);
-            logger.info("tag message string : {}", message);
             messageClientC7n.sendByUserId(userId, websocketKey, message);
         } catch (JsonProcessingException e) {
             logger.error("parse object to string error: {}", e);

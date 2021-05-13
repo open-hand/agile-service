@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.choerodon.agile.infra.dto.PublishVersionDTO;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -30,6 +31,37 @@ public class TagVO {
     private Set<Long> issueIds;
     @JsonIgnore
     private TagCompareVO tagCompareVO;
+
+    private Long objectVersionNumber;
+
+    @Encrypt
+    private Long id;
+
+    private String alias;
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
+    }
 
     public TagCompareVO getTagCompareVO() {
         return tagCompareVO;

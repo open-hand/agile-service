@@ -36,6 +36,26 @@ public class VersionTreeVO {
 
     private String artifactId;
 
+    private String tagAlias;
+
+    public String getTagAlias() {
+        return tagAlias;
+    }
+
+    public void setTagAlias(String tagAlias) {
+        this.tagAlias = tagAlias;
+    }
+
+    private Long objectVersionNumber;
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
+    }
+
     public String getGroupId() {
         return groupId;
     }

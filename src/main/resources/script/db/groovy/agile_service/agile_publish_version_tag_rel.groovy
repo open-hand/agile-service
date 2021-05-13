@@ -29,4 +29,10 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_publish_version_tag_rel.groo
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(id: '2021-05-13-add-column-agile-publish-version-tag-rel', author: 'kaiwen.li@hand-china.com') {
+        addColumn(tableName: 'agile_publish_version_tag_rel') {
+            column(name: 'tag_alias', type: 'VARCHAR(16)', remarks: 'tag别名', afterColumn: 'tag_name')
+        }
+    }
 }

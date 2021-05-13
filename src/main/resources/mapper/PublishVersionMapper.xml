@@ -82,6 +82,9 @@
             <id property="tagName" column="tag_name"/>
             <id property="appServiceCode" column="app_service_code"/>
             <id property="projectId" column="tag_project_id"/>
+            <id property="objectVersionNumber" column="tag_object_version_number"/>
+            <id property="id" column="tag_id"/>
+            <id property="alias" column="tag_alias"/>
         </collection>
     </resultMap>
 
@@ -90,7 +93,10 @@
         apv.*,
         apvtr.tag_name,
         apvtr.app_service_code,
-        apvtr.project_id as tag_project_id
+        apvtr.project_id as tag_project_id,
+        apvtr.object_version_number as tag_object_version_number,
+        apvtr.id as tag_id,
+        apvtr.tag_alias
         from agile_publish_version apv
         left join agile_publish_version_tag_rel apvtr on apv.id = apvtr.publish_version_id
         where apv.organization_id = #{organizationId}

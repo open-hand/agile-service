@@ -105,6 +105,23 @@ public class PublishVersionTreeController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "更新发布版本tag的别名")
+    @PutMapping(value = "/tag/{tag_id}/update_alias")
+    public ResponseEntity updateTagAlias(@ApiParam(value = "项目id", required = true)
+                                         @PathVariable(name = "project_id") Long projectId,
+                                         @ApiParam(value = "发布版本tag关系id", required = true)
+                                         @PathVariable(name = "tag_id") @Encrypt Long tagId,
+                                         @ApiParam(value = "发布版本id", required = true)
+                                         @RequestParam @Encrypt Long publishVersionId,
+                                         @ApiParam(value = "乐观锁", required = true)
+                                         @RequestParam Long objectVersionNumber,
+                                         @ApiParam(value = "别名", required = true)
+                                         @RequestParam String alias) {
+        publishVersionTreeService.updateTagAlias(projectId, tagId, publishVersionId, objectVersionNumber, alias);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "发布版本树删除tag")
     @DeleteMapping(value = "/delete_tag")
     public ResponseEntity deleteTag(@ApiParam(value = "项目id", required = true)
