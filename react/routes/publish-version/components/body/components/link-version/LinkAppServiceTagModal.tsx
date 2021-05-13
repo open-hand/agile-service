@@ -41,7 +41,7 @@ const LinkAppServiceTagModal: React.FC<{ modal?: IModalProps } & ILinkServicePro
         name: 'appService', label: '选择应用服务', type: 'object' as any, required: true, ignore: 'always' as any,
       },
       { name: 'tagName', label: '选择tag', required: true },
-      { name: 'versionAlias', label: '版本别名' },
+      { name: 'versionAlias', label: '版本别名', maxLength: 16 },
       { name: 'appServiceCode', bind: 'appService.code' },
       { name: 'projectId', defaultValue: getProjectId() },
       // { name: 'subProject', label: '选择子项目', required: !!programMode },

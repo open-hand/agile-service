@@ -61,7 +61,7 @@ class PublishDetailStore {
     return this.appServiceList;
   }
 
-  findAppServiceByCode(code:string) {
+  findAppServiceByCode(code: string) {
     return this.getAppServiceList.find((service) => service.code === code);
   }
 
@@ -118,7 +118,7 @@ class PublishDetailStore {
 
   @action async loadDependencyData(id: string = this.getCurrentData.id) {
     const dependencyList = await publishVersionApi.loadDependencyTree(id);
-    this.setDependencyList(dependencyList);
+    this.setDependencyList(dependencyList[0]?.children || []);
   }
 
   @action async loadData(id: string = this.getCurrentData.id, ignoreLoad: string[] = []) {

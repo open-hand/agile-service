@@ -471,11 +471,11 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  export(publishVersionId: string) {
+  export(publishVersionId: string, withSubVersion = false) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/excel/export_publish_version`,
-      params: { publishVersionId },
+      params: { publishVersionId, withSubVersion },
     });
   }
 }

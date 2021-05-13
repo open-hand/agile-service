@@ -1,11 +1,19 @@
 import React from 'react';
-import Provider from './stores';
-import PublishVersion from './PublishVersion';
+import { Route, Switch, RouteChildrenProps } from 'react-router-dom';
+import { nomatch } from '@choerodon/boot';
 
-export default function Index(props:any) {
+const PublishVersion = React.lazy(() => import('./PublishVersion'));
+const PublishVersionPreview = React.lazy(() => import('./PublishVersionPreview'));
+
+const ProjectReport: React.FC<RouteChildrenProps> = ({ match }) => {
+  console.log('match', match?.url, match);
   return (
-    <Provider {...props}>
-      <PublishVersion />
-    </Provider>
+    <Switch>
+      <Route exact path={match?.url} component={PublishVersion} />
+      <Route exact path={`${match?.url}/preview/:id`} component={PublishVersionPreview} />
+      <Route path="*" component={nomatch} />
+    </Switch>
   );
-}
+};
+
+export default PublishVersion;

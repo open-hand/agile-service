@@ -35,7 +35,7 @@ import SelectTeam from '@/components/select/select-team';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
-import { transformFilter } from '@/routes/Issue/stores/utils';
+import { transformFilter, issuesFilter } from './utils';
 import styles from './PreviewResultModal.less';
 
 const JSONbigString = JSONbig({ storeAsString: true });
@@ -52,6 +52,7 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
   modal, tableData, handleOk, selectIssue,
 }) => {
   const [detailProps] = useDetail();
+
   const [applicationId, setApplicationId] = useState<string>();
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields()
@@ -63,7 +64,7 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
     autoCreate: false,
-    paging: false,
+    paging: true,
     selection: false,
     data: tableData,
     // data: [
@@ -111,6 +112,8 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
         store={issueSearchStore}
         onClear={() => { }}
         onChange={() => {
+          console.log('change', issueSearchStore.getCustomFieldFilters());
+          ds.loadData(issuesFilter(tableData, issueSearchStore.getCustomFieldFilters()));
           // localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
           // query();
         }}

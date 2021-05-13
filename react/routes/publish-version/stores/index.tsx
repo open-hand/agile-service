@@ -17,6 +17,7 @@ interface Context {
   issueDiffDataSet: DataSet
   detailProps: any
   store: PublishDetailStore
+  preview: boolean
   prefixCls: string
 }
 const PublishVersionContext = createContext({} as Context);
@@ -26,6 +27,7 @@ export function usePublishVersionContext() {
 const PublishVersionProvider = injectIntl(inject('AppState')(
   (props: any) => {
     const [detailProps] = useDetail();
+    const { preview, publishVersionId } = props;
     const { open } = detailProps;
     const issueDiffDataSet = useMemo(() => new DataSet(IssueDiffDataSet()), []);
     const issueInfoTableDataSet = useMemo(() => new DataSet(IssueInfoTableDataSet()), []);
@@ -57,8 +59,8 @@ const PublishVersionProvider = injectIntl(inject('AppState')(
         });
         tableDataSet.select(0);
       }
-      init();
-    }, [tableDataSet]);
+      !preview && publishVersionId ? store.select(publishVersionId) : init();
+    }, [preview, publishVersionId, tableDataSet]);
     const value = {
       ...props,
       store,

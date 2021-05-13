@@ -30,7 +30,7 @@ function IssueDiffArea() {
   const [generateBtnLoading, setGenerateBtnLoading] = useState(false);
   const [publishVersionId, setPublishVersionId] = useState<string>();
   const { store, issueDiffDataSet } = usePublishVersionContext();
-  const dependencyList = useMemo(() => (store.getDependencyList[0]?.children || []).filter((item) => item.type === 'tag'), [store.getDependencyList]);
+  const dependencyList = store.getDependencyList;
 
   // const applicationId = useMemo(() => {
   //   const appServiceCode = ds.current?.get('appServiceCode');
