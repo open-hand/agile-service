@@ -16,7 +16,13 @@ interface Props extends Partial<SelectProps> {
 }
 const renderService = (appService: any) => {
   if (appService) {
-    return <Tooltip title={appService.code}>{`${appService.name}(${appService.code})`}</Tooltip>;
+    return (
+      <Tooltip title={appService.code}>
+        <div style={{ display: 'inline-block' }}>
+          {`${appService.name}(${appService.code})`}
+        </div>
+      </Tooltip>
+    );
   }
   return null;
 };

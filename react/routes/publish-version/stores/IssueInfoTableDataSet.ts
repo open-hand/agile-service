@@ -1,4 +1,5 @@
 import { publishVersionApiConfig, versionApiConfig } from '@/api';
+import { set } from 'lodash';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 
@@ -23,16 +24,18 @@ function IssueInfoTableDataSet(): DataSetProps {
     transport: {
       read: ({ params, data }) => {
         // console.log('params bug', data, params);
-        const { versionId, issueTypeId } = data;
+        const { search, versionId, issueTypeId } = data;
         console.log('params bug', data, params, issueTypeId);
+        search && set(search, 'advancedSearchArgs.issueTypeId', [issueTypeId]);
         // {
         //   code: 'issueTypeId',
         //     name: '问题类型',
         //       defaultShow: true,
         //         fieldType: 'multiple',
         // }
-        const filters = transformFilter([['issueTypeId', { value: issueTypeId }]]);
-        return ({ ...publishVersionApiConfig.loadIssues(versionId, filters, params) });
+        const filters = transformFilter([['issueTypeId', { value: [issueTypeId] }]]);
+
+        return ({ ...publishVersionApiConfig.loadIssues(versionId, search || filters, params) });
       },
     },
   };

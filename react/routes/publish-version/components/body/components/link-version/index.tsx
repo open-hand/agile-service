@@ -48,11 +48,17 @@ function PublishVersionLinkVersion() {
     });
   }
   function handleDelete(v: IPublishVersionTreeNode) {
+    let versionName = v.versionAlias || v.name;
+    if (v.type === 'tag') {
+      const appService = v.appServiceCode ? store.findAppServiceByCode(v.appServiceCode)! : undefined;
+      versionName = appService ? `${appService.name}（${appService.code}）` : versionName;
+    }
+
     Modal.confirm({
       title: '删除关联版本',
       children: (
         <div>
-          <span>{`您确定要删除关联的版本【${v.versionAlias || v.version}】？`}</span>
+          <span>{`您确定要删除关联的版本【${versionName}】？`}</span>
           {/* <SelectBox mode={'box' as any} defaultValue="only" onChange={(value: any) => { delConfigRef.current = value; }}>
             <SelectBox.Option value="only">仅删除关联关系</SelectBox.Option>
             <SelectBox.Option value="all">删除关联关系及应用版本</SelectBox.Option>
@@ -103,20 +109,21 @@ function PublishVersionLinkVersion() {
             {level === 0 ? (
               <span>
                 {item.type === 'tag' && (
-                <Button
-                  icon="mode_edit"
-                  className={styles.node_btn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openEditAppVersionModal({
-                      data: item as any,
-                      handleOk: async () => {
-                        store.loadData();
-                        return true;
-                      },
-                    });
-                  }}
-                />
+                  <Button
+                    icon="mode_edit"
+                    className={styles.node_btn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditAppVersionModal({
+                        data: item as any,
+                        handleOk: async (newData) => {
+                          publishVersionApi.updateTreeTagAlias(item.id, store.getCurrentData.id, item.objectVersionNumber!, newData.versionAlias);
+                          store.loadData();
+                          return true;
+                        },
+                      });
+                    }}
+                  />
                 )}
                 <Button
                   icon="delete_forever"

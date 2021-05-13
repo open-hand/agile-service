@@ -21,6 +21,7 @@ import { getProjectId } from '@/utils/common';
 import styles from './index.less';
 import PublishVersionSection from '../section';
 import { openPreviewResultModal } from './PreviewResultModal';
+import { requestPreviewData } from './utils';
 
 const JSONbigString = JSONbig({ storeAsString: true });
 
@@ -43,8 +44,13 @@ function IssueDiffArea() {
   const handleSubmit = async () => {
     if (await issueDiffDataSet.validate()) {
       setTableData(false);
+      setGenerateBtnLoading(true);
       // storyTableDataSet.query();
-      await publishVersionApi.comparePreviewTag(store.getCurrentData.id, issueDiffDataSet.toData());
+      const newData = await requestPreviewData(store.getCurrentData.id, issueDiffDataSet.toData());
+      setGenerateBtnLoading(false);
+
+      setTableData(newData);
+      // await publishVersionApi.comparePreviewTag(store.getCurrentData.id, issueDiffDataSet.toData());
       return true;
     }
     return false;
@@ -107,14 +113,14 @@ function IssueDiffArea() {
           {issueDiffDataSet.records.map((r) => renderTags(r))}
 
           <div className={styles.compare}>
-            <WSHandler
+            {/* <WSHandler
               messageKey={`agile-preview-tag-compare-issues${getProjectId()}`}
               onMessage={handleMessage}
-            >
+            > */}
 
-              <Button loading={generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleSubmit}>生成预览信息</Button>
-            </WSHandler>
-            <Button funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
+            <Button loading={generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleSubmit}>生成预览信息</Button>
+            {/* </WSHandler> */}
+            <Button disabled={!tableData || generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
             {/* disabled={!tableData || generateBtnLoading} */}
           </div>
         </Form>

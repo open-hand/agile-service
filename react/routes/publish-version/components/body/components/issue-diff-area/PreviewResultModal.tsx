@@ -12,6 +12,8 @@ import JSONbig from 'json-bigint';
 import { WSHandler } from '@choerodon/boot';
 import classnames from 'classnames';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import DetailContainer, { useDetail } from '@/components/detail-container';
+
 import SelectAppService from '@/components/select/select-app-service';
 import SelectGitTags from '@/components/select/select-git-tags';
 import RadioGroup from 'choerodon-ui/lib/radio/group';
@@ -30,7 +32,11 @@ import {
 } from '@/api';
 import { Checkbox } from 'choerodon-ui';
 import SelectTeam from '@/components/select/select-team';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getOrganizationId } from '@/utils/common';
+import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
+import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import { transformFilter } from '@/routes/Issue/stores/utils';
+import styles from './PreviewResultModal.less';
 
 const JSONbigString = JSONbig({ storeAsString: true });
 
@@ -45,7 +51,14 @@ interface PreviewResultModalProps {
 const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps> = ({
   modal, tableData, handleOk, selectIssue,
 }) => {
+  const [detailProps] = useDetail();
   const [applicationId, setApplicationId] = useState<string>();
+  const issueSearchStore = useIssueSearchStore({
+    getSystemFields: () => getSystemFields()
+      .filter((i) => ['contents', 'issueTypeId', 'priorityId', 'statusId', 'assigneeId'].includes(i.code)) as any,
+    transformFilter,
+    // defaultChosenFields: Array.isArray(localPageCacheStore.getItem('issues')) ? new Map(localPageCacheStore.getItem('issues').map((item) => [item.code, item])) : undefined,
+  });
   const [versionType, setVersionType] = useState<string>('version');
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
@@ -64,7 +77,7 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
       // { name: 'influenceVersion', label: '影响的版本' },
 
       { name: 'assigneeId', label: '经办人' },
-      { name: 'createDate', label: '创建时间' },
+      { name: 'creationDate', label: '创建时间' },
 
     ],
     transport: {
@@ -93,57 +106,86 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
     );
   }
   return (
-    <Table dataSet={ds}>
-      <Column
-        name="summary"
-        className="c7n-agile-table-cell-click"
-        onCell={({ record }) => ({
-          onClick: () => {
-            selectIssue(record.get('issueId'));
-          },
-        })}
-        lock={'left' as any}
-        width={210}
-        renderer={renderSummary}
-      />
-      <Column name="issueNum" width={120} tooltip={'overflow' as any} className="c7n-agile-table-cell" />
-      <Column name="status" renderer={({ record }) => (record?.get('statusVO') ? renderStatus({ record }) : undefined)} />
-      <Column name="priority" renderer={renderPriority} />
-      <Column
-        name="influenceVersion"
-        renderer={({ record }) => {
-          const influenceArr = record?.get('versionIssueRelVOS')?.filter((i: any) => i.relationType === 'influence') || [];
-          return influenceArr.length > 0 ? (
-            <Tooltip title={<div>{influenceArr.map((item: { name: string }) => <div>{item.name}</div>)}</div>}>
-              {renderTags({ array: influenceArr, name: influenceArr[0].name })}
-            </Tooltip>
-          ) : undefined;
+    <div className={styles.wrap}>
+      <IssueSearch
+        store={issueSearchStore}
+        onClear={() => { }}
+        onChange={() => {
+          // localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
+          // query();
         }}
+      // onClickSaveFilter={handleClickSaveFilter}
       />
-      <Column
-        name="assigneeId"
-        className="c7n-agile-table-cell"
-        renderer={({ value, record }) => (value ? (
-          <UserTag data={{
-            imageUrl: record?.get('assigneeImageUrl'),
-            loginName: record?.get('assigneeLoginName'),
-            realName: record?.get('assigneeRealName'),
-            tooltip: record?.get('assigneeName'),
+      <Table dataSet={ds} className={styles.table}>
+        <Column
+          name="summary"
+          className="c7n-agile-table-cell-click"
+          onCell={({ record }) => ({
+            onClick: () => {
+              detailProps.open({
+                path: 'issue',
+                props: {
+                  disabled: true,
+                  issueId: record.get('issueId'),
+                  projectId: getProjectId(),
+                  organizationId: getOrganizationId(),
+                },
+                events: {
+                  update: () => {
+                    // issueInfoTableDataSet.query(issueInfoTableDataSet.currentPage);
+                    // issueDiffDataSet.query(issueDiffDataSet.currentPage)
+                    // handleRefresh();
+                  },
+                },
+              });
+            },
+          })}
+          lock={'left' as any}
+          width={210}
+          renderer={renderSummary}
+        />
+        <Column name="issueNum" width={120} tooltip={'overflow' as any} className="c7n-agile-table-cell" />
+        <Column name="status" renderer={({ record }) => (record?.get('statusVO') ? renderStatus({ record }) : undefined)} />
+        <Column name="priority" renderer={renderPriority} />
+        <Column
+          name="influenceVersion"
+          renderer={({ record }) => {
+            const influenceArr = record?.get('versionIssueRelVOS')?.filter((i: any) => i.relationType === 'influence') || [];
+            return influenceArr.length > 0 ? (
+              <Tooltip title={<div>{influenceArr.map((item: { name: string }) => <div>{item.name}</div>)}</div>}>
+                {renderTags({ array: influenceArr, name: influenceArr[0].name })}
+              </Tooltip>
+            ) : undefined;
           }}
-          />
-        ) : '')}
-      />
-      <Column name="createDate" />
+        />
+        <Column
+          name="assigneeId"
+          className="c7n-agile-table-cell"
+          renderer={({ value, record }) => (value ? (
+            <UserTag data={{
+              imageUrl: record?.get('assigneeImageUrl'),
+              loginName: record?.get('assigneeLoginName'),
+              realName: record?.get('assigneeRealName'),
+              tooltip: record?.get('assigneeName'),
+            }}
+            />
+          ) : '')}
+        />
+        <Column name="creationDate" className="c7n-agile-table-cell" width={100} renderer={({ value }) => (value ? String(value).split(' ')[0] : '')} />
 
-    </Table>
+      </Table>
+      <DetailContainer {...detailProps} />
+    </div>
   );
 };
 function openPreviewResultModal(props: PreviewResultModalProps) {
   const key = Modal.key();
+  let modal = {} as any;
   function handleChangeIssueTag(action: 'add' | 'update') {
     props.onChangeIssueTag(action);
+    modal.close();
   }
-  Modal.open({
+  modal = Modal.open({
     key,
     title: '预览结果',
     style: {
