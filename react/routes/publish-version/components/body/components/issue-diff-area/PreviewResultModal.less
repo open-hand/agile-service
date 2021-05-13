@@ -1,13 +1,48 @@
-.c7n-agile-table-cell-click {
-    color: #3F51B5;
-    cursor: pointer;
-    vertical-align: top;
+.wrap {
+  :global {
+    .c7n-agile-issue-search-choose-field {
+      display: none !important;
+    }
+    .c7n-agile-table-cell-click {
+      color: #3F51B5;
+      cursor: pointer;
+      vertical-align: top;
 
-    &:hover {
-      text-decoration: underline;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .c7n-agile-table-cell {
+      color: rgba(0, 0, 0, 0.65);
     }
   }
+}
 
-  .c7n-agile-table-cell {
-    color: rgba(0, 0, 0, 0.65);
+.table {
+  position: relative;
+  top: -.31rem;
+
+  :global {
+    .c7n-pro-table-filter-select-wrapper {
+
+      input,
+      .c7n-pro-table-filter-select-placeholder,
+      .c7n-pro-table-filter-select-prefix,
+      .c7n-pro-table-filter-select,
+      .c7n-pro-table-filter-select-inner-button {
+        display: none;
+      }
+
+      .c7n-pro-table-filter-select-suffix {
+
+        height: .5rem;
+      }
+
+      .c7n-pro-table-filter-select-suffix,
+      .c7n-pro-table-columns-chooser {
+        width: .5rem;
+      }
+    }
   }
+}

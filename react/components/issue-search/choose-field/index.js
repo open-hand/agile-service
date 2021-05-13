@@ -32,6 +32,7 @@ function ChooseField() {
   const ref = useClickOut(handleClickOut);
   return (
     <div
+      className="c7n-agile-issue-search-choose-field"
       style={{ marginLeft: 5, display: 'flex', alignItems: 'center' }}
     >
       <Dropdown

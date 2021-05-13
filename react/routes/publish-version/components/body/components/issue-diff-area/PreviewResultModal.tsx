@@ -33,7 +33,10 @@ import {
 import { Checkbox } from 'choerodon-ui';
 import SelectTeam from '@/components/select/select-team';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-import './PreviewResultModal.less';
+import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
+import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import { transformFilter } from '@/routes/Issue/stores/utils';
+import styles from './PreviewResultModal.less';
 
 const JSONbigString = JSONbig({ storeAsString: true });
 
@@ -50,6 +53,12 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
 }) => {
   const [detailProps] = useDetail();
   const [applicationId, setApplicationId] = useState<string>();
+  const issueSearchStore = useIssueSearchStore({
+    getSystemFields: () => getSystemFields()
+      .filter((i) => ['contents', 'issueTypeId', 'priorityId', 'statusId', 'assigneeId'].includes(i.code)) as any,
+    transformFilter,
+    // defaultChosenFields: Array.isArray(localPageCacheStore.getItem('issues')) ? new Map(localPageCacheStore.getItem('issues').map((item) => [item.code, item])) : undefined,
+  });
   const [versionType, setVersionType] = useState<string>('version');
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
@@ -97,8 +106,17 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
     );
   }
   return (
-    <div>
-      <Table dataSet={ds}>
+    <div className={styles.wrap}>
+      <IssueSearch
+        store={issueSearchStore}
+        onClear={() => { }}
+        onChange={() => {
+          // localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
+          // query();
+        }}
+      // onClickSaveFilter={handleClickSaveFilter}
+      />
+      <Table dataSet={ds} className={styles.table}>
         <Column
           name="summary"
           className="c7n-agile-table-cell-click"
@@ -162,10 +180,12 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
 };
 function openPreviewResultModal(props: PreviewResultModalProps) {
   const key = Modal.key();
+  let modal = {} as any;
   function handleChangeIssueTag(action: 'add' | 'update') {
     props.onChangeIssueTag(action);
+    modal.close();
   }
-  Modal.open({
+  modal = Modal.open({
     key,
     title: '预览结果',
     style: {

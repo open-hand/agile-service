@@ -27,23 +27,20 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
     autoCreate: true,
     data: data ? [data] : undefined,
     fields: [
-      { name: 'versionAlias', label: '版本别名', required: data?.appService },
+      { name: 'versionAlias', label: '版本别名', required: false },
       // { name: 'version', label: 'version', required: !data?.appService },
       // { name: 'artifactId', label: 'artifactId', required: !data?.appService },
       // { name: 'groupId', label: 'groupId', required: !data?.appService },
       // { name: 'serviceCode', label: '关联应用服务' },
       // { name: 'tagName', label: '关联tag' },
     ],
-    transport: {
-      submit: data ? ({ data: newData }) => publishVersionApi.update(data.id!, newData[0]) : undefined,
-    },
   }), [data]);
 
   const handleSubmit = useCallback(async () => {
     if (!data && !await formDs.validate()) {
       return false;
     }
-    data && await formDs.submit();
+    // data && await formDs.submit();
     const result = handleOk && await handleOk(formDs.current?.toData());
     return typeof (result) !== 'undefined' ? result : true;
   }, [data, formDs, handleOk]);
@@ -80,7 +77,8 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
 const ObserverEditAppVersionModal = observer(EditAppVersionModal);
 async function openEditAppVersionModal(props: IImportPomFunctionProps) {
   const { id } = props.data || {};
-  const data = id ? await publishVersionApi.load(id) : props.data!;
+  const { data } = props;
+  // const data = id ? await publishVersionApi.load(id) : props.data!;
   const key = Modal.key();
   Modal.open({
     key,

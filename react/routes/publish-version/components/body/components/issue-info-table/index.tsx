@@ -54,6 +54,9 @@ function IssueInfoTable() {
           store={issueSearchStore}
           onClear={() => { }}
           onChange={() => {
+            const search = issueSearchStore.getCustomFieldFilters();
+            issueInfoTableDataSet.setQueryParameter('search', search);
+            issueInfoTableDataSet.query();
             // localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
             // query();
           }}

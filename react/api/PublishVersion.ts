@@ -53,6 +53,7 @@ export interface IPublishVersionTreeNode {
   groupId?: string | null
   projectId?: string | null
   tagName?: string | null
+  objectVersionNumber?: number
 }
 interface IPublishVersionListSearchData {
   appService?: boolean
@@ -186,6 +187,18 @@ class PublishVersionApi extends Api<PublishVersionApi> {
         ...data,
         organizationId: getOrganizationId(),
         projectId: data.projectId || getProjectId(),
+      },
+    });
+  }
+
+  updateTreeTagAlias(id: string, publishVersionId: string, objectVersionNumber: number, alias: string) {
+    return this.request({
+      method: 'put',
+      url: `${this.prefix}/publish_version_tree/tag/${id}/update_alias`,
+      params: {
+        publishVersionId,
+        objectVersionNumber,
+        alias,
       },
     });
   }

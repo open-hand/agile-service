@@ -44,8 +44,11 @@ function IssueDiffArea() {
   const handleSubmit = async () => {
     if (await issueDiffDataSet.validate()) {
       setTableData(false);
+      setGenerateBtnLoading(true);
       // storyTableDataSet.query();
       const newData = await requestPreviewData(store.getCurrentData.id, issueDiffDataSet.toData());
+      setGenerateBtnLoading(false);
+
       setTableData(newData);
       // await publishVersionApi.comparePreviewTag(store.getCurrentData.id, issueDiffDataSet.toData());
       return true;
