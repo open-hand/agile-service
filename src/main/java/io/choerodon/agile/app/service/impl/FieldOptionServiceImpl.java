@@ -170,8 +170,8 @@ public class FieldOptionServiceImpl implements FieldOptionService {
     }
 
     @Override
-    public Page<FieldOptionVO> getOptionsPageByFieldId(Long organizationId, Long fieldId, String value, PageRequest pageRequest) {
-        Page<FieldOptionDTO> optionPage = PageHelper.doPage(pageRequest, () -> fieldOptionMapper.selectByFieldIdAndValue(organizationId, fieldId, value));
+    public Page<FieldOptionVO> getOptionsPageByFieldId(Long organizationId, Long fieldId, String searchValue, PageRequest pageRequest) {
+        Page<FieldOptionDTO> optionPage = PageHelper.doPage(pageRequest, () -> fieldOptionMapper.selectByFieldIdAndValue(organizationId, fieldId, searchValue));
         return PageUtils.copyPropertiesAndResetContent(
                 optionPage,
                 modelMapper.map(optionPage.getContent(), new TypeToken<List<FieldOptionVO>>() {}.getType()));

@@ -45,7 +45,8 @@ public interface FieldOptionMapper extends BaseMapper<FieldOptionDTO> {
      *
      * @param organizationId 组织id
      * @param fieldId        field id
+     * @param searchValue  搜索参数
      * @return option
      */
-    List<FieldOptionDTO> selectByFieldIdAndValue(@Param("organizationId") Long organizationId, @Param("fieldId") Long fieldId, @Param("value") String value);
+    List<FieldOptionDTO> selectByFieldIdAndValue(@Param("organizationId") Long organizationId, @Param("fieldId") Long fieldId, @Param("searchValue") String searchValue);
 }

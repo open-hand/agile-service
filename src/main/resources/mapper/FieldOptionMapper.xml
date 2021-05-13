@@ -47,9 +47,9 @@
         SELECT * FROM fd_field_option
         WHERE organization_id = #{organizationId}
         AND field_id = #{fieldId}
-        <if test="value != null and value != ''">
-            <bind name="valueLike" value="'%' + value + '%'"/>
-            AND value LIKE #{valueLike}
+        <if test="searchValue != null and searchValue != ''">
+            <bind name="searchValueLike" value="'%' + searchValue + '%'"/>
+            AND value LIKE #{searchValueLike}
         </if>
         ORDER BY sequence ASC
     </select>
