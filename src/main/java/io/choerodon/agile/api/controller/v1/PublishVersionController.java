@@ -179,9 +179,11 @@ public class PublishVersionController {
     @PostMapping(value = "/{publish_version_id}/compare/preview_issue")
     public ResponseEntity<List<IssueListFieldKVVO>> previewIssueFromTag(@ApiParam(value = "项目id", required = true)
                                                                         @PathVariable(name = "project_id") Long projectId,
-                                                                        @ApiParam(value = "产品版本id", required = true)
+                                                                        @ApiParam(value = "发布版本id", required = true)
                                                                         @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
+                                                                        @ApiParam(value = "组织id", required = true)
                                                                         @RequestParam Long organizationId,
+                                                                        @ApiParam(value = "tag对比对象", required = true)
                                                                         @RequestBody TagCompareVO tagCompareVO) {
         return ResponseEntity.ok(publishVersionService.previewIssueFromTag(projectId, organizationId, publishVersionId, tagCompareVO));
     }
