@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
 import {
-  Page, Header, Content, Breadcrumb,
+  Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import GanttComponent, { GanttProps, Gantt, GanttRef } from 'react-gantt-component';
 import 'react-gantt-component/dist/react-gantt-component.cjs.production.min.css';
@@ -270,22 +270,33 @@ const GanttPage: React.FC = () => {
           ))}
         </FlatSelect>
         <HeaderLine />
-        <Button
-          icon="playlist_add"
-          onClick={() => {
-            store.setCreateIssueVisible(true);
-          }}
-        >
-          创建问题
-        </Button>
-        <Button
-          // @ts-ignore
-          onClick={() => { toggleFullScreen(); }}
-          icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}
-        >
-          {isFullScreen ? '退出全屏' : '全屏'}
-        </Button>
-        <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
+        <HeaderButtons
+          items={[
+            {
+              name: '创建问题',
+              icon: 'playlist_add',
+              display: true,
+              handler: () => {
+                store.setCreateIssueVisible(true);
+              },
+            },
+            {
+              name: isFullScreen ? '退出全屏' : '全屏',
+              icon: isFullScreen ? 'fullscreen_exit' : 'zoom_out_map',
+              display: true,
+              handler: () => {
+                // @ts-ignore
+                toggleFullScreen();
+              },
+            },
+            {
+              name: '个人筛选',
+              icon: 'settings',
+              display: true,
+              handler: handleClickFilterManage,
+            },
+          ]}
+        />
       </Header>
       <Breadcrumb />
       <Content style={{
