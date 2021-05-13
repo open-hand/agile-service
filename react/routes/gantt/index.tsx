@@ -28,7 +28,7 @@ import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import HeaderLine from '@/components/HeaderLine';
 import { Issue, User } from '@/common/types';
-import { transformFilter } from './components/search/util';
+import { transformFilter } from '@/routes/Issue/stores/utils';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
 import GanttGroupBar from './components/gantt-group-bar';
@@ -271,6 +271,7 @@ const GanttPage: React.FC = () => {
         </FlatSelect>
         <HeaderLine />
         <HeaderButtons
+          showClassName={false}
           items={[
             {
               name: '创建问题',
