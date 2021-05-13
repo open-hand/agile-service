@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Button, Modal, Table, Tooltip,
 } from 'choerodon-ui/pro';
@@ -22,7 +22,7 @@ const { Column } = Table;
 function IssueInfoTable() {
   const { issueInfoTableDataSet, store } = usePublishVersionContext();
   const issueSearchStore = useIssueSearchStore({
-    getSystemFields: getSystemFields as any,
+    getSystemFields: () => getSystemFields().filter((i) => i.code !== 'issueTypeId') as any,
     transformFilter,
     // defaultChosenFields: Array.isArray(localPageCacheStore.getItem('issues')) ? new Map(localPageCacheStore.getItem('issues').map((item) => [item.code, item])) : undefined,
   });
@@ -76,17 +76,6 @@ function IssueInfoTable() {
           <Column name="status" renderer={({ record }) => (record?.get('statusVO') ? renderStatus({ record }) : undefined)} />
           <Column name="priority" renderer={renderPriority} />
           <Column
-            name="influenceVersion"
-            renderer={({ record }) => {
-              const influenceArr = record?.get('versionIssueRelVOS')?.filter((i: any) => i.relationType === 'influence') || [];
-              return influenceArr.length > 0 ? (
-                <Tooltip title={<div>{influenceArr.map((item: { name: string }) => <div>{item.name}</div>)}</div>}>
-                  {renderTags({ array: influenceArr, name: influenceArr[0].name })}
-                </Tooltip>
-              ) : undefined;
-            }}
-          />
-          <Column
             name="assigneeId"
             className="c7n-agile-table-cell"
             renderer={({ value, record }) => (value ? (
@@ -99,12 +88,15 @@ function IssueInfoTable() {
               />
             ) : '')}
           />
-          <Column name="tags" width={100} />
+          <Column
+            name="tags"
+            width={140}
+            tooltip={'always' as any}
+            renderer={({ value }) => value?.
+              map((i: any) => (`${i.appServiceCode}${i.tagName}`)).join('、')}
+          />
 
-          <Column name="createDate" width={100} />
-
-          <Column name="action" lock={'right' as any} renderer={renderAction} width={60} />
-
+          <Column name="creationDate" width={100} renderer={({ value }) => (value ? String(value).split(' ')[0] : '')} />
         </Table>
       </div>
     </div>

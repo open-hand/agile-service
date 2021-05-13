@@ -27,26 +27,16 @@ import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
 import { openLinkAppServiceTagModal } from './LinkAppServiceTagModal';
 import { usePublishVersionContext } from '../../../../stores';
 import PublishVersionSection from '../section';
-
+import { openEditAppVersionModal } from './EditAppVersionModal';
 import styles from './index.less';
 import DependencyTreeBase, { DependencyTreeNode } from '../dependency-tree-base';
 import { openImportPomModal } from '../../../publish-version-detail/components/import-pom';
 
-const { Column } = Table;
-const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> = ({
-  title, children, disabled, ...otherProps
-}) => {
-  if (title && disabled) {
-    return <Tooltip title={title}><Button disabled={disabled} {...omit(otherProps, 'onClick')}>{children}</Button></Tooltip>;
-  }
-  return <Button {...otherProps}>{children}</Button>;
-};
-
 function PublishVersionLinkVersion() {
-  const { prefixCls, store } = usePublishVersionContext();
+  const { store } = usePublishVersionContext();
   const dependencyList = useMemo(() => store.getDependencyList[0]?.children || [], [store.getDependencyList]);
   const detailData = store.getCurrentData;
-  console.log('dependencyList', dependencyList);
+
   function handleLinkPublishVersion(linkData: any) {
     publishVersionApi.dependencyTreeAdd({
       id: detailData.id,
@@ -112,20 +102,22 @@ function PublishVersionLinkVersion() {
 
             {level === 0 ? (
               <span>
+                {item.type === 'tag' && (
                 <Button
                   icon="mode_edit"
                   className={styles.node_btn}
                   onClick={(e) => {
                     e.stopPropagation();
-                    // openEditAppVersionModal({
-                    //   data: item as any,
-                    //   handleOk: async () => {
-                    //     store.loadData();
-                    //     return true;
-                    //   },
-                    // });
+                    openEditAppVersionModal({
+                      data: item as any,
+                      handleOk: async () => {
+                        store.loadData();
+                        return true;
+                      },
+                    });
                   }}
                 />
+                )}
                 <Button
                   icon="delete_forever"
                   className={styles.node_btn}
