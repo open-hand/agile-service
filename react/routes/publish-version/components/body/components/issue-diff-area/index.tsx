@@ -52,6 +52,7 @@ function IssueDiffArea() {
   function handleMessage(data: any) {
     const newData = JSONbigString.parse(data);
     const oneTableData = newData.data ? JSONbigString.parse(newData.data) : [];
+    console.log('newDATA', newData);
     console.log('oneTableData', oneTableData);
     setGenerateBtnLoading(true);
     setTableData((oldData) => (!oldData ? [] : oldData.concat(...oneTableData)));
@@ -60,7 +61,6 @@ function IssueDiffArea() {
       setGenerateBtnLoading(false);
       // setTableData(false);
     }
-    console.log('newDATA', newData);
   }
   useEffect(() => {
     publishVersionApi.loadCompareHistory(store.getCurrentData.id); // .....
@@ -114,8 +114,8 @@ function IssueDiffArea() {
 
               <Button loading={generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleSubmit}>生成预览信息</Button>
             </WSHandler>
-            <Button disabled={!tableData || generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
-
+            <Button funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
+            {/* disabled={!tableData || generateBtnLoading} */}
           </div>
         </Form>
       </PublishVersionSection>

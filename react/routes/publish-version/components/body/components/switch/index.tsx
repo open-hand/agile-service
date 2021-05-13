@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {
+  useState, useEffect, useMemo, useCallback,
+} from 'react';
 import { pageConfigApi, PageConfigIssueType, publishVersionApi } from '@/api';
 import { Modal } from 'choerodon-ui/pro';
-import { observer } from 'mobx-react-lite';
+import { observer, useForceUpdate } from 'mobx-react-lite';
 import { IIssueType } from '@/common/types';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
@@ -18,33 +20,48 @@ function IssueTypeSwitch() {
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
 
   const { data: issueTypes = [] } = useProjectIssueTypes({ onlyEnabled: true, typeCode: ['story', 'task', 'bug'] });
-
   const { store, issueInfoTableDataSet } = usePublishVersionContext();
+  const forceUpdate = useForceUpdate();
+
   const issueTypesWithCountMaps = useMemo(() => {
-    issueInfoTableDataSet.setState('currentIssueTypeValue', issueTypes[0]?.id); /** 当前选项 */
+    issueInfoTableDataSet.setState('issueTypeId', issueTypes[0]?.id); /** 当前选项 */
     return new Map<string, number>(issueTypes?.map((i) => [i.id, 0]));
   }, [issueInfoTableDataSet, issueTypes]);
   const handleSelectBox = (val: any, { valueObj }: { valueObj: any }) => {
-    issueInfoTableDataSet.setState('currentIssueTypeValue', val);
+    issueInfoTableDataSet.setState('issueTypeId', val);
     return true;
   };
-
+  const loadTableData = useCallback(() => {
+    if (store.getCurrentData.id && issueInfoTableDataSet.getState('issueTypeId')) {
+      issueInfoTableDataSet.setQueryParameter('issueTypeId', issueInfoTableDataSet.getState('issueTypeId'));
+      issueInfoTableDataSet.setQueryParameter('versionId', store.getCurrentData.id);
+      issueInfoTableDataSet.query();
+    }
+  }, [issueInfoTableDataSet, store.getCurrentData.id, issueInfoTableDataSet.getState('issueTypeId')]);
+  useEffect(() => {
+    loadTableData();
+  }, [loadTableData]);
   // 加载全部字段 用于增添已有字段
   useEffect(() => {
     // store.setLoading(true);
     if (store.getCurrentData.id) {
-      publishVersionApi.loadIssueTypeList(store.getCurrentData.id).then((res: any) => {
-        res.forEach((issueType: any) => {
-
+      publishVersionApi.loadIssueTypeList(store.getCurrentData.id).then((res: Array<{
+        count: number
+        issueTypeId: string
+        issueTypeName: string
+      }>) => {
+        res.forEach((issueType) => {
+          issueTypesWithCountMaps.set(issueType.issueTypeId, issueType.count);
         });
+        forceUpdate();
       });
     }
-  }, [store.getCurrentData.id]);
+  }, [forceUpdate, issueTypesWithCountMaps, store.getCurrentData.id]);
 
   return (
     <Switch
-      value={issueInfoTableDataSet.getState('currentIssueTypeValue')}
-      options={issueTypes?.map((i) => ({ value: i.id, text: `${i.name}(0)` })) || []}
+      value={issueInfoTableDataSet.getState('issueTypeId')}
+      options={issueTypes?.map((i) => ({ value: i.id, text: `${i.name}(${issueTypesWithCountMaps.get(i.id)})` })) || []}
       onChange={handleSelectBox}
     />
   );

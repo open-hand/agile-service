@@ -60,7 +60,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     fields: [
       { name: 'artifactId', label: '应用服务' },
       { name: 'version', label: 'version*', required: true },
-      { name: 'versionAlias', label: '版本名称' },
+      { name: 'versionAlias', label: '版本别名' },
       {
         name: 'appServiceObject',
         type: 'object' as any,
