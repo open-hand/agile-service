@@ -22,7 +22,7 @@ const { Option, OptGroup } = FlatSelect;
 const SearchArea: React.FC = () => {
   const prefixCls = 'c7n-issue';
   const {
-    store, onClear, urlFilter, onClickSaveFilter, projectId,
+    store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight,
   } = useContext(IssueSearchContext);
   const { data: quickFilters } = useQuickFilters({ projectId });
   const {
@@ -271,7 +271,7 @@ const SearchArea: React.FC = () => {
     <div
       className={`${prefixCls}-search`}
       style={{
-        height: folded ? 48 : 'unset',
+        height: folded ? foldedHeight : 'unset',
         overflow: 'hidden',
       }}
     >

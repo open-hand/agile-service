@@ -7,7 +7,7 @@
     overflow-y: scroll;
     overflow-x: hidden;
     .addIssueType_form {
-      padding: 0.24rem;
+      padding-right: 0.24rem;
       .icon {
         position: relative;
         :global {
@@ -32,7 +32,7 @@
     
         .iconPicker {
           position: absolute;
-          top: 4px;
+          top: 6px;
           right: 4px;
         }
         &:focus-within {
@@ -80,14 +80,59 @@
         } 
       }
     }
-    
+    :global {
+      .c7n-pro-form-float {
+        :local {
+          .icon {
+            .icon_replace {
+              top: 20px !important;
+            }
+            .iconPicker {
+              top: 12px !important;
+            }
+            &:focus-within {
+              .iconPicker {
+                top: 12px !important;
+              }
+            }
+          }
+        }
+      }
+    }
   }
   &_footer {
     border-top: 0.01rem solid #e0e0e0;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 24px;
+    padding: 12px 24px;
+    margin-left: -24px;
   }
+}
+
+body[data-theme="theme4"] {
+  .addIssueType {
+    &_content {
+      .addIssueType_form {
+        .icon {
+          .icon_replace {
+            top: 8px;
+          }
+          .iconPicker {
+            top: 8px;
+          }
+          &:focus-within {
+            .iconPicker {
+              top: 8px;
+            }
+          }
+        }
+      }
+    }
+    &_footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 20px 24px;
+    }
+  }
+  
 }
 
 .confirm_modal {

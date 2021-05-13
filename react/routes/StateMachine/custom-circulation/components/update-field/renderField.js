@@ -80,7 +80,7 @@ export default function renderField({
       return (
         <Row gutter={20}>
           <Col span={12}>
-            <Select placeholder="字段值" name={`${code}-select`} className={styles.timeSelect}>
+            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.timeSelect}>
               {
                   extraOptionsMap.time.map((item) => (
                     <Option value={item.id} key={item.id}>{item.label}</Option>
@@ -92,6 +92,7 @@ export default function renderField({
             data[code].selected && data[code].selected === 'specifier' && (
               <Col span={12}>
                 <TimePicker
+                  label="字段值"
                   name={code}
                   style={{ width: '100%' }}
                 />
@@ -113,7 +114,7 @@ export default function renderField({
       return (
         <Row gutter={20}>
           <Col span={12}>
-            <Select placeholder="字段值" name={`${code}-select`} className={styles.dateTimeSelect}>
+            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.dateTimeSelect}>
               {
                 extraOptionsMap.datetime.map((item) => (
                   <Option value={item.id} key={item.id}>{item.label}</Option>
@@ -128,11 +129,13 @@ export default function renderField({
                 data[code].selected === 'specifier' ? (
                   <DateTimePicker
                     name={code}
+                    label="字段值"
                     style={{ width: '100%' }}
                   />
                 ) : (
                   <NumberField
                     name={code}
+                    label="字段值"
                     style={{ width: '100%' }}
                     step={1}
                     min={1}
@@ -157,7 +160,7 @@ export default function renderField({
       return (
         <Row gutter={20}>
           <Col span={12}>
-            <Select placeholder="字段值" name={`${code}-select`} className={styles.dateSelect}>
+            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.dateSelect}>
               {
                 extraOptionsMap.date.map((item) => (
                   <Option value={item.id} key={item.id}>{item.label}</Option>
@@ -172,11 +175,13 @@ export default function renderField({
                 data[code].selected === 'specifier' ? (
                   <DatePicker
                     name={code}
+                    label="字段值"
                     style={{ width: '100%' }}
                   />
                 ) : (
                   <NumberField
                     name={code}
+                    label="字段值"
                     style={{ width: '100%' }}
                     step={1}
                     min={1}
@@ -201,7 +206,7 @@ export default function renderField({
       return (
         <Row gutter={20}>
           <Col span={16}>
-            <Select placeholder="字段值" name={`${code}-select`} className={styles.numberSelect}>
+            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.numberSelect}>
               {
                 extraOptionsMap.number.map((item) => (
                   <Option value={item.id} key={item.id}>{item.label}</Option>
@@ -213,6 +218,7 @@ export default function renderField({
             data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') && (
             <Col span={8}>
               <NumberField
+                label="字段值"
                 name={code}
                 style={{ width: '100%' }}
               />
@@ -232,7 +238,7 @@ export default function renderField({
       return (
         <Row gutter={20}>
           <Col span={12}>
-            <Select placeholder="字段值" name={`${code}-select`} className={styles.inputSelect}>
+            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.inputSelect}>
               {
                 extraOptionsMap.input.map((item) => (
                   <Option value={item.id} key={item.id}>{item.label}</Option>
@@ -244,6 +250,7 @@ export default function renderField({
             data[code].selected && data[code].selected === 'specifier' && (
               <Col span={12}>
                 <TextField
+                  label="字段值"
                   name={code}
                   maxLength={100}
                   style={{ width: '100%' }}
@@ -264,7 +271,7 @@ export default function renderField({
       return (
         <Row gutter={20}>
           <Col span={12}>
-            <Select placeholder="字段值" name={`${code}-select`} className={styles.textSelect}>
+            <Select placeholder="字段值" label="字段值" name={`${code}-select`} className={styles.textSelect}>
               {
                 extraOptionsMap.text.map((item) => (
                   <Option value={item.id} key={item.id}>{item.label}</Option>
@@ -276,6 +283,7 @@ export default function renderField({
             {
               data[code].selected && data[code].selected === 'specifier' && (
               <TextArea
+                label="字段值"
                 name={code}
                 rows={3}
                 maxLength={255}
@@ -294,6 +302,7 @@ export default function renderField({
         <Select
           searchable
           placeholder="字段值"
+          label="字段值"
           name={code}
           style={{ width: '100%' }}
           multiple={isMultiple}
