@@ -20,7 +20,7 @@ function IssueInfoTableDataSet(): DataSetProps {
         name: 'sourceTag', label: '当前tag', type: 'string' as any, dynamicProps: { required: ({ record }) => record.get('appServiceCode') },
       },
       {
-        name: 'targetTag', label: '对比tag', type: 'string' as any, dynamicProps: { required: ({ record }) => record.get('appServiceCode') },
+        name: 'targetTag', label: '对比tag', type: 'string' as any,
       },
     ],
     transport: {

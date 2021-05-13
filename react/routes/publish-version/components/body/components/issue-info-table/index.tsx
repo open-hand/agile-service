@@ -11,7 +11,7 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import renderTags from '@/components/column-renderer/tags';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
-
+import classnames from 'classnames';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 
@@ -20,7 +20,8 @@ import IssueTypeSwitch from '../switch';
 
 const { Column } = Table;
 function IssueInfoTable() {
-  const { issueInfoTableDataSet, store } = usePublishVersionContext();
+  const { issueInfoTableDataSet, store, preview } = usePublishVersionContext();
+  console.log('table preview', preview);
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields().filter((i) => i.code !== 'issueTypeId') as any,
     transformFilter,
@@ -38,16 +39,9 @@ function IssueInfoTable() {
   function renderAction({ record }: RenderProps) {
     return <Button icon="delete_forever" onClick={() => handleDelete(record!)} />;
   }
-  function renderSummary({ value }: RenderProps) {
-    return (
-      <Tooltip title={value} placement="topLeft">
-        <span className="c7n-agile-table-cell-click">{value}</span>
-      </Tooltip>
-    );
-  }
 
   return (
-    <div className={styles.info}>
+    <div className={classnames(styles.info, styles.preview)}>
       <IssueTypeSwitch />
       <div className={styles.body}>
         <IssueSearch
@@ -65,15 +59,15 @@ function IssueInfoTable() {
         <Table dataSet={issueInfoTableDataSet} className={styles.table}>
           <Column
             name="summary"
-            className="c7n-agile-table-cell-click"
+            className={classnames({ 'c7n-agile-table-cell-click': !preview, 'c7n-agile-table-cell': preview })}
+            tooltip={'always' as any}
             onCell={({ record }) => ({
               onClick: () => {
-                store.selectIssue(record.get('issueId'));
+                !preview && store.selectIssue(record.get('issueId'));
               },
             })}
             lock={'left' as any}
             width={210}
-            renderer={renderSummary}
           />
           <Column name="issueNum" width={120} tooltip={'overflow' as any} className="c7n-agile-table-cell" />
           <Column name="status" renderer={({ record }) => (record?.get('statusVO') ? renderStatus({ record }) : undefined)} />
@@ -93,13 +87,14 @@ function IssueInfoTable() {
           />
           <Column
             name="tags"
+            className="c7n-agile-table-cell"
             width={140}
             tooltip={'always' as any}
             renderer={({ value }) => value?.
               map((i: any) => (`${i.appServiceCode}${i.tagName}`)).join('、')}
           />
 
-          <Column name="creationDate" width={100} renderer={({ value }) => (value ? String(value).split(' ')[0] : '')} />
+          <Column name="creationDate" className="c7n-agile-table-cell" width={120} renderer={({ value }) => (value ? String(value).split(' ')[0] : '')} />
         </Table>
       </div>
     </div>

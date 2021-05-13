@@ -11,7 +11,9 @@ import {
 } from 'lodash';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import SideNav from '@/components/side-nav';
-import { usePublishVersionContext } from './stores';
+import { useHistory } from 'react-router';
+import { linkUrl } from '@/utils/to';
+import Provider, { usePublishVersionContext } from './stores';
 import { openCreatePublishVersionModal } from './components/create-edit-publish-version';
 import openExportPublishVersionModal from './components/export';
 import PublishVersionList from './components/list';
@@ -29,17 +31,22 @@ const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> =
 
 function PublishVersion() {
   const { prefixCls, store, tableDataSet } = usePublishVersionContext();
-
-  function handleCreate(data:any) {
+  const history = useHistory();
+  function handleCreate(data: any) {
     store.create(data);
   }
   function handleClickMenu(key: string) {
     switch (key) {
       case 'excel':
-        openExportPublishVersionModal();
+        openExportPublishVersionModal(store.getCurrentData.id);
         break;
       case 'preview':
-
+        window.open(`/#${linkUrl(`/agile/project-version/publish/preview/${store.getCurrentData.id}`, {
+          type: 'project',
+          params: {
+            fullPage: 'true',
+          },
+        })}`);
         break;
       default:
         break;
@@ -64,10 +71,12 @@ function PublishVersion() {
         >
           创建发布版本
         </TooltipButton>
-        <Dropdown overlay={renderMenu()}>
+        {!!store.getCurrentData.id && (
+          <Dropdown overlay={renderMenu()}>
 
-          <Button icon="unarchive">导出版本</Button>
-        </Dropdown>
+            <Button icon="unarchive">导出版本</Button>
+          </Dropdown>
+        )}
       </Header>
       <Breadcrumb />
       <Content
@@ -90,4 +99,11 @@ function PublishVersion() {
     </Page>
   );
 }
-export default observer(PublishVersion);
+const ObserverPublishVersion = observer(PublishVersion);
+export default function Index(props: any) {
+  return (
+    <Provider {...props}>
+      <ObserverPublishVersion />
+    </Provider>
+  );
+}

@@ -1,28 +1,15 @@
 import React, { useMemo } from 'react';
 import {
-  TabPage as Page, Header, Content, Breadcrumb,
-} from '@choerodon/boot';
-import {
-  Button, Menu, Table, Tooltip, Modal, Icon,
+  Button, Modal, Icon,
 } from 'choerodon-ui/pro';
-import { observer } from 'mobx-react-lite';
 import {
-  omit,
-} from 'lodash';
+  observer, useComputed, Observer, useObservable,
+} from 'mobx-react-lite';
 import {
   IPublishVersionTreeNode, publishVersionApi,
-  versionApi,
 } from '@/api';
 import CustomIcon from '@/components/custom-icon';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
-import TableDropMenu from '@/common/TableDropMenu';
-import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { Tag } from '@choerodon/components';
-import VERSION_STATUS_TYPE from '@/constants/VERSION_STATUS_TYPE';
-import SideNav from '@/components/side-nav';
-import { getProjectId } from '@/utils/common';
 import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
 import { openLinkAppServiceTagModal } from './LinkAppServiceTagModal';
 import { usePublishVersionContext } from '../../../../stores';
@@ -33,20 +20,9 @@ import DependencyTreeBase, { DependencyTreeNode } from '../dependency-tree-base'
 import { openImportPomModal } from '../../../publish-version-detail/components/import-pom';
 
 function PublishVersionLinkVersion() {
-  const { store } = usePublishVersionContext();
-  const dependencyList = useMemo(() => store.getDependencyList[0]?.children || [], [store.getDependencyList]);
+  const { store, preview } = usePublishVersionContext();
   const detailData = store.getCurrentData;
-
-  function handleLinkPublishVersion(linkData: any) {
-    publishVersionApi.dependencyTreeAdd({
-      id: detailData.id,
-      type: 'publish',
-      children: linkData?.version.map((item: any) => ({ id: item, type: 'publish' })) || [],
-
-    }).then(() => {
-      store.loadData();
-    });
-  }
+  console.log('dependencyList', store.getDependencyList);
   function handleDelete(v: IPublishVersionTreeNode) {
     let versionName = v.versionAlias || v.name;
     if (v.type === 'tag') {
@@ -79,10 +55,8 @@ function PublishVersionLinkVersion() {
     });
   }
   function renderTreeNode(item: IPublishVersionTreeNode, level: number) {
-    let name = item.versionAlias || item.version;
     const showAdditionalLine = !!(item.groupId || item.artifactId || item.version);
     const appService = item.appServiceCode ? store.findAppServiceByCode(item.appServiceCode)! : undefined;
-    name = item.name ? `${item.name}:${name}` : name;
     return (
       <DependencyTreeNode offsetBottom={10} style={{ height: showAdditionalLine ? 54 : 30 }}>
         <div className={styles.node}>
@@ -106,7 +80,7 @@ function PublishVersionLinkVersion() {
               )}
             </span>
 
-            {level === 0 ? (
+            {level === 0 && !preview ? (
               <span>
                 {item.type === 'tag' && (
                   <Button
@@ -148,6 +122,23 @@ function PublishVersionLinkVersion() {
       </DependencyTreeNode>
     );
   }
+
+  return <Observer>{() => <div>{store.getDependencyList?.map((i) => <DependencyTreeBase data={[i]} renderNode={renderTreeNode} />)}</div>}</Observer>;
+}
+function PublishVersionLinkVersionWrap({ children }: { children: any }) {
+  const { store } = usePublishVersionContext();
+  const detailData = store.getCurrentData;
+
+  function handleLinkPublishVersion(linkData: any) {
+    publishVersionApi.dependencyTreeAdd({
+      id: detailData.id,
+      type: 'publish',
+      children: linkData?.version.map((item: any) => ({ id: item, type: 'publish' })) || [],
+
+    }).then(() => {
+      store.loadData();
+    });
+  }
   async function handleImportPom(pomData: any) {
     await publishVersionApi.createBatch(detailData.id, pomData);
     store.loadData();
@@ -158,7 +149,7 @@ function PublishVersionLinkVersion() {
     publishVersionApi.dependencyTreeAddTag(detailData.id, linkData).then(() => {
       store.loadData();
     });
-    return false;
+    return true;
   }
   return (
     <PublishVersionSection
@@ -208,8 +199,20 @@ function PublishVersionLinkVersion() {
       )}
     >
 
-      {dependencyList.map((i) => <DependencyTreeBase data={[i]} renderNode={renderTreeNode} />)}
+      {children}
     </PublishVersionSection>
   );
 }
-export default observer(PublishVersionLinkVersion);
+const Index = () => {
+  const { preview } = usePublishVersionContext();
+  return preview ? (
+    <PublishVersionSection className={styles.preview}>
+      <PublishVersionLinkVersion />
+    </PublishVersionSection>
+  ) : (
+    <PublishVersionLinkVersionWrap>
+      <PublishVersionLinkVersion />
+    </PublishVersionLinkVersionWrap>
+  );
+};
+export default observer(Index);
