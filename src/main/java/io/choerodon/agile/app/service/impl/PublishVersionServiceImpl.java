@@ -1,7 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.*;
@@ -13,6 +12,7 @@ import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -546,67 +546,38 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     }
 
     @Override
-    @Async
-    public void previewIssueFromTag(Long projectId,
-                                    Long organizationId,
-                                    Long publishVersionId,
-                                    SearchVO searchVO,
-                                    PageRequest pageRequest) {
-        String tagCompareListKey = "tagCompareList";
-        String websocketKey = WEBSOCKET_PREVIEW_TAG_COMPARE + projectId;
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        pageRequest.setPage(1);
-        pageRequest.setSize(0);
+    public List<IssueListFieldKVVO> previewIssueFromTag(Long projectId,
+                                                        Long organizationId,
+                                                        Long publishVersionId,
+                                                        TagCompareVO tagCompareVO) {
+        List<TagCompareVO> tagCompareList = Arrays.asList(tagCompareVO);
+        validateTagCompareList(tagCompareList);
+        Set<Long> issueIds;
         try {
-            Object obj = searchVO.getSearchArgs().get(tagCompareListKey);
-            AssertUtilsForCommonException.notNull(obj, "error.tagCompareList.empty");
-            List<TagCompareVO> tagCompareList;
-            try {
-                tagCompareList =
-                        objectMapper.readValue(objectMapper.writeValueAsString(obj), new TypeReference<List<TagCompareVO>>() {
-                        });
-            } catch (IOException e) {
-                throw new CommonException("error.parse.to.string");
-            }
-            validateTagCompareList(tagCompareList);
-            int total = tagCompareList.size();
-            double current = 1D;
-            for (TagCompareVO tagCompareVO : tagCompareList) {
-                Set<Long> issueIds;
-                try {
-                    issueIds =
-                            devopsClientOperator.getIssueIdsBetweenTags(projectId,
-                                    tagCompareVO.getAppServiceId(),
-                                    tagCompareVO.getSourceTag(),
-                                    tagCompareVO.getTargetTag());
-                } catch (Exception e) {
-                    throw new CommonException("error.getIssue.from.devops", e);
-                }
-                TagCompareVO tagCompare = new TagCompareVO();
-                BeanUtils.copyProperties(tagCompareVO, tagCompare);
-                tagCompare.setAction(DOING);
-                double progress = getProgress(current, total);
-                tagCompare.setProgress(progress);
-                if (!ObjectUtils.isEmpty(issueIds)) {
-                    List<IssueListFieldKVVO> issues =
-                            issueService.listIssueWithSub(projectId, buildSearchVO(searchVO, issueIds), pageRequest, organizationId)
-                                    .getContent();
-                    tagCompare.setData(issues);
-                }
-                sendProgress(tagCompare, userId, websocketKey);
-                current++;
-            }
-            TagCompareVO tagCompareVO = new TagCompareVO();
-            tagCompareVO.setAction(DONE);
-            tagCompareVO.setProgress(1D);
-            sendProgress(tagCompareVO, userId, websocketKey);
+            issueIds =
+                    devopsClientOperator.getIssueIdsBetweenTags(projectId,
+                            tagCompareVO.getAppServiceId(),
+                            tagCompareVO.getSourceTag(),
+                            tagCompareVO.getTargetTag());
         } catch (Exception e) {
-            TagCompareVO tagCompareVO = new TagCompareVO();
-            tagCompareVO.setAction(FAILED);
-            tagCompareVO.setProgress(0D);
-            tagCompareVO.setMsg(e.getMessage());
-            sendProgress(tagCompareVO, userId, websocketKey);
-            throw new CommonException("error.preview.tag.issue", e);
+            throw new CommonException("error.getIssue.from.devops", e);
+        }
+        if (!ObjectUtils.isEmpty(issueIds)) {
+            SearchVO searchVO = new SearchVO();
+            Map<String, Object> searchArgs = new LinkedHashMap<>();
+            searchVO.setSearchArgs(searchArgs);
+            searchArgs.put("tree", false);
+            Map<String, Object> otherArgs = new LinkedHashMap<>();
+            searchVO.setOtherArgs(otherArgs);
+            otherArgs.put("issueIds", new ArrayList<>(issueIds));
+            PageRequest pageRequest = new PageRequest(1, 0);
+            Sort.Order order = new Sort.Order(Sort.Direction.DESC, "issueNum");
+            Sort sort = new Sort(order);
+            pageRequest.setSort(sort);
+            return issueService.listIssueWithSub(projectId, buildSearchVO(searchVO, issueIds), pageRequest, organizationId)
+                    .getContent();
+        } else {
+            return new ArrayList<>();
         }
     }
 

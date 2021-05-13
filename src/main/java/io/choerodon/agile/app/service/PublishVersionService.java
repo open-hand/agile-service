@@ -161,14 +161,13 @@ public interface PublishVersionService {
      * @param projectId
      * @param organizationId
      * @param publishVersionId
-     * @param searchVO
+     * @param tagCompareVO
      * @return
      */
-    void previewIssueFromTag(Long projectId,
-                             Long organizationId,
-                             Long publishVersionId,
-                             SearchVO searchVO,
-                             PageRequest pageRequest);
+    List<IssueListFieldKVVO> previewIssueFromTag(Long projectId,
+                                                 Long organizationId,
+                                                 Long publishVersionId,
+                                                 TagCompareVO tagCompareVO);
 
     /**
      * 查询发布版本可用的appService
