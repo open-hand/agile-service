@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -59,6 +61,7 @@ public class EncryptionUtils {
      */
     public static void decryptSearchVO(SearchVO search) {
         if (!EncryptContext.isEncrypt()){
+            filterEmptyCustomField(search);
             return;
         }
         Optional<Map<String, Object>> adMapOptional = Optional.ofNullable(search).map(SearchVO::getAdvancedSearchArgs);
@@ -69,6 +72,27 @@ public class EncryptionUtils {
         Optional<Map<String, Object>> searchArgs = Optional.ofNullable(search).map(SearchVO::getOtherArgs);
         if (searchArgs.isPresent()) {
             decryptOa(search, searchArgs);
+        }
+    }
+
+    public static void filterEmptyCustomField(SearchVO search) {
+        Optional<Map<String, Object>> searchArgs = Optional.ofNullable(search).map(SearchVO::getOtherArgs);
+        if (searchArgs.isPresent()) {
+            Map<String, Object> map = (Map) searchArgs.map(ad -> (Object) (ad.get("customField"))).get();
+            if (!ObjectUtils.isEmpty(map) && !map.isEmpty()) {
+                List<Object> options = (List) map.get("option");
+                if (!CollectionUtils.isEmpty(options)) {
+                    List<Object> filterOptions = new ArrayList<>();
+                    options.forEach(v -> {
+                        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(v));
+                        JSONArray value = jsonObject.getJSONArray("value");
+                        if (!value.isEmpty() && value.size() > 0) {
+                            filterOptions.add(v);
+                        }
+                    });
+                    map.put("option", filterOptions);
+                }
+            }
         }
     }
 
@@ -638,6 +662,9 @@ public class EncryptionUtils {
                             value1.forEach(v -> {
                                 list.add(v.isNumber() ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), BLANK_KEY) : encryptionService.decrypt(v.textValue(), BLANK_KEY)));
                             });
+                        }
+                        if (CollectionUtils.isEmpty(list)) {
+                            continue;
                         }
                         nodeObjValue.put("value", list);
                     } else if (StringUtils.contains(next.getKey(), "date")){
