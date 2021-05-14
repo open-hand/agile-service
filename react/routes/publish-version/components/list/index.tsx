@@ -119,9 +119,14 @@ function PublishVersionList() {
   useEffect(() => {
     function registerCreateAfter() {
       tableDataSet.query().then(() => {
-        tableDataSet.select(tableDataSet.records[0]);
-        store.select(tableDataSet.records[0].toData());
-        handleInitResizeData();
+        if (tableDataSet.length > 0) {
+          tableDataSet.select(tableDataSet.records[0]);
+          store.select(tableDataSet.records[0].toData());
+          handleInitResizeData();
+        } else { // 无数据时清空详情选择 及版本列表选择
+          tableDataSet.unSelectAll();
+          store.clear();
+        }
       });
     }
     function registerUpdate(newData: any, record: Record) {

@@ -98,6 +98,8 @@ class PublishDetailStore {
     this.currentClickKDetail = undefined;
     this.visible = false;
     this.disabled = false;
+    this.currentMenu = 'detail';
+    this.dependencyList = [];
     // this.appServiceList = [];
   }
 
@@ -146,7 +148,7 @@ class PublishDetailStore {
   }
 
   @action('创建版本')
-  async create(data: any) {
+  async create(data: any, emptyDataStatus = false) {
     this.loading = true;
     const res = await publishVersionApi.create(data);
     // this.select(res);

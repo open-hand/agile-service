@@ -18,6 +18,7 @@ import PublicRelease from '../ReleaseComponent/PublicRelease';
 import TableDropMenu from '../../../common/TableDropMenu';
 import DeleteReleaseWithIssues from '../ReleaseComponent/DeleteReleaseWithIssues';
 import { openLinkVersionModal } from '../ReleaseComponent/link-program-vesion';
+import { openCreatReleaseVersionModal, openEditReleaseVersionModal } from '../components/create-edit-release-version';
 
 const { Column } = Table;
 const { AppState } = stores;
@@ -27,9 +28,9 @@ const COLOR_MAP = {
   归档: 'rgba(0, 0, 0, 0.3)',
 };
 interface ReleaseHomeProps {
-    isInProgram: boolean
-    tableDataSet: DataSet
-    program?:{id:string}
+  isInProgram: boolean
+  tableDataSet: DataSet
+  program?: { id: string }
 }
 const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, program }) => {
   const [createVisible, setCreateVisible] = useState(false);
@@ -45,7 +46,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
       case 'releaseStatus': {
         if (recordData.statusCode === 'version_planning') {
           versionApi.loadPublicVersionDetail(recordData.versionId)
-            .then((res:any) => {
+            .then((res: any) => {
               ReleaseStore.setPublicVersionDetail(res);
               ReleaseStore.setVersionDetail(recordData);
               setPublicVersionVisible(true);
@@ -62,7 +63,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
         break;
       }
       case 'del': {
-        versionApi.loadNamesAndIssueBeforeDel(recordData.versionId).then((res:any) => {
+        versionApi.loadNamesAndIssueBeforeDel(recordData.versionId).then((res: any) => {
           setVersionDelInfo({
             versionName: recordData.name,
             versionId: recordData.versionId,
@@ -75,9 +76,10 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
         break;
       }
       case 'edit': {
-        versionApi.load(recordData.versionId).then((res:any) => {
-          ReleaseStore.setVersionDetail(res);
-          setEditVersionData(res);
+        versionApi.load(recordData.versionId).then((res: any) => {
+          // ReleaseStore.setVersionDetail(res);
+          // setEditVersionData(res);
+          openEditReleaseVersionModal({ editData: res, handleOk: () => tableDataSet.query() });
         });
         break;
       }
@@ -135,17 +137,17 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
           </Menu.Item>
         </Permission>
         {isInProgram
-        && (
-        <Permission service={['choerodon.code.project.cooperation.work-list.ps.version.link.program.version']} key="linkProgramVersion">
-          <Menu.Item key="linkProgramVersion">
-            <Tooltip placement="top" title="关联项目群版本">
-              <span>
-                关联项目群版本
-              </span>
-            </Tooltip>
-          </Menu.Item>
-        </Permission>
-        )}
+          && (
+            <Permission service={['choerodon.code.project.cooperation.work-list.ps.version.link.program.version']} key="linkProgramVersion">
+              <Menu.Item key="linkProgramVersion">
+                <Tooltip placement="top" title="关联项目群版本">
+                  <span>
+                    关联项目群版本
+                  </span>
+                </Tooltip>
+              </Menu.Item>
+            </Permission>
+          )}
         {statusCode === 'archived'
           ? null
           : (
@@ -204,7 +206,8 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
         <Header title="版本管理">
           <Button
             onClick={() => {
-              setCreateVisible(true);
+              // setCreateVisible(true);
+              openCreatReleaseVersionModal({ handleOk: () => tableDataSet.query() });
             }}
             className="leftBtn"
             funcType="flat"
@@ -275,8 +278,8 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
             )}
           />
           <Column name="startDate" className="c7n-agile-table-cell" width={100} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
-          <Column name="expectReleaseDate" className="c7n-agile-table-cell" width={105} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
-          <Column name="releaseDate" className="c7n-agile-table-cell" width={105} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+          <Column name="expectReleaseDate" className="c7n-agile-table-cell" width={120} tooltip={'always' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+          <Column name="releaseDate" className="c7n-agile-table-cell" width={120} tooltip={'always' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
           <Column
             name="description"
             className="c7n-agile-table-cell"
