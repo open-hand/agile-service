@@ -288,7 +288,7 @@ public class ExcelUtil {
         startRow++;
         String[] headers = {"编号", "问题类型", "概要", "状态", "经办人", "tag", "创建时间"};
         int num = issues.size();
-        issues.sort(Comparator.comparing(IssueListFieldKVVO::getIssueId));
+        issues.sort(Comparator.comparing(IssueListFieldKVVO::getIssueTypeId));
         startRow = initVersionTitleAndHeader(sheet, startRow, headers, "问题详情（" + num + "）", workbook);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (IssueListFieldKVVO issue : issues) {
