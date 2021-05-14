@@ -4,32 +4,7 @@ import {
   isEmpty, isEqual, pick, pickBy, isUndefined,
 } from 'lodash';
 
-export const getEmptyValue = (fieldType: string) => {
-  switch (fieldType) {
-    case 'text':
-    case 'input': {
-      return '';
-    }
-    case 'member':
-    case 'multiMember':
-    case 'single':
-    case 'multiple':
-    case 'radio':
-    case 'checkbox': {
-      return [];
-    }
-
-    case 'number': {
-      return null;
-    }
-    case 'time':
-    case 'date':
-    case 'datetime': {
-      return [];
-    }
-    default: return null;
-  }
-};
+export const getEmptyValue = (fieldType: string) => null;
 
 export const isFilterSame = (obj: { [key: string]: any }, obj2: { [key: string]: any }): boolean => {
   // 过滤掉 [] null '' 那些不起作用的属性
