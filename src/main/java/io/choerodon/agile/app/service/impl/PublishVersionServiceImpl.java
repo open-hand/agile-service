@@ -237,9 +237,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         PublishVersionDTO dto = new PublishVersionDTO();
         dto.setId(publishVersionId);
         dto.setProjectId(projectId);
-        PublishVersionVO result = modelMapper.map(publishVersionMapper.selectOne(dto), PublishVersionVO.class);
-        Long creatorId = dto.getCreatedBy();
-        Long updaterId = dto.getLastUpdatedBy();
+        PublishVersionDTO publishVersion = publishVersionMapper.selectOne(dto);
+        PublishVersionVO result = modelMapper.map(publishVersion, PublishVersionVO.class);
+        Long creatorId = publishVersion.getCreatedBy();
+        Long updaterId = publishVersion.getLastUpdatedBy();
         Set<Long> userIds = new HashSet<>();
         userIds.add(creatorId);
         userIds.add(updaterId);

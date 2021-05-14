@@ -189,8 +189,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private TagIssueRelMapper tagIssueRelMapper;
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private WorkLogService workLogService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -768,9 +766,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         PageFieldViewParamVO param = new PageFieldViewParamVO();
         param.setIssueTypeId(issueTypeId);
         param.setSchemeCode(schemeCode);
-        param.setPageCode("agile_issue_create");
+        param.setPageCode(PageCode.AGILE_ISSUE_CREATE);
         List<PageFieldViewVO> createPageFields =
                 pageFieldService.queryPageFieldViewList(organizationId, projectId, param);
+        Set<Long> fieldIds =
+                createPageFields
+                        .stream()
+                        .map(PageFieldViewVO::getFieldId)
+                        .collect(Collectors.toSet());
+        param.setPageCode(PageCode.AGILE_ISSUE_EDIT);
+        pageFieldService.queryPageFieldViewList(organizationId, projectId, param)
+                .forEach(x -> {
+                    Long fieldId = x.getFieldId();
+                    if (!fieldIds.contains(fieldId)) {
+                        createPageFields.add(x);
+                        fieldIds.add(fieldId);
+                    }
+                });
         List<PageFieldViewVO> requiredSystemFields = new ArrayList<>();
         List<PageFieldViewVO> requiredCustomFields = new ArrayList<>();
         createPageFields.forEach(x -> {
@@ -879,11 +891,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 break;
             case FieldCode.STORY_POINTS:
                 value = issue.getStoryPoints();
-                break;
-            case FieldCode.TIME_TRACE:
-                Long issueId = issue.getIssueId();
-                Long projectId = issue.getProjectId();
-                value = workLogService.queryWorkLogListByIssueId(projectId, issueId);
                 break;
             case FieldCode.MAIN_RESPONSIBLE:
                 value = issue.getMainResponsible();
@@ -1534,6 +1541,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         map.put("storyPoints", FieldCode.STORY_POINTS);
         map.put("description", FieldCode.DESCRIPTION);
         map.put("epicName", FieldCode.EPIC_NAME);
+        map.put("epicId", FieldCode.EPIC);
+        map.put("tags", FieldCode.TAG);
         Set<String> result = new HashSet<>();
         systemFields.forEach(x -> {
             if (map.get(x) != null) {
