@@ -331,6 +331,14 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     title: '环境',
     dataIndex: 'environmentName',
   }],
+  ['tag', {
+    title: 'Tag',
+    dataIndex: 'tags',
+    render: ({ rowData, dataIndex }) => {
+      const tagShowText = rowData[dataIndex] && rowData[dataIndex].map((tag: any) => `${tag.appServiceCode}:${tag.tagName}`).join('、');
+      return tagShowText ? <Tooltip title={tagShowText}>{tagShowText}</Tooltip> : '';
+    },
+  }],
 ]);
 
 export function getTableColumns({
