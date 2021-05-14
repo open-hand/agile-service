@@ -136,7 +136,7 @@ class BacklogHome extends Component {
               name: '创建冲刺',
               icon: 'playlist_add',
               handler: this.handleCreateSprint,
-              display: !isInProgram,
+              display: !isShowFeature,
               permissions: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint'],
             }, {
               name: '当前PI下创建冲刺',
