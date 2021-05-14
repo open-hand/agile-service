@@ -24,11 +24,38 @@ import ChooseField from '../choose-field';
 import IssueSearchContext from '../context';
 import EnvironmentField from './field/EnvironmentField';
 
+const getValueByFieldType = (fieldType, value) => {
+  switch (fieldType) {
+    case 'text':
+    case 'input': {
+      return value ?? '';
+    }
+    case 'member':
+    case 'multiMember':
+    case 'single':
+    case 'multiple':
+    case 'radio':
+    case 'checkbox': {
+      return value ?? [];
+    }
+
+    case 'number': {
+      return value ?? null;
+    }
+    case 'time':
+    case 'date':
+    case 'datetime': {
+      return value ?? undefined;
+    }
+    default: return value;
+  }
+};
+
 function CustomField({ field }) {
   const { store, projectId, applyType } = useContext(IssueSearchContext);
   const { chosenFields } = store;
   const { fieldType } = field;
-  const value = chosenFields.get(field.code) ? toJS(chosenFields.get(field.code).value) : undefined;
+  const value = getValueByFieldType(fieldType, chosenFields.get(field.code) ? toJS(chosenFields.get(field.code).value) : undefined);
   const handleChange = (v) => {
     store.handleFilterChange(field.code, v);
   };

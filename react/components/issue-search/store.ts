@@ -1,7 +1,7 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { find, isEmpty } from 'lodash';
+import { cloneDeep, find, isEmpty } from 'lodash';
 import { fieldApi, personalFilterApi } from '@/api';
 import { IField, ISearchVO } from '@/common/types';
 import { getProjectId } from '@/utils/common';
@@ -235,19 +235,25 @@ class IssueSearchStore {
     return filter;
   }
 
-  getCustomFieldFilters = () => this.transformFilter(this.chosenFields)
+  getCustomFieldFilters = () => {
+    const filter = cloneDeep(this.transformFilter(this.chosenFields));
+    filter.otherArgs.customField.option = filter.otherArgs.customField.option.filter((o: any) => o.value);
+    return filter;
+  }
+
+  getCustomFieldFiltersWithNullOption = () => this.transformFilter(this.chosenFields)
 
   @computed
   get isHasFilter() {
-    const currentFilterDTO = this.getCustomFieldFilters()
-      ? flattenObject(this.getCustomFieldFilters()) : {};
+    const currentFilterDTO = this.getCustomFieldFiltersWithNullOption()
+      ? flattenObject(this.getCustomFieldFiltersWithNullOption()) : {};
     return !isFilterSame({}, currentFilterDTO);
   }
 
   @computed
   get currentFlatFilter() {
-    const currentFilterDTO = this.getCustomFieldFilters()
-      ? flattenObject(this.getCustomFieldFilters()) : {};
+    const currentFilterDTO = this.getCustomFieldFiltersWithNullOption()
+      ? flattenObject(this.getCustomFieldFiltersWithNullOption()) : {};
     return filterInvalidAttribute(currentFilterDTO);
   }
 

@@ -1,3 +1,4 @@
+import { toArray } from 'lodash';
 import { toJS } from 'mobx';
 
 function transformSystemFilter(data) {
@@ -104,13 +105,10 @@ export function transformFilter(chosenFields) {
       case 'checkbox':
       case 'multiMember':
       case 'member': {
-        const v = Array.isArray(value) ? value : [value];
-        if (v) {
-          customField.option.push({
-            fieldId: id,
-            value: v,
-          });
-        }
+        customField.option.push({
+          fieldId: id,
+          value: value ? toArray(value) : value,
+        });
         break;
       }
       case 'input': {
@@ -141,20 +139,18 @@ export function transformFilter(chosenFields) {
       case 'time':
       case 'datetime':
       case 'date': {
-        if (Array.isArray(value)) {
-          if (fieldType === 'time') {
-            customField.date_hms.push({
-              fieldId: id,
-              startDate: value[0] ?? null,
-              endDate: value[1] ?? null,
-            });
-          } else {
-            customField.date.push({
-              fieldId: id,
-              startDate: value[0] ?? null,
-              endDate: value[1] ?? null,
-            });
-          }
+        if (fieldType === 'time') {
+          customField.date_hms.push({
+            fieldId: id,
+            startDate: value ? value[0] : value,
+            endDate: value ? value[1] : value,
+          });
+        } else {
+          customField.date.push({
+            fieldId: id,
+            startDate: value ? value[0] : value,
+            endDate: value ? value[1] : value,
+          });
         }
         break;
       }
