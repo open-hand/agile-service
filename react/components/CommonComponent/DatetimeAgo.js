@@ -1,19 +1,9 @@
-import React, { Component } from 'react';
-import { Choerodon } from '@choerodon/boot';
-import { Tooltip } from 'choerodon-ui';
-import TimeAgo from 'timeago-react';
+import { Component } from 'react';
 
 class DatetimeAgo extends Component {
   render() {
     const { date } = this.props;
-    return (
-      <Tooltip placement="top" title={date || ''}>
-        <TimeAgo
-          datetime={date || ''}
-          locale={Choerodon.getMessage('zh_CN', 'en')}
-        />
-      </Tooltip>
-    );
+    return date;
   }
 }
 
