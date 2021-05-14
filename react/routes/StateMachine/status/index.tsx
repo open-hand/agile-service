@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
 import { Divider } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -75,7 +76,15 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
   return (
     <Page>
       <Header>
-        <Button icon="playlist_add" onClick={handleCreateStatusClick}>创建状态</Button>
+        <HeaderButtons items={[
+          {
+            name: '创建状态',
+            display: true,
+            handler: handleCreateStatusClick,
+            icon: 'playlist_add',
+          },
+        ]}
+        />
       </Header>
       <Breadcrumb />
       <Divider className={styles.divider} style={{ margin: 0 }} />

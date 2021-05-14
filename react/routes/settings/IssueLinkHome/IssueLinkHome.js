@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import {
   TabPage as Page, Header, Content, Action, Permission, Breadcrumb,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import {
   Button, Icon, Table, Modal,
 } from 'choerodon-ui/pro';
@@ -119,14 +120,14 @@ function IssueLinkHome() {
       className="c7n-issue-link"
     >
       <Header title={formatMessage({ id: 'issue.link_task' })}>
-        <Permission
-          service={['choerodon.code.project.setting.issue.ps.createfastsearch']}
-        >
-          <Button funcType="flat" onClick={() => openCreateEditModal(false)}>
-            <Icon type="playlist_add icon" />
-            <span>{formatMessage({ id: 'issue_link.create' })}</span>
-          </Button>
-        </Permission>
+        <HeaderButtons items={[{
+          name: formatMessage({ id: 'issue_link.create' }),
+          icon: 'playlist_add',
+          handler: () => openCreateEditModal(false),
+          display: true,
+          permissions: ['choerodon.code.project.setting.issue.ps.createfastsearch'],
+        }]}
+        />
       </Header>
       <Breadcrumb />
       <Content>

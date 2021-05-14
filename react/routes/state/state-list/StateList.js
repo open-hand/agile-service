@@ -11,6 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import {
   Content, Header, TabPage as Page, Breadcrumb, Choerodon, useTheme,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import { getStageMap, getStageList } from '@/utils/stateMachine';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { statusApi } from '@/api';
@@ -41,7 +42,7 @@ const stageList = getStageList();
 function StateList(props) {
   const [theme] = useTheme();
   const context = useContext(Store);
-  const { AppState, stateStore, intl } = context;
+  const { AppState, stateStore, intl: { formatMessage } } = context;
   const {
     name, type, id, organizationId: orgId,
   } = AppState.currentMenuType;
@@ -103,7 +104,7 @@ function StateList(props) {
         </ul>
       ),
       onOk() { },
-      okText: intl.formatMessage({ id: 'confirm' }),
+      okText: formatMessage({ id: 'confirm' }),
     });
   };
 
@@ -282,7 +283,7 @@ function StateList(props) {
       const res = await statusApi.checkName(value);
       setSubmitting(false);
       if (res && res.statusExist) {
-        callback(intl.formatMessage({ id: 'priority.create.name.error' }));
+        callback(formatMessage({ id: 'priority.create.name.error' }));
       } else {
         callback();
       }
@@ -368,7 +369,7 @@ function StateList(props) {
                 required: true,
                 whitespace: true,
                 max: 47,
-                message: intl.formatMessage({ id: 'state.name.required' }),
+                message: formatMessage({ id: 'state.name.required' }),
               }, {
                 validator: checkName,
               }],
@@ -412,7 +413,7 @@ function StateList(props) {
               rules: [{
                 required: true,
                 whitespace: true,
-                message: intl.formatMessage({ id: 'required' }),
+                message: formatMessage({ id: 'required' }),
               }],
               initialValue: editState ? editState.type : 'todo',
             })(
@@ -448,19 +449,20 @@ function StateList(props) {
     return (
       <Page>
         <Header title={<FormattedMessage id="state.title" />}>
-          {!initialTotal
-            ? (
-              <Tooltip placement="bottom" title="请创建项目后再创建状态机">
-                <Button icon="playlist_add " disabled>
-                  <FormattedMessage id="state.create" />
-                </Button>
-              </Tooltip>
-            )
-            : (
-              <Button icon="playlist_add " onClick={() => showSideBar('create')}>
-                <FormattedMessage id="state.create" />
-              </Button>
-            )}
+          <HeaderButtons items={[
+            {
+              name: formatMessage({ id: 'state.create' }),
+              icon: 'playlist_add',
+              display: true,
+              disabled: !initialTotal,
+              handler: () => showSideBar('create'),
+              tooltipsConfig: {
+                hidden: initialTotal,
+                title: '请创建项目后再创建状态机',
+              },
+            },
+          ]}
+          />
         </Header>
         <Breadcrumb />
         <Content className="issue-state-content" style={theme === 'theme4' ? undefined : { paddingTop: 0 }}>

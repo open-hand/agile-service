@@ -6,6 +6,7 @@ import { useHistory } from 'react-router-dom';
 import {
   Header, Content, Page, Breadcrumb, Choerodon, useTheme,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import { Button } from 'choerodon-ui';
 import { map, set, get } from 'lodash';
 import { useUnmount, usePersistFn } from 'ahooks';
@@ -259,45 +260,51 @@ const Issue = observer(({ cached, updateCache }) => {
       <Header
         title="问题管理"
       >
-        <Button
-          className="leftBtn"
-          funcType="flat"
-          icon="playlist_add"
-          onClick={() => {
-            IssueStore.createQuestion(true);
-          }}
-        >
-          创建问题
-        </Button>
-        <Button
-          icon="archive"
-          funcType="flat"
-          onClick={() => handleOpenImport({
-            onFinish: refresh, action: 'agile_import_issue',
-          })}
-        >
-          导入问题
-        </Button>
-        <Button
-          className="leftBtn"
-          icon="unarchive"
-          funcType="flat"
-          onClick={() => {
-            openExportIssueModal(
-              issueSearchStore.getAllFields,
-              issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
-              tableListMode,
-              'agile_export_issue',
-            );
-          }}
-        >
-          导出问题
-        </Button>
-        <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
-        <CollapseAll
-          expandAll={tableProps.expandAll}
-          isExpandAll={tableProps.isExpandAll}
-          expandAbleKeys={tableProps.expandAbleKeys}
+        <HeaderButtons items={[
+          {
+            name: '创建问题',
+            icon: 'playlist_add',
+            handler: () => {
+              IssueStore.createQuestion(true);
+            },
+            display: true,
+          },
+          {
+            name: '导入问题',
+            icon: 'archive',
+            handler: () => handleOpenImport({
+              onFinish: refresh, action: 'agile_import_issue',
+            }),
+            display: true,
+          },
+          {
+            name: '导出问题',
+            icon: 'unarchive',
+            handler: () => {
+              openExportIssueModal(
+                issueSearchStore.getAllFields,
+                issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
+                tableListMode,
+                'agile_export_issue',
+              );
+            },
+            display: true,
+          },
+          {
+            name: '个人筛选',
+            icon: 'settings',
+            handler: handleClickFilterManage,
+            display: true,
+          },
+          {
+            display: true,
+            element: <CollapseAll
+              expandAll={tableProps.expandAll}
+              isExpandAll={tableProps.isExpandAll}
+              expandAbleKeys={tableProps.expandAbleKeys}
+            />,
+          },
+        ]}
         />
         <div style={{ flex: 1, visibility: 'hidden' }} />
         <TableModeSwitch

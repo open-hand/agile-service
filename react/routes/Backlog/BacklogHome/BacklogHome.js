@@ -8,10 +8,9 @@ import {
   Button, Spin, Tooltip,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
-import { findIndex } from 'lodash';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import SideNav from '@/components/side-nav';
-import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import { HeaderButtons } from '@choerodon/master';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
@@ -127,22 +126,31 @@ class BacklogHome extends Component {
     return (
       <>
         <Header title="待办事项">
-          <Button
-            onClick={this.handleClickCBtn}
-            icon="playlist_add"
-          >
-            创建问题
-          </Button>
-          {!isShowFeature && (
-            <Permission
-              service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
-            >
-              <Button icon="playlist_add" onClick={this.handleCreateSprint}>
-                创建冲刺
-              </Button>
-            </Permission>
-          )}
-          {this.renderCreateSprintInPi(isShowFeature, !BacklogStore.getPiInfo.id)}
+          <HeaderButtons
+            items={[{
+              name: '创建问题',
+              icon: 'playlist_add',
+              handler: this.handleClickCBtn,
+              display: true,
+            }, {
+              name: '创建冲刺',
+              icon: 'playlist_add',
+              handler: this.handleCreateSprint,
+              display: !isInProgram,
+              permissions: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint'],
+            }, {
+              name: '当前PI下创建冲刺',
+              icon: 'playlist_add',
+              handler: this.handleCreateCurrentPiSprint,
+              display: isShowFeature,
+              disabled: !BacklogStore.getPiInfo.id,
+              tooltipsConfig: {
+                hidden: BacklogStore.getPiInfo.id,
+                title: '无活跃的PI',
+              },
+              permissions: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'],
+            }]}
+          />
           {isInProgram && arr.length && arr.length > 1
             ? <ShowPlanSprint /> : null}
         </Header>

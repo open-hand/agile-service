@@ -3,8 +3,9 @@ import { observer } from 'mobx-react-lite';
 import {
   TabPage as Page, Header, Content, stores, Permission, Breadcrumb,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import {
-  Button, Menu, Icon, Spin, Tooltip,
+  Menu, Icon, Spin, Tooltip,
 } from 'choerodon-ui';
 import { Table, DataSet } from 'choerodon-ui/pro';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
@@ -204,17 +205,19 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
     <Page>
       <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
         <Header title="版本管理">
-          <Button
-            onClick={() => {
-              // setCreateVisible(true);
-              openCreatReleaseVersionModal({ handleOk: () => tableDataSet.query() });
-            }}
-            className="leftBtn"
-            funcType="flat"
-          >
-            <Icon type="playlist_add" />
-            创建发布版本
-          </Button>
+          <HeaderButtons
+            items={[
+              {
+                name: '创建发布版本',
+                icon: 'playlist_add',
+                handler: () => {
+                  // setCreateVisible(true);
+                  openCreatReleaseVersionModal({ handleOk: () => tableDataSet.query() });
+                },
+                display: true,
+              },
+            ]}
+          />
         </Header>
       </Permission>
       <Breadcrumb />

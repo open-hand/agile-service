@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
+  Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import scrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { observer } from 'mobx-react-lite';
@@ -9,7 +10,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { getProjectId } from '@/utils/common';
 import expandStyles from './index.less';
 
-function ExpandAllButton() {
+function ExpandAllButton(props: any) {
   const [expandAll, setExpandAll] = useState<boolean>(() => {
     const isFirstInto = !localPageCacheStore.has(new RegExp('scrumBoard.panel'));
     return !!isFirstInto;
@@ -31,7 +32,7 @@ function ExpandAllButton() {
   }
   useEffect(() => () => scrumBoardStore.removeBindFunction('expand-current-status'));
   return scrumBoardStore.currentBindFunctionMaps.get('expandOrUp') || scrumBoardStore.currentBindFunctionMaps.get('expandOrUp-epic') ? (
-    <Button onClick={handleClick}>
+    <Button {...props} onClick={handleClick}>
       {expandAll ? '全部收起' : (
         <Tooltip title="仅展开前15项">
           <span>全部展开</span>

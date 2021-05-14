@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
+import { HeaderButtons } from '@choerodon/master';
 import {
   Table, Button, Modal, Select, Icon, message, Menu,
 } from 'choerodon-ui';
@@ -317,7 +318,7 @@ class PriorityList extends Component {
   }
 
   render() {
-    const { PriorityStore } = this.props;
+    const { PriorityStore, intl } = this.props;
     const {
       getPriorityList,
       onLoadingList,
@@ -330,10 +331,13 @@ class PriorityList extends Component {
         className="c7nagile-priority"
       >
         <Header title={<FormattedMessage id="priority.title" />}>
-          <Button onClick={() => this.showSideBar('create')}>
-            <Icon type="playlist_add" />
-            <FormattedMessage id="priority.create" />
-          </Button>
+          <HeaderButtons items={[{
+            name: intl.formatMessage({ id: 'priority.create' }),
+            display: true,
+            icon: 'playlist_add',
+            handler: () => this.showSideBar('create'),
+          }]}
+          />
         </Header>
         <Breadcrumb />
         <Content>

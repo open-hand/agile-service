@@ -5,6 +5,7 @@ import {
   Button, Icon,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
+import { HeaderButtons } from '@choerodon/master';
 import {
   TabPage as Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
@@ -122,10 +123,13 @@ class Search extends Component {
         ]}
       >
         <Header title="快速筛选">
-          <Button funcType="flat" onClick={() => openCreateFastSearch(() => this.loadFilters())}>
-            <Icon type="playlist_add icon" />
-            <span>创建快速筛选</span>
-          </Button>
+          <HeaderButtons items={[{
+            name: '创建快速筛选',
+            icon: 'playlist_add',
+            handler: () => openCreateFastSearch(() => this.loadFilters()),
+            display: true,
+          }]}
+          />
         </Header>
         <Breadcrumb />
         <Content>

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import {
   Button, Tooltip, Dropdown, Menu,
 } from 'choerodon-ui/pro';
+import { HeaderButtons } from '@choerodon/master';
 import { observer } from 'mobx-react-lite';
 import { omit } from 'lodash';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
@@ -20,13 +21,22 @@ import Container from './Container';
 import './PublishVersion.less';
 import empty from './empty.svg';
 
-const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> = ({
-  title, children, disabled, ...otherProps
+const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled?: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
+  title, children, disabled, buttonIcon, buttonDisabled = false, clickEvent, ...otherProps
 }) => {
-  if (title && disabled) {
-    return <Tooltip title={title}><Button disabled={disabled} {...omit(otherProps, 'onClick')}>{children}</Button></Tooltip>;
+  if (title && buttonDisabled) {
+    return <Tooltip title={title}><Button disabled={buttonDisabled} {...omit(otherProps, 'onClick')}>{children}</Button></Tooltip>;
   }
-  return <Button {...otherProps}>{children}</Button>;
+  return (
+    <Button
+      {...otherProps}
+      onClick={clickEvent}
+      icon={buttonIcon}
+      disabled={buttonDisabled}
+    >
+      {children}
+    </Button>
+  );
 };
 
 function PublishVersion() {
@@ -69,24 +79,32 @@ function PublishVersion() {
   return (
     <Page className={prefixCls}>
       <Header>
-        <TooltipButton
-          icon="playlist_add"
-          title="无相应权限创建发布版本"
-          onClick={() => openCreatePublishVersionModal({ handleOk: handleCreate })}
-        >
-          创建发布版本
-        </TooltipButton>
-        {!!store.getCurrentData.id && (
-          <Dropdown overlay={renderMenu()}>
-
-            <Button icon="unarchive">导出版本</Button>
-          </Dropdown>
-        )}
+        <HeaderButtons
+          items={[
+            {
+              display: true,
+              element: (<TooltipButton
+                buttonIcon="playlist_add"
+                title="无相应权限创建发布版本"
+                clickEvent={() => {
+                  openCreatePublishVersionModal({ handleOk: handleCreate });
+                }}
+              >
+                创建发布版本
+              </TooltipButton>),
+            },
+            {
+              display: !!store.getCurrentData.id,
+              element: <Dropdown overlay={renderMenu()}>
+                <Button icon="unarchive">导出版本</Button>
+              </Dropdown>,
+            },
+          ]}
+        />
       </Header>
       <Breadcrumb />
       <Content
         className={`${prefixCls}-content`}
-
       >
         {tableDataSet.status === 'loading' && tableDataSet.length === 0 ? <Loading loading /> : (
           <>
