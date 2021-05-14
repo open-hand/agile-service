@@ -7,6 +7,7 @@ import {
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer, useForceUpdate } from 'mobx-react-lite';
 import { toJS } from 'mobx';
+import { groupBy } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { devOpsApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
@@ -28,7 +29,7 @@ interface Props extends Partial<SelectProps> {
   projectId?: string
 
 }
-const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?: string, onCancel: () => void, originData: any[] }> = observer(({
+const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?: string, onCancel: () => void, originData?: any[] }> = observer(({
   onOK, onCancel, projectId, originData,
 }) => {
   const selectedIdSets = useMemo(() => new Set<string>(), []);
@@ -61,15 +62,18 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
       },
     },
   }), []);
-  function handleSave() {
-    const data = ds.toJSONData();
-    onOK(ds.records);
-  }
+
   const handleCreate = useCallback(() => {
     ds.create();
   }, [ds]);
-  function handleCancel() {
+  function handleCancel(e: any) {
     onCancel();
+    e.stopPropagation();
+  }
+  function handleSave(e: any) {
+    const data = ds.toJSONData();
+    onOK(ds.records);
+    handleCancel(e);
   }
   useEffect(() => {
     function loadData() {
@@ -90,20 +94,40 @@ const MultiServiceTag: React.FC<{ onOK: (records: Record[]) => void, projectId?:
   }, [ds, originData, projectId, serviceOptionDs]);
   const componentId = useMemo(() => `select-multi-service-tag-${randomString(5)}`, []);
   return (
-    <div role="none" id={componentId} className={`${prefixCls}-content`} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-      <Form dataSet={ds}>
-        {ds.records.flatMap((record) => (
-          [<SelectAppService name="appService" options={serviceOptionDs} record={record} primitiveValue getPopupContainer={() => document.getElementById(componentId) as any} />,
-            <SelectGitTags key={`select-tag-${record.get('appServiceId')}`} applicationId={record.get('appServiceId')} name="tagName" multiple record={record} getPopupContainer={() => document.getElementById(componentId) as any} />]
-        ))}
-        {ds.length > 0 && <Button icon="add" color={'primary' as any} onClick={handleCreate}>添加筛选</Button>}
-      </Form>
-      <div className={`${prefixCls}-btns`}>
-        <Button funcType={'raised' as any} color={'primary' as any} onClick={handleSave}>确定</Button>
-        <Button funcType={'raised' as any} onClick={handleCancel}>取消</Button>
+    <div className={prefixCls}>
+      <div role="none" id={componentId} className={`${prefixCls}-content`} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+        <Form dataSet={ds}>
+          {ds.records.flatMap((record) => (
+            [<SelectAppService
+              name="appService"
+              options={serviceOptionDs}
+              record={record}
+              primitiveValue
+              style={{ marginBottom: '-.06rem', width: '90%' }}
+              getPopupContainer={() => document.getElementById(componentId) as any}
+            />,
+              <div className={`${prefixCls}-content-del-wrap`}>
+                <SelectGitTags
+                  key={`select-tag-${record.get('appServiceId')}`}
+                  applicationId={record.get('appServiceId')}
+                  name="tagName"
+                  multiple
+                  style={{ width: '90%' }}
+                  record={record}
+                  getPopupContainer={() => document.getElementById(componentId) as any}
+                />
+                {record.index !== 0 && <Button icon="delete_forever" className={`${prefixCls}-content-del`} onClick={() => { ds.delete(record, false); }} />}
+              </div>]
+          ))}
+          {ds.length > 0 && <Button className={`${prefixCls}-content-add`} icon="add" funcType={'flat' as any} color={'primary' as any} onClick={handleCreate}>添加Tag</Button>}
+        </Form>
 
       </div>
+      <div className={`${prefixCls}-footer`}>
+        <Button funcType={'flat' as any} color={'primary' as any} onClick={handleSave}>确定</Button>
+        <Button funcType={'flat' as any} onClick={handleCancel}>取消</Button>
 
+      </div>
     </div>
 
   );
@@ -123,20 +147,32 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
     return () => console.log('leave Component SelectMultiServiceTag');
   }, []);
   const Component = flat ? FlatSelect : Select;
+  function handleCancel() {
+    innerRef.current?.collapse();
+  }
   function handleSave(data: Record[]) {
-    innerRef.current?.choose(data);
+    // innerRef.current?.choose(data);
     const changeData: any[] = [];
     data.map((i) => i.toJSONData()).forEach((item) => {
       changeData.push(...item.tagName.map((tag: string) => ({ tagName: tag, appServiceCode: item.appServiceCode, projectId: projectId || getProjectId() })));
     });
     console.log('handleSave...', changeData);
     onChange && onChange(changeData, []);
+    handleCancel();
   }
   const value = useMemo(() => {
     console.log('value...', propsValue);
-    return toJS(propsValue)?.map((item: any) => (item.appServiceCode ? `${item.appServiceCode}:${item.tagName}` : item.tagName));
+    return toJS(propsValue)?.map((item: any) => ({ meaning: (item.appServiceCode ? `${item.appServiceCode}:${item.tagName}` : item.tagName), value: item }));
   }, [propsValue]);
-
+  const editValue = useMemo(() => {
+    console.log('editValue propsValue', propsValue);
+    // 合并相同code的tag选项
+    if (value && value.length > 0) {
+      const groupObj = groupBy(value, (v) => v.value.appServiceCode);
+      return Object.entries(groupObj).map(([code, tags]) => ({ appServiceCode: code, tagName: tags?.map((v) => v.value.tagName) }));
+    }
+    return undefined;
+  }, [value]);
   return (
     <Component
       ref={handleBindRef}
@@ -145,6 +181,7 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
       //   console.log('blur..');
       //   innerRef.current?.collapse();
       // }}
+      primitiveValue={false}
       onPopupHiddenChange={(hidden) => {
         console.log('blur..', onBlur);
         // onChange();
@@ -154,11 +191,16 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
       // getPopupContainer={(node) => node.parentNode as any}
       trigger={['click'] as any}
       onChange={(v) => {
+        let newValue = v;
+        if (v && v.length > 0) {
+          newValue = v.map((i:any) => i.value);
+        }
+        onChange && onChange(newValue, []);
         console.log('onChange', v);
       }}
       {...otherProps}
       dropdownMatchSelectWidth={false}
-      popupContent={<MultiServiceTag onOK={handleSave} originData={propsValue} onCancel={() => innerRef.current?.collapse()} projectId={projectId} />}
+      popupContent={<MultiServiceTag onOK={handleSave} originData={editValue} onCancel={handleCancel} projectId={projectId} />}
     />
   );
 });

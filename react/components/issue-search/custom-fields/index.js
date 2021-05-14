@@ -23,6 +23,7 @@ import DateTimeField from './field/DateTimeField';
 import ChooseField from '../choose-field';
 import IssueSearchContext from '../context';
 import EnvironmentField from './field/EnvironmentField';
+import TagField from './field/TagField';
 
 export const getValueByFieldType = (fieldType, value) => {
   switch (fieldType) {
@@ -192,6 +193,14 @@ function CustomField({ field }) {
     case 'environment':
       return (
         <EnvironmentField
+          field={field}
+          value={value}
+          onChange={handleChange}
+        />
+      );
+    case 'tags':
+      return (
+        <TagField
           field={field}
           value={value}
           onChange={handleChange}

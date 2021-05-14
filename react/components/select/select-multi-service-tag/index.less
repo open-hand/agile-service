@@ -3,11 +3,27 @@
     z-index: 100000;
     max-width: 3.4rem;
     padding: .1rem .2rem;
+
+    &-add {
+      width: max-content;
+    }
+
+    &-del {
+      position: absolute;
+      top: -30px;
+      right: -14px;
+    }
+
+    &-del-wrap {
+      position: relative;
+    }
   }
 
   &-footer {
-      width: 100%;
-      padding: .1rem .24rem;
-      border-top: 0.01rem solid #e0e0e0;
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
+    padding: .1rem .24rem;
+    border-top: 0.01rem solid #e0e0e0;
   }
 }
