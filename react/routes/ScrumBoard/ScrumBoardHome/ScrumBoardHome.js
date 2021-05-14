@@ -323,7 +323,7 @@ class ScrumBoardHome extends Component {
         className="c7n-scrumboard-page"
       >
         <Header title="活跃冲刺">
-          <SelectBoard
+          {/* <SelectBoard
             onClick={this.handleCreateBoardClick}
             onChange={(value) => {
               const selectedBoard = ScrumBoardStore.getBoardList.get(value);
@@ -332,7 +332,7 @@ class ScrumBoardHome extends Component {
               this.refresh(selectedBoard);
             }}
           />
-          <HeaderLine />
+          <HeaderLine /> */}
           <HeaderButtons
             items={[
               {
@@ -341,25 +341,57 @@ class ScrumBoardHome extends Component {
                 handler: this.handleCreateIssue,
                 display: true,
               }, {
-                name: '配置看板',
-                icon: 'settings',
-                handler: () => {
-                  to(LINK_URL.scrumboardSetting, {
-                    params: {
-                      boardId: ScrumBoardStore.getSelectedBoard,
-                    },
-                  });
-                },
                 display: true,
-              }, {
-                name: '个人筛选',
-                icon: 'settings',
-                handler: this.handleClickFilterManage,
-                display: true,
+                element: <SelectBoard
+                  onClick={this.handleCreateBoardClick}
+                  onChange={(value) => {
+                    const selectedBoard = ScrumBoardStore.getBoardList.get(value);
+                    ScrumBoardStore.setSelectedBoard(value);
+                    ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
+                    this.refresh(selectedBoard);
+                  }}
+                />,
               }, {
                 display: true,
                 element: <ExpandAllButton />,
               }, {
+                display: true,
+                actions: {
+                  data: [{
+                    text: '配置看板',
+                    action: () => {
+                      to(LINK_URL.scrumboardSetting, {
+                        params: {
+                          boardId: ScrumBoardStore.getSelectedBoard,
+                        },
+                      });
+                    },
+                    icon: 'settings',
+                  }, {
+                    text: '个人筛选',
+                    action: this.handleClickFilterManage,
+                    icon: 'settings',
+                  }],
+                },
+              },
+              // {
+              //   name: '配置看板',
+              //   icon: 'settings',
+              //   handler: () => {
+              //     to(LINK_URL.scrumboardSetting, {
+              //       params: {
+              //         boardId: ScrumBoardStore.getSelectedBoard,
+              //       },
+              //     });
+              //   },
+              //   display: true,
+              // }, {
+              //   name: '个人筛选',
+              //   icon: 'settings',
+              //   handler: this.handleClickFilterManage,
+              //   display: true,
+              // },
+              {
                 display: true,
                 element: <ScrumBoardFullScreen />,
               },

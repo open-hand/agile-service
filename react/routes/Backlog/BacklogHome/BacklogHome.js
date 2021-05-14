@@ -126,6 +126,8 @@ class BacklogHome extends Component {
     return (
       <>
         <Header title="待办事项">
+          {isInProgram && arr.length && arr.length > 1
+            ? <ShowPlanSprint /> : null}
           <HeaderButtons
             items={[{
               name: '创建问题',
@@ -151,8 +153,6 @@ class BacklogHome extends Component {
               permissions: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'],
             }]}
           />
-          {isInProgram && arr.length && arr.length > 1
-            ? <ShowPlanSprint /> : null}
         </Header>
         <Breadcrumb />
         {/* 盖住tab下面的边框 */}

@@ -282,19 +282,22 @@ const GanttPage: React.FC = () => {
               },
             },
             {
-              name: isFullScreen ? '退出全屏' : '全屏',
+              name: '个人筛选',
+              icon: 'settings',
+              display: true,
+              handler: handleClickFilterManage,
+            },
+            {
               icon: isFullScreen ? 'fullscreen_exit' : 'zoom_out_map',
+              iconOnly: true,
               display: true,
               handler: () => {
                 // @ts-ignore
                 toggleFullScreen();
               },
-            },
-            {
-              name: '个人筛选',
-              icon: 'settings',
-              display: true,
-              handler: handleClickFilterManage,
+              tooltipsConfig: {
+                title: isFullScreen ? '退出全屏' : '全屏',
+              },
             },
           ]}
         />

@@ -298,6 +298,18 @@ const Issue = observer(({ cached, updateCache }) => {
           },
           {
             display: true,
+            element: <TableModeSwitch
+              data={tableListMode ? 'list' : 'tree'}
+              onChange={(mode) => {
+                changeTableListMode(mode === 'list');
+              }}
+              style={{
+                marginLeft: 20,
+              }}
+            />,
+          },
+          {
+            display: true,
             element: <CollapseAll
               expandAll={tableProps.expandAll}
               isExpandAll={tableProps.isExpandAll}
@@ -306,13 +318,13 @@ const Issue = observer(({ cached, updateCache }) => {
           },
         ]}
         />
-        <div style={{ flex: 1, visibility: 'hidden' }} />
+        {/* <div style={{ flex: 1, visibility: 'hidden' }} />
         <TableModeSwitch
           data={tableListMode ? 'list' : 'tree'}
           onChange={(mode) => {
             changeTableListMode(mode === 'list');
           }}
-        />
+        /> */}
       </Header>
       <Breadcrumb />
       <Content style={theme === 'theme4' ? undefined : { paddingTop: 0 }} className="c7nagile-issue-content">
