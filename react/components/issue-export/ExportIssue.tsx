@@ -49,7 +49,7 @@ const FormPart: React.FC<FormPartProps> = memo((props) => {
         {!!btnOnClick && (
           <Button
             className={`${prefixCls}-form-btn`}
-            // color={'blue' as ButtonColor}
+            // color={'primary' as ButtonColor}
             onClick={handleClick}
           >
             {btnStatus !== 'NONE' ? '全选' : '全不选'}

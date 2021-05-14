@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 import { piApi } from '@/api';
 import HistoryItem from './HistoryItem';
-
 
 function IssuePIHistory(props) {
   const { store } = props;
@@ -24,12 +23,12 @@ function IssuePIHistory(props) {
         </div>
       </div>
       <div>
-        {(expand ? data : data.slice(0, 3)).map(item => <HistoryItem data={item} featureType={featureType} />)}
+        {(expand ? data : data.slice(0, 3)).map((item) => <HistoryItem data={item} featureType={featureType} />)}
       </div>
       {data.length >= 3 && (
         <Button
           icon={expand ? 'baseline-arrow_drop_up' : 'baseline-arrow_right'}
-          onClick={() => setExpand(e => !e)}
+          onClick={() => setExpand((e) => !e)}
         >
           {expand ? '折叠' : '展开'}
         </Button>

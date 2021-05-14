@@ -1,17 +1,19 @@
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext } from 'react';
 import {
-  Dropdown, Menu, Button, Modal,
+  Dropdown, Menu, Modal,
 } from 'choerodon-ui';
+import {
+  Button,
+  Modal as ModalPro,
+} from 'choerodon-ui/pro';
 import { Permission, Choerodon } from '@choerodon/boot';
-import { Modal as ModalPro } from 'choerodon-ui/pro';
-import { includes, merge, get } from 'lodash';
+
+import { includes } from 'lodash';
 import copy from 'copy-to-clipboard';
-import queryString from 'query-string';
 import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
 import { openEditIssueCopyIssue } from '@/components/CopyIssue';
-import { getProjectId, getProjectName, getOrganizationId } from '@/utils/common';
 import { linkUrl } from '@/utils/to';
 import useIsProgram from '@/hooks/useIsProgram';
 import EditIssueContext from '../stores';
@@ -274,7 +276,7 @@ const IssueDropDown = ({
       getPopupContainer={(trigger) => trigger.parentNode}
       placement="bottomRight"
     >
-      <Button icon="more_vert" />
+      <Button icon="more_vert" funcType="flat" />
     </Dropdown>
   );
 };
