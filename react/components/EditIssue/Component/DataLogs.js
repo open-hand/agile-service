@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Icon, Button } from 'choerodon-ui';
+import { Icon, Button } from 'choerodon-ui/pro';
 import Logs from '@/components/Logs';
 import fieldsMap from './DataLogFieldsMap';
 

@@ -87,7 +87,7 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
                     <br />
                     <Button
                       style={{ fontSize: '14px', marginTop: 15 }}
-                      color={'blue' as ButtonColor}
+                      color={'primary' as ButtonColor}
                       funcType={'raised' as FuncType}
                       onClick={initTemplate}
                     >

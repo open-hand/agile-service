@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import {
   Icon, Button, Tooltip,
-} from 'choerodon-ui';
+} from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/master';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
 import WYSIWYGEditor from '@/components/CKEditor';
@@ -112,8 +112,6 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
             <Tooltip placement="topRight" autoAdjustOverflow={false} title="编辑">
               <Button
                 style={{ padding: '0 6px' }}
-                className="leftBtn"
-                funcType="flat"
                 onClick={() => {
                   setEditDesShow(true);
                   setEditDes(description);

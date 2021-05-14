@@ -79,7 +79,7 @@ const CustomFields: React.FC = () => {
             }
           })}
       </div>
-      <Button color={'blue' as ButtonColor} onClick={() => setExpand(!expand)}>
+      <Button color={'primary' as ButtonColor} onClick={() => setExpand(!expand)}>
         <span>{expand ? '收起' : '展开'}</span>
         <Icon type={expand ? 'baseline-arrow_drop_up' : 'baseline-arrow_right'} style={{ marginRight: 2 }} />
       </Button>

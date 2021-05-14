@@ -1,7 +1,7 @@
 import React, { useRef, useCallback, useEffect } from 'react';
 import {
   Button, Icon, Tooltip,
-} from 'choerodon-ui';
+} from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import MergeRequest from '@/components/MergeRequest';
 import LinkedBranch from '../linked-branch';

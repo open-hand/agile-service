@@ -31,7 +31,7 @@ const Description: React.FC = () => {
         <Tooltip placement="topRight" autoAdjustOverflow={false} title="编辑">
           <Button
             style={{ padding: '0 6px' }}
-            color={'blue' as ButtonColor}
+            color={'primary' as ButtonColor}
             icon="mode_edit"
             onClick={() => {
               setEdit(true);
@@ -54,8 +54,8 @@ const Description: React.FC = () => {
             }}
           />
           <div className={styles.operation}>
-            <Button color={'blue' as ButtonColor} onClick={handleCancel}>取消</Button>
-            <Button color={'blue' as ButtonColor} onClick={handleOk}>确定</Button>
+            <Button color={'primary' as ButtonColor} onClick={handleCancel}>取消</Button>
+            <Button color={'primary' as ButtonColor} onClick={handleOk}>确定</Button>
           </div>
         </div>
       ) : description}
