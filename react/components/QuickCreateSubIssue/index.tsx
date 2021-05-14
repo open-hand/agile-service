@@ -3,15 +3,15 @@ import React, {
 } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import {
-  Button, Input, Form, Icon, Dropdown, Menu,
+  Input, Form, Icon, Dropdown, Menu,
 } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
+import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { useLockFn } from 'ahooks';
-import { isEmpty } from 'lodash';
 import { IIssueType } from '@/common/types';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { FormProps } from 'choerodon-ui/lib/form';
-import { getProjectId } from '@/utils/common';
 import { fieldApi, issueApi } from '@/api';
 import { WrappedFormUtils } from 'choerodon-ui/lib/form/Form';
 import { fields2Map } from '@/utils/defaultValue';
@@ -160,8 +160,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                   )}
                 </FormItem>
                 <Button
-                  type="primary"
-                  funcType="raised"
+                  color={'primary' as ButtonColor}
                   onClick={handleCreate}
                   style={{ margin: '0 10px' }}
                   loading={loading}
@@ -169,7 +168,6 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                   确定
                 </Button>
                 <Button
-                  funcType="raised"
                   onClick={handleCancel}
                   disabled={loading}
                 >
@@ -180,6 +178,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           </Form>
         ) : (
           <Button
+            funcType={'flat' as FuncType}
             onClick={() => {
               setExpand(true);
             }}
