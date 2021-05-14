@@ -28,12 +28,12 @@ const IssueBranch = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="关联分支" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setLinkBranchShow(true)}>
+              <Button  onClick={() => store.setLinkBranchShow(true)}>
                 <Icon type="add_branch icon" />
               </Button>
             </Tooltip>
             <Tooltip placement="topRight" title="创建分支" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setCreateBranchShow(true)}>
+              <Button  onClick={() => store.setCreateBranchShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Button, Icon, Tooltip } from 'choerodon-ui';
+import { Button, Icon, Tooltip } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import QuickCreateIssue from '@/components/QuickCreateIssue/QuickCreateIssue';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
@@ -75,7 +75,7 @@ const SubBug = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="创建缺陷" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setCreateSubBugShow(true)}>
+              <Button onClick={() => store.setCreateSubBugShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>

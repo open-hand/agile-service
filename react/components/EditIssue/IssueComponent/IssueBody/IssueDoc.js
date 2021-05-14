@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Icon, Button, Tooltip } from 'choerodon-ui';
+import { Icon, Button, Tooltip } from 'choerodon-ui/pro';
 import { knowledgeApi } from '@/api';
 import Doc from '../../../Doc';
 import DocItem from '../../Component/DocItem';
@@ -54,7 +54,7 @@ const IssueDoc = observer(({ reloadIssue }) => {
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="关联知识" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => setAddDocShow(true)}>
+              <Button onClick={() => setAddDocShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>

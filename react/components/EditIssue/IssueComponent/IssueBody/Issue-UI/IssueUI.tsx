@@ -82,7 +82,7 @@ const IssueUI = (props: any) => {
           !disabled && (
           <div className="c7n-title-right">
             <Tooltip title="关联UI/UX文件">
-              <Button icon="device_hub" onClick={handleLinkUI} />
+              <Button icon="device_hub" onClick={handleLinkUI} style={{ marginRight: 5 }} />
             </Tooltip>
             <UploadUI {...props} uploading={wsData && !!wsData.length && wsData.some((item) => item.status === 'doing')} />
           </div>
