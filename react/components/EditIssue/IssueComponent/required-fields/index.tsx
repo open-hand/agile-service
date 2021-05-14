@@ -133,7 +133,7 @@ function formatFields(fieldData: IField[], data: object, dataSet: DataSet, isInP
     const field = fieldData.find((item: IField) => item.fieldCode === key);
     if (systemFields.get(key) || field?.system) {
       // @ts-ignore
-      temp.predefinedFields[key === 'epic' && isInProgram ? 'featureId' : (systemFields.get(key)?.id || field?.fieldCode)] = transformValue(dataSet, key, data[key], systemFields.get(key === 'epic' && isInProgram ? 'featureId' : key)?.format);
+      temp.predefinedFields[systemFields.get(key)?.id || field?.fieldCode] = transformValue(dataSet, key, data[key], systemFields.get(key)?.format);
     } else {
       const customField = find(fieldData, { fieldCode: key });
       if (customField) {
@@ -273,19 +273,20 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
     autoCreate: true,
     fields: [
       ...(requiredFields.map((item) => {
+        const key = item.fieldCode === 'epic' && isInProgram ? 'featureId' : (systemFields.get(item.fieldCode as string)?.id || item?.fieldCode);
         const lookupField = {};
-        if (item.system && lookupFields.find((field) => field.name === systemFields.get(item.fieldCode as string)?.id)) {
-          assign(lookupField, lookupFields.find((field) => field.name === systemFields.get(item.fieldCode as string)?.id));
+        if (item.system && lookupFields.find((field) => field.name === key)) {
+          assign(lookupField, lookupFields.find((field) => field.name === key));
         }
         return ({
           ...lookupField,
-          name: item.fieldCode,
-          label: item.fieldName,
+          name: item.fieldCode === 'epic' && isInProgram ? 'featureId' : item.fieldCode,
+          label: item.fieldCode === 'epic' && isInProgram ? '特性' : item.fieldName,
           required: true,
         });
       }))],
 
-  }), [lookupFields, requiredFields]);
+  }), [isInProgram, lookupFields, requiredFields]);
 
   const removeField = useCallback((name: string) => {
     changeTypeDataSet?.fields?.delete(name);
@@ -344,7 +345,8 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
     const obj = {};
     requiredFields.forEach((field) => {
       if (field.fieldCode) {
-        assign(obj, { [field.fieldCode]: temp[field.fieldCode] });
+        const key = field.fieldCode === 'epic' && isInProgram ? 'featureId' : field.fieldCode;
+        assign(obj, { [key]: temp[key] });
       }
     });
     return obj;
