@@ -2,9 +2,9 @@ import React, {
   useMemo, useRef, useState, useCallback, useEffect,
 } from 'react';
 import {
-  DataSet, Form, Modal, Select, Spin, Table, TextField, Tooltip,
+  DataSet, Form, Modal, Select, Spin, Table, TextField, Tooltip, Button,
 } from 'choerodon-ui/pro';
-import { Button } from 'choerodon-ui';
+// import { Button } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
 import classnames from 'classnames';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
@@ -138,7 +138,8 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
         <div className={`${prefixCls}-upload`}>
           <span>上传pom文件</span>
           <Tooltip title={disabledUpload ? `请先选择${programMode ? '所属项目' : ''}` : undefined}>
-            <Button disabled={disabledUpload} funcType="raised" size={'small' as any} type="primary" style={{ color: !disabledUpload ? 'white' : undefined }} icon="file_upload" shape="circle" onClick={() => inputRef.current?.click()} />
+            {/* {style={{ color: !disabledUpload ? 'white' : undefined }} } 变为圆 */}
+            <Button disabled={disabledUpload} funcType={'raised' as any} size={'small' as any} icon="file_upload" onClick={() => inputRef.current?.click()} />
           </Tooltip>
         </div>
 

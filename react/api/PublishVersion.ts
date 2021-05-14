@@ -27,7 +27,7 @@ export interface IPublishVersionData {
   tagName: string | null
   version: string | null
   versionAlias: string | null
-  statusCode: 'version_planning' | 'released' | 'archived'
+  statusCode: 'version_planning' | 'released'
   description: string | null
   [propsName: string]: any
 }
@@ -53,6 +53,7 @@ export interface IPublishVersionTreeNode {
   groupId?: string | null
   projectId?: string | null
   tagName?: string | null
+  tagAlias?: string | null
   objectVersionNumber?: number
 }
 interface IPublishVersionListSearchData {

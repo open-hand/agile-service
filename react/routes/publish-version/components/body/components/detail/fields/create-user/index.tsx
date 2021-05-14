@@ -9,10 +9,10 @@ interface Props {
 }
 const CreateUser: React.FC<Props> = () => {
   const { store } = usePublishVersionContext();
-  const { creationUser } = store.getCurrentData;
+  const { creator } = store.getCurrentData;
   return (
     <Field label="创建人">
-      {creationUser ? <UserTag data={creationUser} /> : '无'}
+      {creator ? <UserTag data={creator} /> : '无'}
     </Field>
 
   );

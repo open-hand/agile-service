@@ -1,3 +1,5 @@
+@color: #3f51b5;
+
 .switch {
   flex-shrink: 0;
   display: flex;
@@ -40,13 +42,14 @@
         border-radius: 2px 0 0 2px;
       }
     }
+
     &:hover {
       // &:not(:last-child) {
       //   border-right-width: 1px;
       // }
       border-right-width: 1px;
       z-index: 2;
-      border-color: #3f51b5;
+      border-color: @color;
     }
 
     // &:last-child {
@@ -57,7 +60,7 @@
   .active {
     font-weight: 500;
     color: rgba(255, 255, 255, 1);
-    background: rgba(63, 81, 181, 1);
+    background: @color;
   }
 }
 
@@ -105,7 +108,7 @@
       //   border-right-width: 1px;
       // }
       z-index: 2;
-      border-color: #3f51b5;
+      border-color: @color;
     }
   }
 
@@ -114,4 +117,8 @@
     z-index: 1;
     padding: 0;
   }
+}
+
+[data-theme="theme4"] {
+  @color:#5365EA;
 }

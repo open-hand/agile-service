@@ -16,12 +16,16 @@
       width: 16px;
       height: 16px;
       line-height: 12px;
+      background-color: transparent !important;
+      &::after {
+        display: none !important;
+      }
     }
 
     .c7n-tree-switcher-noop {
-      width: auto;
-      height: auto;
-
+      width: auto !important;
+      height: auto !important;
+      background: unset !important;
       // line-height: 1;
       .c7n-agile-dependency-tree-expand {
         background: none;
@@ -43,6 +47,7 @@
       transition: all 218ms;
 
       &-icon {
+        display: block !important;
         font-size: 14px;
       }
 
@@ -79,7 +84,6 @@
     //     display: none;
     //   }
     // }
-
     .c7n-tree-node-content-wrapper:hover {
 
       background: none;
@@ -88,3 +92,15 @@
       cursor: default;
     }
   }
+[data-theme="theme4"] {
+  .c7n-agile-dependency-tree {
+    &-expand {
+      position: static;
+      top: unset;
+    }
+    .c7n-tree-node-content-wrapper:hover {
+      opacity: 1 !important;
+      background: none !important;
+    }
+  }
+}

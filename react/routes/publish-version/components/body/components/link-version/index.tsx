@@ -8,6 +8,7 @@ import {
 } from '@/api';
 import CustomIcon from '@/components/custom-icon';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import classNames from 'classnames';
 import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
 import { openLinkAppServiceTagModal } from './LinkAppServiceTagModal';
 import { usePublishVersionContext } from '../../../../stores';
@@ -51,8 +52,10 @@ function useEditModeSectionConfig(preview: boolean) {
       <div className={styles.operation}>
         <Button
           style={{ padding: '0 6px' }}
-          color={'primary' as ButtonColor}
+          color={'primary' as ButtonColor}
           icon="local_offer"
+          funcType={'flat' as any}
+          className={styles.operation_btn} // 线框
           onClick={() => {
             openLinkAppServiceTagModal({ publishVersionId: detailData.id, handleOk: handleLinkTag });
           }}
@@ -61,8 +64,10 @@ function useEditModeSectionConfig(preview: boolean) {
         </Button>
         <Button
           style={{ padding: '0 6px' }}
-          color={'primary' as ButtonColor}
+          color={'primary' as ButtonColor}
           icon="version"
+          className={styles.operation_btn}
+          funcType={'flat' as any}
           onClick={() => {
             openLinkPublishVersionModal({ publishVersionId: detailData.id, handleOk: handleLinkPublishVersion });
           }}
@@ -72,7 +77,7 @@ function useEditModeSectionConfig(preview: boolean) {
 
         <Button
           style={{ padding: '0 6px' }}
-          color={'primary' as ButtonColor}
+          color={'primary' as ButtonColor}
           //   icon="mode_edit"
           onClick={() => {
             openImportPomModal({ handleOk: handleImportPom, versionId: detailData.id });
@@ -90,6 +95,7 @@ function useEditModeSectionConfig(preview: boolean) {
   ));
   return {
     className: styles.wrap,
+    bodyClassName: styles.wrap_body,
     title: <Title />,
 
   };
@@ -134,6 +140,7 @@ function PublishVersionLinkVersion() {
   function renderTreeNode(item: IPublishVersionTreeNode, level: number) {
     const showAdditionalLine = !!(item.groupId || item.artifactId || item.version);
     const appService = item.appServiceCode ? store.findAppServiceByCode(item.appServiceCode)! : undefined;
+    const alias = item.versionAlias || item.tagAlias;
     return (
       <DependencyTreeNode offsetBottom={10} style={{ height: showAdditionalLine ? 54 : 30 }}>
         <div className={styles.node}>
@@ -141,9 +148,9 @@ function PublishVersionLinkVersion() {
             <span className={styles.node_left}>
               {!!item.children?.length && <Icon type="folder-o" className={styles.node_left_icon} />}
               <span className={styles.node_text}>
-                {item.versionAlias && (
+                {alias && (
                   <span className={styles.node_left_alias}>
-                    {item.versionAlias}
+                    {alias}
                     &nbsp;
                   </span>
                 )}
@@ -163,6 +170,7 @@ function PublishVersionLinkVersion() {
                   <Button
                     icon="mode_edit"
                     className={styles.node_btn}
+                    style={{ width: '.26rem', height: '.26rem' }}
                     onClick={(e) => {
                       e.stopPropagation();
                       openEditAppVersionModal({
@@ -178,6 +186,7 @@ function PublishVersionLinkVersion() {
                 )}
                 <Button
                   icon="delete_forever"
+                  style={{ width: '.26rem', height: '.26rem' }}
                   className={styles.node_btn}
                   onClick={(e) => {
                     e.stopPropagation();

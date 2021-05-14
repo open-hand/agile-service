@@ -46,7 +46,7 @@ const VersionItem = observer<VersionItemProps>(({
         break;
       case 'version_planning':
       case 'released': {
-        handleUpdate(record.toData(), record, key);
+        handleUpdate({ ...record.toData(), statusCode: key }, record, key);
 
         break;
       }
@@ -151,6 +151,7 @@ function PublishVersionList() {
         className={styles.search}
         prefix={<Icon type="search" />}
         onChange={handleFilterChange}
+        onInput={(e:any) => handleFilterChange(e.target.value)}
         placeholder="请输入搜索条件"
         clearButton
       />
