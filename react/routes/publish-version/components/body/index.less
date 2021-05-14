@@ -1,8 +1,17 @@
 .body {
   padding: .1rem .24rem;
   padding-left: .14rem;
+  overflow: auto;
+  overflow-x: hidden;
 }
+
 .body_border {
   padding: 0 .24rem;
   border-top: 1px solid rgba(0, 0, 0, .12);
+}
+
+[data-theme="theme4"] {
+  .body_border {
+    border-color: #e8e8e8;
+  }
 }

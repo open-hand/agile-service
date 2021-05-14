@@ -67,25 +67,7 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
         }}
       />);
     });
-    // for (let index = 2; index < level + 1; index += 1) {
-    //   const right = 24 * index - 8 + (hasChildren ? 16 : 0);
-    //   const width = 1;
-    //   // if (index !== level) {
-    //   //   width = 0;
-    //   // }
-    //   index === level && lineArr.push(<span
-    //     className={`${prefixCls}-expand-line`}
-    //     style={{
-    //       // display: index !== level ? 'none' : undefined,
-    //       // right: hasChildren ? 16 * level : undefined,
-    //       // bottom: hasChildren ? 10 - 5 * level : undefined,
-    //       right,
-    //       height: 30,
-    //       bottom: hasChildren ? 5 : undefined,
-    //       width,
-    //     }}
-    //   />);
-    // }
+
     return lineArr;
   }
   function renderTreeNode(item: T, level: number) {

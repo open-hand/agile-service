@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import {
   DataSet, Form, Modal, TextField,
-} from 'choerodon-ui/pro/lib';
+} from 'choerodon-ui/pro';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import './index.less';
 import { IModalProps } from '@/common/types';

@@ -1,5 +1,16 @@
 .operation {
   font-size: .13rem;
+
+  &_btn {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 5px;
+    color: #5365EA;
+    border: 1px solid #D9E6F2 !important;
+    &:hover {
+      color: #5365EA !important;
+      background: rgba(123, 140, 255, 0.08) !important;
+    }
+  }
 }
 
 .title {
@@ -11,6 +22,10 @@
 
 .wrap {
   margin-top: .3rem;
+  &_body {
+    padding: .12rem;
+    padding-left: .14rem;
+  }
 }
 
 .node {
@@ -56,9 +71,7 @@
   }
 
   &_btn {
-    float: left;
-    opacity: 1;
-
+    width: .26rem;
     & +& {
       margin-left: .2rem;
     }
@@ -96,6 +109,7 @@
     margin-left: .2rem;
   }
 }
+
 // 预览样式
 .preview {
   width: 100%;

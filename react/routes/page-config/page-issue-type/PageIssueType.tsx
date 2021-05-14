@@ -263,7 +263,7 @@ function PageIssueType() {
           <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageIssueTypeStore.getDirty} loading={btnLoading} onClick={handleSubmit}>
             保存
           </Button>
-          <Button funcType={'raised' as FuncType} onClick={pageIssueTypeStore.loadData}>
+          <Button funcType={'raised' as FuncType} disabled={!pageIssueTypeStore.getDirty} onClick={pageIssueTypeStore.loadData}>
             取消
           </Button>
         </div>

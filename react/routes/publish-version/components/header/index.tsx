@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { CustomTabs } from '@choerodon/components';
-import VERSION_STATUS_TYPE from '@/constants/VERSION_STATUS_TYPE';
+import PUBLISH_VERSION_STATUS_TYPE from '@/constants/PUBLISH_VERSION_STATUS_TYPE';
 import classNames from 'classnames';
 import { usePublishVersionContext } from '../../stores';
 import styles from './index.less';
@@ -9,7 +9,7 @@ import styles from './index.less';
 function PublishVersionHeader() {
   const { preview, store } = usePublishVersionContext();
   const text = store.getCurrentData.statusCode;
-  const status = VERSION_STATUS_TYPE[text] || {};
+  const status = PUBLISH_VERSION_STATUS_TYPE[text] || {};
   return (
     <div className={classNames(styles.header, { [styles.preview]: preview })}>
       <div className={styles.left}>

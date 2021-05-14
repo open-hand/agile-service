@@ -82,14 +82,15 @@ function IssueDiffArea() {
   }
   return (
     <div className={styles.wrap}>
-      <PublishVersionSection border={false} className={styles.section} bodyClassName={styles.body}>
-        <SelectPublishVersion
-          name="publishVersionId"
-          labelLayout={'float' as any}
-          label="对比发布版本"
-          style={{ width: '4.52rem' }}
-          onChange={setPublishVersionId}
-        />
+      <PublishVersionSection border={false} className={classnames(styles.section, styles.top_form)} bodyClassName={styles.body}>
+        <Form>
+          <SelectPublishVersion
+            name="publishVersionId"
+            label="对比发布版本"
+            style={{ width: '4.52rem' }}
+            onChange={setPublishVersionId}
+          />
+        </Form>
       </PublishVersionSection>
       <PublishVersionSection title="选择对比tag" className={styles.section} bodyClassName={styles.body} border={false}>
         <Form dataSet={issueDiffDataSet} columns={3} className={classnames(styles.form)}>

@@ -1,10 +1,11 @@
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { FieldType, DataSetSelection } from 'choerodon-ui/pro/lib/data-set/enum';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { publishVersionApiConfig } from '@/api';
 
 const PublishVersionDataSet = (): DataSetProps => ({
   autoQuery: false,
   paging: true,
+  selection: 'single' as DataSetSelection,
   fields: [
     { name: 'name', type: 'string' as FieldType, label: '版本名称' },
     { name: 'statusCode', type: 'string' as FieldType, label: '状态' },

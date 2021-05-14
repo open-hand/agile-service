@@ -13,7 +13,7 @@ interface IssueOption {
   text: string,
   type: 'organization' | 'common',
 }
-
+// 主题色更改
 function IssueTypeSwitch() {
   const { data: issueTypes = [] } = useProjectIssueTypes({ onlyEnabled: true, typeCode: ['story', 'task', 'bug'] });
   const { store, issueInfoTableDataSet } = usePublishVersionContext();
