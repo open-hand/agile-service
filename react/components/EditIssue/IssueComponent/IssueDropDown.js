@@ -74,7 +74,7 @@ const IssueDropDown = ({
   const handleClickMenu = async (e) => {
     if (e.key === '0') {
       store.setWorkLogShow(true);
-    } else if (e.key === 'item_11') {
+    } else if (e.key === 'item_12') {
       handleDeleteIssue();
     } else if (e.key === '2') {
       store.setCreateSubTaskShow(true);
@@ -121,7 +121,7 @@ const IssueDropDown = ({
       store.setCreateSubBugShow(true);
     } else if (e.key === '10') {
       store.setRelateStoryShow(true);
-    } else if (e.key === 'item_10') {
+    } else if (e.key === 'item_11') {
       openIssueMove({
         issue,
         customFields: store.customFields,

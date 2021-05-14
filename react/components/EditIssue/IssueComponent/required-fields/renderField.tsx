@@ -46,7 +46,7 @@ export default function renderField<T extends Partial<SelectProps>>({
         );
       case 'epic':
         // @ts-ignore
-        return isInProgram ? (
+        return !isInProgram ? (
           <Select
             name={fieldCode}
             {...otherComponentProps}
