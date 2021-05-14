@@ -20,7 +20,7 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
     data: data ? [data] : undefined,
     fields: [
       {
-        name: 'versionAlias', label: '版本别名', required: false, maxLength: 16,
+        name: 'tagAlias', label: '版本别名', required: false, maxLength: 16,
       },
       // { name: 'serviceCode', label: '关联应用服务' },
       // { name: 'tagName', label: '关联tag' },
@@ -40,7 +40,7 @@ const EditAppVersionModal: React.FC<{ modal?: IModalProps } & Partial<IImportPom
 
   return (
     <Form dataSet={formDs}>
-      <TextField name="versionAlias" />
+      <TextField name="tagAlias" />
     </Form>
   );
 };

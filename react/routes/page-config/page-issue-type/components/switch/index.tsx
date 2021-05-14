@@ -4,8 +4,8 @@ import { Modal } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import useQueryString from '@/hooks/useQueryString';
 import { IIssueType } from '@/common/types';
+import Switch from '@/components/switch';
 import { usePageIssueTypeStore } from '../../stores';
-import Switch from './Switch';
 
 interface IssueOption {
   value: string,
