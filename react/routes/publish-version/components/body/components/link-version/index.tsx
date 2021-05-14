@@ -51,7 +51,7 @@ function useEditModeSectionConfig(preview: boolean) {
       <div className={styles.operation}>
         <Button
           style={{ padding: '0 6px' }}
-          color={'primary' as ButtonColor}
+          color={'primary' as ButtonColor}
           icon="local_offer"
           onClick={() => {
             openLinkAppServiceTagModal({ publishVersionId: detailData.id, handleOk: handleLinkTag });
@@ -61,7 +61,7 @@ function useEditModeSectionConfig(preview: boolean) {
         </Button>
         <Button
           style={{ padding: '0 6px' }}
-          color={'primary' as ButtonColor}
+          color={'primary' as ButtonColor}
           icon="version"
           onClick={() => {
             openLinkPublishVersionModal({ publishVersionId: detailData.id, handleOk: handleLinkPublishVersion });
@@ -72,7 +72,7 @@ function useEditModeSectionConfig(preview: boolean) {
 
         <Button
           style={{ padding: '0 6px' }}
-          color={'primary' as ButtonColor}
+          color={'primary' as ButtonColor}
           //   icon="mode_edit"
           onClick={() => {
             openImportPomModal({ handleOk: handleImportPom, versionId: detailData.id });

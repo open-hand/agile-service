@@ -583,7 +583,7 @@ const UpdateField = ({
           // @ts-ignore
           onClick={Field.add}
           icon="add"
-          color={'primary' as ButtonColor}
+          color={'primary' as ButtonColor}
         >
           添加字段
         </Button>

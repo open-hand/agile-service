@@ -51,7 +51,7 @@ const QuickFilter: React.FC<Props> = ({
       )}
     >
       <Button
-        color={'primary' as ButtonColor}
+        color={'primary' as ButtonColor}
         style={{
           marginLeft: 20,
         }}

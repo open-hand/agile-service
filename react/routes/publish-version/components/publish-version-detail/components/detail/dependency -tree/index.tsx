@@ -122,7 +122,7 @@ const DependencyTree: React.FC = () => {
             <Tooltip placement="topRight" autoAdjustOverflow={false} title="创建应用版本">
               <Button
                 style={{ padding: '0 6px' }}
-                color={'primary' as ButtonColor}
+                color={'primary' as ButtonColor}
                 icon="playlist_add"
                 onClick={() => {
                   openCreateAppVersionModal({ handleOk: handleCreate });
@@ -132,7 +132,7 @@ const DependencyTree: React.FC = () => {
             <Tooltip placement="topRight" autoAdjustOverflow={false} title="导入pom文件">
               <Button
                 style={{ padding: '0 6px' }}
-                color={'primary' as ButtonColor}
+                color={'primary' as ButtonColor}
                 //   icon="mode_edit"
                 onClick={() => {
                   openImportPomModal({ handleOk: handleImportPom, versionId: detailData.id });
@@ -145,7 +145,7 @@ const DependencyTree: React.FC = () => {
             <Tooltip placement="topRight" autoAdjustOverflow={false} title="关联发布版本">
               <Button
                 style={{ padding: '0 6px' }}
-                color={'primary' as ButtonColor}
+                color={'primary' as ButtonColor}
                 icon="playlist_add"
                 onClick={() => {
                   openLinkPublishVersionModal({ publishVersionId: detailData.id, handleOk: handleLinkPublishVersion });
@@ -155,7 +155,7 @@ const DependencyTree: React.FC = () => {
             {/* <Tooltip placement="topRight" autoAdjustOverflow={false} title="关联应用版本">
               <Button
                 style={{ padding: '0 6px' }}
-                color={'primary' as ButtonColor}
+                color={'primary' as ButtonColor}
                 icon="local_offer"
                 onClick={() => {
                   openLinkServiceModal({ versionId: detailData.id || detailData.versionId, handleOk: handleLinkAppService });

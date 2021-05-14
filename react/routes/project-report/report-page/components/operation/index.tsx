@@ -141,7 +141,7 @@ const Operation: React.FC<Props> = () => {
     <div
       className={styles.bar}
     >
-      <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} onClick={handleSubmit}>{edit ? '保存' : '创建'}</Button>
+      <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} onClick={handleSubmit}>{edit ? '保存' : '创建'}</Button>
       {edit && (
         <>
           <Button funcType={'raised' as FuncType} onClick={handlePreview}>预览</Button>

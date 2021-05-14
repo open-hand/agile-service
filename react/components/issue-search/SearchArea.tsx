@@ -230,8 +230,8 @@ const SearchArea: React.FC = () => {
         {onClickSaveFilter && !findSameFilter() && isHasFilter && !folded && (
           <Tooltip title={archiveFields.length > 0 && `${archiveFields.map((f) => f.name).join(',')}字段已被废弃，请去掉该字段后保存`}>
             <Button
+              color={'primary' as ButtonColor}
               onClick={archiveFields.length > 0 ? undefined : onClickSaveFilter}
-              funcType={'flat' as FuncType}
               className={`${prefixCls}-search-right-btn ${prefixCls}-search-right-saveBtn`}
             >
               保存筛选
@@ -263,7 +263,14 @@ const SearchArea: React.FC = () => {
         </div>
       </div>
       <div className={`${prefixCls}-search-right`}>
-        <Button style={{ marginTop: 10 }} onClick={reset} funcType={'flat' as FuncType} color={'primary' as ButtonColor}>重置</Button>
+        <Button
+          style={{ marginTop: 10 }}
+          onClick={reset}
+          funcType={'flat' as FuncType}
+          color={'primary' as ButtonColor}
+        >
+          重置
+        </Button>
       </div>
     </>
   );
