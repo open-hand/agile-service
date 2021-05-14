@@ -26,17 +26,17 @@ const PreviewIssueFile = () => {
     >
       <div className={styles.header}>
         <Button
-          color={'blue' as ButtonColor}
+          // color={'blue' as ButtonColor}
           onClick={handleDownLoadFile}
         >
           {filePreview.name}
           <Icon type="get_app" style={{ marginLeft: 4 }} />
         </Button>
         <Button
-          color={'blue' as ButtonColor}
+          // color={'blue' as ButtonColor}
           style={{
             marginLeft: 'auto',
-            background: 'rgba(151, 167, 255, 0.2)',
+            // background: 'rgba(151, 167, 255, 0.2)',
             borderRadius: '4px',
           }}
           onClick={() => {
@@ -46,9 +46,9 @@ const PreviewIssueFile = () => {
           查看问题详情
         </Button>
         <Button
-          color={'blue' as ButtonColor}
+          // color={'blue' as ButtonColor}
           style={{
-            background: 'rgba(151, 167, 255, 0.2)',
+            // background: 'rgba(151, 167, 255, 0.2)',
             borderRadius: '4px',
             marginLeft: 16,
           }}

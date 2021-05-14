@@ -19,7 +19,7 @@ export const useDetail = (): [DetailContainerProps] => {
   const [routes, setRoutes] = useState<IRouteWithKey[]>([]);
   const [visible, setVisible] = useState(false);
   const [filePreview, setFilePreview] = useState<IPreview>();
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useState(true);
   const [descriptionChanged, setDescriptionChanged] = useState<boolean>(false);
   const eventsMap = useRef<Map<string, DetailEvents>>(new Map());
   const updateEventsMap = useCallback((path: string, events?: DetailEvents) => {

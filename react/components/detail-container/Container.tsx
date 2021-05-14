@@ -106,7 +106,7 @@ const Container: React.FC = () => {
           minWidth,
         }}
         defaultSize={{
-          width: filePreview ? 440 : localStorage.getItem('agile.EditIssue.width') || 640,
+          width: filePreview ? 440 : defaultWidth,
           height: '100%',
         }}
         onResizeEnd={handleResizeEnd}
