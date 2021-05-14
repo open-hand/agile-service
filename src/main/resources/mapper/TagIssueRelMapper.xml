@@ -237,7 +237,7 @@
     <select id="statisticsByIssueType" resultType="io.choerodon.agile.api.vo.IssueTypeCountVO">
         select
         ai.issue_type_id,
-        count(ai.issue_id) as count
+        count(distinct ai.issue_id) as count
         from agile_tag_issue_rel atir
         join agile_issue ai on (ai.project_id = #{projectId} and ai.issue_id = atir.issue_id)
         where atir.organization_id = #{organizationId}
