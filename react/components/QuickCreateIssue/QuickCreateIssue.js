@@ -4,10 +4,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Choerodon } from '@choerodon/boot';
 import {
-  Button, Icon, Dropdown, Input, Menu, Form, Tooltip,
+  Icon, Dropdown, Input, Menu, Form,
 } from 'choerodon-ui';
-import { debounce, isEmpty } from 'lodash';
-import { getProjectId } from '@/utils/common';
+import { Button } from 'choerodon-ui/pro';
+import { debounce } from 'lodash';
 import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { fields2Map } from '@/utils/defaultValue';
@@ -240,8 +240,8 @@ class QuickCreateIssue extends Component {
                     )}
                   </FormItem>
                   <Button
+                    color="primary"
                     funcType="raised"
-                    type="primary"
                     disabled={this.props.issueTypes.length === 0}
                     // htmlType="submit"
                     onClick={this.handleCreate}
@@ -261,7 +261,7 @@ class QuickCreateIssue extends Component {
             </Form>
           ) : (
             <Button
-              type="primary"
+              funcType="flat"
               icon="playlist_add"
               disabled={this.props.issueTypes.length === 0}
               onClick={() => {
