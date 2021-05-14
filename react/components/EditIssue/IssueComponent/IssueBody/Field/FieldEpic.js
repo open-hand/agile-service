@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Button } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';

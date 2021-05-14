@@ -2,8 +2,11 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Button, Icon, Progress, Tooltip,
+  Progress,
 } from 'choerodon-ui';
+import {
+  Button, Icon, Tooltip,
+} from 'choerodon-ui/pro';
 import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
 import CreateSubTask from '../../../CreateIssue/CreateSubTask';
 import IssueList from '../../Component/IssueList';
@@ -89,7 +92,7 @@ const SubTask = observer(({
           {!disableCreate && (
             <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
               <Tooltip placement="topRight" title="创建子任务" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-                <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setCreateSubTaskShow(true)}>
+                <Button onClick={() => store.setCreateSubTaskShow(true)}>
                   <Icon type="playlist_add icon" />
                 </Button>
               </Tooltip>
