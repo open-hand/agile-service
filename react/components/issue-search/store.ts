@@ -140,7 +140,6 @@ class IssueSearchStore {
   @action handleChosenFieldChange = (select: boolean, field: IField) => {
     const { code } = field;
     if (select) {
-      console.log(field, getEmptyValue(field.fieldType));
       this.chosenFields.set(code, observable({ ...field, value: getEmptyValue(field.fieldType) }));
     } else {
       const { value } = this.chosenFields.get(code) as IChosenField;
@@ -235,25 +234,19 @@ class IssueSearchStore {
     return filter;
   }
 
-  getCustomFieldFilters = () => {
-    const filter = cloneDeep(this.transformFilter(this.chosenFields));
-    filter.otherArgs.customField.option = filter.otherArgs.customField.option.filter((o: any) => o.value);
-    return filter;
-  }
-
-  getCustomFieldFiltersWithNullOption = () => this.transformFilter(this.chosenFields)
+  getCustomFieldFilters = () => this.transformFilter(this.chosenFields)
 
   @computed
   get isHasFilter() {
-    const currentFilterDTO = this.getCustomFieldFiltersWithNullOption()
-      ? flattenObject(this.getCustomFieldFiltersWithNullOption()) : {};
+    const currentFilterDTO = this.getCustomFieldFilters()
+      ? flattenObject(this.getCustomFieldFilters()) : {};
     return !isFilterSame({}, currentFilterDTO);
   }
 
   @computed
   get currentFlatFilter() {
-    const currentFilterDTO = this.getCustomFieldFiltersWithNullOption()
-      ? flattenObject(this.getCustomFieldFiltersWithNullOption()) : {};
+    const currentFilterDTO = this.getCustomFieldFilters()
+      ? flattenObject(this.getCustomFieldFilters()) : {};
     return filterInvalidAttribute(currentFilterDTO);
   }
 
