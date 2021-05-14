@@ -7,13 +7,13 @@ import ReleaseHome from './ReleaseHome';
 
 function getSearchObj(values = {}) {
   const searchArgs = {};
-  if (values && values.name && values.name.length > 0) {
+  if (values && values.name) {
     // eslint-disable-next-line prefer-destructuring
-    searchArgs.name = values.name[0];
+    searchArgs.name = values.name;
   }
-  if (values && values.description && values.description.length > 0) {
+  if (values && values.description) {
     // eslint-disable-next-line prefer-destructuring
-    searchArgs.description = values.description[0];
+    searchArgs.description = values.description;
   }
   return {
     advancedSearchArgs: {

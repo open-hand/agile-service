@@ -1,5 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
+import { Loading } from '@/components';
 import { usePublishVersionContext } from '../../stores';
 import Detail from './components/detail';
 import LinkVersion from './components/link-version';
@@ -10,6 +11,9 @@ import IssueDiffArea from './components/issue-diff-area';
 function PublishVersionBody() {
   const { store } = usePublishVersionContext();
   const menu = store.getCurrentMenu;
+  if (!store.getVisible) {
+    return <Loading loading />;
+  }
   switch (menu) {
     case 'detail':
       return (

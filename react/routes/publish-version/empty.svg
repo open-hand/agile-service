@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="174px" height="161px" viewBox="0 0 174 161" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 63.1 (92452) - https://sketch.com -->
+    <title>Group 8</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="7" y="0" width="123.278358" height="40" rx="4"></rect>
+        <filter x="-12.2%" y="-30.0%" width="124.3%" height="175.0%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="4.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.294209254   0 0 0 0 0.394423322   0 0 0 0 0.895493659  0 0 0 0.125081949 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-3" x="7" y="0" width="123.278358" height="40" rx="4"></rect>
+        <filter x="-12.2%" y="-30.0%" width="124.3%" height="175.0%" filterUnits="objectBoundingBox" id="filter-4">
+            <feOffset dx="0" dy="3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="4.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.294209254   0 0 0 0 0.394423322   0 0 0 0 0.895493659  0 0 0 0.125081949 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="版本管理" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="版本管理-创建版本" transform="translate(-569.000000, -356.000000)">
+            <g id="Group-5" transform="translate(426.000000, 296.000000)">
+                <g id="Group-8" transform="translate(145.000000, 66.000000)">
+                    <g id="编组-5" transform="translate(0.000000, 107.833333)">
+                        <rect id="Rectangle-19" fill="#BBC4EB" x="0" y="6.39934534" width="123.278358" height="40" rx="4"></rect>
+                        <rect id="Rectangle-19-Copy-2" fill="#F2F4FD" x="7" y="0" width="123.278358" height="40" rx="4"></rect>
+                        <rect id="Rectangle-21-Copy-6" fill-opacity="0.3" fill="#6776C4" x="24" y="17" width="77.0489739" height="5.77867305" rx="2.88933652"></rect>
+                        <rect id="Rectangle-21-Copy-8" fill="#DFE3F7" x="92.9510261" y="20.2253557" width="7.70489739" height="7.70489739" rx="3.8524487"></rect>
+                        <circle id="Oval-8-Copy-2" fill="#CFD5F1" cx="111.250157" cy="24.0778044" r="3.8524487"></circle>
+                    </g>
+                    <g id="编组-3" transform="translate(0.000000, 54.388889)">
+                        <rect id="Rectangle-19" fill="#BBC4EB" x="0" y="6.33513786" width="123.278358" height="40" rx="4"></rect>
+                        <g id="Rectangle-19-Copy">
+                            <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                            <use fill="#F2F4FD" fill-rule="evenodd" xlink:href="#path-1"></use>
+                        </g>
+                        <g id="编组-7" transform="translate(25.000000, 17.000000)" fill="#6776C4">
+                            <rect id="Rectangle-21-Copy-3" fill-opacity="0.3" x="7.10542736e-15" y="7.81597009e-14" width="86.6800957" height="6.2472141" rx="3.12360705"></rect>
+                            <rect id="Rectangle-21-Copy-3" x="0" y="7.81597009e-14" width="28.8933652" height="6.2472141" rx="3.12360705"></rect>
+                        </g>
+                    </g>
+                    <g id="编组-6">
+                        <rect id="Rectangle-19" fill="#BBC4EB" x="0" y="7.23404255" width="123.278358" height="40" rx="4"></rect>
+                        <g id="Rectangle-19">
+                            <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
+                            <use fill="#F2F4FD" fill-rule="evenodd" xlink:href="#path-3"></use>
+                        </g>
+                        <rect id="Rectangle-21-Copy-3" fill-opacity="0.3" fill="#6776C4" x="26" y="17" width="86.6800957" height="6.2472141" rx="3.12360705"></rect>
+                        <rect id="Rectangle-21-Copy-3" fill="#6776C4" x="25.5331739" y="17.2253557" width="52.0601175" height="6.2472141" rx="3.12360705"></rect>
+                    </g>
+                    <g id="编组-4" transform="translate(89.000000, 59.000000)">
+                        <path d="M3.1897419,17.3686492 C17.6296027,14.3817286 30.3956615,8.59217886 41.4879181,1.47394662e-14 C53.2988515,8.56883182 66.078534,14.3502447 79.8269655,17.3442386 C81.6650404,17.7445231 82.9758272,19.3714809 82.9758272,21.2526367 L82.9758272,67.00578 C82.9758272,68.3431928 82.3074226,69.5921181 81.194628,70.3339812 L43.7067187,95.3259207 C42.3631212,96.2216524 40.6127151,96.2216525 39.2691175,95.325921 L1.78119955,70.3339812 C0.668404684,69.5921181 1.01980542e-14,68.3431927 7.3697331e-15,67.0057798 L7.3697331e-15,21.2857316 C-6.55365033e-06,19.3888935 1.33222717,17.7528807 3.1897419,17.3686492 Z" id="Rectangle-22" fill="#6776C4"></path>
+                        <path d="M9.90907598,22.239562 C21.7990457,19.7088761 32.3253261,14.8948133 41.4879174,7.79737362 C51.2395029,14.8721486 61.7796007,19.6781067 73.108211,22.2152479 C74.9352754,22.6244238 76.234042,24.2462335 76.234042,26.1185554 L76.234042,63.5668462 C76.234042,64.9042589 75.5656374,66.1531843 74.4528428,66.8950474 L43.7067182,87.3924637 C42.3631205,88.2881955 40.6127143,88.2881955 39.2691166,87.3924637 L8.52299206,66.8950474 C7.41019738,66.1531843 6.74179284,64.9042589 6.74179284,63.5668462 L6.74179284,26.1519315 C6.7417862,24.2637059 8.06221989,22.6326506 9.90907598,22.239562 Z" id="Rectangle-22" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle id="Oval-9" fill="#2A2E76" cx="41.1260423" cy="44.3568115" r="22.81835"></circle>
+                        <path d="M31.2307692,48.9170572 L31.2307692,44.7682663 L46.0837692,47.4717692 L44.7682663,31.2307692 L48.9170572,31.2307692 L50.1547692,48.2127692 L50.1560178,48.2129439 L50.4553812,52.3198122 L31.2307692,48.9170572 Z" id="Combined-Shape-Copy-3" fill="#F7941E" transform="translate(40.843075, 41.775291) rotate(45.000000) translate(-40.843075, -41.775291) "></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

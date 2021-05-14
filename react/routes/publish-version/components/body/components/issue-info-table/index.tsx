@@ -23,7 +23,7 @@ function IssueInfoTable() {
   });
 
   return (
-    <div className={classnames(styles.info, styles.preview)}>
+    <div className={classnames(styles.info, { [styles.preview]: preview })}>
       <IssueTypeSwitch />
       <div className={styles.body}>
         <IssueSearch
