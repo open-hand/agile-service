@@ -51,8 +51,6 @@ function useEditModeSectionConfig(preview: boolean) {
       <span>关联版本</span>
       <div className={styles.operation}>
         <Button
-          style={{ padding: '0 6px' }}
-          color={'primary' as ButtonColor}
           icon="local_offer"
           funcType={'flat' as any}
           className={styles.operation_btn} // 线框
@@ -63,8 +61,6 @@ function useEditModeSectionConfig(preview: boolean) {
           关联tag
         </Button>
         <Button
-          style={{ padding: '0 6px' }}
-          color={'primary' as ButtonColor}
           icon="version"
           className={styles.operation_btn}
           funcType={'flat' as any}
@@ -76,9 +72,8 @@ function useEditModeSectionConfig(preview: boolean) {
         </Button>
 
         <Button
-          style={{ padding: '0 6px' }}
-          color={'primary' as ButtonColor}
-          //   icon="mode_edit"
+          funcType={'flat' as any}
+          className={styles.operation_btn}
           onClick={() => {
             openImportPomModal({ handleOk: handleImportPom, versionId: detailData.id });
           }}
@@ -176,7 +171,7 @@ function PublishVersionLinkVersion() {
                       openEditAppVersionModal({
                         data: item as any,
                         handleOk: async (newData) => {
-                          publishVersionApi.updateTreeTagAlias(item.id, store.getCurrentData.id, item.objectVersionNumber!, newData.versionAlias);
+                          publishVersionApi.updateTreeTagAlias(item.id, store.getCurrentData.id, item.objectVersionNumber!, newData.tagAlias);
                           store.loadData();
                           return true;
                         },

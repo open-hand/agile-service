@@ -1,4 +1,4 @@
-@color: #3f51b5;
+@color: #5365EA;
 
 .switch {
   flex-shrink: 0;
@@ -8,6 +8,7 @@
   width: 100%;
   height: max-content;
   background: #fff;
+  // border-radius: 2px;
   padding: 0 1px;
   margin: 0 -1px;
   cursor: pointer;
@@ -49,7 +50,7 @@
       // }
       border-right-width: 1px;
       z-index: 2;
-      border-color: @color;
+      border-color: #3f51b5;
     }
 
     // &:last-child {
@@ -60,7 +61,7 @@
   .active {
     font-weight: 500;
     color: rgba(255, 255, 255, 1);
-    background: @color;
+    background: rgba(63, 81, 181, 1);
   }
 }
 
@@ -108,7 +109,7 @@
       //   border-right-width: 1px;
       // }
       z-index: 2;
-      border-color: @color;
+      border-color: #3f51b5;
     }
   }
 
@@ -120,5 +121,19 @@
 }
 
 [data-theme="theme4"] {
-  @color:#5365EA;
+  .switch {
+    &:hover {
+      border-color: @color;
+    }
+
+    &_wrap {
+      border-color: #D9E6F2;
+      &:hover {
+        border-color: @color;
+      }
+    }
+    .active {
+      background: @color;
+    }
+  }
 }

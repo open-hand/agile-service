@@ -5,6 +5,7 @@ import {
   Button, Form,
 } from 'choerodon-ui/pro';
 import classnames from 'classnames';
+import { uniqBy } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { publishVersionApi } from '@/api';
@@ -76,8 +77,9 @@ function IssueDiffArea() {
     publishVersionApi.compareTag(store.getCurrentData.id, issueDiffDataSet.toData(), action);
   }
   function handleOpenPreview() {
+    const uniqTableData = uniqBy((tableData || []), (item) => item.issueId);
     openPreviewResultModal({
-      publishVersionId: store.getCurrentData.id, onChangeIssueTag: handleChangeIssueTag, tableData: tableData || [], selectIssue: (issueId) => store.selectIssue(issueId),
+      publishVersionId: store.getCurrentData.id, onChangeIssueTag: handleChangeIssueTag, tableData: uniqTableData, selectIssue: (issueId) => store.selectIssue(issueId),
     });
   }
   return (

@@ -20,6 +20,7 @@ import renderTags from '@/components/column-renderer/tags';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import renderSummary from '@/components/column-renderer/summary';
 import { transformFilter, issuesFilter } from './utils';
 import styles from './PreviewResultModal.less';
 
@@ -76,13 +77,13 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
-  function renderSummary({ value }: RenderProps) {
-    return (
-      <Tooltip title={value} placement="topLeft">
-        <span className="c7n-agile-table-cell-click">{value}</span>
-      </Tooltip>
-    );
-  }
+  // function renderSummary({ value }: RenderProps) {
+  //   return (
+  //     <Tooltip title={value} placement="topLeft">
+  //       <span className="c7n-agile-table-cell-click">{value}</span>
+  //     </Tooltip>
+  //   );
+  // }
   return (
     <div className={styles.wrap}>
       <IssueSearch
@@ -118,23 +119,12 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
             },
           })}
           lock={'left' as any}
-          width={210}
+          width={360}
           renderer={renderSummary}
         />
         <Column name="issueNum" width={120} tooltip={'overflow' as any} className="c7n-agile-table-cell" />
         <Column name="status" renderer={({ record }) => (record?.get('statusVO') ? renderStatus({ record }) : undefined)} />
-        <Column name="priority" renderer={renderPriority} />
-        <Column
-          name="influenceVersion"
-          renderer={({ record }) => {
-            const influenceArr = record?.get('versionIssueRelVOS')?.filter((i: any) => i.relationType === 'influence') || [];
-            return influenceArr.length > 0 ? (
-              <Tooltip title={<div>{influenceArr.map((item: { name: string }) => <div>{item.name}</div>)}</div>}>
-                {renderTags({ array: influenceArr, name: influenceArr[0].name })}
-              </Tooltip>
-            ) : undefined;
-          }}
-        />
+        <Column name="priority" width={150} renderer={renderPriority} />
         <Column
           name="assigneeId"
           className="c7n-agile-table-cell"
@@ -148,7 +138,7 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
             />
           ) : '')}
         />
-        <Column name="creationDate" className="c7n-agile-table-cell" width={100} renderer={({ value }) => (value ? String(value).split(' ')[0] : '')} />
+        <Column name="creationDate" className="c7n-agile-table-cell" width={120} renderer={({ value }) => (value ? String(value).split(' ')[0] : '')} />
 
       </Table>
       <DetailContainer {...detailProps} />

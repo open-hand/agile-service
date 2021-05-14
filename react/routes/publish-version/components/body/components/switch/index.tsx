@@ -5,14 +5,8 @@ import { publishVersionApi } from '@/api';
 import { observer, useForceUpdate } from 'mobx-react-lite';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
-import Switch from './Switch';
+import Switch from '@/components/switch';
 
-interface IssueOption {
-  value: string,
-  valueObj: any,
-  text: string,
-  type: 'organization' | 'common',
-}
 // 主题色更改
 function IssueTypeSwitch() {
   const { data: issueTypes = [] } = useProjectIssueTypes({ onlyEnabled: true, typeCode: ['story', 'task', 'bug'] });

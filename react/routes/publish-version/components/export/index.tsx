@@ -63,7 +63,7 @@ const ExportPublishVersion: React.FC<Props> = observer(({ modal, publishVersionI
     modal?.handleOk(handleExport);
   }, [handleExport, modal]);
   return (
-    <div>
+    <div style={{ width: '100%', overflowX: 'hidden' }}>
       <Form dataSet={dataSet}>
         {/* <SelectPublishVersion name="publishVersionId" /> */}
         <CheckBox name="withSubVersion" />
