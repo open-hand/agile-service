@@ -4,6 +4,7 @@ import { toJS } from 'mobx';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import { Button } from 'choerodon-ui/pro';
 import { Divider } from 'choerodon-ui';
 import { getIsOrganization } from '@/utils/common';
@@ -52,45 +53,47 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         !readOnly && (
           <>
             <Header>
-              <Button
-                icon="playlist_add"
-                onClick={() => {
-                  openSelectExistStatus({
-                    statusList: store.statusList,
-                    issueTypeId: selectedType,
-                    onSubmit: () => {
-                      refresh();
-                    },
-                  });
-                }}
-              >
-                添加已有状态
-              </Button>
-              <Button
-                icon="playlist_add"
-                onClick={() => {
-                  openCreateStatus({
-                    selectedIssueType: [selectedType],
-                    onSubmit: () => {
-                      refresh();
-                    },
-                  });
-                }}
-              >
-                创建新的状态
-              </Button>
-              <Button
-                icon="settings-o"
-                onClick={() => {
-                  openSetDefaultStatus({
-                    issueTypeId: selectedType,
-                    statusList: toJS(store.statusList),
-                    onSubmit: refresh,
-                  });
-                }}
-              >
-                设置初始状态
-              </Button>
+              <HeaderButtons items={[
+                {
+                  name: '添加已有状态',
+                  display: true,
+                  handler: () => {
+                    openSelectExistStatus({
+                      statusList: store.statusList,
+                      issueTypeId: selectedType,
+                      onSubmit: () => {
+                        refresh();
+                      },
+                    });
+                  },
+                  icon: 'playlist_add',
+                },
+                {
+                  name: '创建新的状态',
+                  display: true,
+                  handler: () => {
+                    openCreateStatus({
+                      selectedIssueType: [selectedType],
+                      onSubmit: () => {
+                        refresh();
+                      },
+                    });
+                  },
+                  icon: 'playlist_add',
+                }, {
+                  name: '设置初始状态',
+                  display: true,
+                  handler: () => {
+                    openSetDefaultStatus({
+                      issueTypeId: selectedType,
+                      statusList: toJS(store.statusList),
+                      onSubmit: refresh,
+                    });
+                  },
+                  icon: 'settings-o',
+                },
+              ]}
+              />
             </Header>
             <Breadcrumb />
           </>

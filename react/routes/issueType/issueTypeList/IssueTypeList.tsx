@@ -9,6 +9,7 @@ import {
 import {
   Content, Page, Breadcrumb, Choerodon, Header,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { IIssueType } from '@/common/types';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
@@ -264,14 +265,20 @@ function IssueTypeList() {
       className={styles.issueType}
     >
       <Header>
-        <Button icon="playlist_add" onClick={handleAdd}>添加问题类型</Button>
-        {
-          !isOrganization && (
-          <Button icon="relate" onClick={handleOpenRefrenced}>
-            引用问题类型
-          </Button>
-          )
-        }
+        <HeaderButtons items={[
+          {
+            name: '添加问题类型',
+            icon: 'playlist_add',
+            handler: handleAdd,
+            display: true,
+          }, {
+            name: '引用问题类型',
+            icon: 'relate',
+            handler: handleOpenRefrenced,
+            display: !isOrganization,
+          },
+        ]}
+        />
       </Header>
       <Breadcrumb />
       <Content style={{ paddingTop: '0' }}>

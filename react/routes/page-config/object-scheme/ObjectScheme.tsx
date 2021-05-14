@@ -7,6 +7,7 @@ import { Tag } from 'choerodon-ui';
 import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
@@ -242,20 +243,20 @@ function ObjectScheme() {
   return (
     <Page>
       <Header>
-        <Button
-          funcType={'flat' as FuncType}
-          onClick={openCreateFieldModal}
-        >
-          <Icon type="playlist_add icon" />
-          <span>{formatMessage({ id: 'field.create' })}</span>
-        </Button>
-        <Button
-          funcType={'flat' as FuncType}
-          onClick={openImportField}
-        >
-          <Icon type="archive" />
-          <span>{formatMessage({ id: 'field.import' })}</span>
-        </Button>
+        <HeaderButtons items={[
+          {
+            name: formatMessage({ id: 'field.create' }),
+            icon: 'playlist_add',
+            handler: openCreateFieldModal,
+            display: true,
+          }, {
+            name: formatMessage({ id: 'field.import' }),
+            icon: 'archive',
+            handler: openImportField,
+            display: true,
+          },
+        ]}
+        />
       </Header>
       <Breadcrumb />
       <Content className={`${prefixCls}-detail-content`}>

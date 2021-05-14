@@ -138,7 +138,7 @@ function formatFields(fieldData: IField[], data: object, dataSet: DataSet, isInP
       const customField = find(fieldData, { fieldCode: key });
       if (customField) {
         temp.customFields.push({
-          fieldId: customField.id,
+          fieldId: customField.fieldId,
           fieldType: customField.fieldType,
           // @ts-ignore
           value: data[key],
@@ -149,6 +149,8 @@ function formatFields(fieldData: IField[], data: object, dataSet: DataSet, isInP
   return temp;
 }
 
+const extraFields = ['timeTrace'];
+
 const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
   const { isInProgram } = useIsInProgram();
   let { data: issueTypeData = [] } = useProjectIssueTypes({ onlyEnabled: true });
@@ -157,7 +159,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
     modal, requiredFields: fields, issueVO, reloadIssue, onUpdate,
   } = props;
 
-  const [requiredFields, setRequiredFields] = useState(fields || []);
+  const [requiredFields, setRequiredFields] = useState(fields.filter((item) => !includes(extraFields, item.fieldCode)) || []);
   const [loading, setLoading] = useState<boolean>(false);
 
   const lookupFields = useMemo(() => [{
@@ -327,7 +329,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
           if (value) {
             setLoading(true);
             const res = await issueApi.getRequiredField(issueVO.issueId, value);
-            setRequiredFields(res);
+            setRequiredFields(res.filter((item: IField) => !includes(extraFields, item.fieldCode)));
             setLoading(false);
           } else {
             setRequiredFields([]);

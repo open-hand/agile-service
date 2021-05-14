@@ -15,6 +15,7 @@
     "@emotion/styled": "^10.0.27",
     "ahooks": "^2.7.1",
     "antd": "4.5.3",
+    "copy-to-clipboard": "^3.2.0",
     "dayjs": "^1.9.6",
     "dom-helpers": "^5.2.0",
     "echarts": "^4.1.0",
@@ -27,6 +28,7 @@
     "mobx-react-lite": "^1.4.1",
     "moment": "^2.22.2",
     "moment-range": "^4.0.2",
+    "mxgraph-js": "^1.0.1",
     "quill-delta": "^4.2.2",
     "quill-delta-to-html": "^0.8.4",
     "quill-image-drop-and-paste": "^1.1.1",
@@ -49,8 +51,7 @@
     "timeago-react": "2.0.0",
     "use-immer": "^0.4.1",
     "webuploader": "^0.1.8",
-    "wolfy87-eventemitter": "^5.2.8",
-    "copy-to-clipboard": "^3.2.0"
+    "wolfy87-eventemitter": "^5.2.8"
   },
   "devDependencies": {
     "@choerodon/boot": "0.23.1",
