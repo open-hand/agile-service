@@ -78,7 +78,7 @@ public class EncryptionUtils {
     public static void filterEmptyCustomField(SearchVO search) {
         Optional<Map<String, Object>> searchArgs = Optional.ofNullable(search).map(SearchVO::getOtherArgs);
         if (searchArgs.isPresent()) {
-            Map<String, Object> map = (Map) searchArgs.map(ad -> (Object) (ad.get("customField"))).get();
+            Map<String, Object> map = (Map) searchArgs.get().get("customField");
             if (!ObjectUtils.isEmpty(map) && !map.isEmpty()) {
                 List<Object> options = (List) map.get("option");
                 if (!CollectionUtils.isEmpty(options)) {
