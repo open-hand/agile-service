@@ -24,7 +24,7 @@ import ChooseField from '../choose-field';
 import IssueSearchContext from '../context';
 import EnvironmentField from './field/EnvironmentField';
 
-const getValueByFieldType = (fieldType, value) => {
+export const getValueByFieldType = (fieldType, value) => {
   switch (fieldType) {
     case 'text':
     case 'input': {

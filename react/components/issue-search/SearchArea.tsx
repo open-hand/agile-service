@@ -134,8 +134,8 @@ const SearchArea: React.FC = () => {
   };
 
   const findSameFilter = () => {
-    const currentFilterDTO = store.getCustomFieldFiltersWithNullOption()
-      ? flattenObject(store.getCustomFieldFiltersWithNullOption()) : {};
+    const currentFilterDTO = store.getCustomFieldFilters()
+      ? flattenObject(store.getCustomFieldFilters()) : {};
     // console.log(currentFilterDTO);
     // 找到与当前筛选相同条件的我的筛选
     const targetMyFilter = find(myFilters,
@@ -145,7 +145,7 @@ const SearchArea: React.FC = () => {
   const getMyFilterSelectValue = () => {
     const targetMyFilter = findSameFilter();
 
-    const currentFilterDTO = store.getCustomFieldFiltersWithNullOption();
+    const currentFilterDTO = store.getCustomFieldFilters();
     const onlyMe = currentFilterDTO.otherArgs.assigneeId && currentFilterDTO.otherArgs.assigneeId.length === 1 && currentFilterDTO.otherArgs.assigneeId[0] === userId;
     const { starBeacon } = currentFilterDTO.otherArgs;
     const result = [...selectedQuickFilters];

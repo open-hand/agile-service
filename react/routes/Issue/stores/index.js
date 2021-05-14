@@ -39,12 +39,12 @@ export const StoreProvider = inject('AppState')(injectIntl(
       };
       getBatchDeletePermission();
     }, []);
-
+    const cachedFilter = localPageCacheStore.getItem('issues');
     const issueSearchStore = useIssueSearchStore({
       getSystemFields,
       transformFilter,
-      defaultSearchVO: defaultMyFilter ? JSON.parse(defaultMyFilter.filterJson) : undefined,
-      defaultChosenFields: Array.isArray(localPageCacheStore.getItem('issues')) ? new Map(localPageCacheStore.getItem('issues').map((item) => [item.code, item])) : undefined,
+      defaultSearchVO: !cachedFilter && defaultMyFilter ? JSON.parse(defaultMyFilter.filterJson) : undefined,
+      defaultChosenFields: Array.isArray(cachedFilter) ? new Map(cachedFilter.map((item) => [item.code, item])) : undefined,
     });
 
     /**
