@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from 'choerodon-ui';
 import classNames from 'classnames';
 import { IFilter } from '@/components/filter';
-import { find, map } from 'lodash';
+import { find, map, toArray } from 'lodash';
 import { IFilterField, ICustomField } from './index';
 import { IRenderFields } from './Filter';
 import InputField from './components/InputField';
@@ -186,7 +186,7 @@ export function departFilter(filter: IFilter, fields: IFilterField[]) {
     if (field) {
       const { fieldType, system } = field;
       const value = filter[code];
-      if (value === undefined || value === null || value === '') {
+      if (value === undefined || value === '') {
         return;
       }
 
@@ -203,13 +203,10 @@ export function departFilter(filter: IFilter, fields: IFilterField[]) {
         case 'checkbox':
         case 'multiMember':
         case 'member': {
-          const v = Array.isArray(value) ? value : [value];
-          if (v.length > 0) {
-            customField.option.push({
-              fieldId: id,
-              value: v,
-            });
-          }
+          customField.option.push({
+            fieldId: id,
+            value: value ? toArray(value) : value,
+          });
           break;
         }
         case 'input': {
@@ -240,22 +237,18 @@ export function departFilter(filter: IFilter, fields: IFilterField[]) {
         case 'time':
         case 'datetime':
         case 'date': {
-          if (value && value.length > 0) {
-            if (value[0] && value[1]) {
-              if (fieldType === 'time') {
-                customField.date_hms.push({
-                  fieldId: id,
-                  startDate: value[0],
-                  endDate: value[1],
-                });
-              } else {
-                customField.date.push({
-                  fieldId: id,
-                  startDate: value[0],
-                  endDate: value[1],
-                });
-              }
-            }
+          if (fieldType === 'time') {
+            customField.date_hms.push({
+              fieldId: id,
+              startDate: value ? value[0] : value,
+              endDate: value ? value[1] : value,
+            });
+          } else {
+            customField.date.push({
+              fieldId: id,
+              startDate: value ? value[0] : value,
+              endDate: value ? value[1] : value,
+            });
           }
           break;
         }
