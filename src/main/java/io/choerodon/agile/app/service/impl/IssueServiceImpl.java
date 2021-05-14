@@ -783,12 +783,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         fieldIds.add(fieldId);
                     }
                 });
+        boolean belongToProgram =
+                baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId).getBody() != null;
         List<PageFieldViewVO> requiredSystemFields = new ArrayList<>();
         List<PageFieldViewVO> requiredCustomFields = new ArrayList<>();
         createPageFields.forEach(x -> {
             if (Boolean.TRUE.equals(x.getRequired())) {
                 if (Boolean.TRUE.equals(x.getSystem())) {
                     //系统字段
+                    String code = x.getFieldCode();
+                    if (FieldCode.EPIC.equals(code) && belongToProgram) {
+                        return;
+                    }
                     if (isSystemFieldEmpty(x.getFieldCode(), issue)) {
                         requiredSystemFields.add(x);
                     }
@@ -1496,7 +1502,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
         boolean allFieldEmpty = true;
-        if (predefinedFields != null) {
+        if (!ObjectUtils.isEmpty(predefinedFields)) {
             Set<String> systemFields = predefinedFields.keySet();
             Set<String> fieldCodes = convertToFieldCodes(systemFields);
             systemFieldCodes.forEach(x -> {
@@ -1511,7 +1517,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Set<Long> inputCustomFields = new HashSet<>();
             customFields.forEach(x -> inputCustomFields.add(x.getFieldId()));
             customFieldIds.forEach(x -> {
-                if (inputCustomFields.contains(x)) {
+                if (!inputCustomFields.contains(x)) {
                     throw new CommonException("error.required.field.empty." + x);
                 }
             });
