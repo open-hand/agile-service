@@ -23,7 +23,7 @@ export function useIssueSearchStore(props: IssueSearchStoreProps) {
 }
 export { IssueSearchStore };
 const IssueSearch: React.FC<IssueSearchProps> = ({
-  urlFilter, onClear, onClickSaveFilter, store, onChange, projectId, applyType, foldedHeight = 48,
+  urlFilter, onClear, onClickSaveFilter, store, onChange, projectId, applyType, foldedHeight = 43,
 }) => {
   store.setQuery(onChange);
   useEffect(() => {
