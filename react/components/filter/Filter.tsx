@@ -244,7 +244,7 @@ const Filter: React.FC<FilterProps> = ({
         triggerElement={flat ? (
           <Button>
             <span style={{
-              display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.87)', fontWeight: 500,
+              display: 'flex', alignItems: 'center', fontWeight: 500,
             }}
             >
               添加筛选
