@@ -23,7 +23,7 @@ const SelectBoard: React.FC<any> = ({ onChange, onClick }) => {
       ref={ref}
       value={ScrumBoardStore.getSelectedBoard}
       style={{
-        marginRight: 15, fontWeight: 500,
+        marginLeft: 20, fontWeight: 500,
       }}
       onChange={onChange}
       clearButton={false}
