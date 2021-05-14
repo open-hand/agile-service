@@ -18,7 +18,7 @@ const Upload: React.FC<Props> = ({ onUpload, children }) => {
       ref.current.click();
     }
   };
-  let trigger = <Button icon="file_upload" color={'primary' as ButtonColor} onClick={handleClick} />;
+  let trigger = <Button icon="file_upload" color={'primary' as ButtonColor} onClick={handleClick} />;
   if (children) {
     const child = React.Children.only(children);
     if (React.isValidElement(child)) {

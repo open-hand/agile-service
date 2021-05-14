@@ -110,7 +110,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
           },
         }) : (
           <Button
-            color={'primary' as ButtonColor}
+            color={'primary' as ButtonColor}
             icon="add"
             onClick={(e) => {
               e.nativeEvent.stopImmediatePropagation();

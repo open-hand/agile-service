@@ -117,7 +117,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
           <br />
           <Button
             style={{ fontSize: '14px', marginTop: 15 }}
-            color={'primary' as ButtonColor}
+            color={'primary' as ButtonColor}
             funcType={'raised' as FuncType}
             onClick={onClick}
           >
