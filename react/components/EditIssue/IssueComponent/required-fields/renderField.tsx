@@ -52,7 +52,7 @@ export default function renderField<T extends Partial<SelectProps>>({
             {...otherComponentProps}
           />
         ) : (
-          <SelectFeature name={fieldCode} {...otherComponentProps} />
+          <SelectFeature name="featureId" {...otherComponentProps} />
         );
       case 'environment': {
         return <SelectEnvironment name={fieldCode} clearButton placeholder={fieldName} {...otherComponentProps} />;
