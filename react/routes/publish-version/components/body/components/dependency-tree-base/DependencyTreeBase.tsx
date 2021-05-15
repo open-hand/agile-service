@@ -4,6 +4,9 @@ import React, {
 import {
   Button, Icon, Modal, SelectBox, Tooltip,
 } from 'choerodon-ui/pro/lib';
+import {
+  useTheme,
+} from '@choerodon/boot';
 import { pick, set } from 'lodash';
 import { Tree } from 'choerodon-ui/pro';
 import classnames from 'classnames';
@@ -30,6 +33,7 @@ const { TreeNode } = Tree;
 function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: propsData, renderNode }: IDependencyTreeProps<T>) {
   const prefixCls = 'c7n-agile-dependency-tree';
   const [data, setData] = useState(propsData || []);
+  const [theme] = useTheme();
   useEffect(() => {
     setData(propsData);
   }, [propsData]);
@@ -38,14 +42,21 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
     console.log('prevHeight:', prevHeight, height);
     const levelLineHeight = ((height + prevHeight) / 2);
     const levelLineBottom = offsetBottom + 5 - (height / 2);
+    let selfHeight = nodeIndex === 0 ? prevHeight - 7 : levelLineHeight;
+    let selfBottom = hasChildren ? 7 : levelLineBottom;
+    if (theme === 'theme4') {
+      selfHeight = nodeIndex === 0 ? levelLineHeight - 8 * (hasChildren ? 1 : 2) : levelLineHeight + 5;
+      selfBottom = hasChildren ? 7 : levelLineBottom + 4;
+      // selfHeight=hasChildren?
+    }
     lineArr.push(<span
       className={`${prefixCls}-expand-line`}
       style={{
         right: hasChildren ? 17 : -5,
-        bottom: hasChildren ? 7 : levelLineBottom,
+        bottom: selfBottom,
         width: hasChildren ? 16 : 22,
         // height: 30,
-        height: nodeIndex === 0 ? prevHeight - 7 : levelLineHeight,
+        height: selfHeight,
       }}
     />);
     needLineLevelList.forEach((item) => {
@@ -61,7 +72,7 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
           // right: hasChildren ? 16 * level : undefined,
           // bottom: hasChildren ? 10 - 5 * level : undefined,
           right,
-          height,
+          height: theme === 'theme4' ? height + 5 : height,
           bottom: -height + 20,
           width,
         }}

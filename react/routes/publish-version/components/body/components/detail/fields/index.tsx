@@ -20,7 +20,7 @@ function PublishVersionDetail() {
       <LatestUpdateDate />
       <CreateUser />
       <CreateDate />
-      <Description maxWidth={size.width && size.height && size.height > 80 ? size.width / 2 : size.width} />
+      <Description maxWidth={size.width && size.height && size.height > 80 ? size.width / 2 : (size.width || 0) - (menuSize.width || 0)} />
     </div>
   );
 }
