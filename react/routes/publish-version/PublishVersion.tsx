@@ -47,9 +47,7 @@ function PublishVersion() {
       tableDataSet.length === 0 && tableDataSet.query();
     });
   }
-  useEffect(() => {
-    console.log('tableDataSet', tableDataSet.length, tableDataSet.status);
-  }, [tableDataSet.length, tableDataSet.status]);
+
   function handleClickMenu(key: string) {
     switch (key) {
       case 'excel':
@@ -83,21 +81,24 @@ function PublishVersion() {
           items={[
             {
               display: true,
-              element: (<TooltipButton
-                buttonIcon="playlist_add"
-                title="无相应权限创建发布版本"
-                clickEvent={() => {
-                  openCreatePublishVersionModal({ handleOk: handleCreate });
-                }}
-              >
-                创建发布版本
-              </TooltipButton>),
+              element: (
+                <TooltipButton
+                  buttonIcon="playlist_add"
+                  title="无相应权限创建发布版本"
+                  clickEvent={() => {
+                    openCreatePublishVersionModal({ handleOk: handleCreate });
+                  }}
+                >
+                  创建发布版本
+                </TooltipButton>
+              ),
             },
             {
               display: !!store.getCurrentData.id,
-              element: <Dropdown overlay={renderMenu()}>
-                <Button icon="unarchive">导出版本</Button>
-              </Dropdown>,
+              element: (
+                <Dropdown overlay={renderMenu()}>
+                  <Button icon="unarchive">导出版本</Button>
+                </Dropdown>),
             },
           ]}
         />
@@ -106,10 +107,10 @@ function PublishVersion() {
       <Content
         className={`${prefixCls}-content`}
       >
-        {tableDataSet.status === 'loading' && tableDataSet.length === 0 ? <Loading loading /> : (
+        {tableDataSet.status === 'loading' && !tableDataSet.getState('searchMode') && tableDataSet.length === 0 ? <Loading loading /> : (
           <>
             {
-              tableDataSet.length > 0 ? (
+              tableDataSet.getState('searchMode') || tableDataSet.length > 0 ? (
                 <>
                   <SideNav>
                     <SideNav.Panel

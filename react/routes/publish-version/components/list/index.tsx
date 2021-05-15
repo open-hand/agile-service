@@ -1,12 +1,12 @@
 import React, {
-  useCallback, useEffect, useRef,
+  useCallback, useEffect, useRef, useState,
 } from 'react';
 import {
   Menu, Tooltip, TextField, Icon, Spin, Dropdown, Modal,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import ScrollContext from 'react-infinite-scroll-component';
-import { debounce } from 'lodash';
+import { debounce, isEmpty } from 'lodash';
 import classnames from 'classnames';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { useSize } from 'ahooks';
@@ -89,6 +89,7 @@ const VersionItem = observer<VersionItemProps>(({
 });
 function PublishVersionList() {
   const { prefixCls, tableDataSet, store } = usePublishVersionContext();
+  const [searchText, setSearchText] = useState<string>();
   const scrollRef = useRef(null);
   const scrollSize = useSize(scrollRef);
 
@@ -131,27 +132,36 @@ function PublishVersionList() {
     }
     function registerUpdate(newData: any, record: Record) {
       record.set(newData);
-      console.log('registerUpdate', newData, record.toData());
     }
 
     store.init({ events: { update: registerUpdate, createAfter: registerCreateAfter, delete: registerCreateAfter } });
   }, [handleInitResizeData, store, tableDataSet]);
 
   const handleFilterChange = debounce((val) => {
-    tableDataSet.setQueryParameter('content', val);
-    handleInitResizeData();
-    // pIAimProjectStore.setSearchVal(val);
+    setSearchText(val);
   }, 500);
+  useEffect(() => {
+    tableDataSet.setState('searchMode', isEmpty(searchText?.trim()) ? undefined : true);
+    tableDataSet.setQueryParameter('content', searchText?.trim());
+    tableDataSet.query().then((res) => {
+      handleInitResizeData();
+    });
+  }, [handleInitResizeData, searchText, tableDataSet]);
   useEffect(() => {
     handleInitResizeData();
   }, [handleInitResizeData]);
+  useEffect(() => {
+    const selectedRecord = tableDataSet.status === 'ready' && tableDataSet.find((record) => record.get('id') === store.getCurrentData.id);
+    console.log('selectedRecord...', selectedRecord);
+    selectedRecord && tableDataSet.select(selectedRecord);
+  }, [store.getCurrentData.id, tableDataSet, tableDataSet.length, tableDataSet.status]);
   return (
     <div className={styles.list} ref={scrollRef}>
       <TextField
         className={styles.search}
         prefix={<Icon type="search" />}
-        onChange={handleFilterChange}
-        onInput={(e:any) => handleFilterChange(e.target.value)}
+        onChange={setSearchText}
+        onInput={(e: any) => handleFilterChange(e.target.value)}
         placeholder="请输入搜索条件"
         clearButton
       />
@@ -163,7 +173,9 @@ function PublishVersionList() {
         loader={<Spin spinning className={`${prefixCls}-left-project-scroll-spin`} />}
         height="100%"
         endMessage={(
-          <span className={styles.scroll_bottom}>{tableDataSet.totalPage !== 1 ? '到底了' : ''}</span>
+          searchText && tableDataSet.length === 0 ? <span className={styles.scroll_bottom}>暂无匹配内容</span>
+            : <span className={styles.scroll_bottom}>{tableDataSet.totalPage !== 1 ? '到底了' : ''}</span>
+
         )}
       >
         {tableDataSet.map((record) => <VersionItem data={record} name={record.get('versionAlias')} onClick={handleChange} activeId={tableDataSet.currentIndex} />)}

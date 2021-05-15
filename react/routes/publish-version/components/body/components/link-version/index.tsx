@@ -137,8 +137,8 @@ function PublishVersionLinkVersion() {
     const appService = item.appServiceCode ? store.findAppServiceByCode(item.appServiceCode)! : undefined;
     const alias = item.versionAlias || item.tagAlias;
     return (
-      <DependencyTreeNode offsetBottom={10} style={{ height: showAdditionalLine ? 54 : 30 }}>
-        <div className={styles.node}>
+      <DependencyTreeNode offsetBottom={showAdditionalLine ? 10 : 0} style={{ height: showAdditionalLine ? 54 : 30 }}>
+        <div className={styles.node} style={{ marginLeft: item.children?.length ? 4 : 0 }}>
           <div className={styles.top} style={{ height: showAdditionalLine ? undefined : 30 }}>
             <span className={styles.node_left}>
               {!!item.children?.length && <Icon type="folder-o" className={styles.node_left_icon} />}

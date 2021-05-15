@@ -34,6 +34,7 @@ function PublishVersionHeader() {
       {!preview && (
         <CustomTabs
           customType="default"
+          selectedTabValue={store.getCurrentMenu}
           data={[{ name: '详情', value: 'detail' }, { name: '版本对比', value: 'diff' }, { name: '查看版本信息', value: 'info' }]}
           onChange={(e, name, v) => {
             store.setCurrentMenu(v);
