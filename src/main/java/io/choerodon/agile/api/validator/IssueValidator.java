@@ -152,6 +152,17 @@ public class IssueValidator {
             throw new CommonException("error.IssueRule.statusId");
         }
 
+        if (issueUpdate.containsKey("rank") && ObjectUtils.isEmpty(issueUpdate.get("rank"))) {
+            throw new CommonException("error.issue.rank.null");
+        }
+
+        if (issueUpdate.containsKey("priorityId") && ObjectUtils.isEmpty(issueUpdate.get("priorityId"))) {
+            throw new CommonException("error.issue.priorityId.null");
+        }
+
+        if (issueUpdate.containsKey("statusId") && ObjectUtils.isEmpty(issueUpdate.get("priorityId"))) {
+            throw new CommonException("error.issue.statusId.null");
+        }
     }
 
     public void verifySubCreateData(IssueSubCreateVO issueSubCreateVO, Long projectId) {
