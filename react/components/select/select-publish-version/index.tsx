@@ -12,7 +12,7 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<Array<any>>
   statusArr?: Array<string>
   valueField?: string
-  afterLoad?: (versions: IAppVersionData[]) => void
+  afterLoad?: (versions: IAppVersionData[]) => (void | any[])
   request?: Function
   flat?: boolean
   hasUnassign?: boolean
@@ -31,15 +31,17 @@ const SelectPublishVersion: React.FC<Props> = forwardRef(({
       return publishVersionApi.project(projectId || getProjectId()).loadList({ page: page!, size: 20 }, { appService: true, content: filter });
     },
     middleWare: (versions: IAppVersionData[]) => {
+      let newVersion = versions;
+
       if (dataRef) {
         Object.assign(dataRef, {
-          current: versions,
+          current: newVersion,
         });
       }
       if (afterLoad) {
-        afterLoad(versions);
+        const temp = afterLoad(versions);
+        newVersion = Array.isArray(temp) ? temp : newVersion;
       }
-      const newVersion = versions;
       if (hasUnassign) {
         // newVersion = [{ versionId: '0', name: '未分配版本' } as IVersion, ...versions];
       }

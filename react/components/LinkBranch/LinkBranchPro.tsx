@@ -16,15 +16,16 @@ import './commom.less';
 import { IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { Observer } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import SelectAppService from '../select/select-app-service';
-import SelectGitTags from '../select/select-git-tags';
+import SelectBranch from '../select/select-branch-with-tag';
 
 const { Option } = Select;
-interface ILinkBranchModalProps{
-    issueId:string,
-    onOk?:Function
+interface ILinkBranchModalProps {
+  issueId: string,
+  onOk?: Function
 }
-const LinkBranch: React.FC<{ modal?: IModalProps }&ILinkBranchModalProps> = ({ modal }) => {
+const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = observer(({ modal, issueId }) => {
   const formDs = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
@@ -34,7 +35,7 @@ const LinkBranch: React.FC<{ modal?: IModalProps }&ILinkBranchModalProps> = ({ m
       { name: 'branch', label: '分支', type: 'string' as FieldType },
     ],
     events: {
-      update: ({ record, value, name }:any) => {
+      update: ({ record, value, name }: any) => {
         if (name === 'source') {
           record.init('app', undefined);
           record.init('branch', undefined);
@@ -53,12 +54,11 @@ const LinkBranch: React.FC<{ modal?: IModalProps }&ILinkBranchModalProps> = ({ m
         <Option value="other">其他项目</Option>
       </Select>
       <SelectAppService name="app" />
-      <SelectGitTags name="branch" applicationId={formDs.current?.get('applicationId')} style={{ width: '100%' }} />
-      {/* <Observer>{() => }</Observer> */}
+      <SelectBranch name="branch" issueId={issueId} applicationId={formDs.current?.get('applicationId')} enabledTag={false} />
     </Form>
   );
-};
-const openLinkBranchModal = (props:ILinkBranchModalProps) => {
+});
+const openLinkBranchModal = (props: ILinkBranchModalProps) => {
   Modal.open({
     key: Modal.key(),
     title: '添加关联分支',

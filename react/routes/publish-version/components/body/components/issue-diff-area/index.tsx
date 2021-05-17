@@ -1,17 +1,20 @@
 import React, {
-  useEffect, useState,
+  useCallback,
+  useEffect, useMemo, useState,
 } from 'react';
 import {
-  Button, Form,
+  Button, Form, Select, Tooltip,
 } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import { uniqBy } from 'lodash';
-import { observer } from 'mobx-react-lite';
+import { observer, useObserver } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { publishVersionApi } from '@/api';
 // @ts-ignore
 import JSONbig from 'json-bigint';
-import SelectAppService from '@/components/select/select-app-service';
+import OriginSelectAppService from '@/components/select/select-app-service';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+
 import SelectGitTags from '@/components/select/select-git-tags';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import SelectPublishVersion from '@/components/select/select-publish-version';
@@ -20,12 +23,34 @@ import PublishVersionSection from '../section';
 import { openPreviewResultModal } from './PreviewResultModal';
 import { requestPreviewData } from './utils';
 
+const { Option } = Select;
 const JSONbigString = JSONbig({ storeAsString: true });
-
+function SelectAppService({ request, record, ...otherProps }: Partial<SelectProps> & { request: Function }) {
+  const renderService = (appService: any) => {
+    if (appService) {
+      return (
+        <Tooltip title={appService.code}>
+          <div style={{ display: 'inline-block' }}>
+            {`${appService.name}(${appService.code})`}
+          </div>
+        </Tooltip>
+      );
+    }
+    return null;
+  };
+  const options = useObserver(() => (request(record) as any[]).map((item) => <Option value={item.code}>{renderService(item)}</Option>));
+  return (
+    <OriginSelectAppService record={record} {...otherProps}>
+      {options}
+    </OriginSelectAppService>
+  );
+}
 function IssueDiffArea() {
   const [tableData, setTableData] = useState<any[] | false | undefined>();
   const [generateBtnLoading, setGenerateBtnLoading] = useState(false);
   const [publishVersionId, setPublishVersionId] = useState<string>();
+  const [appServerList, setAppServerList] = useState<any[]>([]);
+
   const { store, issueDiffDataSet } = usePublishVersionContext();
   const dependencyList = store.getDependencyList;
 
@@ -33,7 +58,7 @@ function IssueDiffArea() {
     if (await issueDiffDataSet.validate()) {
       setTableData(false);
       setGenerateBtnLoading(true);
-      const newData = await requestPreviewData(store.getCurrentData.id, issueDiffDataSet.toData());
+      const newData = await requestPreviewData(store.getCurrentData.id, issueDiffDataSet.toData().filter((item:any) => item.appServiceCode));
       setGenerateBtnLoading(false);
 
       setTableData(newData);
@@ -54,8 +79,14 @@ function IssueDiffArea() {
     }
   }
   useEffect(() => {
-    publishVersionApi.loadCompareHistory(store.getCurrentData.id); // .....
-  }, []);
+    publishVersionId && issueDiffDataSet.length > 0 && publishVersionApi.loadCompareHistory(publishVersionId).then((res: any) => {
+      res.map((item: any) => {
+        const findRecord = issueDiffDataSet.find((record) => record.get('appServiceCode') === item.appServiceCode);
+        findRecord?.set('targetTag', item.source);
+        return false;
+      });
+    }); // .....
+  }, [issueDiffDataSet, issueDiffDataSet.length, publishVersionId]);
   useEffect(() => {
     if (dependencyList.length === 0) {
       issueDiffDataSet.loadData([{}]);
@@ -67,11 +98,24 @@ function IssueDiffArea() {
       })));
     }
   }, [dependencyList, issueDiffDataSet, store]);
+
+  const loadAppServiceData = useCallback((record: Record) => {
+    const applicationIds = issueDiffDataSet.map((r) => r.get('appServiceId'));
+    console.log('appServerList', applicationIds, appServerList);
+    return appServerList.filter((appService) => record.get('appServiceId') === appService.id || !applicationIds.includes(appService.id));
+  }, [appServerList, issueDiffDataSet]);
+  useEffect(() => {
+    setGenerateBtnLoading(false);
+    setTableData(false);
+    publishVersionApi.loadAppServiceList(store.getCurrentData.id).then((res: any) => {
+      setAppServerList(res);
+    });
+  }, [store.getCurrentData.id]);
   function renderTags(record: Record) {
     const appServiceId = record.get('appServiceId');
-    return [<SelectAppService request={() => publishVersionApi.loadAppServiceList(store.getCurrentData.id)} record={record} name="appServiceCode" onChange={(v) => record.set('appServiceId', v ? store.findAppServiceByCode(v)?.id : undefined).init('sourceTag', undefined).init('targetTag', undefined)} />,
-      <SelectGitTags record={record} name="sourceTag" applicationId={appServiceId} key={`select-sourceTag-${appServiceId}`} />,
-      <SelectGitTags record={record} name="targetTag" applicationId={appServiceId} key={`select-targetTag-${appServiceId}`} />];
+    return [<SelectAppService request={loadAppServiceData} record={record} name="appServiceCode" onChange={(v) => record.set('appServiceId', v ? store.findAppServiceByCode(v)?.id : undefined).init('sourceTag', undefined).init('targetTag', undefined)} />,
+      <SelectGitTags record={record} name="sourceTag" applicationId={appServiceId} />,
+      <SelectGitTags record={record} name="targetTag" applicationId={appServiceId} />];
   }
   function handleChangeIssueTag(action: 'add' | 'update') {
     publishVersionApi.compareTag(store.getCurrentData.id, issueDiffDataSet.toData(), action);
@@ -89,6 +133,7 @@ function IssueDiffArea() {
           <SelectPublishVersion
             name="publishVersionId"
             label="对比发布版本"
+            afterLoad={(data) => data.filter((i) => i.id !== store.getCurrentData.id)}
             style={{ width: '4.52rem' }}
             onChange={setPublishVersionId}
           />

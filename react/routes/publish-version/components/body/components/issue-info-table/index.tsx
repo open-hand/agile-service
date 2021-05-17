@@ -70,7 +70,7 @@ function IssueInfoTable() {
             width={140}
             tooltip={'always' as any}
             renderer={({ value }) => value?.
-              map((i: any) => (`${i.appServiceCode}${i.tagName}`)).join('、')}
+              map((i: any) => (`${i.appServiceCode}:${i.tagName}`)).join('、')}
           />
           <Column name="creationDate" className="c7n-agile-table-cell" width={120} renderer={({ value }) => (value ? String(value).split(' ')[0] : '')} />
         </Table>
