@@ -208,7 +208,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
           <HeaderButtons
             items={[
               {
-                name: '创建发布版本',
+                name: '创建规划版本',
                 icon: 'playlist_add',
                 handler: () => {
                   // setCreateVisible(true);
