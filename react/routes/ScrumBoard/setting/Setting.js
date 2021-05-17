@@ -14,6 +14,7 @@ import './Setting.less';
 import { commonApi, boardApi } from '@/api';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
+import SelectBoard from '../ScrumBoardComponent/select-board';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import SettingColumn from './components/setting-column';
 import SwimLanePage from './components/SwimLanePage/SwimLanePage';
@@ -141,6 +142,14 @@ class Setting extends Component {
     return (
       <Page>
         <Header title="配置看板">
+          <SelectBoard
+            onChange={(value) => {
+              const selectedBoard = ScrumBoardStore.getBoardList.get(value);
+              ScrumBoardStore.setSelectedBoard(value);
+              ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
+              this.refresh(selectedBoard);
+            }}
+          />
           {activeKey === '1' ? (
             <>
               <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.create']}>
