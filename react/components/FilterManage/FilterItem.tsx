@@ -126,7 +126,7 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
         </Tag>
       )}
       <span className="c7n-filterAction">
-        {isEditing ? (
+        {isEditing && (
           <>
             <Tooltip title="保存">
               <Icon
@@ -141,29 +141,28 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
               />
             </Tooltip>
           </>
-        ) : (
-          <>
-            <Action data={[
-              {
-                text: isDefault ? '取消默认' : '设为默认',
-                action: handleSetDefault,
-              },
-              {
-                text: '修改',
-                action: () => {
-                  setIsEditing(true);
-                },
-              },
-              {
-                text: '删除',
-                action: handleDelete,
-              },
-            ]}
-            />
-          </>
         )}
-
       </span>
+      {!isEditing && (
+        <Action data={[
+          {
+            text: isDefault ? '取消默认' : '设为默认',
+            action: handleSetDefault,
+          },
+          {
+            text: '修改',
+            action: () => {
+              setIsEditing(true);
+            },
+          },
+          {
+            text: '删除',
+            action: handleDelete,
+          },
+        ]}
+        />
+      )}
+
     </li>
   );
 };
