@@ -37,7 +37,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
         },
       },
       {
-        name: 'sprintGoal', type: 'string', label: '冲刺目标',
+        name: 'sprintGoal', type: 'string', label: '冲刺目标', maxLength: 30,
       },
     ],
   }), []);
@@ -104,7 +104,7 @@ export function CreateCurrentPiSprint({
         validator: checkDateSame,
       },
       {
-        name: 'sprintGoal', type: 'string', label: '冲刺目标',
+        name: 'sprintGoal', type: 'string', label: '冲刺目标', maxLength: 30,
       },
     ],
   }), []);
