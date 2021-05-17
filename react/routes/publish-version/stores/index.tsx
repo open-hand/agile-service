@@ -48,6 +48,7 @@ const PublishVersionProvider = injectIntl(inject('AppState')(
       },
     }), [issueInfoTableDataSet, open]);
     useEffect(() => {
+      store.clear();
       store.init({ events: { selectIssue: handleSelectIssue } });
     }, [handleSelectIssue]);
     useEffect(() => {

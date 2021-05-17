@@ -44,7 +44,11 @@ function PublishVersion() {
 
   function handleCreate(data: any) {
     store.create(data).then(() => {
-      tableDataSet.length === 0 && tableDataSet.query();
+      // 初次进入 无数据 创建后查询 并选中
+      tableDataSet.length === 0 && tableDataSet.query().then(() => {
+        tableDataSet.select(tableDataSet.records[0]);
+        store.select(tableDataSet.records[0].toData());
+      });
     });
   }
 
@@ -72,6 +76,46 @@ function PublishVersion() {
         <Menu.Item key="preview">在线预览</Menu.Item>
 
       </Menu>
+    );
+  }
+  function render() {
+    if (tableDataSet.status === 'loading' && !tableDataSet.getState('searchMode') && tableDataSet.length === 0) {
+      return <Loading loading />;
+    }
+    return tableDataSet.getState('searchMode') || tableDataSet.length > 0 ? (
+      <>
+        <SideNav>
+          <SideNav.Panel
+            key="version"
+            tabKey="version"
+            title="版本列表"
+            active={false}
+          >
+            <PublishVersionList />
+          </SideNav.Panel>
+        </SideNav>
+        <Container />
+      </>
+
+    ) : (
+      <Empty
+        title="暂无可用发布版本"
+        description={(
+          <div>
+            {/* <span>为管理发布版本,创建发布版本</span> */}
+            <div>
+              <Button
+                funcType={'raised' as any}
+                style={{ marginTop: 10, fontSize: 14 }}
+                onClick={() => { openCreatePublishVersionModal({ handleOk: handleCreate }); }}
+              >
+                创建发布版本
+              </Button>
+            </div>
+          </div>
+        )}
+        pic={empty}
+      />
     );
   }
   return (
@@ -107,47 +151,7 @@ function PublishVersion() {
       <Content
         className={`${prefixCls}-content`}
       >
-        {tableDataSet.status === 'loading' && !tableDataSet.getState('searchMode') && tableDataSet.length === 0 ? <Loading loading /> : (
-          <>
-            {
-              tableDataSet.getState('searchMode') || tableDataSet.length > 0 ? (
-                <>
-                  <SideNav>
-                    <SideNav.Panel
-                      key="version"
-                      tabKey="version"
-                      title="版本列表"
-                      active={false}
-                    >
-                      <PublishVersionList />
-                    </SideNav.Panel>
-                  </SideNav>
-                  <Container />
-                </>
-
-              ) : (
-                <Empty
-                  title="暂无可用发布版本"
-                  description={(
-                    <div>
-                      {/* <span>为管理发布版本,创建发布版本</span> */}
-                      <div>
-                        <Button
-                          funcType={'raised' as any}
-                          style={{ marginTop: 10, fontSize: 14 }}
-                          onClick={() => { openCreatePublishVersionModal({ handleOk: handleCreate }); }}
-                        >
-                          创建发布版本
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  pic={empty}
-                />
-              )
-            }
-          </>
-        )}
+        {render()}
 
       </Content>
     </Page>

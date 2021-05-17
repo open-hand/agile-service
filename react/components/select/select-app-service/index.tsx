@@ -1,10 +1,12 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select, Tooltip, DataSet } from 'choerodon-ui/pro';
 import { omit } from 'lodash';
+import classnames from 'classnames';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { devOpsApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
+import styles from './index.less';
 
 const { OptGroup, Option } = Select;
 interface Props extends Partial<SelectProps> {
@@ -21,7 +23,7 @@ const renderService = (appService: any) => {
   if (appService) {
     return (
       <Tooltip title={appService.code}>
-        <div style={{ display: 'inline-block' }}>
+        <div style={{ display: 'inline-block', zIndex: 99999 }}>
           {`${appService.name}(${appService.code})`}
         </div>
       </Tooltip>
@@ -30,7 +32,7 @@ const renderService = (appService: any) => {
   return null;
 };
 const SelectAppService: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, projectId, request, ...otherProps
+  dataRef, valueField, afterLoad, flat, projectId, request, className, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
@@ -63,6 +65,8 @@ const SelectAppService: React.FC<Props> = forwardRef(({
       ref={ref}
       {...props}
       {...otherProps}
+      className={classnames(className, styles.wrap)}
+
     />
   );
 });
