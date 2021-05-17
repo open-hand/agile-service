@@ -97,7 +97,7 @@ public class PublishVersionController {
     @PostMapping("/list")
     public ResponseEntity<Page<PublishVersionVO>> list(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
-                                                       @SortDefault(value = {"service_code", "version"}, direction = Sort.Direction.ASC)
+                                                       @SortDefault(value = "id", direction = Sort.Direction.DESC)
                                                                PageRequest pageRequest,
                                                        @ApiParam(value = "筛选条件")
                                                        @RequestBody PublishVersionVO publishVersionVO) {
