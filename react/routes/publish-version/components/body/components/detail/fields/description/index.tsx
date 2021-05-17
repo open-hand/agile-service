@@ -12,12 +12,12 @@ interface Props {
 }
 const Description: React.FC<Props> = ({ maxWidth }) => {
   const { store, preview } = usePublishVersionContext();
-
+  console.log('Description', maxWidth);
   const { description } = store.getCurrentData;
   return (
     <Field label="描述">
       <Tooltip title={description}>
-        <span style={{ maxWidth, whiteSpace: maxWidth ? 'nowrap' : 'unset' }} className={classnames(styles.description, { [styles.preview]: preview })}>{description || '无'}</span>
+        <span style={{ maxWidth, whiteSpace: 'nowrap' }} className={classnames(styles.description, { [styles.preview]: preview })}>{description || '无'}</span>
       </Tooltip>
     </Field>
   );
