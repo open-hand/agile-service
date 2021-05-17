@@ -110,7 +110,7 @@ class DevOpsApi extends Api<DevOpsApi> {
     });
   }
 
-  loadBranchesByServiceFilterIssue(applicationId: number, page: number = 1, size: number = 5, searchVO: any, issue_id: string) {
+  loadBranchesByServiceFilterIssue(applicationId: number | string, page: number = 1, size: number = 5, searchVO: any, issue_id: string) {
     return axios({
       method: 'post',
       url: `${this.prefix}/app_service/${applicationId}/git/page_branch_by_options_filtered_by_issue_id`,
