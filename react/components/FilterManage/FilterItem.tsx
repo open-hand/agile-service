@@ -1,10 +1,11 @@
 import React, {
   useState, useCallback, useRef, MutableRefObject,
 } from 'react';
-import { Choerodon } from '@choerodon/boot';
+import { Choerodon, Action } from '@choerodon/boot';
 import {
   Modal, Icon, Tooltip, TextField,
 } from 'choerodon-ui/pro';
+import { Tag } from '@choerodon/components';
 import { personalFilterApi } from '@/api';
 import { IPersonalFilter } from '@/components/quick-search';
 import ObserverTextField from 'choerodon-ui/pro/lib/text-field/TextField';
@@ -119,6 +120,11 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
           />
         ) : (<span>{name}</span>)
       }
+      {isDefault && (
+        <Tag style={{ marginLeft: 'auto', marginRight: 10 }} color="green" type="border">
+          默认
+        </Tag>
+      )}
       <span className="c7n-filterAction">
         {isEditing ? (
           <>
@@ -137,26 +143,23 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
           </>
         ) : (
           <>
-            <Tooltip title={isDefault ? '取消默认' : '设为默认'}>
-              <Icon
-                type={isDefault ? 'block' : 'playlist_add_check'}
-                onClick={handleSetDefault}
-              />
-            </Tooltip>
-            <Tooltip title="修改">
-              <Icon
-                type="mode_edit"
-                onClick={() => {
+            <Action data={[
+              {
+                text: isDefault ? '取消默认' : '设为默认',
+                action: handleSetDefault,
+              },
+              {
+                text: '修改',
+                action: () => {
                   setIsEditing(true);
-                }}
-              />
-            </Tooltip>
-            <Tooltip title="删除">
-              <Icon
-                type="delete_forever"
-                onClick={handleDelete}
-              />
-            </Tooltip>
+                },
+              },
+              {
+                text: '删除',
+                action: handleDelete,
+              },
+            ]}
+            />
           </>
         )}
 
