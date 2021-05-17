@@ -115,7 +115,8 @@ class StatusCirculationStore {
 
   validActionEffective(status: IStatusCirculation, newAction: StatusAction) {
     const checked = newAction.type === 'check';
-    return !(status.canTransformStatus.includes(newAction.to) === checked);
+
+    return !(status.canTransformStatus.includes(newAction.to) === checked || this.checkedMaps.get(status.id)?.rowCheckedIds.has(newAction.to) === checked);
   }
 
   @action
