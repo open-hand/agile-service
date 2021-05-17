@@ -401,12 +401,19 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     }
 
     @Override
-    public void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId) {
+    public void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId, List<Long> customFieldIds) {
         // 查询原来的值
         Long issueId = issueDetailDTO.getIssueId();
         List<FieldValueDTO> fieldValueDTOS = fieldValueMapper.queryListByInstanceIds(Arrays.asList(projectId), Arrays.asList(issueId), "agile_issue", null);
         if (!CollectionUtils.isEmpty(fieldValueDTOS)) {
-            Map<Long, List<FieldValueDTO>> listMap = fieldValueDTOS.stream().collect(Collectors.groupingBy(FieldValueDTO::getFieldId));
+            Map<Long, List<FieldValueDTO>> listMap;
+            boolean copySubIssue = CollectionUtils.isEmpty(customFieldIds);
+            //复制子问题的全部自定义字段
+            if (copySubIssue) {
+                listMap = fieldValueDTOS.stream().collect(Collectors.groupingBy(FieldValueDTO::getFieldId));
+            } else {
+                listMap = fieldValueDTOS.stream().filter(v -> customFieldIds.contains(v.getFieldId())).collect(Collectors.groupingBy(FieldValueDTO::getFieldId));
+            }
             Long organizationId = ConvertUtil.getOrganizationId(projectId);
             List<PageFieldViewCreateVO> createDTOs = new ArrayList<>();
             handlerFieldValue(listMap, createDTOs);
