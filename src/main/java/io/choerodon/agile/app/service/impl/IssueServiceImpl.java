@@ -247,7 +247,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             {
                     ASSIGNEE_ID, EPIC_ID_FIELD, STORY_POINTS_FIELD,
                     FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
-                    ESTIMATED_START_TIME, ESTIMATED_END_TIME, SPRINT_ID_FIELD,
+                    ESTIMATED_START_TIME, ESTIMATED_END_TIME
             };
 
 //
@@ -2258,10 +2258,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<String> predefinedFieldNames = copyConditionVO.getPredefinedFieldNames();
         if (CollectionUtils.isEmpty(predefinedFieldNames)) {
             predefinedFieldNames = new ArrayList<>();
-        } else {
-            //将不需要复制的预定义字段置空
-            handleCopyPredefinedFields(issueDetailDTO, predefinedFieldNames);
         }
+        //将不需要复制的预定义字段置空
+        handleCopyPredefinedFields(issueDetailDTO, predefinedFieldNames);
         if (issueDetailDTO != null) {
             Long newIssueId;
             Long objectVersionNumber;
