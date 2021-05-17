@@ -529,26 +529,11 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     public List<TagCompareHistoryDTO> tagCompareHistory(Long projectId,
                                                         Long organizationId,
                                                         Long publishVersionId) {
-        Set<Long> publishVersionIds =
-                publishVersionTreeClosureMapper.selectDescendants(
-                        new HashSet<>(Arrays.asList(projectId)),
-                        organizationId,
-                        new HashSet<>(Arrays.asList(publishVersionId)),
-                        null)
-                        .stream()
-                        .map(PublishVersionTreeClosureDTO::getDescendantId)
-                        .collect(Collectors.toSet());
-        Set<String> appServiceCodes =
-                publishVersionMapper.selectByIds(StringUtils.join(publishVersionIds, ","))
-                        .stream()
-                        .filter(x -> !StringUtils.isEmpty(x.getServiceCode()))
-                        .map(PublishVersionDTO::getServiceCode)
-                        .collect(Collectors.toSet());
-        if (!appServiceCodes.isEmpty()) {
-            return tagCompareHistoryMapper.selectByAppServiceCodes(projectId, organizationId, appServiceCodes);
-        } else {
-            return new ArrayList<>();
-        }
+        TagCompareHistoryDTO dto = new TagCompareHistoryDTO();
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        dto.setPublishVersionId(publishVersionId);
+        return tagCompareHistoryMapper.select(dto);
     }
 
     @Override
