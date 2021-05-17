@@ -351,14 +351,6 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     public Page<PublishVersionVO> list(Long projectId, PublishVersionVO publishVersionVO, PageRequest pageRequest) {
         Page<PublishVersionVO> result =
                 PageHelper.doPageAndSort(pageRequest, () -> publishVersionMapper.listByOptions(projectId, publishVersionVO));
-        List<PublishVersionVO> content = result.getContent();
-        if (!ObjectUtils.isEmpty(content)) {
-            Map<String, String> codeNameMap =
-                    devopsClientOperator.listActiveAppService(projectId)
-                            .stream()
-                            .collect(Collectors.toMap(AppServiceRepVO::getCode, AppServiceRepVO::getName));
-            content.forEach(x -> x.setAppServiceName(codeNameMap.getOrDefault(x.getServiceCode(), null)));
-        }
         return result;
     }
 
