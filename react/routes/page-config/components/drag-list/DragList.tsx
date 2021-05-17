@@ -294,10 +294,10 @@ class DragList extends Component<Props, StateProps> {
           <div className="issue-dragList-content">
             <Card
               title={(
-                <span>
-                  <span style={{ display: 'inline-block', width: '34%' }}>值</span>
+                <>
+                  <span style={{ display: 'inline-block', width: '35%' }}>值</span>
                   <span>显示值</span>
-                </span>
+                </>
               )}
               bordered={false}
               className="issue-dragList-card"
