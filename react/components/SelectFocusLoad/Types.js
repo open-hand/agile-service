@@ -239,7 +239,7 @@ export default {
       optionLabelProp: 'showName',
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
     },
-    request: ({ filter, page }, issueId) => issueApi.loadIssuesInLink(page, 20, issueId, filter),
+    request: ({ filter, page }, requestArgs) => issueApi.loadIssuesInLink(page, 20, requestArgs?.issueId, filter, requestArgs?.projectId),
     render: (issue) => (
       <Option
         key={issue.issueId}
