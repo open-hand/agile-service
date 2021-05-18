@@ -55,7 +55,7 @@ const Export: React.FC<Props> = ({ innerRef }) => {
     ReactDOM.createPortal(
       <div
         style={{
-          position: 'fixed', top: -100000, left: -100000, width: '100%',
+          position: 'fixed', top: -100000, left: -100000, width: '100%', maxWidth: 1366,
         }}
       >
         <PreviewReport
