@@ -14,12 +14,10 @@
            agile_project_report apr
         WHERE 
            apr.project_id = #{projectId}
-        <if test="title != null and title != ''">
-          <bind name="titleLike" value="'%' + title + '%'"/>
-            AND apr.title LIKE #{titleLike}
-        </if>
-        <if test="createdBy != null">
-            AND apr.created_by = #{createdBy}
+        <if test="projectReport != null">
+            <if test="projectReport.title != null">
+                and apr.title like concat(concat('%', #{projectReport.title}), '%')
+            </if>
         </if>
     </select>
 </mapper>
