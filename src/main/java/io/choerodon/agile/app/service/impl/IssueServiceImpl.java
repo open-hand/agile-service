@@ -53,6 +53,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
@@ -208,7 +212,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String EPIC_COLOR_TYPE = "epic_color";
     private static final String STORY_TYPE = "story";
     private static final String ASSIGNEE = "assignee";
+    private static final String ASSIGNEE_ID = "assigneeId";
     private static final String REPORTER = "reporter";
+    private static final String FEATURE_ID = "featureId";
+    private static final String ENVIRONMENT = "environment";
+    private static final String MAIN_RESPONSIBLE_ID = "mainResponsibleId";
+    private static final String ESTIMATED_START_TIME = "estimatedStartTime";
+    private static final String ESTIMATED_END_TIME = "estimatedEndTime";
     private static final String FIELD_RANK = "Rank";
     protected static final String RANK_HIGHER = "评级更高";
     protected static final String RANK_LOWER = "评级更低";
@@ -233,6 +243,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final List<String> WORK_BENCH_SEARCH_TYPE = Arrays.asList("myBug", "reportedBug", "myStarBeacon", "myReported", "myAssigned");
     private static final String[] UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
     private static final String[] TRANSFORMED_TASK_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, STATUS_ID};
+    private static final String[] COPY_PREDEFINED_FIELDS_NAME = new String[]
+            {
+                    ASSIGNEE_ID, EPIC_ID_FIELD, STORY_POINTS_FIELD,
+                    FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
+                    ESTIMATED_START_TIME, ESTIMATED_END_TIME
+            };
 
 //
 //    private static final String[] FIELDS_NAME;
@@ -349,11 +365,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public void afterCreateSubIssue(Long issueId, IssueConvertDTO subIssueConvertDTO, IssueSubCreateVO issueSubCreateVO, ProjectInfoDTO projectInfoDTO) {
         IssueCreateVO issueCreateVO = new IssueCreateVO();
-        issueCreateVO.setLabelIssueRelVOList(issueCreateVO.getLabelIssueRelVOList());
-        issueCreateVO.setComponentIssueRelVOList(issueCreateVO.getComponentIssueRelVOList());
-        issueCreateVO.setVersionIssueRelVOList(issueCreateVO.getVersionIssueRelVOList());
-        issueCreateVO.setIssueLinkCreateVOList(issueCreateVO.getIssueLinkCreateVOList());
-        issueCreateVO.setTags(issueCreateVO.getTags());
+        issueCreateVO.setLabelIssueRelVOList(issueSubCreateVO.getLabelIssueRelVOList());
+        issueCreateVO.setComponentIssueRelVOList(issueSubCreateVO.getComponentIssueRelVOList());
+        issueCreateVO.setVersionIssueRelVOList(issueSubCreateVO.getVersionIssueRelVOList());
+        issueCreateVO.setIssueLinkCreateVOList(issueSubCreateVO.getIssueLinkCreateVOList());
+        issueCreateVO.setTags(issueSubCreateVO.getTags());
         handleCreateIssueRearAction(subIssueConvertDTO, issueId, projectInfoDTO, issueCreateVO);
     }
 
@@ -2238,24 +2254,31 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             throw new CommonException("error.applyType.illegal");
         }
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
+        //处理需要复制的预定义字段
+        List<String> predefinedFieldNames = copyConditionVO.getPredefinedFieldNames();
+        if (CollectionUtils.isEmpty(predefinedFieldNames)) {
+            predefinedFieldNames = new ArrayList<>();
+        }
+        handleCopyPredefinedFields(issueDetailDTO, predefinedFieldNames);
         if (issueDetailDTO != null) {
             Long newIssueId;
             Long objectVersionNumber;
             issueDetailDTO.setSummary(copyConditionVO.getSummary());
             IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId(), projectId);
             if (issueTypeVO.getTypeCode().equals(SUB_TASK)) {
-                IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToIssueSubCreateDto(issueDetailDTO);
+                IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToIssueSubCreateDto(issueDetailDTO, predefinedFieldNames);
                 IssueSubVO newIssue = stateMachineClientService.createSubIssue(issueSubCreateVO);
                 newIssueId = newIssue.getIssueId();
                 objectVersionNumber = newIssue.getObjectVersionNumber();
             } else {
-                IssueCreateVO issueCreateVO = issueAssembler.issueDtoToIssueCreateDto(issueDetailDTO);
+                IssueCreateVO issueCreateVO = issueAssembler.issueDtoToIssueCreateDto(issueDetailDTO, predefinedFieldNames);
                 if (ISSUE_EPIC.equals(issueCreateVO.getTypeCode())) {
                     setEpicName(projectId, copyConditionVO, issueCreateVO);
                 }
-                if (agilePluginService != null) {
-                    agilePluginService.handlerCloneFeature(issueId,issueCreateVO, applyType, projectId);
-                }
+                //已不支持复制特性
+//                if (agilePluginService != null) {
+//                    agilePluginService.handlerCloneFeature(issueId,issueCreateVO, applyType, projectId);
+//                }
                 IssueVO newIssue = stateMachineClientService.createIssue(issueCreateVO, applyType);
                 newIssueId = newIssue.getIssueId();
                 objectVersionNumber = newIssue.getObjectVersionNumber();
@@ -2270,20 +2293,52 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             //复制故事点和剩余工作量并记录日志
             copyStoryPointAndRemainingTimeData(issueDetailDTO, projectId, newIssueId, objectVersionNumber);
             //复制冲刺
-            handleCreateCopyIssueSprintRel(copyConditionVO.getSprintValues(), issueDetailDTO, newIssueId);
+            if (predefinedFieldNames.contains(SPRINT_ID_FIELD)) {
+                handleCreateCopyIssueSprintRel(issueDetailDTO, newIssueId);
+            }
             if (copyConditionVO.getSubTask()) {
                 List<IssueDTO> subIssueDTOList = issueDetailDTO.getSubIssueDTOList();
                 if (subIssueDTOList != null && !subIssueDTOList.isEmpty()) {
                     subIssueDTOList.forEach(issueDO -> copySubIssue(issueDO, newIssueId, projectId,copyConditionVO));
                 }
             }
-            if (copyConditionVO.getCustomField()) {
+            if (!CollectionUtils.isEmpty(copyConditionVO.getCustomFieldIds())) {
                 // 复制自定义字段的值
-                fieldValueService.copyCustomFieldValue(projectId, issueDetailDTO, newIssueId);
+                fieldValueService.copyCustomFieldValue(projectId, issueDetailDTO, newIssueId, copyConditionVO.getCustomFieldIds());
             }
             return queryIssue(projectId, newIssueId, organizationId);
         } else {
             throw new CommonException("error.issue.copyIssueByIssueId");
+        }
+    }
+
+    private void handleCopyPredefinedFields(IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames) {
+        //将不需要复制的预定义字段置空
+        for (String fieldName : COPY_PREDEFINED_FIELDS_NAME) {
+            if (!predefinedFieldNames.contains(fieldName)) {
+                setFieldValueEmpty(issueDetailDTO, fieldName);
+            }
+        }
+    }
+
+    private void setFieldValueEmpty(IssueDetailDTO issueDetailDTO, String fieldName) {
+        Method method;
+        try {
+            PropertyDescriptor pd = new PropertyDescriptor(fieldName, issueDetailDTO.getClass());
+            method = pd.getWriteMethod();//获得写方法
+        } catch (IntrospectionException e) {
+            throw new CommonException("error.copy.issue.setFiledValueEmpty");
+        }
+        if (!ObjectUtils.isEmpty(method)) {
+            try {
+                if (Objects.equals(EPIC_ID_FIELD, fieldName)) {
+                    method.invoke(issueDetailDTO, 0L);
+                } else {
+                    method.invoke(issueDetailDTO, (Object) null);
+                }
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                throw new CommonException("error.copy.issue.setFiledValueEmpty");
+            }
         }
     }
 
@@ -2333,13 +2388,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             subIssueUpdateVO.setObjectVersionNumber(newSubIssue.getObjectVersionNumber());
             updateIssue(projectId, subIssueUpdateVO, Lists.newArrayList(REMAIN_TIME_FIELD));
         }
-        if (Boolean.TRUE.equals(copyConditionVO.getCustomField())) {
-            fieldValueService.copyCustomFieldValue(projectId, subIssueDetailDTO, newSubIssue.getIssueId());
-        }
+        fieldValueService.copyCustomFieldValue(projectId, subIssueDetailDTO, newSubIssue.getIssueId(), null);
     }
 
-    protected void handleCreateCopyIssueSprintRel(Boolean sprintValues, IssueDetailDTO issueDetailDTO, Long newIssueId) {
-        if (sprintValues && issueDetailDTO.getActiveSprint() != null) {
+    protected void handleCreateCopyIssueSprintRel(IssueDetailDTO issueDetailDTO, Long newIssueId) {
+        if (issueDetailDTO.getActiveSprint() != null) {
             handleCreateSprintRel(issueDetailDTO.getActiveSprint().getSprintId(), issueDetailDTO.getProjectId(), newIssueId);
         }
     }

@@ -467,25 +467,47 @@ public class IssueAssembler extends AbstractAssembler {
         return issueSubVO;
     }
 
-    public IssueCreateVO issueDtoToIssueCreateDto(IssueDetailDTO issueDetailDTO) {
+    public IssueCreateVO issueDtoToIssueCreateDto(IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames) {
         IssueCreateVO issueCreateVO = new IssueCreateVO();
         BeanUtils.copyProperties(issueDetailDTO, issueCreateVO);
         issueCreateVO.setSprintId(null);
         issueCreateVO.setRemainingTime(null);
-        issueCreateVO.setComponentIssueRelVOList(copyComponentIssueRel(issueDetailDTO.getComponentIssueRelDTOList()));
-        issueCreateVO.setVersionIssueRelVOList(copyVersionIssueRel(issueDetailDTO.getVersionIssueRelDTOList()));
-        issueCreateVO.setLabelIssueRelVOList(copyLabelIssueRel(issueDetailDTO.getLabelIssueRelDTOList(), issueDetailDTO.getProjectId()));
+        if (predefinedFieldNames.contains("component")) {
+            issueCreateVO.setComponentIssueRelVOList(copyComponentIssueRel(issueDetailDTO.getComponentIssueRelDTOList()));
+        }
+        boolean copyFixVersion = predefinedFieldNames.contains("fixVersion");
+        boolean copyInfluenceVersion = predefinedFieldNames.contains("influenceVersion");
+        if (copyFixVersion || copyInfluenceVersion) {
+            issueCreateVO.setVersionIssueRelVOList(copyVersionIssueRel(issueDetailDTO.getVersionIssueRelDTOList(), copyFixVersion, copyInfluenceVersion));
+        }
+        if (predefinedFieldNames.contains("label")) {
+            issueCreateVO.setLabelIssueRelVOList(copyLabelIssueRel(issueDetailDTO.getLabelIssueRelDTOList(), issueDetailDTO.getProjectId()));
+        }
+        if (predefinedFieldNames.contains("tag")) {
+            issueCreateVO.setTags(issueDetailDTO.getTags());
+        }
         return issueCreateVO;
     }
 
-    public IssueSubCreateVO issueDtoToIssueSubCreateDto(IssueDetailDTO issueDetailDTO) {
+    public IssueSubCreateVO issueDtoToIssueSubCreateDto(IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames) {
         IssueSubCreateVO issueSubCreateVO = new IssueSubCreateVO();
         BeanUtils.copyProperties(issueDetailDTO, issueSubCreateVO);
         issueSubCreateVO.setSprintId(null);
         issueSubCreateVO.setRemainingTime(null);
-        issueSubCreateVO.setComponentIssueRelVOList(copyComponentIssueRel(issueDetailDTO.getComponentIssueRelDTOList()));
-        issueSubCreateVO.setVersionIssueRelVOList(copyVersionIssueRel(issueDetailDTO.getVersionIssueRelDTOList()));
-        issueSubCreateVO.setLabelIssueRelVOList(copyLabelIssueRel(issueDetailDTO.getLabelIssueRelDTOList(), issueDetailDTO.getProjectId()));
+        if (predefinedFieldNames.contains("component")) {
+            issueSubCreateVO.setComponentIssueRelVOList(copyComponentIssueRel(issueDetailDTO.getComponentIssueRelDTOList()));
+        }
+        boolean copyFixVersion = predefinedFieldNames.contains("fixVersion");
+        boolean copyInfluenceVersion = predefinedFieldNames.contains("influenceVersion");
+        if (copyFixVersion || copyInfluenceVersion) {
+            issueSubCreateVO.setVersionIssueRelVOList(copyVersionIssueRel(issueDetailDTO.getVersionIssueRelDTOList(), copyFixVersion, copyInfluenceVersion));
+        }
+        if (predefinedFieldNames.contains("label")) {
+            issueSubCreateVO.setLabelIssueRelVOList(copyLabelIssueRel(issueDetailDTO.getLabelIssueRelDTOList(), issueDetailDTO.getProjectId()));
+        }
+        if (predefinedFieldNames.contains("tag")) {
+            issueSubCreateVO.setTags(issueDetailDTO.getTags());
+        }
         return issueSubCreateVO;
     }
 
@@ -515,14 +537,26 @@ public class IssueAssembler extends AbstractAssembler {
         return labelIssueRelVOList;
     }
 
-    private List<VersionIssueRelVO> copyVersionIssueRel(List<VersionIssueRelDTO> versionIssueRelDTOList) {
+    private List<VersionIssueRelVO> copyVersionIssueRel(List<VersionIssueRelDTO> versionIssueRelDTOList, boolean copyFixVersion, boolean copyInfluenceVersion) {
+        List<VersionIssueRelDTO> fixVersionIssueRelDTOList = versionIssueRelDTOList.stream().filter(v -> "fix".equals(v.getRelationType())).collect(Collectors.toList());
+        List<VersionIssueRelDTO> influenceVersionIssueRelDTOList = versionIssueRelDTOList.stream().filter(v -> "influence".equals(v.getRelationType())).collect(Collectors.toList());
         List<VersionIssueRelVO> versionIssueRelVOList = new ArrayList<>(versionIssueRelDTOList.size());
-        versionIssueRelDTOList.forEach(versionIssueRelDO -> {
-            VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
-            BeanUtils.copyProperties(versionIssueRelDO, versionIssueRelVO);
-            versionIssueRelVO.setIssueId(null);
-            versionIssueRelVOList.add(versionIssueRelVO);
-        });
+        if (copyFixVersion) {
+            fixVersionIssueRelDTOList.forEach(versionIssueRelDO -> {
+                VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
+                BeanUtils.copyProperties(versionIssueRelDO, versionIssueRelVO);
+                versionIssueRelVO.setIssueId(null);
+                versionIssueRelVOList.add(versionIssueRelVO);
+            });
+        }
+        if (copyInfluenceVersion) {
+            influenceVersionIssueRelDTOList.forEach(versionIssueRelDO -> {
+                VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
+                BeanUtils.copyProperties(versionIssueRelDO, versionIssueRelVO);
+                versionIssueRelVO.setIssueId(null);
+                versionIssueRelVOList.add(versionIssueRelVO);
+            });
+        }
         return versionIssueRelVOList;
     }
 
@@ -535,7 +569,7 @@ public class IssueAssembler extends AbstractAssembler {
         issueCreateDTO.setIssueNum(null);
         issueCreateDTO.setParentIssueId(parentIssueId);
         issueCreateDTO.setComponentIssueRelVOList(copyComponentIssueRel(subIssueDetailDTO.getComponentIssueRelDTOList()));
-        issueCreateDTO.setVersionIssueRelVOList(copyVersionIssueRel(subIssueDetailDTO.getVersionIssueRelDTOList()));
+        issueCreateDTO.setVersionIssueRelVOList(copyVersionIssueRel(subIssueDetailDTO.getVersionIssueRelDTOList(), true, true));
         issueCreateDTO.setLabelIssueRelVOList(copyLabelIssueRel(subIssueDetailDTO.getLabelIssueRelDTOList(), subIssueDetailDTO.getProjectId()));
         return issueCreateDTO;
     }
