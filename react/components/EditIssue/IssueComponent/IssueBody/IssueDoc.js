@@ -61,8 +61,9 @@ const IssueDoc = observer(({ reloadIssue }) => {
           </div>
         )}
       </div>
-      {renderDoc()}
-      {
+      <div className="c7n-content-container">
+        {renderDoc()}
+        {
         addDocShow ? (
           <Doc
             issueId={issueId}
@@ -73,6 +74,7 @@ const IssueDoc = observer(({ reloadIssue }) => {
           />
         ) : null
       }
+      </div>
     </div>
   );
 });
