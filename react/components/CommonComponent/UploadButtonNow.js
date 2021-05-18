@@ -49,24 +49,6 @@ function UploadButtonNow(props) {
 
   return (
     <div className="c7n-agile-uploadButtonNow">
-      {
-        (hasPermission && !disabled) ? (
-          <ChunkUploader
-            prefixPatch="/hfle"
-            showUploadList={false}
-            fileList={fileList}
-            setFileList={setFileList}
-            combine={{
-              url: `${API_HOST}/agile/v1/projects/${getProjectId()}/issue_attachment/combine`,
-              requestData: {
-                issueId,
-              },
-            }}
-          />
-        ) : (
-          <div style={{ height: 32 }} />
-        )
-      }
       <div className="c7n-agile-uploadButtonNow-fileList">
         {
           fileList && fileList.length > 0 && fileList.map((item) => (

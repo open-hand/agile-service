@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Icon } from 'choerodon-ui';
-import { Tooltip } from 'choerodon-ui/pro';
+import { Tooltip, Modal } from 'choerodon-ui/pro';
 import StatusTag from '@/components/StatusTag';
 import { DragSource } from 'react-dnd';
 import { find } from 'lodash';
@@ -48,48 +48,57 @@ class StoryCard extends Component {
   }
 
   handlRemoveStory = (e) => {
-    e.stopPropagation();
     const { story, version, sprint } = this.props;
-    const { issueId, storyMapVersionDTOList, storyMapSprintList } = story;
-    const { swimLine } = StoryMapStore;
-    // 未规划或无泳道
-    if (swimLine === 'none' || (storyMapVersionDTOList.length === 0 && storyMapSprintList.length === 0)) {
-      const storyMapDragVO = {
-        // 问题id列表，移动到版本，配合versionId使用
-        // versionIssueIds: [],
-        epicId: 0, // 要关联的史诗id
-        epicIssueIds: [issueId],
-        featureId: 0, // 要关联的特性id
-        // 问题id列表，移动到特性，配合featureId使用
-        featureIssueIds: [issueId],
-      };
-      storyMapApi.move(storyMapDragVO).then(() => {
-        StoryMapStore.removeStoryFromStoryMap(story);
-        StoryMapStore.loadIssueList();
-      });
-    } else if (swimLine === 'version') {
-      const storyMapDragVO = {
-        versionId: 0,
-        versionIssueRelVOList: [],
-      };
-      if (storyMapVersionDTOList.length > 0) {
-        const removeVersion = find(storyMapVersionDTOList, { versionId: version.versionId });
-        storyMapDragVO.versionIssueRelVOList = [{ ...removeVersion, issueId }];
-      }
-      storyMapApi.move(storyMapDragVO).then(() => {
-        StoryMapStore.removeStoryFromStoryMap(story, version.versionId);
-        StoryMapStore.loadIssueList();
-      });
-    } else if (swimLine === 'sprint') {
-      const storyMapDragVO = {
-        sprintId: 0,
-        sprintIssueIds: [issueId],
-      };
-      storyMapApi.move(storyMapDragVO).then(() => {
-        StoryMapStore.removeStoryFromStoryMap(story, sprint.sprintId);
-        StoryMapStore.loadIssueList();
-      });
-    }
+    e.stopPropagation();
+    Modal.confirm({
+      title: '提示',
+      children: (
+        <div>
+          {`确认要移除${story?.summary}？`}
+        </div>
+      ),
+      onOk: async () => {
+        const { issueId, storyMapVersionDTOList, storyMapSprintList } = story;
+        const { swimLine } = StoryMapStore;
+        // 未规划或无泳道
+        if (swimLine === 'none' || (storyMapVersionDTOList.length === 0 && storyMapSprintList.length === 0)) {
+          const storyMapDragVO = {
+            // 问题id列表，移动到版本，配合versionId使用
+            // versionIssueIds: [],
+            epicId: 0, // 要关联的史诗id
+            epicIssueIds: [issueId],
+            featureId: 0, // 要关联的特性id
+            // 问题id列表，移动到特性，配合featureId使用
+            featureIssueIds: [issueId],
+          };
+          await storyMapApi.move(storyMapDragVO);
+          StoryMapStore.removeStoryFromStoryMap(story);
+          StoryMapStore.loadIssueList();
+        } else if (swimLine === 'version') {
+          const storyMapDragVO = {
+            versionId: 0,
+            versionIssueRelVOList: [],
+          };
+          if (storyMapVersionDTOList.length > 0) {
+            const removeVersion = find(storyMapVersionDTOList, { versionId: version.versionId });
+            storyMapDragVO.versionIssueRelVOList = [{ ...removeVersion, issueId }];
+          }
+          await storyMapApi.move(storyMapDragVO);
+          StoryMapStore.removeStoryFromStoryMap(story, version.versionId);
+          StoryMapStore.loadIssueList();
+        } else if (swimLine === 'sprint') {
+          const storyMapDragVO = {
+            sprintId: 0,
+            sprintIssueIds: [issueId],
+          };
+          await storyMapApi.move(storyMapDragVO);
+          StoryMapStore.removeStoryFromStoryMap(story, sprint.sprintId);
+          StoryMapStore.loadIssueList();
+        }
+        return true;
+      },
+      onCancel: () => true,
+    });
   }
 
   handleClick = () => {
