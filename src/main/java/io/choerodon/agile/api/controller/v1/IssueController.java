@@ -435,6 +435,7 @@ public class IssueController {
                                                         @RequestParam(value = "applyType") String applyType,
                                                        @ApiParam(value = "复制条件", required = true)
                                                         @RequestBody CopyConditionVO copyConditionVO) {
+        issueValidator.checkPredefinedFields(copyConditionVO.getPredefinedFieldNames());
         return Optional.ofNullable(issueService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issue.cloneIssueByIssueId"));

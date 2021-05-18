@@ -219,11 +219,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String MAIN_RESPONSIBLE_ID = "mainResponsibleId";
     private static final String ESTIMATED_START_TIME = "estimatedStartTime";
     private static final String ESTIMATED_END_TIME = "estimatedEndTime";
-    private static final String COMPONENT = "component";
-    private static final String FIX_VERSION = "fixVersion";
-    private static final String INFLUENCE_VERSION = "influenceVersion";
-    private static final String LABEL = "label";
-    private static final String TAG = "tag";
     private static final String FIELD_RANK = "Rank";
     protected static final String RANK_HIGHER = "评级更高";
     protected static final String RANK_LOWER = "评级更低";
@@ -253,13 +248,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                     ASSIGNEE_ID, EPIC_ID_FIELD, STORY_POINTS_FIELD,
                     FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
                     ESTIMATED_START_TIME, ESTIMATED_END_TIME
-            };
-    private static final String[] LEGAL_COPY_PREDEFINED_FIELDS_NAME = new String[]
-            {
-                ASSIGNEE_ID, EPIC_ID_FIELD, STORY_POINTS_FIELD,
-                FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
-                ESTIMATED_START_TIME, ESTIMATED_END_TIME, SPRINT_ID_FIELD, COMPONENT,
-                LABEL, FIX_VERSION, INFLUENCE_VERSION, TAG
             };
 
 //
@@ -2325,21 +2313,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private void handleCopyPredefinedFields(IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames) {
-        //校验预定义字段的合法性
-        checkPredefinedFields(predefinedFieldNames);
         //将不需要复制的预定义字段置空
         for (String fieldName : COPY_PREDEFINED_FIELDS_NAME) {
             if (!predefinedFieldNames.contains(fieldName)) {
                 setFieldValueEmpty(issueDetailDTO, fieldName);
-            }
-        }
-    }
-
-    private void checkPredefinedFields(List<String> predefinedFieldNames) {
-        List<String> legalCopyPredefinedFields = Arrays.asList(LEGAL_COPY_PREDEFINED_FIELDS_NAME);
-        for (String fieldName: predefinedFieldNames) {
-            if (!legalCopyPredefinedFields.contains(fieldName)) {
-                throw new CommonException("error.copy.issue.illegal.field");
             }
         }
     }
