@@ -70,7 +70,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     @Override
     public Page<ProjectReportDTO> page(ProjectReportVO projectReport, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest, () -> {
-            List<ProjectReportVO> page = projectReportMapper.list(projectReport);
+            List<ProjectReportVO> page = projectReportMapper.list(projectReport.getProjectId(), projectReport);
             if (CollectionUtils.isEmpty(page)){
                 return page;
             }

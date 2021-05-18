@@ -29,11 +29,11 @@ public class ProjectReportController {
 
     @ApiOperation(value = "项目报表列表")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping
+    @PostMapping("/list")
     public ResponseEntity<Page<ProjectReportDTO>> page(@PathVariable("project_id") Long projectId,
-                                                       ProjectReportVO projectReport,
                                                        @SortDefault(value = "id", direction = Sort.Direction.DESC)
-                                                       PageRequest pageRequest) {
+                                                               PageRequest pageRequest,
+                                                       @RequestBody ProjectReportVO projectReport) {
         projectReport.setProjectId(projectId);
         return Results.success(projectReportService.page(projectReport, pageRequest));
     }
