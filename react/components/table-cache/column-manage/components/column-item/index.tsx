@@ -63,12 +63,13 @@ const DragableColumnItem: React.FC<ColumnProps> = ({
           {...otherProps}
           ref={provided.innerRef}
           {...provided.draggableProps}
+          {...provided.dragHandleProps}
           style={getItemStyle(
             snapshot.isDragging,
             provided.draggableProps.style,
           )}
         >
-          <Icon {...provided.dragHandleProps} type="baseline-drag_indicator" className={styles.handle} />
+          <Icon type="baseline-drag_indicator" className={styles.handle} />
           {item}
         </div>
       )}
