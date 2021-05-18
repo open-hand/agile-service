@@ -2,6 +2,7 @@ import React, { useMemo, forwardRef } from 'react';
 import { Select, Tooltip, DataSet } from 'choerodon-ui/pro';
 import { omit } from 'lodash';
 import classnames from 'classnames';
+import Tip from '@/components/Tip';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 import { devOpsApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
@@ -15,7 +16,7 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (list: any[]) => void
   flat?: boolean
   request?: SelectConfig['request'],
-  mode?: 'other' | 'self'/** @default 'self' */
+  mode?: 'other' | 'self'/** @default 'self' self 本项目模式 other 其他项目模式 */
   projectId?: string
 }
 const renderService = (appService: any) => {
@@ -31,7 +32,7 @@ const renderService = (appService: any) => {
   }
   return null;
 };
-const SelectAppService: React.FC<Props> = forwardRef(({
+const SelectSelfAppService: React.FC<Props> = forwardRef(({
   dataRef, valueField, afterLoad, flat, projectId, request, className, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
@@ -76,14 +77,6 @@ const SelectTestOtherAppService: React.FC<Props> = forwardRef(({
   const config = useMemo((): SelectConfig => ({
     name: 'appService',
     textField: 'projectName',
-    optionRenderer: (appService: any) => {
-      console.log('appService..optionRenderer', appService);
-      return (
-        <FragmentForSearch name={`${appService.name}(${appService.code})`}>
-          {appService.meaning}
-        </FragmentForSearch>
-      );
-    },
     valueField: valueField || 'projectId',
     request: request || (({ page, filter }) => devOpsApi.project(projectId).loadProjectActiveService(page!, 10, filter)),
     middleWare: (data: any) => {
@@ -103,23 +96,34 @@ const SelectTestOtherAppService: React.FC<Props> = forwardRef(({
   const props = useSelect(config);
   const processProps = omit(props, ['options', 'onOption', 'optionRenderer']);
   return (
-    <Component
-      ref={ref}
-      {...processProps}
-      {...otherProps}
-    >
-      {props.options.map((record) => {
-        const optionProps = props.onOption({ record });
-        if (record.get('loadMoreButton')) {
-          return <Option {...optionProps}>{props.optionRenderer({ record } as any)}</Option>;
-        }
-        return (
-          <OptGroup key={`OptGroup-${record.id}`} label={record.get('meaning')}>
-            {record.get('appServices')?.map((i: any) => <Option value={i.id} {...optionProps}>{renderService(i)}</Option>)}
-          </OptGroup>
-        );
-      })}
-    </Component>
+    <div style={{ position: 'relative' }}>
+      <Component
+        ref={ref}
+        {...processProps}
+        {...otherProps}
+      >
+        {props.options.map((record) => {
+          const optionProps = props.onOption({ record });
+          if (record.get('loadMoreButton')) {
+            return <Option {...optionProps}>{props.optionRenderer({ record } as any)}</Option>;
+          }
+          return (
+            <OptGroup key={`OptGroup%${record.get('projectId')}`} label={record.get('meaning')}>
+              {record.get('appServices')?.map((i: any) => <Option value={{ projectId: record.get('projectId'), id: i.id }} {...optionProps}>{renderService(i)}</Option>)}
+            </OptGroup>
+          );
+        })}
+      </Component>
+      <div style={{ position: 'absolute', right: -25, top: 7 }}>
+        <Tip title="此处会展示出每个项目下最多5个应用服务，若想选择其他应用服务，需要手动输入服务名进行搜索" />
+      </div>
+    </div>
   );
 });
+const SelectAppService: React.FC<Props> = forwardRef(({
+  mode = 'self', ...otherProps
+}, ref: React.Ref<Select>) => React.cloneElement(mode === 'self' ? <SelectSelfAppService /> : <SelectTestOtherAppService />, {
+  ref,
+  ...otherProps,
+}));
 export default SelectAppService;

@@ -158,21 +158,6 @@ function IssueBody(props) {
         ) : null
       }
       {
-        linkBranchShow ? (
-          <LinkBranch
-            issueId={issueId}
-            typeCode={typeCode}
-            issueNum={issueNum}
-            onOk={() => {
-              store.setLinkBranchShow(false);
-              store.refreshBranch();
-            }}
-            onCancel={() => store.setLinkBranchShow(false)}
-            visible={linkBranchShow}
-          />
-        ) : null
-      }
-      {
         workLogShow ? (
           <DailyLog
             issueId={issueId}
