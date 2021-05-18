@@ -1,7 +1,7 @@
 import React, {
   useMemo, forwardRef, useEffect, useRef,
 } from 'react';
-import { Select } from 'choerodon-ui/pro';
+import { Select, Icon } from 'choerodon-ui/pro';
 import { Observer, useComputed, useForceUpdate } from 'mobx-react-lite';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { devOpsApi } from '@/api';
@@ -25,10 +25,16 @@ interface Props extends Partial<SelectProps> {
 const SelectBranch: React.FC<Props> = forwardRef(({
   dataRef, valueField, afterLoad, flat, issueId, applicationId, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const config = useMemo((): SelectConfig => ({
+  const config = useMemo((): SelectConfig<{branchName:string, [propsName:string]:any}> => ({
     name: 'branch',
     textField: 'branchName',
     valueField: 'branchName',
+    optionRenderer: (branch) => (
+      <div>
+        <Icon type="branch" className="c7nagile-name-icon" />
+        {branch.branchName}
+      </div>
+    ),
     request: ({ page, filter }) => (applicationId ? devOpsApi.project(projectId).loadBranchesByServiceFilterIssue(applicationId, page, 20, {
       searchParam: {
         branchName: filter,
@@ -64,7 +70,7 @@ const SelectBranch: React.FC<Props> = forwardRef(({
   );
 });
 const SelectSelectBranchHOC: React.FC<Props> = forwardRef(({
-  applicationId, issueId, ...otherProps
+  applicationId, issueId, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const innerRef = useRef<Select>(null);
   const forceUpdate = useForceUpdate();
@@ -82,6 +88,6 @@ const SelectSelectBranchHOC: React.FC<Props> = forwardRef(({
     return <Select {...otherProps} />;
   }
 
-  return <SelectBranch ref={handleBindRef} issueId={issueId} applicationId={applicationId} {...otherProps} key={`select-git-tag-${applicationId}`} />;
+  return <SelectBranch ref={handleBindRef} issueId={issueId} applicationId={applicationId} projectId={projectId} {...otherProps} key={`select-git-tag-${applicationId}-${projectId}`} />;
 });
 export default SelectSelectBranchHOC;

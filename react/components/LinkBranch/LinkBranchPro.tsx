@@ -1,21 +1,14 @@
 /* eslint-disable no-param-reassign */
-import React, { Component, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
-  Modal, Form, Select, Icon, DataSet,
+  Modal, Form, Select, DataSet,
 } from 'choerodon-ui/pro';
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import {
-  Content, Choerodon,
-} from '@choerodon/boot';
-import { find } from 'lodash';
-import { getProjectId } from '@/utils/common';
+import { FieldType, FieldIgnore } from 'choerodon-ui/pro/lib/data-set/enum';
 import { devOpsApi } from '@/api';
-import SelectApp from '@/components/CreateBranch/SelectApp';
 import './LinkBranch.less';
 import './commom.less';
 import { IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import { Observer } from 'mobx-react';
 import { observer } from 'mobx-react-lite';
 import SelectAppService from '../select/select-app-service';
 import SelectBranch from '../select/select-branch-with-tag';
@@ -25,14 +18,28 @@ interface ILinkBranchModalProps {
   issueId: string,
   onOk?: Function
 }
-const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = observer(({ modal, issueId }) => {
+const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = observer(({ modal, issueId, onOk }) => {
   const formDs = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
-      { name: 'source', label: '服务来源', type: 'string' as FieldType },
-      { name: 'app', label: '应用服务', type: 'object' as FieldType },
-      { name: 'applicationId', type: 'string' as FieldType, bind: 'app.id' },
-      { name: 'branch', label: '分支', type: 'string' as FieldType },
+      {
+        name: 'source', label: '服务来源', type: 'string' as FieldType, defaultValue: 'self', ignore: 'always' as FieldIgnore,
+      },
+      {
+        name: 'app', label: '应用服务', type: 'object' as FieldType, ignore: 'always' as FieldIgnore,
+      },
+      { name: 'projectId', type: 'string' as FieldType, bind: 'app.value.projectId' },
+      { name: 'appServiceId', type: 'string' as FieldType, dynamicProps: { bind: ({ record }: any) => (record.get('source') === 'self' ? 'app.id' : 'app.value.id') } },
+      {
+        name: 'branch', label: '分支', type: 'object' as FieldType, ignore: 'always' as FieldIgnore,
+      },
+      {
+        name: 'branchName', label: '分支', type: 'string' as FieldType, bind: 'branch.branchName',
+      },
+      {
+        name: 'objectVersionNumber', label: '分支', type: 'string' as FieldType, bind: 'branch.objectVersionNumber',
+      },
+
     ],
     events: {
       update: ({ record, value, name }: any) => {
@@ -40,21 +47,27 @@ const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = ob
           record.init('app', undefined);
           record.init('branch', undefined);
         } else if (name === 'app') {
-          console.log('value..', value, record.getPristineValue('app'));
-          // record.set('applicationId',);
           record.init('branch', undefined);
         }
       },
     },
   }), []);
+  const handleSubmit = async () => {
+    const data = formDs.current?.toJSONData();
+    await devOpsApi.project(data.projectId).linkBranch(data.appServiceId, { ...data, issueId }).then(() => {
+      onOk && onOk();
+    });
+    return true;
+  };
+  modal?.handleOk(handleSubmit);
   return (
-    <Form dataSet={formDs}>
+    <Form dataSet={formDs} style={{ width: '5.12rem' }}>
       <Select name="source">
         <Option value="self">本项目</Option>
         <Option value="other">其他项目</Option>
       </Select>
-      <SelectAppService name="app" />
-      <SelectBranch name="branch" issueId={issueId} applicationId={formDs.current?.get('applicationId')} enabledTag={false} />
+      <SelectAppService name="app" mode={formDs.current?.get('source')} />
+      <SelectBranch name="branch" issueId={issueId} projectId={formDs.current?.get('projectId')} applicationId={formDs.current?.get('appServiceId')} enabledTag={false} />
     </Form>
   );
 });
@@ -66,6 +79,7 @@ const openLinkBranchModal = (props: ILinkBranchModalProps) => {
       width: MODAL_WIDTH.middle,
     },
     drawer: true,
+    okText: '添加',
     children: <LinkBranch {...props} />,
 
   });

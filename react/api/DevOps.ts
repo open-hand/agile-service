@@ -5,7 +5,7 @@ import Api from './Api';
 
 interface ICreateBranch {
   branchName: string,
-  issueId: number,
+  issueId: number | string,
   originBranch: string,
 }
 class DevOpsApi extends Api<DevOpsApi> {

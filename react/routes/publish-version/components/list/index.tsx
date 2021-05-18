@@ -6,7 +6,7 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import ScrollContext from 'react-infinite-scroll-component';
-import { debounce, isEmpty } from 'lodash';
+import { debounce, isEmpty, isEqual } from 'lodash';
 import classnames from 'classnames';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { useSize } from 'ahooks';
@@ -106,9 +106,9 @@ function PublishVersionList() {
   /** 初始化滚动加载数据 */
   const handleInitResizeData = useCallback(() => {
     const scrollHeight = (scrollSize.height || 0) - 43 - tableDataSet.length * 38;
-    console.log('scrollHeight', scrollSize, scrollHeight);
 
     if (scrollHeight > 0) {
+      // console.log('scrollHeight', scrollSize, scrollHeight);
       const needMoreDataLength = Math.ceil(scrollHeight / 38);
       const needLoadToPageIndex = tableDataSet.currentPage + Math.ceil(needMoreDataLength / tableDataSet.pageSize);
       for (let pageIndex = tableDataSet.currentPage + 1; pageIndex <= tableDataSet.totalPage && pageIndex <= needLoadToPageIndex; pageIndex += 1) {
@@ -136,17 +136,20 @@ function PublishVersionList() {
 
     store.init({ events: { update: registerUpdate, createAfter: registerCreateAfter, delete: registerCreateAfter } });
   }, [handleInitResizeData, store, tableDataSet]);
-
-  const handleFilterChange = debounce((val) => {
-    setSearchText(val);
-  }, 500);
-  useEffect(() => {
-    tableDataSet.setState('searchMode', isEmpty(searchText?.trim()) ? undefined : true);
-    tableDataSet.setQueryParameter('content', searchText?.trim());
-    tableDataSet.query().then((res) => {
-      handleInitResizeData();
+  const handleChangeSearch = (val: string) => {
+    setSearchText((oldText) => {
+      tableDataSet.setState('searchMode', isEmpty(val?.trim()) ? undefined : true);
+      tableDataSet.setQueryParameter('content', val?.trim());
+      console.log('query....');
+      oldText !== val?.trim() && tableDataSet.query().then((res) => {
+        handleInitResizeData();
+      });
+      return isEqual(oldText, val?.trim()) ? oldText : val?.trim();
     });
-  }, [handleInitResizeData, searchText, tableDataSet]);
+  };
+  const handleFilterChange = debounce((val) => {
+    handleChangeSearch(val);
+  }, 500);
   useEffect(() => {
     handleInitResizeData();
   }, [handleInitResizeData]);
@@ -160,7 +163,7 @@ function PublishVersionList() {
       <TextField
         className={styles.search}
         prefix={<Icon type="search" />}
-        onChange={setSearchText}
+        onChange={handleChangeSearch}
         onInput={(e: any) => handleFilterChange(e.target.value)}
         placeholder="请输入搜索条件"
         clearButton
