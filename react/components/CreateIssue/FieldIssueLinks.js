@@ -13,7 +13,7 @@ function getOtherSelected(total, key) {
   return result;
 }
 const FormItem = Form.Item;
-function FieldIssueLinks({ form }) {
+function FieldIssueLinks({ form, projectId }) {
   const remove = (k) => {
     // can use data-binding to get
     const keys = form.getFieldValue('keys');
@@ -81,6 +81,7 @@ function FieldIssueLinks({ form }) {
               <SelectFocusLoad
                 label="问题"
                 type="issues_in_link"
+                requestArgs={{ projectId }}
                 optionFilter={(issue) => !getOtherSelected(selectedIssues, k).includes(issue.issueId)}
                 getPopupContainer={() => (document.getElementsByClassName('c7n-modal-body') ? document.getElementsByClassName('c7n-modal-body')[0] : document.body)}
               />,
