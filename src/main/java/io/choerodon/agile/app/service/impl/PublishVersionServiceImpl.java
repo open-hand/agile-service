@@ -410,7 +410,6 @@ public class PublishVersionServiceImpl implements PublishVersionService {
 
     @Override
     @Async
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void compareTag(Long projectId,
                            Long organizationId,
                            Long publishVersionId,

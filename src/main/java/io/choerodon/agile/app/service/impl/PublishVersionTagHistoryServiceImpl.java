@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -29,6 +30,7 @@ public class PublishVersionTagHistoryServiceImpl implements PublishVersionTagHis
     private ModelMapper modelMapper;
 
     @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public PublishVersionTagHistoryDTO createDefaultHistory(Long projectId, Long organizationId, Long publishVersionId, String action) {
         PublishVersionTagHistoryDTO publishVersionTagHistoryDTO = new PublishVersionTagHistoryDTO();
         publishVersionTagHistoryDTO.setProjectId(projectId);
@@ -42,6 +44,7 @@ public class PublishVersionTagHistoryServiceImpl implements PublishVersionTagHis
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public void updateStatus(PublishVersionTagHistoryDTO publishVersionTagHistoryDTO, String status) {
         PublishVersionTagHistoryDTO tagOperationHistoryUpdate = new PublishVersionTagHistoryDTO();
         tagOperationHistoryUpdate.setId(publishVersionTagHistoryDTO.getId());
