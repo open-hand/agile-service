@@ -4,16 +4,17 @@ import './Column.less';
 
 import StatusList from './StatusList';
 
-
 class Column extends Component {
   render() {
     const { data } = this.props;
     return (
       <div
-        className="c7n-scrumsetting-column"
+        className="c7n-scrumsetting-unsetcolumn"
         style={{
-          flex: 1,
+          flex: 'unset',
+          width: 200,
           height: '100%',
+          overflow: 'auto',
         }}
       >
         <div
@@ -26,10 +27,10 @@ class Column extends Component {
             <div className="c7n-scrumsetting-columnStatus">
               {data.name}
             </div>
-            <div style={{ borderBottom: '3px solid rgba(0,0,0,0.26)' }} className="c7n-scrumsetting-columnBottom">             
+            <div style={{ borderBottom: '3px solid rgba(0,0,0,0.26)' }} className="c7n-scrumsetting-columnBottom">
               <div>
                 <span>无该问题的状态</span>
-              </div>               
+              </div>
             </div>
           </div>
           <Permission
