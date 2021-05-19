@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/7/3 下午4:58
@@ -8,21 +10,23 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueCompletedStatusVO {
 
-    public IssueCompletedStatusVO(String worker, Integer created) {
-        this.worker = worker;
+    public IssueCompletedStatusVO(Long userId, Integer created) {
+        this.userId = userId;
         this.created = created;
         this.completed = 0;
     }
 
-    public IssueCompletedStatusVO(String worker) {
-        this.worker = worker;
+    public IssueCompletedStatusVO(Long userId) {
+        this.userId = userId;
         this.created = 0;
         this.completed = 0;
     }
 
     public IssueCompletedStatusVO() {
     }
-
+    @Encrypt
+    private Long userId;
+    private UserMessageDTO userMessage;
     private String worker;
     private Integer completed;
     private Integer created;
@@ -49,5 +53,21 @@ public class IssueCompletedStatusVO {
 
     public void setCreated(Integer created) {
         this.created = created;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public UserMessageDTO getUserMessage() {
+        return userMessage;
+    }
+
+    public void setUserMessage(UserMessageDTO userMessage) {
+        this.userMessage = userMessage;
     }
 }
