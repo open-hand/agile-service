@@ -20,15 +20,9 @@ public class PublishVersionTagHistoryVO extends AuditDomain {
     @Encrypt
     private Long publishVersionId;
 
-    private Long successCount;
-
-    private Long failCount;
-
     private String action;
 
     private String status;
-
-    private String msg;
 
     public Long getId() {
         return id;
@@ -76,29 +70,5 @@ public class PublishVersionTagHistoryVO extends AuditDomain {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public Long getSuccessCount() {
-        return successCount;
-    }
-
-    public void setSuccessCount(Long successCount) {
-        this.successCount = successCount;
-    }
-
-    public Long getFailCount() {
-        return failCount;
-    }
-
-    public void setFailCount(Long failCount) {
-        this.failCount = failCount;
     }
 }
