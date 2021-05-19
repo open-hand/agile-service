@@ -240,6 +240,16 @@ const GanttPage: React.FC = () => {
       height={height}
     />
   ), []);
+  const renderInvalidBar: GanttProps['renderInvalidBar'] = useCallback((element, barInfo) => (
+    <Tooltip
+      hidden={barInfo.stepGesture === 'moving'}
+      placement="top"
+      title="点击并拖动以设置预计开始、结束时间。"
+    >
+      {element}
+    </Tooltip>
+  ), []);
+
   const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((record, t) => (
     <div
       role="none"
@@ -335,6 +345,7 @@ const GanttPage: React.FC = () => {
               tableIndent={20}
               expandIcon={getExpandIcon}
               renderBar={renderBar}
+              renderInvalidBar={renderInvalidBar}
               renderGroupBar={renderGroupBar}
               renderBarThumb={renderBarThumb}
               tableCollapseAble={false}
