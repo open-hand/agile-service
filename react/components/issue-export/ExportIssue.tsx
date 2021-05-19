@@ -247,7 +247,7 @@ const ExportIssue: React.FC = () => {
       <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
         <IssueFilterForm {...filterComponentProps}>
           <div style={{ marginTop: 4 }}>
-            <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { color: '#3f51b5' } }} />
+            <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { color: '#5365EA' } }} />
           </div>
         </IssueFilterForm>
       </FormPart>

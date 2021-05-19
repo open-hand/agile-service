@@ -67,7 +67,7 @@ const IssueItem: React.FC<IssueListProps> = ({
           <p
             className="c7n-issueList-summary"
             style={{
-              color: '#3F51B5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
+              color: '#5365EA', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
             }}
             role="none"
             onClick={() => {

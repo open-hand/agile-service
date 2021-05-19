@@ -283,7 +283,7 @@ const PieChart: React.FC<PieChartProps> = ({
                       {link ? (
                         <span
                           style={{
-                            color: '#3F51B5',
+                            color: '#5365EA',
                             cursor: 'pointer',
                           }}
                           role="none"

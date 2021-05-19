@@ -244,7 +244,7 @@ class LinkBranch extends Component {
                           style={{
                             margin: '-4px -20px',
                             padding: '4px 20px',
-                            color: '#3f51b5',
+                            color: '#5365EA',
                           }}
                           onClick={(e) => {
                             e.stopPropagation();

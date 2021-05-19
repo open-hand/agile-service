@@ -51,7 +51,7 @@ function usePieChartReport(config?: PieConfig, onFinish?: Function): [PieSearchP
       .then((res: IPieData[]) => {
         const len = res.length;
         if (len) {
-          const initColors = ['#9665E2', '#F0657D', '#FAD352', '#FF9915', '#45A3FC', '#3F51B5', '#47CBCA', '#59CB79', '#F953BA', '#D3D3D3'];
+          const initColors = ['#9665E2', '#F0657D', '#FAD352', '#FF9915', '#45A3FC', '#5365EA', '#47CBCA', '#59CB79', '#F953BA', '#D3D3D3'];
           if (len > 10) {
             for (let i = 10; i < len; i += 1) {
               // eslint-disable-next-line no-bitwise

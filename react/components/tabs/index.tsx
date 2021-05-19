@@ -17,7 +17,7 @@ export interface TabsProps {
   color?: string
 }
 const Tabs: React.FC<TabsProps> = ({
-  tabs, defaultActiveKey, activeKey: propsActiveKey, onChange, type = 'line', color = '#3F51B5',
+  tabs, defaultActiveKey, activeKey: propsActiveKey, onChange, type = 'line', color = '#5365EA',
 }) => {
   const [activeKey, setActiveKey] = useState<string | null>(propsActiveKey ?? defaultActiveKey ?? tabs[0]?.key);
   useLayoutEffect(() => {

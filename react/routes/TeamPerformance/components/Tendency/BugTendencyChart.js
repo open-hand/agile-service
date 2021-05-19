@@ -42,7 +42,7 @@ const BugTendencyChart = observer(() => {
   };
 
   const getOpts = () => {
-    const colors = ['#9665E2', '#F0657D', '#FAD352', '#FF9915', '#45A3FC', '#3F51B5', '#47CBCA', '#59CB79', '#F953BA', '#D3D3D3'];
+    const colors = ['#9665E2', '#F0657D', '#FAD352', '#FF9915', '#45A3FC', '#5365EA', '#47CBCA', '#59CB79', '#F953BA', '#D3D3D3'];
     const xData = uniq(chartData.map((item) => item.sprintName));
     const groupByIdData = groupBy(chartData, 'responsibleId');
     if (groupByIdData.length > 10) {
