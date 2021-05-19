@@ -54,7 +54,7 @@ class StoryCard extends Component {
       title: '提示',
       children: (
         <div>
-          {`确认要移除${story?.summary}？`}
+          {`确认要移除故事“${story?.summary}”？`}
         </div>
       ),
       onOk: async () => {
