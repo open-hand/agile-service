@@ -203,8 +203,10 @@ public class FieldValueController {
             @PathVariable("field_id") @Encrypt Long fieldId,
             @ApiParam(value = "搜索参数，支持模糊查询", required = true)
             @RequestParam(required = false) String searchValue,
+            @ApiParam(value = "已选择的选项id", required = true)
+            @Encrypt @RequestParam(required = false) List<Long> selected,
             @ApiParam(value = "分页信息", required = true)
             @ApiIgnore PageRequest pageRequest) {
-        return new ResponseEntity<>(fieldOptionService.getOptionsPageByFieldId(organizationId, fieldId, searchValue, pageRequest), HttpStatus.OK);
+        return new ResponseEntity<>(fieldOptionService.getOptionsPageByFieldId(organizationId, fieldId, searchValue, selected, pageRequest), HttpStatus.OK);
     }
 }
