@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author superlee
@@ -156,5 +157,18 @@ public class PublishVersionDTO extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PublishVersionDTO)) return false;
+        PublishVersionDTO that = (PublishVersionDTO) o;
+        return getId().equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }
