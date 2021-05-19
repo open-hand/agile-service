@@ -1,5 +1,5 @@
 import React, {
-  useState, useContext, useEffect, useRef, useLayoutEffect, useCallback,
+  useState, useContext, useEffect, useRef, useLayoutEffect, useCallback, useMemo,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
@@ -46,10 +46,13 @@ export type IFieldPostDataProps = IFieldPostData;
 function CreateField() {
   const ctx = useContext(Store);
   const {
-    formDataSet, formatMessage, modal, onSubmitLocal,
+    formDataSet, formatMessage, modal, onSubmitLocal, defaultContext,
     AppState: { currentMenuType: { type, id, organizationId } }, store,
     schemeCode, isEdit, handleRefresh,
   } = ctx;
+  const disabledContextArr = useMemo(() => defaultContext?.filter((item) => typeof (item) === 'object' && item.disabled).
+    map((item) => (typeof (item) === 'string' ? item : item.code)), [defaultContext]);
+
   const [fieldOptions, setFieldOptions] = useState<Array<any>>([]);
   const userDataRef = useRef<User[] | undefined>();
   useEffect(() => {
@@ -75,7 +78,7 @@ function CreateField() {
   const contextOptionSetter = ({ record }: RenderProps) => {
     const contextValue = formDataSet.current?.get('context');
     const currentValue = record?.get('valueCode');
-    return { disabled: !record?.get('enabled') };
+    return { disabled: !record?.get('enabled') || disabledContextArr?.includes(record?.get('id')) };
     return {
       disabled: currentValue === 'global' ? contextValue.length > 0 && contextValue.indexOf('global') < 0 : contextValue.indexOf('global') >= 0,
     };
@@ -355,12 +358,12 @@ function CreateField() {
             >
               {formatMessage({ id: 'field.decimal' })}
             </CheckBox>
-        ) : null}
+          ) : null}
         </div>
         <Select
           name="context"
           onChange={(val) => {
-            formDataSet.current?.set('context', uniq([...store.eternalContext, ...(val || [])]));
+            formDataSet.current?.set('context', uniq([...store.eternalContext, ...(disabledContextArr || []), ...(val || [])]));
           }}
           onOption={contextOptionSetter}
         />

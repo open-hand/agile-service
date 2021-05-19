@@ -72,7 +72,6 @@ const SelectGitTagsHOC: React.FC<Props> = forwardRef(({
     console.log('forceUpdate applicationId', applicationId);
   }, [applicationId]);
   function handleBindRef(r: any) {
-    console.log('r...', r?.record, ref);
     Object.assign(innerRef, { current: r });
     typeof (ref) === 'function' ? ref(r) : ref && Object.assign(ref, { current: r });
   }

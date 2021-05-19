@@ -25,7 +25,7 @@ const ImportFormItem: React.FC<IImportFormItemProps> = ({ title, footer, childre
   </div>
 );
 
-const ImportField: React.FC<{ modal?: IModalProps }> = ({ modal }) => {
+const ImportField: React.FC<{ modal?: IModalProps, onOk: Function }> = ({ modal, onOk }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState({} as IImportOrExportRecord);
   const [wsData, setWsData] = useState({} as IImportOrExportRecord);
@@ -65,6 +65,7 @@ const ImportField: React.FC<{ modal?: IModalProps }> = ({ modal }) => {
     loadRecord();
     setWsData(() => {
       modal?.update({ okText: '导入' });
+      onOk();
       return newWsData;
     });
   }, [modal]);
@@ -149,7 +150,7 @@ const ImportField: React.FC<{ modal?: IModalProps }> = ({ modal }) => {
     </div>
   );
 };
-function openImportField() {
+function openImportField({ onOk }: { onOk: Function }) {
   /**
      * agile-import-customer-field-org-{organizationId}/agile-import-customer-field-pro-{projectId}
      */
@@ -165,7 +166,7 @@ function openImportField() {
     okText: '导入',
     cancelText: '关闭',
     // footer: (okBtn) => okBtn,
-    children: <ImportField />,
+    children: <ImportField onOk={onOk} />,
   });
 }
 export default openImportField;

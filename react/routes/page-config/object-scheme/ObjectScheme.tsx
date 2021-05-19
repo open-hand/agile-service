@@ -252,7 +252,7 @@ function ObjectScheme() {
           }, {
             name: formatMessage({ id: 'field.import' }),
             icon: 'archive',
-            handler: openImportField,
+            handler: () => openImportField({ onOk: () => schemeTableDataSet.query() }),
             display: true,
           },
         ]}

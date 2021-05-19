@@ -206,7 +206,7 @@ function PageIssueType() {
       formatMessage: intl.formatMessage,
       schemeCode: 'agile_issue',
       onSubmitLocal,
-      defaultContext: [pageIssueTypeStore.getCurrentIssueType],
+      defaultContext: [{ code: pageIssueTypeStore.getCurrentIssueType, disabled: true }],
       localCheckCode: async (str: string) => !!checkCodeOrName('code', str),
       localCheckName: async (str: string) => !!checkCodeOrName('name', str),
     };
@@ -249,15 +249,15 @@ function PageIssueType() {
         <Loading loading={pageIssueTypeStore.getLoading} />
         <div className={styles.top}>
           {
-              !isProject ? <SortTable />
-                : [
-                  <IssueTypeWrap title="字段配置">
-                    <SortTable />
-                  </IssueTypeWrap>,
-                  <IssueTypeWrap title="描述信息格式">
-                    <PageDescription />
-                  </IssueTypeWrap>]
-            }
+            !isProject ? <SortTable />
+              : [
+                <IssueTypeWrap title="字段配置">
+                  <SortTable />
+                </IssueTypeWrap>,
+                <IssueTypeWrap title="描述信息格式">
+                  <PageDescription />
+                </IssueTypeWrap>]
+          }
         </div>
         <div className={styles.bottom}>
           <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageIssueTypeStore.getDirty} loading={btnLoading} onClick={handleSubmit}>

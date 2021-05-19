@@ -32,9 +32,9 @@ function transformSystemFilter(data) {
     updatorIds,
     environment,
     appVersion,
-    tag,
+    tags,
   } = data;
-  console.log('tag', data, tag);
+
   return {
     advancedSearchArgs: {
       issueTypeId,
@@ -62,7 +62,7 @@ function transformSystemFilter(data) {
       creatorIds,
       updatorIds,
       appVersion,
-      tags: tag,
+      tags,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: estimatedStartTime ? estimatedStartTime[0] ?? null : undefined,
