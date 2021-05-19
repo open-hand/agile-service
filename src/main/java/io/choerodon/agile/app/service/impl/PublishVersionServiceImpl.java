@@ -21,6 +21,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,6 +54,8 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 @Transactional(rollbackFor = Exception.class)
 public class PublishVersionServiceImpl implements PublishVersionService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PublishVersionServiceImpl.class);
+
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
@@ -79,6 +82,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private TagIssueRelMapper tagIssueRelMapper;
     @Autowired
     private TagCompareHistoryMapper tagCompareHistoryMapper;
+    @Autowired
+    private PublishVersionTagHistoryService publishVersionTagHistoryService;
     @Autowired
     private PublishVersionTagRelMapper publishVersionTagRelMapper;
     @Autowired
@@ -412,6 +417,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                            String action) {
         String websocketKey = WEBSOCKET_GENERATE_TAG_COMPARE + projectId;
         Long userId = DetailsHelper.getUserDetails().getUserId();
+        PublishVersionTagHistoryDTO publishVersionTagHistoryDTO = publishVersionTagHistoryService.createDefaultHistory(projectId, organizationId, publishVersionId, action);
         try {
             PublishVersionDTO dto = new PublishVersionDTO();
             dto.setProjectId(projectId);
@@ -445,9 +451,9 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                 int total = tags.size();
                 double current = 1D;
                 for (TagVO tag : tags) {
-                    addTagToIssue(tag, projectId, organizationId, programId, issueMap, doUpdate);
+                    addTagToIssue(tag, projectId, organizationId, programId, issueMap, doUpdate, publishVersionTagHistoryDTO);
                     TagCompareVO tagCompareVO = tag.getTagCompareVO();
-                    addTagCompareHistory(tagCompareVO, projectId, organizationId, publishVersionId);
+                    addTagCompareHistory(tagCompareVO, projectId, organizationId, publishVersionId, publishVersionTagHistoryDTO.getId());
                     tagCompareVO.setAction(DOING);
                     tagCompareVO.setProgress(getProgress(current, total));
                     sendProgress(tagCompareVO, userId, websocketKey);
@@ -457,6 +463,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             TagCompareVO tagCompareVO = new TagCompareVO();
             tagCompareVO.setAction(DONE);
             tagCompareVO.setProgress(1D);
+            publishVersionTagHistoryService.updateStatus(publishVersionTagHistoryDTO, DONE);
             sendProgress(tagCompareVO, userId, websocketKey);
         } catch (Exception e) {
             TagCompareVO tagCompareVO = new TagCompareVO();
@@ -464,7 +471,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             tagCompareVO.setProgress(0D);
             tagCompareVO.setMsg(e.getMessage());
             sendProgress(tagCompareVO, userId, websocketKey);
-            throw new CommonException("error.compare.tag", e);
+            publishVersionTagHistoryService.updateStatus(publishVersionTagHistoryDTO, FAILED);
+            LOGGER.error("error.compare.tag", e);
         }
     }
 
@@ -525,7 +533,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         dto.setProjectId(projectId);
         dto.setOrganizationId(organizationId);
         dto.setPublishVersionId(publishVersionId);
-        return tagCompareHistoryMapper.select(dto);
+        return tagCompareHistoryMapper.selectLastCompareHistory(projectId, organizationId, publishVersionId);
     }
 
     @Override
@@ -745,7 +753,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private void addTagCompareHistory(TagCompareVO tagCompareVO,
                                       Long projectId,
                                       Long organizationId,
-                                      Long publishVersionId) {
+                                      Long publishVersionId,
+                                      Long tagOperationHistoryId) {
         TagCompareHistoryDTO dto = new TagCompareHistoryDTO();
         dto.setProjectId(projectId);
         dto.setPublishVersionId(publishVersionId);
@@ -753,9 +762,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         dto.setSource(tagCompareVO.getSourceTag());
         dto.setTarget(tagCompareVO.getTargetTag());
         dto.setAppServiceCode(tagCompareVO.getAppServiceCode());
-        if (tagCompareHistoryMapper.select(dto).isEmpty()) {
-            tagCompareHistoryMapper.insert(dto);
-        }
+        dto.setPublishVersionTagHistoryId(tagOperationHistoryId);
+        tagCompareHistoryMapper.insert(dto);
     }
 
     private void addTagToIssue(TagVO tag,
@@ -763,7 +771,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                                Long organizationId,
                                Long programId,
                                Map<Long, IssueDTO> issueMap,
-                               boolean doUpdate) {
+                               boolean doUpdate,
+                               PublishVersionTagHistoryDTO publishVersionTagHistoryDTO) {
         String appServiceCode = tag.getAppServiceCode();
         String tagName = tag.getTagName();
         Set<Long> issueIds = tag.getIssueIds();
