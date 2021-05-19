@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from 'choerodon-ui';
 import classNames from 'classnames';
 import { IFilter } from '@/components/filter';
-import { find, map, toArray } from 'lodash';
+import { find, map, castArray } from 'lodash';
 import { IFilterField, ICustomField } from './index';
 import { IRenderFields } from './Filter';
 import InputField from './components/InputField';
@@ -205,7 +205,7 @@ export function departFilter(filter: IFilter, fields: IFilterField[]) {
         case 'member': {
           customField.option.push({
             fieldId: id,
-            value: value ? toArray(value) : value,
+            value: value ? castArray(value) : value,
           });
           break;
         }

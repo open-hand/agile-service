@@ -1,4 +1,4 @@
-import { toArray } from 'lodash';
+import { castArray } from 'lodash';
 import { toJS } from 'mobx';
 
 function transformSystemFilter(data) {
@@ -110,7 +110,7 @@ export function transformFilter(chosenFields) {
       case 'member': {
         customField.option.push({
           fieldId: id,
-          value: value ? toArray(value) : value,
+          value: value ? castArray(value) : value,
         });
         break;
       }

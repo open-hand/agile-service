@@ -34,7 +34,6 @@ const SaveFilterModal: React.FC<Props> = (props) => {
     }, {
       name: 'default',
       label: '设为默认',
-      maxLength: 10,
     }],
   }), []);
   const handleSubmit = useCallback(async () => {
