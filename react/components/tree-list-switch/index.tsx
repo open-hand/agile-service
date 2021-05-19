@@ -36,13 +36,7 @@ const TreeListSwitch: React.FC<Props> = ({
   };
   return (
     <div className={classnames(styles.switch, className)} {...otherProps}>
-      {/* <span role="none" onClick={() => handleChange('list')} className={classnames(styles.span, styles.span_list, data === 'list' ? styles.selected : undefined, { [styles.disabled]: disabled })}>
-        {listText || '列表视图'}
-      </span>
-      <span role="none" onClick={() => handleChange('tree')} className={classnames(styles.span, styles.span_tree, data === 'tree' ? styles.selected : undefined, { [styles.disabled]: disabled })}>
-        {treeText || '树形视图'}
-      </span> */}
-      <Select onChange={handleChange} value={data}>
+      <Select onChange={handleChange} value={data} clearButton={false}>
         <Option value="list" key="list" disabled={disabled}>{listText || '列表视图'}</Option>
         <Option value="tree" key="tree" disabled={disabled}>{treeText || '树形视图'}</Option>
       </Select>
