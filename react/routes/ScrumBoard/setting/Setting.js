@@ -183,10 +183,11 @@ class Setting extends Component {
             style={{
               display: 'flex', flexDirection: 'column', height: '100%', overflow: 'auto',
             }}
+            className={activeKey === '1' ? 'c7n-scrumboard-columnsetting-tabs' : ''}
             activeKey={activeKey}
             onChange={this.handleTabChange}
           >
-            <TabPane tab="列配置" key="1">
+            <TabPane className="c7n-scrumboard-columnsetting-panel" tab="列配置" key="1">
               <Spin spinning={loading}>
                 <SettingColumn
                   refresh={this.refresh}

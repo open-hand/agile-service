@@ -133,8 +133,9 @@ class SettingColumn extends Component {
     return (
       <Content
         style={{
+          margin: 0,
           padding: 0,
-          overflow: 'unset',
+          overflow: 'hidden',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -199,26 +200,29 @@ class SettingColumn extends Component {
           <DragDropContext
             onDragEnd={this.handleDragEnd}
           >
-            <Droppable droppableId="columndrop" direction="horizontal" type="columndrop">
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  style={{
-                    display: 'flex',
-                    flex: BoardData.length,
-                  }}
-                  {...provided.droppableProps}
-                >
-                  <Permission
-                    service={['choerodon.code.project.cooperation.iteration-plan.ps.column', 'choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn']}
-                    noAccessChildren={this.renderColumns(columns, true)}
+            <div style={{ overflow: 'auto', marginRight: 12 }}>
+              <Droppable droppableId="columndrop" direction="horizontal" type="columndrop">
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    style={{
+                      display: 'flex',
+                      flex: BoardData.length,
+                    }}
+                    {...provided.droppableProps}
                   >
-                    {this.renderColumns(columns)}
-                  </Permission>
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
+                    <Permission
+                      service={['choerodon.code.project.cooperation.iteration-plan.ps.column', 'choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn']}
+                      noAccessChildren={this.renderColumns(columns, true)}
+                    >
+                      {this.renderColumns(columns)}
+                    </Permission>
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+
+            </div>
             {unsetColumn && (
               <UnSetColumn
                 data={unsetColumn}
