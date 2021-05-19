@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
+import io.choerodon.agile.infra.dto.PublishVersionDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -279,36 +280,129 @@ public class ExcelUtil {
 
     public static int writePublishVersionData(Workbook workbook,
                                               String sheetName,
-                                              List<IssueListFieldKVVO> issues,
+                                              Map<Long, IssueListFieldKVVO> issueMap,
                                               int startRow,
                                               Map<Long, Set<TagVO>> issueTagMap,
                                               Map<Long, String> projectCodeMap,
-                                              Map<TagVO, String> tagAliasMap) {
+                                              Map<Long, Set<Long>> parentSonMap,
+                                              Map<Long, Set<PublishVersionDTO>> issuePublishVersionMap) {
         Sheet sheet = workbook.getSheet(sheetName);
         startRow++;
-        String[] headers = {"编号", "问题类型", "概要", "状态", "经办人", "tag", "创建时间"};
-        int num = issues.size();
-        issues.sort(Comparator.comparing(IssueListFieldKVVO::getIssueTypeId));
+        String[] headers = {"编号", "问题类型", "概要", "状态", "经办人", "tag", "创建时间", "发布版本"};
+        int num = issueMap.size();
         startRow = initVersionTitleAndHeader(sheet, startRow, headers, "问题详情（" + num + "）", workbook);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (IssueListFieldKVVO issue : issues) {
-            Row dataRow = sheet.createRow(startRow++);
-            int col = 0;
-            dataRow.createCell(col++).setCellValue(issue.getIssueNum());
-            dataRow.createCell(col++).setCellValue(Optional.ofNullable(issue.getIssueTypeVO()).map(IssueTypeVO::getName).orElse(""));
-            dataRow.createCell(col++).setCellValue(Optional.ofNullable(issue.getSummary()).orElse(""));
-            dataRow.createCell(col++).setCellValue(Optional.ofNullable(issue.getStatusVO()).map(StatusVO::getName).orElse(""));
-            dataRow.createCell(col++).setCellValue(issue.getAssigneeName());
-            dataRow.createCell(col++).setCellValue(getTag(issue.getIssueId(), issueTagMap, projectCodeMap, tagAliasMap));
-            dataRow.createCell(col++).setCellValue(sdf.format(issue.getCreationDate()));
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setWrapText(true);
+        CellStyle tanForegroundColor = createForegroundColor(workbook, IndexedColors.TAN);
+        CellStyle lightTurquoiseForegroundColor = createForegroundColor(workbook, IndexedColors.LIGHT_TURQUOISE);
+        if (!issueMap.isEmpty()) {
+            Set<Long> childrenSet = new HashSet<>();
+            parentSonMap.forEach((k, v) -> childrenSet.addAll(v));
+            IndexedColors lastColors = null;
+            for (Map.Entry<Long, IssueListFieldKVVO> entry : issueMap.entrySet()) {
+                Long issueId = entry.getKey();
+                if (childrenSet.contains(issueId)) {
+                    continue;
+                }
+                Set<Long> sonSet = parentSonMap.get(issueId);
+                boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
+                CellStyle foregroundColor = null;
+                if (hasSonNodes) {
+                    if (ObjectUtils.isEmpty(lastColors)) {
+                        lastColors = IndexedColors.TAN;
+                        foregroundColor = tanForegroundColor;
+                    } else if (IndexedColors.TAN.equals(lastColors)) {
+                        lastColors = IndexedColors.LIGHT_TURQUOISE;
+                        foregroundColor = lightTurquoiseForegroundColor;
+                    } else if (IndexedColors.LIGHT_TURQUOISE.equals(lastColors)) {
+                        lastColors = IndexedColors.TAN;
+                        foregroundColor = tanForegroundColor;
+                    }
+                }
+                startRow = fillInExcelRow(cellStyle, sheet, startRow, entry.getValue(), foregroundColor, sdf, issueTagMap, issuePublishVersionMap, projectCodeMap);
+                if (hasSonNodes) {
+                    for (Long sonId : sonSet) {
+                        IssueListFieldKVVO son = issueMap.get(sonId);
+                        if (!ObjectUtils.isEmpty(son)) {
+                            startRow = fillInExcelRow(cellStyle, sheet, startRow, son, foregroundColor, sdf, issueTagMap, issuePublishVersionMap, projectCodeMap);
+                        }
+                    }
+                }
+            }
         }
         return startRow;
     }
 
+    private static int fillInExcelRow(CellStyle cellStyle,
+                                      Sheet sheet,
+                                      int rowNum,
+                                      IssueListFieldKVVO issue,
+                                      CellStyle foregroundColor,
+                                      SimpleDateFormat sdf,
+                                      Map<Long, Set<TagVO>> issueTagMap,
+                                      Map<Long, Set<PublishVersionDTO>> issuePublishVersionMap,
+                                      Map<Long, String> projectCodeMap) {
+        Row row = sheet.createRow(rowNum);
+        row.setHeight((short) 260);
+        int col = fillInExcelCell(cellStyle, issue.getIssueNum(), foregroundColor, row, 0);
+        String issueType = Optional.ofNullable(issue.getIssueTypeVO()).map(IssueTypeVO::getName).orElse("");
+        col = fillInExcelCell(cellStyle, issueType, foregroundColor, row, col);
+        String summary = Optional.ofNullable(issue.getSummary()).orElse("");
+        col = fillInExcelCell(cellStyle, summary, foregroundColor, row, col);
+        String status = Optional.ofNullable(issue.getStatusVO()).map(StatusVO::getName).orElse("");
+        col = fillInExcelCell(cellStyle, status, foregroundColor, row, col);
+        col = fillInExcelCell(cellStyle, issue.getAssigneeName(), foregroundColor, row, col);
+        String tag = getTag(issue.getIssueId(), issueTagMap, projectCodeMap);
+        col = fillInExcelCell(cellStyle, tag, foregroundColor, row, col);
+        col = fillInExcelCell(cellStyle, sdf.format(issue.getCreationDate()), foregroundColor, row, col);
+        String publishVersions = getPublishVersion(issue.getIssueId(), issuePublishVersionMap);
+        fillInExcelCell(cellStyle, publishVersions, foregroundColor, row, col);
+        return ++rowNum;
+    }
+
+    private static int fillInExcelCell(CellStyle cellStyle,
+                                       String value,
+                                       CellStyle foregroundColor,
+                                       Row row,
+                                       int col) {
+        Cell cell = row.createCell(col);
+        cell.setCellStyle(cellStyle);
+        if (!ObjectUtils.isEmpty(foregroundColor)) {
+            cell.setCellStyle(foregroundColor);
+        }
+        cell.setCellValue(value);
+        return ++col;
+    }
+
+    private static String getPublishVersion(Long issueId,
+                                            Map<Long, Set<PublishVersionDTO>> issuePublishVersionMap) {
+        Set<PublishVersionDTO> publishVersionSet = issuePublishVersionMap.get(issueId);
+        if (ObjectUtils.isEmpty(publishVersionSet)) {
+            return "";
+        }
+        List<PublishVersionDTO> list = new ArrayList<>(publishVersionSet);
+        list.sort(Comparator.comparing(PublishVersionDTO::getId));
+        Iterator<PublishVersionDTO> iterator = list.iterator();
+        String colon = "：";
+        StringBuilder builder = new StringBuilder();
+        while (iterator.hasNext()) {
+            PublishVersionDTO dto = iterator.next();
+            String alias = dto.getVersionAlias();
+            if (StringUtils.isEmpty(alias)) {
+                alias = dto.getGroupId() + colon + dto.getArtifactId() + colon + dto.getVersion();
+            }
+            builder.append(alias);
+            if (iterator.hasNext()) {
+                builder.append("，");
+            }
+        }
+        return builder.toString();
+    }
+
     private static String getTag(Long issueId,
                                  Map<Long, Set<TagVO>> issueTagMap,
-                                 Map<Long, String> projectCodeMap,
-                                 Map<TagVO, String> tagAliasMap) {
+                                 Map<Long, String> projectCodeMap) {
         Set<TagVO> tags = issueTagMap.get(issueId);
         if (ObjectUtils.isEmpty(tags)) {
             return "";
@@ -320,7 +414,7 @@ public class ExcelUtil {
                         .thenComparing(TagVO::getTagName));
         StringBuilder builder = new StringBuilder();
         Iterator<TagVO> tagIterator = tagList.iterator();
-        String colon = ":";
+        String colon = "：";
         while (tagIterator.hasNext()) {
             TagVO vo = tagIterator.next();
             Long projectId = vo.getProjectId();
@@ -330,7 +424,7 @@ public class ExcelUtil {
                     .append(vo.getAppServiceCode())
                     .append(colon)
                     .append(vo.getTagName());
-            String alias = tagAliasMap.get(vo);
+            String alias = vo.getAlias();
             if (StringUtils.hasText(alias)) {
                 builder.append("（").append(alias).append("）");
             }
@@ -437,10 +531,10 @@ public class ExcelUtil {
     }
 
     protected static int initVersionTitleAndHeader(Sheet sheet,
-                                                 int startRow,
-                                                 String[] headers,
-                                                 String title,
-                                                 Workbook workbook) {
+                                                   int startRow,
+                                                   String[] headers,
+                                                   String title,
+                                                   Workbook workbook) {
         CellStyle headerStyle = createCellStyle(workbook, (short) 13, CellStyle.ALIGN_LEFT, true);
         headerStyle.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
