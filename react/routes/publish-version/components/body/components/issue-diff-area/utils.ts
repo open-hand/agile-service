@@ -5,14 +5,14 @@ import {
 } from 'lodash';
 import { toJS } from 'mobx';
 
-async function sequenceRequest(requests: Array<() => Promise<any[]>>, i: number): Promise<any[]> {
+async function sequenceRequest(requests: Array<() => Promise<any[]>>, tagData: any[], i: number): Promise<any[]> {
   let data = [];
   if (requests[i]) { /** 0[5]  --> 1[4] */
     data = await requests[i]().then(async (res) => {
       console.log('nextData', res);
-
-      const nextData = await sequenceRequest(requests, i + 1);
-      return (res || []).concat(nextData);
+      const currentData = res?.map((item) => ({ ...item, tags: [{ ...tagData[i], tagName: tagData[i].sourceTag }] })) || [];
+      const nextData = await sequenceRequest(requests, tagData, i + 1);
+      return (currentData).concat(nextData);
     });
   }
   return data;
@@ -22,7 +22,7 @@ export async function requestPreviewData(publishVersionId: string, tagData: any[
     console.log('requestPreviewData oneData..requestStack', data);
     return () => publishVersionApi.comparePreviewTag(publishVersionId, data);
   });
-  const tableData = await sequenceRequest(requestStack, 0);
+  const tableData = await sequenceRequest(requestStack, tagData, 0);
   return tableData;
 }
 export function transformFilter(fields: Map<string, any>) {

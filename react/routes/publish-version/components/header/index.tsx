@@ -10,6 +10,7 @@ function PublishVersionHeader() {
   const { preview, store } = usePublishVersionContext();
   const text = store.getCurrentData.statusCode;
   const status = PUBLISH_VERSION_STATUS_TYPE[text] || {};
+
   return (
     <div className={classNames(styles.header, { [styles.preview]: preview })}>
       <div className={styles.left}>
@@ -32,14 +33,15 @@ function PublishVersionHeader() {
         </p>
       </div>
       {!preview && (
-        <CustomTabs
-          customType="default"
-          selectedTabValue={store.getCurrentMenu}
-          data={[{ name: '详情', value: 'detail' }, { name: '版本对比', value: 'diff' }, { name: '查看版本信息', value: 'info' }]}
-          onChange={(e, name, v) => {
-            store.setCurrentMenu(v);
-          }}
-        />
+      <CustomTabs
+        customType="default"
+        key={`CustomTabs-${store.getCurrentMenu}`}
+        selectedTabValue={store.getCurrentMenu}
+        data={[{ name: '详情', value: 'detail' }, { name: '版本对比', value: 'diff' }, { name: '查看版本信息', value: 'info' }]}
+        onChange={(e, name, v) => {
+          store.setCurrentMenu(v);
+        }}
+      />
       )}
     </div>
   );
