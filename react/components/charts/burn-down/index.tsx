@@ -181,6 +181,20 @@ const BurndownChart: React.FC<BurnDownProps> = ({
           type: 'dotted',
           color: 'rgba(0,0,0,0.65)',
         },
+
+      },
+      {
+        symbol: 'none',
+        name: '非工作区',
+        type: 'line',
+        // data: exportAxis,
+        itemStyle: {
+          color: 'rgba(0,0,0,0.65)',
+        },
+        lineStyle: {
+          type: 'dotted',
+          color: 'rgba(0,0,0,0.65)',
+        },
         markArea: {
           itemStyle: {
             color: 'rgba(235,235,235,0.65)',

@@ -24,7 +24,7 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & Partial<PublishVe
     paging: false,
     fields: [
       {
-        name: 'versionAlias', label: '发布版本名称', required: true, validator: handleCheckName,
+        name: 'versionAlias', label: '发布版本名称', required: true, validator: handleCheckName, maxLength: 16,
       },
       { name: 'actualPublishDate', label: '发布时间' },
       { name: 'description', label: '描述' },
