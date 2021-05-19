@@ -29,7 +29,13 @@ const CardList: React.FC<CardListProps> = ({
             : 'unset',
         }}
       >
-        {status.map((item, index) => <StatusCard key={item.statusId} data={item} index={index} columnId={columnId} />)}
+        {(status.length > 0 || snapshot.isDraggingOver) ? status.map((item, index) => <StatusCard key={item.statusId} data={item} index={index} columnId={columnId} />) : (
+          <>
+            {
+            columnId !== '0' && <div className={styles.noStatus_tip}>缺少状态，至少为列分配一个状态，否则该列将不能显示在看板上</div>
+            }
+          </>
+        )}
         {provided.placeholder}
       </div>
     )}
