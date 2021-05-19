@@ -29,4 +29,10 @@ databaseChangeLog(logicalFilePath:'agile_tag_compare_history.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(id: '2021-05-19-agile-tag-compare-history-add-column', author: 'chihao.ran@hand-china.com') {
+        addColumn(tableName: "agile_tag_compare_history"){
+            column(name:"tag_operation_history_id",type:"BIGINT UNSIGNED", remarks:"tag operation history id", defaultValue: "0")
+        }
+    }
 }
