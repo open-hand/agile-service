@@ -2,14 +2,14 @@ package io.choerodon.agile.infra.mapper;
 
 import org.apache.ibatis.annotations.Param;
 
-import io.choerodon.agile.infra.dto.TagOperationHistoryDTO;
+import io.choerodon.agile.infra.dto.PublishVersionTagHistoryDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 
 /**
  * @author chihao.ran@hand-china.com
  * 2021/05/19 11:00
  */
-public interface TagOperationHistoryMapper extends BaseMapper<TagOperationHistoryDTO> {
+public interface PublishVersionTagHistoryMapper extends BaseMapper<PublishVersionTagHistoryDTO> {
 
     /**
      * 查询最近的tag历史
@@ -19,5 +19,5 @@ public interface TagOperationHistoryMapper extends BaseMapper<TagOperationHistor
      * @param userId           用户id
      * @return 最近的tag历史
      */
-    TagOperationHistoryDTO queryLatestHistory(@Param("projectId") Long projectId, @Param("publishVersionId") Long publishVersionId, @Param("userId") Long userId);
+    PublishVersionTagHistoryDTO queryLatestHistory(@Param("projectId") Long projectId, @Param("publishVersionId") Long publishVersionId, @Param("userId") Long userId);
 }

@@ -8,7 +8,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
  * @author chihao.ran@hand-china.com
  * 2021/05/19 10:56
  */
-public class TagOperationHistoryVO extends AuditDomain {
+public class PublishVersionTagHistoryVO extends AuditDomain {
 
     @Encrypt
     private Long id;

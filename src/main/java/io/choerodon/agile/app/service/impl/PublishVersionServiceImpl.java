@@ -83,7 +83,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     @Autowired
     private TagCompareHistoryMapper tagCompareHistoryMapper;
     @Autowired
-    private TagOperationHistoryService tagOperationHistoryService;
+    private PublishVersionTagHistoryService publishVersionTagHistoryService;
     @Autowired
     private PublishVersionTagRelMapper publishVersionTagRelMapper;
     @Autowired
@@ -418,7 +418,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                            String action) {
         String websocketKey = WEBSOCKET_GENERATE_TAG_COMPARE + projectId;
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        TagOperationHistoryDTO tagOperationHistoryDTO = tagOperationHistoryService.createDefaultHistory(projectId, organizationId, publishVersionId, action);
+        PublishVersionTagHistoryDTO publishVersionTagHistoryDTO = publishVersionTagHistoryService.createDefaultHistory(projectId, organizationId, publishVersionId, action);
         try {
             PublishVersionDTO dto = new PublishVersionDTO();
             dto.setProjectId(projectId);
@@ -452,22 +452,19 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                 int total = tags.size();
                 double current = 1D;
                 for (TagVO tag : tags) {
-                    addTagToIssue(tag, projectId, organizationId, programId, issueMap, doUpdate, tagOperationHistoryDTO);
+                    addTagToIssue(tag, projectId, organizationId, programId, issueMap, doUpdate, publishVersionTagHistoryDTO);
                     TagCompareVO tagCompareVO = tag.getTagCompareVO();
-                    addTagCompareHistory(tagCompareVO, projectId, organizationId, publishVersionId, tagOperationHistoryDTO.getId());
+                    addTagCompareHistory(tagCompareVO, projectId, organizationId, publishVersionId, publishVersionTagHistoryDTO.getId());
                     tagCompareVO.setAction(DOING);
                     tagCompareVO.setProgress(getProgress(current, total));
                     sendProgress(tagCompareVO, userId, websocketKey);
                     current++;
                 }
             }
-            if (tagOperationHistoryDTO.getFailCount() != 0L) {
-                throw new CommonException("error.add.tag.to.issue");
-            }
             TagCompareVO tagCompareVO = new TagCompareVO();
             tagCompareVO.setAction(DONE);
             tagCompareVO.setProgress(1D);
-            tagOperationHistoryService.updateStatus(tagOperationHistoryDTO, DONE, null);
+            publishVersionTagHistoryService.updateStatus(publishVersionTagHistoryDTO, DONE);
             sendProgress(tagCompareVO, userId, websocketKey);
         } catch (Exception e) {
             TagCompareVO tagCompareVO = new TagCompareVO();
@@ -475,7 +472,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             tagCompareVO.setProgress(0D);
             tagCompareVO.setMsg(e.getMessage());
             sendProgress(tagCompareVO, userId, websocketKey);
-            tagOperationHistoryService.updateStatus(tagOperationHistoryDTO, FAILED, e.getMessage());
+            publishVersionTagHistoryService.updateStatus(publishVersionTagHistoryDTO, FAILED);
             LOGGER.error("error.compare.tag", e);
         }
     }
@@ -766,7 +763,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         dto.setSource(tagCompareVO.getSourceTag());
         dto.setTarget(tagCompareVO.getTargetTag());
         dto.setAppServiceCode(tagCompareVO.getAppServiceCode());
-        dto.setTagOperationHistoryId(tagOperationHistoryId);
+        dto.setPublishVersionTagHistoryId(tagOperationHistoryId);
         tagCompareHistoryMapper.insert(dto);
     }
 
@@ -776,7 +773,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                                Long programId,
                                Map<Long, IssueDTO> issueMap,
                                boolean doUpdate,
-                               TagOperationHistoryDTO tagOperationHistoryDTO) {
+                               PublishVersionTagHistoryDTO publishVersionTagHistoryDTO) {
         String appServiceCode = tag.getAppServiceCode();
         String tagName = tag.getTagName();
         Set<Long> issueIds = tag.getIssueIds();
@@ -786,33 +783,27 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                 tagIssueRelMapper.deleteByIssueIds(projectId, organizationId, issueIds);
             }
             issueIds.forEach(x -> {
-                try {
-                    IssueDTO issue = issueMap.get(x);
-                    String issueTypeCode = issue.getTypeCode();
-                    if (issueTypeCode == null) {
-                        return;
-                    }
-                    TagIssueRelDTO dto = new TagIssueRelDTO();
-                    dto.setIssueId(x);
-                    dto.setProjectId(projectId);
-                    dto.setOrganizationId(organizationId);
-                    dto.setAppServiceCode(appServiceCode);
-                    dto.setTagName(tagName);
-                    dto.setTagProjectId(tag.getProjectId());
-                    if (tagIssueRelMapper.select(dto).isEmpty()) {
-                        tagIssueRelMapper.insert(dto);
-                    }
-                    if (agilePluginService != null
-                            && IssueTypeCode.isStory(issueTypeCode)
-                            && programId != null
-                            && issue.getFeatureId() != null
-                            && !Objects.equals(0L, issue.getFeatureId())) {
-                        agilePluginService.addTagToFeature(issue.getFeatureId(), programId, organizationId, tag);
-                    }
-                    tagOperationHistoryDTO.setSuccessCount(tagOperationHistoryDTO.getSuccessCount() + 1);
-                } catch (Exception e){
-                    tagOperationHistoryDTO.setFailCount(tagOperationHistoryDTO.getFailCount() + 1);
-                    LOGGER.error("新增问题与tag关系失败", e);
+                IssueDTO issue = issueMap.get(x);
+                String issueTypeCode = issue.getTypeCode();
+                if (issueTypeCode == null) {
+                    return;
+                }
+                TagIssueRelDTO dto = new TagIssueRelDTO();
+                dto.setIssueId(x);
+                dto.setProjectId(projectId);
+                dto.setOrganizationId(organizationId);
+                dto.setAppServiceCode(appServiceCode);
+                dto.setTagName(tagName);
+                dto.setTagProjectId(tag.getProjectId());
+                if (tagIssueRelMapper.select(dto).isEmpty()) {
+                    tagIssueRelMapper.insert(dto);
+                }
+                if (agilePluginService != null
+                        && IssueTypeCode.isStory(issueTypeCode)
+                        && programId != null
+                        && issue.getFeatureId() != null
+                        && !Objects.equals(0L, issue.getFeatureId())) {
+                    agilePluginService.addTagToFeature(issue.getFeatureId(), programId, organizationId, tag);
                 }
             });
         }

@@ -14,10 +14,10 @@ import io.choerodon.mybatis.domain.AuditDomain;
  * @author chihao.ran@hand-china.com
  * 2021/05/19 10:56
  */
-@Table(name = "agile_tag_operation_history")
+@Table(name = "agile_publish_version_tag_history")
 @ModifyAudit
 @VersionAudit
-public class TagOperationHistoryDTO extends AuditDomain {
+public class PublishVersionTagHistoryDTO extends AuditDomain {
 
     @Id
     @GeneratedValue
@@ -28,17 +28,11 @@ public class TagOperationHistoryDTO extends AuditDomain {
 
     private Long organizationId;
 
-    private Long successCount;
-
-    private Long failCount;
-
     private Long publishVersionId;
 
     private String action;
 
     private String status;
-
-    private String msg;
 
     private Long userId;
 
@@ -90,35 +84,11 @@ public class TagOperationHistoryDTO extends AuditDomain {
         this.status = status;
     }
 
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
     public Long getUserId() {
         return userId;
     }
 
     public void setUserId(Long userId) {
         this.userId = userId;
-    }
-
-    public Long getSuccessCount() {
-        return successCount;
-    }
-
-    public void setSuccessCount(Long successCount) {
-        this.successCount = successCount;
-    }
-
-    public Long getFailCount() {
-        return failCount;
-    }
-
-    public void setFailCount(Long failCount) {
-        this.failCount = failCount;
     }
 }

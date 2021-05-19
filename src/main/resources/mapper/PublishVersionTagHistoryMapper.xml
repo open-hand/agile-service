@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="io.choerodon.agile.infra.mapper.TagOperationHistoryMapper">
+<mapper namespace="io.choerodon.agile.infra.mapper.PublishVersionTagHistoryMapper">
 
-    <select id="queryLatestHistory" resultType="io.choerodon.agile.infra.dto.TagOperationHistoryDTO">
+    <select id="queryLatestHistory" resultType="io.choerodon.agile.infra.dto.PublishVersionTagHistoryDTO">
         SELECT *
         FROM agile_tag_operation_history
         WHERE project_id = #{projectId}
