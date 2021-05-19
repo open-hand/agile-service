@@ -31,7 +31,7 @@ const NoneSprint = ({ doingSprintExist, filterItems, hasSetFilter }) => {
           <p style={{ color: 'rgba(0,0,0,0.65)', fontSize: '13px' }}>{`${tipTitle}`}</p>
           <p style={{ fontSize: 16, lineHeight: '34px' }}>
             在工作列表的
-            <span style={{ color: '#3f51b5' }}>待办事项</span>
+            <span style={{ color: '#5365EA' }}>待办事项</span>
             {!doingSprintExist ? '中开启冲刺' : '规划问题到当前冲刺'}
           </p>
         </div>

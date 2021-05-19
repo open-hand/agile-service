@@ -347,10 +347,10 @@ const IssueMove: React.FC<Props> = ({
     <div className={styles.issueMove}>
       <Steps current={currentStep - 1}>
         <Step
-          title={<span style={{ color: currentStep === 1 ? '#3F51B5' : '', fontSize: 14 }}>选择项目和问题类型</span>}
+          title={<span style={{ color: currentStep === 1 ? '#5365EA' : '', fontSize: 14 }}>选择项目和问题类型</span>}
         />
         <Step
-          title={<span style={{ color: currentStep === 2 ? '#3F51B5' : '', fontSize: 14 }}>确认数据信息</span>}
+          title={<span style={{ color: currentStep === 2 ? '#5365EA' : '', fontSize: 14 }}>确认数据信息</span>}
         />
       </Steps>
       <div className={styles.step_content}>

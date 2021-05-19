@@ -177,7 +177,7 @@ const CommentItem: React.FC<Props> = ({
                 loginName: comment.userLoginName,
                 imageUrl: comment.userImageUrl,
               }}
-              textStyle={{ color: '#3f51b5' }}
+              textStyle={{ color: '#5365EA' }}
             />
             {
               isReply && (
@@ -197,7 +197,7 @@ const CommentItem: React.FC<Props> = ({
                       loginName: (comment as ReplyComment).replyToUserLoginName,
                       imageUrl: (comment as ReplyComment).replyToUserImageUrl,
                     }}
-                    textStyle={{ color: '#3f51b5' }}
+                    textStyle={{ color: '#5365EA' }}
                   />
                 </div>
               )

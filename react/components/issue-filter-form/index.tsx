@@ -24,7 +24,7 @@ function DefaultChooseField(chooseConfig: any) {
   });
   return {
     data,
-    component: <ChooseField {...componentProps} dropDownBtnProps={{ icon: 'add', style: { color: '#3f51b5' } }} />,
+    component: <ChooseField {...componentProps} dropDownBtnProps={{ icon: 'add', style: { color: '#5365EA' } }} />,
   };
 }
 

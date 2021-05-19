@@ -87,7 +87,7 @@ const SelectApp = ({ onChange, onAppChange, ...props }) => {
             style={{
               margin: '-4px -20px',
               padding: '4px 20px',
-              color: '#3f51b5',
+              color: '#5365EA',
             }}
             onClick={handleLoadMore}
           >

@@ -121,7 +121,7 @@ class Log extends Component {
                   imageUrl: userImageUrl,
                   tooltip: userName,
                 }}
-                textStyle={{ color: '#3f51b5' }}
+                textStyle={{ color: '#5365EA' }}
               />
             </div>
             <span style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>

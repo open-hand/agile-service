@@ -51,7 +51,7 @@ const transformRes = ({
       const response = {
         plan: [],
         complete: [],
-        colors: ['#9665E2', '#F0657D', '#FAD352', '#FF9915', '#45A3FC', '#3F51B5', '#47CBCA', '#59CB79', '#F953BA', '#D3D3D3'],
+        colors: ['#9665E2', '#F0657D', '#FAD352', '#FF9915', '#45A3FC', '#5365EA', '#47CBCA', '#59CB79', '#F953BA', '#D3D3D3'],
       };
       const copyNestRes = [...nextRes];
       // 过滤掉未分配&&计划故事点为0或null的数据，没有实际意义
