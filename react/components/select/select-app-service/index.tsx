@@ -20,7 +20,6 @@ interface Props extends Partial<SelectProps> {
   projectId?: string
 }
 const renderService = (appService: any) => {
-  console.log('appService.', appService);
   if (appService) {
     return (
       <Tooltip title={appService.code}>

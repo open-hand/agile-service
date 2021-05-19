@@ -18,7 +18,7 @@ interface Context {
   AppState: AppStateProps,
   isEdit?: boolean,
   store: HookStore,
-  defaultContext?: string[],
+  defaultContext?: Array<{ code: string, disabled?: boolean } | string>,
   onSubmitLocal?: (data: IFieldPostDataProps) => Promise<boolean> | boolean,
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
   localCheckName?: (name: string) => Promise<boolean> | boolean,
@@ -36,12 +36,12 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(observer(
   (props) => {
     const {
       formatMessage, AppState: { currentMenuType: { type, id, organizationId } },
-      schemeCode, record, localCheckCode, localCheckName, defaultContext,
+      schemeCode, record, localCheckCode, localCheckName, defaultContext: propsDefaultContext,
     } = props;
     const isEdit = !!record;
     const store = useStore(type, id, organizationId);
     const contextOptionsDataSet = useMemo(() => new DataSet(ContextOptionsDataSet({ isEdit, store, oldRecord: record })), [isEdit, record, store]);
-
+    const defaultContext: string[] | undefined = useMemo(() => propsDefaultContext?.map((item: any) => (typeof (item) === 'string' ? item : item.code)), []);
     const formDataSet = useMemo(() => new DataSet(FormDataSet({
       formatMessage,
       type,

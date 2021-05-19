@@ -331,7 +331,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     title: '环境',
     dataIndex: 'environmentName',
   }],
-  ['tag', {
+  ['tags', {
     title: 'Tag',
     dataIndex: 'tags',
     render: ({ rowData, dataIndex }) => {
