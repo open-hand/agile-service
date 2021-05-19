@@ -13,4 +13,34 @@
             #{appServiceCode}
         </foreach>
     </select>
+
+    <select id="selectLastCompareHistory" resultType="io.choerodon.agile.infra.dto.TagCompareHistoryDTO">
+        SELECT
+            atch.id,
+            atch.publish_version_id,
+            atch.app_service_code,
+            atch.source,
+            atch.target,
+            atch.project_id,
+            atch.organization_id,
+            atch.object_version_number,
+            atch.created_by,
+            atch.creation_date,
+            atch.last_updated_by,
+            atch.last_update_date
+        FROM
+            agile_tag_compare_history atch
+        WHERE
+            atch.id IN (
+                    SELECT
+                        MAX( id )
+                    FROM
+                        agile_tag_compare_history
+                    WHERE
+                        publish_version_id = #{publishVersionId}
+                    AND project_id = #{projectId}
+                    AND organization_id = #{organizationId}
+                    GROUP BY app_service_code
+                  )
+    </select>
 </mapper>

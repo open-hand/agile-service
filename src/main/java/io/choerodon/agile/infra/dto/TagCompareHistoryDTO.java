@@ -26,6 +26,9 @@ public class TagCompareHistoryDTO extends AuditDomain {
     @Encrypt
     private Long publishVersionId;
 
+    @Encrypt
+    private Long tagOperationHistoryId;
+
     private String appServiceCode;
 
     private String source;
@@ -35,6 +38,14 @@ public class TagCompareHistoryDTO extends AuditDomain {
     private Long projectId;
 
     private Long organizationId;
+
+    public Long getTagOperationHistoryId() {
+        return tagOperationHistoryId;
+    }
+
+    public void setTagOperationHistoryId(Long tagOperationHistoryId) {
+        this.tagOperationHistoryId = tagOperationHistoryId;
+    }
 
     public Long getPublishVersionId() {
         return publishVersionId;
