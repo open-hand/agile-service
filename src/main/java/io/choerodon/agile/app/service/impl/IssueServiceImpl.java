@@ -2371,7 +2371,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     protected void copyStoryPointAndRemainingTimeData(IssueDetailDTO issueDetailDTO, Long projectId, Long issueId, Long objectVersionNumber) {
-        if (issueDetailDTO.getStoryPoints() == null && issueDetailDTO.getEstimateTime() == null) {
+        if (issueDetailDTO.getStoryPoints() == null && issueDetailDTO.getRemainingTime() == null) {
             return;
         }
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
