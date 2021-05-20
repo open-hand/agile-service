@@ -61,7 +61,7 @@ class SideIssueList extends Component {
     const { filters: { issueStatus, version: versionList }, HeaderStore } = this.props;
 
     return (
-      <div className="c7nagile-SideIssueList" style={{ top: HeaderStore.announcementClosed ? 49 : 99 }}>
+      <div className="c7nagile-SideIssueList" style={{ top: 99 }}>
         <div className="c7nagile-SideIssueList-header">
           <div className="c7nagile-SideIssueList-input">
             <Input
