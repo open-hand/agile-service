@@ -66,7 +66,7 @@ const Description: React.FC = () => {
             footer
             value={delta}
             style={{
-              minHeight: 260, width: '100%',
+              minHeight: 300, width: '100%',
             }}
             onChange={(value) => {
               setDelta(value);

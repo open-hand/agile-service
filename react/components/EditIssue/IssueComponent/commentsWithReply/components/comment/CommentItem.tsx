@@ -251,7 +251,7 @@ const CommentItem: React.FC<Props> = ({
                 footer
                 value={value}
                 onChange={handleChange}
-                style={{ height: 200, width: '100%' }}
+                style={{ minHeight: 300, width: '100%' }}
                 onCancel={() => {
                   setEditing(false);
                 }}
@@ -273,7 +273,7 @@ const CommentItem: React.FC<Props> = ({
               footer
               value={replyValue}
               onChange={handleReplyChange}
-              style={{ height: 200, width: '100%' }}
+              style={{ minHeight: 300, width: '100%' }}
               onCancel={() => {
                 setReplying(false);
                 setReplyValue('');

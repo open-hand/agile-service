@@ -343,7 +343,7 @@ class ScrumBoardHome extends Component {
               }, {
                 display: true,
                 element: <SelectBoard
-                  onClick={this.handleCreateBoardClick}
+                  onFooterClick={this.handleCreateBoardClick}
                   onChange={(value) => {
                     const selectedBoard = ScrumBoardStore.getBoardList.get(value);
                     ScrumBoardStore.setSelectedBoard(value);

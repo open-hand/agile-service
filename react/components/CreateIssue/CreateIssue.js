@@ -1108,7 +1108,7 @@ class CreateIssue extends Component {
                       uploading,
                     });
                   }}
-                  style={{ width: '100%', overflow: 'hidden' }}
+                  style={{ width: '100%', minHeight: 300, overflow: 'hidden' }}
                 />,
               )}
             </FormItem>

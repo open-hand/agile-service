@@ -190,7 +190,7 @@ class Log extends Component {
                     autoFocus
                     footer
                     value={deltaEdit}
-                    style={{ height: 200, width: '100%' }}
+                    style={{ minHeight: 300, width: '100%' }}
                     onChange={(value) => {
                       this.setState({ editLog: value });
                     }}
