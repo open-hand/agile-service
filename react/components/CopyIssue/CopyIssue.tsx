@@ -82,8 +82,9 @@ const CopyIssue: React.FC<Props> = ({
     }, {
       name: 'fields',
       label: '复制字段',
-      type: 'object' as FieldType,
       multiple: true,
+      textField: 'fieldName',
+      valueField: 'fieldCode',
     }, {
       name: 'copySubIssue',
       label: '是否复制子任务',
@@ -119,7 +120,7 @@ const CopyIssue: React.FC<Props> = ({
           const { fieldCode, fieldId, system } = field;
           if (!system) {
             copyfs.customFieldIds.push(fieldId);
-          } else {
+          } else if (fieldCode !== 'reporter' && fieldCode !== 'priority') {
             copyfs.predefinedFieldNames.push(predefinedFieldsMap.get(fieldCode as string) || fieldCode as string);
           }
         }
