@@ -23,18 +23,20 @@ const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = ob
     autoCreate: true,
     fields: [
       {
-        name: 'source', label: '服务来源', type: 'string' as FieldType, defaultValue: 'self', ignore: 'always' as FieldIgnore,
+        name: 'source', label: '服务来源', type: 'string' as FieldType, defaultValue: 'self', ignore: 'always' as FieldIgnore, required: true,
       },
       {
-        name: 'app', label: '应用服务', type: 'object' as FieldType, ignore: 'always' as FieldIgnore,
+        name: 'app', label: '应用服务', type: 'object' as FieldType, ignore: 'always' as FieldIgnore, required: true,
       },
       { name: 'projectId', type: 'string' as FieldType, bind: 'app.value.projectId' },
-      { name: 'appServiceId', type: 'string' as FieldType, dynamicProps: { bind: ({ record }: any) => (record.get('source') === 'self' ? 'app.id' : 'app.value.id') } },
       {
-        name: 'branch', label: '分支', type: 'object' as FieldType, ignore: 'always' as FieldIgnore,
+        name: 'appServiceId', type: 'string' as FieldType, required: true, dynamicProps: { bind: ({ record }: any) => (record.get('source') === 'self' ? 'app.id' : 'app.value.id') },
       },
       {
-        name: 'branchName', label: '分支', type: 'string' as FieldType, bind: 'branch.branchName',
+        name: 'branch', label: '分支', type: 'object' as FieldType, ignore: 'always' as FieldIgnore, required: true,
+      },
+      {
+        name: 'branchName', label: '分支', type: 'string' as FieldType, bind: 'branch.branchName', required: true,
       },
       {
         name: 'objectVersionNumber', label: '分支', type: 'string' as FieldType, bind: 'branch.objectVersionNumber',
@@ -54,6 +56,9 @@ const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = ob
   }), []);
   const handleSubmit = async () => {
     const data = formDs.current?.toJSONData();
+    if (!await formDs.validate()) {
+      return false;
+    }
     await devOpsApi.project(data.projectId).linkBranch(data.appServiceId, { ...data, issueId }).then(() => {
       onOk && onOk();
     });

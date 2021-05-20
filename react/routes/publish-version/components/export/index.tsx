@@ -6,6 +6,7 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
+import SelectPublishVersion from '@/components/select/select-publish-version';
 import WsProgress from '@/components/ws-progress';
 import { getProjectId, getProjectName } from '@/utils/common';
 import { issueApi, publishVersionApi } from '@/api';
@@ -28,8 +29,9 @@ const ExportPublishVersion: React.FC<Props> = observer(({ modal, publishVersionI
       {
         name: 'publishVersionId',
         label: '选择版本',
-        // required: true,
-        // multiple: true,
+        defaultValue: [publishVersionId],
+        required: true,
+        multiple: true,
       },
       {
         name: 'withSubVersion',
@@ -38,7 +40,7 @@ const ExportPublishVersion: React.FC<Props> = observer(({ modal, publishVersionI
         // multiple: true,
       },
     ],
-  }), []);
+  }), [publishVersionId]);
 
   const [downloadInfo, setDownloadInfo] = useState({} as IDownLoadInfo);
   const handleFinish = useCallback((messageData: any) => {
@@ -49,11 +51,11 @@ const ExportPublishVersion: React.FC<Props> = observer(({ modal, publishVersionI
   const handleExport = useCallback(async () => {
     modal?.update({ okProps: { loading: true } });
     if (await dataSet.current?.validate()) {
-      const { withSubVersion } = dataSet.current?.toData();
-      await publishVersionApi.export(publishVersionId, withSubVersion);
+      const { withSubVersion, publishVersionId: publishVersionIds } = dataSet.current?.toData();
+      await publishVersionApi.export(publishVersionIds, withSubVersion);
     }
     return false;
-  }, [modal]);
+  }, [dataSet, modal]);
   useEffect(() => {
     issueApi.loadLastImportOrExport('download_file_publish_version').then((res: any) => {
       setDownloadInfo(res);
@@ -65,7 +67,7 @@ const ExportPublishVersion: React.FC<Props> = observer(({ modal, publishVersionI
   return (
     <div style={{ width: '100%', overflowX: 'hidden' }}>
       <Form dataSet={dataSet}>
-        {/* <SelectPublishVersion name="publishVersionId" /> */}
+        <SelectPublishVersion name="publishVersionId" />
         <CheckBox name="withSubVersion" />
       </Form>
 

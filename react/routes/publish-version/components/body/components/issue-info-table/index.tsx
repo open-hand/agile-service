@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
 } from 'choerodon-ui/pro';
@@ -11,19 +11,57 @@ import classnames from 'classnames';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 
+import { publishVersionApi } from '@/api';
 import styles from './index.less';
 import IssueTypeSwitch from '../switch';
 
+interface TagActionHistory {
+  action?: 'add'
+  createdBy?: string
+  creationDate?: string
+  id?: string
+  lastUpdateDate?: string
+  lastUpdatedBy?: string
+  objectVersionNumber: number
+  organizationId?: string
+  projectId?: string
+  publishVersionId?: string
+  status?: 'done' | 'doing' | 'failed'
+}
+const STATUS_MAP_TEXT = {
+  done: '完成',
+  doing: '进行中',
+  failed: '失败',
+
+};
 const { Column } = Table;
 function IssueInfoTable() {
   const { issueInfoTableDataSet, store, preview } = usePublishVersionContext();
+  const [history, setHistory] = useState<Required<TagActionHistory> | undefined>(undefined);
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields().filter((i) => i.code !== 'issueTypeId') as any,
     transformFilter,
   });
-
+  useEffect(() => {
+    publishVersionApi.loadLatestTagHistory(store.getCurrentData.id).then((res:any) => {
+      if (res?.id) {
+        setHistory(res);
+      }
+    });
+  }, [store.getCurrentData.id]);
   return (
     <div className={classnames(styles.info, { [styles.preview]: preview })}>
+      {
+        history && (
+        <div className={styles.history}>
+          <span className={styles.history_title}>历史记录</span>
+
+          <div className={styles.history_item}>{`状态：${STATUS_MAP_TEXT[history.status]}`}</div>
+          <div className={styles.history_item}>{`最近处理时间：${history.lastUpdateDate}`}</div>
+
+        </div>
+        )
+      }
       <IssueTypeSwitch />
       <div className={styles.body}>
         <IssueSearch
