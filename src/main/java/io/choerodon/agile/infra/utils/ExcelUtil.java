@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -618,6 +619,20 @@ public class ExcelUtil {
         }
     }
 
+    public static Workbook getWorkbookFromInputStream(Mode mode, InputStream inputStream) {
+        try {
+            switch (mode) {
+                case HSSF:
+                    return new HSSFWorkbook(inputStream);
+                case XSSF:
+                    return new XSSFWorkbook(inputStream);
+                default:
+                    return null;
+            }
+        } catch (IOException e) {
+            throw new CommonException("error.multipartFile.to.workbook", e);
+        }
+    }
 
     public static byte[] getBytes(Workbook workbook) {
         try (ByteArrayOutputStream workbookOutputStream = new ByteArrayOutputStream()) {
