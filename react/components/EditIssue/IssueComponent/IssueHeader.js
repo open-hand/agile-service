@@ -88,7 +88,6 @@ const IssueHeader = (props) => {
               disabled={disabled}
             />
           </span>
-
         </div>
 
         {/* 隐藏 */}
