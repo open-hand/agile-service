@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -77,7 +78,12 @@ public interface ExcelService {
      * 导出发布版本
      *
      * @param projectId
-     * @param publishVersionId
+     * @param publishVersionIds
+     * @param withSubVersion
+     * @param requestAttributes
      */
-    void exportPublishVersion(Long projectId, Long publishVersionId, Boolean withSubVersion);
+    void exportPublishVersion(Long projectId,
+                              Set<Long> publishVersionIds,
+                              Boolean withSubVersion,
+                              ServletRequestAttributes requestAttributes);
 }

@@ -31,6 +31,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -147,10 +148,10 @@ public class ExcelController {
     @PostMapping(value = "/export_publish_version")
     public void exportPublishVersion(@ApiParam(value = "项目id", required = true)
                                      @PathVariable(name = "project_id") Long projectId,
-                                     @ApiParam(value = "项目群版本id", required = true)
-                                     @RequestParam @Encrypt Long publishVersionId,
-                                     @RequestParam(required = false, defaultValue = "false") Boolean withSubVersion) {
-        excelService.exportPublishVersion(projectId, publishVersionId, withSubVersion);
+                                     @RequestParam(required = false, defaultValue = "false") Boolean withSubVersion,
+                                     @ApiParam(value = "项目群版本id集合", required = true)
+                                     @RequestBody @Encrypt Set<Long> publishVersionIds) {
+        excelService.exportPublishVersion(projectId, publishVersionIds, withSubVersion, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
     }
 
 }

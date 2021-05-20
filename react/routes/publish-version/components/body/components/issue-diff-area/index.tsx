@@ -18,6 +18,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import SelectGitTags from '@/components/select/select-git-tags';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import SelectPublishVersion from '@/components/select/select-publish-version';
+import { useMap } from 'ahooks';
 import styles from './index.less';
 import PublishVersionSection from '../section';
 import { openPreviewResultModal } from './PreviewResultModal';
@@ -46,6 +47,7 @@ function SelectAppService({ request, record, ...otherProps }: Partial<SelectProp
   );
 }
 function IssueDiffArea() {
+  const tableDataMap = useMemo(() => new Map<string, any>(), []);
   const [tableData, setTableData] = useState<any[] | false | undefined>();
   const [generateBtnLoading, setGenerateBtnLoading] = useState(false);
   const [publishVersionId, setPublishVersionId] = useState<string>();
@@ -58,9 +60,16 @@ function IssueDiffArea() {
     if (await issueDiffDataSet.validate()) {
       setTableData(false);
       setGenerateBtnLoading(true);
-      const newData = await requestPreviewData(store.getCurrentData.id, issueDiffDataSet.toData().filter((item:any) => item.appServiceCode));
+      const newData = await requestPreviewData(store.getCurrentData.id, issueDiffDataSet.toData().filter((item: any) => item.appServiceCode));
       setGenerateBtnLoading(false);
-
+      newData.forEach((item) => {
+        if (tableDataMap.has(item.issueId)) {
+          const issue = tableDataMap.get(item.issueId);
+          tableDataMap.set(item.issueId, { ...issue, tags: [...issue.tags, ...item.tags] });
+        } else {
+          tableDataMap.set(item.issueId, item);
+        }
+      });
       setTableData(newData);
       return true;
     }
@@ -121,9 +130,10 @@ function IssueDiffArea() {
     publishVersionApi.compareTag(store.getCurrentData.id, issueDiffDataSet.toData(), action);
   }
   function handleOpenPreview() {
-    const uniqTableData = uniqBy((tableData || []), (item) => item.issueId);
+    const uniqTableData = [...tableDataMap.values()]; // uniqBy((tableData || []), (item) => item.issueId);
+    console.log('uniqTableData', uniqTableData);
     openPreviewResultModal({
-      publishVersionId: store.getCurrentData.id, onChangeIssueTag: handleChangeIssueTag, tableData: uniqTableData, selectIssue: (issueId) => store.selectIssue(issueId),
+      publishVersionId: store.getCurrentData.id, onChangeIssueTag: handleChangeIssueTag, tableData: uniqTableData, selectIssue: (issueId) => store.selectIssue(issueId), handleOk: () => store.setCurrentMenu('info'),
     });
   }
   return (
@@ -141,7 +151,6 @@ function IssueDiffArea() {
       </PublishVersionSection>
       <PublishVersionSection title="选择对比tag" className={styles.section} bodyClassName={styles.body} border={false}>
         <Form dataSet={issueDiffDataSet} columns={3} className={classnames(styles.form)}>
-          {/* <SelectAppService name="lastAppService" /> */}
           {issueDiffDataSet.records.map((r) => renderTags(r))}
 
           <div className={styles.compare}>

@@ -425,7 +425,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
               在此史诗中没有预估的故事，请在
               <span
                 style={{
-                  color: '#3F51B5',
+                  color: '#5365EA',
                   cursor: 'pointer',
                 }}
                 role="none"

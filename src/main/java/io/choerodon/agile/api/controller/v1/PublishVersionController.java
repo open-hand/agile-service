@@ -2,6 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.agile.app.service.PublishVersionTagHistoryService;
 import io.choerodon.agile.infra.dto.TagCompareHistoryDTO;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.swagger.annotations.ApiOperation;
@@ -38,6 +39,8 @@ public class PublishVersionController {
 
     @Autowired
     private PublishVersionService publishVersionService;
+    @Autowired
+    private PublishVersionTagHistoryService publishVersionTagHistoryService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建发布版本")
@@ -243,5 +246,17 @@ public class PublishVersionController {
                                                                  @PathVariable(value = "project_id") Long projectId,
                                                                  @PathVariable(value = "publish_version_id") Long publishVersionId) {
         return ResponseEntity.ok(publishVersionService.issueTypeCount(projectId, publishVersionId));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询最近的tag处理记录")
+    @GetMapping(value = "/{publish_version_id}/tag_history/latest")
+    public ResponseEntity<PublishVersionTagHistoryVO> queryLatestTagOperationHistory(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @PathVariable(value = "publish_version_id") @Encrypt Long publishVersionId) {
+        return Optional.ofNullable(publishVersionTagHistoryService.queryLatestHistory(projectId, publishVersionId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.tagHistory.get"));
     }
 }

@@ -177,7 +177,7 @@ const CommentItem: React.FC<Props> = ({
                 loginName: comment.userLoginName,
                 imageUrl: comment.userImageUrl,
               }}
-              textStyle={{ color: '#3f51b5' }}
+              textStyle={{ color: '#5365EA' }}
             />
             {
               isReply && (
@@ -197,7 +197,7 @@ const CommentItem: React.FC<Props> = ({
                       loginName: (comment as ReplyComment).replyToUserLoginName,
                       imageUrl: (comment as ReplyComment).replyToUserImageUrl,
                     }}
-                    textStyle={{ color: '#3f51b5' }}
+                    textStyle={{ color: '#5365EA' }}
                   />
                 </div>
               )
@@ -251,7 +251,7 @@ const CommentItem: React.FC<Props> = ({
                 footer
                 value={value}
                 onChange={handleChange}
-                style={{ height: 200, width: '100%' }}
+                style={{ minHeight: 300, width: '100%' }}
                 onCancel={() => {
                   setEditing(false);
                 }}
@@ -273,7 +273,7 @@ const CommentItem: React.FC<Props> = ({
               footer
               value={replyValue}
               onChange={handleReplyChange}
-              style={{ height: 200, width: '100%' }}
+              style={{ minHeight: 300, width: '100%' }}
               onCancel={() => {
                 setReplying(false);
                 setReplyValue('');

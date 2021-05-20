@@ -10,7 +10,6 @@ import { observer } from 'mobx-react-lite';
 import { omit } from 'lodash';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import SideNav from '@/components/side-nav';
-import { linkUrl } from '@/utils/to';
 import Empty from '@/components/Empty';
 import { Loading } from '@/components';
 import Provider, { usePublishVersionContext } from './stores';
@@ -52,32 +51,6 @@ function PublishVersion() {
     });
   }
 
-  function handleClickMenu(key: string) {
-    switch (key) {
-      case 'excel':
-        openExportPublishVersionModal(store.getCurrentData.id);
-        break;
-      case 'preview':
-        window.open(`/#${linkUrl(`/agile/project-version/publish/preview/${store.getCurrentData.id}`, {
-          type: 'project',
-          params: {
-            fullPage: 'true',
-          },
-        })}`);
-        break;
-      default:
-        break;
-    }
-  }
-  function renderMenu() {
-    return (
-      <Menu onClick={({ key }) => handleClickMenu(key)}>
-        <Menu.Item key="excel">导出Excel</Menu.Item>
-        <Menu.Item key="preview">在线预览</Menu.Item>
-
-      </Menu>
-    );
-  }
   function render() {
     if (tableDataSet.status === 'loading' && !tableDataSet.getState('searchMode') && tableDataSet.length === 0) {
       return <Loading loading />;
@@ -138,11 +111,12 @@ function PublishVersion() {
               ),
             },
             {
+              name: '导出版本',
+              icon: 'unarchive',
+              handler: () => {
+                openExportPublishVersionModal(store.getCurrentData.id);
+              },
               display: !!store.getCurrentData.id,
-              element: (
-                <Dropdown overlay={renderMenu()}>
-                  <Button icon="unarchive">导出版本</Button>
-                </Dropdown>),
             },
           ]}
         />

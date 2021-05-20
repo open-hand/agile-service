@@ -84,7 +84,7 @@ const VersionReportSearch:React.FC<VersionReportSearchProps> = ({
             display: 'flex',
             alignItems: 'center',
             marginBottom: 0,
-            color: '#3F51B5',
+            color: '#5365EA',
             whiteSpace: 'nowrap',
           }}
           role="none"

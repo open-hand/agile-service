@@ -14,11 +14,12 @@ function CollapseAll({
   return (
     <Button
       {...otherProps}
+      funcType="flat"
       onClick={() => {
         expandAll(!isExpandAll);
       }}
     >
-      {isExpandAll ? '全部收起' : '全部展开' }
+      <span>{isExpandAll ? '全部收起' : '全部展开' }</span>
       <Icon
         type="baseline-arrow_drop_up"
         style={{

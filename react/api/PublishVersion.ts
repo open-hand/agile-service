@@ -472,11 +472,22 @@ class PublishVersionApi extends Api<PublishVersionApi> {
     });
   }
 
-  export(publishVersionId: string, withSubVersion = false) {
+  export(publishVersionIds: string[], withSubVersion = false) {
     return this.request({
       method: 'post',
       url: `${this.prefix}/excel/export_publish_version`,
-      params: { publishVersionId, withSubVersion },
+      params: { withSubVersion },
+      data: publishVersionIds,
+    });
+  }
+
+  loadLatestTagHistory(versionId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/publish_version/${versionId}/tag_history/latest`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
     });
   }
 }

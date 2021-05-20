@@ -248,12 +248,11 @@ class ScrumBoardHome extends Component {
 
   renderRemainDate = () => (
     <div style={{ display: 'flex', alignItems: 'center' }}>
-      <Icon type="av_timer" style={{ color: 'rgba(0,0,0,0.6)', marginLeft: 10 }} />
+      <Icon type="av_timer" style={{ color: '#0F1358' }} />
       <span style={{
         paddingLeft: 5,
         marginLeft: 0,
-        marginRight: 10,
-        color: 'rgba(0,0,0,0.6)',
+        color: '#0F1358',
       }}
       >
         {`${ScrumBoardStore.getDayRemain >= 0 ? `${ScrumBoardStore.getDayRemain} days剩余` : '无剩余时间'}`}
@@ -342,17 +341,6 @@ class ScrumBoardHome extends Component {
                 display: true,
               }, {
                 display: true,
-                element: <SelectBoard
-                  onClick={this.handleCreateBoardClick}
-                  onChange={(value) => {
-                    const selectedBoard = ScrumBoardStore.getBoardList.get(value);
-                    ScrumBoardStore.setSelectedBoard(value);
-                    ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
-                    this.refresh(selectedBoard);
-                  }}
-                />,
-              }, {
-                display: true,
                 element: <ExpandAllButton />,
               }, {
                 display: true,
@@ -374,23 +362,6 @@ class ScrumBoardHome extends Component {
                   }],
                 },
               },
-              // {
-              //   name: '配置看板',
-              //   icon: 'settings',
-              //   handler: () => {
-              //     to(LINK_URL.scrumboardSetting, {
-              //       params: {
-              //         boardId: ScrumBoardStore.getSelectedBoard,
-              //       },
-              //     });
-              //   },
-              //   display: true,
-              // }, {
-              //   name: '个人筛选',
-              //   icon: 'settings',
-              //   handler: this.handleClickFilterManage,
-              //   display: true,
-              // },
               {
                 display: true,
                 element: <ScrumBoardFullScreen />,
@@ -398,10 +369,23 @@ class ScrumBoardHome extends Component {
               {
                 name: '完成冲刺',
                 icon: 'alarm_on',
+                // funcType: 'flat',
                 handler: this.handleFinishSprint,
                 display: currentSprintIsDoing,
                 permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish'],
                 preElement: this.renderRemainDate(),
+              }, {
+                display: true,
+                element: <SelectBoard
+                  style={{ marginRight: 24 }}
+                  onFooterClick={this.handleCreateBoardClick}
+                  onChange={(value) => {
+                    const selectedBoard = ScrumBoardStore.getBoardList.get(value);
+                    ScrumBoardStore.setSelectedBoard(value);
+                    ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
+                    this.refresh(selectedBoard);
+                  }}
+                />,
               },
             ]}
           />

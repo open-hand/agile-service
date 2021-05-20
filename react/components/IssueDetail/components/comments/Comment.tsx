@@ -48,7 +48,7 @@ const Comment: React.FC<Props> = ({
               loginName: comment.userLoginName,
               imageUrl: comment.userImageUrl,
             }}
-            color="#3f51b5"
+            color="#5365EA"
           />
           <div style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
             {comment.lastUpdateDate}
@@ -94,7 +94,7 @@ const Comment: React.FC<Props> = ({
               footer
               value={value}
               onChange={handleChange}
-              style={{ height: 200, width: '100%' }}
+              style={{ minHeight: 300, width: '100%' }}
               onCancel={() => {
                 setEditing(false);
               }}

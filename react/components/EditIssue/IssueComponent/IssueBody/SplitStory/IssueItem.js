@@ -15,7 +15,7 @@ const Link = styled.a`
   text-overflow:ellipsis;
   white-space:nowrap;  
   cursor:pointer;
-  color:#3f51b5;
+  color:#5365EA;
 `;
 function IssueItem({ issue, outside, organizationId }) {
   const {

@@ -39,7 +39,7 @@ class Editor<T extends TestProps> extends FormField<T> {
             value={toJS(this.getValue())}
             style={{
               width: '100%',
-              height: 200,
+              minHeight: 300,
               ...this.props.style,
             }}
           />

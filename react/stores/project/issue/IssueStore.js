@@ -188,7 +188,7 @@ export function getSystemFields(excludeCodes = []) {
   {
     code: 'tags',
     name: 'Tag',
-    defaultShow: false,
+    defaultShow: true,
     fieldType: 'multiple',
   },
   ];

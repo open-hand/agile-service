@@ -10,13 +10,13 @@ const { Option } = FlatSelect;
 export interface SelectBoardProps {
 
 }
-const SelectBoard: React.FC<any> = ({ onChange, onClick }) => {
+const SelectBoard: React.FC<any> = ({ onChange, onFooterClick, ...otherProps }) => {
   const ref = useRef<FlatSelect>(null);
   const props = useSelectFooter(ref,
     <Permission
       service={['choerodon.code.project.cooperation.iteration-plan.ps.board.create']}
     >
-      <Button style={{ width: '100%', height: 42, textAlign: 'left' }} onClick={onClick}>创建看板</Button>
+      <Button style={{ width: '100%', height: 42, textAlign: 'left' }} onClick={onFooterClick}>创建看板</Button>
     </Permission>);
   return (
     <FlatSelect
@@ -28,6 +28,7 @@ const SelectBoard: React.FC<any> = ({ onChange, onClick }) => {
       onChange={onChange}
       clearButton={false}
       {...props}
+      {...otherProps}
     >
 
       {

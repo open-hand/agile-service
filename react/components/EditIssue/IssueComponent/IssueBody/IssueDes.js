@@ -62,7 +62,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
               footer
               value={editDes ?? descriptionTemplate}
               style={{
-                height: 'auto', width: '100%', minHeight: 280,
+                height: 'auto', width: '100%', minHeight: 300,
               }}
               onChange={(value) => {
                 setEditDes(value);

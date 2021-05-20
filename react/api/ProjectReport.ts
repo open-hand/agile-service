@@ -19,8 +19,8 @@ class ProjectReportApi extends Api<ProjectReportApi> {
 
   load() {
     return this.request({
-      method: 'get',
-      url: `${this.prefix}/project_report`,
+      method: 'post',
+      url: `${this.prefix}/project_report/list`,
     });
   }
 

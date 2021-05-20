@@ -1,6 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { Checkbox, Icon } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui/pro';
 import { Draggable, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
 import { observer } from 'mobx-react-lite';
 import { useLockFn } from 'ahooks';
@@ -29,7 +30,9 @@ const ColumnItem: React.FC<Pick<ColumnProps, 'data' | 'selected' | 'onSelectChan
   });
   return (
     <>
-      <div className={styles.title}>{data.title}</div>
+      <Tooltip title={data.title}>
+        <div className={styles.title}>{data.title}</div>
+      </Tooltip>
       <Checkbox className={styles.checkbox} checked={selected} onChange={handleCheckChange} />
     </>
   );
@@ -45,12 +48,7 @@ const DragableColumnItem: React.FC<ColumnProps> = ({
   const draggableId = data.code;
   const item = <ColumnItem data={data} selected={selected} onSelectChange={onSelectChange} />;
   if (data.disabled) {
-    return (null
-    // <div className={classNames(styles.item, className)}>
-    //   <Icon style={{ visibility: 'hidden' }} type="baseline-drag_indicator" className={styles.handle} />
-    //   {item}
-    // </div>
-    );
+    return null;
   }
   return (
     <Draggable

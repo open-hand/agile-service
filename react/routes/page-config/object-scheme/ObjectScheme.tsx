@@ -212,8 +212,8 @@ function ObjectScheme() {
         <Tag
           style={{
             background: '#fafafa',
-            color: '#3f51b5',
-            borderColor: '#3f51b5',
+            color: '#5365EA',
+            borderColor: '#5365EA',
           }}
         >
           <span>{formatMessage({ id: 'organization' })}</span>
@@ -252,7 +252,7 @@ function ObjectScheme() {
           }, {
             name: formatMessage({ id: 'field.import' }),
             icon: 'archive',
-            handler: openImportField,
+            handler: () => openImportField({ onOk: () => schemeTableDataSet.query() }),
             display: true,
           },
         ]}

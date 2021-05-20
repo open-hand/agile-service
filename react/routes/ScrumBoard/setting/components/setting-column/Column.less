@@ -1,17 +1,31 @@
 .c7n-scrumsetting-column {
   background: white;
   flex: 1;
-  height: 100%;
+  min-width: 200px;
+  display: flex;
   padding: 0 0.1rem 0 0;
 
+}
+.c7n-scrumsetting-unsetcolumn {
+  background: white;
+  flex: 1;
+  min-width: 200px;
+}
+.c7n-scrumsetting-column,
+.c7n-scrumsetting-unsetcolumn {
   .c7n-scrumsetting-columnContent {
-    height: 100%;
     background: rgba(0, 0, 0, 0.04);
-    padding: 0.12rem;
     display: flex;
     flex-direction: column;
+    width: 100%;
+
     .c7n-scrumsetting-columnTop {
+      top: 0;
+      z-index: 2;
+      position: sticky;
       min-width: 1.2rem;
+      background: #F5F5F5;
+      padding: 0.12rem 0.12rem 0;
 
       .c7n-scrumsetting-icons {
         display: flex;
@@ -23,13 +37,12 @@
         margin-top: 0.16rem;
         font-size: 0.14rem;
         min-height: 0.23rem;
+        white-space: nowrap;
       }
 
       .c7n-scrumsetting-columnBottom {
-        // height: 0.44rem;
         margin-top: 0.12rem;
         padding-bottom: 0.21rem;
-        // border-bottom: 0.03rem solid black;
 
         div {
           display: flex;
@@ -37,15 +50,18 @@
 
           .editSpan {
             flex-basis: 50%;
-            // min-width: 1.15rem;
           }
         }
       }
     }
 
     .c7n-scrumsetting-columnDrop {
-      // height: calc(~'100% - 1.45rem');
+      padding: 0 0.12rem 0;
       flex: 1;
+      .c7n-scrumsetting-column-noStatusTip {
+        margin-top: 20px;
+        color: rgba(15,19,88, 0.65);
+      }
     }
   }
 }

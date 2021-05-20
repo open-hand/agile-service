@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const styles = {
-  log: 'color: white; background-color: #3f51b5;padding: 2px',
+  log: 'color: white; background-color: #5365EA;padding: 2px',
   warn: 'color: white; background-color: #faad14;padding: 2px',
   error: 'color: white; background-color: red;padding: 2px',
 };

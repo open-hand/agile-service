@@ -135,7 +135,7 @@ import styles from './FieldEpic.less';
                             // margin: '10px 0 0 10px',
                             marginLeft: 10,
                             color: 'white',
-                            background: '#3f51b5',
+                            background: '#5365EA',
                             borderRadius: '2px',
                           }}
                           onClick={() => {

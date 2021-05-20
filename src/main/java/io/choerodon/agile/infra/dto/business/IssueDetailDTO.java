@@ -138,6 +138,16 @@ public class IssueDetailDTO {
 
     private List<TagVO> tags;
 
+    private String priorityCode;
+
+    public String getPriorityCode() {
+        return priorityCode;
+    }
+
+    public void setPriorityCode(String priorityCode) {
+        this.priorityCode = priorityCode;
+    }
+
     public List<TagVO> getTags() {
         return tags;
     }

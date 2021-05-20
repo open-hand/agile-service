@@ -2,6 +2,7 @@ import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
 import { sameProject } from '@/utils/detail';
 import { IField } from '@/common/types';
+import { castArray } from 'lodash';
 import Api from './Api';
 
 interface IFiled {
@@ -211,6 +212,20 @@ class FieldApi extends Api<FieldApi> {
       params: {
         issueTypeId,
         organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  getFieldOptions(fieldId: string, searchValue: string | undefined, page: number | undefined, size: number, selected?: string | string[]) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/field_value/${fieldId}/options`,
+      params: {
+        searchValue,
+        page,
+        size,
+        organizationId: this.orgId,
+        selected: selected ? castArray(selected).join(',') : undefined,
       },
     });
   }

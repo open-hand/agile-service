@@ -9,9 +9,10 @@ interface Props {
   status: IStatusCirculation
   record: IStatusCirculation
   disabled?: boolean
+  selectedType: string
 }
 const CheckBoxPart: React.FC<Props> = ({
-  store, status, record, disabled = false,
+  store, status, record, disabled = false, selectedType,
 }) => {
   let finalChecked = record[status.id];
   const actions = store.actions.get(record.id);
@@ -33,7 +34,7 @@ const CheckBoxPart: React.FC<Props> = ({
       name={`path-${status.name}`}
       record={record}
       onChange={(v) => {
-        store.checkChange(record.id, status.id, v);
+        store.updateChangeTransform(record.id, status.id, v, selectedType);
       }}
     />
   );

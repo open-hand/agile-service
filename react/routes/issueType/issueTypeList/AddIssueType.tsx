@@ -30,7 +30,7 @@ const AddIssueType: React.FC<Props> = ({
 }) => {
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [editLoading, setEditLoading] = useState<boolean>(false);
-  const [colour, setColor] = useState<string>('#3F51B5');
+  const [colour, setColor] = useState<string>('#5365EA');
   const [pickerDisplay, setPickerDisplay] = useState<boolean>(false);
   const [initType, setInitType] = useState<any>();
   const isSystemType = initType?.source === 'system';

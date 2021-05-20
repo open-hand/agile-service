@@ -10,6 +10,7 @@ import {
   Button, Spin, Modal, Tabs, Icon,
 } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
+import { HeaderButtons } from '@choerodon/master';
 import './Setting.less';
 import { commonApi, boardApi } from '@/api';
 import to from '@/utils/to';
@@ -142,40 +143,37 @@ class Setting extends Component {
     return (
       <Page>
         <Header title="配置看板">
-          <SelectBoard
-            onChange={(value) => {
-              const selectedBoard = ScrumBoardStore.getBoardList.get(value);
-              ScrumBoardStore.setSelectedBoard(value);
-              ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
-              this.refresh(selectedBoard);
-            }}
+          <HeaderButtons items={[{
+            name: '添加状态',
+            icon: 'playlist_add',
+            handler: this.handleCreateStatusClick,
+            display: activeKey === '1',
+            permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.status.create'],
+          }, {
+            name: '添加列',
+            icon: 'playlist_add',
+            handler: this.handleCreateColumnClick,
+            display: activeKey === '1',
+            permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.column.create'],
+          }, {
+            name: '删除看板',
+            icon: 'delete_forever',
+            handler: this.handleDeleteBoard,
+            display: true,
+            permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.board.delete'],
+          }, {
+            display: true,
+            element: <SelectBoard
+              onFooterClick={this.handleCreateBoardClick}
+              onChange={(value) => {
+                const selectedBoard = ScrumBoardStore.getBoardList.get(value);
+                ScrumBoardStore.setSelectedBoard(value);
+                ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
+                this.refresh(selectedBoard);
+              }}
+            />,
+          }]}
           />
-          {activeKey === '1' ? (
-            <>
-              <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.create']}>
-                <Button
-                  icon="playlist_add"
-                  onClick={this.handleCreateStatusClick}
-                >
-                  添加状态
-                </Button>
-              </Permission>
-              <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.column.create']}>
-                <Button
-                  icon="playlist_add"
-                  onClick={this.handleCreateColumnClick}
-                >
-                  添加列
-                </Button>
-              </Permission>
-            </>
-          ) : null}
-          <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.board.delete']}>
-            <Button funcType="flat" onClick={() => this.handleDeleteBoard()} disabled={ScrumBoardStore.getBoardList.size === 1}>
-              <Icon type="delete_forever icon" />
-              <span>删除看板</span>
-            </Button>
-          </Permission>
         </Header>
         <Breadcrumb title="配置看板" />
         <Content className="c7n-scrumboard" style={{ height: '100%', paddingTop: 0 }}>
@@ -183,10 +181,11 @@ class Setting extends Component {
             style={{
               display: 'flex', flexDirection: 'column', height: '100%', overflow: 'auto',
             }}
+            className={activeKey === '1' ? 'c7n-scrumboard-columnsetting-tabs' : ''}
             activeKey={activeKey}
             onChange={this.handleTabChange}
           >
-            <TabPane tab="列配置" key="1">
+            <TabPane className="c7n-scrumboard-columnsetting-panel" tab="列配置" key="1">
               <Spin spinning={loading}>
                 <SettingColumn
                   refresh={this.refresh}

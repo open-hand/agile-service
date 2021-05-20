@@ -27,7 +27,7 @@ const PageConfigProvider = injectIntl(inject('AppState')(
     } else if (getApplyType() === 'program') {
       disabledEditDefaultFields.push('sprint');
     } else {
-      const newDisabledEditDefaultFields = disabledEditDefaultFields.filter((item) => ['epic', 'sprint'].includes(item));
+      const newDisabledEditDefaultFields = disabledEditDefaultFields.filter((item) => !['epic', 'sprint'].includes(item));
       if (newDisabledEditDefaultFields.length !== disabledEditDefaultFields.length) {
         disabledEditDefaultFields.length = 0;
         disabledEditDefaultFields.push(...newDisabledEditDefaultFields);

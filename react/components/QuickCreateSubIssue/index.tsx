@@ -178,12 +178,12 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           </Form>
         ) : (
           <Button
+            icon="playlist_add"
             funcType={'flat' as FuncType}
             onClick={() => {
               setExpand(true);
             }}
           >
-            <Icon type="playlist_add" />
             快速创建子任务
           </Button>
         )}

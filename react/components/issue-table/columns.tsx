@@ -41,6 +41,16 @@ export const checkBoxColumn = ({
     ),
   });
 };
+export const expandColumn = {
+  title: '',
+  dataIndex: 'issueId',
+  key: 'issueId',
+  className: 'expand-column',
+  width: 10,
+  fixed: true,
+  treeCol: true,
+  render: () => null,
+};
 export const getCustomColumn = (field) => (field && {
   title: field.title,
   dataIndex: field.code,
@@ -49,7 +59,7 @@ export const getCustomColumn = (field) => (field && {
     const value = get(rowData, 'foundationFieldValue')[code];
     if (['member', 'multiMember'].includes(fieldType)) {
       return value && (
-        <div style={{ display: 'inline-flex' }}>
+        <div style={{ display: 'inline-flex', verticalAlign: 'middle' }}>
           <UserTag
             data={value}
           />
@@ -105,7 +115,7 @@ function renderEpicOrFeature({ rowData, dataIndex: fieldName }) {
         fontSize: '13px',
         lineHeight: '20px',
         padding: '0 4px',
-        display: 'inline-block',
+        display: 'inline-flex',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
@@ -122,7 +132,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     dataIndex: 'summary',
     width: 400,
     fixed: true,
-    treeCol: true,
+
     render: ({ rowData }) => (
       <>
         <TypeTag data={get(rowData, 'issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} />
@@ -150,7 +160,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
       <Tooltip mouseEnterDelay={0.5} title={`优先级： ${get(rowData, 'priorityDTO') ? get(rowData, 'priorityDTO').name : ''}`}>
         <PriorityTag
           priority={get(rowData, 'priorityVO')}
-          style={{ display: 'inline-block' }}
+          style={{ display: 'inline-flex' }}
         />
       </Tooltip>
     ),
@@ -220,7 +230,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
         >
           <StatusTag
             data={get(rowData, 'statusVO')}
-            style={{ display: 'inline-block' }}
+            style={{ display: 'inline-flex' }}
           />
         </div>
       </Tooltip>
@@ -232,7 +242,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex' }}>
-        {get('reporterId') && get(rowData, 'reporterId') !== '0' && (
+        {get(rowData, 'reporterId') && get(rowData, 'reporterId') !== '0' && (
           <UserTag
             data={{
               id: get(rowData, 'reporterId'),
@@ -331,7 +341,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     title: '环境',
     dataIndex: 'environmentName',
   }],
-  ['tag', {
+  ['tags', {
     title: 'Tag',
     dataIndex: 'tags',
     render: ({ rowData, dataIndex }) => {

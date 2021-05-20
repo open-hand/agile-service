@@ -1,4 +1,4 @@
-import { toArray } from 'lodash';
+import { castArray } from 'lodash';
 import { toJS } from 'mobx';
 
 function transformSystemFilter(data) {
@@ -32,9 +32,9 @@ function transformSystemFilter(data) {
     updatorIds,
     environment,
     appVersion,
-    tag,
+    tags,
   } = data;
-  console.log('tag', data, tag);
+
   return {
     advancedSearchArgs: {
       issueTypeId,
@@ -62,7 +62,7 @@ function transformSystemFilter(data) {
       creatorIds,
       updatorIds,
       appVersion,
-      tags: tag,
+      tags,
     },
     searchArgs: {
       estimatedStartTimeScopeStart: estimatedStartTime ? estimatedStartTime[0] ?? null : undefined,
@@ -110,7 +110,7 @@ export function transformFilter(chosenFields) {
       case 'member': {
         customField.option.push({
           fieldId: id,
-          value: value ? toArray(value) : value,
+          value: value ? castArray(value) : value,
         });
         break;
       }

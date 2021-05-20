@@ -1,10 +1,12 @@
-import React, { useRef, useState, useMemo } from 'react';
+import React, {
+  useRef, useState, useMemo, useCallback,
+} from 'react';
 import {
-  Page, Breadcrumb, Content, Header,
+  Page, Breadcrumb, Content, Header, HeaderButtons,
 } from '@choerodon/boot';
 import { Button, Dropdown, Menu } from 'choerodon-ui/pro';
 import { IReportContentType } from '@/common/types';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { ButtonProps, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import useIsProgram from '@/hooks/useIsProgram';
 import openAddModal from './components/add-modal';
@@ -22,18 +24,19 @@ interface Props {
   preview?: boolean
   refresh?: () => void
 }
-const noop = () => {};
+const noop = () => { };
 const ReportPage: React.FC<Props> = ({
   store, edit, preview: forcePreview, refresh,
 }) => {
   const baseInfoRef = useRef<BaseInfoRef>({} as BaseInfoRef);
   const [preview, setPreview] = useState(forcePreview !== undefined ? forcePreview : false);
   const { isProgram } = useIsProgram();
-  const addBlock = useMemo(() => (
+  const renderAddButton = useCallback((props?: ButtonProps) => (
     <Dropdown
       trigger={['click' as Action]}
       overlay={(
         <Menu
+          style={{ width: 116 }}
           onClick={({ key }) => {
             openAddModal({
               type: key as IReportContentType,
@@ -51,7 +54,7 @@ const ReportPage: React.FC<Props> = ({
         </Menu>
       )}
     >
-      <Button icon="add">
+      <Button {...props} icon="playlist_add">
         添加报告内容
       </Button>
     </Dropdown>
@@ -69,7 +72,11 @@ const ReportPage: React.FC<Props> = ({
       {preview ? <PreviewReport /> : (
         <Page>
           <Header>
-            {addBlock}
+            <HeaderButtons items={[{
+              display: true,
+              element: renderAddButton({ color: 'primary' as ButtonColor }),
+            }]}
+            />
           </Header>
           <Breadcrumb title={edit ? '编辑项目报告' : '创建项目报告'} />
           <Content style={{ paddingBottom: 0, paddingTop: 0 }}>
@@ -84,7 +91,7 @@ const ReportPage: React.FC<Props> = ({
                   <div className={styles.header}>
                     <div className={styles.tip} />
                     <span className={styles.title}>报告内容</span>
-                    {addBlock}
+                    {renderAddButton()}
                   </div>
                   <BlockList />
                 </div>

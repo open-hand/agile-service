@@ -80,7 +80,7 @@ class WorkCalendar extends Component {
       color: '#EF2A26', background: '#FFE7E7',
     };
     let sprintDayStyle = {
-      color: '#FFF', background: '#3F51B5',
+      color: '#FFF', background: '#5365EA',
     };
     const localData = moment.localeData();
     // 通过日期缩写判断是否为周六日
@@ -115,7 +115,7 @@ class WorkCalendar extends Component {
     if (startDateCopy === date || endDateCopy === date) {
       if (now.format('DD') === moment(date).format('DD')) {
         sprintDayStyle = {
-          color: '#FFF', background: '#3F51B5', boxShadow: 'none',
+          color: '#FFF', background: '#5365EA', boxShadow: 'none',
         };
       }
       dateStyle = sprintDayStyle;
@@ -329,7 +329,7 @@ class WorkCalendar extends Component {
         display: 'flex', padding: '0 16px', flexWrap: 'wrap',
       }}
       >
-        {this.renderTag('起始日/结束日', '#3F51B5', '#FFF', 'N')}
+        {this.renderTag('起始日/结束日', '#5365EA', '#FFF', 'N')}
         {this.renderTag('工作日', '#EFEFEF', '#000', 'N')}
         {this.renderTag('休息日', '#FEF3F2', '#EF2A26', 'N')}
         {this.renderTag('法定节假日补班', '#000', '#FFF', '班')}

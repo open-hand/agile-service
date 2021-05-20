@@ -64,12 +64,13 @@ const PersonalWorkload = () => {
         },
         formatter: (params: EChartOption.Tooltip.Format[]) => {
           let content = '';
+          const unit = chartOption === 'issueCount' ? ' 个' : ' 小时';
           params.forEach((item) => {
             content = `<div>
             <span>${params[0].axisValue}</span>
             <br />
-            <div style="font-size: 11px"><div style="display:inline-block; width: 10px; height: 10px; margin-right: 3px; border-radius: 50%; background: #C0CBD4;"></div>未完成：${undoneCountArr[item.dataIndex || 0]} ${undoneCountArr[item.dataIndex || 0] ? ' 个' : ''}</div>
-            <div style="font-size: 11px"><div style="display:inline-block; width: 10px; height: 10px; margin-right: 3px; border-radius: 50%; background: #00D2C1;"></div>已完成：${doneCountArr[item.dataIndex || 0]} ${doneCountArr[item.dataIndex || 0] ? ' 个' : ''}</div>
+            <div style="font-size: 11px"><div style="display:inline-block; width: 10px; height: 10px; margin-right: 3px; border-radius: 50%; background: #C0CBD4;"></div>未完成：${undoneCountArr[item.dataIndex || 0]} ${undoneCountArr[item.dataIndex || 0] ? unit : ''}</div>
+            <div style="font-size: 11px"><div style="display:inline-block; width: 10px; height: 10px; margin-right: 3px; border-radius: 50%; background: #00D2C1;"></div>已完成：${doneCountArr[item.dataIndex || 0]} ${doneCountArr[item.dataIndex || 0] ? unit : ''}</div>
           </div>`;
           });
           return content;
@@ -149,7 +150,7 @@ const PersonalWorkload = () => {
           itemStyle: {
             color: '#00D2C1',
           },
-          barWidth: 24,
+          barWidth: 30,
           // barMinHeight: 18,
           label: {
             show: true,
@@ -167,7 +168,7 @@ const PersonalWorkload = () => {
           itemStyle: {
             color: '#C0CBD4',
           },
-          barWidth: 24,
+          barWidth: 30,
           // barMinHeight: 18,
           label: {
             show: true,
@@ -184,7 +185,7 @@ const PersonalWorkload = () => {
           itemStyle: {
             color: 'rgba(0, 0, 0, 0.001)',
           },
-          barWidth: 24,
+          barWidth: 30,
           label: {
             position: 'top',
             show: true,
@@ -198,14 +199,14 @@ const PersonalWorkload = () => {
       ],
       dataZoom: [{
         bottom: 0,
-        show: data.length > 8,
+        show: data.length > 12,
         type: 'slider',
         // @ts-ignore
         height: 15,
         width: '85%',
         left: 60,
         startValue: 0,
-        endValue: 7,
+        endValue: 11,
         zoomLock: true,
         handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
         handleSize: '100%',

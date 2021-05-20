@@ -50,6 +50,11 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
         label: '创建人',
       },
     ],
+    queryFields: [{
+      name: 'title',
+      type: 'string' as FieldType,
+      label: '标题',
+    }],
   }), []);
   const handleMenuClick = useCallback(async (key, record) => {
     switch (key) {
