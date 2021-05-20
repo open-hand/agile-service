@@ -813,7 +813,8 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     @Async
-    public void batchImportObjectSchemeField(Long organizationId, Long projectId, Workbook workbook, RequestAttributes requestAttributes) {
+    public void batchImportObjectSchemeField(Long organizationId, Long projectId, InputStream inputStream, RequestAttributes requestAttributes) {
+        Workbook workbook = ExcelUtil.getWorkbookFromInputStream(ExcelUtil.Mode.XSSF, inputStream);
         RequestContextHolder.setRequestAttributes(requestAttributes);
 
         Long userId = DetailsHelper.getUserDetails().getUserId();
@@ -1201,7 +1202,8 @@ public class ExcelServiceImpl implements ExcelService {
     public void batchImport(Long projectId,
                             Long organizationId,
                             Long userId,
-                            Workbook workbook) {
+                            InputStream inputStream) {
+        Workbook workbook = ExcelUtil.getWorkbookFromInputStream(ExcelUtil.Mode.XSSF, inputStream);
         String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + projectId;
         FileOperationHistoryDTO history = initFileOperationHistory(projectId, userId, DOING, UPLOAD_FILE, websocketKey);
         validateWorkbook(workbook, history, websocketKey);

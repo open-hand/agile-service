@@ -16,8 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.app.service.ExcelService;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.ExcelUtil;
+import io.choerodon.agile.infra.utils.MultipartFileUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -75,7 +74,7 @@ public class ExcelOrgController {
                                             @RequestParam("file") MultipartFile file) {
         excelService.batchImportObjectSchemeField(
                 organizationId, null,
-                ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file),
+                MultipartFileUtil.getInputStreamFromMultipartFile(file),
                 RequestContextHolder.getRequestAttributes());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

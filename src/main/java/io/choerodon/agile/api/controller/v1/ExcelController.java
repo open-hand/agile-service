@@ -8,7 +8,7 @@ import io.choerodon.agile.app.service.ExcelService;
 
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
-import io.choerodon.agile.infra.utils.ExcelUtil;
+import io.choerodon.agile.infra.utils.MultipartFileUtil;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -68,7 +68,7 @@ public class ExcelController {
                                       @ApiParam(value = "导入文件", required = true)
                                       @RequestParam("file") MultipartFile file) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        excelService.batchImport(projectId, organizationId, userId, ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file));
+        excelService.batchImport(projectId, organizationId, userId, MultipartFileUtil.getInputStreamFromMultipartFile(file));
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
@@ -138,7 +138,7 @@ public class ExcelController {
                                             @RequestParam("file") MultipartFile file) {
         excelService.batchImportObjectSchemeField(
                 ConvertUtil.getOrganizationId(projectId), projectId,
-                ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file),
+                MultipartFileUtil.getInputStreamFromMultipartFile(file),
                 RequestContextHolder.getRequestAttributes());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

@@ -12,6 +12,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +25,7 @@ public interface ExcelService {
 
     void download(Long projectId, Long organizationId, HttpServletResponse response, ExcelTemplateVO excelTemplateVO);
 
-    void batchImport(Long projectId, Long organizationId, Long userId, Workbook workbook);
+    void batchImport(Long projectId, Long organizationId, Long userId, InputStream inputStream);
 
     void cancelImport(Long projectId, Long id, Long objectVersionNumber);
 
@@ -68,10 +69,10 @@ public interface ExcelService {
      * 导入自定义字段
      * @param organizationId 组织id
      * @param projectId 项目id
-     * @param workbookFromMultipartFile 文件
+     * @param inputStream excel文件流
      * @param requestAttributes 请求头
      */
-    void batchImportObjectSchemeField(Long organizationId, Long projectId, Workbook workbookFromMultipartFile, RequestAttributes requestAttributes);
+    void batchImportObjectSchemeField(Long organizationId, Long projectId, InputStream inputStream, RequestAttributes requestAttributes);
 
     /**
      * 导出发布版本
