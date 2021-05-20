@@ -232,7 +232,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex' }}>
-        {get('reporterId') && get(rowData, 'reporterId') !== '0' && (
+        {get(rowData, 'reporterId') && get(rowData, 'reporterId') !== '0' && (
           <UserTag
             data={{
               id: get(rowData, 'reporterId'),

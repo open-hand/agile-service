@@ -194,6 +194,11 @@ export interface IField {
   required: boolean
   defaultValue: any
 }
+
+export interface IFieldWidthValue extends IField {
+  value: any,
+  valueStr: string | null | undefined
+}
 export interface IComment {
   commentId: string
   commentText: string
@@ -278,6 +283,16 @@ export interface Issue {
   mainResponsible?: {
     id: string
   }
+  activeSprint?: {
+    sprintId: string,
+    sprintName: string,
+  }
+  closeSprint: {
+    sprintId: string,
+    sprintName: string,
+  }[]
+  featureId: string
+  epicId: string
 }
 
 export interface ILog {
