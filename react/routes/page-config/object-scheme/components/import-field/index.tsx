@@ -66,6 +66,7 @@ const ImportField: React.FC<{ modal?: IModalProps, onOk: Function }> = ({ modal,
     setWsData(() => {
       modal?.update({ okText: '导入' });
       onOk();
+      modal?.close();
       return newWsData;
     });
   }, [modal]);
