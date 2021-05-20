@@ -151,7 +151,7 @@ public class ExcelController {
                                      @RequestParam(required = false, defaultValue = "false") Boolean withSubVersion,
                                      @ApiParam(value = "项目群版本id集合", required = true)
                                      @RequestBody @Encrypt Set<Long> publishVersionIds) {
-        excelService.exportPublishVersion(projectId, publishVersionIds, withSubVersion);
+        excelService.exportPublishVersion(projectId, publishVersionIds, withSubVersion, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
     }
 
 }
