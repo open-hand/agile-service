@@ -52,11 +52,11 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
         <div className="c7n-value-wrapper" style={{ display: 'flex', flexWrap: 'nowrap' }}>
           <TextEditToggle
             disabled={disabled}
-            submitTrigger={['change', 'blur']}
+            submitTrigger={['change']}
             onSubmit={this.updateIssueTag}
             initValue={tags}
-            editor={({ submit }) => (
-              <SelectMultiServiceTag onChange={submit} multiple />
+            editor={({ submit, hideEditor }) => (
+              <SelectMultiServiceTag onChange={submit} multiple onBlur={hideEditor} />
             )}
           >
             {

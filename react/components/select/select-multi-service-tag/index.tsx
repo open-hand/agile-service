@@ -6,7 +6,7 @@ import {
 } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import {
-  observer, useComputed, useForceUpdate, useObserver,
+  observer, useComputed, useForceUpdate, useObservable, useObserver,
 } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { groupBy } from 'lodash';
@@ -52,6 +52,7 @@ interface Props extends Partial<SelectProps> {
   valueField?: string
   afterLoad?: (sprints: ILabel[]) => void
   onChange?: (data: ITagItemProps[]) => void
+  onBlur?: () => void
   applicationId?: string | null
   flat?: boolean
   projectId?: string
@@ -71,7 +72,8 @@ interface IMultiServiceTagProps {
 const MultiServiceTag: React.FC<IMultiServiceTagProps> = observer(({
   onOK, onCancel, projectId, data,
 }) => {
-  const [appServiceList, setAppServiceList] = useState([] as any[]);
+  const appServiceList = useObservable([] as any[]);
+  // const [appServiceList, setAppServiceList] = useState([] as any[]);
   const ds = useMemo(() => new DataSet({
     autoCreate: false,
     autoQuery: false,
@@ -86,11 +88,11 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = observer(({
       { name: 'tagName', label: 'Tag' },
     ],
   }), [data]);
-
   useEffect(() => {
     function loadAppServiceData() {
       devOpsApi.project(projectId).loadActiveService().then((res: any) => {
-        setAppServiceList(res);
+        Array.isArray(res) && appServiceList.push(...res);
+        // setAppServiceList(res);
       });
     }
     loadAppServiceData();
@@ -107,7 +109,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = observer(({
       });
       ds.setState('data_int', true);
     }
-  }, [appServiceList, ds]);
+  }, [appServiceList, appServiceList.length, ds]);
   const handleCreate = useCallback(() => {
     ds.create();
   }, [ds]);
@@ -132,8 +134,8 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = observer(({
 
   const loadAppServiceData = useCallback((record: Record) => {
     const applicationCodes = ds.map((r) => r.get('appServiceCode'));
-    console.log('appServerList', applicationCodes, appServiceList);
-    return appServiceList.filter((appService) => record.get('appServiceCode') === appService.code || !applicationCodes.includes(appService.code));
+    const recordAppServiceList = appServiceList.filter((appService) => record.get('appServiceCode') === appService.code || !applicationCodes.includes(appService.code));
+    return recordAppServiceList;
   }, [appServiceList, ds]);
   const componentId = useMemo(() => `select-multi-service-tag-${randomString(5)}`, []);
 
@@ -143,8 +145,6 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = observer(({
         <Form dataSet={ds}>
           {ds.records.map((record) => {
             const applicationId = record.get('applicationId') || appServiceList.find((item) => item.code === record.get('appServiceCode'))?.id;
-            console.log('applicationId...', record.id, record.toData(), applicationId);
-
             return [<SelectAppService
               name="appService"
               record={record}
@@ -185,27 +185,25 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
   const handleBindRef = useCallback((newRef) => {
     if (newRef) {
       ref && Object.assign(ref, { current: newRef });
-      Object.assign(innerRef, { current: newRef });
+      Object.assign(innerRef, {
+        current: Object.assign(newRef, {
+          focus: () => {
+            innerRef.current?.trigger?.delaySetPopupHidden(false, 150);
+          },
+        }),
+      });
     }
   }, [ref]);
-  useEffect(() => {
-    console.log('Component useEffect into SelectMultiServiceTag');
-    return () => console.log('leave Component SelectMultiServiceTag');
-  }, []);
+
   function handleCancel() {
     innerRef.current?.collapse();
+    onBlur && onBlur();
   }
   function handleSave(data: ITagItemProps[]) {
-    // innerRef.current?.choose(data);
-
-    console.log('handleSave...', data);
     onChange && onChange(data);
     handleCancel();
   }
-  const value = useMemo(() => {
-    console.log('value...', propsValue);
-    return toJS(propsValue)?.map((item: any) => ({ meaning: (item.appServiceCode ? `${item.appServiceCode}:${item.tagName}` : item.tagName), value: item }));
-  }, [propsValue]);
+  const value = useMemo(() => toJS(propsValue)?.map((item: any) => ({ meaning: (item.appServiceCode ? `${item.appServiceCode}:${item.tagName}` : item.tagName), value: item })), [propsValue]);
   const editValue = useMemo(() => {
     // 合并相同code的tag选项
     if (value && value.length > 0) {
@@ -225,10 +223,10 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
         value={value}
         primitiveValue={false}
         onPopupHiddenChange={(hidden) => {
-          // console.log('blur..', onBlur);
+          console.log('blur..', hidden, onBlur);
           // onChange();
-          hidden && onBlur && onBlur({} as any);
-          // setMode(dateType === 'datetime' ? 'dateTime' : dateType);
+
+          hidden && onBlur && onBlur();
         }}
         getPopupContainer={(node) => document.getElementById(componentId) as HTMLElement}
         trigger={['click'] as any}

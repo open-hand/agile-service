@@ -13,6 +13,7 @@ interface RenderProps {
 }
 interface EditorRender {
   submit: () => void
+  hideEditor: () => void
 }
 export type Action = 'click' | 'blur' | 'change'
 interface Props {
@@ -65,6 +66,7 @@ const TextEditToggle: React.FC<Props> = ({
   };
   const handleChange = (originOnChange: Function | undefined) => (newValue: any) => {
     dataRef.current = newValue;
+    console.log('toggle...', newValue);
     setValue(newValue);
     if (originOnChange) {
       originOnChange(newValue);
@@ -73,7 +75,10 @@ const TextEditToggle: React.FC<Props> = ({
       submit(newValue);
     }
   };
-  const handleEditorBlur = () => {
+  const handleEditorBlur = (originOnBlur: Function) => () => {
+    if (originOnBlur) {
+      originOnBlur();
+    }
     if (submitTrigger.includes('blur')) {
       submit();
     }
@@ -99,7 +104,7 @@ const TextEditToggle: React.FC<Props> = ({
     });
   };
   const renderEditor = () => {
-    const editorElement = typeof editor === 'function' ? editor({ submit }) : editor;
+    const editorElement = typeof editor === 'function' ? editor({ submit, hideEditor }) : editor;
     if (!editing && !alwaysRender) {
       return null;
     }
@@ -108,7 +113,7 @@ const TextEditToggle: React.FC<Props> = ({
     const editorProps: any = {
       value,
       onChange: handleChange(originProps.onChange),
-      onBlur: handleEditorBlur,
+      onBlur: handleEditorBlur(originProps.onBlur),
       ref: editorRef,
     };
     if (containerRef.current) {
