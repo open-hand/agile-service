@@ -200,7 +200,7 @@ class SettingColumn extends Component {
           <DragDropContext
             onDragEnd={this.handleDragEnd}
           >
-            <div style={{ overflow: 'auto', marginRight: 12 }}>
+            <div style={{ overflow: 'auto', marginRight: 12, flex: 1 }}>
               <Droppable droppableId="columndrop" direction="horizontal" type="columndrop">
                 {(provided) => (
                   <div
