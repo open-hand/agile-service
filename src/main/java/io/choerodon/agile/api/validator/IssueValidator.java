@@ -66,13 +66,16 @@ public class IssueValidator {
     private static final String INFLUENCE_VERSION = "influenceVersion";
     private static final String LABEL = "label";
     private static final String TAG = "tag";
+    private static final String REPORTER_ID = "reporterId";
+    private static final String PRIORITY_ID = "priorityId";
 
     private static final String[] LEGAL_COPY_PREDEFINED_FIELDS_NAME = new String[]
             {
                     ASSIGNEE_ID, EPIC_ID, STORY_POINTS_FIELD, FEATURE_ID,
                     ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
                     ESTIMATED_START_TIME, ESTIMATED_END_TIME, SPRINT_ID_FIELD,
-                    COMPONENT, LABEL, FIX_VERSION, INFLUENCE_VERSION, TAG
+                    COMPONENT, LABEL, FIX_VERSION, INFLUENCE_VERSION, TAG,
+                    REPORTER_ID, PRIORITY_ID
             };
 
     @Autowired

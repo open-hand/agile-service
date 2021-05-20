@@ -214,6 +214,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String ASSIGNEE = "assignee";
     private static final String ASSIGNEE_ID = "assigneeId";
     private static final String REPORTER = "reporter";
+    private static final String REPORTER_ID = "reporterId";
+    private static final String PRIORITY_ID = "priorityId";
     private static final String FEATURE_ID = "featureId";
     private static final String ENVIRONMENT = "environment";
     private static final String MAIN_RESPONSIBLE_ID = "mainResponsibleId";
@@ -247,7 +249,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             {
                     ASSIGNEE_ID, EPIC_ID_FIELD, STORY_POINTS_FIELD,
                     FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
-                    ESTIMATED_START_TIME, ESTIMATED_END_TIME
+                    ESTIMATED_START_TIME, ESTIMATED_END_TIME, REPORTER_ID, PRIORITY_ID
             };
 
 //
@@ -2259,7 +2261,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (CollectionUtils.isEmpty(predefinedFieldNames)) {
             predefinedFieldNames = new ArrayList<>();
         }
-        handleCopyPredefinedFields(issueDetailDTO, predefinedFieldNames);
+        handleCopyPredefinedFields(organizationId, issueDetailDTO, predefinedFieldNames);
         if (issueDetailDTO != null) {
             Long newIssueId;
             Long objectVersionNumber;
@@ -2312,12 +2314,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    private void handleCopyPredefinedFields(IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames) {
+    private void handleCopyPredefinedFields(Long origanizationId, IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames) {
         //将不需要复制的预定义字段置空
         for (String fieldName : COPY_PREDEFINED_FIELDS_NAME) {
             if (!predefinedFieldNames.contains(fieldName)) {
                 setFieldValueEmpty(issueDetailDTO, fieldName);
             }
+        }
+
+        //设置报告人为复制人
+        if (!predefinedFieldNames.contains(REPORTER_ID)) {
+            issueDetailDTO.setReporterId(DetailsHelper.getUserDetails().getUserId());
+        }
+        //设置优先级为默认优先级
+        if (!predefinedFieldNames.contains(PRIORITY_ID)) {
+            PriorityVO priorityVO = priorityService.queryDefaultByOrganizationId(origanizationId);
+            issueDetailDTO.setPriorityCode("priority-" + priorityVO.getId());
+            issueDetailDTO.setPriorityId(priorityVO.getId());
         }
     }
 
