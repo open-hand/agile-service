@@ -31,7 +31,7 @@ class StatusCirculationStore {
 
   @observable checkedMaps = observable.map<IStatusCirculation['id'], StatusAllCheckedItem>();
 
-  @observable loading = false
+  @observable loading = false;
 
   async getStatusList(issueTypeId: string) {
     this.loading = true;
@@ -117,6 +117,54 @@ class StatusCirculationStore {
     const checked = newAction.type === 'check';
 
     return !(status.canTransformStatus.includes(newAction.to) === checked || this.checkedMaps.get(status.id)?.rowCheckedIds.has(newAction.to) === checked);
+  }
+
+  getTransformUpdateData(data: Array<{ id: string, to: string, check: boolean }>) {
+    return data.map((item) => {
+      const toStatus = this.statusMap.get(item.to)!;
+      const fromStatus = this.statusMap.get(item.id)!;
+      return {
+        startNodeId: fromStatus.nodeId,
+        endNodeId: toStatus.nodeId,
+        startStatusName: fromStatus.name,
+        endStatusName: toStatus.name,
+        select: item.check,
+      };
+    });
+  }
+
+  async updateChangeTransform(id: IStatus['id'], to: IStatus['id'], check: boolean, issueTypeId: string) {
+    await statusTransformApi[getIsOrganization() ? 'orgBatchUpdate' : 'batchUpdate'](issueTypeId, this.getTransformUpdateData([{ id, to, check }]));
+    this.getStatusList(issueTypeId);
+  }
+
+  @action
+  async checkAllOrUnAll(check: boolean, issueTypeId: string, rowId?: string, colId?: string) {
+    this.loading = true;
+    const batchUpdateData: Array<{ id: string, to: string, check: boolean }> = [];
+    const rowStatus = rowId ? this.checkedMaps.get(rowId) : undefined;
+    const colStatus = colId ? this.checkedMaps.get(colId) : undefined;
+    if (rowStatus || colStatus) {
+      this.statusList.forEach((item) => {
+        if (item.id !== rowId && rowStatus && !(rowStatus.rowCheckedIds.has(item.id) === check)) {
+          batchUpdateData.push({
+            id: rowId!,
+            to: item.id,
+            check,
+          });
+        }
+
+        if (item.id !== colId && colStatus && !(colStatus.columnCheckedIds.has(item.id) === check)) {
+          batchUpdateData.push({
+            id: item.id,
+            to: colId!,
+            check,
+          });
+        }
+      });
+    }
+    await statusTransformApi[getIsOrganization() ? 'orgBatchUpdate' : 'batchUpdate'](issueTypeId, this.getTransformUpdateData(batchUpdateData));
+    this.getStatusList(issueTypeId);
   }
 
   @action

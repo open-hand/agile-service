@@ -5,7 +5,6 @@ import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
-import { Button } from 'choerodon-ui/pro';
 import { Divider } from 'choerodon-ui';
 import { getIsOrganization } from '@/utils/common';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
@@ -19,7 +18,6 @@ import { TabComponentProps } from '..';
 import { useStatusCirculationContext } from './index';
 import { useStateMachineContext } from '../context';
 import IssueTypeTab from '../components/issue-type-tab';
-import Save from './components/save';
 
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { store } = useStatusCirculationContext();
@@ -128,7 +126,6 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
           <StatusCirculationTable />
         </div>
-        <Save />
       </Content>
     </Page>
   );
