@@ -135,7 +135,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                  @Param("issueId") Long issueId,
                                                  @Param("issueNum") String issueNum,
                                                  @Param("self") Boolean self,
-                                                 @Param("content") String content);
+                                                 @Param("content") String content,
+                                                 @Param("excludeIssueIds") List<Long> excludeIssueIds);
 
 
     List<SprintNameDTO> querySprintNameByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds);

@@ -227,7 +227,7 @@ public interface IssueService {
      * @return IssueNumVO
      */
     Page<IssueNumVO> queryIssueByOptionForAgile(Long projectId, Long issueId, String issueNum,
-                                                    Boolean self, String content, PageRequest pageRequest);
+                                                    Boolean self, String content, PageRequest pageRequest, List<Long> excludeIssueIds);
 
     /**
      * 拖动epic
