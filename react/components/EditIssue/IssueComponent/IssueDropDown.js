@@ -251,7 +251,7 @@ const IssueDropDown = ({
       getPopupContainer={(trigger) => trigger.parentNode}
       placement="bottomRight"
     >
-      <Button icon="more_vert" funcType="flat" />
+      <Button icon="more_vert" />
     </Dropdown>
   );
 };
