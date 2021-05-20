@@ -304,7 +304,7 @@ const Issue = observer(({ cached, updateCache }) => {
                 changeTableListMode(mode === 'list');
               }}
               style={{
-                marginLeft: 20,
+                margin: '-4px 8px 0 0',
               }}
             />,
           },

@@ -269,17 +269,16 @@ const GanttPage: React.FC = () => {
           clearButton={false}
           afterLoad={afterSprintLoad}
           hasUnassign
-          style={{ marginRight: 40 }}
+          style={{ marginRight: 16 }}
           searchable={false}
         />
-        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false}>
+        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 8 }}>
           {typeOptions.map((o) => (
             <Option value={o.value}>
               {o.label}
             </Option>
           ))}
         </FlatSelect>
-        <HeaderLine />
         <HeaderButtons
           showClassName={false}
           items={[

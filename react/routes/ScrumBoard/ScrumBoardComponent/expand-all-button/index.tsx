@@ -33,7 +33,7 @@ function ExpandAllButton(props: any) {
   useEffect(() => () => scrumBoardStore.removeBindFunction('expand-current-status'));
   return scrumBoardStore.currentBindFunctionMaps.get('expandOrUp') || scrumBoardStore.currentBindFunctionMaps.get('expandOrUp-epic') ? (
     <Button {...props} onClick={handleClick}>
-      {expandAll ? '全部收起' : (
+      {expandAll ? <span>全部收起</span> : (
         <Tooltip title="仅展开前15项">
           <span>全部展开</span>
         </Tooltip>

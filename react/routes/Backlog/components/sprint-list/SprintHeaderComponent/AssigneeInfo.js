@@ -97,7 +97,7 @@ import { UserUniqueTag } from '@/components/tag/user-tag';
               )) : null}
           </div>
           <div className="c7n-backlog-assignInfo-right">
-            {filterSprintAssignId && <Button color="blue" onClick={this.handleClearAssignee}>清除筛选</Button>}
+            {filterSprintAssignId && <Button onClick={this.handleClearAssignee}>清除筛选</Button>}
           </div>
         </div>
 

@@ -17,7 +17,7 @@ class SwitchSwimLine extends Component {
       <FlatSelect
         value={swimLine}
         style={{
-          marginLeft: 20, fontWeight: 500,
+          marginLeft: 16, fontWeight: 500, marginRight: 8,
         }}
         onChange={this.handleSwitchSwinLine}
         clearButton={false}

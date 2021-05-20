@@ -10,7 +10,7 @@ const { Option } = FlatSelect;
 export interface SelectBoardProps {
 
 }
-const SelectBoard: React.FC<any> = ({ onChange, onFooterClick }) => {
+const SelectBoard: React.FC<any> = ({ onChange, onFooterClick, ...otherProps }) => {
   const ref = useRef<FlatSelect>(null);
   const props = useSelectFooter(ref,
     <Permission
@@ -28,6 +28,7 @@ const SelectBoard: React.FC<any> = ({ onChange, onFooterClick }) => {
       onChange={onChange}
       clearButton={false}
       {...props}
+      {...otherProps}
     >
 
       {

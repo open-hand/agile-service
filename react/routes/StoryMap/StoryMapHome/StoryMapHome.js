@@ -170,15 +170,6 @@ const StoryMapHome = observer(() => {
             handler: handleOpenIssueList,
             display: !StoryMapStore.isFullScreen,
           }, {
-            display: true,
-            element: <SwitchSwimLine />,
-          }, {
-            display: isInProgram,
-            element: <CheckBox style={{ marginLeft: 20, marginTop: 6 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>,
-          }, {
-            display: true,
-            element: <CheckBox name="foldCompletedEpic" style={{ marginLeft: 20, marginTop: 6 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起已完成的史诗列</CheckBox>,
-          }, {
             icon: isFullScreen ? 'fullscreen_exit' : 'zoom_out_map',
             iconOnly: true,
             handler: () => { toggleFullScreen(); },
@@ -186,12 +177,18 @@ const StoryMapHome = observer(() => {
             tooltipsConfig: {
               title: isFullScreen ? '退出全屏' : '全屏',
             },
+          }, {
+            display: true,
+            element: <SwitchSwimLine />,
+          }, {
+            display: isInProgram,
+            element: <CheckBox style={{ marginLeft: 16 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>,
+          }, {
+            display: true,
+            element: <CheckBox name="foldCompletedEpic" style={{ marginLeft: 16 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起已完成的史诗列</CheckBox>,
           },
         ]}
         />
-        {/* {isInProgram && <CheckBox style={{ marginLeft: 20 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>}
-        <CheckBox name="foldCompletedEpic" style={{ marginLeft: 20 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起已完成的史诗列</CheckBox> */}
-        {/* <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button> */}
       </Header>
       <Breadcrumb />
       <Content style={{
