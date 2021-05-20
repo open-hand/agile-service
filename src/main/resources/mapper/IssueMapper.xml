@@ -1635,6 +1635,12 @@
             <if test="issueNum != null">
                 AND ai.issue_num != #{issueNum}
             </if>
+            <if test='excludeIssueIds != null and excludeIssueIds.size > 0'>
+                AND ai.issue_id not in
+                <foreach collection="excludeIssueIds" item="issueId" open="(" separator="," close=")">
+                    #{issueId}
+                </foreach>
+            </if>
         ) search where 1=1
         <if test='content != null'>
             AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE CONCAT(CONCAT('%',

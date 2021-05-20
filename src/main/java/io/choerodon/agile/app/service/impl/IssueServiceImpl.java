@@ -2676,7 +2676,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public Page<IssueNumVO> queryIssueByOptionForAgile(Long projectId, Long issueId, String issueNum, Boolean self, String content, PageRequest pageRequest) {
+    public Page<IssueNumVO> queryIssueByOptionForAgile(Long projectId, Long issueId, String issueNum, Boolean self, String content, PageRequest pageRequest, List<Long> excludeIssueIds) {
         Map<String, String> orders = new HashMap<>();
         orders.put("issueNum", "issue_num_convert");
         Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, orders);
@@ -2692,7 +2692,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         Page<IssueNumDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest,
                 () ->
-                issueMapper.queryIssueByOptionForAgile(projectId, issueId, issueNum, self, content));
+                issueMapper.queryIssueByOptionForAgile(projectId, issueId, issueNum, self, content, excludeIssueIds));
         if (self && issueNumDTO != null) {
             issueDOPage.getContent().add(0, issueNumDTO);
             issueDOPage.setSize(issueDOPage.getSize() + 1);
