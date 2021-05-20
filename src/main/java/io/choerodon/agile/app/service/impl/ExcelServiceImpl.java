@@ -905,7 +905,11 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     @Async
-    public void exportPublishVersion(Long projectId, Set<Long> publishVersionIds, Boolean withSubVersion) {
+    public void exportPublishVersion(Long projectId,
+                                     Set<Long> publishVersionIds,
+                                     Boolean withSubVersion,
+                                     ServletRequestAttributes requestAttributes) {
+        RequestContextHolder.setRequestAttributes(requestAttributes);
         ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
         String projectCode = project.getCode();
         Map<Long, String> projectCodeMap = new HashMap<>();
@@ -921,7 +925,7 @@ public class ExcelServiceImpl implements ExcelService {
             processPublishVersions(projectId, organizationId, publishVersionIds, publishVersions);
             int total = publishVersions.size();
             int current = 1;
-            Workbook workbook = new SXSSFWorkbook();
+            Workbook workbook = new SXSSFWorkbook(100);
             Map<Long, IssueListFieldKVVO> issueMap = new HashMap<>();
             Map<Long, Set<TagVO>> issueTagMap = new HashMap<>();
             Map<Long, Set<PublishVersionDTO>> issuePublishVersionMap = new HashMap<>();
@@ -3335,7 +3339,7 @@ public class ExcelServiceImpl implements ExcelService {
      */
     @Override
     public void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId) {
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream();) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             workbook.write(os);
             byte[] content = os.toByteArray();
             MultipartFile file = new MultipartExcel("file", fileName, EXCELCONTENTTYPE, content);
@@ -3362,6 +3366,10 @@ public class ExcelServiceImpl implements ExcelService {
                         break;
                 }
                 sendProcess(fileOperationHistoryDTO, userId, 100.0, websocketKey);
+                if (workbook instanceof SXSSFWorkbook) {
+                    //处理在磁盘上支持本工作簿的临时文件
+                    ((SXSSFWorkbook) workbook).dispose();
+                }
                 workbook.close();
             } catch (IOException e) {
                 LOGGER.warn(EXPORT_ERROR_WORKBOOK_CLOSE, e);

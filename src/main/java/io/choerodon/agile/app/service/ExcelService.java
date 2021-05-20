@@ -79,6 +79,10 @@ public interface ExcelService {
      * @param projectId
      * @param publishVersionIds
      * @param withSubVersion
+     * @param requestAttributes
      */
-    void exportPublishVersion(Long projectId, Set<Long> publishVersionIds, Boolean withSubVersion);
+    void exportPublishVersion(Long projectId,
+                              Set<Long> publishVersionIds,
+                              Boolean withSubVersion,
+                              ServletRequestAttributes requestAttributes);
 }
