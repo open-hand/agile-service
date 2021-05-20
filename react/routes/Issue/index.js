@@ -339,6 +339,7 @@ const Issue = observer(({ cached, updateCache }) => {
           onClickSaveFilter={handleClickSaveFilter}
         />
         <IssueTable
+          isTree={!tableListMode}
           tableProps={tableProps}
           fields={tableFields}
           listLayoutColumns={cached?.listLayoutColumns ?? defaultListLayoutColumns}
