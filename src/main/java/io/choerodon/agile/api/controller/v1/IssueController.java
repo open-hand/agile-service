@@ -212,7 +212,7 @@ public class IssueController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("分页搜索查询issue列表")
     @CustomPageRequest
-    @GetMapping(value = "/agile/summary")
+    @PostMapping(value = "/agile/summary")
     public ResponseEntity<Page<IssueNumVO>> queryIssueByOptionForAgile(@ApiIgnore @ApiParam(value = "分页信息", required = true)
                                                                        @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
                                                                             PageRequest pageRequest,
@@ -226,7 +226,7 @@ public class IssueController {
                                                                        @RequestParam() Boolean self,
                                                                        @ApiParam(value = "搜索内容")
                                                                        @RequestParam(required = false) String content,
-                                                                       @RequestParam(required = false) @Encrypt
+                                                                       @RequestBody(required = false) @Encrypt
                                                                             List<Long> excludeIssueIds) {
         return Optional.ofNullable(issueService.queryIssueByOptionForAgile(projectId, issueId, issueNum, self, content, pageRequest, excludeIssueIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
