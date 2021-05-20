@@ -9,7 +9,7 @@ import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
 import { ListLayoutColumnVO } from '@/api';
 import useTable from '@/hooks/useTable';
-import { checkBoxColumn, getTableColumns } from './columns';
+import { checkBoxColumn, expandColumn, getTableColumns } from './columns';
 
 export interface IssueTableProps extends Partial<TableProps> {
   tableRef?: React.RefObject<any>
@@ -28,7 +28,7 @@ export interface IssueTableProps extends Partial<TableProps> {
   tableProps: ReturnType<typeof useTable>
   onColumnResize?: (columnWidth: number, dataKey: string) => void
   isTree?: boolean
-  height?:number
+  height?: number
 }
 // const mapper = (key: IIssueColumnName): string => ({
 //   summary: 'issueId',
@@ -89,14 +89,14 @@ const IssueTable: React.FC<IssueTableProps> = ({
     handleCheckChange: props.handleCheckChange,
     handleCheckAllChange: props.handleCheckAllChange,
   }), [props.checkValues, props.flattenData, props.handleCheckAllChange, props.handleCheckChange]);
-
+  console.log(isTree);
   return (
     <div className="c7nagile-issue-table">
       <PerformanceTable
         {...restProps}
         virtualized
         bordered={false}
-        columns={[checkboxColumn, ...visibleColumns]}
+        columns={[checkboxColumn, ...isTree ? [expandColumn] : [], ...visibleColumns]}
         height={height ?? 400}
       />
       {createIssue && (

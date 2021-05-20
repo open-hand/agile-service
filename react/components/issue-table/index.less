@@ -1,108 +1,17 @@
 .c7nagile-issue-table {
   flex: 1;
-  &-summary {
-    display: inline-block;
-    margin-left: -1px;
-  }
 
-  .c7n-pro-table-wrapper {
-    margin-top: -19px;
-  }
-
-  .c7n-pro-table-filter-select-wrapper {
-    .c7n-pro-table-filter-select-suffix {
-      right: 0 !important;
-
-      .c7n-pro-table-columns-chooser {
-        width: 0.45rem;
-      }
+  .c7n-performance-table-row[data-depth="1"] {
+    .c7n-typeTag{
+      margin-left: 10px;
     }
   }
 
-  .c7n-pro-table-thead {
-    .c7n-pro-table-cell[data-index="issueId"] {
-      padding-left: 13px;
-
-      .c7n-pro-table-cell-inner {
-        .icon {
-          margin-right: 12px;
-          margin-top: -4px;
-        }
-      }
-    }
+  .expand-column {
+    text-overflow: clip;
   }
 
-  .c7n-pro-table-row {
-    .c7n-pro-table-cell[data-index="statusId"] {
-      .c7n-pro-table-cell-inner {
-        display: flex;
-        align-items: center;
-      }
-    }
-  }
-
-
-  .c7n-pro-table-cell[data-index="issueId"] {
-    .c7n-pro-table-cell-prefix {
-      padding-left: 0;
-
-      .icon {
-        margin-top: -3px;
-        margin-left: -4px;
-        margin-right: -8px;
-      }
-    }
-  }
-
-  .c7n-pro-table-filter-select-wrapper {
-    position: static;
-    pointer-events: none;
-
-    .c7n-pro-table-filter-select-multiple-value,
-    .c7n-pro-table-filter-select-placeholder,
-    .c7n-pro-table-filter-select-prefix,
-    .c7n-pro-table-filter-select,
-    .c7n-pro-table-filter-select-inner-button {
-      display: none;
-    }
-
-    label {
-      position: static;
-    }
-
-    .c7n-pro-table-filter-select-suffix {
-      position: absolute;
-      top: 9px;
-      right: 20px;
-      margin: 0;
-    }
-
-    .c7n-pro-table-columns-chooser {
-      button {
-        pointer-events: auto;
-      }
-    }
-  }
-
-  .c7n-pro-table-footer {
-    border-top: 0.01rem solid #e0e0e0;
-  }
-
-  .c7nagile-row-selected {
-    background: rgba(140, 158, 255, 0.12);
-  }
-}
-
-.c7n-pro-table-columns-chooser-dropdown-menu {
-  .c7nagile-issue-table-summary {
-    margin-left: 0;
-  }
-}
-
-body[data-theme="theme4"] {
-  .c7n-pro-table-filter-select-wrapper {
-    position: relative;
-    top: -50px;
-    right: -16px;
+  .c7n-performance-table-cell-expand-wrapper {
+    margin-left: -14px;
   }
 }
