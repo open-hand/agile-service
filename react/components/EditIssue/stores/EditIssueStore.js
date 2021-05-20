@@ -5,6 +5,7 @@ import { find } from 'lodash';
 import { uiApi } from '@/api';
 
 const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
+const copyHiddenFields = ['issueType', 'summary', 'description', 'status', 'timeTrace', 'creationDate', 'lastUpdateDate', 'created_user', 'last_updated_user'];
 class EditIssueStore {
   // issue
   @observable issue = {};
@@ -31,6 +32,10 @@ class EditIssueStore {
 
   @computed get customFields() {
     return this.fields.filter((field) => !hiddenFields.includes(field.fieldCode));
+  }
+
+  @computed get copyFields() {
+    return this.fields.filter((field) => !copyHiddenFields.includes(field.fieldCode));
   }
 
   @observable doc = {};

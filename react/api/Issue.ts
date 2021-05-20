@@ -63,11 +63,11 @@ interface SearchVO {
 }
 interface CopyCondition {
   issueLink: boolean,
-  sprintValues: boolean,
   subTask: boolean,
   summary: string,
   epicName?: string,
-  customField?: boolean,
+  predefinedFieldNames: string[],
+  customFieldIds: string[],
 }
 
 interface ICustomFieldData {
@@ -247,12 +247,12 @@ class IssueApi extends Api<IssueApi> {
     * @param applyType
     * @param copyCondition
     */
-  clone(issueId: number, applyType: string = 'agile', copyCondition: CopyCondition) {
+  clone(issueId: string, applyType: string = 'agile', copyCondition: CopyCondition) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
       url: `${this.prefix}/issues/${issueId}/clone_issue`,
-      data: { customField: true, ...copyCondition },
+      data: copyCondition,
       params: {
         organizationId,
         applyType,

@@ -21,7 +21,7 @@ class EpicApi extends Api<EpicApi> {
    * 史诗名检查
    * @param epicName
    */
-  checkName(epicName: string, epicId: string) {
+  checkName(epicName: string, epicId?: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/issues/check_epic_name`,

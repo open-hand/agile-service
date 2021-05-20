@@ -82,14 +82,13 @@ const IssueDropDown = ({
       store.setCreateSubTaskShow(true);
     } else if (e.key === '3') {
       openEditIssueCopyIssue({
-        issueId,
-        issueNum,
         issue,
         issueLink: store.getLinkIssues,
         issueSummary: issue.summary,
         // onCancel: () => store.setCopyIssueShow(false),
         onOk: handleCopyIssue.bind(this),
         applyType,
+        copyFields: store.copyFields,
       });
       store.setCopyIssueShow(true);
     } else if (e.key === '4') {
