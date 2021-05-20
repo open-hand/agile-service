@@ -54,7 +54,7 @@ const ReportPage: React.FC<Props> = ({
         </Menu>
       )}
     >
-      <Button {...props} icon="add">
+      <Button {...props} icon="playlist_add">
         添加报告内容
       </Button>
     </Dropdown>
