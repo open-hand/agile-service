@@ -94,7 +94,7 @@ const Comment: React.FC<Props> = ({
               footer
               value={value}
               onChange={handleChange}
-              style={{ height: 200, width: '100%' }}
+              style={{ minHeight: 300, width: '100%' }}
               onCancel={() => {
                 setEditing(false);
               }}
