@@ -2,9 +2,16 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.IssueLinkCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkVO;
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.IssueLinkService;
 
+import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
@@ -15,7 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,5 +89,27 @@ public class IssueLinkController {
         return Optional.ofNullable(issueLinkService.listIssueLinkByBatch(projectId, issueIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLink.listIssueLinkByBatch"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("分页查询未关联问题列表")
+    @PostMapping(value = "/un_link/{issueId}")
+    public ResponseEntity<Page<IssueListFieldKVVO>> listUnLinkIssue(
+            @ApiIgnore
+            @ApiParam(value = "分页信息", required = true)
+            @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
+                    PageRequest pageRequest,
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable(name = "issueId") Long issueId,
+            @ApiParam(value = "查询参数", required = true)
+            @RequestBody(required = false) SearchVO searchVO,
+            @ApiParam(value = "组织id", required = true)
+            @RequestParam(required = false) Long organizationId) {
+        EncryptionUtils.decryptSearchVO(searchVO);
+        return Optional.ofNullable(issueLinkService.listUnLinkIssue(issueId, projectId, searchVO, pageRequest, organizationId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.Issue.listUnLinkIssue"));
     }
 }

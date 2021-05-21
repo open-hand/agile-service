@@ -3,8 +3,12 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.IssueLinkCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkFixVO;
 import io.choerodon.agile.api.vo.IssueLinkVO;
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -53,4 +57,16 @@ public interface IssueLinkService {
     List<IssueLinkFixVO> listIssueLinkByIssuedIds(Long projectId);
 
     void deleteIssueLinkByIssueId(IssueConvertDTO issueConvertDTO, List<IssueLinkDTO> issueLinkDTOS);
+
+    /**
+     * 查询未关联当前问题的问题
+     *
+     * @param issueId 测试用例id
+     * @param projectId 项目id
+     * @param searchVO 查询参数
+     * @param pageRequest 分页参数
+     * @param organizationId 组织id
+     * @return 测试用例未关联的问题
+     */
+    Page<IssueListFieldKVVO> listUnLinkIssue(Long issueId, Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 }
