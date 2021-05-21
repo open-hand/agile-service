@@ -185,7 +185,7 @@ class AddComponent extends Component {
     // [=, !=, in, notIn]
     const equal_notEqual_in_notin = new Set(['priority', 'issue_type', 'status']);
     // [=, !=, in, notIn, is, isNot]
-    const equal_notEqual_in_notIn_is_isNot = new Set(['assignee', 'reporter', 'created_user', 'last_updated_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'feature', 'member', 'multiMember']);
+    const equal_notEqual_in_notIn_is_isNot = new Set(['assignee', 'reporter', 'created_user', 'last_updated_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'feature', 'member']);
     // [>, >=, <, <=]
     const greater_greaterAndEqual_lessThan_lessThanAndEqual = new Set(['last_update_date', 'creation_date', 'date', 'datetime', 'time']);
     // [>, >=, <, <=, is, isNot]
@@ -193,7 +193,7 @@ class AddComponent extends Component {
     // [=, !=, is, isNot]
     const equal_notEqual_is_isNot = new Set(['single', 'radio']);
     // [in, notIn, is, isNot]
-    const in_notIn_is_isNot = new Set(['multiple', 'checkbox']);
+    const in_notIn_is_isNot = new Set(['multiple', 'checkbox','multiMember']);
     //[=, !=, like, notLike]
     const equal_notEqual_like_notLike = new Set(['input', 'text']);
     /* eslint-enable */
@@ -404,8 +404,13 @@ class AddComponent extends Component {
     const { isInProgram } = this.props;
     const getPreDefinedField = () => quickFilterApi.loadField();
     const getCustomField = () => fieldApi.getCustomFields();
-    Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
+    Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField = []]) => {
+      const customFieldState = {};
+      customField.forEach((item) => {
+        customFieldState[`origin${item.code}`] = item.fieldOptions || [];
+      });
       this.setState({
+        ...customFieldState,
         quickFilterFiled: [...preDefinedField, ...isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map((field) => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || [],
       });
     });
@@ -800,13 +805,14 @@ class AddComponent extends Component {
     featureApi.queryAllInSubProject([], undefined, 1, 0).then((res) => this.setState(
       { originFeatures: res.content },
     ));
-    fieldApi.getCustomFields().then((res) => {
-      const customFieldState = {};
-      res.forEach((item) => {
-        customFieldState[`origin${item.code}`] = item.fieldOptions || [];
-      });
-      this.setState(customFieldState);
-    });
+    // 多次同时请求axios（boot优化过） 会忽略 多余的
+    // fieldApi.getCustomFields().then((res) => {
+    //   const customFieldState = {};
+    //   res.forEach((item) => {
+    //     customFieldState[`origin${item.code}`] = item.fieldOptions || [];
+    //   });
+    //   this.setState(customFieldState);
+    // });
   }
 
   renderOperation(filter, index) {

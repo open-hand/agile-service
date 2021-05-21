@@ -36,7 +36,16 @@ export default class SwimLaneHeader extends Component {
           }}
         >
           {switchMap.get(mode)(parentIssue)}
-          <span className="c7n-parentIssue-count" style={{ whiteSpace: 'nowrap' }}>{`  (${subTaskLength ? `${subTaskLength} 子任务` : ''}${shouldShowDot ? ', ' : ''}${bugLength ? `${bugLength} 缺陷` : ''})`}</span>
+          {
+            !bugLength && !subTaskLength && (
+              <span className="c7n-parentIssue-count">(0)</span>
+            )
+          }
+          {
+            (!!bugLength || !!subTaskLength) && (
+              <span className="c7n-parentIssue-count" style={{ whiteSpace: 'nowrap' }}>{`  (${subTaskLength ? `${subTaskLength} 子任务` : ''}${shouldShowDot ? ', ' : ''}${bugLength ? `${bugLength} 缺陷` : ''})`}</span>
+            )
+          }
         </div>
       );
     }
@@ -65,7 +74,7 @@ export default class SwimLaneHeader extends Component {
         <span
           style={{ cursor: 'pointer', minWidth: 70, marginRight: 10 }}
         >
-          {`#${issueNum}`}
+          {`${issueNum}`}
         </span>
         <StatusTag
           categoryCode={categoryCode}

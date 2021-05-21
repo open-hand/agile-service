@@ -8,7 +8,7 @@ import io.choerodon.agile.app.service.ExcelService;
 
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
-import io.choerodon.agile.infra.utils.ExcelUtil;
+import io.choerodon.agile.infra.utils.MultipartFileUtil;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -19,7 +19,6 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +30,8 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -69,7 +68,7 @@ public class ExcelController {
                                       @ApiParam(value = "导入文件", required = true)
                                       @RequestParam("file") MultipartFile file) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        excelService.batchImport(projectId, organizationId, userId, ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file));
+        excelService.batchImport(projectId, organizationId, userId, MultipartFileUtil.getInputStreamFromMultipartFile(file));
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
@@ -139,9 +138,20 @@ public class ExcelController {
                                             @RequestParam("file") MultipartFile file) {
         excelService.batchImportObjectSchemeField(
                 ConvertUtil.getOrganizationId(projectId), projectId,
-                ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file),
+                MultipartFileUtil.getInputStreamFromMultipartFile(file),
                 RequestContextHolder.getRequestAttributes());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("导出发布版本")
+    @PostMapping(value = "/export_publish_version")
+    public void exportPublishVersion(@ApiParam(value = "项目id", required = true)
+                                     @PathVariable(name = "project_id") Long projectId,
+                                     @RequestParam(required = false, defaultValue = "false") Boolean withSubVersion,
+                                     @ApiParam(value = "项目群版本id集合", required = true)
+                                     @RequestBody @Encrypt Set<Long> publishVersionIds) {
+        excelService.exportPublishVersion(projectId, publishVersionIds, withSubVersion, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
     }
 
 }

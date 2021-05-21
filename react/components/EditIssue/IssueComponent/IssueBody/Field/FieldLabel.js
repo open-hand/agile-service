@@ -91,7 +91,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
                           borderRadius: '100px',
                           fontSize: '13px',
                           padding: '2px 12px',
-                          background: '#3f51b5',
+                          background: '#5365EA',
                           marginRight: '8px',
                           marginTop: '2px',
                           marginBottom: '2px',

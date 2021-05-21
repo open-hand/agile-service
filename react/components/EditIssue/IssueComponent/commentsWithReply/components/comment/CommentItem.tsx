@@ -6,7 +6,6 @@ import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import WYSIWYGEditor from '@/components/CKEditor';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
-import DatetimeAgo from '@/components/CommonComponent/DatetimeAgo';
 import './Comment.less';
 import { IComment } from '@/common/types';
 import { issueCommentApi, UComment, IReplyCreate } from '@/api/IssueComment';
@@ -178,7 +177,7 @@ const CommentItem: React.FC<Props> = ({
                 loginName: comment.userLoginName,
                 imageUrl: comment.userImageUrl,
               }}
-              textStyle={{ color: '#3f51b5' }}
+              textStyle={{ color: '#5365EA' }}
             />
             {
               isReply && (
@@ -198,15 +197,13 @@ const CommentItem: React.FC<Props> = ({
                       loginName: (comment as ReplyComment).replyToUserLoginName,
                       imageUrl: (comment as ReplyComment).replyToUserImageUrl,
                     }}
-                    textStyle={{ color: '#3f51b5' }}
+                    textStyle={{ color: '#5365EA' }}
                   />
                 </div>
               )
             }
             <div style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
-              <DatetimeAgo
-                date={comment.lastUpdateDate}
-              />
+              {comment.lastUpdateDate}
             </div>
           </div>
           <div className="c7n-action">
@@ -254,7 +251,7 @@ const CommentItem: React.FC<Props> = ({
                 footer
                 value={value}
                 onChange={handleChange}
-                style={{ height: 200, width: '100%' }}
+                style={{ minHeight: 300, width: '100%' }}
                 onCancel={() => {
                   setEditing(false);
                 }}
@@ -276,7 +273,7 @@ const CommentItem: React.FC<Props> = ({
               footer
               value={replyValue}
               onChange={handleReplyChange}
-              style={{ height: 200, width: '100%' }}
+              style={{ minHeight: 300, width: '100%' }}
               onCancel={() => {
                 setReplying(false);
                 setReplyValue('');

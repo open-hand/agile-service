@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import classNames from 'classnames';
 import {
-  Page, Header, Content, Breadcrumb,
+  Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import GanttComponent, { GanttProps, Gantt, GanttRef } from 'react-gantt-component';
 import 'react-gantt-component/dist/react-gantt-component.cjs.production.min.css';
@@ -20,7 +20,7 @@ import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import TypeTag from '@/components/TypeTag';
 import Loading from '@/components/Loading';
 import SelectSprint from '@/components/select/select-sprint';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import useFullScreen from '@/common/useFullScreen';
 import { ILocalField } from '@/components/issue-search/store';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
@@ -28,7 +28,7 @@ import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
 import HeaderLine from '@/components/HeaderLine';
 import { Issue, User } from '@/common/types';
-import { transformFilter } from './components/search/util';
+import { transformFilter } from '@/routes/Issue/stores/utils';
 import Search from './components/search';
 import GanttBar from './components/gantt-bar';
 import GanttGroupBar from './components/gantt-group-bar';
@@ -240,6 +240,16 @@ const GanttPage: React.FC = () => {
       height={height}
     />
   ), []);
+  const renderInvalidBar: GanttProps['renderInvalidBar'] = useCallback((element, barInfo) => (
+    <Tooltip
+      hidden={barInfo.stepGesture === 'moving'}
+      placement="top"
+      title="点击并拖动以设置预计开始、结束时间。"
+    >
+      {element}
+    </Tooltip>
+  ), []);
+
   const renderBarThumb: GanttProps['renderBarThumb'] = useCallback((record, t) => (
     <div
       role="none"
@@ -259,41 +269,57 @@ const GanttPage: React.FC = () => {
           clearButton={false}
           afterLoad={afterSprintLoad}
           hasUnassign
-          style={{ marginRight: 40 }}
+          style={{ marginRight: 16 }}
           searchable={false}
         />
-        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false}>
+        <FlatSelect value={type} onChange={handleTypeChange} clearButton={false} style={{ marginRight: 8 }}>
           {typeOptions.map((o) => (
             <Option value={o.value}>
               {o.label}
             </Option>
           ))}
         </FlatSelect>
-        <HeaderLine />
-        <Button
-          icon="playlist_add"
-          onClick={() => {
-            store.setCreateIssueVisible(true);
-          }}
-        >
-          创建问题
-        </Button>
-        <Button
-          // @ts-ignore
-          onClick={() => { toggleFullScreen(); }}
-          icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}
-        >
-          {isFullScreen ? '退出全屏' : '全屏'}
-        </Button>
-        <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button>
+        <HeaderButtons
+          showClassName={false}
+          items={[
+            {
+              name: '创建问题',
+              icon: 'playlist_add',
+              display: true,
+              handler: () => {
+                store.setCreateIssueVisible(true);
+              },
+            },
+            {
+              name: '个人筛选',
+              icon: 'settings',
+              display: true,
+              handler: handleClickFilterManage,
+            },
+            {
+              icon: isFullScreen ? 'fullscreen_exit' : 'zoom_out_map',
+              iconOnly: true,
+              display: true,
+              handler: () => {
+                // @ts-ignore
+                toggleFullScreen();
+              },
+              tooltipsConfig: {
+                title: isFullScreen ? '退出全屏' : '全屏',
+              },
+            },
+          ]}
+        />
       </Header>
       <Breadcrumb />
-      <Content style={{
-        borderTop: '1px solid rgb(216, 216, 216)',
-        display: 'flex',
-        paddingTop: 7,
-        flexDirection: 'column',
-      }}
+      <Content
+        className="c7n-gantt-content"
+        style={{
+          borderTop: '1px solid rgb(216, 216, 216)',
+          display: 'flex',
+          paddingTop: 7,
+          flexDirection: 'column',
+        }}
       >
         <Context.Provider value={{ store }}>
           <div style={{ display: 'flex' }}>
@@ -318,6 +344,7 @@ const GanttPage: React.FC = () => {
               tableIndent={20}
               expandIcon={getExpandIcon}
               renderBar={renderBar}
+              renderInvalidBar={renderInvalidBar}
               renderGroupBar={renderGroupBar}
               renderBarThumb={renderBarThumb}
               tableCollapseAble={false}

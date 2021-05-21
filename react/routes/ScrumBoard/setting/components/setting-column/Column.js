@@ -165,8 +165,7 @@ class Column extends Component {
                 >
                   <div
                     style={{
-                      visibility: ScrumBoardStore.getCurrentConstraint === 'constraint_none' ? 'hidden' : 'visible',
-                      display: 'flex',
+                      display: ScrumBoardStore.getCurrentConstraint === 'constraint_none' ? 'none' : 'flex',
                       justifyContent: 'space-between',
                       flexWrap: 'wrap',
                     }}

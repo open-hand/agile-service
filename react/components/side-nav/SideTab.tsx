@@ -48,13 +48,15 @@ const SideTab: SideTabComponent = ({
     }}
     >
       <div className={styles.container}>
-        <NavList onTabClick={(key) => {
-          if (key === activeKey) {
-            handleChange(null);
-          } else {
-            handleChange(key);
-          }
-        }}
+        <NavList
+          onTabClick={(key) => {
+            if (key === activeKey) {
+              handleChange(null);
+            } else {
+              handleChange(key);
+            }
+          }}
+          activeKey={activeKey}
         />
         <PanelList
           activeKey={activeKey}

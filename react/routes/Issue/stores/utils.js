@@ -1,10 +1,5 @@
-import React from 'react';
+import { castArray } from 'lodash';
 import { toJS } from 'mobx';
-import { observer } from 'mobx-react-lite';
-import { Button } from 'choerodon-ui';
-import openBatchDeleteModal from '@/components/BatchDeleteConfirm';
-import Modal from '../components/Modal';
-import BatchModal from '../components/BatchModal';
 
 function transformSystemFilter(data) {
   const {
@@ -14,10 +9,10 @@ function transformSystemFilter(data) {
     priorityId,
     issueIds,
     quickFilterIds,
-    createDate = [],
-    updateDate = [],
-    estimatedStartTime = [],
-    estimatedEndTime = [],
+    createDate,
+    updateDate,
+    estimatedStartTime,
+    estimatedEndTime,
     contents,
     component,
     epic,
@@ -37,7 +32,9 @@ function transformSystemFilter(data) {
     updatorIds,
     environment,
     appVersion,
+    tags,
   } = data;
+
   return {
     advancedSearchArgs: {
       issueTypeId,
@@ -65,16 +62,17 @@ function transformSystemFilter(data) {
       creatorIds,
       updatorIds,
       appVersion,
+      tags,
     },
     searchArgs: {
-      estimatedStartTimeScopeStart: estimatedStartTime[0],
-      estimatedStartTimeScopeEnd: estimatedStartTime[1],
-      estimatedEndTimeScopeStart: estimatedEndTime[0],
-      estimatedEndTimeScopeEnd: estimatedEndTime[1],
-      createStartDate: createDate[0],
-      createEndDate: createDate[1],
-      updateStartDate: updateDate[0],
-      updateEndDate: updateDate[1],
+      estimatedStartTimeScopeStart: estimatedStartTime ? estimatedStartTime[0] ?? null : undefined,
+      estimatedStartTimeScopeEnd: estimatedStartTime ? estimatedStartTime[1] ?? null : undefined,
+      estimatedEndTimeScopeStart: estimatedEndTime ? estimatedEndTime[0] ?? null : undefined,
+      estimatedEndTimeScopeEnd: estimatedEndTime ? estimatedEndTime[1] ?? null : undefined,
+      createStartDate: createDate ? createDate[0] ?? null : undefined,
+      createEndDate: createDate ? createDate[1] ?? null : undefined,
+      updateStartDate: updateDate ? updateDate[0] ?? null : undefined,
+      updateEndDate: updateDate ? updateDate[1] ?? null : undefined,
     },
     quickFilterIds,
     contents,
@@ -93,7 +91,7 @@ export function transformFilter(chosenFields) {
   for (const [code, field] of chosenFields) {
     const { fieldType, id } = field;
     const value = toJS(field.value);
-    if (value === undefined || value === null || value === '') {
+    if (value === undefined) {
       // eslint-disable-next-line no-continue
       continue;
     }
@@ -110,13 +108,10 @@ export function transformFilter(chosenFields) {
       case 'checkbox':
       case 'multiMember':
       case 'member': {
-        const v = Array.isArray(value) ? value : [value];
-        if (v.length > 0) {
-          customField.option.push({
-            fieldId: id,
-            value: v,
-          });
-        }
+        customField.option.push({
+          fieldId: id,
+          value: value ? castArray(value) : value,
+        });
         break;
       }
       case 'input': {
@@ -147,20 +142,18 @@ export function transformFilter(chosenFields) {
       case 'time':
       case 'datetime':
       case 'date': {
-        if (value && value.length > 0) {
-          if (fieldType === 'time') {
-            customField.date_hms.push({
-              fieldId: id,
-              startDate: value[0],
-              endDate: value[1],
-            });
-          } else {
-            customField.date.push({
-              fieldId: id,
-              startDate: value[0],
-              endDate: value[1],
-            });
-          }
+        if (fieldType === 'time') {
+          customField.date_hms.push({
+            fieldId: id,
+            startDate: value ? value[0] : value,
+            endDate: value ? value[1] : value,
+          });
+        } else {
+          customField.date.push({
+            fieldId: id,
+            startDate: value ? value[0] : value,
+            endDate: value ? value[1] : value,
+          });
         }
         break;
       }
@@ -170,107 +163,4 @@ export function transformFilter(chosenFields) {
   const filter = transformSystemFilter(systemFilter);
   filter.otherArgs.customField = customField;
   return filter;
-}
-
-let modal;
-function Header({
-  dataSet, close, onClickEdit, onClickDelete, hasBatchDeletePermission,
-}) {
-  return (
-    <>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span style={{
-          fontSize: '30px', fontWeight: 500, marginRight: 12, color: '#FFFFFF',
-        }}
-        >
-          {`${dataSet.selected.length}`}
-        </span>
-        <span style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.8)', marginTop: 5 }}>项已选中</span>
-      </div>
-      <div style={{
-        marginLeft: 'auto', height: 56, display: 'flex', alignItems: 'center',
-      }}
-      >
-        {
-          hasBatchDeletePermission && (
-            <div style={{
-              display: 'inline-block', height: 56, lineHeight: '56px', borderRight: '1px solid #95A5FF',
-            }}
-            >
-              <Button
-                icon="mode_edit"
-                style={{ color: 'white', marginRight: 6 }}
-                onClick={onClickEdit}
-              >
-                批量编辑
-              </Button>
-              <Button
-                icon="delete_forever"
-                style={{ color: 'white', marginRight: 18 }}
-                onClick={onClickDelete}
-              >
-                批量删除
-              </Button>
-            </div>
-          )
-        }
-        <Button
-          icon="close"
-          shape="circle"
-          style={{ color: 'white', marginRight: -10, marginLeft: 10 }}
-          onClick={close}
-        />
-      </div>
-    </>
-  );
-}
-const ObserverHeader = observer(Header);
-export function handleSelect({ dataSet }, issueSearchStore, hasBatchDeletePermission) {
-  const close = () => {
-    dataSet.unSelectAll();
-    issueSearchStore.setBatchAction(undefined);
-  };
-  if (!hasBatchDeletePermission) {
-    issueSearchStore.setBatchAction('edit');
-  }
-  modal = Modal.open({
-    key: 'modal',
-    header: <ObserverHeader
-      dataSet={dataSet}
-      modal={modal}
-      close={() => {
-        modal.close();
-        close();
-      }}
-      onClickEdit={() => {
-        issueSearchStore.setBatchAction('edit');
-      }}
-      onClickDelete={() => {
-        modal.close();
-        issueSearchStore.setBatchAction('delete');
-        openBatchDeleteModal({ dataSet, close });
-      }}
-      hasBatchDeletePermission={hasBatchDeletePermission}
-    />,
-    content: <BatchModal
-      dataSet={dataSet}
-      modal={modal}
-      fields={issueSearchStore.fields}
-      onCancel={() => {
-        modal.close();
-        close();
-      }}
-      onEdit={() => {
-        modal.close();
-        close();
-        dataSet.query();
-      }}
-      issueSearchStore={issueSearchStore}
-    />,
-  });
-}
-export function handleUnSelect({ dataSet }) {
-  if (dataSet.selected.length === 0 && modal) {
-    modal.close();
-  }
 }

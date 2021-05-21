@@ -73,8 +73,8 @@ const ReportBlock: React.FC<Props> = (props) => {
         <span className={styles.title}>{title}</span>
         {!isPreview && (
           <div className={styles.operation}>
-            <Button icon="mode_edit" color={'blue' as ButtonColor} onClick={handleEdit}>编辑</Button>
-            <Button icon="delete" color={'blue' as ButtonColor} onClick={handleDelete}>删除</Button>
+            <Button icon="mode_edit" onClick={handleEdit} />
+            <Button icon="delete" onClick={handleDelete} />
           </div>
         )}
       </div>

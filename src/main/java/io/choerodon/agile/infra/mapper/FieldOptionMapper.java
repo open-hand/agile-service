@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.FieldOptionDTO;
 import io.choerodon.mybatis.common.BaseMapper;
+
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -38,4 +39,15 @@ public interface FieldOptionMapper extends BaseMapper<FieldOptionDTO> {
      * @return
      */
     List<FieldOptionDTO> selectByOptionIds(@Param("organizationId") Long organizationId, @Param("optionIds") List<Long> optionIds);
+
+    /**
+     * 根据fieldId和value查询option
+     *
+     * @param organizationId 组织id
+     * @param fieldId        field id
+     * @param searchValue    搜索参数
+     * @param selected       已选择的选项
+     * @return option
+     */
+    List<FieldOptionDTO> selectByFieldIdAndValue(@Param("organizationId") Long organizationId, @Param("fieldId") Long fieldId, @Param("searchValue") String searchValue, @Param("selected") List<Long> selected);
 }

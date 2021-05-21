@@ -1,0 +1,31 @@
+.field {
+  display: flex;
+  flex-shrink: 0;
+  // max-width: 50%;
+  // min-height: 32px;
+  align-items: center;
+  margin-bottom: .08rem;
+  color: rgba(0, 0, 0, 0.65);
+
+  & >div {
+    color: rgba(0, 0, 0, 1);
+  }
+
+  .label {
+    font-size: 0.13rem;
+    line-height: 0.2rem;
+    font-family: PingFangSC-Medium, PingFang SC;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+    flex-shrink: 0;
+    margin-right: .04rem;
+  }
+
+  .text {
+    padding-left: .05rem;
+  }
+
+  &:not(:last-child) {
+    margin-right: .3rem;
+  }
+}

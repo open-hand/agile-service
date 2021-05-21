@@ -5,6 +5,7 @@ import {
 import { find, isEmpty, set } from 'lodash';
 import { store, stores, Choerodon } from '@choerodon/boot';
 import { workCalendarApi, statusApi, boardApi } from '@/api';
+import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
 
 const { AppState } = stores;
 
@@ -313,9 +314,24 @@ class ScrumBoardStore {
   clickIssueMap = observable.map();
 
   @action setClickedIssue(issueId) {
-    if (!this.clickIssueMap.has(issueId)) {
-      this.clickIssueMap.clear();
-      this.clickIssueMap.set(issueId, true);
+    const setData = () => {
+      if (!this.clickIssueMap.has(issueId)) {
+        this.clickIssueMap.clear();
+        this.clickIssueMap.set(issueId, true);
+      }
+    };
+
+    if (!this.detailProps.descriptionChanged) {
+      setData();
+    } else {
+      openDescriptionConfirm({
+        onOk: () => {
+          setData();
+          if (this.detailProps.setDescriptionChanged) {
+            this.detailProps.setDescriptionChanged(false);
+          }
+        },
+      });
     }
   }
 
@@ -325,6 +341,12 @@ class ScrumBoardStore {
 
   @computed get getCurrentClickId() {
     return [...this.clickIssueMap.keys()][0];
+  }
+
+  @observable detailProps = {};
+
+  @action setDetailProps = (data) => {
+    this.detailProps = data;
   }
 
   @action setMoveOverRef(data) {

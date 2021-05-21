@@ -1,7 +1,9 @@
+/* eslint-disable react/jsx-indent */
 import React, { useState, useEffect } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import {
   Button, Modal, Spin, message, Select, Tooltip,
 } from 'choerodon-ui/pro/lib';
@@ -32,13 +34,22 @@ import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
 import { transformDefaultValue, beforeSubmitTransform } from './utils';
 
-const TooltipButton: React.FC<{ title?: string } & Omit<ButtonProps, 'title'>> = ({
-  title, children, disabled, ...otherProps
+const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
+  title, children, buttonIcon, buttonDisabled, clickEvent, ...otherProps
 }) => {
-  if (title && disabled) {
-    return <Tooltip title={title}><Button disabled={disabled} {...omit(otherProps, 'onClick')}>{children}</Button></Tooltip>;
+  if (title && buttonDisabled) {
+    return <Tooltip title={title}><Button {...omit(otherProps, 'onClick')} icon={buttonIcon} disabled={buttonDisabled}>{children}</Button></Tooltip>;
   }
-  return <Button {...otherProps}>{children}</Button>;
+  return (
+    <Button
+      {...otherProps}
+      onClick={clickEvent}
+      icon={buttonIcon}
+      disabled={buttonDisabled}
+    >
+      {children}
+    </Button>
+  );
 };
 type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: number, localDefaultObj: any, defaultValueObj: any, };
 function PageIssueType() {
@@ -195,7 +206,7 @@ function PageIssueType() {
       formatMessage: intl.formatMessage,
       schemeCode: 'agile_issue',
       onSubmitLocal,
-      defaultContext: [pageIssueTypeStore.getCurrentIssueType],
+      defaultContext: [{ code: pageIssueTypeStore.getCurrentIssueType, disabled: true }],
       localCheckCode: async (str: string) => !!checkCodeOrName('code', str),
       localCheckName: async (str: string) => !!checkCodeOrName('name', str),
     };
@@ -213,16 +224,24 @@ function PageIssueType() {
     <Page>
       <Prompt message={`是否放弃更改 ${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageIssueTypeStore.getDirty} />
       <Header>
-        <TooltipButton title="该问题类型已停用，无法创建字段" disabled={!pageIssueTypeStore.currentIssueType.enabled} icon="playlist_add" onClick={openCreateFieldModal}>创建字段</TooltipButton>
-        <TooltipButton
-          icon="add"
-          title="该问题类型已停用，无法添加已有字段"
-          disabled={!pageIssueTypeStore.currentIssueType.enabled}
-          onClick={() => openAddField(addUnselectedDataSet,
-            pageIssueTypeStore, onSubmitLocal, onRestoreLocal)}
-        >
-          添加已有字段
-        </TooltipButton>
+        <HeaderButtons items={[
+          {
+            display: true,
+            element: <TooltipButton title="该问题类型已停用，无法创建字段" buttonDisabled={!pageIssueTypeStore.currentIssueType.enabled} buttonIcon="playlist_add" clickEvent={openCreateFieldModal}>创建字段</TooltipButton>,
+          }, {
+            display: true,
+            element: <TooltipButton
+              buttonIcon="add"
+              title="该问题类型已停用，无法添加已有字段"
+              buttonDisabled={!pageIssueTypeStore.currentIssueType.enabled}
+              clickEvent={() => openAddField(addUnselectedDataSet,
+                pageIssueTypeStore, onSubmitLocal, onRestoreLocal)}
+            >
+              添加已有字段
+                     </TooltipButton>,
+          },
+        ]}
+        />
       </Header>
       <Breadcrumb />
       <Content className={`${prefixCls}-content`} style={{ overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -230,21 +249,21 @@ function PageIssueType() {
         <Loading loading={pageIssueTypeStore.getLoading} />
         <div className={styles.top}>
           {
-              !isProject ? <SortTable />
-                : [
-                  <IssueTypeWrap title="字段配置">
-                    <SortTable />
-                  </IssueTypeWrap>,
-                  <IssueTypeWrap title="描述信息格式">
-                    <PageDescription />
-                  </IssueTypeWrap>]
-            }
+            !isProject ? <SortTable />
+              : [
+                <IssueTypeWrap title="字段配置">
+                  <SortTable />
+                </IssueTypeWrap>,
+                <IssueTypeWrap title="描述信息格式">
+                  <PageDescription />
+                </IssueTypeWrap>]
+          }
         </div>
         <div className={styles.bottom}>
           <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageIssueTypeStore.getDirty} loading={btnLoading} onClick={handleSubmit}>
             保存
           </Button>
-          <Button funcType={'raised' as FuncType} onClick={pageIssueTypeStore.loadData}>
+          <Button funcType={'raised' as FuncType} disabled={!pageIssueTypeStore.getDirty} onClick={pageIssueTypeStore.loadData}>
             取消
           </Button>
         </div>

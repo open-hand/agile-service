@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Tooltip, Icon } from 'choerodon-ui/pro';
+import { Tooltip, Icon, Select } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import styles from './index.less';
 
+const { Option } = Select;
 const ListIcon = ({ className = '', onClick }: { className: string, onClick: () => void }) => (
   <div role="none" className={className} onClick={onClick}>
     <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="776" width="200" height="200">
@@ -19,7 +20,7 @@ interface Props {
   treeText?: string
 }
 const TreeListSwitch: React.FC<Props> = ({
-  data: propsData, onChange, disabled, className, listText, treeText,
+  data: propsData, onChange, disabled, className, listText, treeText, ...otherProps
 }) => {
   const [data, setData] = useState(() => propsData);
   useEffect(() => {
@@ -34,13 +35,11 @@ const TreeListSwitch: React.FC<Props> = ({
     });
   };
   return (
-    <div className={classnames(styles.switch, className)}>
-      <span role="none" onClick={() => handleChange('list')} className={classnames(styles.span, styles.span_list, data === 'list' ? styles.selected : undefined, { [styles.disabled]: disabled })}>
-        {listText || '列表视图'}
-      </span>
-      <span role="none" onClick={() => handleChange('tree')} className={classnames(styles.span, styles.span_tree, data === 'tree' ? styles.selected : undefined, { [styles.disabled]: disabled })}>
-        {treeText || '树形视图'}
-      </span>
+    <div className={classnames(styles.switch, className)} {...otherProps}>
+      <Select onChange={handleChange} value={data} clearButton={false}>
+        <Option value="list" key="list" disabled={disabled}>{listText || '列表视图'}</Option>
+        <Option value="tree" key="tree" disabled={disabled}>{treeText || '树形视图'}</Option>
+      </Select>
     </div>
   );
 };

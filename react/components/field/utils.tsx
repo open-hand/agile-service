@@ -13,7 +13,7 @@ import SelectComponent from '@/components/select/select-component';
 import SelectVersion from '@/components/select/select-version';
 import SelectSubProject from '@/components/select/select-sub-project';
 import SelectUser from '@/components/select/select-user';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import SelectStatus from './components/StatusField';
 import FeatureProjectField from './components/FeatureProjectField';
 import PIField from './components/pi-field';

@@ -1,14 +1,18 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { handleFileUpload } from '@/utils/richText';
+import { Tooltip } from 'choerodon-ui';
 import { getProjectId } from '@/utils/common';
+import ChunkUploader from '@/components/chunk-uploader';
 import { UploadButtonNow } from '../../../CommonComponent';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
+// eslint-disable-next-line no-underscore-dangle
+const { API_HOST } = window._env_;
+
 const IssueAttachment = observer((props) => {
-  const { reloadIssue, hasPermission } = props;
-  const { store, disabled } = useContext(EditIssueContext);
+  const { reloadIssue, hasPermission = true } = props;
+  const { store, disabled = false } = useContext(EditIssueContext);
   const { issueId, issueAttachmentVOList = [] } = store.getIssue;
   const initialFileList = issueAttachmentVOList.map((issueAttachment) => ({
     uid: issueAttachment.attachmentId,
@@ -26,21 +30,6 @@ const IssueAttachment = observer((props) => {
     }
   };
 
-  /**
-   * 上传附件
-   * @param arr
-   */
-  const onChangeFileList = (arr) => {
-    if (arr.length > 0 && arr.some((one) => !one.url)) {
-      const config = {
-        issueId,
-        fileName: arr[0].name || 'AG_ATTACHMENT',
-        projectId: getProjectId(),
-      };
-      handleFileUpload(arr, refresh, config);
-    }
-  };
-
   return (
     <div id="attachment">
       <Divider />
@@ -48,8 +37,32 @@ const IssueAttachment = observer((props) => {
         <div className="c7n-title-left">
           <span>附件</span>
         </div>
+        {
+        (hasPermission && !disabled) ? (
+          <div className="c7n-title-right">
+            <Tooltip title="上传附件">
+              <div>
+                <ChunkUploader
+                  prefixPatch="/hfle"
+                  showUploadList={false}
+                  fileList={fileList}
+                  setFileList={setFileList}
+                  combine={{
+                    url: `${API_HOST}/agile/v1/projects/${getProjectId()}/issue_attachment/combine`,
+                    requestData: {
+                      issueId,
+                    },
+                  }}
+                />
+              </div>
+            </Tooltip>
+          </div>
+        ) : (
+          <div style={{ height: 32 }} />
+        )
+      }
       </div>
-      <div className="c7n-content-wrapper" style={{ marginTop: '-47px', justifyContent: 'flex-end' }}>
+      <div className="c7n-content-container">
         <UploadButtonNow
           fileList={fileList}
           setFileList={setFileList}

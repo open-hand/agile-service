@@ -4,10 +4,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Choerodon } from '@choerodon/boot';
 import {
-  Button, Icon, Dropdown, Input, Menu, Form, Tooltip,
+  Icon, Dropdown, Input, Menu, Form,
 } from 'choerodon-ui';
-import { debounce, isEmpty } from 'lodash';
-import { getProjectId } from '@/utils/common';
+import { Button } from 'choerodon-ui/pro';
+import { debounce } from 'lodash';
 import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { fields2Map } from '@/utils/defaultValue';
@@ -63,7 +63,7 @@ class QuickCreateIssue extends Component {
   handleCreate = debounce(() => {
     const { currentTypeId } = this.state;
     const {
-      form, issueTypes, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram,
+      form, issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram, cantCreateEvent,
     } = this.props;
     form.validateFields(async (err, values) => {
       const { summary } = values;
@@ -74,10 +74,28 @@ class QuickCreateIssue extends Component {
           });
           const currentType = issueTypes.find((t) => t.id === currentTypeId);
           if (!await checkCanQuickCreate(currentType.id)) { //
-            Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
-            this.setState({
-              loading: false,
-            });
+            if (!cantCreateEvent) {
+              Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
+              this.setState({
+                loading: false,
+              });
+            } else {
+              Choerodon.prompt('请填写标注的必填字段');
+              if (this.props.summaryChange) {
+                this.props.summaryChange(summary);
+              }
+              if (this.props.typeIdChange) {
+                this.props.typeIdChange(currentType.id);
+              }
+              if (this.props.setDefaultSprint) {
+                this.props.setDefaultSprint(sprintId);
+              }
+              this.setState({
+                loading: false,
+                create: false,
+              });
+              cantCreateEvent();
+            }
             return;
           }
           const {
@@ -97,6 +115,7 @@ class QuickCreateIssue extends Component {
               featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
               assigneeId: defaultAssignee,
               epicId,
+              relateIssueId,
               versionIssueRelVOList: propsVersionIssueRelVOList,
               sprintId,
               summary,
@@ -133,11 +152,26 @@ class QuickCreateIssue extends Component {
     leading: true,
   });
 
+  handleCancel = () => {
+    this.setState({
+      create: false,
+    });
+    if (this.props.typeIdChange) {
+      this.props.typeIdChange(undefined);
+    }
+    if (this.props.summaryChange) {
+      this.props.summaryChange(undefined);
+    }
+    if (this.props.setDefaultSprint) {
+      this.props.setDefaultSprint(undefined);
+    }
+  };
+
   render() {
     const {
       create, loading, currentTypeId,
     } = this.state;
-    const { issueTypes, form: { getFieldDecorator } } = this.props;
+    const { issueTypes, buttonShowText, form: { getFieldDecorator } } = this.props;
     const currentType = issueTypes.find((t) => t.id === currentTypeId);
 
     const typeList = (
@@ -205,8 +239,8 @@ class QuickCreateIssue extends Component {
                     )}
                   </FormItem>
                   <Button
+                    color="primary"
                     funcType="raised"
-                    type="primary"
                     disabled={this.props.issueTypes.length === 0}
                     // htmlType="submit"
                     onClick={this.handleCreate}
@@ -217,11 +251,7 @@ class QuickCreateIssue extends Component {
                   </Button>
                   <Button
                     funcType="raised"
-                    onClick={() => {
-                      this.setState({
-                        create: false,
-                      });
-                    }}
+                    onClick={this.handleCancel}
                   >
                     取消
                   </Button>
@@ -230,7 +260,7 @@ class QuickCreateIssue extends Component {
             </Form>
           ) : (
             <Button
-              type="primary"
+              funcType="flat"
               icon="playlist_add"
               disabled={this.props.issueTypes.length === 0}
               onClick={() => {
@@ -241,7 +271,7 @@ class QuickCreateIssue extends Component {
                 });
               }}
             >
-              创建问题
+              {buttonShowText || '创建问题'}
             </Button>
           )
         }

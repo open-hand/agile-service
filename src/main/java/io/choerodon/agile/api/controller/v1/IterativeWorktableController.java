@@ -96,4 +96,17 @@ public class IterativeWorktableController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.queryIssueTypeDistribute.get"));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("迭代冲刺台查询活跃冲刺经办人工作量")
+    @GetMapping(value = "/personal_workload")
+    public ResponseEntity<List<AssigneeIssueVO>> queryPersonWorkload(@ApiParam(value = "项目id", required = true)
+                                                                     @PathVariable(name = "project_id") Long projectId,
+                                                                     @ApiParam(value = "冲刺id", required = true)
+                                                                     @RequestParam @Encrypt Long sprintId,
+                                                                     @ApiParam(value = "组织id", required = true)
+                                                                     @RequestParam Long organizationId) {
+        return ResponseEntity.ok(iterativeWorktableService.queryPersonWorkload(projectId, sprintId, organizationId));
+    }
+
 }

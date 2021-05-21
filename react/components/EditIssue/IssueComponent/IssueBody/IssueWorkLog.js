@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Icon, Button, Tooltip } from 'choerodon-ui';
+import { Icon, Button, Tooltip } from 'choerodon-ui/pro';
 import { FormattedMessage } from 'react-intl';
 import Log from '../../Component/Log';
 import EditIssueContext from '../../stores';
@@ -39,7 +39,7 @@ const IssueWorkLog = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="登记工作" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setWorkLogShow(true)}>
+              <Button onClick={() => store.setWorkLogShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>

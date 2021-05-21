@@ -1,14 +1,16 @@
 import React, {
   useState, useCallback, useRef, MutableRefObject,
 } from 'react';
-import { Choerodon } from '@choerodon/boot';
+import { Choerodon, Action } from '@choerodon/boot';
 import {
   Modal, Icon, Tooltip, TextField,
 } from 'choerodon-ui/pro';
+import { Tag } from '@choerodon/components';
 import { personalFilterApi } from '@/api';
 import { IPersonalFilter } from '@/components/quick-search';
 import ObserverTextField from 'choerodon-ui/pro/lib/text-field/TextField';
 import IssueStore from '@/stores/project/issue/IssueStore';
+import { useLockFn } from 'ahooks';
 
 interface Props {
   data: IPersonalFilter
@@ -16,7 +18,9 @@ interface Props {
   onDelete: () => void
 }
 const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
-  const { filterId, name, objectVersionNumber } = data;
+  const {
+    filterId, name, objectVersionNumber, default: isDefault,
+  } = data;
   const [isEditing, setIsEditing] = useState(false);
   const valueRef = useRef<string>(name);
   const inputRef = useRef() as MutableRefObject<ObserverTextField>;
@@ -66,6 +70,22 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
       okType: 'danger',
     });
   }, [filterId, name, onDelete]);
+
+  const handleSetDefault = useLockFn(async () => {
+    const updateData = {
+      objectVersionNumber,
+      name,
+      default: !isDefault,
+    };
+    try {
+      await personalFilterApi.update(filterId, updateData);
+      await onSubmit();
+      Choerodon.prompt('修改成功');
+    } catch (error) {
+      IssueStore.setLoading(false);
+      Choerodon.prompt('修改失败');
+    }
+  });
   const checkName = useCallback(async (value: string) => {
     if (name === value) {
       return true;
@@ -100,8 +120,13 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
           />
         ) : (<span>{name}</span>)
       }
+      {isDefault && (
+        <Tag style={{ marginLeft: 'auto', marginRight: 10 }} color="green" type="border">
+          默认
+        </Tag>
+      )}
       <span className="c7n-filterAction">
-        {isEditing ? (
+        {isEditing && (
           <>
             <Tooltip title="保存">
               <Icon
@@ -116,26 +141,28 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
               />
             </Tooltip>
           </>
-        ) : (
-          <>
-            <Tooltip title="修改">
-              <Icon
-                type="mode_edit"
-                onClick={() => {
-                  setIsEditing(true);
-                }}
-              />
-            </Tooltip>
-            <Tooltip title="删除">
-              <Icon
-                type="delete_forever"
-                onClick={handleDelete}
-              />
-            </Tooltip>
-          </>
         )}
-
       </span>
+      {!isEditing && (
+        <Action data={[
+          {
+            text: isDefault ? '取消默认' : '设为默认',
+            action: handleSetDefault,
+          },
+          {
+            text: '修改',
+            action: () => {
+              setIsEditing(true);
+            },
+          },
+          {
+            text: '删除',
+            action: handleDelete,
+          },
+        ]}
+        />
+      )}
+
     </li>
   );
 };

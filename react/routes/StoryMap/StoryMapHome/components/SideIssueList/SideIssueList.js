@@ -5,7 +5,7 @@ import {
 import { Select } from 'choerodon-ui/pro';
 import { observer, inject } from 'mobx-react';
 import { configTheme } from '@/utils/common';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import FiltersProvider from '../../../../../components/FiltersProvider';
 import ClickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
@@ -61,7 +61,7 @@ class SideIssueList extends Component {
     const { filters: { issueStatus, version: versionList }, HeaderStore } = this.props;
 
     return (
-      <div className="c7nagile-SideIssueList" style={{ top: HeaderStore.announcementClosed ? 49 : 99 }}>
+      <div className="c7nagile-SideIssueList" style={{ top: 99 }}>
         <div className="c7nagile-SideIssueList-header">
           <div className="c7nagile-SideIssueList-input">
             <Input

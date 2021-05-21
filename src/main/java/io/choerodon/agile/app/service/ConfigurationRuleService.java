@@ -69,7 +69,7 @@ public interface ConfigurationRuleService {
 
     List<ConfigurationRuleVO> selectByProjectId(ConfigurationRuleVO configurationRuleVO);
 
-    List<MessageSender> generateAutoRuleTriggerSender(Long userId, String summary, Collection<ConfigurationRuleVO> values, Supplier<Boolean> operator);
+    List<MessageSender> generateAutoRuleTriggerSender(String url, String summary, Collection<ConfigurationRuleVO> values, Supplier<Boolean> operator);
 
     List<Long> selectReceiverByRuleIds(List<Long> ruleIdList, List<String> types);
 

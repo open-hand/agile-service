@@ -346,9 +346,9 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         if (StringUtils.isBlank(prefixPath)) {
             return name;
         }
-        int dot = name.lastIndexOf(prefixPath);
+        int dot = name.indexOf(prefixPath);
         if ((dot > -1) && (dot < (name.length()))) {
-            return name.substring(name.lastIndexOf(prefixPath) + prefixPath.length());
+            return name.substring(name.indexOf(prefixPath) + prefixPath.length());
         }
         return name;
     }
@@ -538,15 +538,45 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     }
 
     private boolean isMessyCode(String str) {
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
-            // 当从Unicode编码向某个字符集转换时，如果在该字符集中没有对应的编码，则得到0x3f（即问号字符?）
-            // 从其他字符集向Unicode编码转换时，如果这个二进制数在该字符集中没有标识任何的字符，则得到的结果是0xfffd
-            if ((int) c == 0xfffd) {
-                // 存在乱码
-                return true;
-            }
+        boolean isUtf8 = true;
+        byte[] buffer;
+        try {
+            buffer = str.getBytes("GBK");
+        }catch (Exception e){
+            return false;
         }
-        return false;
+        int end = buffer.length;
+        int i = 0;
+        while (i < end) {
+            boolean isBreak = true;
+            byte temp = buffer[i];
+            if ((temp & 0x80) == 0) {
+                isBreak = false;
+            } else if ((temp & 0xC0) == 0xC0 && (temp & 0x20) == 0) {
+                if (i + 1 < end && (buffer[i + 1] & 0x80) == 0x80 && (buffer[i + 1] & 0x40) == 0) {
+                    i = i + 1;
+                    isBreak = false;
+                }
+            } else if ((temp & 0xE0) == 0xE0 && (temp & 0x10) == 0) {
+                if (i + 2 < end && (buffer[i + 1] & 0x80) == 0x80 && (buffer[i + 1] & 0x40) == 0
+                        && (buffer[i + 2] & 0x80) == 0x80 && (buffer[i + 2] & 0x40) == 0) {
+                    i = i + 2;
+                    isBreak = false;
+                }
+            } else if ((temp & 0xF0) == 0xF0 && (temp & 0x08) == 0) {
+                if (i + 3 < end && (buffer[i + 1] & 0x80) == 0x80 && (buffer[i + 1] & 0x40) == 0
+                        && (buffer[i + 2] & 0x80) == 0x80 && (buffer[i + 2] & 0x40) == 0
+                        && (buffer[i + 3] & 0x80) == 0x80 && (buffer[i + 3] & 0x40) == 0) {
+                    i = i + 3;
+                    isBreak = false;
+                }
+            }
+            if (isBreak) {
+                isUtf8 = false;
+                break;
+            }
+            i = i + 1;
+        }
+        return isUtf8;
     }
 }

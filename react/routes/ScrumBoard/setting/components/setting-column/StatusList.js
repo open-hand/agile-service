@@ -19,7 +19,7 @@ function StatusList({ data, isDragDisabled }) {
               minHeight: 300,
             }}
           >
-            {data.subStatusDTOS.map((status, index) => (
+            {(data.subStatusDTOS.length > 0 || snapshot.isDraggingOver) ? data.subStatusDTOS.map((status, index) => (
               <StatusCard
                 isDragDisabled={isDragDisabled}
                 key={status.id}
@@ -28,7 +28,15 @@ function StatusList({ data, isDragDisabled }) {
                 index={index}
                 refresh={() => {}}
               />
-            ))}
+            )) : (
+              <>
+                {
+                  data.columnId !== '0' && (
+                    <div className="c7n-scrumsetting-column-noStatusTip">缺少状态，至少为列分配一个状态，否则该列将不能显示在看板上</div>
+                  )
+                }
+              </>
+            )}
             {provided.placeholder}
           </div>
         )}

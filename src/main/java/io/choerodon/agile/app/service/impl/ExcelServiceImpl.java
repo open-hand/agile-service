@@ -5,9 +5,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
@@ -24,7 +29,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -36,6 +40,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -90,14 +95,14 @@ public class ExcelServiceImpl implements ExcelService {
     private static final String EXCELCONTENTTYPE = "application/vnd.ms-excel";
     private static final String FILESUFFIX = ".xlsx";
     protected static final String DOWNLOAD_FILE = "download_file";
-    protected static final String DOWNLOAD_FILE_PI = "download_file_pi";
-    protected static final String DOWNLOAD_FILE_ISSUE_ANALYSIS = "download_file_issue_analysis";
+    private static final String DOWNLOAD_FILE_PUBLISH_VERSION = "download_file_publish_version";
     private static final String EXPORT_ERROR_WORKBOOK_CLOSE = "error.issue.close.workbook";
     private static final String PROJECT_ERROR = "error.project.notFound";
     private static final String FIX_RELATION_TYPE = "fix";
     private static final String INFLUENCE_RELATION_TYPE = "influence";
     private static final String UPLOAD_FILE_CUSTOM_FIELD = "upload_file_customer_field";
     private static final String WEBSOCKET_IMPORT_CUSTOM_FIELD_CODE = "agile-import-customer-field-";
+    private static final String WEBSOCKET_EXPORT_PUBLISH_VERSION = "agile-export-publish-version";
 
     protected static final String VERSION_PLANNING = "version_planning";
 
@@ -108,7 +113,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private static final String SUB_BUG_CN = "子缺陷";
 
-    private static final String COLON_CN = "：";
+    protected static final String COLON_CN = "：";
 
     private static final int PREDEFINED_VALUE_START_ROW = 1;
     private static final int PREDEFINED_VALUE_END_ROW = 500;
@@ -180,6 +185,12 @@ public class ExcelServiceImpl implements ExcelService {
     protected WorkLogMapper workLogMapper;
     @Autowired
     private StatusMapper statusMapper;
+    @Autowired
+    private PublishVersionMapper publishVersionMapper;
+    @Autowired
+    private PublishVersionTreeClosureMapper publishVersionTreeClosureMapper;
+    @Autowired
+    protected TagIssueRelMapper tagIssueRelMapper;
 
     private static final String[] FIELDS_NAMES;
 
@@ -308,7 +319,7 @@ public class ExcelServiceImpl implements ExcelService {
         List<String> result = new ArrayList<>();
         systemFields.forEach(s -> {
             String title = ExcelImportTemplate.IssueHeader.getValueByCode(s);
-            if (!StringUtils.hasText(title)) {
+            if (StringUtils.isEmpty(title)) {
                 throw new CommonException("error.excel.header.code." + s);
             }
             result.add(title);
@@ -316,7 +327,7 @@ public class ExcelServiceImpl implements ExcelService {
         if (!ObjectUtils.isEmpty(customFields)) {
             customFields.forEach(c -> {
                 String title = customFieldCodeNameMap.get(c);
-                if (!StringUtils.hasText(title)) {
+                if (StringUtils.isEmpty(title)) {
                     throw new CommonException("error.excel.header.custom.field.code." + c);
                 }
                 result.add(title);
@@ -802,7 +813,8 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     @Async
-    public void batchImportObjectSchemeField(Long organizationId, Long projectId, Workbook workbook, RequestAttributes requestAttributes) {
+    public void batchImportObjectSchemeField(Long organizationId, Long projectId, InputStream inputStream, RequestAttributes requestAttributes) {
+        Workbook workbook = ExcelUtil.getWorkbookFromInputStream(ExcelUtil.Mode.XSSF, inputStream);
         RequestContextHolder.setRequestAttributes(requestAttributes);
 
         Long userId = DetailsHelper.getUserDetails().getUserId();
@@ -892,6 +904,236 @@ public class ExcelServiceImpl implements ExcelService {
         sendProcess(result, result.getUserId(), 100.0, socketKey);
     }
 
+    @Override
+    @Async
+    public void exportPublishVersion(Long projectId,
+                                     Set<Long> publishVersionIds,
+                                     Boolean withSubVersion,
+                                     ServletRequestAttributes requestAttributes) {
+        RequestContextHolder.setRequestAttributes(requestAttributes);
+        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        String projectCode = project.getCode();
+        Map<Long, String> projectCodeMap = new HashMap<>();
+        projectCodeMap.put(projectId, projectCode);
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        String websocketKey = WEBSOCKET_EXPORT_PUBLISH_VERSION + "-" + projectId;
+        FileOperationHistoryDTO history =
+                initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE_PUBLISH_VERSION, websocketKey);
+        try {
+            validatePublishVersion(projectId, publishVersionIds, userId, history);
+            List<PublishVersionDTO> publishVersions = new ArrayList<>();
+            processPublishVersions(projectId, organizationId, publishVersionIds, publishVersions);
+            int total = publishVersions.size();
+            int current = 1;
+            Workbook workbook = new SXSSFWorkbook(100);
+            Map<Long, IssueListFieldKVVO> issueMap = new HashMap<>();
+            Map<Long, Set<TagVO>> issueTagMap = new HashMap<>();
+            Map<Long, Set<PublishVersionDTO>> issuePublishVersionMap = new HashMap<>();
+            Map<Long, Set<Long>> parentSonMap = new HashMap<>();
+            String sheetName = "汇总";
+            Sheet sheet = workbook.createSheet(sheetName);
+            sheet.setDefaultColumnWidth(13);
+            sheet.setColumnWidth(1, 8000);
+            sheet.setColumnWidth(5, 8000);
+            for (PublishVersionDTO publishVersion : publishVersions) {
+                writePublishVersionData(projectCodeMap, organizationId, workbook, publishVersion, withSubVersion, issueMap, issueTagMap, issuePublishVersionMap, parentSonMap);
+                sendProcess(history, userId, getProcess(current, total), websocketKey);
+                current++;
+            }
+            ExcelUtil.writePublishVersionData(workbook, sheetName, issueMap, 0, issueTagMap, projectCodeMap, parentSonMap, issuePublishVersionMap);
+            String fileName = projectCode + "发布版本" + FILESUFFIX;
+            //把workbook上传到对象存储服务中
+            downloadWorkBook(organizationId, workbook, fileName, history, userId);
+        } catch (Exception e) {
+            history.setStatus(FAILED);
+            fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
+            history.setMsg(e.getMessage());
+            sendProcess(history, userId, 0D, websocketKey);
+            LOGGER.error("export publish version failed, exception: {}", e);
+        }
+    }
+
+    protected void writePublishVersionData(Map<Long, String> projectCodeMap,
+                                           Long organizationId,
+                                           Workbook workbook,
+                                           PublishVersionDTO publishVersion,
+                                           Boolean withSubVersion,
+                                           Map<Long, IssueListFieldKVVO> issueMap,
+                                           Map<Long, Set<TagVO>> issueTagMap,
+                                           Map<Long, Set<PublishVersionDTO>> issuePublishVersionMap,
+                                           Map<Long, Set<Long>> parentSonMap) {
+        Long projectId = publishVersion.getProjectId();
+        String projectCode = projectCodeMap.get(projectId);
+        String version = publishVersion.getVersionAlias();
+        String sheetName;
+        if (ObjectUtils.isEmpty(version)) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH-mm-ss-SSS");
+            sheetName = sdf.format(new Date());
+        } else {
+            sheetName = projectCode + "#" + version;
+        }
+        List<TagVO> tagList = publishVersion.getTags();
+        if (!ObjectUtils.isEmpty(tagList)) {
+            Map<TagVO, String> tagAliasMap = new HashMap<>();
+            tagList.forEach(x -> tagAliasMap.put(x, x.getAlias()));
+            Map<Long, Set<TagVO>> thisIssueTagMap = new HashMap<>();
+            Map<Long, IssueListFieldKVVO> thisIssueMap = new HashMap<>();
+            Map<Long, Set<PublishVersionDTO>> thisIssuePublishVersionMap = new HashMap<>();
+            Set<Long> allIssueIds = new HashSet<>();
+            List<TagIssueRelDTO> tagIssueRelList =
+                    tagIssueRelMapper.selectByTags(new HashSet<>(tagList), projectCodeMap.keySet());
+            tagIssueRelList.forEach(x -> {
+                TagVO tag = new TagVO();
+                tag.setTagName(x.getTagName());
+                tag.setAppServiceCode(x.getAppServiceCode());
+                tag.setProjectId(x.getTagProjectId());
+                String alias = tagAliasMap.get(tag);
+                if (!StringUtils.isEmpty(alias)) {
+                    tag.setAlias(alias);
+                }
+                Set<Long> issueIds = tag.getIssueIds();
+                if (issueIds == null) {
+                    issueIds = new HashSet<>();
+                }
+                issueIds.add(x.getIssueId());
+                Set<TagVO> thisTagSet = thisIssueTagMap.computeIfAbsent(x.getIssueId(), y -> new HashSet<>());
+                thisTagSet.add(tag);
+                Set<TagVO> tagSet = issueTagMap.computeIfAbsent(x.getIssueId(), y -> new HashSet<>());
+                tagSet.add(tag);
+                allIssueIds.add(x.getIssueId());
+            });
+            if (!allIssueIds.isEmpty()) {
+                processIssueMapByIds(projectId, organizationId, allIssueIds, thisIssueMap);
+            }
+            Map<Long, Set<Long>> thisParentSonMap = new HashMap<>();
+            thisIssueMap.forEach((k, v) -> {
+                IssueListFieldKVVO vo = issueMap.get(k);
+                if (vo == null) {
+                    issueMap.put(k, v);
+                }
+
+                Set<PublishVersionDTO> publishVersionSet = issuePublishVersionMap.computeIfAbsent(k, y -> new HashSet<>());
+                publishVersionSet.add(publishVersion);
+                Set<PublishVersionDTO> thisPublishVersionSet = thisIssuePublishVersionMap.computeIfAbsent(k, y -> new HashSet<>());
+                thisPublishVersionSet.add(publishVersion);
+                Long parentId = v.getParentId();
+                if (parentId != null && !Objects.equals(0L, parentId)) {
+                    Set<Long> thisSonSet = thisParentSonMap.computeIfAbsent(parentId, y -> new HashSet<>());
+                    thisSonSet.add(k);
+                    Set<Long> sonSet = parentSonMap.computeIfAbsent(parentId, y -> new HashSet<>());
+                    sonSet.add(k);
+                }
+            });
+            if (!thisIssueMap.isEmpty() && Boolean.TRUE.equals(withSubVersion)) {
+                Map<String, String> headDataMap = buildPublishVersionHeaderDataMap(publishVersion);
+                List<CellRangeAddress> cellRangeAddresses =
+                        Arrays.asList(
+                                new CellRangeAddress(2, 3, 0, 0),
+                                new CellRangeAddress(2, 3, 1, 6)
+                        );
+                int endRow = ExcelUtil.writeSheetVersionHeader(workbook, sheetName, headDataMap, cellRangeAddresses);
+                ExcelUtil.writePublishVersionData(workbook, sheetName, thisIssueMap, endRow, thisIssueTagMap, projectCodeMap, thisParentSonMap, thisIssuePublishVersionMap);
+            }
+        }
+    }
+
+    private void processIssueMapByIds(Long projectId,
+                                      Long organizationId,
+                                      Set<Long> allIssueIds,
+                                      Map<Long, IssueListFieldKVVO> issueMap) {
+        SearchVO searchVO = new SearchVO();
+        Map<String, Object> searchArgs = new LinkedHashMap<>();
+        searchVO.setSearchArgs(searchArgs);
+        searchArgs.put("tree", true);
+        Map<String, Object> otherArgs = new LinkedHashMap<>();
+        searchVO.setOtherArgs(otherArgs);
+        otherArgs.put("issueIds", new ArrayList<>(allIssueIds));
+        PageRequest pageRequest = new PageRequest(1, 0);
+        Sort.Order order = new Sort.Order(Sort.Direction.DESC, "issueNum");
+        Sort sort = new Sort(order);
+        pageRequest.setSort(sort);
+        issueMap.putAll(
+                issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId)
+                        .getContent()
+                        .stream()
+                        .collect(Collectors.toMap(IssueListFieldKVVO::getIssueId, Function.identity())));
+    }
+
+    private Map<String, String> buildPublishVersionHeaderDataMap(PublishVersionDTO publishVersionDTO) {
+        Map<String, String> result = new LinkedHashMap<>();
+        String version = getVersion(publishVersionDTO);
+        result.put("版本名称", version);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String actualPublishDateStr = "";
+        Date actualPublishDate = publishVersionDTO.getActualPublishDate();
+        if (actualPublishDate != null) {
+            actualPublishDateStr = sdf.format(actualPublishDate);
+        }
+        result.put("发布时间", actualPublishDateStr);
+        result.put("描述", publishVersionDTO.getDescription());
+        return result;
+    }
+
+    private String getVersion(PublishVersionDTO publishVersionDTO) {
+        String version = publishVersionDTO.getVersionAlias();
+        if (StringUtils.isEmpty(version)) {
+            version = publishVersionDTO.getVersion();
+        }
+        return version;
+    }
+
+    private void processPublishVersions(Long projectId,
+                                        Long organizationId,
+                                        Set<Long> publishVersionIds,
+                                        List<PublishVersionDTO> publishVersions) {
+        Set<Long> projectIds = new HashSet<>(Arrays.asList(projectId));
+        publishVersionIds.addAll(
+                publishVersionTreeClosureMapper
+                        .selectDescendants(projectIds, organizationId, publishVersionIds, null)
+                        .stream()
+                        .map(PublishVersionTreeClosureDTO::getDescendantId)
+                        .collect(Collectors.toSet())
+        );
+        publishVersions.addAll(publishVersionMapper.selectWithTag(publishVersionIds, projectIds, organizationId));
+    }
+
+    private void validatePublishVersion(Long projectId,
+                                        Set<Long> publishVersionIds,
+                                        Long userId,
+                                        FileOperationHistoryDTO history) {
+        String msg = null;
+        if (ObjectUtils.isEmpty(publishVersionIds)) {
+            history.setStatus(FAILED);
+            msg = "error.publish.version.ids.empty";
+            history.setMsg(msg);
+        } else {
+            List<PublishVersionDTO> publishVersionList =
+                    publishVersionMapper.selectByIds(StringUtils.join(publishVersionIds, ","));
+            if (publishVersionIds.size() != publishVersionList.size()) {
+                Set<Long> existedIds =
+                        publishVersionList.stream().map(PublishVersionDTO::getId).collect(Collectors.toSet());
+                Set<Long> illegalIds = new HashSet<>();
+                publishVersionIds.forEach(x -> {
+                    if (!existedIds.contains(x)) {
+                        illegalIds.add(x);
+                    }
+                });
+                String ids = StringUtils.join(illegalIds, ",");
+
+                history.setStatus(FAILED);
+                msg = "error.publish.version.not.existed." + ids;
+                history.setMsg(msg);
+            }
+        }
+        if (msg != null) {
+            fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
+            String websocketKey = WEBSOCKET_EXPORT_PUBLISH_VERSION + "-" + projectId;
+            sendProcess(history, userId, 1D, websocketKey);
+            throw new CommonException(msg);
+        }
+    }
+
     protected String uploadErrorExcel(Workbook errorWorkbook, Long organizationId) {
         // 上传错误的excel
         MultipartFile multipartFile = new MultipartExcelUtil(MULTIPART_NAME, ORIGINAL_FILE_NAME, errorWorkbook);
@@ -960,7 +1202,8 @@ public class ExcelServiceImpl implements ExcelService {
     public void batchImport(Long projectId,
                             Long organizationId,
                             Long userId,
-                            Workbook workbook) {
+                            InputStream inputStream) {
+        Workbook workbook = ExcelUtil.getWorkbookFromInputStream(ExcelUtil.Mode.XSSF, inputStream);
         String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + projectId;
         FileOperationHistoryDTO history = initFileOperationHistory(projectId, userId, DOING, UPLOAD_FILE, websocketKey);
         validateWorkbook(workbook, history, websocketKey);
@@ -2365,7 +2608,7 @@ public class ExcelServiceImpl implements ExcelService {
         for (int i = 0; i < headerNames.size(); i++) {
             String headerName = headerNames.get(i);
             String code = ExcelImportTemplate.IssueHeader.getCodeByValue(headerName);
-            boolean isSystemField = StringUtils.hasText(code);
+            boolean isSystemField = !StringUtils.isEmpty(code);
             ExcelColumnVO excelColumnVO = new ExcelColumnVO();
             headerMap.put(i, excelColumnVO);
             excelColumnVO.setCustomField(!isSystemField);
@@ -3098,7 +3341,7 @@ public class ExcelServiceImpl implements ExcelService {
      */
     @Override
     public void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId) {
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream();) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             workbook.write(os);
             byte[] content = os.toByteArray();
             MultipartFile file = new MultipartExcel("file", fileName, EXCELCONTENTTYPE, content);
@@ -3113,8 +3356,22 @@ public class ExcelServiceImpl implements ExcelService {
             try {
                 fileOperationHistoryDTO.setLastUpdateDate(new Date());
                 fileOperationHistoryMapper.updateByPrimaryKey(fileOperationHistoryDTO);
-                String websocketKey = WEBSOCKET_EXPORT_CODE + "-" + fileOperationHistoryDTO.getProjectId();
+                String websocketKey = "";
+                switch (fileOperationHistoryDTO.getAction()) {
+                    case DOWNLOAD_FILE:
+                        websocketKey = WEBSOCKET_EXPORT_CODE + "-" + fileOperationHistoryDTO.getProjectId();
+                        break;
+                    case DOWNLOAD_FILE_PUBLISH_VERSION:
+                        websocketKey = WEBSOCKET_EXPORT_PUBLISH_VERSION + "-" + fileOperationHistoryDTO.getProjectId();;
+                        break;
+                    default:
+                        break;
+                }
                 sendProcess(fileOperationHistoryDTO, userId, 100.0, websocketKey);
+                if (workbook instanceof SXSSFWorkbook) {
+                    //处理在磁盘上支持本工作簿的临时文件
+                    ((SXSSFWorkbook) workbook).dispose();
+                }
                 workbook.close();
             } catch (IOException e) {
                 LOGGER.warn(EXPORT_ERROR_WORKBOOK_CLOSE, e);

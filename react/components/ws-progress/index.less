@@ -8,7 +8,7 @@
 .c7n-agile-ws {
   &-progress-area {
     background: @progress-area-background;
-    box-shadow: 0 0.01rem 0.05rem 0 @progress-area-box-shadow1, 0 0.02rem 0.02rem 0 @progress-area-box-shadow2, 0 0.03rem 0.01rem -0.02rem@progress-area-box-shadow3;
+    box-shadow: 0 0.01rem 0.05rem 0 @progress-area-box-shadow1, 0 0.02rem 0.02rem 0 @progress-area-box-shadow2, 0 0.03rem 0.01rem -0.02rem @progress-area-box-shadow3;
     border-radius: 0.04rem;
     width: 3.3rem;
     height: 1.85rem;
@@ -35,19 +35,18 @@
   &-finish {
 
     font-size: .13rem;
-    font-family: PingFangSC-Regular, PingFang SC;
     font-weight: 400;
     color: rgba(0, 0, 0, 0.65);
     line-height: .18rem;
 
-    span {
+    & > span {
       display: inline-block;
       margin-bottom: .1rem;
       width: 100%;
     }
 
     &-url {
-      color: #3F51B5;
+      color: #5365EA;
       margin-bottom: 0 !important;
       &:hover {
         cursor: pointer;
@@ -56,16 +55,5 @@
   }
   &-progress-download-btn {
     margin-top: 5px;
-    display: flex;
-    align-items: center;
-    background: rgba(83, 101, 234, 0.14);
-    border-radius: 4px;
-    padding-left: 8px;
-    & > span {
-      margin-bottom: 0;
-    }
-    & > i.icon + span, & > span + i.icon {
-      margin-left: 0;
-    }
   }
 }

@@ -59,12 +59,8 @@ const StatusCirculationTable: React.FC = () => {
                 indeterminate={!!(currentSize && currentSize > 1 && currentSize < store.statusList.length)}
                 checked={currentSize === store.statusList.length}
                 onChange={(value) => {
-                  store.statusList.forEach((item) => {
-                    if (item.id !== status.id) {
-                      store.checkChange(item.id, status.id, value);
-                    }
-                  });
-                  return value;
+                  store.checkAllOrUnAll(value, selectedType, undefined, status.id);
+                  return !value;
                 }}
               />
             );
@@ -74,9 +70,9 @@ const StatusCirculationTable: React.FC = () => {
         {status.name}
       </span>),
     render: ((text: string, record) => (
-      <Checkbox store={store} status={status} record={record} disabled={readOnly} />
+      <Checkbox store={store} status={status} record={record} disabled={readOnly} selectedType={selectedType} />
     )),
-  })), [readOnly, statusList, store]);
+  })), [readOnly, selectedType, statusList, store]);
   // @ts-ignore
   const columns: ColumnsType<IStatusCirculation> = useMemo(() => [{
     dataIndex: 'name',
@@ -98,12 +94,8 @@ const StatusCirculationTable: React.FC = () => {
                 indeterminate={rowInfo.rowIndeterminate}
                 checked={rowInfo.rowChecked}
                 onChange={(value) => {
-                  store.statusList.forEach((item) => {
-                    if (item.id !== record.id) {
-                      store.checkChange(record.id, item.id, value);
-                    }
-                  });
-                  return value;
+                  store.checkAllOrUnAll(value, selectedType, record.id);
+                  return !value;
                 }}
               />
             );

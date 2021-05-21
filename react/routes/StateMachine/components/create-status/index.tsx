@@ -4,15 +4,17 @@ import React, {
 import {
   Modal, Form, DataSet, TextField, Select, SelectBox,
 } from 'choerodon-ui/pro';
-import { axios } from '@choerodon/boot';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
-import { getProjectId, getOrganizationId, getIsOrganization } from '@/utils/common';
+import { getProjectId, getIsOrganization } from '@/utils/common';
 import { IStatus, IIssueType } from '@/common/types';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import './index.less';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
-import { statusTransformApi, statusTransformApiConfig } from '@/api';
+import {
+  boardApiConfig, statusTransformApi, statusTransformApiConfig,
+} from '@/api';
 import { observer } from 'mobx-react-lite';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 import useIsProgram from '@/hooks/useIsProgram';
@@ -23,14 +25,16 @@ interface Props {
   selectedIssueType?: string[]
   onSubmit: Function
   modal?: any
+  record?: Record
 }
 const CreateStatus: React.FC<Props> = ({
-  modal, onSubmit, selectedIssueType = [],
+  modal, onSubmit, selectedIssueType = [], record: statusRecord,
 }) => {
   const modalRef = useRef(modal);
   modalRef.current = modal;
   const isOrganization = getIsOrganization();
   const [type, setType] = useState<IStatus['valueCode'] | null>(null);
+  const [editStatus, setEditStatus] = useState<any>(null);
   const { data: issueTypes } = useIssueTypes({ hasTemplate: true, excludeTypes: ['feature', 'issue_auto_test', 'issue_test', ...(isOrganization ? ['issue_epic'] : [])] });
   // 记录哪些类型下已经有同名状态
   const [hasStatusIssueTypes, setHasStatusIssueTypes] = useState<IIssueType[]>([]);
@@ -40,13 +44,20 @@ const CreateStatus: React.FC<Props> = ({
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     transport: {
-      create: ({ data: dataArray }) => {
+      submit: ({ data: dataArray }) => {
         const data = dataArray[0];
-        return statusTransformApiConfig[isOrganization ? 'orgCreateStatus' : 'createStatus'](data.issueTypeIds, {
+        return statusRecord ? boardApiConfig.updateStatus(editStatus?.issueStatusId, {
+          objectVersionNumber: editStatus?.issueStatusObjectVersionNumberId,
+          completed: data.completed,
+          statusId: editStatus?.id,
+          id: editStatus?.issueStatusId,
+          projectId: getProjectId(),
+        }) : statusTransformApiConfig[isOrganization ? 'orgCreateStatus' : 'createStatus'](data.issueTypeIds, {
           name: data.name,
           type: data.valueCode,
           defaultStatus: data.default,
           transferAll: data.transferAll,
+          completed: data.completed,
         });
       },
     },
@@ -98,8 +109,15 @@ const CreateStatus: React.FC<Props> = ({
         label: '是否转换到所有状态?',
         required: true,
       },
+      {
+        name: 'completed',
+        type: 'boolean' as FieldType,
+        defaultValue: false,
+        label: '是否为已解决状态？',
+        required: true,
+      },
     ],
-  }), []);
+  }), [editStatus?.id, editStatus?.issueStatusId, editStatus?.issueStatusObjectVersionNumberId, isOrganization, statusRecord]);
   useEffect(() => {
     if (selectedIssueType?.length > 0) {
       dataSet.current?.set('issueTypeIds', selectedIssueType);
@@ -125,14 +143,9 @@ const CreateStatus: React.FC<Props> = ({
     }
   }, [hasStatusIssueTypes]);
   const handleSubmit = useCallback(async () => {
-    if (await dataSet.validate()) {
-      try {
-        await dataSet.submit();
-        onSubmit();
-        return true;
-      } catch (error) {
-        return false;
-      }
+    if (await dataSet.submit()) {
+      onSubmit();
+      return true;
     }
     return false;
   }, [dataSet, onSubmit]);
@@ -140,10 +153,23 @@ const CreateStatus: React.FC<Props> = ({
     modal.handleOk(handleSubmit);
   }, [modal, handleSubmit]);
 
+  useEffect(() => {
+    if (statusRecord) {
+      statusTransformApi.getStatus(statusRecord.get('id')).then((res: any) => {
+        setEditStatus(res);
+        dataSet.current?.set('name', res.name);
+        dataSet.current?.set('valueCode', res.type);
+        dataSet.current?.set('issueTypeIds', res.issueTypeIds);
+        dataSet.current?.set('completed', res.completed);
+      });
+    }
+  }, [dataSet, statusRecord]);
+
   return (
     <>
       <Form dataSet={dataSet}>
         <TextField
+          disabled={!!statusRecord}
           name="name"
           maxLength={MAX_LENGTH_STATUS}
           onInput={(e) => {
@@ -172,20 +198,32 @@ const CreateStatus: React.FC<Props> = ({
           optionsFilter={isProgram ? undefined : (record) => (isProgram ? true : record.get('valueCode') !== 'prepare')}
           optionRenderer={({ record }) => (<StatusTypeTag code={record?.get('valueCode') as IStatus['valueCode']} />)}
           renderer={({ value }) => (value ? <StatusTypeTag code={value as IStatus['valueCode']} /> : null)}
-          disabled={type !== null}
+          disabled={type !== null || !!statusRecord}
         />
-        <Select name="issueTypeIds" multiple>
+        <Select name="issueTypeIds" multiple disabled={!!statusRecord}>
           {(issueTypes || []).map((issueType: IIssueType) => (
             <Option value={issueType.id}>
               {issueType.name}
             </Option>
           ))}
         </Select>
-        <SelectBox name="default" style={{ marginTop: 13 }}>
-          <Option value>是</Option>
-          <Option value={false}>否</Option>
-        </SelectBox>
-        <SelectBox name="transferAll">
+        {
+          !statusRecord && (
+            <SelectBox name="default" style={{ marginTop: 13 }}>
+              <Option value>是</Option>
+              <Option value={false}>否</Option>
+            </SelectBox>
+          )
+        }
+        {
+          !statusRecord && (
+            <SelectBox name="transferAll">
+              <Option value>是</Option>
+              <Option value={false}>否</Option>
+            </SelectBox>
+          )
+        }
+        <SelectBox name="completed" style={{ marginTop: statusRecord ? 13 : 0 }}>
           <Option value>是</Option>
           <Option value={false}>否</Option>
         </SelectBox>
@@ -196,13 +234,13 @@ const CreateStatus: React.FC<Props> = ({
 const ObserverCreateStatus = observer(CreateStatus);
 const openCreateStatus = (props: Omit<Props, 'modal'>) => {
   Modal.open({
-    title: '创建状态',
+    title: props.record ? '编辑状态' : '创建状态',
     key,
     drawer: true,
     style: {
       width: 380,
     },
-    okText: '创建',
+    okText: props.record ? '确定' : '创建',
     children: <ObserverCreateStatus {...props} />,
   });
 };

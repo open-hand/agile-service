@@ -1,10 +1,10 @@
 import React, {
-  useMemo, useEffect, useImperativeHandle, useState,
+  useMemo, useEffect, useImperativeHandle, useState, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  SelectBox, CheckBox, DataSet, Button,
-} from 'choerodon-ui/pro';
+  SelectBox, DataSet, Button, TextField,
+} from 'choerodon-ui/pro/lib';
 import { fieldApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { includes } from 'lodash';
@@ -91,29 +91,37 @@ interface Props {
   }>,
   setReRender: Function,
   checkBoxChangeOk: (data: string[]) => void
+  requires?: string[]
+  systems?:{code: string, title: string}[]
+  fields?: {code: string, title: string, system: boolean}[]
 }
 
-const ImportFields: React.FC<Props> = ({ importFieldsRef, setReRender, checkBoxChangeOk }) => {
+const ImportFields: React.FC<Props> = ({
+  importFieldsRef, setReRender, checkBoxChangeOk, requires, systems, fields: fs,
+}) => {
   const { isInProgram, loading } = useIsInProgram();
   const [updateCount, setUpdateCount] = useState<number>(0);
-  const [requiredFields, setRequiredFields] = useState<string[]>([]);
+  const [requiredFields, setRequiredFields] = useState<string[]>(requires || []);
   const [btnStatus, setBtnStatus] = useState<'ALL' | 'NONE'>();
-  const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>([]);
+  const [systemFields, setSystemFields] = useState<{ code: string, title: string }[]>(systems || []);
+  const [allFields, setAllFields] = useState<{code: string, title: string, system: boolean}[]>([]);
   const applyType = getApplyType();
   useEffect(() => {
-    if (!loading) {
-      if (applyType === 'program') {
-        setRequiredFields(programImportRequiresFields);
-        setSystemFields(programSystemFields);
-      } else if (isInProgram) {
-        setRequiredFields(subProjectImportRequiredFields);
-        setSystemFields(subProjectSystemFields);
-      } else {
-        setRequiredFields(projectImportRequiresFields);
-        setSystemFields(projectSystemFields);
+    if (!systems && !requires) {
+      if (!loading) {
+        if (applyType === 'program') {
+          setRequiredFields(programImportRequiresFields);
+          setSystemFields(programSystemFields);
+        } else if (isInProgram) {
+          setRequiredFields(subProjectImportRequiredFields);
+          setSystemFields(subProjectSystemFields);
+        } else {
+          setRequiredFields(projectImportRequiresFields);
+          setSystemFields(projectSystemFields);
+        }
       }
     }
-  }, [applyType, isInProgram, loading]);
+  }, [applyType, isInProgram, loading, requires, systems]);
 
   const fieldsOptionDataSet = useMemo(() => new DataSet({
     paging: false,
@@ -150,14 +158,16 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef, setReRender, checkBoxC
 
   useEffect(() => {
     const loadData = async () => {
-      const fields = await fieldApi.getFoundationHeader();
-      fieldsOptionDataSet.loadData([...(systemFields.map((item) => ({ ...item, system: true }))), ...fields]);
+      const fields = fs || await fieldApi.getFoundationHeader();
+      const allFs = [...(systemFields.map((item) => ({ ...item, system: true }))), ...fields];
+      setAllFields(allFs);
+      fieldsOptionDataSet.loadData(allFs);
     };
 
-    if (systemFields && systemFields.length) {
+    if ((systemFields && systemFields.length) || fs?.length) {
       loadData();
     }
-  }, [chooseDataSet, fieldsOptionDataSet, systemFields]);
+  }, [fieldsOptionDataSet, fs, systemFields]);
 
   useImperativeHandle(importFieldsRef, () => ({
     fields: (chooseDataSet?.current?.get('fields') || requiredFields).filter((code: string) => !includes(['linkIssue', 'parentIssue'], code)),
@@ -177,6 +187,11 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef, setReRender, checkBoxC
     }
     result && setBtnStatus(nextBtnStatus);
   }
+  const handleSearch = useCallback((value) => {
+    // @ts-ignore
+    fieldsOptionDataSet.loadData(allFields.filter((item) => item.title.indexOf(value || '') > -1));
+  }, [allFields, fieldsOptionDataSet]);
+
   return (
     <div className={styles.importFields}>
       <div className={styles.importFields_title}>
@@ -184,6 +199,12 @@ const ImportFields: React.FC<Props> = ({ importFieldsRef, setReRender, checkBoxC
         <Button className={styles.importFields_btn} onClick={handleClick}>{btnStatus !== 'NONE' ? '全选' : '全不选'}</Button>
       </div>
       <div className={styles.importFields_content}>
+        <TextField
+          placeholder="请输入搜索内容"
+          style={{ height: 34, width: '100%', marginBottom: 8 }}
+          onChange={handleSearch}
+          clearButton
+        />
         <SelectBox
           dataSet={chooseDataSet}
           name="fields"

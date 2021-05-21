@@ -22,6 +22,10 @@ const Star: React.FC<Props> = ({
   inActiveTooltip = '',
   ...otherProps
 }) => {
+  // 禁用并且没关注，不显示
+  if (disabled && !active) {
+    return null;
+  }
   const className = classNames({
     [styles.star]: true,
     [styles.star_active]: active,

@@ -23,12 +23,40 @@ import DateTimeField from './field/DateTimeField';
 import ChooseField from '../choose-field';
 import IssueSearchContext from '../context';
 import EnvironmentField from './field/EnvironmentField';
+import TagField from './field/TagField';
+
+export const getValueByFieldType = (fieldType, value) => {
+  switch (fieldType) {
+    case 'text':
+    case 'input': {
+      return value ?? '';
+    }
+    case 'member':
+    case 'multiMember':
+    case 'single':
+    case 'multiple':
+    case 'radio':
+    case 'checkbox': {
+      return value ?? [];
+    }
+
+    case 'number': {
+      return value ?? null;
+    }
+    case 'time':
+    case 'date':
+    case 'datetime': {
+      return value ?? undefined;
+    }
+    default: return value;
+  }
+};
 
 function CustomField({ field }) {
   const { store, projectId, applyType } = useContext(IssueSearchContext);
   const { chosenFields } = store;
   const { fieldType } = field;
-  const value = chosenFields.get(field.code) ? toJS(chosenFields.get(field.code).value) : undefined;
+  const value = getValueByFieldType(fieldType, chosenFields.get(field.code) ? toJS(chosenFields.get(field.code).value) : undefined);
   const handleChange = (v) => {
     store.handleFilterChange(field.code, v);
   };
@@ -165,6 +193,14 @@ function CustomField({ field }) {
     case 'environment':
       return (
         <EnvironmentField
+          field={field}
+          value={value}
+          onChange={handleChange}
+        />
+      );
+    case 'tags':
+      return (
+        <TagField
           field={field}
           value={value}
           onChange={handleChange}

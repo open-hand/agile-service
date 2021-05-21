@@ -136,6 +136,26 @@ public class IssueDetailDTO {
 
     private Long lastUpdatedBy;
 
+    private List<TagVO> tags;
+
+    private String priorityCode;
+
+    public String getPriorityCode() {
+        return priorityCode;
+    }
+
+    public void setPriorityCode(String priorityCode) {
+        this.priorityCode = priorityCode;
+    }
+
+    public List<TagVO> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<TagVO> tags) {
+        this.tags = tags;
+    }
+
     public String getParentRelateDescription() {
         return parentRelateDescription;
     }

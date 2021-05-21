@@ -4,8 +4,10 @@ import {
   Page, Header, Content, stores, Breadcrumb, Choerodon, Permission,
 } from '@choerodon/boot';
 import {
-  Button, Select, Spin, Icon, Modal, Form, Tooltip,
+  Button, Spin, Select, Icon, Modal, Form, Tooltip,
 } from 'choerodon-ui';
+import { HeaderButtons } from '@choerodon/master';
+import { FlatSelect } from '@choerodon/components';
 import Loading from '@/components/Loading';
 import { set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
@@ -32,8 +34,9 @@ import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 import CreateIssue from '../ScrumBoardComponent/create-issue';
 import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
 import BoardSearch from '../ScrumBoardComponent/board-search';
+import SelectBoard from '../ScrumBoardComponent/select-board';
 
-const { Option } = Select;
+const { Option } = FlatSelect;
 const { AppState } = stores;
 
 const style = (swimLaneId) => `
@@ -241,23 +244,20 @@ class ScrumBoardHome extends Component {
       },
       children: <CreateBoard onCreate={this.getBoard} />,
     });
-    // 关掉下拉框
-    this.SelectBoard.rcSelect.setOpenState(false);
   }
 
   renderRemainDate = () => (
-    <>
-      <Icon type="av_timer" style={{ color: 'rgba(0,0,0,0.6)', marginLeft: 10 }} />
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <Icon type="av_timer" style={{ color: '#0F1358' }} />
       <span style={{
         paddingLeft: 5,
         marginLeft: 0,
-        marginRight: 10,
-        color: 'rgba(0,0,0,0.6)',
+        color: '#0F1358',
       }}
       >
         {`${ScrumBoardStore.getDayRemain >= 0 ? `${ScrumBoardStore.getDayRemain} days剩余` : '无剩余时间'}`}
       </span>
-    </>
+    </div>
   )
 
   refresh = (defaultBoard, url, boardListData) => {
@@ -266,6 +266,9 @@ class ScrumBoardHome extends Component {
       statusApi.loadAllTransformForAllIssueType(defaultBoard.boardId),
       ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId),
       epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
+      if (!this.dataConverter) {
+        return;
+      }
       this.dataConverter.setSourceData(epicData, defaultBoardData);
       const renderDataMap = new Map([
         ['parent_child', this.dataConverter.getParentWithSubData],
@@ -319,81 +322,73 @@ class ScrumBoardHome extends Component {
         className="c7n-scrumboard-page"
       >
         <Header title="活跃冲刺">
-          <Select
-            ref={(SelectBoard) => { this.SelectBoard = SelectBoard; }}
-            className="SelectTheme  autoWidth"
-            value={ScrumBoardStore.getSelectedBoard}
-            style={{
-              marginRight: 15, fontWeight: 500, lineHeight: '28px',
-            }}
-            dropdownClassName="c7n-scrumboard-page-select-board-dropdown"
-            dropdownStyle={{
-              width: 200,
-            }}
+          {/* <SelectBoard
+            onClick={this.handleCreateBoardClick}
             onChange={(value) => {
               const selectedBoard = ScrumBoardStore.getBoardList.get(value);
               ScrumBoardStore.setSelectedBoard(value);
               ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
               this.refresh(selectedBoard);
             }}
-            footer={(
-              <Permission
-                service={['choerodon.code.project.cooperation.iteration-plan.ps.board.create']}
-              >
-                <Button style={{ width: '100%', height: 42, textAlign: 'left' }} onClick={this.handleCreateBoardClick}>创建看板</Button>
-              </Permission>
-            )}
-          >
-
-            {// ScrumBoardStore.getSpinIf
-              [...ScrumBoardStore.getBoardList.values()].map((item) => (
-                <Option key={item.boardId} value={item.boardId}>
-                  <Tooltip title={item.name}>
-                    {item.name}
-                  </Tooltip>
-                </Option>
-              ))
-            }
-          </Select>
-          <HeaderLine />
-          <Button onClick={this.handleCreateIssue} icon="playlist_add">创建问题</Button>
-          <Button
-            className="c7n-scrumboard-settingButton"
-            funcType="flat"
-            icon="settings"
-            onClick={() => {
-              to(LINK_URL.scrumboardSetting, {
-                params: {
-                  boardId: ScrumBoardStore.getSelectedBoard,
+          />
+          <HeaderLine /> */}
+          <HeaderButtons
+            items={[
+              {
+                name: '创建问题',
+                icon: 'playlist_add',
+                handler: this.handleCreateIssue,
+                display: true,
+              }, {
+                display: true,
+                element: <ExpandAllButton />,
+              }, {
+                display: true,
+                actions: {
+                  data: [{
+                    text: '配置看板',
+                    action: () => {
+                      to(LINK_URL.scrumboardSetting, {
+                        params: {
+                          boardId: ScrumBoardStore.getSelectedBoard,
+                        },
+                      });
+                    },
+                    icon: 'settings',
+                  }, {
+                    text: '个人筛选',
+                    action: this.handleClickFilterManage,
+                    icon: 'settings',
+                  }],
                 },
-              });
-            }}
-          >
-            配置看板
-          </Button>
-          <Button onClick={this.handleClickFilterManage} icon="settings">个人筛选</Button>
-          <ExpandAllButton />
-          <ScrumBoardFullScreen />
-          {
-            currentSprintIsDoing && (
-              <>
-                {this.renderRemainDate()}
-                <Permission
-                  service={['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish']}
-                >
-                  <Button
-                    style={{
-                      marginLeft: 15,
-                    }}
-                    icon="alarm_on"
-                    onClick={this.handleFinishSprint}
-                  >
-                    完成冲刺
-                  </Button>
-                </Permission>
-              </>
-            )
-          }
+              },
+              {
+                display: true,
+                element: <ScrumBoardFullScreen />,
+              },
+              {
+                name: '完成冲刺',
+                icon: 'alarm_on',
+                // funcType: 'flat',
+                handler: this.handleFinishSprint,
+                display: currentSprintIsDoing,
+                permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish'],
+                preElement: this.renderRemainDate(),
+              }, {
+                display: true,
+                element: <SelectBoard
+                  style={{ marginRight: 24 }}
+                  onFooterClick={this.handleCreateBoardClick}
+                  onChange={(value) => {
+                    const selectedBoard = ScrumBoardStore.getBoardList.get(value);
+                    ScrumBoardStore.setSelectedBoard(value);
+                    ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
+                    this.refresh(selectedBoard);
+                  }}
+                />,
+              },
+            ]}
+          />
         </Header>
         <Breadcrumb />
         <Content
@@ -411,21 +406,20 @@ class ScrumBoardHome extends Component {
           }}
           >
             <BoardSearch onRefresh={this.handleFilterChange} saveStore={this.handleSaveSearchStore} />
-
             <Loading loading={ScrumBoardStore.getSpinIf} />
             <div className="c7n-scrumboard">
               <div style={{ display: 'table', minWidth: '100%' }}>
                 <div className="c7n-scrumboard-header">
                   <StatusColumn />
                 </div>
-                {this.issueSearchStore && (!ScrumBoardStore.didCurrentSprintExist
+                {(!ScrumBoardStore.didCurrentSprintExist
                   || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
                     && (!ScrumBoardStore.interconnectedData
                       || ScrumBoardStore.interconnectedData.size === 0))) ? (
                         <NoneSprint
                           doingSprintExist={ScrumBoardStore.didCurrentSprintExist}
-                          hasSetFilter={this.issueSearchStore.isHasFilter}
-                          filterItems={this.issueSearchStore.currentFlatFilter}
+                          hasSetFilter={this.issueSearchStore?.isHasFilter}
+                          filterItems={this.issueSearchStore?.currentFlatFilter ?? {}}
                         />
                   )
                   : (
@@ -504,12 +498,12 @@ class ScrumBoardHome extends Component {
                 >
                   {
                     ScrumBoardStore.getTransformToCompleted.map((item) => (
-                      <Option
+                      <Select.Option
                         key={item.id}
                         value={item.id}
                       >
                         {item.statusVO.name}
-                      </Option>
+                      </Select.Option>
                     ))
                   }
                 </Select>

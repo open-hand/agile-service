@@ -6,7 +6,6 @@ import UserTag from '@/components/tag/user-tag';
 
 import WYSIWYGEditor from '../../CKEditor';
 import WYSIWYGViewer from '../../CKEditorViewer';
-import { DatetimeAgo } from '../../CommonComponent';
 import './Log.less';
 
 class Log extends Component {
@@ -122,13 +121,11 @@ class Log extends Component {
                   imageUrl: userImageUrl,
                   tooltip: userName,
                 }}
-                textStyle={{ color: '#3f51b5' }}
+                textStyle={{ color: '#5365EA' }}
               />
             </div>
             <span style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
-              <DatetimeAgo
-                date={worklog.lastUpdateDate}
-              />
+              {worklog.lastUpdateDate}
             </span>
           </div>
           <div className="c7n-action">
@@ -193,7 +190,7 @@ class Log extends Component {
                     autoFocus
                     footer
                     value={deltaEdit}
-                    style={{ height: 200, width: '100%' }}
+                    style={{ minHeight: 300, width: '100%' }}
                     onChange={(value) => {
                       this.setState({ editLog: value });
                     }}

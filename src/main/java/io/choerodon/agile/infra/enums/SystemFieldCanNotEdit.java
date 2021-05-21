@@ -71,6 +71,7 @@ public class SystemFieldCanNotEdit {
         featureMap.put(FieldCode.SUB_PROJECT, new PageConfigFieldEditedVO(false, true, true));
         featureMap.put(FieldCode.CREATOR, new PageConfigFieldEditedVO(true, true, true));
         featureMap.put(FieldCode.UPDATOR, new PageConfigFieldEditedVO(true, true, true));
+        featureMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
 
         storyMap = new HashMap<>();
         storyMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));
@@ -83,6 +84,11 @@ public class SystemFieldCanNotEdit {
         storyMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(true, false, true));
         storyMap.put(FieldCode.CREATOR, new PageConfigFieldEditedVO(true, true, true));
         storyMap.put(FieldCode.UPDATOR, new PageConfigFieldEditedVO(true, true, true));
+        storyMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
+        storyMap.put(FieldCode.STORY_POINTS, new PageConfigFieldEditedVO(false, false, true));
+        storyMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, false, true));
+        storyMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(true, true, false));
+
 //        storyMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
 //        storyMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
 //        storyMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));
@@ -104,6 +110,10 @@ public class SystemFieldCanNotEdit {
         taskMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(true, false, true));
         taskMap.put(FieldCode.CREATOR, new PageConfigFieldEditedVO(true, true, true));
         taskMap.put(FieldCode.UPDATOR, new PageConfigFieldEditedVO(true, true, true));
+        taskMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
+        taskMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, false, true));
+        taskMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(true, true, false));
+
 //        taskMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
 //        taskMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
 //        taskMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));
@@ -124,6 +134,10 @@ public class SystemFieldCanNotEdit {
         bugMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(true, false, true));
         bugMap.put(FieldCode.CREATOR, new PageConfigFieldEditedVO(true, true, true));
         bugMap.put(FieldCode.UPDATOR, new PageConfigFieldEditedVO(true, true, true));
+        bugMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
+        bugMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, false, true));
+        bugMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(true, true, false));
+
 //        bugMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
 //        bugMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
 //        bugMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));

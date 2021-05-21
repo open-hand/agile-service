@@ -30,6 +30,9 @@ public class PersonalFilterVO {
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
 
+    @ApiModelProperty(value = "是否是默认")
+    private Boolean isDefault;
+
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
     }
@@ -76,6 +79,14 @@ public class PersonalFilterVO {
 
     public void setFilterJson(String filterJson) {
         this.filterJson = filterJson;
+    }
+
+    public Boolean getDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(Boolean aDefault) {
+        isDefault = aDefault;
     }
 }
 

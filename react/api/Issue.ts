@@ -35,13 +35,23 @@ interface UIssue {
   [propName: string]: any,
 }
 interface UTypeAndStatus {
-  issueId: number,
-  issueTypeId: number, // 问题类型id
+  issueId: string,
+  issueTypeId: string, // 问题类型id
   objectVersionNumber: number,
-  projectId: number | string,
+  projectId?: string,
   typeCode: string,
-  statusId?: number, // 状态id
-  parentIssueId?: number// 父id
+  statusId?: string, // 状态id
+  parentIssueId?: string// 父id
+  epicName?: string
+  batchUpdateFieldsValueVo?: {
+    issueIds: string[],
+    predefinedFields: object
+    customFields: {
+      fieldId: string,
+      fieldType: string,
+      value: any,
+    }[]
+  }
 }
 interface UIssueParent {
   issueId: number,
@@ -53,11 +63,11 @@ interface SearchVO {
 }
 interface CopyCondition {
   issueLink: boolean,
-  sprintValues: boolean,
   subTask: boolean,
   summary: string,
   epicName?: string,
-  customField?: boolean,
+  predefinedFieldNames: string[],
+  customFieldIds: string[],
 }
 
 interface ICustomFieldData {
@@ -202,6 +212,18 @@ class IssueApi extends Api<IssueApi> {
     });
   }
 
+  getRequiredField(issueId: string, issueTypeId: string) {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/issues/${issueId}/list_required_field`,
+      params: {
+        organizationId,
+        issueTypeId,
+      },
+    });
+  }
+
   /**
     * 更新问题类型
     * @param data
@@ -225,12 +247,12 @@ class IssueApi extends Api<IssueApi> {
     * @param applyType
     * @param copyCondition
     */
-  clone(issueId: number, applyType: string = 'agile', copyCondition: CopyCondition) {
+  clone(issueId: string, applyType: string = 'agile', copyCondition: CopyCondition) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
       url: `${this.prefix}/issues/${issueId}/clone_issue`,
-      data: { customField: true, ...copyCondition },
+      data: copyCondition,
       params: {
         organizationId,
         applyType,
@@ -335,7 +357,7 @@ class IssueApi extends Api<IssueApi> {
  * 取消导入
  * @param id 导入id
  */
-  cancelImport(id: number|string, objectVersionNumber: number) {
+  cancelImport(id: number | string, objectVersionNumber: number) {
     return axios({
       method: 'put',
       url: `${this.prefix}/excel/cancel`,
@@ -350,7 +372,7 @@ class IssueApi extends Api<IssueApi> {
  * 查询最新的导入导出记录
  * @returns {V|*}
  */
-  loadLastImportOrExport(action: 'upload_file' | 'download_file' | 'upload_file_customer_field'):Promise<IImportOrExportRecord> {
+  loadLastImportOrExport(action: 'upload_file' | 'download_file' | 'upload_file_customer_field' | 'upload_file_backlog' | 'download_file_publish_version'): Promise<IImportOrExportRecord> {
     return axios({
       url: `${this.prefix}/excel/latest`,
       method: 'get',
@@ -531,6 +553,29 @@ class IssueApi extends Api<IssueApi> {
       method: 'post',
       url: `${this.prefix}/issues/batch_delete`,
       data: issueIds,
+    });
+  }
+
+  loadIssues(page: number, size: number, sort: string | undefined, search: SearchVO) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issues/include_sub`,
+      params: {
+        page,
+        size,
+        sort,
+      },
+      data: search,
+    });
+  }
+
+  decrypt(issueId: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/decrypt`,
+      params: {
+        issueId,
+      },
     });
   }
 }

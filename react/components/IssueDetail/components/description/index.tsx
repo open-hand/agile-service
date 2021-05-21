@@ -39,7 +39,7 @@ const Description: React.FC = () => {
           <Tooltip title="全屏编辑">
             <Button
               style={{ padding: '0 6px' }}
-              color={'blue' as ButtonColor}
+              color={'primary' as ButtonColor}
               icon="zoom_out_map"
               onClick={() => {
                 setFullEdit(true);
@@ -49,7 +49,7 @@ const Description: React.FC = () => {
           <Tooltip placement="topRight" autoAdjustOverflow={false} title="编辑">
             <Button
               style={{ padding: '0 6px' }}
-              color={'blue' as ButtonColor}
+              color={'primary' as ButtonColor}
               icon="mode_edit"
               onClick={() => {
                 setEdit(true);
@@ -66,7 +66,7 @@ const Description: React.FC = () => {
             footer
             value={delta}
             style={{
-              minHeight: 260, width: '100%',
+              minHeight: 300, width: '100%',
             }}
             onChange={(value) => {
               setDelta(value);

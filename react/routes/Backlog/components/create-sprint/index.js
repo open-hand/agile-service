@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import {
-  Form, TextField, DataSet, TextArea, Icon,
+  Form, TextField, DataSet, TextArea, Icon, Select,
 } from 'choerodon-ui/pro';
 import moment from 'moment';
 import { sprintApi } from '@/api';
@@ -13,12 +13,21 @@ async function sprintNameValidator(value) {
   const isSame = await sprintApi.validate(value);
   return isSame ? '冲刺名称已存在' : true;
 }
+
+const { Option } = Select;
+
 export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
       {
         name: 'sprintName', type: 'string', label: '冲刺名称', required: true, validator: sprintNameValidator,
+      },
+      {
+        name: 'duration',
+        type: 'string',
+        label: '周期',
+        defaultValue: '0',
       },
       {
         name: 'startDate',
@@ -40,6 +49,19 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
         name: 'sprintGoal', type: 'string', label: '冲刺目标', maxLength: 30,
       },
     ],
+    events: {
+      update: ({
+        dataSet: createDataSet, name, value, oldValue,
+      }) => {
+        const duration = Number(createDataSet.current.get('duration'));
+        const startDate = createDataSet.current.get('startDate');
+        if ((name === 'startDate' && duration) || (name === 'duration' && startDate)) {
+          if (startDate) {
+            createDataSet.current?.set('endDate', moment(startDate).add(duration, 'weeks'));
+          }
+        }
+      },
+    },
   }), []);
   async function submit() {
     const isValidate = await dataSet.validate();
@@ -62,6 +84,12 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
   return (
     <Form dataSet={dataSet}>
       <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
+      <Select name="duration" clearButton={false}>
+        <Option value="0">自定义</Option>
+        <Option value="1">1周</Option>
+        <Option value="2">2周</Option>
+        <Option value="4">4周</Option>
+      </Select>
       <DateTimePicker name="startDate" />
       <DateTimePicker name="endDate" defaultPickerValue={moment().endOf('d')} />
       <TextArea
@@ -73,7 +101,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
   );
 }
 export function CreateCurrentPiSprint({
-  modal: { handleOk, close }, onCreate, PiName, sprints, piId,
+  modal: { handleOk, close }, onCreate, sprints, pi,
 }) {
   function checkDateSame(value, name, record) {
     const startDate = record.get('startDate');
@@ -88,6 +116,12 @@ export function CreateCurrentPiSprint({
     fields: [
       {
         name: 'sprintName', type: 'string', label: '冲刺名称', required: true, validator: sprintNameValidator,
+      },
+      {
+        name: 'duration',
+        type: 'string',
+        label: '周期',
+        defaultValue: '0',
       },
       {
         name: 'startDate',
@@ -107,12 +141,34 @@ export function CreateCurrentPiSprint({
         name: 'sprintGoal', type: 'string', label: '冲刺目标', maxLength: 30,
       },
     ],
+    events: {
+      update: ({
+        dataSet: createDataSet, name, value, oldValue,
+      }) => {
+        const duration = Number(createDataSet.current.get('duration'));
+        const startDate = createDataSet.current.get('startDate');
+        if ((name === 'startDate' && duration) || (name === 'duration' && startDate)) {
+          if (startDate) {
+            createDataSet.current?.set('endDate', moment(startDate).add(duration, 'weeks'));
+          }
+        }
+      },
+    },
   }), []);
+
+  const isDisabledOption = useCallback((value) => {
+    // 开启日期是当前时间
+    const startDate = moment();
+    // 使用moment套一下，因为add是会改变原值的
+    const endDate = moment(startDate).add(Number(value), 'weeks');
+    return !BacklogStore.rangeCanChoose({ startDate, endDate, sprintId: undefined });
+  }, []);
+
   async function submit() {
     const isValidate = await dataSet.validate();
     if (isValidate) {
       const [values] = dataSet.toData();
-      const sprint = await sprintApi.createOnCurrentPi({ ...values, piId });
+      const sprint = await sprintApi.createOnCurrentPi({ ...values, piId: pi.id });
       if (!sprint.failed) {
         onCreate(sprint);
         close();
@@ -132,9 +188,15 @@ export function CreateCurrentPiSprint({
       <div>
         <Icon type="info" style={{ marginBottom: '.04rem', marginRight: '.05rem', color: 'rgb(255,0,0,1)' }} />
         创建的冲刺将自动关联当前PI：
-        {PiName}
+        {`${pi.code}-${pi.name}`}
       </div>
       <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
+      <Select name="duration" clearButton={false}>
+        <Option value="0">自定义</Option>
+        <Option value="1" disabled={isDisabledOption('1')}>1周</Option>
+        <Option value="2" disabled={isDisabledOption('2')}>2周</Option>
+        <Option value="4" disabled={isDisabledOption('4')}>4周</Option>
+      </Select>
       <DateTimePicker
         name="startDate"
         filter={(date) => {

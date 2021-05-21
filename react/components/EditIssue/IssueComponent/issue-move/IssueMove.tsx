@@ -49,9 +49,8 @@ const IssueMove: React.FC<Props> = ({
   modal, issue, fieldsWithValue, onMoveIssue, loseItems,
 }) => {
   const { dataMap } = store;
-  const [updateCount, setUpdateCount] = useState<number>(0);
+  const [, setUpdateCount] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [step1NextDisabled, setsStep1NextDisabled] = useState<boolean>(true);
   const [submitBtnDisable, setSubmitBtnDisable] = useState<boolean>(true);
   const [btnLoading, setBtnLoading] = useState<boolean>(false);
   const [targetProjectType, setTargetProjectType] = useState<'program' | 'project' | 'subProject'>('project');
@@ -163,10 +162,6 @@ const IssueMove: React.FC<Props> = ({
         }
         if (name === 'targetProjectId' || name === 'issueType' || name === 'subTaskIssueTypeId' || name === 'subBugIssueTypeId') {
           resetData(moveDataSet, ['targetProjectId', 'issueType', 'subTaskIssueTypeId', 'subBugIssueTypeId']); // 改变项目或者问题类型应该重置
-
-          Promise.all([moveDataSet.current?.getField('targetProjectId')?.checkValidity(), moveDataSet.current?.getField('issueType')?.checkValidity(), moveDataSet.current?.getField('subTaskIssueTypeId')?.checkValidity(), moveDataSet.current?.getField('subBugIssueTypeId')?.checkValidity()]).then((validateRes) => {
-            setsStep1NextDisabled(!validateRes.every((validate) => !!validate));
-          });
         }
         if (name === `${issue.issueId}-sprint` && issue.subIssueVOList && issue.subIssueVOList.length) {
           issue.subIssueVOList.forEach((subTask) => {
@@ -178,7 +173,7 @@ const IssueMove: React.FC<Props> = ({
             moveDataSet.current?.set(`${subTask.issueId}-sprint`, value);
           });
         }
-        if (name !== 'targetProjectId' && name !== 'issueType') {
+        if (name !== 'targetProjectId' && name !== 'issueType' && name !== 'subTaskIssueTypeId' && name !== 'subBugIssueTypeId') {
           const validate = await moveDataSet.validate();
           setSubmitBtnDisable(!validate);
         }
@@ -191,13 +186,17 @@ const IssueMove: React.FC<Props> = ({
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [issue.issueId, issue.subBugVOList?.length, issue.subIssueVOList, issue.typeCode, issueTypeDataSet, resetData]);
+  }), [issue.issueId, issue.subBugVOList, issue.subIssueVOList, issue.typeCode, issueTypeDataSet, resetData]);
 
   const handlePre = () => {
     setCurrentStep(currentStep - 1);
   };
   const handleNext = async () => {
-    setCurrentStep(currentStep + 1);
+    Promise.all([dataSet.current?.getField('targetProjectId')?.checkValidity(), dataSet.current?.getField('issueType')?.checkValidity(), dataSet.current?.getField('subTaskIssueTypeId')?.checkValidity(), dataSet.current?.getField('subBugIssueTypeId')?.checkValidity()]).then((validateRes) => {
+      if (validateRes.every((validate) => !!validate)) {
+        setCurrentStep(currentStep + 1);
+      }
+    });
   };
   const handleCancel = () => {
     dataSet.reset();
@@ -348,10 +347,10 @@ const IssueMove: React.FC<Props> = ({
     <div className={styles.issueMove}>
       <Steps current={currentStep - 1}>
         <Step
-          title={<span style={{ color: currentStep === 1 ? '#3F51B5' : '', fontSize: 14 }}>选择项目和问题类型</span>}
+          title={<span style={{ color: currentStep === 1 ? '#5365EA' : '', fontSize: 14 }}>选择项目和问题类型</span>}
         />
         <Step
-          title={<span style={{ color: currentStep === 2 ? '#3F51B5' : '', fontSize: 14 }}>确认数据信息</span>}
+          title={<span style={{ color: currentStep === 2 ? '#5365EA' : '', fontSize: 14 }}>确认数据信息</span>}
         />
       </Steps>
       <div className={styles.step_content}>
@@ -372,7 +371,7 @@ const IssueMove: React.FC<Props> = ({
       <div className={styles.steps_action}>
         {currentStep === 1 && (
           <>
-            <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleNext} disabled={step1NextDisabled}>
+            <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleNext}>
               下一步
             </Button>
             <Button onClick={handleCancel} funcType={'raised' as FuncType}>

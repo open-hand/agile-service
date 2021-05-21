@@ -1,16 +1,14 @@
 import React, {
-  createContext, useMemo, useEffect, useState, useRef,
+  createContext, useEffect, useState, useRef,
 } from 'react';
-import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
 import { fieldApi, permissionApi } from '@/api';
-import IssueStore, { getSystemFields } from '@/stores/project/issue/IssueStore';
+import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
-import IssueDataSet from '@/components/issue-table/dataSet';
 import useQueryString from '@/hooks/useQueryString';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import { transformFilter, handleSelect, handleUnSelect } from './utils';
+import { transformFilter } from './utils';
 
 const Store = createContext();
 
@@ -18,8 +16,7 @@ export default Store;
 
 export const StoreProvider = inject('AppState')(injectIntl(
   (props) => {
-    const { intl, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
-    const [fields, setFields] = useState([]);
+    const { defaultMyFilter, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
     const [hasBatchDeletePermission, setHasBatchDeletePermission] = useState(false);
     const permissionRef = useRef(false);
     permissionRef.current = hasBatchDeletePermission;
@@ -34,20 +31,6 @@ export const StoreProvider = inject('AppState')(injectIntl(
       }
       return undefined;
     });/** 类型为boolean 时 则为用户操作  类型为string 即值为list时为缓存数据 */
-    useEffect(() => {
-      if (typeof (tableListMode) === 'boolean') {
-        tableListMode ? localPageCacheStore.setItem('issues.table.mode', 'list') : localPageCacheStore.remove('issues.table.mode');
-        handleUnSelect({ dataSet }, issueSearchStore, hasBatchDeletePermission);
-        IssueStore.query();
-      }
-    }, [tableListMode]);
-    useEffect(() => {
-      const loadData = async () => {
-        const Fields = await fieldApi.getFoundationHeader();
-        setFields(Fields);
-      };
-      loadData();
-    }, []);
 
     useEffect(() => {
       const getBatchDeletePermission = async () => {
@@ -56,33 +39,14 @@ export const StoreProvider = inject('AppState')(injectIntl(
       };
       getBatchDeletePermission();
     }, []);
-
+    const cachedFilter = localPageCacheStore.getItem('issues');
     const issueSearchStore = useIssueSearchStore({
       getSystemFields,
       transformFilter,
-      defaultChosenFields: Array.isArray(localPageCacheStore.getItem('issues')) ? new Map(localPageCacheStore.getItem('issues').map((item) => [item.code, item])) : undefined,
+      defaultSearchVO: !cachedFilter && defaultMyFilter ? JSON.parse(defaultMyFilter.filterJson) : undefined,
+      defaultChosenFields: Array.isArray(cachedFilter) ? new Map(cachedFilter.map((item) => [item.code, item])) : undefined,
     });
-    const dataSet = useMemo(() => new DataSet(IssueDataSet({
-      intl,
-      projectId,
-      organizationId,
-      issueSearchStore,
-      IssueStore,
-      tableListMode,
-      events: {
-        select: () => handleSelect({ dataSet }, issueSearchStore, permissionRef.current),
-        selectAll: () => handleSelect({ dataSet }, issueSearchStore, permissionRef.current),
-        unSelect: handleUnSelect,
-        unSelectAll: handleUnSelect,
-        load: () => {
-          // 有筛选，自动展开
-          if (issueSearchStore.isHasFilter && IssueStore.tableRef.current) {
-            IssueStore.tableRef.current.tableStore.expandAll();
-          }
-        },
-      },
-    })), [intl, issueSearchStore, organizationId, projectId, tableListMode]);
-    IssueStore.dataSet = dataSet;
+
     /**
     * detail data
     * 详情页数据
@@ -91,11 +55,10 @@ export const StoreProvider = inject('AppState')(injectIntl(
 
     const value = {
       ...props,
+      hasBatchDeletePermission,
       tableListMode,
       changeTableListMode,
       issueSearchStore,
-      fields,
-      dataSet,
       projectId,
       organizationId,
       userId,

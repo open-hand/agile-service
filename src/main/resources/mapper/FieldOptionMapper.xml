@@ -43,4 +43,20 @@
         </foreach>
     </select>
 
+    <select id="selectByFieldIdAndValue" resultMap="fieldOptionMap">
+        SELECT * FROM fd_field_option
+        WHERE organization_id = #{organizationId}
+        AND field_id = #{fieldId}
+        <if test="searchValue != null and searchValue != ''">
+            <bind name="searchValueLike" value="'%' + searchValue + '%'"/>
+            AND value LIKE #{searchValueLike}
+        </if>
+        <if test="selected != null and selected.size() != 0">
+            AND id NOT IN
+            <foreach collection="selected" item="optionId" index="index" open="(" close=")" separator=",">
+                #{optionId}
+            </foreach>
+        </if>
+        ORDER BY sequence ASC
+    </select>
 </mapper>

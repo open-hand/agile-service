@@ -2,17 +2,19 @@
   &-form {
 
     &-title {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
       height: .24rem;
       font-size: 14px;
-      font-family: PingFangSC-Medium, PingFang SC;
       font-weight: 500;
       color: rgba(0, 0, 0, 0.87);
       line-height: .24rem;
       margin-bottom: .03rem;
-
       & >span {
+        font-size: 14px;
+        font-weight: 500;
         padding-right: .1rem;
+        line-height: 16px;
       }
       .c7n-pro-btn {
         span {
@@ -21,13 +23,22 @@
         }
       }
     }
+    &-block {
+      display: inline-block;
+      margin-right: 6px;
+      width: 3px;
+      height: 16px;
+      background: #798DFB;
+      border-radius: 2px;
+    }
     &-content {
       .c7n-pro-btn {
         padding-left: 0;
       }
     }
     &-btn {
-      color: #3F51B5;
+      margin-top: 5px;
+      color: #5365EA;
       font-size: .13rem;
 
       span {
@@ -35,23 +46,18 @@
       }
     }
     &-template {
-      margin-bottom: .23rem;
+      margin-bottom: .35rem;
     }
     .c7n-pro-form {
       margin-top: .03rem;
     }
   }
-
+  &-wsProgress-area {
+    width: 100%;
+  }
   &-check-box {
     padding-right: .1rem;
     padding-bottom: .12rem;
-  }
-
-  &-horizontal {
-    margin: .2rem 0;
-    margin-left: -.2rem;
-    width: ~"calc(100% + .4rem)";
-    height: .001rem;
   }
 
   .c7n-agile-ws-progress-area {
@@ -95,6 +101,7 @@
   }
 
   &-form-filter {
+    margin-bottom: 0.35rem;
     .c7n-pro-form {
       margin-top: .11rem;
 
@@ -122,5 +129,6 @@
   }
   &-btns {
     margin-top: .16rem;
+    margin-bottom: .16rem;
   }
 }

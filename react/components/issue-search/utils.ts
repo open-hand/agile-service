@@ -1,15 +1,18 @@
 /* eslint-disable camelcase */
+import { IFieldType } from '@/common/types';
 import {
-  isEmpty, isEqual, pick, pickBy,
+  isEmpty, isEqual, pick, pickBy, isUndefined,
 } from 'lodash';
+
+export const getEmptyValue = (fieldType: string) => null;
 
 export const isFilterSame = (obj: { [key: string]: any }, obj2: { [key: string]: any }): boolean => {
   // 过滤掉 [] null '' 那些不起作用的属性
-  const keys1 = Object.keys(obj).filter((k) => !isEmpty(obj[k]));
-  const keys2 = Object.keys(obj2).filter((k) => !isEmpty(obj2[k]));
+  const keys1 = Object.keys(obj).filter((k) => !isUndefined(obj[k]));
+  const keys2 = Object.keys(obj2).filter((k) => !isUndefined(obj2[k]));
   return isEqual(pick(obj, keys1), pick(obj2, keys2));
 };
-export const filterInvalidAttribute = (obj: { [key: string]: any }):{ [key: string]: any } => pickBy(obj, (i) => !isEmpty(i));
+export const filterInvalidAttribute = (obj: { [key: string]: any }): { [key: string]: any } => pickBy(obj, (i) => !isEmpty(i));
 /**
  * 对象扁平化 {a:{b:'v'}}  = >  {b:'v'}
  *

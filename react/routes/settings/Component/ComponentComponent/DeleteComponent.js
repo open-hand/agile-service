@@ -26,7 +26,6 @@ const DeleteComponent = (props) => {
     },
   );
 
-
   const onRadioChange = (e) => {
     setRadio(e.target.value);
   };
@@ -51,7 +50,7 @@ const DeleteComponent = (props) => {
   };
 
   const renderDelete = () => (
-    <Fragment>
+    <>
       <RadioGroup label="" onChange={onRadioChange} value={radio}>
         <Radio style={{ display: 'block' }} value={1}>
           删除模块
@@ -73,20 +72,20 @@ const DeleteComponent = (props) => {
             });
           }}
         >
-          {originComponents && originComponents.map(c => (
+          {originComponents && originComponents.map((c) => (
             <Option key={c.componentId} value={c.componentId}>
               {c.name}
             </Option>
           ))}
         </Select>
       )}
-    </Fragment>
+    </>
   );
   return (
     <div>
       {
-        issueCount ? (
-          <Fragment>
+        Number(issueCount) ? (
+          <>
             <div>
               <div>
                 删除模块:
@@ -108,14 +107,14 @@ const DeleteComponent = (props) => {
               </div>
             </div>
             <div>{renderDelete()}</div>
-          </Fragment>
+          </>
         )
           : (
-            <Fragment>
+            <>
               确定要删除
               <span style={{ margin: '0 5px', fontWeight: 500 }}>{name}</span>
               模块吗？
-            </Fragment>
+            </>
           )
       }
     </div>

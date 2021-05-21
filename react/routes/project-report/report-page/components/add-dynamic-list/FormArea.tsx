@@ -44,7 +44,7 @@ const ExportIssue: React.FC<Props> = ({ innerRef }) => {
         chosenFields={choseFieldStore.getAllChosenField}
         onDelete={(item) => choseFieldStore.delChosenFields(item.code)}
       >
-        <ChooseField store={choseFieldStore} dropDownBtnProps={{ icon: 'add', style: { color: '#3f51b5' } }} />
+        <ChooseField store={choseFieldStore} dropDownBtnProps={{ icon: 'add', style: { color: '#5365EA' } }} />
       </IssueFilterForm>
     </div>
   );

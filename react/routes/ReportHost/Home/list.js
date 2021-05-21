@@ -2,7 +2,7 @@ export default [
   {
     key: 'burndownchart',
     title: '燃尽图',
-    des: '跟踪记录所有问题的剩余工作工作时间，这有助于在团队管理方面取得更进一步的掌控与把握。',
+    des: '跟踪记录项目工作的剩余情况，这有助于在团队管理方面取得更进一步的掌控与把握。',
     link: '/agile/reporthost/burndownchart',
     pic: 'burndownchart',
   },

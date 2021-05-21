@@ -534,6 +534,7 @@ const UpdateField = ({
                 <Select
                   style={{ width: '100%' }}
                   placeholder="字段"
+                  label="字段"
                   value={f.id}
                   onChange={(value) => {
                     const field = find(fieldData, { id: value });
@@ -582,7 +583,7 @@ const UpdateField = ({
           // @ts-ignore
           onClick={Field.add}
           icon="add"
-          color={'blue' as ButtonColor}
+          color={'primary' as ButtonColor}
         >
           添加字段
         </Button>

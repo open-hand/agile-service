@@ -26,6 +26,7 @@ import FeatureLinkage from './components/linkage/feature-linkage';
 import NotifySetting from './components/notify-setting';
 import UpdateField from './components/update-field';
 import IssueTypeTab from '../components/issue-type-tab';
+import AutoTransform from './components/auto-transform';
 import { useStateMachineContext } from '../context';
 import styles from './index.less';
 import { TabComponentProps } from '../index';
@@ -36,6 +37,7 @@ interface ISetting {
   children: JSX.Element,
 }
 interface ModalSettings {
+  autoTransform: ISetting,
   condition: ISetting,
   linkage: ISetting,
   updateField: ISetting,
@@ -276,12 +278,22 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   }), [selectedType]);
 
   // @ts-ignore
-  const getModalSetting = (key: 'condition' | 'linkage' | 'updateField' | 'notifySetting', record) => {
+  const getModalSetting = (key: 'autoTransform' | 'condition' | 'linkage' | 'updateField' | 'notifySetting', record) => {
     const selectedTypeCode = find(issueTypes, (
       item: IIssueType,
     ) => item.id === selectedType)?.typeCode;
 
     const settings: ModalSettings = {
+      autoTransform: {
+        width: 380,
+        title: '自动流转',
+        // @ts-ignore
+        children: <AutoTransform
+          record={record}
+          selectedType={selectedType}
+          customCirculationDataSet={customCirculationDataSet}
+        />,
+      },
       condition: {
         width: 380,
         title: '流转条件',
@@ -335,7 +347,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     return settings[key];
   };
 
-  const handleMenuClick = (record: any, e: { key: 'condition' | 'linkage' | 'updateField' | 'notifySetting' }) => {
+  const handleMenuClick = (record: any, e: { key: 'condition' | 'linkage' | 'updateField' | 'notifySetting' | 'autoTransform' }) => {
     const { title, width, children } = getModalSetting(e.key, record);
     Modal.open({
       className: `${styles[`customCirculation_${e.key}Modal`]}`,
@@ -359,6 +371,11 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this, record)} selectable={false}>
+        {
+          (selectedTypeCode !== 'issue_epic' && selectedTypeCode !== 'feature') && (
+            <Menu.Item key="autoTransform">自动流转</Menu.Item>
+          )
+        }
         <Menu.Item key="condition">流转条件</Menu.Item>
         {
           (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug' || selectedTypeCode === 'feature') && (
@@ -479,6 +496,20 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     const transferRender = (isProjectOwnerExist || (assigners && assigners.length > 0)) && `移到工作项到此状态需为：${isProjectOwnerExist ? '项目所有者' : ''}${isProjectOwnerExist && assigners.length > 0 ? '、' : ''}${assigners.join('、')}`;
     return (
       <div className={styles.setting}>
+        {
+          selectedTypeCode !== 'feature' && selectedTypeCode !== 'epic' && record.get('executionCaseStatusChangeSettingVO')?.testStatusVO && (
+            <div className={styles.settingItem}>
+              {`问题关联的测试用例的执行到${record.get('executionCaseStatusChangeSettingVO')?.testStatusVO.statusName}状态，将自动流转到${record.get('name')}状态`}
+            </div>
+          )
+        }
+        {
+          selectedTypeCode !== 'feature' && selectedTypeCode !== 'epic' && record.get('statusBranchMergeSettingVO')?.autoTransform && (
+            <div className={styles.settingItem}>
+              {`分支合并后自动将状态流转到${record.get('name')}`}
+            </div>
+          )
+        }
         {
           (isProjectOwnerExist || (assigners && assigners.length > 0)) && (
             <div className={styles.settingItem}>

@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.validator;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import com.alibaba.fastjson.JSONObject;
@@ -21,6 +23,7 @@ import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -49,6 +52,31 @@ public class IssueValidator {
     private static final String ERROR_ISSUE_ID_NOT_FOUND = "error.IssueRule.issueId";
     private static final String AGILE = "agile";
     private static final String EPIC_ID = "epicId";
+    private static final String SPRINT_ID_FIELD = "sprintId";
+    private static final String STORY_POINTS_FIELD = "storyPoints";
+    private static final String REMAIN_TIME_FIELD = "remainingTime";
+    private static final String ASSIGNEE_ID = "assigneeId";
+    private static final String FEATURE_ID = "featureId";
+    private static final String ENVIRONMENT = "environment";
+    private static final String MAIN_RESPONSIBLE_ID = "mainResponsibleId";
+    private static final String ESTIMATED_START_TIME = "estimatedStartTime";
+    private static final String ESTIMATED_END_TIME = "estimatedEndTime";
+    private static final String COMPONENT = "component";
+    private static final String FIX_VERSION = "fixVersion";
+    private static final String INFLUENCE_VERSION = "influenceVersion";
+    private static final String LABEL = "label";
+    private static final String TAG = "tag";
+    private static final String REPORTER_ID = "reporterId";
+    private static final String PRIORITY_ID = "priorityId";
+
+    private static final String[] LEGAL_COPY_PREDEFINED_FIELDS_NAME = new String[]
+            {
+                    ASSIGNEE_ID, EPIC_ID, STORY_POINTS_FIELD, FEATURE_ID,
+                    ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
+                    ESTIMATED_START_TIME, ESTIMATED_END_TIME, SPRINT_ID_FIELD,
+                    COMPONENT, LABEL, FIX_VERSION, INFLUENCE_VERSION, TAG,
+                    REPORTER_ID, PRIORITY_ID
+            };
 
     @Autowired
     private IssueService issueService;
@@ -152,6 +180,17 @@ public class IssueValidator {
             throw new CommonException("error.IssueRule.statusId");
         }
 
+        if (issueUpdate.containsKey("rank") && ObjectUtils.isEmpty(issueUpdate.get("rank"))) {
+            throw new CommonException("error.issue.rank.null");
+        }
+
+        if (issueUpdate.containsKey("priorityId") && ObjectUtils.isEmpty(issueUpdate.get("priorityId"))) {
+            throw new CommonException("error.issue.priorityId.null");
+        }
+
+        if (issueUpdate.containsKey("statusId") && ObjectUtils.isEmpty(issueUpdate.get("priorityId"))) {
+            throw new CommonException("error.issue.statusId.null");
+        }
     }
 
     public void verifySubCreateData(IssueSubCreateVO issueSubCreateVO, Long projectId) {
@@ -225,9 +264,6 @@ public class IssueValidator {
         }
         if (issueUpdateTypeVO.getTypeCode() == null) {
             throw new CommonException("error.IssueRule.typeCode");
-        }
-        if (issueUpdateTypeVO.getTypeCode().equals(ISSUE_EPIC) && issueUpdateTypeVO.getEpicName() == null) {
-            throw new CommonException("error.IssueRule.epicName");
         }
         IssueConvertDTO issueConvertDTO = issueService.queryIssueByProjectIdAndIssueId(projectId, issueUpdateTypeVO.getIssueId());
         if (issueConvertDTO == null) {
@@ -375,6 +411,17 @@ public class IssueValidator {
             }
             if (rankVO.getProjectId() == null) {
                 throw new CommonException("error.projectId.isNull");
+            }
+        }
+    }
+
+    public void checkPredefinedFields(List<String> predefinedFieldNames) {
+        if (!CollectionUtils.isEmpty(predefinedFieldNames)) {
+            List<String> legalCopyPredefinedFields = Arrays.asList(LEGAL_COPY_PREDEFINED_FIELDS_NAME);
+            for (String fieldName: predefinedFieldNames) {
+                if (!legalCopyPredefinedFields.contains(fieldName)) {
+                    throw new CommonException("error.copy.issue.illegal.field");
+                }
             }
         }
     }

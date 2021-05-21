@@ -15,7 +15,7 @@ interface IIssueFilterFormProps {
   onDelete?: (field: IChosenFieldField) => boolean | void,
   // defaultValue?: any,
   defaultVisibleFooterAddBtn?: boolean, // 是否显示默认的添加筛选按钮
-  extraRenderFields?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null,
+  extraRenderFields?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet, useSelectUserForceRefreshHook?: (...other: any) => [any, React.Dispatch<React.SetStateAction<any>>] }) => React.ReactElement | false | null,
   extraFormItems?: IChosenFieldField[],
 }
 function DefaultChooseField(chooseConfig: any) {
@@ -24,7 +24,7 @@ function DefaultChooseField(chooseConfig: any) {
   });
   return {
     data,
-    component: <ChooseField {...componentProps} dropDownBtnProps={{ icon: 'add', style: { color: '#3f51b5' } }} />,
+    component: <ChooseField {...componentProps} dropDownBtnProps={{ icon: 'add', style: { color: '#5365EA' } }} />,
   };
 }
 

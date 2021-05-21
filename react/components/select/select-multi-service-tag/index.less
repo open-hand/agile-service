@@ -1,0 +1,31 @@
+.c7n-agile-select-multi-service-tag {
+  cursor: default;
+  &-content {
+    // z-index: 100000;
+    max-width: 3.4rem;
+    padding: .1rem .2rem;
+    overflow: auto;
+    overflow-x: hidden;
+    &-add {
+      width: max-content;
+    }
+
+    &-del {
+      position: absolute;
+      top: -30px;
+      right: -14px;
+    }
+
+    &-del-wrap {
+      position: relative;
+    }
+  }
+
+  &-footer {
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
+    padding: .1rem .24rem;
+    border-top: 0.01rem solid #e0e0e0;
+  }
+}

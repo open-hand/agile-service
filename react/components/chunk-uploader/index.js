@@ -4,7 +4,6 @@ import { inject } from 'mobx-react';
 
 import { observer } from 'mobx-react-lite';
 import { Button, message } from 'choerodon-ui/pro';
-
 import Cookies from 'universal-cookie';
 
 import validateFile from '@/utils/File';
@@ -206,7 +205,7 @@ const FragmentUpload = inject('AppState')(observer((props) => {
       >
         {
           children || (
-            <Button style={{ padding: '0 6px' }} disabled={disabled}>
+            <Button disabled={disabled}>
               <Icon type="file_upload" />
             </Button>
           )

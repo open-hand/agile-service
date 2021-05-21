@@ -3,13 +3,14 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { WSHandler, Choerodon } from '@choerodon/boot';
-import { Divider, Tooltip } from 'choerodon-ui';
+import { Tooltip } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import { getProjectId } from '@/utils/common';
 import SingleFileUpload from '@/components/SingleFileUpload';
 import to from '@/utils/to';
 import UploadUI from './components/upload';
 import openLinkUI from './components/link';
+import Divider from '../Divider';
 import './IssueUI.less';
 
 import EditIssueContext from '../../../stores';
@@ -81,10 +82,16 @@ const IssueUI = (props: any) => {
         {
           !disabled && (
           <div className="c7n-title-right">
-            <Tooltip title="关联UI/UX文件">
-              <Button icon="device_hub" onClick={handleLinkUI} />
-            </Tooltip>
-            <UploadUI {...props} uploading={wsData && !!wsData.length && wsData.some((item) => item.status === 'doing')} />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+            >
+              <Tooltip title="关联UI/UX文件">
+                <Button icon="device_hub" onClick={handleLinkUI} style={{ marginRight: 5 }} />
+              </Tooltip>
+              <UploadUI {...props} uploading={wsData && !!wsData.length && wsData.some((item) => item.status === 'doing')} />
+            </div>
           </div>
           )
         }

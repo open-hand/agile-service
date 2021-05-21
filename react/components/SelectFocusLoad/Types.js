@@ -538,7 +538,6 @@ export default {
     ),
     props: {
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filterOption,
       loadWhenMount: true,
     },
     avoidShowError: (props, List) => new Promise((resolve) => {

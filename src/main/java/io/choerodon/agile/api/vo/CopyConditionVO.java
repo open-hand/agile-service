@@ -2,6 +2,9 @@ package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
+import java.util.List;
 
 /**
  * @author dinghuang123@gmail.com
@@ -18,11 +21,12 @@ public class CopyConditionVO {
     @ApiModelProperty(value = "是否复制问题链接")
     private Boolean issueLink;
 
-    @ApiModelProperty(value = "是否复制冲刺")
-    private Boolean sprintValues;
+    @Encrypt
+    @ApiModelProperty(value = "需要复制的自定义字段")
+    private List<Long> customFieldIds;
 
-    @ApiModelProperty(value = "是否复制自定义字段")
-    private Boolean customField;
+    @ApiModelProperty(value = "需要复制的预定义字段")
+    private List<String> predefinedFieldNames;
 
     private String epicName;
 
@@ -58,24 +62,24 @@ public class CopyConditionVO {
         this.issueLink = issueLink;
     }
 
-    public Boolean getSprintValues() {
-        return sprintValues;
-    }
-
-    public void setSprintValues(Boolean sprintValues) {
-        this.sprintValues = sprintValues;
-    }
-
     @Override
     public String toString() {
         return StringUtil.getToString(this);
     }
 
-    public Boolean getCustomField() {
-        return customField;
+    public List<Long> getCustomFieldIds() {
+        return customFieldIds;
     }
 
-    public void setCustomField(Boolean customField) {
-        this.customField = customField;
+    public void setCustomFieldIds(List<Long> customFieldIds) {
+        this.customFieldIds = customFieldIds;
+    }
+
+    public List<String> getPredefinedFieldNames() {
+        return predefinedFieldNames;
+    }
+
+    public void setPredefinedFieldNames(List<String> predefinedFieldNames) {
+        this.predefinedFieldNames = predefinedFieldNames;
     }
 }

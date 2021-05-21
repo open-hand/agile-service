@@ -24,6 +24,7 @@ function getEventHandlerOptions(instance, eventName) {
 
 export default function onClickOutsideHOC(WrappedComponent, config) {
   return class onClickOutside extends Component {
+    // eslint-disable-next-line react/static-property-placement
     static defaultProps = {
       eventTypes: ['mousedown', 'touchstart'],
       excludeScrollbar: (config && config.excludeScrollbar) || false,
@@ -46,11 +47,13 @@ export default function onClickOutsideHOC(WrappedComponent, config) {
           throw new Error('instance handle not a function');
         }
       }
+      // eslint-disable-next-line react/no-find-dom-node
       this.componentNode = findDOMNode(this.getInstance());
       this.enableOnClickOutside();
     }
 
     componentDidUpdate() {
+      // eslint-disable-next-line react/no-find-dom-node
       this.componentNode = findDOMNode(this.getInstance());
     }
 
@@ -59,7 +62,7 @@ export default function onClickOutsideHOC(WrappedComponent, config) {
     }
 
     getInstance() {
-      if (!WrappedComponent.prototype.isReactComponent) {
+      if (!WrappedComponent.prototype || !WrappedComponent.prototype.isReactComponent) {
         return this;
       }
       const ref = this.instanceRef;
@@ -137,8 +140,7 @@ export default function onClickOutsideHOC(WrappedComponent, config) {
 
     render() {
       const { ...props } = this.props;
-
-      if (WrappedComponent.prototype.isReactComponent) {
+      if (WrappedComponent.prototype && WrappedComponent.prototype.isReactComponent) {
         props.ref = this.getRef;
       } else {
         props.wrappedRef = this.getRef;

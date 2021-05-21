@@ -2,7 +2,7 @@ import React, {
   useCallback, useMemo, useState, useEffect,
 } from 'react';
 import {
-  Page, Header, Content, Breadcrumb, useTheme,
+  Page, Header, Content, Breadcrumb, useTheme, HeaderButtons,
 } from '@choerodon/master';
 import {
   Button, Table, DataSet, Modal, Tooltip,
@@ -77,17 +77,18 @@ const KanbanTemplateList = () => {
   return (
     <Page>
       <Header>
-        <Tooltip title={!enableCreate ? '请先配置故事、任务、子任务或缺陷的状态机模板' : ''}>
-          <span>
-            <Button
-              icon="playlist_add"
-              onClick={handleClick}
-              disabled={!enableCreate}
-            >
-              创建看板模板
-            </Button>
-          </span>
-        </Tooltip>
+        <HeaderButtons items={[{
+          name: '创建看板模板',
+          icon: 'playlist_add',
+          disabled: !enableCreate,
+          handler: handleClick,
+          tooltipsConfig: {
+            hidden: enableCreate,
+            title: '请先配置故事、任务、子任务或缺陷的状态机模板',
+          },
+          display: true,
+        }]}
+        />
       </Header>
       <Breadcrumb />
       <Content style={theme === 'theme4' ? undefined : { paddingTop: 0 }}>

@@ -1,0 +1,63 @@
+@activeColor: rgba(15, 19, 88, 0.06);
+
+.list {
+  padding-top: .18rem;
+  height: 100%;
+
+  .search {
+    margin-left: .1rem;
+    margin-right: .1rem;
+    margin-bottom: .11rem;
+  }
+
+  .scroll {
+
+    // height: ~"calc(100% - 60px )";
+    // overflow-y: auto;
+    &_bottom {
+      color: rgba(58, 52, 95, 0.65);
+      text-align: center;
+      width: 100%;
+      display: inline-block;
+    }
+  }
+
+  .version_item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    width: 100%;
+    padding: .1rem;
+
+    line-height: 18px;
+    font-size: 13px;
+    font-family: PingFangSC-Regular, PingFang SC;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.87);
+    cursor: pointer;
+
+    &:hover {
+      background: @activeColor;
+    }
+
+    &_active {
+      font-weight: 500;
+      background: @activeColor;
+    }
+
+    &_text {
+      color: #0F1358;
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+  :global {
+    .infinite-scroll-component__outerdiv {
+      overflow: auto;
+      height: ~"calc(100% - .43rem)";
+    }
+  }
+}

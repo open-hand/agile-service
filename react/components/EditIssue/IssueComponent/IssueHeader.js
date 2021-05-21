@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { Icon, Popover } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 import { useDetailContainerContext } from '@/components/detail-container/context';
 import IssueNumber from './IssueNumber';
 import IssueParentSummary from './IssueParentSummary';
@@ -88,21 +89,19 @@ const IssueHeader = (props) => {
               disabled={disabled}
             />
           </span>
-
         </div>
 
         {/* 隐藏 */}
         {!fullPage && (
-          <div
-            className={`${prefixCls}-IssueHeader-btn`}
-            role="none"
+          <Button
+            funcType="flat"
+            icon="last_page"
             onClick={() => {
               onCancel();
             }}
           >
-            <Icon type="last_page" style={{ fontSize: '18px', fontWeight: '500' }} />
-            <span>隐藏详情</span>
-          </div>
+            隐藏详情
+          </Button>
         )}
       </div>
     </div>

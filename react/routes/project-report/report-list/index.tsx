@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import {
   Page, Header, Breadcrumb, Content,
 } from '@choerodon/boot';
-import { Button } from 'choerodon-ui/pro';
+import { HeaderButtons } from '@choerodon/master';
 import to from '@/utils/to';
 import ReportTable from './components/report-table';
 
@@ -13,7 +13,13 @@ const ReportList: React.FC = () => {
   return (
     <Page>
       <Header>
-        <Button icon="playlist_add" onClick={handleAddClick}>创建报告</Button>
+        <HeaderButtons items={[{
+          name: '创建报告',
+          handler: handleAddClick,
+          icon: 'playlist_add',
+          display: true,
+        }]}
+        />
       </Header>
       <Breadcrumb />
       <Content style={{ paddingTop: 0 }}>

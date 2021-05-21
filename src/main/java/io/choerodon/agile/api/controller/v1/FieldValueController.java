@@ -1,12 +1,11 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.FieldValueService;
-import io.choerodon.agile.app.service.IssueFieldValueService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.app.service.PageFieldService;
+import io.choerodon.agile.app.service.*;
 
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -19,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -39,6 +39,8 @@ public class FieldValueController {
     private ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
     private IssueFieldValueService issueFieldValueService;
+    @Autowired
+    private FieldOptionService fieldOptionService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "界面上获取字段列表，带有字段选项")
@@ -173,5 +175,38 @@ public class FieldValueController {
                                                               @RequestParam Long organizationId,
                                                               @RequestParam @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(objectSchemeFieldService.getIssueSummaryDefaultValue(organizationId, projectId, issueTypeId), HttpStatus.OK);
+    }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "界面获取字段表头(包含系统字段和自定义字段)")
+    @GetMapping("/list/get_fields")
+    public ResponseEntity<List<ObjectSchemeFieldVO>> getFields(@ApiParam(value = "项目id", required = true)
+                                                                       @PathVariable("project_id") Long projectId,
+                                                                       @ApiParam(value = "组织id", required = true)
+                                                                       @RequestParam Long organizationId,
+                                                                       @ApiParam(value = "方案编码", required = true)
+                                                                       @RequestParam String schemeCode,
+                                                                       @ApiParam(value = "字段类型", required = true)
+                                                                       @RequestParam String issueTypeList) {
+        return new ResponseEntity<>(objectSchemeFieldService.getAllField(organizationId, projectId, schemeCode, issueTypeList), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "分页获取自定义字段下的选项")
+    @GetMapping("/{field_id}/options")
+    public ResponseEntity<Page<FieldOptionVO>> getOptionsPageByFieldId(
+            @ApiParam(value = "项目id", required = true)
+            @PathVariable("project_id") Long projectId,
+            @ApiParam(value = "组织id", required = true)
+            @RequestParam Long organizationId,
+            @PathVariable("field_id") @Encrypt Long fieldId,
+            @ApiParam(value = "搜索参数，支持模糊查询", required = true)
+            @RequestParam(required = false) String searchValue,
+            @ApiParam(value = "已选择的选项id", required = true)
+            @Encrypt @RequestParam(required = false) List<Long> selected,
+            @ApiParam(value = "分页信息", required = true)
+            @ApiIgnore PageRequest pageRequest) {
+        return new ResponseEntity<>(fieldOptionService.getOptionsPageByFieldId(organizationId, fieldId, searchValue, selected, pageRequest), HttpStatus.OK);
     }
 }

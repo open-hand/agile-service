@@ -2,12 +2,14 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.validator.IterativeWorktableValidator;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.assembler.IssueSearchAssembler;
 import io.choerodon.agile.app.assembler.IterativeWorktableAssembler;
 import io.choerodon.agile.app.service.IterativeWorktableService;
 import io.choerodon.agile.app.service.PriorityService;
 import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.mapper.IssueSprintRelMapper;
 import io.choerodon.agile.infra.mapper.IterativeWorktableMapper;
 import io.choerodon.agile.infra.mapper.SprintMapper;
 import io.choerodon.agile.infra.mapper.WorkCalendarRefMapper;
@@ -53,6 +55,10 @@ public class IterativeWorktableServiceImpl implements IterativeWorktableService 
     private StatusService statusService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private IssueSprintRelMapper issueSprintRelMapper;
+    @Autowired
+    private IssueSearchAssembler issueSearchAssembler;
 
     @Override
     public List<PriorityDistributeVO> queryPriorityDistribute(Long projectId, Long sprintId, Long organizationId) {
@@ -169,5 +175,28 @@ public class IterativeWorktableServiceImpl implements IterativeWorktableService 
         }
         return modelMapper.map(issueTypeDistributeDTOList, new TypeToken<List<IssueTypeDistributeVO>>() {
         }.getType());
+    }
+
+    @Override
+    public List<AssigneeIssueVO> queryPersonWorkload(Long projectId, Long sprintId, Long organizationId) {
+        IssueSprintRelDTO dto = new IssueSprintRelDTO();
+        dto.setProjectId(projectId);
+        dto.setSprintId(sprintId);
+        Set<Long> issueIds =
+                issueSprintRelMapper.select(dto)
+                        .stream()
+                        .map(IssueSprintRelDTO::getIssueId)
+                        .collect(Collectors.toSet());
+        if (issueIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Set<Long> assigneeIds = sprintMapper.queryAssigneeIdsByIssueIds(projectId, issueIds);
+        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(assigneeIds), true);
+        List<AssigneeIssueDTO> assigneeIssueList =
+                sprintMapper.queryAssigneeIssueByActiveSprintIdAndIssueIds(projectId, sprintId, new ArrayList<>(issueIds))
+                        .stream()
+                        .filter(x -> !Objects.equals(0L, x.getAssigneeId()))
+                        .collect(Collectors.toList());
+        return issueSearchAssembler.dtoListToAssigneeIssueVO(assigneeIssueList, usersMap);
     }
 }

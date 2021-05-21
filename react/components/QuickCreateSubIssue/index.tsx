@@ -3,15 +3,15 @@ import React, {
 } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import {
-  Button, Input, Form, Icon, Dropdown, Menu,
+  Input, Form, Icon, Dropdown, Menu,
 } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
+import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { useLockFn } from 'ahooks';
-import { isEmpty } from 'lodash';
 import { IIssueType } from '@/common/types';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { FormProps } from 'choerodon-ui/lib/form';
-import { getProjectId } from '@/utils/common';
 import { fieldApi, issueApi } from '@/api';
 import { WrappedFormUtils } from 'choerodon-ui/lib/form/Form';
 import { fields2Map } from '@/utils/defaultValue';
@@ -24,9 +24,10 @@ interface QuickCreateSubIssueProps extends FormProps {
   parentIssueId: string
   sprintId: string
   onCreate?: () => void
+  onOpen: (issueId: string) => void
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
-  form, priorityId, parentIssueId, sprintId, onCreate,
+  form, priorityId, parentIssueId, sprintId, onCreate, onOpen,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: 'sub_task', onlyEnabled: true });
   const [expand, setExpand] = useState(false);
@@ -70,11 +71,12 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           }, fieldsMap);
 
           const res = await issueApi.createSubtask(issue);
-          fieldApi.quickCreateDefault(res.issueId, {
+          await fieldApi.quickCreateDefault(res.issueId, {
             schemeCode: 'agile_issue',
             issueTypeId: currentType.id,
             pageCode: 'agile_issue_create',
           });
+          onOpen(res.issueId);
           setLoading(false);
           handleCancel();
           onCreate && onCreate();
@@ -158,8 +160,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                   )}
                 </FormItem>
                 <Button
-                  type="primary"
-                  funcType="raised"
+                  color={'primary' as ButtonColor}
                   onClick={handleCreate}
                   style={{ margin: '0 10px' }}
                   loading={loading}
@@ -167,7 +168,6 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                   确定
                 </Button>
                 <Button
-                  funcType="raised"
                   onClick={handleCancel}
                   disabled={loading}
                 >
@@ -178,11 +178,12 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
           </Form>
         ) : (
           <Button
+            icon="playlist_add"
+            funcType={'flat' as FuncType}
             onClick={() => {
               setExpand(true);
             }}
           >
-            <Icon type="playlist_add" />
             快速创建子任务
           </Button>
         )}

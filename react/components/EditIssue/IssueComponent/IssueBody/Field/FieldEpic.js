@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Button } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
@@ -136,7 +135,7 @@ import styles from './FieldEpic.less';
                             // margin: '10px 0 0 10px',
                             marginLeft: 10,
                             color: 'white',
-                            background: '#3f51b5',
+                            background: '#5365EA',
                             borderRadius: '2px',
                           }}
                           onClick={() => {

@@ -198,12 +198,13 @@ public interface ProjectConfigService {
      * @param projectId
      * @param issueTypeId
      * @param applyType
-     * @param statusId
-     * @param defaultStatus
-     * @param transferAll
+     * @param status
      * @return
      */
-    StatusMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus, Boolean transferAll);
+    StatusMachineNodeVO linkStatus(Long projectId,
+                                   Long issueTypeId,
+                                   String applyType,
+                                   StatusVO status);
 
     /**
      * 删除状态机里面的状态

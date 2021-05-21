@@ -151,15 +151,16 @@
 .c7n-backlog-piSelect,
 .c7n-backlog-sprintSelect {
   margin: 0 8px;
-  display: flex;
-  height: 30px;
+  display: flex !important;
+  height: 30px !important;
 
-  .c7n-select-selection__rendered {
-    height: 30px;
-
-    .c7n-select-selection-selected-value {
-      height: 30px;
-      margin-top: -10px;
+  .c7n-select-selection {
+    display: flex;
+    .c7n-select-selection__rendered {
+      height: 26px !important;
+      // line-height: 34px !important;
+      display: flex;
+      align-items: center;
     }
   }
 
@@ -198,7 +199,7 @@
 
 .c7n-backlog-piSelect.c7n-select-has-border::before,
 .c7n-backlog-sprintSelect.c7n-select-has-border::before {
-  border-radius: unset;
+  border-radius: unset !important;
 }
 
 .c7n-backlog-piSelect.c7n-select-focused.c7n-select::before,

@@ -1,0 +1,32 @@
+.summary {
+  // flex: 1;
+  font-size: 16px;
+  font-family: PingFangSC-Medium, PingFang SC;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+  line-height: 22px;
+  .summary_edit {
+    :global {
+      .c7n-pro-validation-message {
+        display: inline-block;
+
+        .icon {
+          display: none;
+        }
+      }
+    }
+
+    textarea {
+      line-height: 30px;
+      padding: 5px;
+    }
+    &_textArea {
+      min-width: 1.2rem;
+      width: 100%;
+    }
+  }
+
+  .summary_text {
+    word-break: break-all;
+  }
+}

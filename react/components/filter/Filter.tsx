@@ -65,7 +65,7 @@ const Filter: React.FC<FilterProps> = ({
 
   const handleFilterChange = useCallback((code: string, v: any) => {
     const clonedFilter = { ...filter };
-    if (v === null || v === undefined) {
+    if (v === undefined) {
       delete clonedFilter[code];
     } else {
       clonedFilter[code] = v;
@@ -75,7 +75,8 @@ const Filter: React.FC<FilterProps> = ({
   const handleSelect = useCallback((select: string[]) => {
     const newValue = uniq([...selected, ...select]);
     onSelectChange(newValue);
-  }, [onSelectChange, selected]);
+    select.forEach((code) => handleFilterChange(code, null));
+  }, [handleFilterChange, onSelectChange, selected]);
   const handleUnSelect = useCallback((unselect: string[]) => {
     const newValue = [...selected];
     const clonedFilter = { ...filter };
@@ -243,7 +244,7 @@ const Filter: React.FC<FilterProps> = ({
         triggerElement={flat ? (
           <Button>
             <span style={{
-              display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.87)', fontWeight: 500,
+              display: 'flex', alignItems: 'center', fontWeight: 500,
             }}
             >
               添加筛选

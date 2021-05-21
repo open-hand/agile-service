@@ -1,14 +1,17 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
+import SelectCustomField from '@/components/select/select-custom-field';
 
 const { Option } = FlatSelect;
 function SelectField({ field, value, onChange }) {
-  const { fieldOptions, name } = field;
+  const { fieldOptions, name, id } = field;
   return (
-    <FlatSelect
-      key={`${field.code}-${value}`}
+    <SelectCustomField
+      fieldId={id}
+      flat
       value={value}
+      selected={value}
       onChange={onChange}
       placeholder={name}
       dropdownMatchSelectWidth={false}
@@ -18,8 +21,8 @@ function SelectField({ field, value, onChange }) {
       maxTagTextLength={10}
       getPopupContainer={(triggerNode) => triggerNode.parentNode}
     >
-      {(fieldOptions || []).map((option) => <Option value={String(option.id)}>{option.value}</Option>)}
-    </FlatSelect>
+      {/* {(fieldOptions || []).map((option) => <Option value={String(option.id)}>{option.value}</Option>)} */}
+    </SelectCustomField>
   );
 }
 export default observer(SelectField);

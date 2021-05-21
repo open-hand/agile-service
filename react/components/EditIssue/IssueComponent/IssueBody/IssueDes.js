@@ -3,15 +3,17 @@ import React, {
 } from 'react';
 import {
   Icon, Button, Tooltip,
-} from 'choerodon-ui';
+} from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/master';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
 import WYSIWYGEditor from '@/components/CKEditor';
+import { useDetailContainerContext } from '@/components/detail-container/context';
 import { issueApi } from '@/api';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const IssueDes = ({ reloadIssue, setIssueLoading }) => {
+  const { setDescriptionChanged } = useDetailContainerContext();
   const [editDesShow, setEditDesShow] = useState(false);
   const [editDes, setEditDes] = useState('');
   const { store, disabled, descriptionEditRef } = useContext(EditIssueContext);
@@ -33,6 +35,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
         description: text,
       };
       await issueApi.update(obj);
+      setDescriptionChanged(false);
       setEditDesShow(false);
       if (reloadIssue) {
         reloadIssue(issueId);
@@ -59,10 +62,12 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
               footer
               value={editDes ?? descriptionTemplate}
               style={{
-                height: 'auto', width: '100%', minHeight: 280,
+                height: 'auto', width: '100%', minHeight: 300,
               }}
               onChange={(value) => {
                 setEditDes(value);
+                store.setIssue({ ...store.getIssue, hasChanged: true, newDes: value });
+                setDescriptionChanged(value !== description);
               }}
               onCancel={() => {
                 setEditDesShow(false);
@@ -107,8 +112,6 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
             <Tooltip placement="topRight" autoAdjustOverflow={false} title="编辑">
               <Button
                 style={{ padding: '0 6px' }}
-                className="leftBtn"
-                funcType="flat"
                 onClick={() => {
                   setEditDesShow(true);
                   setEditDes(description);

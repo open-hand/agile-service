@@ -7,7 +7,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { versionApi } from '@/api';
 import { SelectProps as OldSelectProps } from 'choerodon-ui/lib/select';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 import { IProgramVersion } from '@/common/types';
 import versionStyles from './index.less';
 

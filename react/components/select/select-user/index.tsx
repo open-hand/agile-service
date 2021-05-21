@@ -8,7 +8,7 @@ import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import FlatSelect from '@/components/flat-select';
+import { FlatSelect } from '@choerodon/components';
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {

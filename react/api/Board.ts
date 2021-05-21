@@ -114,7 +114,11 @@ class BoardApi extends Api<BoardApi> {
     * @param data
     */
   updateStatus(id: number, data: ICardStatus) {
-    return axios.put(`${this.prefix}/issue_status/${id}`, data);
+    return this.request({
+      method: 'put',
+      url: `${this.prefix}/issue_status/${id}`,
+      data,
+    });
   }
 
   /**
@@ -212,4 +216,5 @@ class BoardApi extends Api<BoardApi> {
 }
 
 const boardApi = new BoardApi();
-export { boardApi };
+const boardApiConfig = new BoardApi(true);
+export { boardApi, boardApiConfig };

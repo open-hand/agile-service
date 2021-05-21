@@ -81,7 +81,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             batchUpdateFieldStatusVO.setIncrementalValue(incrementalValue);
             //修改issue预定义字段值
             if (!CollectionUtils.isEmpty(batchUpdateFieldsValueVo.getPredefinedFields())) {
-                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO,applyType);
+                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO,applyType, true);
             }
 
             // 批量修改issue自定义字段值

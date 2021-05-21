@@ -13,6 +13,10 @@ const IssueDetail: React.FC<Props> = ({ refresh }) => {
     store.setIssueId(newIssueId);
   }, [store]);
   const [detailProps] = useDetail();
+
+  useEffect(() => {
+    store.setDetailProps(detailProps);
+  }, [detailProps, store]);
   const { open, close } = detailProps;
 
   const visible = issueId;

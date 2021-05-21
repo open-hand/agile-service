@@ -1,0 +1,24 @@
+.section {
+  &_body {
+    padding: .14rem;
+    padding-right: .12rem;
+
+    &_border {
+      box-shadow: 0 0 4px 0 rgba(90, 95, 123, 0.18);
+      border-radius: 4px;
+      // margin: 0 4px;
+    }
+  }
+
+  &_body +&_body {
+    margin-top: .1rem;
+  }
+
+  &_title {
+    font-size: 14px;
+    font-family: PingFangSC-Medium, PingFang SC;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+    line-height: 20px;
+  }
+}

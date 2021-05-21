@@ -8,13 +8,13 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { FlatSelect } from '@choerodon/components';
 import { flattenObject, isFilterSame } from './utils';
 import IssueSearchContext from './context';
 import SummaryField from './custom-fields/field/SummaryField';
 import CustomFields from './custom-fields';
 import useQuickFilters from './useQuickFilters';
 import ListenSearchSize from './ListenSearchSize';
-import FlatSelect from '../flat-select';
 
 const { AppState } = stores;
 const { Option, OptGroup } = FlatSelect;
@@ -22,7 +22,7 @@ const { Option, OptGroup } = FlatSelect;
 const SearchArea: React.FC = () => {
   const prefixCls = 'c7n-issue';
   const {
-    store, onClear, urlFilter, onClickSaveFilter, projectId,
+    store, onClear, urlFilter, onClickSaveFilter, projectId, foldedHeight,
   } = useContext(IssueSearchContext);
   const { data: quickFilters } = useQuickFilters({ projectId });
   const {
@@ -205,7 +205,7 @@ const SearchArea: React.FC = () => {
                     <Option value={`quick|${filter.filterId}`}>{filter.name}</Option>
                   ))}
                 </OptGroup>
-                <OptGroup key="my" label="我的筛选">
+                <OptGroup key="my" label="个人筛选">
                   {
                     myFilters.map((filter) => (
                       <Option value={`my|${filter.filterId}`}>{filter.name}</Option>
@@ -230,8 +230,8 @@ const SearchArea: React.FC = () => {
         {onClickSaveFilter && !findSameFilter() && isHasFilter && !folded && (
           <Tooltip title={archiveFields.length > 0 && `${archiveFields.map((f) => f.name).join(',')}字段已被废弃，请去掉该字段后保存`}>
             <Button
+              color={'primary' as ButtonColor}
               onClick={archiveFields.length > 0 ? undefined : onClickSaveFilter}
-              funcType={'flat' as FuncType}
               className={`${prefixCls}-search-right-btn ${prefixCls}-search-right-saveBtn`}
             >
               保存筛选
@@ -263,7 +263,14 @@ const SearchArea: React.FC = () => {
         </div>
       </div>
       <div className={`${prefixCls}-search-right`}>
-        <Button style={{ marginTop: 10 }} onClick={reset} funcType={'flat' as FuncType} color={'blue' as ButtonColor}>重置</Button>
+        <Button
+          style={{ marginTop: 10 }}
+          onClick={reset}
+          funcType={'flat' as FuncType}
+          color={'primary' as ButtonColor}
+        >
+          重置
+        </Button>
       </div>
     </>
   );
@@ -271,7 +278,7 @@ const SearchArea: React.FC = () => {
     <div
       className={`${prefixCls}-search`}
       style={{
-        height: folded ? 48 : 'unset',
+        height: folded ? foldedHeight : 'unset',
         overflow: 'hidden',
       }}
     >

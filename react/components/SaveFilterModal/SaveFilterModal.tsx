@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useMemo } from 'react';
 import {
-  Modal, Form, TextField, DataSet,
+  Modal, Form, TextField, DataSet, CheckBox,
 } from 'choerodon-ui/pro';
 import { IModalProps } from '@/common/types';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -31,6 +31,9 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       maxLength: 10,
       required: true,
       validator: checkName,
+    }, {
+      name: 'default',
+      label: '设为默认',
     }],
   }), []);
   const handleSubmit = useCallback(async () => {
@@ -39,6 +42,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
     }
     const value = dataSet.toData()[0] as any;
     const data = {
+      default: value.default,
       name: value.filterName,
       filterJson: JSON.stringify(searchVO),
       personalFilterSearchVO: searchVO,
@@ -69,6 +73,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
           dataSet.current?.getField('filterName')?.checkValidity();
         }}
       />
+      <CheckBox name="default">设为默认</CheckBox>
     </Form>
   );
 };

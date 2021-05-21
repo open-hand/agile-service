@@ -9,13 +9,14 @@ import { observer } from 'mobx-react';
 import moment from 'moment';
 import { MAX_NUMBER_VALUE, MAX_NUMBER_STEP } from '@/constants/MAX_VALUE';
 import React, { Component } from 'react';
+import SelectCustomField from '@/components/select/select-custom-field';
 
 const EditorMap = new Map([
   ['text', TextArea],
   ['input', TextField],
   ['member', SelectUser],
-  ['single', Select],
-  ['multiple', Select],
+  ['single', SelectCustomField],
+  ['multiple', SelectCustomField],
   ['radio', SelectBox],
   ['checkbox', SelectBox],
   ['number', NumberField],
@@ -66,13 +67,24 @@ const EditorMap = new Map([
   renderEditor = () => {
     const { field } = this.props;
     const {
-      value, fieldType, required, valueStr, extraConfig,
+      value, fieldType, required, valueStr, extraConfig, fieldId,
     } = field;
     const Editor = EditorMap.get(fieldType);
     if (Editor) {
       switch (fieldType) {
         case 'single':
         case 'multiple':
+        {
+          return (
+            <Editor
+              searchable
+              selected={value}
+              required={required}
+              fieldId={fieldId}
+              multiple={fieldType === 'multiple'}
+            />
+          );
+        }
         case 'radio':
         case 'checkbox':
         {

@@ -13,7 +13,7 @@ const Save: React.FC = () => {
     <div style={{ height: 50, display: 'flex', alignItems: 'center' }}>
       <Button
         disabled={!hasAction}
-        color={'blue' as ButtonColor}
+        color={'primary' as ButtonColor}
         funcType={'raised' as FuncType}
         onClick={async () => {
           await store.batchUpdateStatusTransform(selectedType);

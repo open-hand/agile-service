@@ -1,6 +1,8 @@
-import React, { useContext } from 'react';
-import { Button, Icon, Tooltip } from 'choerodon-ui';
+import React, { useContext, useState } from 'react';
+import { Button, Icon, Tooltip } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import QuickCreateIssue from '@/components/QuickCreateIssue/QuickCreateIssue';
+import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import CreateSubBug from '../../../CreateIssue/CreateSubBug';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
@@ -10,6 +12,12 @@ const SubBug = observer(({
   reloadIssue, onDeleteSubIssue, onUpdate,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
+  const {
+    issueId: relateIssueId, priorityId,
+  } = store.getIssue;
+  const disableCreate = disabled;
+  const { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, typeCode: 'bug' }, { enabled: !disabled });
+
   const { issueId, summary, subBugVOList = [] } = store.getIssue;
   const { getCreateSubBugShow: createSubBugShow } = store;
   const renderIssueList = (issue, i) => (
@@ -67,7 +75,7 @@ const SubBug = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="创建缺陷" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setCreateSubBugShow(true)}>
+              <Button onClick={() => store.setCreateSubBugShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>
@@ -75,6 +83,15 @@ const SubBug = observer(({
         )}
       </div>
       {renderSubIssues()}
+      {!disableCreate && (
+      <QuickCreateIssue
+        defaultPriority={{ id: priorityId }}
+        issueTypes={issueTypeData || []}
+        relateIssueId={relateIssueId}
+        buttonShowText="快速创建缺陷"
+        onCreate={handleCreateSubIssue}
+      />
+      )}
       {
         createSubBugShow ? (
           <CreateSubBug

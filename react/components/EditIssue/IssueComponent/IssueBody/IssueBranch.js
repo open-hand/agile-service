@@ -1,9 +1,10 @@
 import React, { useRef, useCallback, useEffect } from 'react';
 import {
   Button, Icon, Tooltip,
-} from 'choerodon-ui';
+} from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import MergeRequest from '@/components/MergeRequest';
+import openLinkBranchModal from '@/components/LinkBranch/LinkBranchPro';
 import LinkedBranch from '../linked-branch';
 
 const IssueBranch = observer(({
@@ -28,12 +29,12 @@ const IssueBranch = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="关联分支" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setLinkBranchShow(true)}>
+              <Button onClick={() => openLinkBranchModal({ issueId, onOk: () => store.refreshBranch() })}>
                 <Icon type="add_branch icon" />
               </Button>
             </Tooltip>
             <Tooltip placement="topRight" title="创建分支" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setCreateBranchShow(true)}>
+              <Button onClick={() => store.setCreateBranchShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>

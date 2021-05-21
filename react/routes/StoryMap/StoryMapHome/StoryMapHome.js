@@ -5,6 +5,7 @@ import React, {
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import { Button } from 'choerodon-ui';
 import {
   CheckBox,
@@ -156,23 +157,38 @@ const StoryMapHome = observer(() => {
       className="c7nagile-StoryMap"
     >
       <Header title="故事地图">
-        {!isInProgram && isEmpty && !loading ? <Button onClick={handleCreateEpicClick} icon="playlist_add">创建史诗</Button> : null}
-        {!StoryMapStore.isFullScreen && (
-          <Button
-            icon="view_module"
-            onClick={handleOpenIssueList}
-          >
-            需求池
-          </Button>
-        )}
-        <Button className="c7nagile-StoryMap-fullScreenBtn" onClick={() => { toggleFullScreen(); }} icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}>
-          {isFullScreen ? '退出全屏' : '全屏'}
-        </Button>
-        <HeaderLine />
-        <SwitchSwimLine />
-        {isInProgram && <CheckBox style={{ marginLeft: 20 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>}
-        <CheckBox name="foldCompletedEpic" style={{ marginLeft: 20 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起已完成的史诗列</CheckBox>
-        {/* <Button onClick={handleClickFilterManage} icon="settings">个人筛选</Button> */}
+        <HeaderButtons items={[
+          {
+            name: '创建史诗',
+            icon: 'playlist_add',
+            handler: handleCreateEpicClick,
+            display: !isInProgram && isEmpty && !loading,
+          },
+          {
+            name: '需求池',
+            icon: 'view_module',
+            handler: handleOpenIssueList,
+            display: !StoryMapStore.isFullScreen,
+          }, {
+            icon: isFullScreen ? 'fullscreen_exit' : 'zoom_out_map',
+            iconOnly: true,
+            handler: () => { toggleFullScreen(); },
+            display: true,
+            tooltipsConfig: {
+              title: isFullScreen ? '退出全屏' : '全屏',
+            },
+          }, {
+            display: true,
+            element: <SwitchSwimLine />,
+          }, {
+            display: isInProgram,
+            element: <CheckBox style={{ marginLeft: 16 }} name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleNoStoryCheckBoxChange}>隐藏无故事的列</CheckBox>,
+          }, {
+            display: true,
+            element: <CheckBox name="foldCompletedEpic" style={{ marginLeft: 16 }} checked={StoryMapStore.foldCompletedEpic} onChange={handleCompletedEpicCheckBoxChange}>收起已完成的史诗列</CheckBox>,
+          },
+        ]}
+        />
       </Header>
       <Breadcrumb />
       <Content style={{

@@ -169,7 +169,7 @@ const Linkage = ({
         <div>
           <Button
             icon="playlist_add"
-            color={'blue' as ButtonColor}
+            color={'primary' as ButtonColor}
             onClick={() => {
               const newKey = Field.add();
               addFieldRule(newKey);

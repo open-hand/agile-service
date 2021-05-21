@@ -8,7 +8,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
 
 @inject('AppState')
 @observer class FieldWSJFDTO extends Component {
-  updateIssueWSJFField = (value) => {  
+  updateIssueWSJFField = (value) => {
     const {
       store, onUpdate, reloadIssue, field,
     } = this.props;
@@ -44,7 +44,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
-            {`${fieldName}：`}
+            {`${fieldName}`}
           </span>
         </div>
         <div className="c7n-value-wrapper">
@@ -55,13 +55,13 @@ import TextEditToggle from '@/components/TextEditTogglePro';
             initValue={value ? String(value) : undefined}
             editor={({ submit }) => (
               <SelectNumber
-                getPopupContainer={() => document.body} 
-                selectNumbers={['1', '2', '3', '5', '8', '13', '20']} 
+                getPopupContainer={() => document.body}
+                selectNumbers={['1', '2', '3', '5', '8', '13', '20']}
                 onChange={submit}
-                pattern={/^[1-9]\d{0,2}$/} 
+                pattern={/^[1-9]\d{0,2}$/}
                 validationRenderer={() => (
                   <span>请输入小于3位的整数</span>
-                )} 
+                )}
               />
             )}
           >

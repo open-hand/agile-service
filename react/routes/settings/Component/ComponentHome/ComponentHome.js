@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import {
   TabPage as Page, Header, Content, stores, Permission, Breadcrumb,
 } from '@choerodon/boot';
+import { HeaderButtons } from '@choerodon/master';
 import './ComponentHome.less';
 import TableAction from '@/components/TableAction';
 import UserTag from '@/components/tag/user-tag';
@@ -71,6 +72,7 @@ function ComponentHome() {
       style: {
         width: 520,
       },
+      className: 'c7n-component-deleteModal',
       children: (
         <DeleteComponent
           component={component}
@@ -153,6 +155,7 @@ function ComponentHome() {
       />
       <Column name="description" className="c7n-agile-table-cell" />
       <Column name="defaultAssigneeRole" className="c7n-agile-table-cell" />
+      <Column name="sequence" className="c7n-agile-table-cell" />
     </Table>
   );
   return (
@@ -163,14 +166,14 @@ function ComponentHome() {
       ]}
     >
       <Header title="模块管理">
-        <Permission
-          service={['choerodon.code.project.setting.issue.ps.createcomponent']}
-        >
-          <Button funcType="flat" onClick={openCreateModal}>
-            <Icon type="playlist_add icon" />
-            <span>创建模块</span>
-          </Button>
-        </Permission>
+        <HeaderButtons items={[{
+          name: '创建模块',
+          icon: 'playlist_add',
+          handler: openCreateModal,
+          display: true,
+          permissions: ['choerodon.code.project.setting.issue.ps.createcomponent'],
+        }]}
+        />
       </Header>
       <Breadcrumb />
       <Content>

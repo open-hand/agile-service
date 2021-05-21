@@ -73,8 +73,12 @@
 
   // 备注样式更改
   .c7n-ckeditor-viewer {
-    .ck.ck-editor__editable_inline >:first-child {
-      margin-top: 0;
+    .ck.ck-editor__editable_inline {
+      padding-left: 0;
+
+      & > :first-child {
+        margin-top: 0;
+      }
     }
   }
 }

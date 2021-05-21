@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Icon, Button, Tooltip } from 'choerodon-ui';
+import { Icon, Button, Tooltip } from 'choerodon-ui/pro';
 import _ from 'lodash';
 import CreateLinkTask from '../../../CreateLinkTask';
 import LinkList from '../../Component/LinkList';
@@ -97,7 +97,7 @@ import Divider from './Divider';
           {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联问题'} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => this.setState({ createLinkTaskShow: true })}>
+              <Button onClick={() => this.setState({ createLinkTaskShow: true })}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>

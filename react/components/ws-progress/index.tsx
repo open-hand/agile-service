@@ -4,6 +4,7 @@ import React, {
 import { WSHandler } from '@choerodon/boot';
 import fileSever, { FileSaverOptions } from 'file-saver';
 import moment from 'moment';
+import { usePersistFn } from 'ahooks';
 import { Button, Progress } from 'choerodon-ui/pro';
 import { ProgressStatus, ProgressType } from 'choerodon-ui/lib/progress/enum';
 import { humanizeDuration } from '@/utils/common';
@@ -85,6 +86,7 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
     }
     return '';
   }, [props.predefineProgressTextConfig]);
+  const onFinish = usePersistFn(props.onFinish || ((d: any) => { }));
   const [stateProgress, dispatch] = useReducer((state: StateProps, action: ActionProps) => {
     switch (action.type) {
       case 'init':
@@ -107,9 +109,6 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
           data: action.data,
         };
       case 'finish': {
-        if (props.onFinish && typeof (props.onFinish) === 'function') {
-          props.onFinish(action.data);
-        }
         return {
           data: { [percentKey]: 0 },
           visible: false,
@@ -129,6 +128,7 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
   function handleFinish(data: any) {
     const { autoDownload } = props;
     dispatch({ type: 'finish', data });
+    onFinish(data);
     if (autoDownload) {
       const autoDownLoadFieldCode = typeof (autoDownload) === 'boolean' ? 'fileUrl' : autoDownload.fieldKey;
       const url = data[autoDownLoadFieldCode || 'fileUrl'];
@@ -169,7 +169,7 @@ const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
                 <span>{downloadInfo.timeLine ?? `${doingTextTemplate}完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate, downloadInfo.timeFormat)}）`}</span>
                 {
                   downloadBtn ? (
-                    <Button icon="archive" color={'primary' as ButtonColor} className="c7n-agile-ws-progress-download-btn" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</Button>
+                    <Button icon="archive" className="c7n-agile-ws-progress-download-btn" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</Button>
                   ) : (
                     <span role="none" className="c7n-agile-ws-finish-url" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</span>
                   )

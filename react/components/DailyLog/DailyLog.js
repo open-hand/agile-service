@@ -408,7 +408,7 @@ class DailyLog extends Component {
                   <div className="clear-p-mw">
                     <WYSIWYGEditor
                       value={delta}
-                      style={{ width: '100%' }}
+                      style={{ width: '100%', minHeight: 300 }}
                       onChange={(value) => {
                         this.setState({ delta: value });
                       }}

@@ -127,8 +127,8 @@ const BoardSearch: React.FC<Props> = ({ onRefresh, saveStore }) => {
           scrumBoardStore.setSearchVO(newSearch);
           onRefresh();
         }}
+        foldedHeight={40}
       />
-
     </div>
 
   );

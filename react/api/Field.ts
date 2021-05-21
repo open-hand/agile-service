@@ -1,6 +1,8 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
 import { sameProject } from '@/utils/detail';
+import { IField } from '@/common/types';
+import { castArray } from 'lodash';
 import Api from './Api';
 
 interface IFiled {
@@ -180,6 +182,28 @@ class FieldApi extends Api<FieldApi> {
   }
 
   /**
+   * 项目层，获取自定义字段表头
+   */
+  getTableFields(issueTypeList?: 'agileIssueType' | 'programIssueType') {
+    return axios.get(`${this.prefix}/field_value/list/get_fields`, {
+      params: {
+        project_id: getProjectId(),
+        organizationId: getOrganizationId(),
+        schemeCode: 'agile_issue',
+        issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
+      },
+    }).then((res: IField[]) => {
+      const issueNum = {
+        code: 'issueNum',
+      };
+      // @ts-ignore
+      res.splice(1, 0, issueNum);
+
+      return res;
+    });
+  }
+
+  /**
    *获取概要默认值
    * @param issueTypeId
    */
@@ -188,6 +212,20 @@ class FieldApi extends Api<FieldApi> {
       params: {
         issueTypeId,
         organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  getFieldOptions(fieldId: string, searchValue: string | undefined, page: number | undefined, size: number, selected?: string | string[]) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/field_value/${fieldId}/options`,
+      params: {
+        searchValue,
+        page,
+        size,
+        organizationId: this.orgId,
+        selected: selected ? castArray(selected).join(',') : undefined,
       },
     });
   }

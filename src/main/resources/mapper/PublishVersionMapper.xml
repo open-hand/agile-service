@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.PublishVersionMapper">
+
+    <select id="selectByProjectIds" resultType="io.choerodon.agile.api.vo.PublishVersionVO">
+        select
+        apv.id,
+        apv.group_id,
+        apv.artifact_id,
+        ifnull(apv.version_alias, apv.version) as version,
+        apv.service_code,
+        apv.project_id,
+        apv.organization_id,
+        apv.object_version_number
+        from agile_publish_version apv
+        where apv.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
+    </select>
+
+    <select id="listByOptions" resultType="io.choerodon.agile.api.vo.PublishVersionVO">
+        SELECT apv.*
+        FROM agile_publish_version apv
+        WHERE apv.project_id = #{projectId}
+        <if test="publishVersionVO != null ">
+            <if test="publishVersionVO.appService != null">
+                and apv.app_service = #{publishVersionVO.appService}
+            </if>
+            <if test="publishVersionVO.content != null and !''.equals(publishVersionVO.content)">
+                <bind name="contentLike" value="'%' + publishVersionVO.content + '%'"/>
+                AND (apv.version LIKE #{contentLike}
+                OR apv.version_alias LIKE #{contentLike}
+                OR apv.service_code LIKE #{contentLike})
+            </if>
+        </if>
+    </select>
+
+    <select id="selectIssueIds" resultType="java.lang.Long">
+        select
+        distinct atir.issue_id
+        from agile_tag_issue_rel atir
+        join (
+            select distinct
+            apvtr.project_id,
+            apvtr.tag_name,
+            apvtr.app_service_code
+            from agile_publish_version_tag_rel apvtr
+            where apvtr.organization_id = #{organizationId}
+            and apvtr.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            and apvtr.publish_version_id in
+            <foreach collection="publishVersionIds" item="publishVersionId" open="(" separator="," close=")">
+                #{publishVersionId}
+            </foreach>
+        ) t
+        on (
+            atir.tag_project_id = t.project_id
+            and atir.project_id = t.project_id
+            and atir.tag_name = t.tag_name
+            and atir.app_service_code = t.app_service_code
+        )
+    </select>
+
+    <resultMap id="publishVersionWithTag" type="io.choerodon.agile.infra.dto.PublishVersionDTO">
+        <id property="id" column="id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="artifactId" column="artifact_id"/>
+        <result property="version" column="version"/>
+        <result property="versionAlias" column="version_alias"/>
+        <result property="serviceCode" column="service_code"/>
+        <result property="projectId" column="project_id"/>
+        <result property="organizationId" column="organization_id"/>
+        <result property="appService" column="app_service"/>
+        <result property="actualPublishDate" column="actual_publish_date"/>
+        <result property="description" column="description"/>
+        <result property="statusCode" column="status_code"/>
+        <result property="objectVersionNumber" column="object_version_number"/>
+        <collection property="tags" ofType="io.choerodon.agile.api.vo.TagVO">
+            <id property="tagName" column="tag_name"/>
+            <id property="appServiceCode" column="app_service_code"/>
+            <id property="projectId" column="tag_project_id"/>
+            <id property="objectVersionNumber" column="tag_object_version_number"/>
+            <id property="id" column="tag_id"/>
+            <id property="alias" column="tag_alias"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectWithTag" resultMap="publishVersionWithTag">
+        select
+        apv.*,
+        apvtr.tag_name,
+        apvtr.app_service_code,
+        apvtr.project_id as tag_project_id,
+        apvtr.object_version_number as tag_object_version_number,
+        apvtr.id as tag_id,
+        apvtr.tag_alias
+        from agile_publish_version apv
+        left join agile_publish_version_tag_rel apvtr on apv.id = apvtr.publish_version_id
+        where apv.organization_id = #{organizationId}
+        and apv.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
+        and apv.id in
+        <foreach collection="publishVersionIds" item="publishVersionId" open="(" close=")" separator=",">
+            #{publishVersionId}
+        </foreach>
+    </select>
+</mapper>

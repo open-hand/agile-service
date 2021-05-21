@@ -24,7 +24,7 @@ const { AppState } = stores;
 class PriorityCreate extends Component {
   // eslint-disable-next-line react/state-in-constructor
   state = {
-    priorityColor: '#3F51B5',
+    priorityColor: '#5365EA',
     displayColorPicker: false,
     loading: false,
   };

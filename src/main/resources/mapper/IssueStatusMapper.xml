@@ -66,7 +66,6 @@
         from fd_status fs
         join agile_issue_status ais on fs.id = ais.status_id
         where ais.is_completed = 1
-        and ais.is_enabled = 1
         and ais.project_id in
         <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
             #{projectId}
