@@ -198,6 +198,18 @@ function EditIssue() {
   useImperativeHandle(forwardedRef, () => ({
     loadIssueDetail,
   }));
+  // 更改loading状态 增加异常处理
+  const changeLoading = async (data) => {
+    if (typeof (data) === 'function') {
+      try {
+        await data();
+      } finally {
+        setIssueLoading(false);
+      }
+    } else {
+      setIssueLoading(data);
+    }
+  };
 
   const issue = store.getIssue;
   const {
@@ -216,6 +228,26 @@ function EditIssue() {
   } = store;
   const { isInProgram } = useIsInProgram();
   const rightDisabled = disabled || (isInProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
+  useEffect(() => {
+    function updateBefore() {
+      setIssueLoading(true);
+    }
+    async function updateAfter(result) {
+      const failed = typeof (result) === 'object' && result ? result.failed : false;
+      if (failed) {
+        setIssueLoading(false);
+        throw result;
+      }
+      if (onUpdate) {
+        onUpdate();
+      }
+      if (loadIssueDetail) {
+        loadIssueDetail(issueId);
+      }
+      return result;
+    }
+    store.events = { updateAfter, updateBefore };
+  }, [issueId, loadIssueDetail, onUpdate, store]);
   return (
 
     <div className={`${prefixCls}`} style={style} ref={container}>

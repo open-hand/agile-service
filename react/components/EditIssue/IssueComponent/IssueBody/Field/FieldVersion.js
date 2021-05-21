@@ -52,14 +52,8 @@ import TextEditToggle from '@/components/TextEditTogglePro';
         versionIssueRelVOList: versionList,
         versionType: 'influence',
       };
-      issueApi.update(obj)
+      store.update(obj)
         .then(() => {
-          if (onUpdate) {
-            onUpdate();
-          }
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
           // 新建版本，刷新版本侧边栏
           if (newSign && onCreateVersion) {
             onCreateVersion();

@@ -62,7 +62,7 @@
 
     .foldedBtn {
       background-color: #5365EA;
-      color: #ffffff;
+      color: #fff;
 
       &:hover {
         color: #5365EA;
@@ -71,7 +71,7 @@
       &:active,
       &:focus {
         background-color: #5365EA;
-        color: #ffffff;
+        color: #fff;
       }
     }
 
@@ -107,12 +107,21 @@
     & > div:first-child {
       display: none;
     }
-
     & > div:nth-child(2) > div {
+
       & > ul > li > ul > li {
         padding-left: .12rem;
       }
+      & >ul {
+        & >li:nth-child(3) {
+          .c7n-checkbox { // 隐藏CheckBox
+            display: none;
+          }
+          & >ul >li {
+            padding-left: .1rem;
+          }
+        }
+      }
     }
   }
-
 }

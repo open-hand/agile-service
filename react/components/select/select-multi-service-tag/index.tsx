@@ -53,6 +53,7 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (sprints: ILabel[]) => void
   onChange?: (data: ITagItemProps[]) => void
   onBlur?: () => void
+  onPopupHidden?: (hidden: boolean) => void
   applicationId?: string | null
   flat?: boolean
   projectId?: string
@@ -179,7 +180,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = observer(({
   );
 });
 const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, applicationId, projectId, onBlur, onChange, value: propsValue, ...otherProps
+  dataRef, valueField, afterLoad, flat, applicationId, projectId, onBlur, onChange, onPopupHidden, value: propsValue, ...otherProps
 }, ref: React.Ref<Select>) => {
   const innerRef = useRef<Select | null>();
   const handleBindRef = useCallback((newRef) => {
@@ -197,7 +198,6 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
 
   function handleCancel() {
     innerRef.current?.collapse();
-    onBlur && onBlur();
   }
   function handleSave(data: ITagItemProps[]) {
     onChange && onChange(data);
@@ -225,7 +225,7 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
         onPopupHiddenChange={(hidden) => {
           console.log('blur..', hidden, onBlur);
           // onChange();
-
+          onPopupHidden && onPopupHidden(hidden);
           hidden && onBlur && onBlur();
         }}
         getPopupContainer={(node) => document.getElementById(componentId) as HTMLElement}

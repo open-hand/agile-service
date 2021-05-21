@@ -10,11 +10,12 @@ import { piApi } from '@/api';
 class FieldPI extends Component {
   updateIssuePI = async (value) => {
     const {
-      store, onUpdate, reloadIssue,
+      store, onUpdate, reloadIssue, setIssueLoading,
     } = this.props;
     const issue = store.getIssue;
     const { issueId, activePi } = issue;
     const { id } = activePi || {};
+    setIssueLoading(true);
     await piApi.addFeatures([issueId], id || 0, value || 0);
     if (onUpdate) {
       onUpdate();

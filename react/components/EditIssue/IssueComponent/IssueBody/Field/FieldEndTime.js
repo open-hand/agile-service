@@ -17,15 +17,7 @@ class FieldEndTime extends Component {
       objectVersionNumber,
       estimatedEndTime: value ? value.format('YYYY-MM-DD HH:mm:ss') : null,
     };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
+    store.update(obj);
   };
 
   render() {

@@ -19,15 +19,7 @@ import { withRouter } from 'react-router-dom';
       objectVersionNumber,
       reporterId: reporterId || 0,
     };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
+    store.update(obj);
   };
 
   render() {

@@ -9,7 +9,7 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
 @observer class FieldProgramSprint extends Component {
   updateIssueSprint = async (sprintIds) => {
     const {
-      store, onUpdate, reloadIssue,
+      store, onUpdate, reloadIssue, setIssueLoading,
     } = this.props;
     const issue = store.getIssue;
     const { issueId } = issue;
@@ -19,6 +19,7 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
     const removeSprints = sprintIds ? originSprintIds.filter(
       (sprintId) => !sprintIds.includes(sprintId),
     ) : originSprintIds;
+    setIssueLoading(true);
     await featureApi.updateTeamAndSprint({
       piId: issue.activePi ? issue.activePi.id : null,
       deleteSprintIds: removeSprints,

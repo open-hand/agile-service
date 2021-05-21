@@ -48,15 +48,7 @@ import { Tooltip } from 'choerodon-ui';
         objectVersionNumber,
         componentIssueRelVOList: componentList,
       };
-      issueApi.update(obj)
-        .then(() => {
-          if (onUpdate) {
-            onUpdate();
-          }
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
-        });
+      store.update(obj);
     }
   };
 

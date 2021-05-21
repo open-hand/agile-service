@@ -6,7 +6,6 @@ import SelectPriority from '@/components/select/select-priority';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { issueApi } from '@/api';
 
-
 @inject('AppState')
 @observer class FieldPriority extends Component {
   updateIssuePriority = (newPriorityId) => {
@@ -18,15 +17,7 @@ import { issueApi } from '@/api';
       objectVersionNumber,
       priorityId: newPriorityId,
     };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
+    store.update(obj);
   };
 
   render() {

@@ -20,15 +20,7 @@ import UserTag from '@/components/tag/user-tag';
       objectVersionNumber,
       assigneeId: assigneeId || 0,
     };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
+    store.update(obj);
   };
 
   render() {

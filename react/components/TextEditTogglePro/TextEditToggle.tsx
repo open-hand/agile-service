@@ -66,7 +66,6 @@ const TextEditToggle: React.FC<Props> = ({
   };
   const handleChange = (originOnChange: Function | undefined) => (newValue: any) => {
     dataRef.current = newValue;
-    console.log('toggle...', newValue);
     setValue(newValue);
     if (originOnChange) {
       originOnChange(newValue);
