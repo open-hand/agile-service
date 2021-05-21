@@ -21,7 +21,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -400,12 +399,66 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         if (publishVersionIds.isEmpty()) {
             return emptyPage;
         }
-        Set<Long> issueIds = publishVersionMapper.selectIssueIds(new HashSet<>(Arrays.asList(projectId)), organizationId, publishVersionIds);
-        if (issueIds.isEmpty()) {
+        List<IssueDTO> issues =
+                publishVersionMapper.selectIssueIds(new HashSet<>(Arrays.asList(projectId)), organizationId, publishVersionIds);
+        if (issues.isEmpty()) {
             return emptyPage;
         }
+        Set<Long> issueIds  = filterIssueIds(issues, searchVO);
         addSearchParam(searchVO, issueIds);
         return issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
+    }
+
+    private Set<Long> filterIssueIds(List<IssueDTO> issues, SearchVO searchVO) {
+        Map<String, Object> advancedSearchArgs = searchVO.getAdvancedSearchArgs();
+        Set<Long> issueTypeIds = new HashSet<>();
+        if (!ObjectUtils.isEmpty(advancedSearchArgs)) {
+            List<String> issueTypeIdStr = (List<String>) advancedSearchArgs.get("issueTypeId");
+            if (!ObjectUtils.isEmpty(issueTypeIdStr)) {
+                issueTypeIdStr.forEach(x -> issueTypeIds.add(Long.valueOf(x)));
+                advancedSearchArgs.remove("issueTypeId");
+            }
+        }
+        Map<Long, Set<Long>> parentSonMap = new HashMap<>();
+        issues.forEach(x -> {
+            if (IssueTypeCode.isSubTask(x.getTypeCode())) {
+                Long parentId = x.getParentIssueId();
+                if (parentId != null && !Objects.equals(0L, parentId)) {
+                    Set<Long> sonSet = parentSonMap.computeIfAbsent(parentId, y -> new HashSet<>());
+                    sonSet.add(x.getIssueId());
+                }
+            } else if (IssueTypeCode.isBug(x.getTypeCode())) {
+                Long relateIssueId = x.getRelateIssueId();
+                if (relateIssueId != null && !Objects.equals(0L, relateIssueId)) {
+                    Set<Long> sonSet = parentSonMap.computeIfAbsent(relateIssueId, y -> new HashSet<>());
+                    sonSet.add(x.getIssueId());
+                }
+            } else {
+                parentSonMap.computeIfAbsent(x.getIssueId(), y -> new HashSet<>());
+            }
+        });
+        Set<Long> issueIdSet = parentSonMap.keySet();
+        if (!issueIdSet.isEmpty() && !issueTypeIds.isEmpty()) {
+            issueIdSet =
+                    issueMapper.selectByIds(StringUtils.join(issueIdSet, ","))
+                            .stream()
+                            .filter(x -> issueTypeIds.contains(x.getIssueTypeId()))
+                            .map(IssueDTO::getIssueId)
+                            .collect(Collectors.toSet());
+        }
+        Set<Long> issueIds = new HashSet<>();
+        for (Map.Entry<Long, Set<Long>> entry : parentSonMap.entrySet()) {
+            Long issueId = entry.getKey();
+            Set<Long> sonSet = entry.getValue();
+            if (issueIdSet.contains(issueId)) {
+                issueIds.add(issueId);
+                if (!ObjectUtils.isEmpty(sonSet)) {
+                    issueIds.addAll(sonSet);
+                }
+            }
+
+        }
+        return issueIds;
     }
 
     @Override
@@ -823,16 +876,16 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         for (Long issueId : issueIds) {
             issueIdList.add(issueId + "");
         }
-        resetTreeParam(searchVO);
+        addTreeParamIfNotExisted(searchVO, true);
     }
 
-    private void resetTreeParam(SearchVO searchVO) {
+    private void addTreeParamIfNotExisted(SearchVO searchVO, boolean defaultValue) {
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
         if (otherArgs == null) {
             otherArgs = new HashMap<>();
             searchVO.setOtherArgs(otherArgs);
         }
-        otherArgs.put("tree", false);
+        otherArgs.putIfAbsent("tree", defaultValue);
     }
 
     private void validateProjectCategories(ProjectVO project) {

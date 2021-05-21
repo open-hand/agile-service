@@ -236,25 +236,35 @@
 
     <select id="statisticsByIssueType" resultType="io.choerodon.agile.api.vo.IssueTypeCountVO">
         select
-        ai.issue_type_id,
-        count(distinct ai.issue_id) as count
-        from agile_tag_issue_rel atir
-        join agile_issue ai on (ai.project_id = #{projectId} and ai.issue_id = atir.issue_id)
-        where atir.organization_id = #{organizationId}
-        and atir.project_id = #{projectId}
-        and atir.tag_project_id in
-        <foreach collection="tags" item="tag" open="(" separator="," close=")">
-            #{tag.projectId}
-        </foreach>
-        and atir.tag_name in
-        <foreach collection="tags" item="tag" open="(" separator="," close=")">
-            #{tag.tagName}
-        </foreach>
-        and atir.app_service_code in
-        <foreach collection="tags" item="tag" open="(" separator="," close=")">
-            #{tag.appServiceCode}
-        </foreach>
-        group by ai.issue_type_id
+        ai1.issue_type_id,
+        count(ai1.issue_id) as count
+        from (
+            select
+                distinct
+                    case
+                    when ai.type_code = 'sub_task' then ai.parent_issue_id
+                    when ai.type_code = 'bug' and ai.relate_issue_id is not null and ai.relate_issue_id != 0 then ai.relate_issue_id
+                    else ai.issue_id
+                end as issue_id
+            from agile_tag_issue_rel atir
+            join agile_issue ai on (ai.project_id = #{projectId} and ai.issue_id = atir.issue_id)
+            where atir.organization_id = #{organizationId}
+            and atir.project_id = #{projectId}
+            and atir.tag_project_id in
+            <foreach collection="tags" item="tag" open="(" separator="," close=")">
+                #{tag.projectId}
+            </foreach>
+            and atir.tag_name in
+            <foreach collection="tags" item="tag" open="(" separator="," close=")">
+                #{tag.tagName}
+            </foreach>
+            and atir.app_service_code in
+            <foreach collection="tags" item="tag" open="(" separator="," close=")">
+                #{tag.appServiceCode}
+            </foreach>
+        ) temp
+        join agile_issue ai1 on (ai1.project_id = #{projectId} and temp.issue_id = ai1.issue_id)
+        group by ai1.issue_type_id
     </select>
 
     <select id="selectByTags" resultType="io.choerodon.agile.infra.dto.TagIssueRelDTO">
