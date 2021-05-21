@@ -5,7 +5,7 @@ import { find } from 'lodash';
 import { uiApi } from '@/api';
 
 const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
-const copyHiddenFields = ['issueType', 'summary', 'description', 'status', 'timeTrace', 'creationDate', 'lastUpdateDate', 'created_user', 'last_updated_user'];
+const copyHiddenFields = ['issueType', 'summary', 'description', 'timeTrace', 'creationDate', 'lastUpdateDate', 'created_user', 'last_updated_user', 'epicName'];
 class EditIssueStore {
   // issue
   @observable issue = {};
@@ -35,7 +35,11 @@ class EditIssueStore {
   }
 
   @computed get copyFields() {
-    return this.fields.filter((field) => !copyHiddenFields.includes(field.fieldCode));
+    return [...(this.issue.typeCode === 'story' ? [{
+      system: true, fieldCode: 'storyPoints', fieldName: '故事点', fieldType: 'number',
+    }] : []), ...(this.issue.typeCode === 'task' || this.issue.typeCode === 'sub_task' || this.issue.typeCode === 'bug' ? [{
+      system: true, fieldCode: 'remainingTime', fieldName: '剩余预估时间', fieldType: 'number',
+    }] : []), ...this.fields.filter((field) => !copyHiddenFields.includes(field.fieldCode))];
   }
 
   @observable doc = {};

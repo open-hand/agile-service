@@ -293,6 +293,12 @@ export interface Issue {
   }[]
   featureId: string
   epicId: string
+  versionIssueRelVOList: {
+    versionId: string,
+    issueId: string,
+    name: string,
+    relationType: 'influence' | 'fix',
+  }[]
 }
 
 export interface ILog {
