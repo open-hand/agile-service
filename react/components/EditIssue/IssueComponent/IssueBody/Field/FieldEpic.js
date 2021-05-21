@@ -34,15 +34,7 @@ import styles from './FieldEpic.less';
         objectVersionNumber,
         epicId: newEpicId || 0,
       };
-      issueApi.update(obj)
-        .then(() => {
-          if (onUpdate) {
-            onUpdate();
-          }
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
-        });
+      store.update(obj);
     }
   };
 

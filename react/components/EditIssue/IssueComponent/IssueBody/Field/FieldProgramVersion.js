@@ -28,10 +28,11 @@ class FieldProgramVersion extends Component {
 
   updateIssueField = async (value) => {
     const {
-      store, onUpdate, reloadIssue, field,
+      store, onUpdate, reloadIssue, field, setIssueLoading,
     } = this.props;
     const issue = store.getIssue;
     const { issueId, objectVersionNumber } = issue;
+    setIssueLoading(true);
     await featureApi.updateVersions(issueId, value);
     if (onUpdate) {
       onUpdate();

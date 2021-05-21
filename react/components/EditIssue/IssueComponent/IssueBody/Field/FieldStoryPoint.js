@@ -24,15 +24,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
       objectVersionNumber,
       [fieldCode]: value === '' ? null : value,
     };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
+    store.update(obj);
   };
 
   render() {

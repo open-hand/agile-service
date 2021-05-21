@@ -51,14 +51,8 @@ import SelectVersion from '@/components/select/select-version';
         versionIssueRelVOList: versionList,
         versionType: 'fix',
       };
-      issueApi.update(obj)
+      store.update(obj)
         .then(() => {
-          if (onUpdate) {
-            onUpdate();
-          }
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
           // 新建版本，刷新版本侧边栏
           if (newSign && onCreateVersion) {
             onCreateVersion();
