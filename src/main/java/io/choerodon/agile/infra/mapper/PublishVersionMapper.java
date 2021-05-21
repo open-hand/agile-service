@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.PublishVersionVO;
 import io.choerodon.agile.infra.dto.PublishVersionDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 
 import org.apache.ibatis.annotations.Param;
@@ -35,9 +36,9 @@ public interface PublishVersionMapper extends BaseMapper<PublishVersionDTO> {
      * @param publishVersionIds
      * @return
      */
-    Set<Long> selectIssueIds(@Param("projectIds") Set<Long> projectIds,
-                             @Param("organizationId") Long organizationId,
-                             @Param("publishVersionIds") Set<Long> publishVersionIds);
+    List<IssueDTO> selectIssueIds(@Param("projectIds") Set<Long> projectIds,
+                                  @Param("organizationId") Long organizationId,
+                                  @Param("publishVersionIds") Set<Long> publishVersionIds);
 
     /**
      * 查询发布版本，附带tag数据
