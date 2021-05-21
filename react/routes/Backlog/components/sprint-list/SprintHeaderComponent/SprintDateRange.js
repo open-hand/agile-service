@@ -99,7 +99,7 @@ const FormItem = Form.Item;
                 </Text>
                 <Edit>
                   <Form>
-                    <div style={{ display: 'flex' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
                       <FormItem>
                         {getFieldDecorator('startDate', {
                           rules: [
@@ -109,7 +109,7 @@ const FormItem = Form.Item;
                         })(
                           <DatePicker
                             autoFocus
-                            style={{ width: 165, height: 32 }}
+                            style={{ width: 170 }}
                             allowClear
                             disabledDate={(date) => {
                               if (!date) {
@@ -146,7 +146,7 @@ const FormItem = Form.Item;
                         )}
                       </FormItem>
 
-                      <p style={{ marginTop: '.08rem' }}>~</p>
+                      <p>~</p>
                       <FormItem>
                         {getFieldDecorator('endDate', {
                           rules: [
@@ -156,7 +156,7 @@ const FormItem = Form.Item;
                         })(
                           <DatePicker
                             autoFocus
-                            style={{ width: 165, height: 32 }}
+                            style={{ width: 170 }}
                             allowClear
                             disabledDate={(date) => {
                               if (!date) {
