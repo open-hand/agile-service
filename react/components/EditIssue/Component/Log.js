@@ -124,7 +124,7 @@ class Log extends Component {
                 textStyle={{ color: '#5365EA' }}
               />
             </div>
-            <span style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
+            <span style={{ color: 'var(--text-color3)', marginLeft: 15 }}>
               {worklog.lastUpdateDate}
             </span>
           </div>
@@ -163,11 +163,11 @@ class Log extends Component {
               ) : ''}
           </div>
         </div>
-        <div className="line-start" style={{ color: 'rgba(0, 0, 0, 0.65)', marginTop: '10px' }}>
+        <div className="line-start" style={{ color: 'var(--text-color3)', marginTop: '10px' }}>
           <span style={{ width: 70 }}>耗费时间:</span>
           <span style={{ color: '#000', fontWeight: '500' }}>{`${worklog.workTime}小时` || '无'}</span>
         </div>
-        <div className="line-start" style={{ color: 'rgba(0, 0, 0, 0.65)', marginTop: '10px' }}>
+        <div className="line-start" style={{ color: 'var(--text-color3)', marginTop: '10px' }}>
           <span style={{ width: 70 }}>工作日期:</span>
           <span style={{ color: '#000', fontWeight: '500' }}>{worklog.startDate || '无'}</span>
         </div>
@@ -175,7 +175,7 @@ class Log extends Component {
           expand && (
             <div>
               <div className="c7n-conent-log" style={{ marginTop: 10, display: 'flex' }}>
-                <span style={{ width: 70, flexShrink: 0, color: 'rgba(0, 0, 0, 0.65)' }}>备注:</span>
+                <span style={{ width: 70, flexShrink: 0, color: 'var(--text-color3)' }}>备注:</span>
                 <span style={{ flex: 1 }}>
                   {
                     worklog.logId !== editLogId ? (

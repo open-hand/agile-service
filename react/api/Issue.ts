@@ -489,10 +489,10 @@ class IssueApi extends Api<IssueApi> {
     * @param issueId
     * @param content
     */
-  loadIssuesInLink(page: number = 1, size: number = 10, issueId?: number, content?: string, projectId?: number) {
+  loadIssuesInLink(page: number = 1, size: number = 10, issueId?: number, content?: string, excludeIssueIds?:string[]) {
     return axios({
-      method: 'get',
-      url: `/agile/v1/projects/${projectId || getProjectId()}/issues/agile/summary`,
+      method: 'post',
+      url: `/agile/v1/projects/${getProjectId()}/issues/agile/summary`,
       params: {
         page,
         size,
@@ -500,6 +500,7 @@ class IssueApi extends Api<IssueApi> {
         content,
         self: false,
       },
+      data: excludeIssueIds,
     });
   }
 

@@ -420,7 +420,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
         >
           <img src={pic} alt="没有预估故事点" />
           <div style={{ textAlign: 'left', marginLeft: '50px' }}>
-            <span style={{ fontSize: getFontSize(12), color: 'rgba(0, 0, 0, 0.65)' }}>报表不能显示</span>
+            <span style={{ fontSize: getFontSize(12), color: 'var(--text-color3)' }}>报表不能显示</span>
             <p style={{ marginTop: 10, fontSize: getFontSize(20) }}>
               在此史诗中没有预估的故事，请在
               <span

@@ -50,7 +50,7 @@ const Comment: React.FC<Props> = ({
             }}
             color="#5365EA"
           />
-          <div style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
+          <div style={{ color: 'var(--text-color3)', marginLeft: 15 }}>
             {comment.lastUpdateDate}
           </div>
         </div>

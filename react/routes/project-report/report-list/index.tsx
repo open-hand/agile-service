@@ -22,7 +22,7 @@ const ReportList: React.FC = () => {
         />
       </Header>
       <Breadcrumb />
-      <Content style={{ paddingTop: 0 }}>
+      <Content>
         <ReportTable onClick={handleAddClick} />
       </Content>
     </Page>

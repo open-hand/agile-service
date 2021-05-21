@@ -8,11 +8,10 @@ function SprintVisibleIssue({
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   const issueCount = issueList.length || 0;
   return (
-    <div style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: '0.26rem' }}>
+    <div style={{ color: 'var(--text-color3)', marginLeft: '0.26rem' }}>
       {`${issueCount}个问题可见`}
     </div>
   );
 }
-
 
 export default observer(SprintVisibleIssue);

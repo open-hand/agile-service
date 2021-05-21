@@ -28,37 +28,39 @@ function TimeField({ field, value, onChange }) {
     width = 230;
   }
   return (
-    <Picker
-      label={field.name}
-      labelLayout="float"
-      style={{ width, margin: '6px 0' }}
-      placeholder={['开始时间', '结束时间']}
-      value={getSelectedDate(field, value)}
-      onChange={(range) => {
-        const { start, end } = range || {};
-        if (start && end) {
-          if (field.fieldType === 'time') {
-            onChange([
-              start.format('HH:mm:ss'),
-              end.format('HH:mm:ss'),
-            ]);
-          } else if (field.fieldType === 'date') {
-            onChange([
-              start.startOf('day').format('YYYY-MM-DD HH:mm:ss'),
-              end.endOf('day').format('YYYY-MM-DD HH:mm:ss'),
-            ]);
+    <div className="c7n-pro-form-float">
+      <Picker
+        label={field.name}
+        labelLayout="float"
+        style={{ width, margin: '6px 0' }}
+        placeholder={['开始时间', '结束时间']}
+        value={getSelectedDate(field, value)}
+        onChange={(range) => {
+          const { start, end } = range || {};
+          if (start && end) {
+            if (field.fieldType === 'time') {
+              onChange([
+                start.format('HH:mm:ss'),
+                end.format('HH:mm:ss'),
+              ]);
+            } else if (field.fieldType === 'date') {
+              onChange([
+                start.startOf('day').format('YYYY-MM-DD HH:mm:ss'),
+                end.endOf('day').format('YYYY-MM-DD HH:mm:ss'),
+              ]);
+            } else {
+              onChange([
+                start.format('YYYY-MM-DD HH:mm:ss'),
+                end.format('YYYY-MM-DD HH:mm:ss'),
+              ]);
+            }
           } else {
-            onChange([
-              start.format('YYYY-MM-DD HH:mm:ss'),
-              end.format('YYYY-MM-DD HH:mm:ss'),
-            ]);
+            onChange([]);
           }
-        } else {
-          onChange([]);
-        }
-      }}
-      range={['start', 'end']}
-    />
+        }}
+        range={['start', 'end']}
+      />
+    </div>
   );
 }
 export default observer(TimeField);

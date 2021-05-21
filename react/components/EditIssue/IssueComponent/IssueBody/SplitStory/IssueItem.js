@@ -52,7 +52,7 @@ function IssueItem({ issue, outside, organizationId }) {
         alignItems: 'center',
         padding: '5px 0',
         cursor: 'pointer',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+        borderBottom: '1px solid var(--divider)',
       }}
     >
       <Tooltip mouseEnterDelay={0.5} title={`任务类型: ${issueTypeVO.name}`}>

@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import {
   Content, stores, Permission, Choerodon,
 } from '@choerodon/boot';
-import { Select } from 'choerodon-ui';
+import { Select } from 'choerodon-ui/pro';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { last, cloneDeep, find } from 'lodash';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
@@ -143,7 +143,6 @@ class SettingColumn extends Component {
       >
         <div
           style={{
-            marginTop: 16,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -172,6 +171,8 @@ class SettingColumn extends Component {
               value={ScrumBoardStore.getCurrentConstraint}
               label="列约束"
               style={{ width: 512 }}
+              labelLayout="float"
+              clearButton={false}
               onChange={(value) => {
                 const oldData = ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard);
                 boardApi.update(ScrumBoardStore.getSelectedBoard, {

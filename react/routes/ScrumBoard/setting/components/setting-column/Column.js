@@ -18,17 +18,16 @@ class Column extends Component {
     const {
       data, refresh,
     } = this.props;
-    Modal.confirm({
+    Modal.open({
       title: '删除列',
       children: '确定要删除该列？',
-    }).then((button) => {
-      if (button === 'ok') {
-        boardColumnApi.delete(data.columnId).then(() => {
+      onOk: async () => {
+        return boardColumnApi.delete(data.columnId).then(() => {
           refresh();
         }).catch((err) => {
         });
       }
-    });
+    })
   }
 
   updateColumnMaxMin = (type, value) => {
@@ -179,7 +178,7 @@ class Column extends Component {
                           {'最大值：'}
                           {typeof data.maxNum === 'number' ? data.maxNum : '没有最大'}
                         </span>
-                            )}
+                      )}
                     >
                       <TextEditToggle
                         formKey="name"
@@ -214,7 +213,7 @@ class Column extends Component {
                           {'最小值：'}
                           {typeof data.minNum === 'number' ? data.minNum : '没有最小'}
                         </span>
-                            )}
+                      )}
                     >
                       <TextEditToggle
                         formKey="name"

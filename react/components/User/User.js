@@ -50,7 +50,7 @@ const User = ({
           whiteSpace: 'nowrap',
           fontSize: '13px',
           lineHeight: '20px',
-          color: 'rgba(0, 0, 0, 0.65)',
+          color: 'var(--text-color3)',
         }}
       >
         {user.loginName}

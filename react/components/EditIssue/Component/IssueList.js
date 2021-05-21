@@ -65,8 +65,8 @@ class IssueList extends Component {
           alignItems: 'center',
           padding: '5px 0',
           cursor: 'pointer',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-          borderTop: !i ? '1px solid rgba(0, 0, 0, 0.12)' : '',
+          borderBottom: '1px solid var(--divider)',
+          borderTop: !i ? '1px solid var(--divider)' : '',
           ...style,
         }}
       >

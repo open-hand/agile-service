@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Table } from 'choerodon-ui';
 import _ from 'lodash';
-import { Content } from '@choerodon/boot';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 
 const { Sidebar } = Modal;
@@ -30,9 +29,14 @@ class AssigneeModal extends Component {
       title: '经办人',
       dataIndex: 'assigneeName',
       key: 'assigneeName',
+      width: 200,
       render: (text) => (text === '合计' ? (
         <span>{text}</span>
-      ) : (<span>{text || '未分配'}</span>)),
+      ) : (
+        <span>
+          {text || '未分配'}
+        </span>
+      )),
     }, {
       title: '总问题数',
       dataIndex: 'issueCount',
@@ -118,28 +122,21 @@ class AssigneeModal extends Component {
         width={MODAL_WIDTH.middle}
       >
         {data.assigneeIssues && (
-          <Content
-            style={{
-              padding: 0,
-              overflow: 'hidden',
-            }}
-          >
-            <Table
-              pagination={dataSource + 1 > 10}
-              dataSource={_.concat(dataSource, {
-                assigneeName: '合计',
-                issueCount: this.dealDecimal(total.totalIssue),
-                remainingIssueCount: this.dealDecimal(total.totalRemainIssueCount),
-                totalStoryPoints: this.dealDecimal(total.totalStoryPoints),
-                remainingStoryPoints: this.dealDecimal(total.remainingStoryPoints),
-                totalRemainingTime: this.dealDecimal(total.totalTime),
-                remainingTime: this.dealDecimal(total.totalRemainTime),
-              })}
-              columns={columns}
-              filterBar={false}
-              rowKey="assigneeName"
-            />
-          </Content>
+          <Table
+            pagination={false}
+            dataSource={_.concat(dataSource, {
+              assigneeName: '合计',
+              issueCount: this.dealDecimal(total.totalIssue),
+              remainingIssueCount: this.dealDecimal(total.totalRemainIssueCount),
+              totalStoryPoints: this.dealDecimal(total.totalStoryPoints),
+              remainingStoryPoints: this.dealDecimal(total.remainingStoryPoints),
+              totalRemainingTime: this.dealDecimal(total.totalTime),
+              remainingTime: this.dealDecimal(total.totalRemainTime),
+            })}
+            columns={columns}
+            filterBar={false}
+            rowKey="assigneeName"
+          />
         )}
       </Sidebar>
     );

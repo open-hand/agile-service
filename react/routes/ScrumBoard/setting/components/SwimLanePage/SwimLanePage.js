@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Content, Choerodon } from '@choerodon/boot';
-import { Select } from 'choerodon-ui';
+import { Select } from 'choerodon-ui/pro';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { boardApi } from '@/api';
 
@@ -30,16 +30,12 @@ class SwimLanePage extends Component {
   render() {
     const defaultSelect = ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard);
     return (
-      <Content
-        style={{
-          padding: 0,
-          height: '100%',
-          paddingTop: 5,
-        }}
-      >
+      <div>
         <Select
           style={{ width: 512 }}
           label="基础泳道在"
+          clearButton={false}
+          labelLayout="float"
           defaultValue={ScrumBoardStore.getSwimLaneCode || 'parent_child'}
           onChange={(value) => {
             this.setState({
@@ -54,7 +50,7 @@ class SwimLanePage extends Component {
           <Option value="swimlane_epic">史诗</Option>
           <Option value="swimlane_none">无</Option>
         </Select>
-      </Content>
+      </div>
     );
   }
 }
