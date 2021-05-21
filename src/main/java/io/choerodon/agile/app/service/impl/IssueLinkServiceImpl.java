@@ -4,21 +4,27 @@ import io.choerodon.agile.api.vo.IssueLinkCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkFixVO;
 import io.choerodon.agile.api.vo.IssueLinkVO;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.assembler.IssueLinkAssembler;
 import io.choerodon.agile.app.service.IssueLinkService;
+import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author dinghuang123@gmail.com
@@ -36,6 +42,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     private IssueLinkValidator issueLinkValidator;
     @Autowired
     private IssueLinkAssembler issueLinkAssembler;
+    @Autowired
+    private IssueService issueService;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -106,5 +114,27 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     public void deleteIssueLinkByIssueId(IssueConvertDTO issueConvertDTO, List<IssueLinkDTO> issueLinkDTOS) {
         BaseFieldUtil.updateIssueLastUpdateInfoForIssueLinks(issueConvertDTO, issueLinkDTOS);
         issueLinkMapper.deleteByIssueId(issueConvertDTO.getIssueId());
+    }
+
+    @Override
+    public Page<IssueListFieldKVVO> listUnLinkIssue(Long issueId, Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
+        if (searchVO == null) {
+            searchVO = new SearchVO();
+        }
+        if (searchVO.getOtherArgs() == null) {
+            searchVO.setOtherArgs(new HashMap<>(1));
+        }
+
+        Set<Long> issueIds = new HashSet<>();
+        issueIds.add(issueId);
+        List<IssueLinkDTO> issueLinks = issueLinkMapper.queryIssueLinkByIssueId(issueId, projectId, false);
+        if (!CollectionUtils.isEmpty(issueLinks)) {
+            issueLinks.forEach(issueLink -> {
+                issueIds.add(issueLink.getIssueId());
+                issueIds.add(issueLink.getLinkedIssueId());
+            });
+        }
+        searchVO.getOtherArgs().put("excludeIssueIds", issueIds);
+        return issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
     }
 }
