@@ -91,7 +91,7 @@ function IssueList({ data, sprintId }) {
                 ] : undefined}
                 sprintId={sprintId}
                 chosenFeatureId={BacklogStore.getChosenFeature !== 'all' && BacklogStore.getChosenFeature !== 'unset' ? BacklogStore.getChosenFeature : undefined}
-                defaultAssignee={BacklogStore.filterSprintAssign.get(sprintId)}
+                defaultAssignee={BacklogStore.filterSprintAssignUser.get(sprintId)}
                 onCreate={(res) => {
                   BacklogStore.handleCreateIssue(res, String(sprintId));
                   BacklogStore.refresh(false, false); // 更新侧边框
@@ -102,6 +102,9 @@ function IssueList({ data, sprintId }) {
                 }}
                 summaryChange={(summary) => {
                   BacklogStore.setDefaultSummary(summary);
+                }}
+                assigneeChange={(assigneeId) => {
+                  BacklogStore.setDefaultAssignee(assigneeId);
                 }}
                 setDefaultSprint={(value) => {
                   BacklogStore.setDefaultSprint(value);

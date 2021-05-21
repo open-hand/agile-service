@@ -363,6 +363,12 @@ class BacklogStore {
     this.filterSprintAssign.set(sprintId, assigneeId);
   }
 
+  @observable filterSprintAssignUser = observable.map();
+
+  @action setFilterSprintAssignUser(sprintId, assignee) {
+    this.filterSprintAssignUser.set(sprintId, assignee);
+  }
+
   @action clearFilterSprintAssign(sprintId) {
     this.filterSprintAssign.delete(sprintId);
   }
@@ -1268,6 +1274,12 @@ class BacklogStore {
 
   @action setDefaultSprint = (data) => {
     this.defaultSprint = data;
+  }
+
+  @observable defaultAssignee;
+
+  @action setDefaultAssignee = (data) => {
+    this.defaultAssignee = data;
   }
 }
 
