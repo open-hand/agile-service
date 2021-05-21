@@ -17,10 +17,12 @@ import styles from './CopyIssue.less';
 
 const { Option } = Select;
 const systemFieldsMap = new Map([
+  ['status', 'statusId'],
   ['reporter', 'reporterId'],
   ['assignee', 'assigneeId'],
   ['sprint', 'activeSprint'],
   ['fixVersion', 'versionIssueRelVOList'],
+  ['influenceVersion', 'versionIssueRelVOList'],
   ['epic', 'epicId'],
   ['priority', 'priorityId'],
   ['label', 'labelIssueRelVOList'],
@@ -29,6 +31,7 @@ const systemFieldsMap = new Map([
 ]);
 
 const predefinedFieldsMap = new Map([
+  ['status', 'statusId'],
   ['reporter', 'reporterId'],
   ['assignee', 'assigneeId'],
   ['epic', 'epicId'],
@@ -120,7 +123,7 @@ const CopyIssue: React.FC<Props> = ({
           const { fieldCode, fieldId, system } = field;
           if (!system) {
             copyfs.customFieldIds.push(fieldId);
-          } else if (fieldCode !== 'reporter' && fieldCode !== 'priority') {
+          } else {
             copyfs.predefinedFieldNames.push(predefinedFieldsMap.get(fieldCode as string) || fieldCode as string);
           }
         }
@@ -169,6 +172,12 @@ const CopyIssue: React.FC<Props> = ({
           } else {
             arr.push(fields[i]);
           }
+        }
+        if (fieldCode === 'influenceVersion' && (issue.versionIssueRelVOList?.length && find(issue.versionIssueRelVOList || [], { relationType: 'influence' }))) {
+          arr.push(fields[i]);
+        }
+        if (fieldCode === 'fixVersion' && (issue.versionIssueRelVOList?.length && find(issue.versionIssueRelVOList || [], { relationType: 'fix' }))) {
+          arr.push(fields[i]);
         }
         // @ts-ignore
         const systemValue = toJS(issue[systemFieldsMap.get(fieldCode) || fieldCode]);

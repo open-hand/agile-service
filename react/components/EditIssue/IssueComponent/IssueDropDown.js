@@ -13,6 +13,7 @@ import { issueApi } from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
 import { openEditIssueCopyIssue } from '@/components/CopyIssue';
+import { isInProgram } from '@/utils/program';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 import openIssueMove from './issue-move';
@@ -196,7 +197,7 @@ const IssueDropDown = ({
           </Menu.Item>
         )
       }
-      {['feature'].indexOf(typeCode) === -1 && (
+      {['feature', ...(isInProgram() ? ['issue_epic'] : [])].indexOf(typeCode) === -1 && (
         <Menu.Item key="3">
           复制问题
         </Menu.Item>
