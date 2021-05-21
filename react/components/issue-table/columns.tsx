@@ -59,7 +59,7 @@ export const getCustomColumn = (field) => (field && {
     const value = get(rowData, 'foundationFieldValue')[code];
     if (['member', 'multiMember'].includes(fieldType)) {
       return value && (
-        <div style={{ display: 'inline-flex', verticalAlign: 'middle' }}>
+        <div style={{ display: 'inline-flex', verticalAlign: 'middle', height: 40 }}>
           <UserTag
             data={value}
           />
@@ -170,7 +170,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     dataIndex: 'assignee',
     sortable: true,
     render: ({ rowData }) => (
-      <div style={{ display: 'inline-flex' }}>
+      <div style={{ display: 'inline-flex', height: 40 }}>
         {
           get(rowData, 'assigneeId') && get(rowData, 'assigneeId') !== '0' && (
             <UserTag
@@ -191,7 +191,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     title: '创建人',
     dataIndex: 'createUser',
     render: ({ rowData }) => (
-      <div style={{ display: 'inline-flex' }}>
+      <div style={{ display: 'inline-flex', height: 40 }}>
         {
           get(rowData, 'createUser') && (
             <UserTag
@@ -206,7 +206,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     title: '更新人',
     dataIndex: 'updateUser',
     render: ({ rowData }) => (
-      <div style={{ display: 'inline-flex' }}>
+      <div style={{ display: 'inline-flex', height: 40 }}>
         {
           get(rowData, 'updateUser') && (
             <UserTag
@@ -241,7 +241,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     dataIndex: 'reporter',
     sortable: true,
     render: ({ rowData }) => (
-      <div style={{ display: 'inline-flex' }}>
+      <div style={{ display: 'inline-flex', height: 40 }}>
         {get(rowData, 'reporterId') && get(rowData, 'reporterId') !== '0' && (
           <UserTag
             data={{

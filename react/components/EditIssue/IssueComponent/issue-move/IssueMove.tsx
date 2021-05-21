@@ -345,14 +345,16 @@ const IssueMove: React.FC<Props> = ({
   const targetSubBugType = issueTypeDataSet.toData().find((item: IIssueType) => item.id === subBugIssueTypeId) as IIssueType;
   return (
     <div className={styles.issueMove}>
-      <Steps current={currentStep - 1}>
-        <Step
-          title={<span style={{ color: currentStep === 1 ? '#5365EA' : '', fontSize: 14 }}>选择项目和问题类型</span>}
-        />
-        <Step
-          title={<span style={{ color: currentStep === 2 ? '#5365EA' : '', fontSize: 14 }}>确认数据信息</span>}
-        />
-      </Steps>
+      <div style={{ padding: '20px 20px 0' }}>
+        <Steps current={currentStep - 1}>
+          <Step
+            title={<span style={{ color: currentStep === 1 ? '#5365EA' : '', fontSize: 14 }}>选择项目和问题类型</span>}
+          />
+          <Step
+            title={<span style={{ color: currentStep === 2 ? '#5365EA' : '', fontSize: 14 }}>确认数据信息</span>}
+          />
+        </Steps>
+      </div>
       <div className={styles.step_content}>
         {currentStep === 1 && <SelectProject issue={issue} dataSet={dataSet} issueTypeDataSet={issueTypeDataSet} />}
         {currentStep === 2 && (
@@ -368,7 +370,7 @@ const IssueMove: React.FC<Props> = ({
           />
         )}
       </div>
-      <div className={styles.steps_action}>
+      <div className="c7n-pro-modal-footer c7n-pro-modal-footer-drawer">
         {currentStep === 1 && (
           <>
             <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleNext}>

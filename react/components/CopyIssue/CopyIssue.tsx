@@ -204,21 +204,23 @@ const CopyIssue: React.FC<Props> = ({
       }
       <Select name="fields">
         {
-            finalFields.map((item) => (
-              <Option value={item.fieldCode} key={item.fieldCode}>{item.fieldName}</Option>
-            ))
-          }
+          finalFields.map((item) => (
+            <Option value={item.fieldCode} key={item.fieldCode}>{item.fieldName}</Option>
+          ))
+        }
       </Select>
-      {
-        !!issue.subIssueVOList.length && (
-        <CheckBox name="copySubIssue" />
-        )
-      }
-      {
-        !!issueLink.length && (
-          <CheckBox name="copyLinkIssue" />
-        )
-      }
+      <div>
+        {
+          !!issue.subIssueVOList.length && (
+            <CheckBox name="copySubIssue" />
+          )
+        }
+        {
+          !!issueLink.length && (
+            <CheckBox style={{ marginLeft: 10 }} name="copyLinkIssue" />
+          )
+        }
+      </div>
     </Form>
   );
 };
