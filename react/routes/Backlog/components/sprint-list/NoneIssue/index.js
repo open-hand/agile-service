@@ -30,7 +30,7 @@ function BacklogNoIssue() {
     >
       <img style={{ width: 172 }} alt="emptybacklog" src={EmptyBacklog} />
       <div style={{ marginLeft: 40 }}>
-        <p style={{ color: 'rgba(0,0,0,0.65)', fontSize: '13px' }}>当前项目暂无待办事项</p>
+        <p style={{ color: 'var(--text-color3)', fontSize: '13px' }}>当前项目暂无待办事项</p>
         <p style={{ fontSize: 16, lineHeight: '28px', marginTop: 8 }}>
           您可以在此创建并评估问题，可通过上下拖动来规划问题的排列顺序
         </p>

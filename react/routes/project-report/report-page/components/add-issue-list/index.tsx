@@ -227,7 +227,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           name="visibleColumns"
           multiple // @ts-ignore
           help={(
-            <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.65)', marginTop: 8 }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-color3)', marginTop: 8 }}>
               为了保证最佳的预览效果，请将字段控制在6个以内
             </div>
           )}

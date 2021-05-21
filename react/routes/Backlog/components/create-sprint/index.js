@@ -221,9 +221,8 @@ export function CreateCurrentPiSprint({
         }}
       />
       <TextArea
-        rowSpan={2}
-        colSpan={2}
         name="sprintGoal"
+        resize="vertical"
       />
     </Form>
   );

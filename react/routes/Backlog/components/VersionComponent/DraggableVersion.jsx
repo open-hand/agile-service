@@ -278,7 +278,7 @@ class VersionItem extends Component {
             <p className="c7n-backlog-versionItemDetail">详情</p>
             <div className="c7n-backlog-versionItemParams">
               <div className="c7n-backlog-versionItemParam">
-                <p style={{ color: 'rgba(0,0,0,0.65)' }}>开始日期</p>
+                <p style={{ color: 'var(--text-color3)' }}>开始日期</p>
                 <Permission
                   service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion']}
                   noAccessChildren={<p className="c7n-backlog-versionItemNotStoryPoint">{!_.isNull(item.startDate) ? `${item && item.startDate.split('-')[0]}/${item.startDate.split('-')[1]}/${item.startDate.split('-')[2].substring(0, 2)}` : '无'}</p>}
@@ -296,7 +296,7 @@ class VersionItem extends Component {
                 </Permission>
               </div>
               <div className="c7n-backlog-versionItemParam">
-                <p style={{ color: 'rgba(0,0,0,0.65)' }}>预计发布日期</p>
+                <p style={{ color: 'var(--text-color3)' }}>预计发布日期</p>
                 <Permission
                   service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion']}
                   noAccessChildren={<p className="c7n-backlog-versionItemNotStoryPoint">{!_.isNull(item.expectReleaseDate) ? `${item && item.expectReleaseDate.split('-')[0]}/${item.expectReleaseDate.split('-')[1]}/${item.expectReleaseDate.split('-')[2].substring(0, 2)}` : '无'}</p>}

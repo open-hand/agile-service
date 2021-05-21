@@ -114,7 +114,6 @@ function SingleFileUplaod(props) {
             <Tooltip title="下载">
               <Icon
                 type="get_app"
-                style={{ color: '#000' }}
                 onClick={handleDownLoadFile}
               />
             </Tooltip>

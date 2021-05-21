@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Modal } from 'choerodon-ui/pro';
-import { Select } from 'choerodon-ui';
+import { Modal, Select } from 'choerodon-ui/pro';
+
 import { stores } from '@choerodon/boot';
 import { sprintApi } from '@/api';
 import _ from 'lodash';
@@ -52,7 +52,7 @@ class CloseSprint extends Component {
     const { completeMessage, defaultValuePrompt } = this.props;
     const { selectChose } = this.state;
     return (
-      <div>
+      <div className="c7n-pro-form-float">
         <p className="c7n-closeSprint-message">
           <span>{!_.isNull(completeMessage) ? completeMessage.partiallyCompleteIssues : ''}</span>
           {' '}
@@ -63,10 +63,11 @@ class CloseSprint extends Component {
           {' '}
           个问题 未完成
         </p>
-        <p style={{ marginTop: 19, color: 'rgba(0,0,0,0.65)' }}>{`其中有${completeMessage ? completeMessage.parentsDoneUnfinishedSubtasks.length : 0}个问题包含子任务，父级任务移动后与之相关的子任务也会被移动`}</p>
-        <p style={{ fontSize: 14, marginTop: 36 }}>选择该冲刺未完成的问题：</p>
+        <p style={{ marginTop: 19, color: 'var(--text-color3)' }}>{`其中有${completeMessage ? completeMessage.parentsDoneUnfinishedSubtasks.length : 0}个问题包含子任务，父级任务移动后与之相关的子任务也会被移动`}</p>
+        <div style={{ fontSize: 14, marginTop: 36 }}>选择该冲刺未完成的问题移动到：</div>
         <Select
           label="移动至"
+          labelLayout="float"
           style={{ marginTop: 12, width: 512 }}
           value={selectChose}
           onChange={(value) => {
@@ -82,7 +83,7 @@ class CloseSprint extends Component {
           ) : ''}
           <Option value="0">待办事项</Option>
         </Select>
-        {defaultValuePrompt && <p style={{ marginTop: 10, color: 'rgba(0,0,0,0.65)' }}>{defaultValuePrompt}</p>}
+        {defaultValuePrompt && <p style={{ marginTop: 10, color: 'var(--text-color3)' }}>{defaultValuePrompt}</p>}
       </div>
     );
   }
@@ -92,8 +93,6 @@ export default function (props) {
   Modal.open({
     key: 'sprint',
     title: '完成冲刺',
-    okText: '结束',
-    cancelText: '取消',
     drawer: true,
     style: {
       width: 740,

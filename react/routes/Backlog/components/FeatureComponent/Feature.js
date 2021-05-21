@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { Select } from 'choerodon-ui';
+import { Select } from 'choerodon-ui/pro';
 import { min } from 'lodash';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { featureApi, commonApi } from '@/api';
@@ -65,32 +66,30 @@ class Feature extends Component {
         notDoneSprintList = BacklogStore.piMap.get(minPIId) && BacklogStore.piMap.get(minPIId).sprints;
       }
     }
-
     return (
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicChoice">
           <Select
             onChange={this.handlePiChange}
-            value={selectedPiId}
+            value={toJS(selectedPiId)}
             placeholder="PI"
-            className="c7n-backlog-piSelect"
-            allowClear
+            style={{ marginLeft: 8, marginBottom: 6 }}
           >
             {
               [...notDonePiList, { id: '0' }].map((pi) => (
                 <Option key={pi.id} value={pi.id}>
-                  <span>{pi.id === '0' ? '未分配PI' : pi.fullName || `${pi.code}-${pi.name}`}</span>
-                  {pi.id === (BacklogStore.piInfo && BacklogStore.piInfo.id) && (
-                    <div
-                      style={{
-                        marginLeft: '0.08rem',
-                        paddingTop: '0.02rem',
-                        display: 'inline-block',
-                      }}
-                    >
-                      <span className="c7n-agile-sprintSearchSelect-option-active">当前</span>
-                    </div>
-                  )}
+                  <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    <span>{pi.id === '0' ? '未分配PI' : pi.fullName || `${pi.code}-${pi.name}`}</span>
+                    {pi.id === (BacklogStore.piInfo && BacklogStore.piInfo.id) && (
+                      <div
+                        style={{
+                          marginLeft: '0.08rem',
+                        }}
+                      >
+                        <span className="c7n-agile-sprintSearchSelect-option-active">当前</span>
+                      </div>
+                    )}
+                  </div>
                 </Option>
               ))
             }
@@ -109,24 +108,24 @@ class Feature extends Component {
           {
             selectedPi && notDoneSprintList && notDoneSprintList.length > 0 && (
               <Select
+                style={{ marginTop: 6, marginBottom: 8, marginLeft: 8 }}
                 key="sprintSelect"
-                className="c7n-backlog-sprintSelect"
                 placeholder="冲刺"
-                allowClear
                 dropdownMatchSelectWidth={false}
-                value={selectedSprintId}
+                value={toJS(selectedSprintId)}
                 onChange={this.handleSprintChange}
-                getPopupContainer={(triggerNode) => triggerNode.parentNode}
               >
                 {
                   (notDoneSprintList || []).map((item) => (
                     <Option key={item.sprintId} value={item.sprintId} title={item.sprintName}>
-                      {item.sprintName}
-                      {
-                        item.statusCode === 'started' && (
-                          <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>
-                        )
-                      }
+                      <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                        {item.sprintName}
+                        {
+                          item.statusCode === 'started' && (
+                            <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>
+                          )
+                        }
+                      </div>
                     </Option>
                   ))
                 }

@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import {
-  Dropdown, Menu, Modal,
+  Modal,
 } from 'choerodon-ui';
 import {
   Button,
-  Modal as ModalPro,
+  Modal as ModalPro, Dropdown, Menu,
 } from 'choerodon-ui/pro';
 import { Permission } from '@choerodon/boot';
 
@@ -102,14 +102,10 @@ const IssueDropDown = ({
           assigneeId={assigneeId}
           objectVersionNumber={objectVersionNumber}
           onOk={() => {
-            store.setAssigneeShow(false);
             if (onUpdate) {
               onUpdate();
             }
             reloadIssue(issueId);
-          }}
-          onCancel={() => {
-            store.setAssigneeShow(false);
           }}
         />,
       });
@@ -252,7 +248,7 @@ const IssueDropDown = ({
       getPopupContainer={(trigger) => trigger.parentNode}
       placement="bottomRight"
     >
-      <Button icon="more_vert" />
+      <Button icon="more_vert" style={{ background: 'var(--primary-color)', color: 'white' }} />
     </Dropdown>
   );
 };

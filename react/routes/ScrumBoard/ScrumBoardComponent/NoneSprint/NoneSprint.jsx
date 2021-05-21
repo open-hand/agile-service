@@ -28,7 +28,7 @@ const NoneSprint = ({ doingSprintExist, filterItems, hasSetFilter }) => {
             marginLeft: 40,
           }}
         >
-          <p style={{ color: 'rgba(0,0,0,0.65)', fontSize: '13px' }}>{`${tipTitle}`}</p>
+          <p style={{ color: 'var(--text-color3)', fontSize: '13px' }}>{`${tipTitle}`}</p>
           <p style={{ fontSize: 16, lineHeight: '34px' }}>
             在工作列表的
             <span style={{ color: '#5365EA' }}>待办事项</span>
