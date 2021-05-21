@@ -80,7 +80,7 @@ const AutoTransform: React.FC<Props> = ({
             <div style={{
               marginTop: -12,
               fontSize: 12,
-              color: 'rgba(0, 0, 0, 0.65)',
+              color: 'var(--text-color3)',
               marginLeft: 2,
             }}
             >

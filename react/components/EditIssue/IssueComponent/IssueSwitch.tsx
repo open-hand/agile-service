@@ -40,7 +40,7 @@ const IssueSwitch: React.FC<Props> = ({ issue, reloadIssue }) => {
     <IssueList
       showStar
       style={{
-        borderBottom: sameParentList.length > 1 ? '1px solid rgba(0, 0, 0, 0.12)' : '',
+        borderBottom: sameParentList.length > 1 ? '1px solid var(--divider)' : '',
       }}
       showAssignee={false}
       key={item.issueId}

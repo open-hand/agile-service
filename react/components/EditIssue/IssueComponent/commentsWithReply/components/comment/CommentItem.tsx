@@ -184,7 +184,7 @@ const CommentItem: React.FC<Props> = ({
                 <div className="c7n-title-commit-to">
                   <span style={{
                     marginRight: 12,
-                    color: 'rgba(0, 0, 0, 0.65)',
+                    color: 'var(--text-color3)',
                   }}
                   >
                     回复
@@ -202,7 +202,7 @@ const CommentItem: React.FC<Props> = ({
                 </div>
               )
             }
-            <div style={{ color: 'rgba(0, 0, 0, 0.65)', marginLeft: 15 }}>
+            <div style={{ color: 'var(--text-color3)', marginLeft: 15 }}>
               {comment.lastUpdateDate}
             </div>
           </div>

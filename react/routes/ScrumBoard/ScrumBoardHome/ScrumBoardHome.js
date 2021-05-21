@@ -322,8 +322,9 @@ class ScrumBoardHome extends Component {
         className="c7n-scrumboard-page"
       >
         <Header title="活跃冲刺">
-          {/* <SelectBoard
-            onClick={this.handleCreateBoardClick}
+          <SelectBoard
+            style={{ marginRight: 24 }}
+            onFooterClick={this.handleCreateBoardClick}
             onChange={(value) => {
               const selectedBoard = ScrumBoardStore.getBoardList.get(value);
               ScrumBoardStore.setSelectedBoard(value);
@@ -331,7 +332,6 @@ class ScrumBoardHome extends Component {
               this.refresh(selectedBoard);
             }}
           />
-          <HeaderLine /> */}
           <HeaderButtons
             items={[
               {
@@ -354,11 +354,9 @@ class ScrumBoardHome extends Component {
                         },
                       });
                     },
-                    icon: 'settings',
                   }, {
                     text: '个人筛选',
                     action: this.handleClickFilterManage,
-                    icon: 'settings',
                   }],
                 },
               },
@@ -374,18 +372,6 @@ class ScrumBoardHome extends Component {
                 display: currentSprintIsDoing,
                 permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish'],
                 preElement: this.renderRemainDate(),
-              }, {
-                display: true,
-                element: <SelectBoard
-                  style={{ marginRight: 24 }}
-                  onFooterClick={this.handleCreateBoardClick}
-                  onChange={(value) => {
-                    const selectedBoard = ScrumBoardStore.getBoardList.get(value);
-                    ScrumBoardStore.setSelectedBoard(value);
-                    ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
-                    this.refresh(selectedBoard);
-                  }}
-                />,
               },
             ]}
           />

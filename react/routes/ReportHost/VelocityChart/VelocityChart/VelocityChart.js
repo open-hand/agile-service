@@ -106,7 +106,7 @@ class VelocityChart extends Component {
           // interval: VS.getChartDataX.length >= 16 ? 5 : 0,
           interval: 0,
           textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
+            color: 'var(--text-color3)',
             fontSize: 12,
             fontStyle: 'normal',
           },
@@ -150,7 +150,7 @@ class VelocityChart extends Component {
           show: true,
           interval: 'auto',
           textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
+            color: 'var(--text-color3)',
             fontSize: 12,
             fontStyle: 'normal',
           },

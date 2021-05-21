@@ -81,8 +81,8 @@ function FieldIssueLinks({ form, projectId }) {
               <SelectFocusLoad
                 label="问题"
                 type="issues_in_link"
-                requestArgs={{ projectId }}
-                optionFilter={(issue) => !getOtherSelected(selectedIssues, k).includes(issue.issueId)}
+                // optionFilter={(issue) => !getOtherSelected(selectedIssues, k).includes(issue.issueId)}
+                requestArgs={{ excludeIssueIds: getOtherSelected(selectedIssues, k) }}
                 getPopupContainer={() => (document.getElementsByClassName('c7n-modal-body') ? document.getElementsByClassName('c7n-modal-body')[0] : document.body)}
               />,
             )}

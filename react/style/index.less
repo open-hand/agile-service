@@ -1,6 +1,16 @@
 @import './default.less';
 @import '~choerodon-ui/lib/style/themes/default';
 
+:root {
+  --primary-color: #5365EA;
+  --primary-color2: rgba(83,101,234,0.08);
+  --divider: #d9e6f2;
+  --table-click-color: #415BC9;
+  --text-color: #0f1358;
+  --text-color2: #0f1358;
+  --text-color3: rgba(15, 19, 88, 0.65);
+}
+
 .hidden-label-mixin() {
   border-color: @input-label-borderColor;
 
@@ -289,11 +299,11 @@ body:not([data-theme="theme4"]) {
   }
 
   .c7n-agile-table-cell {
-    color: rgba(0, 0, 0, 0.65);
+    
   }
 
   .c7n-agile-table-cell-click {
-    color: #5365EA;
+    color: var(--table-click-color);
     cursor: pointer;
     vertical-align: top;
 
@@ -301,11 +311,14 @@ body:not([data-theme="theme4"]) {
       text-decoration: underline;
     }
   }
-  .c7n-table-thead > tr > th:focus, .c7n-table-tbody > tr > td:focus {
+
+  .c7n-table-thead > tr > th:focus,
+  .c7n-table-tbody > tr > td:focus {
     background-color: unset;
   }
+
   .primary {
-    color: #5365EA;
+    color: var(--primary-color);
   }
 }
 
@@ -361,7 +374,7 @@ body:not([data-theme="theme4"]) {
 }
 
 .greyColor {
-  color: rgba(0, 0, 0, 0.65);
+  color: var(--text-color3);
 }
 
 
@@ -398,7 +411,7 @@ body:not([data-theme="theme4"]) {
   }
 
   .c7n-@{type}-search__field__placeholder {
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--text-color2);
   }
 
   .c7n-@{type}-open {

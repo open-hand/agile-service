@@ -161,15 +161,20 @@ class BacklogHome extends Component {
           position: 'absolute',
           background: 'white',
           height: '1px',
-          top: '137px',
-          left: '109px',
-          zIndex: 1,
+          top: '134px',
+          left: '89px',
+          zIndex: 3,
         }}
         />
         <Content style={{
           display: 'flex',
           flexDirection: 'column',
-          ...theme === 'theme4' ? {} : {
+          ...theme === 'theme4' ? {
+            marginLeft: 0,
+            marginRight: 0,
+            paddingLeft: 0,
+            paddingRight: 0,
+          } : {
             padding: 0, paddingTop: 4,
           },
         }}

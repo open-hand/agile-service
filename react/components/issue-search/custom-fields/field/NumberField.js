@@ -1,17 +1,16 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { InputNumber } from 'choerodon-ui';
+import { NumberField } from 'choerodon-ui/pro';
 
-function NumberField({ field, value, onChange }) {
+function NumberFieldComponent({ field, value, onChange }) {
   const { name } = field;
   return (
-    <InputNumber
-      className="hidden-label"
+    <NumberField
       value={value}
       onChange={onChange}
       placeholder={name}
-      style={{ width: 100, height: 30 }}
-    />      
+      style={{ width: 100 }}
+    />
   );
 }
-export default observer(NumberField);
+export default observer(NumberFieldComponent);

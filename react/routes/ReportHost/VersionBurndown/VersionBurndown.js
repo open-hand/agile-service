@@ -571,7 +571,7 @@ class VersionBurndown extends Component {
         >
           <img src={pic} alt="没有预估故事点" />
           <div style={{ textAlign: 'left', marginLeft: '50px' }}>
-            <span style={{ fontSize: 12, color: 'rgba(0, 0, 0, 0.65)' }}>报表不能显示</span>
+            <span style={{ fontSize: 12, color: 'var(--text-color3)' }}>报表不能显示</span>
             <p style={{ marginTop: 10, fontSize: 20 }}>
               在此版本中没有预估的故事，请在
               <a

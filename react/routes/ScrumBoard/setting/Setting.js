@@ -103,12 +103,6 @@ class Setting extends Component {
   handleTabChange = (key) => {
     this.setState({
       activeKey: key,
-    }, () => {
-      if (key === '4') {
-        // setTimeout(() => {
-        //   this.input.focus();
-        // }, 100);
-      }
     });
   }
 
@@ -132,9 +126,6 @@ class Setting extends Component {
   renderEditBoardName = (editBoardNamePermission) => (
     <EditBoardName
       editBoardNameDisabled={!editBoardNamePermission}
-      saveRef={(ref) => {
-        this.input = ref;
-      }}
     />
   )
 
@@ -176,7 +167,7 @@ class Setting extends Component {
           />
         </Header>
         <Breadcrumb title="配置看板" />
-        <Content className="c7n-scrumboard" style={{ height: '100%', paddingTop: 0 }}>
+        <Content className="c7n-scrumboard c7n-pro-form-float" style={{ height: '100%', paddingTop: 0 }}>
           <Tabs
             style={{
               display: 'flex', flexDirection: 'column', height: '100%', overflow: 'auto',

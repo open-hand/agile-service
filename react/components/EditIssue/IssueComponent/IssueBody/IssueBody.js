@@ -59,7 +59,7 @@ function IssueBody(props) {
             field={{ fieldCode: 'summary', fieldName: '概要' }}
           />
           <FieldStar {...props} />
-          <div style={{ flexShrink: 0, marginLeft: 'auto', color: 'rgba(0, 0, 0, 0.65)' }}>
+          <div style={{ flexShrink: 0, marginLeft: 'auto', color: 'var(--text-color3)' }}>
             {!disabled && (
               <IssueDropDown {...props} testLinkStoreRef={testLinkStoreRef} />
             )}

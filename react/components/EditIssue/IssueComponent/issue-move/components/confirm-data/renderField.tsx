@@ -330,7 +330,7 @@ const renderField = ({
             ? (
               <p
                 style={{
-                  color: isSelf ? '#4d90fe' : 'rgba(0, 0, 0, 0.65)',
+                  color: isSelf ? '#4d90fe' : 'var(--text-color3)',
                   fontSize: '13px',
                   lineHeight: '20px',
                   display: 'inline-block',
@@ -340,7 +340,7 @@ const renderField = ({
               </p>
             ) : (
               <div style={{
-                color: isSelf ? '#000000' : 'rgba(0, 0, 0, 0.65)',
+                color: isSelf ? '#000000' : 'var(--text-color3)',
               }}
               >
                 无

@@ -180,7 +180,7 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
       <TextField placeholder="请输入搜索内容" style={{ height: 34 }} onChange={handleSearch} clearButton />
       {
         filter && !filteredOptions.length ? (
-          <div style={{ color: 'rgba(0, 0, 0, 0.65)' }}>暂无搜索结果</div>
+          <div style={{ color: 'var(--text-color3)' }}>暂无搜索结果</div>
         ) : (
           <SelectBox name={name} onChange={handleChange}>
             {filteredOptions.map((option) => <SelectBox.Option value={option.value} {...option.optionConfig}>{renderOptionLabel(option.label)}</SelectBox.Option>)}
