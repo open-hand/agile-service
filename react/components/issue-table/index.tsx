@@ -89,7 +89,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
     handleCheckChange: props.handleCheckChange,
     handleCheckAllChange: props.handleCheckAllChange,
   }), [props.checkValues, props.flattenData, props.handleCheckAllChange, props.handleCheckChange]);
-  console.log(isTree);
+
   return (
     <div className="c7nagile-issue-table">
       <PerformanceTable
@@ -98,6 +98,7 @@ const IssueTable: React.FC<IssueTableProps> = ({
         bordered={false}
         columns={[checkboxColumn, ...isTree ? [expandColumn] : [], ...visibleColumns]}
         height={height ?? 400}
+        rowHeight={40}
       />
       {createIssue && (
         <div style={{ paddingTop: 5 }}>

@@ -42,10 +42,10 @@ const IssueDropDown = ({
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
   const handleDeleteIssue = () => {
-    const deleteModal = confirm({
+    const deleteModal = ModalPro.open({
       width: 560,
       title: `删除问题${issueNum}`,
-      content:
+      children:
         (
           <div>
             <p style={{ marginBottom: 10 }}>请确认您要删除这个问题。</p>
@@ -65,9 +65,7 @@ const IssueDropDown = ({
             }
           });
       },
-      onCancel() { },
       okText: '删除',
-      okType: 'danger',
     });
   };
   const handleClickMenu = async (e) => {
@@ -130,7 +128,7 @@ const IssueDropDown = ({
     }
   };
   const getMenu = () => (
-    <Menu onClick={handleClickMenu}>
+    <Menu onClick={handleClickMenu} selectable={false}>
       {!['feature', 'issue_epic'].includes(typeCode) && (
         <Menu.Item key="0">
           登记工作日志
