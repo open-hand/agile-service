@@ -247,7 +247,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String[] TRANSFORMED_TASK_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, STATUS_ID};
     private static final String[] COPY_PREDEFINED_FIELDS_NAME = new String[]
             {
-                    ASSIGNEE_ID, EPIC_ID_FIELD, STORY_POINTS_FIELD,
+                    ASSIGNEE_ID, EPIC_ID_FIELD, STORY_POINTS_FIELD, STATUS_ID,
                     FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
                     ESTIMATED_START_TIME, ESTIMATED_END_TIME, REPORTER_ID, PRIORITY_ID
             };

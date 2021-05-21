@@ -68,6 +68,7 @@ public class IssueValidator {
     private static final String TAG = "tag";
     private static final String REPORTER_ID = "reporterId";
     private static final String PRIORITY_ID = "priorityId";
+    private static final String STATUS_ID_FIELD = "statusId";
 
     private static final String[] LEGAL_COPY_PREDEFINED_FIELDS_NAME = new String[]
             {
@@ -75,7 +76,7 @@ public class IssueValidator {
                     ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
                     ESTIMATED_START_TIME, ESTIMATED_END_TIME, SPRINT_ID_FIELD,
                     COMPONENT, LABEL, FIX_VERSION, INFLUENCE_VERSION, TAG,
-                    REPORTER_ID, PRIORITY_ID
+                    REPORTER_ID, PRIORITY_ID, STATUS_ID_FIELD
             };
 
     @Autowired
