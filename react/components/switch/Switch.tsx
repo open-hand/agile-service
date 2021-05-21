@@ -12,12 +12,13 @@ interface Props {
     [propsName: string]: any,
   }>,
   defaultValue: any,
+  style?: React.CSSProperties
   onChange: (value: any, otherProps: any) => Promise<boolean> | boolean,
   value: any,
 }
-type SwitchProps = Required<Pick<Props, 'options'>> & Partial<Pick<Props, 'defaultValue' | 'onChange' | 'value'>>
+type SwitchProps = Required<Pick<Props, 'options'>> & Partial<Pick<Props, 'defaultValue' | 'onChange' | 'value' | 'style'>>
 function Switch({
-  options: propsOption, onChange, defaultValue, value: propsValue,
+  options: propsOption, onChange, defaultValue, value: propsValue, style,
 }: SwitchProps) {
   const [value, setValue] = useState<Props['defaultValue']>(defaultValue || 0);
   const [options, setOptions] = useState<Props['options']>([]);
@@ -52,7 +53,7 @@ function Switch({
   }, [propsValue]);
 
   return (
-    <div className={styles.switch}>
+    <div className={styles.switch} style={style}>
       {options.map((option, index) => (
         <span
           role="none"

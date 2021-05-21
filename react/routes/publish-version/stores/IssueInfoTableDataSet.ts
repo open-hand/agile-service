@@ -7,6 +7,11 @@ function IssueInfoTableDataSet(): DataSetProps {
   return {
     autoQuery: false,
     paging: true,
+    primaryKey: 'issueId',
+    modifiedCheck: false,
+    parentField: 'parentId',
+    expandField: 'expand',
+    idField: 'issueId',
     selection: false,
     fields: [
       { name: 'summary', label: '概要' },

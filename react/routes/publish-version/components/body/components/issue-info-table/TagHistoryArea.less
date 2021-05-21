@@ -1,0 +1,36 @@
+.history {
+  display: flex;
+  align-items: center;
+  margin-left: .3rem;
+  border: 1px solid #D9E6F2;
+  border-radius: 4px;
+  padding: .07rem .14rem;
+
+  &_item {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-family: PingFangSC-Regular, PingFang SC;
+    font-weight: 400;
+    color: rgba(15, 19, 88, 0.85);
+    line-height: 18px;
+
+    & >span {
+      margin-left: .06rem;
+    }
+  }
+
+  &_item +&_item {
+    margin-left: .23rem;
+  }
+
+  &_tag {
+    display: inline-block;
+    border-radius: 2px;
+    padding: .04rem .06rem;
+    font-size: 12px;
+    font-family: PingFangSC-Medium, PingFang SC;
+    font-weight: 500;
+    color: #FFF;
+    line-height: 12px;
+  }
+}

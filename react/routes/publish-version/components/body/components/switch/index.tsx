@@ -50,6 +50,7 @@ function IssueTypeSwitch() {
 
   return (
     <Switch
+      style={{ width: 'unset' }}
       value={issueInfoTableDataSet.getState('issueTypeId')}
       options={issueTypes?.map((i) => ({ value: i.id, text: `${i.name}(${issueTypesWithCountMaps.get(i.id)})` })) || []}
       onChange={handleSelectBox}

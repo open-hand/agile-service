@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Table,
 } from 'choerodon-ui/pro';
+import { TableMode } from 'choerodon-ui/pro/lib/table/enum';
 import UserTag from '@/components/tag/user-tag';
 import renderStatus from '@/components/column-renderer/status';
 import renderPriority from '@/components/column-renderer/priority';
@@ -14,6 +15,7 @@ import { transformFilter } from '@/routes/Issue/stores/utils';
 import { publishVersionApi } from '@/api';
 import styles from './index.less';
 import IssueTypeSwitch from '../switch';
+import TagHistoryArea from './TagHistoryArea';
 
 interface TagActionHistory {
   action?: 'add'
@@ -28,12 +30,7 @@ interface TagActionHistory {
   publishVersionId?: string
   status?: 'done' | 'doing' | 'failed'
 }
-const STATUS_MAP_TEXT = {
-  done: '完成',
-  doing: '进行中',
-  failed: '失败',
 
-};
 const { Column } = Table;
 function IssueInfoTable() {
   const { issueInfoTableDataSet, store, preview } = usePublishVersionContext();
@@ -42,27 +39,26 @@ function IssueInfoTable() {
     getSystemFields: () => getSystemFields().filter((i) => i.code !== 'issueTypeId') as any,
     transformFilter,
   });
-  useEffect(() => {
-    publishVersionApi.loadLatestTagHistory(store.getCurrentData.id).then((res:any) => {
+  const loadHistory = useCallback(() => {
+    publishVersionApi.loadLatestTagHistory(store.getCurrentData.id).then((res: any) => {
       if (res?.id) {
         setHistory(res);
       }
     });
   }, [store.getCurrentData.id]);
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
   return (
     <div className={classnames(styles.info, { [styles.preview]: preview })}>
-      {
-        history && (
-        <div className={styles.history}>
-          <span className={styles.history_title}>历史记录</span>
 
-          <div className={styles.history_item}>{`状态：${STATUS_MAP_TEXT[history.status]}`}</div>
-          <div className={styles.history_item}>{`最近处理时间：${history.lastUpdateDate}`}</div>
+      <div className={styles.top}>
+        <IssueTypeSwitch />
 
-        </div>
-        )
-      }
-      <IssueTypeSwitch />
+        {
+          history && <TagHistoryArea data={history} onFinish={loadHistory} />
+        }
+      </div>
       <div className={styles.body}>
         <IssueSearch
           store={issueSearchStore}
@@ -73,7 +69,7 @@ function IssueInfoTable() {
             issueInfoTableDataSet.query();
           }}
         />
-        <Table dataSet={issueInfoTableDataSet} className={styles.table}>
+        <Table dataSet={issueInfoTableDataSet} className={styles.table} mode={'tree' as TableMode}>
           <Column
             name="summary"
             className={classnames({ 'c7n-agile-table-cell-click': !preview, 'c7n-agile-table-cell': preview })}
