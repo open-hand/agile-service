@@ -2,11 +2,13 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import { find } from 'lodash';
-import { uiApi } from '@/api';
+import { issueApi, uiApi } from '@/api';
 
 const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
 const copyHiddenFields = ['issueType', 'summary', 'description', 'timeTrace', 'creationDate', 'lastUpdateDate', 'created_user', 'last_updated_user', 'epicName'];
 class EditIssueStore {
+  events = { updateAfter: () => { }, updateBefore: () => { } };
+
   // issue
   @observable issue = {};
 
@@ -270,7 +272,7 @@ class EditIssueStore {
 
   commentReplysMap = observable.map();
 
-  promptExtraNodeMap=observable.map();/** 各类提示信息的额外内容 */
+  promptExtraNodeMap = observable.map();/** 各类提示信息的额外内容 */
 
   @observable linkedUI = [];
 
@@ -312,10 +314,22 @@ class EditIssueStore {
     }
   }
 
-  refreshBranch=() => {}
+  refreshBranch = () => { }
 
   setRefreshBranch(refreshBranch) {
     this.refreshBranch = refreshBranch;
+  }
+
+  async update(data, ignoreEvents = []) {
+    ignoreEvents.includes('updateBefore') || await this.events.updateBefore();
+    let res;
+    try {
+      res = await issueApi.update(data);
+    } catch (error) {
+      res = { failed: true, ...error };
+    }
+    ignoreEvents.includes('updateAfter') || await this.events.updateAfter(res);
+    return res;
   }
 }
 export default EditIssueStore;

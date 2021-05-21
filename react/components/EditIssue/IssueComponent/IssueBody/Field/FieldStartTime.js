@@ -17,15 +17,7 @@ class FieldStartTime extends Component {
       objectVersionNumber,
       estimatedStartTime: value ? value.format('YYYY-MM-DD HH:mm:ss') : null,
     };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
+    store.update(obj);
   };
 
   render() {

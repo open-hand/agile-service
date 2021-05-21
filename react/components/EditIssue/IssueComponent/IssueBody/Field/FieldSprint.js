@@ -14,7 +14,7 @@ const { Option } = Select;
 @observer class FieldSprint extends Component {
   updateIssueSprint = (newSprintId) => {
     const {
-      store, onUpdate, reloadIssue,
+      store, onUpdate, reloadIssue, setIssueLoading,
     } = this.props;
     const issue = store.getIssue;
     const { activeSprint = {}, issueId, objectVersionNumber } = issue;
@@ -26,15 +26,7 @@ const { Option } = Select;
         objectVersionNumber,
         sprintId: newSprintId || 0,
       };
-      issueApi.update(obj)
-        .then(() => {
-          if (onUpdate) {
-            onUpdate();
-          }
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
-        });
+      store.update(obj);
     }
   };
 

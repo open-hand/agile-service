@@ -39,15 +39,7 @@ import TextArea from '@/components/TextArea';
         };
       }
       if (obj) {
-        issueApi.update(obj)
-          .then(() => {
-            if (onUpdate) {
-              onUpdate();
-            }
-            if (reloadIssue) {
-              reloadIssue(issueId);
-            }
-          });
+        store.update(obj);
       }
     }
   };
@@ -70,8 +62,7 @@ import TextArea from '@/components/TextArea';
                 {`${fieldName}`}
               </span>
             </div>
-          ) : null
-        }
+          ) : null}
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled}

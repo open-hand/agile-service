@@ -18,15 +18,7 @@ import React, { Component } from 'react';
       objectVersionNumber,
       [`${field.fieldCode}Id`]: value || 0,
     };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
+    store.update(obj);
   };
 
   renderEditor = () => {

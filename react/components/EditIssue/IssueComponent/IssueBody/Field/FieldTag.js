@@ -23,15 +23,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
     }
     // if(tags.map((i) => `${i.appServiceCode}:${i.tagName}`).join('，')===)
     console.log('newTags', newTags);
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
+    store.update(obj);
   };
 
   render() {
@@ -56,7 +48,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
             onSubmit={this.updateIssueTag}
             initValue={tags}
             editor={({ submit, hideEditor }) => (
-              <SelectMultiServiceTag onChange={submit} multiple onBlur={hideEditor} />
+              <SelectMultiServiceTag onChange={submit} multiple onPopupHidden={(hidden) => hidden && hideEditor()} />
             )}
           >
             {

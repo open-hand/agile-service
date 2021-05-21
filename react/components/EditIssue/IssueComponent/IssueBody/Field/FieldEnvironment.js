@@ -18,15 +18,7 @@ import ENVIRONMENT_TYPE from '@/constants/ENVIRONMENT_TYPE';
       objectVersionNumber,
       environment: value,
     };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
+    store.update(obj);
   };
 
   render() {

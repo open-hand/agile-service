@@ -46,15 +46,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
         objectVersionNumber,
         labelIssueRelVOList: labelList,
       };
-      issueApi.update(obj)
-        .then(() => {
-          if (onUpdate) {
-            onUpdate();
-          }
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
-        });
+      store.update(obj);
     }
   };
 
