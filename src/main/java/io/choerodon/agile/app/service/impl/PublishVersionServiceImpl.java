@@ -401,10 +401,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         }
         List<IssueDTO> issues =
                 publishVersionMapper.selectIssueIds(new HashSet<>(Arrays.asList(projectId)), organizationId, publishVersionIds);
-        if (issues.isEmpty()) {
+        Set<Long> issueIds  = filterIssueIds(issues, searchVO);
+        if (issueIds.isEmpty()) {
             return emptyPage;
         }
-        Set<Long> issueIds  = filterIssueIds(issues, searchVO);
         addSearchParam(searchVO, issueIds);
         return issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId);
     }
