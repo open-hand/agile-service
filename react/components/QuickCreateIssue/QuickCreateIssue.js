@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/state-in-constructor */
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 import { Choerodon } from '@choerodon/boot';
 import {
@@ -13,6 +13,7 @@ import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCrea
 import { fields2Map } from '@/utils/defaultValue';
 import TypeTag from '../TypeTag';
 import './QuickCreateIssue.less';
+import UserDropdown from '../UserDropdown';
 
 const FormItem = Form.Item;
 
@@ -31,6 +32,7 @@ class QuickCreateIssue extends Component {
       loading: false,
       currentTypeId: props.issueTypes[0]?.id,
     };
+    this.userDropDownRef = createRef();
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -65,6 +67,9 @@ class QuickCreateIssue extends Component {
     const {
       form, issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram, cantCreateEvent,
     } = this.props;
+
+    const assigneeId = this.userDropDownRef?.current?.selectedUser?.id;
+
     form.validateFields(async (err, values) => {
       const { summary } = values;
       if (summary && summary.trim()) {
@@ -73,7 +78,7 @@ class QuickCreateIssue extends Component {
             loading: true,
           });
           const currentType = issueTypes.find((t) => t.id === currentTypeId);
-          if (!await checkCanQuickCreate(currentType.id)) { //
+          if (!await checkCanQuickCreate(currentType.id, assigneeId)) { //
             if (!cantCreateEvent) {
               Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
               this.setState({
@@ -90,6 +95,9 @@ class QuickCreateIssue extends Component {
               if (this.props.setDefaultSprint) {
                 this.props.setDefaultSprint(sprintId);
               }
+              if (this.props.assigneeChange) {
+                this.props.assigneeChange(assigneeId);
+              }
               this.setState({
                 loading: false,
                 create: false,
@@ -99,7 +107,7 @@ class QuickCreateIssue extends Component {
             return;
           }
           const {
-            defaultPriority, onCreate, defaultAssignee,
+            defaultPriority, onCreate,
           } = this.props;
           if (summary.trim() !== '') {
             const param = {
@@ -113,7 +121,7 @@ class QuickCreateIssue extends Component {
             const issue = getQuickCreateDefaultObj({
               epicName: currentTypeId === 'issue_epic' ? summary.trim() : undefined,
               featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
-              assigneeId: defaultAssignee,
+              assigneeId,
               epicId,
               relateIssueId,
               versionIssueRelVOList: propsVersionIssueRelVOList,
@@ -224,6 +232,7 @@ class QuickCreateIssue extends Component {
                       />
                     </div>
                   </Dropdown>
+                  <UserDropdown userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id} />
                   <FormItem label="summary" style={{ flex: 1, margin: '0 10px', padding: 0 }}>
                     {getFieldDecorator('summary', {
                       rules: [{ required: true, message: '请输入问题概要！' }],

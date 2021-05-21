@@ -87,5 +87,6 @@ class UserApi extends Api<UserApi> {
 }
 
 const userApi = new UserApi();
+const userApiConfig = new UserApi(true);
 
-export { userApi };
+export { userApi, userApiConfig };

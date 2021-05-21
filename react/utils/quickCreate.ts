@@ -2,7 +2,7 @@ import { fieldApi } from '@/api';
 import { isEmpty } from 'lodash';
 import { getProjectId } from './common';
 
-export async function checkCanQuickCreate(typeId: string) {
+export async function checkCanQuickCreate(typeId: string, assigneeId?: string) {
   const param = {
     schemeCode: 'agile_issue',
     issueTypeId: typeId,
@@ -10,10 +10,11 @@ export async function checkCanQuickCreate(typeId: string) {
   };
   const whiteList = ['summary', 'status', 'reporter', 'issueType', 'priority', 'epicName'];
   const fields = await fieldApi.getFields(param);
-  if (fields.some((field: any) => !whiteList.includes(field.fieldCode) && field.required && !field.defaultValue)) {
-    return false;
+  const requiredButNullFields = fields.filter((field: any) => !whiteList.includes(field.fieldCode) && field.required && !field.defaultValue);
+  if (!requiredButNullFields.length || (requiredButNullFields.length === 1 && requiredButNullFields[0].fieldCode === 'assignee' && assigneeId)) {
+    return true;
   }
-  return true;
+  return false;
 }
 interface IQuickCreateDefaultValueParams {
   issueTypeId: string

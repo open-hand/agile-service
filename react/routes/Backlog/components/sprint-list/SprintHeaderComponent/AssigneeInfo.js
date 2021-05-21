@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
-import { findIndex } from 'lodash';
+import { findIndex, find } from 'lodash';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
@@ -15,13 +15,20 @@ import { UserUniqueTag } from '@/components/tag/user-tag';
     const assigneeId = localPageCacheStore.getItem(`backlog.sprint-${sprintId}`);
     if (assigneeId && findIndex(assigneeIssues, (item) => String(item.assigneeId) === String(assigneeId)) !== -1) {
       BacklogStore.setFilterSprintAssign(sprintId, assigneeId);
+      const sprintDefaultAssignee = find(assigneeIssues, (item) => String(item.assigneeId) === String(assigneeId));
+      BacklogStore.setFilterSprintAssignUser(sprintId, {
+        id: assigneeId,
+        imageUrl: sprintDefaultAssignee.imageUrl,
+        loginName: sprintDefaultAssignee.assigneeLoginName,
+        realName: sprintDefaultAssignee.assigneeRealName,
+      });
     } else {
       localPageCacheStore.remove(`backlog.sprint-${sprintId}`);
     }
   }
 
   handleSearchAssignee = (assigneeId) => {
-    const { data: { sprintId } } = this.props;
+    const { data: { sprintId, assigneeIssues } } = this.props;
     const filterSprintAssignId = BacklogStore.filterSprintAssign.get(sprintId);
     if (filterSprintAssignId === assigneeId) {
       localPageCacheStore.remove(`backlog.sprint-${sprintId}`);
@@ -29,6 +36,13 @@ import { UserUniqueTag } from '@/components/tag/user-tag';
     } else {
       localPageCacheStore.setItem(`backlog.sprint-${sprintId}`, assigneeId);
       BacklogStore.setFilterSprintAssign(sprintId, assigneeId);
+      const sprintDefaultAssignee = find(assigneeIssues, (item) => String(item.assigneeId) === String(assigneeId));
+      BacklogStore.setFilterSprintAssignUser(sprintId, {
+        id: assigneeId,
+        imageUrl: sprintDefaultAssignee.imageUrl,
+        loginName: sprintDefaultAssignee.assigneeLoginName,
+        realName: sprintDefaultAssignee.assigneeRealName,
+      });
     }
   };
 

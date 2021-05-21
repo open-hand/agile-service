@@ -6,7 +6,7 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 export default observer(({ QuickCreateRef }) => {
   const {
-    newIssueVisible, chosenEpic, chosenFeature, chosenVersion, featureList, defaultTypeId, defaultSummary, defaultSprint,
+    newIssueVisible, chosenEpic, chosenFeature, chosenVersion, featureList, defaultTypeId, defaultSummary, defaultSprint, defaultAssignee,
   } = BacklogStore;
   const chosenFeatureItem = featureList.find((feature) => feature.issueId === chosenFeature) || {};
   return (
@@ -18,17 +18,20 @@ export default observer(({ QuickCreateRef }) => {
         chosenFeatureName={chosenFeatureItem.summary}
         chosenVersion={chosenVersion !== 'all' && chosenVersion !== 'unset' ? chosenVersion : undefined}
         chosenSprint={defaultSprint}
+        chosenAssignee={defaultAssignee}
         onCancel={() => {
           BacklogStore.setNewIssueVisible(false);
           BacklogStore.setDefaultSummary(undefined);
           BacklogStore.setDefaultTypeId(undefined);
           BacklogStore.setDefaultSprint(undefined);
+          BacklogStore.setDefaultAssignee(undefined);
         }}
         onOk={(res) => {
           BacklogStore.setNewIssueVisible(false);
           BacklogStore.setDefaultSummary(undefined);
           BacklogStore.setDefaultTypeId(undefined);
           BacklogStore.setDefaultSprint(undefined);
+          BacklogStore.setDefaultAssignee(undefined);
           // 创建issue后刷新
           if (res) {
             BacklogStore.refresh(false, false);
