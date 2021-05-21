@@ -1,15 +1,16 @@
 .c7n-agile-singleFileUpload-container {
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--selection-background);
   border-radius: 2px;
   padding: 0 10px !important;
   margin-bottom: 10px;
   height: fit-content;
- 
+
   &:hover {
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(83, 101, 234, 0.1);
   }
+
   .c7n-agile-singleFileUpload {
     display: flex;
     justify-content: space-between;
@@ -17,39 +18,45 @@
     flex-wrap: nowrap;
     max-width: 100%;
     height: 0.32rem;
-    
+
     &-img {
       width: 18px;
       height: 20px;
     }
+
     &-fileName {
       display: inline-block;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      color: rgba(0, 0, 0, 0.87);
       font-size: 13px;
       margin-left: 10px;
     }
+
     .icon {
       cursor: pointer;
       margin-left: 10px;
     }
+
     .icon-get_app {
       margin-top: 2px;
     }
   }
+
   .c7n-agile-singleFileUpload-process {
     margin-top: -10px;
     padding-bottom: 2px;
+
     &-progress {
       .c7n-progress-outer {
         height: 4px;
+
         .c7n-progress-inner {
           height: 4px;
           border-radius: 0;
           background: rgba(0, 191, 165, 0.2);
+
           .c7n-progress-bg {
             height: 4px !important;
             border-radius: 0;
@@ -57,7 +64,7 @@
           }
         }
       }
-      
+
       .c7n-progress-text {
         white-space: nowrap;
         margin-left: 0.02rem;
@@ -66,6 +73,7 @@
         top: 2px;
         font-size: 20px;
         transform: scale(0.5);
+
         .icon-check_circle {
           transform: scale(1.5);
           position: absolute;
@@ -82,12 +90,13 @@
       .c7n-progress-outer {
         .c7n-progress-inner {
           background: rgba(244, 67, 54, 0.6);
+
           .c7n-progress-bg {
             background: #F44336 !important;
           }
         }
       }
-      
+
       .c7n-progress-text {
         .icon-cancel {
           transform: scale(1.5);
@@ -100,5 +109,3 @@
     }
   }
 }
-
-

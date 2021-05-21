@@ -385,7 +385,7 @@ function StateList(props) {
             )}
             {disabledEditName && (
             <span style={{
-              color: 'rgba(0,0,0,0.65)',
+              color: 'var(--text-color3)',
               marginLeft: 2,
             }}
             >

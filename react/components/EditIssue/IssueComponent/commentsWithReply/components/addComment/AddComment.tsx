@@ -94,7 +94,7 @@ const Comments: React.FC<Props> = ({
         height: 36,
         lineHeight: '32px',
         width: '100%',
-        color: 'rgba(0,0,0,0.65)',
+        color: 'var(--text-color3)',
         paddingLeft: 10,
         cursor: 'pointer',
       }}

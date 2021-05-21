@@ -194,7 +194,7 @@ function ObjectScheme() {
     const system = record?.get('system');
     const projectId = record?.get('projectId');
     if (system) {
-      return <Tag style={{ color: 'rgba(0,0,0,0.65)', borderColor: '#d9d9d9', background: '#fafafa' }}>{formatMessage({ id: 'system' })}</Tag>;
+      return <Tag style={{ color: 'var(--text-color3)', borderColor: '#d9d9d9', background: '#fafafa' }}>{formatMessage({ id: 'system' })}</Tag>;
     }
     return projectId
       ? (

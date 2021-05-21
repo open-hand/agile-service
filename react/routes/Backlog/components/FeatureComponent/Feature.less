@@ -148,38 +148,7 @@
   }
 }
 
-.c7n-backlog-piSelect,
-.c7n-backlog-sprintSelect {
-  margin: 0 8px;
-  display: flex !important;
-  height: 30px !important;
 
-  .c7n-select-selection {
-    display: flex;
-    .c7n-select-selection__rendered {
-      height: 26px !important;
-      // line-height: 34px !important;
-      display: flex;
-      align-items: center;
-    }
-  }
-
-  .c7n-select-label {
-    margin-top: -4px;
-  }
-  // 样式临时解决 此样式从QuickSearch.less复制
-  .c7n-agile-sprintSearchSelect-option-active {
-    display: inline-block;
-    font-size: 0.13rem;
-    margin-left: 0.05rem;
-    padding: 0.01rem 0.1rem;
-    white-space: nowrap;
-    height: 0.21rem;
-    line-height: 0.21rem;
-    color: #00bfa5;
-    background: rgba(0, 191, 165, 0.08);
-  }
-}
 // 样式临时解决 此样式从QuickSearch.less复制
 .c7n-agile-sprintSearchSelect-option-active {
   display: inline-block;
@@ -191,19 +160,4 @@
   line-height: 0.21rem;
   color: #00bfa5;
   background: rgba(0, 191, 165, 0.08);
-}
-
-.c7n-backlog-sprintSelect {
-  margin-top: 6px;
-}
-
-.c7n-backlog-piSelect.c7n-select-has-border::before,
-.c7n-backlog-sprintSelect.c7n-select-has-border::before {
-  border-radius: unset !important;
-}
-
-.c7n-backlog-piSelect.c7n-select-focused.c7n-select::before,
-.c7n-backlog-sprintSelect.c7n-select-focused.c7n-select::before,
-.has-error .c7n-select::before {
-  border-width: 1px !important;
 }

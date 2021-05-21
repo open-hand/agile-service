@@ -88,7 +88,7 @@ const IssueUI = (props: any) => {
             }}
             >
               <Tooltip title="关联UI/UX文件">
-                <Button icon="device_hub" onClick={handleLinkUI} style={{ marginRight: 5 }} />
+                <Button icon="device_hub" onClick={handleLinkUI} style={{ marginRight: 16 }} />
               </Tooltip>
               <UploadUI {...props} uploading={wsData && !!wsData.length && wsData.some((item) => item.status === 'doing')} />
             </div>

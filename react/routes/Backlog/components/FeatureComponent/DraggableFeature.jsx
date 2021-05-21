@@ -171,7 +171,7 @@ class DraggableFeature extends Component {
                 <p className="c7n-backlog-epicItemParamKey">总故事点数</p>
                 <p
                   className="c7n-backlog-epicItemParamValue"
-                  style={{ minWidth: 31, color: 'rgba(0,0,0,0.65)' }}
+                  style={{ minWidth: 31, color: 'var(--text-color3)' }}
                 >
                   {item.totalStoryPoints}
                 </p>
@@ -180,7 +180,7 @@ class DraggableFeature extends Component {
                 <p className="c7n-backlog-epicItemParamKey">已完成故事点数</p>
                 <p
                   className="c7n-backlog-epicItemParamValue"
-                  style={{ minWidth: 31, color: 'rgba(0,0,0,0.65)' }}
+                  style={{ minWidth: 31, color: 'var(--text-color3)' }}
                 >
                   {item.successStoryPoints}
                 </p>

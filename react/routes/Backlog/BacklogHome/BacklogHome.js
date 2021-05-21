@@ -161,7 +161,7 @@ class BacklogHome extends Component {
           position: 'absolute',
           background: 'white',
           height: '1px',
-          top: '134px',
+          top: '112px',
           left: '89px',
           zIndex: 3,
         }}
@@ -170,10 +170,12 @@ class BacklogHome extends Component {
           display: 'flex',
           flexDirection: 'column',
           ...theme === 'theme4' ? {
+            paddingTop: 45,
             marginLeft: 0,
             marginRight: 0,
             paddingLeft: 0,
             paddingRight: 0,
+            paddingBottom: 0,
           } : {
             padding: 0, paddingTop: 4,
           },

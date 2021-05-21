@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Checkbox } from 'choerodon-ui';
+import { CheckBox } from 'choerodon-ui/pro';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
@@ -12,17 +12,17 @@ function ShowPlanSprint() {
   }, []);
   return (
     <div>
-      <Checkbox
+      <CheckBox
         // className="primary"
-        style={{ marginLeft: 20, color: 'black' }}
+        style={{ marginLeft: 20 }}
         checked={BacklogStore.showPlanSprint}
-        onChange={(e) => {
-          localPageCacheStore.setItem('backlog.show.sprint', e.target.checked);
-          BacklogStore.setShowPlanSprint(e.target.checked);
+        onChange={(checked) => {
+          localPageCacheStore.setItem('backlog.show.sprint', checked);
+          BacklogStore.setShowPlanSprint(checked);
         }}
       >
         显示未开始冲刺
-      </Checkbox>
+      </CheckBox>
     </div>
   );
 }

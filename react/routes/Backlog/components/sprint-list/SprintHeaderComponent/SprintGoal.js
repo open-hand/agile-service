@@ -8,7 +8,6 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 const { Text, Edit } = TextEditToggle;
 
-
 @observer class SprintGoal extends Component {
   handler = (value) => {
     const { data } = this.props;
@@ -23,7 +22,7 @@ const { Text, Edit } = TextEditToggle;
       BacklogStore.updateSprint(sprintId, {
         objectVersionNumber: res.objectVersionNumber,
         sprintGoal: res.sprintGoal,
-      });   
+      });
     }).catch((error) => {
     });
   };
