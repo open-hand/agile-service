@@ -114,7 +114,6 @@ class QuickCreateIssue extends Component {
               epicName: currentTypeId === 'issue_epic' ? summary.trim() : undefined,
               featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
               assigneeId: defaultAssignee,
-              reporterId: defaultAssignee,
               epicId,
               relateIssueId,
               versionIssueRelVOList: propsVersionIssueRelVOList,

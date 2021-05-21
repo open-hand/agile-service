@@ -184,7 +184,7 @@ class CreateLinkTask extends Component {
               <SelectFocusLoad
                 label={issueType === 'feature' ? '特性' : '问题'}
                 type={issueType === 'feature' ? 'features_in_link' : 'issues_in_link'}
-                requestArgs={issueId}
+                requestArgs={{ issueId }}
                 // getPopupContainer={() => document.body}
               />,
             )}
