@@ -166,7 +166,8 @@ class TransformFromSubIssue extends Component {
               rules: [{ required: true, message: '请选择状态' }],
             })(
               <Select
-                label="状态"
+                label={!form.getFieldValue('typeId') ? '请先选择问题类型' : '状态'}
+                disabled={!form.getFieldValue('typeId')}
                 loading={selectLoading}
               >
                 {
