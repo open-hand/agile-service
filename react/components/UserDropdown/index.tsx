@@ -12,7 +12,7 @@ import { userApiConfig } from '@/api';
 import styles from './index.less';
 
 interface Props {
-  userDropDownRef: React.MutableRefObject<{ selectedUser: User | undefined }>
+  userDropDownRef: React.MutableRefObject<{ selectedUser: User | undefined } | null>
   defaultAssignee: User | undefined,
 }
 
