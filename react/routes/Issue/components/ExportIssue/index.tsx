@@ -1,17 +1,18 @@
 import React from 'react';
-import { DataSet, Table } from 'choerodon-ui/pro/lib';
-import { openExportIssueModal as originOpenExportIssueModal } from '@/components/issue-export';
+import { DataSet, Table, Modal } from 'choerodon-ui/pro/lib';
+import ExportIssue, { openExportIssueModal as originOpenExportIssueModal } from '@/components/issue-export';
 import IssueExportStore from '@/components/issue-export/stores/store';
 import { issueApi, TemplateAction } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { set } from 'lodash';
+import { IFoundationHeader } from '@/common/types';
 import { isInProgram } from '@/utils/program';
 import {
   getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields, getReverseExportFieldCodes,
 } from './utils';
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
-  tableDataSet: DataSet, tableRef: React.RefObject<Table>, tableListMode: boolean, action?: TemplateAction) {
+  tableFields: IFoundationHeader[], visibleColumns: string[], tableListMode: boolean, action?: TemplateAction) {
   const store = new IssueExportStore({
     defaultInitFieldAction: (data, self) => {
       if (data.code === 'sprint') {
@@ -60,6 +61,31 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     },
   });
 
-  originOpenExportIssueModal(fields, chosenFields, tableDataSet, tableRef, store, action);
+  const checkOptions = tableFields.map((option) => ({ value: option.code, label: option.title as string, order: false }));
+
+  const key = Modal.key();
+  Modal.open({
+    key,
+    title: '导出问题',
+    style: {
+      width: 740,
+    },
+    className: 'c7n-agile-export-issue-modal',
+    drawer: true,
+    children: <ExportIssue
+      fields={fields}
+      chosenFields={chosenFields}
+      checkOptions={checkOptions}
+      visibleColumns={visibleColumns}
+      store={store}
+      action={action}
+      exportBtnText="导出"
+    />,
+    // footer: (okBtn: any, cancelBtn: any) => cancelBtn,
+    okText: '导出',
+    // okProps: { ...store.exportButtonConfig?.buttonProps },
+    cancelText: '关闭',
+  });
+  // originOpenExportIssueModal(fields, chosenFields, tableDataSet, tableRef, store, action);
 }
 export { openExportIssueModal };

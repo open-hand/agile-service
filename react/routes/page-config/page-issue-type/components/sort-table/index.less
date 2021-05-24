@@ -38,6 +38,7 @@
         margin-bottom: .03rem;
         transform: scale(0.9);
       }
+
       // &:nth-child(n+3) {
       //   width: 15%;
       // }
@@ -85,18 +86,21 @@
         line-height: .24rem;
         margin-left: -.05rem;
       }
-
-      span {
-        // display: inline-block;
-        color: fade(#000, 87%);
-      }
     }
 
     &-action {
       height: .32rem;
 
       &-button {
+        cursor: pointer;
         opacity: 0;
+        color: #5365EA;
+        font-size: 18px;
+        margin-left: .1rem;
+        float: right;
+        position: relative;
+        top: .08rem;
+        right: .1rem;
 
         &:hover,
         &:active {
@@ -117,6 +121,7 @@
       &:not(:first-child) {
         margin-left: .05rem;
       }
+
       // &:nth-child(n+3) {
       //   width: 15%;
       //   margin-left: 0;
@@ -139,6 +144,7 @@
           color: fade(#000, 87%);
           min-height: .28rem;
         }
+
         &-text {
           display: inline-block;
           width: 100%;

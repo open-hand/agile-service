@@ -4,7 +4,7 @@ import React, {
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import {
-  find, findIndex, isEqual, map, uniq,
+  find, findIndex, isEqual, map, uniq, uniqBy,
 } from 'lodash';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
@@ -100,7 +100,7 @@ const ExportIssue: React.FC = () => {
   const checkOptions = useMemo(() => { // checkBokProps
     const newCheckOptions = propsCheckOptions.map((option) => ({ ...option, ...store.checkboxOptionsExtraConfig?.get(option.value) })) || [];
     newCheckOptions.push(...(choseFieldStore.getOriginalField.get('custom') || []).map((option) => ({ value: option.code, label: option.name, ...store.checkboxOptionsExtraConfig?.get(option.code) })));
-    return newCheckOptions;
+    return uniqBy(newCheckOptions, 'value');
   }, [choseFieldStore.getOriginalField, propsCheckOptions, store.checkboxOptionsExtraConfig]);
 
   const handleCheckBoxChangeOk = useCallback((value) => {

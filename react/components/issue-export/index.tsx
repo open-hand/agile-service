@@ -12,8 +12,8 @@ import { IChosenFieldField } from '../chose-field/types';
 interface IExportIssueProps {
   fields: IChosenFieldField[],
   chosenFields: IChosenFieldField[],
-  checkOptions: Array<{ value: string, label: string, order?: string }>,
-  tableRef: React.RefObject<Table>,
+  checkOptions: Array<{ value: string, label: string, order?: any }>,
+  visibleColumns: Array<string>
   store: IssueExportStore,
   // eslint-disable-next-line react/require-default-props
   action?: TemplateAction
@@ -30,7 +30,11 @@ export default function Index(props: IExportIssueProps) {
 }
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
-  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, action?: TemplateAction, otherModalProps?: ModalProps, exportBtnText?: string, extraOptions?: {value: string, label: '描述'}[]) {
+  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, action?: TemplateAction, otherModalProps?: ModalProps, exportBtnText?: string, extraOptions?: { value: string, label: '描述' }[]) {
+  const columns = tableRef.current
+    ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden)
+    : [];
+
   const checkOptions = [...tableDataSet.fields.values()].map((option) => ({ value: option.props.name!, label: option.props.label as string, order: option.order }));
   const { className, ...otherProps } = otherModalProps || {};
   const key = Modal.key();
@@ -46,7 +50,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
       fields={fields}
       chosenFields={chosenFields}
       checkOptions={checkOptions}
-      tableRef={tableRef}
+      visibleColumns={columns.map((item) => item.name!)}
       store={store}
       action={action}
       exportBtnText={exportBtnText}

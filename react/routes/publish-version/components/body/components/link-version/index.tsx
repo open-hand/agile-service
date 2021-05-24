@@ -160,7 +160,7 @@ function PublishVersionLinkVersion() {
             </span>
 
             {level === 0 && !preview ? (
-              <span>
+              <span className={styles.node_operation}>
                 {item.type === 'tag' && (
                   <Button
                     icon="mode_edit"
@@ -193,9 +193,9 @@ function PublishVersionLinkVersion() {
           </div>
           {showAdditionalLine && (
             <div className={styles.bottom}>
-              {item.artifactId && <span className={styles.node_text}>{`artifactID：${item.artifactId}`}</span>}
-              {item.groupId && <span className={styles.node_text}>{`groupID：${item.groupId}`}</span>}
-              {item.version && <span className={styles.node_text}>{`versionID：${item.version}`}</span>}
+              {item.artifactId && <span className={styles.node_text}>{`Artifact：${item.artifactId}`}</span>}
+              {item.groupId && <span className={styles.node_text}>{`Group：${item.groupId}`}</span>}
+              {item.version && <span className={styles.node_text}>{`Version：${item.version}`}</span>}
             </div>
           )}
 
