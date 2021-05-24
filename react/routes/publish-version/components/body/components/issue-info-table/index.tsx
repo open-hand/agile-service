@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import {
   Table,
 } from 'choerodon-ui/pro';
@@ -13,6 +15,7 @@ import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 
 import { publishVersionApi } from '@/api';
+import { useSize } from 'ahooks';
 import styles from './index.less';
 import IssueTypeSwitch from '../switch';
 import TagHistoryArea from './TagHistoryArea';
@@ -35,6 +38,8 @@ const { Column } = Table;
 function IssueInfoTable() {
   const { issueInfoTableDataSet, store, preview } = usePublishVersionContext();
   const [history, setHistory] = useState<Required<TagActionHistory> | undefined>(undefined);
+  const ref = useRef(null);
+  const size = useSize(ref);
   const issueSearchStore = useIssueSearchStore({
     getSystemFields: () => getSystemFields().filter((i) => i.code !== 'issueTypeId') as any,
     transformFilter,
@@ -49,11 +54,12 @@ function IssueInfoTable() {
   useEffect(() => {
     loadHistory();
   }, [loadHistory]);
-  return (
-    <div className={classnames(styles.info, { [styles.preview]: preview })}>
 
-      <div className={styles.top}>
-        <IssueTypeSwitch />
+  return (
+    <div className={classnames(styles.info, { [styles.preview]: preview })} ref={ref}>
+
+      <div className={styles.top} style={{ maxWidth: size.width }}>
+        <IssueTypeSwitch width={size.width} />
 
         {
           history && <TagHistoryArea data={history} onFinish={loadHistory} />

@@ -8,7 +8,7 @@ import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import Switch from '@/components/switch';
 
 // 主题色更改
-function IssueTypeSwitch() {
+function IssueTypeSwitch({ width }: { width: number | undefined }) {
   const { data: issueTypes = [] } = useProjectIssueTypes({ onlyEnabled: true, typeCode: ['story', 'task', 'bug'] });
   const { store, issueInfoTableDataSet } = usePublishVersionContext();
   const forceUpdate = useForceUpdate();
@@ -43,12 +43,6 @@ function IssueTypeSwitch() {
         res.forEach((issueType) => {
           issueTypesWithCountMaps.set(issueType.issueTypeId, issueType.count);
         });
-        res.forEach((issueType) => {
-          issueTypesWithCountMaps.set(`${issueType.issueTypeId}copy`, issueType.count);
-        });
-        res.forEach((issueType) => {
-          issueTypesWithCountMaps.set(`${issueType.issueTypeId}copy`, issueType.count);
-        });
         forceUpdate();
       });
     }
@@ -56,9 +50,9 @@ function IssueTypeSwitch() {
 
   return (
     <Switch
-      style={{ width: 'unset' }}
+      style={{ flexShrink: 1, flexWrap: width ? 'nowrap' : 'wrap' }}
       value={issueInfoTableDataSet.getState('issueTypeId')}
-      options={[...issueTypes, ...issueTypes.map((i) => ({ ...i, id: `${i.id}copy` }))]?.map((i) => ({ value: i.id, text: `${i.name}(${issueTypesWithCountMaps.get(i.id)})` })) || []}
+      options={issueTypes?.map((i) => ({ value: i.id, text: `${i.name}(${issueTypesWithCountMaps.get(i.id)})` })) || []}
       onChange={handleSelectBox}
     />
   );

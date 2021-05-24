@@ -28,7 +28,7 @@ interface Props {
     onFinish?: () => void
 }
 function TagHistoryArea({ data, onFinish }: Props) {
-  const status = STATUS_MAP_TEXT[data.status];
+  const status = STATUS_MAP_TEXT[data.status] || {};
   return (
     <WSHandler
       messageKey={`agile-preview-tag-compare-issues${getProjectId()}`}
