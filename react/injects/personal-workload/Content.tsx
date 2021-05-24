@@ -83,11 +83,11 @@ const PersonalWorkload = () => {
         itemGap: 14,
         icon: 'rect',
         right: '10px',
-        top: '-5px',
+        top: 0,
       },
       grid: {
-        left: '10',
-        top: '35px',
+        left: 10,
+        top: 40,
         right: '10px',
         // right: '28%',
         bottom: data.length > 8 ? 34 : 14, // 14
