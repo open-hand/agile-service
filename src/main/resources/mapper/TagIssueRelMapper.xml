@@ -225,8 +225,11 @@
     <select id="selectByOptions" resultType="io.choerodon.agile.infra.dto.TagIssueRelDTO">
         select * from agile_tag_issue_rel
         where organization_id = #{organizationId}
-        <if test="projectId != null">
-            and project_id = #{projectId}
+        <if test="projectIds != null and projectIds.size > 0">
+            and project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
         </if>
         and issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">

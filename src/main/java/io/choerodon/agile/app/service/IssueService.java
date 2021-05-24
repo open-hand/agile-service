@@ -1,6 +1,8 @@
 package io.choerodon.agile.app.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -444,4 +446,6 @@ public interface IssueService {
                                                        Long issueTypeId);
 
     void executionUpdateStatus(Long projectId, Long issueId, ExecutionUpdateIssueVO executionUpdateIssueVO);
+
+    Map<Long, Set<TagVO>> listTagMap(Long organizationId, Set<Long> projectIds, List<Long> issueIds);
 }
