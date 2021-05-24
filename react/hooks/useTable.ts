@@ -43,11 +43,12 @@ interface Options {
   defaultPage?: number
   defaultPageSize?: number
   defaultVisibleColumns?: string[]
+  defaultChecked?: string[]
   isTree?: boolean
 }
 export default function useTable(getData: TableRequest, options: Options) {
   const {
-    autoQuery = true, defaultPage, defaultPageSize, defaultVisibleColumns, isTree = true, rowKey,
+    autoQuery = true, defaultPage, defaultPageSize, defaultChecked, defaultVisibleColumns, isTree = true, rowKey,
   } = options ?? {};
   const [pageSize, setPageSize] = useState(defaultPageSize ?? 10);
   const [current, setCurrent] = useState(defaultPage ?? 1);
@@ -55,7 +56,7 @@ export default function useTable(getData: TableRequest, options: Options) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
-  const [checkValues, setCheckValues] = useState<string[]>([]);
+  const [checkValues, setCheckValues] = useState<string[]>(defaultChecked ?? []);
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
   const [sort, setSort] = useState({ sortType: undefined, sortColumn: undefined });
   const handleCheckChange = usePersistFn((value, key) => {

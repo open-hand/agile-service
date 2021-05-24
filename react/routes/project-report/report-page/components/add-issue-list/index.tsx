@@ -7,9 +7,7 @@ import {
 import { observer } from 'mobx-react-lite';
 import { Choerodon } from '@choerodon/boot';
 import IssueTable from '@/components/issue-table';
-import IssueTableDataSet from '@/components/issue-table/dataSet';
 import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
-import { getProjectId, getOrganizationId } from '@/utils/common';
 import {
   transformFilter,
 } from '@/routes/Issue/stores/utils';
@@ -98,91 +96,27 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
     }],
   }), [editData]);
 
-  // @ts-ignore
-  const dataSet = useMemo(() => new DataSet(IssueTableDataSet({
-    projectId: getProjectId(),
-    organizationId: getOrganizationId(),
-    issueSearchStore,
-    // searchDTO: editData?.searchVO,
-    events: isEdit ? {
-      // @ts-ignore
-      load: ({ dataSet: ds }) => {
-        // @ts-ignore
-        ds.forEach((record) => {
-          if (selectedRef.current.has(record.get('issueId'))) {
-            record.set('source', 'auto');
-            ds.select(record);
-          }
-        });
-      },
-      // @ts-ignore
-      select: ({ record }) => {
-        selectedRef.current.add(record.get('issueId'));
-        const source = record.get('source');
-        if (source === 'auto') {
-          record.set('source', undefined);
-          return;
-        }
-        autoSelectChildren(dataSet, record);
-        autoSelectParent(dataSet, record);
-      },
-      // @ts-ignore
-      unSelect: ({ record }) => {
-        selectedRef.current.delete(record.get('issueId'));
-        const source = record.get('source');
-        if (source === 'auto') {
-          record.set('source', undefined);
-          return;
-        }
-        autoUnSelectChildren(dataSet, record);
-        autoUnSelectParent(dataSet, record);
-      },
-      // @ts-ignore
-      selectAll: ({ dataSet: ds }) => {
-        // @ts-ignore
-        ds.forEach((record) => {
-          selectedRef.current.add(record.get('issueId'));
-        });
-      },
-      // @ts-ignore
-      unSelectAll: ({ dataSet: ds }) => {
-        // @ts-ignore
-        ds.forEach((record) => {
-          selectedRef.current.delete(record.get('issueId'));
-        });
-      },
-    } : {
-      select: ({ record }: { record: Record }) => {
-        const source = record.get('source');
-        if (source === 'auto') {
-          record.set('source', undefined);
-          return;
-        }
-        autoSelectChildren(dataSet, record);
-        autoSelectParent(dataSet, record);
-      },
-      unSelect: ({ record }: { record: Record }) => {
-        const source = record.get('source');
-        if (source === 'auto') {
-          record.set('source', undefined);
-          return;
-        }
-        autoUnSelectChildren(dataSet, record);
-        autoUnSelectParent(dataSet, record);
-      },
-    },
-  })), [isEdit, issueSearchStore]);
-
+  const getTableData = useCallback(({ page, sort, size }) => {
+    const search = issueSearchStore.getCustomFieldFilters();
+    set(search, 'searchArgs.tree', false);
+    return issueApi.loadIssues(page, size, sort, search);
+  }, [issueSearchStore]);
+  const tableProps = useTable(getTableData, {
+    isTree: false,
+    rowKey: 'issueId',
+    defaultChecked: [...selectedRef.current],
+  });
   const refresh = useCallback(() => {
-    dataSet.query();
-  }, [dataSet]);
+    tableProps.query();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableProps.query]);
   useEffect(() => {
     refresh();
   }, [refresh]);
   const handleSubmit = useCallback(async () => {
     if (await formDataSet.current?.validate(true)) {
       const data = formDataSet.current?.toData();
-      const issueIds = isEdit ? [...selectedRef.current] : dataSet.selected.map((record) => record.get('issueId'));
+      const issueIds = tableProps.checkValues;
       if (issueIds.length === 0) {
         Choerodon.prompt('请至少勾选一个问题');
         return false;
@@ -201,20 +135,12 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       return block;
     }
     return false;
-  }, [dataSet.selected, formDataSet, isEdit]);
+  }, [formDataSet, tableProps.checkValues]);
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);
   const { isInProgram } = useIsInProgram();
-  const getTableData = useCallback(({ page, sort, size }) => {
-    const search = issueSearchStore.getCustomFieldFilters();
-    set(search, 'searchArgs.tree', false);
-    return issueApi.loadIssues(page, size, sort, search);
-  }, [issueSearchStore]);
-  const tableProps = useTable(getTableData, {
-    isTree: false,
-    rowKey: 'issueId',
-  });
+
   const { data } = useIssueTableFields();
   if (!data) {
     return null;
@@ -271,7 +197,6 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
         tableProps={tableProps}
         style={{ marginTop: 10 }}
         queryBar={'none' as TableQueryBarType}
-        dataSet={dataSet}
         fields={data}
         createIssue={false}
         listLayoutColumns={formDataSet.current?.get('visibleColumns').map((code: string) => ({
