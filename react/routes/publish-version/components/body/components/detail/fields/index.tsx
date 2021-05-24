@@ -14,7 +14,7 @@ function PublishVersionDetail() {
   const size = useSize(ref);
   const menuSize = useSize(document.getElementById('menu'));
   const maxWidth = useMemo(() => {
-    const pageContentWidth = !size.width || !menuSize.width ? 0 : size.width - menuSize.width;
+    const pageContentWidth = !size.width || !menuSize.width ? 0 : size.width - 58;
     const newWidth = pageContentWidth && size.height && size.height! > 80 ? pageContentWidth / 2 : pageContentWidth;
     console.log('newWidth:...', newWidth);
     return newWidth;

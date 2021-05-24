@@ -15,7 +15,7 @@ import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
 import { openLinkAppServiceTagModal } from './LinkAppServiceTagModal';
 import { usePublishVersionContext } from '../../../../stores';
 import PublishVersionSection from '../section';
-import { openEditAppVersionModal } from './EditAppVersionModal';
+import { openEditAppVersionModal, openEditLinkAppServiceModal } from './EditAppVersionModal';
 import styles from './index.less';
 
 function useEditModeSectionConfig(preview: boolean) {

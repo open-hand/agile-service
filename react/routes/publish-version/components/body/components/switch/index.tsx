@@ -43,6 +43,12 @@ function IssueTypeSwitch() {
         res.forEach((issueType) => {
           issueTypesWithCountMaps.set(issueType.issueTypeId, issueType.count);
         });
+        res.forEach((issueType) => {
+          issueTypesWithCountMaps.set(`${issueType.issueTypeId}copy`, issueType.count);
+        });
+        res.forEach((issueType) => {
+          issueTypesWithCountMaps.set(`${issueType.issueTypeId}copy`, issueType.count);
+        });
         forceUpdate();
       });
     }
@@ -52,7 +58,7 @@ function IssueTypeSwitch() {
     <Switch
       style={{ width: 'unset' }}
       value={issueInfoTableDataSet.getState('issueTypeId')}
-      options={issueTypes?.map((i) => ({ value: i.id, text: `${i.name}(${issueTypesWithCountMaps.get(i.id)})` })) || []}
+      options={[...issueTypes, ...issueTypes.map((i) => ({ ...i, id: `${i.id}copy` }))]?.map((i) => ({ value: i.id, text: `${i.name}(${issueTypesWithCountMaps.get(i.id)})` })) || []}
       onChange={handleSelectBox}
     />
   );
