@@ -48,7 +48,7 @@ public class SprintDelaySendMessageTask {
     private static final String LINK = "link";
     private static final String PROJECT_OWNER = "projectOwner";
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private NotifyFeignClient notifyFeignClient;

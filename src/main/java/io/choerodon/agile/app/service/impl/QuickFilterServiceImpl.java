@@ -199,7 +199,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
                 String errorMsg = "error." + fieldCode + ".predefined.null";
                 throw new CommonException(errorMsg);
             }
-            if (predefined) {
+            if (Boolean.TRUE.equals(predefined)) {
                 appendPredefinedFieldSql(sqlQuery, quickFilterValueVO, projectId);
             } else {
                 sqlQuery.append(appendCustomFieldSql(quickFilterValueVO, organizationId, projectId));
@@ -210,7 +210,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
                 idx++;
             }
         }
-        if (!childIncluded) {
+        if (Boolean.FALSE.equals(childIncluded)) {
             sqlQuery.append(" and type_code != 'sub_task' ");
         }
         return sqlQuery.toString();
@@ -409,7 +409,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         if (!projectId.equals(quickFilterVO.getProjectId())) {
             throw new CommonException("error.projectId.notEqual");
         }
-        if (checkName(projectId, quickFilterVO.getName())) {
+        if (Boolean.TRUE.equals(checkName(projectId, quickFilterVO.getName()))) {
             throw new CommonException("error.quickFilterName.exist");
         }
         Optional.ofNullable(quickFilterVO.getQuickFilterValueVOList())
@@ -499,8 +499,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         if (quickFilterDTOList != null && !quickFilterDTOList.isEmpty()) {
             PageInfo pageInfo = new PageInfo(quickFilterDTOList.getNumber(), quickFilterDTOList.getSize());
             List<QuickFilterVO> quickFilterVOList = modelMapper.map(quickFilterDTOList, new TypeToken<List<QuickFilterVO>>(){}.getType());
-            Page<QuickFilterVO> quickFilterVOPage = new Page<>(quickFilterVOList, pageInfo, quickFilterDTOList.getTotalElements());
-            return quickFilterVOPage;
+            return new Page<>(quickFilterVOList, pageInfo, quickFilterDTOList.getTotalElements());
         } else {
             return new Page<>();
         }
@@ -578,9 +577,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
      * @return
      */
     public  String handlerFilterDescription(String description, boolean encrypt) {
-        String prefix = description.substring(0, description.lastIndexOf("+") + 1);
+        String prefix = description.substring(0, description.lastIndexOf('+') + 1);
         StringBuilder stringBuilder = new StringBuilder(prefix);
-        String oriName = description.substring(description.lastIndexOf("+") + 1);
+        String oriName = description.substring(description.lastIndexOf('+') + 1);
         try {
             JsonNode jsonNode = objectMapper.readTree(oriName);
             JsonNode arr = jsonNode.get("arr");
@@ -624,7 +623,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             }
         } else {
             if (!"'null'".equals(value)) {
-                String field = Optional.ofNullable(quickFilterFieldService.selectByFieldCode(fieldCode)).map(QuickFilterFieldDTO::getField).orElse(null);;
+                String field = Optional.ofNullable(quickFilterFieldService.selectByFieldCode(fieldCode)).map(QuickFilterFieldDTO::getField).orElse(null);
                 if (!Arrays.asList(EncryptionUtils.FIELD_VALUE).contains(field)) {
                     objectNode.put("value", handlerFilterEncryptList(value, encrypt));
                 }

@@ -49,9 +49,9 @@ public class EncryptionUtils {
 
     public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","last_update_date"};
 
-    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds","fixVersion","influenceVersion", "creatorIds", "updatorIds"};
+    protected static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds","programVersion","mainResponsibleIds","fixVersion","influenceVersion", "creatorIds", "updatorIds"};
 
-    public static final String[] IGNORE_VALUES = {"0","none"};
+    protected static final String[] IGNORE_VALUES = {"0","none"};
     public static final String BLANK_KEY = "";
 
     /**
@@ -371,7 +371,6 @@ public class EncryptionUtils {
     @SuppressWarnings("unchecked")
     private static void decryptOa(SearchVO search, Optional<Map<String, Object>> oaMapOptional) {
         List<String> temp;
-        String tempStr;// versionList
         // priorityId
         temp = oaMapOptional.map(ad -> (List<String>) (ad.get("priorityId"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
@@ -447,7 +446,7 @@ public class EncryptionUtils {
         }
 
         // customField
-        Object ob = oaMapOptional.map(ad -> (Object) (ad.get("customField"))).orElse(null);
+        Object ob = oaMapOptional.map(ad -> ad.get("customField")).orElse(null);
         if (!ObjectUtils.isEmpty(ob)) {
             search.getOtherArgs().put("customField",handlerCustomField(ob,false));
         }
@@ -558,8 +557,7 @@ public class EncryptionUtils {
         Pattern compile = Pattern.compile(regEx);
         Matcher matcher = compile.matcher(value);
         String replace = matcher.replaceAll("").trim();
-        String[] split = replace.split(",");
-        return split;
+        return replace.split(",");
     }
 
 
@@ -609,7 +607,6 @@ public class EncryptionUtils {
     }
 
     private static Map<String, Object> handlerOtherArgs(Map<String, Object> map, boolean encrypt) {
-        List<String> temp;
         List<String> list = Arrays.asList(FILTER_FIELD);
         Map<String, Object> map1 = new HashMap<>();
         Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
@@ -659,9 +656,7 @@ public class EncryptionUtils {
                     if ("option".equals(next.getKey())) {
                         List<String> list = new ArrayList<>();
                         if (value1.isArray()) {
-                            value1.forEach(v -> {
-                                list.add(v.isNumber() ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), BLANK_KEY) : encryptionService.decrypt(v.textValue(), BLANK_KEY)));
-                            });
+                            value1.forEach(v -> list.add(v.isNumber() ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), BLANK_KEY) : encryptionService.decrypt(v.textValue(), BLANK_KEY))));
                         }
                         if (CollectionUtils.isEmpty(list)) {
                             continue;

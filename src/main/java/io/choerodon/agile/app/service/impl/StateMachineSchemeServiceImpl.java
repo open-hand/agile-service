@@ -292,13 +292,6 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         initScheme(projectCode + "默认状态机方案【测试】", SchemeApplyType.TEST, projectEvent);
     }
 
-//    @Override
-//    public void initByConsumeCreateProgram(ProjectEvent projectEvent) {
-//        String projectCode = projectEvent.getProjectCode();
-//        //创建项目群状态机方案
-//        initScheme(projectCode + "默认状态机方案【项目群】", SchemeApplyType.PROGRAM, projectEvent);
-//    }
-
     /**
      * 初始化状态机方案
      *

@@ -39,7 +39,7 @@ public class StateMachineConfigServiceImpl implements StateMachineConfigService 
 
     @Override
     public StateMachineConfigVO create(Long organizationId, Long stateMachineId, Long transformId, StateMachineConfigVO configDTO) {
-        if (!EnumUtil.contain(ConfigType.class, configDTO.getType())) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(ConfigType.class, configDTO.getType()))) {
             throw new CommonException(ERROR_STATUS_TYPE_ILLEGAL);
         }
         //验证configCode
@@ -89,7 +89,7 @@ public class StateMachineConfigServiceImpl implements StateMachineConfigService 
 
     @Override
     public List<StateMachineConfigVO> queryDeployByTransformIds(Long organizationId, String type, List<Long> transformIds) {
-        if (!EnumUtil.contain(ConfigType.class, type)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(ConfigType.class, type))) {
             throw new CommonException(ERROR_STATUS_TYPE_ILLEGAL);
         }
         if (transformIds != null && !transformIds.isEmpty()) {

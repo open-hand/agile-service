@@ -37,8 +37,6 @@ public class IIssueCommentServiceImpl implements IIssueCommentService {
     @Override
     @DataLog(type = "updateComment")
     public IssueCommentDTO updateBase(IssueCommentDTO issueCommentDTO, String[] fieldList) {
-//        Criteria criteria = new Criteria();
-//        criteria.update(fieldList);
         if (issueCommentMapper.updateOptional(issueCommentDTO, fieldList) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }

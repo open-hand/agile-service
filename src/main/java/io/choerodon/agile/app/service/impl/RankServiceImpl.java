@@ -9,8 +9,6 @@ import io.choerodon.agile.infra.dto.RankDTO;
 import io.choerodon.agile.infra.mapper.RankMapper;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.core.exception.CommonException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +26,7 @@ import java.util.stream.Collectors;
 @Service
 public class RankServiceImpl implements RankService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RankServiceImpl.class);
     private static final String RANK_TYPE_EPIC = "epic";
-    private static final String RANK_TYPE_FEATURE = "feature";
 
     @Autowired
     private RankValidator rankValidator;
@@ -57,25 +53,6 @@ public class RankServiceImpl implements RankService {
         Collections.sort(epicIds, Comparator.reverseOrder());
         return epicIds;
     }
-
-//    private List<Long> getFeatureIds(Long projectId) {
-//        List<Long> featureIds = new ArrayList<>();
-//        // get program feature
-//        ProjectVO program = userService.getGroupInfoByEnableProject(ConvertUtil.getOrganizationId(projectId), projectId);
-//        if (program != null) {
-//            List<Long> programFeatureIds = rankMapper.selectFeatureIdsByProgram(program.getId());
-//            if (programFeatureIds != null && !programFeatureIds.isEmpty()) {
-//                featureIds.addAll(programFeatureIds);
-//            }
-//        }
-//        // get project feature
-//        List<Long> projectFeatureIds = rankMapper.selectFeatureIdsByProject(projectId);
-//        if (projectFeatureIds != null && !projectFeatureIds.isEmpty()) {
-//            featureIds.addAll(projectFeatureIds);
-//        }
-//        Collections.sort(featureIds, Comparator.reverseOrder());
-//        return featureIds;
-//    }
 
     protected void insertRankByBatch(Long projectId, List<Long> issueIds, String type) {
         List<RankDTO> insertRankList = new ArrayList<>();
@@ -148,7 +125,7 @@ public class RankServiceImpl implements RankService {
         rankValidator.checkEpicAndFeatureRank(rankVO);
         Long referenceIssueId = rankVO.getReferenceIssueId();
         RankDTO referenceRank = getOrinitReferenceRank(projectId, rankVO.getType(), referenceIssueId, rankVO.getIssueId());
-        if (rankVO.getBefore()) {
+        if (Boolean.TRUE.equals(rankVO.getBefore())) {
             String leftRank = rankMapper.selectLeftRank(projectId, rankVO.getType(), referenceRank.getRank());
             String rank = (leftRank == null ? RankUtil.genPre(referenceRank.getRank()) : RankUtil.between(leftRank, referenceRank.getRank()));
             RankDTO rankDTO = rankMapper.selectRankByIssueId(projectId, rankVO.getType(), rankVO.getIssueId());

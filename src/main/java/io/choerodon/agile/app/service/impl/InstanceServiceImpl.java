@@ -133,7 +133,7 @@ public class InstanceServiceImpl implements InstanceService {
             Collections.sort(transformInfos, (transformInfo1, transformInfo2) -> transformInfo1.getRank().compareTo(transformInfo2.getRank()));
         }
         //调用对应服务，根据条件校验转换，过滤掉不可用的转换
-        if (isNeedFilter) {
+        if (Boolean.TRUE.equals(isNeedFilter)) {
             try {
                 transformInfos = modelMapper.map(stateMachineClientService.conditionFilter(instanceId, modelMapper.map(transformInfos, new TypeToken<List<io.choerodon.agile.infra.statemachineclient.dto.TransformInfo>>() {
                 }.getType())), new TypeToken<List<TransformInfo>>() {
@@ -159,7 +159,7 @@ public class InstanceServiceImpl implements InstanceService {
                 }.getType()));
                 executeResult = stateMachineClientService.configExecuteCondition(null, transform.getConditionStrategy(), modelMapper.map(inputDTO, InputDTO.class));
             }
-            if (executeResult.getSuccess() && !validatorConfigs.isEmpty()) {
+            if (Boolean.TRUE.equals(executeResult.getSuccess()) && !validatorConfigs.isEmpty()) {
                 inputDTO.setConfigs(modelMapper.map(validatorConfigs, new TypeToken<List<StateMachineConfigVO>>() {
                 }.getType()));
                 executeResult = stateMachineClientService.configExecuteValidator(null, modelMapper.map(inputDTO, InputDTO.class));

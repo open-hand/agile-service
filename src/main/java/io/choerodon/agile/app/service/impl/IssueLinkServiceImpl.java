@@ -53,7 +53,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         issueLinkDTOList.forEach(issueLinkDTO -> {
             issueLinkDTO.setProjectId(projectId);
             issueLinkValidator.verifyCreateData(issueLinkDTO);
-            if (issueLinkValidator.checkUniqueLink(issueLinkDTO)) {
+            if (Boolean.TRUE.equals(issueLinkValidator.checkUniqueLink(issueLinkDTO))) {
                 create(issueLinkDTO);
                 BaseFieldUtil.updateIssueLastUpdateInfoForIssueLink(issueLinkDTO.getProjectId(), issueLinkDTO);
             }

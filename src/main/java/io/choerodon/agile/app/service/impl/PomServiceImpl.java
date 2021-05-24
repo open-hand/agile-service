@@ -68,6 +68,9 @@ public class PomServiceImpl implements PomService {
     }
 
     private AppServiceRepVO getAppServiceByArtifactId(List<AppServiceRepVO> appServiceRepList, String artifactId) {
+        if (ObjectUtils.isEmpty(artifactId)) {
+            return null;
+        }
         AppServiceRepVO appServiceRepVO = null;
         for (AppServiceRepVO vo : appServiceRepList) {
             if (artifactId.equals(vo.getArtifactId())) {

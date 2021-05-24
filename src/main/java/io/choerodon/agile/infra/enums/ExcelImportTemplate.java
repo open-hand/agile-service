@@ -151,12 +151,12 @@ public class ExcelImportTemplate {
 
     public static class IssueHeader {
 
-        public static final List<Header> HEADERS;
+        protected static final List<Header> HEADERS;
 
         public static final String PARENT = "parent";
         public static final String RELATE_ISSUE = "relate_issue";
         private static final int INIT_CAPACITY = 50;
-        public static final List<String> HEADER_CODES = new ArrayList<>(INIT_CAPACITY);
+        protected static final List<String> HEADER_CODES = new ArrayList<>(INIT_CAPACITY);
         private static final Map<String, String> CODE_VALUE_MAP = new HashMap(INIT_CAPACITY);
         private static final Map<String, String> VALUE_CODE_MAP = new HashMap(INIT_CAPACITY);
         private static final Map<String, Integer> VALUE_WIDTH_MAP = new HashMap<>(INIT_CAPACITY);

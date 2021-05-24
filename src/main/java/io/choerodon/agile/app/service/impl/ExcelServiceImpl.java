@@ -103,13 +103,43 @@ public class ExcelServiceImpl implements ExcelService {
     private static final String UPLOAD_FILE_CUSTOM_FIELD = "upload_file_customer_field";
     private static final String WEBSOCKET_IMPORT_CUSTOM_FIELD_CODE = "agile-import-customer-field-";
     private static final String WEBSOCKET_EXPORT_PUBLISH_VERSION = "agile-export-publish-version";
+    private static final String ERROR_FILE_OPERATION_HISTORY_UPDATE = "error.FileOperationHistoryDTO.update";
 
     protected static final String VERSION_PLANNING = "version_planning";
 
     protected static final String RELATION_TYPE_FIX = "fix";
     protected static final String IMPORT_TEMPLATE_NAME = "导入模板";
+    private static  final String DATE_CHECK_MSG = "请输入正确的日期格式";
 
     protected static final String EPIC_CN = "史诗";
+    private static final String SUMMARY = "summary";
+    private static final String ISSUE_NUM = "issueNum";
+    private static final String EPIC_NAME = "epicName";
+    private static final String TYPE_NAME = "typeName";
+    private static final String DESCRIPTION = "description";
+    private static final String PRIORITY_NAME = "priorityName";
+    private static final String STATUS_NAME = "statusName";
+    private static final String RESOLUTION = "resolution";
+    private static final String SPRINT_NAME = "sprintName";
+    private static final String ASSIGNEE_NAME = "assigneeName";
+    private static final String REPORTER_NAME = "reporterName";
+    private static final String STORY_POINTS = "storyPoints";
+    private static final String REMAINING_TIME = "remainingTime";
+    private static final String VERSION_NAME = "versionName";
+    private static final String FIX_VERSION_NAME = "fixVersionName";
+    private static final String INFLUENCE_VERSION_NAME = "influenceVersionName";
+    private static final String LABEL_NAME = "labelName";
+    private static final String COMPONENT_NAME = "componentName";
+    private static final String CREATION_DATE = "creationDate";
+    private static final String LAST_UPDATE_DATE = "lastUpdateDate";
+    private static final String ESTIMATED_START_TIME = "estimatedStartTime";
+    private static final String ESTIMATED_END_TIME = "estimatedEndTime";
+    private static final String CREATED_USER_NAME = "createdUserName";
+    private static final String LAST_UPDATE_USER_NAME = "lastUpdatedUserName";
+    private static final String MAIN_RESPONSIBLE_NAME = "mainResponsibleName";
+    private static final String ENVIRONMENT_NAME = "environmentName";
+    private static final String SPENT_WORK_TIME = "spentWorkTime";
+    private static final String ALL_ESTIMATE_TIME = "allEstimateTime";
 
     private static final String SUB_BUG_CN = "子缺陷";
 
@@ -201,38 +231,38 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected static Map<String, String> FIELD_MAP = new LinkedHashMap<>();
 
-    protected static String[] AUTO_SIZE_WIDTH = {"summary", "epicName", "feature",
-            "creationDate", "lastUpdateDate", "sprintName"};
+    protected static String[] AUTO_SIZE_WIDTH = {SUMMARY, EPIC_NAME, FEATURE,
+            CREATION_DATE, LAST_UPDATE_DATE, SPRINT_NAME};
 
     static {
-        FIELD_MAP.put("typeName", "问题类型");
-        FIELD_MAP.put("issueNum", "问题编号");
-        FIELD_MAP.put("summary", "概要");
-        FIELD_MAP.put("description", "描述");
-        FIELD_MAP.put("priorityName", "优先级");
-        FIELD_MAP.put("statusName", "状态");
-        FIELD_MAP.put("resolution", "解决状态");
-        FIELD_MAP.put("sprintName", "冲刺");
-        FIELD_MAP.put("assigneeName", "经办人");
-        FIELD_MAP.put("reporterName", "报告人");
-        FIELD_MAP.put("storyPoints", "故事点");
-        FIELD_MAP.put("remainingTime", "剩余预估时间");
-        FIELD_MAP.put("versionName", "版本");
-        FIELD_MAP.put("fixVersionName", "修复的版本");
-        FIELD_MAP.put("influenceVersionName", "影响的版本");
-        FIELD_MAP.put("epicName", "所属史诗");
-        FIELD_MAP.put("labelName", "标签");
-        FIELD_MAP.put("componentName", "模块");
-        FIELD_MAP.put("creationDate", "创建时间");
-        FIELD_MAP.put("lastUpdateDate", "最后更新时间");
-        FIELD_MAP.put("estimatedStartTime", "预计开始时间");
-        FIELD_MAP.put("estimatedEndTime", "预计结束时间");
-        FIELD_MAP.put("createdUserName", "创建人");
-        FIELD_MAP.put("lastUpdatedUserName", "更新人");
-        FIELD_MAP.put("mainResponsibleName", "主要负责人");
-        FIELD_MAP.put("environmentName", "环境");
-        FIELD_MAP.put("spentWorkTime", "已耗费时间");
-        FIELD_MAP.put("allEstimateTime", "总预估时间");
+        FIELD_MAP.put(TYPE_NAME, "问题类型");
+        FIELD_MAP.put(ISSUE_NUM, "问题编号");
+        FIELD_MAP.put(SUMMARY, "概要");
+        FIELD_MAP.put(DESCRIPTION, "描述");
+        FIELD_MAP.put(PRIORITY_NAME, "优先级");
+        FIELD_MAP.put(STATUS_NAME, "状态");
+        FIELD_MAP.put(RESOLUTION, "解决状态");
+        FIELD_MAP.put(SPRINT_NAME, "冲刺");
+        FIELD_MAP.put(ASSIGNEE_NAME, "经办人");
+        FIELD_MAP.put(REPORTER_NAME, "报告人");
+        FIELD_MAP.put(STORY_POINTS, "故事点");
+        FIELD_MAP.put(REMAINING_TIME, "剩余预估时间");
+        FIELD_MAP.put(VERSION_NAME, "版本");
+        FIELD_MAP.put(FIX_VERSION_NAME, "修复的版本");
+        FIELD_MAP.put(INFLUENCE_VERSION_NAME, "影响的版本");
+        FIELD_MAP.put(EPIC_NAME, "所属史诗");
+        FIELD_MAP.put(LABEL_NAME, "标签");
+        FIELD_MAP.put(COMPONENT_NAME, "模块");
+        FIELD_MAP.put(CREATION_DATE, "创建时间");
+        FIELD_MAP.put(LAST_UPDATE_DATE, "最后更新时间");
+        FIELD_MAP.put(ESTIMATED_START_TIME, "预计开始时间");
+        FIELD_MAP.put(ESTIMATED_END_TIME, "预计结束时间");
+        FIELD_MAP.put(CREATED_USER_NAME, "创建人");
+        FIELD_MAP.put(LAST_UPDATE_USER_NAME, "更新人");
+        FIELD_MAP.put(MAIN_RESPONSIBLE_NAME, "主要负责人");
+        FIELD_MAP.put(ENVIRONMENT_NAME, "环境");
+        FIELD_MAP.put(SPENT_WORK_TIME, "已耗费时间");
+        FIELD_MAP.put(ALL_ESTIMATE_TIME, "总预估时间");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -350,7 +380,7 @@ public class ExcelServiceImpl implements ExcelService {
                 objectSchemeFieldService.queryCustomFieldList(projectId, issueTypeList);
         Map<String, List<String>> customFieldValueMap = new HashMap<>();
         List<String> customFieldCodes = new ArrayList<>();
-        List<String> fieldTypes = Arrays.asList("multiple", "single", "checkbox", "radio");
+        List<String> fieldTypes = Arrays.asList(FieldType.MULTIPLE, FieldType.SINGLE, FieldType.CHECKBOX, FieldType.RADIO);
         List<String> userNames =
                 baseFeignClient.listUsersByProjectId(projectId, 1, 0, null)
                         .getBody()
@@ -402,35 +432,35 @@ public class ExcelServiceImpl implements ExcelService {
         result.add(processParentIssuePredefined(projectId, cursor, systemFields));
         Optional
                 .ofNullable(processVersionPredefined(projectId, cursor, systemFields))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
         Optional
                 .ofNullable(processInfluenceVersionPredefined(projectId, cursor, systemFields))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
         Optional
                 .ofNullable(processComponentPredefined(projectId, cursor, systemFields))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
         Optional
                 .ofNullable(processSprintPredefined(projectId, cursor, systemFields))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
         List<String> userNameList = new ArrayList<>(getManagers(projectId).keySet());
         Optional
                 .ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.ASSIGNEE))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
         Optional
                 .ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.REPORTER))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
         Optional
                 .ofNullable(processEpicOrFeaturePredefined(organizationId, projectId, withFeature, cursor, systemFields))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
         Optional.ofNullable(processLabelPredefined(projectId, cursor, systemFields))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
 
         Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, userNameList, FieldCode.MAIN_RESPONSIBLE))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
         Optional.ofNullable(buildPredefinedByFieldCodeAndValues(cursor, systemFields, Arrays.asList("非生产环境", "生产环境"), FieldCode.ENVIRONMENT))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
         Optional.ofNullable(processIssueStatusPredefined(organizationId, projectId, cursor, systemFields))
-                .ifPresent(x -> result.add(x));
+                .ifPresent(result::add);
         return result;
     }
 
@@ -740,7 +770,7 @@ public class ExcelServiceImpl implements ExcelService {
         ResponseEntity<Page<UserDTO>> response = baseFeignClient.listUsersByProjectId(projectId, 1, 0, null);
         List<UserDTO> users = response.getBody().getContent();
         users.forEach(u -> {
-            if (u.getEnabled()) {
+            if (Boolean.TRUE.equals(u.getEnabled())) {
                 String realName = u.getRealName();
                 String loginName = u.getLoginName();
                 Boolean isLdap = u.getLdap();
@@ -765,7 +795,7 @@ public class ExcelServiceImpl implements ExcelService {
         update.setFileUrl(fileOperationHistoryDTO.getFileUrl());
         update.setObjectVersionNumber(fileOperationHistoryDTO.getObjectVersionNumber());
         if (fileOperationHistoryMapper.updateByPrimaryKeySelective(update) != 1) {
-            throw new CommonException("error.FileOperationHistoryDTO.update");
+            throw new CommonException(ERROR_FILE_OPERATION_HISTORY_UPDATE);
         }
         FileOperationHistoryDTO result = fileOperationHistoryMapper.selectByPrimaryKey(update.getId());
         String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + result.getProjectId();
@@ -920,13 +950,12 @@ public class ExcelServiceImpl implements ExcelService {
         String websocketKey = WEBSOCKET_EXPORT_PUBLISH_VERSION + "-" + projectId;
         FileOperationHistoryDTO history =
                 initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE_PUBLISH_VERSION, websocketKey);
-        try {
+        try (Workbook workbook = new SXSSFWorkbook(100)) {
             validatePublishVersion(projectId, publishVersionIds, userId, history);
             List<PublishVersionDTO> publishVersions = new ArrayList<>();
             processPublishVersions(projectId, organizationId, publishVersionIds, publishVersions);
             int total = publishVersions.size();
             int current = 1;
-            Workbook workbook = new SXSSFWorkbook(100);
             Map<Long, IssueListFieldKVVO> issueMap = new HashMap<>();
             Map<Long, Set<TagVO>> issueTagMap = new HashMap<>();
             Map<Long, Set<PublishVersionDTO>> issuePublishVersionMap = new HashMap<>();
@@ -1050,7 +1079,7 @@ public class ExcelServiceImpl implements ExcelService {
         searchVO.setOtherArgs(otherArgs);
         otherArgs.put("issueIds", new ArrayList<>(allIssueIds));
         PageRequest pageRequest = new PageRequest(1, 0);
-        Sort.Order order = new Sort.Order(Sort.Direction.DESC, "issueNum");
+        Sort.Order order = new Sort.Order(Sort.Direction.DESC, ISSUE_NUM);
         Sort sort = new Sort(order);
         pageRequest.setSort(sort);
         issueMap.putAll(
@@ -1231,7 +1260,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Integer, Long> rowIssueIdMap = new HashMap<>();
         List<RelatedIssueVO> relatedIssueList = new ArrayList<>();
         for (int rowNum = 1; rowNum <= dataRowCount; rowNum++) {
-            if (checkCanceled(projectId, history.getId(), importedIssueIds)) {
+            if (Boolean.TRUE.equals(checkCanceled(projectId, history.getId(), importedIssueIds))) {
                 return;
             }
             Row row = dataSheet.getRow(rowNum);
@@ -1280,7 +1309,7 @@ public class ExcelServiceImpl implements ExcelService {
                     List<ComponentIssueRelVO> components =  parent.getComponentIssueRelVOList();
                     Long sprintId = parent.getSprintId();
                     Long epicId = parent.getEpicId();
-                    Optional.ofNullable(parent.getRelatedIssueVO()).ifPresent(x -> relatedIssueList.add(x));
+                    Optional.ofNullable(parent.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
                     IssueVO result = stateMachineClientService.createIssue(parent, APPLY_TYPE_AGILE);
                     insertIds.add(result.getIssueId());
                     insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
@@ -1316,7 +1345,7 @@ public class ExcelServiceImpl implements ExcelService {
                         continue;
                     }
                     sonMap.forEach((k, v) -> {
-                        Optional.ofNullable(v.getRelatedIssueVO()).ifPresent(x -> relatedIssueList.add(x));
+                        Optional.ofNullable(v.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
                         IssueVO returnValue = stateMachineClientService.createIssue(v, APPLY_TYPE_AGILE);
                         insertIds.add(returnValue.getIssueId());
                         insertCustomFields(returnValue.getIssueId(), v.getCustomFields(), projectId);
@@ -1345,7 +1374,7 @@ public class ExcelServiceImpl implements ExcelService {
                     sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
                     continue;
                 }
-                Optional.ofNullable(issueCreateVO.getRelatedIssueVO()).ifPresent(x -> relatedIssueList.add(x));
+                Optional.ofNullable(issueCreateVO.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
                 IssueVO result = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
                 insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId);
                 rowIssueIdMap.put(rowNum, result.getIssueId());
@@ -1746,15 +1775,15 @@ public class ExcelServiceImpl implements ExcelService {
                     customFieldValue = value;
                 }
             }
-            PageFieldViewUpdateVO PageFieldViewUpdateVO = excelColumn.getCustomFieldDetail();
+            PageFieldViewUpdateVO pageFieldViewUpdateVO = excelColumn.getCustomFieldDetail();
             List<PageFieldViewUpdateVO> customFields = issueCreateVO.getCustomFields();
             if (customFields == null) {
                 customFields = new ArrayList<>();
                 issueCreateVO.setCustomFields(customFields);
             }
             PageFieldViewUpdateVO pageFieldViewUpdate = new PageFieldViewUpdateVO();
-            pageFieldViewUpdate.setFieldId(PageFieldViewUpdateVO.getFieldId());
-            pageFieldViewUpdate.setFieldType(PageFieldViewUpdateVO.getFieldType());
+            pageFieldViewUpdate.setFieldId(pageFieldViewUpdateVO.getFieldId());
+            pageFieldViewUpdate.setFieldType(pageFieldViewUpdateVO.getFieldType());
             pageFieldViewUpdate.setValue(customFieldValue);
             customFields.add(pageFieldViewUpdate);
         }
@@ -1791,11 +1820,11 @@ public class ExcelServiceImpl implements ExcelService {
                                      SimpleDateFormat formatYearOnly) {
         if (!cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
             String value = cell.toString();
-            cell.setCellValue(buildWithErrorMsg(value, "请输入正确的日期格式"));
+            cell.setCellValue(buildWithErrorMsg(value, DATE_CHECK_MSG));
             addErrorColumn(rowNum, col, errorRowColMap);
         } else {
             if (!DateUtil.isCellDateFormatted(cell)) {
-                cell.setCellValue(buildWithErrorMsg(cell.toString(), "请输入正确的日期格式"));
+                cell.setCellValue(buildWithErrorMsg(cell.toString(), DATE_CHECK_MSG));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
                 Date date = cell.getDateCellValue();
@@ -2009,7 +2038,7 @@ public class ExcelServiceImpl implements ExcelService {
                     if (str.startsWith("！") || str.startsWith("!")) {
                         relatedRows.add(Integer.valueOf(str.substring(1)) - 1);
                     } else {
-                        int num = Integer.valueOf(str);
+                        int num = Integer.parseInt(str);
                         String issueNum = projectCode + "-" + num;
                         IssueVO issueVO = issueMapper.selectByIssueNum(projectId, issueNum);
                         if (issueVO == null) {
@@ -2042,11 +2071,11 @@ public class ExcelServiceImpl implements ExcelService {
         int rowNum = row.getRowNum();
         if (!isCellEmpty(cell)) {
             if (!cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
-                cell.setCellValue(buildWithErrorMsg("", "请输入正确的日期格式"));
+                cell.setCellValue(buildWithErrorMsg("", DATE_CHECK_MSG));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
                 if (!DateUtil.isCellDateFormatted(cell)) {
-                    cell.setCellValue(buildWithErrorMsg("", "请输入正确的日期格式"));
+                    cell.setCellValue(buildWithErrorMsg("", DATE_CHECK_MSG));
                     addErrorColumn(rowNum, col, errorRowColMap);
                 } else {
                     Date date = cell.getDateCellValue();
@@ -2287,7 +2316,7 @@ public class ExcelServiceImpl implements ExcelService {
                 if (value.length() > 20) {
                     cell.setCellValue(buildWithErrorMsg(value, "史诗名称过长，不能超过20位"));
                     addErrorColumn(rowNum, col, errorRowColMap);
-                } else if (!checkEpicNameExist(projectId, value)) {
+                } else if (Boolean.FALSE.equals(checkEpicNameExist(projectId, value))) {
                     cell.setCellValue(buildWithErrorMsg(value, "史诗名称重复"));
                     addErrorColumn(rowNum, col, errorRowColMap);
                 } else {
@@ -2425,7 +2454,7 @@ public class ExcelServiceImpl implements ExcelService {
                                     Integer rowNum,
                                     String value) {
 
-        if (!NumberUtil.isNumeric(value)) {
+        if (Boolean.FALSE.equals(NumberUtil.isNumeric(value))) {
             cell.setCellValue(buildWithErrorMsg(value, "请输入数字"));
             addErrorColumn(rowNum, col, errorRowColMap);
         } else if (getNumberOfIntegerPlace(value) > 3) {
@@ -2448,7 +2477,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private int getNumberOfIntegerPlace(String value) {
-        int index = value.indexOf(".");
+        int index = value.indexOf('.');
         if (index < 0) {
             index = value.length();
         }
@@ -2457,7 +2486,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private int getNumberOfDecimalPlaces(BigDecimal bigDecimal) {
         String string = bigDecimal.stripTrailingZeros().toPlainString();
-        int index = string.indexOf(".");
+        int index = string.indexOf('.');
         return index < 0 ? 0 : string.length() - index - 1;
     }
 
@@ -2525,11 +2554,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void addErrorColumn(int rowNum, Integer col, Map<Integer, List<Integer>> errorRowColMap) {
-        List<Integer> columns = errorRowColMap.get(rowNum);
-        if (columns == null) {
-            columns = new ArrayList<>();
-            errorRowColMap.put(rowNum, columns);
-        }
+        List<Integer> columns = errorRowColMap.computeIfAbsent(rowNum, k -> new ArrayList<>());
         columns.add(col);
     }
 
@@ -2663,7 +2688,7 @@ public class ExcelServiceImpl implements ExcelService {
 
         Map<String, ObjectSchemeFieldDetailVO> fieldMap = new HashMap<>();
         objectSchemeFieldDetails.forEach(o -> fieldMap.put(o.getName(), o));
-        String status = "error_custom_field_header_";
+        StringBuilder status = new StringBuilder("error_custom_field_header_");
         List<String> multiValueFieldType = Arrays.asList("checkbox", "multiple","multiMember");
         List<String> fieldTypes = Arrays.asList("multiple", "single", "checkbox", "radio");
         List<String> dateTypes = Arrays.asList("date", "datetime", "time");
@@ -2671,8 +2696,8 @@ public class ExcelServiceImpl implements ExcelService {
             String headerName = excelColumn.getFieldCode();
             ObjectSchemeFieldDetailVO detail = fieldMap.get(headerName);
             if (ObjectUtils.isEmpty(detail)) {
-                status += headerName;
-                history.setStatus(status);
+                status.append(headerName);
+                history.setStatus(status.toString());
                 fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
                 sendProcess(history, history.getUserId(), 0.0, websocketKey);
                 throw new CommonException("error.illegal.custom.field.header." + headerName);
@@ -2953,7 +2978,7 @@ public class ExcelServiceImpl implements ExcelService {
                               IssueTypeLinkDTO issueTypeLink,
                               Integer rowNum,
                               Map<Integer, ExcelColumnVO> headerMap) {
-        if (issueTypeLink.hasNext()) {
+        if (Boolean.TRUE.equals(issueTypeLink.hasNext())) {
             IssueTypeLinkDTO next = issueTypeLink.getNext();
             String nextType = next.getType();
             String nextIssueTypeCode = getIssueTypeCode(headerMap, nextType);
@@ -2980,7 +3005,7 @@ public class ExcelServiceImpl implements ExcelService {
                                 IssueTypeLinkDTO issueTypeLink,
                                 Integer rowNum,
                                 Map<Integer, ExcelColumnVO> headerMap) {
-        if (issueTypeLink.hasNext()) {
+        if (Boolean.TRUE.equals(issueTypeLink.hasNext())) {
             IssueTypeLinkDTO next = issueTypeLink.getNext();
             String nextType = next.getType();
             String nextIssueTypeCode = getIssueTypeCode(headerMap, nextType);
@@ -3001,7 +3026,7 @@ public class ExcelServiceImpl implements ExcelService {
                 || !IMPORT_TEMPLATE_NAME.equals(workbook.getSheetAt(index).getSheetName())) {
             history.setStatus("template_error");
             if (fileOperationHistoryMapper.updateByPrimaryKeySelective(history) != 1) {
-                throw new CommonException("error.FileOperationHistoryDTO.update");
+                throw new CommonException(ERROR_FILE_OPERATION_HISTORY_UPDATE);
             }
             FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
             sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
@@ -3066,7 +3091,7 @@ public class ExcelServiceImpl implements ExcelService {
         fileOperationHistoryDTO.setStatus(CANCELED);
         fileOperationHistoryDTO.setObjectVersionNumber(objectVersionNumber);
         if (fileOperationHistoryMapper.updateByPrimaryKeySelective(fileOperationHistoryDTO) != 1) {
-            throw new CommonException("error.FileOperationHistoryDTO.update");
+            throw new CommonException(ERROR_FILE_OPERATION_HISTORY_UPDATE);
         }
     }
 
@@ -3109,7 +3134,7 @@ public class ExcelServiceImpl implements ExcelService {
         String sheetName = project.getName();
         Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);
         ExcelCursorDTO cursor = new ExcelCursorDTO(1, 0, 1000);
-        if (condition) {
+        if (Boolean.TRUE.equals(condition)) {
             String filterSql = null;
             if (searchVO.getQuickFilterIds() != null && !searchVO.getQuickFilterIds().isEmpty()) {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
@@ -3226,7 +3251,6 @@ public class ExcelServiceImpl implements ExcelService {
                 cursor.increasePage();
             }
         }
-//        ExcelUtil.writeToResponse(response, workbook);
         String fileName = project.getName() + FILESUFFIX;
         //把workbook上传到对象存储服务中
         downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
@@ -3325,7 +3349,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected Double getProcess(Integer currentNum, Integer totalNum) {
         double process = (currentNum + 1.0) / (totalNum + 1.0) * 0.95 * 100;
-        BigDecimal b = new BigDecimal(process);
+        BigDecimal b = BigDecimal.valueOf(process);
         process = b.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
         return process;
     }
@@ -3362,7 +3386,7 @@ public class ExcelServiceImpl implements ExcelService {
                         websocketKey = WEBSOCKET_EXPORT_CODE + "-" + fileOperationHistoryDTO.getProjectId();
                         break;
                     case DOWNLOAD_FILE_PUBLISH_VERSION:
-                        websocketKey = WEBSOCKET_EXPORT_PUBLISH_VERSION + "-" + fileOperationHistoryDTO.getProjectId();;
+                        websocketKey = WEBSOCKET_EXPORT_PUBLISH_VERSION + "-" + fileOperationHistoryDTO.getProjectId();
                         break;
                     default:
                         break;
@@ -3529,9 +3553,9 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected String[] sortFieldCodes(String[] fieldCodes) {
         List<String> result = new ArrayList<>();
-        result.add("typeName");
-        result.add("issueNum");
-        result.add("summary");
+        result.add(TYPE_NAME);
+        result.add(ISSUE_NUM);
+        result.add(SUMMARY);
         for (String str : fieldCodes) {
             if (result.get(0).equals(str)
                     || result.get(1).equals(str)
@@ -3561,11 +3585,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private void appendToParentSonMap(Long parentId, Long issueId, Map<Long, Set<Long>> parentSonMap) {
-        Set<Long> childrenSet =  parentSonMap.get(parentId);
-        if (childrenSet == null) {
-            childrenSet = new HashSet<>();
-            parentSonMap.put(parentId, childrenSet);
-        }
+        Set<Long> childrenSet = parentSonMap.computeIfAbsent(parentId, k -> new HashSet<>());
         childrenSet.add(issueId);
     }
 
@@ -3628,7 +3648,7 @@ public class ExcelServiceImpl implements ExcelService {
         List<ObjectSchemeFieldDTO> userDefinedFieldDTOS = fieldDTOS.stream().
                 filter(v -> !v.getSystem()).collect(Collectors.toList());
 
-        if (exportFieldCodes != null && exportFieldCodes.size() != 0) {
+        if (exportFieldCodes != null && !exportFieldCodes.isEmpty()) {
             Map<String, String> data = new HashMap<>(fields.length + userDefinedFieldDTOS.size());
             for (int i = 0; i < fields.length; i++) {
                 data.put(fields[i], fieldsName[i]);
@@ -3706,9 +3726,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private String setListElementStr(StringBuilder result, Element element) {
-        element.children().forEach(childElement -> {
-            result.append(getLiText(childElement)).append("\n");
-        });
+        element.children().forEach(childElement -> result.append(getLiText(childElement)).append("\n"));
         return element.text();
     }
 

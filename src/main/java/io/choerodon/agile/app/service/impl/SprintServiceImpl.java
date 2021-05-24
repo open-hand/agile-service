@@ -139,10 +139,9 @@ public class SprintServiceImpl implements SprintService {
     @Override
     public synchronized SprintDetailVO createSprintByDetails(Long projectId, SprintCreateVO sprintCreateVO) {
         SprintConvertDTO sprint = new SprintConvertDTO(projectId, sprintCreateVO.getSprintName(), sprintCreateVO.getSprintGoal(), sprintCreateVO.getStartDate(), sprintCreateVO.getEndDate(), STATUS_SPRINT_PLANNING_CODE);
-        if (checkName(projectId, sprintCreateVO.getSprintName())) {
+        if (Boolean.TRUE.equals(checkName(projectId, sprintCreateVO.getSprintName()))) {
             throw new CommonException("error.sprintName.exist");
         }
-        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         SprintConvertDTO sprintConvertDTO = null;
         if (agilePluginService != null) {
             sprintConvertDTO = agilePluginService.createSubProjectSprint(projectId, sprint);
@@ -191,30 +190,8 @@ public class SprintServiceImpl implements SprintService {
         moveIssueToBacklog(projectId, sprintId);
         issueAccessDataService.batchRemoveFromSprint(projectId, sprintId);
         delete(sprintConvertDTO);
-//        //删除冲刺时清空默认值
-//        deleteDefaultValueOfSprint(projectId, sprintId);
         return true;
     }
-
-//    /**
-//     * 完成或删除冲刺时，清空该冲刺的默认值设置
-//     * @param projectId
-//     * @param sprintId
-//     */
-//    private void deleteDefaultValueOfSprint(Long projectId, Long sprintId) {
-//        ObjectSchemeFieldDTO fieldDTO = objectSchemeFieldService.getObjectSchemeFieldDTO(FieldCode.SPRINT);
-//        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-//        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
-//        for (ObjectSchemeFieldExtendDTO objectSchemeFieldExtendDTO : objectSchemeFieldExtendList) {
-//            String defaultValue = objectSchemeFieldExtendDTO.getDefaultValue();
-//            if (!Objects.isNull(defaultValue) && Objects.equals(defaultValue, sprintId.toString())) {
-//                objectSchemeFieldExtendDTO.setDefaultValue("");
-//                if (objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(objectSchemeFieldExtendDTO) != 1) {
-//                    throw new CommonException("error.extend.field.update");
-//                }
-//            }
-//        }
-//    }
 
     private void moveIssueToBacklog(Long projectId, Long sprintId) {
         List<MoveIssueDTO> moveIssueDTOS = new ArrayList<>();
@@ -281,7 +258,6 @@ public class SprintServiceImpl implements SprintService {
         handleSprintIssueData(issueIdSprintIdVOS, issueIds, sprintSearches, backLogIssueVO, projectId, priorityMap, statusMapDTOMap, issueTypeDTOMap,allIssueIds);
         backlog.put(SPRINT_DATA, sprintSearches);
         backlog.put(BACKLOG_DATA, backLogIssueVO);
-        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {
             agilePluginService.addProgramAttr(projectId,issueIds,backlog);
         }
@@ -438,8 +414,6 @@ public class SprintServiceImpl implements SprintService {
         sprintConvertDTO.completeSprint();
         update(sprintConvertDTO);
         moveNotDoneIssueToTargetSprint(projectId, sprintCompleteVO);
-//        //完成冲刺时清空默认值
-//        deleteDefaultValueOfSprint(projectId, sprintCompleteVO.getSprintId());
         return true;
     }
 
@@ -723,19 +697,4 @@ public class SprintServiceImpl implements SprintService {
         dataLogRedisUtil.deleteByUpdateSprint(sprintConvertDTO);
         return true;
     }
-
-//    @Override
-//    public Boolean checkDefaultValue(Long projectId, Long sprintId) {
-//        ObjectSchemeFieldDTO fieldDTO = objectSchemeFieldService.getObjectSchemeFieldDTO(FieldCode.SPRINT);
-//        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-//        List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendList = objectSchemeFieldExtendMapper.selectExtendFields(organizationId, fieldDTO.getId(), projectId);
-//        for (ObjectSchemeFieldExtendDTO objectSchemeFieldExtendDTO : objectSchemeFieldExtendList) {
-//            String defaultValue = objectSchemeFieldExtendDTO.getDefaultValue();
-//            if (!Objects.isNull(defaultValue) && Objects.equals(defaultValue, sprintId.toString())) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
 }

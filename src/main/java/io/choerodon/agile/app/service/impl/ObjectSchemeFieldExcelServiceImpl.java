@@ -53,10 +53,10 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     private static final short DATE_FORMAT = 14;
     private static final short TIME_FORMAT = 21;
 
-    private static final SimpleDateFormat BASE_SDF = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
-    private static final SimpleDateFormat DATE_TIME_SDF = new SimpleDateFormat(BaseConstants.Pattern.SYS_DATETIME);
-    private static final SimpleDateFormat DATE_SDF = new SimpleDateFormat(BaseConstants.Pattern.SYS_DATE);
-    private static final SimpleDateFormat TIME_SDF = new SimpleDateFormat(BaseConstants.Pattern.TIME_SS);
+    private SimpleDateFormat baseSDF = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
+    private SimpleDateFormat dateTimeSDF = new SimpleDateFormat(BaseConstants.Pattern.SYS_DATETIME);
+    private SimpleDateFormat dateSDF = new SimpleDateFormat(BaseConstants.Pattern.SYS_DATE);
+    private SimpleDateFormat timeSDF = new SimpleDateFormat(BaseConstants.Pattern.TIME_SS);
 
     private static final int HEADER_LENGTH = 8;
     private static final int NOT_KEY_HEADER_LENGTH = 5;
@@ -248,7 +248,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     private void validateDateDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, String fieldType, Row row, Cell cell, Map<Integer, List<Integer>> errorRowColMap) {
         if (CellType.STRING.equals(cell.getCellTypeEnum()) && "当前时间".equals(cell.toString())) {
             objectSchemeFieldCreate.setExtraConfig(true);
-            objectSchemeFieldCreate.setDefaultValue(BASE_SDF.format(new Date()));
+            objectSchemeFieldCreate.setDefaultValue(baseSDF.format(new Date()));
             return;
         }
         if (!CellType.NUMERIC.equals(cell.getCellTypeEnum()) || !DateUtil.isCellDateFormatted(cell)) {
@@ -261,7 +261,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         switch (cellFormat) {
             case DATE_TIME_FORMAT:
                 if (!FieldType.DATETIME.equals(fieldType)) {
-                    String oldDateStr = DATE_TIME_SDF.format(cell.getDateCellValue());
+                    String oldDateStr = dateTimeSDF.format(cell.getDateCellValue());
                     cell.setCellType(CellType.STRING);
                     cell.setCellValue(buildWithErrorMsg(oldDateStr, "该字段类型默认值不支持时间日期"));
                     addErrorColumn(row.getRowNum(), 4, errorRowColMap);
@@ -270,7 +270,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
                 break;
             case TIME_FORMAT:
                 if (!FieldType.TIME.equals(fieldType)) {
-                    String oldDateStr = TIME_SDF.format(cell.getDateCellValue());
+                    String oldDateStr = timeSDF.format(cell.getDateCellValue());
                     cell.setCellType(CellType.STRING);
                     cell.setCellValue(buildWithErrorMsg(oldDateStr, "该字段类型默认值不支持仅时间"));
                     addErrorColumn(row.getRowNum(), 4, errorRowColMap);
@@ -279,7 +279,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
                 break;
             case DATE_FORMAT:
                 if (!FieldType.DATE.equals(fieldType)) {
-                    String oldDateStr = DATE_SDF.format(cell.getDateCellValue());
+                    String oldDateStr = dateSDF.format(cell.getDateCellValue());
                     cell.setCellType(CellType.STRING);
                     cell.setCellValue(buildWithErrorMsg(oldDateStr, "该字段类型默认值不支持仅日期"));
                     addErrorColumn(row.getRowNum(), 4, errorRowColMap);
@@ -293,7 +293,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
                 addErrorColumn(row.getRowNum(), 4, errorRowColMap);
                 return;
         }
-        objectSchemeFieldCreate.setDefaultValue(BASE_SDF.format(cell.getDateCellValue()));
+        objectSchemeFieldCreate.setDefaultValue(baseSDF.format(cell.getDateCellValue()));
     }
 
     private void validateNumberDefaultValue(ObjectSchemeFieldCreateVO objectSchemeFieldCreate, Row row, Cell cell, Map<Integer, List<Integer>> errorRowColMap) {

@@ -7,6 +7,7 @@ import io.choerodon.core.exception.CommonException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,13 +34,13 @@ public class ObjectSchemeFieldContext {
 
     public static final String BACKLOG = "backlog";
 
-    public static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
+    protected static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
 
-    public static final String[] FIX_DATA_ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
+    protected static final String[] FIX_DATA_ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
 
-    public static final List<String> ISSUE_TYPES_LIST = Arrays.asList(ISSUE_TYPES);
+    public static final List<String> ISSUE_TYPES_LIST = Collections.unmodifiableList(Arrays.asList(ISSUE_TYPES));
 
-    public static final List<String> NORMAL_PROJECT = Arrays.asList(STORY, EPIC, BUG, TASK, SUB_TASK);
+    public static final List<String> NORMAL_PROJECT = Collections.unmodifiableList(Arrays.asList(STORY, EPIC, BUG, TASK, SUB_TASK));
 
     public static void isIllegalContexts(String[] context) {
         for (String str : context) {

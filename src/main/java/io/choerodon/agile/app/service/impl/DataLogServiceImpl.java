@@ -6,23 +6,19 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.mapper.DataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.utils.PageUtils;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -103,16 +99,14 @@ public class DataLogServiceImpl implements DataLogService {
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(createByIds, true);
         for (DataLogVO dto : dataLogVOS) {
             UserMessageDTO userMessageDTO = usersMap.get(dto.getCreatedBy());
-            String name = userMessageDTO != null ? userMessageDTO.getName() : null;
-            String loginName = userMessageDTO != null ? userMessageDTO.getLoginName() : null;
-            String realName = userMessageDTO != null ? userMessageDTO.getRealName() : null;
-            String imageUrl = userMessageDTO != null ? userMessageDTO.getImageUrl() : null;
-            String email = userMessageDTO != null ? userMessageDTO.getEmail() : null;
-            dto.setName(name);
-            dto.setLoginName(loginName);
-            dto.setRealName(realName);
-            dto.setImageUrl(imageUrl);
-            dto.setEmail(email);
+            if (!ObjectUtils.isEmpty(userMessageDTO)) {
+                dto.setName(userMessageDTO.getName());
+                dto.setLoginName(userMessageDTO.getLoginName());
+                dto.setRealName(userMessageDTO.getRealName());
+                dto.setImageUrl(userMessageDTO.getImageUrl());
+                dto.setEmail(userMessageDTO.getEmail());
+            }
+           
             if (ruleLogRelMap.get(dto.getLogId()) != null) {
                 dto.setRuleName(ruleLogRelMap.get(dto.getLogId()).getRuleName());
             }

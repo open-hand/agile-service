@@ -135,23 +135,13 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     private void addUsersByUsers (List<String> res, List<Long> result, Set<Long> users) {
-        if (res.contains(USERS) && users != null && users.size() != 0) {
+        if (res.contains(USERS) && !CollectionUtils.isEmpty(users)) {
             for (Long userId : users) {
                 if (!result.contains(userId)) {
                     result.add(userId);
                 }
             }
         }
-    }
-
-
-    private String[] judgeUserType(MessageDTO changeMessageDTO, List<String> res) {
-        String[] users = null;
-        if (changeMessageDTO.getEnable()) {
-            res.add(changeMessageDTO.getNoticeType());
-            users = USERS.equals(changeMessageDTO.getNoticeType()) && changeMessageDTO.getUser() != null && changeMessageDTO.getUser().length() != 0 && !"null".equals(changeMessageDTO.getUser()) ? changeMessageDTO.getUser().split(",") : null;
-        }
-        return users;
     }
 
     @Override

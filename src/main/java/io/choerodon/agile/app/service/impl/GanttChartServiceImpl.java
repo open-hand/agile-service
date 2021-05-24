@@ -58,7 +58,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             return new ArrayList<>();
         }
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
-        if (condition) {
+        if (Boolean.TRUE.equals(condition)) {
             String filterSql;
             List<Long> quickFilterIds = searchVO.getQuickFilterIds();
             if (!ObjectUtils.isEmpty(quickFilterIds)) {
