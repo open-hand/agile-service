@@ -42,6 +42,10 @@ class Epic extends Component {
     });
   };
 
+  handleOpenCreateIssue = () => {
+    BacklogStore.setNewIssueVisible(true);
+  };
+
   render() {
     const { draggableIds, addEpic } = this.state;
     const { refresh, issueRefresh } = this.props;
@@ -157,6 +161,14 @@ class Epic extends Component {
               });
             }}
             refresh={this.epicRefresh}
+            cantCreateEvent={this.handleOpenCreateIssue}
+            typeIdChange={(id) => {
+              BacklogStore.setDefaultTypeId(id);
+            }}
+            summaryChange={(summary) => {
+              BacklogStore.setDefaultSummary(summary);
+            }}
+            epicNameChange={BacklogStore.setDefaultEpicName}
           />
         </div>
       </div>

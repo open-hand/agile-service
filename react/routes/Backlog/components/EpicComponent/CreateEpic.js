@@ -55,10 +55,29 @@ class CreateEpic extends Component {
           loading: true,
         });
         if (!await checkCanQuickCreate(epicType.id)) {
-          Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
-          this.setState({
-            loading: false,
-          });
+          if (!this.props.cantCreateEvent) {
+            Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
+            this.setState({
+              loading: false,
+            });
+          } else {
+            Choerodon.prompt('请填写标注的必填字段');
+            if (this.props.summaryChange) {
+              this.props.summaryChange(value.summary.trim());
+            }
+            if (this.props.typeIdChange) {
+              this.props.typeIdChange(epicType && epicType.id);
+            }
+            if (this.props.epicNameChange) {
+              this.props.epicNameChange(value.name.trim());
+            }
+            this.setState({
+              loading: false,
+            });
+            onCancel();
+            this.props.cantCreateEvent();
+            form.resetFields();
+          }
           return;
         }
         issueApi.create(req).then((res) => {

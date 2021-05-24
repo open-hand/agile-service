@@ -1281,6 +1281,12 @@ class BacklogStore {
   @action setDefaultAssignee = (data) => {
     this.defaultAssignee = data;
   }
+
+  @observable defaultEpicName;
+
+  @action setDefaultEpicName = (data) => {
+    this.defaultEpicName = data;
+  }
 }
 
 const backlogStore = new BacklogStore();
