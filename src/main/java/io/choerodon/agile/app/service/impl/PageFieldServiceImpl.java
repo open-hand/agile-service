@@ -10,7 +10,6 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.FieldValueUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
-import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -111,7 +110,7 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Override
     public Map<String, Object> listQuery(Long organizationId, Long projectId, String pageCode, String context, Long issueTypeId) {
         Map<String, Object> result = new HashMap<>(2);
-        if (!EnumUtil.contain(PageCode.class, pageCode)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(PageCode.class, pageCode))) {
             throw new CommonException(ERROR_PAGECODE_ILLEGAL);
         }
         if (issueTypeId != null && !EnumUtil.contain(ObjectSchemeFieldContext.class, context)) {
@@ -168,7 +167,6 @@ public class PageFieldServiceImpl implements PageFieldService {
     }
 
     protected List<PageFieldDTO> selectPageField(Long organizationId, Long projectId, Long issueTypeId, Boolean created, Boolean edited) {
-        String issueType = issueTypeService.getIssueTypeById(issueTypeId);
         List<PageFieldDTO> pageFields =
                 objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueTypeId, created, edited);
         if (pageFields.isEmpty()) {
@@ -227,7 +225,6 @@ public class PageFieldServiceImpl implements PageFieldService {
         if (!ObjectUtils.isEmpty(commonField)) {
             return Objects.equals(commonField.created(), created) || Objects.equals(commonField.edited(), edited);
         }
-        BacklogExpandService backlogExpandService = SpringBeanUtil.getExpandBean(BacklogExpandService.class);
         if (backlogExpandService != null) {
             return backlogExpandService.checkFieldPageConfig(issueType, code, created, edited);
         }
@@ -237,7 +234,7 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Override
     @CopyPageField
     public PageFieldVO adjustFieldOrder(Long organizationId, Long projectId, String pageCode, AdjustOrderVO adjustOrder) {
-        if (!EnumUtil.contain(PageCode.class, pageCode)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(PageCode.class, pageCode))) {
             throw new CommonException(ERROR_PAGECODE_ILLEGAL);
         }
         PageFieldDTO current = pageFieldMapper.queryByFieldId(organizationId, projectId, pageCode, adjustOrder.getCurrentFieldId());
@@ -245,7 +242,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         PageFieldDTO update = new PageFieldDTO();
         update.setId(current.getId());
         update.setObjectVersionNumber(current.getObjectVersionNumber());
-        if (adjustOrder.getBefore()) {
+        if (Boolean.TRUE.equals(adjustOrder.getBefore())) {
             update.setRank(RankUtil.genNext(outset.getRank()));
         } else {
             String rightRank = pageFieldMapper.queryRightRank(organizationId, projectId, pageCode, outset.getRank());
@@ -262,7 +259,7 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Override
     @CopyPageField
     public PageFieldVO update(Long organizationId, Long projectId, String pageCode, Long fieldId, PageFieldUpdateVO updateDTO) {
-        if (!EnumUtil.contain(PageCode.class, pageCode)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(PageCode.class, pageCode))) {
             throw new CommonException(ERROR_PAGECODE_ILLEGAL);
         }
         PageFieldDTO field = pageFieldMapper.queryByFieldId(organizationId, projectId, pageCode, fieldId);
@@ -383,10 +380,10 @@ public class PageFieldServiceImpl implements PageFieldService {
     public List<PageFieldViewVO> queryPageFieldViewList(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO) {
         Long issueTypeId = paramDTO.getIssueTypeId();
         String pageCode = paramDTO.getPageCode();
-        if (!EnumUtil.contain(PageCode.class, pageCode)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(PageCode.class, pageCode))) {
             throw new CommonException(ERROR_PAGECODE_ILLEGAL);
         }
-        if (!EnumUtil.contain(ObjectSchemeCode.class, paramDTO.getSchemeCode())) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(ObjectSchemeCode.class, paramDTO.getSchemeCode()))) {
             throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
         }
         List<PageFieldDTO> pageFields = queryPageField(organizationId, projectId, pageCode, issueTypeId);

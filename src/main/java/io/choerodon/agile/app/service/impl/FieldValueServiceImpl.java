@@ -114,7 +114,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             FieldValueUtil.handleValue2DTO(values, createDTO.getFieldType(), createDTO.getValue());
             //校验
             ObjectSchemeFieldDTO field = objectSchemeFieldService.baseQueryById(organizationId, projectId, createDTO.getFieldId());
-            if (field.getSystem()) {
+            if (Boolean.TRUE.equals(field.getSystem())) {
                 throw new CommonException(ERROR_SYSTEM_ILLEGAL);
             }
             values.forEach(value -> value.setFieldId(createDTO.getFieldId()));
@@ -285,7 +285,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             }
 
             if ("issue_epic".equals(v.getTypeCode())) {
-                fieldList.remove(String.valueOf("epicId"));
+                fieldList.remove("epicId");
                 issueUpdateVO.setEpicId(null);
             }
 
@@ -449,12 +449,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             case FieldType.CHECKBOX:
             case FieldType.MULTI_MEMBER:
             case FieldType.MULTIPLE:
-                List<FieldValueDTO> fieldValueDTOS = listMap.get(objectSchemeFieldDTO.getId());
-                List<String> values = new ArrayList<>();
-                if (!CollectionUtils.isEmpty(fieldValueDTOS)) {
-                    values.addAll(fieldValueDTOS.stream().map(v -> String.valueOf(v.getOptionId())).collect(Collectors.toList()));
-                }
-                value = values;
+                value = handlerMultiple(listMap, objectSchemeFieldDTO.getId());
                 break;
             case FieldType.MEMBER:
             case FieldType.SINGLE:
@@ -498,6 +493,15 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 break;
         }
         return value;
+    }
+
+    private Object handlerMultiple(Map<Long, List<FieldValueDTO>> listMap, Long fieldId) {
+        List<FieldValueDTO> fieldValueDTOS = listMap.get(fieldId);
+        List<String> values = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(fieldValueDTOS)) {
+            values.addAll(fieldValueDTOS.stream().map(v -> String.valueOf(v.getOptionId())).collect(Collectors.toList()));
+        }
+        return values;
     }
 
     protected void batchHandlerCustomFields(Long projectId, PageFieldViewUpdateVO pageFieldViewUpdateVO, String schemeCode, List<Long> needAddIssueIds) {

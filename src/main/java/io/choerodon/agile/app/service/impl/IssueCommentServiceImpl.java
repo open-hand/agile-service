@@ -96,9 +96,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             return new ArrayList<>();
         }
         List<Long> userIds = new ArrayList<>();
-        issueCommentVOList.forEach(issueCommentVO -> {
-            userIds.add(issueCommentVO.getUserId());
-        });
+        issueCommentVOList.forEach(issueCommentVO -> userIds.add(issueCommentVO.getUserId()));
         Map<Long, UserMessageDTO> userMessageMap = userService.queryUsersMap(
                 userIds.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList()), true);
         issueCommentVOList.forEach(issueCommentVO -> {
@@ -185,16 +183,20 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         issueCommentVOList.forEach(issueCommentVO -> {
             UserMessageDTO replyToUser = userMessageMap.get(issueCommentVO.getReplyToUserId());
             UserMessageDTO commentUser = userMessageMap.get(issueCommentVO.getUserId());
-            issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
-            issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
-            issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
-            issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
+            if (!ObjectUtils.isEmpty(commentUser)) {
+                issueCommentVO.setUserName(commentUser.getName());
+                issueCommentVO.setUserImageUrl(commentUser.getImageUrl());
+                issueCommentVO.setUserRealName(commentUser.getRealName());
+                issueCommentVO.setUserLoginName(commentUser.getLoginName());
+            }
             //设置被回复人信息
             issueCommentVO.setReplyToUserId(parentIssueComment.getUserId());
-            issueCommentVO.setReplyToUserName(replyToUser != null ? replyToUser.getName() : null);
-            issueCommentVO.setReplyToUserLoginName(replyToUser != null ? replyToUser.getLoginName() : null);
-            issueCommentVO.setReplyToUserRealName(replyToUser != null ? replyToUser.getRealName() : null);
-            issueCommentVO.setReplyToUserImageUrl(replyToUser != null ? replyToUser.getImageUrl() : null);
+            if (!ObjectUtils.isEmpty(replyToUser)) {
+                issueCommentVO.setReplyToUserName(replyToUser.getName());
+                issueCommentVO.setReplyToUserLoginName(replyToUser.getLoginName());
+                issueCommentVO.setReplyToUserRealName(replyToUser.getRealName());
+                issueCommentVO.setReplyToUserImageUrl(replyToUser.getImageUrl());
+            }
         });
         return issueCommentVOList;
     }

@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.enums;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,7 +35,7 @@ public class FieldType {
     public static final String DATE = "date";
     public static final String MULTI_MEMBER = "multiMember";
 
-    public static final List<String> multipleFieldType = Arrays.asList(CHECKBOX, MULTIPLE, MULTI_MEMBER);
+    public static final List<String> multipleFieldType = Collections.unmodifiableList(Arrays.asList(CHECKBOX, MULTIPLE, MULTI_MEMBER));
 
     public static Boolean hasOption(String typeName) {
         return typeName.equals(RADIO) || typeName.equals(CHECKBOX) || typeName.equals(SINGLE) || typeName.equals(MULTIPLE);

@@ -361,7 +361,7 @@ public class StateMachineServiceImpl implements StateMachineService {
             String applyType = projectConfig.getApplyType();
             count = count + issueMapper.querySizeByApplyTypeAndStatusId(projectId, applyType, statusId);
         }
-        if (count.equals(0L) && checkStatusInBoardColumnBySm(projectConfigs, statusId)) {
+        if (count.equals(0L) && Boolean.TRUE.equals(checkStatusInBoardColumnBySm(projectConfigs, statusId))) {
             result.put("canDelete", true);
         } else {
             result.put("canDelete", false);

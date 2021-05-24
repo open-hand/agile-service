@@ -77,6 +77,12 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private static final String SYSTEM = "system";
 
+    private static final String ERROR_ISSUE_TYPE_NAME_EXISTED = "error.issue.type.name.existed";
+
+    private static final String ERROR_ISSUE_TYPE_ICON_EXISTED = "error.issue.type.icon.existed";
+
+    private static final String ERROR_ISSUE_TYPE_NOT_EXISTED = "error.issue.type.not.existed";
+
     @Autowired
     private OrganizationConfigService organizationConfigService;
 
@@ -113,11 +119,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                     IssueTypeCode.ISSUE_EPIC.value()
             );
 
-    private static final List<String> PROGRAM_ISSUE_TYPES =
-            Arrays.asList(
-                    IssueTypeCode.ISSUE_EPIC.value(),
-                    IssueTypeCode.FEATURE.value());
-
     private static final Map<String, List<String>> TYPE_CODE_CATEGORY_MAP;
 
     static {
@@ -150,10 +151,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         String typeCode = issueTypeVO.getTypeCode();
         Set<String> categoryCodes = validateTypeCode(typeCode, projectId);
         if (nameExisted(organizationId, projectId, issueTypeVO.getName(), null)) {
-            throw new CommonException("error.issue.type.name.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_NAME_EXISTED);
         }
         if (iconExisted(organizationId, projectId, issueTypeVO.getIcon(), null)) {
-            throw new CommonException("error.issue.type.icon.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_ICON_EXISTED);
         }
         issueTypeVO.setInitialize(false);
         issueTypeVO.setReferenced(ZERO.equals(projectId));
@@ -302,7 +303,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private IssueTypeDTO querySystemIssueTypeByCode(Long organizationId, String typeCode){
         // 查询系统问题类型的状态机id
         List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectSystemIssueTypeByOrganizationIds(new HashSet<>(Arrays.asList(organizationId)));
-        IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Objects.equals(typeCode, v.getTypeCode())).findAny().get();
+        IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Objects.equals(typeCode, v.getTypeCode())).findAny().orElse(null);
         if(ObjectUtils.isEmpty(issueTypeDTO)){
             throw new CommonException("error.system.issueType.not.found");
         }
@@ -337,7 +338,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         Set<String> codes = getProjectCategoryCodes(projectId);
         List<String> issueTypes = new ArrayList<>(AGILE_CREATE_ISSUE_TYPES);
-//        issueTypes.add(IssueTypeCode.BACKLOG.value());
         if (codes.contains(ProjectCategory.MODULE_AGILE)
                 && !issueTypes.contains(typeCode)) {
             throw new CommonException("error.illegal.type.code");
@@ -345,17 +345,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
             throw new CommonException("error.program.can.not.create.custom.issue.type");
         }
-//        issueTypes.clear();
-//        issueTypes.addAll(PROGRAM_ISSUE_TYPES);
-//        issueTypes.add(IssueTypeCode.BACKLOG.value());
-//        if (codes.contains(ProjectCategory.MODULE_PROGRAM)
-//                && !issueTypes.contains(typeCode)) {
-//            throw new CommonException("error.illegal.type.code");
-//        }
-//        if (!codes.contains(ProjectCategory.MODULE_BACKLOG)
-//                && IssueTypeCode.BACKLOG.value().equals(typeCode)) {
-//            throw new CommonException("error.project.backlog.not.open");
-//        }
         return codes;
     }
 
@@ -492,7 +481,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
         IssueTypeDTO issueTypeDTO = selectOne(organizationId, projectId, issueTypeId);
         if (issueTypeDTO == null) {
-            throw new CommonException("error.issue.type.not.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_NOT_EXISTED);
         }
         if (SYSTEM.equals(issueTypeDTO.getSource())
                 && !ZERO.equals(projectId)) {
@@ -500,10 +489,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         String name = issueTypeVO.getName();
         if (nameExisted(organizationId, projectId, name, issueTypeId)) {
-            throw new CommonException("error.issue.type.name.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_NAME_EXISTED);
         }
         if (iconExisted(organizationId, projectId, issueTypeVO.getIcon(), issueTypeId)) {
-            throw new CommonException("error.issue.type.icon.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_ICON_EXISTED);
         }
         issueTypeDTO.setColour(issueTypeVO.getColour());
         issueTypeDTO.setDescription(issueTypeVO.getDescription());
@@ -726,7 +715,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                                 PageRequest pageRequest) {
         IssueTypeDTO dto = selectOne(organizationId, ZERO, issueTypeId);
         if (dto == null) {
-            throw new CommonException("error.issue.type.not.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_NOT_EXISTED);
         }
         Page<ProjectIssueTypeVO> emptyPage = PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         if (Boolean.TRUE.equals(dto.getInitialize())) {
@@ -792,7 +781,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                           IssueTypeVO issueTypeVO) {
         IssueTypeDTO issueType = selectOne(organizationId, ZERO, referenceId);
         if (issueType == null) {
-            throw new CommonException("error.issue.type.not.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_NAME_EXISTED);
         }
         if (Boolean.TRUE.equals(issueType.getInitialize())) {
             throw new CommonException("error.system.issue.type.can.not.be.referenced");
@@ -875,7 +864,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         });
         result.forEach(x -> {
             if (Boolean.FALSE.equals(x.getInitialize())) {
-                int count = Optional.ofNullable(referenceMap.get(x.getId())).map(y -> y.size()).orElse(0);
+                int count = Optional.ofNullable(referenceMap.get(x.getId())).map(Set::size).orElse(0);
                 x.setUsageCount(count);
             }
         });
@@ -883,8 +872,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private void setPredefinedUsageCount(List<IssueTypeVO> result,
                                          Map<String, Set<Long>> categoryProjectMap) {
-        int agileProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_AGILE)).map(x -> x.size()).orElse(0);
-        int programProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_PROGRAM)).map(x -> x.size()).orElse(0);
+        int agileProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_AGILE)).map(Set::size).orElse(0);
+        int programProjectCount = Optional.ofNullable(categoryProjectMap.get(ProjectCategory.MODULE_PROGRAM)).map(Set::size).orElse(0);
         int total = agileProjectCount + programProjectCount;
         int backlogProjectCount = queryBacklogProjectCount(categoryProjectMap.get(ProjectCategory.MODULE_BACKLOG));
         result.forEach(x -> {
@@ -1022,7 +1011,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         IssueTypeDTO dto = issueTypeMapper.selectWithAlias(issueTypeId, projectId);
         if (dto == null) {
-            throw new CommonException("error.issue.type.not.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_NOT_EXISTED);
         }
         List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, null);
         //子任务至少要有一个，故事和任务至少要有一个
@@ -1036,7 +1025,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             }
         });
         String dtoTypeCode = dto.getTypeCode();
-        Optional.ofNullable(typeCodeCountMap.get(dtoTypeCode)).orElse(0);
         if (IssueTypeCode.SUB_TASK.value().equals(dtoTypeCode)) {
             int count = Optional.ofNullable(typeCodeCountMap.get(dtoTypeCode)).orElse(0);
             return count > 1;
@@ -1070,7 +1058,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     public void updateReferenced(Long organizationId, Long issueTypeId, Boolean referenced) {
         IssueTypeDTO issueType = selectOne(organizationId, ZERO, issueTypeId);
         if (issueType == null) {
-            throw new CommonException("error.issue.type.not.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_NOT_EXISTED);
         }
         if (Boolean.TRUE.equals(issueType.getInitialize())) {
             throw new CommonException("error.system.issue.type.can.not.edit");
@@ -1123,7 +1111,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     public String getIssueTypeById(Long issueTypeId) {
         IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
         if (issueTypeDTO == null) {
-            throw new CommonException("error.issue.type.not.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_NOT_EXISTED);
         }
         return issueTypeDTO.getTypeCode();
     }
@@ -1139,7 +1127,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
         IssueTypeDTO dto = issueTypeMapper.selectWithAlias(issueTypeId, projectId);
         if (dto == null) {
-            throw new CommonException("error.issue.type.not.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_NOT_EXISTED);
         }
         String name = issueTypeVO.getName();
         String icon = issueTypeVO.getIcon();
@@ -1190,10 +1178,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             throw new CommonException("error.issue.type.colour.empty");
         }
         if (nameExisted(organizationId, projectId, name, issueTypeId)) {
-            throw new CommonException("error.issue.type.name.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_NAME_EXISTED);
         }
         if (iconExisted(organizationId, projectId, icon, issueTypeId)) {
-            throw new CommonException("error.issue.type.icon.existed");
+            throw new CommonException(ERROR_ISSUE_TYPE_ICON_EXISTED);
         }
     }
 

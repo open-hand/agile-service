@@ -182,7 +182,6 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
         node.setType(NodeType.START);
         node.setStateMachineId(stateMachineId);
         node.setOrganizationId(organizationId);
-        // List<StateMachineNodeDraftDTO> nodes = nodeDraftMapper.select(node);
         List<StatusMachineNodeDTO> nodes = nodeDeployMapper.select(node);
         if (nodes.isEmpty()) {
             throw new CommonException("error.initNode.null");
@@ -193,7 +192,7 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
     @Override
     public List<StatusMachineNodeVO> queryByStateMachineId(Long organizationId, Long stateMachineId, Boolean isDraft) {
         List<StatusMachineNodeVO> nodeVOS;
-        if (isDraft) {
+        if (Boolean.TRUE.equals(isDraft)) {
             //获取节点
             List<StateMachineNodeDraftDTO> nodes = nodeDraftMapper.selectByStateMachineId(stateMachineId);
             Map<Long, StatusDTO> map = nodes.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StateMachineNodeDraftDTO::getId, StateMachineNodeDraftDTO::getStatus));

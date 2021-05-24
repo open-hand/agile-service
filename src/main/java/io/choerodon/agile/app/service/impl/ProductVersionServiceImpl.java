@@ -42,7 +42,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 public class ProductVersionServiceImpl implements ProductVersionService {
 
     private static final String INSERT_ERROR = "error.version.insert";
-    private static final String DELETE_ERROR = "error.version.delete";
     private static final String UPDATE_ERROR = "error.version.update";
     private static final String AGILE = "Agile:";
     private static final String PIECHART = AGILE + "PieChart";
@@ -98,7 +97,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     private static final String ARCHIVED_ERROR = "error.productVersion.archived";
     private static final String VERSION_STATUS_RELEASE_CODE = "released";
     private static final String REVOKE_RELEASE_ERROR = "error.productVersion.revokeRelease";
-    private static final String SOURCE_VERSION_ERROR = "error.sourceVersionIds.notNull";
     private static final String FIX_RELATION_TYPE = "fix";
     private static final String INFLUENCE_RELATION_TYPE = "influence";
 
@@ -142,9 +140,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     @Override
     public Boolean deleteVersion(Long projectId, Long versionId, Long targetVersionId) {
         productVersionValidator.judgeExist(projectId, targetVersionId);
-//        //校验是否设为影响的版本和修复的版本默认值
-//        objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfMultiple(projectId, versionId, FieldCode.INFLUENCE_VERSION);
-//        objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfMultiple(projectId, versionId, FieldCode.FIX_VERSION);
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         if (targetVersionId != null && !Objects.equals(targetVersionId, 0L)) {
             List<VersionIssueDTO> versionFixIssues = productVersionMapper.queryIssuesByRelationType(projectId, versionId, FIX_RELATION_TYPE);
@@ -173,8 +168,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             if (versionDTO == null) {
                 throw new CommonException(NOT_FOUND);
             }
-            Boolean deleteResult = iProductVersionService.delete(versionDTO);
-            return deleteResult;
+            return iProductVersionService.delete(versionDTO);
         } catch (Exception e) {
             throw new CommonException("error.simple.delete.version", e);
         }
@@ -234,13 +228,13 @@ public class ProductVersionServiceImpl implements ProductVersionService {
                     .stream().collect(Collectors.groupingBy(StatusVO::getType, Collectors.mapping(StatusVO::getId, Collectors.toList())));
             List<Long> done = statusMap.get(CATEGORY_DONE_CODE);
             Boolean condition = done != null && !done.isEmpty();
-            Map<Long, Integer> doneIssueCountMap = condition ? productVersionMapper.queryIssueCount(projectId, productVersionIds, done).stream().collect(toMap(IssueCountDTO::getId, IssueCountDTO::getIssueCount)) : null;
+            Map<Long, Integer> doneIssueCountMap = Boolean.TRUE.equals(condition) ? productVersionMapper.queryIssueCount(projectId, productVersionIds, done).stream().collect(toMap(IssueCountDTO::getId, IssueCountDTO::getIssueCount)) : null;
             Map<Long, Integer> issueCountMap = productVersionMapper.queryIssueCount(projectId, productVersionIds, null).stream().collect(toMap(IssueCountDTO::getId, IssueCountDTO::getIssueCount));
             Map<Long, Integer> notEstimateMap = productVersionMapper.queryNotEstimate(projectId, productVersionIds).stream().collect(toMap(IssueCountDTO::getId, IssueCountDTO::getIssueCount));
             Map<Long, Integer> totalEstimateMap = productVersionMapper.queryTotalEstimate(projectId, productVersionIds).stream().collect(toMap(IssueCountDTO::getId, IssueCountDTO::getIssueCount));
             productVersions.forEach(productVersion -> {
                 productVersion.setIssueCount(issueCountMap.get(productVersion.getVersionId()));
-                productVersion.setDoneIssueCount(condition ? doneIssueCountMap.get(productVersion.getVersionId()) : null);
+                productVersion.setDoneIssueCount(Boolean.TRUE.equals(condition) ? doneIssueCountMap.get(productVersion.getVersionId()) : null);
                 productVersion.setNotEstimate(notEstimateMap.get(productVersion.getVersionId()));
                 productVersion.setTotalEstimate(totalEstimateMap.get(productVersion.getVersionId()));
             });
@@ -270,15 +264,15 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     public List<IssueListVO> queryIssueByVersionIdAndStatusCode(Long projectId, Long versionId, String statusCode, Long organizationId, SearchVO searchVO) {
         //处理用户搜索
         Boolean condition = issueService.handleSearchUser(searchVO, projectId);
-        if (condition) {
+        if (Boolean.TRUE.equals(condition)) {
             Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
             Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
             Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
             List<Long> filterStatusIds = new ArrayList<>();
             if (statusCode != null) {
-                for (Long key : statusMapDTOMap.keySet()) {
-                    if (statusCode.equals(statusMapDTOMap.get(key).getType())) {
-                        filterStatusIds.add(key);
+                for (Map.Entry<Long, StatusVO> entry : statusMapDTOMap.entrySet()) {
+                    if (statusCode.equals(statusMapDTOMap.get(entry.getKey()).getType())) {
+                        filterStatusIds.add(entry.getKey());
                     }
                 }
             }
@@ -466,8 +460,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
 
     @Override
     public ProductVersionDTO updateByFieldList(ProductVersionDTO versionDTO, List<String> fieldList) {
-//        Criteria criteria = new Criteria();
-//        criteria.update(fieldList.toArray(new String[0]));
         if (productVersionMapper.updateOptional(versionDTO, fieldList.toArray(new String[0])) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }

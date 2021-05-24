@@ -150,7 +150,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     @Override
     public List<IssueAttachmentVO> create(Long projectId, Long issueId, HttpServletRequest request) {
         List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
-        if (files != null && !files.isEmpty()) {
+        if (!CollectionUtils.isEmpty(files)) {
             for (MultipartFile multipartFile : files) {
                 String fileName = multipartFile.getOriginalFilename();
                 Long organizationId = projectUtil.getOrganizationId(projectId);
@@ -199,7 +199,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     @Override
     public List<String> uploadForAddress(Long projectId, HttpServletRequest request) {
         List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
-        if (!(files != null && !files.isEmpty())) {
+        if (CollectionUtils.isEmpty(files)) {
             throw new CommonException("error.attachment.exits");
         }
         List<String> result = new ArrayList<>();

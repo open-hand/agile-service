@@ -86,8 +86,8 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
     public IssueTypeSchemeVO create(Long organizationId, IssueTypeSchemeVO issueTypeSchemeVO) {
         //创建的均为通用的
         issueTypeSchemeVO.setApplyType(SchemeApplyType.COMMON);
-
-        if (!checkName(organizationId, issueTypeSchemeVO.getName(), null)) {
+        Boolean checkName = checkName(organizationId, issueTypeSchemeVO.getName(), null);
+        if (Boolean.FALSE.equals(checkName)) {
             throw new CommonException("error.issueTypeScheme.name.exist");
         }
 
@@ -141,7 +141,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
     public Boolean delete(Long organizationId, Long issueTypeSchemeId) {
         Map<String, Object> result = checkDelete(organizationId, issueTypeSchemeId);
         Boolean canDelete = (Boolean) result.get("canDelete");
-        if (canDelete) {
+        if (Boolean.TRUE.equals(canDelete)) {
             int isDelete = issueTypeSchemeMapper.deleteByPrimaryKey(issueTypeSchemeId);
             if (isDelete != 1) {
                 throw new CommonException("error.issueType.delete");
@@ -209,20 +209,6 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
         }
         return modelMapper.map(issueTypeMapper.selectByOptions(organizationId, projectId, null), new TypeToken<List<IssueTypeDTO>>(){}.getType());
     }
-
-//    @Override
-//    public void initByConsumeCreateProgram(Long projectId, String projectCode) {
-//        Long organizationId = projectUtil.getOrganizationId(projectId);
-//        IssueTypeDTO query = new IssueTypeDTO();
-//        query.setOrganizationId(organizationId);
-//        query.setInitialize(true);
-//        List<IssueTypeDTO> issueTypes = issueTypeMapper.select(query);
-//        //处理老的组织没有创建的数据
-//        issueTypes = initOrganizationIssueType(organizationId, issueTypes);
-//        Map<String, IssueTypeDTO> issueTypeMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeDTO::getTypeCode, x -> x));
-//        //初始化项目群问题类型方案
-//        initScheme(projectId, organizationId, projectCode + "默认类型方案【项目群】", issueTypeMap.get(InitIssueType.FEATURE.getTypeCode()).getId(), SchemeApplyType.PROGRAM, issueTypeMap);
-//    }
 
     protected List<IssueTypeDTO> initOrganizationIssueType(Long organizationId, List<IssueTypeDTO> issueTypes) {
         if (issueTypes == null || issueTypes.isEmpty()) {

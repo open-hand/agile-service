@@ -39,8 +39,6 @@ public class IssueAccessDataServiceImpl implements IssueAccessDataService {
     public IssueConvertDTO update(IssueConvertDTO issueConvertDTO, String[] fieldList) {
         IssueDTO issueDTO = modelMapper.map(issueConvertDTO, IssueDTO.class);
         IssueDTO issueInDB = issueMapper.selectByPrimaryKey(issueDTO.getIssueId());
-//        Criteria criteria = new Criteria();
-//        criteria.update(fieldList);
         if (issueMapper.updateOptional(issueDTO, fieldList) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }

@@ -41,7 +41,8 @@ public class PersonalTemplateServiceImpl implements PersonalTemplateService {
 
     @Override
     public PersonalTemplatelVO create(Long projectId, PersonalTemplateCreateVO createVO) {
-        if (checkNameByAction(projectId, createVO.getUserId(), createVO.getName(), createVO.getAction(), createVO.getType())) {
+        Boolean checkNameByAction = checkNameByAction(projectId, createVO.getUserId(), createVO.getName(), createVO.getAction(), createVO.getType());
+        if (Boolean.TRUE.equals(checkNameByAction)) {
             throw new CommonException("error.personal.template.name.exist");
         }
         //校验action合法性
@@ -63,8 +64,9 @@ public class PersonalTemplateServiceImpl implements PersonalTemplateService {
         }
         //校验当前用户
         checkUser(personalTemplateDTO.getUserId());
+        Boolean checkNameByAction = checkNameByAction(projectId, personalTemplateDTO.getUserId(), updateVO.getName(), personalTemplateDTO.getAction(), personalTemplateDTO.getType());
         if (!Objects.equals(personalTemplateDTO.getName(), updateVO.getName())
-                && checkNameByAction(projectId, personalTemplateDTO.getUserId(), updateVO.getName(), personalTemplateDTO.getAction(), personalTemplateDTO.getType())) {
+                && Boolean.TRUE.equals(checkNameByAction)) {
             throw new CommonException("error.personal.template.name.exist");
         }
         PersonalTemplateDTO updateDTO = modelMapper.map(updateVO, PersonalTemplateDTO.class);
@@ -124,7 +126,8 @@ public class PersonalTemplateServiceImpl implements PersonalTemplateService {
     private void checkAction(Long projectId, String action) {
         ProjectVO body = ConvertUtil.queryProject(projectId);
         List<String> actions;
-        if (!ObjectUtils.isEmpty(body) && ProjectCategory.checkContainProjectCategory(body.getCategories(),ProjectCategory.MODULE_PROGRAM)) {
+        Boolean projectCategory = ProjectCategory.checkContainProjectCategory(body.getCategories(), ProjectCategory.MODULE_PROGRAM);
+        if (!ObjectUtils.isEmpty(body) && Boolean.TRUE.equals(projectCategory)) {
             actions = Arrays.asList(PROGRAM_PERSONAL_TEMPLATE_ACTIONS);
         }else {
             actions = Arrays.asList(AGILE_PERSONAL_TEMPLATE_ACTIONS);

@@ -52,7 +52,7 @@ public class PriorityServiceImpl implements PriorityService {
 
     @Override
     public PriorityVO create(Long organizationId, PriorityVO priorityVO) {
-        if (checkName(organizationId, priorityVO.getName())) {
+        if (Boolean.TRUE.equals(checkName(organizationId, priorityVO.getName()))) {
             throw new CommonException("error.priority.create.name.same");
         }
         priorityVO.setSequence((priorityMapper.getNextSequence(organizationId)).add(new BigDecimal(1)));
@@ -83,7 +83,8 @@ public class PriorityServiceImpl implements PriorityService {
 
     @Override
     public PriorityVO update(PriorityVO priorityVO) {
-        if (checkNameUpdate(priorityVO.getOrganizationId(), priorityVO.getId(), priorityVO.getName())) {
+        Boolean checkNameUpdate = checkNameUpdate(priorityVO.getOrganizationId(), priorityVO.getId(), priorityVO.getName());
+        if (Boolean.TRUE.equals(checkNameUpdate)) {
             throw new CommonException("error.priority.update.name.same");
         }
         PriorityDTO priority = modelMapper.map(priorityVO, PriorityDTO.class);
@@ -226,7 +227,7 @@ public class PriorityServiceImpl implements PriorityService {
 
     @Override
     public PriorityVO enablePriority(Long organizationId, Long id, Boolean enable) {
-        if (!enable) {
+        if (Boolean.FALSE.equals(enable)) {
             checkLastPriority(organizationId, id);
         }
         PriorityDTO priority = priorityMapper.selectByPrimaryKey(id);
@@ -234,12 +235,9 @@ public class PriorityServiceImpl implements PriorityService {
             throw new CommonException(NOT_FOUND);
         }
         priority.setEnable(enable);
-//        Criteria criteria = new Criteria();
-//        criteria.update("enable");
-//        priorityMapper.updateByPrimaryKeyOptions(priority, criteria);
         priorityMapper.updateOptional(priority, "enable");
         //失效之后再进行默认优先级的重置
-        if (!enable && priority.getDefault()) {
+        if (Boolean.FALSE.equals(enable) && Boolean.TRUE.equals(priority.getDefault())) {
             updateOtherDefault(organizationId);
         }
         return queryById(organizationId, id);
@@ -286,7 +284,7 @@ public class PriorityServiceImpl implements PriorityService {
         if (isDelete != 1) {
             throw new CommonException("error.priority.delete");
         }
-        if (priority.getDefault()) {
+        if (Boolean.TRUE.equals(priority.getDefault())) {
             updateOtherDefault(organizationId);
         }
         return true;

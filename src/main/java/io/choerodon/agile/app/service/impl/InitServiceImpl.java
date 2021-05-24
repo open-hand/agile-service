@@ -117,7 +117,6 @@ public class InitServiceImpl implements InitService {
         createStateMachineDetail(organizationId, statusMachine.getId(), SchemeApplyType.AGILE);
         //发布状态机
         Long stateMachineId = statusMachine.getId();
-//        stateMachineService.deploy(organizationId, stateMachineId, false);
         //敏捷创建完状态机后需要到敏捷创建列
         if (ObjectUtils.isEmpty(projectEvent.getUseTemplate()) || Boolean.FALSE.equals(projectEvent.getUseTemplate())) {
             List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
@@ -142,9 +141,7 @@ public class InitServiceImpl implements InitService {
         //创建状态机节点和转换
         createStateMachineDetail(organizationId, statusMachine.getId(), SchemeApplyType.TEST);
         //发布状态机
-        Long stateMachineId = statusMachine.getId();
-//        stateMachineService.deploy(organizationId, stateMachineId, false);
-        return stateMachineId;
+        return statusMachine.getId();
     }
 
     /**

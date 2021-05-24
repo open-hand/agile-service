@@ -28,6 +28,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,7 +70,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
     @Override
     public IssueComponentVO create(Long projectId, IssueComponentVO issueComponentVO) {
-        if (checkComponentName(projectId, issueComponentVO.getName())) {
+        if (Boolean.TRUE.equals(checkComponentName(projectId, issueComponentVO.getName()))) {
             throw new CommonException("error.componentName.exist");
         }
         IssueComponentValidator.checkCreateComponent(projectId, issueComponentVO);
@@ -91,7 +92,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
     @Override
     public IssueComponentVO update(Long projectId, Long id, IssueComponentVO issueComponentVO, List<String> fieldList) {
-        if (checkNameUpdate(projectId, id, issueComponentVO.getName())) {
+        if (Boolean.TRUE.equals(checkNameUpdate(projectId, id, issueComponentVO.getName()))) {
             throw new CommonException("error.componentName.exist");
         }
         IssueComponentValidator.checkUpdateComponent(projectId, issueComponentVO);
@@ -115,7 +116,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
             relate.setProjectId(projectId);
             relate.setIssueId(componentIssue.getIssueId());
             relate.setComponentId(relateComponentId);
-            if (issueValidator.existComponentIssueRel(relate)) {
+            if (Boolean.TRUE.equals(issueValidator.existComponentIssueRel(relate))) {
                 componentIssueRelService.create(relate);
             }
         }
@@ -124,7 +125,6 @@ public class IssueComponentServiceImpl implements IssueComponentService {
     @Override
     public void delete(Long projectId, Long id, Long relateComponentId) {
 //        //默认值校验
-//        objectSchemeFieldService.checkObjectSchemeFieldDefaultValueOfMultiple(projectId, id, FieldCode.COMPONENT);
         if (relateComponentId == null) {
             unRelateIssueWithComponent(projectId, id);
         } else {
@@ -150,7 +150,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
     public Page<ComponentForListVO> queryComponentByProjectId(Long projectId, Long componentId, Boolean noIssueTest, SearchVO searchVO, PageRequest pageRequest) {
         //处理用户搜索
         Boolean condition = handleSearchUser(searchVO);
-        if (condition) {
+        if (Boolean.TRUE.equals(condition)) {
             Page<ComponentForListDTO> componentForListDTOPage = PageHelper.doPageAndSort(pageRequest, () ->
                     issueComponentMapper.queryComponentByOption(Arrays.asList(projectId), noIssueTest, componentId, searchVO.getSearchArgs(),
                             searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
@@ -167,14 +167,12 @@ public class IssueComponentServiceImpl implements IssueComponentService {
                 Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
                 componentForListVOPageInfo.getContent().forEach(componentForListVO -> {
                     UserMessageDTO userMessageDTO = usersMap.get(componentForListVO.getManagerId());
-                    String assigneeName = userMessageDTO != null ? userMessageDTO.getName() : null;
-                    String assigneeLoginName = userMessageDTO != null ? userMessageDTO.getLoginName() : null;
-                    String assigneeRealName = userMessageDTO != null ? userMessageDTO.getRealName() : null;
-                    String imageUrl = userMessageDTO != null ? userMessageDTO.getImageUrl() : null;
-                    componentForListVO.setManagerName(assigneeName);
-                    componentForListVO.setManagerLoginName(assigneeLoginName);
-                    componentForListVO.setManagerRealName(assigneeRealName);
-                    componentForListVO.setImageUrl(imageUrl);
+                    if (!ObjectUtils.isEmpty(userMessageDTO)) {
+                        componentForListVO.setManagerName(userMessageDTO.getName());
+                        componentForListVO.setManagerLoginName(userMessageDTO.getLoginName());
+                        componentForListVO.setManagerRealName(userMessageDTO.getRealName());
+                        componentForListVO.setImageUrl(userMessageDTO.getImageUrl());
+                    }
                 });
             }
             return componentForListVOPageInfo;

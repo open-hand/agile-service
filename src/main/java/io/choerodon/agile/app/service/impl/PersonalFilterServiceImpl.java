@@ -1,9 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.PersonalFilterVO;
 import io.choerodon.agile.app.service.PersonalFilterService;
-import io.choerodon.agile.app.service.QuickFilterFieldService;
 import io.choerodon.agile.infra.dto.PersonalFilterDTO;
 import io.choerodon.agile.infra.mapper.PersonalFilterMapper;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
@@ -48,8 +46,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
             throw new CommonException(NOTFOUND_ERROR);
         }
         personalFilterDTO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterDTO.getFilterJson(),true));
-        PersonalFilterVO personalFilterVO = modelMapper.map(personalFilterDTO, PersonalFilterVO.class);
-        return personalFilterVO;
+        return modelMapper.map(personalFilterDTO, PersonalFilterVO.class);
     }
 
     @Override
@@ -59,7 +56,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         }
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         Long userId = customUserDetails.getUserId();
-        if (checkName(projectId, userId, personalFilterVO.getName())) {
+        if (Boolean.TRUE.equals(checkName(projectId, userId, personalFilterVO.getName()))) {
             throw new CommonException(NAME_EXIST);
         }
         if (!ObjectUtils.isEmpty(personalFilterVO.getDefault()) && Boolean.TRUE.equals(personalFilterVO.getDefault())) {

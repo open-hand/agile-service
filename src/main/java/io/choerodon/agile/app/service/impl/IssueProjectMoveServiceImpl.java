@@ -42,11 +42,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
-    private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
     private static final String TYPE_CODE_FIELD = "typeCode";
     private static final String EPIC_ID_FIELD = "epicId";
-    private static final String BUG_TYPE = "bug";
     private static final String TASK_TYPE = "task";
     private static final String SPRINT_ID_FIELD = "sprintId";
     private static final String STORY_TYPE = "story";
@@ -64,7 +62,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     private static final String AGILE_SCHEME_CODE = "agile_issue";
     private static final String FEATURE = "feature";
     private static final String[] FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
-
+    private static final String FEATURE_ID = "featureId";
+    private static final String ERROR_TRANSFER_PROJECT_ILLEGAL = "error.transfer.project.illegal";
     @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
@@ -164,13 +163,13 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         List<String> codes = targetProjectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
         if (Objects.equals(typeCode, ISSUE_EPIC)) {
             if (!(codes.contains(ProjectCategory.MODULE_AGILE) || codes.contains(ProjectCategory.MODULE_PROGRAM))) {
-                throw new CommonException("error.transfer.project.illegal");
+                throw new CommonException(ERROR_TRANSFER_PROJECT_ILLEGAL);
             }
         } else if (Objects.equals(typeCode, FEATURE) && !codes.contains(ProjectCategory.MODULE_PROGRAM)) {
-            throw new CommonException("error.transfer.project.illegal");
+            throw new CommonException(ERROR_TRANSFER_PROJECT_ILLEGAL);
         } else {
             if (!codes.contains(ProjectCategory.MODULE_AGILE)) {
-                throw new CommonException("error.transfer.project.illegal");
+                throw new CommonException(ERROR_TRANSFER_PROJECT_ILLEGAL);
             }
         }
     }
@@ -312,7 +311,8 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
     }
 
     private void calculationRank(Long projectId, IssueConvertDTO issueConvertDTO) {
-        if (sprintValidator.hasIssue(projectId, issueConvertDTO.getSprintId())) {
+        Boolean hasIssue = sprintValidator.hasIssue(projectId, issueConvertDTO.getSprintId());
+        if (Boolean.TRUE.equals(hasIssue)) {
             String rank = sprintMapper.queryMaxRank(projectId, issueConvertDTO.getSprintId());
             //处理rank值为null的脏数据
             if (StringUtils.isEmpty(rank)) {
@@ -363,10 +363,10 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
         // 更新issue的值
         if (!ObjectUtils.isEmpty(jsonObject)) {
             IssueDTO issue1 = issueMapper.selectByPrimaryKey(issueId);
-            if (!ObjectUtils.isEmpty(programValueMap.get("featureId"))) {
-                Long featureId = Long.valueOf(programValueMap.get("featureId").toString());
+            if (!ObjectUtils.isEmpty(programValueMap.get(FEATURE_ID))) {
+                Long featureId = Long.valueOf(programValueMap.get(FEATURE_ID).toString());
                 issueUpdateVO.setFeatureId(featureId);
-                fieldList.add("featureId");
+                fieldList.add(FEATURE_ID);
             }
             issueUpdateVO.setIssueId(issueId);
             issueUpdateVO.setObjectVersionNumber(issue1.getObjectVersionNumber());

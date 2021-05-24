@@ -16,7 +16,6 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,6 +53,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private static final String ERROR_ISSUE_STATUS_NOT_FOUND = "error.createIssue.issueStatusNotFound";
     private static final String ERROR_APPLYTYPE_ILLEGAL = "error.applyType.illegal";
     private static final String ERROR_STATEMACHINESCHEMEID_NULL = "error.stateMachineSchemeId.null";
+    private static final String FEATURE_TYPE_CODE = "feature";
 
     @Autowired
     private ProjectConfigMapper projectConfigMapper;
@@ -130,10 +130,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
-        if (!EnumUtil.contain(SchemeType.class, schemeType)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeType.class, schemeType))) {
             throw new CommonException("error.schemeType.illegal");
         }
-        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
         ProjectConfigDTO projectConfig = new ProjectConfigDTO(projectId, schemeId, schemeType, applyType);
@@ -147,10 +147,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             throw new CommonException("error.projectConfig.create");
         }
 
-//        //若是关联状态机方案，设置状态机方案、状态机为活跃
-//        if (schemeType.equals(SchemeType.STATE_MACHINE)) {
-//            stateMachineSchemeService.activeSchemeWithRefProjectConfig(schemeId);
-//        }
         return projectConfig;
     }
 
@@ -188,7 +184,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     public List<IssueTypeVO> queryIssueTypesByProjectId(Long projectId,
                                                         String applyType,
                                                         boolean onlyEnabled) {
-        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
         Long organizationId = projectUtil.getOrganizationId(projectId);
@@ -208,7 +204,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     public List<IssueTypeWithStateMachineIdVO> queryIssueTypesWithStateMachineIdByProjectId(Long projectId,
                                                                                             String applyType,
                                                                                             Boolean onlyEnabled) {
-        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
         Long organizationId = projectUtil.getOrganizationId(projectId);
@@ -271,9 +267,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (!CollectionUtils.isEmpty(issueCounts)) {
             map.putAll(issueCounts.stream().collect(Collectors.groupingBy(IssueCountDTO::getId, Collectors.mapping(IssueCountDTO::getIssueTypeId, Collectors.toList()))));
         }
-        result.forEach(status -> {
-            status.setIssueTypeIds(map.get(status.getId()));
-        });
+        result.forEach(status -> status.setIssueTypeIds(map.get(status.getId())));
         return result;
     }
 
@@ -296,7 +290,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             if (categoryCodes.contains(ProjectCategory.MODULE_AGILE)) {
                 IssueTypeDTO issueType = new IssueTypeDTO();
                 issueType.setOrganizationId(organizationId);
-                issueType.setTypeCode("feature");
+                issueType.setTypeCode(FEATURE_TYPE_CODE);
                 List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.select(issueType);
                 if (!CollectionUtils.isEmpty(issueTypeDTOS)) {
                     issueTypeDTOS.forEach(x -> issueTypeIds.add(x.getId()));
@@ -312,7 +306,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public List<TransformVO> queryTransformsByProjectId(Long projectId, Long currentStatusId, Long issueId, Long issueTypeId, String applyType) {
-        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
         Long organizationId = projectUtil.getOrganizationId(projectId);
@@ -351,7 +345,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId,Long boardId,String applyType) {
-        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
         //获取状态机方案
@@ -371,7 +365,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<Long> skipIssueTypeId = new ArrayList<>();
         skipIssueTypeId.add(0L);
         issueTypes.forEach(v -> {
-            boolean isSkip = "issue_epic".equals(v.getTypeCode()) || (SchemeApplyType.AGILE.equals(applyType) && "feature".equals(v.getTypeCode()));
+            boolean isSkip = "issue_epic".equals(v.getTypeCode()) || (SchemeApplyType.AGILE.equals(applyType) && FEATURE_TYPE_CODE.equals(v.getTypeCode()));
             if (Boolean.TRUE.equals(isSkip)) {
                 skipIssueTypeId.add(v.getId());
             }
@@ -386,9 +380,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<StatusVO> statusVOS = statusService.queryAllStatus(organizationId);
         Map<Long, StatusVO> sMap = statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, x -> x));
         //匹配默认状态机的问题类型映射
-//        Long defaultStateMachineId = idMap.get(0L);
-//        resultMap.put(0L, statusMap.get(defaultStateMachineId));
-
         Set<Long> boardStatus = new HashSet<>();
         if (!ObjectUtils.isEmpty(boardId)) {
             // 查询出面板上有的状态
@@ -396,7 +387,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         //匹配状态机的问题类型映射
         for (IssueTypeDTO issueType : issueTypes) {
-            boolean isSkip = "issue_epic".equals(issueType.getTypeCode()) || (SchemeApplyType.AGILE.equals(applyType) && "feature".equals(issueType.getTypeCode()));
+            boolean isSkip = "issue_epic".equals(issueType.getTypeCode()) || (SchemeApplyType.AGILE.equals(applyType) && FEATURE_TYPE_CODE.equals(issueType.getTypeCode()));
             if (Boolean.TRUE.equals(isSkip)) {
                 continue;
             }
@@ -409,15 +400,14 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, issueType.getId(), new ArrayList<>(allStatus));
                 // 过滤掉不能转换的状态
                 Map<Long, List<TransformVO>> transferMap = new HashMap<>();
-                statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L && boardStatus.contains(entry.getKey())).forEach(entry -> {
+                statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L && boardStatus.contains(entry.getKey())).forEach(entry ->
                     transferMap.put(entry.getKey(),entry.getValue().stream().filter(v ->  canTransferStatus.contains(v.getEndStatusId())).map(v -> {
                         StatusVO statusVO = sMap.get(v.getEndStatusId());
                         if (statusVO != null) {
                             v.setStatusType(statusVO.getType());
                         }
                         return v;
-                    }).collect(Collectors.toList()));
-                });
+                    }).collect(Collectors.toList())));
                 resultMap.put(issueType.getId(),transferMap);
             }
         }
@@ -426,7 +416,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public List<StatusAndTransformVO> statusTransformList(Long projectId, Long issueTypeId, String applyType) {
-        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
         // 获取状态加Id
@@ -540,7 +530,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         StatusCheckVO statusCheckVO = statusService.checkName(organizationId, statusVO.getName());
         // 创建状态
         StatusVO status;
-        if (statusCheckVO.getStatusExist()) {
+        if (Boolean.TRUE.equals(statusCheckVO.getStatusExist())) {
             StatusDTO statusInDb = statusMapper.queryById(organizationId, statusCheckVO.getId());
             status = modelMapper.map(statusInDb, StatusVO.class);
         }else {
@@ -692,7 +682,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     @Override
     public List<IssueTypeVO> checkExistStatusIssueType(Long projectId, Long organizationId, Long statusId) {
         ProjectVO projectVO = ConvertUtil.queryProject(projectId);
-        String applyType = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM) ? "program" : "agile";
+        Boolean projectCategory = ProjectCategory.checkContainProjectCategory(projectVO.getCategories(), ProjectCategory.MODULE_PROGRAM);
+        String applyType = Boolean.TRUE.equals(projectCategory) ? "program" : "agile";
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
         if (stateMachineSchemeId == null) {
             throw new CommonException(ERROR_STATEMACHINESCHEMEID_NULL);
@@ -961,22 +952,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         return transferStatusId;
     }
 
-    private void updateIssueStatusByStatusId(Long projectId, Long issueTypeId, String applyType, Long currentStatusId, Long statusId, StatusMachineNodeDTO statusMachineNodeDTO){
-        if (ObjectUtils.isEmpty(statusId)) {
-            throw new CommonException("error.status.has.using");
-        } else {
-            // 校验状态机node里面存在当前指定状态
-            statusMachineNodeDTO.setStatusId(statusId);
-            List<StatusMachineNodeDTO> select = statusMachineNodeMapper.select(statusMachineNodeDTO);
-            if(CollectionUtils.isEmpty(select)){
-                throw new CommonException("error.status.id.illegal");
-            }
-            // 将关联的状态修改为指定状态
-            Long userId = DetailsHelper.getUserDetails().getUserId();
-            issueAccessDataService.updateIssueStatusByIssueTypeId(projectId,applyType,issueTypeId,currentStatusId,statusId,userId);
-        }
-    }
-
     private Boolean checkIssueUse(Long projectId,Long issueTypeId,Long statusId) {
         if (issueTypeId == 0) {
             return false;
@@ -1007,7 +982,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public Long queryStateMachineId(Long projectId, String applyType, Long issueTypeId) {
-        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
         Long organizationId = projectUtil.getOrganizationId(projectId);
@@ -1028,7 +1003,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         Long organizationId = projectUtil.getOrganizationId(projectId);
         statusVO.setOrganizationId(organizationId);
         Map<String, Object> result = checkCreateStatusForAgile(projectId, applyType);
-        if ((Boolean) result.get(FLAG)) {
+        if (Boolean.TRUE.equals(result.get(FLAG))) {
             Long stateMachineId = (Long) result.get(STATEMACHINEID);
             statusVO = statusService.createStatusForAgile(organizationId, stateMachineId, statusVO);
         } else {
@@ -1080,14 +1055,14 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     public void removeStatusForAgile(Long projectId, Long statusId, String applyType) {
         Map<String, Object> result = checkCreateStatusForAgile(projectId, applyType);
         Boolean flag = (Boolean) result.get(FLAG);
-        if (flag) {
+        if (Boolean.TRUE.equals(flag)) {
             Long stateMachineId = (Long) result.get(STATEMACHINEID);
             Long organizationId = projectUtil.getOrganizationId(projectId);
             Long initStatusId = instanceService.queryInitStatusId(organizationId, stateMachineId);
             if (statusId.equals(initStatusId)) {
                 throw new CommonException("error.initStatus.illegal");
             }
-            if (!checkStatusInBoardColumn(projectId, statusId)) {
+            if (Boolean.FALSE.equals(checkStatusInBoardColumn(projectId, statusId))) {
                 throw new CommonException("error.status.inBoardColumn");
             }
             statusService.removeStatusForAgile(organizationId, stateMachineId, statusId);
@@ -1105,18 +1080,13 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         columnStatusRelDTO.setProjectId(projectId);
         columnStatusRelDTO.setStatusId(statusId);
         List<ColumnStatusRelDTO> columnStatusRelDTOList = columnStatusRelMapper.select(columnStatusRelDTO);
-        if (columnStatusRelDTOList != null && !columnStatusRelDTOList.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
+        return  CollectionUtils.isEmpty(columnStatusRelDTOList);
     }
 
     @Override
     public Boolean checkRemoveStatusForAgile(Long projectId, Long statusId, String applyType) {
         Map<String, Object> result = checkCreateStatusForAgile(projectId, applyType);
-        Boolean flag = (Boolean) result.get(FLAG);
-        if (flag) {
+        if (Boolean.TRUE.equals(result.get(FLAG))) {
             Long stateMachineId = (Long) result.get(STATEMACHINEID);
             Long organizationId = projectUtil.getOrganizationId(projectId);
             Long initStatusId = instanceService.queryInitStatusId(organizationId, stateMachineId);

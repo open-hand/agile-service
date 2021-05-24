@@ -98,10 +98,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private static final String VERSION_ALIAS_EMPTY_EXCEPTION = "error.publish.version.alias.empty";
     private static final String VERSION_EMPTY_EXCEPTION = "error.publish.version.version.empty";
     private static final String ARTIFACT_ID_EMPTY_EXCEPTION = "error.publish.version.artifactId.empty";
-    private static final String SERVICE_CODE_EMPTY_EXCEPTION = "error.publish.version.serviceCode.empty";
     private static final String PUBLISH_VERSION_NOT_EXIST_EXCEPTION = "error.publish.version.not.existed";
-
-    private static final String WEBSOCKET_PREVIEW_TAG_COMPARE = "agile-preview-tag-compare-issues";
 
     private static final String WEBSOCKET_GENERATE_TAG_COMPARE = "agile-generate-tag-compare-issues";
 
@@ -353,15 +350,13 @@ public class PublishVersionServiceImpl implements PublishVersionService {
 
     @Override
     public Page<PublishVersionVO> list(Long projectId, PublishVersionVO publishVersionVO, PageRequest pageRequest) {
-        Page<PublishVersionVO> result =
-                PageHelper.doPageAndSort(pageRequest, () -> publishVersionMapper.listByOptions(projectId, publishVersionVO));
-        return result;
+        return PageHelper.doPageAndSort(pageRequest, () -> publishVersionMapper.listByOptions(projectId, publishVersionVO));
     }
 
     @Override
     public Boolean checkAlias(Long projectId, String alias, Long publishVersionId) {
         if (StringUtils.isEmpty(alias)) {
-            throw new CommonException("error.publish.version.alias.empty");
+            throw new CommonException(VERSION_ALIAS_EMPTY_EXCEPTION);
         }
         PublishVersionDTO dto = new PublishVersionDTO();
         dto.setProjectId(projectId);
@@ -706,7 +701,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private double getProgress(double current, int total) {
 
         BigDecimal num1 = BigDecimal.valueOf(current);
-        BigDecimal num2 = BigDecimal.valueOf(total + 1);
+        BigDecimal num2 = BigDecimal.valueOf(total + 1L);
         return num1.divide(num2, 2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 

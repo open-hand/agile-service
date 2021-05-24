@@ -57,12 +57,13 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private static final String ERROR_ISSUE_NOT_FOUND = "error.issue.notFound";
     private static final String ERROR_PROJECT_INFO_NOT_FOUND = "error.createIssue.projectInfoNotFound";
     private static final String ERROR_ISSUE_STATUS_NOT_FOUND = "error.createIssue.issueStatusNotFound";
+    private static final String ERROR_PORJECT_ID_ILLEGAL = "error.project.id.illegal";
+    private static final String ERROR_APPLY_TYPE_ILLEGAL = "error.applyType.illegal";
     private static final String RANK = "rank";
     private static final String STATUS_ID = "statusId";
     private static final String STAY_DATE = "stayDate";
     private static final String UPDATE_STATUS = "updateStatus";
     private static final String UPDATE_STATUS_MOVE = "updateStatusMove";
-    private static final String ISSUE_FEATURE = "feature";
     private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
     private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
 
@@ -78,10 +79,6 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private StateMachineClient stateMachineClient;
-//    @Autowired
-//    private FeatureService featureService;
-//    @Autowired
-//    private PiFeatureService piFeatureService;
     @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
@@ -115,7 +112,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             rank = (minRank == null ? RankUtil.mid() : RankUtil.genPre(minRank));
         } else {
             RankDTO referenceRank = rankService.getReferenceRank(projectId, rankVO.getType(), rankVO.getReferenceIssueId());
-            if (rankVO.getBefore()) {
+            if (Boolean.TRUE.equals(rankVO.getBefore())) {
                 String leftRank = rankMapper.selectLeftRank(projectId, rankVO.getType(), referenceRank.getRank());
                 rank = (leftRank == null ? RankUtil.genPre(referenceRank.getRank()) : RankUtil.between(leftRank, referenceRank.getRank()));
             } else {
@@ -249,8 +246,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
      */
     @Override
     public ExecuteResult executeTransform(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType, InputDTO inputDTO) {
-        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
-            throw new CommonException("error.applyType.illegal");
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
+            throw new CommonException(ERROR_APPLY_TYPE_ILLEGAL);
         }
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
@@ -258,7 +255,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
         if (!projectId.equals(issue.getProjectId())) {
-            throw new CommonException("error.project.id.illegal");
+            throw new CommonException(ERROR_PORJECT_ID_ILLEGAL);
         }
         //获取状态机id
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());
@@ -269,7 +266,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         Long currentStatusId = issue.getStatusId();
         //执行状态转换
         ExecuteResult executeResult = instanceService.executeTransform(organizationId, AGILE_SERVICE, stateMachineId, currentStatusId, transformId, inputDTO);
-        if (!executeResult.getSuccess()) {
+        if (Boolean.FALSE.equals(executeResult.getSuccess())) {
             throw new CommonException("error.stateMachine.executeTransform", executeResult.getException());
         }
         statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
@@ -289,8 +286,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
      */
     @Override
     public ExecuteResult executeTransformForDemo(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType, InputDTO inputDTO) {
-        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
-            throw new CommonException("error.applyType.illegal");
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
+            throw new CommonException(ERROR_APPLY_TYPE_ILLEGAL);
         }
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
@@ -298,7 +295,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
         if (!projectId.equals(issue.getProjectId())) {
-            throw new CommonException("error.project.id.illegal");
+            throw new CommonException(ERROR_PORJECT_ID_ILLEGAL);
         }
         //获取状态机id
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());
@@ -316,15 +313,15 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
 
     @Override
     public void cleanInstanceCache(Long projectId, Long issueId, String applyType) {
-        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
-            throw new CommonException("error.applyType.illegal");
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
+            throw new CommonException(ERROR_APPLY_TYPE_ILLEGAL);
         }
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
         if (issue == null) {
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
         if (!projectId.equals(issue.getProjectId())) {
-            throw new CommonException("error.project.id.illegal");
+            throw new CommonException(ERROR_PORJECT_ID_ILLEGAL);
         }
         //获取状态机id
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());

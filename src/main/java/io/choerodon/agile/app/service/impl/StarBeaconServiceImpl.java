@@ -41,7 +41,7 @@ public class StarBeaconServiceImpl implements StarBeaconService {
     private static final String ERROR_INSTANCE_IS_NULL = "error.instance.is.null";
     private static final String ERROR_STAR_INSTANCE_FAILED = "error.star.instance.failed";
     private static final String ERROR_DELETE_STAR_INSTANCE_FAILED = "error.delete.star.instance.failed";
-    private final static String STAR_BEACON_TYPE_ISSUE = "issue";
+    private static final String STAR_BEACON_TYPE_ISSUE = "issue";
 
     @Override
     public void starInstance(StarBeaconVO starBeaconVO) {

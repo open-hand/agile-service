@@ -50,7 +50,7 @@ public class BoardServiceImpl implements BoardService {
     private static final String PROJECT_ID = "projectId";
     private static final String RANK = "rank";
     private static final String UPDATE_STATUS_MOVE = "updateStatusMove";
-
+    private static final String SPRINT_FIELD = "sprint";
     @Autowired
     private BoardMapper boardMapper;
     @Autowired
@@ -373,7 +373,7 @@ public class BoardServiceImpl implements BoardService {
     public JSONObject queryAllData(Long projectId, Long boardId, Long organizationId, SearchVO searchVO) {
         JSONObject jsonObject = new JSONObject(true);
         //没有传冲刺id，则使用活跃的冲刺
-        SprintDTO currentSprint = handlerCurrentSprint(projectId, searchVO, organizationId);
+        SprintDTO currentSprint = handlerCurrentSprint(projectId, searchVO);
         String filterSql = null;
         if (searchVO.getQuickFilterIds() != null && !searchVO.getQuickFilterIds().isEmpty()) {
             filterSql = getQuickFilter(searchVO.getQuickFilterIds());
@@ -426,10 +426,10 @@ public class BoardServiceImpl implements BoardService {
         return jsonObject;
     }
 
-    private SprintDTO handlerCurrentSprint(Long projectId, SearchVO searchVO, Long organizationId) {
+    private SprintDTO handlerCurrentSprint(Long projectId, SearchVO searchVO) {
         Long sprintId = null;
-        if (searchVO.getOtherArgs() != null && searchVO.getOtherArgs().get("sprint") != null) {
-            List<String> sprintIds = (List<String>) searchVO.getOtherArgs().get("sprint");
+        if (searchVO.getOtherArgs() != null && searchVO.getOtherArgs().get(SPRINT_FIELD) != null) {
+            List<String> sprintIds = (List<String>) searchVO.getOtherArgs().get(SPRINT_FIELD);
             sprintId = Long.valueOf(sprintIds.get(0));
         }
         if (ObjectUtils.isEmpty(sprintId)) {
@@ -441,7 +441,7 @@ public class BoardServiceImpl implements BoardService {
             if (ObjectUtils.isEmpty(otherArgs)) {
                 otherArgs = new HashMap<>();
             }
-            otherArgs.put("sprint", Arrays.asList(activeSprint.getSprintId()));
+            otherArgs.put(SPRINT_FIELD, Arrays.asList(activeSprint.getSprintId()));
             return activeSprint;
         } else {
             return sprintMapper.selectByPrimaryKey(sprintId);
@@ -458,7 +458,7 @@ public class BoardServiceImpl implements BoardService {
             String userId = DetailsHelper.getUserDetails().getUserId().toString();
             isAssignee = assigneeIds.contains(userId);
         }
-        Boolean onlyStory = false;
+        Boolean onlyStory = true;
         if (searchVO.getAdvancedSearchArgs() != null && searchVO.getAdvancedSearchArgs().get("issueTypeId") != null) {
             List<String> issueTypeIds = new ArrayList<>();
             try {
@@ -470,10 +470,7 @@ public class BoardServiceImpl implements BoardService {
 
             for (String issueTypeId : issueTypeIds) {
                 String typeCode = issueTypeService.getIssueTypeById(Long.valueOf(issueTypeId));
-                if (Objects.equals(typeCode, "story")) {
-                    onlyStory = true;
-                    continue;
-                } else {
+                if (!Objects.equals(typeCode, "story")) {
                     onlyStory = false;
                     break;
                 }
@@ -608,43 +605,51 @@ public class BoardServiceImpl implements BoardService {
         if (Boolean.TRUE.equals(issueMoveVO.getRankFlag())) {
             String rank;
             if (Boolean.TRUE.equals(issueMoveVO.getBefore())) {
-                if (issueMoveVO.getOutsetIssueId() == null || Objects.equals(issueMoveVO.getOutsetIssueId(), 0L)) {
-                    String minRank = sprintMapper.queryMinRank(projectId, issueMoveVO.getSprintId());
-                    if (minRank == null) {
-                        rank = RankUtil.mid();
-                    } else {
-                        rank = RankUtil.genPre(minRank);
-                    }
-                } else {
-                    String rightRank = issueMapper.queryRank(projectId, issueMoveVO.getOutsetIssueId());
-                    if (rightRank == null) {
-                        //处理子任务没有rank的旧数据
-                        rightRank = handleSubIssueNotRank(projectId, issueMoveVO.getOutsetIssueId(), issueMoveVO.getSprintId());
-                    }
-                    String leftRank = issueMapper.queryLeftRank(projectId, issueMoveVO.getSprintId(), rightRank);
-                    if (leftRank == null) {
-                        rank = RankUtil.genPre(rightRank);
-                    } else {
-                        rank = RankUtil.between(leftRank, rightRank);
-                    }
-                }
+                rank = getBeforeRank(projectId, issueMoveVO);
             } else {
-                String leftRank = issueMapper.queryRank(projectId, issueMoveVO.getOutsetIssueId());
-                if (leftRank == null) {
-                    leftRank = handleSubIssueNotRank(projectId, issueMoveVO.getOutsetIssueId(), issueMoveVO.getSprintId());
-                }
-                String rightRank = issueMapper.queryRightRank(projectId, issueMoveVO.getSprintId(), leftRank);
-                if (rightRank == null) {
-                    rank = RankUtil.genNext(leftRank);
-                } else {
-                    rank = RankUtil.between(leftRank, rightRank);
-                }
+                rank = getAfterRank(projectId, issueMoveVO);
             }
             jsonObject.put(RANK, rank);
             jsonObject.put(PROJECT_ID, projectId);
             return jsonObject;
         } else {
             return null;
+        }
+    }
+
+    private String getBeforeRank(Long projectId, IssueMoveVO issueMoveVO) {
+        if (issueMoveVO.getOutsetIssueId() == null || Objects.equals(issueMoveVO.getOutsetIssueId(), 0L)) {
+            String minRank = sprintMapper.queryMinRank(projectId, issueMoveVO.getSprintId());
+            if (minRank == null) {
+                return RankUtil.mid();
+            } else {
+                return RankUtil.genPre(minRank);
+            }
+        } else {
+            String rightRank = issueMapper.queryRank(projectId, issueMoveVO.getOutsetIssueId());
+            if (rightRank == null) {
+                //处理子任务没有rank的旧数据
+                rightRank = handleSubIssueNotRank(projectId, issueMoveVO.getOutsetIssueId(), issueMoveVO.getSprintId());
+            }
+            String leftRank = issueMapper.queryLeftRank(projectId, issueMoveVO.getSprintId(), rightRank);
+            if (leftRank == null) {
+                return RankUtil.genPre(rightRank);
+            } else {
+                return RankUtil.between(leftRank, rightRank);
+            }
+        }
+    }
+
+    private String getAfterRank(Long projectId, IssueMoveVO issueMoveVO){
+        String leftRank = issueMapper.queryRank(projectId, issueMoveVO.getOutsetIssueId());
+        if (leftRank == null) {
+            leftRank = handleSubIssueNotRank(projectId, issueMoveVO.getOutsetIssueId(), issueMoveVO.getSprintId());
+        }
+        String rightRank = issueMapper.queryRightRank(projectId, issueMoveVO.getSprintId(), leftRank);
+        if (rightRank == null) {
+            return RankUtil.genNext(leftRank);
+        } else {
+            return RankUtil.between(leftRank, rightRank);
         }
     }
 

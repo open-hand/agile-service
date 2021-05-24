@@ -94,8 +94,8 @@ public class IterativeWorktableServiceImpl implements IterativeWorktableService 
             }
         }
         List<PriorityDistributeVO> res = new ArrayList<>();
-        for (Long key : result.keySet()) {
-            res.add(result.get(key));
+        for (Map.Entry<Long, PriorityDistributeVO> entry : result.entrySet()) {
+            res.add(result.get(entry.getKey()));
         }
         Collections.sort(res, Comparator.comparing(PriorityDistributeVO::getTotalNum));
         Collections.reverse(res);

@@ -18,7 +18,6 @@ import io.choerodon.core.enums.MessageAdditionalType;
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +56,7 @@ public class IssueDelaySendMessageTask {
     private static final String TH = "<th>";
     private static final String TR = "<tr>";
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private NotifyFeignClient notifyFeignClient;
@@ -340,21 +339,15 @@ public class IssueDelaySendMessageTask {
                 );
             });
         });
-        priorityMap.forEach((k, v) -> {
-            v.forEach((x, y) -> priorityNameMap.put(x, y));
-        });
-        statusMap.forEach((k, v) -> {
-            v.forEach((x, y) -> statusNameMap.put(x, y));
-        });
+        priorityMap.forEach((k, v) -> v.forEach((x, y) -> priorityNameMap.put(x, y)));
+        statusMap.forEach((k, v) -> v.forEach((x, y) -> statusNameMap.put(x, y)));
     }
 
     private void queryOrganizationStatusMap(Long organizationId,
                                             Map<Long, Map<Long, String>> statusMap) {
         if (ObjectUtils.isEmpty(statusMap.get(organizationId))) {
             Map nameMap = new HashMap();
-            statusService.queryAllStatusMap(organizationId).forEach((k, v) -> {
-                nameMap.put(k, v.getName());
-            });
+            statusService.queryAllStatusMap(organizationId).forEach((k, v) -> nameMap.put(k, v.getName()));
             statusMap.put(organizationId, nameMap);
         }
     }
@@ -363,9 +356,7 @@ public class IssueDelaySendMessageTask {
                                               Map<Long, Map<Long, String>> priorityMap) {
         if (ObjectUtils.isEmpty(priorityMap.get(organizationId))) {
             Map nameMap = new HashMap();
-            priorityService.queryByOrganizationId(organizationId).forEach((k, v) -> {
-                nameMap.put(k, v.getName());
-            });
+            priorityService.queryByOrganizationId(organizationId).forEach((k, v) -> nameMap.put(k, v.getName()));
             priorityMap.put(organizationId, nameMap);
         }
     }

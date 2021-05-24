@@ -387,6 +387,9 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
 
     private void initProjectStatusRel(Long organizationId, Long issueTypeId, Long schemeId, Long projectId) {
         StatusMachineSchemeConfigDTO statusMachineSchemeConfig = queryStatusMachineSchemeConfig(organizationId, issueTypeId, schemeId);
+        if (ObjectUtils.isEmpty(statusMachineSchemeConfig)) {
+           throw new CommonException("error.status.machine.scheme.config.not.exist");
+        }
         List<StatusMachineNodeVO> machineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, statusMachineSchemeConfig.getStateMachineId(), false);
         List<IssueStatusVO> issueStatusVOS = issueStatusService.queryIssueStatusList(projectId);
         List<Long> projectStatusIds = new ArrayList<>();
@@ -569,7 +572,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                     issueStatusDTO.setStatusId(statusSettingVO.getId());
                     StatusTemplateDTO statusTemplateDTO = new StatusTemplateDTO(organizationId, statusSettingVO.getId());
                     StatusTemplateDTO templateDTO = statusTemplateMapper.selectOne(statusTemplateDTO);
-                    issueStatusDTO.setCompleted(ObjectUtils.isEmpty(templateDTO) ? false : templateDTO.getTemplateCompleted());
+                    issueStatusDTO.setCompleted(ObjectUtils.isEmpty(templateDTO) ? Boolean.FALSE : templateDTO.getTemplateCompleted());
                     issueStatusService.insertIssueStatus(issueStatusDTO);
                 }
                 // 处理状态上设置的流转条件
