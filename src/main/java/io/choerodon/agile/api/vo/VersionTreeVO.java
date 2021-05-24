@@ -38,6 +38,16 @@ public class VersionTreeVO {
 
     private String tagAlias;
 
+    private Boolean appService;
+
+    public Boolean getAppService() {
+        return appService;
+    }
+
+    public void setAppService(Boolean appService) {
+        this.appService = appService;
+    }
+
     public String getTagAlias() {
         return tagAlias;
     }

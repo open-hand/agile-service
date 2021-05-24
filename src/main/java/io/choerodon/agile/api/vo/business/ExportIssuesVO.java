@@ -107,7 +107,17 @@ public class ExportIssuesVO {
     @ApiModelProperty("总预估时间")
     private BigDecimal allEstimateTime;
 
+    private String tags;
+
     public ExportIssuesVO() {
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 
     public String getTeamProjects() {
