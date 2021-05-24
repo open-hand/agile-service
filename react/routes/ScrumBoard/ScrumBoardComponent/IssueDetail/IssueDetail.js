@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { observer } from 'mobx-react-lite';
 import DetailContainer, { useDetail } from '@/components/detail-container';
@@ -11,12 +11,14 @@ const IssueDetail = ({ refresh }) => {
     ScrumBoardStore.setDetailProps(detailProps);
   }, [detailProps]);
 
-  const handleIssueCopy = ({ issueId }) => {
-    refresh();
-    ScrumBoardStore.clickedOnce('0', {
-      issueId,
-    });
-  };
+  const handleIssueCopy = useCallback(({ issueId } = {}) => {
+    refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
+    if (issueId) {
+      ScrumBoardStore.clickedOnce('0', {
+        issueId,
+      });
+    }
+  }, [refresh]);
 
   const issueId = ScrumBoardStore.getCurrentClickId;
   const visible = issueId;
@@ -46,7 +48,7 @@ const IssueDetail = ({ refresh }) => {
     } else {
       close();
     }
-  }, [visible, issueId]);
+  }, [visible, issueId, open, refresh, close, handleIssueCopy]);
   return (
     <DetailContainer {...detailProps} />
   );
