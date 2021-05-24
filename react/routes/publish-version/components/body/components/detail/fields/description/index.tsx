@@ -8,7 +8,7 @@ import Field from '../field';
 import styles from './index.less';
 
 interface Props {
-  maxWidth?: number
+  maxWidth?: number | string
 }
 const Description: React.FC<Props> = ({ maxWidth }) => {
   const { store, preview } = usePublishVersionContext();

@@ -11,6 +11,26 @@ import {
   getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields, getReverseExportFieldCodes,
 } from './utils';
 
+const mapper = {
+  summary: 'issueId',
+  issueNum: 'issueNum',
+  priority: 'priorityId',
+  sprint: 'issueSprintVOS',
+  reporter: 'reporterId',
+  creationDate: 'creationDate',
+  assign: 'assigneeId',
+  status: 'statusId',
+  lastUpdateDate: 'lastUpdateDate',
+  estimatedStartTime: 'estimatedStartTime',
+  estimatedEndTime: 'estimatedEndTime',
+  label: 'label',
+  component: 'component',
+  storyPoints: 'storyPoints',
+  fixVersion: 'fixVersion',
+  influenceVersion: 'influenceVersion',
+  epic: 'epic',
+  feature: 'feature',
+};
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
   tableFields: IFoundationHeader[], visibleColumns: string[], tableListMode: boolean, action?: TemplateAction) {
   const store = new IssueExportStore({
@@ -61,7 +81,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
     },
   });
 
-  const checkOptions = tableFields.map((option) => ({ value: option.code, label: option.title as string, order: false }));
+  const checkOptions = tableFields.map((option) => ({ value: mapper[option.code as keyof typeof mapper] || option.code, label: option.title as string, order: false }));
 
   const key = Modal.key();
   Modal.open({
@@ -76,7 +96,7 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
       fields={fields}
       chosenFields={chosenFields}
       checkOptions={checkOptions}
-      visibleColumns={visibleColumns}
+      visibleColumns={visibleColumns.map((i) => mapper[i as keyof typeof mapper] || i)}
       store={store}
       action={action}
       exportBtnText="导出"

@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Icon } from 'choerodon-ui';
+import { Icon, Tooltip } from 'choerodon-ui/pro';
 import './TypeTag.less';
 import { IIssueType, IFeatureType } from '@/common/types';
 
@@ -30,34 +30,36 @@ const TypeTag: React.FC<Props> = ({
   }
   const reverse = ['agile_epic', 'agile_story', 'agile_fault', 'agile_task', 'agile_subtask', 'test-case', 'test-automation', 'agile-feature'].includes(icon);
   return (
-    <div className="c7n-typeTag" style={style}>
-      {!reverse ? (
-        <Icon
-          className="c7n-typeTag-icon-normal"
-          style={{
-            transition: 'none',
-            fontSize: iconSize * 15 / 24 || '15px',
-            background: colour || '#fab614',
-            color: 'white',
-          }}
-          type={icon}
-        />
-      ) : (
-        <Icon
-          style={{
-            transition: 'none',
-            fontSize: iconSize || '26px',
-            color: colour || '#fab614',
-          }}
-          type={icon || 'help'}
-        />
-      )}
-      {
-        showName && (
-          <span className="name">{name}</span>
-        )
-      }
-    </div>
+    <Tooltip title={name}>
+      <div className="c7n-typeTag" style={style}>
+        {!reverse ? (
+          <Icon
+            className="c7n-typeTag-icon-normal"
+            style={{
+              transition: 'none',
+              fontSize: iconSize * 15 / 24 || '15px',
+              background: colour || '#fab614',
+              color: 'white',
+            }}
+            type={icon}
+          />
+        ) : (
+          <Icon
+            style={{
+              transition: 'none',
+              fontSize: iconSize || '26px',
+              color: colour || '#fab614',
+            }}
+            type={icon || 'help'}
+          />
+        )}
+        {
+          showName && (
+            <span className="name">{name}</span>
+          )
+        }
+      </div>
+    </Tooltip>
   );
 };
 export default memo(TypeTag);
