@@ -1,26 +1,21 @@
 import React, {
-  Fragment, useEffect, useRef, useState,
+  useEffect, useState,
 } from 'react';
-import {
-  Button, Icon, Modal, SelectBox, Tooltip,
-} from 'choerodon-ui/pro/lib';
-import {
-  useTheme,
-} from '@choerodon/boot';
+import { Icon } from 'choerodon-ui/pro/lib';
+import { useTheme } from '@choerodon/boot';
 import { pick, set } from 'lodash';
 import { Tree } from 'choerodon-ui/pro';
 import classnames from 'classnames';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { randomString } from '@/utils/random';
-import './DependencyTreeBase.less';
+import './TreeWithLine.less';
 
-interface IDependencyTreeNodeBaseProps<T> {
+interface ITreeWithLineBaseProps<T> {
   id: string
   height?: number
   // offsetBottom?: number /** 每个连线基于原位置向下的偏移量 */
   children?: Array<T>
 }
-interface IDependencyTreeProps<T extends IDependencyTreeNodeBaseProps<T>> {
+interface ITreeWithLineProps<T extends ITreeWithLineBaseProps<T>> {
   data: Array<T>
   renderNode: (data: T, level: number) => React.ReactElement
 }
@@ -30,7 +25,7 @@ const { TreeNode } = Tree;
  *
  * @returns
  */
-function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: propsData, renderNode }: IDependencyTreeProps<T>) {
+function TreeWithLine<T extends ITreeWithLineBaseProps<T>>({ data: propsData, renderNode }: ITreeWithLineProps<T>) {
   const prefixCls = 'c7n-agile-dependency-tree';
   const [data, setData] = useState(propsData || []);
   const [theme] = useTheme();
@@ -144,12 +139,12 @@ function DependencyTree<T extends IDependencyTreeNodeBaseProps<T>>({ data: props
     </Tree>
   );
 }
-interface DependencyTreeNodeProps {
+interface TreeWithLineNodeProps {
   offsetBottom?: number /** 每个连线基于原位置向下的偏移量 */
   style?: React.CSSProperties
 
 }
-export const DependencyTreeNode: React.FC<DependencyTreeNodeProps> = ({
+export const TreeWithLineNode: React.FC<TreeWithLineNodeProps> = ({
   children, offsetBottom, style, ...otherProps
 }) => {
   let originNode: React.ReactElement = <span>--</span>;
@@ -158,4 +153,4 @@ export const DependencyTreeNode: React.FC<DependencyTreeNodeProps> = ({
   }
   return React.cloneElement(<></>, { children: originNode, offsetBottom });
 };
-export default DependencyTree;
+export default TreeWithLine;

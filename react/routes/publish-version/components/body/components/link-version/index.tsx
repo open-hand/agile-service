@@ -9,14 +9,14 @@ import {
 import CustomIcon from '@/components/custom-icon';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import classNames from 'classnames';
+import DependencyTreeBase, { TreeWithLineNode as DependencyTreeNode } from '@/components/tree-with-line';
+import { openImportPomModal } from '@/components/import-pom';
 import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
 import { openLinkAppServiceTagModal } from './LinkAppServiceTagModal';
 import { usePublishVersionContext } from '../../../../stores';
 import PublishVersionSection from '../section';
 import { openEditAppVersionModal } from './EditAppVersionModal';
 import styles from './index.less';
-import DependencyTreeBase, { DependencyTreeNode } from '../dependency-tree-base';
-import { openImportPomModal } from '../../../publish-version-detail/components/import-pom';
 
 function useEditModeSectionConfig(preview: boolean) {
   const { store } = usePublishVersionContext();

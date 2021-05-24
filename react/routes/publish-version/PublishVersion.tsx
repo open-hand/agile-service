@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb, useTheme,
 } from '@choerodon/boot';
 import {
-  Button, Tooltip, Dropdown, Menu,
+  Button, Tooltip,
 } from 'choerodon-ui/pro';
 import { HeaderButtons } from '@choerodon/master';
 import { observer } from 'mobx-react-lite';
