@@ -71,10 +71,12 @@ const CodeQuality: React.FC<CodeQualityProps> = ({
   return (
     <div>
       <Spin spinning={loading}>
-        <ReactEcharts
-          className="c7n-chart"
-          option={getOption()}
-        />
+        {series.length > 0 && (
+          <ReactEcharts
+            className="c7n-chart"
+            option={getOption()}
+          />
+        )}
         <div className={styles.pie_legend}>
           <p className={styles.pie_legend_title}>数据统计</p>
           <table>

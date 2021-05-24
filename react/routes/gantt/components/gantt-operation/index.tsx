@@ -5,7 +5,7 @@ import {
 import { observer } from 'mobx-react-lite';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { find } from 'lodash';
-import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import Context from '../../context';
 import { units } from '../../store';
 
@@ -25,6 +25,7 @@ const GanttOperation: React.FC = () => {
         onClick={() => {
           ganttRef.current && ganttRef.current.backToday();
         }}
+        color={'white' as ButtonColor}
         style={{
           borderRadius: '16px',
           boxShadow: '0px 0px 7px 0px rgba(0, 0, 0, 0.1)',
@@ -47,6 +48,7 @@ const GanttOperation: React.FC = () => {
         trigger={['click' as Action]}
       >
         <Button
+          color={'white' as ButtonColor}
           funcType={'raised' as FuncType}
           style={{
             borderRadius: '16px',

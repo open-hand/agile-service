@@ -9,18 +9,19 @@ import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
 import 'echarts/lib/component/legend';
 import {
-  Page, Header, Content, stores, axios, Breadcrumb,
+  Page, Header, Content, axios, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Button, Select, Icon, Spin, Tooltip,
+  Select, Spin, Tooltip,
 } from 'choerodon-ui';
 import './pie.less';
 import { sprintApi, versionApi, statusApi } from '@/api';
-import to, { linkUrl } from '@/utils/to';
+import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import SwitchChart from '../../Component/switchChart';
 import PieChartStore from '../../../../stores/project/pieChart/PieChartStore';
 import NoDataComponent from '../../Component/noData';
+import BackBtn from '../../back-btn';
 import pic from '../../../../assets/image/emptyChart.svg';
 
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
@@ -399,18 +400,29 @@ class PieChart extends Component {
       >
         <Header
           title="统计图"
-          backPath={linkUrl(LINK_URL.report)}
         >
-          <SwitchChart
-            current="pieReport"
+          <HeaderButtons
+            items={[{
+              name: '切换',
+              element: <SwitchChart
+                current="pieReport"
+              />,
+              display: true,
+            }, {
+              name: '返回',
+              element: <BackBtn />,
+              display: true,
+            }, {
+              name: '刷新',
+              icon: 'refresh',
+              iconOnly: true,
+              handler: this.handelRefresh,
+              display: true,
+            }]}
           />
-          <Button onClick={this.handelRefresh}>
-            <Icon type="refresh" />
-            刷新
-          </Button>
         </Header>
         <Breadcrumb title="统计图" />
-        <Content>
+        <Content style={{ paddingTop: 20 }}>
           <Spin spinning={PieChartStore.pieLoading}>
             <div className="c7n-pieChart-filter">
               <Select

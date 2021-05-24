@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import ReactEcharts from 'echarts-for-react';
 import {
-  Page, Header, Content, stores, Breadcrumb,
+  Page, Header, Content, stores, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Button, Tabs, Table, Select, Icon, Tooltip, Spin,
+  Tabs, Table, Select, Icon, Tooltip, Spin,
 } from 'choerodon-ui';
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
-import to, { linkUrl } from '@/utils/to';
+import to from '@/utils/to';
 import pic from '../../../../assets/image/emptyChart.svg';
 import finish from './legend/finish.svg';
 import total from './legend/total.svg';
@@ -20,6 +20,7 @@ import PriorityTag from '../../../../components/PriorityTag';
 import TypeTag from '../../../../components/TypeTag';
 import VS from '../../../../stores/project/versionReportNew';
 import EmptyBlock from '../../../../components/EmptyBlock';
+import BackBtn from '../../back-btn';
 import './VersionReport.less';
 
 const { TabPane } = Tabs;
@@ -573,28 +574,37 @@ class EpicReport extends Component {
   }
 
   render() {
-    const urlParams = AppState.currentMenuType;
     return (
       <Page
         className="c7n-versionReport"
       >
         <Header
           title="版本报告图"
-          backPath={linkUrl(LINK_URL.report)}
         >
-          <SwithChart
-            current="versionReport"
+          <HeaderButtons
+            items={[{
+              name: '切换',
+              element: <SwithChart
+                current="versionReport"
+              />,
+              display: true,
+            }, {
+              name: '返回',
+              element: <BackBtn />,
+              display: true,
+            }, {
+              name: '刷新',
+              icon: 'refresh',
+              iconOnly: true,
+              handler: () => {
+                this.refresh();
+              },
+              display: true,
+            }]}
           />
-          <Button
-            funcType="flat"
-            onClick={() => this.refresh()}
-          >
-            <Icon type="refresh icon" />
-            <span>刷新</span>
-          </Button>
         </Header>
         <Breadcrumb title="版本报告图" />
-        <Content>
+        <Content style={{ paddingTop: 20 }}>
           {
             !(!VS.versions.length && VS.versionFinishLoading) ? (
               <div>

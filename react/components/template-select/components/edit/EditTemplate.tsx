@@ -4,6 +4,7 @@ import React, {
 import {
   Modal, TextField, Form, Button, DataSet,
 } from 'choerodon-ui/pro';
+import { FuncType } from 'choerodon-ui/pro/lib/button/interface';
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import TableColumnCheckBoxes, { ITableColumnCheckBoxesDataProps, useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
@@ -11,8 +12,7 @@ import { IModalProps } from '@/common/types';
 import { TemplateAction, templateApi } from '@/api';
 import classnames from 'classnames';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { map, uniq, update } from 'lodash';
-import { Divider } from 'choerodon-ui';
+import { map, uniq } from 'lodash';
 import styles from './EditTemplate.less';
 
 interface FormPartProps {
@@ -44,6 +44,7 @@ const FormPart: React.FC<FormPartProps> = memo((props) => {
           <Button
             className={styles.part_btn}
             onClick={handleClick}
+            funcType={'flat' as FuncType}
           >
             {btnStatus !== 'NONE' ? '全选' : '全不选'}
           </Button>

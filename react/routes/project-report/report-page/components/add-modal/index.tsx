@@ -74,7 +74,7 @@ const openAddModal = (props: Props) => {
     key: 'modal',
     title: isEdit ? `编辑${TEXTS[type as string] || ''}` : `添加${TEXTS[type as string] || ''}`,
     style: {
-      width: type === 'text' ? MODAL_WIDTH.middle : type === 'dynamic_list' ? 380 : 1088,
+      width: type === 'text' ? MODAL_WIDTH.middle : type === 'dynamic_list' ? MODAL_WIDTH.middle : 1088,
     },
     drawer: true,
     children: <AddModal {...props} />,

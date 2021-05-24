@@ -3,12 +3,12 @@ import { withRouter } from 'react-router-dom';
 import _ from 'lodash';
 import {
   Dropdown, Button, Menu, Icon,
-} from 'choerodon-ui';
+} from 'choerodon-ui/pro';
 import to from '@/utils/to';
 import list from '../Home/list';
 
 let linkFromParamUrl;
-function SwitchChart({ location: { search }, current }) {
+function SwitchChart({ location: { search }, current, ...buttonProps }) {
   useEffect(() => {
     const defaultParm = current ? `reporthost/${current}` : undefined;
     const currentLinkFromParamUrl = _.last(search.split('&')).split('=')[0] === 'paramUrl' ? _.last(search.split('&')).split('=')[1] : defaultParm;
@@ -38,9 +38,9 @@ function SwitchChart({ location: { search }, current }) {
   );
   return (
     <Dropdown placement="bottomCenter" trigger={['click']} overlay={menu}>
-      <Button funcType="flat" style={{ color: '#000' }}>
-        <span>切换报表</span>
-        <Icon type="arrow_drop_down" />
+      <Button {...buttonProps}>
+        <span style={{ marginRight: 5 }}>切换报表</span>
+        <Icon type="arrow_drop_down" style={{ marginRight: -5 }} />
       </Button>
     </Dropdown>
   );

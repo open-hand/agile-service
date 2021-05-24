@@ -36,7 +36,7 @@ const ReportPage: React.FC<Props> = ({
       trigger={['click' as Action]}
       overlay={(
         <Menu
-          style={{ width: 116 }}
+          style={{ width: 120 }}
           onClick={({ key }) => {
             openAddModal({
               type: key as IReportContentType,

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import classNames from 'classnames';
 import { Button, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import {
   IReportBlock, IReportTextBlock, IReportChartBlock, IReportListBlock,
 } from '../../store';
@@ -73,8 +73,8 @@ const ReportBlock: React.FC<Props> = (props) => {
         <span className={styles.title}>{title}</span>
         {!isPreview && (
           <div className={styles.operation}>
-            <Button icon="mode_edit" onClick={handleEdit} />
-            <Button icon="delete" onClick={handleDelete} />
+            <Button icon="mode_edit" funcType={'flat' as FuncType} onClick={handleEdit} />
+            <Button icon="delete" funcType={'flat' as FuncType} onClick={handleDelete} />
           </div>
         )}
       </div>

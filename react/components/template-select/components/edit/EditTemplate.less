@@ -2,16 +2,13 @@
   &_title {
     display: inline-flex;
     align-items: center;
-    height: .24rem;
     font-weight: 500;
-    color: rgba(0, 0, 0, 0.87);
-    line-height: .24rem;
     margin-bottom: .03rem;
 
     & >span {
       font-weight: 500;
       font-size: 14px;
-      padding-right: .1rem;
+      // padding-right: .1rem;
     }
 
     :global {
@@ -25,7 +22,6 @@
   }
   &_block {
     display: inline-block;
-    margin-top: 3px;
     margin-right: 6px;
     width: 3px;
     height: 16px;
@@ -33,47 +29,16 @@
     border-radius: 2px;
   }
   &_content {
-    :global {
-      .c7n-pro-btn {
-        padding-left: 0;
-      }
-      .c7n-pro-checkbox:disabled + .c7n-pro-checkbox-inner {
-        border-color: #D7D7D7 !important;
-        background-color: #F5F5F5 !important;
-        &::after {
-          border-color: #D7D7D7 !important;
-          color: #FFF;
-          background-color: #F5F5F5 !important;
-        }
-        & + span {
-          color: rgba(0, 0, 0, 0.87);
-        }
-      }
-      .c7n-pro-checkbox-float-label {
-        padding-top: 0;
-        margin-bottom: .14rem;
-    
-        .c7n-pro-checkbox-label {
-          padding-right: .16rem;
-          padding-left: .04rem;
-        }
-      }
-    }
+
   }
 
   &_btn {
-    color: #5365EA;
-    font-size: .13rem;
-    margin-top: 5px;
 
-    span {
-      font-weight: 500;
-    }
   }
 
   :global {
-    .c7n-pro-form {
-      margin-top: .03rem;
+    .c7n-pro-form-float-label.c7n-pro-form {
+      margin-top: 0.1rem;
     }
   }
 }
@@ -84,6 +49,12 @@
   :global {
     .c7n-pro-form-float-label .c7n-pro-field-wrapper {
       margin-bottom: 0;
+    }
+    .c7n-pro-field-wrapper {
+      padding-bottom: 0;
+    }
+    .c7n-pro-form {
+      margin-top: -3px;
     }
   }
 }

@@ -2,12 +2,14 @@ import React, {
   useMemo, useState, useEffect, useCallback,
 } from 'react';
 import {
-  DataSet, Form, SelectBox, Tooltip, TextField,
-} from 'choerodon-ui/pro/lib';
+  DataSet, Form, SelectBox, Tooltip, TextField, Icon,
+} from 'choerodon-ui/pro';
 import { set, uniq } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { CheckBoxProps } from 'choerodon-ui/pro/lib/check-box/CheckBox';
 import { FormProps } from 'choerodon-ui/pro/lib/form/Form';
+import { LabelLayout } from 'choerodon-ui/pro/lib/form/interface';
+
 import { pageConfigApi } from '@/api';
 import { OptionProps } from 'choerodon-ui/lib/select';
 
@@ -180,8 +182,8 @@ const TableColumnCheckBoxes: React.FC<Props> = ({
 
   const filteredOptions = options.filter((option) => option.label.indexOf(filter || '') > -1);
   return (
-    <Form dataSet={dataSet} {...formProps}>
-      <TextField placeholder="请输入搜索内容" style={{ height: 34 }} onChange={handleSearch} clearButton />
+    <Form dataSet={dataSet} {...formProps} labelLayout={'none' as LabelLayout}>
+      <TextField prefix={<Icon type="search" />} placeholder="请输入搜索内容" style={{ height: 34 }} onChange={handleSearch} clearButton />
       {
         filter && !filteredOptions.length ? (
           <div style={{ color: 'var(--text-color3)' }}>暂无搜索结果</div>

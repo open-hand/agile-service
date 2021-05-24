@@ -64,12 +64,12 @@ const VersionBurnDownSearch:React.FC<VersionBurnDownSearchProps> = ({
       {
       (versions.length > 0 && !versionIsLoading) && (
         <div className={styles.epicBurnDown_search}>
-          <div style={{ display: 'flex' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <Select
               className={styles.epicBurnDown_search_select}
               labelLayout={'float' as LabelLayout}
               clearButton={false}
-              style={{ width: 500, marginRight: 33, height: 36 }}
+              style={{ width: 493, marginRight: 33 }}
               label="版本"
               value={currentVersionId}
               onChange={handleChangeCurrentVersion}
@@ -89,6 +89,7 @@ const VersionBurnDownSearch:React.FC<VersionBurnDownSearchProps> = ({
             </Select>
             <div className={styles.epicSelect}>
               <CheckBox
+                style={{ marginTop: 15 }}
                 label="查看选项"
                 value="checked"
                 checked={checked === 'checked'}

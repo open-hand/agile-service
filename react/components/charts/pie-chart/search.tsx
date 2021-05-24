@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui/pro';
 import { IVersion, ISprint, IStatus } from '@/common/types';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
+import { find } from 'lodash';
 import styles from './index.less';
 import { IPieChartType } from './index';
 
@@ -108,6 +109,7 @@ const PieSearch: React.FC<PieSearchProps> = ({
         label="统计类型"
         onChange={changeType}
         clearButton={false}
+        style={{ width: 240 }}
       >
         {
           types.map((item) => (
@@ -118,7 +120,7 @@ const PieSearch: React.FC<PieSearchProps> = ({
       <Select
         className={styles.c7n_pieChart_filter_item}
         labelLayout={'float' as LabelLayout}
-        style={{ minWidth: 70 }}
+        style={{ width: 241 }}
         label="选择维度"
         defaultValue={chooseDimensionType[0].name}
         value={chooseDimension}
@@ -142,6 +144,7 @@ const PieSearch: React.FC<PieSearchProps> = ({
             key={chooseDimension}
             className={styles.c7n_pieChart_filter_item}
             style={{ minWidth: 200 }}
+            label={find(chooseDimensionType, { key: chooseDimension })?.name}
             labelLayout={'float' as LabelLayout}
             value={chooseId?.toString()}
             onChange={handleChooseIdChange}

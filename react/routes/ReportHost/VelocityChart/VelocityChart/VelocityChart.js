@@ -3,20 +3,20 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import ReactEcharts from 'echarts-for-react';
 import {
-  Page, Header, Content, stores, Breadcrumb,
+  Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Button, Table, Select, Icon, Spin,
+  Table, Select, Spin,
 } from 'choerodon-ui';
-import to, { linkUrl } from '@/utils/to';
+import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import pic from '../../../../assets/image/emptyChart.svg';
 import SwithChart from '../../Component/switchChart';
 import VS from '../../../../stores/project/velocityChart';
 import EmptyBlock from '../../../../components/EmptyBlock';
+import BackBtn from '../../back-btn';
 import './VelocityChart.less';
 
-const { AppState } = stores;
 const { Option } = Select;
 
 @observer
@@ -336,21 +336,35 @@ class VelocityChart extends Component {
   }
 
   render() {
-    const urlParams = AppState.currentMenuType;
     return (
       <Page className="c7n-velocity">
         <Header
           title="迭代速度图"
-          backPath={linkUrl(LINK_URL.report)}
         >
-          <SwithChart current="velocityChart" />
-          <Button funcType="flat" onClick={() => this.refresh()}>
-            <Icon type="refresh icon" />
-            <span>刷新</span>
-          </Button>
+          <HeaderButtons
+            items={[{
+              name: '切换',
+              element: <SwithChart
+                current="velocityChart"
+              />,
+              display: true,
+            }, {
+              name: '返回',
+              element: <BackBtn />,
+              display: true,
+            }, {
+              name: '刷新',
+              icon: 'refresh',
+              iconOnly: true,
+              handler: () => {
+                this.refresh();
+              },
+              display: true,
+            }]}
+          />
         </Header>
         <Breadcrumb title="迭代速度图" />
-        <Content>
+        <Content style={{ paddingTop: 20 }}>
           {!(!VS.chartLoading && !VS.getChartDataX.length) ? (
             <div>
               <Select

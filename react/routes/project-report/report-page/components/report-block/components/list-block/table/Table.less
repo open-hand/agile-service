@@ -1,15 +1,22 @@
 .table {
   // table-layout: fixed;
   width: 100%;
+
   thead {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgb(243, 246, 254);
     border-top: 1px solid var(--divider);
     border-bottom: 1px solid var(--divider);
 
     th {
-      height: 42px;
+      height: 30px;
       padding-left: 10px;
       white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr:nth-child(even) {
+      background-color: rgb(250, 250, 252) !important;
     }
   }
 

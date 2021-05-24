@@ -4,14 +4,14 @@ import { observer } from 'mobx-react';
 import ReactEcharts from 'echarts-for-react';
 import _ from 'lodash';
 import {
-  Page, Header, Content, stores, Breadcrumb,
+  Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Button, Tabs, Table, Select, Icon, Tooltip, Spin, Checkbox,
+  Tabs, Table, Select, Icon, Tooltip, Spin, Checkbox,
 } from 'choerodon-ui';
 // import pic from './no_epic.svg';
 import STATUS from '@/constants/STATUS';
-import to, { linkUrl } from '@/utils/to';
+import to from '@/utils/to';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 
 import pic from '../../../assets/image/emptyChart.svg';
@@ -28,9 +28,9 @@ import speedIcon from './speedIcon.svg';
 import sprintIcon from './sprintIcon.svg';
 import storyPointIcon from './storyPointIcon.svg';
 import completed from './completed.svg';
+import BackBtn from '../back-btn';
 import './EpicReport.less';
 
-const { AppState } = stores;
 const { Option } = Select;
 const { TabPane } = Tabs;
 const CheckboxGroup = Checkbox.Group;
@@ -820,21 +820,32 @@ class EpicBurndown extends Component {
       >
         <Header
           title="史诗燃耗图"
-          backPath={linkUrl(LINK_URL.report)}
         >
-          <SwithChart
-            current="epicBurndown"
+          <HeaderButtons
+            items={[{
+              name: '切换',
+              element: <SwithChart
+                current="epicBurndown"
+              />,
+              display: true,
+            }, {
+              name: '返回',
+              element: <BackBtn />,
+              display: true,
+            }, {
+              name: '刷新',
+              icon: 'refresh',
+              iconOnly: true,
+              handler: () => {
+                this.refresh();
+              },
+              display: true,
+            }]}
           />
-          <Button
-            funcType="flat"
-            onClick={() => this.refresh()}
-          >
-            <Icon type="refresh icon" />
-            <span>刷新</span>
-          </Button>
+
         </Header>
         <Breadcrumb title="史诗燃耗图" />
-        <Content>
+        <Content style={{ paddingTop: 20 }}>
           {
             !(!ES.epics.length && ES.epicFinishLoading) ? (
               <div>
@@ -852,9 +863,8 @@ class EpicBurndown extends Component {
                       ))
                     }
                   </Select>
-                  <div className="c7n-epicSelectHeader">
+                  <div className="c7n-epicSelectHeader" style={{ marginTop: 5 }}>
                     <CheckboxGroup
-                      label="查看选项"
                       value={checkbox}
                       options={[{ label: '根据图表校准冲刺', value: 'checked' }]}
                       onChange={(val) => this.handleChangeCheckbox(val)}

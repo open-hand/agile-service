@@ -179,6 +179,9 @@ const ChooseField: React.FC<Props> = (props) => {
             e.nativeEvent.stopImmediatePropagation();
             setHidden(false);
           }}
+          style={{
+            marginLeft: 6,
+          }}
           {...props.dropDownBtnProps}
         >
           {dropDownBtnChildren}

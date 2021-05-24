@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import {
   Form, DataSet, Select, TextField, CheckBox,
-} from 'choerodon-ui/pro/lib';
+} from 'choerodon-ui/pro';
 import { find, map } from 'lodash';
 import { epicApi, issueApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -212,12 +212,12 @@ const CopyIssue: React.FC<Props> = ({
       <div>
         {
           !!issue.subIssueVOList.length && (
-            <CheckBox name="copySubIssue" />
+            <CheckBox name="copySubIssue" style={{ marginRight: 10 }} />
           )
         }
         {
           !!issueLink.length && (
-            <CheckBox style={{ marginLeft: 10 }} name="copyLinkIssue" />
+            <CheckBox name="copyLinkIssue" />
           )
         }
       </div>

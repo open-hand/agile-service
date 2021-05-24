@@ -18,6 +18,7 @@ const CodeQualityVarySearch: React.FC<CodeQualityVarySearchProps> = ({
       value={days}
       onChange={setDays}
       labelLayout={'float' as LabelLayout}
+      label="时间"
       clearButton={false}
     >
       <Option value={7}>

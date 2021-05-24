@@ -6,7 +6,7 @@ import {
   Button, Spin, Icon, Select, Table, Checkbox, Tabs, Tooltip, Pagination,
 } from 'choerodon-ui';
 import {
-  Page, Header, Content, Breadcrumb,
+  Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import moment from 'moment';
 import querystring from 'querystring';
@@ -20,10 +20,11 @@ import TypeTag from '@/components/TypeTag';
 import BurnDownChart from '@/components/charts/burn-down';
 import STATUS from '@/constants/STATUS';
 import { sprintApi, reportApi } from '@/api';
-import to, { linkUrl } from '@/utils/to';
+import to from '@/utils/to';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
-import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';
+import NoDataComponent from '../Component/noData';
+import BackBtn from '../back-btn';
 import './SprintReport.less';
 
 const { Option } = Select;
@@ -298,96 +299,92 @@ class SprintReport extends Component {
       <Page className="c7n-report">
         <Header
           title="冲刺报告图"
-          backPath={linkUrl(LINK_URL.report)}
-
         >
-          <SwithChart
-            current="sprint"
+          <HeaderButtons
+            items={[{
+              name: '切换',
+              element: <SwithChart
+                current="sprint"
+              />,
+              display: true,
+            }, {
+              name: '返回',
+              element: <BackBtn />,
+              display: true,
+            }, {
+              name: '刷新',
+              icon: 'refresh',
+              iconOnly: true,
+              handler: () => {
+                this.axiosGetRestDays();
+                ReportStore.changeCurrentSprint(ReportStore.currentSprint.sprintId);
+              },
+              display: true,
+            }]}
           />
-          <Button
-            funcType="flat"
-            onClick={() => {
-              this.axiosGetRestDays();
-              ReportStore.changeCurrentSprint(ReportStore.currentSprint.sprintId);
-            }}
-          >
-            <Icon type="refresh icon" />
-            <span>刷新</span>
-          </Button>
         </Header>
         <Breadcrumb title="冲刺报告图" />
-        <Content>
+        <Content style={{ paddingTop: 20 }}>
           <Spin spinning={this.state.loading}>
             {
               BurndownChartStore.getSprintList.length > 0 ? (
                 <div>
                   <div>
-                    <Select
-                      getPopupContainer={(triggerNode) => triggerNode.parentNode}
-                      style={{ width: 244 }}
-                      label="迭代冲刺"
-                      value={this.state.defaultSprint}
-                      onChange={(value) => {
-                        ReportStore.changeCurrentSprint(value);
-                        ReportStore.setDonePagination({
-                          current: 0,
-                          pageSize: 10,
-                          total: undefined,
-                        });
-                        ReportStore.setTodoPagination({
-                          current: 0,
-                          pageSize: 10,
-                          total: undefined,
-                        });
-                        ReportStore.setRemovePagination({
-                          current: 0,
-                          pageSize: 10,
-                          total: undefined,
-                        });
-                        let newEndDate;
-                        for (let index = 0, len = BurndownChartStore.getSprintList.length;
-                          index < len; index += 1) {
-                          if (BurndownChartStore.getSprintList[index].sprintId === value) {
-                            newEndDate = BurndownChartStore.getSprintList[index].endDate;
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <Select
+                        getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                        style={{ width: 244 }}
+                        label="迭代冲刺"
+                        value={this.state.defaultSprint}
+                        onChange={(value) => {
+                          ReportStore.changeCurrentSprint(value);
+                          ReportStore.setDonePagination({
+                            current: 0,
+                            pageSize: 10,
+                            total: undefined,
+                          });
+                          ReportStore.setTodoPagination({
+                            current: 0,
+                            pageSize: 10,
+                            total: undefined,
+                          });
+                          ReportStore.setRemovePagination({
+                            current: 0,
+                            pageSize: 10,
+                            total: undefined,
+                          });
+                          let newEndDate;
+                          for (let index = 0, len = BurndownChartStore.getSprintList.length;
+                            index < len; index += 1) {
+                            if (BurndownChartStore.getSprintList[index].sprintId === value) {
+                              newEndDate = BurndownChartStore.getSprintList[index].endDate;
+                            }
                           }
-                        }
-                        this.setState({
-                          defaultSprint: value,
-                          endDate: newEndDate,
-                        }, () => {
-                          this.axiosGetRestDays();
-                        });
-                      }}
-                    >
-                      {BurndownChartStore.getSprintList.length > 0
-                        ? BurndownChartStore.getSprintList.map((item) => (
-                          <Option value={item.sprintId}>{item.sprintName}</Option>
-                        )) : ''}
-                    </Select>
-                    <Checkbox
-                      style={{ marginLeft: 24 }}
-                      checked={this.state.restDayShow}
-                      onChange={this.onCheckChange}
-                    >
-                      显示非工作日
-                    </Checkbox>
-                    <div className="c7n-sprintMessage">
-                      <div className="c7n-sprintContent">
-                        <span>
-                          {ReportStore.getCurrentSprintStatus.status}
-                          {'冲刺,'}
-                          {'共'}
-                          {ReportStore.currentSprint.issueCount || 0}
-                          {'个问题'}
-                        </span>
-                        <span>
-                          {`${commonformatDate(ReportStore.currentSprint.startDate)} - ${commonformatDate(ReportStore.currentSprint.actualEndDate) || '至今'}`}
-                        </span>
-                      </div>
+                          this.setState({
+                            defaultSprint: value,
+                            endDate: newEndDate,
+                          }, () => {
+                            this.axiosGetRestDays();
+                          });
+                        }}
+                      >
+                        {BurndownChartStore.getSprintList.length > 0
+                          ? BurndownChartStore.getSprintList.map((item) => (
+                            <Option value={item.sprintId}>{item.sprintName}</Option>
+                          )) : ''}
+                      </Select>
+                      <Checkbox
+                        style={{ marginLeft: 24 }}
+                        checked={this.state.restDayShow}
+                        onChange={this.onCheckChange}
+                      >
+                        显示非工作日
+                      </Checkbox>
                       <p
                         className="primary"
                         style={{
                           cursor: 'pointer',
+                          marginLeft: 'auto',
                         }}
                         role="none"
                         onClick={() => {
@@ -403,6 +400,20 @@ class SprintReport extends Component {
                         在“问题管理中”查看
                         <Icon style={{ fontSize: 13, verticalAlign: -2 }} type="open_in_new" />
                       </p>
+                    </div>
+                    <div className="c7n-sprintMessage">
+                      <div className="c7n-sprintContent">
+                        <span style={{ marginRight: 50 }}>
+                          {ReportStore.getCurrentSprintStatus.status}
+                          {'冲刺,'}
+                          {'共'}
+                          {ReportStore.currentSprint.issueCount || 0}
+                          {'个问题'}
+                        </span>
+                        <span>
+                          {`${commonformatDate(ReportStore.currentSprint.startDate)} - ${commonformatDate(ReportStore.currentSprint.actualEndDate) || '至今'}`}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <BurnDownChart

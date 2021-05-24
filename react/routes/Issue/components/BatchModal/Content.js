@@ -340,11 +340,12 @@ function BatchModal({
         {fields.map((f) => {
           const { key, id } = f;
           return (
-            <Row key={key} gutter={20}>
+            <Row key={key} gutter={20} type="flex" align="middle">
               <Col span={11}>
                 <Select
                   style={{ width: '100%' }}
                   placeholder="请选择字段"
+                  label="字段"
                   value={id}
                   onChange={(value) => {
                     const field = find(fieldData, { id: value });
@@ -360,7 +361,9 @@ function BatchModal({
               </Col>
               {id && (
                 <Col span={11} key={id}>
-                  {renderField(f)}
+                  {React.cloneElement(renderField(f), {
+                    label: f.name,
+                  })}
                 </Col>
               )}
               <Col span={2}>
@@ -376,7 +379,7 @@ function BatchModal({
           );
         })}
         <div>
-          <Button onClick={Field.add} icon="add" color="blue">选择字段</Button>
+          <Button onClick={Field.add} icon="add">选择字段</Button>
         </div>
       </Form>
       {loading && (
@@ -397,8 +400,8 @@ function BatchModal({
         </Button>
         <Button
           disabled={Object.keys(getData()).length === 0}
-          color="blue"
           loading={loading}
+          color="primary"
           style={{
             fontWeight: 500,
           }}

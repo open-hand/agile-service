@@ -1,16 +1,15 @@
 import React from 'react';
 import {
-  Page, Header, Content, Breadcrumb,
+  Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Button, Icon, Spin,
+  Spin,
 } from 'choerodon-ui';
 import Accumulation from '@/components/charts/accumulation';
 import AccumulationSearch from '@/components/charts/accumulation/search';
 import useAccumulationReport from '@/components/charts/accumulation/useAccumulationReport';
 import pic from '@/assets/image/emptyChart.svg';
-import { linkUrl } from '@/utils/to';
-import LINK_URL from '@/constants/LINK_URL';
+import BackBtn from '../back-btn';
 import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';
 
@@ -41,16 +40,30 @@ const AccumulationReport: React.FC = () => {
     <Page>
       <Header
         title="累积流量图"
-        backPath={linkUrl(LINK_URL.report)}
       >
-        <SwithChart
-          // @ts-ignore
-          current="accumulation"
+        <HeaderButtons
+          items={[{
+            name: '切换',
+            element: <SwithChart
+            // @ts-ignore
+              current="accumulation"
+            />,
+            display: true,
+          }, {
+            name: '返回',
+            element: <BackBtn />,
+            display: true,
+          }, {
+            name: '刷新',
+            icon: 'refresh',
+            iconOnly: true,
+            handler: () => {
+              refresh();
+            },
+            display: true,
+          }]}
         />
-        <Button funcType="flat" onClick={() => refresh()}>
-          <Icon type="refresh icon" />
-          <span>刷新</span>
-        </Button>
+
       </Header>
       <Breadcrumb title="累积流量图" />
       <Content

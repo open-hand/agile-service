@@ -64,11 +64,11 @@ const tableColumns: GanttProps<Issue>['columns'] = [{
   render: (record) => (
     <Tooltip title={record.summary}>
       {!record.group ? (
-        <span style={{ cursor: 'pointer', color: 'rgba(0,0,0,0.87)' }}>
+        <span style={{ cursor: 'pointer', color: 'var(--table-click-color)' }}>
           <TypeTag iconSize={22} data={record.issueTypeVO} style={{ marginRight: 5 }} />
           <span style={{ verticalAlign: 'middle' }}>{record.summary}</span>
         </span>
-      ) : <span style={{ color: 'rgba(0,0,0,0.87)' }}>{record.summary}</span>}
+      ) : <span style={{ color: 'var(--table-click-color)' }}>{record.summary}</span>}
     </Tooltip>
   ),
 },
@@ -242,6 +242,8 @@ const GanttPage: React.FC = () => {
   ), []);
   const renderInvalidBar: GanttProps['renderInvalidBar'] = useCallback((element, barInfo) => (
     <Tooltip
+      // @ts-ignore
+      getPopupContainer={(t) => document.getElementsByClassName('gantt-chart')[0] as HTMLElement}
       hidden={barInfo.stepGesture === 'moving'}
       placement="top"
       title="点击并拖动以设置预计开始、结束时间。"
@@ -319,6 +321,7 @@ const GanttPage: React.FC = () => {
           display: 'flex',
           paddingTop: 7,
           flexDirection: 'column',
+          paddingBottom: 0,
         }}
       >
         <Context.Provider value={{ store }}>

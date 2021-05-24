@@ -109,7 +109,6 @@ function ObjectScheme() {
           onContinue={handleContinueCheckChange}
           promptText={promptText}
         />),
-        footer: null,
       });
     }
     return isOpen;

@@ -38,7 +38,7 @@ const TextBlock: React.FC<Props> = ({ data: { content, key } }) => {
     }
   }, [onFinish]);
   return (
-    <div style={{ padding: '10px 26px' }} ref={ref}>
+    <div style={{ padding: '0 26px' }} ref={ref}>
       <WYSIWYGViewer value={content} />
     </div>
   );
