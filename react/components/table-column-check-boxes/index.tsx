@@ -11,8 +11,11 @@ import { FormProps } from 'choerodon-ui/pro/lib/form/Form';
 import { pageConfigApi } from '@/api';
 import { OptionProps } from 'choerodon-ui/lib/select';
 
+export interface ITableColumnCheckBoxesOptionData {
+  label: string, value: string, checkBoxProps?: CheckBoxProps, defaultChecked?: boolean, optionConfig?: OptionProps
+}
 interface Props {
-  options: Array<{ label: string, value: string, checkBoxProps?: CheckBoxProps, defaultChecked?: boolean, optionConfig?: OptionProps }>,
+  options: Array<ITableColumnCheckBoxesOptionData>,
   otherCheckBoxProps?: Partial<CheckBoxProps>,
   formProps?: Partial<FormProps>,
   name?: string,
@@ -31,6 +34,7 @@ interface IConfig {
   onChange?: (data: string[] | string) => void | boolean,
   checkBoxProps?: Partial<CheckBoxProps>,
 }
+
 export interface ITableColumnCheckBoxesDataProps {
   checkedOptions: string[],
   setCheckedOptions: (codes: string[]) => void,

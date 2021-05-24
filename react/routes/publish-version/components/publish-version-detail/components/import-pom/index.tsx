@@ -39,7 +39,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     autoCreate: true,
     fields: [
       { name: 'subProject', label: '所属项目', required: programMode },
-      { name: 'groupId', label: 'GroupId' },
+      { name: 'groupId', label: 'Group' },
     ],
   }), []);
   const disabledUpload = useMemo(() => {
@@ -58,8 +58,8 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     //   { artifactId: 'agile-test', version: '0.18.a', versionAlias: undefined },
     // ],
     fields: [
-      { name: 'artifactId', label: '应用服务' },
-      { name: 'version', label: 'version*', required: true },
+      { name: 'artifactId', label: 'Artifact' },
+      { name: 'version', label: 'Version*', required: true },
       { name: 'versionAlias', label: '版本别名' },
       {
         name: 'appServiceObject',
@@ -71,7 +71,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
       },
       { name: 'serviceCode', bind: 'appServiceObject.code' },
       // { name: 'serviceName', bind: 'appServiceObject.name' },
-      { name: 'tagName', label: 'tag' },
+      { name: 'tagName', label: 'Tag' },
     ],
   }), []);
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

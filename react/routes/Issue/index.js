@@ -283,9 +283,12 @@ const Issue = observer(({ cached, updateCache }) => {
             name: '导出问题',
             icon: 'unarchive',
             handler: () => {
+              const visibleColumns = (cached?.listLayoutColumns || defaultListLayoutColumns).filter((item) => item.display).map((item) => item.columnCode);
               openExportIssueModal(
                 issueSearchStore.getAllFields,
                 issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()].filter(((c) => !['issueIds', 'contents', 'userId'].includes(c.code))) : [],
+                tableFields || [],
+                visibleColumns,
                 tableListMode,
                 'agile_export_issue',
               );
@@ -377,33 +380,33 @@ const Issue = observer(({ cached, updateCache }) => {
           />
         )}
         {tableProps.checkValues.length > 0 && (
-        <BatchModal
-          issueSearchStore={issueSearchStore}
-          fields={issueSearchStore.fields}
-          selected={tableProps.checkValues}
-          onClickEdit={() => {
-            issueSearchStore.setBatchAction('edit');
-          }}
-          close={() => {
-            closeBatchModal();
-          }}
-          onClickDelete={() => {
-            issueSearchStore.setBatchAction('delete');
-            openBatchDeleteModal({
-              selected: tableProps.checkValues,
-              close: closeBatchModal,
-              onDelete: () => refresh(true),
-            });
-          }}
-          onCancel={() => {
-            closeBatchModal();
-          }}
-          onEdit={() => {
-            closeBatchModal();
-            refresh();
-          }}
-          hasBatchDeletePermission={hasBatchDeletePermission}
-        />
+          <BatchModal
+            issueSearchStore={issueSearchStore}
+            fields={issueSearchStore.fields}
+            selected={tableProps.checkValues}
+            onClickEdit={() => {
+              issueSearchStore.setBatchAction('edit');
+            }}
+            close={() => {
+              closeBatchModal();
+            }}
+            onClickDelete={() => {
+              issueSearchStore.setBatchAction('delete');
+              openBatchDeleteModal({
+                selected: tableProps.checkValues,
+                close: closeBatchModal,
+                onDelete: () => refresh(true),
+              });
+            }}
+            onCancel={() => {
+              closeBatchModal();
+            }}
+            onEdit={() => {
+              closeBatchModal();
+              refresh();
+            }}
+            hasBatchDeletePermission={hasBatchDeletePermission}
+          />
         )}
         <DetailContainer {...props} />
       </Content>

@@ -64,7 +64,7 @@ const DraggableItem: React.FC<Props> = ({
             <span>{value}</span>
           </>
         )}
-        isHasMenu={!disabledDel && showSplitLine}
+        isHasMenu={false}
       />
     </div>
   );
@@ -111,16 +111,14 @@ const DraggableItem: React.FC<Props> = ({
         name, record, dataSet,
       }, editDisabled)}
       {
-        (!disabledDel && !showSplitLine && record?.get('createdLevel') !== 'organization')
+        (!disabledDel && (!showSplitLine || record?.get('createdLevel') === 'organization'))
         && (
-          <Button
-            className={`${prefixCls}-action-button`}
-            disabled={isDragDisabled}
-            style={{ marginLeft: 10 }}
-            onClick={() => onClickDel(record!, dataSet!)}
-          >
-            <Icon type="delete" style={{ fontSize: 18 }} />
-          </Button>
+        <Icon
+          className={classnames(`${prefixCls}-action-button`, { [`${prefixCls}-action-button-disabled`]: isDragDisabled })}
+          style={{ opacity: showSplitLine ? 1 : undefined }}
+          type="delete"
+          onClick={() => onClickDel(record!, dataSet!)}
+        />
         )
       }
 

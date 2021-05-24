@@ -35,7 +35,7 @@ const ExportPublishVersion: React.FC<Props> = observer(({ modal, publishVersionI
       },
       {
         name: 'withSubVersion',
-        label: '是否包含子版本',
+        label: '是否同步导出子版本信息',
         // required: true,
         // multiple: true,
       },

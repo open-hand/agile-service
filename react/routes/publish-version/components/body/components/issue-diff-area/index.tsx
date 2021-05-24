@@ -97,10 +97,11 @@ function IssueDiffArea() {
     }); // .....
   }, [issueDiffDataSet, issueDiffDataSet.length, publishVersionId]);
   useEffect(() => {
-    if (dependencyList.length === 0) {
+    const availableDependencyList = dependencyList.filter((i) => i.type === 'tag');
+    if (availableDependencyList.length === 0) {
       issueDiffDataSet.loadData([{}]);
     } else {
-      issueDiffDataSet.loadData(dependencyList.map((i) => ({
+      issueDiffDataSet.loadData(availableDependencyList.map((i) => ({
         appServiceCode: i.appServiceCode,
         appServiceId: store.findAppServiceByCode(i.appServiceCode!)?.id,
         sourceTag: i.tagName,

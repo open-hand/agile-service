@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import {
-  TabPage as Page, Header, Content, Breadcrumb,
+  TabPage as Page, Header, Content, Breadcrumb, useTheme,
 } from '@choerodon/boot';
 import {
   Button, Tooltip, Dropdown, Menu,
@@ -40,6 +40,7 @@ const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabl
 
 function PublishVersion() {
   const { prefixCls, tableDataSet, store } = usePublishVersionContext();
+  const [theme] = useTheme();
 
   function handleCreate(data: any) {
     store.create(data).then(() => {
@@ -123,6 +124,17 @@ function PublishVersion() {
       </Header>
       <Breadcrumb />
       <Content
+        style={{
+          ...theme === 'theme4' ? {
+            marginLeft: 0,
+            marginRight: 0,
+            paddingLeft: 0,
+            paddingRight: 0,
+            paddingBottom: 0,
+          } : {
+            padding: 0, paddingTop: 4,
+          },
+        }}
         className={`${prefixCls}-content`}
       >
         {render()}

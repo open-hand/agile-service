@@ -110,6 +110,7 @@ const getExportFieldCodes = (data: Array<any>): string[] => {
     updateUser: 'lastUpdatedUserName',
     mainResponsibleUser: 'mainResponsibleName',
     environmentName: 'environmentName',
+    tags: 'tagName',
   };
   // @ts-ignore
   return data.map((code: string) => fieldTransform[code] || code);
@@ -145,6 +146,7 @@ const getReverseExportFieldCodes = (data: Array<any>) => {
     componentName: 'component',
     createdUserName: 'createUser',
     lastUpdatedUserName: 'updateUser',
+    tagName: 'tags',
   };
   // @ts-ignore
   return data.map((code: string) => fieldTransform[code] || code);
