@@ -88,7 +88,6 @@ const ImportField: React.FC<{ modal?: IModalProps, onOk: Function }> = ({ modal,
         title="下载模板"
         footer={(
           <Button
-            color={'primary' as any}
             onClick={handleDownload}
             icon="get_app"
           >

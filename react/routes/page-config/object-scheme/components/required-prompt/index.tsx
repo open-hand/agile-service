@@ -33,7 +33,7 @@ const RequiredPrompt: React.FC<Props> = ({
           {promptText}
         </span>
         <CheckBox
-          style={{ marginTop: 10 }}
+          style={{ marginTop: 16 }}
           value="false"
           onChange={setIsPrompt}
           defaultChecked={false}
