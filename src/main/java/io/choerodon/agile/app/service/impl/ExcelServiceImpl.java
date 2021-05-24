@@ -263,6 +263,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(ENVIRONMENT_NAME, "环境");
         FIELD_MAP.put(SPENT_WORK_TIME, "已耗费时间");
         FIELD_MAP.put(ALL_ESTIMATE_TIME, "总预估时间");
+        FIELD_MAP.put("tags", "Tag");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -3205,6 +3206,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, issueIds, true, "agile_issue");
                     Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                     Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
+                    Map<Long, Set<TagVO>> tagMap = listTagMap(projectId, issueIds);
                     cursor
                             .addCollections(userIds)
                             .addCollections(usersMap)
@@ -3217,7 +3219,8 @@ public class ExcelServiceImpl implements ExcelService {
                             .addCollections(labelNames)
                             .addCollections(componentMap)
                             .addCollections(foundationCodeValue)
-                            .addCollections(workLogVOMap);
+                            .addCollections(workLogVOMap)
+                            .addCollections(tagMap);
                     issues.forEach(issue ->
                             buildExcelIssueFromIssue(
                                     project.getName(),
@@ -3235,6 +3238,7 @@ public class ExcelServiceImpl implements ExcelService {
                                     foundationCodeValue,
                                     envMap,
                                     workLogVOMap,
+                                    tagMap,
                                     issue));
                 }
                 if (!isTreeView) {
@@ -3256,6 +3260,25 @@ public class ExcelServiceImpl implements ExcelService {
         downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
     }
 
+    private Map<Long, Set<TagVO>> listTagMap(Long projectId, List<Long> issueIds) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Map<Long, Set<TagVO>> map = new HashMap<>();
+        if (!ObjectUtils.isEmpty(issueIds)) {
+            tagIssueRelMapper.selectByOptions(organizationId, projectId, issueIds)
+                    .forEach(x -> {
+                        Long issueId = x.getIssueId();
+                        Set<TagVO> tags = map.computeIfAbsent(issueId, y -> new HashSet<>());
+                        TagVO tag = new TagVO();
+                        tag.setProjectId(x.getTagProjectId());
+                        tag.setTagName(x.getTagName());
+                        tag.setAppServiceCode(x.getAppServiceCode());
+                        tags.add(tag);
+                    });
+        }
+        return map;
+
+    }
+
     protected ExportIssuesVO buildExcelIssueFromIssue(String projectName,
                                                       Map<Long, Set<Long>> parentSonMap,
                                                       Map<Long, ExportIssuesVO> issueMap,
@@ -3271,6 +3294,7 @@ public class ExcelServiceImpl implements ExcelService {
                                                       Map<Long, Map<String, Object>> foundationCodeValue,
                                                       Map<String, String> envMap,
                                                       Map<Long, List<WorkLogVO>> workLogVOMap,
+                                                      Map<Long, Set<TagVO>> tagMap,
                                                       IssueDTO issue) {
         Long issueId = issue.getIssueId();
         ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
@@ -3300,7 +3324,29 @@ public class ExcelServiceImpl implements ExcelService {
         issueMap.put(issueId, exportIssuesVO);
         processParentSonRelation(parentSonMap, issue);
         setSpentWorkTimeAndAllEstimateTime(workLogVOMap, exportIssuesVO);
+        setTag(tagMap, exportIssuesVO);
         return exportIssuesVO;
+    }
+
+    private void setTag(Map<Long, Set<TagVO>> tagMap, ExportIssuesVO exportIssuesVO) {
+        Long issueId = exportIssuesVO.getIssueId();
+        Set<TagVO> tags = tagMap.get(issueId);
+        if (!ObjectUtils.isEmpty(tags)) {
+            List<TagVO> tagList = new ArrayList<>(tags);
+            tagList.sort(Comparator.comparing(TagVO::getProjectId)
+                    .thenComparing(TagVO::getAppServiceCode)
+                    .thenComparing(TagVO::getTagName));
+            StringBuilder build = new StringBuilder();
+            Iterator<TagVO> iterator = tagList.iterator();
+            while (iterator.hasNext()) {
+                TagVO tag = iterator.next();
+                build.append(tag.getAppServiceCode()).append(COLON_CN).append(tag.getTagName());
+                if (iterator.hasNext()) {
+                    build.append("，");
+                }
+            }
+            exportIssuesVO.setTags(build.toString());
+        }
     }
 
     /**
