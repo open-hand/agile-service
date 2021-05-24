@@ -24,6 +24,8 @@ export interface IssueTableProps extends Partial<TableProps> {
   onSummaryClick: () => void
   typeIdChange?: (id: string) => void
   summaryChange?: (summary: string) => void
+  setDefaultSprint?: (sprintId: string | undefined) => void,
+  assigneeChange?: (assigneeId: string | undefined) => void
   IssueStore?: any
   tableProps: ReturnType<typeof useTable>
   onColumnResize?: (columnWidth: number, dataKey: string) => void
@@ -62,6 +64,8 @@ const IssueTable: React.FC<IssueTableProps> = ({
   createIssue = true,
   typeIdChange = () => { },
   summaryChange = () => { },
+  assigneeChange = () => {},
+  setDefaultSprint = () => {},
   IssueStore,
   tableProps,
   onColumnResize,
@@ -107,6 +111,8 @@ const IssueTable: React.FC<IssueTableProps> = ({
             cantCreateEvent={handleOpenCreateIssue}
             typeIdChange={typeIdChange}
             summaryChange={summaryChange}
+            assigneeChange={assigneeChange}
+            setDefaultSprint={setDefaultSprint}
           />
         </div>
       )}

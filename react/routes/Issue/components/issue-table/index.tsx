@@ -23,6 +23,8 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
   tableRef,
   typeIdChange,
   summaryChange,
+  assigneeChange,
+  setDefaultSprint,
   IssueStore,
   isTree,
 }) => {
@@ -80,6 +82,8 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
         onRowClick={onRowClick}
         typeIdChange={typeIdChange}
         summaryChange={summaryChange}
+        assigneeChange={assigneeChange}
+        setDefaultSprint={setDefaultSprint}
         IssueStore={IssueStore}
         onSummaryClick={onSummaryClick}
         onColumnResize={handleColumnResize}

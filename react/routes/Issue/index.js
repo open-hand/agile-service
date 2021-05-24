@@ -207,6 +207,8 @@ const Issue = observer(({ cached, updateCache }) => {
     IssueStore.createQuestion(false);
     IssueStore.setDefaultSummary(undefined);
     IssueStore.setDefaultTypeId(undefined);
+    IssueStore.setDefaultSprint(undefined);
+    IssueStore.setDefaultAssignee(undefined);
     refresh();
   }, [refresh]);
   const handleRowClick = useCallback((record) => {
@@ -347,6 +349,8 @@ const Issue = observer(({ cached, updateCache }) => {
           onRowClick={handleRowClick}
           typeIdChange={IssueStore.setDefaultTypeId}
           summaryChange={IssueStore.setDefaultSummary}
+          assigneeChange={IssueStore.setDefaultAssignee}
+          setDefaultSprint={IssueStore.setDefaultSprint}
           IssueStore={IssueStore}
           onSummaryClick={handleSummaryClick}
         />
@@ -362,10 +366,14 @@ const Issue = observer(({ cached, updateCache }) => {
               IssueStore.createQuestion(false);
               IssueStore.setDefaultSummary(undefined);
               IssueStore.setDefaultTypeId(undefined);
+              IssueStore.setDefaultSprint(undefined);
+              IssueStore.setDefaultAssignee(undefined);
             }}
             onOk={handleCreateIssue}
             defaultTypeId={IssueStore.defaultTypeId}
             defaultSummary={IssueStore.defaultSummary}
+            chosenSprint={IssueStore.defaultSprint}
+            chosenAssignee={IssueStore.defaultAssignee}
           />
         )}
         {tableProps.checkValues.length > 0 && (

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { Button, Icon, Tooltip } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import QuickCreateIssue from '@/components/QuickCreateIssue/QuickCreateIssue';
@@ -55,8 +55,16 @@ const SubBug = observer(({
     </div>
   );
 
+  const resetDefault = useCallback(() => {
+    store.setDefaultSummary(undefined);
+    store.setDefaultTypeId(undefined);
+    store.setDefaultSprint(undefined);
+    store.setDefaultAssignee(undefined);
+  }, [store]);
+
   const handleCreateSubIssue = () => {
     store.setCreateSubBugShow(false);
+    resetDefault();
     if (onUpdate) {
       onUpdate();
     }
@@ -90,6 +98,19 @@ const SubBug = observer(({
         relateIssueId={relateIssueId}
         buttonShowText="快速创建缺陷"
         onCreate={handleCreateSubIssue}
+        cantCreateEvent={() => { store.setCreateSubBugShow(true); }}
+        typeIdChange={(id) => {
+          store.setDefaultTypeId(id);
+        }}
+        summaryChange={(issueSummary) => {
+          store.setDefaultSummary(issueSummary);
+        }}
+        assigneeChange={(assigneeId) => {
+          store.setDefaultAssignee(assigneeId);
+        }}
+        setDefaultSprint={(value) => {
+          store.setDefaultSprint(value);
+        }}
       />
       )}
       {
@@ -98,8 +119,12 @@ const SubBug = observer(({
             relateIssueId={issueId}
             parentSummary={summary}
             visible={createSubBugShow}
-            onCancel={() => store.setCreateSubBugShow(false)}
+            onCancel={() => { store.setCreateSubBugShow(false); resetDefault(); }}
             onOk={handleCreateSubIssue}
+            chosenSprint={store.defaultSprint}
+            chosenAssignee={store.defaultAssignee}
+            defaultTypeId={store.defaultTypeId}
+            defaultSummary={store.defaultSummary}
           />
         ) : null
       }

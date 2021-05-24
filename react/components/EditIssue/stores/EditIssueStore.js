@@ -331,5 +331,29 @@ class EditIssueStore {
     ignoreEvents.includes('updateAfter') || await this.events.updateAfter(res);
     return res;
   }
+
+  @observable defaultTypeId = '';
+
+  @action setDefaultTypeId = (data) => {
+    this.defaultTypeId = data;
+  }
+
+  @observable defaultSummary = '';
+
+  @action setDefaultSummary = (data) => {
+    this.defaultSummary = data;
+  }
+
+  @observable defaultSprint = '';
+
+  @action setDefaultSprint = (data) => {
+    this.defaultSprint = data;
+  }
+
+  @observable defaultAssignee;
+
+  @action setDefaultAssignee = (data) => {
+    this.defaultAssignee = data;
+  }
 }
 export default EditIssueStore;

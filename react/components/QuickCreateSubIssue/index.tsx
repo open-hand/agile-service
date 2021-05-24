@@ -9,13 +9,14 @@ import { Button } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { useLockFn } from 'ahooks';
-import { IIssueType } from '@/common/types';
+import { IIssueType, User } from '@/common/types';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { FormProps } from 'choerodon-ui/lib/form';
 import { fieldApi, issueApi } from '@/api';
 import { WrappedFormUtils } from 'choerodon-ui/lib/form/Form';
 import { fields2Map } from '@/utils/defaultValue';
 import TypeTag from '../TypeTag';
+import UserDropdown from '../UserDropdown';
 
 const FormItem = Form.Item;
 
@@ -25,9 +26,15 @@ interface QuickCreateSubIssueProps extends FormProps {
   sprintId: string
   onCreate?: () => void
   onOpen: (issueId: string) => void
+  defaultAssignee: User | undefined
+  cantCreateEvent?: () => void
+  summaryChange?: (summary: string) => void,
+  typeIdChange?: (typeId: string) => void,
+  setDefaultSprint?: (sprintId: string | undefined) => void,
+  assigneeChange?: (assigneeId: string | undefined) => void
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
-  form, priorityId, parentIssueId, sprintId, onCreate, onOpen,
+  form, priorityId, parentIssueId, sprintId, onCreate, onOpen, defaultAssignee, cantCreateEvent, summaryChange, typeIdChange, setDefaultSprint, assigneeChange,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: 'sub_task', onlyEnabled: true });
   const [expand, setExpand] = useState(false);
@@ -35,6 +42,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   const [loading, setLoading] = useState(false);
   const currentTemplate = useRef<string>();
   const currentType = issueTypes?.find((t) => t.id === id);
+  const userDropDownRef = useRef<{ selectedUser: User | undefined }>(null);
   useEffect(() => {
     if (issueTypes && issueTypes.length > 0) {
       setId(issueTypes[0].id);
@@ -46,12 +54,33 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   const handleCreate = useLockFn(async () => {
     (form as WrappedFormUtils).validateFields(async (err, values) => {
       const { summary } = values;
+      const assigneeId = userDropDownRef?.current?.selectedUser?.id;
+
       if (currentType && summary && summary.trim()) {
         if (!err) {
           setLoading(true);
-          if (!await checkCanQuickCreate(currentType.id)) {
-            Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
-            setLoading(false);
+          if (!await checkCanQuickCreate(currentType.id, assigneeId)) {
+            if (!cantCreateEvent) {
+              Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
+              setLoading(false);
+            } else {
+              Choerodon.prompt('请填写标注的必填字段');
+              if (summaryChange) {
+                summaryChange(summary);
+              }
+              if (typeIdChange) {
+                typeIdChange(currentType.id);
+              }
+              if (setDefaultSprint) {
+                setDefaultSprint(sprintId);
+              }
+              if (assigneeChange) {
+                assigneeChange(assigneeId);
+              }
+              setLoading(false);
+              handleCancel();
+              cantCreateEvent();
+            }
             return;
           }
           const param = {
@@ -92,7 +121,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
         });
       });
     }
-  }, [expand, id]);
+  }, [expand, form, id]);
   const handleCancel = useCallback(() => {
     setExpand(false);
   }, []);
@@ -145,6 +174,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                     </div>
                   </Dropdown>
                 )}
+                <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} />
                 <FormItem label="summary" style={{ flex: 1, margin: '0 10px', padding: 0 }}>
                   {getFieldDecorator('summary', {
                     rules: [{ required: true, message: '请输入问题概要！' }],

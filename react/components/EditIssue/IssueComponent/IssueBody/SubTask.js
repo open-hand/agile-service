@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-curly-brace-presence */
-import React, { useContext } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Progress,
@@ -61,8 +61,16 @@ const SubTask = observer(({
     </div>
   );
 
+  const resetDefault = useCallback(() => {
+    store.setDefaultSummary(undefined);
+    store.setDefaultTypeId(undefined);
+    store.setDefaultSprint(undefined);
+    store.setDefaultAssignee(undefined);
+  }, [store]);
+
   const handleCreateSubIssue = () => {
     store.setCreateSubTaskShow(false);
+    resetDefault();
     if (onUpdate) {
       onUpdate();
     }
@@ -118,6 +126,19 @@ const SubTask = observer(({
                 reloadIssue(issueId);
               }
             }}
+            cantCreateEvent={() => { store.setCreateSubTaskShow(true); }}
+            typeIdChange={(id) => {
+              store.setDefaultTypeId(id);
+            }}
+            summaryChange={(issueSummary) => {
+              store.setDefaultSummary(issueSummary);
+            }}
+            assigneeChange={(assigneeId) => {
+              store.setDefaultAssignee(assigneeId);
+            }}
+            setDefaultSprint={(value) => {
+              store.setDefaultSprint(value);
+            }}
           />
         )}
         {
@@ -126,9 +147,13 @@ const SubTask = observer(({
               parentIssueId={parentIssueId}
               parentSummary={parentSummary}
               visible={createSubTaskShow}
-              onCancel={() => store.setCreateSubTaskShow(false)}
+              onCancel={() => { store.setCreateSubTaskShow(false); resetDefault(); }}
               onOk={handleCreateSubIssue}
               store={store}
+              chosenSprint={store.defaultSprint}
+              chosenAssignee={store.defaultAssignee}
+              defaultTypeId={store.defaultTypeId}
+              defaultSummary={store.defaultSummary}
             />
           ) : null
         }

@@ -428,6 +428,18 @@ class IssueStore {
   @action setDefaultSummary = (data) => {
     this.defaultSummary = data;
   }
+
+  @observable defaultSprint = '';
+
+  @action setDefaultSprint = (data) => {
+    this.defaultSprint = data;
+  }
+
+  @observable defaultAssignee;
+
+  @action setDefaultAssignee = (data) => {
+    this.defaultAssignee = data;
+  }
 }
 
 export default new IssueStore();
