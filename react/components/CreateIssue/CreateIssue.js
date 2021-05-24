@@ -1045,6 +1045,7 @@ class CreateIssue extends Component {
                 rules: [{ required: true, message: '史诗名称为必输项' }, {
                   validator: this.checkEpicNameRepeat,
                 }],
+                initialValue: this.props.defaultEpicName,
               })(
                 <DebounceInput autoFocus label="史诗名称" maxLength={20} />,
               )}
