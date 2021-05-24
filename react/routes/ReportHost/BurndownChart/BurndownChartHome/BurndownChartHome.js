@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Button, Icon, Select, Checkbox, Dropdown, Menu,
+  Checkbox,
 } from 'choerodon-ui';
 import {
-  Page, Header, Content, Breadcrumb, stores,
+  Select,
+} from 'choerodon-ui/pro';
+import {
+  Page, Header, Content, Breadcrumb, stores, HeaderButtons,
 } from '@choerodon/boot';
 import { some } from 'lodash';
 import Moment from 'moment';
@@ -24,6 +27,7 @@ import NoDataComponent from '../../Component/noData';
 import SwithChart from '../../Component/switchChart';
 import BurndownTable from './components/burndown-table';
 import './BurndownChartHome.less';
+import BackBtn from '../../back-btn';
 
 const { AppState } = stores;
 const moment = extendMoment(Moment);
@@ -236,7 +240,7 @@ class BurndownChartHome extends Component {
     });
   };
 
-  refresh=() => {
+  refresh = () => {
     this.getTableData();
     this.axiosGetRestDays();
   }
@@ -250,22 +254,8 @@ class BurndownChartHome extends Component {
       <Page>
         <Header
           title="燃尽图"
-          backPath={linkUrl(LINK_URL.report)}
         >
-          <SwithChart
-            current="burndownchart"
-          />
-          <HeaderLine />
-          <Button
-            funcType="flat"
-            onClick={() => {
-              this.getTableData();
-              this.axiosGetRestDays();
-            }}
-          >
-            <Icon type="refresh icon" />
-            <span>刷新</span>
-          </Button>
+
           <Checkbox
             style={{ marginLeft: 24 }}
             checked={restDayShow}
@@ -273,12 +263,31 @@ class BurndownChartHome extends Component {
           >
             显示非工作日
           </Checkbox>
+          <HeaderButtons
+            items={[{
+              name: '切换',
+              element: <SwithChart
+                current="burndownchart"
+              />,
+              display: true,
+            }, {
+              name: '返回',
+              element: <BackBtn />,
+              display: true,
+            }, {
+              name: '刷新',
+              icon: 'refresh',
+              iconOnly: true,
+              handler: () => {
+                this.getTableData();
+                this.axiosGetRestDays();
+              },
+              display: true,
+            }]}
+          />
         </Header>
         <Breadcrumb title="燃尽图" />
-        <Content style={{
-          borderTop: '1px solid rgb(216, 216, 216)',
-        }}
-        >
+        <Content>
           {
             sprints.length > 0 ? (
               <div>
@@ -287,11 +296,6 @@ class BurndownChartHome extends Component {
                 }}
                 >
                   <Select
-                    // {...configTheme({
-                    //   list: sprints,
-                    //   textField: 'sprintName',
-                    //   valueFiled: 'sprintId',
-                    // })}
                     getPopupContainer={(triggerNode) => triggerNode.parentNode}
                     style={{
                       width: 150,
@@ -318,6 +322,7 @@ class BurndownChartHome extends Component {
                         this.axiosGetRestDays();
                       });
                     }}
+                    clearButton={false}
                   >
                     {sprints.length > 0
                       ? sprints.map((item) => (
@@ -332,6 +337,7 @@ class BurndownChartHome extends Component {
                     value={this.state.select}
                     onChange={this.handleChangeSelect}
                     dropdownMatchSelectWidth={false}
+                    clearButton={false}
                   >
                     <Option value="remainingEstimatedTime">剩余时间</Option>
                     <Option value="storyPoints">故事点</Option>

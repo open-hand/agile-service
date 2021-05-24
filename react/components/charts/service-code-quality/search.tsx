@@ -1,8 +1,8 @@
 import React from 'react';
 import { SelectBox, Select, DatePicker } from 'choerodon-ui/pro';
 import moment, { Moment } from 'moment';
+import { CustomTabs } from '@choerodon/components';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
-import { ViewMode } from 'choerodon-ui/pro/lib/radio/enum';
 import SelectService from './SelectService';
 
 const { Option } = SelectBox;
@@ -38,6 +38,7 @@ const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
       projectId={projectId}
       value={serviceId}
       onChange={setServiceId}
+      style={{ width: 240 }}
       afterLoad={(data) => {
         if (!serviceId) {
           if (data.length > 0) {
@@ -51,7 +52,7 @@ const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
     />
     <Select
       label="对象类型"
-      style={{ marginLeft: 24 }}
+      style={{ marginLeft: 24, width: 230 }}
       value={type}
       onChange={setType}
       labelLayout={'float' as LabelLayout}
@@ -67,35 +68,38 @@ const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
         重复度
       </Option>
     </Select>
-    <SelectBox
-      mode={'button' as ViewMode}
-      style={{ marginLeft: 24 }}
-      value={days}
-      onChange={setDays}
-      labelLayout={'float' as LabelLayout}
-      clearButton={false}
-    >
-      <Option value={0}>
-        今天
-      </Option>
-      <Option value={7}>
-        近7天
-      </Option>
-      <Option value={30}>
-        近30天
-      </Option>
-    </SelectBox>
-    <DatePicker
-      style={{ marginLeft: 24 }}
-      range
-      placeholder={['开始时间', '结束时间']}
-      label=" "
-      value={range}
-      onChange={onRangeChange}
-      clearButton={false}
-      labelLayout={'float' as LabelLayout}
-      max={moment()}
-    />
+    <div style={{ marginTop: 20, display: 'flex', alignItems: 'center' }}>
+      <DatePicker
+        range
+        style={{ width: 497 }}
+        placeholder={['开始时间', '结束时间']}
+        label=" "
+        value={range}
+        onChange={onRangeChange}
+        clearButton={false}
+        labelLayout={'float' as LabelLayout}
+        max={moment()}
+      />
+      <div style={{ marginLeft: 20 }}>
+        <CustomTabs
+          // @ts-ignore
+          selectedTabValue={days}
+          onChange={(a, b, c) => setDays(c)}
+          data={[{
+            name: '今天',
+            value: 0,
+          },
+          {
+            name: '近7天',
+            value: 7,
+          },
+          {
+            name: '近30天',
+            value: 30,
+          }]}
+        />
+      </div>
+    </div>
   </div>
 );
 export default ServiceCodeQualityVarySearch;

@@ -3,10 +3,11 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  SelectBox, DataSet, Button, TextField,
-} from 'choerodon-ui/pro/lib';
+  SelectBox, DataSet, Button, TextField, Icon,
+} from 'choerodon-ui/pro';
 import { fieldApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { FuncType } from 'choerodon-ui/pro/lib/button/interface';
 import { includes } from 'lodash';
 import { getApplyType } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
@@ -196,10 +197,11 @@ const ImportFields: React.FC<Props> = ({
     <div className={styles.importFields}>
       <div className={styles.importFields_title}>
         <span>选择字段</span>
-        <Button className={styles.importFields_btn} onClick={handleClick}>{btnStatus !== 'NONE' ? '全选' : '全不选'}</Button>
+        <Button funcType={'flat' as FuncType} className={styles.importFields_btn} onClick={handleClick}>{btnStatus !== 'NONE' ? '全选' : '全不选'}</Button>
       </div>
       <div className={styles.importFields_content}>
         <TextField
+          prefix={<Icon type="search" />}
           placeholder="请输入搜索内容"
           style={{ height: 34, width: '100%', marginBottom: 8 }}
           onChange={handleSearch}

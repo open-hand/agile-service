@@ -65,8 +65,6 @@ const SaveTemplateBtn: React.FC<Props> = ({
         !templateIsExist && (
         <Button
           icon="unarchive"
-          funcType={'flat' as FuncType}
-          color={'primary' as ButtonColor}
           onClick={handleSaveTemplate}
           className="c7n-importIssue-btn"
           style={{

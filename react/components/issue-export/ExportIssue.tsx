@@ -49,7 +49,7 @@ const FormPart: React.FC<FormPartProps> = memo((props) => {
         {!!btnOnClick && (
           <Button
             className={`${prefixCls}-form-btn`}
-            // color={'primary' as ButtonColor}
+            funcType={'flat' as FuncType}
             onClick={handleClick}
           >
             {btnStatus !== 'NONE' ? '全选' : '全不选'}
@@ -247,7 +247,7 @@ const ExportIssue: React.FC = () => {
       <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
         <IssueFilterForm {...filterComponentProps}>
           <div style={{ marginTop: 4 }}>
-            <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { color: '#5365EA' } }} />
+            <ChooseField {...choseComponentProps} dropDownBtnProps={{ icon: 'add', style: { marginLeft: 6, marginTop: 10 } }} />
           </div>
         </IssueFilterForm>
       </FormPart>
@@ -277,9 +277,9 @@ const ExportIssue: React.FC = () => {
           !templateIsExist && (
             <Button
               icon="unarchive"
-              funcType={'flat' as FuncType}
+              // funcType={'flat' as FuncType}
               onClick={handleSaveTemplate}
-              color={'primary' as ButtonColor}
+              // color={'primary' as ButtonColor}
               className="c7n-exportIssue-btn"
               style={{
                 // marginLeft: 16,

@@ -338,7 +338,7 @@ const AddIssueType: React.FC<Props> = ({
             <CheckBox
               name="copyStatusMachine"
               style={{
-                marginTop: -60,
+                marginTop: -50,
               }}
             />
             )
@@ -348,7 +348,7 @@ const AddIssueType: React.FC<Props> = ({
             <CheckBox
               name="copyCustomField"
               style={{
-                marginTop: -80,
+                marginTop: -70,
               }}
             />
             )

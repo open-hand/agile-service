@@ -204,8 +204,8 @@ class EpicCell extends Component {
                 zIndex: 6,
                 background: isOver ? 'rgb(240,240,240)' : 'white',
                 ...collapse ? {
-                  borderLeft: lastCollapse ? 'none' : 'solid 1px #D8D8D8',
-                  borderRight: 'solid 1px #D8D8D8',
+                  borderLeft: lastCollapse ? 'none' : 'solid 1px var(--divider)',
+                  borderRight: 'solid 1px var(--divider)',
                   boxShadow: 'rgb(216, 216, 216) 0px -1px 0px inset',
                 } : {},
               }}

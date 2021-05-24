@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 
 function Header({
   selected, close, onClickEdit, onClickDelete, hasBatchDeletePermission,
@@ -26,6 +26,7 @@ function Header({
             }}
             >
               <Button
+                className="c7n-batch-header-btn"
                 icon="mode_edit"
                 style={{ color: 'white', marginRight: 6 }}
                 onClick={onClickEdit}
@@ -33,6 +34,7 @@ function Header({
                 批量编辑
               </Button>
               <Button
+                className="c7n-batch-header-btn"
                 icon="delete_forever"
                 style={{ color: 'white', marginRight: 18 }}
                 onClick={onClickDelete}

@@ -9,11 +9,33 @@ body.c7n-gantt-fullScreen {
 .c7n-gantt-content {
   .c7n-issue-search {
     width: calc(~"100% - 190px");
+    margin-right: 0;
   }
 }
+
 .gantt-body {
   flex: 1;
 }
+
+.gantt-table-body-cell {
+  color: var(--text-color);
+}
+
+.gantt-selection-indicator {
+  background: var(--selection-background);
+}
+
+.gantt-today,
+.gantt-today_line {
+  background: var(--primary-color);
+}
+
+// .gantt-body,
+// .gantt-body main,
+// .gantt-table-header-cell,
+// .gantt-table-body-cell {
+//   border-color: var(--divider);
+// }
 
 .c7n-gantt-expand-icon {
   cursor: pointer;

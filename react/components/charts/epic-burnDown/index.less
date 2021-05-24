@@ -1,27 +1,14 @@
-@primary-color:  #5365EA;
+@primary-color: #5365EA;
 
 .primary {
   color: @primary-color;
 }
+
 .epicBurnDown_search {
-  &_select {
-    height: 36px;
-  }
+
   .epicSelect {
     position: relative;
     display: inline-block;
-    :global {
-      .c7n-checkbox {
-        .c7n-checkbox-inner {
-          border-color: rgba(0, 0, 0, 0.54);
-        }
-      }
-      .c7n-checkbox-checked {
-        .c7n-checkbox-inner {
-          border-color: transparent;
-        }
-      }
-    }
 
     .icon_show {
       margin-left: -0.05rem;
@@ -29,12 +16,13 @@
       vertical-align: 0.02rem;
       padding-bottom: 0.25rem;
       background-color: transparent;
+
       :global {
         i {
-          margin-top: 4px;
+          margin-top: 16px;
           color: var(--text-color3);
         }
-      } 
+      }
     }
 
     .icon_show_info {
@@ -71,15 +59,16 @@
         margin-top: 0.12rem;
       }
     }
+  }
+
 }
 
+.epicInfo {
+  font-size: 0.13rem;
+  margin-top: 15px;
 }
 
 .epicBurnDown_chart {
-  .c7n_epicInfo {
-    font-size: 0.13rem;
-    margin-top: -0.22rem;
-  }
 
   .c7n_report {
     display: flex;
@@ -235,4 +224,3 @@
     }
   }
 }
-  

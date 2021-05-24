@@ -7,7 +7,7 @@ import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { Row, Col } from 'choerodon-ui';
 import moment from 'moment';
 import {
-  DataSet, Form, Icon,
+  DataSet, Form, Button,
 } from 'choerodon-ui/pro';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import renderField from './components/renderField';
@@ -162,14 +162,13 @@ const IssueFilterForm: React.FC = () => {
         {props.chosenFields?.map((item, index) => (typeof (item.immutableCheck) === 'boolean' || typeof (props.onDelete) === 'undefined'
           ? render(item)
           : (
-            <Row key={`export-field-row-${item.code}`}>
+            <Row key={`export-field-row-${item.code}`} type="flex" align="middle" gutter={8}>
               <Col span={22}>
                 {render(item)}
               </Col>
               <Col span={2}>
-                <Icon
-                  type="delete"
-                  className={`${prefixCls}-del`}
+                <Button
+                  icon="delete"
                   onClick={() => {
                     const { onDelete } = props;
                     onDelete!(item);

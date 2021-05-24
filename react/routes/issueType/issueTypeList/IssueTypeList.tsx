@@ -55,7 +55,7 @@ function IssueTypeList() {
       icon,
     };
     return (
-      <div className={styles.name} role="none" onClick={() => handleEdit({ record, dataSet })}>
+      <div className={`${styles.name} c7n-agile-table-cell-click`} role="none" onClick={() => handleEdit({ record, dataSet })}>
         <TypeTag
           data={data as IIssueType}
           showName
@@ -281,7 +281,7 @@ function IssueTypeList() {
         />
       </Header>
       <Breadcrumb />
-      <Content style={{ paddingTop: '0' }}>
+      <Content>
         <Table dataSet={issueTypeDataSet} className={styles.issueTypeTable}>
           <Column name="name" width={150} renderer={renderName} />
           <Column name="action" width={50} renderer={renderAction} />

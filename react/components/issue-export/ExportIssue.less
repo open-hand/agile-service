@@ -4,24 +4,21 @@
     &-title {
       display: inline-flex;
       align-items: center;
-      height: .24rem;
       font-size: 14px;
       font-weight: 500;
-      color: rgba(0, 0, 0, 0.87);
-      line-height: .24rem;
       margin-bottom: .03rem;
       & >span {
         font-size: 14px;
         font-weight: 500;
-        padding-right: .1rem;
+        // padding-right: .1rem;
         line-height: 16px;
       }
-      .c7n-pro-btn {
-        span {
-          display: inline-block;
-          padding-bottom: .02rem;
-        }
-      }
+      // .c7n-pro-btn {
+      //   span {
+      //     display: inline-block;
+      //     padding-bottom: .02rem;
+      //   }
+      // }
     }
     &-block {
       display: inline-block;
@@ -36,15 +33,7 @@
         padding-left: 0;
       }
     }
-    &-btn {
-      margin-top: 5px;
-      color: #5365EA;
-      font-size: .13rem;
 
-      span {
-        font-weight: 500;
-      }
-    }
     &-template {
       margin-bottom: .35rem;
     }
@@ -77,29 +66,6 @@
     font-size: .18rem;
   }
 
-  .c7n-pro-checkbox:disabled + .c7n-pro-checkbox-inner {
-    border-color: #D7D7D7 !important;
-    background-color: #F5F5F5 !important;
-    &::after {
-      border-color: #D7D7D7 !important;
-      color: #FFF;
-      background-color: #F5F5F5 !important;
-    }
-    & + span {
-      color: rgba(0, 0, 0, 0.87);
-    }
-  }
-
-  .c7n-pro-checkbox-float-label {
-    padding-top: 0;
-    margin-bottom: .14rem;
-
-    .c7n-pro-checkbox-label {
-      padding-right: .16rem;
-      padding-left: .04rem;
-    }
-  }
-
   &-form-filter {
     margin-bottom: 0.35rem;
     .c7n-pro-form {
@@ -118,7 +84,9 @@
   .c7n-pro-form-float-label .c7n-pro-field-wrapper {
     margin-bottom: 0;
   }
-
+  .c7n-pro-field-wrapper {
+    padding-top: 0;
+  }
   .c7n-agile-ws-finish {
     margin-top: .1rem;
   }

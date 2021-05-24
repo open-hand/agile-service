@@ -74,7 +74,7 @@ const BaseInfo: React.FC = () => {
   const selectedCCList = useMemo(() => (edit ? toJS(store.baseInfo?.ccList) : undefined), [edit, store.baseInfo?.ccList]);
   return (
     <>
-      <Prompt message={edit ? '项目报告有更改，放弃更改？' : '项目报告未保存，放弃更改？'} when={store.dirty} />
+      <Prompt message={edit ? '项目报告保存__@.@__项目报告有更改，放弃更改？' : '项目报告保存__@.@__项目报告未保存，放弃更改？'} when={store.dirty} />
       <Form style={{ width: 600, marginLeft: 18 }} dataSet={dataSet}>
         <TextField name="title" />
         <TextArea

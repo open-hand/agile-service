@@ -1,5 +1,5 @@
 import React from 'react';
-import { DatePicker } from 'choerodon-ui/pro';
+import { DatePicker, Form } from 'choerodon-ui/pro';
 import { Moment } from 'moment';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import SelectBoard from './SelectBoard';
@@ -13,6 +13,7 @@ export interface AccumulationSearchProps {
   quickFilterIds: string[]
   onQuickSearchChange: (quickFilterIds: string[]) => void
   projectId?: string
+  float?:boolean
 }
 const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
   range,
@@ -22,25 +23,31 @@ const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
   quickFilterIds,
   onQuickSearchChange,
   projectId,
+  float,
 }) => (
-  <div>
-    <DatePicker
-      range
-      value={range}
-      onChange={onRangeChange}
-      clearButton={false}
-      labelLayout={'float' as LabelLayout}
-    />
-    <SelectBoard
-      projectId={projectId}
-      onChange={onBoardChange}
-      value={boardId}
-    />
-    <QuickFilter
-      projectId={projectId}
-      onChange={onQuickSearchChange}
-      value={quickFilterIds}
-    />
-  </div>
+  <Form labelLayout={float ? 'float' as any : 'none'}>
+    <div style={{ display: 'flex', marginLeft: -6 }}>
+      <div style={{ width: 493 }}>
+        <DatePicker
+          style={{ width: '100%' }}
+          range
+          value={range}
+          onChange={onRangeChange}
+          clearButton={false}
+          labelLayout={'float' as LabelLayout}
+        />
+      </div>
+      <SelectBoard
+        projectId={projectId}
+        onChange={onBoardChange}
+        value={boardId}
+      />
+      <QuickFilter
+        projectId={projectId}
+        onChange={onQuickSearchChange}
+        value={quickFilterIds}
+      />
+    </div>
+  </Form>
 );
 export default AccumulationSearch;

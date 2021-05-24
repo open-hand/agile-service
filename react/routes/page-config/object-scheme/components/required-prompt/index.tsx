@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { IModalProps } from '@/common/types';
 import { Button, CheckBox } from 'choerodon-ui/pro';
 
@@ -17,28 +17,29 @@ const RequiredPrompt: React.FC<Props> = ({
   modal, formatMessage, onContinue, promptText,
 }) => {
   const [isPrompt, setIsPrompt] = useState<string>('true');
-  const handleCancel = () => {
-    modal?.close();
-  };
-  const handleConfirm = () => {
+
+  const handleConfirm = useCallback(async () => {
     localStorage.setItem('agile.page.field.setting.required.prompt', isPrompt);
     onContinue(true);
-    modal?.close();
-  };
+    return true;
+  }, [isPrompt, onContinue]);
+  useEffect(() => {
+    modal?.handleOk(handleConfirm);
+  }, [handleConfirm, modal]);
   return (
     <>
       <div className={promptStyles.content}>
         <span className={promptStyles.text}>
           {promptText}
         </span>
-        <div className={promptStyles.btn}>
-          <Button onClick={handleCancel}>{formatMessage({ id: 'cancel' })}</Button>
-          <Button color={'primary' as ButtonColor} onClick={handleConfirm}>{formatMessage({ id: 'confirm' })}</Button>
-        </div>
-
-      </div>
-      <div className={promptStyles.footer}>
-        <CheckBox value="false" onChange={setIsPrompt} defaultChecked={false}>不再提示</CheckBox>
+        <CheckBox
+          style={{ marginTop: 10 }}
+          value="false"
+          onChange={setIsPrompt}
+          defaultChecked={false}
+        >
+          不再提示
+        </CheckBox>
       </div>
     </>
   );

@@ -92,7 +92,7 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
               className={styles.epicBurnDown_search_select}
               labelLayout={'float' as LabelLayout}
               clearButton={false}
-              style={{ width: 500, marginRight: 33, height: 36 }}
+              style={{ width: 493, marginRight: 33 }}
               label="史诗"
               value={currentEpicId}
               onChange={handleChangeCurrentEpic}
@@ -107,6 +107,7 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
             </Select>
             <div className={styles.epicSelect}>
               <CheckBox
+                style={{ marginTop: 15 }}
                 label="查看选项"
                 value="checked"
                 checked={checked === 'checked'}

@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import {
   Input, Icon, Tooltip,
 } from 'choerodon-ui';
-import { Select } from 'choerodon-ui/pro';
+import { TextField } from 'choerodon-ui/pro';
 import { observer, inject } from 'mobx-react';
-import { configTheme } from '@/utils/common';
 import { FlatSelect } from '@choerodon/components';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import FiltersProvider from '../../../../../components/FiltersProvider';
@@ -42,9 +41,9 @@ class SideIssueList extends Component {
 
   }
 
-  handleFilterChange = (e) => {
+  handleFilterChange = (value) => {
     this.setState({
-      filter: e.target.value,
+      filter: value,
     });
   }
 
@@ -61,11 +60,11 @@ class SideIssueList extends Component {
     const { filters: { issueStatus, version: versionList }, HeaderStore } = this.props;
 
     return (
-      <div className="c7nagile-SideIssueList" style={{ top: 99 }}>
+      <div className="c7nagile-SideIssueList" style={{ top: 104 }}>
         <div className="c7nagile-SideIssueList-header">
           <div className="c7nagile-SideIssueList-input">
-            <Input
-              className="hidden-label"
+            <TextField
+              style={{ width: '100%' }}
               placeholder="按照名称搜索"
               prefix={<Icon type="search" />}
               value={filter}
@@ -77,7 +76,7 @@ class SideIssueList extends Component {
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',
-          padding: '0 10px',
+          padding: '0 16px',
         }}
         >
           <FlatSelect
@@ -108,6 +107,9 @@ class SideIssueList extends Component {
             placeholder="版本"
             dropdownStyle={{
               width: 180,
+            }}
+            style={{
+              marginLeft: 6,
             }}
             maxTagCount={2}
             maxTagTextLength={3}

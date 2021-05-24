@@ -2,7 +2,7 @@ import React, {
   useCallback, useState,
 } from 'react';
 import {
-  DataSet, Modal, Button, Progress,
+  Modal, Button, Progress,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { Choerodon, WSHandler } from '@choerodon/boot';
@@ -11,6 +11,7 @@ import { issueApi } from '@/api';
 import { getProjectId, getApplyType } from '@/utils/common';
 
 import { ProgressStatus } from 'choerodon-ui/lib/progress/enum';
+import { ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import styles from './index.less';
 
 interface Props {
@@ -69,28 +70,27 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
 
   return (
     <div>
-      {`确定要删除选中的${selected.length}个问题项吗？删除后，问题下的关联项将一并删除${getApplyType() === 'program' ? '' : '，包括子任务'}。`}
-      <span style={{ color: '#F44336' }}>
-        请谨慎操作！
-      </span>
-      <WSHandler
-        messageKey={`agile-batch-delete-issue-${getProjectId()}`}
-        onMessage={handleMessage}
-      >
-        {loading && (
+      <div style={{ padding: '0.2rem' }}>
+        {`确定要删除选中的${selected.length}个问题项吗？删除后，问题下的关联项将一并删除${getApplyType() === 'program' ? '' : '，包括子任务'}。`}
+        <span style={{ color: '#F44336' }}>
+          请谨慎操作！
+        </span>
+        <WSHandler
+          messageKey={`agile-batch-delete-issue-${getProjectId()}`}
+          onMessage={handleMessage}
+        >
+          {loading && (
           <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
             {loading === 'success' ? '删除成功' : ['正在删除，请稍等片刻', <span className={styles.dot}>…</span>]}
             <Progress status={'success' as ProgressStatus} value={Math.round(progress * 100)} />
           </div>
-        )}
-      </WSHandler>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+          )}
+        </WSHandler>
+      </div>
+      <div className="c7n-pro-modal-footer">
         <Button
           onClick={handleCancel}
           disabled={!!loading}
-          style={{
-            fontWeight: 500,
-          }}
         >
           取消
         </Button>
@@ -98,9 +98,7 @@ const BatchDeleteModal: React.FC<Props> = (props) => {
           className={styles.batchDeleteBtn}
           disabled={!!loading}
           loading={Boolean(loading)}
-          style={{
-            fontWeight: 500,
-          }}
+          color={'primary' as ButtonColor}
           onClick={() => {
             handleDelete();
           }}
@@ -122,7 +120,7 @@ const openBatchDeleteModal = (props: Props) => {
     },
     className: styles.batchDeleteModal,
     children: <ObserverBatchDeleteModal {...props} />,
-    footer: () => null,
+    footer: null,
     border: false,
   });
 };

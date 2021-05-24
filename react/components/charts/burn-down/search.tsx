@@ -62,6 +62,7 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
   return (
     <div>
       <SelectSprint
+        style={{ width: 273 }}
         label="迭代冲刺"
         labelLayout={'float' as LabelLayout}
         clearButton={false}
@@ -124,7 +125,7 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
       <Select
         clearButton={false}
         labelLayout={'float' as LabelLayout}
-        style={{ width: 244, marginLeft: 24 }}
+        style={{ width: 200, marginLeft: 20 }}
         label="单位"
         value={type}
         onChange={setType}
@@ -140,20 +141,21 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
       >
         显示非工作日
       </CheckBox>
-      <IssueSearch
-        projectId={projectId}
-        applyType="agile"
-        store={issueSearchStore}
-        onClear={() => {
-          const newSearchVO = issueSearchStore.getCustomFieldFilters();
-          setSearchVO(newSearchVO);
-        }}
-        onChange={() => {
-          const newSearchVO = issueSearchStore.getCustomFieldFilters();
-          setSearchVO(newSearchVO);
-        }}
-      />
-
+      <div style={{ marginLeft: -5, marginTop: 15 }}>
+        <IssueSearch
+          projectId={projectId}
+          applyType="agile"
+          store={issueSearchStore}
+          onClear={() => {
+            const newSearchVO = issueSearchStore.getCustomFieldFilters();
+            setSearchVO(newSearchVO);
+          }}
+          onChange={() => {
+            const newSearchVO = issueSearchStore.getCustomFieldFilters();
+            setSearchVO(newSearchVO);
+          }}
+        />
+      </div>
     </div>
   );
 };

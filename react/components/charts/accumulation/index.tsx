@@ -59,8 +59,8 @@ const AccumulationChart: React.FC<AccumulationChartProps> = ({
       itemHeight: 14,
     },
     grid: {
-      left: '50',
-      right: '90',
+      left: '20',
+      right: '40',
       top: '8%',
       containLabel: true,
     },

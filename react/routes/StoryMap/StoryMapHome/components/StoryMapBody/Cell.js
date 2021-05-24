@@ -13,10 +13,10 @@ class Cell extends Component {
         ref={saveRef}
         style={{
           padding: CellPadding,
-          boxShadow: epicIndex === 0 ? 'inset 0 -1px 0 #D8D8D8' : 'inset 1px -1px 0 #D8D8D8',
+          boxShadow: epicIndex === 0 ? 'inset 0 -1px 0 var(--divider)' : 'inset 1px -1px 0 var(--divider)',
           // border: 'none',
-          // ...isLastEpic ? { borderRight: 'solid 1px #D8D8D8' } : {},
-          ...lastCollapse ? { boxShadow: 'inset 0 -1px 0 #D8D8D8' } : {},
+          // ...isLastEpic ? { borderRight: 'solid 1px var(--divider)' } : {},
+          ...lastCollapse ? { boxShadow: 'inset 0 -1px 0 var(--divider)' } : {},
           ...collapse ? { boxShadow: 'none' } : {},
           ...style,
         }}

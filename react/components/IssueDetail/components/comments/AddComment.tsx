@@ -50,13 +50,12 @@ const Comments: React.FC<Props> = ({ onSubmit }) => {
       role="none"
       onClick={() => setAdding(true)}
       style={{
-        background: 'rgba(0,0,0,0.03)',
-        border: '1px solid rgba(0,0,0,0.20)',
+        background: 'rgba(158,173,190,0.04)',
+        border: '1px solid var(--divider)',
         borderRadius: '5px',
         height: 36,
         lineHeight: '32px',
         width: '100%',
-        color: 'var(--text-color3)',
         paddingLeft: 10,
         cursor: 'pointer',
         marginBottom: 10,

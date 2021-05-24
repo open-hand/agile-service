@@ -43,7 +43,7 @@ const AccumulationComponent: React.FC<Props> = ({ innerRef, data, projectId }) =
   }), [handleSubmit]);
   return (
     <div>
-      <AccumulationSearch {...searchProps} />
+      <AccumulationSearch {...searchProps} float />
       <Accumulation {...props} />
     </div>
   );

@@ -37,6 +37,7 @@ const SprintSearch: React.FC<SprintSearchProps> = ({
       <SelectSprint
         label="迭代冲刺"
         labelLayout={'float' as LabelLayout}
+        style={{ width: 493 }}
         clearButton={false}
         projectId={projectId}
         statusList={['started', 'closed']}
