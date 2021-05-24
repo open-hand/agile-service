@@ -3206,7 +3206,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, issueIds, true, "agile_issue");
                     Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                     Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
-                    Map<Long, Set<TagVO>> tagMap = listTagMap(projectId, issueIds);
+                    Map<Long, Set<TagVO>> tagMap = issueService.listTagMap(ConvertUtil.getOrganizationId(projectId), new HashSet<>(Arrays.asList(projectId)), issueIds);
                     cursor
                             .addCollections(userIds)
                             .addCollections(usersMap)
@@ -3258,25 +3258,6 @@ public class ExcelServiceImpl implements ExcelService {
         String fileName = project.getName() + FILESUFFIX;
         //把workbook上传到对象存储服务中
         downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
-    }
-
-    private Map<Long, Set<TagVO>> listTagMap(Long projectId, List<Long> issueIds) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        Map<Long, Set<TagVO>> map = new HashMap<>();
-        if (!ObjectUtils.isEmpty(issueIds)) {
-            tagIssueRelMapper.selectByOptions(organizationId, projectId, issueIds)
-                    .forEach(x -> {
-                        Long issueId = x.getIssueId();
-                        Set<TagVO> tags = map.computeIfAbsent(issueId, y -> new HashSet<>());
-                        TagVO tag = new TagVO();
-                        tag.setProjectId(x.getTagProjectId());
-                        tag.setTagName(x.getTagName());
-                        tag.setAppServiceCode(x.getAppServiceCode());
-                        tags.add(tag);
-                    });
-        }
-        return map;
-
     }
 
     protected ExportIssuesVO buildExcelIssueFromIssue(String projectName,

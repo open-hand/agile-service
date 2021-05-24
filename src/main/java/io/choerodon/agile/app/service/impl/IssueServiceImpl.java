@@ -815,6 +815,27 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
+    @Override
+    public Map<Long, Set<TagVO>> listTagMap(Long organizationId,
+                                            Set<Long> projectIds,
+                                            List<Long> issueIds) {
+        Map<Long, Set<TagVO>> map = new HashMap<>();
+        if (!ObjectUtils.isEmpty(issueIds)
+                && !ObjectUtils.isEmpty(projectIds)) {
+            tagIssueRelMapper.selectByOptions(organizationId, projectIds, issueIds)
+                    .forEach(x -> {
+                        Long issueId = x.getIssueId();
+                        Set<TagVO> tags = map.computeIfAbsent(issueId, y -> new HashSet<>());
+                        TagVO tag = new TagVO();
+                        tag.setProjectId(x.getTagProjectId());
+                        tag.setTagName(x.getTagName());
+                        tag.setAppServiceCode(x.getAppServiceCode());
+                        tags.add(tag);
+                    });
+        }
+        return map;
+    }
+
     private String getApplyType(Long projectId) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         List<String> projectCodes = projectVO.getCategories().stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
