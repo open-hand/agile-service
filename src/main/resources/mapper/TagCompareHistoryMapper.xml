@@ -32,15 +32,15 @@
             agile_tag_compare_history atch
         WHERE
             atch.id IN (
-                    SELECT
-                        MAX( id )
-                    FROM
-                        agile_tag_compare_history
-                    WHERE
-                        publish_version_id = #{publishVersionId}
-                    AND project_id = #{projectId}
-                    AND organization_id = #{organizationId}
-                    GROUP BY app_service_code
-                  )
+                SELECT
+                MAX(atch1.id)
+                FROM agile_version_tag_history avth
+                JOIN agile_tag_compare_history atch1 ON avth.id = atch1.version_tag_history_id
+                WHERE avth.organization_id = #{organizationId}
+                AND avth.project_id = #{projectId}
+                AND avth.version_id = #{versionId}
+                AND avth.version_type = #{versionType}
+                GROUP BY atch1.app_service_code
+            )
     </select>
 </mapper>

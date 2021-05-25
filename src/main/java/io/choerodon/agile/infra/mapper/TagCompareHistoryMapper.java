@@ -21,10 +21,14 @@ public interface TagCompareHistoryMapper extends BaseMapper<TagCompareHistoryDTO
     /**
      * 查询最新的对比记录以自动填充界面
      *
-     * @param projectId        项目id
-     * @param organizationId   组织id
-     * @param publishVersionId 发布版本id
+     * @param projectId      项目id
+     * @param organizationId 组织id
+     * @param versionId      版本id
+     * @param versionType
      * @return 最新的对比记录
      */
-    List<TagCompareHistoryDTO> selectLastCompareHistory(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId, @Param("publishVersionId") Long publishVersionId);
+    List<TagCompareHistoryDTO> selectLastCompareHistory(@Param("projectId") Long projectId,
+                                                        @Param("organizationId") Long organizationId,
+                                                        @Param("versionId") Long versionId,
+                                                        @Param("versionType") String versionType);
 }

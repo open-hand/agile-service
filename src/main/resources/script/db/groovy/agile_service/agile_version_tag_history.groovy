@@ -1,11 +1,14 @@
 package script.db.groovy.agile_service
-databaseChangeLog(logicalFilePath:'agile_publish_version_tag_history.groovy') {
-    changeSet(id: '2021-05-19-agile-publish-version-tag-history', author: 'chihao.ran@hand-china.com') {
-        createTable(tableName: "agile_publish_version_tag_history") {
+databaseChangeLog(logicalFilePath:'agile_version_tag_history.groovy') {
+    changeSet(id: '2021-05-19-agile-version-tag-history', author: 'chihao.ran@hand-china.com') {
+        createTable(tableName: "agile_version_tag_history") {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'publish_version_id', type: 'BIGINT UNSIGNED', remarks: 'publish_version_id'){
+            column(name: 'version_id', type: 'BIGINT UNSIGNED', remarks: '版本id'){
+                constraints(nullable: false)
+            }
+            column(name: 'version_type', type: 'VARCHAR(32)', remarks: 'program为项目群版本Id，publish为发布版本id'){
                 constraints(nullable: false)
             }
             column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: '用户id')
