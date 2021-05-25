@@ -110,6 +110,16 @@ class Store {
     return [...this.issueMap.values()].map((t) => t.fields);
   }
 
+  // 是否所有的必填值都已经填了
+  @computed get valueReady() {
+    return [...this.issueMap.values()].every((t) => {
+      const { target: { fields, issue: { customFields } } } = t;
+      const requiredFields = fields.filter((f) => f.required);
+      // 每个必选项都可以找到值
+      return requiredFields.every((f) => customFields.get(f.fieldCode as string)?.value);
+    });
+  }
+
   @action async initIssueMap(issueType: string, mainIssue: Issue) {
     const { subIssueVOList, subBugVOList } = mainIssue;
     const { subTaskTypeId, subBugTypeId } = this;
