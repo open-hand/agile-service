@@ -28,7 +28,7 @@
         </foreach>
         and atir.tag_project_id in
         <foreach collection="tags" item="tag" open="(" separator="," close=")">
-            #{tag.projectId}}
+            #{tag.projectId}
         </foreach>
         and ai.type_code = #{issueTypeCode}
     </select>

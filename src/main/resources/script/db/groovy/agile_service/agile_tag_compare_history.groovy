@@ -5,7 +5,7 @@ databaseChangeLog(logicalFilePath:'agile_tag_compare_history.groovy') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
-            column(name: 'publish_version_id', type: 'BIGINT UNSIGNED', remarks: '发布版本id') {
+            column(name: 'version_tag_history_id', type: 'BIGINT UNSIGNED', remarks: '版本tag对比历史id') {
                 constraints(nullable: false)
             }
             column(name: 'app_service_code', type: 'VARCHAR(255)', remarks: '应用服务code') {
@@ -27,12 +27,6 @@ databaseChangeLog(logicalFilePath:'agile_tag_compare_history.groovy') {
             column(name: "creation_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
             column(name: "last_updated_by", type: "BIGINT UNSIGNED", defaultValue: "0")
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
-        }
-    }
-
-    changeSet(id: '2021-05-19-agile-tag-compare-history-add-column', author: 'chihao.ran@hand-china.com') {
-        addColumn(tableName: "agile_tag_compare_history"){
-            column(name:"publish_version_tag_history_id",type:"BIGINT UNSIGNED", remarks:"tag operation history id")
         }
     }
 }
