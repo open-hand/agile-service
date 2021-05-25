@@ -316,7 +316,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
 
     private double updateProcess(List<StaticFileOperationHistoryDTO> staticFileCompressHistoryList, StaticFileOperationHistoryDTO staticFileCompressHistory, int toTalSize, long nowSize, double process, String issueId) {
         double nowProcess = new BigDecimal(nowSize).divide(new BigDecimal(toTalSize), 2, RoundingMode.HALF_UP).doubleValue();
-        if (nowProcess - process < 0.05) {
+        if (nowProcess - process < 0.1) {
             return process;
         }
         staticFileCompressHistory.setProcess(nowProcess);

@@ -59,6 +59,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
         String messageCode = WEBSOCKET_BATCH_UPDATE_FIELD+"-"+projectId;
         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
         try {
+            batchUpdateFieldStatusVO.setLastProcess(0.0);
             batchUpdateFieldStatusVO.setStatus("doing");
             batchUpdateFieldStatusVO.setKey(messageCode);
             batchUpdateFieldStatusVO.setUserId(userId);
