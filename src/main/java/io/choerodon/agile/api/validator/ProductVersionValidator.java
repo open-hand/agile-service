@@ -35,7 +35,7 @@ public class ProductVersionValidator {
     }
 
     public void judgeName(Long projectId, Long versionId, String name) {
-        if (versionId != null && !Objects.equals(versionId, 0L) && productVersionMapper.isNotReName(projectId, versionId, name)) {
+        if (versionId != null && !Objects.equals(versionId, 0L) && Boolean.TRUE.equals(productVersionMapper.isNotReName(projectId, versionId, name))) {
             return;
         }
         if (productVersionMapper.isRepeatName(projectId, name)) {

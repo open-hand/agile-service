@@ -50,6 +50,11 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     protected static final String ERROR_FIELDTYPE_ILLEGAL = "error.fieldType.illegal";
     private static final String ERROR_SYSTEM_ILLEGAL = "error.system.illegal";
 
+    private static final String EPIC_ID = "epicId";
+    private static final String FIX_VERSION = "fixVersion";
+    private static final String INFLUENCE_VERSION = "influenceVersion";
+    private static final String SCHEME_CODE = "agile_issue";
+
     @Autowired
     protected FieldValueMapper fieldValueMapper;
     @Autowired
@@ -259,10 +264,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
         }
-        List<VersionIssueRelVO> fixVersion = ObjectUtils.isEmpty(predefinedFields.get("fixVersion")) ? null : EncryptionUtils.jsonToList(predefinedFields.get("fixVersion"),VersionIssueRelVO.class);
-        List<VersionIssueRelVO> influenceVersion = ObjectUtils.isEmpty(predefinedFields.get("influenceVersion")) ? null : EncryptionUtils.jsonToList(predefinedFields.get("influenceVersion"),VersionIssueRelVO.class);
-        predefinedFields.remove("fixVersion");
-        predefinedFields.remove("influenceVersion");
+        List<VersionIssueRelVO> fixVersion = buildVersionData(predefinedFields.get(FIX_VERSION));
+        List<VersionIssueRelVO> influenceVersion = buildVersionData(predefinedFields.get(INFLUENCE_VERSION));
+        predefinedFields.remove(FIX_VERSION);
+        predefinedFields.remove(INFLUENCE_VERSION);
         Map<String,Object> programMap = new HashMap<>();
         if (agilePluginService != null) {
             agilePluginService.handlerProgramPredefinedFields(projectId,predefinedFields,programMap,appleType);
@@ -270,25 +275,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         issueDTOS.forEach(v -> {
             IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
             List<String> fieldList = verifyUpdateUtil.verifyUpdateData(predefinedFields, issueUpdateVO);
-            if (!"story".equals(v.getTypeCode())) {
-                fieldList.remove(String.valueOf("storyPoints"));
-                issueUpdateVO.setStoryPoints(null);
-            }
-
-            if (!"bug".equals(v.getTypeCode())) {
-                fieldList.remove(String.valueOf("environment"));
-                issueUpdateVO.setEnvironment(null);
-            }
-
-            if ("story".equals(v.getTypeCode()) && agilePluginService != null) {
-                agilePluginService.setFeatureId(issueUpdateVO,programMap,fieldList);
-            }
-
-            if ("issue_epic".equals(v.getTypeCode())) {
-                fieldList.remove("epicId");
-                issueUpdateVO.setEpicId(null);
-            }
-
+            fieldListRemove(v, fieldList, issueUpdateVO, programMap);
             if (!CollectionUtils.isEmpty(fixVersion)) {
                 issueUpdateVO.setVersionType("fix");
                 issueUpdateVO.setVersionIssueRelVOList(fixVersion);
@@ -302,34 +289,17 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             issueUpdateVO.setIssueId(v.getIssueId());
             issueUpdateVO.setObjectVersionNumber(v.getObjectVersionNumber());
             handlerEstimatedTime(v, issueUpdateVO, fieldList);
-            boolean doCheck = IssueTypeCode.FEATURE.value().equals(v.getTypeCode()) && fieldList.contains("epicId");
+            boolean doCheck = IssueTypeCode.FEATURE.value().equals(v.getTypeCode()) && fieldList.contains(EPIC_ID);
             if (doCheck && agilePluginService.checkFeatureSummaryAndReturn(issueUpdateVO, projectId)) {
-                fieldList.remove("epicId");
+                fieldList.remove(EPIC_ID);
                 issueUpdateVO.setEpicId(null);
-                addErrMessage(v, batchUpdateFieldStatusVO, "epicId");
+                addErrMessage(v, batchUpdateFieldStatusVO, EPIC_ID);
             }
             IssueVO issueVO = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
-            if ("bug".equals(v.getTypeCode())) {
-                IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
-                if (!CollectionUtils.isEmpty(influenceVersion)) {
-                    issueUpdateVO1.setVersionType("influence");
-                    issueUpdateVO1.setVersionIssueRelVOList(influenceVersion);
-                }
-                issueUpdateVO1.setIssueId(v.getIssueId());
-                issueUpdateVO1.setObjectVersionNumber(issueVO.getObjectVersionNumber());
-                issueService.updateIssue(projectId, issueUpdateVO1, new ArrayList<>());
-            }
+            // 处理影响的版本
+            handlerBugInfluenceVersion(projectId,v, influenceVersion, issueVO);
             // 修改issue的状态
-            if (!ObjectUtils.isEmpty(statusId)) {
-                List<TransformVO> transformVOS = projectConfigService.queryTransformsByProjectId(projectId, v.getStatusId(), v.getIssueId(), v.getIssueTypeId(), appleType);
-                if (!CollectionUtils.isEmpty(transformVOS)) {
-                    Map<Long, TransformVO> map = transformVOS.stream().collect(Collectors.toMap(TransformVO::getEndStatusId, Function.identity()));
-                    TransformVO transformVO = map.get(statusId);
-                    if (!ObjectUtils.isEmpty(transformVO)) {
-                        issueService.updateIssueStatus(projectId, v.getIssueId(), transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), appleType);
-                    }
-                }
-            }
+            updateIssueStatus(projectId, statusId, v, appleType);
             if (agilePluginService != null) {
                 agilePluginService.handlerFeatureField(projectId,v,programMap);
             }
@@ -338,6 +308,57 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
             }
         });
+    }
+
+    private List<VersionIssueRelVO> buildVersionData(Object object) {
+       return ObjectUtils.isEmpty(object) ? null : EncryptionUtils.jsonToList(object,VersionIssueRelVO.class);
+    }
+
+    private void updateIssueStatus(Long projectId, Long statusId, IssueDTO issueDTO, String appleType) {
+        if (!ObjectUtils.isEmpty(statusId)) {
+            List<TransformVO> transformVOS = projectConfigService.queryTransformsByProjectId(projectId, issueDTO.getStatusId(), issueDTO.getIssueId(), issueDTO.getIssueTypeId(), appleType);
+            if (!CollectionUtils.isEmpty(transformVOS)) {
+                Map<Long, TransformVO> map = transformVOS.stream().collect(Collectors.toMap(TransformVO::getEndStatusId, Function.identity()));
+                TransformVO transformVO = map.get(statusId);
+                if (!ObjectUtils.isEmpty(transformVO)) {
+                    issueService.updateIssueStatus(projectId, issueDTO.getIssueId(), transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), appleType);
+                }
+            }
+        }
+    }
+
+    private void handlerBugInfluenceVersion(Long projectId,IssueDTO issueDTO, List<VersionIssueRelVO> influenceVersion, IssueVO issueVO) {
+        if ("bug".equals(issueDTO.getTypeCode())) {
+            IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
+            if (!CollectionUtils.isEmpty(influenceVersion)) {
+                issueUpdateVO1.setVersionType("influence");
+                issueUpdateVO1.setVersionIssueRelVOList(influenceVersion);
+            }
+            issueUpdateVO1.setIssueId(issueDTO.getIssueId());
+            issueUpdateVO1.setObjectVersionNumber(issueVO.getObjectVersionNumber());
+            issueService.updateIssue(projectId, issueUpdateVO1, new ArrayList<>());
+        }
+    }
+
+    private void fieldListRemove(IssueDTO v, List<String> fieldList, IssueUpdateVO issueUpdateVO, Map<String,Object> programMap) {
+        if (!"story".equals(v.getTypeCode())) {
+            fieldList.remove(String.valueOf("storyPoints"));
+            issueUpdateVO.setStoryPoints(null);
+        }
+
+        if (!"bug".equals(v.getTypeCode())) {
+            fieldList.remove(String.valueOf("environment"));
+            issueUpdateVO.setEnvironment(null);
+        }
+
+        if ("story".equals(v.getTypeCode()) && agilePluginService != null) {
+            agilePluginService.setFeatureId(issueUpdateVO,programMap,fieldList);
+        }
+
+        if ("issue_epic".equals(v.getTypeCode())) {
+            fieldList.remove(EPIC_ID);
+            issueUpdateVO.setEpicId(null);
+        }
     }
 
     private void addErrMessage(IssueDTO issueDTO, BatchUpdateFieldStatusVO batchUpdateFieldStatusVO, String field) {
@@ -404,7 +425,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     public void copyCustomFieldValue(Long projectId, IssueDetailDTO issueDetailDTO, Long newIssueId, List<Long> customFieldIds) {
         // 查询原来的值
         Long issueId = issueDetailDTO.getIssueId();
-        List<FieldValueDTO> fieldValueDTOS = fieldValueMapper.queryListByInstanceIds(Arrays.asList(projectId), Arrays.asList(issueId), "agile_issue", null);
+        List<FieldValueDTO> fieldValueDTOS = fieldValueMapper.queryListByInstanceIds(Arrays.asList(projectId), Arrays.asList(issueId), SCHEME_CODE, null);
         if (!CollectionUtils.isEmpty(fieldValueDTOS)) {
             Map<Long, List<FieldValueDTO>> listMap;
             boolean copySubIssue = CollectionUtils.isEmpty(customFieldIds);
@@ -417,7 +438,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             Long organizationId = ConvertUtil.getOrganizationId(projectId);
             List<PageFieldViewCreateVO> createDTOs = new ArrayList<>();
             handlerFieldValue(listMap, createDTOs);
-            createFieldValues(organizationId, projectId, newIssueId, "agile_issue", createDTOs);
+            createFieldValues(organizationId, projectId, newIssueId, SCHEME_CODE, createDTOs);
         }
     }
 
@@ -428,10 +449,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         for (Map.Entry<Long, List<FieldValueDTO>> entry : listMap.entrySet()) {
             Long key = entry.getKey();
             ObjectSchemeFieldDTO objectSchemeFieldDTO = schemeFieldDTOMap.get(key);
-            if (ObjectUtils.isEmpty(objectSchemeFieldDTO)) {
-                continue;
-            }
-            if (Boolean.TRUE.equals(objectSchemeFieldDTO.getSystem())) {
+            if (ObjectUtils.isEmpty(objectSchemeFieldDTO) || Boolean.TRUE.equals(objectSchemeFieldDTO.getSystem())) {
                 continue;
             }
             PageFieldViewCreateVO pageFieldViewCreateVO = new PageFieldViewCreateVO();
@@ -540,7 +558,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             List<FieldValueDTO> newFiledList = newFieldMap.get(v);
             list.addAll(FieldValueUtil.batchHandlerFiledLog(projectId, v, oldFiledList, newFiledList));
         });
-        if (!CollectionUtils.isEmpty(list) && "agile_issue".equals(schemeCode)) {
+        if (!CollectionUtils.isEmpty(list) && SCHEME_CODE.equals(schemeCode)) {
             CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
             fieldDataLogMapper.batchInsert(projectId, schemeCode, list, customUserDetails.getUserId());
         }

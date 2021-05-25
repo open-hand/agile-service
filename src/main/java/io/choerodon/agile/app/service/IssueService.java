@@ -169,9 +169,6 @@ public interface IssueService {
 
     Page<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, PageRequest pageRequest);
 
-//    void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
-//                      HttpServletResponse response, Long organizationId, Sort sort);
-
     /**
      * 根据issueId复制一个issue
      *
@@ -240,26 +237,6 @@ public interface IssueService {
      */
     EpicDataVO dragEpic(Long projectId, EpicSequenceVO epicSequenceVO);
 
-//    /**
-//     * 查询issue统计信息
-//     *
-//     * @param projectId  projectId
-//     * @param type       type
-//     * @param issueTypes issueTypes要排除的issue类型
-//     * @return PieChartVO
-//     */
-//    List<PieChartVO> issueStatistic(Long projectId, String type, List<String> issueTypes);
-
-//    /**
-//     * 测试模块查询issue详情列表
-//     *
-//     * @param projectId   projectId
-//     * @param searchVO   searchVO
-//     * @param pageRequest pageRequest
-//     * @return IssueComponentDetailTO
-//     */
-//    Page<IssueComponentDetailDTO> listIssueWithoutSubDetail(Long projectId, SearchVO searchVO, PageRequest pageRequest);
-
     IssueVO issueParentIdUpdate(Long projectId, IssueUpdateParentIdVO issueUpdateParentIdVO);
 
     JSONObject countUnResolveByProjectId(Long projectId);
@@ -277,23 +254,6 @@ public interface IssueService {
      * @return String
      */
     String querySwimLaneCode(Long projectId);
-
-//    /**
-//     * 克隆issue同时生成版本
-//     *
-//     * @param projectId projectId
-//     * @param versionId versionId
-//     * @param issueIds  issueIds
-//     * @return new issueIds
-//     */
-//    List<Long> cloneIssuesByVersionId(Long projectId, Long versionId, List<Long> issueIds);
-
-//    /**
-//     * 根据项目分组测试类型issue
-//     *
-//     * @return IssueProjectVO
-//     */
-//    List<IssueProjectVO> queryIssueTestGroupByProject();
 
     /**
      * 批量把issue根据冲刺判断更新为初始状态
@@ -313,8 +273,6 @@ public interface IssueService {
     Boolean handleSearchUser(SearchVO searchVO, Long projectId);
 
     Boolean checkEpicName(Long projectId, String epicName, Long epicId);
-
-//    IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum);
 
     /**
      * 根据projectId按批次迁移数据

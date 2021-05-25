@@ -862,12 +862,12 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             statusMachineNodeDTO.setStateMachineId(schemeConfigVO.getStateMachineId());
             statusMachineNodeDTO.setOrganizationId(organizationId);
             StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectOne(statusMachineNodeDTO);
-            if (ObjectUtils.isEmpty(machineNodeDTO)) {
-                continue;
+            if (!ObjectUtils.isEmpty(machineNodeDTO)) {
+                Long tansferStatusId = handlerTransferStatus(machineNodeDTO, map, schemeConfigVO);
+                // 删除node
+                deleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId(), tansferStatusId);
             }
-            Long tansferStatusId = handlerTransferStatus(machineNodeDTO, map, schemeConfigVO);
-            // 删除node
-            deleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId(), tansferStatusId);
+
         }
     }
 
@@ -887,11 +887,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             statusMachineNodeDTO.setStateMachineId(schemeConfigVO.getStateMachineId());
             statusMachineNodeDTO.setOrganizationId(organizationId);
             StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectOne(statusMachineNodeDTO);
-            if (ObjectUtils.isEmpty(machineNodeDTO)) {
-                continue;
+            if (!ObjectUtils.isEmpty(machineNodeDTO)) {
+                // 检查是否能删除node
+                checkDeleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId());
             }
-            // 检查是否能删除node
-            checkDeleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId());
         }
     }
 

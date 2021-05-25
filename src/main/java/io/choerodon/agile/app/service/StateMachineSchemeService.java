@@ -1,7 +1,6 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.agile.api.vo.StateMachineSchemeVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -88,13 +87,6 @@ public interface StateMachineSchemeService {
      * @param projectEvent
      */
     void initByConsumeCreateProject(ProjectEvent projectEvent);
-
-    /**
-     * 创建项目时，初始化项目群方案
-     *
-     * @param projectEvent
-     */
-//    void initByConsumeCreateProgram(ProjectEvent projectEvent);
 
     /**
      * 若项目关联状态机方案，设置状态机方案、状态机为活跃

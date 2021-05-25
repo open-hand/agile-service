@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.io.Serializable;
-import java.util.Date;
-
 /**
  * @author dinghuang123@gmail.com
  * @since 2018-05-15 16:21:18

@@ -207,19 +207,12 @@ public class BoardServiceImpl implements BoardService {
             epicIds.add(issue.getEpicId());
         }
         if ("sub_task".equals(issue.getTypeCode()) && issue.getParentIssueId() != null) {
-            List<Long> subtaskIds = null;
-            subtaskIds = parentWithSubs.get(issue.getParentIssueId());
-            if (subtaskIds == null) {
-                subtaskIds = new ArrayList<>();
-            }
+            List<Long> subtaskIds = parentWithSubs.getOrDefault(issue.getParentIssueId(), new ArrayList<>());
             subtaskIds.add(issue.getIssueId());
             parentWithSubs.put(issue.getParentIssueId(), subtaskIds);
         }
         if ("bug".equals(issue.getTypeCode()) && issue.getRelateIssueId() != null) {
-            List<Long> subBugIds = parentWithSubs.get(issue.getRelateIssueId());
-            if (subBugIds == null) {
-                subBugIds = new ArrayList<>();
-            }
+            List<Long> subBugIds = parentWithSubs.getOrDefault(issue.getRelateIssueId(), new ArrayList<>());
             subBugIds.add(issue.getIssueId());
             parentWithSubs.put(issue.getRelateIssueId(), subBugIds);
         }

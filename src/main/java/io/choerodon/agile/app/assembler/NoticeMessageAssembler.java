@@ -29,7 +29,8 @@ public class NoticeMessageAssembler {
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(ids, true);
         messageDTOList.forEach(messageDTO -> {
             List<IdWithNameVO> idWithNameVOList = new ArrayList<>();
-            if (messageDTO.getEnable() && messageDTO.getUser() != null && messageDTO.getUser().length() != 0 && !"null".equals(messageDTO.getUser())) {
+            Boolean checkUser = messageDTO.getEnable() && messageDTO.getUser() != null && messageDTO.getUser().length() != 0 && !"null".equals(messageDTO.getUser());
+            if (Boolean.TRUE.equals(checkUser)) {
                 String[] strs = messageDTO.getUser().split(",");
                 for (String str : strs) {
                     Long id = Long.parseLong(str);

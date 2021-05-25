@@ -1,7 +1,6 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.BatchUpdateFieldsValueVo;
-import org.hzero.starter.keyencrypt.core.EncryptType;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**

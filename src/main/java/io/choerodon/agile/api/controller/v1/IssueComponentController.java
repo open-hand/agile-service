@@ -2,7 +2,6 @@ package io.choerodon.agile.api.controller.v1;
 
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.ComponentForListVO;
-import io.choerodon.agile.api.vo.MoveComponentVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.SearchVO;
 
@@ -38,7 +37,7 @@ import java.util.Optional;
 @RequestMapping(value = "/v1/projects/{project_id}/component")
 public class IssueComponentController {
 
-    private final static String SEQUENCE_FIELD_NAME = "sequence";
+    private static final String SEQUENCE_FIELD_NAME = "sequence";
 
     @Autowired
     private IssueComponentService issueComponentService;
