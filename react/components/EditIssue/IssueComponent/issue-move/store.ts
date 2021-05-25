@@ -11,12 +11,15 @@ import { initTargetIssue, getFinalFields } from './utils';
 
 export interface MoveMapItem {
   issue: Issue,
-  fields: IField[],
+  lostFields: IField[]
+  fields: FieldWithValue[],
   target: MoveTarget
 }
 export interface FieldWithValue {
   fieldId: string,
   fieldType: string,
+  fieldCode: string
+  projectId: string
   system: boolean
   value: string,
   valueStr: any
@@ -35,7 +38,11 @@ export interface MoveTarget {
   projectId: string
 }
 class Store {
-  dataMap = observable.map();
+  @observable loading = false;
+
+  @action setLoading(loading: boolean) {
+    this.loading = loading;
+  }
 
   @observable selfFields: IField[] = [];
 
@@ -91,8 +98,16 @@ class Store {
 
   @observable issueMap = new Map<string, MoveMapItem>();
 
+  @computed get issueMapValues() {
+    return [...this.issueMap.values()];
+  }
+
   @computed get issues() {
     return [...this.issueMap.values()].map((t) => t.issue);
+  }
+
+  @computed get issueFields() {
+    return [...this.issueMap.values()].map((t) => t.fields);
   }
 
   @action async initIssueMap(issueType: string, mainIssue: Issue) {
@@ -134,7 +149,10 @@ class Store {
   @observable statusList = []
 
   @action async loadData(targetIssueTypes: IIssueType[], targetProjectId: string, targetProjectType: string) {
-    const [issueDetails, issueFields, targetIssueFields, issueStatus, labelList] = await Promise.all([
+    const [lostFields, issueDetails, issueFields, targetIssueFields, issueStatus, labelList] = await Promise.all([
+      Promise.all(
+        this.issues.map((issue) => moveIssueApi.getFieldsLosed(targetProjectId, issue.issueId, find(targetIssueTypes, { typeCode: issue.issueTypeVO.typeCode })?.id as string)),
+      ),
       Promise.all(
         this.issues.map((issue) => issueApi.load(issue.issueId)),
       ),
@@ -162,6 +180,7 @@ class Store {
       const source = this.issueMap.get(issueDetail.issueId)!;
       source.issue = issueDetail;
       source.fields = issueFields[index];
+      source.lostFields = lostFields[index];
       source.target.issue = initTargetIssue(issueDetail);
       source.target.projectId = targetProjectId;
 
@@ -175,17 +194,19 @@ class Store {
       // 最后设置fields，保证渲染正确
       source.target.fields = getFinalFields({ fields: targetFields, typeCode: targetIssueTypes[issueTypeIndex].typeCode, targetProjectType });
       // 开始设置一些默认值
-      this.setDefaultStatus(statusList, source.target);
+      this.setDefaultStatus(statusList, issueDetail, source.target);
       // needSetUserMap.set()
     });
     // await this.setDefaultUserFields(targetProjectId, issueDetail, target);
   }
 
-  @action setDefaultStatus(statusList: IStatusCirculation[], target: MoveTarget) {
+  @action setDefaultStatus(statusList: IStatusCirculation[], issueDetail: Issue, target: MoveTarget) {
     // 判断是否有相同状态
+    const sameStatus = find(statusList, { id: issueDetail.statusVO.id });
     const defaultStatus = find(statusList, { defaultStatus: true });
-    if (defaultStatus) {
-      this.updateFieldValue(defaultStatus.id, defaultStatus, 'status', target);
+    const status = sameStatus ?? defaultStatus;
+    if (status) {
+      this.updateFieldValue(status.id, status, 'status', target);
     }
   }
 
@@ -227,6 +248,8 @@ class Store {
       target.issue.customFields.set(fieldCode, {
         fieldId: field.fieldId,
         fieldType: field.fieldType,
+        fieldCode: field.fieldCode as string,
+        projectId: field.projectId as string,
         system: field.system,
         value,
         valueStr,

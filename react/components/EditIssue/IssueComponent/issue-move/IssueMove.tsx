@@ -1,5 +1,5 @@
 import React, {
-  useMemo, useState, useEffect, useCallback, useRef,
+  useMemo, useState, useEffect, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
@@ -9,13 +9,12 @@ import { Steps } from 'choerodon-ui';
 import {
   includes, map, compact, uniq,
 } from 'lodash';
-import { toJS } from 'mobx';
 import {
-  IModalProps, AppStateProps, IIssueType, IField,
+  IModalProps, IIssueType,
 } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
-import { stores, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import {
   issueTypeApi, projectApi, moveIssueApi, commonApi,
 } from '@/api';
@@ -26,9 +25,8 @@ import Confirm from './components/confirm-data';
 import styles from './IssueMove.less';
 import { IssueWithSubIssueVOList, ILoseItems } from './components/confirm-data/Confirm';
 import { submitFieldMap } from './transformValue';
-import { IFieldWithValue } from './components/confirm-data/transformValue';
 
-import store from './store';
+import store, { FieldWithValue } from './store';
 
 const isDEV = process.env.NODE_ENV === 'development';
 // @ts-ignore
@@ -39,7 +37,7 @@ const { Step } = Steps;
 interface Props {
   issue: IssueWithSubIssueVOList,
   modal?: IModalProps
-  fieldsWithValue: IFieldWithValue[]
+  fieldsWithValue: FieldWithValue[]
   onMoveIssue: () => void,
   loseItems: ILoseItems,
 }
@@ -74,7 +72,6 @@ const IssueMove: React.FC<Props> = ({
     fieldNames.forEach((name: string) => {
       removeField(ds, name);
     });
-    store.dataMap.clear();
   }, [removeField]);
 
   const dataSet = useMemo(() => new DataSet({
@@ -304,7 +301,7 @@ const ObserverIssueMove = observer(IssueMove);
 
 const openIssueMove = ({
   issue, customFields, onMoveIssue, loseItems,
-}: { issue: IssueWithSubIssueVOList, customFields: IFieldWithValue[], onMoveIssue: () => void, loseItems: ILoseItems }) => {
+}: { issue: IssueWithSubIssueVOList, customFields: FieldWithValue[], onMoveIssue: () => void, loseItems: ILoseItems }) => {
   Modal.open({
     key: 'issueMoveModal',
     drawer: true,
