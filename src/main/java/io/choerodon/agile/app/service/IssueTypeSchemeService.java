@@ -2,7 +2,6 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.IssueTypeSchemeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeSchemeVO;
 import io.choerodon.agile.api.vo.IssueTypeSchemeWithInfoVO;
@@ -96,14 +95,6 @@ public interface IssueTypeSchemeService {
      */
     void initByConsumeCreateProject(Long projectId, String projectCode);
 
-//    /**
-//     * 创建项目群初始化问题类型方案
-//     *
-//     * @param projectId
-//     * @param projectCode
-//     * @return
-//     */
-//    void initByConsumeCreateProgram(Long projectId, String projectCode);
 
     Page<IssueTypeSchemeWithInfoVO> queryIssueTypeSchemeList(PageRequest pageRequest, Long organizationId, IssueTypeSchemeSearchVO issueTypeSchemeVO);
 

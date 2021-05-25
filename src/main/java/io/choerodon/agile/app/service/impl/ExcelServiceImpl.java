@@ -305,7 +305,7 @@ public class ExcelServiceImpl implements ExcelService {
             fillInPredefinedValues(wb, sheet, predefinedList);
             wb.write(response.getOutputStream());
         } catch (Exception e) {
-            LOGGER.info("exception: {}", e);
+            LOGGER.info("exception: {0}", e);
         }
     }
 
@@ -813,7 +813,7 @@ public class ExcelServiceImpl implements ExcelService {
         try {
             message = objectMapper.writeValueAsString(fileOperationHistoryDTO);
         } catch (JsonProcessingException e) {
-            LOGGER.error("object to json error: {}", e);
+            LOGGER.error("object to json error: {0}", e);
         }
         messageClientC7n.sendByUserId(userId, websocketKey, message);
     }
@@ -838,7 +838,7 @@ public class ExcelServiceImpl implements ExcelService {
         try {
             wb.write(response.getOutputStream());
         } catch (Exception e) {
-            LOGGER.info("exception: {}", e);
+            LOGGER.info("exception: {0}", e);
         }
     }
 
@@ -980,7 +980,7 @@ public class ExcelServiceImpl implements ExcelService {
             fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
             history.setMsg(e.getMessage());
             sendProcess(history, userId, 0D, websocketKey);
-            LOGGER.error("export publish version failed, exception: {}", e);
+            LOGGER.error("export publish version failed, exception: {0}", e);
         }
     }
 
@@ -1359,7 +1359,7 @@ public class ExcelServiceImpl implements ExcelService {
                     progress.addProcessNum(sonSet.size() + 1);
                     rowNum = Collections.max(sonSet);
                 } catch (Exception e) {
-                    LOGGER.error("insert data error when import excel, exception: {}", e);
+                    LOGGER.error("insert data error when import excel, exception: {0}", e);
                     processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol);
                     rowNum = Collections.max(sonSet);
                     issueService.batchDeleteIssuesAgile(projectId, insertIds);

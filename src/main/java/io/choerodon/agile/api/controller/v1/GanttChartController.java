@@ -6,16 +6,12 @@ import io.choerodon.agile.api.vo.GanttChartTreeVO;
 import io.choerodon.agile.app.service.GanttChartService;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 

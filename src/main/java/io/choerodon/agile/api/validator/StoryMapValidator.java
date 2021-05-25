@@ -26,10 +26,8 @@ public class StoryMapValidator {
     private ProductVersionMapper productVersionMapper;
 
     public void checkEpicExist(Long epicId) {
-        if (epicId != null && !Objects.equals(epicId, 0L)) {
-            if (issueMapper.selectByPrimaryKey(epicId) == null) {
-                throw new CommonException("error.epic.notFound");
-            }
+        if (epicId != null && !Objects.equals(epicId, 0L) && issueMapper.selectByPrimaryKey(epicId) == null) {
+            throw new CommonException("error.epic.notFound");
         }
     }
 

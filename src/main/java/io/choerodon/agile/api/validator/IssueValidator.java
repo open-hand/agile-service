@@ -40,8 +40,8 @@ public class IssueValidator {
     private static final String ERROR_TYPECODE_ISSUBTASK = "error.typeCode.isSubtask";
     private static final String ERROR_PARENT_ISSUE_ISSUBTASK = "error.parentIssue.isSubtask";
     private static final String ERROR_PARENT_ISSUE_ISTEST = "error.parentIssue.isTest";
-    private static final String ERROR_SPRINTIDANDVERSIONID_ALLNOTNULL = "error.sprintIdAndVersionId.allNotNull";
     private static final String ERROR_PARENT_ISSUE_NOT_EXIST = "error.parentIssue.get";
+    private static final String ERROR_ISSUE_RULE_TYPE_CODE= "error.IssueRule.typeCode";
     private static final String ISSUE_ID = "issueId";
     private static final String COLOR = "color";
     private static final String EPIC_NAME = "epicName";
@@ -110,7 +110,7 @@ public class IssueValidator {
     public void verifyCreateData(IssueCreateVO issueCreateVO, Long projectId, String applyType) {
         issueCreateVO.setProjectId(projectId);
         if (issueCreateVO.getTypeCode() == null) {
-            throw new CommonException("error.IssueRule.typeCode");
+            throw new CommonException(ERROR_ISSUE_RULE_TYPE_CODE);
         }
         if (issueCreateVO.getSummary() == null) {
             throw new CommonException("error.IssueRule.Summary");
@@ -185,11 +185,11 @@ public class IssueValidator {
             throw new CommonException("error.issue.rank.null");
         }
 
-        if (issueUpdate.containsKey("priorityId") && ObjectUtils.isEmpty(issueUpdate.get("priorityId"))) {
+        if (issueUpdate.containsKey(PRIORITY_ID) && ObjectUtils.isEmpty(issueUpdate.get(PRIORITY_ID))) {
             throw new CommonException("error.issue.priorityId.null");
         }
 
-        if (issueUpdate.containsKey("statusId") && ObjectUtils.isEmpty(issueUpdate.get("priorityId"))) {
+        if (issueUpdate.containsKey(STATUS_ID_FIELD) && ObjectUtils.isEmpty(issueUpdate.get(PRIORITY_ID))) {
             throw new CommonException("error.issue.statusId.null");
         }
     }
@@ -264,7 +264,7 @@ public class IssueValidator {
             throw new CommonException("error.issuetypeId.isNull");
         }
         if (issueUpdateTypeVO.getTypeCode() == null) {
-            throw new CommonException("error.IssueRule.typeCode");
+            throw new CommonException(ERROR_ISSUE_RULE_TYPE_CODE);
         }
         IssueConvertDTO issueConvertDTO = issueService.queryIssueByProjectIdAndIssueId(projectId, issueUpdateTypeVO.getIssueId());
         if (issueConvertDTO == null) {
@@ -323,7 +323,7 @@ public class IssueValidator {
             throw new CommonException("error.issuetypeId.isNull");
         }
         if (issueTransformTask.getTypeCode() == null) {
-            throw new CommonException("error.IssueRule.typeCode");
+            throw new CommonException(ERROR_ISSUE_RULE_TYPE_CODE);
         }
         if (issueTransformTask.getTypeCode().equals(ISSUE_EPIC) && issueTransformTask.getEpicName() == null) {
             throw new CommonException("error.IssueRule.epicName");
@@ -366,30 +366,17 @@ public class IssueValidator {
             throw new CommonException(ERROR_PARENT_ISSUE_NOT_EXIST);
         }
         String typeCode = issueDTO.getTypeCode();
-        if (!"sub_task".equals(typeCode)) {
+        if (!SUB_TASK.equals(typeCode)) {
             throw new CommonException(ERROR_TYPECODE_ISSUBTASK);
         }
         typeCode = parentIssueDTO.getTypeCode();
-        if ("sub_task".equals(typeCode)) {
+        if (SUB_TASK.equals(typeCode)) {
             throw new CommonException(ERROR_PARENT_ISSUE_ISSUBTASK);
         }
         if (SchemeApplyType.TEST.equals(issueDTO.getApplyType())) {
             throw new CommonException(ERROR_PARENT_ISSUE_ISTEST);
         }
     }
-
-
-//    public void checkIssueIdsAndVersionId(Long projectId, List<Long> issueIds, Long versionId) {
-//        if (issueIds.isEmpty()) {
-//            throw new CommonException("error.issueValidator.issueIdsNull");
-//        }
-//        ProductVersionDTO productVersionDTO = new ProductVersionDTO();
-//        productVersionDTO.setProjectId(projectId);
-//        productVersionDTO.setVersionId(versionId);
-//        if (productVersionMapper.selectByPrimaryKey(productVersionDTO) == null) {
-//            throw new CommonException("error.issueValidator.versionNotFound");
-//        }
-//    }
 
     public void checkIssueCreate(IssueCreateVO issueCreateVO, String applyType) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
