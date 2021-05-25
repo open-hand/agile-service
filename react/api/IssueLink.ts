@@ -3,10 +3,10 @@ import { getProjectId } from '@/utils/common';
 import { sameProject } from '@/utils/detail';
 import Api from './Api';
 
-interface IIssueLink {
-    linkTypeId: number, // 链接类型id
-    linkedIssueId: number, // 被链接问题id
-    issueId: number;// 链接问题id
+export interface IIssueLink {
+    linkTypeId: string, // 链接类型id
+    linkedIssueId: string, // 被链接问题id
+    issueId: string;// 链接问题id
 }
 
 class IssueLinkApi extends Api<IssueLinkApi> {
@@ -60,7 +60,7 @@ class IssueLinkApi extends Api<IssueLinkApi> {
    * @param issueId
    * @param issueLinkCreateVOList 关联的问题
    */
-  create(issueId:number, issueLinkCreateVOList:Array<IIssueLink>) {
+  create(issueId:string, issueLinkCreateVOList:Array<IIssueLink>) {
     return axios.post(`${this.prefix}/issue_links/${issueId}`, issueLinkCreateVOList);
   }
 

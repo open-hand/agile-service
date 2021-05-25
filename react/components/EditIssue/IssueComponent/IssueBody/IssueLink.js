@@ -1,27 +1,21 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Icon, Button, Tooltip } from 'choerodon-ui/pro';
-import _ from 'lodash';
-import CreateLinkTask from '../../../CreateLinkTask';
+import { map, groupBy } from 'lodash';
 import LinkList from '../../Component/LinkList';
 import Divider from './Divider';
+import openCreateLink from './create-link/CreateLink';
 
 @observer class IssueLink extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      createLinkTaskShow: false,
-    };
   }
 
   componentDidMount() {
   }
 
-  handleCreateLinkIssue() {
+  onCreateLinkIssue() {
     const { reloadIssue } = this.props;
-    this.setState({
-      createLinkTaskShow: false,
-    });
     if (reloadIssue) {
       reloadIssue();
     }
@@ -63,17 +57,16 @@ import Divider from './Divider';
     const issue = store.getIssue;
     const { typeCode } = issue;
     const linkIssues = store.getLinkIssues;
-    // const group = _.groupBy(linkIssues.filter(i => i.applyType === 'agile'), 'ward');
-    const group = typeCode !== 'feature' ? _.groupBy(linkIssues, 'ward') : _.groupBy(linkIssues, 'relationName');
+    const group = typeCode !== 'feature' ? groupBy(linkIssues, 'ward') : groupBy(linkIssues, 'relationName');
     return (
       <div className="c7n-tasks">
         {
-          _.map(group, (v, k) => (
+          map(group, (v, k) => (
             <div key={k}>
               <div style={{ margin: '7px auto' }}>{k}</div>
               {
-                  _.map(v, (linkIssue, i) => this.renderLinkList(linkIssue, i))
-                }
+                map(v, (linkIssue, i) => this.renderLinkList(linkIssue, i))
+              }
             </div>
           ))
         }
@@ -82,7 +75,6 @@ import Divider from './Divider';
   }
 
   render() {
-    const { createLinkTaskShow } = this.state;
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { issueId, typeCode } = issue;
@@ -97,7 +89,7 @@ import Divider from './Divider';
           {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联问题'} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button onClick={() => this.setState({ createLinkTaskShow: true })}>
+              <Button onClick={() => { openCreateLink({ issueId, onOk: () => { this.onCreateLinkIssue(); } }); }}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>
@@ -105,18 +97,6 @@ import Divider from './Divider';
           )}
         </div>
         {this.renderLinkIssues()}
-        {
-          createLinkTaskShow ? (
-            <CreateLinkTask
-              issue={issue}
-              issueId={issueId}
-              issueType={typeCode}
-              visible={createLinkTaskShow}
-              onCancel={() => this.setState({ createLinkTaskShow: false })}
-              onOk={this.handleCreateLinkIssue.bind(this)}
-            />
-          ) : null
-        }
       </div>
     );
   }

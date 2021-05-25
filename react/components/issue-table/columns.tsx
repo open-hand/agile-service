@@ -153,7 +153,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
   }],
   ['priority', {
     title: '优先级',
-    dataIndex: 'priority',
+    dataIndex: 'priorityId',
     className: 'c7n-agile-table-cell',
     sortable: true,
     render: ({ rowData }) => (
@@ -167,7 +167,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
   }],
   ['assignee', {
     title: '经办人',
-    dataIndex: 'assignee',
+    dataIndex: 'assigneeId',
     sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
@@ -219,7 +219,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
   }],
   ['status', {
     title: '状态',
-    dataIndex: 'status',
+    dataIndex: 'statusId',
     sortable: true,
     render: ({ rowData }) => (
       <Tooltip title={get(rowData, 'statusVO')?.name}>
@@ -238,7 +238,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
   }],
   ['reporter', {
     title: '报告人',
-    dataIndex: 'reporter',
+    dataIndex: 'reporterId',
     sortable: true,
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
