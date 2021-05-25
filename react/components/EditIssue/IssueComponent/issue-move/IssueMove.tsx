@@ -194,7 +194,9 @@ const IssueMove: React.FC<Props> = ({
     store.setSelectUserIds(uniqUserIds);
   }, [fieldsWithValue, issue.assigneeId, issue.mainResponsible?.id, issue.reporterId]);
 
-  const { selfFields, subTaskFields, subBugFields } = store;
+  const {
+    selfFields, subTaskFields, subBugFields, valueReady,
+  } = store;
   const targetTypeId = dataSet.current?.get('issueType');
   const subTaskIssueTypeId = dataSet.current?.get('subTaskIssueTypeId');
   const subBugIssueTypeId = dataSet.current?.get('subBugIssueTypeId');
@@ -284,7 +286,7 @@ const IssueMove: React.FC<Props> = ({
             <Button style={{ marginLeft: 8 }} color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handlePre}>
               上一步
             </Button>
-            <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleSubmit} disabled={submitBtnDisable} loading={btnLoading}>
+            <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} onClick={handleSubmit} disabled={!valueReady} loading={btnLoading}>
               确认
             </Button>
             <Button onClick={handleCancel} funcType={'raised' as FuncType}>
