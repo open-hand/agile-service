@@ -579,7 +579,15 @@ class IssueApi extends Api<IssueApi> {
       },
     });
   }
+
+  getUnLinkedIssues(issueId: string, data: any) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_links/un_link/${issueId}`,
+      data,
+    });
+  }
 }
 const issueApi = new IssueApi();
-
-export { issueApi };
+const issueApiConfig = new IssueApi(true);
+export { issueApi, issueApiConfig };
