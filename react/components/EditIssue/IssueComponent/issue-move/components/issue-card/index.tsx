@@ -17,13 +17,15 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import TypeTag from '@/components/TypeTag';
 import styles from './index.less';
 import Field from './Field';
-import store, { MoveTarget } from '../../store';
+import transformValue from './transformValue';
+import store, { FieldWithValue, MoveTarget } from '../../store';
 
 export interface IssueCardProps {
   // record: Record
   sourceIssue: Issue
+  sourceFields: FieldWithValue[]
 }
-const IssueCard: React.FC<IssueCardProps> = ({ sourceIssue }) => {
+const IssueCard: React.FC<IssueCardProps> = ({ sourceIssue, sourceFields }) => {
   const { target } = store.issueMap.get(sourceIssue.issueId)!;
   const { fields, issue: targetIssue } = target;
   return (
@@ -47,26 +49,20 @@ const IssueCard: React.FC<IssueCardProps> = ({ sourceIssue }) => {
         </Row>
         {
           fields.map((field) => {
-            const { fieldCode, fieldName } = field;
-            // const subTaskDetail = subTaskDetailMap.get(`${sourceIssue.issueId}%detail`) || {};
-            // const subTaskCustomFields = subTaskDetailMap.get(`${sourceIssue.issueId}%fields`) || [];
-            // const transformedOriginValue = transformValue({ sourceIssue: subTaskDetail, field, fieldsWithValue: subTaskCustomFields });
+            const { fieldCode, fieldName, required } = field;
+            const sourceValue = transformValue({ issue: sourceIssue, field, fieldsWithValue: sourceFields });
             return (
               <Row key={fieldCode} className={styles.fieldRow}>
                 <Col span={7}>
                   <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
                     {fieldName}
-                    {/* {
-                      dataSet.current?.getField(`${sourceIssue.issueId}-${fieldCode}`)?.props?.required && (
-                        <span className={styles.required}>*</span>
-                      )
-                    } */}
+                    {required && (<span className={styles.required}>*</span>)}
                   </span>
                 </Col>
                 <Col span={8}>
-                  {/* <Tooltip title={transformedOriginValue}>
-                    <span className={styles.fieldReadOnly}>{transformedOriginValue}</span>
-                  </Tooltip> */}
+                  <Tooltip title={sourceValue}>
+                    <span className={styles.fieldReadOnly}>{sourceValue}</span>
+                  </Tooltip>
                 </Col>
                 <Col span={9}>
                   <Field field={field} target={target} />

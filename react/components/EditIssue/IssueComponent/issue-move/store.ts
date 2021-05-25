@@ -11,12 +11,14 @@ import { initTargetIssue, getFinalFields } from './utils';
 
 export interface MoveMapItem {
   issue: Issue,
-  fields: IField[],
+  fields: FieldWithValue[],
   target: MoveTarget
 }
 export interface FieldWithValue {
   fieldId: string,
   fieldType: string,
+  fieldCode: string
+  projectId: string
   system: boolean
   value: string,
   valueStr: any
@@ -93,6 +95,10 @@ class Store {
 
   @computed get issues() {
     return [...this.issueMap.values()].map((t) => t.issue);
+  }
+
+  @computed get issueFields() {
+    return [...this.issueMap.values()].map((t) => t.fields);
   }
 
   @action async initIssueMap(issueType: string, mainIssue: Issue) {
@@ -229,6 +235,8 @@ class Store {
       target.issue.customFields.set(fieldCode, {
         fieldId: field.fieldId,
         fieldType: field.fieldType,
+        fieldCode: field.fieldCode as string,
+        projectId: field.projectId as string,
         system: field.system,
         value,
         valueStr,

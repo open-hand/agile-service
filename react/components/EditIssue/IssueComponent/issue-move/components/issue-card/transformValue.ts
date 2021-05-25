@@ -1,11 +1,7 @@
 import { IField } from '@/common/types';
+import { FieldWithValue } from '../../store';
 
-export interface IFieldWithValue extends IField {
-  value: any,
-  valueStr: any,
-}
-
-const transformValue = ({ issue, field, fieldsWithValue }: {issue: any, field: IField, fieldsWithValue: IFieldWithValue[]}) => {
+const transformValue = ({ issue, field, fieldsWithValue }: {issue: any, field: IField, fieldsWithValue: FieldWithValue[]}) => {
   const {
     fieldCode, system, fieldType, projectId,
   } = field;
@@ -42,7 +38,7 @@ const transformValue = ({ issue, field, fieldsWithValue }: {issue: any, field: I
       break;
   }
   if (!system && fieldType === 'member' && !projectId) {
-    const fieldItem = fieldsWithValue.find((item: IFieldWithValue) => item.fieldCode === fieldCode);
+    const fieldItem = fieldsWithValue.find((item: FieldWithValue) => item.fieldCode === fieldCode);
     if (fieldItem) {
       return fieldItem.valueStr?.realName || '无';
     }

@@ -1,27 +1,11 @@
-import React, {
-  useEffect, useState, useCallback, useMemo,
-} from 'react';
-import { observer, useLocalStore } from 'mobx-react-lite';
-import {
-  Icon, Row, Col,
-} from 'choerodon-ui';
+import React, { useEffect, useMemo } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Icon } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
-import {
-  Issue, IField, IIssueType,
-} from '@/common/types';
-import {
-  includes, uniq, compact, flatten, find, findIndex,
-} from 'lodash';
-import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
-import TypeTag from '@/components/TypeTag';
-import { DataSet, Tooltip } from 'choerodon-ui/pro';
-import {
-  fieldApi, moveIssueApi, issueApi, userApi,
-} from '@/api';
+import { Issue, IIssueType } from '@/common/types';
+import { DataSet } from 'choerodon-ui/pro';
 import styles from './Confirm.less';
-import transformValue, { IFieldWithValue } from './transformValue';
-import store from '../../store';
+import store, { FieldWithValue } from '../../store';
 import IssueCard from '../issue-card';
 
 export interface IssueWithSubIssueVOList extends Omit<Issue, 'subIssueVOList'> {
@@ -37,15 +21,13 @@ export interface ILoseItems {
 interface Props {
   issue: any,
   dataSet: DataSet,
-  fieldsWithValue: IFieldWithValue[]
+  fieldsWithValue: FieldWithValue[]
   targetProjectType: 'program' | 'project' | 'subProject'
   targetIssueType?: IIssueType
   targetSubTaskType?: IIssueType
   targetSubBugType?: IIssueType
   loseItems: ILoseItems,
 }
-
-const { AppState } = stores;
 
 const Confirm: React.FC<Props> = ({
   issue: mainIssue, dataSet, fieldsWithValue, targetProjectType, targetIssueType, targetSubTaskType, targetSubBugType, loseItems,
@@ -60,7 +42,7 @@ const Confirm: React.FC<Props> = ({
   // const targetIssueTypeIds = [issueType, subTaskTypeId, subBugTypeId].filter(Boolean);
   const targetIssueTypes = useMemo(() => [targetIssueType, targetSubTaskType, targetSubBugType].filter(Boolean), [targetIssueType, targetSubBugType, targetSubTaskType]);
 
-  const { issues, issueMap } = store;
+  const { issues, issueFields } = store;
   useEffect(() => {
     store.initIssueMap(issueType, mainIssue);
     store.loadData(targetIssueTypes as IIssueType[], targetProjectId, targetProjectType);
@@ -79,9 +61,11 @@ const Confirm: React.FC<Props> = ({
         </div>
         <div className={styles.contentMain}>
           {
-            issues.map((issue: Issue) => (
+            issues.map((issue: Issue, index) => (
               <IssueCard
                 sourceIssue={issue}
+                sourceFields={issueFields[index]}
+                key={issue.issueId}
               />
             ))
           }

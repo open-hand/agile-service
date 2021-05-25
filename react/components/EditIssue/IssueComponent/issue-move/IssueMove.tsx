@@ -25,9 +25,8 @@ import Confirm from './components/confirm-data';
 import styles from './IssueMove.less';
 import { IssueWithSubIssueVOList, ILoseItems } from './components/confirm-data/Confirm';
 import { submitFieldMap } from './transformValue';
-import { IFieldWithValue } from './components/confirm-data/transformValue';
 
-import store from './store';
+import store, { FieldWithValue } from './store';
 
 const isDEV = process.env.NODE_ENV === 'development';
 // @ts-ignore
@@ -38,7 +37,7 @@ const { Step } = Steps;
 interface Props {
   issue: IssueWithSubIssueVOList,
   modal?: IModalProps
-  fieldsWithValue: IFieldWithValue[]
+  fieldsWithValue: FieldWithValue[]
   onMoveIssue: () => void,
   loseItems: ILoseItems,
 }
@@ -303,7 +302,7 @@ const ObserverIssueMove = observer(IssueMove);
 
 const openIssueMove = ({
   issue, customFields, onMoveIssue, loseItems,
-}: { issue: IssueWithSubIssueVOList, customFields: IFieldWithValue[], onMoveIssue: () => void, loseItems: ILoseItems }) => {
+}: { issue: IssueWithSubIssueVOList, customFields: FieldWithValue[], onMoveIssue: () => void, loseItems: ILoseItems }) => {
   Modal.open({
     key: 'issueMoveModal',
     drawer: true,
