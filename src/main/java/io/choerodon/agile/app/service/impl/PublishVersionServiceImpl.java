@@ -498,13 +498,14 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                 }
                 int total = tags.size();
                 double current = 1D;
+                double lastProgress = 0D;
                 for (TagVO tag : tags) {
                     addTagToIssue(tag, projectId, organizationId, programId, issueMap, doUpdate, publishVersionTagHistoryDTO);
                     TagCompareVO tagCompareVO = tag.getTagCompareVO();
                     addTagCompareHistory(tagCompareVO, projectId, organizationId, publishVersionId, publishVersionTagHistoryDTO.getId());
                     tagCompareVO.setAction(DOING);
                     tagCompareVO.setProgress(getProgress(current, total));
-                    sendProgress(tagCompareVO, userId, websocketKey);
+                    lastProgress = sendProgress(tagCompareVO, userId, websocketKey, lastProgress);
                     current++;
                 }
             }
@@ -512,13 +513,13 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             tagCompareVO.setAction(DONE);
             tagCompareVO.setProgress(1D);
             publishVersionTagHistoryService.updateStatus(publishVersionTagHistoryDTO, DONE);
-            sendProgress(tagCompareVO, userId, websocketKey);
+            sendProgress(tagCompareVO, userId, websocketKey, 1D);
         } catch (Exception e) {
             TagCompareVO tagCompareVO = new TagCompareVO();
             tagCompareVO.setAction(FAILED);
             tagCompareVO.setProgress(0D);
             tagCompareVO.setMsg(e.getMessage());
-            sendProgress(tagCompareVO, userId, websocketKey);
+            sendProgress(tagCompareVO, userId, websocketKey, 0D);
             publishVersionTagHistoryService.updateStatus(publishVersionTagHistoryDTO, FAILED);
             LOGGER.error("error.compare.tag", e);
         }
@@ -723,13 +724,17 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         return result;
     }
 
-    private void sendProgress(TagCompareVO tagCompareVO, Long userId, String websocketKey) {
+    private double sendProgress(TagCompareVO tagCompareVO, Long userId, String websocketKey, double lastProgress) {
+        if (tagCompareVO.getProgress() != 0 && tagCompareVO.getProgress() < 100 && tagCompareVO.getProgress() - lastProgress > 0.1) {
+            return lastProgress;
+        }
         try {
             String message = objectMapper.writeValueAsString(tagCompareVO);
             messageClientC7n.sendByUserId(userId, websocketKey, message);
         } catch (JsonProcessingException e) {
             logger.error("parse object to string error: {}", e);
         }
+        return tagCompareVO.getProgress();
     }
 
     private void deleteTagCompareHistory(Long projectId,

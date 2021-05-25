@@ -908,7 +908,8 @@ public class ExcelServiceImpl implements ExcelService {
                 history.setFailCount(progress.getFailCount());
             }
             progress.processNumIncrease();
-            if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / realRowCount > 0.03) {
+            if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / realRowCount >= 0.1) {
+                lastSendCountNum = progress.getProcessNum();
                 sendProcess(history, userId, (progress.getProcessNum() * 1.0 / realRowCount) * 0.97 * 100, socketKey);
             }
         }
@@ -966,9 +967,14 @@ public class ExcelServiceImpl implements ExcelService {
             sheet.setDefaultColumnWidth(13);
             sheet.setColumnWidth(1, 8000);
             sheet.setColumnWidth(5, 8000);
+            double lastProcess = 0d;
             for (PublishVersionDTO publishVersion : publishVersions) {
                 writePublishVersionData(projectCodeMap, organizationId, workbook, publishVersion, withSubVersion, issueMap, issueTagMap, issuePublishVersionMap, parentSonMap);
-                sendProcess(history, userId, getProcess(current, total), websocketKey);
+                double process = getProcess(current, total);
+                if (process - lastProcess >= 0.1) {
+                    sendProcess(history, userId, process, websocketKey);
+                    lastProcess = process;
+                }
                 current++;
             }
             ExcelUtil.writePublishVersionData(workbook, sheetName, issueMap, 0, issueTagMap, projectCodeMap, parentSonMap, issuePublishVersionMap);
@@ -1260,6 +1266,7 @@ public class ExcelServiceImpl implements ExcelService {
         List<Long> importedIssueIds = new ArrayList<>();
         Map<Integer, Long> rowIssueIdMap = new HashMap<>();
         List<RelatedIssueVO> relatedIssueList = new ArrayList<>();
+        int lastSendCountNum = 0;
         for (int rowNum = 1; rowNum <= dataRowCount; rowNum++) {
             if (Boolean.TRUE.equals(checkCanceled(projectId, history.getId(), importedIssueIds))) {
                 return;
@@ -1285,7 +1292,10 @@ public class ExcelServiceImpl implements ExcelService {
                 progress.failCountIncrease();
                 progress.processNumIncrease();
                 history.setFailCount(progress.getFailCount());
-                sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+                if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
+                    lastSendCountNum = progress.getProcessNum();
+                    sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+                }
                 continue;
             } else {
                 issueType = issueTypeCell.toString();
@@ -1303,7 +1313,7 @@ public class ExcelServiceImpl implements ExcelService {
                     IssueCreateVO parent = new IssueCreateVO();
                     validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, parent, null, issueTypeCol, parentCol);
                     if (!ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
-                        processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol);
+                        lastSendCountNum = processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol, lastSendCountNum);
                         rowNum = Collections.max(sonSet);
                         continue;
                     }
@@ -1340,7 +1350,7 @@ public class ExcelServiceImpl implements ExcelService {
                         }
                     }
                     if (!sonsOk) {
-                        processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol);
+                        lastSendCountNum = processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol, lastSendCountNum);
                         rowNum = Collections.max(sonSet);
                         issueService.batchDeleteIssuesAgile(projectId, insertIds);
                         continue;
@@ -1360,7 +1370,7 @@ public class ExcelServiceImpl implements ExcelService {
                     rowNum = Collections.max(sonSet);
                 } catch (Exception e) {
                     LOGGER.error("insert data error when import excel, exception: {}", e);
-                    processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol);
+                    lastSendCountNum = processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol, lastSendCountNum);
                     rowNum = Collections.max(sonSet);
                     issueService.batchDeleteIssuesAgile(projectId, insertIds);
                     continue;
@@ -1372,7 +1382,10 @@ public class ExcelServiceImpl implements ExcelService {
                     progress.failCountIncrease();
                     progress.processNumIncrease();
                     history.setFailCount(progress.getFailCount());
-                    sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+                    if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
+                        lastSendCountNum = progress.getProcessNum();
+                        sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+                    }
                     continue;
                 }
                 Optional.ofNullable(issueCreateVO.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
@@ -1386,7 +1399,10 @@ public class ExcelServiceImpl implements ExcelService {
             }
             history.setFailCount(progress.getFailCount());
             history.setSuccessCount(progress.getSuccessCount());
-            sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+            if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
+                lastSendCountNum = progress.getProcessNum();
+                sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+            }
         }
         updateRelatedIssue(relatedIssueList, rowIssueIdMap, errorRowColMap, headerMap, dataSheet, projectId, progress, parentSonMap, parentCol);
 
@@ -1612,7 +1628,7 @@ public class ExcelServiceImpl implements ExcelService {
         return result;
     }
 
-    private void processErrorData(Long userId,
+    private int processErrorData(Long userId,
                                   FileOperationHistoryDTO history,
                                   Sheet dataSheet,
                                   Integer dataRowCount,
@@ -1620,7 +1636,7 @@ public class ExcelServiceImpl implements ExcelService {
                                   Map<Integer, List<Integer>> errorRowColMap,
                                   int rowNum,
                                   Set<Integer> sonSet,
-                                  int parentColIndex) {
+                                  int parentColIndex, int lastSendCountNum) {
         setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet, parentColIndex);
         int errorCount = sonSet.size() + 1;
         Long failCount = progress.getFailCount() + errorCount;
@@ -1629,7 +1645,11 @@ public class ExcelServiceImpl implements ExcelService {
         progress.setFailCount(failCount);
         progress.addProcessNum(errorCount);
         String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + history.getProjectId();
-        sendProcess(history, userId, processNum * 1.0 / dataRowCount, websocketKey);
+        if ((processNum - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
+            sendProcess(history, userId, processNum * 1.0 / dataRowCount, websocketKey);
+            lastSendCountNum = processNum;
+        }
+        return lastSendCountNum;
     }
 
     private void setErrorMsgToParentSonRow(int rowNum,
@@ -3142,6 +3162,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
             final String searchSql = filterSql;
             String orderStr = getOrderStrOfQueryingIssuesWithSub(sort);
+            double lastProcess = 0D;
             while (true) {
                 //查询所有父节点问题
                 Page<IssueDTO> page =
@@ -3247,7 +3268,11 @@ public class ExcelServiceImpl implements ExcelService {
                 ExcelUtil.writeIssue(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, sheetName, Arrays.asList(AUTO_SIZE_WIDTH), workbook, cursor);
                 boolean hasNextPage = (cursor.getPage() + 1) < page.getTotalPages();
                 cursor.clean();
-                sendProcess(fileOperationHistoryDTO, userId, getProcess(cursor.getPage(), page.getTotalPages()), websocketKey);
+                double process = getProcess(cursor.getPage(), page.getTotalPages());
+                if (process - lastProcess >= 0.1) {
+                    sendProcess(fileOperationHistoryDTO, userId, process, websocketKey);
+                    lastProcess = process;
+                }
                 if (!hasNextPage) {
                     break;
                 }

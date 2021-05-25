@@ -334,8 +334,11 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 agilePluginService.handlerFeatureField(projectId,v,programMap);
             }
             if (sendMsg) {
-                batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-                messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                batchUpdateFieldStatusVO.setProcess(batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
+                if (batchUpdateFieldStatusVO.getProcess() - batchUpdateFieldStatusVO.getLastProcess() >= 0.1) {
+                    messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                    batchUpdateFieldStatusVO.setLastProcess(batchUpdateFieldStatusVO.getProcess());
+                }
             }
         });
     }
@@ -395,7 +398,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             }
             if (sendMsg) {
                 batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-                messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                if (batchUpdateFieldStatusVO.getProcess() - batchUpdateFieldStatusVO.getLastProcess() >= 0.1) {
+                    messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                    batchUpdateFieldStatusVO.setLastProcess(batchUpdateFieldStatusVO.getProcess());
+                }
             }
         });
     }

@@ -53,7 +53,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                 return;
             }
             Double progress = 0.0;
-            double incremental = Math.ceil(issueIds.size() <= 20 ? 1 : (issueIds.size()*1.0) / 20) ;
+            double lastSendProcess = 0D;
             try {
                 batchUpdateFieldStatusVO.setStatus("doing");
                 batchUpdateFieldStatusVO.setProcess(progress);
@@ -68,10 +68,12 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                     if (!subList.contains(issueId)) {
                         issueService.deleteIssue(projectId, issueId);
                     }
-                    if (i % incremental == 0) {
-                        batchUpdateFieldStatusVO.setProcess((i * 1.0) / issueIds.size());
+                    double process = (i * 1.0) / issueIds.size();
+                    if (process - lastSendProcess >= 0.1) {
+                        batchUpdateFieldStatusVO.setProcess(process);
+                        messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                        lastSendProcess = process;
                     }
-                    messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 }
                 batchUpdateFieldStatusVO.setStatus("success");
                 batchUpdateFieldStatusVO.setProcess(1.0);

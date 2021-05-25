@@ -21,6 +21,8 @@ public class BatchUpdateFieldStatusVO {
 
     private Double incrementalValue;
 
+    private Double lastProcess;
+
     private Map<Object, Object> errorMsgMap;
 
     public String getStatus() {
@@ -77,5 +79,13 @@ public class BatchUpdateFieldStatusVO {
 
     public void setErrorMsgMap(Map<Object, Object> errorMsgMap) {
         this.errorMsgMap = errorMsgMap;
+    }
+
+    public Double getLastProcess() {
+        return lastProcess;
+    }
+
+    public void setLastProcess(Double lastProcess) {
+        this.lastProcess = lastProcess;
     }
 }
