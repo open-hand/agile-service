@@ -14,6 +14,7 @@ import SelectVersion from '@/components/select/select-version';
 import SelectSubProject from '@/components/select/select-sub-project';
 import SelectUser from '@/components/select/select-user';
 import { FlatSelect } from '@choerodon/components';
+import { toArray } from 'lodash';
 import SelectStatus from './components/StatusField';
 import FeatureProjectField from './components/FeatureProjectField';
 import PIField from './components/pi-field';
@@ -135,7 +136,7 @@ export function getFieldElement(field: IFilterField, flat?: boolean): React.Reac
           multiple
           flat={flat}
             // @ts-ignore
-          selectedUserIds={defaultValue ? defaultValue.map((item: string) => ({ id: item })) : undefined}
+          selectedUserIds={defaultValue ? toArray(defaultValue).map((item: string) => ({ id: item })) : undefined}
           clearButton
         />
       );

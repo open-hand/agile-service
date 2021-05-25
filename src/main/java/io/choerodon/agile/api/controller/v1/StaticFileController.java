@@ -7,17 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import io.choerodon.agile.api.vo.StaticFileHeaderVO;
 import io.choerodon.agile.api.vo.StaticFileRelatedVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.StaticFileService;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;

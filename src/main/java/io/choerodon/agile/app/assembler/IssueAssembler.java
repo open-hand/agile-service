@@ -40,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -93,59 +94,66 @@ public class IssueAssembler extends AbstractAssembler {
         assigneeIdList.add(issueDetailDTO.getCreatedBy());
         assigneeIdList.add(issueDetailDTO.getMainResponsibleId());
         assigneeIdList.add(issueDetailDTO.getLastUpdatedBy());
-        Boolean issueCommentCondition = issueVO.getIssueCommentVOList() != null && !issueVO.getIssueCommentVOList().isEmpty();
-        if (issueCommentCondition) {
+        Boolean issueCommentCondition = CollectionUtils.isNotEmpty(issueVO.getIssueCommentVOList());
+        if (Boolean.TRUE.equals(issueCommentCondition)) {
             assigneeIdList.addAll(issueVO.getIssueCommentVOList().stream().map(IssueCommentVO::getUserId).collect(Collectors.toList()));
         }
         Map<Long, UserMessageDTO> userMessageDOMap = userService.queryUsersMap(
                 assigneeIdList.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList()), true);
-        UserMessageDTO assigneeUserDO = userMessageDOMap.get(issueVO.getAssigneeId());
-        UserMessageDTO reporterUserDO = userMessageDOMap.get(issueVO.getReporterId());
-        UserMessageDTO createrUserDO = userMessageDOMap.get(issueVO.getCreatedBy());
-        UserMessageDTO updaterUserDO = userMessageDOMap.get(issueDetailDTO.getLastUpdatedBy());
-        String assigneeName = assigneeUserDO != null ? assigneeUserDO.getName() : null;
-        String assigneeLoginName = assigneeUserDO != null ? assigneeUserDO.getLoginName() : null;
-        String assigneeRealName = assigneeUserDO != null ? assigneeUserDO.getRealName() : null;
-        String reporterName = reporterUserDO != null ? reporterUserDO.getName() : null;
-        String reporterLoginName = reporterUserDO != null ? reporterUserDO.getLoginName() : null;
-        String reporterRealName = reporterUserDO != null ? reporterUserDO.getRealName() : null;
-        issueVO.setAssigneeName(assigneeName);
-        issueVO.setAssigneeImageUrl(assigneeName != null ? userMessageDOMap.get(issueVO.getAssigneeId()).getImageUrl() : null);
-        issueVO.setReporterName(reporterName);
-        issueVO.setReporterImageUrl(reporterName != null ? userMessageDOMap.get(issueVO.getReporterId()).getImageUrl() : null);
-        issueVO.setCreaterName(createrUserDO != null ? createrUserDO.getName() : null);
-        issueVO.setCreaterLoginName(createrUserDO != null ? createrUserDO.getLoginName() : null);
-        issueVO.setCreaterRealName(createrUserDO != null ? createrUserDO.getRealName() : null);
-        issueVO.setCreaterImageUrl(createrUserDO != null ? createrUserDO.getImageUrl() : null);
-        issueVO.setCreaterEmail(createrUserDO != null ? createrUserDO.getEmail() : null);
-        issueVO.setAssigneeLoginName(assigneeLoginName);
-        issueVO.setAssigneeRealName(assigneeRealName);
-        issueVO.setReporterLoginName(reporterLoginName);
-        issueVO.setReporterRealName(reporterRealName);
-
-        issueVO.setUpdater(updaterUserDO);
-        if (issueCommentCondition) {
+        handlerUser(issueVO, userMessageDOMap, issueDetailDTO);
+        if (Boolean.TRUE.equals(issueCommentCondition)) {
             Map<Long, Integer> parentSizeMap = new HashMap<>(issueVO.getIssueCommentVOList().size());
             Iterator<IssueCommentVO> iterator = issueVO.getIssueCommentVOList().iterator();
             while (iterator.hasNext()) {
                 IssueCommentVO issueCommentVO = iterator.next();
                 if (issueCommentVO.getParentId() != null && issueCommentVO.getParentId() != 0L) {
-                    Integer size = parentSizeMap.get(issueCommentVO.getParentId()) != null ? parentSizeMap.get(issueCommentVO.getParentId()) : 0;
+                    Integer size = parentSizeMap.getOrDefault(issueCommentVO.getParentId(),0);
                     parentSizeMap.put(issueCommentVO.getParentId(), size + 1);
                     iterator.remove();
                 } else {
                     UserMessageDTO commentUser = userMessageDOMap.get(issueCommentVO.getUserId());
-                    issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
-                    issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
-                    issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
-                    issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
-                    issueCommentVO.setReplySize(parentSizeMap.get(issueCommentVO.getCommentId()) != null ? parentSizeMap.get(issueCommentVO.getCommentId()) : 0);
+                    if (!ObjectUtils.isEmpty(commentUser)) {
+                        issueCommentVO.setUserName( commentUser.getName());
+                        issueCommentVO.setUserImageUrl(commentUser.getImageUrl());
+                        issueCommentVO.setUserRealName(commentUser.getRealName());
+                        issueCommentVO.setUserLoginName(commentUser.getLoginName());
+                    }
+                    issueCommentVO.setReplySize(parentSizeMap.getOrDefault(issueCommentVO.getCommentId(),0));
                 }
             }
         }
+        return issueVO;
+    }
+
+    private void handlerUser(IssueVO issueVO, Map<Long, UserMessageDTO> userMessageDOMap, IssueDetailDTO issueDetailDTO) {
+        UserMessageDTO assigneeUserDO = userMessageDOMap.get(issueVO.getAssigneeId());
+        UserMessageDTO reporterUserDO = userMessageDOMap.get(issueVO.getReporterId());
+        UserMessageDTO createrUserDO = userMessageDOMap.get(issueVO.getCreatedBy());
+        UserMessageDTO updaterUserDO = userMessageDOMap.get(issueDetailDTO.getLastUpdatedBy());
+        if (!ObjectUtils.isEmpty(assigneeUserDO)) {
+            issueVO.setAssigneeLoginName(assigneeUserDO.getLoginName());
+            issueVO.setAssigneeRealName(assigneeUserDO.getRealName());
+            issueVO.setAssigneeName(assigneeUserDO.getName());
+            issueVO.setAssigneeImageUrl(assigneeUserDO.getImageUrl());
+        }
+        if (!ObjectUtils.isEmpty(reporterUserDO)) {
+            issueVO.setReporterLoginName(reporterUserDO.getLoginName());
+            issueVO.setReporterRealName(reporterUserDO.getRealName());
+            issueVO.setReporterName(reporterUserDO.getName());
+            issueVO.setReporterImageUrl(reporterUserDO.getImageUrl());
+        }
+
+        if (!ObjectUtils.isEmpty(createrUserDO)) {
+            issueVO.setCreaterName(createrUserDO.getName());
+            issueVO.setCreaterLoginName(createrUserDO.getLoginName());
+            issueVO.setCreaterRealName(createrUserDO.getRealName());
+            issueVO.setCreaterImageUrl(createrUserDO.getImageUrl());
+            issueVO.setCreaterEmail(createrUserDO.getEmail());
+        }
+
+        issueVO.setUpdater(updaterUserDO);
         // 添加主要负责人、测试负责人信息
         issueVO.setMainResponsible(userMessageDOMap.get(issueDetailDTO.getMainResponsibleId()));
-        return issueVO;
     }
 
     /**
@@ -167,28 +175,25 @@ public class IssueAssembler extends AbstractAssembler {
         issueDTOList.forEach(issueDO -> {
             UserMessageDTO assigneeUserDO = usersMap.get(issueDO.getAssigneeId());
             UserMessageDTO reporterUserDO = usersMap.get(issueDO.getReporterId());
-            String assigneeName = assigneeUserDO != null ? assigneeUserDO.getName() : null;
-            String assigneeLoginName = assigneeUserDO != null ? assigneeUserDO.getLoginName() : null;
-            String assigneeRealName = assigneeUserDO != null ? assigneeUserDO.getRealName() : null;
-            String reporterName = reporterUserDO != null ? reporterUserDO.getName() : null;
-            String reporterLoginName = reporterUserDO != null ? reporterUserDO.getLoginName() : null;
-            String reporterRealName = reporterUserDO != null ? reporterUserDO.getRealName() : null;
-            String assigneeImageUrl = assigneeUserDO != null ? assigneeUserDO.getImageUrl() : null;
-            String reporterImageUrl = reporterUserDO != null ? reporterUserDO.getImageUrl() : null;
             IssueListFieldKVVO issueListFieldKVVO = toTarget(issueDO, IssueListFieldKVVO.class);
-            issueListFieldKVVO.setAssigneeName(assigneeName);
-            issueListFieldKVVO.setAssigneeLoginName(assigneeLoginName);
-            issueListFieldKVVO.setAssigneeRealName(assigneeRealName);
-            issueListFieldKVVO.setReporterName(reporterName);
-            issueListFieldKVVO.setReporterLoginName(reporterLoginName);
-            issueListFieldKVVO.setReporterRealName(reporterRealName);
+            if (!ObjectUtils.isEmpty(assigneeUserDO)) {
+                issueListFieldKVVO.setAssigneeName(assigneeUserDO.getName());
+                issueListFieldKVVO.setAssigneeLoginName(assigneeUserDO.getLoginName());
+                issueListFieldKVVO.setAssigneeRealName(assigneeUserDO.getRealName());
+                issueListFieldKVVO.setAssigneeImageUrl(assigneeUserDO.getImageUrl());
+            }
+            if (!ObjectUtils.isEmpty(assigneeUserDO)) {
+                issueListFieldKVVO.setReporterName(reporterUserDO.getName());
+                issueListFieldKVVO.setReporterLoginName(reporterUserDO.getLoginName());
+                issueListFieldKVVO.setReporterRealName(reporterUserDO.getRealName());
+                issueListFieldKVVO.setReporterImageUrl(reporterUserDO.getImageUrl());
+            }
+
             issueListFieldKVVO.setPriorityVO(priorityMap.get(issueDO.getPriorityId()));
             if (!ObjectUtils.isEmpty(issueTypeDTOMap)) {
                 issueListFieldKVVO.setIssueTypeVO(issueTypeDTOMap.get(issueDO.getIssueTypeId()));
             }
             issueListFieldKVVO.setStatusVO(statusMapDTOMap.get(issueDO.getStatusId()));
-            issueListFieldKVVO.setAssigneeImageUrl(assigneeImageUrl);
-            issueListFieldKVVO.setReporterImageUrl(reporterImageUrl);
             List<VersionIssueRelVO> versionList = toTargetList(issueDO.getVersionIssueRelDTOS(), VersionIssueRelVO.class);
             issueListFieldKVVO.setVersionIssueRelVOS(versionList);
             if (!CollectionUtils.isEmpty(versionList)) {
@@ -353,26 +358,24 @@ public class IssueAssembler extends AbstractAssembler {
         issueDTOList.forEach(issueDO -> {
             UserMessageDTO assigneeUserDO = usersMap.get(issueDO.getAssigneeId());
             UserMessageDTO reporterUserDO = usersMap.get(issueDO.getReporterId());
-            String assigneeName = assigneeUserDO != null ? assigneeUserDO.getName() : null;
-            String assigneeLoginName = assigneeUserDO != null ? assigneeUserDO.getLoginName() : null;
-            String assigneeRealName = assigneeUserDO != null ? assigneeUserDO.getRealName() : null;
-            String reporterName = reporterUserDO != null ? reporterUserDO.getName() : null;
-            String reporterLoginName = reporterUserDO != null ? reporterUserDO.getLoginName() : null;
-            String reporterRealName = reporterUserDO != null ? reporterUserDO.getRealName() : null;
-            String assigneeImageUrl = assigneeUserDO != null ? assigneeUserDO.getImageUrl() : null;
-            String reporterImageUrl = reporterUserDO != null ? reporterUserDO.getImageUrl() : null;
             IssueListVO issueListVO = toTarget(issueDO, IssueListVO.class);
-            issueListVO.setAssigneeName(assigneeName);
-            issueListVO.setAssigneeLoginName(assigneeLoginName);
-            issueListVO.setAssigneeRealName(assigneeRealName);
-            issueListVO.setReporterName(reporterName);
-            issueListVO.setReporterLoginName(reporterLoginName);
-            issueListVO.setReporterRealName(reporterRealName);
+            if (!ObjectUtils.isEmpty(assigneeUserDO)) {
+                issueListVO.setAssigneeName(assigneeUserDO.getName());
+                issueListVO.setAssigneeLoginName(assigneeUserDO.getLoginName());
+                issueListVO.setAssigneeRealName(assigneeUserDO.getLoginName());
+                issueListVO.setAssigneeImageUrl(assigneeUserDO.getImageUrl());
+            }
+            if (!ObjectUtils.isEmpty(reporterUserDO)) {
+                issueListVO.setReporterName(reporterUserDO.getName());
+                issueListVO.setReporterLoginName(reporterUserDO.getLoginName());
+                issueListVO.setReporterRealName(reporterUserDO.getRealName());
+                issueListVO.setReporterImageUrl(reporterUserDO.getImageUrl());
+            }
+
             issueListVO.setPriorityVO(priorityMap.get(issueDO.getPriorityId()));
             issueListVO.setIssueTypeVO(issueTypeDTOMap.get(issueDO.getIssueTypeId()));
             issueListVO.setStatusVO(statusMapDTOMap.get(issueDO.getStatusId()));
-            issueListVO.setAssigneeImageUrl(assigneeImageUrl);
-            issueListVO.setReporterImageUrl(reporterImageUrl);
+
             issueListVO.setVersionIssueRelVOS(toTargetList(issueDO.getVersionIssueRelDTOS(), VersionIssueRelVO.class));
             issueListVO.setIssueComponentBriefVOS(toTargetList(issueDO.getIssueComponentBriefDTOS(), IssueComponentBriefVO.class));
             issueListVO.setIssueSprintVOS(toTargetList(issueDO.getIssueSprintDTOS(), IssueSprintVO.class));
@@ -436,30 +439,39 @@ public class IssueAssembler extends AbstractAssembler {
         assigneeIdList.add(issueDetailDTO.getReporterId());
         assigneeIdList.add(issueDetailDTO.getCreatedBy());
         Boolean issueCommentCondition = issueSubVO.getIssueCommentVOList() != null && !issueSubVO.getIssueCommentVOList().isEmpty();
-        if (issueCommentCondition) {
+        if (Boolean.TRUE.equals(issueCommentCondition)) {
             assigneeIdList.addAll(issueSubVO.getIssueCommentVOList().stream().map(IssueCommentVO::getUserId).collect(Collectors.toList()));
         }
         Map<Long, UserMessageDTO> userMessageDOMap = userService.queryUsersMap(
                 assigneeIdList.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList()), true);
-        String assigneeName = userMessageDOMap.get(issueSubVO.getAssigneeId()) != null ? userMessageDOMap.get(issueSubVO.getAssigneeId()).getName() : null;
-        String reporterName = userMessageDOMap.get(issueSubVO.getReporterId()) != null ? userMessageDOMap.get(issueSubVO.getReporterId()).getName() : null;
-        String createrName = userMessageDOMap.get(issueSubVO.getCreatedBy()) != null ? userMessageDOMap.get(issueSubVO.getCreatedBy()).getName() : null;
-        issueSubVO.setCreaterEmail(userMessageDOMap.get(issueSubVO.getCreatedBy()) != null ? userMessageDOMap.get(issueSubVO.getCreatedBy()).getEmail() : null);
-        issueSubVO.setAssigneeName(assigneeName);
-        issueSubVO.setAssigneeImageUrl(assigneeName != null ? userMessageDOMap.get(issueSubVO.getAssigneeId()).getImageUrl() : null);
-        issueSubVO.setReporterName(reporterName);
-        issueSubVO.setReporterImageUrl(reporterName != null ? userMessageDOMap.get(issueSubVO.getReporterId()).getImageUrl() : null);
-        issueSubVO.setCreaterName(createrName);
-        issueSubVO.setCreaterImageUrl(createrName != null ? userMessageDOMap.get(issueSubVO.getCreatedBy()).getImageUrl() : null);
-        if (issueCommentCondition) {
+        UserMessageDTO assigneeDTO = userMessageDOMap.get(issueSubVO.getAssigneeId());
+        if (!ObjectUtils.isEmpty(assigneeDTO)) {
+            issueSubVO.setAssigneeName(assigneeDTO.getName());
+            issueSubVO.setAssigneeImageUrl(assigneeDTO.getImageUrl());
+        }
+
+        UserMessageDTO reporterDTO = userMessageDOMap.get(issueSubVO.getReporterId());
+        if (!ObjectUtils.isEmpty(reporterDTO)) {
+            issueSubVO.setReporterName(reporterDTO.getName());
+            issueSubVO.setReporterImageUrl(reporterDTO.getImageUrl());
+        }
+        UserMessageDTO createrDTO = userMessageDOMap.get(issueSubVO.getCreatedBy());
+        if (!ObjectUtils.isEmpty(createrDTO)) {
+            issueSubVO.setCreaterEmail(createrDTO.getEmail());
+            issueSubVO.setCreaterName(createrDTO.getName());
+            issueSubVO.setCreaterImageUrl(createrDTO.getImageUrl());
+        }
+        if (Boolean.TRUE.equals(issueCommentCondition)) {
             Map<Long, IssueCommentVO> commentMap = new HashMap<>(issueSubVO.getIssueCommentVOList().size());
             for (int i = issueSubVO.getIssueCommentVOList().size() - 1; i >= 0; i--) {
                 IssueCommentVO issueCommentVO = issueSubVO.getIssueCommentVOList().get(i);
                 UserMessageDTO commentUser = userMessageDOMap.get(issueCommentVO.getUserId());
-                issueCommentVO.setUserName(commentUser != null ? commentUser.getName() : null);
-                issueCommentVO.setUserImageUrl(commentUser != null ? commentUser.getImageUrl() : null);
-                issueCommentVO.setUserRealName(commentUser != null ? commentUser.getRealName() : null);
-                issueCommentVO.setUserLoginName(commentUser != null ? commentUser.getLoginName() : null);
+                if (!ObjectUtils.isEmpty(commentUser)) {
+                    issueCommentVO.setUserName(commentUser.getName());
+                    issueCommentVO.setUserImageUrl(commentUser.getImageUrl());
+                    issueCommentVO.setUserRealName(commentUser.getRealName());
+                    issueCommentVO.setUserLoginName(commentUser.getLoginName());
+                }
                 issueCommentVO.setReplySize(0);
                 commentMap.put(issueCommentVO.getCommentId(), issueCommentVO);
                 if (issueCommentVO.getParentId() != null
@@ -599,24 +611,23 @@ public class IssueAssembler extends AbstractAssembler {
             Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
             Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
             issueComponentDetailInfoDTOS.parallelStream().forEachOrdered(issueDO -> {
-                String assigneeName = usersMap.get(issueDO.getAssigneeId()) != null ? usersMap.get(issueDO.getAssigneeId()).getName() : null;
-                String assigneeLoginName = usersMap.get(issueDO.getAssigneeId()) != null ? usersMap.get(issueDO.getAssigneeId()).getLoginName() : null;
-                String assigneeRealName = usersMap.get(issueDO.getAssigneeId()) != null ? usersMap.get(issueDO.getAssigneeId()).getRealName() : null;
-                String reporterName = usersMap.get(issueDO.getReporterId()) != null ? usersMap.get(issueDO.getReporterId()).getName() : null;
-                String reporterLoginName = usersMap.get(issueDO.getReporterId()) != null ? usersMap.get(issueDO.getReporterId()).getLoginName() : null;
-                String reporterRealName = usersMap.get(issueDO.getReporterId()) != null ? usersMap.get(issueDO.getReporterId()).getRealName() : null;
-                String assigneeImageUrl = assigneeName != null ? usersMap.get(issueDO.getAssigneeId()).getImageUrl() : null;
-                String reporterImageUrl = reporterName != null ? usersMap.get(issueDO.getReporterId()).getImageUrl() : null;
+                UserMessageDTO assigneeDTO = usersMap.get(issueDO.getAssigneeId());
+                UserMessageDTO reporterDTO = usersMap.get(issueDO.getReporterId());
                 IssueComponentDetailDTO issueComponentDetailDTO = new IssueComponentDetailDTO();
                 BeanUtils.copyProperties(issueDO, issueComponentDetailDTO);
-                issueComponentDetailDTO.setAssigneeName(assigneeName);
-                issueComponentDetailDTO.setAssigneeLoginName(assigneeLoginName);
-                issueComponentDetailDTO.setAssigneeRealName(assigneeRealName);
-                issueComponentDetailDTO.setReporterName(reporterName);
-                issueComponentDetailDTO.setReporterLoginName(reporterLoginName);
-                issueComponentDetailDTO.setReporterRealName(reporterRealName);
-                issueComponentDetailDTO.setAssigneeImageUrl(assigneeImageUrl);
-                issueComponentDetailDTO.setReporterImageUrl(reporterImageUrl);
+                if (!ObjectUtils.isEmpty(assigneeDTO)) {
+                    issueComponentDetailDTO.setAssigneeName(assigneeDTO.getName());
+                    issueComponentDetailDTO.setAssigneeLoginName(assigneeDTO.getLoginName());
+                    issueComponentDetailDTO.setAssigneeRealName(assigneeDTO.getRealName());
+                    issueComponentDetailDTO.setAssigneeImageUrl(assigneeDTO.getImageUrl());
+                }
+                if (!ObjectUtils.isEmpty(reporterDTO)) {
+                    issueComponentDetailDTO.setReporterName(reporterDTO.getName());
+                    issueComponentDetailDTO.setReporterLoginName(reporterDTO.getLoginName());
+                    issueComponentDetailDTO.setReporterRealName(reporterDTO.getRealName());
+                    issueComponentDetailDTO.setReporterImageUrl(reporterDTO.getImageUrl());
+                }
+
                 issueComponentDetailDTO.setIssueTypeVO(issueTypeDTOMap.get(issueDO.getIssueTypeId()));
                 issueComponentDetailDTO.setStatusVO(statusMapDTOMap.get(issueDO.getStatusId()));
                 issueComponentDetailDTO.setPriorityVO(priorityDTOMap.get(issueDO.getPriorityId()));
@@ -756,12 +767,12 @@ public class IssueAssembler extends AbstractAssembler {
         return new IssueCountWithStatusIdsVO(statusIds, issues.size(), issueTypeIds);
     }
 
-    public List<Map.Entry<String, Integer>> convertBugEntry(List<ReportIssueConvertDTO> reportIssueConvertDTOList, DateFormat df, Function<ReportIssueConvertDTO, Boolean> func){
+    public List<Map.Entry<String, Integer>> convertBugEntry(List<ReportIssueConvertDTO> reportIssueConvertDTOList, DateFormat df, Predicate<ReportIssueConvertDTO> func){
         Map<Date, List<ReportIssueConvertDTO>> group = reportIssueConvertDTOList.stream()
-                .filter(func::apply).collect(Collectors.groupingBy(bug1 -> DateUtils.truncate(bug1.getDate(), Calendar.DAY_OF_MONTH)));
+                .filter(func::test).collect(Collectors.groupingBy(bug1 -> DateUtils.truncate(bug1.getDate(), Calendar.DAY_OF_MONTH)));
         // 去重
-        for (Date date : group.keySet()) {
-            List<ReportIssueConvertDTO> reportIssueConvertDTOS = group.get(date);
+        for (Map.Entry<Date, List<ReportIssueConvertDTO>> entry : group.entrySet()) {
+            List<ReportIssueConvertDTO> reportIssueConvertDTOS = group.get(entry.getKey());
             if (CollectionUtils.isNotEmpty(reportIssueConvertDTOS)) {
                 List<ReportIssueConvertDTO> issueList = new ArrayList<>();
                 List<ReportIssueConvertDTO> issueNullList = reportIssueConvertDTOS.stream().filter(v -> ObjectUtils.isEmpty(v.getIssueId())).collect(Collectors.toList());
@@ -771,10 +782,10 @@ public class IssueAssembler extends AbstractAssembler {
                 }
                 if (CollectionUtils.isNotEmpty(issueNotNullList)) {
                     issueNotNullList = issueNotNullList.stream().collect(collectingAndThen(
-                            toCollection(() -> new TreeSet<>(comparing(n -> n.getIssueId()))), ArrayList::new));
+                            toCollection(() -> new TreeSet<>(comparing(ReportIssueConvertDTO::getIssueId))), ArrayList::new));
                     issueList.addAll(issueNotNullList);
                 }
-                group.put(date, issueList);
+                group.put(entry.getKey(), issueList);
             }
         }
         return group.entrySet().stream().sorted(Map.Entry.comparingByKey())

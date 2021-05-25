@@ -44,7 +44,6 @@ import org.hzero.core.base.AopProxy;
 import org.hzero.core.message.MessageAccessor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -220,7 +219,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     protected static final String RANK_HIGHER = "评级更高";
     protected static final String RANK_LOWER = "评级更低";
     private static final String RANK_FIELD = "rank";
+    private static final String AGILE_SCHEME_CODE = "agile_issue";
     private static final String ERROR_ISSUE_NOT_FOUND = "error.Issue.queryIssue";
+    private static final String ERROR_ISSUE_TYPE_NOT_ISSUE_TEST= "error.Issue.type.isNotIssueTest";
     private static final String SEARCH = "search";
     private static final String STORYMAP = "storymap";
     private static final String AGILE = "agile";
@@ -516,42 +517,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Page<Long> issueIdPage;
             String filterSql = null;
             //处理自定义搜索
-            if (searchVO.getQuickFilterIds() != null && !searchVO.getQuickFilterIds().isEmpty()) {
+            if (!CollectionUtils.isEmpty(searchVO.getQuickFilterIds())) {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
             }
             //处理未匹配的筛选
             boardAssembler.handleOtherArgs(searchVO);
             final String searchSql = filterSql;
-            if (!handleSortField(pageRequest).equals("")) {
-                String fieldCode = handleSortField(pageRequest);
-                Map<String, String> order = new HashMap<>(1);
-                String sortCode = fieldCode.split("\\.")[1];
-                order.put(fieldCode, sortCode);
-                order.put(ISSUE_NUM, ISSUE_NUM_CONVERT);
-                PageUtil.sortResetOrder(pageRequest.getSort(), null, order);
-                List<Long> issueIdsWithSub =
-                        issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null, isTreeView)
-                                .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-                List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageRequest);
-
-                List<Long> foundationIssueIdsWithSub = foundationIssueIds.stream().filter(issueIdsWithSub::contains).collect(Collectors.toList());
-                List<Long> issueIdsWithSubWithoutFoundation = issueIdsWithSub.stream().filter(t -> !foundationIssueIdsWithSub.contains(t)).collect(Collectors.toList());
-
-                issueIdPage = new Page<>();
-                issueIdPage.setNumber(pageRequest.getPage());
-                issueIdPage.setSize(pageRequest.getSize());
-                issueIdPage.setTotalElements(issueIdsWithSub.size());
-                issueIdPage.addAll(handleIssueLists(foundationIssueIdsWithSub, issueIdsWithSubWithoutFoundation, pageRequest)
-                        .subList((pageRequest.getPage() - 1) * pageRequest.getSize(), pageRequest.getPage() * pageRequest.getSize()));
-            } else {
-                String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
-                Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
-                List<Long> issueIds = issues.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-                issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
-            }
-
-            Page<IssueListFieldKVVO> issueListDTOPage;
-            if (issueIdPage.getContent() != null && !issueIdPage.getContent().isEmpty()) {
+            issueIdPage = getIssueIdPage(pageRequest, projectId, searchVO, searchSql, organizationId, isTreeView);
+            Page<IssueListFieldKVVO> issueListDTOPage = new Page<>();
+            if (!CollectionUtils.isEmpty(issueIdPage.getContent())) {
                 List<Long> issueIds = issueIdPage.getContent();
                 Set<Long> childrenIds = new HashSet<>();
                 if (isTreeView) {
@@ -562,21 +536,50 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
                 List<Long> allIssueIds = issueDTOList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-                Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, allIssueIds, false, "agile_issue");
+                Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, allIssueIds, false, AGILE_SCHEME_CODE);
                 Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), allIssueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                 List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue, workLogVOMap);
-                AgilePluginService expandBean = SpringBeanUtil.getExpandBean(AgilePluginService.class);
-                if (!ObjectUtils.isEmpty(expandBean) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
-                    expandBean.doToIssueListFieldKVDTO(projectId,issueListFieldKVVOS);
+                if (!ObjectUtils.isEmpty(agilePluginService) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
+                    agilePluginService.doToIssueListFieldKVDTO(projectId,issueListFieldKVVOS);
                 }
                 issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,issueListFieldKVVOS);
-            } else {
-                issueListDTOPage = new Page<>();
             }
             return issueListDTOPage;
         } else {
             return new Page<>();
         }
+    }
+
+    private Page<Long> getIssueIdPage(PageRequest pageRequest, Long projectId, SearchVO searchVO, String searchSql, Long organizationId, Boolean isTreeView) {
+        Page<Long>issueIdPage = new Page<>();
+        if (!handleSortField(pageRequest).equals("")) {
+            String fieldCode = handleSortField(pageRequest);
+            Map<String, String> order = new HashMap<>(1);
+            String sortCode = fieldCode.split("\\.")[1];
+            order.put(fieldCode, sortCode);
+            order.put(ISSUE_NUM, ISSUE_NUM_CONVERT);
+            PageUtil.sortResetOrder(pageRequest.getSort(), null, order);
+            List<Long> issueIdsWithSub =
+                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null, isTreeView)
+                            .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+            List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageRequest);
+
+            List<Long> foundationIssueIdsWithSub = foundationIssueIds.stream().filter(issueIdsWithSub::contains).collect(Collectors.toList());
+            List<Long> issueIdsWithSubWithoutFoundation = issueIdsWithSub.stream().filter(t -> !foundationIssueIdsWithSub.contains(t)).collect(Collectors.toList());
+
+
+            issueIdPage.setNumber(pageRequest.getPage());
+            issueIdPage.setSize(pageRequest.getSize());
+            issueIdPage.setTotalElements(issueIdsWithSub.size());
+            issueIdPage.addAll(handleIssueLists(foundationIssueIdsWithSub, issueIdsWithSubWithoutFoundation, pageRequest)
+                    .subList((pageRequest.getPage() - 1) * pageRequest.getSize(), pageRequest.getPage() * pageRequest.getSize()));
+        } else {
+            String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
+            Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr, isTreeView));
+            List<Long> issueIds = issues.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+            issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
+        }
+        return issueIdPage;
     }
 
     protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
@@ -628,29 +631,28 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
         if (otherArgs != null) {
             List<String> list = (List<String>) otherArgs.get("sprint");
-            if (list != null && list.contains("0")) {
-                otherArgs.put("sprintNull", true);
-            }
+            handlerNullValue(list, "sprintNull", otherArgs);
+
             list = (List<String>) otherArgs.get("version");
-            if (list != null && list.contains("0")) {
-                otherArgs.put("versionNull", true);
-            }
+            handlerNullValue(list, "versionNull", otherArgs);
+
             list = (List<String>) otherArgs.get("component");
-            if (list != null && list.contains("0")) {
-                otherArgs.put("componentNull", true);
-            }
+            handlerNullValue(list, "componentNull", otherArgs);
+
             list = (List<String>) otherArgs.get("epic");
-            if (list != null && list.contains("0")) {
-                otherArgs.put("epicNull", true);
-            }
+            handlerNullValue(list, "epicNull", otherArgs);
+
             list = (List<String>) otherArgs.get("label");
-            if (list != null && list.contains("0")) {
-                otherArgs.put("labelNull", true);
-            }
+            handlerNullValue(list, "labelNull", otherArgs);
+
             list = (List<String>) otherArgs.get(ASSIGNEE_ID);
-            if (list != null && list.contains("0")) {
-                otherArgs.put("assigneeIdNull", true);
-            }
+            handlerNullValue(list, "assigneeIdNull", otherArgs);
+        }
+    }
+
+    private void handlerNullValue(List<String> list, String key, Map<String, Object> otherArgs){
+        if (list != null && list.contains("0")) {
+            otherArgs.put(key, true);
         }
     }
 
@@ -658,24 +660,28 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public Boolean handleSearchUser(SearchVO searchVO, Long projectId) {
         if (searchVO.getSearchArgs() != null && searchVO.getSearchArgs().get(ASSIGNEE) != null) {
             String userName = (String) searchVO.getSearchArgs().get(ASSIGNEE);
-            if (userName != null && !"".equals(userName)) {
-                List<UserVO> userVOS = userService.queryUsersByNameAndProjectId(projectId, userName);
-                if (userVOS != null && !userVOS.isEmpty()) {
-                    searchVO.getAdvancedSearchArgs().put("assigneeIds", userVOS.stream().map(UserVO::getId).collect(Collectors.toList()));
-                } else {
-                    return false;
-                }
+            Boolean result = handlerUserSearch(projectId, userName, searchVO, "assigneeIds");
+            if (!result) {
+                return false;
             }
         }
         if (searchVO.getSearchArgs() != null && searchVO.getSearchArgs().get(REPORTER) != null) {
             String userName = (String) searchVO.getSearchArgs().get(REPORTER);
-            if (userName != null && !"".equals(userName)) {
-                List<UserVO> userVOS = userService.queryUsersByNameAndProjectId(projectId, userName);
-                if (userVOS != null && !userVOS.isEmpty()) {
-                    searchVO.getAdvancedSearchArgs().put("reporterIds", userVOS.stream().map(UserVO::getId).collect(Collectors.toList()));
-                } else {
-                    return false;
-                }
+            Boolean result = handlerUserSearch(projectId, userName, searchVO, "reporterIds");
+            if (!result) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private Boolean handlerUserSearch(Long projectId, String userName, SearchVO searchVO, String key) {
+        if (userName != null && !"".equals(userName)) {
+            List<UserVO> userVOS = userService.queryUsersByNameAndProjectId(projectId, userName);
+            if (!CollectionUtils.isEmpty(userVOS)) {
+                searchVO.getAdvancedSearchArgs().put(key, userVOS.stream().map(UserVO::getId).collect(Collectors.toList()));
+            } else {
+                return false;
             }
         }
         return true;
@@ -730,10 +736,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                                               Long organizationId,
                                                               Long issueId,
                                                               Long issueTypeId) {
-        String schemeCode = "agile_issue";
+        String schemeCode = AGILE_SCHEME_CODE;
         IssueVO issue = queryIssue(projectId, issueId, organizationId);
         Map<String, Object> customFieldMap =
-                pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, Arrays.asList(issueId), false, "agile_issue")
+                pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, Arrays.asList(issueId), false, AGILE_SCHEME_CODE)
                         .get(issueId);
         AssertUtilsForCommonException.notNull(issue, "error.issue.null");
         PageFieldViewParamVO param = new PageFieldViewParamVO();
@@ -762,24 +768,28 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<PageFieldViewVO> requiredCustomFields = new ArrayList<>();
         createPageFields.forEach(x -> {
             if (Boolean.TRUE.equals(x.getRequired())) {
-                if (Boolean.TRUE.equals(x.getSystem())) {
-                    //系统字段
-                    String code = x.getFieldCode();
-                    if (FieldCode.EPIC.equals(code) && belongToProgram) {
-                        return;
-                    }
-                    if (isSystemFieldEmpty(x.getFieldCode(), issue)) {
-                        requiredSystemFields.add(x);
-                    }
-                } else {
-                    if (ObjectUtils.isEmpty(customFieldMap.get(x.getFieldCode()))) {
-                        requiredCustomFields.add(x);
-                    }
-                }
+                handlerSystemAndCustomRequiredField(customFieldMap, belongToProgram, x, requiredSystemFields, requiredCustomFields, issue);
             }
         });
         requiredSystemFields.addAll(requiredCustomFields);
         return requiredSystemFields;
+    }
+
+    private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO x, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
+        if (Boolean.TRUE.equals(x.getSystem())) {
+            //系统字段
+            String code = x.getFieldCode();
+            if (FieldCode.EPIC.equals(code) && belongToProgram) {
+                return;
+            }
+            if (isSystemFieldEmpty(x.getFieldCode(), issue)) {
+                requiredSystemFields.add(x);
+            }
+        } else {
+            if (ObjectUtils.isEmpty(customFieldMap.get(x.getFieldCode()))) {
+                requiredCustomFields.add(x);
+            }
+        }
     }
 
     @Override
@@ -1071,7 +1081,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             wikiRelationMapper.deleteByIssueId(projectId, issueId);
         }
         // 删除自定义字段的值
-        fieldValueMapper.deleteList(projectId, issueId, "agile_issue", null);
+        fieldValueMapper.deleteList(projectId, issueId, AGILE_SCHEME_CODE, null);
         //不是子任务的issue删除子任务
         if (!(SUB_TASK).equals(issueConvertDTO.getTypeCode())) {
             if ((ISSUE_EPIC).equals(issueConvertDTO.getTypeCode())) {
@@ -1122,7 +1132,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public void batchDeleteIssuesAgile(Long projectId, List<Long> issueIds) {
         if (issueMapper.queryIssueIdsIsNotTest(projectId, issueIds) != issueIds.size()) {
-            throw new CommonException("error.Issue.type.isNotIssueTest");
+            throw new CommonException(ERROR_ISSUE_TYPE_NOT_ISSUE_TEST);
         }
         issueMapper.batchDeleteIssues(projectId, issueIds);
         dataLogRedisUtil.deleteByDeleteIssueInfo(projectId);
@@ -1131,7 +1141,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public void batchDeleteIssues(Long projectId, List<Long> issueIds) {
         if (issueMapper.queryIssueIdsIsTest(projectId, issueIds) != issueIds.size()) {
-            throw new CommonException("error.Issue.type.isNotIssueTest");
+            throw new CommonException(ERROR_ISSUE_TYPE_NOT_ISSUE_TEST);
         }
         List<Long> issueIdList = issueMapper.queryIssueSubListByIssueIds(projectId, issueIds);
         issueIds.addAll(issueIdList);
@@ -1185,7 +1195,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (versionId != null && !Objects.equals(versionId, 0L)) {
             productVersionValidator.judgeExist(projectId, versionId);
             if (issueMapper.queryIssueIdsIsTest(projectId, issueIds) != issueIds.size()) {
-                throw new CommonException("error.Issue.type.isNotIssueTest");
+                throw new CommonException(ERROR_ISSUE_TYPE_NOT_ISSUE_TEST);
             }
             issueAccessDataService.batchRemoveVersionTest(projectId, issueIds);
             VersionIssueRelDTO versionIssueRelDTO = new VersionIssueRelDTO();
@@ -1229,27 +1239,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             afterRank(projectId, sprintId, moveIssueVO, moveIssueDTOS);
         }
         //处理评级日志
-        if (moveIssueVO.getRankIndex() != null && !moveIssueVO.getRankIndex()) {
-            dataLogRank(projectId, moveIssueVO, RANK_LOWER, sprintId);
-        } else if (moveIssueVO.getRankIndex() != null && moveIssueVO.getRankIndex()) {
-            dataLogRank(projectId, moveIssueVO, RANK_HIGHER, sprintId);
-        }
+        handlerDataLogRank(moveIssueVO, projectId, sprintId);
         issueAccessDataService.batchUpdateIssueRank(projectId, moveIssueDTOS);
         List<Long> moveIssueIds = moveIssueVO.getIssueIds();
         List<Long> frontIncomingIssues = deepCopy(moveIssueIds);
         //处理子任务与子缺陷
         List<Long> subTaskIds = issueMapper.querySubIssueIds(projectId, moveIssueIds);
         List<Long> subBugIds = issueMapper.querySubBugIds(projectId, moveIssueIds);
-        if (subTaskIds != null && !subTaskIds.isEmpty()) {
+        if (!CollectionUtils.isEmpty(subTaskIds)) {
             moveIssueIds.addAll(subTaskIds);
         }
-        if (subBugIds != null && !subBugIds.isEmpty()) {
+        if (!CollectionUtils.isEmpty(subBugIds)) {
             moveIssueIds.addAll(subBugIds);
         }
         //把与现在冲刺与要移动的冲刺相同的issue排除掉
         List<IssueSearchDTO> issueSearchDTOList = issueMapper.queryIssueByIssueIds(projectId, moveIssueVO.getIssueIds()).stream()
                 .filter(issueDO -> issueDO.getSprintId() == null ? sprintId != 0 : !issueDO.getSprintId().equals(sprintId)).collect(Collectors.toList());
-        if (issueSearchDTOList != null && !issueSearchDTOList.isEmpty()) {
+        if (!CollectionUtils.isEmpty(issueSearchDTOList)) {
             List<Long> moveIssueIdsFilter = issueSearchDTOList.stream().map(IssueSearchDTO::getIssueId).collect(Collectors.toList());
             BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, sprintId, moveIssueIdsFilter);
             issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
@@ -1268,9 +1274,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     }
 
+    private void handlerDataLogRank(MoveIssueVO moveIssueVO, Long projectId, Long sprintId) {
+        if (moveIssueVO.getRankIndex() != null) {
+            if (!moveIssueVO.getRankIndex()) {
+                dataLogRank(projectId, moveIssueVO, RANK_LOWER, sprintId);
+            } else if (moveIssueVO.getRankIndex()) {
+                dataLogRank(projectId, moveIssueVO, RANK_HIGHER, sprintId);
+            }
+        }
+    }
+
     private List<Long> deepCopy(List<Long> src) {
         List<Long> dest = new ArrayList<>(src.size());
-        src.forEach(i -> dest.add(i));
+        src.forEach(dest::add);
         return dest;
     }
 
@@ -1454,7 +1470,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         List<PageFieldViewUpdateVO> customFields = batchUpdateFieldsValueVo.getCustomFields();
         if (!ObjectUtils.isEmpty(customFields)) {
-            fieldValueService.handlerCustomFields(projectId, customFields, "agile_issue", issueIds, batchUpdateFieldStatusVO, false);
+            fieldValueService.handlerCustomFields(projectId, customFields, AGILE_SCHEME_CODE, issueIds, batchUpdateFieldStatusVO, false);
         }
         if(!ObjectUtils.isEmpty(batchUpdateFieldStatusVO.getErrorMsgMap())) {
             throw new CommonException("error.update.field.value");
@@ -1867,23 +1883,26 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
             //复制故事点和剩余工作量并记录日志
             copyStoryPointAndRemainingTimeData(issueDetailDTO, projectId, newIssueId, objectVersionNumber);
-            //复制冲刺
-            if (predefinedFieldNames.contains(SPRINT_ID_FIELD)) {
-                handleCreateCopyIssueSprintRel(issueDetailDTO, newIssueId);
-            }
-            if (copyConditionVO.getSubTask()) {
-                List<IssueDTO> subIssueDTOList = issueDetailDTO.getSubIssueDTOList();
-                if (subIssueDTOList != null && !subIssueDTOList.isEmpty()) {
-                    subIssueDTOList.forEach(issueDO -> copySubIssue(issueDO, newIssueId, projectId,copyConditionVO));
-                }
-            }
-            if (!CollectionUtils.isEmpty(copyConditionVO.getCustomFieldIds())) {
-                // 复制自定义字段的值
-                fieldValueService.copyCustomFieldValue(projectId, issueDetailDTO, newIssueId, copyConditionVO.getCustomFieldIds());
-            }
+            // 处理冲刺、子任务、自定义字段的值
+            handlerOtherFields(projectId, predefinedFieldNames, issueDetailDTO, newIssueId, copyConditionVO);
             return queryIssue(projectId, newIssueId, organizationId);
         } else {
             throw new CommonException("error.issue.copyIssueByIssueId");
+        }
+    }
+
+    private void handlerOtherFields(Long projectId, List<String> predefinedFieldNames, IssueDetailDTO issueDetailDTO, Long newIssueId, CopyConditionVO copyConditionVO) {
+        //复制冲刺
+        if (predefinedFieldNames.contains(SPRINT_ID_FIELD)) {
+            handleCreateCopyIssueSprintRel(issueDetailDTO, newIssueId);
+        }
+        if (copyConditionVO.getSubTask() && !CollectionUtils.isEmpty(issueDetailDTO.getSubIssueDTOList())) {
+            List<IssueDTO> subIssueDTOList = issueDetailDTO.getSubIssueDTOList();
+            subIssueDTOList.forEach(issueDO -> copySubIssue(issueDO, newIssueId, projectId,copyConditionVO));
+        }
+        if (!CollectionUtils.isEmpty(copyConditionVO.getCustomFieldIds())) {
+            // 复制自定义字段的值
+            fieldValueService.copyCustomFieldValue(projectId, issueDetailDTO, newIssueId, copyConditionVO.getCustomFieldIds());
         }
     }
 
@@ -2047,7 +2066,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (!issueConvertDTO.getTypeCode().equals(SUB_TASK)) {
                 issueConvertDTO.setObjectVersionNumber(issueTransformSubTask.getObjectVersionNumber());
                 List<Long> subIssueIds = issueMapper.querySubIssueIdsByIssueId(projectId, issueConvertDTO.getIssueId());
-                if (subIssueIds != null && !subIssueIds.isEmpty()) {
+                if (!CollectionUtils.isEmpty(subIssueIds)) {
                     throw new CommonException("error.transformedSubTask.issueHaveSubIssue");
                 }
                 issueConvertDTO.setEpicSequence(null);
@@ -2397,28 +2416,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return result;
     }
 
-    private void handleCreateCopyComponentIssueRel(List<ComponentIssueRelDTO> componentIssueRelDTOList, Long issueId) {
-        componentIssueRelDTOList.forEach(componentIssueRelDO -> {
-            ComponentIssueRelDTO componentIssueRelDTO = new ComponentIssueRelDTO();
-            BeanUtils.copyProperties(componentIssueRelDO, componentIssueRelDTO);
-            componentIssueRelDTO.setIssueId(issueId);
-            componentIssueRelDTO.setObjectVersionNumber(null);
-            if (issueValidator.existComponentIssueRel(componentIssueRelDTO)) {
-                componentIssueRelService.create(componentIssueRelDTO);
-            }
-        });
-    }
-
-    private void handleCreateCopyLabelIssueRel(List<LabelIssueRelDTO> labelIssueRelDTOList, Long issueId) {
-        labelIssueRelDTOList.forEach(labelIssueRel -> {
-            LabelIssueRelDTO labelIssueRelDTO = new LabelIssueRelDTO();
-            BeanUtils.copyProperties(labelIssueRel, labelIssueRelDTO);
-            labelIssueRelDTO.setIssueId(issueId);
-            labelIssueRelDTO.setObjectVersionNumber(null);
-            labelIssueRelService.create(labelIssueRelDTO);
-        });
-    }
-
     public void deleteIssueInfo(Long issueId, Long projectId) {
         //删除issue发送消息
         IssuePayload issuePayload = new IssuePayload();
@@ -2604,12 +2601,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Long parentId = null;
             Long parentIssueId = v.getParentIssueId();
             Long relateIssueId = v.getRelateIssueId();
-            if (!ObjectUtils.isEmpty(parentIssueId) && parentIssueId != 0) {
-                parentId = parentIssueId;
-            }
-            if (!ObjectUtils.isEmpty(relateIssueId) && relateIssueId != 0) {
-                parentId = relateIssueId;
-            }
+            parentId = setParentId(parentIssueId);
+            parentId = setParentId(relateIssueId);
             issueListFieldKVVO.setParentId(parentId);
             list.add(issueListFieldKVVO);
             Long assigneeId = v.getAssigneeId();
@@ -2628,6 +2621,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
         return new Page<>(list, pageInfo, parentPage.getTotalElements());
+    }
+
+    private Long setParentId(Long issueId){
+        if (!ObjectUtils.isEmpty(issueId) && issueId != 0) {
+            return issueId;
+        }
+        return null;
     }
 
     private void setIssueTypeVO(IssueListFieldKVVO issueListFieldKVVO, List<IssueTypeVO> issueTypeVOList) {

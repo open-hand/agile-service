@@ -14,7 +14,7 @@ export const submitFieldMap = new Map([
   ['programVersion', 'programVersionIds'],
   ['feature', 'featureId'],
   ['reporter', 'reporterId'],
-  ['mainResponseible', 'mainResponsibleId'],
+  ['mainResponsible', 'mainResponsibleId'],
 ]);
 
 interface Props {

@@ -20,9 +20,9 @@ import java.util.function.Supplier;
  * @date 2020-09-23 09:29:15
  */
 public interface ConfigurationRuleService {
-    ConfigurationRuleVO create(Long projectId, ConfigurationRuleVO ConfigurationRuleVO);
+    ConfigurationRuleVO create(Long projectId, ConfigurationRuleVO configurationRuleVO);
 
-    ConfigurationRuleVO update(Long projectId, Long ruleId, ConfigurationRuleVO ConfigurationRuleVO);
+    ConfigurationRuleVO update(Long projectId, Long ruleId, ConfigurationRuleVO configurationRuleVO);
 
     void deleteById(Long projectId, Long filterId);
 

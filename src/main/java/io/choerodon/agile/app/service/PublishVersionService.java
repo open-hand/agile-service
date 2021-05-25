@@ -3,12 +3,14 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.infra.dto.TagCompareHistoryDTO;
+import io.choerodon.agile.infra.dto.VersionTagHistoryDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author superlee
@@ -126,6 +128,14 @@ public interface PublishVersionService {
                     List<TagCompareVO> tagCompareList,
                     String action);
 
+    void compareTagAndSendProgress(Long programId,
+                                   Long organizationId,
+                                   List<TagCompareVO> tagCompareList,
+                                   String action,
+                                   String websocketKey,
+                                   Long userId,
+                                   VersionTagHistoryDTO versionTagHistoryDTO);
+
     /**
      * 删除tag相关数据
      *
@@ -150,23 +160,24 @@ public interface PublishVersionService {
      *
      * @param projectId
      * @param organizationId
-     * @param publishVersionId
+     * @param versionId
      * @return
      */
-    List<TagCompareHistoryDTO> tagCompareHistory(Long projectId, Long organizationId, Long publishVersionId);
+    List<TagCompareHistoryDTO> tagCompareHistory(Long projectId,
+                                                 Long organizationId,
+                                                 Long versionId,
+                                                 String versionType);
 
     /**
      * 查看tag对比的issue
      *
      * @param projectId
      * @param organizationId
-     * @param publishVersionId
      * @param tagCompareVO
      * @return
      */
     List<IssueListFieldKVVO> previewIssueFromTag(Long projectId,
                                                  Long organizationId,
-                                                 Long publishVersionId,
                                                  TagCompareVO tagCompareVO);
 
     /**
@@ -186,4 +197,7 @@ public interface PublishVersionService {
      * @return
      */
     List<IssueTypeCountVO> issueTypeCount(Long projectId, Long publishVersionId);
+
+    Set<TagVO> queryTagList(Set<Long> publishVersionIdSet, Long organizationId, Set<Long> projectIds);
+
 }

@@ -33,7 +33,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -402,27 +401,6 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issue.transformedTask"));
     }
 
-//    @ResponseBody
-//    @Permission(level = ResourceLevel.ORGANIZATION)
-//    @ApiOperation("导出issue列表")
-//    @PostMapping(value = "/export")
-//    public void exportIssues(@ApiIgnore
-//                             @ApiParam(value = "分页信息", required = true)
-//                             @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-//                             PageRequest pageRequest,
-//                             @ApiParam(value = "项目id", required = true)
-//                             @PathVariable(name = "project_id") Long projectId,
-//                             @ApiParam(value = "组织id", required = true)
-//                             @RequestParam Long organizationId,
-//                             @ApiParam(value = "查询参数", required = true)
-//                             @RequestBody(required = false) SearchVO searchVO,
-//                             HttpServletRequest request,
-//                             HttpServletResponse response) {
-//        EncryptionUtils.decryptSearchVO(searchVO);
-//        issueService.exportIssues(projectId, searchVO, request, response, organizationId, pageRequest.getSort());
-//    }
-
-
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("复制一个issue")
     @PostMapping("/{issueId}/clone_issue")
@@ -520,38 +498,6 @@ public class IssueController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issueController.dragEpic"));
     }
-
-//    @Permission(level = ResourceLevel.ORGANIZATION)
-//    @ApiOperation("统计issue相关信息（测试模块用）")
-//    @PostMapping(value = "/test_component/statistic")
-//    public ResponseEntity<List<PieChartVO>> issueStatistic(@ApiParam(value = "项目id", required = true)
-//                                                            @PathVariable(name = "project_id") Long projectId,
-//                                                           @ApiParam(value = "查询类型(version、component、label)", required = true)
-//                                                            @RequestParam String type,
-//                                                           @ApiParam(value = "需要排除的issue类型列表")
-//                                                            @RequestBody List<String> issueTypes) {
-//        return Optional.ofNullable(issueService.issueStatistic(projectId, type, issueTypes))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException("error.Issue.issueStatistic"));
-//    }
-
-//    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
-//    @ApiOperation("分页过滤查询issue列表(不包含子任务，包含详情),测试模块用")
-//    @CustomPageRequest
-//    @PostMapping(value = "/test_component/no_sub_detail")
-//    public ResponseEntity<PageInfo<IssueComponentDetailDTO>> listIssueWithoutSubDetail(@ApiIgnore
-//                                                                                   @ApiParam(value = "分页信息", required = true)
-//                                                                                   @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-//                                                                                           Pageable pageable,
-//                                                                                       @ApiParam(value = "项目id", required = true)
-//                                                                                   @PathVariable(name = "project_id") Long projectId,
-//                                                                                       @ApiParam(value = "查询参数", required = true)
-//                                                                                   @RequestBody(required = false) SearchVO searchVO) {
-//        return Optional.ofNullable(issueService.listIssueWithoutSubDetail(projectId, searchVO, pageable))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException("error.Issue.listIssueWithoutSubDetail"));
-//    }
-
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更改父任务")

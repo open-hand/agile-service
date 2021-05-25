@@ -8,7 +8,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
  * @author chihao.ran@hand-china.com
  * 2021/05/19 10:56
  */
-public class PublishVersionTagHistoryVO extends AuditDomain {
+public class VersionTagHistoryVO extends AuditDomain {
 
     @Encrypt
     private Long id;
@@ -18,11 +18,21 @@ public class PublishVersionTagHistoryVO extends AuditDomain {
     private Long organizationId;
 
     @Encrypt
-    private Long publishVersionId;
+    private Long versionId;
+
+    private String versionType;
 
     private String action;
 
     private String status;
+
+    public String getVersionType() {
+        return versionType;
+    }
+
+    public void setVersionType(String versionType) {
+        this.versionType = versionType;
+    }
 
     public Long getId() {
         return id;
@@ -48,12 +58,12 @@ public class PublishVersionTagHistoryVO extends AuditDomain {
         this.organizationId = organizationId;
     }
 
-    public Long getPublishVersionId() {
-        return publishVersionId;
+    public Long getVersionId() {
+        return versionId;
     }
 
-    public void setPublishVersionId(Long publishVersionId) {
-        this.publishVersionId = publishVersionId;
+    public void setVersionId(Long versionId) {
+        this.versionId = versionId;
     }
 
     public String getAction() {

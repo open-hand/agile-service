@@ -339,8 +339,8 @@ public class IssueDelaySendMessageTask {
                 );
             });
         });
-        priorityMap.forEach((k, v) -> v.forEach((x, y) -> priorityNameMap.put(x, y)));
-        statusMap.forEach((k, v) -> v.forEach((x, y) -> statusNameMap.put(x, y)));
+        priorityMap.forEach((k, v) -> v.forEach(priorityNameMap::put));
+        statusMap.forEach((k, v) -> v.forEach(statusNameMap::put));
     }
 
     private void queryOrganizationStatusMap(Long organizationId,

@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -52,8 +51,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class PublishVersionServiceImpl implements PublishVersionService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PublishVersionServiceImpl.class);
 
     @Autowired
     private ModelMapper modelMapper;
@@ -82,7 +79,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     @Autowired
     private TagCompareHistoryMapper tagCompareHistoryMapper;
     @Autowired
-    private PublishVersionTagHistoryService publishVersionTagHistoryService;
+    private VersionTagHistoryService versionTagHistoryService;
     @Autowired
     private PublishVersionTagRelMapper publishVersionTagRelMapper;
     @Autowired
@@ -465,7 +462,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                            String action) {
         String websocketKey = WEBSOCKET_GENERATE_TAG_COMPARE + projectId;
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        PublishVersionTagHistoryDTO publishVersionTagHistoryDTO = publishVersionTagHistoryService.createDefaultHistory(projectId, organizationId, publishVersionId, action);
+        VersionTagHistoryDTO versionTagHistoryDTO =
+                versionTagHistoryService.createDefaultHistory(projectId, organizationId, publishVersionId, action, "publish");
         try {
             PublishVersionDTO dto = new PublishVersionDTO();
             dto.setProjectId(projectId);
@@ -473,56 +471,75 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             PublishVersionDTO publishVersion = publishVersionMapper.selectOne(dto);
             AssertUtilsForCommonException.notNull(publishVersion, "error.publish.version.null");
             AssertUtilsForCommonException.notEmpty(tagCompareList, "error.tagCompareList.empty");
-            validateTagCompareList(tagCompareList);
-            if (!TAG_COMPARE_ADD.equals(action)
-                    && !TAG_COMPARE_UPDATE.equals(action)) {
-                throw new CommonException("error.illegal.action." + action);
-            }
-            boolean doUpdate = TAG_COMPARE_UPDATE.equals(action);
 
-            List<TagVO> tags = new ArrayList<>();
-            Set<Long> allIssueIds = new HashSet<>();
-            getIssueIdsByTagsFromDevops(tags, allIssueIds, tagCompareList, projectId);
-
-            if (!tags.isEmpty()) {
-                Map<Long, IssueDTO> issueMap =
-                        issueMapper.selectByIds(StringUtils.join(allIssueIds, ","))
-                                .stream()
-                                .collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity()));
-                Long programId = null;
-                if (agilePluginService != null) {
-                    ProjectVO program = agilePluginService.getProgram(projectId, organizationId);
-                    if (program != null) {
-                        programId = program.getId();
-                    }
-                }
-                int total = tags.size();
-                double current = 1D;
-                double lastProgress = 0D;
-                for (TagVO tag : tags) {
-                    addTagToIssue(tag, projectId, organizationId, programId, issueMap, doUpdate, publishVersionTagHistoryDTO);
-                    TagCompareVO tagCompareVO = tag.getTagCompareVO();
-                    addTagCompareHistory(tagCompareVO, projectId, organizationId, publishVersionId, publishVersionTagHistoryDTO.getId());
-                    tagCompareVO.setAction(DOING);
-                    tagCompareVO.setProgress(getProgress(current, total));
-                    lastProgress = sendProgress(tagCompareVO, userId, websocketKey, lastProgress);
-                    current++;
+            Long programId = null;
+            if (agilePluginService != null) {
+                ProjectVO program = agilePluginService.getProgram(projectId, organizationId);
+                if (program != null) {
+                    programId = program.getId();
                 }
             }
-            TagCompareVO tagCompareVO = new TagCompareVO();
-            tagCompareVO.setAction(DONE);
-            tagCompareVO.setProgress(1D);
-            publishVersionTagHistoryService.updateStatus(publishVersionTagHistoryDTO, DONE);
-            sendProgress(tagCompareVO, userId, websocketKey, 1D);
+            compareTagAndSendProgress(programId, organizationId, tagCompareList, action, websocketKey, userId, versionTagHistoryDTO);
         } catch (Exception e) {
             TagCompareVO tagCompareVO = new TagCompareVO();
             tagCompareVO.setAction(FAILED);
             tagCompareVO.setProgress(0D);
             tagCompareVO.setMsg(e.getMessage());
-            sendProgress(tagCompareVO, userId, websocketKey, 0D);
-            publishVersionTagHistoryService.updateStatus(publishVersionTagHistoryDTO, FAILED);
-            LOGGER.error("error.compare.tag", e);
+            sendProgress(tagCompareVO, userId, websocketKey);
+            versionTagHistoryService.updateStatus(versionTagHistoryDTO, FAILED);
+            logger.error("error.compare.tag", e);
         }
+    }
+
+    @Override
+    public void compareTagAndSendProgress(Long programId,
+                                          Long organizationId,
+                                          List<TagCompareVO> tagCompareList,
+                                          String action,
+                                          String websocketKey,
+                                          Long userId,
+                                          VersionTagHistoryDTO versionTagHistoryDTO) {
+        validateTagCompareList(tagCompareList);
+        if (!TAG_COMPARE_ADD.equals(action)
+                && !TAG_COMPARE_UPDATE.equals(action)) {
+            throw new CommonException("error.illegal.action." + action);
+        }
+        boolean doUpdate = TAG_COMPARE_UPDATE.equals(action);
+        List<TagVO> tags = new ArrayList<>();
+        Set<Long> allIssueIds = new HashSet<>();
+        getIssueIdsByTagsFromDevops(tags, allIssueIds, tagCompareList);
+
+        if (!tags.isEmpty()) {
+            Map<Long, Map<Long, IssueDTO>> projectIssueMap = new HashMap<>();
+            issueMapper.selectByIds(StringUtils.join(allIssueIds, ","))
+                    .forEach(x -> {
+                        Long thisProjectId = x.getProjectId();
+                        Map<Long, IssueDTO> issueMap = projectIssueMap.computeIfAbsent(thisProjectId, y -> new HashMap<>());
+                        issueMap.put(x.getIssueId(), x);
+                    });
+
+            int total = tags.size();
+            double current = 1D;
+            for (TagVO tag : tags) {
+                Long thisProjectId = tag.getProjectId();
+                Map<Long, IssueDTO> issueMap = projectIssueMap.get(tag.getProjectId());
+                if (issueMap == null) {
+                    issueMap = new HashMap<>();
+                }
+                addTagToIssue(tag, thisProjectId, organizationId, programId, issueMap, doUpdate);
+                TagCompareVO tagCompareVO = tag.getTagCompareVO();
+                addTagCompareHistory(tagCompareVO, thisProjectId, organizationId, versionTagHistoryDTO.getId());
+                tagCompareVO.setAction(DOING);
+                tagCompareVO.setProgress(getProgress(current, total));
+                sendProgress(tagCompareVO, userId, websocketKey);
+                current++;
+            }
+        }
+        TagCompareVO tagCompareVO = new TagCompareVO();
+        tagCompareVO.setAction(DONE);
+        tagCompareVO.setProgress(1D);
+        versionTagHistoryService.updateStatus(versionTagHistoryDTO, DONE);
+        sendProgress(tagCompareVO, userId, websocketKey);
     }
 
     private void validateTagCompareList(List<TagCompareVO> tagCompareList) {
@@ -577,18 +594,14 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     @Override
     public List<TagCompareHistoryDTO> tagCompareHistory(Long projectId,
                                                         Long organizationId,
-                                                        Long publishVersionId) {
-        TagCompareHistoryDTO dto = new TagCompareHistoryDTO();
-        dto.setProjectId(projectId);
-        dto.setOrganizationId(organizationId);
-        dto.setPublishVersionId(publishVersionId);
-        return tagCompareHistoryMapper.selectLastCompareHistory(projectId, organizationId, publishVersionId);
+                                                        Long versionId,
+                                                        String versionType) {
+        return tagCompareHistoryMapper.selectLastCompareHistory(projectId, organizationId, versionId, versionType);
     }
 
     @Override
     public List<IssueListFieldKVVO> previewIssueFromTag(Long projectId,
                                                         Long organizationId,
-                                                        Long publishVersionId,
                                                         TagCompareVO tagCompareVO) {
         List<TagCompareVO> tagCompareList = Arrays.asList(tagCompareVO);
         validateTagCompareList(tagCompareList);
@@ -641,7 +654,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         return result;
     }
 
-    private Set<TagVO> queryTagList(Set<Long> publishVersionIdSet, Long organizationId, Set<Long> projectIds) {
+    @Override
+    public Set<TagVO> queryTagList(Set<Long> publishVersionIdSet, Long organizationId, Set<Long> projectIds) {
         Set<Long> publishVersionIds =
                 publishVersionTreeClosureMapper
                         .selectDescendants(
@@ -724,17 +738,13 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         return result;
     }
 
-    private double sendProgress(TagCompareVO tagCompareVO, Long userId, String websocketKey, double lastProgress) {
-        if (tagCompareVO.getProgress() != 0 && tagCompareVO.getProgress() < 100 && tagCompareVO.getProgress() - lastProgress > 0.1) {
-            return lastProgress;
-        }
+    private void sendProgress(TagCompareVO tagCompareVO, Long userId, String websocketKey) {
         try {
             String message = objectMapper.writeValueAsString(tagCompareVO);
             messageClientC7n.sendByUserId(userId, websocketKey, message);
         } catch (JsonProcessingException e) {
             logger.error("parse object to string error: {}", e);
         }
-        return tagCompareVO.getProgress();
     }
 
     private void deleteTagCompareHistory(Long projectId,
@@ -775,12 +785,12 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     }
 
     private void getIssueIdsByTagsFromDevops(List<TagVO> tags,
-                                             Set<Long> allIssueIds,
-                                             List<TagCompareVO> tagCompareList,
-                                             Long projectId) {
+                                            Set<Long> allIssueIds,
+                                            List<TagCompareVO> tagCompareList) {
         for (TagCompareVO tagCompareVO : tagCompareList) {
             String appServiceCode = tagCompareVO.getAppServiceCode();
             String tagName = tagCompareVO.getSourceTag();
+            Long projectId = tagCompareVO.getProjectId();
             try {
                 Set<Long> issueIds =
                         devopsClientOperator.getIssueIdsBetweenTags(projectId,
@@ -806,16 +816,14 @@ public class PublishVersionServiceImpl implements PublishVersionService {
     private void addTagCompareHistory(TagCompareVO tagCompareVO,
                                       Long projectId,
                                       Long organizationId,
-                                      Long publishVersionId,
                                       Long tagOperationHistoryId) {
         TagCompareHistoryDTO dto = new TagCompareHistoryDTO();
         dto.setProjectId(projectId);
-        dto.setPublishVersionId(publishVersionId);
         dto.setOrganizationId(organizationId);
         dto.setSource(tagCompareVO.getSourceTag());
         dto.setTarget(tagCompareVO.getTargetTag());
         dto.setAppServiceCode(tagCompareVO.getAppServiceCode());
-        dto.setPublishVersionTagHistoryId(tagOperationHistoryId);
+        dto.setVersionTagHistoryId(tagOperationHistoryId);
         tagCompareHistoryMapper.insert(dto);
     }
 
@@ -824,8 +832,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                                Long organizationId,
                                Long programId,
                                Map<Long, IssueDTO> issueMap,
-                               boolean doUpdate,
-                               PublishVersionTagHistoryDTO publishVersionTagHistoryDTO) {
+                               boolean doUpdate) {
         String appServiceCode = tag.getAppServiceCode();
         String tagName = tag.getTagName();
         Set<Long> issueIds = tag.getIssueIds();
@@ -836,6 +843,9 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             }
             issueIds.forEach(x -> {
                 IssueDTO issue = issueMap.get(x);
+                if (issue == null) {
+                    return;
+                }
                 String issueTypeCode = issue.getTypeCode();
                 if (issueTypeCode == null) {
                     return;

@@ -4,8 +4,6 @@ import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.SprintSearchVO;
 import io.choerodon.agile.api.vo.business.StoryMapDragVO;
 import io.choerodon.agile.api.vo.StoryMapVO;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.util.List;
 
 /**

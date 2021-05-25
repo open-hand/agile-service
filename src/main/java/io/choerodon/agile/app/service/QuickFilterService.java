@@ -6,9 +6,6 @@ import io.choerodon.agile.api.vo.QuickFilterSequenceVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
-import java.util.List;
-
-
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/6/13.
  * Email: fuqianghuang01@gmail.com

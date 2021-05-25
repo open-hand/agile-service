@@ -2,7 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
-import io.choerodon.agile.app.service.PublishVersionTagHistoryService;
+import io.choerodon.agile.app.service.VersionTagHistoryService;
 import io.choerodon.agile.infra.dto.TagCompareHistoryDTO;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.swagger.annotations.ApiOperation;
@@ -40,7 +40,7 @@ public class PublishVersionController {
     @Autowired
     private PublishVersionService publishVersionService;
     @Autowired
-    private PublishVersionTagHistoryService publishVersionTagHistoryService;
+    private VersionTagHistoryService versionTagHistoryService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建发布版本")
@@ -161,7 +161,7 @@ public class PublishVersionController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "查询发布版本关联的已完成故事")
+    @ApiOperation(value = "查询发布版本关联的问题")
     @PostMapping(value = "/{publish_version_id}/issues")
     public ResponseEntity<Page<IssueListFieldKVVO>> listRelIssueByOption(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable(name = "project_id") Long projectId,
@@ -188,7 +188,7 @@ public class PublishVersionController {
                                                                         @RequestParam Long organizationId,
                                                                         @ApiParam(value = "tag对比对象", required = true)
                                                                         @RequestBody TagCompareVO tagCompareVO) {
-        return ResponseEntity.ok(publishVersionService.previewIssueFromTag(projectId, organizationId, publishVersionId, tagCompareVO));
+        return ResponseEntity.ok(publishVersionService.previewIssueFromTag(projectId, organizationId, tagCompareVO));
     }
 
 
@@ -226,7 +226,7 @@ public class PublishVersionController {
                                                                         @PathVariable(name = "project_id") Long projectId,
                                                                         @PathVariable(name = "publish_version_id") @Encrypt Long publishVersionId,
                                                                         @RequestParam Long organizationId) {
-        return ResponseEntity.ok(publishVersionService.tagCompareHistory(projectId, organizationId, publishVersionId));
+        return ResponseEntity.ok(publishVersionService.tagCompareHistory(projectId, organizationId, publishVersionId, "publish"));
     }
 
 
@@ -251,11 +251,11 @@ public class PublishVersionController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询最近的tag处理记录")
     @GetMapping(value = "/{publish_version_id}/tag_history/latest")
-    public ResponseEntity<PublishVersionTagHistoryVO> queryLatestTagOperationHistory(
+    public ResponseEntity<VersionTagHistoryVO> queryLatestTagOperationHistory(
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @PathVariable(value = "publish_version_id") @Encrypt Long publishVersionId) {
-        return Optional.ofNullable(publishVersionTagHistoryService.queryLatestHistory(projectId, publishVersionId))
+        return Optional.ofNullable(versionTagHistoryService.queryLatestHistory(projectId, publishVersionId, "publish"))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.tagHistory.get"));
     }
