@@ -20,21 +20,20 @@ import {
   issueTypeApi, projectApi, moveIssueApi, commonApi,
 } from '@/api';
 import Field from 'choerodon-ui/pro/lib/data-set/Field';
+import { usePersistFn } from 'ahooks';
 import SelectProject from './components/select-project';
 import Confirm from './components/confirm-data';
 import styles from './IssueMove.less';
 import { IssueWithSubIssueVOList, ILoseItems } from './components/confirm-data/Confirm';
-import transformValue, { submitFieldMap } from './transformValue';
+import { submitFieldMap } from './transformValue';
 import { IFieldWithValue } from './components/confirm-data/transformValue';
 
 import store from './store';
-import { split } from './utils';
 
 const isDEV = process.env.NODE_ENV === 'development';
 // @ts-ignore
 const HAS_AGILE_PRO = C7NHasModule('@choerodon/agile-pro');
 const shouldRequest = isDEV || HAS_AGILE_PRO;
-const { AppState }: { AppState: AppStateProps } = stores;
 const { Step } = Steps;
 
 interface Props {
@@ -48,10 +47,9 @@ interface Props {
 const IssueMove: React.FC<Props> = ({
   modal, issue, fieldsWithValue, onMoveIssue, loseItems,
 }) => {
-  const { dataMap } = store;
   const [, setUpdateCount] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [submitBtnDisable, setSubmitBtnDisable] = useState<boolean>(true);
+  const [submitBtnDisable, setSubmitBtnDisable] = useState<boolean>(false);
   const [btnLoading, setBtnLoading] = useState<boolean>(false);
   const [targetProjectType, setTargetProjectType] = useState<'program' | 'project' | 'subProject'>('project');
   const issueTypeDataSet = useMemo(() => new DataSet({
@@ -163,19 +161,9 @@ const IssueMove: React.FC<Props> = ({
         if (name === 'targetProjectId' || name === 'issueType' || name === 'subTaskIssueTypeId' || name === 'subBugIssueTypeId') {
           resetData(moveDataSet, ['targetProjectId', 'issueType', 'subTaskIssueTypeId', 'subBugIssueTypeId']); // 改变项目或者问题类型应该重置
         }
-        if (name === `${issue.issueId}-sprint` && issue.subIssueVOList && issue.subIssueVOList.length) {
-          issue.subIssueVOList.forEach((subTask) => {
-            moveDataSet.current?.set(`${subTask.issueId}-sprint`, value);
-          });
-        }
-        if (name === `${issue.issueId}-sprint` && issue.subBugVOList && issue.subBugVOList.length) {
-          issue.subBugVOList.forEach((subTask) => {
-            moveDataSet.current?.set(`${subTask.issueId}-sprint`, value);
-          });
-        }
         if (name !== 'targetProjectId' && name !== 'issueType' && name !== 'subTaskIssueTypeId' && name !== 'subBugIssueTypeId') {
           const validate = await moveDataSet.validate();
-          setSubmitBtnDisable(!validate);
+          // setSubmitBtnDisable(!validate);
         }
         if (name === 'subTaskIssueTypeId') {
           store.setSubTaskTypeId(value);
@@ -215,120 +203,32 @@ const IssueMove: React.FC<Props> = ({
   const subBugIssueTypeId = dataSet.current?.get('subBugIssueTypeId');
   const targetProjectId = dataSet.current?.get('targetProjectId');
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = usePersistFn(() => {
     setBtnLoading(true);
-    let submitData: any = {
-      issueId: issue.issueId,
-      issueTypeId: targetTypeId,
-      subIssues: [],
+
+    const result = new Map();
+
+    store.issueMap.forEach((item, issueId) => {
+      const { target } = item;
+      const targetIssue = target.issue;
+      const getValue = (code: string) => targetIssue.customFields.get(code)?.value;
+      const targetValue: any = { issueId, issueTypeId: targetIssue.issueTypeVO.id };
+      [...submitFieldMap.entries()].forEach(([key, idKey]) => {
+        targetValue[idKey] = getValue(key);
+      });
+      targetValue.customFields = [...targetIssue.customFields.values()].filter((f) => !f.system);
+      result.set(issueId, targetValue);
+    });
+    const mainIssue = result.get(issue.issueId);
+    const submitData: any = {
+      ...mainIssue,
+      // 子任务的冲刺要跟着父级
+      subIssues: [...issue.subIssueVOList, ...issue.subBugVOList].map((i) => result.get(i.issueId)),
     };
-    for (const [k, v] of Object.entries(dataSet.current?.data || {})) {
-      const kIssueId = split(k, '-')[0];
-      const isSelf = kIssueId === issue.issueId;
-      if (kIssueId && kIssueId !== 'undefined' && split(k, '-')[1] && v) {
-        const isSubTask = issue.subIssueVOList?.find((item) => item.issueId === kIssueId);
-        let fields = selfFields;
-        if (!isSelf) {
-          if (isSubTask) {
-            fields = subTaskFields;
-          } else {
-            fields = subBugFields;
-          }
-        }
-        const fieldInfo = fields.find((item: IField) => item.fieldCode === split(k, '-')[1]);
-        if (fieldInfo) {
-          if (fieldInfo.system) { // 系统字段
-            if (submitFieldMap.get(split(k, '-')[1])) {
-              const fieldAndValue = {
-                [submitFieldMap.get(split(k, '-')[1]) as string]: transformValue({
-                  k,
-                  v,
-                  dataMap,
-                  targetProjectId,
-                }),
-              };
-              if (isSelf) {
-                submitData = {
-                  ...submitData,
-                  ...fieldAndValue,
-                };
-                if (k.indexOf('fixVersion') > -1) {
-                  submitData = {
-                    ...submitData,
-                    versionType: 'fix',
-                  };
-                }
-              } else {
-                const currentSubIssueItemIndex = submitData.subIssues.findIndex((item: any) => item.issueId === kIssueId);
-                if (currentSubIssueItemIndex === -1) {
-                  submitData.subIssues.push({
-                    issueId: kIssueId,
-                    issueTypeId: isSubTask ? subTaskIssueTypeId : subBugIssueTypeId,
-                    ...fieldAndValue,
-                  });
-                } else {
-                  submitData.subIssues[currentSubIssueItemIndex] = {
-                    ...submitData.subIssues[currentSubIssueItemIndex],
-                    ...fieldAndValue,
-                  };
-                }
-                if (k.indexOf('fixVersion') > -1) {
-                  submitData.subIssues[currentSubIssueItemIndex] = {
-                    ...submitData.subIssues[currentSubIssueItemIndex],
-                    versionType: 'fix',
-                  };
-                }
-              }
-            }
-          } else if (isSelf) { // 非系统字段，自己
-            if (submitData.customFields) {
-              submitData.customFields.push({
-                fieldId: fieldInfo.fieldId,
-                fieldType: fieldInfo.fieldType,
-                value: v,
-              });
-            } else {
-              submitData.customFields = [{
-                fieldId: fieldInfo.fieldId,
-                fieldType: fieldInfo.fieldType,
-                value: v,
-              }];
-            }
-          } else { // 非系统字段，子任务 | 子缺陷
-            const currentSubIssueItemIndex = submitData.subIssues.findIndex((item: any) => item.issueId === kIssueId);
-            if (currentSubIssueItemIndex === -1) {
-              submitData.subIssues.push({
-                issueId: kIssueId,
-                issueTypeId: isSubTask ? subTaskIssueTypeId : subBugIssueTypeId,
-                customFields: [
-                  {
-                    fieldId: fieldInfo.fieldId,
-                    fieldType: fieldInfo.fieldType,
-                    value: v,
-                  },
-                ],
-              });
-            } else if (submitData.subIssues[currentSubIssueItemIndex].customFields) {
-              submitData.subIssues[currentSubIssueItemIndex].customFields.push({
-                fieldId: fieldInfo.fieldId,
-                fieldType: fieldInfo.fieldType,
-                value: v,
-              });
-            } else {
-              submitData.subIssues[currentSubIssueItemIndex].customFields = [
-                {
-                  fieldId: fieldInfo.fieldId,
-                  fieldType: fieldInfo.fieldType,
-                  value: v,
-                },
-              ];
-            }
-          }
-        }
-      }
-    }
+    // const key = submitFieldMap.get(split(k, '-')[1]);
+    // transformValue
+    console.log(submitData);
     moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
-      dataSet.reset();
       onMoveIssue();
       Choerodon.prompt('移动成功');
       setBtnLoading(false);
@@ -338,11 +238,12 @@ const IssueMove: React.FC<Props> = ({
       Choerodon.prompt('移动失败');
     });
     return false;
-  }, [dataMap, dataSet, issue.issueId, issue.subIssueVOList, modal, onMoveIssue, selfFields, subBugFields, subBugIssueTypeId, subTaskFields, subTaskIssueTypeId, targetProjectId, targetTypeId]);
+  });
 
-  const targetIssueType = issueTypeDataSet.toData().find((item: IIssueType) => item.id === targetTypeId) as IIssueType;
-  const targetSubTaskType = issueTypeDataSet.toData().find((item: IIssueType) => item.id === subTaskIssueTypeId) as IIssueType;
-  const targetSubBugType = issueTypeDataSet.toData().find((item: IIssueType) => item.id === subBugIssueTypeId) as IIssueType;
+  const targetIssueType = useMemo(() => issueTypeDataSet.toData().find((item: IIssueType) => item.id === targetTypeId) as IIssueType, [issueTypeDataSet, targetTypeId]);
+  const targetSubTaskType = useMemo(() => issueTypeDataSet.toData().find((item: IIssueType) => item.id === subTaskIssueTypeId) as IIssueType, [issueTypeDataSet, subTaskIssueTypeId]);
+  const targetSubBugType = useMemo(() => issueTypeDataSet.toData().find((item: IIssueType) => item.id === subBugIssueTypeId) as IIssueType, [issueTypeDataSet, subBugIssueTypeId]);
+
   return (
     <div className={styles.issueMove}>
       <div style={{ padding: '20px 20px 0' }}>

@@ -20,6 +20,7 @@ interface Props {
   disabled?: boolean
   submitTrigger?: Action[] // 触发提交的动作
   alwaysRender?: boolean // 查看模式也挂载编辑器
+  mountRenderEditor?: boolean // 第一次mount就挂载编辑器，设为false就会在第一次编辑时再挂载，相当于懒加载了
   editor: (editorRender: EditorRender) => JSX.Element
   editorExtraContent?: () => JSX.Element
   children: (({ value, editing }: RenderProps) => React.ReactNode) | React.ReactNode
@@ -29,13 +30,15 @@ interface Props {
 }
 
 const TextEditToggle: React.FC<Props> = ({
-  disabled, submitTrigger = ['blur'], editor, editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true,
+  disabled, submitTrigger = ['blur'], editor, editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true, mountRenderEditor = true,
 } = {} as Props) => {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(initValue);
   const editingRef = useRef(editing);
   const dataRef = useRef(initValue);
   const editorRef = useRef<JSX.Element | FormField<any>>(null);
+  const firstRenderEditorRef = useRef(true);
+
   const handleClickOut = () => {
     if (submitTrigger.includes('click')) {
       submit();
@@ -60,6 +63,7 @@ const TextEditToggle: React.FC<Props> = ({
     }
   };
   const showEditor = () => {
+    firstRenderEditorRef.current = false;
     if (!editing) {
       setEditing(true);
     }
@@ -104,6 +108,9 @@ const TextEditToggle: React.FC<Props> = ({
   };
   const renderEditor = () => {
     const editorElement = typeof editor === 'function' ? editor({ submit, hideEditor }) : editor;
+    if (!editing && firstRenderEditorRef.current && !mountRenderEditor) {
+      return null;
+    }
     if (!editing && !alwaysRender) {
       return null;
     }

@@ -38,7 +38,7 @@ const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabl
   title, children, buttonIcon, buttonDisabled, clickEvent, ...otherProps
 }) => {
   if (title && buttonDisabled) {
-    return <Tooltip title={title}><Button {...omit(otherProps, 'onClick')} icon={buttonIcon} disabled={buttonDisabled}>{children}</Button></Tooltip>;
+    return <Tooltip title={title}><Button {...omit(otherProps, 'onClick', 'color')} icon={buttonIcon} disabled={buttonDisabled}>{children}</Button></Tooltip>;
   }
   return (
     <Button
