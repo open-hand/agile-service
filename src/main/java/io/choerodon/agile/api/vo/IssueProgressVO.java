@@ -2,8 +2,6 @@ package io.choerodon.agile.api.vo;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import java.math.BigDecimal;
-
 /**
  * @author zhaotianxin
  * @date 2020-11-25 9:58

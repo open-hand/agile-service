@@ -47,6 +47,8 @@ public class FixDataController {
     private ProductVersionService productVersionService;
     @Autowired
     private NoticeService noticeService;
+//    @Autowired
+//    private NotifyFeignClient notifyFeignClient;
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修复0.19创建项目产生的脏数据【全部】")
@@ -127,6 +129,7 @@ public class FixDataController {
     @GetMapping("/migration_to_base")
     public ResponseEntity migrateToBase() {
         LOGGER.info("==============================>>>>>>>> AGILE Data Migrate Start In Controller <<<<<<<<=================================");
+//        notifyFeignClient.checkLog("0.20.0", "agile");
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
