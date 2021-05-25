@@ -151,7 +151,7 @@ class Store {
   @action async loadData(targetIssueTypes: IIssueType[], targetProjectId: string, targetProjectType: string) {
     const [lostFields, issueDetails, issueFields, targetIssueFields, issueStatus, labelList] = await Promise.all([
       Promise.all(
-        this.issues.map((issue) => moveIssueApi.getFieldsLosed(targetProjectId, issue.issueId, find(targetIssueTypes, { typeCode: issue.issueTypeVO.typeCode })?.id as string)),
+        this.issueMapValues.map(({ issue, target }) => moveIssueApi.getFieldsLosed(targetProjectId, issue.issueId, target.issueTypeId)),
       ),
       Promise.all(
         this.issues.map((issue) => issueApi.load(issue.issueId)),
