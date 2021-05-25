@@ -32,6 +32,7 @@ export const getFinalFields = ({ fields, typeCode, targetProjectType }: { fields
   const reporterField = {
     fieldName: '报告人',
     fieldCode: 'reporter',
+    fieldType: 'member',
     system: true,
     code: 'reporter',
     required: true,

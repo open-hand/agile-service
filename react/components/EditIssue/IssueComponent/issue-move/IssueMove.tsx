@@ -72,7 +72,6 @@ const IssueMove: React.FC<Props> = ({
     fieldNames.forEach((name: string) => {
       removeField(ds, name);
     });
-    store.dataMap.clear();
   }, [removeField]);
 
   const dataSet = useMemo(() => new DataSet({

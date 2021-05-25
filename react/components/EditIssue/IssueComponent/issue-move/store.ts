@@ -11,6 +11,7 @@ import { initTargetIssue, getFinalFields } from './utils';
 
 export interface MoveMapItem {
   issue: Issue,
+  lostFields: IField[]
   fields: FieldWithValue[],
   target: MoveTarget
 }
@@ -37,7 +38,11 @@ export interface MoveTarget {
   projectId: string
 }
 class Store {
-  dataMap = observable.map();
+  @observable loading = false;
+
+  @action setLoading(loading: boolean) {
+    this.loading = loading;
+  }
 
   @observable selfFields: IField[] = [];
 
@@ -93,6 +98,10 @@ class Store {
 
   @observable issueMap = new Map<string, MoveMapItem>();
 
+  @computed get issueMapValues() {
+    return [...this.issueMap.values()];
+  }
+
   @computed get issues() {
     return [...this.issueMap.values()].map((t) => t.issue);
   }
@@ -140,7 +149,10 @@ class Store {
   @observable statusList = []
 
   @action async loadData(targetIssueTypes: IIssueType[], targetProjectId: string, targetProjectType: string) {
-    const [issueDetails, issueFields, targetIssueFields, issueStatus, labelList] = await Promise.all([
+    const [lostFields, issueDetails, issueFields, targetIssueFields, issueStatus, labelList] = await Promise.all([
+      Promise.all(
+        this.issues.map((issue) => moveIssueApi.getFieldsLosed(targetProjectId, issue.issueId, find(targetIssueTypes, { typeCode: issue.issueTypeVO.typeCode })?.id as string)),
+      ),
       Promise.all(
         this.issues.map((issue) => issueApi.load(issue.issueId)),
       ),
@@ -168,6 +180,7 @@ class Store {
       const source = this.issueMap.get(issueDetail.issueId)!;
       source.issue = issueDetail;
       source.fields = issueFields[index];
+      source.lostFields = lostFields[index];
       source.target.issue = initTargetIssue(issueDetail);
       source.target.projectId = targetProjectId;
 
