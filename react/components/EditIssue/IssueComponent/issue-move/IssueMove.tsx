@@ -1,5 +1,5 @@
 import React, {
-  useMemo, useState, useEffect, useCallback, useRef,
+  useMemo, useState, useEffect, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
@@ -9,13 +9,12 @@ import { Steps } from 'choerodon-ui';
 import {
   includes, map, compact, uniq,
 } from 'lodash';
-import { toJS } from 'mobx';
 import {
-  IModalProps, AppStateProps, IIssueType, IField,
+  IModalProps, IIssueType,
 } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
-import { stores, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import {
   issueTypeApi, projectApi, moveIssueApi, commonApi,
 } from '@/api';

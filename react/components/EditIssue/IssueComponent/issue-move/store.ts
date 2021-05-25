@@ -175,17 +175,19 @@ class Store {
       // 最后设置fields，保证渲染正确
       source.target.fields = getFinalFields({ fields: targetFields, typeCode: targetIssueTypes[issueTypeIndex].typeCode, targetProjectType });
       // 开始设置一些默认值
-      this.setDefaultStatus(statusList, source.target);
+      this.setDefaultStatus(statusList, issueDetail, source.target);
       // needSetUserMap.set()
     });
     // await this.setDefaultUserFields(targetProjectId, issueDetail, target);
   }
 
-  @action setDefaultStatus(statusList: IStatusCirculation[], target: MoveTarget) {
+  @action setDefaultStatus(statusList: IStatusCirculation[], issueDetail: Issue, target: MoveTarget) {
     // 判断是否有相同状态
+    const sameStatus = find(statusList, { id: issueDetail.statusVO.id });
     const defaultStatus = find(statusList, { defaultStatus: true });
-    if (defaultStatus) {
-      this.updateFieldValue(defaultStatus.id, defaultStatus, 'status', target);
+    const status = sameStatus ?? defaultStatus;
+    if (status) {
+      this.updateFieldValue(status.id, status, 'status', target);
     }
   }
 
