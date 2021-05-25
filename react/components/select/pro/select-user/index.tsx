@@ -12,15 +12,16 @@ export interface SelectUserProps extends Partial<SelectProps> {
   }[],
   flat?: boolean
   projectId?: string
+  queryOptions?: Parameters<typeof useProjectUsers>[1]
 }
 
 const SelectUser: React.FC<SelectUserProps> = forwardRef(({
-  extraOptions, flat, projectId, ...otherProps
+  extraOptions, flat, projectId, queryOptions, ...otherProps
 }, ref: React.Ref<Select>) => {
   const [text, setText] = useState('');
   const {
     fetchNextPage, data, hasNextPage,
-  } = useProjectUsers({ param: text });
+  } = useProjectUsers({ param: text }, queryOptions);
   const [props] = useSelect({
     data,
     textField: 'realName',
