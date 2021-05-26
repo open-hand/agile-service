@@ -1,27 +1,17 @@
-import React, {
-  useEffect, useState, useCallback,
-} from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Icon, Row, Col,
+  Row, Col,
 } from 'choerodon-ui';
 import { Tooltip } from 'choerodon-ui/pro';
-import { stores } from '@choerodon/boot';
-import {
-  Issue, IField, User, IIssueType,
-} from '@/common/types';
-import {
-  includes, map, uniq, compact, flatten, find, keyBy,
-} from 'lodash';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { Issue } from '@/common/types';
 import TypeTag from '@/components/TypeTag';
 import styles from './index.less';
 import Field from './Field';
 import transformValue from './transformValue';
-import store, { FieldWithValue, MoveTarget } from '../../store';
+import store, { FieldWithValue } from '../../store';
 
 export interface IssueCardProps {
-  // record: Record
   sourceIssue: Issue
   sourceFields: FieldWithValue[]
 }
