@@ -104,6 +104,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         FIELD_CODE.put(FieldCode.ESTIMATED_START_TIME, "estimatedStartTime");
         FIELD_CODE.put(FieldCode.MAIN_RESPONSIBLE, "mainResponsibleId");
         FIELD_CODE.put(FieldCode.ENVIRONMENT, "environment");
+        FIELD_CODE.put(FieldCode.TAG, "tags");
         PROGRAM_FIELD_CODE.put(FieldCode.PROGRAM_VERSION, "programVersion");
     }
     @Override
@@ -363,7 +364,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
             fieldList.add(fieldName);
             if (CLEAR.equals(statusFieldValueSettingDTO.getOperateType())) {
-                if (FieldCode.COMPONENT.equals(v.getFieldCode()) || FieldCode.LABEL.equals(v.getFieldCode())) {
+                if (FieldCode.COMPONENT.equals(v.getFieldCode()) || FieldCode.LABEL.equals(v.getFieldCode()) || FieldCode.TAG.equals(v.getFieldCode())) {
                     field.set(issueUpdateVO, new ArrayList<>());
                 } else {
                     field.set(issueUpdateVO, null);
