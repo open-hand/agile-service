@@ -2,19 +2,18 @@
 /* eslint-disable camelcase */
 import React from 'react';
 import { Select } from 'choerodon-ui';
-import { find } from 'lodash';
+import { find, castArray } from 'lodash';
 import {
   userApi, componentApi, issueApi, epicApi, versionApi,
   issueTypeApi, commonApi, issueLabelApi, priorityApi, statusApi,
-  featureApi, piApi, sprintApi,
+  featureApi, piApi, sprintApi, fieldApi,
 } from '@/api';
-
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
-
 import { Tooltip } from 'choerodon-ui/pro';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
 import UserTag from '../tag/user-tag';
+
 // 增加 typeof 避免选项中 加载更多 影响
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
   input.toLowerCase(),
@@ -216,6 +215,23 @@ export default {
         name={issueType.name}
       >
         {issueType.name}
+      </Option>
+    ),
+  },
+  custom_field: {
+    props: {
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+      loadWhenMount: true,
+    },
+    request: ({ filter, page }, { fieldId, selected, projectId } = {}) => fieldApi.project(projectId).getFieldOptions(fieldId, filter, page, 10, castArray(selected).filter(Boolean)),
+    render: (option) => (
+      <Option
+        key={option.id}
+        value={option.id}
+      >
+        <Tooltip title={option.value} placement="top" arrowPointAtCenter>
+          <span>{option.value}</span>
+        </Tooltip>
       </Option>
     ),
   },

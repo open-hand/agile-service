@@ -216,7 +216,7 @@ class FieldApi extends Api<FieldApi> {
     });
   }
 
-  getFieldOptions(fieldId: string, searchValue: string | undefined, page: number | undefined, size: number, selected?: string | string[]) {
+  getFieldOptions(fieldId: string, searchValue: string | undefined = '', page: number | undefined, size: number, selected?: string | string[]) {
     return axios({
       method: 'get',
       url: this.isOutside ? `${this.prefix}/backlog_external/field_value/${fieldId}/options` : `${this.prefix}/field_value/${fieldId}/options`,
