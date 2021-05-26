@@ -47,11 +47,10 @@ export function useEditModeSectionConfig() {
   const TitleRight = memo(({ operation }: { operation: any }) => (
     <div className={styles.operation}>
       <Button
-        icon="local_offer"
+        icon="local_offer-o"
         funcType={'flat' as any}
         className={styles.operation_btn} // 线框
         onClick={() => {
-          console.log('operation onClickTag', operation);
           typeof (operation.onClickTag) === 'function' ? operation?.onClickTag()
             : openLinkAppServiceTagModal({ publishVersionId: detailData.id, handleOk: handleLinkTag });
         }}
@@ -59,7 +58,7 @@ export function useEditModeSectionConfig() {
         关联tag
       </Button>
       <Button
-        icon="version"
+        icon="versionline"
         className={styles.operation_btn}
         funcType={'flat' as any}
         onClick={() => {
@@ -79,7 +78,7 @@ export function useEditModeSectionConfig() {
         }}
       >
         <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-          <CustomIcon type="icon-pom" width={18} height={18} />
+          <CustomIcon type="archive-o" width={18} height={18} />
           导入POM依赖
         </span>
 
@@ -162,7 +161,7 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
               <span className={styles.node_operation}>
                 {(typeof (nodeOperationProps.isShowEdit) === 'function' ? nodeOperationProps.isShowEdit(item) : nodeOperationProps.isShowEdit) && (
                   <Button
-                    icon="mode_edit"
+                    icon="edit-o"
                     className={styles.node_btn}
                     style={{ width: '.26rem', height: '.26rem' }}
                     onClick={(e) => {
@@ -180,7 +179,7 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
                 )}
                 {(typeof (nodeOperationProps.isShowDel) === 'function' ? nodeOperationProps.isShowDel(item) : nodeOperationProps.isShowDel) && (
                 <Button
-                  icon="delete_forever"
+                  icon="delete_sweep-o"
                   style={{ width: '.26rem', height: '.26rem' }}
                   className={styles.node_btn}
                   onClick={(e) => {

@@ -120,7 +120,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
                 <Icon
                   className="c7n-des-fullEdit"
                   role="none"
-                  type="mode_edit icon"
+                  type="edit-o icon"
                 />
               </Button>
             </Tooltip>

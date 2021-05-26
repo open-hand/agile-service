@@ -273,7 +273,7 @@ const Issue = observer(({ cached, updateCache }) => {
           },
           {
             name: '导入问题',
-            icon: 'archive',
+            icon: 'archive-o',
             handler: () => handleOpenImport({
               onFinish: refresh, action: 'agile_import_issue',
             }),
@@ -281,7 +281,7 @@ const Issue = observer(({ cached, updateCache }) => {
           },
           {
             name: '导出问题',
-            icon: 'unarchive',
+            icon: 'unarchive-o',
             handler: () => {
               const visibleColumns = (cached?.listLayoutColumns || defaultListLayoutColumns).filter((item) => item.display).map((item) => item.columnCode);
               openExportIssueModal(
@@ -297,7 +297,7 @@ const Issue = observer(({ cached, updateCache }) => {
           },
           {
             name: '个人筛选',
-            icon: 'settings',
+            icon: 'settings-o',
             handler: handleClickFilterManage,
             display: true,
           },

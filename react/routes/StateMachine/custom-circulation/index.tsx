@@ -393,7 +393,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         trigger={['click']}
       >
         <Icon
-          type="settings"
+          type="settings-o"
           style={{
             fontSize: 18,
           }}
