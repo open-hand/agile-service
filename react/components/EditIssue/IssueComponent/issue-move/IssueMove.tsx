@@ -213,10 +213,8 @@ const IssueMove: React.FC<Props> = ({
     const mainIssue = result.get(issue.issueId);
     const submitData: any = {
       ...mainIssue,
-      // 子任务的冲刺要跟着父级
       subIssues: [...issue.subIssueVOList, ...issue.subBugVOList].map((i) => result.get(i.issueId)),
     };
-
     moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
       onMoveIssue();
       Choerodon.prompt('移动成功');

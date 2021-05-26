@@ -19,10 +19,12 @@ export interface FieldCommonProps {
   field: IField
   onChange?: (value: any | undefined, valueStr: any) => void
   fieldWithValue: FieldWithValue | undefined
+  disabledSprint: boolean
 }
 export interface FieldProps {
   field: IField
   target: MoveTarget
+  disabledSprint: boolean
 }
 function getFieldComponent(field: IField) {
   const { fieldCode, fieldType } = field;
@@ -64,9 +66,14 @@ function getFieldComponent(field: IField) {
   }
   return null;
 }
-const Field: React.FC<FieldProps> = ({ field, target }) => {
+const Field: React.FC<FieldProps> = ({ field, target, disabledSprint }) => {
   const handleSubmit = useCallback((value, valueStr) => {
-    store.updateFieldValue(value, valueStr, field.fieldCode as string, target);
+    // 主issue冲刺变了，把所有子任务和子bug的冲刺也改掉
+    if (field.fieldCode === 'sprint') {
+      store.issueMapValues.forEach(({ target: issueTarget }) => store.updateFieldValue(value, valueStr, field.fieldCode as string, issueTarget));
+    } else {
+      store.updateFieldValue(value, valueStr, field.fieldCode as string, target);
+    }
   }, [field, target]);
   const component = getFieldComponent(field);
   if (!component) {
@@ -74,7 +81,7 @@ const Field: React.FC<FieldProps> = ({ field, target }) => {
   }
   const fieldWithValue = target.issue.customFields.get(field.fieldCode as string);
   return React.createElement(component, {
-    target, field, fieldWithValue, onChange: handleSubmit,
+    target, field, fieldWithValue, onChange: handleSubmit, disabledSprint,
   });
 };
 export default observer(Field);

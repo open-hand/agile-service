@@ -213,7 +213,23 @@ class Store {
       // 开始设置一些默认值
       this.setDefaultStatus(statusList, issueDetail, source.target);
       this.setDefaultUserFields(targetProjectId, issueDetail, existUserMap, source.target);
-      // needSetUserMap.set()
+      // 设置相同的字段（来自组织）值，除用户类型的字段外
+      issueFields[index].filter((f: any) => !f.system).forEach((f: any) => {
+        if (f.value && f.fieldType !== 'member') {
+          const sameField = find(targetFields, { fieldId: f.fieldId });
+          if (sameField) {
+            source.target.issue.customFields.set(sameField.fieldCode, {
+              fieldId: sameField.fieldId,
+              fieldType: sameField.fieldType,
+              fieldCode: sameField.fieldCode as string,
+              projectId: sameField.projectId as string,
+              system: sameField.system,
+              value: f.value,
+              valueStr: f.valueStr,
+            });
+          }
+        }
+      });
     });
   }
 

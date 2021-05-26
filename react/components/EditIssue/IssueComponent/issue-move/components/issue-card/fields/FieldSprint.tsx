@@ -9,12 +9,16 @@ export interface FieldSprintProps extends FieldCommonProps {
 
 }
 
-const FieldSprint: React.FC<FieldSprintProps> = ({ target, onChange, fieldWithValue }) => {
+const FieldSprint: React.FC<FieldSprintProps> = ({
+  target, onChange, fieldWithValue, disabledSprint,
+}) => {
   const handleChange = useCallback((value) => {
     onChange && onChange(value?.sprintId, value);
   }, [onChange]);
+
   return (
     <TextEditToggle
+      disabled={disabledSprint}
       onSubmit={handleChange}
       initValue={fieldWithValue?.valueStr}
       mountRenderEditor={false}
