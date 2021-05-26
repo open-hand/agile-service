@@ -50,6 +50,8 @@ public class IssueSearchAssembler extends AbstractAssembler {
                 String assigneeName = userMessageDTO != null ? userMessageDTO.getName() : null;
                 String assigneeLoginName = userMessageDTO != null ? userMessageDTO.getLoginName() : null;
                 String assigneeRealName = userMessageDTO != null ? userMessageDTO.getRealName() : null;
+                String email = userMessageDTO != null ? userMessageDTO.getEmail() : null;
+                Boolean ldap = userMessageDTO != null ? userMessageDTO.getLdap() : null;
                 String imageUrl = assigneeName != null ? userMessageDTO.getImageUrl() : null;
                 AssigneeIssueVO assigneeIssueVO = new AssigneeIssueVO();
                 BeanUtils.copyProperties(assigneeIssueDO, assigneeIssueVO);
@@ -57,6 +59,8 @@ public class IssueSearchAssembler extends AbstractAssembler {
                 assigneeIssueVO.setAssigneeLoginName(assigneeLoginName);
                 assigneeIssueVO.setAssigneeRealName(assigneeRealName);
                 assigneeIssueVO.setImageUrl(imageUrl);
+                assigneeIssueVO.setEmail(email);
+                assigneeIssueVO.setLadp(ldap);
                 assigneeIssues.add(assigneeIssueVO);
             });
             return assigneeIssues;
