@@ -27,7 +27,7 @@ function Header({
             >
               <Button
                 className="c7n-batch-header-btn"
-                icon="mode_edit"
+                icon="edit-o"
                 style={{ color: 'white', marginRight: 6 }}
                 onClick={onClickEdit}
               >
@@ -35,7 +35,7 @@ function Header({
               </Button>
               <Button
                 className="c7n-batch-header-btn"
-                icon="delete_forever"
+                icon="delete_sweep-o"
                 style={{ color: 'white', marginRight: 18 }}
                 onClick={onClickDelete}
               >

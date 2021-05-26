@@ -58,7 +58,7 @@ const Comment: React.FC<Props> = ({
           {
             hasPermission && (
               <Icon
-                type="mode_edit mlr-3 pointer"
+                type="edit-o"
                 onClick={() => {
                   if (canEditOrDelete) {
                     setEditing(true);
@@ -79,7 +79,7 @@ const Comment: React.FC<Props> = ({
                 okType="danger"
               >
                 <Icon
-                  type="delete_forever mlr-3 pointer"
+                  type="delete_sweep-o"
                 />
               </Popconfirm>
             )

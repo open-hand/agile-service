@@ -319,6 +319,7 @@ const Issue = observer(({ cached, updateCache }) => {
               expandAll={tableProps.expandAll}
               isExpandAll={tableProps.isExpandAll}
               expandAbleKeys={tableProps.expandAbleKeys}
+              style={{ marginRight: 16 }}
             />,
           },
         ]}

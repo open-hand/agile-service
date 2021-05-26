@@ -65,7 +65,7 @@ class DocItem extends Component {
               placement="topRight"
               arrowPointAtCenter
             >
-              <Icon type="delete" className="c7n-docItem-delete" />
+              <Icon type="delete_sweep-o" className="c7n-docItem-delete" />
             </Popconfirm>
             )
           }

@@ -102,7 +102,7 @@ const LinkItem: React.FC<Props> = ({ ui, reloadIssue, uploading = false }) => {
         }
         {
           !uploading && !disabled && (
-            <Button icon="delete_forever" onClick={() => { openDeleteModal({ ui: ui as IUi, store, reloadIssue }); }} />
+            <Button icon="delete_sweep-o" onClick={() => { openDeleteModal({ ui: ui as IUi, store, reloadIssue }); }} />
           )
         }
       </div>

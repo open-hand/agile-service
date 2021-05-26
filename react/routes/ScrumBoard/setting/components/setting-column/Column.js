@@ -21,13 +21,11 @@ class Column extends Component {
     Modal.open({
       title: '删除列',
       children: '确定要删除该列？',
-      onOk: async () => {
-        return boardColumnApi.delete(data.columnId).then(() => {
-          refresh();
-        }).catch((err) => {
-        });
-      }
-    })
+      onOk: async () => boardColumnApi.delete(data.columnId).then(() => {
+        refresh();
+      }).catch((err) => {
+      }),
+    });
   }
 
   updateColumnMaxMin = (type, value) => {
@@ -144,7 +142,7 @@ class Column extends Component {
                     />
                     <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.column.create']}>
                       <Icon
-                        type="delete"
+                        type="delete_sweep-o"
                         style={{
                           cursor: 'pointer',
                           display: isDragDisabled && 'none',

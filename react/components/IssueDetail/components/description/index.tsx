@@ -50,7 +50,7 @@ const Description: React.FC = () => {
             <Button
               style={{ padding: '0 6px' }}
               color={'primary' as ButtonColor}
-              icon="mode_edit"
+              icon="edit-o"
               onClick={() => {
                 setEdit(true);
               }}
