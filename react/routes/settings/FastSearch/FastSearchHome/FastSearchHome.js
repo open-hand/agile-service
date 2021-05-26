@@ -1,16 +1,11 @@
 /* eslint-disable react/jsx-no-bind */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Button, Icon,
-} from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import { HeaderButtons } from '@choerodon/master';
 import {
   TabPage as Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import CreateFilter from './Component/CreateFilter';
-import EditFilter from './Component/EditFilter';
 import DeleteFilter from './Component/DeleteFilter';
 import FastSearchTable from '../components/table';
 import './FastSearchHome.less';
@@ -21,37 +16,11 @@ class Search extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentFilterId: undefined,
       filter: {},
     };
-    const createKey = Modal.key();
     const deleteKey = Modal.key();
-    const createFilter = React.createRef();
     const deleteFilter = React.createRef();
     this.tableRef = React.createRef();
-    this.openCreateModal = () => {
-      Modal.open({
-        key: createKey,
-        title: '创建快速筛选',
-        style: {
-          width: 740,
-        },
-        className: 'c7nagile-fastSearch-create',
-        drawer: true,
-        okText: '创建',
-        cancelText: '取消',
-        children: (
-          <CreateFilter
-            forwardref={createFilter}
-            onOk={() => {
-              this.loadFilters();
-            }}
-          />
-        ),
-        onOk: () => createFilter.current.handleSubmit(),
-      });
-    };
-
     this.openDeleteModal = (filter) => {
       Modal.open({
         key: deleteKey,
@@ -99,21 +68,13 @@ class Search extends Component {
   }
 
   handleClickEdit = (record) => {
-    // this.setState({
-    //   editFilterShow: true,
-    //   currentFilterId: record.get('filterId'),
-    // });
-
     openEditFastSearch(record.get('filterId'), () => {
       this.loadFilters();
     });
   }
 
   render() {
-    const {
-      editFilterShow,
-      deleteFilterShow, filter, currentFilterId,
-    } = this.state;
+    const { deleteFilterShow, filter } = this.state;
 
     return (
       <Page
@@ -138,16 +99,6 @@ class Search extends Component {
             onEditClick={this.handleClickEdit}
             onMenuClick={this.handleClickMenu}
           />
-          {editFilterShow ? (
-            <EditFilter
-              filterId={currentFilterId}
-              onOk={() => {
-                this.setState({ editFilterShow: false });
-                this.loadFilters();
-              }}
-              onCancel={() => this.setState({ editFilterShow: false })}
-            />
-          ) : null}
           {deleteFilterShow ? (
             <DeleteFilter
               filter={filter}

@@ -10,13 +10,12 @@ interface Props extends Partial<SelectProps> {
   fieldId: string
   selected?: string[]
   extraOptions?: any[]
-  priorityId?: number
   flat?: boolean
   projectId?: string
 }
 
 const SelectCustomField: React.FC<Props> = forwardRef(({
-  priorityId, fieldId, flat, projectId, selected, extraOptions, ...otherProps
+  fieldId, flat, projectId, selected, extraOptions, ...otherProps
 },
 ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
