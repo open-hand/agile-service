@@ -113,7 +113,7 @@ function SingleFileUplaod(props) {
           url && (
             <Tooltip title="下载">
               <Icon
-                type="get_app"
+                type="cloud_download-o"
                 onClick={handleDownLoadFile}
               />
             </Tooltip>
@@ -122,7 +122,7 @@ function SingleFileUplaod(props) {
           {(hasDeletePermission && onDeleteFile && (url || error)) && (
           <Tooltip title="删除">
             <Icon
-              type="delete_forever"
+              type="delete_sweep-o"
               onClick={() => { onDeleteFile(); }}
             />
           </Tooltip>

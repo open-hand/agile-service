@@ -166,7 +166,7 @@ const StoryMapHome = observer(() => {
           },
           {
             name: '需求池',
-            icon: 'view_module',
+            icon: 'work_log',
             handler: handleOpenIssueList,
             display: !StoryMapStore.isFullScreen,
           }, {

@@ -26,7 +26,7 @@ const WorkLoadBtn = ({ data }) => {
           display: assigneeIssues && assigneeIssues.length > 0 ? 'flex' : 'none',
         }}
       >
-        <Icon type="find_in_page" />
+        <Icon type="find_in_page-o" />
         <span>查看经办人工作量</span>
       </span>
       <AssigneeModal

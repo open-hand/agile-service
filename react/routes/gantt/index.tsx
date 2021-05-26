@@ -294,7 +294,7 @@ const GanttPage: React.FC = () => {
             },
             {
               name: '个人筛选',
-              icon: 'settings',
+              icon: 'settings-o',
               display: true,
               handler: handleClickFilterManage,
             },

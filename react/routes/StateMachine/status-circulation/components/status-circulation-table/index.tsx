@@ -135,7 +135,7 @@ const StatusCirculationTable: React.FC = () => {
           <Tooltip title={disabled[1]}>
             <Button
               disabled={disabled[0]}
-              icon="delete"
+              icon="delete_sweep-o"
               onClick={() => handleDeleteClick(record)}
             />
           </Tooltip>

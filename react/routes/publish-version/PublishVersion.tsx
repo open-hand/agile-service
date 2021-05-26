@@ -118,7 +118,7 @@ function PublishVersion() {
             },
             {
               name: '导出版本',
-              icon: 'unarchive',
+              icon: 'unarchive-o',
               handler: () => {
                 openExportPublishVersionModal(store.getCurrentData.id);
               },

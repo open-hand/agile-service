@@ -209,13 +209,13 @@ const CommentItem: React.FC<Props> = ({
           <div className="c7n-action">
             {
               !readonly && (
-                <Icon type="message_notification" onClick={handleClickReply} />
+                <Icon type="sms-o" onClick={handleClickReply} />
               )
             }
             {
               !readonly && hasPermission && (
                 <Icon
-                  type="mode_edit mlr-3 pointer"
+                  type="edit-o"
                   onClick={() => {
                     if (canEditOrDelete) {
                       if (replying) {
@@ -236,7 +236,7 @@ const CommentItem: React.FC<Props> = ({
             {
               !readonly && hasPermission && (
                 <Icon
-                  type="delete_forever mlr-3 pointer"
+                  type="delete_sweep-o"
                   onClick={handleClickDltBtn}
                 />
               )

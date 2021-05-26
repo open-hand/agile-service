@@ -206,7 +206,7 @@ const FragmentUpload = inject('AppState')(observer((props) => {
         {
           children || (
             <Button disabled={disabled}>
-              <Icon type="file_upload" />
+              <Icon type="backup-o" />
             </Button>
           )
         }

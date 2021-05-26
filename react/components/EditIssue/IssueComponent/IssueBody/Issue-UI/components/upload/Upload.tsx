@@ -67,7 +67,7 @@ const UploadUI: React.FC<Props> = (props) => {
             uploading ? (
               <Tooltip title="正在上传，请稍后" placement="topRight" autoAdjustOverflow={false} getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}>
                 <Button style={{ padding: '0 6px' }} disabled>
-                  <Icon type="file_upload" />
+                  <Icon type="backup-o" />
                 </Button>
               </Tooltip>
             ) : (
@@ -77,7 +77,7 @@ const UploadUI: React.FC<Props> = (props) => {
               >
                 <Tooltip title="上传UI/UX文件" placement="topRight" autoAdjustOverflow={false} getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}>
                   <Button style={{ padding: '0 6px' }}>
-                    <Icon type="file_upload" />
+                    <Icon type="backup-o" />
                   </Button>
                 </Tooltip>
               </Upload>

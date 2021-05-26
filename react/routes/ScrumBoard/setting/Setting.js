@@ -148,7 +148,7 @@ class Setting extends Component {
             permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.column.create'],
           }, {
             name: '删除看板',
-            icon: 'delete_forever',
+            icon: 'delete_sweep-o',
             handler: this.handleDeleteBoard,
             display: true,
             permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.board.delete'],

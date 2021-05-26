@@ -571,7 +571,7 @@ const UpdateField = ({
                     // @ts-ignore
                     dataSet.current.init(f.code);
                   }}
-                  icon="delete"
+                  icon="delete_sweep-o"
                 />
               </Col>
             </Row>
