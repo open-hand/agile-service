@@ -7,14 +7,8 @@ import {
   devOpsApi,
   IAppVersionData, IPublishVersionData, IPublishVersionTreeNode, publishVersionApi,
 } from '@/api';
-
-interface EventsProps {
-  load: (data: any) => any | Promise<any>
-  createAfter: (data: any) => any /** 创建完发布版本事件 */
-  delete: (data: any) => any
-  selectIssue: (id: string) => any
-  update: ((data: any, record: Record) => any | Promise<any>)
-}
+import { DetailContainerProps } from '@/components/detail-container';
+import { IPublishVersionBaseDetailStore, IPublishVersionBaseDetailEventsProps } from './interface';
 
 export interface IAppVersionDataItem extends IAppVersionData {
   name: string,
@@ -23,8 +17,9 @@ export interface IAppVersionDataItem extends IAppVersionData {
   tag: boolean
   children?: IAppVersionDataItem[],
 }
-class PublishDetailStore {
-  events: EventsProps = {
+
+class PublishDetailStore implements IPublishVersionBaseDetailStore<IPublishVersionData> {
+  events: IPublishVersionBaseDetailEventsProps = {
     update: () => true, load: () => true, selectIssue: () => { }, createAfter: () => { }, delete: () => { },
   };
 
@@ -36,11 +31,11 @@ class PublishDetailStore {
 
   @observable appServiceList: Array<{ id: string, name: string, code: string }> = [];
 
-  @observable currentMenu: 'detail' | 'diff' | 'info' = 'detail';
+  @observable currentMenu: 'detail' | 'diff' | 'info' | string = 'detail';
+
+  @observable currentInfoMenu: string | undefined;
 
   @observable dependencyList: Array<IPublishVersionTreeNode> = [];
-
-  @observable visible: boolean = false;
 
   @observable disabled: boolean | undefined = false;
 
@@ -48,15 +43,11 @@ class PublishDetailStore {
     return this.loading;
   }
 
-  @computed get getVisible() {
-    return this.visible;
-  }
-
   @computed get getAppServiceList() {
     return this.appServiceList;
   }
 
-  findAppServiceByCode(code: string) {
+  findAppServiceByCode(code: string, extraItem?: IPublishVersionTreeNode | any) {
     return this.getAppServiceList.find((service) => service.code === code);
   }
 
@@ -88,6 +79,10 @@ class PublishDetailStore {
     this.current = data;
   }
 
+  @action setCurrentInfoMenu(data: string) {
+    this.currentInfoMenu = data;
+  }
+
   @computed get getCurrentData() {
     return this.current || this.currentClickKDetail || {} as IPublishVersionData;
   }
@@ -96,18 +91,17 @@ class PublishDetailStore {
     this.loading = false;
     this.current = undefined;
     this.currentClickKDetail = undefined;
-    this.visible = false;
     this.disabled = false;
     this.currentMenu = 'detail';
     this.dependencyList = [];
-    // this.appServiceList = [];
+    this.appServiceList = [];
   }
 
-  @action init(initData?: { disabled?: boolean, events?: Partial<EventsProps> }) {
+  @action init(events?: Partial<IPublishVersionBaseDetailEventsProps>, initData?: { disabled?: boolean, detailProps?: DetailContainerProps }) {
     // this.clear();
     this.disabled = initData?.disabled;
-    if (initData?.events) {
-      Object.entries<any>(initData.events).forEach(([key, event]) => {
+    if (events) {
+      Object.entries<any>(events).forEach(([key, event]) => {
         set(this.events, key, event);
       });
     }
@@ -173,7 +167,6 @@ class PublishDetailStore {
     }
     this.currentClickKDetail = newClickDetail as IPublishVersionData;
     this.loadData(waitQueryId as string);
-    this.visible = true;
   }
 
   @action selectIssue(issueId: string) {
@@ -181,7 +174,6 @@ class PublishDetailStore {
   }
 
   @action unSelect() {
-    this.visible = false;
     this.current = undefined;
     // this.current = {} as IPIAimData;
   }

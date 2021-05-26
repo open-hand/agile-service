@@ -23,7 +23,7 @@ interface VersionItemProps {
 const VersionItem = observer<VersionItemProps>(({
   name, activeId, onClick, data,
 }) => {
-  const { store } = usePublishVersionContext();
+  const { store, leftListItemConfig } = usePublishVersionContext();
   function handleUpdate(updateData: any, record: any, statusCode?: any) {
     store.update(updateData, record, statusCode);
   }
@@ -65,13 +65,15 @@ const VersionItem = observer<VersionItemProps>(({
         <span className={styles.version_item_text}>{name}</span>
         <span role="none" onClick={(e) => e.stopPropagation()}>
           <Dropdown
-            overlay={(
-              <Menu onClick={({ key }) => handleClickMenu(key, data!)}>
-                {data?.get('statusCode') === 'version_planning' ? <Menu.Item key="released">发布</Menu.Item>
-                  : <Menu.Item key="version_planning">撤销发布</Menu.Item>}
-                <Menu.Item key="edit">编辑</Menu.Item>
-                <Menu.Item key="del">删除</Menu.Item>
-              </Menu>
+            overlay={(leftListItemConfig ? leftListItemConfig.renderMenus(data)
+              : (
+                <Menu onClick={({ key }) => handleClickMenu(key, data!)}>
+                  {data?.get('statusCode') === 'version_planning' ? <Menu.Item key="released">发布</Menu.Item>
+                    : <Menu.Item key="version_planning">撤销发布</Menu.Item>}
+                  <Menu.Item key="edit">编辑</Menu.Item>
+                  <Menu.Item key="del">删除</Menu.Item>
+                </Menu>
+              )
             )}
             trigger={['click'] as any}
           >
@@ -88,7 +90,9 @@ const VersionItem = observer<VersionItemProps>(({
   );
 });
 function PublishVersionList() {
-  const { prefixCls, tableDataSet, store } = usePublishVersionContext();
+  const {
+    prefixCls, tableDataSet, store, leftListItemConfig,
+  } = usePublishVersionContext();
   const [searchText, setSearchText] = useState<string>();
   const scrollRef = useRef(null);
   const scrollSize = useSize(scrollRef);
@@ -97,6 +101,7 @@ function PublishVersionList() {
     // data.dataSet?.select(data);
     tableDataSet.select(data);
     store.select(data.toData());
+    leftListItemConfig && leftListItemConfig.onChange && leftListItemConfig.onChange(data);
   }
   function handleLoadMore() {
     console.log('load more...');
@@ -134,7 +139,7 @@ function PublishVersionList() {
       record.set(newData);
     }
 
-    store.init({ events: { update: registerUpdate, createAfter: registerCreateAfter, delete: registerCreateAfter } });
+    store.init({ update: registerUpdate, createAfter: registerCreateAfter, delete: registerCreateAfter });
   }, [handleInitResizeData, store, tableDataSet]);
   const handleChangeSearch = (val: string) => {
     setSearchText((oldText) => {
@@ -181,7 +186,14 @@ function PublishVersionList() {
 
         )}
       >
-        {tableDataSet.map((record) => <VersionItem data={record} name={record.get('versionAlias')} onClick={handleChange} activeId={tableDataSet.currentIndex} />)}
+        {tableDataSet.map((record) => (
+          <VersionItem
+            data={record}
+            name={leftListItemConfig ? leftListItemConfig.renderName(record) : record.get('versionAlias')}
+            onClick={handleChange}
+            activeId={tableDataSet.currentIndex}
+          />
+        ))}
       </ScrollContext>
     </div>
   );

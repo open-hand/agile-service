@@ -48,6 +48,7 @@ export interface IPublishVersionTreeNode {
   versionAlias?: string | null
   type?: string | 'app' | 'publish' | 'tag'
   children?: Array<IPublishVersionTreeNode>
+  appService?: boolean
   appServiceCode?: string | null
   artifactId?: string | null
   groupId?: string | null
