@@ -68,14 +68,14 @@ const SubTask = observer(({
     store.setDefaultAssignee(undefined);
   }, [store]);
 
-  const handleCreateSubIssue = () => {
+  const handleCreateSubIssue = (issue) => {
     store.setCreateSubTaskShow(false);
     resetDefault();
     if (onUpdate) {
       onUpdate();
     }
     if (reloadIssue) {
-      reloadIssue();
+      reloadIssue(issue.issueId);
     }
   };
 
@@ -121,11 +121,6 @@ const SubTask = observer(({
             sprintId={sprintId}
             parentIssueId={parentIssueId}
             onCreate={handleCreateSubIssue}
-            onOpen={(issueId) => {
-              if (reloadIssue) {
-                reloadIssue(issueId);
-              }
-            }}
             cantCreateEvent={() => { store.setCreateSubTaskShow(true); }}
             typeIdChange={(id) => {
               store.setDefaultTypeId(id);

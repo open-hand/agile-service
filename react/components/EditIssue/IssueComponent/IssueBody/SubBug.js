@@ -62,14 +62,14 @@ const SubBug = observer(({
     store.setDefaultAssignee(undefined);
   }, [store]);
 
-  const handleCreateSubIssue = () => {
+  const handleCreateSubIssue = (issue) => {
     store.setCreateSubBugShow(false);
     resetDefault();
     if (onUpdate) {
       onUpdate();
     }
     if (reloadIssue) {
-      reloadIssue();
+      reloadIssue(issue.issueId);
     }
   };
 

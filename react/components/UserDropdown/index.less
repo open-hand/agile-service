@@ -3,15 +3,34 @@
   color: #bfbfbf;
   white-space: nowrap;
 }
-
-.dropdown_menu {
-  max-height: 400px;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  position: relative;
-  .dropdown_loadMoreMenuItem {
-    
-    // position: absolute;
-    // bottom: 0;
+.overlay {
+  .searchDiv {
+    padding: 0.05rem 0.12rem;
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+  .dropdown_menu {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    padding-bottom: 8px;
+    :global {
+      .c7n-menu-item {
+        padding: 0.05rem 0.12rem;
+        line-height: 0.22rem;
+        height: unset;
+      }
+    }
+    &_noContentTipItem {
+      color: red;
+      cursor: auto;
+      &:hover {
+        background-color: unset;
+      }
+      &_tip {
+        color: rgba(0, 0, 0, 0.54);
+      }
+    }
   }
 }
+
