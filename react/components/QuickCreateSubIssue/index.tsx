@@ -9,7 +9,7 @@ import { Button } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { useLockFn } from 'ahooks';
-import { IIssueType, User } from '@/common/types';
+import { IIssueType, Issue, User } from '@/common/types';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
 import { FormProps } from 'choerodon-ui/lib/form';
 import { fieldApi, issueApi } from '@/api';
@@ -24,8 +24,7 @@ interface QuickCreateSubIssueProps extends FormProps {
   priorityId: string
   parentIssueId: string
   sprintId: string
-  onCreate?: () => void
-  onOpen: (issueId: string) => void
+  onCreate?: (issue: Issue) => void
   defaultAssignee: User | undefined
   cantCreateEvent?: () => void
   summaryChange?: (summary: string) => void,
@@ -34,7 +33,7 @@ interface QuickCreateSubIssueProps extends FormProps {
   assigneeChange?: (assigneeId: string | undefined) => void
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
-  form, priorityId, parentIssueId, sprintId, onCreate, onOpen, defaultAssignee, cantCreateEvent, summaryChange, typeIdChange, setDefaultSprint, assigneeChange,
+  form, priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, cantCreateEvent, summaryChange, typeIdChange, setDefaultSprint, assigneeChange,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: 'sub_task', onlyEnabled: true });
   const [expand, setExpand] = useState(false);
@@ -97,6 +96,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
             issueTypeId: currentType.id,
             typeCode: 'sub_task',
             sprintId,
+            assigneeId,
           }, fieldsMap);
 
           const res = await issueApi.createSubtask(issue);
@@ -105,10 +105,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
             issueTypeId: currentType.id,
             pageCode: 'agile_issue_create',
           });
-          onOpen(res.issueId);
           setLoading(false);
           handleCancel();
-          onCreate && onCreate();
+          onCreate && onCreate(res);
         }
       }
     });

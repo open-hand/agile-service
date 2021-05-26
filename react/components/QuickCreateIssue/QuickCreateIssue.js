@@ -232,7 +232,7 @@ class QuickCreateIssue extends Component {
                       />
                     </div>
                   </Dropdown>
-                  <UserDropdown userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id} />
+                  <UserDropdown userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id || 'null'} />
                   <FormItem label="summary" style={{ flex: 1, margin: '0 10px', padding: 0 }}>
                     {getFieldDecorator('summary', {
                       rules: [{ required: true, message: '请输入问题概要！' }],

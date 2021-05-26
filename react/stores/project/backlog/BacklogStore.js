@@ -371,6 +371,7 @@ class BacklogStore {
 
   @action clearFilterSprintAssign(sprintId) {
     this.filterSprintAssign.delete(sprintId);
+    this.filterSprintAssignUser.delete(sprintId);
   }
 
   axiosGetSprint = () => sprintApi.getSprintAndIssues(this.quickFilters, this.assigneeFilterIds, this.filter)
