@@ -17,7 +17,7 @@ const FieldLabel: React.FC<FieldLabelProps> = ({ target, onChange, fieldWithValu
     <TextEditToggle
       onSubmit={handleChange}
       initValue={fieldWithValue?.value}
-      alwaysRender={false}
+      mountRenderEditor={false}
       submitTrigger={['blur']}
       editor={() => (
         <SelectLabel multiple projectId={target.projectId} combo={false} primitiveValue={false} />
