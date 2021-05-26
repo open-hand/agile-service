@@ -1,7 +1,5 @@
 package io.choerodon.agile.infra.dto;
 
-
-import io.choerodon.agile.api.vo.IssueProgressVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 

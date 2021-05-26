@@ -1,8 +1,6 @@
 package io.choerodon.agile.infra.statemachineclient.dto;
 
 import com.google.common.base.MoreObjects;
-import io.choerodon.agile.infra.statemachineclient.dto.ConfigCodeDTO;
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -15,8 +15,6 @@ public interface VersionIssueRelMapper extends BaseMapper<VersionIssueRelDTO> {
 
     int deleteIncompleteIssueByVersionId(@Param("projectId") Long projectId, @Param("versionId") Long versionId);
 
-//    int deleteByVersionIds(@Param("projectId") Long projectId, @Param("versionIds") List<Long> versionIds);
-
     /**
      * 通过issueId和Type批量删除版本关联（已归档的不删除）
      *

@@ -1,7 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
-import io.choerodon.agile.infra.statemachineclient.dto.StateMachineTransformDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 

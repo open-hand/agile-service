@@ -6,7 +6,6 @@ import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.utils.IssueNumUtil;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -24,8 +23,6 @@ public class IssueConvertDTO {
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
-    private static final String DEFAULT_ASSIGNEE = "default_assignee";
-    private static final String CURRENT_USER = "current_user";
     private static final String ISSUE_FEATURE = "feature";
 
     private Long issueId;
@@ -458,13 +455,6 @@ public class IssueConvertDTO {
     }
 
     private void initializationDefaultSetting(ProjectInfoDTO projectInfoDTO) {
-//        if (this.assigneeId == null && projectInfoDTO.getDefaultAssigneeType() != null) {
-//            if (DEFAULT_ASSIGNEE.equals(projectInfoDTO.getDefaultAssigneeType())) {
-//                this.assigneeId = projectInfoDTO.getDefaultAssigneeId();
-//            } else if (CURRENT_USER.equals(projectInfoDTO.getDefaultAssigneeType())) {
-//                this.assigneeId = DetailsHelper.getUserDetails().getUserId();
-//            }
-//        }
         if (this.priorityCode == null && projectInfoDTO.getDefaultPriorityCode() != null) {
             this.priorityCode = projectInfoDTO.getDefaultPriorityCode();
         }

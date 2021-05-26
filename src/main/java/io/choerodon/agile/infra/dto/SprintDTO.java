@@ -6,12 +6,11 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/14.

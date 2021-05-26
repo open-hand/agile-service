@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
  * @since 2021-01-18
  */
 public class ProjectCategoryUtil {
+    private ProjectCategoryUtil(){}
 
     public static Set<String> getCategoryCodeAndValidate(List<ProjectCategoryDTO> categories) {
         if (ObjectUtils.isEmpty(categories)) {

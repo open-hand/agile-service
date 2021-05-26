@@ -1,7 +1,5 @@
 package io.choerodon.agile.infra.statemachineclient.dto;
 
-import io.choerodon.agile.infra.statemachineclient.dto.StateMachineConfigDTO;
-
 import java.util.List;
 
 /**

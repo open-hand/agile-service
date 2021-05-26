@@ -15,8 +15,6 @@ import java.util.List;
 @Component
 public class NotifyFeignClientFallback implements NotifyFeignClient {
 
-    private static final String FEIGN_ERROR = "notify.error";
-    private static final String FEIGN_WS_ERROR = "notify.ws.error";
     private static final String GET_MESSAGE = "notify.get.message.setting.error";
 
     @Override

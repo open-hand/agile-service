@@ -1,8 +1,5 @@
 package io.choerodon.agile.infra.enums;
 
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.infra.utils.SpringBeanUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 

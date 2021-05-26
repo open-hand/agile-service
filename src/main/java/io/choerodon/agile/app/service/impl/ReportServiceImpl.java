@@ -121,7 +121,8 @@ public class ReportServiceImpl implements ReportService {
     private static final String E_PIC = "Epic";
     private static final String ASC = "asc";
     private static final ExecutorService pool = Executors.newFixedThreadPool(3);
-
+    private static final String START_SPRINT= "startSprint";
+    private static final String END_SPRINT= "endSprint";
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportServiceImpl.class);
     @Autowired
     private ModelMapper modelMapper;
@@ -305,7 +306,7 @@ public class ReportServiceImpl implements ReportService {
 
     private BigDecimal handleExpectCount(List<ReportIssueConvertDTO> reportIssueConvertDTOList) {
         BigDecimal expectCount = new BigDecimal(0);
-        List<ReportIssueConvertDTO> startReportIssue = reportIssueConvertDTOList.stream().filter(reportIssueConvertDTO -> "startSprint".equals(reportIssueConvertDTO.getType())).collect(Collectors.toList());
+        List<ReportIssueConvertDTO> startReportIssue = reportIssueConvertDTOList.stream().filter(reportIssueConvertDTO -> START_SPRINT.equals(reportIssueConvertDTO.getType())).collect(Collectors.toList());
         if (startReportIssue != null && !startReportIssue.isEmpty()) {
             for (ReportIssueConvertDTO reportIssueConvertDTO : startReportIssue) {
                 if (reportIssueConvertDTO.getStatistical()) {
@@ -426,7 +427,6 @@ public class ReportServiceImpl implements ReportService {
         orders.put("issueNum", "issue_num_convert");
         Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", orders);
         pageRequest.setSort(sort);
-        //pageable.resetOrder("ai", new HashMap<>());
         Page<IssueDTO> reportIssuePage = PageHelper.doPageAndSort(pageRequest, () -> reportMapper.
                 queryReportIssues(projectId, versionId, status, type));
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
@@ -1430,7 +1430,7 @@ public class ReportServiceImpl implements ReportService {
     @Cacheable(cacheNames = AGILE, key = "'BurnDownCoordinate' + #projectId + ':' + #sprintId + ':' + #burnDownSearchVO")
     public JSONObject queryBurnDownCoordinate(Long projectId, Long sprintId, BurnDownSearchVO burnDownSearchVO) {
         List<ReportIssueConvertDTO> reportIssueConvertDTOList = getBurnDownReport(projectId, sprintId, burnDownSearchVO);
-        return handleSameDay(reportIssueConvertDTOList.stream().filter(reportIssueConvertDTO -> !"endSprint".equals(reportIssueConvertDTO.getType())).
+        return handleSameDay(reportIssueConvertDTOList.stream().filter(reportIssueConvertDTO -> !END_SPRINT.equals(reportIssueConvertDTO.getType())).
                 sorted(Comparator.comparing(ReportIssueConvertDTO::getDate)).collect(Collectors.toList()));
     }
 
@@ -1441,14 +1441,14 @@ public class ReportServiceImpl implements ReportService {
         DateFormat bf = new SimpleDateFormat("yyyy-MM-dd");
         // 新增bug统计
         issueCount.setCreatedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf,
-                bug -> StringUtils.equals(bug.getType(), "startSprint")
+                bug -> StringUtils.equals(bug.getType(), START_SPRINT)
                         || bug.getStatistical() && StringUtils.equalsAny(bug.getType(),
                  "endSprint", "addDuringSprint")));
         // 解决bug统计
         issueCount.setCompletedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf, bug -> {
-            if (Objects.equals(bug.getType(), "startSprint") && !bug.getStatistical()) {
+            if (Objects.equals(bug.getType(), START_SPRINT) && !bug.getStatistical()) {
                 return true;
-            } else if (Objects.equals(bug.getType(), "endSprint") && !bug.getStatistical()) {
+            } else if (Objects.equals(bug.getType(), END_SPRINT) && !bug.getStatistical()) {
                 bug.setNewValue(BigDecimal.ONE);
                 bug.setOldValue(BigDecimal.ZERO);
                 return true;

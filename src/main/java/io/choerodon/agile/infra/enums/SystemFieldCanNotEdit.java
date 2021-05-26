@@ -54,11 +54,6 @@ public class SystemFieldCanNotEdit {
         epicMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(true, false, true));
         epicMap.put(FieldCode.CREATOR, new PageConfigFieldEditedVO(true, true, true));
         epicMap.put(FieldCode.UPDATOR, new PageConfigFieldEditedVO(true, true, true));
-//        epicMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
-//        epicMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));
-//        epicMap.put(FieldCode.COMPONENT, new PageConfigFieldEditedVO(false, true, true));
-//        epicMap.put(FieldCode.FIX_VERSION, new PageConfigFieldEditedVO(false, true, true));
-//        epicMap.put(FieldCode.INFLUENCE_VERSION, new PageConfigFieldEditedVO(false, true, true));
 
         featureMap = new HashMap<>();
         featureMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));
@@ -89,16 +84,6 @@ public class SystemFieldCanNotEdit {
         storyMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, false, true));
         storyMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(true, true, false));
 
-//        storyMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
-//        storyMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
-//        storyMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));
-//        storyMap.put(FieldCode.INFLUENCE_VERSION, new PageConfigFieldEditedVO(false, true, true));
-//        storyMap.put(FieldCode.FIX_VERSION, new PageConfigFieldEditedVO(false, true, true));
-//        storyMap.put(FieldCode.STORY_POINTS, new PageConfigFieldEditedVO(false, true, true));
-//        storyMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, true, true));
-//        storyMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(false, true, true));
-//        storyMap.put(FieldCode.COMPONENT, new PageConfigFieldEditedVO(false, true, true));
-
         taskMap = new HashMap<>();
         taskMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));
         taskMap.put(FieldCode.PRIORITY, new PageConfigFieldEditedVO(true, true, true));
@@ -114,15 +99,6 @@ public class SystemFieldCanNotEdit {
         taskMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, false, true));
         taskMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(true, true, false));
 
-//        taskMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
-//        taskMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
-//        taskMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));
-//        taskMap.put(FieldCode.FIX_VERSION, new PageConfigFieldEditedVO(false, true, true));
-//        taskMap.put(FieldCode.INFLUENCE_VERSION, new PageConfigFieldEditedVO(false, true, true));
-//        taskMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, true, true));
-//        taskMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(false, true, true));
-//        taskMap.put(FieldCode.COMPONENT, new PageConfigFieldEditedVO(false, true, true));
-
         bugMap = new HashMap<>();
         bugMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));
         bugMap.put(FieldCode.PRIORITY, new PageConfigFieldEditedVO(true, true, true));
@@ -137,15 +113,6 @@ public class SystemFieldCanNotEdit {
         bugMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
         bugMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, false, true));
         bugMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(true, true, false));
-
-//        bugMap.put(FieldCode.ASSIGNEE, new PageConfigFieldEditedVO(false, true, true));
-//        bugMap.put(FieldCode.EPIC, new PageConfigFieldEditedVO(false, true, true));
-//        bugMap.put(FieldCode.SPRINT, new PageConfigFieldEditedVO(false, true, true));
-//        bugMap.put(FieldCode.INFLUENCE_VERSION, new PageConfigFieldEditedVO(false, true, true));
-//        bugMap.put(FieldCode.FIX_VERSION, new PageConfigFieldEditedVO(false, true, true));
-//        bugMap.put(FieldCode.REMAINING_TIME, new PageConfigFieldEditedVO(false, true, true));
-//        bugMap.put(FieldCode.TIME_TRACE, new PageConfigFieldEditedVO(false, true, true));
-//        bugMap.put(FieldCode.COMPONENT, new PageConfigFieldEditedVO(false, true, true));
     }
 
 }

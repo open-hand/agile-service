@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
  */
 public class NumberUtil {
 
+    private NumberUtil() {}
+
     /**
      * 判断字符串是否为数字
      *

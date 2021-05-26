@@ -57,7 +57,6 @@ public class SendMsgUtil {
 
     private static final String FEATURE_URL_TEMPLATE1 = "#/agile/feature?type=project&id=";
     private static final String FEATURE_URL_TEMPLATE2 = "&name=";
-    private static final String FEATURE_URL_TEMPLATE3 = "&category=";
     private static final String FEATURE_URL_TEMPLATE4 = "&organizationId=";
     @Autowired
     private SiteMsgUtil siteMsgUtil;
@@ -209,7 +208,7 @@ public class SendMsgUtil {
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, issueMoveVO.getStatusId()).getCompleted();
         if (completed != null && completed && issueDTO.getAssigneeId() != null && SchemeApplyType.AGILE.equals(issueDTO.getApplyType())) {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUESOLVE", modelMapper.map(issueDTO, IssueVO.class));
-            ProjectVO projectVO = getProjectVO(projectId, "error.project.notExist");
+            ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             StringBuilder url = new StringBuilder();
             String projectName = convertProjectName(projectVO);
             ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
@@ -220,7 +219,7 @@ public class SendMsgUtil {
                 pio = pioList.get(0);
             }
             String pioCode = (pio == null ? "" : pio.getProjectCode());
-            if ("sub_task".equals(issueDTO.getTypeCode())) {
+            if (SUB_TASK.equals(issueDTO.getTypeCode())) {
                 url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + pioCode + "-" + issueDTO.getIssueNum() + URL_TEMPLATE4 + issueDTO.getParentIssueId() + URL_TEMPLATE5 + issueDTO.getIssueId());
             } else {
                 url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + pioCode + "-" + issueDTO.getIssueNum() + URL_TEMPLATE4 + issueDTO.getIssueId() + URL_TEMPLATE5 + issueDTO.getIssueId());

@@ -1,9 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
-import java.util.List;
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.agile.infra.dto.*;
-import org.apache.ibatis.annotations.Param;
 
 
 /**

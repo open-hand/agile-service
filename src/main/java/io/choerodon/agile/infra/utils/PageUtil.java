@@ -14,6 +14,7 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
  * Email: ettwz@hotmail.com
  */
 public class PageUtil {
+    private PageUtil() {}
 
     public static Page buildPageInfoWithPageInfoList(Page page, List list) {
         Page result = new Page<>();
@@ -33,12 +34,6 @@ public class PageUtil {
                 Sort.Order order = iterator.next();
                 for (Map.Entry<String, String> entry : map.entrySet()) {
                     if (entry.getKey().equals(order.getProperty())) {
-//                        if(order.getDirection().isAscending()){
-//                            order = Sort.Order.asc(entry.getValue());
-//                        }
-//                        else {
-//                            order = Sort.Order.desc(entry.getValue());
-//                        }
                         order.setProperty(entry.getValue());
                         flag = true;
                     }
