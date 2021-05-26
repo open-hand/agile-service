@@ -79,6 +79,8 @@ const Confirm: React.FC<Props> = ({
                 sourceIssue={issue}
                 sourceFields={issueFields[index]}
                 key={issue.issueId}
+                // 第一个是主issue，其他issue是子任务和子bug，禁用选择冲刺，跟着父级走
+                disabledSprint={index > 0}
               />
             ))
           }

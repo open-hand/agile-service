@@ -14,8 +14,9 @@ import store, { FieldWithValue } from '../../store';
 export interface IssueCardProps {
   sourceIssue: Issue
   sourceFields: FieldWithValue[]
+  disabledSprint: boolean
 }
-const IssueCard: React.FC<IssueCardProps> = ({ sourceIssue, sourceFields }) => {
+const IssueCard: React.FC<IssueCardProps> = ({ sourceIssue, sourceFields, disabledSprint }) => {
   const { target } = store.issueMap.get(sourceIssue.issueId)!;
   const { fields, issue: targetIssue } = target;
   return (
@@ -55,7 +56,7 @@ const IssueCard: React.FC<IssueCardProps> = ({ sourceIssue, sourceFields }) => {
                   </Tooltip>
                 </Col>
                 <Col span={9}>
-                  <Field field={field} target={target} />
+                  <Field field={field} target={target} disabledSprint={disabledSprint} />
                 </Col>
               </Row>
             );
