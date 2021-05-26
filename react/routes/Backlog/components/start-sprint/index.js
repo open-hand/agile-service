@@ -393,8 +393,8 @@ class StartSprint extends Component {
                 <span style={{ marginRight: 20 }}>
                   {`此Sprint中有${this.getWorkDays(startDate, endDate)}个工作日`}
                 </span>
-                <Icon type="settings" style={{ verticalAlign: 'top' }} />
-                <a onClick={this.showWorkCalendar} role="none">
+                <Icon type="settings-o" style={{ verticalAlign: 'top', color: '#5365EA' }} />
+                <a onClick={this.showWorkCalendar} role="none" style={{ color: '#5365EA' }}>
                   设置当前冲刺工作日
                 </a>
               </div>
@@ -421,8 +421,8 @@ class StartSprint extends Component {
                 <span style={{ marginRight: 20 }}>
                   {`此Sprint中有${this.getWorkDays(moment(), endDate)}个工作日`}
                 </span>
-                <Icon type="settings" style={{ verticalAlign: 'top' }} />
-                <a onClick={this.showWorkCalendar} role="none">
+                <Icon type="settings-o" style={{ verticalAlign: 'top', color: '#5365EA' }} />
+                <a onClick={this.showWorkCalendar} role="none" style={{ color: '#5365EA' }}>
                   设置当前冲刺工作日
                 </a>
               </div>
