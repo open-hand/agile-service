@@ -24,7 +24,9 @@ const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 const TeamPerformance = React.lazy(() => import('./routes/TeamPerformance'));
 const VersionList = React.lazy(() => (import('./routes/version-list')));
 // 敏捷设置
-const Settings = React.lazy(() => import('./routes/settings'));
+const Component = React.lazy(() => import('./routes/settings/Component'));
+const IssueLink = React.lazy(() => import('./routes/settings/IssueLinkHome'));
+const QuickSearch = React.lazy(() => import('./routes/settings/FastSearch/FastSearchHome/FastSearchHome'));
 const ProjectReport = React.lazy(() => import('./routes/project-report'));
 const GanttPage = React.lazy(() => import('./routes/gantt'));
 const UiPreview = React.lazy(() => import('./routes/ui-preview'));
@@ -56,7 +58,9 @@ export function getRoutes(match) {
       component={PageConfig}
     />,
     <Route path={`${match.url}/issue-type`} component={IssueType} />,
-    <Route path={`${match.url}/settings`} component={Settings} />,
+    <PermissionRoute service={['choerodon.code.project.setting.issue.ps.component']} path={`${match.url}/component`} component={Component} />,
+    <PermissionRoute service={['choerodon.code.project.setting.issue.ps.fastsearch']} path={`${match.url}/quicksearch`} component={QuickSearch} />,
+    <PermissionRoute service={['choerodon.code.project.setting.issue.ps.issuelink']} path={`${match.url}/issuelink`} component={IssueLink} />,
     <PermissionRoute
       service={[]}
       path={`${match.url}/kanban-template/detail/:templateId`}
