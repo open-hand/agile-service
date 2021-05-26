@@ -29,11 +29,11 @@ const EditorMap = new Map([
 @observer class FieldPro extends Component {
   updateIssueField = (value) => {
     const {
-      store, onUpdate, reloadIssue, field,
+      store, onUpdate, reloadIssue, field, setIssueLoading,
     } = this.props;
     const issue = store.getIssue;
     const {
-      fieldId, fieldType, fieldCode, setIssueLoading,
+      fieldId, fieldType, fieldCode,
     } = field;
     let newValue = value;
     if (fieldType === 'time' || fieldType === 'datetime' || fieldType === 'date') {

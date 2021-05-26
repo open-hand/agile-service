@@ -95,12 +95,9 @@
     "dist": "choerodon-front-boot dist --config ./react/config.js",
     "watch": "compiler compile --watch --ignore-error",
     "compile": "compiler compile --ignore-error",
-    "analyze": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-analyze --config ./react/config.js",
     "fix": "eslint --ext .jsx,.js,tsx,ts react/ --fix",
     "lint-staged": "lint-staged",
-    "lint-staged:es": "eslint",
-    "transform": "babel react --out-dir lib --copy-files --watch --extensions \".ts,.js,.jsx,.tsx\"",
-    "i": "yarn install --pure-lockfile"
+    "lint-staged:es": "eslint"
   },
   "author": "",
   "license": "ISC",

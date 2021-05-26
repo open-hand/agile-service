@@ -171,8 +171,6 @@ const FormDataSet = ({
       {
         name: 'defaultValue',
         label: formatMessage({ id: 'field.default' }),
-        valueField: 'id',
-        textField: 'realName',
         dynamicProps: {
           max: ({ record }: { record: Record }) => {
             const fieldType = record.get('fieldType');
