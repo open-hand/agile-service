@@ -2,10 +2,10 @@
 import { observable, action, computed } from 'mobx';
 import { stores } from '@choerodon/master';
 import {
-  IField, IIssueType, ILabel, Issue, User,
+  IField, IIssueType, Issue, User,
 } from '@/common/types';
 import {
-  fieldApi, moveIssueApi, issueApi, userApi, statusTransformApi, IStatusCirculation, issueLabelApi,
+  fieldApi, moveIssueApi, issueApi, userApi, statusTransformApi, IStatusCirculation,
 } from '@/api';
 import {
   find, findIndex, uniq, flatten,
@@ -38,7 +38,6 @@ export interface MoveTarget {
   issueTypeId: string,
   fields: IField[]
   statusList: IStatusCirculation[]
-  labelList: ILabel[]
   projectId: string
 }
 class Store {
@@ -165,7 +164,7 @@ class Store {
   @action async loadData(targetIssueTypes: IIssueType[], targetProjectId: string, targetProjectType: string) {
     const needLoadUserIds = uniq(flatten(this.issues.map((issue) => ([issue.assigneeId, issue.reporterId, issue.mainResponsible?.id])))).filter(Boolean);
     console.log(needLoadUserIds);
-    const [users, lostFields, issueDetails, issueFields, targetIssueFields, issueStatus, labelList] = await Promise.all([
+    const [users, lostFields, issueDetails, issueFields, targetIssueFields, issueStatus] = await Promise.all([
       Promise.all(
         needLoadUserIds.map((userId) => userApi.project(targetProjectId).getById(userId as string).then((res: any) => res.list[0])),
       ),
@@ -192,7 +191,6 @@ class Store {
       Promise.all(
         targetIssueTypes.map((issueType) => statusTransformApi.project(targetProjectId).loadList(issueType.id)),
       ),
-      issueLabelApi.loads(targetProjectId),
     ]);
     const existUserMap = new Map<string, User>(
       users.filter(Boolean).map((user) => ([user.id, user])),
@@ -211,7 +209,6 @@ class Store {
       source.target.issue.issueTypeVO = targetIssueTypes[issueTypeIndex];
       const statusList = issueStatus[issueTypeIndex];
       source.target.statusList = statusList;
-      source.target.labelList = labelList;
       // 最后设置fields，保证渲染正确
       source.target.fields = getFinalFields({ fields: targetFields, typeCode: targetIssueTypes[issueTypeIndex].typeCode, targetProjectType });
       // 开始设置一些默认值

@@ -18,6 +18,7 @@ const FieldUser: React.FC<FieldUserProps> = ({
   return (
     <TextEditToggle
       onSubmit={handleChange}
+      mountRenderEditor={false}
       initValue={fieldWithValue?.valueStr}
       submitTrigger={['blur', 'change']}
       editor={() => (
