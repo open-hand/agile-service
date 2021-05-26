@@ -49,6 +49,12 @@ public class AssigneeIssueVO {
     @ApiModelProperty(value = "经办人真实名称")
     private String assigneeRealName;
 
+    @ApiModelProperty(value = "ldap")
+    private Boolean ladp;
+
+    @ApiModelProperty(value = "经办人邮箱")
+    private String email;
+
     public Long getSprintId() {
         return sprintId;
     }
@@ -143,5 +149,21 @@ public class AssigneeIssueVO {
 
     public void setAssigneeRealName(String assigneeRealName) {
         this.assigneeRealName = assigneeRealName;
+    }
+
+    public Boolean getLadp() {
+        return ladp;
+    }
+
+    public void setLadp(Boolean ladp) {
+        this.ladp = ladp;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
