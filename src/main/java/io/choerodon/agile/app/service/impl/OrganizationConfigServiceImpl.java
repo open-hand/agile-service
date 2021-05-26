@@ -110,7 +110,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
 
     @Override
     public OrganizationConfigDTO initStatusMachineTemplate(Long organizationId, Long issueTypeId) {
-        OrganizationConfigDTO configDTO = querySchemeId(organizationId, "scheme_state_machine", "agile");
+        OrganizationConfigDTO configDTO = querySchemeId(organizationId, SchemeType.STATE_MACHINE, SchemeApplyType.AGILE);
         if (ObjectUtils.isEmpty(configDTO)) {
             // 创建状态机方案
             Long schemeId = stateMachineSchemeService.initOrgDefaultStatusMachineScheme(organizationId);
@@ -120,8 +120,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
             OrganizationConfigDTO organizationConfigDTO = new OrganizationConfigDTO();
             organizationConfigDTO.setOrganizationId(organizationId);
             organizationConfigDTO.setSchemeId(schemeId);
-            organizationConfigDTO.setSchemeType("scheme_state_machine");
-            organizationConfigDTO.setApplyType("agile");
+            organizationConfigDTO.setSchemeType(SchemeType.STATE_MACHINE);
+            organizationConfigDTO.setApplyType(SchemeApplyType.AGILE);
             baseInsert(organizationConfigDTO);
             return organizationConfigDTO;
         } else {
@@ -435,7 +435,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         configMap.put("boardTemplateConfig", boardTemplateConfig);
         // 查询是否配置状态机模板
         Boolean statusMachineTemplateConfig = false;
-        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", SchemeApplyType.AGILE);
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, SchemeType.STATE_MACHINE, SchemeApplyType.AGILE);
         if (!ObjectUtils.isEmpty(organizationConfigDTO)) {
             List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, organizationConfigDTO.getSchemeId());
             List<IssueTypeVO> issueTypeVOS = issueTypeService.queryByOrgId(organizationId, null);
@@ -458,7 +458,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
 
     @Override
     public Boolean checkStatusMachineTemplate(Long organizationId, Long issueTypeId) {
-        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", SchemeApplyType.AGILE);
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, SchemeType.STATE_MACHINE, SchemeApplyType.AGILE);
         if (!ObjectUtils.isEmpty(organizationConfigDTO)) {
             StatusMachineSchemeConfigDTO statusMachineSchemeConfigDTO = queryStatusMachineSchemeConfig(organizationId, issueTypeId, organizationConfigDTO.getSchemeId());
             return !ObjectUtils.isEmpty(statusMachineSchemeConfigDTO);
@@ -470,7 +470,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
 
     @Override
     public Long queryIssueTypeStatusMachineId(Long organizationId, Long issueTypeId) {
-        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", "agile");
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, SchemeType.STATE_MACHINE, SchemeApplyType.AGILE);
         if (ObjectUtils.isEmpty(organizationConfigDTO)) {
             return null;
         }
@@ -480,7 +480,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
 
     @Override
     public List<IssueTypeVO> listIssueType(Long organizationId) {
-        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", "agile");
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, SchemeType.STATE_MACHINE, SchemeApplyType.AGILE);
         if (ObjectUtils.isEmpty(organizationConfigDTO)) {
             return new ArrayList<>();
         }
@@ -521,14 +521,14 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         OrganizationConfigDTO organizationConfigDTO = new OrganizationConfigDTO();
         organizationConfigDTO.setOrganizationId(organizationId);
         organizationConfigDTO.setSchemeId(schemeId);
-        organizationConfigDTO.setSchemeType("scheme_state_machine");
-        organizationConfigDTO.setApplyType("agile");
+        organizationConfigDTO.setSchemeType(SchemeType.STATE_MACHINE);
+        organizationConfigDTO.setApplyType(SchemeApplyType.AGILE);
         baseInsert(organizationConfigDTO);
         return organizationConfigDTO;
     }
 
     private void handlerTemplateStatusMachineMap(Map<Long, Long> templateStatusMachineMap, Long organizationId) {
-        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", "agile");
+        OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, SchemeType.STATE_MACHINE, SchemeApplyType.AGILE);
         if (!ObjectUtils.isEmpty(organizationConfigDTO)) {
             List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, organizationConfigDTO.getSchemeId());
             if (!CollectionUtils.isEmpty(statusMachineSchemeConfigVOS)) {
@@ -613,7 +613,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
             statusNoticeSettingVO.setProjectId(projectId);
             if (!CollectionUtils.isEmpty(userIdList)) {
                 Set<Long> users = userIdList.stream()
-                        .filter(v -> userIds.contains(v))
+                        .filter(userIds::contains)
                         .collect(Collectors.toSet());
                 if (!CollectionUtils.isEmpty(noticeTypeList) || !CollectionUtils.isEmpty(users)) {
                     statusNoticeSettingVO.setUserIdList(users);
@@ -653,7 +653,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
             if (Objects.equals(entry.getKey(), "specifier") && !CollectionUtils.isEmpty(entryValue)) {
                 List<Long> ids = entryValue.stream()
                         .map(StatusTransferSettingVO::getUserId)
-                        .filter(v -> userIds.contains(v))
+                        .filter(userIds::contains)
                         .collect(Collectors.toList());
                 if (!CollectionUtils.isEmpty(ids)) {
                     settingCreateVO.setUserIds(userIds);

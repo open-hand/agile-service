@@ -14,8 +14,6 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
  * Email: ettwz@hotmail.com
  */
 public class PageUtil {
-    private PageUtil() {}
-
     public static Page buildPageInfoWithPageInfoList(Page page, List list) {
         Page result = new Page<>();
         result.setNumber(page.getNumber());
