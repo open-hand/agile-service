@@ -42,16 +42,16 @@ const IssueCard: React.FC<IssueCardProps> = ({ sourceIssue, sourceFields }) => {
             const { fieldCode, fieldName, required } = field;
             const sourceValue = transformValue({ issue: sourceIssue, field, fieldsWithValue: sourceFields });
             return (
-              <Row key={fieldCode} className={styles.fieldRow}>
+              <Row key={fieldCode} className={styles.fieldRow} type="flex" align="middle">
                 <Col span={7}>
-                  <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
+                  <div className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
                     {fieldName}
                     {required && (<span className={styles.required}>*</span>)}
-                  </span>
+                  </div>
                 </Col>
                 <Col span={8}>
                   <Tooltip title={sourceValue}>
-                    <span className={styles.fieldReadOnly}>{sourceValue}</span>
+                    <div className={styles.fieldReadOnly}>{sourceValue}</div>
                   </Tooltip>
                 </Col>
                 <Col span={9}>
