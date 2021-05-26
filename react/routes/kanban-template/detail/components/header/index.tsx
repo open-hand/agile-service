@@ -45,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({
           {...provided.dragHandleProps}
         />
         <Icon
-          type="delete"
+          type="delete_sweep-o"
           className={styles.operation__delete}
           onClick={handleDeleteClick}
         />

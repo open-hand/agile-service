@@ -73,7 +73,7 @@ const ReportBlock: React.FC<Props> = (props) => {
         <span className={styles.title}>{title}</span>
         {!isPreview && (
           <div className={styles.operation}>
-            <Button icon="mode_edit" funcType={'flat' as FuncType} onClick={handleEdit} />
+            <Button icon="edit-o" funcType={'flat' as FuncType} onClick={handleEdit} />
             <Button icon="delete" funcType={'flat' as FuncType} onClick={handleDelete} />
           </div>
         )}

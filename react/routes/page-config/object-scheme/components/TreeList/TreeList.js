@@ -116,9 +116,8 @@ class TreeList extends Component {
         return data.map((item) => {
           if (item.tempKey === key || item.id === key) {
             return { ...item, [changeKey]: changeValue };
-          } else {
-            return { ...item, children: loopEdit(item.children, key, changeKey, changeValue) };
           }
+          return { ...item, children: loopEdit(item.children, key, changeKey, changeValue) };
         });
       }
       return [];
@@ -139,16 +138,14 @@ class TreeList extends Component {
     const loopInvalid = (data, key, all) => {
       if (data) {
         if (all) {
-          return data.map(item => ({ ...item, isEnable: '0', children: loopInvalid(item.children, key, all) }));
-        } else {
-          return data.map((item) => {
-            if (item.tempKey === key || item.id === key) {
-              return { ...item, isEnable: '0', children: loopInvalid(item.children, key, true) };
-            } else {
-              return { ...item, children: loopInvalid(item.children, key, all) };
-            }
-          });
+          return data.map((item) => ({ ...item, isEnable: '0', children: loopInvalid(item.children, key, all) }));
         }
+        return data.map((item) => {
+          if (item.tempKey === key || item.id === key) {
+            return { ...item, isEnable: '0', children: loopInvalid(item.children, key, true) };
+          }
+          return { ...item, children: loopInvalid(item.children, key, all) };
+        });
       }
       return [];
     };
@@ -167,16 +164,14 @@ class TreeList extends Component {
     const loopActive = (data, key, all) => {
       if (data) {
         if (all) {
-          return data.map(item => ({ ...item, isEnable: '1', children: loopActive(item.children, key, all) }));
-        } else {
-          return data.map((item) => {
-            if (item.tempKey === key || item.id === key) {
-              return { ...item, isEnable: '1', children: loopActive(item.children, key, true) };
-            } else {
-              return { ...item, children: loopActive(item.children, key, all) };
-            }
-          });
+          return data.map((item) => ({ ...item, isEnable: '1', children: loopActive(item.children, key, all) }));
         }
+        return data.map((item) => {
+          if (item.tempKey === key || item.id === key) {
+            return { ...item, isEnable: '1', children: loopActive(item.children, key, true) };
+          }
+          return { ...item, children: loopActive(item.children, key, all) };
+        });
       }
       return [];
     };
@@ -194,12 +189,11 @@ class TreeList extends Component {
   remove = (tempKey) => {
     const loopRemove = (data, key) => {
       if (data) {
-        const newDate = data.filter(item => item.tempKey !== key && item.id !== key);
+        const newDate = data.filter((item) => item.tempKey !== key && item.id !== key);
         if (data.length !== newDate.length) {
           return newDate;
-        } else {
-          return data.map(item => ({ ...item, children: loopRemove(item.children, key) }));
         }
+        return data.map((item) => ({ ...item, children: loopRemove(item.children, key) }));
       }
       return [];
     };
@@ -213,7 +207,6 @@ class TreeList extends Component {
     }
     this.cancel();
   };
-
 
   cancel = () => {
     this.editting = false;
@@ -260,7 +253,7 @@ class TreeList extends Component {
         <TreeNode
           key="create"
           title={(
-            <Fragment>
+            <>
               <span className="issue-dragList-input">
                 <Input
                   id="treeList-input"
@@ -286,13 +279,12 @@ class TreeList extends Component {
               >
                 <FormattedMessage id="cancel" />
               </Button>
-            </Fragment>
+            </>
           )}
         />
       );
-    } else {
-      return [];
     }
+    return [];
   };
 
   renderTreeNode = (item) => {
@@ -300,7 +292,7 @@ class TreeList extends Component {
     const { intl } = this.props;
     if (String(tempKey) === String(item.id) || String(tempKey) === item.tempKey) {
       return (
-        <Fragment>
+        <>
           <span className="issue-dragList-input">
             <Input
               id="treeList-input"
@@ -327,11 +319,11 @@ class TreeList extends Component {
           >
             <FormattedMessage id="cancel" />
           </Button>
-        </Fragment>
+        </>
       );
-    } else if (item.isEnable === '0' || String(selecteId) === String(item.id) || String(selecteId) === item.tempKey) {
+    } if (item.isEnable === '0' || String(selecteId) === String(item.id) || String(selecteId) === item.tempKey) {
       return (
-        <Fragment>
+        <>
           <span className="issue-dragList-text">{item.value}</span>
           <div className="issue-dragList-operate">
             <Tooltip
@@ -343,7 +335,7 @@ class TreeList extends Component {
                 shape="circle"
                 onClick={() => this.editItem(item.id || item.tempKey)}
               >
-                <i className="icon icon-mode_edit" />
+                <i className="icon icon-edit-o" />
               </Button>
             </Tooltip>
             {
@@ -378,14 +370,13 @@ class TreeList extends Component {
               </Button>
             </Tooltip>
           </div>
-        </Fragment>
+        </>
       );
-    } else {
-      return (<span className="issue-dragList-text">{item.value}</span>);
     }
+    return (<span className="issue-dragList-text">{item.value}</span>);
   };
 
-  loop = data => data.map((item) => {
+  loop = (data) => data.map((item) => {
     if (item.children && item.children.length) {
       return (
         <TreeNode
@@ -405,7 +396,6 @@ class TreeList extends Component {
       />
     );
   });
-
 
   render() {
     const {

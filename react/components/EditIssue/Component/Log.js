@@ -133,7 +133,7 @@ class Log extends Component {
               !disabled && (
               <Icon
                 role="none"
-                type="mode_edit mlr-3 pointer"
+                type="edit-o"
                 onClick={() => {
                   this.setState({
                     editLogId: worklog.logId,
@@ -157,7 +157,7 @@ class Log extends Component {
                   okType="danger"
                 >
                   <Icon
-                    type="delete_forever mlr-3 pointer"
+                    type="delete_sweep-o"
                   />
                 </Popconfirm>
               ) : ''}

@@ -163,7 +163,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = observer(({
                   record={record}
                   getPopupContainer={() => document.getElementById(componentId) as any}
                 />
-                {record.index !== 0 && <Button icon="delete_forever" className={`${prefixCls}-content-del`} onClick={() => { ds.delete(record, false); }} />}
+                {record.index !== 0 && <Button icon="delete_sweep-o" className={`${prefixCls}-content-del`} onClick={() => { ds.delete(record, false); }} />}
               </div>];
           })}
           {ds.length > 0 && <Button className={`${prefixCls}-content-add`} icon="add" funcType={'flat' as any} color={'primary' as any} onClick={handleCreate}>添加Tag</Button>}

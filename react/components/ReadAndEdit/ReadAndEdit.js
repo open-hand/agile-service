@@ -93,7 +93,7 @@ class ReadAndEdit extends Component {
                   alignItems: 'center',
                 }}
               >
-                <Icon type="mode_edit" />
+                <Icon type="edit-o" />
               </span>
               {readModeContent}
             </div>
@@ -131,8 +131,7 @@ class ReadAndEdit extends Component {
                       onOk();
                       callback(undefined);
                     }
-                  }
-                  }
+                  }}
                 >
                   <Icon style={{ fontSize: '14px' }} type="check" />
                 </span>
@@ -163,8 +162,7 @@ class ReadAndEdit extends Component {
         }
         {error
           ? <span style={{ color: '#d50000' }}>{error}</span>
-          : ''
-        }
+          : ''}
       </div>
     );
   }

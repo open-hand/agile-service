@@ -75,39 +75,38 @@ class EasyEdit extends Component {
           {...inputProps}
         />
       );
-    } else {
-      return (
-        <DatePicker
-          autoFocus
-          open={edit}
-          defaultValue={defaultValue}
-          disabledDate={disabledDate}
-          format="YYYY-MM-DD HH:mm:ss"
-          showTime={time}
-          onOpenChange={(status) => {
-            if (!status) {
-              this.setState({
-                edit: false,
-                hoverIf: false,
-              });
-            }
-          }}
-          onChange={(date, dateString) => {
+    }
+    return (
+      <DatePicker
+        autoFocus
+        open={edit}
+        defaultValue={defaultValue}
+        disabledDate={disabledDate}
+        format="YYYY-MM-DD HH:mm:ss"
+        showTime={time}
+        onOpenChange={(status) => {
+          if (!status) {
             this.setState({
               edit: false,
               hoverIf: false,
-              date,
-              dateString,
-            }, () => {
-              if (!time) {
-                this.handleOnOk();
-              }
             });
-          }}
-          onOk={this.handleOnOk.bind(this)}
-        />
-      );
-    }
+          }
+        }}
+        onChange={(date, dateString) => {
+          this.setState({
+            edit: false,
+            hoverIf: false,
+            date,
+            dateString,
+          }, () => {
+            if (!time) {
+              this.handleOnOk();
+            }
+          });
+        }}
+        onOk={this.handleOnOk.bind(this)}
+      />
+    );
   }
 
   render() {
@@ -180,7 +179,7 @@ class EasyEdit extends Component {
                     width: '31px',
                   }}
                 >
-                  <Icon style={{ fontSize: 15 }} type="mode_edit" />
+                  <Icon style={{ fontSize: 15 }} type="edit-o" />
                 </div>
               </div>
             </div>

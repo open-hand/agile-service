@@ -54,7 +54,7 @@ const TemplateList: React.FC<Props> = ({
                 <div className={styles.template_item_action}>
                   <Tooltip title="修改">
                     <Icon
-                      type="mode_edit"
+                      type="edit-o"
                       onClick={() => handleClickEdit({ template })}
                       style={{
                         marginRight: 12,
@@ -72,7 +72,7 @@ const TemplateList: React.FC<Props> = ({
                       cancelText="取消"
                       okType="danger"
                     >
-                      <Icon type="delete_forever pointer" />
+                      <Icon type="delete_sweep-o" />
                     </Popconfirm>
                   </Tooltip>
                 </div>

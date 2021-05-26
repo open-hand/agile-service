@@ -381,7 +381,7 @@ class DragList extends Component<Props, StateProps> {
                                         shape="circle"
                                         onClick={() => this.editItem(item.tempKey || item.id)}
                                       >
-                                        <i className="icon icon-mode_edit" />
+                                        <i className="icon icon-edit-o" />
                                       </Button>
                                     </Tooltip>
                                     {

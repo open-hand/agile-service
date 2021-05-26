@@ -97,7 +97,7 @@ class EpicCard extends Component {
                         {
                           epicName && (
                             <div className="c7nagile-StoryMap-EpicCard-editIcon" role="none" onClick={this.handleEditEpic.bind(this)}>
-                              <Icon type="mode_edit" />
+                              <Icon type="edit-o" />
                             </div>
                           )
                         }

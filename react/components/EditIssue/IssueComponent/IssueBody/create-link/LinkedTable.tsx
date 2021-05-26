@@ -96,6 +96,15 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
       select: () => {
         setUpdateCount((count) => count + 1);
       },
+      selectAll: () => {
+        setUpdateCount((count) => count + 1);
+      },
+      unSelect: () => {
+        setUpdateCount((count) => count + 1);
+      },
+      unSelectAll: () => {
+        setUpdateCount((count) => count + 1);
+      },
     },
   }), [issueId, queryDataSet]);
   dataSetRef.current = dataSet;

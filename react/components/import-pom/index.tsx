@@ -126,7 +126,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     return value;
   }
   function renderAction({ record }: RenderProps) {
-    return record?.get('appService') ? undefined : <Button icon="delete_forever" onClick={() => ds.delete(record!, false)} />;
+    return record?.get('appService') ? undefined : <Button icon="delete_sweep-o" onClick={() => ds.delete(record!, false)} />;
   }
   return (
     <div className={prefixCls}>

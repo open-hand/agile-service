@@ -116,7 +116,7 @@ const DraggableItem: React.FC<Props> = ({
         <Icon
           className={classnames(`${prefixCls}-action-button`, { [`${prefixCls}-action-button-disabled`]: isDragDisabled })}
           style={{ opacity: showSplitLine ? 1 : undefined }}
-          type="delete"
+          type="delete_sweep-o"
           onClick={() => onClickDel(record!, dataSet!)}
         />
         )

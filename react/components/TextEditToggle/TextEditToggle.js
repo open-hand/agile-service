@@ -343,7 +343,7 @@ class TextEditToggle extends Component {
         {editButtonMode && (
         <Button
           className="c7nagile-TextEditToggle-text-edit-button"
-          icon="mode_edit"
+          icon="edit-o"
           shape="circle"
           funcType="flat"
           onClick={() => { this.enterEditing(); }}
