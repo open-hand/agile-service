@@ -1,27 +1,17 @@
-import React, {
-  useEffect, useState, useCallback,
-} from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Icon, Row, Col,
+  Row, Col,
 } from 'choerodon-ui';
 import { Tooltip } from 'choerodon-ui/pro';
-import { stores } from '@choerodon/boot';
-import {
-  Issue, IField, User, IIssueType,
-} from '@/common/types';
-import {
-  includes, map, uniq, compact, flatten, find, keyBy,
-} from 'lodash';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { Issue } from '@/common/types';
 import TypeTag from '@/components/TypeTag';
 import styles from './index.less';
 import Field from './Field';
 import transformValue from './transformValue';
-import store, { FieldWithValue, MoveTarget } from '../../store';
+import store, { FieldWithValue } from '../../store';
 
 export interface IssueCardProps {
-  // record: Record
   sourceIssue: Issue
   sourceFields: FieldWithValue[]
 }
@@ -52,16 +42,16 @@ const IssueCard: React.FC<IssueCardProps> = ({ sourceIssue, sourceFields }) => {
             const { fieldCode, fieldName, required } = field;
             const sourceValue = transformValue({ issue: sourceIssue, field, fieldsWithValue: sourceFields });
             return (
-              <Row key={fieldCode} className={styles.fieldRow}>
+              <Row key={fieldCode} className={styles.fieldRow} type="flex" align="middle">
                 <Col span={7}>
-                  <span className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
+                  <div className={`${styles.fieldReadOnly} ${styles.fieldNameCol}`}>
                     {fieldName}
                     {required && (<span className={styles.required}>*</span>)}
-                  </span>
+                  </div>
                 </Col>
                 <Col span={8}>
                   <Tooltip title={sourceValue}>
-                    <span className={styles.fieldReadOnly}>{sourceValue}</span>
+                    <div className={styles.fieldReadOnly}>{sourceValue}</div>
                   </Tooltip>
                 </Col>
                 <Col span={9}>

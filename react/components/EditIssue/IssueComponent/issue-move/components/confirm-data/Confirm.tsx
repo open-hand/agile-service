@@ -33,14 +33,10 @@ interface Props {
 const Confirm: React.FC<Props> = ({
   issue: mainIssue, dataSet, targetProjectType, targetIssueType, targetSubTaskType, targetSubBugType, loseItems,
 }) => {
-  const {
-    selfFields, subTaskFields, subBugFields, moveToProjectList, subTaskDetailMap, subBugDetailMap, subTaskTypeId, subBugTypeId, selectedUserIds, selectedUsers,
-  } = store;
+  const { moveToProjectList } = store;
   const targetProjectId = dataSet?.current?.get('targetProjectId');
   const issueType = dataSet?.current?.get('issueType');
-  const { subIssueVOList, subBugVOList } = mainIssue;
 
-  // const targetIssueTypeIds = [issueType, subTaskTypeId, subBugTypeId].filter(Boolean);
   const targetIssueTypes = useMemo(() => [targetIssueType, targetSubTaskType, targetSubBugType].filter(Boolean), [targetIssueType, targetSubBugType, targetSubTaskType]);
 
   const { issues, issueFields, issueMapValues } = store;

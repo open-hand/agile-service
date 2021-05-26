@@ -47,7 +47,6 @@ const IssueMove: React.FC<Props> = ({
 }) => {
   const [, setUpdateCount] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [submitBtnDisable, setSubmitBtnDisable] = useState<boolean>(false);
   const [btnLoading, setBtnLoading] = useState<boolean>(false);
   const [targetProjectType, setTargetProjectType] = useState<'program' | 'project' | 'subProject'>('project');
   const issueTypeDataSet = useMemo(() => new DataSet({
@@ -158,10 +157,6 @@ const IssueMove: React.FC<Props> = ({
         if (name === 'targetProjectId' || name === 'issueType' || name === 'subTaskIssueTypeId' || name === 'subBugIssueTypeId') {
           resetData(moveDataSet, ['targetProjectId', 'issueType', 'subTaskIssueTypeId', 'subBugIssueTypeId']); // 改变项目或者问题类型应该重置
         }
-        if (name !== 'targetProjectId' && name !== 'issueType' && name !== 'subTaskIssueTypeId' && name !== 'subBugIssueTypeId') {
-          const validate = await moveDataSet.validate();
-          // setSubmitBtnDisable(!validate);
-        }
         if (name === 'subTaskIssueTypeId') {
           store.setSubTaskTypeId(value);
         }
@@ -171,7 +166,7 @@ const IssueMove: React.FC<Props> = ({
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [issue.issueId, issue.subBugVOList, issue.subIssueVOList, issue.typeCode, issueTypeDataSet, resetData]);
+  }), [issue.subBugVOList, issue.subIssueVOList, issue.typeCode, issueTypeDataSet, resetData]);
 
   const handlePre = () => {
     setCurrentStep(currentStep - 1);
@@ -184,7 +179,6 @@ const IssueMove: React.FC<Props> = ({
     });
   };
   const handleCancel = () => {
-    dataSet.reset();
     modal?.close();
   };
 
@@ -194,9 +188,7 @@ const IssueMove: React.FC<Props> = ({
     store.setSelectUserIds(uniqUserIds);
   }, [fieldsWithValue, issue.assigneeId, issue.mainResponsible?.id, issue.reporterId]);
 
-  const {
-    selfFields, subTaskFields, subBugFields, valueReady,
-  } = store;
+  const { valueReady } = store;
   const targetTypeId = dataSet.current?.get('issueType');
   const subTaskIssueTypeId = dataSet.current?.get('subTaskIssueTypeId');
   const subBugIssueTypeId = dataSet.current?.get('subBugIssueTypeId');
@@ -224,9 +216,7 @@ const IssueMove: React.FC<Props> = ({
       // 子任务的冲刺要跟着父级
       subIssues: [...issue.subIssueVOList, ...issue.subBugVOList].map((i) => result.get(i.issueId)),
     };
-    // const key = submitFieldMap.get(split(k, '-')[1]);
-    // transformValue
-    console.log(submitData);
+
     moveIssueApi.moveIssueToProject(issue.issueId, targetProjectId, submitData).then(() => {
       onMoveIssue();
       Choerodon.prompt('移动成功');

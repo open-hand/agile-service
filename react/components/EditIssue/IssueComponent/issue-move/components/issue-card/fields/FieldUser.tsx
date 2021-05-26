@@ -18,10 +18,15 @@ const FieldUser: React.FC<FieldUserProps> = ({
   return (
     <TextEditToggle
       onSubmit={handleChange}
+      mountRenderEditor={false}
       initValue={fieldWithValue?.valueStr}
       submitTrigger={['blur', 'change']}
       editor={() => (
-        <SelectUser projectId={target.projectId} primitiveValue={false} />
+        <SelectUser
+          projectId={target.projectId}
+          primitiveValue={false}
+          extraOptions={fieldWithValue?.valueStr}
+        />
       )}
     >
       {fieldWithValue?.valueStr ? (

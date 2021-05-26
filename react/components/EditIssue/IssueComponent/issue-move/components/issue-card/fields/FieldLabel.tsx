@@ -3,16 +3,13 @@ import { Select } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import LabelTags from '@/components/tag/label-tags';
+import SelectLabel from '@/components/select/select-label';
 import { FieldCommonProps } from '../Field';
 
 export interface FieldLabelProps extends FieldCommonProps {
 
 }
-
-const { Option } = Select;
-
 const FieldLabel: React.FC<FieldLabelProps> = ({ target, onChange, fieldWithValue }) => {
-  const { labelList } = target;
   const handleChange = useCallback((value) => {
     onChange && onChange(value, value);
   }, [onChange]);
@@ -23,13 +20,7 @@ const FieldLabel: React.FC<FieldLabelProps> = ({ target, onChange, fieldWithValu
       alwaysRender={false}
       submitTrigger={['blur']}
       editor={() => (
-        <Select multiple>
-          {labelList.map((label) => (
-            <Option value={label.labelId}>
-              {label.labelName}
-            </Option>
-          ))}
-        </Select>
+        <SelectLabel multiple projectId={target.projectId} combo={false} primitiveValue={false} />
       )}
     >
       <LabelTags
