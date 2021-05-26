@@ -5,7 +5,7 @@ import Provider from './stores';
 import styles from './PublishVersionPreview.less';
 import Header from './components/header';
 import Detail from './components/body/components/detail';
-import LinkVersion from './components/body/components/link-version';
+// import LinkVersion from './components/body/components/link-version';
 import IssueTable from './components/body/components/issue-info-table';
 
 const PreviewSection: React.FC<{ title: string }> = ({ title, children }) => (
@@ -29,7 +29,7 @@ function PublishVersion() {
           <Detail />
         </PreviewSection>
         <PreviewSection title="关联版本">
-          <LinkVersion />
+          {/* <LinkVersion /> */}
         </PreviewSection>
         <PreviewSection title="版本信息">
           <IssueTable />

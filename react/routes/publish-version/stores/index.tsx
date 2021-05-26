@@ -50,14 +50,13 @@ const PublishVersionProvider = injectIntl(inject('AppState')(
         },
       },
     }), [issueInfoTableDataSet, open]);
+    useEffect(() => { store.clear(); }, [store]);
     useEffect(() => {
-      store.clear();
       store.init({ selectIssue: handleSelectIssue }, { detailProps });
     }, [detailProps, handleSelectIssue, store]);
     useEffect(() => {
       async function init() {
         await tableDataSet.query().then((res) => {
-          console.log('init....1', res);
           if (res?.list[0]) {
             store.select(res.list[0]);
           }

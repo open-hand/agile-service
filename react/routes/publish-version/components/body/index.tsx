@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Loading } from '@/components';
 import { omit } from 'lodash';
 import { IPublishVersionTreeNode } from '@/api';
+import classNames from 'classnames';
 import { usePublishVersionContext } from '../../stores';
 import Detail from './components/detail';
 import LinkVersion, { useEditModeSectionConfig } from './components/link-version';
@@ -29,10 +30,8 @@ function PublishVersionBody() {
           let { titleRight } = sectionProps;
           const { content }: { content: any } = item;
           if (content) {
-            console.log('render..', content.sectionProps);
             titleRight = React.cloneElement(titleRight, { ...titleRight.props, operation: content.sectionProps.operation });
           }
-          console.log('fininal', { ...sectionProps, ...content.sectionProps, titleRight });
           return <LinkVersion sectionProps={{ ...sectionProps, ...content.sectionProps, titleRight }} nodeOperationProps={content.nodeOperationProps} />;
         }
         return item.content;
@@ -46,10 +45,8 @@ function PublishVersionBody() {
     case 'diff': {
       const customDiff = menuDiff && menuDiff(context);
       if (customDiff) {
-        console.log('customDiff', customDiff, React.isValidElement(customDiff));
-        // const menuDiffConfig = omit(customDiff, ['bottomFormContent', 'topFormContent', 'bottomFormProps']);
         return (
-          <div className={styles.body_border}>
+          <div className={classNames(styles.body_border, styles.diff)}>
             {React.isValidElement(customDiff) ? customDiff : (
               <IssueDiffAreaBase
                 bottomFormContent={customDiff.bottomFormContent}
@@ -62,7 +59,7 @@ function PublishVersionBody() {
         );
       }
       return (
-        <div className={styles.body_border}>
+        <div className={classNames(styles.body_border, styles.diff)}>
           <IssueDiffArea />
         </div>
       );

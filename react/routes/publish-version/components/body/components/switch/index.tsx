@@ -18,6 +18,7 @@ function IssueTypeSwitch({ width, customOptions }: { width: number | undefined, 
     return customOptions ? new Map<string, number>() : new Map<string, number>((issueTypes)?.map((i) => [i.id, 0]));
   }, [customOptions, issueInfoTableDataSet, issueTypes]);
   const handleSelectBox = (val: any, { valueObj }: { valueObj: any }) => {
+    console.log('val...', val);
     issueInfoTableDataSet.setState('issueTypeId', val);
     return true;
   };
