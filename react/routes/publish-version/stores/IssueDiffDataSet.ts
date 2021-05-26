@@ -10,6 +10,9 @@ function IssueInfoTableDataSet(): DataSetProps {
         name: 'appServiceId',
       },
       {
+        name: 'projectId', label: '子项目',
+      },
+      {
         name: 'appServiceCode', label: '应用服务', type: 'string' as any, required: false,
       },
       {

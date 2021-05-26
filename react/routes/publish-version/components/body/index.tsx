@@ -17,7 +17,7 @@ function PublishVersionBody() {
   } = context;
   const menu = store.getCurrentMenu;
   const sectionProps = useEditModeSectionConfig();
-  const nodeOperationProps = useMemo(() => ({ isShowEdit: (item:IPublishVersionTreeNode) => item.type === 'tag' || item.appService, isShowDel: true }), []);
+  const nodeOperationProps = useMemo(() => ({ isShowEdit: (item: IPublishVersionTreeNode) => item.type === 'tag' || item.appService, isShowDel: true }), []);
 
   switch (menu) {
     case 'detail': {
@@ -46,15 +46,18 @@ function PublishVersionBody() {
     case 'diff': {
       const customDiff = menuDiff && menuDiff(context);
       if (customDiff) {
+        console.log('customDiff', customDiff, React.isValidElement(customDiff));
         // const menuDiffConfig = omit(customDiff, ['bottomFormContent', 'topFormContent', 'bottomFormProps']);
         return (
           <div className={styles.body_border}>
-            <IssueDiffAreaBase
-              bottomFormContent={customDiff.bottomFormContent}
-              topFormContent={customDiff.topFormContent}
-              bottomFormProps={customDiff.bottomFormProps}
-              menuDiffConfig={customDiff}
-            />
+            {React.isValidElement(customDiff) ? customDiff : (
+              <IssueDiffAreaBase
+                bottomFormContent={customDiff.bottomFormContent}
+                topFormContent={customDiff.topFormContent}
+                bottomFormProps={customDiff.bottomFormProps}
+                menuDiffConfig={customDiff}
+              />
+            )}
           </div>
         );
       }

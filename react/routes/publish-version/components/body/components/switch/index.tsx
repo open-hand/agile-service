@@ -14,9 +14,9 @@ function IssueTypeSwitch({ width, customOptions }: { width: number | undefined, 
   const forceUpdate = useForceUpdate();
 
   const issueTypesWithCountMaps = useMemo(() => {
-    issueInfoTableDataSet.setState('issueTypeId', issueTypes[0]?.id); /** 当前选项 */
-    return new Map<string, number>(issueTypes?.map((i) => [i.id, 0]));
-  }, [issueInfoTableDataSet, issueTypes]);
+    issueInfoTableDataSet.setState('issueTypeId', customOptions ? customOptions[0]?.value : issueTypes[0]?.id); /** 当前选项 */
+    return customOptions ? new Map<string, number>() : new Map<string, number>((issueTypes)?.map((i) => [i.id, 0]));
+  }, [customOptions, issueInfoTableDataSet, issueTypes]);
   const handleSelectBox = (val: any, { valueObj }: { valueObj: any }) => {
     issueInfoTableDataSet.setState('issueTypeId', val);
     return true;

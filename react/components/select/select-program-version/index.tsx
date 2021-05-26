@@ -14,7 +14,7 @@ import versionStyles from './index.less';
 interface Props extends Partial<SelectProps> {
   teamProjectIds?: string[],
   dataRef?: React.MutableRefObject<any>
-  afterLoad?: (versions: any[]) => void
+  afterLoad?: (versions: any[]) => void | Array<any>
   flat?: boolean
   optionFlat?: boolean
   filterSelected?: boolean
@@ -34,7 +34,7 @@ interface ActionProps extends Partial<StateProps> {
 interface VersionDataConfigProps {
   dataRef?: React.MutableRefObject<any>
   teamProjectIds?: string[]
-  afterLoad?: (versions: any[]) => void
+  afterLoad?: (versions: any[]) => void | Array<any>
   projectId?: string
 }
 function useGetVersionData({
@@ -50,14 +50,14 @@ function useGetVersionData({
           headOptions: [],
         };
       case 'change': {
-        const { data } = action;
+        let { data } = action;
         if (dataRef) {
           Object.assign(dataRef, {
             current: data,
           });
         }
         if (afterLoad) {
-          afterLoad(data || []);
+          data = afterLoad(data || []) || data;
         }
         const newOption = new Map<string, Array<IProgramVersion>>();
         const newHeadOption = new Array<{ id: string, name: string }>();

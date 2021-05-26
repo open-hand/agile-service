@@ -23,8 +23,11 @@ interface LinkVersionReturnSectionProps<T> extends Partial<LinkVersionSectionPro
 interface LinkVersionNodeOperationProps<T> {
   isShowEdit: boolean | ((item: IPublishVersionTreeNode) => boolean | undefined)
   isShowDel: boolean | ((item: IPublishVersionTreeNode) => boolean | undefined)
-
+  onEdit?: (newData:any, item: IPublishVersionTreeNode) => any
+  onDelete?: (item: IPublishVersionTreeNode) => any
+  renderLeftNode?: (item: IPublishVersionTreeNode, node: React.ReactElement) => React.ReactElement
 }
+export type IPublishVersionLinkVersionNodeOperationProps = LinkVersionNodeOperationProps<any>
 interface MenuDetailConfigFieldProps {
   dataKey: string,
   type?: string,
@@ -80,7 +83,7 @@ export interface IPublishVersionProps<DetailType> {
   menuDetail?: (detail: MenuDetailConfigProps<DetailType>['detail'],
     linkVersion: MenuDetailConfigProps<DetailType>['linkVersion']) => Array<MenuDetailConfigReturnItemProps<DetailType>>
   menuInfo?: (context: IPublishVersionContext) => MenuInfoConfigProps
-  menuDiff?: (context: IPublishVersionContext) => MenuDiffConfigProps
+  menuDiff?: (context: IPublishVersionContext) => MenuDiffConfigProps | React.ReactElement
   customMenu?: Map<string, { component: React.ReactElement, title: string }>
 }
 export function ExtendPublishVersion<DetailType>(props: IPublishVersionProps<DetailType>) {

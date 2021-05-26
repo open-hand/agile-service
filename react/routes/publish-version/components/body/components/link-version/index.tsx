@@ -11,6 +11,7 @@ import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import classNames from 'classnames';
 import DependencyTreeBase, { TreeWithLineNode as DependencyTreeNode } from '@/components/tree-with-line';
 import { openImportPomModal } from '@/components/import-pom';
+import { IPublishVersionLinkVersionNodeOperationProps } from '@/routes/publish-version';
 import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
 import { openLinkAppServiceTagModal } from './LinkAppServiceTagModal';
 import { usePublishVersionContext } from '../../../../stores';
@@ -94,7 +95,7 @@ export function useEditModeSectionConfig() {
     titleRight: <TitleRight operation={{}} />,
   };
 }
-function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { sectionProps?: any, nodeOperationProps?: any }) {
+function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { sectionProps?: any, nodeOperationProps: IPublishVersionLinkVersionNodeOperationProps | undefined }) {
   const { store, preview } = usePublishVersionContext();
   const detailData = store.getCurrentData;
   const dependencyList = store.getDependencyList;
@@ -116,17 +117,20 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
             <SelectBox.Option value="all">删除关联关系及应用版本</SelectBox.Option>
           </SelectBox> */}
         </div>),
-      onOk: () => {
-        (v.type === 'tag' ? publishVersionApi.dependencyTreeDelTag(detailData.id, [v as any])
-          : publishVersionApi.dependencyTreeDel({
-            id: detailData.id,
-            type: 'publish',
-            children: [
-              { id: v.id, type: v.type },
-            ],
-          })).then(() => {
-          store.loadData();
-        });
+      onOk: async () => {
+        if (typeof (nodeOperationProps?.onDelete) === 'function') {
+          await nodeOperationProps.onDelete(v);
+        } else {
+          await (v.type === 'tag' ? publishVersionApi.dependencyTreeDelTag(detailData.id, [v as any])
+            : publishVersionApi.dependencyTreeDel({
+              id: detailData.id,
+              type: 'publish',
+              children: [
+                { id: v.id, type: v.type },
+              ],
+            }));
+        }
+        store.loadData();
       },
     });
   }
@@ -134,32 +138,35 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
     const showAdditionalLine = !!(item.groupId || item.artifactId || item.version);
     const appService = item.appServiceCode ? store.findAppServiceByCode(item.appServiceCode, item)! : undefined;
     const alias = item.versionAlias || item.tagAlias;
+    const nodeLeft = (
+      <span className={styles.node_left}>
+        {!!item.children?.length && <Icon type="folder-o" className={styles.node_left_icon} />}
+        <span className={styles.node_text}>
+          {alias && (
+            <span className={styles.node_left_alias}>
+              {alias}
+              &nbsp;
+            </span>
+          )}
+          {appService ? <span>{`${appService.name}（${appService.code}）`}</span> : <span>{item.name}</span>}
+
+        </span>
+        {item.tagName && (
+          <span className={styles.tag}>
+            {item.tagName}
+          </span>
+        )}
+      </span>
+    );
+
     return (
       <DependencyTreeNode offsetBottom={showAdditionalLine ? 10 : 0} style={{ height: showAdditionalLine ? 54 : 30 }}>
         <div className={styles.node} style={{ marginLeft: item.children?.length ? 4 : 0 }}>
           <div className={styles.top} style={{ height: showAdditionalLine ? undefined : 30 }}>
-            <span className={styles.node_left}>
-              {!!item.children?.length && <Icon type="folder-o" className={styles.node_left_icon} />}
-              <span className={styles.node_text}>
-                {alias && (
-                  <span className={styles.node_left_alias}>
-                    {alias}
-                    &nbsp;
-                  </span>
-                )}
-                {appService ? <span>{`${appService.name}（${appService.code}）`}</span> : <span>{item.name}</span>}
-
-              </span>
-              {item.tagName && (
-                <span className={styles.tag}>
-                  {item.tagName}
-                </span>
-              )}
-            </span>
-
+            {nodeOperationProps?.renderLeftNode ? nodeOperationProps.renderLeftNode(item, nodeLeft) : nodeLeft}
             {level === 0 && !preview ? (
               <span className={styles.node_operation}>
-                {(typeof (nodeOperationProps.isShowEdit) === 'function' ? nodeOperationProps.isShowEdit(item) : nodeOperationProps.isShowEdit) && (
+                {(typeof (nodeOperationProps?.isShowEdit) === 'function' ? nodeOperationProps.isShowEdit(item) : nodeOperationProps?.isShowEdit) && (
                   <Button
                     icon="edit-o"
                     className={styles.node_btn}
@@ -169,7 +176,8 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
                       openEditAppVersionModal({
                         data: item as any,
                         handleOk: async (newData) => {
-                          publishVersionApi.updateTreeTagAlias(item.id, store.getCurrentData.id, item.objectVersionNumber!, newData.tagAlias);
+                          typeof (nodeOperationProps?.onEdit) === 'function' ? await nodeOperationProps?.onEdit(newData, item)
+                            : await publishVersionApi.updateTreeTagAlias(item.id, store.getCurrentData.id, item.objectVersionNumber!, newData.tagAlias);
                           store.loadData();
                           return true;
                         },
@@ -177,7 +185,7 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
                     }}
                   />
                 )}
-                {(typeof (nodeOperationProps.isShowDel) === 'function' ? nodeOperationProps.isShowDel(item) : nodeOperationProps.isShowDel) && (
+                {(typeof (nodeOperationProps?.isShowDel) === 'function' ? nodeOperationProps?.isShowDel(item) : nodeOperationProps?.isShowDel) && (
                 <Button
                   icon="delete_sweep-o"
                   style={{ width: '.26rem', height: '.26rem' }}
@@ -211,6 +219,5 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
 }
 PublishVersionLinkVersion.defaultProps = {
   sectionProps: undefined,
-  nodeOperationProps: undefined,
 };
 export default observer(PublishVersionLinkVersion);
