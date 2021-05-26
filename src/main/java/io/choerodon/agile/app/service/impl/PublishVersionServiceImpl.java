@@ -443,6 +443,8 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                 if (relateIssueId != null && !Objects.equals(0L, relateIssueId)) {
                     Set<Long> sonSet = parentSonMap.computeIfAbsent(relateIssueId, y -> new HashSet<>());
                     sonSet.add(x.getIssueId());
+                } else {
+                    parentSonMap.computeIfAbsent(x.getIssueId(), y -> new HashSet<>());
                 }
             } else {
                 parentSonMap.computeIfAbsent(x.getIssueId(), y -> new HashSet<>());
