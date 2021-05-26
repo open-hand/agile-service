@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.feign.operator;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.choerodon.agile.api.vo.AppServiceRepVO;
+import io.choerodon.agile.api.vo.AppServiceSimpleVO;
 import io.choerodon.agile.infra.feign.DevopsFeignClient;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.ServiceUnavailableException;
@@ -57,6 +58,19 @@ public class DevopsClientOperator {
                     );
         } catch (ServiceUnavailableException e) {
             return new HashSet<>();
+        }
+    }
+
+    public List<AppServiceSimpleVO> listByProjectIdAndCode(Long organizationId, List<AppServiceSimpleVO> appServiceList) {
+        try {
+            return
+                    ResponseUtils.getResponse(
+                            devopsFeignClient.listByProjectIdAndCode(organizationId, appServiceList),
+                            new TypeReference<List<AppServiceSimpleVO>>() {
+                            }
+                    );
+        } catch (ServiceUnavailableException e) {
+            return new ArrayList<>();
         }
     }
 

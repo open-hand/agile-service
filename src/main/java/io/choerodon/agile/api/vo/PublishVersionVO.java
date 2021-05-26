@@ -59,6 +59,16 @@ public class PublishVersionVO {
 
     private UserMessageDTO updater;
 
+    private String tagName;
+
+    public String getTagName() {
+        return tagName;
+    }
+
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
+    }
+
     public UserMessageDTO getCreator() {
         return creator;
     }
