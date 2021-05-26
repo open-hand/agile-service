@@ -18,7 +18,9 @@ const SubBug = observer(({
   const disableCreate = disabled;
   const { data: issueTypeData } = useProjectIssueTypes({ onlyEnabled: true, typeCode: 'bug' }, { enabled: !disabled });
 
-  const { issueId, summary, subBugVOList = [] } = store.getIssue;
+  const {
+    issueId, summary, subBugVOList = [], activeSprint,
+  } = store.getIssue;
   const { getCreateSubBugShow: createSubBugShow } = store;
   const renderIssueList = (issue, i) => (
     <IssueList
@@ -93,6 +95,7 @@ const SubBug = observer(({
       {renderSubIssues()}
       {!disableCreate && (
       <QuickCreateIssue
+        sprintId={activeSprint?.sprintId}
         defaultPriority={{ id: priorityId }}
         issueTypes={issueTypeData || []}
         relateIssueId={relateIssueId}

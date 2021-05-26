@@ -1069,6 +1069,7 @@ class CreateIssue extends Component {
                   label="预估时间"
                   loose
                   getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                  className="c7n-createIssue-numSelect"
                 />,
               )}
             </FormItem>
@@ -1091,6 +1092,7 @@ class CreateIssue extends Component {
                   label="故事点"
                   loose
                   getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                  className="c7n-createIssue-numSelect"
                 />,
               )}
             </FormItem>
