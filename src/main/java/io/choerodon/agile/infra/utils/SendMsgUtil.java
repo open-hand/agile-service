@@ -250,7 +250,7 @@ public class SendMsgUtil {
         ids[1] = userDetails.getUserId();
         ids[2] = issueDTO.getReporterId();
         List<UserDTO> userDTOList = userService.listUsersByIds(ids);
-        Boolean isProgram = Objects.equals(issueDTO.getApplyType(), "program") ? true : false;
+        Boolean isProgram = Objects.equals(issueDTO.getApplyType(), "program");
         String memberType = Boolean.TRUE.equals(isProgram) ? "报告人" : "经办人";
         String assigneeName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), Boolean.TRUE.equals(isProgram) ? issueDTO.getReporterId(): issueDTO.getAssigneeId()))
                 .findFirst().map(UserDTO::getRealName).orElse("");
