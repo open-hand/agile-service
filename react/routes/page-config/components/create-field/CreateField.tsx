@@ -1,5 +1,5 @@
 import React, {
-  useState, useContext, useEffect, useRef, useLayoutEffect, useCallback, useMemo,
+  useState, useContext, useEffect, useRef, useCallback, useMemo,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
@@ -8,10 +8,10 @@ import {
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import SelectUser from '@/components/select/select-user';
-import moment from 'moment';
 import { User } from '@/common/types';
 import { toJS } from 'mobx';
 import { set, uniq, isEmpty } from 'lodash';
+import SelectCustomField from '@/components/select/select-custom-field';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { pageConfigApi, userApi } from '@/api';
@@ -281,28 +281,14 @@ function CreateField() {
               onDelete={onTreeDelete}
               onInvalid={onTreeDelete}
             />
-            <Select
+            <SelectCustomField
               name="defaultValue"
               key={`${singleList.indexOf(fieldType) !== -1 ? 'single' : 'multiple'}-defaultValue-select`}
               style={{ width: '100%', marginTop: '20px' }}
               multiple={!(singleList.indexOf(fieldType) !== -1)}
-            >
-              {fieldOptions
-                && fieldOptions.length > 0
-                && fieldOptions.map((item) => {
-                  if (item.enabled) {
-                    return (
-                      <Option
-                        value={item.id || item.tempKey}
-                        key={item.id || item.tempKey}
-                      >
-                        {item.value}
-                      </Option>
-                    );
-                  }
-                  return [];
-                })}
-            </Select>
+              fieldOptions={fieldOptions}
+              selected={toJS(current?.get('defaultValue'))}
+            />
           </>
         );
       }

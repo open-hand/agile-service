@@ -8,11 +8,13 @@ import SelectUser from '@/components/select/select-user';
 import SelectFeature from '@/components/select/select-feature';
 import EndDateTimePicker from '@/components/date-time-picker';
 import SelectEnvironment from '@/components/select/select-environment';
+import SelectCustomField from '@/components/select/select-custom-field';
 
-const { Option } = Select;
 const singleList = ['radio', 'single'];
 
-export default function renderField({ code, fieldType, fieldOptions }) {
+export default function renderField({
+  code, fieldType, fieldOptions, id,
+}) {
   switch (code) {
     case 'componentIssueRelVOList': {
       return <Select style={{ width: '100%' }} multiple name={code} searchable searchMatcher="name" />;
@@ -96,28 +98,13 @@ export default function renderField({ code, fieldType, fieldOptions }) {
       );
     case 'radio': case 'single': case 'checkbox': case 'multiple':
       return (
-        <Select
+        <SelectCustomField
           name={code}
+          fieldId={id}
           style={{ width: '100%' }}
           multiple={!(singleList.indexOf(fieldType) !== -1)}
           searchable
-        >
-          {fieldOptions
-            && fieldOptions.length > 0
-            && fieldOptions.map((item) => {
-              if (item.enabled) {
-                return (
-                  <Option
-                    value={item.tempKey || item.id}
-                    key={item.tempKey || item.id}
-                  >
-                    {item.value}
-                  </Option>
-                );
-              }
-              return [];
-            })}
-        </Select>
+        />
       );
     case 'multiMember':
     case 'member':

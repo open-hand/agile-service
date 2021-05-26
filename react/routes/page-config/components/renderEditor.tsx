@@ -15,6 +15,7 @@ import SelectSprint from '@/components/select/select-sprint';
 import SelectEpic from '@/components/select/select-epic';
 import { IField, IFieldType } from '@/common/types';
 import SelectEnvironment from '@/components/select/select-environment';
+import SelectCustomField from '@/components/select/select-custom-field';
 import SelectPickDate from './select-date-pick';
 import { InjectedRenderComponent } from '../page-issue-type/components/sort-table/injectComponent';
 
@@ -84,13 +85,12 @@ function renderEditor({
   if (['checkbox', 'multiple', 'radio', 'single'].includes(fieldType)) {
     const fieldOptions = data.fieldOptions || [];
     return (
-      <Select
+      <SelectCustomField
         multiple={['checkbox', 'multiple'].includes(fieldType)}
         style={style}
+        fieldOptions={fieldOptions.map((item: any) => ({ ...item, id: item.id ?? item.tempKey }))}
         {...otherProps}
-      >
-        {fieldOptions.map((item: any) => <Select.Option value={item.id || item.tempKey}>{item.value}</Select.Option>)}
-      </Select>
+      />
     );
   }
   switch (fieldType) {

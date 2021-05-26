@@ -20,10 +20,13 @@ import FeatureProjectField from './components/FeatureProjectField';
 import PIField from './components/pi-field';
 import QuickFilterField from './components/quick-filter-field';
 import { IFilterField, ICustomField } from '../filter';
+import SelectCustomField from '../select/select-custom-field';
 
 const { Option } = Select;
 export function getFieldElement(field: IFilterField, flat?: boolean): React.ReactNode {
-  const { code, fieldType, system } = field;
+  const {
+    code, fieldType, system,
+  } = field;
   if (system) {
     switch (code) {
       case 'sprint':
@@ -111,7 +114,12 @@ export function getFieldElement(field: IFilterField, flat?: boolean): React.Reac
           maxLength={255}
         />
       );
-    case 'radio': case 'single': case 'checkbox': case 'multiple': {
+    case 'single': case 'multiple': {
+      return (
+        <SelectCustomField fieldId={(field as ICustomField).id} flat={flat} />
+      );
+    }
+    case 'radio': case 'checkbox': {
       const Component = flat ? FlatSelect : Select;
       return (
         <Component>
