@@ -14,6 +14,7 @@ import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 
 import SelectEnvironment from '@/components/select/select-environment';
 import SelectFeature from '@/components/select/select-feature';
+import SelectCustomField from '@/components/select/select-custom-field';
 
 const { Option } = Select;
 const forceUpdate = observable.box(false);
@@ -26,7 +27,7 @@ export default function renderField<T extends Partial<SelectProps>>({
   field, otherComponentProps, dataSet, isInProgram,
 }: {field: IField, otherComponentProps: T | Partial<DatePickerProps> | any, dataSet: DataSet, isInProgram: boolean}) {
   const {
-    fieldCode, fieldType, fieldName, fieldOptions, defaultValue, system,
+    fieldCode, fieldType, fieldName, fieldOptions, defaultValue, system, fieldId,
   } = field;
   if (system) {
     switch (fieldCode) {
@@ -133,12 +134,23 @@ export default function renderField<T extends Partial<SelectProps>>({
           {...otherComponentProps}
         />
       );
-    case 'radio': case 'single': case 'checkbox': case 'multiple':
+    case 'single': case 'multiple':
+      return (
+        <SelectCustomField
+          name={fieldCode}
+          style={{ width: '100%' }}
+          multiple={fieldType === 'multiple'}
+          fieldId={fieldId as string}
+          selected={defaultValue}
+          {...otherComponentProps}
+        />
+      );
+    case 'radio': case 'checkbox':
       return (
         <Select
           name={fieldCode}
           style={{ width: '100%' }}
-          multiple={fieldType === 'checkbox' || fieldType === 'multiple'}
+          multiple={fieldType === 'checkbox'}
           {...otherComponentProps}
         >
           {fieldOptions
