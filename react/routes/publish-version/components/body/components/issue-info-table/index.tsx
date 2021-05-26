@@ -66,7 +66,7 @@ const IssueInfoTable: React.FC<IPublishVersionMenuInfoConfigProps> = ({
   }, [issueInfoTableDataSet, store.getCurrentData.id]);
   useEffect(() => {
     const issueTypeId = issueInfoTableDataSet.getState('issueTypeId');
-    typeof (onLoadTableData) === 'function' ? onLoadTableData(issueTypeId) : loadTableData(issueTypeId);
+    typeof (onLoadTableData) === 'function' ? onLoadTableData(issueTypeId) : !issueInfoBody && loadTableData(issueTypeId);
   }, [issueInfoTableDataSet, loadTableData, onLoadTableData, issueInfoTableDataSet.getState('issueTypeId')]);
   const renderBody = () => (
     <>
