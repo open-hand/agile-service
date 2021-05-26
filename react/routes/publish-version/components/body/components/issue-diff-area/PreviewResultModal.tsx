@@ -28,14 +28,12 @@ const JSONbigString = JSONbig({ storeAsString: true });
 
 const { Column } = Table;
 interface PreviewResultModalProps {
-  publishVersionId: string
   tableData: any[]
   handleOk?: () => any
   onChangeIssueTag: (action: 'add' | 'update') => void
-  selectIssue: (issueId: string) => void
 }
 const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps> = ({
-  modal, tableData, handleOk, selectIssue,
+  modal, tableData, handleOk,
 }) => {
   const [detailProps] = useDetail();
 

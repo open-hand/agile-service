@@ -12,7 +12,10 @@ const Container: React.FC = () => {
   return (
     <div className={styles.container}>
       <Observer>
-        {() => <Loading loading={store.loading} />}
+        {() => {
+          console.log('loading  <Loading loading={store.getLoading} />', store.getLoading);
+          return <Loading loading={store.getLoading} />;
+        }}
       </Observer>
       <Header />
       <Body />

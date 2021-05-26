@@ -19,6 +19,7 @@ import PublishVersionList from './components/list';
 import Container from './Container';
 import './PublishVersion.less';
 import empty from './empty.svg';
+import { IPublishVersionProps } from '.';
 
 const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabled?: boolean, clickEvent?: () => void } & Omit<ButtonProps, 'title'>> = ({
   title, children, disabled, buttonIcon, buttonDisabled = false, clickEvent, ...otherProps
@@ -39,7 +40,9 @@ const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabl
 };
 
 function PublishVersion() {
-  const { prefixCls, tableDataSet, store } = usePublishVersionContext();
+  const {
+    prefixCls, tableDataSet, store, pageHeader, pageContentEmpty, renderPage,
+  } = usePublishVersionContext();
   const [theme] = useTheme();
 
   function handleCreate(data: any) {
@@ -71,30 +74,32 @@ function PublishVersion() {
         <Container />
       </>
 
-    ) : (
-      <Empty
-        title="暂无可用发布版本"
-        description={(
-          <div>
-            {/* <span>为管理发布版本,创建发布版本</span> */}
+    ) : (pageContentEmpty
+      || (
+        <Empty
+          title="暂无可用发布版本"
+          description={(
             <div>
-              <Button
-                funcType={'raised' as any}
-                style={{ marginTop: 10, fontSize: 14 }}
-                onClick={() => { openCreatePublishVersionModal({ handleOk: handleCreate }); }}
-              >
-                创建发布版本
-              </Button>
+              {/* <span>为管理发布版本,创建发布版本</span> */}
+              <div>
+                <Button
+                  funcType={'raised' as any}
+                  style={{ marginTop: 10, fontSize: 14 }}
+                  onClick={() => { openCreatePublishVersionModal({ handleOk: handleCreate }); }}
+                >
+                  创建发布版本
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-        pic={empty}
-      />
+          )}
+          pic={empty}
+        />
+      )
     );
   }
-  return (
-    <Page className={prefixCls}>
-      <Header>
+  const renderPageHeader = () => (
+    <Header>
+      {pageHeader || (
         <HeaderButtons
           items={[
             {
@@ -121,25 +126,34 @@ function PublishVersion() {
             },
           ]}
         />
-      </Header>
-      <Breadcrumb />
-      <Content
-        style={{
-          ...theme === 'theme4' ? {
-            marginLeft: 0,
-            marginRight: 0,
-            paddingLeft: 0,
-            paddingRight: 0,
-            paddingBottom: 0,
-          } : {
-            padding: 0, paddingTop: 4,
-          },
-        }}
-        className={`${prefixCls}-content`}
-      >
-        {render()}
+      )}
 
-      </Content>
+    </Header>
+  );
+  const renderContent = () => (
+    <Content
+      style={{
+        ...theme === 'theme4' ? {
+          marginLeft: 0,
+          marginRight: 0,
+          paddingLeft: 0,
+          paddingRight: 0,
+          paddingBottom: 0,
+        } : {
+          padding: 0, paddingTop: 4,
+        },
+      }}
+      className={`${prefixCls}-content`}
+    >
+      {render()}
+
+    </Content>
+  );
+  return renderPage ? renderPage(renderPageHeader, render) : (
+    <Page className={prefixCls}>
+      {renderPageHeader()}
+      <Breadcrumb />
+      {renderContent()}
     </Page>
   );
 }

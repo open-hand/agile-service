@@ -101,7 +101,6 @@ function TreeWithLine<T extends ITreeWithLineBaseProps<T>>({ data: propsData, re
     set(item, 'offsetBottom', node.props.offsetBottom);
     // @ts-ignore
 
-    console.log('node', node.props.offsetBottom);
     return (
       <TreeNode
         title={node}

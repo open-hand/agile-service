@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   Button, Modal, Icon,
 } from 'choerodon-ui/pro';
@@ -18,11 +18,9 @@ import PublishVersionSection from '../section';
 import { openEditAppVersionModal, openEditLinkAppServiceModal } from './EditAppVersionModal';
 import styles from './index.less';
 
-function useEditModeSectionConfig(preview: boolean) {
+export function useEditModeSectionConfig() {
   const { store } = usePublishVersionContext();
-  if (preview) {
-    return { className: styles.preview };
-  }
+
   const detailData = store.getCurrentData;
 
   function handleLinkPublishVersion(linkData: any) {
@@ -46,65 +44,66 @@ function useEditModeSectionConfig(preview: boolean) {
     });
     return true;
   }
-  const Title = memo(() => (
-    <div className={styles.title}>
-      <span>关联版本</span>
-      <div className={styles.operation}>
-        <Button
-          icon="local_offer"
-          funcType={'flat' as any}
-          className={styles.operation_btn} // 线框
-          onClick={() => {
-            openLinkAppServiceTagModal({ publishVersionId: detailData.id, handleOk: handleLinkTag });
-          }}
-        >
-          关联tag
-        </Button>
-        <Button
-          icon="version"
-          className={styles.operation_btn}
-          funcType={'flat' as any}
-          onClick={() => {
-            openLinkPublishVersionModal({ publishVersionId: detailData.id, handleOk: handleLinkPublishVersion });
-          }}
-        >
-          关联发布版本
-        </Button>
+  const TitleRight = memo(({ operation }: { operation: any }) => (
+    <div className={styles.operation}>
+      <Button
+        icon="local_offer"
+        funcType={'flat' as any}
+        className={styles.operation_btn} // 线框
+        onClick={() => {
+          console.log('operation onClickTag', operation);
+          typeof (operation.onClickTag) === 'function' ? operation?.onClickTag()
+            : openLinkAppServiceTagModal({ publishVersionId: detailData.id, handleOk: handleLinkTag });
+        }}
+      >
+        关联tag
+      </Button>
+      <Button
+        icon="version"
+        className={styles.operation_btn}
+        funcType={'flat' as any}
+        onClick={() => {
+          typeof (operation.onClickVersion) === 'function' ? operation?.onClickVersion()
+            : openLinkPublishVersionModal({ publishVersionId: detailData.id, handleOk: handleLinkPublishVersion });
+        }}
+      >
+        关联发布版本
+      </Button>
 
-        <Button
-          funcType={'flat' as any}
-          className={styles.operation_btn}
-          onClick={() => {
-            openImportPomModal({ handleOk: handleImportPom, versionId: detailData.id });
-          }}
-        >
-          <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-            <CustomIcon type="icon-pom" width={18} height={18} />
-            导入POM依赖
-          </span>
+      <Button
+        funcType={'flat' as any}
+        className={styles.operation_btn}
+        onClick={() => {
+          typeof (operation.onClickPom) === 'function' ? operation?.onClickPom()
+            : openImportPomModal({ handleOk: handleImportPom, versionId: detailData.id });
+        }}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+          <CustomIcon type="icon-pom" width={18} height={18} />
+          导入POM依赖
+        </span>
 
-        </Button>
+      </Button>
 
-      </div>
     </div>
   ));
   return {
     className: styles.wrap,
     bodyClassName: styles.wrap_body,
-    title: <Title />,
-
+    titleClassName: styles.title,
+    title: '关联版本',
+    titleRight: <TitleRight operation={{}} />,
   };
 }
-function PublishVersionLinkVersion() {
+function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { sectionProps?: any, nodeOperationProps?: any }) {
   const { store, preview } = usePublishVersionContext();
   const detailData = store.getCurrentData;
-  const sectionProps = useEditModeSectionConfig(preview);
   const dependencyList = store.getDependencyList;
   console.log('dependencyList', store.getDependencyList);
   function handleDelete(v: IPublishVersionTreeNode) {
     let versionName = v.versionAlias || v.name;
     if (v.type === 'tag') {
-      const appService = v.appServiceCode ? store.findAppServiceByCode(v.appServiceCode)! : undefined;
+      const appService = v.appServiceCode ? store.findAppServiceByCode(v.appServiceCode, v)! : undefined;
       versionName = appService ? `${appService.name}（${appService.code}）` : versionName;
     }
 
@@ -134,7 +133,7 @@ function PublishVersionLinkVersion() {
   }
   function renderTreeNode(item: IPublishVersionTreeNode, level: number) {
     const showAdditionalLine = !!(item.groupId || item.artifactId || item.version);
-    const appService = item.appServiceCode ? store.findAppServiceByCode(item.appServiceCode)! : undefined;
+    const appService = item.appServiceCode ? store.findAppServiceByCode(item.appServiceCode, item)! : undefined;
     const alias = item.versionAlias || item.tagAlias;
     return (
       <DependencyTreeNode offsetBottom={showAdditionalLine ? 10 : 0} style={{ height: showAdditionalLine ? 54 : 30 }}>
@@ -161,7 +160,7 @@ function PublishVersionLinkVersion() {
 
             {level === 0 && !preview ? (
               <span className={styles.node_operation}>
-                {item.type === 'tag' && (
+                {(typeof (nodeOperationProps.isShowEdit) === 'function' ? nodeOperationProps.isShowEdit(item) : nodeOperationProps.isShowEdit) && (
                   <Button
                     icon="mode_edit"
                     className={styles.node_btn}
@@ -179,6 +178,7 @@ function PublishVersionLinkVersion() {
                     }}
                   />
                 )}
+                {(typeof (nodeOperationProps.isShowDel) === 'function' ? nodeOperationProps.isShowDel(item) : nodeOperationProps.isShowDel) && (
                 <Button
                   icon="delete_forever"
                   style={{ width: '.26rem', height: '.26rem' }}
@@ -188,6 +188,7 @@ function PublishVersionLinkVersion() {
                     handleDelete(item);
                   }}
                 />
+                )}
               </span>
             ) : null}
           </div>
@@ -209,5 +210,8 @@ function PublishVersionLinkVersion() {
     </PublishVersionSection>
   );
 }
-
+PublishVersionLinkVersion.defaultProps = {
+  sectionProps: undefined,
+  nodeOperationProps: undefined,
+};
 export default observer(PublishVersionLinkVersion);

@@ -17,10 +17,10 @@ async function sequenceRequest(requests: Array<() => Promise<any[]>>, tagData: a
   }
   return data;
 }
-export async function requestPreviewData(publishVersionId: string, tagData: any[]): Promise<any[]> {
+export async function requestPreviewData(tagData: any[], request: (item: any) => Promise<any>): Promise<any[]> {
   const requestStack: Array<() => Promise<any[]>> = tagData.map((data) => {
     console.log('requestPreviewData oneData..requestStack', data);
-    return () => publishVersionApi.comparePreviewTag(publishVersionId, data);
+    return () => request(data);// publishVersionApi.comparePreviewTag(publishVersionId, data);
   });
   const tableData = await sequenceRequest(requestStack, tagData, 0);
   return tableData;

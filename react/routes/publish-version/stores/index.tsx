@@ -6,12 +6,14 @@ import { injectIntl } from 'react-intl';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import { useDetail } from '@/components/detail-container';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import { IPublishVersionData } from '@/api';
 import PublishVersionDataSet from './PublishVersionDataSet';
-import store, { PublishDetailStore } from './store';
+import { PublishDetailStore } from './store';
 import IssueInfoTableDataSet from './IssueInfoTableDataSet';
 import IssueDiffDataSet from './IssueDiffDataSet';
+import { IPublishVersionProps } from '..';
 
-interface Context {
+export interface IPublishVersionContext extends IPublishVersionProps<IPublishVersionData> {
   tableDataSet: DataSet
   issueInfoTableDataSet: DataSet
   issueDiffDataSet: DataSet
@@ -20,18 +22,19 @@ interface Context {
   preview: boolean
   prefixCls: string
 }
-const PublishVersionContext = createContext({} as Context);
+const PublishVersionContext = createContext({} as IPublishVersionContext);
 export function usePublishVersionContext() {
   return useContext(PublishVersionContext);
 }
 const PublishVersionProvider = injectIntl(inject('AppState')(
-  (props: any) => {
+  (props: IPublishVersionProps<IPublishVersionData> & { [propsName: string]: any }) => {
     const [detailProps] = useDetail();
-    const { preview, publishVersionId } = props;
+    const { leftListDataSetConfig, publishVersionId } = props;
     const { open } = detailProps;
+    const store = useMemo(() => props.store || new PublishDetailStore(), [props.store]);
     const issueDiffDataSet = useMemo(() => new DataSet(IssueDiffDataSet()), []);
     const issueInfoTableDataSet = useMemo(() => new DataSet(IssueInfoTableDataSet()), []);
-    const tableDataSet = useMemo(() => new DataSet(PublishVersionDataSet()), []);
+    const tableDataSet = useMemo(() => new DataSet({ ...PublishVersionDataSet(), ...leftListDataSetConfig }), [leftListDataSetConfig]);
     const handleSelectIssue = useCallback((id: string) => open({
       path: 'issue',
       props: {
@@ -49,22 +52,24 @@ const PublishVersionProvider = injectIntl(inject('AppState')(
     }), [issueInfoTableDataSet, open]);
     useEffect(() => {
       store.clear();
-      store.init({ events: { selectIssue: handleSelectIssue } });
-    }, [handleSelectIssue]);
+      store.init({ selectIssue: handleSelectIssue }, { detailProps });
+    }, [detailProps, handleSelectIssue, store]);
     useEffect(() => {
       async function init() {
         await tableDataSet.query().then((res) => {
-          if (res.list[0]) {
+          console.log('init....1', res);
+          if (res?.list[0]) {
             store.select(res.list[0]);
           }
         });
         tableDataSet.select(0);
       }
-      !preview && publishVersionId ? store.select(publishVersionId) : init();
-    }, [preview, publishVersionId, tableDataSet]);
+      init();
+    }, [publishVersionId, store, tableDataSet]);
     const value = {
       ...props,
-      store,
+      preview: false,
+      store: store as PublishDetailStore,
       detailProps,
       prefixCls: 'c7n-agile-publish-version',
       tableDataSet,

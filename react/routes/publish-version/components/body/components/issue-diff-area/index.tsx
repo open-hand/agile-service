@@ -19,6 +19,7 @@ import SelectGitTags from '@/components/select/select-git-tags';
 import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import SelectPublishVersion from '@/components/select/select-publish-version';
 import { useMap } from 'ahooks';
+import { IPublishVersionMenuDiffConfigProps } from '@/routes/publish-version';
 import styles from './index.less';
 import PublishVersionSection from '../section';
 import { openPreviewResultModal } from './PreviewResultModal';
@@ -41,26 +42,36 @@ function SelectAppService({ request, record, ...otherProps }: Partial<SelectProp
   };
   const options = useObserver(() => (request(record) as any[]).map((item) => <Option value={item.code}>{renderService(item)}</Option>));
   return (
-    <OriginSelectAppService record={record} {...otherProps}>
+    <Select record={record} {...otherProps}>
       {options}
-    </OriginSelectAppService>
+    </Select>
   );
 }
-function IssueDiffArea() {
+interface IssueDiffAreaBaseProps {
+  topFormContent: React.ReactNode,
+  bottomFormContent: React.ReactNode,
+  bottomFormProps: { columns: number }
+  menuDiffConfig?: IPublishVersionMenuDiffConfigProps
+}
+export function IssueDiffAreaBase({
+  topFormContent, bottomFormContent, bottomFormProps, menuDiffConfig,
+}: IssueDiffAreaBaseProps) {
   const tableDataMap = useMemo(() => new Map<string, any>(), []);
   const [tableData, setTableData] = useState<any[] | false | undefined>();
   const [generateBtnLoading, setGenerateBtnLoading] = useState(false);
-  const [publishVersionId, setPublishVersionId] = useState<string>();
-  const [appServerList, setAppServerList] = useState<any[]>([]);
-
   const { store, issueDiffDataSet } = usePublishVersionContext();
-  const dependencyList = store.getDependencyList;
-
+  useEffect(() => {
+    setGenerateBtnLoading(false);
+    setTableData(false);
+  }, [store.getCurrentData.id]);
+  function handleRequest(data: any) {
+    return publishVersionApi.comparePreviewTag(store.getCurrentData.id, data);
+  }
   const handleSubmit = async () => {
     if (await issueDiffDataSet.validate()) {
       setTableData(false);
       setGenerateBtnLoading(true);
-      const newData = await requestPreviewData(store.getCurrentData.id, issueDiffDataSet.toData().filter((item: any) => item.appServiceCode));
+      const newData = await requestPreviewData(issueDiffDataSet.toData().filter((item: any) => item.appServiceCode), menuDiffConfig?.onCompareTagRequest || handleRequest);
       setGenerateBtnLoading(false);
       newData.forEach((item) => {
         if (tableDataMap.has(item.issueId)) {
@@ -75,18 +86,47 @@ function IssueDiffArea() {
     }
     return false;
   };
-  function handleMessage(data: any) {
-    const newData = JSONbigString.parse(data);
-    const oneTableData = newData.data ? JSONbigString.parse(newData.data) : [];
-    console.log('newDATA', newData);
-    setGenerateBtnLoading(true);
-    setTableData((oldData) => (!oldData ? [] : oldData.concat(...oneTableData)));
-
-    if (newData.action === 'done') {
-      setGenerateBtnLoading(false);
-      // setTableData(false);
-    }
+  function handleChangeIssueTag(action: 'add' | 'update') {
+    menuDiffConfig?.onChangeIssueTag ? menuDiffConfig?.onChangeIssueTag(issueDiffDataSet, action)
+      : publishVersionApi.compareTag(store.getCurrentData.id, issueDiffDataSet.toData(), action);
   }
+  function handleOpenPreview() {
+    const uniqTableData = [...tableDataMap.values()]; // uniqBy((tableData || []), (item) => item.issueId);
+    console.log('uniqTableData', uniqTableData);
+    openPreviewResultModal({
+      onChangeIssueTag: handleChangeIssueTag, tableData: uniqTableData, handleOk: () => store.setCurrentMenu('info'),
+    });
+  }
+  return (
+    <div className={styles.wrap}>
+      <PublishVersionSection border={false} className={classnames(styles.section, styles.top_form)} bodyClassName={styles.body}>
+        <Form>
+          {topFormContent}
+        </Form>
+      </PublishVersionSection>
+      <PublishVersionSection title="选择对比tag" className={styles.section} bodyClassName={styles.body} border={false}>
+        <Form dataSet={issueDiffDataSet} className={classnames(styles.form)} {...bottomFormProps}>
+          {bottomFormContent}
+
+          <div className={styles.compare}>
+            <Button loading={generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleSubmit}>生成预览信息</Button>
+            <Button disabled={!tableData || generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
+          </div>
+        </Form>
+      </PublishVersionSection>
+    </div>
+  );
+}
+IssueDiffAreaBase.defaultProps = {
+  menuDiffConfig: undefined,
+};
+function IssueDiffArea() {
+  const [publishVersionId, setPublishVersionId] = useState<string>();
+  const [appServerList, setAppServerList] = useState<any[]>([]);
+
+  const { store, issueDiffDataSet } = usePublishVersionContext();
+  const dependencyList = store.getDependencyList;
+
   useEffect(() => {
     publishVersionId && issueDiffDataSet.length > 0 && publishVersionApi.loadCompareHistory(publishVersionId).then((res: any) => {
       res.map((item: any) => {
@@ -115,8 +155,6 @@ function IssueDiffArea() {
     return appServerList.filter((appService) => record.get('appServiceId') === appService.id || !applicationIds.includes(appService.id));
   }, [appServerList, issueDiffDataSet]);
   useEffect(() => {
-    setGenerateBtnLoading(false);
-    setTableData(false);
     publishVersionApi.loadAppServiceList(store.getCurrentData.id).then((res: any) => {
       setAppServerList(res);
     });
@@ -127,40 +165,20 @@ function IssueDiffArea() {
       <SelectGitTags record={record} name="sourceTag" applicationId={appServiceId} />,
       <SelectGitTags record={record} name="targetTag" applicationId={appServiceId} />];
   }
-  function handleChangeIssueTag(action: 'add' | 'update') {
-    publishVersionApi.compareTag(store.getCurrentData.id, issueDiffDataSet.toData(), action);
-  }
-  function handleOpenPreview() {
-    const uniqTableData = [...tableDataMap.values()]; // uniqBy((tableData || []), (item) => item.issueId);
-    console.log('uniqTableData', uniqTableData);
-    openPreviewResultModal({
-      publishVersionId: store.getCurrentData.id, onChangeIssueTag: handleChangeIssueTag, tableData: uniqTableData, selectIssue: (issueId) => store.selectIssue(issueId), handleOk: () => store.setCurrentMenu('info'),
-    });
-  }
   return (
-    <div className={styles.wrap}>
-      <PublishVersionSection border={false} className={classnames(styles.section, styles.top_form)} bodyClassName={styles.body}>
-        <Form>
-          <SelectPublishVersion
-            name="publishVersionId"
-            label="对比发布版本"
-            afterLoad={(data) => data.filter((i) => i.id !== store.getCurrentData.id)}
-            style={{ width: '4.52rem' }}
-            onChange={setPublishVersionId}
-          />
-        </Form>
-      </PublishVersionSection>
-      <PublishVersionSection title="选择对比tag" className={styles.section} bodyClassName={styles.body} border={false}>
-        <Form dataSet={issueDiffDataSet} columns={3} className={classnames(styles.form)}>
-          {issueDiffDataSet.records.map((r) => renderTags(r))}
-
-          <div className={styles.compare}>
-            <Button loading={generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleSubmit}>生成预览信息</Button>
-            <Button disabled={!tableData || generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
-          </div>
-        </Form>
-      </PublishVersionSection>
-    </div>
+    <IssueDiffAreaBase
+      topFormContent={(
+        <SelectPublishVersion
+          name="publishVersionId"
+          label="对比发布版本"
+          afterLoad={(data) => data.filter((i) => i.id !== store.getCurrentData.id)}
+          style={{ width: '4.52rem' }}
+          onChange={setPublishVersionId}
+        />
+      )}
+      bottomFormContent={issueDiffDataSet.records.map((r) => renderTags(r))}
+      bottomFormProps={{ columns: 3 }}
+    />
   );
 }
 export default observer(IssueDiffArea);
