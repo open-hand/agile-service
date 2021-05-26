@@ -12,8 +12,6 @@ import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.message.entity.Receiver;
 import org.hzero.core.base.BaseConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -32,18 +30,12 @@ import java.util.stream.Collectors;
 @Component
 public class SiteMsgUtil {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SiteMsgUtil.class);
-
     private static final String ASSIGNEENAME = "assigneeName";
     private static final String OPERATOR_NAME = "operatorName";
     private static final String SUMMARY = "summary";
     private static final String URL = "url";
-    private static final String NOTIFY_TYPE = "agile";
     private static final String PROJECT_NAME = "projectName";
     private static final String USER_NAME = "userName";
-    private static final String MSG_TYPE_EMAIL = "EMAIL";
-    private static final String MSG_TYPE_WEB = "WEB";
-    private static final String MSG_TYPE_WEBHOOK = "WEB_HOOK";
     private static final String ISSUE_SUMMARY = "issueSummary";
     private static final String LINK = "link";
     private static final String COMMENT = "comment";
@@ -195,7 +187,6 @@ public class SiteMsgUtil {
         messageSender.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
         messageSender.setMessageCode("ISSUECHANGESTATUS");
         List<Receiver> receiverList = new ArrayList<>();
-        Map<Long, UserDTO> userMap = handleReceiver(receiverList, userSet);
         setLoginNameAndRealName(operatorId, templateArgsMap);
         // 设置模板参数
         messageSender.setArgs(templateArgsMap);
@@ -320,7 +311,6 @@ public class SiteMsgUtil {
         messageSender.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
         messageSender.setMessageCode("ISSUECHANGESTATUS");
         List<Receiver> receiverList = new ArrayList<>();
-        Map<Long, UserDTO> userMap = handleReceiver(receiverList, userSet);
         setLoginNameAndRealName(operatorId, templateArgsMap);
         // 设置模板参数
         messageSender.setArgs(templateArgsMap);

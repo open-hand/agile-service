@@ -25,7 +25,6 @@ import java.util.*;
 @Component
 public class UserServiceImpl implements UserService {
 
-    private static final String PROJECT_ADMIN = "project-admin";
 
     private final BaseFeignClient baseFeignClient;
 
@@ -145,19 +144,6 @@ public class UserServiceImpl implements UserService {
         ResponseEntity<ProjectVO> projectDTOResponseEntity = baseFeignClient.getGroupInfoByEnableProject(ConvertUtil.getOrganizationId(projectId), projectId);
         return projectDTOResponseEntity != null ? projectDTOResponseEntity.getBody() : null;
     }
-
-//    @Override
-//    public WebHookJsonSendDTO.User getWebHookUserById(Long userId) {
-//        Long[] ids = new Long[2];
-//        ids[0] = userId;
-//        ResponseEntity<List<UserDTO>> users = baseFeignClient.listUsersByIds(ids, false);
-//        if (users != null) {
-//            UserDTO userDTO = users.getBody().get(0);
-//            return new WebHookJsonSendDTO.User(userDTO.getLoginName(), userDTO.getRealName());
-//        } else {
-//            return new WebHookJsonSendDTO.User("0", "unknown");
-//        }
-//    }
 
     @Override
     public boolean isProjectOwner(Long projectId, Long userId) {

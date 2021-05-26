@@ -8,7 +8,6 @@ import io.choerodon.agile.app.service.OrganizationConfigService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusTransferSettingService;
 import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;

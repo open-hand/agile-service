@@ -46,7 +46,6 @@ public class ClientProcessor implements BeanPostProcessor {
                 ConfigCodeDTO configCodeDTO = new ConfigCodeDTO(condition.code(), condition.name(), condition.description(), StateMachineConfigType.CONDITION);
                 stateMachinePropertyData.getList().add(configCodeDTO);
                 Object object = stateMachineApplicationContextHelper.getContext().getBean(method.getDeclaringClass());
-//                StateMachineConfigMonitor.checkConfigUniqueCode(condition.code());
                 StateMachineConfigMonitor.configInvokeBeanMap.put(condition.code(), new InvokeBean(method, object, condition.code()));
             }
             PostAction postAction = AnnotationUtils.getAnnotation(method, PostAction.class);
@@ -55,7 +54,6 @@ public class ClientProcessor implements BeanPostProcessor {
                 ConfigCodeDTO configCodeDTO = new ConfigCodeDTO(postAction.code(), postAction.name(), postAction.description(), StateMachineConfigType.POSTPOSITION);
                 stateMachinePropertyData.getList().add(configCodeDTO);
                 Object object = stateMachineApplicationContextHelper.getContext().getBean(method.getDeclaringClass());
-//                StateMachineConfigMonitor.checkConfigUniqueCode(postAction.code());
                 StateMachineConfigMonitor.configInvokeBeanMap.put(postAction.code(), new InvokeBean(method, object, postAction.code()));
             }
             Validator validator = AnnotationUtils.getAnnotation(method, Validator.class);
@@ -64,7 +62,6 @@ public class ClientProcessor implements BeanPostProcessor {
                 ConfigCodeDTO configCodeDTO = new ConfigCodeDTO(validator.code(), validator.name(), validator.description(), StateMachineConfigType.VALIDATOR);
                 stateMachinePropertyData.getList().add(configCodeDTO);
                 Object object = stateMachineApplicationContextHelper.getContext().getBean(method.getDeclaringClass());
-//                StateMachineConfigMonitor.checkConfigUniqueCode(validator.code());
                 StateMachineConfigMonitor.configInvokeBeanMap.put(validator.code(), new InvokeBean(method, object, validator.code()));
             }
             Trigger trigger = AnnotationUtils.getAnnotation(method, Trigger.class);
@@ -73,7 +70,6 @@ public class ClientProcessor implements BeanPostProcessor {
                 ConfigCodeDTO configCodeDTO = new ConfigCodeDTO(trigger.code(), trigger.name(), trigger.description(), StateMachineConfigType.TRIGGER);
                 stateMachinePropertyData.getList().add(configCodeDTO);
                 Object object = stateMachineApplicationContextHelper.getContext().getBean(method.getDeclaringClass());
-//                StateMachineConfigMonitor.checkConfigUniqueCode(trigger.code());
                 StateMachineConfigMonitor.configInvokeBeanMap.put(trigger.code(), new InvokeBean(method, object, trigger.code()));
             }
             //扫描UpdateStatus注解的方法
@@ -81,7 +77,6 @@ public class ClientProcessor implements BeanPostProcessor {
             if (updateStatus != null) {
                 LOGGER.info("stateMachine client annotation updateStatus:{}", updateStatus);
                 Object object = stateMachineApplicationContextHelper.getContext().getBean(method.getDeclaringClass());
-//                StateMachineConfigMonitor.checkUpdateUniqueCode(updateStatus.code());
                 StateMachineConfigMonitor.updateStatusBeanMap.put(updateStatus.code(), new InvokeBean(method, object, updateStatus.code()));
             }
         }

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class CommonMapperUtil {
     public static final Logger log = LoggerFactory.getLogger(CommonMapperUtil.class);
     
-    private final static ObjectMapper objectMapper;
+    private static final  ObjectMapper objectMapper;
     
     static {
         objectMapper = (ObjectMapper)new ObjectMapperPostProcess()

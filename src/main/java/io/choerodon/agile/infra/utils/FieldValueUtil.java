@@ -16,7 +16,6 @@ import io.choerodon.agile.infra.dto.FieldValueDTO;
 import io.choerodon.agile.infra.dto.PageFieldDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.FieldType;
-import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.FieldOptionMapper;
 import io.choerodon.core.exception.CommonException;
@@ -29,6 +28,8 @@ import org.springframework.util.ObjectUtils;
  * @since 2019/6/11
  */
 public class FieldValueUtil {
+
+    private FieldValueUtil() {}
 
     private static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     /**
@@ -159,6 +160,7 @@ public class FieldValueUtil {
                         // 用户id加密
                         value = EncryptionUtils.encryptList(optionIds);
                     }
+                    break;
                 default:
                     break;
             }
@@ -248,7 +250,7 @@ public class FieldValueUtil {
                         userIds.add(Long.valueOf(v.getDefaultValue().toString()));
                     } else {
                         String[] split = v.getDefaultValue().toString().split(",");
-                        List<Long> ids = Stream.of(split).map(id -> Long.valueOf(id)).collect(Collectors.toList());
+                        List<Long> ids = Stream.of(split).map(Long::valueOf).collect(Collectors.toList());
                         userIds.addAll(ids);
                     }
                 });
@@ -513,7 +515,7 @@ public class FieldValueUtil {
                     }
                     if (!newFieldValues.isEmpty()) {
                         List<Long> newOptionIds = newFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList());
-                        create.setNewValue(newOptionIds.stream().map(x -> String.valueOf(x)).collect(Collectors.joining(",")));
+                        create.setNewValue(newOptionIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
                         create.setNewString(fieldOptionMapper.selectByOptionIds(organizationId, newOptionIds).stream().map(FieldOptionDTO::getValue).collect(Collectors.joining(",")));
                     }
                     break;
@@ -669,7 +671,7 @@ public class FieldValueUtil {
                     }
                     if (!newFieldValues.isEmpty()) {
                         List<Long> newOptionIds = newFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList());
-                        create.setNewValue(newOptionIds.stream().map(x -> String.valueOf(x)).collect(Collectors.joining(",")));
+                        create.setNewValue(newOptionIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
                         create.setNewString(fieldOptionMapper.selectByOptionIds(organizationId, newOptionIds).stream().map(FieldOptionDTO::getValue).collect(Collectors.joining(",")));
                     }
                     break;

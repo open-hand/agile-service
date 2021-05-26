@@ -244,11 +244,9 @@ public class SprintServiceImpl implements SprintService {
             allIssueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
         }
 
-        if (!ObjectUtils.isEmpty(advancedSearchArgs.get("featureId")) || !ObjectUtils.isEmpty(advancedSearchArgs.get("epicId"))) {
-            if (!CollectionUtils.isEmpty(allIssueIds)) {
-                List<Long> subTask = issueMapper.selectIssueSubTaskAndSubBugIds(projectId, allIssueIds);
-                allIssueIds.addAll(subTask.isEmpty() ? new ArrayList<>() : subTask);
-            }
+        if ((!ObjectUtils.isEmpty(advancedSearchArgs.get("featureId")) || !ObjectUtils.isEmpty(advancedSearchArgs.get("epicId"))) && !CollectionUtils.isEmpty(allIssueIds)) {
+            List<Long> subTask = issueMapper.selectIssueSubTaskAndSubBugIds(projectId, allIssueIds);
+            allIssueIds.addAll(subTask.isEmpty() ? new ArrayList<>() : subTask);
         }
         BackLogIssueVO backLogIssueVO = new BackLogIssueVO();
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);

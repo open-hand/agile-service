@@ -1,6 +1,5 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.api.vo.BoardColumnVO;
 import io.choerodon.agile.api.vo.ColumnWithMaxMinNumVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.event.RemoveStatusWithProject;

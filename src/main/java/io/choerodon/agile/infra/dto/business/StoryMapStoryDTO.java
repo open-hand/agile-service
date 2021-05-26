@@ -1,6 +1,5 @@
 package io.choerodon.agile.infra.dto.business;
 
-import io.choerodon.agile.api.vo.IssueProgressVO;
 import io.choerodon.agile.api.vo.SprintNameVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.infra.dto.StoryMapVersionDTO;

@@ -515,7 +515,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         if (upperFileName.endsWith(TAR_GZ)) {
             return TAR_GZ;
         }
-        return upperFileName.substring(upperFileName.lastIndexOf("."));
+        return upperFileName.substring(upperFileName.lastIndexOf('.'));
     }
 
     @Override

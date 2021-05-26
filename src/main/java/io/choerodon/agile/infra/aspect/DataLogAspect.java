@@ -2,7 +2,6 @@ package io.choerodon.agile.infra.aspect;
 
 import io.choerodon.agile.api.vo.PriorityVO;
 import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.api.vo.StaticFileRelatedVO;
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.*;
@@ -61,7 +60,6 @@ public class DataLogAspect {
     private static final String BATCH_UPDATE_ISSUE_EPIC_ID = "batchUpdateIssueEpicId";
     private static final String BATCH_VERSION_DELETE_BY_IN_COMPLETE_ISSUE = "batchVersionDeleteByIncompleteIssue";
     private static final String BATCH_DELETE_VERSION_BY_VERSION = "batchDeleteVersionByVersion";
-//    private static final String BATCH_VERSION_DELETE_BY_VERSION_IDS = "batchVersionDeleteByVersionIds";
     private static final String BATCH_COMPONENT_DELETE = "batchComponentDelete";
     private static final String BATCH_TO_VERSION = "batchToVersion";
     private static final String BATCH_REMOVE_VERSION = "batchRemoveVersion";
@@ -113,10 +111,8 @@ public class DataLogAspect {
     private static final String FIELD_RANK = "Rank";
     private static final String RANK_HIGHER = "评级更高";
     private static final String RANK_LOWER = "评级更低";
-    private static final String TYPE_CODE = "typeCode";
     private static final String FIELD_ISSUETYPE = "issuetype";
     private static final String FIELD_FIX_VERSION = "Fix Version";
-//    private static final String BATCH_MOVE_TO_VERSION = "batchMoveVersion";
     private static final String FIX_VERSION = "fix";
     private static final String FIELD_VERSION = "Version";
     private static final String FIELD_COMPONENT = "Component";
@@ -325,9 +321,6 @@ public class DataLogAspect {
                     case BATCH_DELETE_VERSION_BY_VERSION:
                         batchDeleteVersionByVersion(args);
                         break;
-//                    case BATCH_MOVE_TO_VERSION:
-//                        batchMoveVersionDataLog(args);
-//                        break;
                     case BATCH_REMOVE_SPRINT_BY_SPRINT_ID:
                         batchRemoveSprintBySprintId(args);
                         break;
@@ -337,9 +330,6 @@ public class DataLogAspect {
                     case BATCH_UPDATE_ISSUE_STATUS_TO_OTHER:
                         batchUpdateIssueStatusToOtherDataLog(args);
                         break;
-//                    case BATCH_VERSION_DELETE_BY_VERSION_IDS:
-//                        batchDeleteVersionByVersionIds(args);
-//                        break;
                     case BATCH_VERSION_DELETE_BY_IN_COMPLETE_ISSUE:
                         batchVersionDeleteByInCompleteIssue(args);
                         break;
@@ -677,24 +667,6 @@ public class DataLogAspect {
         }
     }
 
-//    @SuppressWarnings("unchecked")
-//    private void batchDeleteVersionByVersionIds(Object[] args) {
-//        List<Long> versionIds = new ArrayList<>();
-//        Long projectId = null;
-//        for (Object arg : args) {
-//            if (arg instanceof List) {
-//                versionIds = (List) arg;
-//            }
-//            if (arg instanceof Long) {
-//                projectId = (Long) arg;
-//            }
-//        }
-//        if (projectId != null && !versionIds.isEmpty()) {
-//            List<VersionIssueDTO> versionIssues = productVersionMapper.queryIssueForLogByVersionIds(projectId, versionIds);
-//            handleBatchDeleteVersion(versionIssues, projectId, null);
-//            dataLogRedisUtil.deleteByBatchDeleteVersionByVersionIds(projectId, versionIds);
-//        }
-//    }
 
     private void batchUpdateIssueStatusDataLog(Object[] args) {
         IssueStatusDTO issueStatus = null;
@@ -708,11 +680,11 @@ public class DataLogAspect {
             IssueDTO query = new IssueDTO();
             query.setStatusId(issueStatus.getStatusId());
             query.setProjectId(projectId);
-            StatusVO StatusVO = statusService.queryStatusById(ConvertUtil.getOrganizationId(projectId), issueStatus.getStatusId());
+            StatusVO statusVO = statusService.queryStatusById(ConvertUtil.getOrganizationId(projectId), issueStatus.getStatusId());
             List<IssueDTO> issueDTOS = issueMapper.select(query);
             if (issueDTOS != null && !issueDTOS.isEmpty()) {
                 Long userId = DetailsHelper.getUserDetails().getUserId();
-                dataLogMapper.batchCreateStatusLogByIssueDOS(projectId, issueDTOS, userId, StatusVO, issueStatus.getCompleted());
+                dataLogMapper.batchCreateStatusLogByIssueDOS(projectId, issueDTOS, userId, statusVO, issueStatus.getCompleted());
                 dataLogRedisUtil.handleBatchDeleteRedisCache(issueDTOS, projectId);
             }
 
@@ -782,25 +754,6 @@ public class DataLogAspect {
             handleBatchRemoveSprint(projectId, moveIssueIds, 0L);
         }
     }
-
-//    @SuppressWarnings("unchecked")
-//    private void batchMoveVersionDataLog(Object[] args) {
-//        Long projectId = (Long) args[0];
-//        Long targetVersionId = (Long) args[1];
-//        List<VersionIssueDTO> versionIssueDTOS = (List<VersionIssueDTO>) args[2];
-//        if (projectId != null && targetVersionId != null && !versionIssueDTOS.isEmpty()) {
-//            ProductVersionDTO productVersionDTO = productVersionMapper.selectByPrimaryKey(targetVersionId);
-//            if (productVersionDTO == null) {
-//                throw new CommonException("error.productVersion.get");
-//            }
-//            for (VersionIssueDTO versionIssueDTO : versionIssueDTOS) {
-//                String field = FIX_VERSION.equals(versionIssueDTO.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
-//                createDataLog(projectId, versionIssueDTO.getIssueId(), field, null,
-//                        productVersionDTO.getName(), null, targetVersionId.toString());
-//            }
-//            dataLogRedisUtil.deleteByHandleBatchDeleteVersion(projectId, productVersionDTO.getVersionId());
-//        }
-//    }
 
     private void handleDeleteCommentDataLog(Object[] args) {
         IssueCommentDTO issueCommentDTO = null;
@@ -1210,9 +1163,9 @@ public class DataLogAspect {
                 IssueStatusDTO issueStatusDTO = issueStatusMapper.selectByStatusId(issueConvertDTO.getProjectId(), issueConvertDTO.getStatusId());
                 Boolean condition = (issueStatusDTO.getCompleted() != null && issueStatusDTO.getCompleted());
                 if (condition) {
-                    StatusVO StatusVO = statusService.queryStatusById(ConvertUtil.getOrganizationId(issueConvertDTO.getProjectId()), issueConvertDTO.getStatusId());
+                    StatusVO statusVO = statusService.queryStatusById(ConvertUtil.getOrganizationId(issueConvertDTO.getProjectId()), issueConvertDTO.getStatusId());
                     createDataLog(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), FIELD_RESOLUTION, null,
-                            StatusVO.getName(), null, issueStatusDTO.getStatusId().toString());
+                            statusVO.getName(), null, issueStatusDTO.getStatusId().toString());
                 }
                 if (issueConvertDTO.getEpicId() != null && !issueConvertDTO.getEpicId().equals(0L)) {
                     //选择EPIC要生成日志
@@ -1446,7 +1399,7 @@ public class DataLogAspect {
             Long logId = dataLog.getLogId();
             Long instanceId = originIssueDTO.getIssueId();
             Long projectId = originIssueDTO.getProjectId();
-            String businessType = "issue";
+            String businessType = ISSUE;
             Long organizationId = ConvertUtil.getOrganizationId(projectId);
             RuleLogRelVO ruleLogRelVO = new RuleLogRelVO(logId, ruleId, businessType, instanceId, projectId, organizationId);
             agileTriggerService.insertRuleLogRel(ruleLogRelVO);
@@ -1563,7 +1516,6 @@ public class DataLogAspect {
     }
 
     private void dataLogCreateEpicId(Long epicId, IssueDTO originIssueDTO, ProjectInfoDTO projectInfoDTO) {
-//        IssueDTO issueEpic = queryIssueByIssueIdAndProjectId(originIssueDTO.getProjectId(), epicId);
         IssueDTO issueEpic = issueMapper.selectByPrimaryKey(epicId);
         if (issueEpic == null) {
             throw new CommonException(ERROR_EPIC_NOT_FOUND);
@@ -1585,7 +1537,6 @@ public class DataLogAspect {
     }
 
     private void dataLogChangeEpicId(Long epicId, IssueDTO originIssueDTO, ProjectInfoDTO projectInfoDTO) {
-//        IssueDTO oldIssueEpic = queryIssueByIssueIdAndProjectId(originIssueDTO.getProjectId(), originIssueDTO.getEpicId());
         IssueDTO oldIssueEpic = issueMapper.selectByPrimaryKey(originIssueDTO.getEpicId());
         if (oldIssueEpic == null) {
             throw new CommonException(ERROR_EPIC_NOT_FOUND);
@@ -1600,7 +1551,6 @@ public class DataLogAspect {
                         oldEpicProject.getProjectCode() + "-" + oldIssueEpic.getIssueNum(),
                         null, oldIssueEpic.getIssueId().toString(), null);
             } else {
-//                IssueDTO newIssueEpic = queryIssueByIssueIdAndProjectId(originIssueDTO.getProjectId(), epicId);
                 IssueDTO newIssueEpic = issueMapper.selectByPrimaryKey(epicId);
                 if (newIssueEpic == null) {
                     throw new CommonException(ERROR_EPIC_NOT_FOUND);
@@ -1625,13 +1575,6 @@ public class DataLogAspect {
                     originIssueDTO.getIssueId().toString(), null);
             dataLogRedisUtil.deleteByDataLogCreateEpicId(projectInfoDTO.getProjectId(), oldIssueEpic.getIssueId());
         }
-    }
-
-    private IssueDTO queryIssueByIssueIdAndProjectId(Long projectId, Long issueId) {
-        IssueDTO issueDTO = new IssueDTO();
-        issueDTO.setIssueId(issueId);
-        issueDTO.setProjectId(projectId);
-        return issueMapper.selectOne(issueDTO);
     }
 
     private DataLogDTO createDataLog(Long projectId, Long issueId, String field, String oldString,

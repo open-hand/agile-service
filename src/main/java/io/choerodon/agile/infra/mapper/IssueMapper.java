@@ -188,8 +188,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                       @Param("typeCode") String typeCode,
                                                       @Param("date") Date date);
 
-//    List<Long> queryInVersionIssueIds(@Param("projectId") Long projectId, @Param("versionId") Long versionId, @Param("issueIds") List<Long> issueIds);
-
     /**
      * 查询issue和issue没有关闭的冲刺
      *
@@ -225,16 +223,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @return Integer
      */
     Integer queryMaxEpicSequenceByProject(@Param("projectId") Long projectId);
-
-//    /**
-//     * 返回issue统计信息
-//     *
-//     * @param projectId  projectId
-//     * @param type       type查询的类型
-//     * @param issueTypes issueTypes要排除的issue类型
-//     * @return PieChartDTO
-//     */
-//    List<PieChartDTO> issueStatistic(@Param("projectId") Long projectId, @Param("type") String type, @Param("issueTypes") List<String> issueTypes);
 
     /**
      * 返回issue的详情列表（测试模块用）
@@ -321,20 +309,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      */
     List<IssueBurnDownReportDTO> queryIssueByVersionId(@Param("projectId") Long projectId, @Param("versionId") Long versionId);
 
-//    /**
-//     * 根据ids查询所有issue
-//     *
-//     * @param projectId projectId
-//     * @param issueIds  issueIds
-//     * @return IssueDTO
-//     */
-//    List<IssueDetailDTO> queryByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
-
     String selectMaxRankByProjectId(@Param("projectId") Long projectId);
-
-//    List<Long> selectIssueIdsByProjectId(@Param("projectId") Long projectId);
-
-//    void updateMapRank(@Param("projectId") Long projectId, @Param("mapMoveIssueDOS") List<StoryMapMoveIssueDO> mapMoveIssueDOS);
 
     Integer queryIssueIdsIsTest(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
@@ -357,13 +332,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @return IssueDTO
      */
     IssueDTO queryEpicWithStatusByIssueId(@Param("issueId") Long issueId, @Param("projectId") Long projectId);
-
-//    /**
-//     * 根据项目分组测试类型issue
-//     *
-//     * @return IssueProjectDTO
-//     */
-//    List<IssueProjectDTO> queryIssueTestGroupByProject();
 
     List<IssueDTO> queryIssueIdsListWithSub(@Param("projectId") Long projectId,
                                             @Param("searchVO") SearchVO searchVO,

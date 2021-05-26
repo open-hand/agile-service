@@ -89,12 +89,6 @@ public class VerifyUpdateUtil {
         else if (type == Boolean.class) {
             field.set(objectUpdate,v);
         }
-//        else if (type instanceof Object) {
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            Object obj = type.newInstance();
-//            EncryptionUtils.handlerObject(objectMapper.writeValueAsString(v), obj, type);
-//            field.set(objectUpdate, obj);
-//        }
         return flag;
     }
 

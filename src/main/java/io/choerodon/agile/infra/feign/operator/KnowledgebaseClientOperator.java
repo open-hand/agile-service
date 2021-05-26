@@ -2,7 +2,6 @@ package io.choerodon.agile.infra.feign.operator;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.choerodon.agile.api.vo.WorkSpaceVO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.feign.KnowledgebaseClient;
 import io.choerodon.core.exception.ServiceUnavailableException;
 import io.choerodon.core.utils.FeignClientUtils;
