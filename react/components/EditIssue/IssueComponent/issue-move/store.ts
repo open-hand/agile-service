@@ -163,7 +163,6 @@ class Store {
 
   @action async loadData(targetIssueTypes: IIssueType[], targetProjectId: string, targetProjectType: string) {
     const needLoadUserIds = uniq(flatten(this.issues.map((issue) => ([issue.assigneeId, issue.reporterId, issue.mainResponsible?.id])))).filter(Boolean);
-    console.log(needLoadUserIds);
     const [users, lostFields, issueDetails, issueFields, targetIssueFields, issueStatus] = await Promise.all([
       Promise.all(
         needLoadUserIds.map((userId) => userApi.project(targetProjectId).getById(userId as string).then((res: any) => res.list[0])),

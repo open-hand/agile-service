@@ -16,7 +16,7 @@ const FieldEpic: React.FC<FieldEpicProps> = ({ target, onChange, fieldWithValue 
   return (
     <TextEditToggle
       onSubmit={handleChange}
-      initValue={fieldWithValue?.value}
+      initValue={fieldWithValue?.valueStr}
       mountRenderEditor={false}
       submitTrigger={['blur', 'change']}
       editor={() => (

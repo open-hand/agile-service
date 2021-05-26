@@ -6,6 +6,7 @@ import FieldUser from './fields/FieldUser';
 import FieldLabel from './fields/FieldLabel';
 import FieldSprint from './fields/FieldSprint';
 import FieldComponent from './fields/FieldComponent';
+import FieldEpic from './fields/FieldEpic';
 import FieldFeature from './fields/FieldFeature';
 import FieldProgramVersion from './fields/FieldProgramVersion';
 import FieldPI from './fields/FieldPI';
@@ -37,6 +38,9 @@ function getFieldComponent(field: IField) {
     }
     case 'component': {
       return FieldComponent;
+    }
+    case 'epic': {
+      return FieldEpic;
     }
     case 'feature': {
       return FieldFeature;
