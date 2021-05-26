@@ -7,7 +7,9 @@ import {
 } from 'choerodon-ui/pro';
 import classnames from 'classnames';
 import { uniqBy } from 'lodash';
-import { observer, useObserver } from 'mobx-react-lite';
+import {
+  observer, useComputed, useObservable, useObserver,
+} from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { publishVersionApi } from '@/api';
 // @ts-ignore
@@ -40,10 +42,12 @@ function SelectAppService({ request, record, ...otherProps }: Partial<SelectProp
     }
     return null;
   };
+  // const options = useObservable((request(record) || []) as any[]);
   const options = useObserver(() => (request(record) as any[]).map((item) => <Option value={item.code}>{renderService(item)}</Option>));
   return (
     <Select record={record} {...otherProps}>
       {options}
+      {/* {options.map((item) => <Option value={item.code}>{renderService(item)}</Option>)} */}
     </Select>
   );
 }
@@ -108,12 +112,13 @@ export function IssueDiffAreaBase({
         <Form dataSet={issueDiffDataSet} className={classnames(styles.form)} {...bottomFormProps}>
           {bottomFormContent}
 
-          <div className={styles.compare}>
-            <Button loading={generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleSubmit}>生成预览信息</Button>
-            <Button disabled={!tableData || generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
-          </div>
         </Form>
+
       </PublishVersionSection>
+      <div className={styles.compare}>
+        <Button loading={generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleSubmit}>生成预览信息</Button>
+        <Button disabled={!tableData || generateBtnLoading} funcType={'raised' as any} color={'primary' as any} onClick={handleOpenPreview}>查看结果</Button>
+      </div>
     </div>
   );
 }

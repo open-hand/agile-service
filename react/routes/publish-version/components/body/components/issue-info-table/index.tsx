@@ -17,6 +17,7 @@ import { transformFilter } from '@/routes/Issue/stores/utils';
 import { publishVersionApi } from '@/api';
 import { useSize } from 'ahooks';
 import { IPublishVersionMenuInfoConfigProps } from '@/routes/publish-version';
+import { observer } from 'mobx-react-lite';
 import styles from './index.less';
 import IssueTypeSwitch from '../switch';
 import TagHistoryArea from './TagHistoryArea';
@@ -66,6 +67,7 @@ const IssueInfoTable: React.FC<IPublishVersionMenuInfoConfigProps> = ({
   }, [issueInfoTableDataSet, store.getCurrentData.id]);
   useEffect(() => {
     const issueTypeId = issueInfoTableDataSet.getState('issueTypeId');
+    console.log('issueInfoTableDataSet issueTypeId', issueTypeId);
     typeof (onLoadTableData) === 'function' ? onLoadTableData(issueTypeId) : !issueInfoBody && loadTableData(issueTypeId);
   }, [issueInfoTableDataSet, loadTableData, onLoadTableData, issueInfoTableDataSet.getState('issueTypeId')]);
   const renderBody = () => (
@@ -137,4 +139,4 @@ const IssueInfoTable: React.FC<IPublishVersionMenuInfoConfigProps> = ({
   );
 };
 
-export default IssueInfoTable;
+export default observer(IssueInfoTable);
