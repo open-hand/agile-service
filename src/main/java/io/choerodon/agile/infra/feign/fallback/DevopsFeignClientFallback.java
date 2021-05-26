@@ -1,9 +1,12 @@
 package io.choerodon.agile.infra.feign.fallback;
 
+import io.choerodon.agile.api.vo.AppServiceSimpleVO;
 import io.choerodon.agile.infra.feign.DevopsFeignClient;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author superlee
@@ -23,5 +26,11 @@ public class DevopsFeignClientFallback implements DevopsFeignClient {
 
     @Override
     public ResponseEntity<String> getIssueIdsBetweenTags(Long projectId, Long appServiceId, String from, String to) {
-        throw new CommonException("error.devops.getIssueIdsBetweenTags");    }
+        throw new CommonException("error.devops.getIssueIdsBetweenTags");
+    }
+
+    @Override
+    public ResponseEntity<String> listByProjectIdAndCode(Long organizationId, List<AppServiceSimpleVO> appServiceList) {
+        throw new CommonException("error.devops.listByProjectIdAndCode");
+    }
 }

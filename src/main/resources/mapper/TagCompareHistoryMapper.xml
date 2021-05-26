@@ -16,18 +16,7 @@
 
     <select id="selectLastCompareHistory" resultType="io.choerodon.agile.infra.dto.TagCompareHistoryDTO">
         SELECT
-            atch.id,
-            atch.publish_version_id,
-            atch.app_service_code,
-            atch.source,
-            atch.target,
-            atch.project_id,
-            atch.organization_id,
-            atch.object_version_number,
-            atch.created_by,
-            atch.creation_date,
-            atch.last_updated_by,
-            atch.last_update_date
+            atch.*
         FROM
             agile_tag_compare_history atch
         WHERE

@@ -1,12 +1,12 @@
 package io.choerodon.agile.infra.feign;
 
+import io.choerodon.agile.api.vo.AppServiceSimpleVO;
 import io.choerodon.agile.infra.feign.fallback.DevopsFeignClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 /**
@@ -34,5 +34,9 @@ public interface DevopsFeignClient {
                                                   @PathVariable(value = "app_service_id") Long appServiceId,
                                                   @RequestParam String from,
                                                   @RequestParam String to);
+
+    @PostMapping({"/v1/organizations/{organization_id}/list_by_project_id_and_code"})
+    ResponseEntity<String> listByProjectIdAndCode(@PathVariable(value = "organization_id") Long organizationId,
+                                                  @RequestBody List<AppServiceSimpleVO> appServiceList);
 
 }

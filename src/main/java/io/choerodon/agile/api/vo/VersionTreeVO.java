@@ -28,6 +28,8 @@ public class VersionTreeVO {
 
     private String appServiceCode;
 
+    private String appServiceName;
+
     private String tagName;
 
     private List<VersionTreeVO> children;
@@ -39,6 +41,14 @@ public class VersionTreeVO {
     private String tagAlias;
 
     private Boolean appService;
+
+    public String getAppServiceName() {
+        return appServiceName;
+    }
+
+    public void setAppServiceName(String appServiceName) {
+        this.appServiceName = appServiceName;
+    }
 
     public Boolean getAppService() {
         return appService;

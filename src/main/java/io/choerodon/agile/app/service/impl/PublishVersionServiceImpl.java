@@ -326,8 +326,27 @@ public class PublishVersionServiceImpl implements PublishVersionService {
                                               Long publishVersionId,
                                               List<PublishVersionVO> publishVersionList) {
         List<PublishVersionVO> result = new ArrayList<>();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         if (!ObjectUtils.isEmpty(publishVersionList)) {
-            publishVersionList.forEach(x -> result.add(create(projectId, x)));
+            publishVersionList.forEach(x -> {
+                PublishVersionVO vo = create(projectId, x);
+                result.add(vo);
+                Long thisPublishVersionId = vo.getId();
+                Long tagProjectId = x.getProjectId();
+                String appServiceCode = x.getServiceCode();
+                String tagName = x.getTagName();
+                if (!ObjectUtils.isEmpty(tagProjectId)
+                        && !ObjectUtils.isEmpty(appServiceCode)
+                        && !ObjectUtils.isEmpty(tagName)
+                        && !ObjectUtils.isEmpty(thisPublishVersionId)) {
+                    TagVO tag = new TagVO();
+                    tag.setProjectId(tagProjectId);
+                    tag.setAppServiceCode(appServiceCode);
+                    tag.setTagName(tagName);
+                    Set<TagVO> tags = new HashSet<>(Arrays.asList(tag));
+                    publishVersionTreeService.addTag(projectId, organizationId, thisPublishVersionId, tags);
+                }
+            });
         }
         if (publishVersionId != null && !result.isEmpty()) {
             VersionTreeVO vo = new VersionTreeVO();
