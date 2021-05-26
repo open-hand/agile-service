@@ -21,7 +21,11 @@ const FieldUser: React.FC<FieldUserProps> = ({
       initValue={fieldWithValue?.valueStr}
       submitTrigger={['blur', 'change']}
       editor={() => (
-        <SelectUser projectId={target.projectId} primitiveValue={false} />
+        <SelectUser
+          projectId={target.projectId}
+          primitiveValue={false}
+          extraOptions={fieldWithValue?.valueStr}
+        />
       )}
     >
       {fieldWithValue?.valueStr ? (

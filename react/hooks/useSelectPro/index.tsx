@@ -1,7 +1,7 @@
 import React, {
   useMemo, useRef, useCallback,
 } from 'react';
-import { debounce } from 'lodash';
+import { debounce, castArray, uniqBy } from 'lodash';
 import { Button, DataSet } from 'choerodon-ui/pro';
 import { SearchMatcher, SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { Renderer } from 'choerodon-ui/pro/lib/field/FormField';
@@ -34,6 +34,7 @@ export interface LoadConfig {
 
 export interface SelectConfig<T = {}> {
   data: T[]
+  extraOptions?: T | T[]
   hasNextPage?: boolean
   fetchNextPage?: () => void
   onSearch?: (param: string) => void
@@ -50,7 +51,8 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   const cacheRef = useRef<Map<any, T>>(new Map());
   const defaultRender = useCallback((item: T) => getValueByPath(item, config.textField), [config.textField]);
   const {
-    data,
+    data: baseData,
+    extraOptions,
     hasNextPage,
     fetchNextPage,
     onSearch,
@@ -59,6 +61,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     optionRenderer = defaultRender,
     paging = true,
   } = config;
+  const data = useMemo(() => uniqBy([...castArray(extraOptions ?? []), ...baseData], valueField), [baseData, extraOptions, valueField]);
   const renderer = useCallback(({ value, maxTagTextLength }) => {
     const item = cacheRef.current?.get(value);
     if (item) {
@@ -164,6 +167,9 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     options,
     optionRenderer: renderOption,
     renderer,
+    // @ts-ignore
+    valueField,
+    textField,
     onOption: ({ record }) => {
       if (record.get('loadMoreButton') === true) {
         return {

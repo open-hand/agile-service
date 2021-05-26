@@ -1,14 +1,18 @@
 /* eslint-disable no-param-reassign */
 import { observable, action, computed } from 'mobx';
+import { stores } from '@choerodon/master';
 import {
   IField, IIssueType, ILabel, Issue, User,
 } from '@/common/types';
 import {
   fieldApi, moveIssueApi, issueApi, userApi, statusTransformApi, IStatusCirculation, issueLabelApi,
 } from '@/api';
-import { find, findIndex } from 'lodash';
+import {
+  find, findIndex, uniq, flatten,
+} from 'lodash';
 import { initTargetIssue, getFinalFields } from './utils';
 
+const { AppState } = stores;
 export interface MoveMapItem {
   issue: Issue,
   lostFields: IField[]
@@ -159,7 +163,12 @@ class Store {
   @observable statusList = []
 
   @action async loadData(targetIssueTypes: IIssueType[], targetProjectId: string, targetProjectType: string) {
-    const [lostFields, issueDetails, issueFields, targetIssueFields, issueStatus, labelList] = await Promise.all([
+    const needLoadUserIds = uniq(flatten(this.issues.map((issue) => ([issue.assigneeId, issue.reporterId, issue.mainResponsible?.id])))).filter(Boolean);
+    console.log(needLoadUserIds);
+    const [users, lostFields, issueDetails, issueFields, targetIssueFields, issueStatus, labelList] = await Promise.all([
+      Promise.all(
+        needLoadUserIds.map((userId) => userApi.project(targetProjectId).getById(userId as string).then((res: any) => res.list[0])),
+      ),
       Promise.all(
         this.issueMapValues.map(({ issue, target }) => moveIssueApi.getFieldsLosed(targetProjectId, issue.issueId, target.issueTypeId)),
       ),
@@ -185,7 +194,9 @@ class Store {
       ),
       issueLabelApi.loads(targetProjectId),
     ]);
-    // const needSetUserMap=new Map();
+    const existUserMap = new Map<string, User>(
+      users.filter(Boolean).map((user) => ([user.id, user])),
+    );
     issueDetails.forEach((issueDetail, index) => {
       const source = this.issueMap.get(issueDetail.issueId)!;
       source.issue = issueDetail;
@@ -205,9 +216,9 @@ class Store {
       source.target.fields = getFinalFields({ fields: targetFields, typeCode: targetIssueTypes[issueTypeIndex].typeCode, targetProjectType });
       // 开始设置一些默认值
       this.setDefaultStatus(statusList, issueDetail, source.target);
+      this.setDefaultUserFields(targetProjectId, issueDetail, existUserMap, source.target);
       // needSetUserMap.set()
     });
-    // await this.setDefaultUserFields(targetProjectId, issueDetail, target);
   }
 
   @action setDefaultStatus(statusList: IStatusCirculation[], issueDetail: Issue, target: MoveTarget) {
@@ -220,25 +231,22 @@ class Store {
     }
   }
 
-  @action async setDefaultUserFields(targetProjectId: string, issueDetail: Issue, target: MoveTarget) {
-    // 判断是否有相同状态
-    const [assignee, reporter, mainResponsible] = await Promise.all([
-      issueDetail.assigneeId && userApi.project(targetProjectId).getById(issueDetail.assigneeId),
-      issueDetail.reporterId && userApi.project(targetProjectId).getById(issueDetail.reporterId),
-      issueDetail.mainResponsible?.id && userApi.project(targetProjectId).getById(issueDetail.mainResponsible?.id),
-    ]);
-
-    if (assignee) {
+  // 为member类型的字段设置值
+  @action setDefaultUserFields(targetProjectId: string, issueDetail: Issue, existUserMap: Map<string, User>, target: MoveTarget) {
+    if (issueDetail.assigneeId && existUserMap.has(issueDetail.assigneeId)) {
+      const assignee = existUserMap.get(issueDetail.assigneeId)!;
       this.updateFieldValue(assignee.id, assignee, 'assignee', target);
     }
-    if (reporter) {
+    if (issueDetail.reporterId && existUserMap.has(issueDetail.reporterId)) {
+      const reporter = existUserMap.get(issueDetail.reporterId)!;
       this.updateFieldValue(reporter.id, reporter, 'reporter', target);
     } else {
       // 目标项目没有原项目的报告人，就设置为自己
-      const self = await userApi.getSelf();
+      const self = AppState.userInfo;
       this.updateFieldValue(self.id, self, 'reporter', target);
     }
-    if (mainResponsible) {
+    if (issueDetail.mainResponsibleUser?.id && existUserMap.has(issueDetail.mainResponsibleUser?.id)) {
+      const mainResponsible = existUserMap.get(issueDetail.mainResponsibleUser?.id)!;
       this.updateFieldValue(mainResponsible.id, mainResponsible, 'mainResponsible', target);
     }
   }

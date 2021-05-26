@@ -24,6 +24,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
   } = useProjectUsers({ param: text }, queryOptions);
   const [props] = useSelect({
     data,
+    extraOptions,
     textField: 'realName',
     valueField: 'id',
     hasNextPage,
