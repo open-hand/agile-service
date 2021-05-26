@@ -23,7 +23,7 @@ const SelectComponent: React.FC<Props> = forwardRef(({
     name: 'component',
     textField: 'name',
     valueField: valueField || 'componentId',
-    request: ({ page, filter }) => componentApi.loadAllComponents(filter, projectId, page, 10),
+    request: ({ page, filter }) => componentApi.loadAllComponents(filter, projectId, page, 50),
     middleWare: (components) => {
       // @ts-ignore
       let data = components || [];

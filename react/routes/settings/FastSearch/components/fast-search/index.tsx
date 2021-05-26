@@ -79,7 +79,8 @@ const FastSearch: React.FC<FastSearchProps> = ({
       },
       { name: 'name', bind: 'attribute.name' },
       { name: 'fieldCode', type: 'string' as any, bind: 'attribute.fieldCode' },
-      { name: 'isCustomField', type: 'boolean' as any, bind: 'attribute.id' },
+      { name: 'id', bind: 'attribute.id' },
+      // { name: 'isCustomField', bind: 'attribute.id' },
       { name: 'fieldType', type: 'string' as any, bind: 'attribute.fieldType' },
       { name: 'fieldOptions', bind: 'attribute.fieldOptions', ignore: 'always' as any },
       {

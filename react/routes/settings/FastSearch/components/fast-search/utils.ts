@@ -135,7 +135,6 @@ interface FastFieldBaseProps {
  */
 export function transformFieldToRenderProps({ fieldCode, ...otherProps }: FastFieldBaseProps, omitProps: string[] = ['value']): IChosenFieldField {
   let value: any = otherProps.valueBindValue || otherProps.value;
-  console.log('other', otherProps);
   const baseProps = {
     name: 'value',
     code: FieldTransformCodeRenderFieldObj[fieldCode as keyof typeof FieldTransformCodeRenderFieldObj] || fieldCode,
