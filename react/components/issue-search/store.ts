@@ -126,7 +126,7 @@ class IssueSearchStore {
       .filter((f) => f.defaultShow)
       .forEach((f) => {
         if (!chosenFields.has(f.code)) {
-          chosenFields.set(f.code, observable({ ...f, value: undefined }));
+          chosenFields.set(f.code, observable({ ...f, value: getEmptyValue(f) }));
         }
       });
     this.chosenFields = chosenFields;
@@ -140,7 +140,7 @@ class IssueSearchStore {
   @action handleChosenFieldChange = (select: boolean, field: IField) => {
     const { code } = field;
     if (select) {
-      this.chosenFields.set(code, observable({ ...field, value: getEmptyValue(field.fieldType) }));
+      this.chosenFields.set(code, observable({ ...field, value: getEmptyValue(field) }));
     } else {
       const { value } = this.chosenFields.get(code) as IChosenField;
       this.chosenFields.delete(code);
@@ -165,8 +165,10 @@ class IssueSearchStore {
     return allField;
   }
 
-  @action setFieldFilter = (code: string, value: any) => {
+  @action setFieldFilter = (code: string, v: any) => {
     const field = this.chosenFields.get(code);
+    // 这里如果select清空，那么置为空数据
+    const value = v ?? getEmptyValue(field);
     // 说明这时候没有被选择，那么要自动选上
     if (!field) {
       const unSelectField = find([...this.fields, ...this.getSystemFields()], { code });
@@ -184,7 +186,7 @@ class IssueSearchStore {
 
   @action chooseAll(filteredFields: IField[]) {
     filteredFields.forEach((field) => {
-      this.chosenFields.set(field.code, observable({ ...field, value: undefined }));
+      this.chosenFields.set(field.code, observable({ ...field, value: getEmptyValue(field) }));
     });
   }
 
@@ -206,13 +208,14 @@ class IssueSearchStore {
 
   @action
   clearAllFilter() {
-    for (const [, field] of this.chosenFields) {
-      if (field.archive) {
-        this.handleChosenFieldChange(false, field as IField);
-      } else if (field.value) {
-        field.value = undefined;
-      }
-    }
+    this.chosenFields.clear();
+    this.getSystemFields()
+      .filter((f) => f.defaultShow)
+      .forEach((f) => {
+        if (!this.chosenFields.has(f.code)) {
+          this.chosenFields.set(f.code, observable({ ...f, value: getEmptyValue(f) }));
+        }
+      });
   }
 
   getFieldCodeById(id: string) {
