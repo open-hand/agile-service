@@ -12,6 +12,8 @@ import classNames from 'classnames';
 import DependencyTreeBase, { TreeWithLineNode as DependencyTreeNode } from '@/components/tree-with-line';
 import { openImportPomModal } from '@/components/import-pom';
 import { IPublishVersionLinkVersionNodeOperationProps } from '@/routes/publish-version';
+import { omit, pick } from 'lodash';
+import ProjectTag from '@/components/tag/project-tag';
 import { openLinkPublishVersionModal } from './LinkPublishVersionModal';
 import { openLinkAppServiceTagModal } from './LinkAppServiceTagModal';
 import { usePublishVersionContext } from '../../../../stores';
@@ -99,7 +101,6 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
   const { store, preview } = usePublishVersionContext();
   const detailData = store.getCurrentData;
   const dependencyList = store.getDependencyList;
-  console.log('dependencyList', store.getDependencyList);
   function handleDelete(v: IPublishVersionTreeNode) {
     let versionName = v.versionAlias || v.name;
     if (v.type === 'tag') {
@@ -121,7 +122,7 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
         if (typeof (nodeOperationProps?.onDelete) === 'function') {
           await nodeOperationProps.onDelete(v);
         } else {
-          await (v.type === 'tag' ? publishVersionApi.dependencyTreeDelTag(detailData.id, [v as any])
+          await (v.type === 'tag' ? publishVersionApi.dependencyTreeDelTag(detailData.id, [omit(v, 'projectObject') as any])
             : publishVersionApi.dependencyTreeDel({
               id: detailData.id,
               type: 'publish',
@@ -149,13 +150,13 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
             </span>
           )}
           {appService ? <span>{`${appService.name}（${appService.code}）`}</span> : <span>{item.name}</span>}
-
         </span>
         {item.tagName && (
           <span className={styles.tag}>
             {item.tagName}
           </span>
         )}
+        {item.projectObject ? <ProjectTag data={item.projectObject} style={{ marginLeft: '.1rem' }} showText /> : null}
       </span>
     );
 
@@ -185,9 +186,9 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
                         }) : openEditLinkAppServiceModal({
                           data: item as any,
                           handleOk: async (newData) => {
-                            console.log('newData....', newData);
                             typeof (nodeOperationProps?.onEdit) === 'function' ? await nodeOperationProps?.onEdit(newData, item)
                               : await publishVersionApi.update(item.id, newData);
+                            store.loadData();
                             return true;
                           },
                         });

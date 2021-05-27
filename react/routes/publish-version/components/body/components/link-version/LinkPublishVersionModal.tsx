@@ -63,7 +63,11 @@ const LinkPublishVersionModal: React.FC<{ modal?: IModalProps } & ILinkServicePr
   }, [handleSubmit, modal]);
   return (
     <Form dataSet={ds}>
-      <Select name="version" />
+      <Select
+        name="version"
+        searchable
+        searchMatcher={({ record, text }) => String(record.get('name')).toLowerCase().indexOf(String(text).toLowerCase()) !== -1}
+      />
     </Form>
   );
 };

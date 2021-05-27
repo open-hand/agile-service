@@ -1,7 +1,7 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { set, cloneDeep } from 'lodash';
+import { set, cloneDeep, pick } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import {
   devOpsApi,
@@ -51,8 +51,22 @@ class PublishDetailStore implements IPublishVersionBaseDetailStore<IPublishVersi
     return this.getAppServiceList.find((service) => service.code === code);
   }
 
+  processDependency(item: any) {
+    let newItem = item;
+    if (!item.appService) {
+      const tagData = item.children && item.children[0] ? pick(item.children[0], ['tagAlias', 'appServiceCode', 'appServiceName', 'projectId', 'tagName']) : undefined;
+      newItem = {
+        ...item, children: [], ...tagData,
+      };
+    }
+    if (newItem.children && newItem.children.length > 0) {
+      set(newItem, 'children', newItem.children.map((i:any) => this.processDependency(i)));
+    }
+    return newItem;
+  }
+
   @computed get getDependencyList() {
-    return this.dependencyList;
+    return this.dependencyList.map((item) => this.processDependency(item));
   }
 
   @computed get getCurrentMenu() {

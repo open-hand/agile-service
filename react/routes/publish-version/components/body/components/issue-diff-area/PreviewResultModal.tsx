@@ -30,10 +30,11 @@ const { Column } = Table;
 interface PreviewResultModalProps {
   tableData: any[]
   handleOk?: () => any
+  applyType?:string
   onChangeIssueTag: (action: 'add' | 'update') => void
 }
 const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps> = ({
-  modal, tableData, handleOk,
+  modal, tableData, handleOk, applyType,
 }) => {
   const [detailProps] = useDetail();
 
@@ -87,7 +88,8 @@ const PreviewResult: React.FC<{ modal?: IModalProps } & PreviewResultModalProps>
     <div className={styles.wrap}>
       <IssueSearch
         store={issueSearchStore}
-        onClear={() => { }}
+        applyType={applyType}
+        onClear={() => { ds.loadData(issuesFilter(tableData, issueSearchStore.getCustomFieldFilters())); }}
         onChange={() => {
           console.log('change', issueSearchStore.getCustomFieldFilters());
           ds.loadData(issuesFilter(tableData, issueSearchStore.getCustomFieldFilters()));
