@@ -3,8 +3,8 @@ import React from 'react';
 import {
   map, get, find, intersection,
 } from 'lodash';
-import { Tooltip, Tag } from 'choerodon-ui';
-import { CheckBox } from 'choerodon-ui/pro';
+import { Tag } from 'choerodon-ui';
+import { CheckBox, Tooltip } from 'choerodon-ui/pro';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
@@ -52,7 +52,7 @@ export const expandColumn = {
   render: () => null,
 };
 export const getCustomColumn = (field) => (field && {
-  title: field.title,
+  title: <Tooltip title={field.title}>{field.title}</Tooltip>,
   dataIndex: field.code,
   render: ({ rowData, dataIndex, rowIndex }) => {
     const { fieldType, code } = field;
@@ -128,7 +128,7 @@ function renderEpicOrFeature({ rowData, dataIndex: fieldName }) {
 }
 const getColumnsMap = ({ onSummaryClick }) => new Map([
   ['summary', {
-    title: '概要',
+    title: <Tooltip title="概要">概要</Tooltip>,
     dataIndex: 'summary',
     width: 400,
     fixed: true,
@@ -145,14 +145,14 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     ),
   }],
   ['issueNum', {
-    title: '编号',
+    title: <Tooltip title="编号">编号</Tooltip>,
     dataIndex: 'issueNum',
     width: 120,
     className: 'c7n-agile-table-cell',
     sortable: true,
   }],
   ['priority', {
-    title: '优先级',
+    title: <Tooltip title="优先级">优先级</Tooltip>,
     dataIndex: 'priorityId',
     className: 'c7n-agile-table-cell',
     sortable: true,
@@ -166,7 +166,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     ),
   }],
   ['assignee', {
-    title: '经办人',
+    title: <Tooltip title="经办人">经办人</Tooltip>,
     dataIndex: 'assigneeId',
     sortable: true,
     render: ({ rowData }) => (
@@ -188,7 +188,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     ),
   }],
   ['createUser', {
-    title: '创建人',
+    title: <Tooltip title="创建人">创建人</Tooltip>,
     dataIndex: 'createUser',
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
@@ -203,7 +203,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     ),
   }],
   ['updateUser', {
-    title: '更新人',
+    title: <Tooltip title="更新人">更新人</Tooltip>,
     dataIndex: 'updateUser',
     render: ({ rowData }) => (
       <div style={{ display: 'inline-flex', height: 40 }}>
@@ -218,7 +218,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     ),
   }],
   ['status', {
-    title: '状态',
+    title: <Tooltip title="状态">状态</Tooltip>,
     dataIndex: 'statusId',
     sortable: true,
     render: ({ rowData }) => (
@@ -237,7 +237,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     ),
   }],
   ['reporter', {
-    title: '报告人',
+    title: <Tooltip title="报告人">报告人</Tooltip>,
     dataIndex: 'reporterId',
     sortable: true,
     render: ({ rowData }) => (
@@ -257,92 +257,92 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     ),
   }],
   ['lastUpdateDate', {
-    title: '最近更新时间',
+    title: <Tooltip title="最近更新时间">最近更新时间</Tooltip>,
     width: 170,
     dataIndex: 'lastUpdateDate',
     sortable: true,
   }],
   ['creationDate', {
-    title: '创建时间',
+    title: <Tooltip title="创建时间">创建时间</Tooltip>,
     width: 170,
     dataIndex: 'creationDate',
   }],
   ['estimatedStartTime', {
-    title: '预计开始时间',
+    title: <Tooltip title="预计开始时间">预计开始时间</Tooltip>,
     width: 170,
     dataIndex: 'estimatedStartTime',
   }],
   ['estimatedEndTime', {
-    title: '预计结束时间',
+    title: <Tooltip title="预计结束时间">预计结束时间</Tooltip>,
     width: 170,
     dataIndex: 'estimatedEndTime',
   }],
   ['remainingTime', {
-    title: '剩余预估时间',
+    title: <Tooltip title="剩余预估时间">剩余预估时间</Tooltip>,
     width: 170,
     dataIndex: 'remainingTime',
   }],
   ['spentWorkTime', {
-    title: '已耗费时间',
+    title: <Tooltip title="已耗费时间">已耗费时间</Tooltip>,
     width: 170,
     dataIndex: 'spentWorkTime',
   }],
   ['allEstimateTime', {
-    title: '总预估时间',
+    title: <Tooltip title="总预估时间">总预估时间</Tooltip>,
     width: 170,
     dataIndex: 'allEstimateTime',
   }],
   ['label', {
-    title: '标签',
+    title: <Tooltip title="标签">标签</Tooltip>,
     dataIndex: 'label',
     render: renderTag('labelIssueRelVOS', 'labelName'),
   }],
   ['component', {
-    title: '模块',
+    title: <Tooltip title="模块">模块</Tooltip>,
     dataIndex: 'component',
     render: renderTag('issueComponentBriefVOS', 'name'),
   }],
   ['fixVersion', {
-    title: '修复的版本',
+    title: <Tooltip title="修复的版本">修复的版本</Tooltip>,
     dataIndex: 'fixVersion',
     render: renderTag('fixVersionIssueRelVOS', 'name'),
   }],
   ['influenceVersion', {
-    title: '影响的版本',
+    title: <Tooltip title="影响的版本">影响的版本</Tooltip>,
     dataIndex: 'influenceVersion',
     render: renderTag('influenceVersionIssueRelVOS', 'name'),
   }],
   ['sprint', {
-    title: '冲刺',
+    title: <Tooltip title="冲刺">冲刺</Tooltip>,
     dataIndex: 'sprint',
     render: renderTag('issueSprintVOS', 'sprintName'),
   }],
   ['storyPoints', {
-    title: '故事点',
+    title: <Tooltip title="故事点">故事点</Tooltip>,
     dataIndex: 'storyPoints',
     render: ({ rowData, dataIndex }) => rowData[dataIndex] ?? '-',
   }],
   ['feature', {
-    title: '特性',
+    title: <Tooltip title="特性">特性</Tooltip>,
     dataIndex: 'feature',
     render: renderEpicOrFeature,
   }],
   ['epic', {
-    title: '史诗',
+    title: <Tooltip title="史诗">史诗</Tooltip>,
     dataIndex: 'epic',
     render: renderEpicOrFeature,
   }],
   ['mainResponsibleUser', {
-    title: '负责人',
+    title: <Tooltip title="负责人">负责人</Tooltip>,
     dataIndex: 'mainResponsibleUser',
     render: ({ rowData, dataIndex }) => rowData[dataIndex] && <UserTag data={rowData[dataIndex]} />,
   }],
   ['environmentName', {
-    title: '环境',
+    title: <Tooltip title="环境">环境</Tooltip>,
     dataIndex: 'environmentName',
   }],
   ['tags', {
-    title: 'Tag',
+    title: <Tooltip title="Tag">Tag</Tooltip>,
     dataIndex: 'tags',
     render: ({ rowData, dataIndex }) => {
       const tagShowText = rowData[dataIndex] && rowData[dataIndex].map((tag: any) => `${tag.appServiceCode}:${tag.tagName}`).join('、');
