@@ -217,7 +217,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService {
             Set<Long> olderFieldIds = fieldValueDTOS.stream().map(FieldValueDTO::getFieldId).collect(Collectors.toSet());
             olderFieldIds.removeAll(fieldIds);
             if (!CollectionUtils.isEmpty(olderFieldIds)) {
-                List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectByIds(olderFieldIds.stream().map(v -> v.toString()).collect(Collectors.joining(",")));
+                List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectByIds(olderFieldIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
                 return modelMapper.map(objectSchemeFieldDTOS, new TypeToken<List<ObjectSchemeFieldVO>>() {
                 }.getType());
             }

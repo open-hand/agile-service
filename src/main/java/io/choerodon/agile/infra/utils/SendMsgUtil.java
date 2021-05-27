@@ -58,6 +58,7 @@ public class SendMsgUtil {
     private static final String FEATURE_URL_TEMPLATE1 = "#/agile/feature?type=project&id=";
     private static final String FEATURE_URL_TEMPLATE2 = "&name=";
     private static final String FEATURE_URL_TEMPLATE4 = "&organizationId=";
+    private static final String ISSUE_SOLVE = "ISSUESOLVE";
     @Autowired
     private SiteMsgUtil siteMsgUtil;
 
@@ -80,7 +81,7 @@ public class SendMsgUtil {
 
     private String convertProjectName(ProjectVO projectVO) {
         String projectName = projectVO.getName();
-        return projectName.replaceAll(" ", "%20");
+        return projectName.replace(" ", "%20");
     }
 
     @Async
@@ -184,7 +185,7 @@ public class SendMsgUtil {
                                        Long operatorId) {
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, result.getStatusId()).getCompleted();
         if (fieldList.contains(STATUS_ID) && completed != null && completed && result.getAssigneeId() != null && SchemeApplyType.AGILE.equals(result.getApplyType())) {
-            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUESOLVE", result);
+            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SOLVE, result);
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             String projectName = convertProjectName(projectVO);
             StringBuilder url = new StringBuilder();
@@ -207,7 +208,7 @@ public class SendMsgUtil {
         // 发送消息
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, issueMoveVO.getStatusId()).getCompleted();
         if (completed != null && completed && issueDTO.getAssigneeId() != null && SchemeApplyType.AGILE.equals(issueDTO.getApplyType())) {
-            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUESOLVE", modelMapper.map(issueDTO, IssueVO.class));
+            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SOLVE, modelMapper.map(issueDTO, IssueVO.class));
             ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             StringBuilder url = new StringBuilder();
             String projectName = convertProjectName(projectVO);
@@ -312,7 +313,7 @@ public class SendMsgUtil {
                 || !SchemeApplyType.AGILE.equals(result.getApplyType())) {
             return null;
         }
-        List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUESOLVE", result);
+        List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SOLVE, result);
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         StringBuilder url = new StringBuilder();
         if (SUB_TASK.equals(result.getTypeCode())) {

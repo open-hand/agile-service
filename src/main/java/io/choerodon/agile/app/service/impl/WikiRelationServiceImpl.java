@@ -11,8 +11,6 @@ import io.choerodon.agile.infra.mapper.WikiRelationMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,8 +32,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class WikiRelationServiceImpl implements WikiRelationService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(WikiRelationServiceImpl.class);
 
     @Autowired
     private WikiRelationMapper wikiRelationMapper;

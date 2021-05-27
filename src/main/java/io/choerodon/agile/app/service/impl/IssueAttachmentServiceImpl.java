@@ -48,10 +48,6 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     private static final String BACKETNAME = "agile-service";
 
     @Autowired
-    public IssueAttachmentServiceImpl() {
-    }
-
-    @Autowired
     private IssueAttachmentMapper issueAttachmentMapper;
     @Autowired
     private IssueMapper issueMapper;

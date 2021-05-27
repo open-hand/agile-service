@@ -46,6 +46,12 @@ public class PomServiceImpl implements PomService {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         documentBuilderFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        documentBuilderFactory.setXIncludeAware(false);
+        documentBuilderFactory.setExpandEntityReferences(false);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         Document document = documentBuilder.parse(inputStream);
         String artifactId = getValueByTagName(document, ARTIFACT_ID);
@@ -162,18 +168,5 @@ public class PomServiceImpl implements PomService {
             throw new CommonException("error.illegal.pom.missing." + tagName);
         }
         return pomArtifactIdNodeList.item(0).getTextContent();
-    }
-
-    private Long fetchProjectId(String serviceCode, List<AppServiceRepVO> appServiceRepList) {
-        if (ObjectUtils.isEmpty(appServiceRepList)) {
-            return null;
-        }
-        for (AppServiceRepVO vo : appServiceRepList) {
-            String code = vo.getCode();
-            if (serviceCode.equals(code)) {
-                return vo.getProjectId();
-            }
-        }
-        return null;
     }
 }

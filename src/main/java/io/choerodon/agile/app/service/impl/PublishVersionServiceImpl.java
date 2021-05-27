@@ -52,6 +52,8 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 @Transactional(rollbackFor = Exception.class)
 public class PublishVersionServiceImpl implements PublishVersionService {
 
+    private static final  String ISSUE_IDS = "issueIds";
+
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
@@ -251,10 +253,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
 
     @Override
     public void delete(Long projectId, Long publishVersionId) {
-        PublishVersionDTO record = new PublishVersionDTO();
-        record.setId(publishVersionId);
-        record.setProjectId(projectId);
-        if (publishVersionMapper.selectOne(record) == null) {
+        PublishVersionDTO publishVersionDTO = new PublishVersionDTO();
+        publishVersionDTO.setId(publishVersionId);
+        publishVersionDTO.setProjectId(projectId);
+        if (publishVersionMapper.selectOne(publishVersionDTO) == null) {
             throw new CommonException(PUBLISH_VERSION_NOT_EXIST_EXCEPTION);
         }
         publishVersionTreeClosureMapper.deleteAssociatedData(publishVersionId, projectId, ConvertUtil.getOrganizationId(projectId));
@@ -644,7 +646,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             searchArgs.put("tree", false);
             Map<String, Object> otherArgs = new LinkedHashMap<>();
             searchVO.setOtherArgs(otherArgs);
-            otherArgs.put("issueIds", new ArrayList<>(issueIds));
+            otherArgs.put(ISSUE_IDS, new ArrayList<>(issueIds));
             PageRequest pageRequest = new PageRequest(1, 0);
             Sort.Order order = new Sort.Order(Sort.Direction.DESC, "issueNum");
             Sort sort = new Sort(order);
@@ -756,7 +758,7 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             otherArgs = new LinkedHashMap<>();
             result.setOtherArgs(otherArgs);
         }
-        otherArgs.put("issueIds", new ArrayList<>(issueIds));
+        otherArgs.put(ISSUE_IDS, new ArrayList<>(issueIds));
         return result;
     }
 
@@ -904,10 +906,10 @@ public class PublishVersionServiceImpl implements PublishVersionService {
             otherArgs = new HashMap<>();
             searchVO.setOtherArgs(otherArgs);
         }
-        List<String> issueIdList = (List<String>) otherArgs.get("issueIds");
+        List<String> issueIdList = (List<String>) otherArgs.get(ISSUE_IDS);
         if (issueIdList == null) {
             issueIdList = new ArrayList<>();
-            otherArgs.put("issueIds", issueIdList);
+            otherArgs.put(ISSUE_IDS, issueIdList);
         }
         for (Long issueId : issueIds) {
             issueIdList.add(issueId + "");

@@ -91,16 +91,6 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
         return redisTemplate.opsForValue();
     }
 
-//    @Bean
-//    public RedisCacheManager cacheManager(RedisTemplate redisTemplate) {
-//        RedisCacheManager redisCacheManager = new RedisCacheManager(redisTemplate);
-//        redisCacheManager.setTransactionAware(true);
-//        redisCacheManager.setLoadRemoteCachesOnStartup(true);
-//        redisCacheManager.setUsePrefix(true);
-//        redisCacheManager.setDefaultExpiration(86400);
-//        return redisCacheManager;
-//    }
-
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()

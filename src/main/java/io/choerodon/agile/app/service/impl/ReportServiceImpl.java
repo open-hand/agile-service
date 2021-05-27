@@ -51,6 +51,8 @@ import java.util.stream.Collectors;
 @Service
 public class ReportServiceImpl implements ReportService {
 
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
+
     @Autowired
     private SprintMapper sprintMapper;
     @Autowired
@@ -283,7 +285,7 @@ public class ReportServiceImpl implements ReportService {
 
     private JSONObject handleSameDay(List<ReportIssueConvertDTO> reportIssueConvertDTOList) {
         JSONObject jsonObject = new JSONObject();
-        DateFormat bf = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat bf = new SimpleDateFormat(DATE_FORMAT);
         TreeMap<String, BigDecimal> report = new TreeMap<>();
         //处理同一天
         reportIssueConvertDTOList.forEach(reportIssueConvertDTO -> {
@@ -346,7 +348,7 @@ public class ReportServiceImpl implements ReportService {
                 Objects.equals(columnChangeVO.getColumnFrom(), cumulativeFlowDiagramVO.getColumnId().toString())
                         || Objects.equals(columnChangeVO.getColumnTo(), cumulativeFlowDiagramVO.getColumnId().toString())).collect(Collectors.toList());
         if (columnChange != null && !columnChange.isEmpty()) {
-            DateFormat bf = new SimpleDateFormat("yyyy-MM-dd");
+            DateFormat bf = new SimpleDateFormat(DATE_FORMAT);
             TreeMap<String, Integer> report = handleColumnCoordinateReport(columnChange, startDate, endDate, cumulativeFlowDiagramVO, bf);
             report.forEach((k, v) -> {
                 CoordinateVO coordinateVO = new CoordinateVO();
@@ -1438,12 +1440,12 @@ public class ReportServiceImpl implements ReportService {
     public IssueCountVO selectBugBysprint(Long projectId, Long sprintId) {
         List<ReportIssueConvertDTO> reportIssueConvertDTOList = queryBugCount(projectId, sprintId);
         IssueCountVO issueCount = new IssueCountVO();
-        DateFormat bf = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat bf = new SimpleDateFormat(DATE_FORMAT);
         // 新增bug统计
         issueCount.setCreatedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf,
                 bug -> StringUtils.equals(bug.getType(), START_SPRINT)
                         || bug.getStatistical() && StringUtils.equalsAny(bug.getType(),
-                 "endSprint", "addDuringSprint")));
+                 END_SPRINT, "addDuringSprint")));
         // 解决bug统计
         issueCount.setCompletedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf, bug -> {
             if (Objects.equals(bug.getType(), START_SPRINT) && !bug.getStatistical()) {

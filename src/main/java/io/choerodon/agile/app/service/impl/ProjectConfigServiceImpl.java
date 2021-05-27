@@ -668,7 +668,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void checkDeleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId) {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);

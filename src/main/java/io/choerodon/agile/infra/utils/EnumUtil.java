@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
  */
 public class EnumUtil {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(EnumUtil.class);
+    private static final  Logger LOGGER = LoggerFactory.getLogger(EnumUtil.class);
 
     private EnumUtil(){
     }

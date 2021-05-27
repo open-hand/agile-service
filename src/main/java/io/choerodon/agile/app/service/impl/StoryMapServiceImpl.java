@@ -199,7 +199,7 @@ public class StoryMapServiceImpl implements StoryMapService {
             moveIssueVO.setRankIndex(false);
             Long outIssueId = sprintMapper.queryOutIssueId(projectId, sprintId);
             moveIssueVO.setOutsetIssueId(ObjectUtils.isEmpty(outIssueId) ? 0L : outIssueId);
-            moveIssueVO.setBefore(ObjectUtils.isEmpty(outIssueId) ? true : false);
+            moveIssueVO.setBefore(ObjectUtils.isEmpty(outIssueId));
             moveIssueVO.setRankIndex(false);
             issueService.batchIssueToSprint(projectId, sprintId, moveIssueVO);
         }

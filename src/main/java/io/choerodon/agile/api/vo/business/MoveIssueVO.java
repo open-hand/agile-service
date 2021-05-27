@@ -28,8 +28,6 @@ public class MoveIssueVO {
     private String statusCategoryCode;
     @Encrypt(ignoreValue = {"0"})
     private Long currentPiId;
-    public MoveIssueVO() {
-    }
 
     public void setUpdateStatusId(Long updateStatusId) {
         this.updateStatusId = updateStatusId;

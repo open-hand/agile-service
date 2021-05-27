@@ -3,7 +3,6 @@ package io.choerodon.agile.infra.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.choerodon.agile.infra.annotation.Update;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang.ArrayUtils;
@@ -61,7 +60,7 @@ public class VerifyUpdateUtil {
     }
 
     private Boolean handleFieldType(Field field, Object objectUpdate, Object v, Boolean flag) throws
-            IllegalAccessException, ParseException, ClassNotFoundException, InstantiationException, JsonProcessingException {
+            IllegalAccessException, ParseException, ClassNotFoundException, InstantiationException {
         Class<?> type = field.getType();
         if (type == String.class) {
             field.set(objectUpdate, v);
@@ -130,7 +129,7 @@ public class VerifyUpdateUtil {
                 field.set(objectUpdate, JSON.parseArray(json, forName));
             }
         } else {
-            JSONArray jsonArray = JSONObject.parseArray(JSON.toJSONString(v));
+            JSONArray jsonArray = JSON.parseArray(JSON.toJSONString(v));
             List list = new ArrayList();
             for (Object objValue : jsonArray) {
                 JSONObject jsonObject = JSON.parseObject(objValue.toString());
