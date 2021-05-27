@@ -4,7 +4,7 @@ import {
   isEmpty, isEqual, pick, pickBy, isUndefined,
 } from 'lodash';
 
-export const getEmptyValue = (fieldType: string) => null;
+export const getEmptyValue = (field: any) => (field.defaultShow ? undefined : null);
 
 export const isFilterSame = (obj: { [key: string]: any }, obj2: { [key: string]: any }): boolean => {
   // 过滤掉 [] null '' 那些不起作用的属性
