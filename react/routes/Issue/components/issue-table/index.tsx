@@ -56,6 +56,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
   });
 
   const visibleColumnCodes = useMemo(() => (listLayoutColumns.filter((c) => c.display).map((c) => c.columnCode)), [listLayoutColumns]);
+
   const [theme] = useTheme();
   const columns = useMemo(() => getTableColumns({
     listLayoutColumns, fields, onSummaryClick, handleColumnResize: () => { },
@@ -64,6 +65,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
     const heightFromData = tableProps.data.length * ROW_HEIGHT + HEADER_HEIGHT;
     return Math.max(Math.min(heightFromData, availableHeight - FOOTER_HEIGHT), MIN_HEIGHT);
   });
+
   return (
     <>
       <div style={{
@@ -75,9 +77,9 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
         <ColumnManage
           value={visibleColumnCodes}
           options={columns.map(((c) => ({
-            code: c.dataIndex,
+            code: c.code,
             title: c.title,
-            disabled: c.dataIndex === 'summary',
+            disabled: c.code === 'summary',
           })))}
         />
       </div>
