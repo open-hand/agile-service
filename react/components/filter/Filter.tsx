@@ -64,14 +64,16 @@ const Filter: React.FC<FilterProps> = ({
   const filterRef = useRef<HTMLDivElement | null>(null);
 
   const handleFilterChange = useCallback((code: string, v: any) => {
+    // 保证默认显示的字段在值清空时不会出现保存筛选
+    const value = alwaysRenderFields.includes(code) ? v ?? undefined : v ?? null;
     const clonedFilter = { ...filter };
-    if (v === undefined) {
+    if (value === undefined) {
       delete clonedFilter[code];
     } else {
-      clonedFilter[code] = v;
+      clonedFilter[code] = value;
     }
     onFilterChange(clonedFilter);
-  }, [filter, onFilterChange]);
+  }, [alwaysRenderFields, filter, onFilterChange]);
   const handleSelect = useCallback((select: string[]) => {
     const newValue = uniq([...selected, ...select]);
     onSelectChange(newValue);
