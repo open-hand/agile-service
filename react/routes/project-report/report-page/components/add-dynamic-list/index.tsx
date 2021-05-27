@@ -97,6 +97,7 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           key: String(Math.random()),
           title: data.title,
           type: 'dynamic_list',
+          collapse: false,
           colList: data.visibleColumns,
           searchVO,
         };

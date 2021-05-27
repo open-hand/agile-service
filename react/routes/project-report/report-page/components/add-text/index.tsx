@@ -33,6 +33,7 @@ const AddText: React.FC<Props> = ({ innerRef, data: editData }) => {
         key: String(Math.random()),
         title: data.title,
         type: 'text',
+        collapse: false,
         content: text,
       };
       return block;

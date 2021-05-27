@@ -1,5 +1,6 @@
+/* eslint-disable no-param-reassign */
 import {
-  observable, action,
+  observable, action, computed,
 } from 'mobx';
 import {
   IReportContentType, User, IIssueColumnName, ISearchVO,
@@ -26,6 +27,7 @@ interface IBaseReportBlock {
   key: string
   title: string
   type: IReportContentType
+  collapse: boolean
 }
 export type BurnDownSearchVO = {
   projectId: string
@@ -194,7 +196,7 @@ class ProjectReportStore {
 
   @action('设置ReportData')
   setReportData(reportData: IProjectReport) {
-    this.blockList = (reportData.reportUnitList || []).map((block) => ({ ...block, key: String(Math.random()) }));
+    this.blockList = (reportData.reportUnitList || []).map((block) => ({ ...block, key: String(Math.random()), collapse: false }));
     this.baseInfo = reportData;
     this.dirty = false;
   }
@@ -214,6 +216,21 @@ class ProjectReportStore {
       destinationIndex,
     );
     this.dirty = true;
+  }
+
+  @action('折叠展开block')
+  handleCollapseBlock(collapse: boolean, block: IReportBlock) {
+    block.collapse = collapse;
+  }
+
+  @computed get hasCollapse() {
+    return this.blockList.some((b) => b.collapse);
+  }
+
+  collapseAll(collapse: boolean) {
+    return this.blockList.forEach((b) => {
+      b.collapse = collapse;
+    });
   }
 }
 
