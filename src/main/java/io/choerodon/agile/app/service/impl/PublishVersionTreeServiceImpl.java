@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class PublishVersionTreeServiceImpl implements PublishVersionTreeService {
 
+    private static final  String ERROR_PUBLISH_VERSION_NOT_EXISTED = "error.publish.version.not.existed.";
+
     @Autowired
     private PublishVersionTreeClosureMapper publishVersionTreeClosureMapper;
     @Autowired
@@ -226,7 +228,7 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
                        Long publishVersionId,
                        Set<TagVO> tags) {
         PublishVersionDTO publishVersion = publishVersionMapper.selectByPrimaryKey(publishVersionId);
-        AssertUtilsForCommonException.notNull(publishVersion, "error.publish.version.not.existed.", publishVersionId);
+        AssertUtilsForCommonException.notNull(publishVersion, ERROR_PUBLISH_VERSION_NOT_EXISTED, publishVersionId);
         if (!ObjectUtils.isEmpty(tags)) {
             tags.forEach(x -> {
                 PublishVersionTagRelDTO dto = buildPublishVersionTagRel(organizationId, publishVersionId, x);
@@ -243,7 +245,7 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
                           Long publishVersionId,
                           Set<TagVO> tags) {
         PublishVersionDTO publishVersion = publishVersionMapper.selectByPrimaryKey(publishVersionId);
-        AssertUtilsForCommonException.notNull(publishVersion, "error.publish.version.not.existed.", publishVersionId);
+        AssertUtilsForCommonException.notNull(publishVersion, ERROR_PUBLISH_VERSION_NOT_EXISTED, publishVersionId);
         if (!ObjectUtils.isEmpty(tags)) {
             tags.forEach(x -> {
                 PublishVersionTagRelDTO dto = buildPublishVersionTagRel(organizationId, publishVersionId, x);
@@ -430,7 +432,7 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
                                  Map<Long, Map<String, String>> appServiceCodeMap) {
         PublishVersionDTO publishVersionDTO = publishVersionMap.get(rootId);
         if (publishVersionDTO == null) {
-            throw new CommonException("error.publish.version.not.existed." + rootId);
+            throw new CommonException(ERROR_PUBLISH_VERSION_NOT_EXISTED + rootId);
         }
         VersionTreeVO root = convertToVersionTree(publishVersionDTO, rootId, appServiceCodeMap);
         addPublishVersionTag(root, publishVersionDTO.getTags(), projectCodeMap, appServiceCodeMap);

@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RefreshScope
+@Transactional(rollbackFor = Exception.class)
 public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     private static final String AGILE_SERVICE = "agile-service";
@@ -622,7 +623,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId, Long statusId) {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -668,7 +668,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void checkDeleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId) {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -845,7 +844,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void handlerDeleteStatusByProject(Long projectId, String applyType, Long statusId, List<DeleteStatusTransferVO> statusTransferVOS) {
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);

@@ -86,7 +86,7 @@ public class EncryptionUtils {
                     options.forEach(v -> {
                         JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(v));
                         JSONArray value = jsonObject.getJSONArray("value");
-                        if (!ObjectUtils.isEmpty(value) && value.size() > 0) {
+                        if (!ObjectUtils.isEmpty(value) && !value.isEmpty()) {
                             filterOptions.add(v);
                         }
                     });

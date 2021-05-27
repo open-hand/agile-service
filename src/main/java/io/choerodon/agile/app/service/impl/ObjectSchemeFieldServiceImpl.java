@@ -205,10 +205,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             } else {
                 issueTypes = new ArrayList<>(ObjectSchemeFieldContext.NORMAL_PROJECT);
             }
-            if (backlogExpandService != null) {
-                if (Boolean.TRUE.equals(backlogExpandService.enabled(projectId))) {
-                    issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
-                }
+            if (backlogExpandService != null && backlogExpandService.enabled(projectId)) {
+                issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
             }
         } else {
             issueTypes = ObjectSchemeFieldContext.getIssueTye();
@@ -353,11 +351,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             } else {
                 issueTypes = new ArrayList<>(ObjectSchemeFieldContext.NORMAL_PROJECT);
             }
-            if (backlogExpandService != null) {
-                if (Boolean.TRUE.equals(backlogExpandService.enabled(projectId))) {
-                    issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
-                    includeBacklogSystemField = true;
-                }
+            if (backlogExpandService != null && backlogExpandService.enabled(projectId)) {
+                issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
+                includeBacklogSystemField = true;
             }
         } else {
             //判断组织下如果没有开启需求池的项目，组织层不展示需求类型的系统字段
@@ -1336,15 +1332,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 }
             }
             //multiMember
-            else if (FieldType.MULTI_MEMBER.equals(v.getFieldType())) {
-                if (v.getDefaultValue() != null && !"".equals(v.getDefaultValue())) {
-                    List<String> defaultIds = Arrays.asList(v.getDefaultValue().split(","));
-                    List<String> encryptList = EncryptionUtils.encryptListToStr(defaultIds);
-                    v.setDefaultValue(StringUtils.join(encryptList.toArray(), ","));
-                    List<UserDTO> list = baseFeignClient.listUsersByIds(defaultIds.stream().map(Long::valueOf).toArray(Long[]::new), false).getBody();
-                    if (!CollectionUtils.isEmpty(list)) {
-                        v.setDefaultValueObj(list);
-                    }
+            else if (FieldType.MULTI_MEMBER.equals(v.getFieldType()) && v.getDefaultValue() != null && !"".equals(v.getDefaultValue())) {
+                List<String> defaultIds = Arrays.asList(v.getDefaultValue().split(","));
+                List<String> encryptList = EncryptionUtils.encryptListToStr(defaultIds);
+                v.setDefaultValue(StringUtils.join(encryptList.toArray(), ","));
+                List<UserDTO> list = baseFeignClient.listUsersByIds(defaultIds.stream().map(Long::valueOf).toArray(Long[]::new), false).getBody();
+                if (!CollectionUtils.isEmpty(list)) {
+                    v.setDefaultValueObj(list);
                 }
             }
         });

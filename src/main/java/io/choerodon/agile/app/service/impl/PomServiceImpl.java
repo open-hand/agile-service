@@ -163,17 +163,4 @@ public class PomServiceImpl implements PomService {
         }
         return pomArtifactIdNodeList.item(0).getTextContent();
     }
-
-    private Long fetchProjectId(String serviceCode, List<AppServiceRepVO> appServiceRepList) {
-        if (ObjectUtils.isEmpty(appServiceRepList)) {
-            return null;
-        }
-        for (AppServiceRepVO vo : appServiceRepList) {
-            String code = vo.getCode();
-            if (serviceCode.equals(code)) {
-                return vo.getProjectId();
-            }
-        }
-        return null;
-    }
 }

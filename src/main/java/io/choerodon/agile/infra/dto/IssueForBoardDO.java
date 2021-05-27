@@ -67,8 +67,7 @@ public class IssueForBoardDO {
 
     private Date estimatedEndTime;
 
-//    private Long piId;
-    @Encrypt(ignoreValue = "0")/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = "0")
     private Long relateIssueId;
 
     private Boolean starBeacon;
@@ -224,14 +223,6 @@ public class IssueForBoardDO {
     public String getFeatureType() {
         return featureType;
     }
-
-//    public void setPiId(Long piId) {
-//        this.piId = piId;
-//    }
-//
-//    public Long getPiId() {
-//        return piId;
-//    }
 
     public String getAssigneeLoginName() {
         return assigneeLoginName;

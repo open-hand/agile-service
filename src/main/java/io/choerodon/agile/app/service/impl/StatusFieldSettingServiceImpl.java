@@ -466,9 +466,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             if (ObjectUtils.isEmpty(oldValue)) {
                 return numberAddValue;
             }
-            BigDecimal add = oldValue.add(numberAddValue);
-            bigDecimal = add;
-            return add;
+            return oldValue.add(numberAddValue);
         } else {
             bigDecimal = statusFieldValueSettingDTO.getNumberValue();
         }

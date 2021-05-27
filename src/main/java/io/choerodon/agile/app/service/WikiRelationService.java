@@ -1,6 +1,5 @@
 package io.choerodon.agile.app.service;
 
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.KnowledgeRelationVO;
 import io.choerodon.agile.api.vo.WikiRelationVO;
 

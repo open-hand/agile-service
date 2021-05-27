@@ -30,6 +30,8 @@ public class IssueAttachmentController {
     @Autowired
     private IssueAttachmentService issueAttachmentService;
 
+    private static final String ERROR_ATTACHMENT_UPLOAD = "error.attachment.upload";
+
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("上传附件")
     @PostMapping
@@ -40,7 +42,7 @@ public class IssueAttachmentController {
                                                                     HttpServletRequest request) {
         return Optional.ofNullable(issueAttachmentService.create(projectId, issueId, request))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException("error.attachment.upload"));
+                .orElseThrow(() -> new CommonException(ERROR_ATTACHMENT_UPLOAD));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -62,7 +64,7 @@ public class IssueAttachmentController {
                                                           HttpServletRequest request) {
         return Optional.ofNullable(issueAttachmentService.uploadForAddress(projectId, request))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException("error.attachment.upload"));
+                .orElseThrow(() -> new CommonException(ERROR_ATTACHMENT_UPLOAD));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -76,6 +78,6 @@ public class IssueAttachmentController {
         issueAttachmentService.validCombineUpload(issueAttachmentCombineVO);
         return Optional.ofNullable(issueAttachmentService.attachmentCombineUpload(projectId, issueAttachmentCombineVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException("error.attachment.upload"));
+                .orElseThrow(() -> new CommonException(ERROR_ATTACHMENT_UPLOAD));
     }
 }

@@ -35,10 +35,7 @@ public class NumberUtil {
     public static Boolean isInteger(String str) {
         Pattern pattern = Pattern.compile("[0-9]*");
         Matcher isNum = pattern.matcher(str);
-        if (!isNum.matches()) {
-            return false;
-        }
-        return true;
+        return isNum.matches();
     }
 
     public static Boolean canParseInteger(String str) {
@@ -54,9 +51,6 @@ public class NumberUtil {
                 n++;
             }
         }
-        if (n > 0) {
-            return false;
-        }
-        return true;
+        return n <= 0;
     }
 }

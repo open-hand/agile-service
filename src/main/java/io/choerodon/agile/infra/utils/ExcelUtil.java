@@ -99,12 +99,7 @@ public class ExcelUtil {
 
     private static String[] subArray(String[] data, boolean withFeature) {
         if (withFeature) {
-            int len = data.length;
-            String[] newArray = new String[len - 1];
-            for (int i = 0; i < len - 1; i++) {
-                newArray[i] = data[i];
-            }
-            return newArray;
+            return Arrays.copyOf(data,data.length);
         } else {
             return data;
         }
@@ -199,15 +194,12 @@ public class ExcelUtil {
                 boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
                 CellStyle foregroundColor = null;
                 if (hasSonNodes) {
-                    if (ObjectUtils.isEmpty(lastColors)) {
+                    if (ObjectUtils.isEmpty(lastColors) || IndexedColors.LIGHT_TURQUOISE.equals(lastColors)) {
                         lastColors = IndexedColors.TAN;
                         foregroundColor = tanForegroundColor;
                     } else if (IndexedColors.TAN.equals(lastColors)) {
                         lastColors = IndexedColors.LIGHT_TURQUOISE;
                         foregroundColor = lightTurquoiseForegroundColor;
-                    } else if (IndexedColors.LIGHT_TURQUOISE.equals(lastColors)) {
-                        lastColors = IndexedColors.TAN;
-                        foregroundColor = tanForegroundColor;
                     }
                 }
                 fillInExcelRow(clazz, fieldsName, fields, cellStyle, sheet, rowNum, data, foregroundColor, formatter);
@@ -261,7 +253,7 @@ public class ExcelUtil {
         sheet.setColumnWidth(1, 8000);
         sheet.setColumnWidth(5, 8000);
         if (!ObjectUtils.isEmpty(cellRangeAddresses)) {
-            cellRangeAddresses.forEach(x -> sheet.addMergedRegion(x));
+            cellRangeAddresses.forEach(sheet::addMergedRegion);
         }
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setAlignment(CellStyle.ALIGN_LEFT);
@@ -310,15 +302,12 @@ public class ExcelUtil {
                 boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
                 CellStyle foregroundColor = null;
                 if (hasSonNodes) {
-                    if (ObjectUtils.isEmpty(lastColors)) {
+                    if (ObjectUtils.isEmpty(lastColors) || IndexedColors.LIGHT_TURQUOISE.equals(lastColors)) {
                         lastColors = IndexedColors.TAN;
                         foregroundColor = tanForegroundColor;
                     } else if (IndexedColors.TAN.equals(lastColors)) {
                         lastColors = IndexedColors.LIGHT_TURQUOISE;
                         foregroundColor = lightTurquoiseForegroundColor;
-                    } else if (IndexedColors.LIGHT_TURQUOISE.equals(lastColors)) {
-                        lastColors = IndexedColors.TAN;
-                        foregroundColor = tanForegroundColor;
                     }
                 }
                 startRow = fillInExcelRow(cellStyle, sheet, startRow, entry.getValue(), foregroundColor, sdf, issueTagMap, issuePublishVersionMap, projectCodeMap);
@@ -864,7 +853,6 @@ public class ExcelUtil {
             throw new CommonException("不支持在不同的版本的excel中复制样式）");
         }
 
-//        logger.debug("src中style number:{}, des中style number:{}", srcBook.getNumCellStyles(), desBook.getNumCellStyles());
         short[] src2des = new short[srcBook.getNumCellStyles()];
         short[] des2src = new short[desBook.getNumCellStyles() + srcBook.getNumCellStyles()];
 
@@ -894,10 +882,6 @@ public class ExcelUtil {
      * @param mapping       不同book中复制样式时，必传
      */
     private static void copySheet(Sheet srcSheet, Sheet desSheet, boolean copyValueFlag, boolean copyStyleFlag, StyleMapping mapping) {
-        if (srcSheet.getWorkbook() == desSheet.getWorkbook()) {
-//            logger.warn("统一workbook内复制sheet建议使用 workbook的cloneSheet方法");
-        }
-
         //合并区域处理
         copyMergedRegion(srcSheet, desSheet);
 
@@ -947,12 +931,10 @@ public class ExcelUtil {
         if (srcBook == desBook && copyStyleFlag) {
             //同文件，复制引用
             desCell.setCellStyle(srcCell.getCellStyle());
-        } else if (copyStyleFlag) {
+        } else if (copyStyleFlag && !ObjectUtils.isEmpty(mapping)) {
             //不同文件，通过映射关系复制
-            if (null != mapping) {
-                short desIndex = mapping.desIndex(srcCell.getCellStyle().getIndex());
-                desCell.setCellStyle(desBook.getCellStyleAt(desIndex));
-            }
+            short desIndex = mapping.desIndex(srcCell.getCellStyle().getIndex());
+            desCell.setCellStyle(desBook.getCellStyleAt(desIndex));
         }
 
         //复制评论
@@ -997,7 +979,6 @@ public class ExcelUtil {
         int sheetMergerCount = srcSheet.getNumMergedRegions();
         for (int i = 0; i < sheetMergerCount; i++) {
             desSheet.addMergedRegion(srcSheet.getMergedRegion(i));
-            CellRangeAddress cellRangeAddress = srcSheet.getMergedRegion(i);
         }
     }
 

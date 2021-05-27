@@ -91,6 +91,7 @@ public class ChartUnitVO extends ReportUnitVO {
     /**
      * 各图表必输校验
      */
+    @Override
     public void validateAndconvert(){
         super.validateAndconvert();
         ChartSearchVO chartSearchVO = getChartSearchVO();
