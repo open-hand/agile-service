@@ -1773,10 +1773,15 @@
         ai.issue_id
         FROM agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
+        LEFT JOIN (SELECT aisr.issue_id, asp.sprint_id
+        FROM agile_issue_sprint_rel aisr, agile_sprint asp
+        WHERE aisr.sprint_id = asp.sprint_id AND asp.status_code != 'closed'
+        ) asp1 ON asp1.issue_id = ai.issue_id
         WHERE
         (ais.is_completed != 1 or ais.is_completed is null)
         and ai.project_id = #{projectId} AND ai.type_code in ('story', 'task', 'bug') AND
         ai.apply_type = 'agile'
+        AND asp1.sprint_id IS NULL
         <if test='advancedSearchArgs != null'>
             <if test='advancedSearchArgs.versionId != null'>
                 AND ai.issue_id IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id =
@@ -1824,8 +1829,10 @@
         aisr.sprint_id
         FROM agile_issue ai
         LEFT JOIN agile_issue_sprint_rel aisr ON aisr.issue_id = ai.issue_id
+        LEFT JOIN agile_sprint asp on asp.sprint_id = aisr.sprint_id
         WHERE ai.project_id = #{projectId} AND ai.type_code in ('story', 'task', 'bug','sub_task') AND
         ai.apply_type = 'agile'
+        AND  asp.status_code != 'closed'
         <if test='advancedSearchArgs != null'>
             <if test='advancedSearchArgs.versionId != null'>
                 AND ai.issue_id IN (SELECT issue_id FROM agile_version_issue_rel WHERE version_id =
