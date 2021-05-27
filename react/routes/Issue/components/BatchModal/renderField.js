@@ -13,7 +13,7 @@ import SelectCustomField from '@/components/select/select-custom-field';
 const singleList = ['radio', 'single'];
 
 export default function renderField({
-  code, fieldType, fieldOptions, id,
+  code, fieldType, fieldOptions, id, name,
 }) {
   switch (code) {
     case 'componentIssueRelVOList': {
@@ -28,6 +28,7 @@ export default function renderField({
           name={code}
           style={{ width: '100%' }}
           defaultPickerValue={moment().endOf('d')}
+          label="预计结束时间"
         />
       );
     }
@@ -36,6 +37,7 @@ export default function renderField({
         <SelectEnvironment
           name={code}
           style={{ width: '100%' }}
+          label="环境"
         />
       );
     }
@@ -47,6 +49,7 @@ export default function renderField({
         <TimePicker
           name={code}
           style={{ width: '100%' }}
+          label={name}
         />
       );
     case 'datetime':
@@ -54,6 +57,7 @@ export default function renderField({
         <DateTimePicker
           name={code}
           style={{ width: '100%' }}
+          label={name}
         />
       );
     case 'date':
@@ -61,6 +65,7 @@ export default function renderField({
         <DatePicker
           name={code}
           style={{ width: '100%' }}
+          label={name}
         />
       );
     case 'number':
@@ -69,6 +74,7 @@ export default function renderField({
           <NumberField
             name={code}
             style={{ width: '100%' }}
+            label={name}
           // step={isCheck ? 0.1 : 1}
           />
         </div>
@@ -80,6 +86,7 @@ export default function renderField({
           maxLength={100}
           valueChangeAction="input"
           style={{ width: '100%' }}
+          label={name}
         />
       );
     case 'text':
@@ -90,12 +97,14 @@ export default function renderField({
           maxLength={255}
           valueChangeAction="input"
           style={{ width: '100%' }}
+          label={name}
         />
       );
     case 'url':
       return (
         <UrlField
           name={code}
+          label={name}
         />
       );
     case 'radio': case 'single': case 'checkbox': case 'multiple':
@@ -106,6 +115,7 @@ export default function renderField({
           style={{ width: '100%' }}
           multiple={!(singleList.indexOf(fieldType) !== -1)}
           searchable
+          label={name}
         />
       );
     case 'multiMember':
@@ -115,6 +125,7 @@ export default function renderField({
           multiple={fieldType === 'multiMember'}
           style={{ width: '100%' }}
           name={code}
+          label={name}
         />
       );
     default:

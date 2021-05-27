@@ -177,7 +177,7 @@ const CommentItem: React.FC<Props> = ({
                 loginName: comment.userLoginName,
                 imageUrl: comment.userImageUrl,
               }}
-              textStyle={{ color: '#5365EA' }}
+              textStyle={{ color: 'var(--primary-color)' }}
             />
             {
               isReply && (

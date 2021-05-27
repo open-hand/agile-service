@@ -68,7 +68,7 @@ const Logs: React.FC<Props> = ({ datalogs, expand, fieldsMap }) => (
           </div>
           <div className="c7n-Logs-log-right">
             <div className="c7n-Logs-log-logOperation">
-              <span className="c7n-Logs-log-userName">{log.realName}</span>
+              <span className="c7n-Logs-log-userName">{log.realName || log.user?.realName}</span>
               <Log log={log} fieldsMap={fieldsMap} />
             </div>
             <div className="c7n-Logs-log-lastUpdateDate">
