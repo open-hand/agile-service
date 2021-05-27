@@ -523,6 +523,7 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
         versionTreeVO.setArtifactId(publishVersionDTO.getArtifactId());
         versionTreeVO.setAppService(publishVersionDTO.getAppService());
         versionTreeVO.setObjectVersionNumber(publishVersionDTO.getObjectVersionNumber());
+        versionTreeVO.setAppServiceCode(publishVersionDTO.getServiceCode());
         setAppServiceName(versionTreeVO, appServiceCodeMap);
         return versionTreeVO;
     }

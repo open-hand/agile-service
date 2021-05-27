@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -377,7 +378,21 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if(isProgram && agilePluginService != null){
            return agilePluginService.filterProgramEpic(objectSchemeFieldDTOS);
         }
-        return objectSchemeFieldDTOS;
+        return filterFieldsByProjectCategories(objectSchemeFieldDTOS, projectId, schemeCode);
+    }
+
+    private List<ObjectSchemeFieldDTO> filterFieldsByProjectCategories(List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS,
+                                                                       Long projectId,
+                                                                       String schemeCode) {
+        if (projectId == null || !ObjectSchemeCode.AGILE_ISSUE.equals(schemeCode)) {
+            return objectSchemeFieldDTOS;
+        }
+        Set<String> codes = getProjectCategoryCodes(projectId);
+        if(!codes.contains(ProjectCategory.MODULE_DEVOPS)) {
+            return objectSchemeFieldDTOS.stream().filter(x -> !FieldCode.TAG.equals(x.getCode())).collect(Collectors.toList());
+        } else {
+            return objectSchemeFieldDTOS;
+        }
     }
 
     private void addNotSyncedField(List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS, List<String> issueTypes, boolean includeBacklogSystemField) {
@@ -1182,7 +1197,30 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (!CollectionUtils.isEmpty(fieldCodes)) {
             list.addAll(objectSchemeFieldMapper.selectFieldsByFieldCodes(fieldCodes));
         }
-        return list;
+        return filterFields(list, projectId);
+    }
+
+    private List<ObjectSchemeFieldDetailVO> filterFields(List<ObjectSchemeFieldDetailVO> list,
+                                                         Long projectId) {
+        if (projectId == null) {
+            return list;
+        }
+        Set<String> codes = getProjectCategoryCodes(projectId);
+        if (codes.contains(ProjectCategory.MODULE_AGILE)
+                && !codes.contains(ProjectCategory.MODULE_DEVOPS)) {
+            return list.stream().filter(x -> !FieldCode.TAG.equals(x.getCode())).collect(Collectors.toList());
+        } else {
+            return list;
+        }
+    }
+
+    private Set<String> getProjectCategoryCodes(Long projectId) {
+        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        return project
+                .getCategories()
+                .stream()
+                .map(ProjectCategoryDTO::getCode)
+                .collect(Collectors.toSet());
     }
 
     private List<String> getIssueTypeFieldCodes(Long issueTypeId, Long organizationId, Long projectId) {
@@ -1531,7 +1569,21 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (agilePluginService != null) {
            return agilePluginService.queryProgramPageConfigFields(projectId,issueTypeId,pageConfigFieldVOS);
         }
-        return pageConfigFieldVOS;
+        return filterFieldsByProjectCategories(pageConfigFieldVOS, projectId);
+    }
+
+    private List<PageConfigFieldVO> filterFieldsByProjectCategories(List<PageConfigFieldVO> pageConfigFieldVOS,
+                                                                    Long projectId) {
+        if (projectId == null) {
+            return pageConfigFieldVOS;
+        }
+        Set<String> codes = getProjectCategoryCodes(projectId);
+        if (codes.contains(ProjectCategory.MODULE_AGILE)
+                && !codes.contains(ProjectCategory.MODULE_DEVOPS)) {
+            return pageConfigFieldVOS.stream().filter(x -> !FieldCode.TAG.equals(x.getFieldCode())).collect(Collectors.toList());
+        } else {
+            return pageConfigFieldVOS;
+        }
     }
 
     @Override

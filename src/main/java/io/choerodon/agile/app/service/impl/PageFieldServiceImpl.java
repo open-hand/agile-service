@@ -6,6 +6,8 @@ import io.choerodon.agile.infra.annotation.CopyPageField;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.FieldValueUtil;
@@ -75,6 +77,8 @@ public class PageFieldServiceImpl implements PageFieldService {
 
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     @Override
     public PageFieldDTO baseCreate(PageFieldDTO field) {
@@ -178,7 +182,26 @@ public class PageFieldServiceImpl implements PageFieldService {
         if (agilePluginService != null) {
             pageFields = agilePluginService.handlerProgramPageField(projectId,issueTypeId,pageFields);
         }
-        return pageFields;
+        return filterFieldsByProjectCategories(pageFields, projectId);
+    }
+
+    private List<PageFieldDTO> filterFieldsByProjectCategories(List<PageFieldDTO> pageFields, Long projectId) {
+        if (projectId == null) {
+            return pageFields;
+        }
+        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        Set<String> codes =
+                project
+                        .getCategories()
+                        .stream()
+                        .map(ProjectCategoryDTO::getCode)
+                        .collect(Collectors.toSet());
+        if (codes.contains(ProjectCategory.MODULE_AGILE)
+                && !codes.contains(ProjectCategory.MODULE_DEVOPS)) {
+            return pageFields.stream().filter(x -> !FieldCode.TAG.equals(x.getFieldCode())).collect(Collectors.toList());
+        } else {
+            return pageFields;
+        }
     }
 
     private void addNotSyncField(Long organizationId,
