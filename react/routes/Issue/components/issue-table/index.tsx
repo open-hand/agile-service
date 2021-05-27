@@ -47,7 +47,10 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
         ...listLayoutColumn,
         ...listLayoutColumn.columnCode === dataKey ? {
           width: columnWidth,
-        } : {},
+        } : {
+          width: listLayoutColumn.width ?? 0,
+        },
+        sort: i,
       })),
     });
   });
