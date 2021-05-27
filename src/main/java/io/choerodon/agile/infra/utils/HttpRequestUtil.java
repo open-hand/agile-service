@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
@@ -47,6 +48,8 @@ public class HttpRequestUtil {
             // 建立实际的连接
             connection.connect();
             // 定义 BufferedReader输入流来读取URL的响应
+            in = new BufferedReader(new InputStreamReader(
+                    connection.getInputStream()));
             String line;
             while ((line = in.readLine()) != null) {
                 result.append(line);
