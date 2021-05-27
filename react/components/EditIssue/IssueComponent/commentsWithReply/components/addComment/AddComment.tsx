@@ -90,6 +90,7 @@ const Comments: React.FC<Props> = ({
       style={{
         background: 'rgba(158,173,190,0.04)',
         border: '1px solid var(--divider)',
+        color: 'var(--text-color)',
         borderRadius: '5px',
         height: 36,
         lineHeight: '32px',
