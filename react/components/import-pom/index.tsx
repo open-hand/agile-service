@@ -12,13 +12,15 @@ import './index.less';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import SelectTeam from '@/components/select/select-team';
 import { IModalProps } from '@/common/types';
-import { publishVersionApi, versionApi } from '@/api';
+import { devOpsApi, publishVersionApi, versionApi } from '@/api';
 import Loading from '@/components/Loading';
 import { observer } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import SelectAppService from '@/components/select/select-app-service';
 import SelectGitTags from '@/components/select/select-git-tags';
 import SelectSubProject from '@/components/select/select-sub-project';
+import { omit } from 'lodash';
+import { getProjectId } from '@/utils/common';
 
 interface IImportPomFunctionProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
@@ -32,7 +34,8 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
 }) => {
   const prefixCls = 'c7n-agile-publish-version-detail-import-pom';
   const [groupId, setGroupId] = useState<string[] | undefined>();
-  const [subProjectId, setSubProjectId] = useState<string>();
+  const [subProjectId, setSubProjectId] = useState<string>(() => getProjectId());
+  const [appServiceList, setAppServiceList] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const formDs = useMemo(() => new DataSet({
@@ -44,16 +47,16 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
   }), []);
   const disabledUpload = useMemo(() => {
     if (programMode) {
-      return !formDs.current?.get('subProject');
+      return !subProjectId;
     }
     return false;
-  }, [formDs, formDs.current?.get('subProject')]);
+  }, [programMode, subProjectId]);
 
   const ds = useMemo(() => new DataSet({
     autoQuery: false,
     paging: false,
     selection: false,
-
+    dataToJSON: 'normal' as any,
     // data:
     //   { artifactId: 'agile-test', version: '0.18.a', versionAlias: undefined },
     // ],
@@ -91,6 +94,9 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
         // ds.splice(0,0,)
       }).finally(() => {
         setLoading(false);
+        devOpsApi.project(subProjectId).loadActiveService().then((res: any) => {
+          setAppServiceList(res);
+        });
         inputRef.current?.setAttribute('value', '');
       });
 
@@ -103,19 +109,26 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
     }
   };
   const handleSubmit = useCallback(async () => {
-    console.log('submit');
-    const versionCheckRes = Promise.all(ds.map((r) => r.getField('version')?.checkValidity())).then((v) => {
-      console.log('iii', v);
-      return !v.some((i) => !i);
-    });
+    const versionCheckRes = Promise.all(ds.map((r) => r.getField('version')?.checkValidity())).then((v) => !v.some((i) => !i));
     if (!await versionCheckRes) {
       return false;
     }
 
-    const data = ds.toData();
+    const data = ds.toJSONData().map((item) => omit(item, ['appServiceObject', 'children', 'appServiceName', 'id']));
     const result = handleOk && await handleOk(data);
     return typeof (result) !== 'undefined' ? result : true;
   }, [ds, handleOk]);
+  useEffect(() => {
+    console.log('appServiceList', appServiceList);
+    if (appServiceList.length > 0) {
+      ds.records.forEach((record) => {
+        const recordArtifactId = record.get('artifactId');
+        const recordGroupId = record.get('groupId');
+        const appService = recordArtifactId && recordGroupId ? appServiceList.find((item) => item.artifactId === recordArtifactId && item.groupId === recordGroupId) : undefined;
+        appService && record.set('appServiceObject', appService);
+      });
+    }
+  }, [appServiceList, ds.records]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
@@ -131,7 +144,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
   return (
     <div className={prefixCls}>
       <Form dataSet={formDs} style={{ width: '6.2rem' }}>
-        {programMode ? <SelectSubProject name="subProject" /> : null}
+        {programMode ? <SelectSubProject name="subProject" onChange={setSubProjectId} /> : null}
         <TextField name="groupId" onChange={setGroupId} multiple />
       </Form>
       <div className={`${prefixCls}-body`}>
@@ -156,10 +169,10 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
             editor={(record) => {
               const appService = record.get('appServiceObject');
               // console.log('record.', appService?.id, record.toData(), record.get('projectId'), record.get('appServiceObject'));
-              return <SelectGitTags key={`import-pom-select-tag-${appService?.id}`} projectId={record.get('projectId')} applicationId={appService?.id} />;
+              return <SelectGitTags projectId={record.get('projectId')} applicationId={appService?.id} />;
             }}
           />
-          <Column name="action" width={65} command={({ record }) => [<Button icon="delete_forever" onClick={() => ds.splice(record.index, 1)} />]} />
+          <Column name="action" width={65} renderer={renderAction} />
         </Table>
       </div>
       <input

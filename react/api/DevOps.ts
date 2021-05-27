@@ -8,6 +8,12 @@ interface ICreateBranch {
   issueId: number | string,
   originBranch: string,
 }
+interface ILinkBrach {
+  appServiceId:string
+  issueIds:Array<string|number>
+  objectVersionNumber:number
+  branchName:string
+}
 class DevOpsApi extends Api<DevOpsApi> {
   get prefix() {
     return `/devops/v1/projects/${this.projectId}`;
@@ -30,7 +36,7 @@ class DevOpsApi extends Api<DevOpsApi> {
     });
   }
 
-  linkBranch(applicationId: number, devopsBranchVO: ICreateBranch) {
+  linkBranch(applicationId: number, devopsBranchVO: ILinkBrach) {
     return axios({
       method: 'put',
       url: `${this.prefix}/app_service/${applicationId}/git/update_branch_issue`,
