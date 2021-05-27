@@ -364,6 +364,7 @@ export function getTableColumns({
       const column = columnsMap.has(code) ? columnsMap.get(code) : getCustomColumn(field);
       res.push({
         ...column,
+        code,
         display: layoutColumn.display,
         resizable: true,
         onResize: handleColumnResize,
