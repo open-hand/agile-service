@@ -2,6 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import {
   Modal, Form, DataSet, TextField,
 } from 'choerodon-ui/pro';
+import { ValueChangeAction } from 'choerodon-ui/pro/lib/text-field/interface';
 import { IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { MAX_LENGTH_KANBAN_NAME } from '@/constants/MAX_LENGTH';
@@ -69,7 +70,7 @@ const KanbanTemplateModal: React.FC<KanbanTemplateModalProps> = (props) => {
   }, [dataSet, mode, props]);
   return (
     <Form dataSet={dataSet}>
-      <TextField name="name" maxLength={MAX_LENGTH_KANBAN_NAME} />
+      <TextField name="name" maxLength={MAX_LENGTH_KANBAN_NAME} valueChangeAction={'input' as ValueChangeAction} />
     </Form>
   );
 };
