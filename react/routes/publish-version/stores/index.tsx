@@ -7,6 +7,7 @@ import { DataSet } from 'choerodon-ui/pro/lib';
 import { useDetail } from '@/components/detail-container';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { IPublishVersionData } from '@/api';
+import { set } from 'lodash';
 import PublishVersionDataSet from './PublishVersionDataSet';
 import { PublishDetailStore } from './store';
 import IssueInfoTableDataSet from './IssueInfoTableDataSet';
@@ -29,7 +30,7 @@ export function usePublishVersionContext() {
 const PublishVersionProvider = injectIntl(inject('AppState')(
   (props: IPublishVersionProps<IPublishVersionData> & { [propsName: string]: any }) => {
     const [detailProps] = useDetail();
-    const { leftListDataSetConfig, publishVersionId } = props;
+    const { leftListDataSetConfig, publishVersionId, pageContentEmpty } = props;
     const { open } = detailProps;
     const store = useMemo(() => props.store || new PublishDetailStore(), [props.store]);
     const issueDiffDataSet = useMemo(() => new DataSet(IssueDiffDataSet()), []);
@@ -75,6 +76,7 @@ const PublishVersionProvider = injectIntl(inject('AppState')(
       issueInfoTableDataSet,
       issueDiffDataSet,
     };
+    typeof (pageContentEmpty) === 'function' && set(value, 'pageContentEmpty', pageContentEmpty(value));
     return (
       <PublishVersionContext.Provider value={value}>
         {props.children}

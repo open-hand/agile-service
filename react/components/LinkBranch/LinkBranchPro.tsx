@@ -59,7 +59,7 @@ const LinkBranch: React.FC<{ modal?: IModalProps } & ILinkBranchModalProps> = ob
     if (!await formDs.validate()) {
       return false;
     }
-    await devOpsApi.project(data.projectId).linkBranch(data.appServiceId, { ...data, issueId }).then(() => {
+    await devOpsApi.project(data.projectId).linkBranch(data.appServiceId, { ...data, issueIds: [issueId] }).then(() => {
       onOk && onOk();
     });
     return true;

@@ -40,9 +40,10 @@ const TooltipButton: React.FC<{ title?: string, buttonIcon: string, buttonDisabl
 };
 
 function PublishVersion() {
+  const context = usePublishVersionContext();
   const {
     prefixCls, tableDataSet, store, pageHeader, pageContentEmpty, renderPage,
-  } = usePublishVersionContext();
+  } = context;
   const [theme] = useTheme();
 
   function handleCreate(data: any) {

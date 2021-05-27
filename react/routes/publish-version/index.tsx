@@ -1,7 +1,7 @@
 import React from 'react';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import {
-  Table, Menu, DataSet,
+  DataSet,
 } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import Column from 'choerodon-ui/pro/lib/table/Column';
@@ -23,7 +23,7 @@ interface LinkVersionReturnSectionProps<T> extends Partial<LinkVersionSectionPro
 export interface IPublishVersionLinkVersionNodeOperationProps {
   isShowEdit: boolean | ((item: IPublishVersionTreeNode) => boolean | undefined)
   isShowDel: boolean | ((item: IPublishVersionTreeNode) => boolean | undefined)
-  onEdit?: (newData:any, item: IPublishVersionTreeNode) => any
+  onEdit?: (newData: any, item: IPublishVersionTreeNode) => any
   onDelete?: (item: IPublishVersionTreeNode) => any
   renderLeftNode?: (item: IPublishVersionTreeNode, node: React.ReactElement) => React.ReactElement
 }
@@ -74,7 +74,7 @@ export interface IPublishVersionProps<DetailType> {
   pageHeader?: React.ReactNode
   renderDetailLeftHeader?: (status: (status: DetailHeaderStatusProps) => React.ReactElement) => React.ReactNode
   // pageContent?: React.ReactNode
-  pageContentEmpty?: React.ReactNode
+  pageContentEmpty?: React.ReactElement | ((context: IPublishVersionContext)=>React.ReactElement)
   leftListDataSetConfig?: DataSetProps
   leftListItemConfig?: { renderName: (data: Record) => string, renderMenus: (data: Record) => React.ReactElement, onChange?: (data: Record) => void }
   menuDetail?: (detail: MenuDetailConfigProps<DetailType>['detail'],
@@ -86,8 +86,5 @@ export interface IPublishVersionProps<DetailType> {
 export function ExtendPublishVersion<DetailType>(props: IPublishVersionProps<DetailType>) {
   return <OriginPublishVersion {...props} />;
 }
-const PublishVersion: React.FC<IPublishVersionProps<IPublishVersionData>> = (props) => {
-  console.log('publish...');
-  return <OriginPublishVersion {...props} />;
-};
+const PublishVersion: React.FC<IPublishVersionProps<IPublishVersionData>> = (props) => <OriginPublishVersion {...props} />;
 export default PublishVersion;

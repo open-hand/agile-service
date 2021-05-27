@@ -84,12 +84,13 @@ const IssueInfoTable: React.FC<IPublishVersionMenuInfoConfigProps> = ({
       <Table dataSet={issueInfoTableDataSet} className={styles.table} mode={'tree' as TableMode}>
         <Column
           name="summary"
-          className={classnames({ 'c7n-agile-table-cell-click': !preview, 'c7n-agile-table-cell': preview })}
+          className={classnames('c7n-agile-table-cell-click')}
           tooltip={'always' as any}
           onCell={({ record }) => ({
             onClick: () => {
               !preview && store.selectIssue(record.get('issueId'));
             },
+            className: classnames('c7n-agile-table-cell-click', { [styles.summary_leaf]: !record.get('parentId') }),
           })}
           lock={'left' as any}
           width={210}
