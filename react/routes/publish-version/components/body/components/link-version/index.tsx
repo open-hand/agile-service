@@ -173,28 +173,37 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
                     style={{ width: '.26rem', height: '.26rem' }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      openEditAppVersionModal({
-                        data: item as any,
-                        handleOk: async (newData) => {
-                          typeof (nodeOperationProps?.onEdit) === 'function' ? await nodeOperationProps?.onEdit(newData, item)
-                            : await publishVersionApi.updateTreeTagAlias(item.id, store.getCurrentData.id, item.objectVersionNumber!, newData.tagAlias);
-                          store.loadData();
-                          return true;
-                        },
-                      });
+                      item.type === 'tag'
+                        ? openEditAppVersionModal({
+                          data: item as any,
+                          handleOk: async (newData) => {
+                            typeof (nodeOperationProps?.onEdit) === 'function' ? await nodeOperationProps?.onEdit(newData, item)
+                              : await publishVersionApi.updateTreeTagAlias(item.id, store.getCurrentData.id, item.objectVersionNumber!, newData.tagAlias);
+                            store.loadData();
+                            return true;
+                          },
+                        }) : openEditLinkAppServiceModal({
+                          data: item as any,
+                          handleOk: async (newData) => {
+                            console.log('newData....', newData);
+                            typeof (nodeOperationProps?.onEdit) === 'function' ? await nodeOperationProps?.onEdit(newData, item)
+                              : await publishVersionApi.update(item.id, newData);
+                            return true;
+                          },
+                        });
                     }}
                   />
                 )}
                 {(typeof (nodeOperationProps?.isShowDel) === 'function' ? nodeOperationProps?.isShowDel(item) : nodeOperationProps?.isShowDel) && (
-                <Button
-                  icon="delete_sweep-o"
-                  style={{ width: '.26rem', height: '.26rem' }}
-                  className={styles.node_btn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(item);
-                  }}
-                />
+                  <Button
+                    icon="delete_sweep-o"
+                    style={{ width: '.26rem', height: '.26rem' }}
+                    className={styles.node_btn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(item);
+                    }}
+                  />
                 )}
               </span>
             ) : null}

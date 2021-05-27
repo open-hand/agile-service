@@ -10,6 +10,7 @@ import { IModalProps } from '@/common/types';
 import { observer } from 'mobx-react-lite';
 import SelectAppService from '@/components/select/select-app-service';
 import SelectGitTags from '@/components/select/select-git-tags';
+import { pick } from 'lodash';
 
 interface IImportPomFunctionProps {
   handleOk?: ((data: any) => void) | (() => Promise<any>)
@@ -58,14 +59,14 @@ const EditLinkAppServiceModal: React.FC<{ modal?: IModalProps } & IImportPomFunc
     paging: false,
     data: [data],
     fields: [
-      { name: 'artifactId', label: 'Artifact' },
+      { name: 'artifactId', label: 'Artifact', disabled: true },
       { name: 'version', label: 'Version', required: true },
       {
-        name: 'appService', label: '选择应用服务', type: 'object' as any, required: true, ignore: 'always' as any,
+        name: 'appServiceObj', label: '选择应用服务', type: 'object' as any, valueField: 'appServiceCode', required: false, ignore: 'always' as any,
       },
-      { name: 'tagName', label: '选择tag', required: true },
-      { name: 'alias', label: '版本别名', maxLength: 16 },
-      { name: 'appServiceCode', bind: 'appService.code' },
+      { name: 'tagName', label: '选择tag', required: false },
+      { name: 'versionAlias', label: '版本别名', maxLength: 16 },
+      { name: 'appServiceCode', bind: 'appServiceObj.code' },
 
     ],
   }), []);
@@ -74,29 +75,37 @@ const EditLinkAppServiceModal: React.FC<{ modal?: IModalProps } & IImportPomFunc
     if (!await ds.current?.validate()) {
       return false;
     }
-    const newData = ds?.toJSONData();
-    const result = handleOk && await handleOk(newData);
+    const newData = pick(ds.current?.toJSONData(), ['version', 'tagName', 'versionAlias', 'appServiceCode']);
+    const originData = pick(data, ['id', 'objectVersionNumber', 'artifactId', 'groupId', 'appService']);
+    console.log('newData', originData, newData);
+    // return false;
+    const result = handleOk && await handleOk({ ...originData, ...newData });
     return typeof (result) !== 'undefined' ? result : true;
-  }, [ds, handleOk]);
+  }, [data, ds, handleOk]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
   return (
     <Form dataSet={ds}>
+      <TextField name="artifactId" />
+
+      <TextField name="version" />
+      <TextField name="versionAlias" />
+
       <SelectAppService
-        name="appService"
+        name="appServiceObj"
         onChange={(v) => {
           setApplicationId(v ? v.id : undefined);
         }}
       />
-      <SelectGitTags key={`select-git-tag-${applicationId}`} name="tagName" applicationId={applicationId} />
-      <TextField name="alias" />
+      <SelectGitTags name="tagName" applicationId={applicationId} />
 
     </Form>
   );
 });
 function openEditLinkAppServiceModal(props: IImportPomFunctionProps) {
   const key = Modal.key();
+  console.log('key', props);
   Modal.open({
     key,
     title: '修改关联版本',

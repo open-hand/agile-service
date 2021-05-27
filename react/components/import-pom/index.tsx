@@ -143,7 +143,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
           </Tooltip>
         </div>
 
-        <Table dataSet={ds} queryBar={'none' as any}>
+        <Table dataSet={ds} queryBar={'none' as any} className={`${prefixCls}-table`}>
           <Column name="artifactId" tooltip={'overflow' as any} />
           <Column name="version" editor />
           <Column name="versionAlias" editor renderer={renderAlias} tooltip={'overflow' as any} />
@@ -159,7 +159,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
               return <SelectGitTags key={`import-pom-select-tag-${appService?.id}`} projectId={record.get('projectId')} applicationId={appService?.id} />;
             }}
           />
-          <Column name="action" renderer={renderAction} width={65} />
+          <Column name="action" width={65} command={({ record }) => [<Button icon="delete_forever" onClick={() => ds.splice(record.index, 1)} />]} />
         </Table>
       </div>
       <input

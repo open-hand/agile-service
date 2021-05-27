@@ -20,14 +20,13 @@ interface LinkVersionReturnSectionProps<T> extends Partial<LinkVersionSectionPro
   operation: { onClickPom: (data: T) => void, onClickTag: (data: T) => void, onClickVersion: (data: T) => void }
 }
 
-interface LinkVersionNodeOperationProps<T> {
+export interface IPublishVersionLinkVersionNodeOperationProps {
   isShowEdit: boolean | ((item: IPublishVersionTreeNode) => boolean | undefined)
   isShowDel: boolean | ((item: IPublishVersionTreeNode) => boolean | undefined)
   onEdit?: (newData:any, item: IPublishVersionTreeNode) => any
   onDelete?: (item: IPublishVersionTreeNode) => any
   renderLeftNode?: (item: IPublishVersionTreeNode, node: React.ReactElement) => React.ReactElement
 }
-export type IPublishVersionLinkVersionNodeOperationProps = LinkVersionNodeOperationProps<any>
 interface MenuDetailConfigFieldProps {
   dataKey: string,
   type?: string,
@@ -36,17 +35,17 @@ interface MenuDetailConfigFieldProps {
 }
 interface MenuDetailConfigProps<T> {
   detail: Array<MenuDetailConfigFieldProps>
-  linkVersion: { sectionProps: LinkVersionSectionProps<T>, nodeOperationProps: LinkVersionNodeOperationProps<T> }
+  linkVersion: { sectionProps: LinkVersionSectionProps<T>, nodeOperationProps: IPublishVersionLinkVersionNodeOperationProps }
 }
 interface MenuDetailLinkVersionReturnConfigProps<T> {
   sectionProps: LinkVersionReturnSectionProps<T>,
-  nodeOperationProps: LinkVersionNodeOperationProps<T>
+  nodeOperationProps: IPublishVersionLinkVersionNodeOperationProps
 }
 interface MenuDetailConfigReturnItemProps<DetailType> {
   key: 'detail' | 'linkVersion' | string,
   content: MenuDetailConfigProps<DetailType>['detail'] | MenuDetailLinkVersionReturnConfigProps<DetailType> | React.ReactElement
 }
-interface MenuInfoConfigProps {
+export interface IPublishVersionMenuInfoConfigProps {
   issueSearchStore?: IssueSearchStoreProps // 未实现
   issueInfoDataSetConfig?: DataSetProps // 未实现
   issueInfoColumns?: Array<typeof Column> // 未实现
@@ -56,12 +55,11 @@ interface MenuInfoConfigProps {
   onLoadTableData?: (optionValue: string) => void
   issueInfoSwitchIssueCountMap?: Map<string, number> // 未实现
 }
-export type IPublishVersionMenuInfoConfigProps = MenuInfoConfigProps
 interface DetailHeaderStatusProps {
   name: string
   color: string
 }
-interface MenuDiffConfigProps {
+export interface IPublishVersionMenuDiffConfigProps {
   topFormContent: React.ReactNode,
   bottomFormContent: React.ReactNode,
   bottomFormProps: { columns: number }
@@ -70,7 +68,6 @@ interface MenuDiffConfigProps {
   onChangeIssueTag?: (issueDiffDataSet: DataSet, action: 'add' | 'update') => void
   onSubmitDiff?: (issueDiffDataSet: DataSet) => void // 未实现
 }
-export type IPublishVersionMenuDiffConfigProps = MenuDiffConfigProps
 export interface IPublishVersionProps<DetailType> {
   store?: IPublishVersionBaseDetailStore<DetailType>,
   renderPage?: (pageHeader: React.ReactNode, pageContent: React.ReactNode) => React.ReactElement
@@ -82,8 +79,8 @@ export interface IPublishVersionProps<DetailType> {
   leftListItemConfig?: { renderName: (data: Record) => string, renderMenus: (data: Record) => React.ReactElement, onChange?: (data: Record) => void }
   menuDetail?: (detail: MenuDetailConfigProps<DetailType>['detail'],
     linkVersion: MenuDetailConfigProps<DetailType>['linkVersion']) => Array<MenuDetailConfigReturnItemProps<DetailType>>
-  menuInfo?: (context: IPublishVersionContext) => MenuInfoConfigProps
-  menuDiff?: (context: IPublishVersionContext) => MenuDiffConfigProps | React.ReactElement
+  menuInfo?: (context: IPublishVersionContext) => IPublishVersionMenuInfoConfigProps
+  menuDiff?: (context: IPublishVersionContext) => IPublishVersionMenuDiffConfigProps | React.ReactElement
   customMenu?: Map<string, { component: React.ReactElement, title: string }>
 }
 export function ExtendPublishVersion<DetailType>(props: IPublishVersionProps<DetailType>) {

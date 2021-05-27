@@ -18,7 +18,13 @@ function PublishVersionBody() {
   } = context;
   const menu = store.getCurrentMenu;
   const sectionProps = useEditModeSectionConfig();
-  const nodeOperationProps = useMemo(() => ({ isShowEdit: (item: IPublishVersionTreeNode) => item.type === 'tag' || item.appService, isShowDel: true }), []);
+  const nodeOperationProps = useMemo(() => ({
+    isShowEdit: (item: IPublishVersionTreeNode) => {
+      console.log('item..', item);
+      return item.type === 'tag' || !item.appService;
+    },
+    isShowDel: true,
+  }), []);
 
   switch (menu) {
     case 'detail': {
