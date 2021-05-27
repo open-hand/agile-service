@@ -378,20 +378,43 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if(isProgram && agilePluginService != null){
            return agilePluginService.filterProgramEpic(objectSchemeFieldDTOS);
         }
-        return filterFieldsByProjectCategories(objectSchemeFieldDTOS, projectId, schemeCode);
+        return filterFieldsByProjectCategories(objectSchemeFieldDTOS, projectId);
     }
 
-    private List<ObjectSchemeFieldDTO> filterFieldsByProjectCategories(List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS,
-                                                                       Long projectId,
-                                                                       String schemeCode) {
-        if (projectId == null || !ObjectSchemeCode.AGILE_ISSUE.equals(schemeCode)) {
-            return objectSchemeFieldDTOS;
+    private List filterFieldsByProjectCategories(List list,
+                                                 Long projectId) {
+        if (projectId == null || ObjectUtils.isEmpty(list)) {
+            return list;
         }
         Set<String> codes = getProjectCategoryCodes(projectId);
-        if(!codes.contains(ProjectCategory.MODULE_DEVOPS)) {
-            return objectSchemeFieldDTOS.stream().filter(x -> !FieldCode.TAG.equals(x.getCode())).collect(Collectors.toList());
+        boolean doFilter =
+                codes.contains(ProjectCategory.MODULE_AGILE)
+                        && !codes.contains(ProjectCategory.MODULE_DEVOPS);
+        if (doFilter) {
+            Object obj = list.get(0);
+            List result = list;
+            if (obj instanceof ObjectSchemeFieldDTO) {
+                result =
+                        ((List<ObjectSchemeFieldDTO>) list)
+                                .stream()
+                                .filter(x -> !FieldCode.TAG.equals(x.getCode()))
+                                .collect(Collectors.toList());
+            } else if (obj instanceof PageConfigFieldVO) {
+                result =
+                        ((List<PageConfigFieldVO>) list)
+                                .stream()
+                                .filter(x -> !FieldCode.TAG.equals(x.getFieldCode()))
+                                .collect(Collectors.toList());
+            } else if (obj instanceof ObjectSchemeFieldDetailVO) {
+                result =
+                        ((List<ObjectSchemeFieldDetailVO>) list)
+                                .stream()
+                                .filter(x -> !FieldCode.TAG.equals(x.getCode()))
+                                .collect(Collectors.toList());
+            }
+            return result;
         } else {
-            return objectSchemeFieldDTOS;
+            return list;
         }
     }
 
@@ -1197,21 +1220,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (!CollectionUtils.isEmpty(fieldCodes)) {
             list.addAll(objectSchemeFieldMapper.selectFieldsByFieldCodes(fieldCodes));
         }
-        return filterFields(list, projectId);
-    }
-
-    private List<ObjectSchemeFieldDetailVO> filterFields(List<ObjectSchemeFieldDetailVO> list,
-                                                         Long projectId) {
-        if (projectId == null) {
-            return list;
-        }
-        Set<String> codes = getProjectCategoryCodes(projectId);
-        if (codes.contains(ProjectCategory.MODULE_AGILE)
-                && !codes.contains(ProjectCategory.MODULE_DEVOPS)) {
-            return list.stream().filter(x -> !FieldCode.TAG.equals(x.getCode())).collect(Collectors.toList());
-        } else {
-            return list;
-        }
+        return filterFieldsByProjectCategories(list, projectId);
     }
 
     private Set<String> getProjectCategoryCodes(Long projectId) {
@@ -1570,20 +1579,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
            return agilePluginService.queryProgramPageConfigFields(projectId,issueTypeId,pageConfigFieldVOS);
         }
         return filterFieldsByProjectCategories(pageConfigFieldVOS, projectId);
-    }
-
-    private List<PageConfigFieldVO> filterFieldsByProjectCategories(List<PageConfigFieldVO> pageConfigFieldVOS,
-                                                                    Long projectId) {
-        if (projectId == null) {
-            return pageConfigFieldVOS;
-        }
-        Set<String> codes = getProjectCategoryCodes(projectId);
-        if (codes.contains(ProjectCategory.MODULE_AGILE)
-                && !codes.contains(ProjectCategory.MODULE_DEVOPS)) {
-            return pageConfigFieldVOS.stream().filter(x -> !FieldCode.TAG.equals(x.getFieldCode())).collect(Collectors.toList());
-        } else {
-            return pageConfigFieldVOS;
-        }
     }
 
     @Override
