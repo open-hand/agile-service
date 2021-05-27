@@ -13,6 +13,7 @@ interface BasicProps extends Partial<SelectProps> {
   extraOptions?: any[]
   flat?: boolean
   projectId?: string
+  organizationId?: string
   outside?: boolean
 
 }
@@ -30,7 +31,7 @@ type SelectCustomFieldProps = BasicProps & ({
 })
 
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
-  fieldId, fieldOptions, flat, projectId, selected, extraOptions, outside = false, ...otherProps
+  fieldId, fieldOptions, flat, projectId, organizationId, selected, extraOptions, outside = false, ...otherProps
 },
 ref: React.Ref<Select>) => {
   const needOptions = useMemo(() => [...castArray(otherProps.value), ...castArray(selected)].filter(Boolean), [selected, otherProps.value]);
@@ -49,7 +50,7 @@ ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     textField: 'value',
     valueField: 'id',
-    request: ({ page, filter }) => (fieldOptions ? fakePageRequest(filter, page, 10, needOptions) : fieldApi.outside(outside).project(projectId).getFieldOptions(fieldId!, filter, page, 10, needOptions)),
+    request: ({ page, filter }) => (fieldOptions ? fakePageRequest(filter, page, 10, needOptions) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, 10, needOptions)),
     middleWare: (data) => {
       if (!extraOptions) {
         return data;
@@ -57,7 +58,7 @@ ref: React.Ref<Select>) => {
       return unionBy([...extraOptions, ...data], 'id');
     },
     paging: true,
-  }), [extraOptions, fieldOptions, fakePageRequest, fieldId, needOptions, outside, projectId]);
+  }), [fieldOptions, fakePageRequest, needOptions, outside, organizationId, projectId, fieldId, extraOptions]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (
