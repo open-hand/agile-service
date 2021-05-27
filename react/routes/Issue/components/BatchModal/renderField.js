@@ -78,6 +78,7 @@ export default function renderField({
         <TextField
           name={code}
           maxLength={100}
+          valueChangeAction="input"
           style={{ width: '100%' }}
         />
       );
@@ -87,6 +88,7 @@ export default function renderField({
           name={code}
           rows={3}
           maxLength={255}
+          valueChangeAction="input"
           style={{ width: '100%' }}
         />
       );

@@ -112,6 +112,7 @@ export default function renderField<T extends Partial<SelectProps>>({
         <TextField
           name={fieldCode}
           maxLength={100}
+          valueChangeAction={'input' as any}
           style={{ width: '100%' }}
           {...otherComponentProps}
         />
@@ -122,6 +123,7 @@ export default function renderField<T extends Partial<SelectProps>>({
           name={fieldCode}
           rows={3}
           maxLength={255}
+          valueChangeAction={'input' as any}
           style={{ width: '100%' }}
           // @ts-ignore
           {...otherComponentProps}
@@ -185,6 +187,7 @@ export default function renderField<T extends Partial<SelectProps>>({
         <TextField
           name={fieldCode}
           maxLength={100}
+          valueChangeAction={'input' as any}
           style={{ width: '100%' }}
           {...otherComponentProps}
         />

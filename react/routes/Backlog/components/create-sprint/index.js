@@ -83,7 +83,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
 
   return (
     <Form dataSet={dataSet}>
-      <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
+      <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} valueChangeAction="input" />
       <Select name="duration" clearButton={false}>
         <Option value="0">自定义</Option>
         <Option value="1">1周</Option>
@@ -190,7 +190,7 @@ export function CreateCurrentPiSprint({
         创建的冲刺将自动关联当前PI：
         {`${pi.code}-${pi.name}`}
       </div>
-      <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
+      <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} valueChangeAction="input" />
       <Select name="duration" clearButton={false}>
         <Option value="0">自定义</Option>
         <Option value="1" disabled={isDisabledOption('1')}>1周</Option>

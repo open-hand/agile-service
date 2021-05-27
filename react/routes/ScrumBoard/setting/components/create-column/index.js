@@ -40,7 +40,7 @@ function CreateColumn({
   return (
     <>
       <Form dataSet={dataSet}>
-        <TextField name="name" maxLength={MAX_LENGTH_STATUS} />
+        <TextField name="name" maxLength={MAX_LENGTH_STATUS} valueChangeAction="input" />
         <Select
           name="categoryCode"
           optionRenderer={({ record }) => (<StatusTag data={record.toData()} />)}

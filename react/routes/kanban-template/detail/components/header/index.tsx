@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({
         <TextEditToggle
           initValue={name}
           onSubmit={handleSubmit}
-          editor={() => <TextField maxLength={MAX_LENGTH_KANBAN_COLUMN_NAME} />}
+          editor={() => <TextField maxLength={MAX_LENGTH_KANBAN_COLUMN_NAME} valueChangeAction={'input' as any} />}
         >
           {name}
         </TextEditToggle>

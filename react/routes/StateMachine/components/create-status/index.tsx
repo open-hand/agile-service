@@ -172,6 +172,7 @@ const CreateStatus: React.FC<Props> = ({
           disabled={!!statusRecord}
           name="name"
           maxLength={MAX_LENGTH_STATUS}
+          valueChangeAction={'input' as any}
           onInput={(e) => {
             // @ts-ignore
             const { value } = e.target;

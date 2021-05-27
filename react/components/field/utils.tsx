@@ -105,6 +105,7 @@ export function getFieldElement(field: IFilterField, flat?: boolean): React.Reac
       return (
         <TextField
           maxLength={100}
+          valueChangeAction={'input' as any}
         />
       );
     case 'text':
@@ -112,6 +113,7 @@ export function getFieldElement(field: IFilterField, flat?: boolean): React.Reac
         <TextArea
           rows={3}
           maxLength={255}
+          valueChangeAction={'input' as any}
         />
       );
     case 'single': case 'multiple': {

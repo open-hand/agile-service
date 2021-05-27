@@ -117,6 +117,7 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
               setTimeout(handleCancel, 200);
             }}
             maxLength={10}
+            valueChangeAction={'input' as any}
           />
         ) : (<span>{name}</span>)
       }

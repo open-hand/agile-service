@@ -95,9 +95,9 @@ function renderEditor({
   }
   switch (fieldType) {
     case 'input':
-      return <TextField maxLength={100} {...otherProps} />;
+      return <TextField maxLength={100} valueChangeAction={'input' as any} {...otherProps} />;
     case 'text':
-      return <TextArea rows={3} maxLength={255} {...otherProps} />;
+      return <TextArea rows={3} maxLength={255} valueChangeAction={'input' as any} {...otherProps} />;
     case 'multiMember':
     case 'member':
     {

@@ -91,6 +91,7 @@ class EditBoardName extends Component {
                 style={{ width: 512, marginTop: 5 }}
                 label="看板名称"
                 maxLength={10}
+                valueChangeAction="input"
                 value={initialBoardName}
                 disabled
               />
@@ -101,6 +102,7 @@ class EditBoardName extends Component {
                     name="boardName"
                     label="看板名称"
                     maxLength={10}
+                    valueChangeAction="input"
                   />
                 </Form>
                 <div style={{ padding: '12px 0', borderTop: '1px solid var(--divider)', textAlign: 'right' }}>

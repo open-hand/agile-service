@@ -179,6 +179,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         <TextField
           name={code}
           maxLength={100}
+          valueChangeAction={'input' as any}
           label={name}
           style={{ width: '100%' }}
           {...otherComponentProps}
@@ -190,6 +191,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           name={code}
           rows={3}
           maxLength={255}
+          valueChangeAction={'input' as any}
           label={name}
           style={{ width: '100%' }}
           // @ts-ignore
@@ -251,6 +253,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         <TextField
           name={code}
           maxLength={100}
+          valueChangeAction={'input' as any}
           label={name}
           style={{ width: '100%' }}
           {...otherComponentProps}

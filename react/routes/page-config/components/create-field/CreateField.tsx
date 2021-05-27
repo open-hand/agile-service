@@ -252,6 +252,7 @@ function CreateField() {
           <TextField
             name="defaultValue"
             maxLength={100}
+            valueChangeAction={'input' as any}
           />
         );
       case 'text':
@@ -260,6 +261,7 @@ function CreateField() {
             name="defaultValue"
             rows={3}
             maxLength={255}
+            valueChangeAction={'input' as any}
           />
         );
       case 'url':
@@ -323,10 +325,12 @@ function CreateField() {
           : (
             <TextField
               name="code"
+              valueChangeAction={'input' as any}
             />
           )}
         <TextField
           name="name"
+          valueChangeAction={'input' as any}
         />
         <div>
           <Select

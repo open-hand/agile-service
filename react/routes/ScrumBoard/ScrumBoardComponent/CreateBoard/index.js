@@ -39,7 +39,7 @@ export default inject('AppState')(({ AppState, modal: { handleOk, close }, onCre
 
   return (
     <Form dataSet={dataSet}>
-      <TextField name="name" required maxLength={30} autoFocus />
+      <TextField name="name" required maxLength={30} autoFocus valueChangeAction="input" />
     </Form>
   );
 });
