@@ -82,6 +82,7 @@ function CustomField({ field }) {
       return (
         <StatusField
           projectId={projectId}
+          applyType={applyType}
           field={field}
           value={value}
           onChange={handleChange}

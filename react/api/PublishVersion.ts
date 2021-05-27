@@ -56,6 +56,7 @@ export interface IPublishVersionTreeNode {
   tagName?: string | null
   tagAlias?: string | null
   objectVersionNumber?: number
+  projectObject?: any/** 前端插入的数据，有则显示项目 */
 }
 interface IPublishVersionListSearchData {
   appService?: boolean

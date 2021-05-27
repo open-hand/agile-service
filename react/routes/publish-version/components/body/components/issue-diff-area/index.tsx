@@ -98,7 +98,7 @@ export function IssueDiffAreaBase({
     const uniqTableData = [...tableDataMap.values()]; // uniqBy((tableData || []), (item) => item.issueId);
     console.log('uniqTableData', uniqTableData);
     openPreviewResultModal({
-      onChangeIssueTag: handleChangeIssueTag, tableData: uniqTableData, handleOk: () => store.setCurrentMenu('info'),
+      onChangeIssueTag: handleChangeIssueTag, tableData: uniqTableData, handleOk: () => store.setCurrentMenu('info'), applyType: (store as any).applyType,
     });
   }
   return (
@@ -142,7 +142,7 @@ function IssueDiffArea() {
     }); // .....
   }, [issueDiffDataSet, issueDiffDataSet.length, publishVersionId]);
   useEffect(() => {
-    const availableDependencyList = dependencyList.filter((i) => i.type === 'tag');
+    const availableDependencyList = dependencyList.filter((i) => i.type === 'tag' || (!i.appService && i.tagName));
     if (availableDependencyList.length === 0) {
       issueDiffDataSet.loadData([{}]);
     } else {

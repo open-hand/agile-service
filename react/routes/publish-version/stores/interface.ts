@@ -24,6 +24,7 @@ export interface IPublishVersionBaseDetailStore<T> {
   init: (events?: Partial<IPublishVersionBaseDetailEventsProps>, initData?: { detailProps?: DetailContainerProps }, ...other: any) => void
   clear: Function
   loadData: Function
+  findAppServiceByCode: (code: string, data: any) => any
   select: (data: T | any) => void
   setCurrentMenu: (data: 'detail' | 'diff' | 'info' | string) => void
 }

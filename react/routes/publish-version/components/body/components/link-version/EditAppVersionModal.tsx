@@ -59,14 +59,15 @@ const EditLinkAppServiceModal: React.FC<{ modal?: IModalProps } & IImportPomFunc
     paging: false,
     data: [data],
     fields: [
-      { name: 'artifactId', label: 'Artifact', disabled: true },
       { name: 'version', label: 'Version', required: true },
+      { name: 'artifactId', label: 'Artifact' },
+      { name: 'groupId', label: 'Group' },
       {
-        name: 'appServiceObj', label: '选择应用服务', type: 'object' as any, valueField: 'appServiceCode', required: false, ignore: 'always' as any,
+        name: 'appServiceObj', label: '选择应用服务', type: 'object' as any, valueField: 'serviceCode', required: false, ignore: 'always' as any,
       },
-      { name: 'tagName', label: '选择tag', required: false },
+      { name: 'tagName', label: '选择Tag', required: false },
       { name: 'versionAlias', label: '版本别名', maxLength: 16 },
-      { name: 'appServiceCode', bind: 'appServiceObj.code' },
+      { name: 'serviceCode', bind: 'appServiceObj.code' },
 
     ],
   }), []);
@@ -75,8 +76,8 @@ const EditLinkAppServiceModal: React.FC<{ modal?: IModalProps } & IImportPomFunc
     if (!await ds.current?.validate()) {
       return false;
     }
-    const newData = pick(ds.current?.toJSONData(), ['version', 'tagName', 'versionAlias', 'appServiceCode']);
-    const originData = pick(data, ['id', 'objectVersionNumber', 'artifactId', 'groupId', 'appService']);
+    const newData = pick(ds.current?.toJSONData(), ['version', 'tagName', 'versionAlias', 'artifactId', 'groupId', 'serviceCode']);
+    const originData = pick(data, ['id', 'objectVersionNumber', 'appService']);
     console.log('newData', originData, newData);
     // return false;
     const result = handleOk && await handleOk({ ...originData, ...newData });
@@ -87,6 +88,8 @@ const EditLinkAppServiceModal: React.FC<{ modal?: IModalProps } & IImportPomFunc
   }, [handleSubmit, modal]);
   return (
     <Form dataSet={ds}>
+      <TextField name="groupId" />
+
       <TextField name="artifactId" />
 
       <TextField name="version" />
@@ -94,6 +97,15 @@ const EditLinkAppServiceModal: React.FC<{ modal?: IModalProps } & IImportPomFunc
 
       <SelectAppService
         name="appServiceObj"
+        afterLoad={(list) => {
+          if (list.length > 0 && !ds.current?.getState('init_code')) {
+            const service = list.find((item) => item.code === data.appServiceCode);
+            console.log('appServiceObj service', service);
+            ds.current?.set('appServiceObj', service);
+            service && setApplicationId(service.id);
+          }
+          console.log('list...', list, data);
+        }}
         onChange={(v) => {
           setApplicationId(v ? v.id : undefined);
         }}
