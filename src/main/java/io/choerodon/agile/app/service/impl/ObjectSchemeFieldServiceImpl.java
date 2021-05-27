@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -377,7 +378,44 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if(isProgram && agilePluginService != null){
            return agilePluginService.filterProgramEpic(objectSchemeFieldDTOS);
         }
-        return objectSchemeFieldDTOS;
+        return filterFieldsByProjectCategories(objectSchemeFieldDTOS, projectId);
+    }
+
+    private List filterFieldsByProjectCategories(List list,
+                                                 Long projectId) {
+        if (projectId == null || ObjectUtils.isEmpty(list)) {
+            return list;
+        }
+        Set<String> codes = getProjectCategoryCodes(projectId);
+        boolean doFilter =
+                codes.contains(ProjectCategory.MODULE_AGILE)
+                        && !codes.contains(ProjectCategory.MODULE_DEVOPS);
+        if (doFilter) {
+            Object obj = list.get(0);
+            List result = list;
+            if (obj instanceof ObjectSchemeFieldDTO) {
+                result =
+                        ((List<ObjectSchemeFieldDTO>) list)
+                                .stream()
+                                .filter(x -> !FieldCode.TAG.equals(x.getCode()))
+                                .collect(Collectors.toList());
+            } else if (obj instanceof PageConfigFieldVO) {
+                result =
+                        ((List<PageConfigFieldVO>) list)
+                                .stream()
+                                .filter(x -> !FieldCode.TAG.equals(x.getFieldCode()))
+                                .collect(Collectors.toList());
+            } else if (obj instanceof ObjectSchemeFieldDetailVO) {
+                result =
+                        ((List<ObjectSchemeFieldDetailVO>) list)
+                                .stream()
+                                .filter(x -> !FieldCode.TAG.equals(x.getCode()))
+                                .collect(Collectors.toList());
+            }
+            return result;
+        } else {
+            return list;
+        }
     }
 
     private void addNotSyncedField(List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS, List<String> issueTypes, boolean includeBacklogSystemField) {
@@ -1182,7 +1220,16 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (!CollectionUtils.isEmpty(fieldCodes)) {
             list.addAll(objectSchemeFieldMapper.selectFieldsByFieldCodes(fieldCodes));
         }
-        return list;
+        return filterFieldsByProjectCategories(list, projectId);
+    }
+
+    private Set<String> getProjectCategoryCodes(Long projectId) {
+        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        return project
+                .getCategories()
+                .stream()
+                .map(ProjectCategoryDTO::getCode)
+                .collect(Collectors.toSet());
     }
 
     private List<String> getIssueTypeFieldCodes(Long issueTypeId, Long organizationId, Long projectId) {
@@ -1531,7 +1578,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (agilePluginService != null) {
            return agilePluginService.queryProgramPageConfigFields(projectId,issueTypeId,pageConfigFieldVOS);
         }
-        return pageConfigFieldVOS;
+        return filterFieldsByProjectCategories(pageConfigFieldVOS, projectId);
     }
 
     @Override
