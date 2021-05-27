@@ -17,6 +17,9 @@
         <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
             #{projectId}
         </foreach>
+        <if test="appService != null">
+            and apv.app_service = #{appService}
+        </if>
     </select>
 
     <select id="listByOptions" resultType="io.choerodon.agile.api.vo.PublishVersionVO">
