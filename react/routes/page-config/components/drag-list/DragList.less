@@ -41,11 +41,11 @@
 
   &-operate {
     float: right;
+    width: 100px;
   }
 
   &-text {
-    width: 35%;
-    display: inline-block;
+    width: calc(50% - 50px);
     line-height: 0.24rem;
   }
 
@@ -63,9 +63,11 @@
   &-input {
     width: 35%;
     display: inline-block;
+
     .c7n-input-focused .c7n-input-label {
       display: none;
     }
+
     .c7n-input-has-border.c7n-input-wrapper:before {
       border: none;
     }

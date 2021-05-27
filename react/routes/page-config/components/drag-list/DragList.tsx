@@ -2,11 +2,13 @@ import React, { Component, Fragment, CSSProperties } from 'react';
 import {
   DragDropContext, Droppable, Draggable, DraggingStyle, DropResult, NotDraggingStyle,
 } from 'react-beautiful-dnd';
+import { WindowScroller, List, AutoSizer } from 'react-virtualized';
 import _ from 'lodash';
 import { Choerodon } from '@choerodon/boot';
 import {
   Card, Tooltip, Button, Input, Popconfirm,
 } from 'choerodon-ui';
+import { TextField } from 'choerodon-ui/pro';
 import { InjectedIntl } from 'react-intl';
 import { Size } from 'choerodon-ui/lib/_util/enum';
 import './DragList.less';
@@ -38,6 +40,42 @@ interface StateProps {
   value: string,
   code: string,
   saveDisabled: boolean,
+}
+
+function getStyle({
+  draggableStyle, virtualStyle, isDragging, item,
+}: any) {
+  let color = '#DDE7F2';
+  if (isDragging) {
+    color = '#DDE7F2';
+  } else if (item.enabled) {
+    color = '#F7F7F7';
+  } else {
+    color = '#F0F0F0';
+  }
+  const combined = {
+    ...virtualStyle,
+    ...draggableStyle,
+  };
+
+  const grid = 8;
+  const height = isDragging ? combined.height : combined.height - grid;
+  const result = {
+    ...combined,
+    left: isDragging ? combined.left : combined.left + grid,
+    width: isDragging
+      ? draggableStyle.width
+      : `calc(${combined.width} - ${grid * 2}px)`,
+    marginBottom: grid,
+    background: color,
+    display: 'flex',
+    alignItems: 'center',
+  };
+  // eslint-disable-next-line no-restricted-globals
+  if (!isNaN(height)) {
+    result.height = height;
+  }
+  return result;
 }
 class DragList extends Component<Props, StateProps> {
   constructor(props: Props) {
@@ -80,28 +118,6 @@ class DragList extends Component<Props, StateProps> {
       addItemVisible: false,
       tempKey: false,
     });
-  };
-
-  // 获取元素样式，根据是否拖动变化
-  // @ts-ignore
-  getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDraggingStyle | undefined,
-    item: OptionData): CSSProperties => {
-    let color = '#DDE7F2';
-    if (isDragging) {
-      color = '#DDE7F2';
-    } else if (item.enabled) {
-      color = '#F7F7F7';
-    } else {
-      color = '#F0F0F0';
-    }
-    return {
-      userSelect: 'none',
-      padding: '5px 20px',
-      margin: '0 0 5px 0',
-      background: color,
-      height: 34,
-      ...draggableStyle,
-    };
   };
 
   /**
@@ -248,12 +264,12 @@ class DragList extends Component<Props, StateProps> {
     });
   };
 
-  onValueChange = (e: any) => {
+  onValueChange = (value: any) => {
     const { code } = this.state;
-    if (e.target.value) {
+    if (value) {
       this.setState({
         saveDisabled: !code,
-        value: e.target.value,
+        value,
       });
     } else {
       this.setState({
@@ -263,12 +279,12 @@ class DragList extends Component<Props, StateProps> {
     }
   };
 
-  onCodeChange = (e: React.ChangeEvent<any>) => {
+  onCodeChange = (v:string) => {
     const { value } = this.state;
-    if (e.target.value) {
+    if (v) {
       this.setState({
         saveDisabled: !value,
-        code: e.target.value as string,
+        code: v,
       });
     } else {
       this.setState({
@@ -277,6 +293,143 @@ class DragList extends Component<Props, StateProps> {
       });
     }
   };
+
+  renderItem = ({
+    index, style, provided, isDragging, state,
+  }: any) => {
+    const { data, formatMessage } = this.props;
+
+    const { tempKey, saveDisabled } = state;
+
+    const item = data[index];
+    return (
+      <div
+        ref={provided.innerRef}
+        {...provided.draggableProps}
+        {...provided.dragHandleProps}
+        style={{
+          ...getStyle({
+            draggableStyle: provided.draggableProps.style,
+            virtualStyle: style,
+            isDragging,
+            item,
+          }),
+        }}
+      >
+        {item.id === tempKey || item.tempKey === tempKey
+          ? (
+            <>
+              <span className="issue-dragList-input">
+                <TextField
+                  defaultValue={item.code}
+                  onChange={this.onCodeChange}
+                  placeholder={formatMessage({ id: 'dragList.placeholder.code' })}
+                  maxLength={MAX_LENGTH_FIELD_OPTION_CODE}
+                  valueChangeAction={'input' as any}
+                />
+              </span>
+              <span className="issue-dragList-input">
+                <TextField
+                  defaultValue={item.value}
+                  onChange={this.onValueChange}
+                  placeholder={formatMessage({ id: 'dragList.placeholder' })}
+                  maxLength={MAX_LENGTH_FIELD_OPTION_VALUE}
+                  valueChangeAction={'input' as any}
+                />
+              </span>
+              <Button
+                disabled={saveDisabled}
+                type="primary"
+                size={'small' as Size}
+                onClick={() => this.edit(tempKey)}
+                funcType="raised"
+                className="issue-dragList-add"
+              >
+                {formatMessage({ id: 'save' })}
+              </Button>
+              <Button
+                size={'small' as Size}
+                onClick={this.cancel}
+                funcType="raised"
+              >
+                {formatMessage({ id: 'cancel' })}
+              </Button>
+            </>
+          )
+          : (
+            <>
+              <span className="issue-dragList-text">{item.code}</span>
+              <span className="issue-dragList-text">{item.value}</span>
+              <div className="issue-dragList-operate">
+                <Tooltip
+                  placement="bottom"
+                  title={formatMessage({ id: 'edit' })}
+                >
+                  <Button
+                    size={'small' as Size}
+                    shape="circle"
+                    icon="mode_edit"
+                    onClick={() => this.editItem(item.tempKey || item.id)}
+                  />
+                </Tooltip>
+                {
+                  item.enabled
+                    ? (
+                      <Tooltip
+                        placement="bottom"
+                        title={formatMessage({ id: 'dragList.invalid' })}
+                      >
+                        <Button size={'small' as Size} icon="block" shape="circle" onClick={() => this.invalid(item.tempKey || item.id)} />
+                      </Tooltip>
+                    )
+                    : (
+                      <Tooltip
+                        placement="bottom"
+                        title={formatMessage({ id: 'dragList.active' })}
+                      >
+                        <Button size={'small' as Size} icon="playlist_add_check" shape="circle" onClick={() => this.active(item.tempKey || item.id)} />
+                      </Tooltip>
+                    )
+                }
+                <Tooltip
+                  placement="bottom"
+                  title={formatMessage({ id: 'delete' })}
+                >
+                  <Popconfirm
+                    placement="top"
+                    title={`确认要删除 ${item.value} 吗？问题上该字段值也会被清空。`}
+                    onConfirm={() => this.remove(item.tempKey || item.id)}
+                    okText="删除"
+                    cancelText="取消"
+                  >
+                    <Button size={'small' as Size} shape="circle" icon="delete" />
+                  </Popconfirm>
+                </Tooltip>
+              </div>
+            </>
+          )}
+      </div>
+    );
+  }
+
+  rowRenderer = ({ index, style, state }: any) => {
+    const { data } = this.props;
+
+    const item = data[index];
+    return (
+      <Draggable
+        key={item.tempKey || item.id}
+        draggableId={String(item.tempKey || item.id)}
+        index={index}
+      >
+        {(provided, snapshot) => (
+          this.renderItem({
+            index, style, provided, isDragging: snapshot.isDragging, state,
+          })
+        )}
+      </Draggable>
+    );
+  }
 
   render() {
     const {
@@ -302,153 +455,76 @@ class DragList extends Component<Props, StateProps> {
               bordered={false}
               className="issue-dragList-card"
             >
-              <Droppable droppableId="droppable">
+              <Droppable
+                droppableId="droppable"
+                mode="virtual"
+                renderClone={(provided, snapshot, rubric) => {
+                  const { index } = rubric.source;
+                  const issueObj = data[index];
+                  if (!issueObj) {
+                    return (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      />
+                    );
+                  }
+                  return this.renderItem({
+                    style: { margin: 0 },
+                    index,
+                    isDragging: snapshot.isDragging,
+                    provided,
+                    state: this.state,
+                  });
+                }}
+              >
                 {(provided) => (
                   <div
                     ref={provided.innerRef}
                     className="issue-issueTypeDrag-drop"
                   >
-                    {data && data.map((item, index) => (
-                      <Draggable
-                        key={item.tempKey || item.id}
-                        draggableId={String(item.tempKey || item.id)}
-                        index={index}
-                      >
-                        {(subProvided, subSnapshot) => (
-                          <div
-                            ref={subProvided.innerRef}
-                            {...subProvided.draggableProps}
-                            {...subProvided.dragHandleProps}
-                            style={this.getItemStyle(
-                              subSnapshot.isDragging,
-                              subProvided.draggableProps.style,
-                              item,
-                            )}
-                          >
-                            {item.id === tempKey || item.tempKey === tempKey
-                              ? (
-                                <>
-                                  <span className="issue-dragList-input">
-                                    <Input
-                                      id="dragList-code"
-                                      defaultValue={item.code}
-                                      onChange={this.onCodeChange}
-                                      className="hidden-label"
-                                      placeholder={formatMessage({ id: 'dragList.placeholder.code' })}
-                                      maxLength={10}
-                                    />
-                                  </span>
-                                  <span className="issue-dragList-input">
-                                    <Input
-                                      id="dragList-value"
-                                      defaultValue={item.value}
-                                      onChange={this.onValueChange}
-                                      className="hidden-label"
-                                      placeholder={formatMessage({ id: 'dragList.placeholder' })}
-                                      maxLength={10}
-                                    />
-                                  </span>
-                                  <Button
-                                    disabled={saveDisabled}
-                                    type="primary"
-                                    size={'small' as Size}
-                                    onClick={() => this.edit(tempKey)}
-                                    funcType="raised"
-                                    className="issue-dragList-add"
-                                  >
-                                    {formatMessage({ id: 'save' })}
-                                  </Button>
-                                  <Button
-                                    size={'small' as Size}
-                                    onClick={this.cancel}
-                                    funcType="raised"
-                                  >
-                                    {formatMessage({ id: 'cancel' })}
-                                  </Button>
-                                </>
-                              )
-                              : (
-                                <>
-                                  <span className="issue-dragList-text">{item.code}</span>
-                                  <span className="issue-dragList-text">{item.value}</span>
-                                  <div className="issue-dragList-operate">
-                                    <Tooltip
-                                      placement="bottom"
-                                      title={formatMessage({ id: 'edit' })}
-                                    >
-                                      <Button
-                                        size={'small' as Size}
-                                        shape="circle"
-                                        onClick={() => this.editItem(item.tempKey || item.id)}
-                                      >
-                                        <i className="icon icon-edit-o" />
-                                      </Button>
-                                    </Tooltip>
-                                    {
-                                      item.enabled
-                                        ? (
-                                          <Tooltip
-                                            placement="bottom"
-                                            title={formatMessage({ id: 'dragList.invalid' })}
-                                          >
-                                            <Button size={'small' as Size} shape="circle" onClick={() => this.invalid(item.tempKey || item.id)}>
-                                              <i className="icon icon-block" />
-                                            </Button>
-                                          </Tooltip>
-                                        )
-                                        : (
-                                          <Tooltip
-                                            placement="bottom"
-                                            title={formatMessage({ id: 'dragList.active' })}
-                                          >
-                                            <Button size={'small' as Size} shape="circle" onClick={() => this.active(item.tempKey || item.id)}>
-                                              <i className="icon icon-playlist_add_check" />
-                                            </Button>
-                                          </Tooltip>
-                                        )
-                                    }
-                                    <Tooltip
-                                      placement="bottom"
-                                      title={formatMessage({ id: 'delete' })}
-                                    >
-                                      <Popconfirm
-                                        placement="top"
-                                        title={`确认要删除 ${item.value} 吗？问题上该字段值也会被清空。`}
-                                        onConfirm={() => this.remove(item.tempKey || item.id)}
-                                        okText="删除"
-                                        cancelText="取消"
-                                      >
-                                        <Button size={'small' as Size} shape="circle">
-                                          <i className="icon icon-delete" />
-                                        </Button>
-                                      </Popconfirm>
-                                    </Tooltip>
-                                  </div>
-                                </>
-                              )}
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
+                    <WindowScroller scrollElement={document.getElementsByClassName('c7n-pro-modal-body')[0]}>
+                      {({ height, scrollTop, registerChild }) => (
+                        <AutoSizer disableHeight>
+                          {({ width }) => (
+                            <div ref={(el) => registerChild(el)} style={{ width: '100%' }}>
+                              <List
+                                autoHeight
+                                overscanRowCount={20}
+                                height={height}
+                                rowCount={data.length}
+                                rowHeight={48}
+                                rowRenderer={({ index, style }) => this.rowRenderer({
+                                  index,
+                                  style,
+                                  state: this.state,
+                                })}
+                                scrollTop={scrollTop}
+                                width={width}
+                              />
+                            </div>
+                          )}
+                        </AutoSizer>
+                      )}
+                    </WindowScroller>
                     {addItemVisible
                       ? (
                         <div className="issue-dragList-addItem">
                           <span className="issue-dragList-input">
-                            <Input
-                              id="dragList-code"
+                            <TextField
                               onChange={this.onCodeChange}
-                              className="hidden-label"
                               placeholder={formatMessage({ id: 'dragList.placeholder.code' })}
                               maxLength={MAX_LENGTH_FIELD_OPTION_CODE}
+                              valueChangeAction={'input' as any}
                             />
                           </span>
                           <span className="issue-dragList-input">
-                            <Input
-                              id="dragList-value"
+                            <TextField
                               onChange={this.onValueChange}
-                              className="hidden-label"
                               placeholder={formatMessage({ id: 'dragList.placeholder' })}
                               maxLength={MAX_LENGTH_FIELD_OPTION_VALUE}
+                              valueChangeAction={'input' as any}
                             />
                           </span>
                           <div className="issue-dragList-btns">
