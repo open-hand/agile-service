@@ -8,6 +8,7 @@ import SelectUser from '@/components/select/select-user';
 import SelectEnvironment from '@/components/select/select-environment';
 import SelectProgramVersion from '@/components/select/select-program-version';
 import { userApi } from '@/api';
+import SelectCustomField from '@/components/select/select-custom-field';
 import styles from './index.less';
 
 const { Option } = Select;
@@ -301,7 +302,7 @@ export default function renderField({
       const options = [...(!required ? [{ id: 'clear', value: '清空', enabled: true }] : []), ...(fieldOptions || [])];
       const isMultiple = !(singleList.indexOf(fieldType) !== -1);
       return (
-        <Select
+        <SelectCustomField
           searchable
           placeholder="字段值"
           label="字段值"
@@ -313,21 +314,8 @@ export default function renderField({
           onOption={({ record }) => ({
             disabled: isMultiple && data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
           })}
-        >
-          {options.map((item) => {
-            if (item.enabled) {
-              return (
-                <Option
-                  value={item.tempKey || item.id}
-                  key={item.tempKey || item.id}
-                >
-                  {item.value}
-                </Option>
-              );
-            }
-            return [];
-          })}
-        </Select>
+          fieldOptions={options.map((item) => ({ ...item, id: item.tempKey ?? item.id }))}
+        />
       );
     }
     case 'multiMember':
