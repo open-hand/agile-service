@@ -89,9 +89,9 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
                         if (!ObjectUtils.isEmpty(projectId)
                                 && !ObjectUtils.isEmpty(appServiceCode)) {
                             appServiceSet.add(buildAppServiceSimpleVO(projectId, appServiceCode));
-                            if (!ObjectUtils.isEmpty(x.getTags())) {
-                                x.getTags().forEach(y -> getAppServiceSimpleFromTag(appServiceSet, y));
-                            }
+                        }
+                        if (!ObjectUtils.isEmpty(x.getTags())) {
+                            x.getTags().forEach(y -> getAppServiceSimpleFromTag(appServiceSet, y));
                         }
                     });
             queryAppServiceCodeMapFromDevops(organizationId, result, appServiceSet);
@@ -524,6 +524,7 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
         versionTreeVO.setAppService(publishVersionDTO.getAppService());
         versionTreeVO.setObjectVersionNumber(publishVersionDTO.getObjectVersionNumber());
         versionTreeVO.setAppServiceCode(publishVersionDTO.getServiceCode());
+        versionTreeVO.setProjectId(publishVersionDTO.getProjectId());
         setAppServiceName(versionTreeVO, appServiceCodeMap);
         return versionTreeVO;
     }
