@@ -51,7 +51,7 @@ export interface IPublishVersionMenuInfoConfigProps {
   issueInfoColumns?: Array<typeof Column> // 未实现
   issueInfoSwitchCustomOptions?: Array<{ value: string, text: string }>
   issueInfoBody?: React.ReactNode
-  onLoadHistory?: () => void
+  onLoadHistory?: (change: (val: any) => void) => void
   onLoadTableData?: (optionValue: string) => void
   issueInfoSwitchIssueCountMap?: Map<string, number> // 未实现
 }
@@ -74,7 +74,7 @@ export interface IPublishVersionProps<DetailType> {
   pageHeader?: React.ReactNode
   renderDetailLeftHeader?: (status: (status: DetailHeaderStatusProps) => React.ReactElement) => React.ReactNode
   // pageContent?: React.ReactNode
-  pageContentEmpty?: React.ReactElement | ((context: IPublishVersionContext)=>React.ReactElement)
+  pageContentEmpty?: React.ReactElement | ((context: IPublishVersionContext) => React.ReactElement)
   leftListDataSetConfig?: DataSetProps
   leftListItemConfig?: { renderName: (data: Record) => string, renderMenus: (data: Record) => React.ReactElement, onChange?: (data: Record) => void }
   menuDetail?: (detail: MenuDetailConfigProps<DetailType>['detail'],

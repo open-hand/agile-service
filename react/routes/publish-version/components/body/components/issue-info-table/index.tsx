@@ -56,7 +56,7 @@ const IssueInfoTable: React.FC<IPublishVersionMenuInfoConfigProps> = ({
     });
   }, [store.getCurrentData.id]);
   useEffect(() => {
-    typeof (onLoadHistory) === 'function' ? onLoadHistory() : loadHistory();
+    typeof (onLoadHistory) === 'function' ? onLoadHistory(setHistory) : loadHistory();
   }, [loadHistory, onLoadHistory]);
   const loadTableData = useCallback((issueTypeId: string) => {
     if (store.getCurrentData.id && issueTypeId) {
