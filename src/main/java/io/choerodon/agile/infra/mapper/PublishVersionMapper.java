@@ -16,7 +16,8 @@ import java.util.Set;
  */
 public interface PublishVersionMapper extends BaseMapper<PublishVersionDTO> {
 
-    List<PublishVersionVO> selectByProjectIds(@Param("projectIds") Set<Long> projectIds);
+    List<PublishVersionVO> selectByProjectIds(@Param("projectIds") Set<Long> projectIds,
+                                              @Param("appService") Boolean appService);
 
     /**
      * 查询项目下应用版本
