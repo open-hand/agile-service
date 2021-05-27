@@ -241,7 +241,8 @@ public class SprintServiceImpl implements SprintService {
         Map<String, Object> advancedSearchArgs = StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS));
         List<Long> allIssueIds = new ArrayList<>();
         if (!CollectionUtils.isEmpty(issueIdSprintIdVOS)) {
-            allIssueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
+            Set<Long> sprintIssueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toSet());
+            allIssueIds.addAll(sprintIssueIds);
         }
 
         if ((!ObjectUtils.isEmpty(advancedSearchArgs.get("featureId")) || !ObjectUtils.isEmpty(advancedSearchArgs.get("epicId"))) && !CollectionUtils.isEmpty(allIssueIds)) {
