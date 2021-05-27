@@ -62,7 +62,7 @@ const KanbanTemplateModal: React.FC<KanbanTemplateColumnModalProps> = (props) =>
 
   return (
     <Form dataSet={dataSet}>
-      <TextField name="name" maxLength={MAX_LENGTH_KANBAN_COLUMN_NAME} />
+      <TextField name="name" maxLength={MAX_LENGTH_KANBAN_COLUMN_NAME} valueChangeAction={'input' as any} />
       <Select
         name="categoryCode"
         optionRenderer={({ record }) => (

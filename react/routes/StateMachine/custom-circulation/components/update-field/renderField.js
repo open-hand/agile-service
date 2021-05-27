@@ -253,6 +253,7 @@ export default function renderField({
                   label="字段值"
                   name={code}
                   maxLength={100}
+                  valueChangeAction="input"
                   style={{ width: '100%' }}
                 />
               </Col>
@@ -287,6 +288,7 @@ export default function renderField({
                 name={code}
                 rows={3}
                 maxLength={255}
+                valueChangeAction="input"
                 style={{ width: '100%' }}
               />
               )

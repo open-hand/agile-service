@@ -170,9 +170,9 @@ const FastSearch: React.FC<FastSearchProps> = ({
   }, [handleSubmit, modal]);
   return (
     <Form dataSet={ds} className={styles.form}>
-      <TextField name="name" maxLength={10} />
+      <TextField name="name" maxLength={10} valueChangeAction={'input' as any} />
       <FastSearchForm dataSet={searchConditionDs} />
-      <TextField name="description" maxLength={30} />
+      <TextField name="description" maxLength={30} valueChangeAction={'input' as any} />
     </Form>
   );
 };

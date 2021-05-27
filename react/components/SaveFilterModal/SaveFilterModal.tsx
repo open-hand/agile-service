@@ -67,6 +67,7 @@ const SaveFilterModal: React.FC<Props> = (props) => {
       <TextField
         name="filterName"
         maxLength={10}
+        valueChangeAction={'input' as any}
         onInput={(e) => {
           // @ts-ignore
           dataSet.current?.set('filterName', e.target.value);
