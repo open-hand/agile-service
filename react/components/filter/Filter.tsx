@@ -100,6 +100,9 @@ const Filter: React.FC<FilterProps> = ({
       handleUnSelect(codes);
     }
   }, [handleSelect, handleUnSelect]);
+  const clearAllSelected = useCallback(() => {
+    handleSelectChange(selected, false);
+  }, [handleSelectChange, selected]);
   const totalFields = useMemo(() => [...systemFields, ...customFields], [customFields, systemFields]);
   const selectedFields = useMemo(() => alwaysRenderFields.concat(selected).reduce((result: IFilterField[], code) => {
     const field = find(totalFields, { code });
@@ -257,14 +260,15 @@ const Filter: React.FC<FilterProps> = ({
   }, [flat, groups, handleSelectChange, selected]);
   const resetFilter = useCallback(() => {
     onFilterChange({});
-  }, [onFilterChange]);
+    clearAllSelected();
+  }, [clearAllSelected, onFilterChange]);
 
   const expandFilter = useCallback(() => {
     setFolded(!folded);
   }, [folded]);
 
   const renderResetButton = useCallback(() => {
-    if (!Object.keys(filter).some((key) => filter[key] !== undefined && filter[key] !== null && filter[key] !== '')) {
+    if (!Object.keys(filter).some((key) => filter[key] !== undefined && filter[key] !== '')) {
       return null;
     }
     return (
