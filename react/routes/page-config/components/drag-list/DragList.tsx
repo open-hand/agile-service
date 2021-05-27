@@ -49,9 +49,9 @@ function getStyle({
   if (isDragging) {
     color = '#DDE7F2';
   } else if (item.enabled) {
-    color = '#F7F7F7';
+    color = '#FAFAFC';
   } else {
-    color = '#F0F0F0';
+    color = '#F6F6F9';
   }
   const combined = {
     ...virtualStyle,
@@ -62,14 +62,15 @@ function getStyle({
   const height = isDragging ? combined.height : combined.height - grid;
   const result = {
     ...combined,
-    left: isDragging ? combined.left : combined.left + grid,
+    left: isDragging ? combined.left : combined.left,
     width: isDragging
       ? draggableStyle.width
-      : `calc(${combined.width} - ${grid * 2}px)`,
+      : combined.width,
     marginBottom: grid,
     background: color,
     display: 'flex',
     alignItems: 'center',
+    padding: '0 10px',
   };
   // eslint-disable-next-line no-restricted-globals
   if (!isNaN(height)) {
@@ -138,11 +139,6 @@ class DragList extends Component<Props, StateProps> {
     this.setState({
       addItemVisible: true,
       tempKey: false,
-    }, () => {
-      const input = document.getElementById('dragList-input');
-      if (input) {
-        input.focus();
-      }
     });
   };
 
@@ -154,11 +150,6 @@ class DragList extends Component<Props, StateProps> {
       addItemVisible: false,
       code: (editItem && editItem[0].code) || '',
       value: (editItem && editItem[0].value) || '',
-    }, () => {
-      const input = document.getElementById('dragList-input');
-      if (input) {
-        input.focus();
-      }
     });
   };
 
@@ -319,30 +310,31 @@ class DragList extends Component<Props, StateProps> {
         {item.id === tempKey || item.tempKey === tempKey
           ? (
             <>
-              <span className="issue-dragList-input">
+              <div className="issue-dragList-input">
                 <TextField
                   defaultValue={item.code}
                   onChange={this.onCodeChange}
-                  placeholder={formatMessage({ id: 'dragList.placeholder.code' })}
+                  label={formatMessage({ id: 'dragList.placeholder.code' })}
                   maxLength={MAX_LENGTH_FIELD_OPTION_CODE}
                   valueChangeAction={'input' as any}
                 />
-              </span>
-              <span className="issue-dragList-input">
+              </div>
+              <div className="issue-dragList-input">
                 <TextField
                   defaultValue={item.value}
                   onChange={this.onValueChange}
-                  placeholder={formatMessage({ id: 'dragList.placeholder' })}
+                  label={formatMessage({ id: 'dragList.placeholder' })}
                   maxLength={MAX_LENGTH_FIELD_OPTION_VALUE}
                   valueChangeAction={'input' as any}
                 />
-              </span>
+              </div>
               <Button
                 disabled={saveDisabled}
                 type="primary"
                 size={'small' as Size}
                 onClick={() => this.edit(tempKey)}
                 funcType="raised"
+                style={{ marginLeft: 10 }}
                 className="issue-dragList-add"
               >
                 {formatMessage({ id: 'save' })}
@@ -368,7 +360,7 @@ class DragList extends Component<Props, StateProps> {
                   <Button
                     size={'small' as Size}
                     shape="circle"
-                    icon="mode_edit"
+                    icon="edit-o"
                     onClick={() => this.editItem(item.tempKey || item.id)}
                   />
                 </Tooltip>
@@ -448,7 +440,7 @@ class DragList extends Component<Props, StateProps> {
             <Card
               title={(
                 <>
-                  <span style={{ display: 'inline-block', width: '35%' }}>值</span>
+                  <span style={{ display: 'inline-block', width: 'calc(50% - 52px)' }}>值</span>
                   <span>显示值</span>
                 </>
               )}
@@ -486,26 +478,22 @@ class DragList extends Component<Props, StateProps> {
                   >
                     <WindowScroller scrollElement={document.getElementsByClassName('c7n-pro-modal-body')[0]}>
                       {({ height, scrollTop, registerChild }) => (
-                        <AutoSizer disableHeight>
-                          {({ width }) => (
-                            <div ref={(el) => registerChild(el)} style={{ width: '100%' }}>
-                              <List
-                                autoHeight
-                                overscanRowCount={20}
-                                height={height}
-                                rowCount={data.length}
-                                rowHeight={48}
-                                rowRenderer={({ index, style }) => this.rowRenderer({
-                                  index,
-                                  style,
-                                  state: this.state,
-                                })}
-                                scrollTop={scrollTop}
-                                width={width}
-                              />
-                            </div>
-                          )}
-                        </AutoSizer>
+                        <div ref={(el) => registerChild(el)} style={{ width: '100%' }}>
+                          <List
+                            autoHeight
+                            overscanRowCount={5}
+                            height={height}
+                            rowCount={data.length}
+                            rowHeight={80}
+                            rowRenderer={({ index, style }) => this.rowRenderer({
+                              index,
+                              style,
+                              state: this.state,
+                            })}
+                            scrollTop={scrollTop}
+                            width={656}
+                          />
+                        </div>
                       )}
                     </WindowScroller>
                     {addItemVisible
@@ -514,7 +502,7 @@ class DragList extends Component<Props, StateProps> {
                           <span className="issue-dragList-input">
                             <TextField
                               onChange={this.onCodeChange}
-                              placeholder={formatMessage({ id: 'dragList.placeholder.code' })}
+                              label={formatMessage({ id: 'dragList.placeholder.code' })}
                               maxLength={MAX_LENGTH_FIELD_OPTION_CODE}
                               valueChangeAction={'input' as any}
                             />
@@ -522,7 +510,7 @@ class DragList extends Component<Props, StateProps> {
                           <span className="issue-dragList-input">
                             <TextField
                               onChange={this.onValueChange}
-                              placeholder={formatMessage({ id: 'dragList.placeholder' })}
+                              label={formatMessage({ id: 'dragList.placeholder' })}
                               maxLength={MAX_LENGTH_FIELD_OPTION_VALUE}
                               valueChangeAction={'input' as any}
                             />

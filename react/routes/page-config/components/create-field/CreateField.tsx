@@ -3,8 +3,8 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Form, TextField, Select as S1, DatePicker, TimePicker, DateTimePicker,
-  CheckBox, NumberField, TextArea, UrlField,
+  Form, TextField, DatePicker, TimePicker, DateTimePicker,
+  CheckBox, NumberField, TextArea, UrlField, Spin,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import SelectUser from '@/components/select/select-user';
@@ -22,7 +22,6 @@ import * as images from '../../images';
 import beforeSubmitProcessData from './util';
 import Select from './SelectU';
 
-const { Option } = Select;
 const singleList = ['radio', 'single'];
 const multipleList = ['checkbox', 'multiple'];
 interface FiledOptions {
@@ -315,51 +314,53 @@ function CreateField() {
         return null;
     }
   }
-
   return (
     <div className="create-field-form-wrap">
-      <Form
-        dataSet={formDataSet}
-      >
-        {isEdit ? null
-          : (
-            <TextField
-              name="code"
-              valueChangeAction={'input' as any}
-            />
-          )}
-        <TextField
-          name="name"
-          valueChangeAction={'input' as any}
-        />
-        <div>
-          <Select
-            name="fieldType"
-            disabled={isEdit}
-            style={{ width: '100%' }}
-            optionRenderer={fieldTypeOptionRender}
+      <Spin spinning={formDataSet.status === 'loading'}>
+        <Form
+          dataSet={formDataSet}
+          style={{ width: '100%' }}
+        >
+          {isEdit ? null
+            : (
+              <TextField
+                name="code"
+                valueChangeAction={'input' as any}
+              />
+            )}
+          <TextField
+            name="name"
+            valueChangeAction={'input' as any}
           />
-          {formDataSet.current?.get('fieldType') === 'number' ? (
-            <CheckBox
-              name="check"
-              style={{
-                paddingTop: '.1rem', paddingLeft: '.02rem', display: 'flex', alignItems: 'center',
-              }}
-            >
-              {formatMessage({ id: 'field.decimal' })}
-            </CheckBox>
+          <div>
+            <Select
+              name="fieldType"
+              disabled={isEdit}
+              style={{ width: '100%' }}
+              optionRenderer={fieldTypeOptionRender}
+            />
+            {formDataSet.current?.get('fieldType') === 'number' ? (
+              <CheckBox
+                name="check"
+                style={{
+                  paddingTop: '.1rem', paddingLeft: '.02rem', display: 'flex', alignItems: 'center',
+                }}
+              >
+                {formatMessage({ id: 'field.decimal' })}
+              </CheckBox>
           ) : null}
-        </div>
-        <Select
-          name="context"
-          onChange={(val) => {
+          </div>
+          <Select
+            name="context"
+            onChange={(val) => {
             formDataSet.current?.set('context', uniq([...store.eternalContext, ...(disabledContextArr || []), ...(val || [])]));
-          }}
-          onOption={contextOptionSetter}
-        />
-        {getAttachFields()}
-        {isEdit ? <Select name="syncIssueType" /> : null}
-      </Form>
+            }}
+            onOption={contextOptionSetter}
+          />
+          {getAttachFields()}
+          {isEdit ? <Select name="syncIssueType" /> : null}
+        </Form>
+      </Spin>
     </div>
   );
 }
