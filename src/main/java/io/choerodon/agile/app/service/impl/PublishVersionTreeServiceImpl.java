@@ -232,8 +232,16 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
         if (!ObjectUtils.isEmpty(tags)) {
             tags.forEach(x -> {
                 PublishVersionTagRelDTO dto = buildPublishVersionTagRel(organizationId, publishVersionId, x);
-                if (publishVersionTagRelMapper.select(dto).isEmpty()) {
+                PublishVersionTagRelDTO example = new PublishVersionTagRelDTO();
+                BeanUtils.copyProperties(dto, example);
+                example.setTagAlias(null);
+                List<PublishVersionTagRelDTO> result = publishVersionTagRelMapper.select(example);
+                if (result.isEmpty()) {
                     publishVersionTagRelMapper.insert(dto);
+                } else {
+                    PublishVersionTagRelDTO updateObj = result.get(0);
+                    updateObj.setTagAlias(dto.getTagAlias());
+                    publishVersionTagRelMapper.updateByPrimaryKeySelective(updateObj);
                 }
             });
         }

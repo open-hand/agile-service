@@ -229,7 +229,31 @@ public class PublishVersionServiceImpl implements PublishVersionService {
         if (publishVersionMapper.updateByPrimaryKey(dto) != 1) {
             throw new CommonException("error.publish.version.update");
         }
+        updateTag(publishVersionVO, projectId);
         return modelMapper.map(publishVersionMapper.selectByPrimaryKey(publishVersionDTO.getId()), PublishVersionVO.class);
+    }
+
+    private void updateTag(PublishVersionVO publishVersionVO, Long projectId) {
+        String appServiceCode = publishVersionVO.getServiceCode();
+        String tagName = publishVersionVO.getTagName();
+        TagVO tag = null;
+        if (!StringUtils.isEmpty(appServiceCode)
+                && !StringUtils.isEmpty(tagName)) {
+            tag = new TagVO();
+            tag.setProjectId(projectId);
+            tag.setTagName(tagName);
+            tag.setAppServiceCode(appServiceCode);
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Long publishVersionId = publishVersionVO.getId();
+        PublishVersionTagRelDTO dto = new PublishVersionTagRelDTO();
+        dto.setPublishVersionId(publishVersionId);
+        dto.setProjectId(projectId);
+        dto.setOrganizationId(organizationId);
+        publishVersionTagRelMapper.delete(dto);
+        if (tag != null) {
+            publishVersionTreeService.addTag(projectId, organizationId, publishVersionId, new HashSet<>(Arrays.asList(tag)));
+        }
     }
 
     @Override
