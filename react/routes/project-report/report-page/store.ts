@@ -196,7 +196,7 @@ class ProjectReportStore {
 
   @action('设置ReportData')
   setReportData(reportData: IProjectReport) {
-    this.blockList = (reportData.reportUnitList || []).map((block) => ({ ...block, key: String(Math.random()), collapse: false }));
+    this.blockList = (reportData.reportUnitList || []).map((block, index) => ({ ...block, key: String(Math.random()), collapse: this.blockList[index]?.collapse ?? false }));
     this.baseInfo = reportData;
     this.dirty = false;
   }
