@@ -125,6 +125,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
         key: String(Math.random()),
         title: data.title,
         type: 'chart',
+        collapse: false,
         chartCode: data.chart,
         chartSearchVO: search,
       };

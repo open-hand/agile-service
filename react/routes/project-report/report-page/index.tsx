@@ -13,6 +13,7 @@ import openAddModal from './components/add-modal';
 import BlockList from './components/block-list';
 import BaseInfo from './components/base-info';
 import Operation from './components/operation';
+import CollapseAll from './components/collapse-all';
 import PreviewReport from '../report-preview/Preview';
 import ProjectReportContext, { BaseInfoRef } from './context';
 import ProjectReportStore from './store';
@@ -75,6 +76,9 @@ const ReportPage: React.FC<Props> = ({
             <HeaderButtons items={[{
               display: true,
               element: renderAddButton({ color: 'primary' as ButtonColor }),
+            }, {
+              display: true,
+              element: <CollapseAll />,
             }]}
             />
           </Header>
