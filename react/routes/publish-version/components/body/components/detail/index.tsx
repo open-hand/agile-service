@@ -6,7 +6,7 @@ import Fields from './fields';
 import styles from './index.less';
 
 function PublishVersionDetail({ customFields }: { customFields?: any[] }) {
-  const { preview, menuDetail } = usePublishVersionContext();
+  const { preview } = usePublishVersionContext();
 
   return (
     <PublishVersionSection border={!preview} bodyClassName={styles.section_body}>
