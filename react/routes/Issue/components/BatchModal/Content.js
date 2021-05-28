@@ -15,7 +15,7 @@ import useFields from './useFields';
 import renderField from './renderField';
 import styles from './Content.less';
 
-const systemFields = new Map([
+export const systemFields = new Map([
   ['statusId', {
     id: 'statusId',
     code: 'statusId',
