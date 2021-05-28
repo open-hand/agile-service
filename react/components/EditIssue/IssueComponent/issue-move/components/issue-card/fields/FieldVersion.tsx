@@ -11,7 +11,7 @@ export interface FieldVersionProps extends FieldCommonProps {
 
 const FieldVersion: React.FC<FieldVersionProps> = ({ target, onChange, fieldWithValue }) => {
   const handleChange = useCallback((value) => {
-    onChange && onChange(value?.map((v: any) => v.versionId), value);
+    onChange && onChange(value, value);
   }, [onChange]);
   return (
     <TextEditToggle
