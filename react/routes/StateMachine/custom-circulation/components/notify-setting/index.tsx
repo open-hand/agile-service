@@ -278,7 +278,8 @@ const NotifySetting = ({
   return (
     <div className={styles.notify_setting}>
       <Loading loading={loading} />
-      <Form dataSet={notifySettingDataSet}>
+      <div className={styles.tip}>问题流转到当前状态后，将按照下方设置通知相关方。</div>
+      <Form dataSet={notifySettingDataSet} className={styles.form}>
         <Select name="noticeTypeList" />
         <Dropdown
           // @ts-ignore
@@ -332,7 +333,7 @@ const NotifySetting = ({
         {
           !isProgram && (
             <>
-              <div style={{ borderTop: '1px solid #e8e8e8', width: 'calc(100% + .4rem)', marginLeft: '-0.2rem' }} />
+              <div style={{ borderTop: '1px solid var(--divider)' }} />
               <CheckBox
                 name="webhook"
                 style={{

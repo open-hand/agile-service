@@ -1,12 +1,4 @@
-.form {
-    padding-top: 7px;
-  
-    :global(.c7n-pro-field-wrapper) {
-      margin-top: 0;
-      margin-bottom: 16px;
-    }
-  }
-  
+
   .dot {
     display: inline-block;
     height: 1em;
@@ -36,3 +28,30 @@
   .numberSelect {
     width: 100%;
   }
+
+  
+  .updateField {
+    height: 100%;
+    .content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow-y: hidden;
+      .tip {
+        flex-shrink: 0;
+        padding: 15px 24px;
+        color: var(--text-color3);
+        border-bottom: 1px solid var(--divider);
+      }
+      .form {
+        flex: 1;
+        overflow-y: auto;
+        padding: 13px 20px 0;
+        :global(.c7n-pro-field-wrapper) {
+          margin-top: 0;
+          margin-bottom: 16px;
+        }
+      }
+    }
+  }
+  
