@@ -2,6 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.service.FieldOptionService;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
@@ -28,6 +29,8 @@ public class ObjectSchemeFieldController {
 
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
+    @Autowired
+    private FieldOptionService fieldOptionService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据方案编码获取字段列表")
@@ -165,5 +168,46 @@ public class ObjectSchemeFieldController {
                                            @RequestBody @Valid  ObjectSchemeFieldUpdateVO updateDTO) {
         objectSchemeFieldService.syncDefaultValue(organizationId, null, fieldId, updateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "创建选项")
+    @PostMapping("/{field_id}/options")
+    public ResponseEntity<FieldOptionVO> insertOption(
+            @ApiParam(value = "组织id", required = true)
+            @PathVariable("organization_id") Long organizationId,
+            @ApiParam(value = "字段id", required = true)
+            @PathVariable("field_id") @Encrypt Long fieldId,
+            @RequestBody @Valid FieldOptionUpdateVO fieldOptionUpdateVO) {
+        return new ResponseEntity<>(fieldOptionService.insertOption(fieldOptionUpdateVO, fieldId, organizationId), HttpStatus.CREATED);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "更新选项")
+    @PutMapping("/{field_id}/options/{option_id}")
+    public ResponseEntity<FieldOptionVO> updateOption(
+            @ApiParam(value = "组织id", required = true)
+            @PathVariable("organization_id") Long organizationId,
+            @ApiParam(value = "字段id", required = true)
+            @PathVariable("field_id") @Encrypt Long fieldId,
+            @ApiParam(value = "选项id", required = true)
+            @PathVariable("option_id") @Encrypt Long optionId,
+            @RequestBody @Valid FieldOptionUpdateVO fieldOptionUpdateVO) {
+        fieldOptionUpdateVO.setId(optionId);
+        return new ResponseEntity<>(fieldOptionService.updateOption(fieldOptionUpdateVO, fieldId, organizationId), HttpStatus.CREATED);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "删除选项")
+    @DeleteMapping("/{field_id}/options/{option_id}")
+    public ResponseEntity<Void> deleteOption(
+            @ApiParam(value = "组织id", required = true)
+            @PathVariable("organization_id") Long organizationId,
+            @ApiParam(value = "字段id", required = true)
+            @PathVariable("field_id") @Encrypt Long fieldId,
+            @ApiParam(value = "选项id", required = true)
+            @PathVariable("option_id") @Encrypt Long optionId) {
+        fieldOptionService.deleteOption(optionId, fieldId, organizationId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

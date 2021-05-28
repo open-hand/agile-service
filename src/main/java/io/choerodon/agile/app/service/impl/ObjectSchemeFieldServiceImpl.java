@@ -763,13 +763,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public ObjectSchemeFieldDetailVO update(Long organizationId, Long projectId, Long fieldId, ObjectSchemeFieldUpdateVO updateDTO) {
-        //处理字段选项
-        if (updateDTO.getFieldOptions() != null) {
-            String defaultIds = fieldOptionService.handleFieldOption(organizationId, fieldId, updateDTO.getFieldOptions());
-            if (defaultIds != null && !"".equals(defaultIds)) {
-                updateDTO.setDefaultValue(defaultIds);
-            }
-        }
         ObjectSchemeFieldDTO update = modelMapper.map(updateDTO, ObjectSchemeFieldDTO.class);
         //处理context
         IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();

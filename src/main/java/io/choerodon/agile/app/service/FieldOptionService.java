@@ -78,4 +78,30 @@ public interface FieldOptionService {
      * @return 自定义字段下的选项
      */
     Page<FieldOptionVO> getOptionsPageByFieldId(Long organizationId, Long filedId, String searchValue, List<Long> selected, PageRequest pageRequest);
+
+    /**
+     * 创建自定义字段下的选项
+     * @param fieldOptionUpdateVO 要创建的自定义字段
+     * @param fieldId 字段id
+     * @param organizationId 组织id
+     * @return 创建的自定义字段
+     */
+    FieldOptionVO insertOption(FieldOptionUpdateVO fieldOptionUpdateVO, Long fieldId, Long organizationId);
+
+    /**
+     * 更新自定义字段下的选项
+     * @param fieldOptionUpdateVO 要更新的自定义字段
+     * @param fieldId 字段id
+     * @param organizationId 组织id
+     * @return 更新的自定义字段
+     */
+    FieldOptionVO updateOption(FieldOptionUpdateVO fieldOptionUpdateVO, Long fieldId, Long organizationId);
+
+    /**
+     * 删除自定义字段
+     * @param optionId 选项id
+     * @param fieldId 字段id
+     * @param organizationId 组织id
+     */
+    void deleteOption(Long optionId, Long fieldId, Long organizationId);
 }
