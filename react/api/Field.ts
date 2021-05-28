@@ -1,5 +1,7 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
+import {
+  getProjectId, getOrganizationId, getApplyType, getMenuType,
+} from '@/utils/common';
 import { sameProject } from '@/utils/detail';
 import { FieldOption, IField } from '@/common/types';
 import { castArray } from 'lodash';
@@ -32,6 +34,10 @@ export interface FieldOptionCreate {
 class FieldApi extends Api<FieldApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
+  }
+
+  get prefixOrgOrPro() {
+    return `/agile/v1/${getMenuType() === 'project' ? `projects/${this.projectId}` : `organizations/${this.projectId}`}`;
   }
 
   get outPrefix() {
@@ -226,7 +232,7 @@ class FieldApi extends Api<FieldApi> {
   getFieldOptions(fieldId: string, searchValue: string | undefined = '', page: number | undefined, size: number, selected?: string | string[]) {
     return axios({
       method: 'get',
-      url: this.isOutside ? `${this.outPrefix}/field_value/${fieldId}/options` : `${this.prefix}/field_value/${fieldId}/options`,
+      url: this.isOutside ? `${this.outPrefix}/field_value/${fieldId}/options` : `${this.prefixOrgOrPro}/field_value/${fieldId}/options`,
       params: {
         searchValue,
         page,
@@ -240,7 +246,7 @@ class FieldApi extends Api<FieldApi> {
   updateFieldOption(fieldId: string, optionId: string, data: FieldOption) {
     return axios({
       method: 'put',
-      url: `${this.prefix}/object_scheme_field/${fieldId}/options/${optionId}`,
+      url: `${this.prefixOrgOrPro}/object_scheme_field/${fieldId}/options/${optionId}`,
       params: {
         organizationId: this.orgId,
       },
@@ -251,7 +257,7 @@ class FieldApi extends Api<FieldApi> {
   createFieldOption(fieldId: string, data: FieldOptionCreate) {
     return axios({
       method: 'post',
-      url: `${this.prefix}/object_scheme_field/${fieldId}/options`,
+      url: `${this.prefixOrgOrPro}/object_scheme_field/${fieldId}/options`,
       params: {
         organizationId: this.orgId,
       },
@@ -262,7 +268,7 @@ class FieldApi extends Api<FieldApi> {
   deleteFieldOption(fieldId: string, optionId: string) {
     return axios({
       method: 'delete',
-      url: `${this.prefix}/object_scheme_field/${fieldId}/options/${optionId}`,
+      url: `${this.prefixOrgOrPro}/object_scheme_field/${fieldId}/options/${optionId}`,
       params: {
         organizationId: this.orgId,
       },
