@@ -47,9 +47,9 @@ function PublishVersion() {
   const [theme] = useTheme();
 
   function handleCreate(data: any) {
-    store.create(data).then(() => {
+    store.create(data).then((res) => {
       // 初次进入 无数据 创建后查询 并选中
-      tableDataSet.length === 0 && tableDataSet.query().then(() => {
+      typeof (res) === 'boolean' && !res && tableDataSet.query().then(() => {
         tableDataSet.select(tableDataSet.records[0]);
         store.select(tableDataSet.records[0].toData());
       });
