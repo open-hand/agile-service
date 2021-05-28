@@ -38,7 +38,7 @@ public class StatusMachineNodeVO {
     private Long organizationId;
     @ApiModelProperty(value = "状态对象")
     private StatusVO statusVO;
-
+    private String rank;
     /**
      * 前端要用到
      */
@@ -157,5 +157,13 @@ public class StatusMachineNodeVO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
     }
 }

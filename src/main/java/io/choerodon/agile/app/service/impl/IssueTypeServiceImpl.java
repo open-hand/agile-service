@@ -375,7 +375,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                 // 处理状态机里面有,而项目没有的状态机
                 handlerStatus(organizationId, projectId, statusMachineId, applyType);
             } else {
-                defaultHandlerStateMachine(organizationId, typeCode, stateMachineSchemeId);
+                statusMachineId = defaultHandlerStateMachine(organizationId, typeCode, stateMachineSchemeId);
             }
         }
         stateMachineSchemeConfigService.initStatusMachineAndSchemeConfig(organizationId, stateMachineName, stateMachineSchemeId, issueTypeId, projectVO, applyType, statusMachineId);
