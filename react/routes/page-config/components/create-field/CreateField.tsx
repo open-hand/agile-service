@@ -4,7 +4,7 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import {
   Form, TextField, DatePicker, TimePicker, DateTimePicker,
-  CheckBox, NumberField, TextArea, UrlField, Spin,
+  CheckBox, NumberField, TextArea, UrlField, Spin, Button,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import SelectUser from '@/components/select/select-user';
@@ -21,6 +21,7 @@ import './index.less';
 import * as images from '../../images';
 import beforeSubmitProcessData from './util';
 import Select from './SelectU';
+import openEditFieldOptionsModal from '../edit-field-options';
 
 const singleList = ['radio', 'single'];
 const multipleList = ['checkbox', 'multiple'];
@@ -270,8 +271,21 @@ function CreateField() {
           />
         );
       case 'radio': case 'single': case 'checkbox': case 'multiple': {
+        const fieldId = formDataSet.current?.get('id');
         return (
           <>
+            <Button onClick={() => {
+              openEditFieldOptionsModal({
+                fieldOptions,
+                fieldId,
+                onClose: (newData) => {
+                  setFieldOptions(newData);
+                },
+              });
+            }}
+            >
+              open
+            </Button>
             <DragList
               title={formatMessage({ id: `field.${fieldType}` })}
               data={fieldOptions}
