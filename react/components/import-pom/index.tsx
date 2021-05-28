@@ -73,7 +73,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
         ignore: 'always' as any,
       },
       { name: 'serviceCode', bind: 'appServiceObject.code' },
-      // { name: 'serviceName', bind: 'appServiceObject.name' },
+      { name: 'name', bind: 'appServiceObject.name' },
       { name: 'tagName', label: 'Tag' },
     ],
   }), []);
@@ -126,6 +126,7 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
         const recordGroupId = record.get('groupId');
         const appService = recordArtifactId && recordGroupId ? appServiceList.find((item) => item.artifactId === recordArtifactId && item.groupId === recordGroupId) : undefined;
         appService && record.set('appServiceObject', appService);
+        console.log('record', record.get('serviceCode'));
       });
     }
   }, [appServiceList, ds.records]);
@@ -162,12 +163,22 @@ const ImportPom: React.FC<{ modal?: IModalProps } & IImportPomFunctionProps> = (
           <Column name="versionAlias" editor renderer={renderAlias} tooltip={'overflow' as any} />
           <Column
             name="appServiceObject"
-            editor={(record, name) => <SelectAppService record={record} name={name} projectId={record.get('projectId')} primitiveValue onChange={() => record.init('tagId', undefined)} />}
+            editor={(record, name) => (
+              <SelectAppService
+                record={record}
+                name="appServiceObject"
+                valueField="code"
+                projectId={record.get('projectId')}
+                  // primitiveValue={false}
+                onChange={() => record.init('tagId', undefined)}
+              />
+            )}
           />
           <Column
             name="tagName"
             editor={(record) => {
               const appService = record.get('appServiceObject');
+              console.log('version....', appService);
               // console.log('record.', appService?.id, record.toData(), record.get('projectId'), record.get('appServiceObject'));
               return <SelectGitTags projectId={record.get('projectId')} applicationId={appService?.id} />;
             }}

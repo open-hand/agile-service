@@ -31,7 +31,7 @@ const LinkAppServiceTagModal: React.FC<{ modal?: IModalProps } & ILinkServicePro
         name: 'appService', label: '选择应用服务', type: 'object' as any, required: true, ignore: 'always' as any,
       },
       { name: 'tagName', label: '选择tag', required: true },
-      { name: 'alias', label: '版本别名', maxLength: 16 },
+      // { name: 'alias', label: '版本别名', maxLength: 16 },
       { name: 'appServiceCode', bind: 'appService.code' },
       { name: 'projectId', defaultValue: getProjectId() },
 
@@ -58,7 +58,6 @@ const LinkAppServiceTagModal: React.FC<{ modal?: IModalProps } & ILinkServicePro
         }}
       />
       <SelectGitTags key={`select-git-tag-${applicationId}`} name="tagName" applicationId={applicationId} />
-      <TextField name="alias" />
 
     </Form>
   );
