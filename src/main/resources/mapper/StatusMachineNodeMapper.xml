@@ -147,11 +147,11 @@
 
     <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
       insert into fd_status_machine_node(state_machine_id,status_id,type
-      ,organization_id,created_by,last_updated_by)
+      ,organization_id,created_by,last_updated_by,rank)
       values
         <foreach collection="list" item="item" separator=",">
             (#{item.stateMachineId},#{item.statusId},#{item.type}
-            ,#{item.organizationId},#{item.createdBy},#{item.lastUpdatedBy})
+            ,#{item.organizationId},#{item.createdBy},#{item.lastUpdatedBy},#{item.rank})
         </foreach>
     </insert>
 

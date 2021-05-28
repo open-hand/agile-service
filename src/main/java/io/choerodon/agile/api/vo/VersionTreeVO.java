@@ -38,8 +38,6 @@ public class VersionTreeVO {
 
     private String artifactId;
 
-    private String tagAlias;
-
     private Boolean appService;
 
     public String getAppServiceName() {
@@ -56,14 +54,6 @@ public class VersionTreeVO {
 
     public void setAppService(Boolean appService) {
         this.appService = appService;
-    }
-
-    public String getTagAlias() {
-        return tagAlias;
-    }
-
-    public void setTagAlias(String tagAlias) {
-        this.tagAlias = tagAlias;
     }
 
     private Long objectVersionNumber;

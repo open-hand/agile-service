@@ -234,13 +234,11 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
                 PublishVersionTagRelDTO dto = buildPublishVersionTagRel(organizationId, publishVersionId, x);
                 PublishVersionTagRelDTO example = new PublishVersionTagRelDTO();
                 BeanUtils.copyProperties(dto, example);
-                example.setTagAlias(null);
                 List<PublishVersionTagRelDTO> result = publishVersionTagRelMapper.select(example);
                 if (result.isEmpty()) {
                     publishVersionTagRelMapper.insert(dto);
                 } else {
                     PublishVersionTagRelDTO updateObj = result.get(0);
-                    updateObj.setTagAlias(dto.getTagAlias());
                     publishVersionTagRelMapper.updateByPrimaryKeySelective(updateObj);
                 }
             });
@@ -262,30 +260,6 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
         }
     }
 
-    @Override
-    public void updateTagAlias(Long projectId,
-                               Long tagId,
-                               Long publishVersionId,
-                               Long objectVersionNumber,
-                               String alias) {
-        if(alias.length() > 16) {
-            throw new CommonException("error.tag.alias.length.more.than.16");
-        }
-        if (StringUtils.isEmpty(alias)) {
-            throw new CommonException("error.tag.alias.empty");
-        }
-        PublishVersionTagRelDTO dto = new PublishVersionTagRelDTO();
-        dto.setId(tagId);
-        dto.setPublishVersionId(publishVersionId);
-        PublishVersionTagRelDTO result = publishVersionTagRelMapper.selectOne(dto);
-        AssertUtilsForCommonException.notNull(result, "error.publish.version.tag.null");
-        result.setObjectVersionNumber(objectVersionNumber);
-        result.setTagAlias(alias);
-        if (publishVersionTagRelMapper.updateByPrimaryKey(result) != 1) {
-            throw new CommonException("error.update.publish.version.tag");
-        }
-    }
-
     private PublishVersionTagRelDTO buildPublishVersionTagRel(Long organizationId, Long publishVersionId, TagVO tag) {
         Long thisProjectId = tag.getProjectId();
         String appServiceCode = tag.getAppServiceCode();
@@ -299,7 +273,6 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
         dto.setAppServiceCode(appServiceCode);
         dto.setTagName(tagName);
         dto.setPublishVersionId(publishVersionId);
-        dto.setTagAlias(tag.getAlias());
         return dto;
     }
 
@@ -487,7 +460,6 @@ public class PublishVersionTreeServiceImpl implements PublishVersionTreeService 
                 child.setAppServiceCode(appServiceCode);
                 child.setTagName(tagName);
                 child.setId(x.getId());
-                child.setTagAlias(x.getAlias());
                 child.setObjectVersionNumber(x.getObjectVersionNumber());
                 setAppServiceName(child, appServiceCodeMap);
                 root.getChildren().add(child);
