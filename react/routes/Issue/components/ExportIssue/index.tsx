@@ -18,7 +18,7 @@ const mapper = {
   sprint: 'issueSprintVOS',
   reporter: 'reporterId',
   creationDate: 'creationDate',
-  assign: 'assigneeId',
+  assignee: 'assigneeId',
   status: 'statusId',
   lastUpdateDate: 'lastUpdateDate',
   estimatedStartTime: 'estimatedStartTime',
@@ -82,7 +82,6 @@ function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Ar
   });
 
   const checkOptions = tableFields.map((option) => ({ value: mapper[option.code as keyof typeof mapper] || option.code, label: option.title as string, order: false }));
-
   const key = Modal.key();
   Modal.open({
     key,
