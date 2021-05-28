@@ -125,7 +125,10 @@ function CreateField() {
         if (isEdit) {
           postData.objectVersionNumber = formDataSet.current?.get('objectVersionNumber');
         }
-        return JSON.stringify(postData);
+        return JSON.stringify({
+          ...postData,
+          fieldOptions: isEdit ? null : postData.fieldOptions,
+        });
       },
     });
     const syncIssueTypeArr = isEdit ? [...current?.get('syncIssueType')] : [];
@@ -274,19 +277,8 @@ function CreateField() {
         const fieldId = formDataSet.current?.get('id');
         return (
           <>
-            <Button onClick={() => {
-              openEditFieldOptionsModal({
-                fieldOptions,
-                fieldId,
-                onClose: (newData) => {
-                  setFieldOptions(newData);
-                },
-              });
-            }}
-            >
-              open
-            </Button>
             <DragList
+              disabled={isEdit ?? false}
               title={formatMessage({ id: `field.${fieldType}` })}
               data={fieldOptions}
               tips={formatMessage({ id: 'field.dragList.tips' })}
@@ -296,6 +288,22 @@ function CreateField() {
               onDelete={onTreeDelete}
               onInvalid={onTreeDelete}
             />
+            {isEdit && (
+              <Button
+                onClick={() => {
+                  openEditFieldOptionsModal({
+                    fieldOptions,
+                    fieldId,
+                    onClose: (newData) => {
+                      setFieldOptions(newData);
+                    },
+                  });
+                }}
+                style={{ marginTop: 15 }}
+              >
+                调整选项
+              </Button>
+            )}
             <SelectCustomField
               name="defaultValue"
               key={`${singleList.indexOf(fieldType) !== -1 ? 'single' : 'multiple'}-defaultValue-select`}
@@ -362,12 +370,12 @@ function CreateField() {
               >
                 {formatMessage({ id: 'field.decimal' })}
               </CheckBox>
-          ) : null}
+            ) : null}
           </div>
           <Select
             name="context"
             onChange={(val) => {
-            formDataSet.current?.set('context', uniq([...store.eternalContext, ...(disabledContextArr || []), ...(val || [])]));
+              formDataSet.current?.set('context', uniq([...store.eternalContext, ...(disabledContextArr || []), ...(val || [])]));
             }}
             onOption={contextOptionSetter}
           />

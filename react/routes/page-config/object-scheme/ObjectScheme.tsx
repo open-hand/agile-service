@@ -261,7 +261,7 @@ function ObjectScheme() {
       <Content className={`${prefixCls}-detail-content`}>
         <Table dataSet={schemeTableDataSet} queryBar={'none' as TableQueryBarType} className={`${prefixCls}-detail-content-table`}>
           <Column name="name" renderer={renderDropDown} />
-          <Column name="contextName" width={245} />
+          <Column name="contextName" tooltip={'overflow' as any} width={245} />
           <Column name="fieldOrigin" renderer={renderFieldOrigin} header={formatMessage({ id: 'field.origin' })} />
           <Column name="fieldTypeName" />
           <Column name="required" renderer={renderRequired} />
