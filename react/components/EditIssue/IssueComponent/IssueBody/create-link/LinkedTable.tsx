@@ -118,7 +118,7 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
       dataSet={dataSet}
       queryBar={() => (
         <Form dataSet={queryDataSet} columns={5}>
-          <TextField name="content" prefix={<Icon type="search" />} />
+          <TextField name="content" prefix={<Icon type="search" />} valueChangeAction={'input' as any} />
           <SelectIssueType name="issueType" />
           <SelectStatus name="status" request={() => statusApi.loadByProject('agile')} />
           <SelectPriority name="priority" clearButton />
