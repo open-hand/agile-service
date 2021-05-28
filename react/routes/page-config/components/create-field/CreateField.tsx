@@ -4,7 +4,7 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import {
   Form, TextField, DatePicker, TimePicker, DateTimePicker,
-  CheckBox, NumberField, TextArea, UrlField, Spin,
+  CheckBox, NumberField, TextArea, UrlField, Spin, Button,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import SelectUser from '@/components/select/select-user';
@@ -21,6 +21,7 @@ import './index.less';
 import * as images from '../../images';
 import beforeSubmitProcessData from './util';
 import Select from './SelectU';
+import openEditFieldOptionsModal from '../edit-field-options';
 
 const singleList = ['radio', 'single'];
 const multipleList = ['checkbox', 'multiple'];
@@ -124,7 +125,10 @@ function CreateField() {
         if (isEdit) {
           postData.objectVersionNumber = formDataSet.current?.get('objectVersionNumber');
         }
-        return JSON.stringify(postData);
+        return JSON.stringify({
+          ...postData,
+          fieldOptions: isEdit ? null : postData.fieldOptions,
+        });
       },
     });
     const syncIssueTypeArr = isEdit ? [...current?.get('syncIssueType')] : [];
@@ -270,9 +274,11 @@ function CreateField() {
           />
         );
       case 'radio': case 'single': case 'checkbox': case 'multiple': {
+        const fieldId = formDataSet.current?.get('id');
         return (
           <>
             <DragList
+              disabled={isEdit ?? false}
               title={formatMessage({ id: `field.${fieldType}` })}
               data={fieldOptions}
               tips={formatMessage({ id: 'field.dragList.tips' })}
@@ -282,6 +288,22 @@ function CreateField() {
               onDelete={onTreeDelete}
               onInvalid={onTreeDelete}
             />
+            {isEdit && (
+              <Button
+                onClick={() => {
+                  openEditFieldOptionsModal({
+                    fieldOptions,
+                    fieldId,
+                    onClose: (newData) => {
+                      setFieldOptions(newData);
+                    },
+                  });
+                }}
+                style={{ marginTop: 15 }}
+              >
+                调整选项
+              </Button>
+            )}
             <SelectCustomField
               name="defaultValue"
               key={`${singleList.indexOf(fieldType) !== -1 ? 'single' : 'multiple'}-defaultValue-select`}
@@ -348,12 +370,12 @@ function CreateField() {
               >
                 {formatMessage({ id: 'field.decimal' })}
               </CheckBox>
-          ) : null}
+            ) : null}
           </div>
           <Select
             name="context"
             onChange={(val) => {
-            formDataSet.current?.set('context', uniq([...store.eternalContext, ...(disabledContextArr || []), ...(val || [])]));
+              formDataSet.current?.set('context', uniq([...store.eternalContext, ...(disabledContextArr || []), ...(val || [])]));
             }}
             onOption={contextOptionSetter}
           />

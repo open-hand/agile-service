@@ -172,11 +172,13 @@ export interface IIssueType {
 }
 export type IFeatureType = 'business' | 'enabler'
 
-interface FieldOption {
+export interface FieldOption {
   id: string,
   fieldId: string,
   code: string,
-  value: string,
+  value: string
+  sequence: number
+  enabled: boolean
 }
 export interface IField {
   code: string,

@@ -1,7 +1,9 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
+import {
+  getProjectId, getOrganizationId, getApplyType, getMenuType,
+} from '@/utils/common';
 import { sameProject } from '@/utils/detail';
-import { IField } from '@/common/types';
+import { FieldOption, IField } from '@/common/types';
 import { castArray } from 'lodash';
 import Api from './Api';
 
@@ -22,9 +24,20 @@ interface BathUpdateField {
   issueIds: Array<number>,
   predefinedFields: Array<any>,
 }
+
+export interface FieldOptionCreate {
+  code: string
+  value: string
+  enabled: boolean
+  sequence: number
+}
 class FieldApi extends Api<FieldApi> {
   get prefix() {
     return `/agile/v1/projects/${this.projectId}`;
+  }
+
+  get prefixOrgOrPro() {
+    return `/agile/v1/${getMenuType() === 'project' ? `projects/${this.projectId}` : `organizations/${this.projectId}`}`;
   }
 
   get outPrefix() {
@@ -219,13 +232,45 @@ class FieldApi extends Api<FieldApi> {
   getFieldOptions(fieldId: string, searchValue: string | undefined = '', page: number | undefined, size: number, selected?: string | string[]) {
     return axios({
       method: 'get',
-      url: this.isOutside ? `${this.outPrefix}/field_value/${fieldId}/options` : `${this.prefix}/field_value/${fieldId}/options`,
+      url: this.isOutside ? `${this.outPrefix}/field_value/${fieldId}/options` : `${this.prefixOrgOrPro}/field_value/${fieldId}/options`,
       params: {
         searchValue,
         page,
         size,
         organizationId: this.orgId,
         selected: selected ? castArray(selected).join(',') : undefined,
+      },
+    });
+  }
+
+  updateFieldOption(fieldId: string, optionId: string, data: FieldOption) {
+    return axios({
+      method: 'put',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/${fieldId}/options/${optionId}`,
+      params: {
+        organizationId: this.orgId,
+      },
+      data,
+    });
+  }
+
+  createFieldOption(fieldId: string, data: FieldOptionCreate) {
+    return axios({
+      method: 'post',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/${fieldId}/options`,
+      params: {
+        organizationId: this.orgId,
+      },
+      data,
+    });
+  }
+
+  deleteFieldOption(fieldId: string, optionId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/${fieldId}/options/${optionId}`,
+      params: {
+        organizationId: this.orgId,
       },
     });
   }
