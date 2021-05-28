@@ -86,6 +86,10 @@ const OptionList: React.ForwardRefRenderFunction<OptionListRef, OptionListProps>
     ]));
     setCurrentAdd(false);
   });
+  const handleDelete = usePersistFn(async (item) => {
+    await fieldApi.deleteFieldOption(fieldId, item.id);
+    setFieldOptions((old) => old.filter((i) => i.id !== item.id));
+  });
   const renderClone = usePersistFn((provided, snapshot, rubric) => {
     const { index } = rubric.source;
     const item = fieldOptions[index];
@@ -157,6 +161,7 @@ const OptionList: React.ForwardRefRenderFunction<OptionListRef, OptionListProps>
                               editing={item.id === currentEdit?.id ? currentEdit : undefined}
                               updateCurrentEdit={setCurrentEdit}
                               onUpdate={handleUpdate}
+                              onDelete={handleDelete}
                               style={style}
                               isDragging={snapshot.isDragging}
                               provided={provided}

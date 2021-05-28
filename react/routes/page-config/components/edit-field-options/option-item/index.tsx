@@ -2,6 +2,7 @@ import { FieldOption } from '@/common/types';
 import { MAX_LENGTH_FIELD_CODE, MAX_LENGTH_FIELD_NAME } from '@/constants/MAX_LENGTH';
 import { usePersistFn } from 'ahooks';
 import { TextField, Button, Tooltip } from 'choerodon-ui/pro';
+import { Popconfirm } from 'choerodon-ui';
 import React, { memo } from 'react';
 import {
   DraggableProvided,
@@ -16,6 +17,7 @@ interface OptionItemProps {
   editing?: FieldOption
   updateCurrentEdit?: (data: FieldOption | null) => void
   onUpdate?: (data: FieldOption) => Promise<any>
+  onDelete?: (data: FieldOption) => Promise<any>
 
 }
 function getStyle({
@@ -55,7 +57,7 @@ function getStyle({
   return result;
 }
 const OptionItem: React.FC<OptionItemProps> = ({
-  data, style: virtualStyle, isDragging, provided, editing, updateCurrentEdit, onUpdate,
+  data, style: virtualStyle, isDragging, provided, editing, updateCurrentEdit, onUpdate, onDelete,
 }) => {
   const updateEditing = usePersistFn((newData) => {
     updateCurrentEdit && updateCurrentEdit(newData);
@@ -72,7 +74,9 @@ const OptionItem: React.FC<OptionItemProps> = ({
   const handleDisableClick = usePersistFn(async () => {
     await update({ ...data, enabled: false });
   });
-
+  const handleDeleteClick = usePersistFn(async () => {
+    onDelete && await onDelete(data);
+  });
   const handleCodeChange = usePersistFn((value) => {
     updateEditing({
       ...editing,
@@ -152,7 +156,15 @@ const OptionItem: React.FC<OptionItemProps> = ({
                 onClick={data.enabled ? handleDisableClick : handleEnableClick}
               />
             </Tooltip>
-            <Button icon="delete" funcType={'flat' as any} />
+            <Popconfirm
+              placement="top"
+              title={`确认要删除 ${data.value} 吗？问题上该字段值也会被清空。`}
+              onConfirm={handleDeleteClick}
+              okText="删除"
+              cancelText="取消"
+            >
+              <Button icon="delete" funcType={'flat' as any} />
+            </Popconfirm>
           </div>
         </>
       )}

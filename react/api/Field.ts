@@ -258,6 +258,16 @@ class FieldApi extends Api<FieldApi> {
       data,
     });
   }
+
+  deleteFieldOption(fieldId: string, optionId: string) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/object_scheme_field/${fieldId}/options/${optionId}`,
+      params: {
+        organizationId: this.orgId,
+      },
+    });
+  }
 }
 const fieldApi = new FieldApi();
 export default FieldApi;
