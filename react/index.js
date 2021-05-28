@@ -4,7 +4,9 @@ import {
   Switch,
 } from 'react-router-dom';
 import { ModalContainer } from 'choerodon-ui/pro';
-import { asyncLocaleProvider, stores, nomatch } from '@choerodon/boot';
+import {
+  asyncLocaleProvider, stores, nomatch, Charts,
+} from '@choerodon/boot';
 import 'moment/locale/zh-cn';
 import 'moment/locale/en-nz';
 import moment from 'moment';
@@ -68,6 +70,7 @@ export function getRoutes(match) {
     />,
     <Route path={`${match.url}/states`} component={State} />,
     <Route path={`${match.url}/priorities`} component={Priority} />,
+    <Route path={`${match.url}/charts`} component={() => <Charts reportType="agile" />} />,
     <PermissionRoute
       service={['choerodon.code.project.setting.state.ps.default',
         'choerodon.code.project.setting.state.ps.master']}
