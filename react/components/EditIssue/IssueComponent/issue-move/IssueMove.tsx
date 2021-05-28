@@ -203,9 +203,15 @@ const IssueMove: React.FC<Props> = ({
       const { target } = item;
       const targetIssue = target.issue;
       const getValue = (code: string) => targetIssue.customFields.get(code)?.value;
-      const targetValue: any = { issueId, issueTypeId: targetIssue.issueTypeVO.id };
+      const targetValue: any = {
+        issueId,
+        issueTypeId: targetIssue.issueTypeVO.id,
+      };
       [...submitFieldMap.entries()].forEach(([key, idKey]) => {
         targetValue[idKey] = getValue(key);
+        if (key === 'fixVersion') {
+          targetValue.versionType = 'fix';
+        }
       });
       targetValue.customFields = [...targetIssue.customFields.values()].filter((f) => !f.system);
       result.set(issueId, targetValue);
