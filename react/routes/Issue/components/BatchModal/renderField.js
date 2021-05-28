@@ -9,6 +9,8 @@ import SelectFeature from '@/components/select/select-feature';
 import EndDateTimePicker from '@/components/date-time-picker';
 import SelectEnvironment from '@/components/select/select-environment';
 import SelectCustomField from '@/components/select/select-custom-field';
+// eslint-disable-next-line import/no-cycle
+import { systemFields } from './Content';
 
 const singleList = ['radio', 'single'];
 
@@ -109,14 +111,25 @@ export default function renderField({
       );
     case 'radio': case 'single': case 'checkbox': case 'multiple':
       return (
-        <SelectCustomField
-          name={code}
-          fieldId={id}
-          style={{ width: '100%' }}
-          multiple={!(singleList.indexOf(fieldType) !== -1)}
-          searchable
-          label={name}
-        />
+        systemFields.has(code) ? (
+          <Select
+            name={code}
+            fieldId={id}
+            style={{ width: '100%' }}
+            multiple={!(singleList.indexOf(fieldType) !== -1)}
+            searchable
+            label={name}
+          />
+        ) : (
+          <SelectCustomField
+            name={code}
+            fieldId={id}
+            style={{ width: '100%' }}
+            multiple={!(singleList.indexOf(fieldType) !== -1)}
+            searchable
+            label={name}
+          />
+        )
       );
     case 'multiMember':
     case 'member':
