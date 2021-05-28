@@ -344,21 +344,20 @@ class ScrumBoardHome extends Component {
                 element: <ExpandAllButton />,
               }, {
                 display: true,
-                actions: {
-                  data: [{
-                    text: '配置看板',
-                    action: () => {
-                      to(LINK_URL.scrumboardSetting, {
-                        params: {
-                          boardId: ScrumBoardStore.getSelectedBoard,
-                        },
-                      });
-                    },
-                  }, {
-                    text: '个人筛选',
-                    action: this.handleClickFilterManage,
-                  }],
-                },
+                name: '更多操作',
+                groupBtnItems: [{
+                  name: '配置看板',
+                  handler: () => {
+                    to(LINK_URL.scrumboardSetting, {
+                      params: {
+                        boardId: ScrumBoardStore.getSelectedBoard,
+                      },
+                    });
+                  },
+                }, {
+                  name: '个人筛选',
+                  handler: this.handleClickFilterManage,
+                }],
               },
               {
                 display: true,
