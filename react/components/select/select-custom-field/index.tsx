@@ -29,7 +29,7 @@ type SelectCustomFieldProps = BasicProps & ({
     value: string
   }[]
 })
-
+const SIZE = 50;
 const SelectCustomField: React.FC<SelectCustomFieldProps> = forwardRef(({
   fieldId, fieldOptions, flat, projectId, organizationId, selected, extraOptions, outside = false, ...otherProps
 },
@@ -50,7 +50,7 @@ ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     textField: 'value',
     valueField: 'id',
-    request: ({ page, filter }) => (fieldOptions ? fakePageRequest(filter, page, 10, needOptions) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, 10, needOptions)),
+    request: ({ page, filter }) => (fieldOptions ? fakePageRequest(filter, page, SIZE, needOptions) : fieldApi.outside(outside).org(organizationId).project(projectId).getFieldOptions(fieldId!, filter, page, SIZE, needOptions)),
     middleWare: (data) => {
       if (!extraOptions) {
         return data;
