@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  DataSet, CheckBox,
+  DataSet, CheckBox, Form, Select,
 } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { Divider } from 'choerodon-ui';
@@ -71,26 +71,33 @@ const AutoTransform: React.FC<Props> = ({
     <div className={styles.autoTransform}>
       <div className={styles.tip}>满足以下条件后问题将自动流转到当前状态。</div>
       <div className={styles.setting}>
-        {hasTest ? mount('testmanager:StatusAutoTransform', {
-          testTransformRef,
-          issueTypeId: selectedType,
-          statusId: record.get('id'),
-        }) : ''}
         {
-        hasTest && (
-          <>
-            <div style={{
-              fontSize: 12,
-              color: 'var(--text-color3)',
-              marginLeft: 2,
-            }}
-            >
-              {`问题关联的用例的测试执行处于下方状态，问题将自动流转到${record.get('name')}。`}
-            </div>
+          hasTest && (
+            <>
+              <div style={{
+                fontSize: 12,
+                color: 'var(--text-color3)',
+                marginLeft: 2,
+                marginBottom: 10,
+              }}
+              >
+                {`问题关联的用例的测试执行处于下方状态，问题将自动流转到${record.get('name')}。`}
+              </div>
+            </>
+          )
+        }
+        {
+          hasTest ? mount('testmanager:StatusAutoTransform', {
+            testTransformRef,
+            issueTypeId: selectedType,
+            statusId: record.get('id'),
+          }) : ''
+        }
+        {
+          hasTest && (
             <div className={styles.divider} />
-          </>
-        )
-      }
+          )
+        }
         <CheckBox checked={checked} onChange={handleChange}>{`分支合并后自动将状态流转到${record.get('name')}`}</CheckBox>
       </div>
 
