@@ -20,7 +20,7 @@ export interface IAppVersionDataItem extends IAppVersionData {
 
 class PublishDetailStore implements IPublishVersionBaseDetailStore<IPublishVersionData> {
   events: IPublishVersionBaseDetailEventsProps = {
-    update: () => true, load: () => true, selectIssue: () => { }, createAfter: () => { }, delete: () => { },
+    update: () => true, load: () => true, selectIssue: () => { }, createAfter: () => false, delete: () => { },
   };
 
   @observable loading: boolean = false;
@@ -60,7 +60,7 @@ class PublishDetailStore implements IPublishVersionBaseDetailStore<IPublishVersi
       };
     }
     if (newItem.children && newItem.children.length > 0) {
-      set(newItem, 'children', newItem.children.map((i:any) => this.processDependency(i)));
+      set(newItem, 'children', newItem.children.map((i: any) => this.processDependency(i)));
     }
     return newItem;
   }
@@ -160,8 +160,9 @@ class PublishDetailStore implements IPublishVersionBaseDetailStore<IPublishVersi
     this.loading = true;
     const res = await publishVersionApi.create(data);
     // this.select(res);
-    await this.events.createAfter(res);
+    const eventRes = await this.events.createAfter(res);
     this.loading = false;
+    return eventRes;
   }
 
   @action('删除版本')
