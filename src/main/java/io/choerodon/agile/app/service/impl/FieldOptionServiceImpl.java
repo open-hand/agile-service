@@ -15,6 +15,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -182,5 +183,80 @@ public class FieldOptionServiceImpl implements FieldOptionService {
         return PageUtils.copyPropertiesAndResetContent(
                 optionPage,
                 modelMapper.map(optionPage.getContent(), new TypeToken<List<FieldOptionVO>>() {}.getType()));
+    }
+
+    @Override
+    public FieldOptionVO insertOption(FieldOptionUpdateVO fieldOptionUpdateVO, Long fieldId, Long organizationId) {
+        if (StringUtils.isBlank(fieldOptionUpdateVO.getValue()) || StringUtils.isBlank(fieldOptionUpdateVO.getCode())) {
+            throw new CommonException(ERROR_OPTION_ILLEGAL);
+        }
+        List<FieldOptionDTO> fieldOptions = fieldOptionMapper.selectByCodeOrValue(organizationId, fieldId, fieldOptionUpdateVO.getCode(), fieldOptionUpdateVO.getValue());
+        if (CollectionUtils.isNotEmpty(fieldOptions)) {
+            throw new CommonException(ERROR_OPTION_ILLEGAL);
+        }
+        updateSequence(fieldOptionUpdateVO, null, fieldId, organizationId);
+        create(organizationId, fieldId, fieldOptionUpdateVO);
+        return modelMapper.map(fieldOptionUpdateVO, FieldOptionVO.class);
+    }
+
+    @Override
+    public FieldOptionVO updateOption(FieldOptionUpdateVO fieldOptionUpdateVO, Long fieldId, Long organizationId) {
+        FieldOptionDTO fieldOption = fieldOptionMapper.selectByPrimaryKey(fieldOptionUpdateVO.getId());
+        if (fieldOption == null) {
+            throw new CommonException(ERROR_OPTION_NOTFOUND);
+        }
+        List<FieldOptionDTO> fieldOptions = fieldOptionMapper.selectByCodeOrValue(organizationId, fieldId, fieldOptionUpdateVO.getCode(), fieldOptionUpdateVO.getValue());
+        if (CollectionUtils.isNotEmpty(fieldOptions) &&
+                (fieldOptions.size() > 1 || !ObjectUtils.equals(fieldOptions.get(0).getId(), fieldOptionUpdateVO.getId()))){
+            throw new CommonException(ERROR_OPTION_ILLEGAL);
+        }
+        if (fieldOptionUpdateVO.getSequence() == null) {
+            fieldOptionUpdateVO.setSequence(fieldOption.getSequence());
+        }
+        if (!ObjectUtils.equals(fieldOptionUpdateVO.getSequence(), fieldOption.getSequence())) {
+            updateSequence(fieldOptionUpdateVO, fieldOption, fieldId, organizationId);
+        }
+        fieldOption.setCode(fieldOptionUpdateVO.getCode());
+        fieldOption.setValue(fieldOptionUpdateVO.getValue());
+        fieldOption.setEnabled(fieldOptionUpdateVO.getEnabled());
+        fieldOption.setSequence(fieldOptionUpdateVO.getSequence());
+        baseUpdate(fieldOption);
+        return modelMapper.map(fieldOption, FieldOptionVO.class);
+    }
+
+    @Override
+    public void deleteOption(Long optionId, Long fieldId, Long organizationId) {
+        FieldOptionDTO fieldOption = fieldOptionMapper.selectByPrimaryKey(optionId);
+        if (fieldOption == null) {
+            throw new CommonException(ERROR_OPTION_NOTFOUND);
+        }
+        updateSequence(null, fieldOption, fieldId, organizationId);
+        baseDelete(optionId);
+    }
+
+    private void updateSequence(FieldOptionUpdateVO fieldOption, FieldOptionDTO oldFieldOption, Long fieldId, Long organizationId) {
+        if (fieldOption == null && oldFieldOption == null) {
+            return;
+        }
+        FieldOptionDTO optionRecord = new FieldOptionDTO();
+        optionRecord.setFieldId(fieldId);
+        optionRecord.setOrganizationId(organizationId);
+        int count = fieldOptionMapper.selectCount(optionRecord);
+        int newSequence = fieldOption == null || fieldOption.getSequence() >= count ? count - 1 : fieldOption.getSequence();
+        int oldSequence = oldFieldOption == null ? count : oldFieldOption.getSequence();
+
+        if (oldFieldOption == null && (fieldOption.getSequence() == null || fieldOption.getSequence() >= count)) {
+            fieldOption.setSequence(count);
+            return;
+        }
+        if (fieldOption != null){
+            fieldOption.setSequence(newSequence);
+        }
+
+        if (newSequence > oldSequence) {
+            fieldOptionMapper.sequenceDecrement(oldSequence, newSequence, fieldId, organizationId);
+        } else if(newSequence < oldSequence){
+            fieldOptionMapper.sequenceIncrement(newSequence, oldSequence, fieldId, organizationId);
+        }
     }
 }

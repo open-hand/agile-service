@@ -59,4 +59,31 @@
         </if>
         ORDER BY sequence ASC
     </select>
+
+    <select id="selectByCodeOrValue" resultMap="fieldOptionMap">
+        SELECT *
+        FROM fd_field_option fdo
+        WHERE
+            fdo.field_id = #{fieldId}
+        AND fdo.organization_id = #{organizationId}
+        AND (fdo.value = #{value} OR fdo.code = #{code})
+    </select>
+
+    <update id="sequenceDecrement">
+        UPDATE fd_field_option
+        SET sequence = sequence - 1
+        WHERE field_id = #{fieldId}
+        AND organization_id = #{organizationId}
+        AND sequence &gt; #{start}
+        AND sequence &lt;= #{end}
+    </update>
+
+    <update id="sequenceIncrement">
+        UPDATE fd_field_option
+        SET sequence = sequence + 1
+        WHERE field_id = #{fieldId}
+        AND organization_id = #{organizationId}
+        AND sequence &gt;= #{start}
+        AND sequence &lt; #{end}
+    </update>
 </mapper>
