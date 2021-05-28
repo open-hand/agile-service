@@ -10,9 +10,9 @@ const fieldsMap = new Map([
         const { newString } = log;
         return (
           <span>
-            更新
+            <span className="c7n-Log-operation">更新</span>
             <span className="c7n-Log-field">【冲刺】</span>
-            为
+            <span className="c7n-Log-operation">为</span>
             <span className="c7n-Log-value">{`【${newString}】`}</span>
           </span>
         );
@@ -31,11 +31,11 @@ const fieldsMap = new Map([
         const { newString } = log;
         return (
           <span>
-            将
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【故事点】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">【未预估】</span>
-            改变为
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">{`【${Number(newString)}】`}</span>
           </span>
         );
@@ -56,11 +56,11 @@ const fieldsMap = new Map([
         const { oldString } = log;
         return (
           <span>
-            将
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【故事点】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">{`【${Number(oldString)}】`}</span>
-            改变为
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">【未预估】</span>
           </span>
         );
@@ -74,11 +74,11 @@ const fieldsMap = new Map([
         const { newString } = log;
         return (
           <span>
-            将
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【剩余预估时间】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">【未预估】</span>
-            改变为
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">{`【${Number(newString)}】`}</span>
           </span>
         );
@@ -99,11 +99,11 @@ const fieldsMap = new Map([
         const { oldString } = log;
         return (
           <span>
-            将
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【剩余预估时间】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">{`【${Number(oldString)}】`}</span>
-            改变为
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">【未预估】</span>
           </span>
         );
@@ -176,9 +176,9 @@ const fieldsMap = new Map([
         const { newString } = log;
         return (
           <span>
-            更新
+            <span className="c7n-Log-operation">更新</span>
             <span className="c7n-Log-field">【史诗】</span>
-            为
+            <span className="c7n-Log-operation">为</span>
             <span className="c7n-Log-value">{`【${newString}】`}</span>
           </span>
         );
@@ -195,16 +195,16 @@ const fieldsMap = new Map([
             {
               ruleName && (
                 <span>
-                  触发
+                  <span className="c7n-Log-operation">触发</span>
                   <span className="c7n-Log-field">{`【${ruleName}】`}</span>
-                  触发器，
+                  <span className="c7n-Log-operation">触发器，</span>
                 </span>
               )
             }
             <span>
-              更新
+              <span className="c7n-Log-operation">更新</span>
               <span className="c7n-Log-field">【经办人】</span>
-              为
+              <span className="c7n-Log-operation">为</span>
               <span className="c7n-Log-value">{`【${newString}】`}</span>
             </span>
           </>
@@ -219,17 +219,17 @@ const fieldsMap = new Map([
             {
               ruleName && (
                 <span>
-                  触发
+                  <span className="c7n-Log-operation">触发</span>
                   <span className="c7n-Log-field">{`【${ruleName}】`}</span>
-                  触发器，
+                  <span className="c7n-Log-operation">触发器，</span>
                 </span>
               )
             }
-            <span>将</span>
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【经办人】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">{`【${oldString}】`}</span>
-            <span>改变为</span>
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">{`【${newString}】`}</span>
           </>
         );
@@ -243,9 +243,9 @@ const fieldsMap = new Map([
         const { newString } = log;
         return (
           <span>
-            更新
+            <span className="c7n-Log-operation">更新</span>
             <span className="c7n-Log-field">【报告人】</span>
-            为
+            <span className="c7n-Log-operation">为</span>
             <span className="c7n-Log-value">{`【${newString}】`}</span>
           </span>
         );
@@ -271,7 +271,7 @@ const fieldsMap = new Map([
       create: {
         render: () => (
           <span>
-            更新
+            <span className="c7n-Log-operation">更新</span>
             <span className="c7n-Log-field">【花费时间】</span>
           </span>
         ),
@@ -279,7 +279,7 @@ const fieldsMap = new Map([
       update: {
         render: () => (
           <span>
-            更新
+            <span className="c7n-Log-operation">更新</span>
             <span className="c7n-Log-field">【花费时间】</span>
           </span>
         ),
@@ -309,7 +309,7 @@ const fieldsMap = new Map([
       create: {
         render: () => (
           <span>
-            更新
+            <span className="c7n-Log-operation">更新</span>
             <span className="c7n-Log-field">【排序】</span>
           </span>
         ),
@@ -317,7 +317,7 @@ const fieldsMap = new Map([
       update: {
         render: () => (
           <span>
-            更新
+            <span className="c7n-Log-operation">更新</span>
             <span className="c7n-Log-field">【排序】</span>
           </span>
         ),
@@ -344,7 +344,7 @@ const fieldsMap = new Map([
       create: {
         render: () => (
           <span>
-            更新
+            <span className="c7n-Log-operation">更新</span>
             <span className="c7n-Log-field">【解决状态】</span>
           </span>
         ),
@@ -352,7 +352,7 @@ const fieldsMap = new Map([
       update: {
         render: () => (
           <span>
-            更新
+            <span className="c7n-Log-operation">更新</span>
             <span className="c7n-Log-field">【解决状态】</span>
           </span>
         ),
@@ -360,7 +360,7 @@ const fieldsMap = new Map([
       delete: {
         render: () => (
           <span>
-            更新
+            <span className="c7n-Log-operation">更新</span>
             <span className="c7n-Log-field">【解决状态】</span>
           </span>
         ),
@@ -404,9 +404,9 @@ const fieldsMap = new Map([
           const { newString } = log;
           return (
             <span>
-              更新
+              <span className="c7n-Log-operation">更新</span>
               <span className="c7n-Log-field">【PI】</span>
-              为
+              <span className="c7n-Log-operation">为</span>
               <span className="c7n-Log-value">{`【${newString}】`}</span>
             </span>
           );
@@ -435,7 +435,7 @@ const fieldsMap = new Map([
     create: {
       render: (log: ILog) => (
         <span>
-          创建
+          <span className="c7n-Log-operation">创建</span>
           <span className="c7n-Log-value">{`【${log.newString}】`}</span>
         </span>
       ),
@@ -453,7 +453,7 @@ const fieldsMap = new Map([
       create: {
         render: (log: ILog) => (
           <span>
-            创建
+            <span className="c7n-Log-operation">创建</span>
             <span className="c7n-Log-value">【史诗】</span>
           </span>
         ),
@@ -472,7 +472,7 @@ const fieldsMap = new Map([
       create: {
         render: (log: ILog) => (
           <span>
-            创建
+            <span className="c7n-Log-operation">创建</span>
             <span className="c7n-Log-value">【故事】</span>
           </span>
         ),
@@ -491,7 +491,7 @@ const fieldsMap = new Map([
       create: {
         render: (log: ILog) => (
           <span>
-            创建
+            <span className="c7n-Log-operation">创建</span>
             <span className="c7n-Log-value">【缺陷】</span>
           </span>
         ),
@@ -510,7 +510,7 @@ const fieldsMap = new Map([
       create: {
         render: (log: ILog) => (
           <span>
-            创建
+            <span className="c7n-Log-operation">创建</span>
             <span className="c7n-Log-value">【任务】</span>
           </span>
         ),
@@ -529,7 +529,7 @@ const fieldsMap = new Map([
       create: {
         render: (log: ILog) => (
           <span>
-            创建
+            <span className="c7n-Log-operation">创建</span>
             <span className="c7n-Log-value">【子任务】</span>
           </span>
         ),
@@ -548,7 +548,7 @@ const fieldsMap = new Map([
       create: {
         render: (log: ILog) => (
           <span>
-            创建
+            <span className="c7n-Log-operation">创建</span>
             <span className="c7n-Log-value">【特性】</span>
           </span>
         ),
@@ -595,14 +595,14 @@ const fieldsMap = new Map([
         return (
           <span>
             <span>
-              变更了
+              <span className="c7n-Log-operation">变更了</span>
               <span className="c7n-Log-value">{`【${trigger}】`}</span>
-              ，使得当前问题自动流转到
+              <span className="c7n-Log-operation">，使得当前问题自动流转到</span>
               <span className="c7n-Log-value">{`【${newStatus}】`}</span>
               {
                 resolutionChanged && !removeResolution && (
                   <>
-                    ，更新
+                    <span className="c7n-Log-operation">，更新</span>
                     <span className="c7n-Log-value">【解决状态】</span>
                   </>
                 )
@@ -610,7 +610,7 @@ const fieldsMap = new Map([
               {
                 resolutionChanged && removeResolution && (
                   <>
-                    ，移除
+                    <span className="c7n-Log-operation">，移除</span>
                     <span className="c7n-Log-value">【解决状态】</span>
                   </>
                 )
@@ -628,11 +628,11 @@ const fieldsMap = new Map([
         const { newString } = log;
         return (
           <span>
-            将
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【预计开始时间】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">【无】</span>
-            改变为
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">{`【${newString}】`}</span>
           </span>
         );
@@ -643,11 +643,11 @@ const fieldsMap = new Map([
         const { oldString } = log;
         return (
           <span>
-            将
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【预计开始时间】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">{`【${oldString}】`}</span>
-            改变为
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">【无】</span>
           </span>
         );
@@ -661,11 +661,11 @@ const fieldsMap = new Map([
         const { newString } = log;
         return (
           <span>
-            将
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【预计结束时间】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">【无】</span>
-            改变为
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">{`【${newString}】`}</span>
           </span>
         );
@@ -676,11 +676,11 @@ const fieldsMap = new Map([
         const { oldString } = log;
         return (
           <span>
-            将
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【预计结束时间】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">{`【${oldString}】`}</span>
-            改变为
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">【无】</span>
           </span>
         );
@@ -694,11 +694,11 @@ const fieldsMap = new Map([
         const { newString } = log;
         return (
           <span>
-            将
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【冲刺】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">【无】</span>
-            改变为
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">{`【${newString}】`}</span>
           </span>
         );
@@ -709,11 +709,11 @@ const fieldsMap = new Map([
         const { oldString } = log;
         return (
           <span>
-            将
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">【冲刺】</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">{`【${oldString}】`}</span>
-            改变为
+            <span className="c7n-Log-operation">改变为</span>
             <span className="c7n-Log-value">【无】</span>
           </span>
         );

@@ -47,9 +47,9 @@ const Log: React.FC<LogProps> = ({ log, fieldsMap }) => {
       {
         !(fieldConfig.update && fieldConfig.update.hidden) ? (
           <>
-            <span>将</span>
+            <span className="c7n-Log-operation">将</span>
             <span className="c7n-Log-field">{`【${fieldConfig.name}】`}</span>
-            <span>由</span>
+            <span className="c7n-Log-operation">由</span>
             <span className="c7n-Log-value">{`【${fieldConfig.update?.transform ? fieldConfig.update.transform({ oldString }) : oldString}】`}</span>
             <span>改变为</span>
             <span className="c7n-Log-value">{`【${fieldConfig.update?.transform ? fieldConfig.update.transform({ newString }) : newString}】`}</span>
