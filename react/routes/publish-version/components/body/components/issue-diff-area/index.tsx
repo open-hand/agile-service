@@ -6,7 +6,7 @@ import {
   Button, Form, Select, Tooltip,
 } from 'choerodon-ui/pro';
 import classnames from 'classnames';
-import { uniqBy } from 'lodash';
+import { sortBy } from 'lodash';
 import {
   observer, useComputed, useObservable, useObserver,
 } from 'mobx-react-lite';
@@ -22,6 +22,7 @@ import { usePublishVersionContext } from '@/routes/publish-version/stores';
 import SelectPublishVersion from '@/components/select/select-publish-version';
 import { useMap } from 'ahooks';
 import { IPublishVersionMenuDiffConfigProps } from '@/routes/publish-version';
+import moment from 'moment';
 import styles from './index.less';
 import PublishVersionSection from '../section';
 import { openPreviewResultModal } from './PreviewResultModal';
@@ -95,7 +96,7 @@ export function IssueDiffAreaBase({
       : publishVersionApi.compareTag(store.getCurrentData.id, issueDiffDataSet.toData(), action);
   }
   function handleOpenPreview() {
-    const uniqTableData = [...tableDataMap.values()]; // uniqBy((tableData || []), (item) => item.issueId);
+    const uniqTableData = sortBy([...tableDataMap.values()], (item) => (!item.creationDate ? 0 : moment(item.creationDate).unix())); // uniqBy((tableData || []), (item) => item.issueId);
     console.log('uniqTableData', uniqTableData);
     openPreviewResultModal({
       onChangeIssueTag: handleChangeIssueTag, tableData: uniqTableData, handleOk: () => store.setCurrentMenu('info'), applyType: (store as any).applyType,

@@ -64,10 +64,23 @@
   justify-content: space-between;
   flex: 1;
 }
-.summary_leaf{
-  :global{
-    .c7n-pro-table-cell-prefix{
+
+.summary_leaf {
+  :global {
+    .c7n-pro-table-expand-icon-spaced {
       display: none;
     }
+
+    .c7n-pro-table-expand-icon {
+      padding-left: .1rem;
+      margin-right: 0.08rem;
+    }
+
+    .c7n-pro-table-cell-prefix {
+      padding: 0;
+      margin: 0 !important;
+    }
+
+
   }
 }

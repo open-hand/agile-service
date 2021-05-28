@@ -174,24 +174,15 @@ function PublishVersionLinkVersion({ sectionProps, nodeOperationProps }: { secti
                     style={{ width: '.26rem', height: '.26rem' }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      item.type === 'tag'
-                        ? openEditAppVersionModal({
-                          data: item as any,
-                          handleOk: async (newData) => {
-                            typeof (nodeOperationProps?.onEdit) === 'function' ? await nodeOperationProps?.onEdit(newData, item)
-                              : await publishVersionApi.updateTreeTagAlias(item.id, store.getCurrentData.id, item.objectVersionNumber!, newData.tagAlias);
-                            store.loadData();
-                            return true;
-                          },
-                        }) : openEditLinkAppServiceModal({
-                          data: item as any,
-                          handleOk: async (newData) => {
-                            typeof (nodeOperationProps?.onEdit) === 'function' ? await nodeOperationProps?.onEdit(newData, item)
-                              : await publishVersionApi.update(item.id, newData);
-                            store.loadData();
-                            return true;
-                          },
-                        });
+                      openEditLinkAppServiceModal({
+                        data: item as any,
+                        handleOk: async (newData) => {
+                          typeof (nodeOperationProps?.onEdit) === 'function' ? await nodeOperationProps?.onEdit(newData, item)
+                            : await publishVersionApi.update(item.id, newData);
+                          store.loadData();
+                          return true;
+                        },
+                      });
                     }}
                   />
                 )}
