@@ -529,7 +529,7 @@ const UpdateField = ({
         fields.map((f: IFieldK) => {
           const { key, id } = f;
           return (
-            <Row key={key} gutter={20}>
+            <Row key={key} gutter={20} type="flex" align="middle">
               <Col span={11}>
                 <Select
                   style={{ width: '100%' }}
@@ -593,7 +593,11 @@ const UpdateField = ({
   return (
     <div className={styles.updateField}>
       <Loading loading={loading} />
-      {render()}
+      <div className={styles.content}>
+        <div className={styles.tip}>问题流转到当前状态后，将自动执行下面设置的字段值变更。</div>
+        {render()}
+      </div>
+
     </div>
   );
 };

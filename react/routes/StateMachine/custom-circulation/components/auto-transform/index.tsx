@@ -69,29 +69,31 @@ const AutoTransform: React.FC<Props> = ({
 
   return (
     <div className={styles.autoTransform}>
-      {hasTest ? mount('testmanager:StatusAutoTransform', {
-        testTransformRef,
-        issueTypeId: selectedType,
-        statusId: record.get('id'),
-      }) : ''}
-      {
+      <div className={styles.tip}>满足以下条件后问题将自动流转到当前状态。</div>
+      <div className={styles.setting}>
+        {hasTest ? mount('testmanager:StatusAutoTransform', {
+          testTransformRef,
+          issueTypeId: selectedType,
+          statusId: record.get('id'),
+        }) : ''}
+        {
         hasTest && (
           <>
             <div style={{
-              marginTop: -12,
               fontSize: 12,
               color: 'var(--text-color3)',
               marginLeft: 2,
             }}
             >
-              {`自动将issue流转到${record.get('name')}`}
-
+              {`问题关联的用例的测试执行处于下方状态，问题将自动流转到${record.get('name')}。`}
             </div>
-            <Divider style={{ marginTop: 30, marginBottom: 20 }} />
+            <div className={styles.divider} />
           </>
         )
       }
-      <CheckBox checked={checked} onChange={handleChange}>{`分支合并后自动将状态流转到${record.get('name')}`}</CheckBox>
+        <CheckBox checked={checked} onChange={handleChange}>{`分支合并后自动将状态流转到${record.get('name')}`}</CheckBox>
+      </div>
+
     </div>
   );
 };
