@@ -35,4 +35,10 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_publish_version_tag_rel.groo
             column(name: 'tag_alias', type: 'VARCHAR(16)', remarks: 'tag别名', afterColumn: 'tag_name')
         }
     }
+
+    changeSet(id: '2021-05-28-drop-column-agile-publish-version-tag-rel', author: 'ztxemail@163.com') {
+        dropColumn(tableName: 'agile_publish_version_tag_rel') {
+            column(name: 'tag_alias')
+        }
+    }
 }

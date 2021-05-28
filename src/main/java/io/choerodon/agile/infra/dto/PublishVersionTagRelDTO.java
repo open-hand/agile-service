@@ -31,16 +31,6 @@ public class PublishVersionTagRelDTO extends AuditDomain {
 
     private Long organizationId;
 
-    private String tagAlias;
-
-    public String getTagAlias() {
-        return tagAlias;
-    }
-
-    public void setTagAlias(String tagAlias) {
-        this.tagAlias = tagAlias;
-    }
-
     public Long getId() {
         return id;
     }
