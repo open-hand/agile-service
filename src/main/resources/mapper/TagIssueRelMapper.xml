@@ -13,25 +13,94 @@
     </delete>
 
     <select id="selectByTagAndIssueType" resultType="java.lang.Long">
-        select atir.issue_id
+        select distinct ai.issue_id
         from agile_tag_issue_rel atir
         join agile_issue ai on atir.issue_id = ai.issue_id
         where atir.organization_id = #{organizationId}
-        and atir.project_id = #{projectId}
+        and atir.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
         and atir.app_service_code in
-        <foreach collection="tags" item="tag" open="(" separator="," close=")">
-            #{tag.appServiceCode}
+        <foreach collection="appServiceCodes" item="appServiceCode" open="(" separator="," close=")">
+            #{appServiceCode}
         </foreach>
         and atir.tag_name in
-        <foreach collection="tags" item="tag" open="(" separator="," close=")">
-            #{tag.tagName}
+        <foreach collection="tagNames" item="tagName" open="(" separator="," close=")">
+            #{tagName}
         </foreach>
         and atir.tag_project_id in
-        <foreach collection="tags" item="tag" open="(" separator="," close=")">
-            #{tag.projectId}
+        <foreach collection="tagProjectIds" item="tagProjectId" open="(" separator="," close=")">
+            #{tagProjectId}
         </foreach>
         and ai.type_code = #{issueTypeCode}
     </select>
+
+    <select id="selectFeatureByTag" resultType="java.lang.Long">
+        select distinct ai.issue_id
+        from agile_tag_issue_rel atir
+        join agile_issue ai on atir.issue_id = ai.issue_id
+        where atir.organization_id = #{organizationId}
+        and atir.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and atir.app_service_code in
+        <foreach collection="appServiceCodes" item="appServiceCode" open="(" separator="," close=")">
+            #{appServiceCode}
+        </foreach>
+        and atir.tag_name in
+        <foreach collection="tagNames" item="tagName" open="(" separator="," close=")">
+            #{tagName}
+        </foreach>
+        and atir.tag_project_id in
+        <foreach collection="tagProjectIds" item="tagProjectId" open="(" separator="," close=")">
+            #{tagProjectId}
+        </foreach>
+        and ai.type_code = 'feature'
+        union
+        select
+        ai1.feature_id
+        from (
+            select
+            case
+            when ai.type_code = 'sub_task' then ai.parent_issue_id
+            else ai.relate_issue_id
+            end as parent_id
+            from agile_tag_issue_rel atir
+            join agile_issue ai on ai.issue_id = atir.issue_id
+            where atir.organization_id = #{organizationId}
+            and atir.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            and atir.app_service_code in
+            <foreach collection="appServiceCodes" item="appServiceCode" open="(" separator="," close=")">
+                #{appServiceCode}
+            </foreach>
+            and atir.tag_name in
+            <foreach collection="tagNames" item="tagName" open="(" separator="," close=")">
+                #{tagName}
+            </foreach>
+            and atir.tag_project_id in
+            <foreach collection="tagProjectIds" item="tagProjectId" open="(" separator="," close=")">
+                #{tagProjectId}
+            </foreach>
+            and ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            and (
+                (ai.type_code = 'sub_task' and ai.parent_issue_id is not null and ai.parent_issue_id != 0)
+                or
+                (ai.type_code = 'sub_task' and ai.relate_issue_id is not null and ai.relate_issue_id != 0)
+            )
+        ) t1 join agile_issue ai1 on t1.parent_id = ai1.issue_id
+        where ai1.type_code = 'story'
+        and ai1.feature_id is not null
+        and ai1.feature_id != 0
+    </select>
+
 
     <resultMap id="tagWithIssue" type="io.choerodon.agile.api.vo.TagWithIssueVO">
         <id property="projectId" column="project_id"/>
@@ -287,6 +356,106 @@
         and tag_project_id in
         <foreach collection="tags" item="tag" open="(" separator="," close=")">
             #{tag.projectId}
+        </foreach>
+    </select>
+
+    <select id="selectStoryByFeatureIds" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.feature_id
+        from agile_issue ai
+        where ai.project_id in
+        <foreach collection="subProjectIds" item="subProjectId" open="(" separator="," close=")">
+            #{subProjectId}
+        </foreach>
+        and ai.type_code = 'story'
+        and ai.feature_id in
+        <foreach collection="featureIds" item="featureId" open="(" separator="," close=")">
+            #{featureId}
+        </foreach>
+    </select>
+
+    <select id="selectIssueByStoryAndTag" resultType="io.choerodon.agile.api.vo.business.IssueListFieldKVVO">
+        select
+        ai.issue_id,
+        0 as parent_id
+        from agile_issue ai
+        join agile_tag_issue_rel atir on atir.project_id in
+        <foreach collection="subProjectIds" item="subProjectId" open="(" separator="," close=")">
+            #{subProjectId}
+        </foreach>
+        and atir.issue_id = ai.issue_id
+        where ai.project_id in
+        <foreach collection="subProjectIds" item="subProjectId" open="(" separator="," close=")">
+            #{subProjectId}
+        </foreach>
+        and ai.type_code = 'story'
+        and ai.issue_id in
+        <foreach collection="storyIds" item="storyId" open="(" separator="," close=")">
+            #{storyId}
+        </foreach>
+        and atir.tag_project_id in
+        <foreach collection="tagProjectIds" item="tagProjectId" open="(" separator="," close=")">
+            #{tagProjectId}
+        </foreach>
+        and atir.tag_name in
+        <foreach collection="tagNames" item="tagName" open="(" separator="," close=")">
+            #{tagName}
+        </foreach>
+        and atir.app_service_code in
+        <foreach collection="appServiceCodes" item="appServiceCode" open="(" separator="," close=")">
+            #{appServiceCode}
+        </foreach>
+        union
+        select
+        t1.issue_id,
+        t1.parent_id
+        from (
+            select
+            ai1.issue_id,
+            case
+            when ai1.type_code = 'bug' then ai1.relate_issue_id
+            else ai1.parent_issue_id
+            end as parent_id
+            from agile_issue ai1
+            where ai1.project_id in
+            <foreach collection="subProjectIds" item="subProjectId" open="(" separator="," close=")">
+                #{subProjectId}
+            </foreach>
+            and (
+                (
+                    ai1.type_code = 'sub_task'
+                    and ai1.parent_issue_id in
+                    <foreach collection="storyIds" item="storyId" open="(" separator="," close=")">
+                        #{storyId}
+                    </foreach>
+                )
+                or
+                (
+                    ai1.type_code = 'bug'
+                    and ai1.relate_issue_id is not null and ai1.relate_issue_id != 0
+                    and ai1.relate_issue_id in
+                    <foreach collection="storyIds" item="storyId" open="(" separator="," close=")">
+                        #{storyId}
+                    </foreach>
+                )
+            )
+        ) t1 join agile_tag_issue_rel atir1 on t1.issue_id = atir1.issue_id
+        where atir1.project_id in
+        <foreach collection="subProjectIds" item="subProjectId" open="(" separator="," close=")">
+            #{subProjectId}
+        </foreach>
+        and atir1.tag_project_id in
+        <foreach collection="tagProjectIds" item="tagProjectId" open="(" separator="," close=")">
+            #{tagProjectId}
+        </foreach>
+        and atir1.tag_name in
+        <foreach collection="tagNames" item="tagName" open="(" separator="," close=")">
+            #{tagName}
+        </foreach>
+        and atir1.app_service_code in
+        <foreach collection="appServiceCodes" item="appServiceCode" open="(" separator="," close=")">
+            #{appServiceCode}
         </foreach>
     </select>
 </mapper>
