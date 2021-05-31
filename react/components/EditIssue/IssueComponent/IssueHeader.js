@@ -14,7 +14,7 @@ const IssueHeader = (props) => {
   const { AppState, store, prefixCls } = useContext(EditIssueContext);
   const { fullPage } = useDetailContainerContext();
   const {
-    resetIssue, onCancel, reloadIssue, disabled,
+    resetIssue, onCancel, reloadIssue, disabled, otherProject, outside,
   } = props;
   const issue = store.getIssue;
   const {
@@ -87,6 +87,8 @@ const IssueHeader = (props) => {
               parentSummary={parentIssueSummary || parentRelateSummary}
               issue={issue}
               disabled={disabled}
+              otherProject={otherProject}
+              outside={outside}
             />
           </span>
         </div>

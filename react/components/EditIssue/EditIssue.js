@@ -281,6 +281,8 @@ function EditIssue() {
           loginUserId={AppState.userInfo.id}
           onDeleteIssue={onDeleteIssue}
           onUpdate={onUpdate}
+          otherProject={otherProject}
+          outside={outside}
         />
         <IssueBody
           setIssueLoading={setIssueLoading}

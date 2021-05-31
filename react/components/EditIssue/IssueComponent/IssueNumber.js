@@ -12,9 +12,9 @@ import IssueSwitch from './IssueSwitch';
 import styles from './IssueNumber.less';
 
 const IssueNumber = ({
-  reloadIssue, typeCode, parentSummary, issue, disabled,
+  reloadIssue, typeCode, parentSummary, issue, disabled, otherProject, outside,
 }) => {
-  const { isProgram } = useIsProgram;
+  const { isProgram } = useIsProgram();
   const { issueId, issueNum } = issue;
 
   const handleClickIssueNum = useCallback(() => {
@@ -65,7 +65,7 @@ const IssueNumber = ({
         )
       }
       {
-        issueId && (
+        issueId && !otherProject && !outside && (
           <Tooltip title="复制链接">
             <Icon type="link2" role="none" className={styles.copyLinkIcon} style={{ cursor: 'pointer' }} onClick={handleCopyLink} />
           </Tooltip>
