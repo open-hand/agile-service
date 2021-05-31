@@ -1,7 +1,7 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { cloneDeep, find, isEmpty } from 'lodash';
+import { debounce, find, isEmpty } from 'lodash';
 import { fieldApi, personalFilterApi } from '@/api';
 import { IField, ISearchVO } from '@/common/types';
 import { getProjectId } from '@/utils/common';
@@ -67,7 +67,7 @@ class IssueSearchStore {
   }
 
   setQuery(query: () => void) {
-    this.query = query;
+    this.query = debounce(query, 300);
   }
 
   // 我的筛选列表
