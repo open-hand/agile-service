@@ -15,7 +15,7 @@ export interface IssueTableMainProps extends IssueTableProps {
 const ROW_HEIGHT = 40;
 const HEADER_HEIGHT = 45;
 const FOOTER_HEIGHT = 100;
-const MIN_HEIGHT = 400;
+const MIN_HEIGHT = 200;
 const IssueTableMain: React.FC<IssueTableMainProps> = ({
   listLayoutColumns: savedListLayoutColumns,
   fields,

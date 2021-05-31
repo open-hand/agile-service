@@ -7,8 +7,8 @@ import {
 } from '@choerodon/boot';
 import moment from 'moment';
 import {
-  Button, Spin, Modal, Tabs, Icon,
-} from 'choerodon-ui';
+  Spin, Modal, Tabs,
+} from 'choerodon-ui/pro';
 import { withRouter } from 'react-router-dom';
 import { HeaderButtons } from '@choerodon/master';
 import './Setting.less';
@@ -82,9 +82,9 @@ class Setting extends Component {
 
   handleDeleteBoard() {
     const { name } = ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard);
-    confirm({
+    Modal.open({
       title: `删除看板"${name}"`,
-      content: '确定要删除该看板吗?',
+      children: '确定要删除该看板吗?',
       okText: '删除',
       cancelText: '取消',
       className: 'scrumBoardMask',
@@ -151,6 +151,7 @@ class Setting extends Component {
             icon: 'delete_sweep-o',
             handler: this.handleDeleteBoard,
             display: true,
+            disabled: ScrumBoardStore.getBoardList.size === 1,
             permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.board.delete'],
           }, {
             display: true,
