@@ -306,7 +306,7 @@ public class IssueDelaySendMessageTask {
                 Long assigneeId = x.getAssigneeId();
                 if (assigneeId != null && !Objects.equals(0L, assigneeId)) {
                     userIds.add(assigneeId);
-                    if (receiverTypes.contains(ASSIGNEE)) {
+                    if (receiverTypes != null && receiverTypes.contains(ASSIGNEE)) {
                         addValueToMultiKeyMap(
                                 multiKeyMap,
                                 projectId,
@@ -317,7 +317,7 @@ public class IssueDelaySendMessageTask {
                 Long reporterId = x.getReporterId();
                 if (reporterId != null && !Objects.equals(0L, reporterId)) {
                     userIds.add(reporterId);
-                    if (receiverTypes.contains(REPORTER)) {
+                    if (receiverTypes != null && receiverTypes.contains(REPORTER)) {
                         addValueToMultiKeyMap(
                                 multiKeyMap,
                                 projectId,
