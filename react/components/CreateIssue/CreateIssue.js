@@ -1189,7 +1189,6 @@ class CreateIssue extends Component {
       case 'estimatedStartTime':
         return (
           <FieldStartTime
-            style={{ display: 'block', width: 330 }}
             form={form}
             field={field || {}}
           />
@@ -1197,7 +1196,6 @@ class CreateIssue extends Component {
       case 'estimatedEndTime':
         return (
           <FieldEndTime
-            style={{ display: 'block', width: 330 }}
             form={form}
             field={field || {}}
           />
@@ -1285,7 +1283,7 @@ class CreateIssue extends Component {
         );
       default:
         return (
-          <FormItem label={fieldName} style={{ width: 330 }}>
+          <FormItem label={fieldName}>
             {getFieldDecorator(fieldCode, {
               rules: [{ required, message: `${fieldName}为必填项` }],
               getValueFromEvent: fieldType === 'number' ? (value) => (value ? String(value) : undefined) : undefined,

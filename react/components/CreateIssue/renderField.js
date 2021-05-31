@@ -143,6 +143,7 @@ export default function renderField(field, projectId) {
   } if (field.fieldType === 'number') {
     return (
       <InputNumber
+        style={{ display: 'block', width: '100%' }}
         label={fieldName}
         step={field.extraConfig ? 0.01 : 1}
         precision={field.extraConfig ? MAX_FLOAT_BITE : 0}
@@ -152,6 +153,7 @@ export default function renderField(field, projectId) {
   } if (field.fieldType === 'text') {
     return (
       <TextArea
+        style={{ display: 'block', width: '100%' }}
         autosize
         label={fieldName}
         maxLength={255}

@@ -13,7 +13,7 @@ function FieldStartTime({ form, field, initialValue }) {
         initialValue,
       })(
         <DatePicker
-          style={{ display: 'block', width: 330 }}
+          style={{ display: 'block', width: '100%' }}
           label="预计开始时间"
           placeholder="预计开始时间"
           format="YYYY-MM-DD HH:mm:ss"
