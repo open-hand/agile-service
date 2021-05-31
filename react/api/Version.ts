@@ -30,16 +30,7 @@ interface DragVersionData {
   objectVersionNumber: number,
   versionId: number
 }
-export interface IAppVersionData {
-  artifactId: string
-  groupId: string
-  id: null | string
-  organizationId: string
-  projectId: string
-  serviceCode: string
-  version: null | string
-  versionAlias: null | string
-}
+
 export interface IAppVersionCreateData {
   versionAlias?: string
   version: string
