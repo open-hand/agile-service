@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.dto.business;
 
-import io.choerodon.agile.api.vo.TagVO;
+import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.infra.dto.IssueComponentBriefDTO;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.LabelIssueRelDTO;

@@ -1,14 +1,10 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.choerodon.agile.infra.dto.PublishVersionDTO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * @author superlee
@@ -24,13 +20,6 @@ public class TagVO {
     private Long projectId;
 
     private String appServiceName;
-
-    @JsonIgnore
-    private List<PublishVersionDTO> publishVersionList;
-    @JsonIgnore
-    private Set<Long> issueIds;
-    @JsonIgnore
-    private TagCompareVO tagCompareVO;
 
     private Long objectVersionNumber;
 
@@ -61,30 +50,6 @@ public class TagVO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
-    }
-
-    public TagCompareVO getTagCompareVO() {
-        return tagCompareVO;
-    }
-
-    public void setTagCompareVO(TagCompareVO tagCompareVO) {
-        this.tagCompareVO = tagCompareVO;
-    }
-
-    public Set<Long> getIssueIds() {
-        return issueIds;
-    }
-
-    public void setIssueIds(Set<Long> issueIds) {
-        this.issueIds = issueIds;
-    }
-
-    public List<PublishVersionDTO> getPublishVersionList() {
-        return publishVersionList;
-    }
-
-    public void setPublishVersionList(List<PublishVersionDTO> publishVersionList) {
-        this.publishVersionList = publishVersionList;
     }
 
     public String getAppServiceCode() {

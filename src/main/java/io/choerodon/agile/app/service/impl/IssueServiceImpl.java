@@ -182,8 +182,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private FieldValueMapper fieldValueMapper;
     @Autowired
-    private TagIssueRelMapper tagIssueRelMapper;
-    @Autowired
     private ModelMapper modelMapper;
 
     private static final String SUB_TASK = "sub_task";
@@ -298,25 +296,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private void handleCreateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId) {
-        if (!ObjectUtils.isEmpty(tags)) {
-            Long organizationId = ConvertUtil.getOrganizationId(projectId);
-            tags.forEach(x -> {
-                String tagName = x.getTagName();
-                String appServiceCode = x.getAppServiceCode();
-                if (!StringUtils.hasText(tagName) || !StringUtils.hasText(appServiceCode)) {
-                    throw new CommonException("error.issue.tag.null");
-                }
-                TagIssueRelDTO dto = new TagIssueRelDTO();
-                dto.setIssueId(issueId);
-                dto.setOrganizationId(organizationId);
-                dto.setTagName(tagName);
-                dto.setAppServiceCode(appServiceCode);
-                dto.setTagProjectId(x.getProjectId());
-                dto.setProjectId(projectId);
-                if (tagIssueRelMapper.select(dto).isEmpty()) {
-                    tagIssueRelMapper.insertSelective(dto);
-                }
-            });
+        if (agilePluginService != null) {
+            agilePluginService.createTagIssueRel(tags, projectId, issueId);
         }
     }
 
@@ -719,15 +700,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public void handleUpdateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        TagIssueRelDTO dto = new TagIssueRelDTO();
-        dto.setProjectId(projectId);
-        dto.setOrganizationId(organizationId);
-        dto.setIssueId(issueId);
-        tagIssueRelMapper.delete(dto);
-        handleCreateTagIssueRel(tags, projectId, issueId);
         if (agilePluginService != null) {
-            agilePluginService.handleProgramUpdateTag(tags, projectId, issueId);
+            agilePluginService.updateTagIssueRel(tags, projectId, issueId);
         }
     }
 
@@ -823,27 +797,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 updateIssueStatus(projectId, issueId, transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), appleType);
             }
         }
-    }
-
-    @Override
-    public Map<Long, Set<TagVO>> listTagMap(Long organizationId,
-                                            Set<Long> projectIds,
-                                            List<Long> issueIds) {
-        Map<Long, Set<TagVO>> map = new HashMap<>();
-        if (!ObjectUtils.isEmpty(issueIds)
-                && !ObjectUtils.isEmpty(projectIds)) {
-            tagIssueRelMapper.selectByOptions(organizationId, projectIds, issueIds)
-                    .forEach(x -> {
-                        Long issueId = x.getIssueId();
-                        Set<TagVO> tags = map.computeIfAbsent(issueId, y -> new HashSet<>());
-                        TagVO tag = new TagVO();
-                        tag.setProjectId(x.getTagProjectId());
-                        tag.setTagName(x.getTagName());
-                        tag.setAppServiceCode(x.getAppServiceCode());
-                        tags.add(tag);
-                    });
-        }
-        return map;
     }
 
     private String getApplyType(Long projectId) {
