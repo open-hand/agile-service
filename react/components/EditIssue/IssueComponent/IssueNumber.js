@@ -14,7 +14,7 @@ import styles from './IssueNumber.less';
 const IssueNumber = ({
   reloadIssue, typeCode, parentSummary, issue, disabled,
 }) => {
-  const { isProgram } = useIsProgram;
+  const { isProgram } = useIsProgram();
   const { issueId, issueNum } = issue;
 
   const handleClickIssueNum = useCallback(() => {
