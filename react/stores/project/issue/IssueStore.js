@@ -6,6 +6,7 @@ import {
   debounce, isEmpty, isEqual, pick, includes,
 } from 'lodash';
 import { isInProgram } from '@/utils/program';
+import { has } from '@choerodon/inject';
 
 export const isFilterSame = (obj, obj2) => {
   // 过滤掉 [] null '' 那些不起作用的属性
@@ -185,13 +186,15 @@ export function getSystemFields(excludeCodes = []) {
     defaultShow: false,
     fieldType: 'member',
   },
-  {
-    code: 'tags',
-    name: 'Tag',
-    defaultShow: true,
-    fieldType: 'multiple',
-  },
   ];
+  if (has('agile:PublishVersion')) {
+    systemFields.push({
+      code: 'tags',
+      name: 'Tag',
+      defaultShow: false,
+      fieldType: 'multiple',
+    });
+  }
   return isInProgram() ? systemFields.filter((f) => !includes(excludeCodes, f.code)) : systemFields.filter((f) => f.code !== 'feature' && !includes(excludeCodes, f.code));
 }
 export function getSystemFieldsInStoryMap(excludeCodes = []) {
