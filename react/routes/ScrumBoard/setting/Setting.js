@@ -156,7 +156,7 @@ class Setting extends Component {
           }, {
             display: true,
             element: <SelectBoard
-              onFooterClick={this.handleCreateBoardClick}
+              createButton={false}
               onChange={(value) => {
                 const selectedBoard = ScrumBoardStore.getBoardList.get(value);
                 ScrumBoardStore.setSelectedBoard(value);

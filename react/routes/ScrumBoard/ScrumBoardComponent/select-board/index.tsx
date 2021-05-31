@@ -8,16 +8,22 @@ import useSelectFooter from '@/hooks/useSelectFooter';
 
 const { Option } = FlatSelect;
 export interface SelectBoardProps {
-
+  createButton?: boolean
+  onChange: (v: string | null) => void
+  onFooterClick?: () => void
 }
-const SelectBoard: React.FC<any> = ({ onChange, onFooterClick, ...otherProps }) => {
+const SelectBoard: React.FC<SelectBoardProps> = ({
+  onChange, onFooterClick, createButton = true, ...otherProps
+}) => {
   const ref = useRef<FlatSelect>(null);
   const props = useSelectFooter(ref,
-    <Permission
-      service={['choerodon.code.project.cooperation.iteration-plan.ps.board.create']}
-    >
-      <Button style={{ width: '100%', height: 42, textAlign: 'left' }} onClick={onFooterClick}>创建看板</Button>
-    </Permission>);
+    createButton ? (
+      <Permission
+        service={['choerodon.code.project.cooperation.iteration-plan.ps.board.create']}
+      >
+        <Button style={{ width: '100%', height: 42, textAlign: 'left' }} onClick={onFooterClick}>创建看板</Button>
+      </Permission>
+    ) : null);
   return (
     <FlatSelect
       ref={ref}
