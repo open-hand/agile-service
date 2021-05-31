@@ -178,6 +178,16 @@ public class IssueListFieldKVVO {
     @ApiModelProperty("tags")
     private List<TagVO> tags;
 
+    private List<ProjectVO> projectVOList;
+
+    public List<ProjectVO> getProjectVOList() {
+        return projectVOList;
+    }
+
+    public void setProjectVOList(List<ProjectVO> projectVOList) {
+        this.projectVOList = projectVOList;
+    }
+
     public List<TagVO> getTags() {
         return tags;
     }
