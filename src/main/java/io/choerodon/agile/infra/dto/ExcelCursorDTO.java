@@ -16,6 +16,8 @@ public class ExcelCursorDTO {
 
     private List<Object> collections;
 
+    private boolean previousBorderBold = true;
+
     public ExcelCursorDTO() {
         this.collections = new ArrayList<>();
     }
@@ -25,6 +27,14 @@ public class ExcelCursorDTO {
         this.page = page;
         this.size = size;
         this.collections = new ArrayList<>();
+    }
+
+    public boolean isPreviousBorderBold() {
+        return previousBorderBold;
+    }
+
+    public void setPreviousBorderBold(boolean previousBorderBold) {
+        this.previousBorderBold = previousBorderBold;
     }
 
     public Integer getRow() {
