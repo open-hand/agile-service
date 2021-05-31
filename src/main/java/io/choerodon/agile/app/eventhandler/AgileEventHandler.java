@@ -66,8 +66,6 @@ public class AgileEventHandler {
     @Autowired
     private BoardTemplateService boardTemplateService;
     @Autowired
-    private PublishVersionService publishVersionService;
-    @Autowired
     private StatusBranchMergeSettingService statusBranchMergeSettingService;
 
     @SagaTask(code = TASK_ORG_CREATE,
@@ -171,18 +169,6 @@ public class AgileEventHandler {
         } else {
             LOGGER.info("项目{}已初始化，跳过项目初始化", projectEvent.getProjectCode());
         }
-        return message;
-    }
-
-    @SagaTask(code = TASK_GIT_TAG_DELETE, sagaCode = GIT_TAG_DELETE, seq = 1,
-            description = "agile消费tag删除事件")
-    public String handleTagDeleteEvent(String message) {
-        DevopsGitlabTagPayload devopsGitlabTagPayload = JSON.parseObject(message, DevopsGitlabTagPayload.class);
-        LOGGER.info("删除tag同时删除相关tag数据，{}", message);
-        Long projectId = devopsGitlabTagPayload.getProjectId();
-        String appServiceCode = devopsGitlabTagPayload.getServiceCode();
-        String tagName = devopsGitlabTagPayload.getTag();
-        publishVersionService.deleteTag(projectId, appServiceCode, tagName);
         return message;
     }
 

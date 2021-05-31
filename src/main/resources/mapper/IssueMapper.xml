@@ -63,7 +63,7 @@
                     ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="querySubBugByIssueId"/>
         <collection property="tags" column="issue_id"
-                    ofType="io.choerodon.agile.api.vo.TagVO"
+                    ofType="io.choerodon.agile.api.vo.business.TagVO"
                     select="queryTagsByIssueId"/>
     </resultMap>
 
@@ -278,7 +278,7 @@
         WHERE issue_id = #{issueId} order by creation_date desc
     </select>
 
-    <select id="queryTagsByIssueId" resultType="io.choerodon.agile.api.vo.TagVO">
+    <select id="queryTagsByIssueId" resultType="io.choerodon.agile.api.vo.business.TagVO">
         select
         distinct
         atir.tag_project_id as project_id,
@@ -388,7 +388,7 @@
             <result property="labelName" column="label_name"/>
         </collection>
         <collection property="tags"
-                    ofType="io.choerodon.agile.api.vo.TagVO">
+                    ofType="io.choerodon.agile.api.vo.business.TagVO">
             <id property="tagName" column="tag_name"/>
             <id property="projectId" column="tag_project_id"/>
             <id property="appServiceCode" column="app_service_code"/>

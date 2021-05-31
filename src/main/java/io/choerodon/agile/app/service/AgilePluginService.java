@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.dto.business.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -459,4 +460,10 @@ public interface AgilePluginService {
     void deleteProgramTagRel(Long projectId, Long organizationId, String appServiceCode, String tagName);
 
     void handleProgramUpdateTag(List<TagVO> tags, Long projectId, Long issueId);
+
+    Map<Long, Set<TagVO>> listTagMap(Long organizationId, Set<Long> projectIds, List<Long> issueIds);
+
+    void createTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
+
+    void updateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
 }
