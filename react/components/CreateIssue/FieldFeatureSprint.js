@@ -6,7 +6,7 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
 
 const FormItem = Form.Item;
 function FieldFeatureSprint({ form: { getFieldDecorator, getFieldValue, setFieldsValue }, field }) {
-  useEffect(() => { setFieldsValue({ subProjectSprintId: undefined }); }, [getFieldValue('pi'), getFieldValue('teamProjectIds')]);
+  // useEffect(() => { setFieldsValue({ subProjectSprintId: undefined }); }, [getFieldValue('pi'), getFieldValue('teamProjectIds')]);
   return (
     <FormItem label="冲刺" key="feature-sprint">
       {getFieldDecorator('subProjectSprintId', {

@@ -139,10 +139,12 @@ const OldSelectProgramVersion: React.FC<OldProps> = ({ teamProjectIds, ...restPr
     const options = (versionData.option.get(item.id) || []);
 
     return (
-      <OldSelect.OptGroup label={(
-        <Tooltip title={item.name}>
-          <span className={versionStyles.OptGroup}>{item.name}</span>
-        </Tooltip>) as unknown as string}
+      <OldSelect.OptGroup
+        key={item.name}
+        label={(
+          <Tooltip title={item.name}>
+            <span className={versionStyles.OptGroup}>{item.name}</span>
+          </Tooltip>) as unknown as string}
       >
         { options.map((option) => (
           <OldSelect.Option value={option.id}>

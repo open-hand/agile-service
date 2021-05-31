@@ -1210,7 +1210,7 @@ class CreateIssue extends Component {
               {getFieldDecorator('programVersion', {
                 rules: [{ required: field.required, message: '版本为必输项' }],
               })(
-                <SelectProgramVersion mode="multiple" placeholder="版本" />,
+                <SelectProgramVersion mode="multiple" placeholder="版本" label="版本" />,
               )}
             </FormItem>
           )
@@ -1386,7 +1386,7 @@ class CreateIssue extends Component {
         keyboard={false}
       >
         <Spin spinning={loading}>
-          <Form layout="vertical" className="c7nagile-form">
+          <Form layout="vertical" className="c7nagile-form c7n-pro-form-float">
             <div className="c7nagile-createIssue-fields" key={newIssueTypeCode}>
               {['sub_task', 'sub_bug'].includes(mode) && (
                 <FormItem>
