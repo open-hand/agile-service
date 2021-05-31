@@ -187,6 +187,7 @@ public class SiteMsgUtil {
         messageSender.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
         messageSender.setMessageCode("ISSUECHANGESTATUS");
         List<Receiver> receiverList = new ArrayList<>();
+        handleReceiver(receiverList, userSet);
         setLoginNameAndRealName(operatorId, templateArgsMap);
         // 设置模板参数
         messageSender.setArgs(templateArgsMap);
