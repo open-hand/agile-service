@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.text.SimpleDateFormat;
@@ -328,15 +329,18 @@ public class IssueDelaySendMessageTask {
                 if (receiverTypes != null && receiverTypes.contains(PROJECT_OWNER)) {
                     projectIdForProjectOwner.add(projectId);
                 }
-                projectMessageVO.getUserIds().forEach(y -> {
-                            addValueToMultiKeyMap(
-                                    multiKeyMap,
-                                    projectId,
-                                    y,
-                                    new IssueDelayCarrierVO(x, x.getIssueId(), delayDay, organizationId));
-                            userIds.add(y);
-                        }
-                );
+                Set<Long> projectUserIds = projectMessageVO.getUserIds();
+                if (!CollectionUtils.isEmpty(projectUserIds)) {
+                    projectMessageVO.getUserIds().forEach(y -> {
+                                addValueToMultiKeyMap(
+                                        multiKeyMap,
+                                        projectId,
+                                        y,
+                                        new IssueDelayCarrierVO(x, x.getIssueId(), delayDay, organizationId));
+                                userIds.add(y);
+                            }
+                    );
+                }
             });
         });
         priorityMap.forEach((k, v) -> v.forEach(priorityNameMap::put));
