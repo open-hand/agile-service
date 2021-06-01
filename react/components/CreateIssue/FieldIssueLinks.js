@@ -82,7 +82,7 @@ function FieldIssueLinks({ form, projectId }) {
                 label="问题"
                 type="issues_in_link"
                 // optionFilter={(issue) => !getOtherSelected(selectedIssues, k).includes(issue.issueId)}
-                requestArgs={{ excludeIssueIds: getOtherSelected(selectedIssues, k) }}
+                requestArgs={{ excludeIssueIds: getOtherSelected(selectedIssues, k), projectId }}
                 getPopupContainer={() => (document.getElementsByClassName('c7n-modal-body') ? document.getElementsByClassName('c7n-modal-body')[0] : document.body)}
               />,
             )}
