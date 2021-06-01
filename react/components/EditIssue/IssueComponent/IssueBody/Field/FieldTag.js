@@ -27,7 +27,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
   };
 
   render() {
-    const { store, disabled } = this.props;
+    const { store, disabled, applyType } = this.props;
     const issue = store.getIssue;
     const {
       tags,
@@ -48,7 +48,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
             onSubmit={this.updateIssueTag}
             initValue={tags}
             editor={({ submit, hideEditor }) => (
-              <SelectMultiServiceTag onChange={submit} multiple onPopupHidden={(hidden) => hidden && hideEditor()} />
+              <SelectMultiServiceTag onChange={submit} mode={applyType === 'program' ? 'program' : undefined} multiple onPopupHidden={(hidden) => hidden && hideEditor()} />
             )}
           >
             {

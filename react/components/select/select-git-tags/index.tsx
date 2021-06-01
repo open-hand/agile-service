@@ -62,20 +62,19 @@ const SelectGitTags: React.FC<Props> = forwardRef(({
   );
 });
 const SelectGitTagsHOC: React.FC<Props> = forwardRef(({
-  applicationId, ...otherProps
+  applicationId, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const innerRef = useRef<Select>(null);
   const forceUpdate = useForceUpdate();
 
   useEffect(() => {
     forceUpdate();
-    console.log('forceUpdate applicationId', applicationId);
-  }, [applicationId]);
+  }, [applicationId, projectId]);
   function handleBindRef(r: any) {
     Object.assign(innerRef, { current: r });
     typeof (ref) === 'function' ? ref(r) : ref && Object.assign(ref, { current: r });
   }
 
-  return <SelectGitTags ref={handleBindRef} applicationId={applicationId} {...otherProps} key={`select-git-tag-${applicationId}`} />;
+  return <SelectGitTags ref={handleBindRef} applicationId={applicationId} projectId={projectId} {...otherProps} key={`select-git-tag-${applicationId}-${projectId}`} />;
 });
 export default SelectGitTagsHOC;
