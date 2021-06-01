@@ -67,6 +67,7 @@ public class SystemFieldCanNotEdit {
         featureMap.put(FieldCode.CREATOR, new PageConfigFieldEditedVO(true, true, true));
         featureMap.put(FieldCode.UPDATOR, new PageConfigFieldEditedVO(true, true, true));
         featureMap.put(FieldCode.TAG, new PageConfigFieldEditedVO(false, false, false));
+        featureMap.put(FieldCode.FEATURE_TYPE, new PageConfigFieldEditedVO(true, true, true));
 
         storyMap = new HashMap<>();
         storyMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));

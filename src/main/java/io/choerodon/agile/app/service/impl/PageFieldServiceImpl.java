@@ -180,7 +180,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         }
         addNotSyncField(organizationId, projectId, pageFields, issueTypeId, created, edited);
         if (agilePluginService != null) {
-            pageFields = agilePluginService.handlerProgramPageField(projectId,issueTypeId,pageFields);
+            pageFields = agilePluginService.handlerProgramPageField(projectId,issueTypeId,pageFields, created, edited);
         }
         return filterFieldsByProjectCategories(pageFields, projectId);
     }

@@ -39,6 +39,7 @@ public class SystemFieldPageConfig {
         CREATER(FieldCode.CREATOR, false, true),
         UPDATER(FieldCode.UPDATOR, false, true),
         TAG(FieldCode.TAG, true, true),
+        FEATURE_TYPE(FieldCode.FEATURE_TYPE, true, false),
         ;
 
 
