@@ -74,7 +74,7 @@ const Comments: React.FC<Props> = ({
       <WYSIWYGEditor
         autoFocus
         footer
-        style={{ minHeight: 300, width: '100%' }}
+        style={{ minHeight: 300, maxHeight: 500, width: '100%' }}
         onCancel={() => {
           cancel();
         }}
