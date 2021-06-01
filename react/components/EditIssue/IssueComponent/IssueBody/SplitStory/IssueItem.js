@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router';
 import { Tooltip } from 'choerodon-ui';
-import ProjectHead from '@/components/ProjectHead';
+import ProjectTag from '@/components/tag/project-tag';
 import PriorityTag from '@/components/PriorityTag';
 import StatusTag from '@/components/StatusTag';
 import TypeTag from '@/components/TypeTag';
@@ -74,13 +74,9 @@ function IssueItem({ issue, outside, organizationId }) {
           </Link>
         </div>
       </Tooltip>
-      <Tooltip title={`团队: ${projectVO.name}`}>
-        <ProjectHead
-          project={projectVO}
-          hiddenText
-          tooltip={false}
-        />
-      </Tooltip>
+      <ProjectTag
+        data={projectVO}
+      />
       {totalCount ? (
         <Tooltip
           mouseEnterDelay={0.5}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { piApi } from '@/api';
 import HistoryItem from './HistoryItem';
+import Divider from '../Divider';
 
 function IssuePIHistory(props) {
   const { store } = props;
@@ -33,6 +34,7 @@ function IssuePIHistory(props) {
           {expand ? '折叠' : '展开'}
         </Button>
       )}
+      <Divider />
     </div>
   );
 }
