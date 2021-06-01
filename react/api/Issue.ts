@@ -492,7 +492,7 @@ class IssueApi extends Api<IssueApi> {
   loadIssuesInLink(page: number = 1, size: number = 10, issueId?: number, content?: string, excludeIssueIds?:string[]) {
     return axios({
       method: 'post',
-      url: `/agile/v1/projects/${getProjectId()}/issues/agile/summary`,
+      url: `/agile/v1/projects/${this.projectId}/issues/agile/summary`,
       params: {
         page,
         size,

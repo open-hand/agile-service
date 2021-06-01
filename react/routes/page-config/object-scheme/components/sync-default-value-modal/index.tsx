@@ -6,7 +6,7 @@ import renderEditor from '@/routes/page-config/components/renderEditor';
 import { getMenuType } from '@/utils/common';
 import {
   Form, DataSet, Modal, Select,
-} from 'choerodon-ui/pro/lib';
+} from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import moment from 'moment';
 import React, {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { DataSet, Modal, Table } from 'choerodon-ui/pro/lib';
+import { DataSet, Modal, Table } from 'choerodon-ui/pro';
 import { ModalProps } from 'choerodon-ui/pro/lib/modal/Modal';
 import classnames from 'classnames';
 import { TemplateAction } from '@/api';

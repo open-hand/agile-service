@@ -6,7 +6,7 @@ import moment from 'moment';
 import {
   PageConfigIssueType, pageConfigApi, IFiledProps, IFiledListItemProps, IFieldOptionProps,
 } from '@/api';
-import { DataSet } from 'choerodon-ui/pro/lib';
+import { DataSet } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { IFieldPostDataProps } from '../../components/create-field/CreateField';
 import { transformDefaultValue } from '../utils';

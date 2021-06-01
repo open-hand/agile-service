@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { remove } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { DataSet } from 'choerodon-ui/pro/lib';
+import { DataSet } from 'choerodon-ui/pro';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';

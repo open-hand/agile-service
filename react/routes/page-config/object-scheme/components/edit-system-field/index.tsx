@@ -3,7 +3,7 @@ import { IModalProps } from '@/common/types';
 import renderEditor from '@/routes/page-config/components/renderEditor';
 import {
   Form, DataSet, Modal, Select,
-} from 'choerodon-ui/pro/lib';
+} from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect } from 'react';

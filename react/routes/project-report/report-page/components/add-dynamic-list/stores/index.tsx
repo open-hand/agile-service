@@ -1,7 +1,7 @@
 import React, {
   createContext, useContext,
 } from 'react';
-import { DataSet } from 'choerodon-ui/pro/lib';
+import { DataSet } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { findIndex } from 'lodash';
 import useIsInProgram from '@/hooks/useIsInProgram';

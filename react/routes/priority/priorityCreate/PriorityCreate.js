@@ -10,7 +10,7 @@ import { CompactPicker } from 'react-color';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import './priorityCreate.less';
 import { priorityApi } from '@/api';
-import { Button } from 'choerodon-ui/pro/lib';
+import { Button } from 'choerodon-ui/pro';
 
 const FormItem = Form.Item;
 const { Sidebar } = Modal;

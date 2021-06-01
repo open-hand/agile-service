@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { injectIntl, InjectedIntl } from 'react-intl';
 import { getMenuType } from '@/utils/common';
-import { DataSet } from 'choerodon-ui/pro/lib';
+import { DataSet } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import SortTableDataSet from './SortTableDataSet';
 import AddUnselectedDataSet from './AddUnselectedDataSet';
