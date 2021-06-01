@@ -7,7 +7,6 @@ import {
   Header, Content, Page, Breadcrumb, Choerodon, useTheme,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
-import { Button } from 'choerodon-ui';
 import { map, set, get } from 'lodash';
 import { useUnmount, usePersistFn } from 'ahooks';
 import CreateIssue from '@/components/CreateIssue';

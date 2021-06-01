@@ -1,5 +1,6 @@
 import { castArray } from 'lodash';
 import { toJS } from 'mobx';
+import { getDateValue } from '@/components/issue-search/utils';
 
 function transformSystemFilter(data) {
   const {
@@ -34,7 +35,6 @@ function transformSystemFilter(data) {
     appVersion,
     tags,
   } = data;
-
   return {
     advancedSearchArgs: {
       issueTypeId,
@@ -65,14 +65,14 @@ function transformSystemFilter(data) {
       tags,
     },
     searchArgs: {
-      estimatedStartTimeScopeStart: estimatedStartTime ? estimatedStartTime[0] ?? null : undefined,
-      estimatedStartTimeScopeEnd: estimatedStartTime ? estimatedStartTime[1] ?? null : undefined,
-      estimatedEndTimeScopeStart: estimatedEndTime ? estimatedEndTime[0] ?? null : undefined,
-      estimatedEndTimeScopeEnd: estimatedEndTime ? estimatedEndTime[1] ?? null : undefined,
-      createStartDate: createDate ? createDate[0] ?? null : undefined,
-      createEndDate: createDate ? createDate[1] ?? null : undefined,
-      updateStartDate: updateDate ? updateDate[0] ?? null : undefined,
-      updateEndDate: updateDate ? updateDate[1] ?? null : undefined,
+      estimatedStartTimeScopeStart: getDateValue(estimatedStartTime, 0),
+      estimatedStartTimeScopeEnd: getDateValue(estimatedStartTime, 1),
+      estimatedEndTimeScopeStart: getDateValue(estimatedEndTime, 0),
+      estimatedEndTimeScopeEnd: getDateValue(estimatedEndTime, 1),
+      createStartDate: getDateValue(createDate, 0),
+      createEndDate: getDateValue(createDate, 1),
+      updateStartDate: getDateValue(updateDate, 0),
+      updateEndDate: getDateValue(updateDate, 1),
     },
     quickFilterIds,
     contents,
@@ -115,21 +115,17 @@ export function transformFilter(chosenFields) {
         break;
       }
       case 'input': {
-        if (value && value.length > 0) {
-          customField.string.push({
-            fieldId: id,
-            value,
-          });
-        }
+        customField.string.push({
+          fieldId: id,
+          value,
+        });
         break;
       }
       case 'text': {
-        if (value && value.length > 0) {
-          customField.text.push({
-            fieldId: id,
-            value,
-          });
-        }
+        customField.text.push({
+          fieldId: id,
+          value,
+        });
         break;
       }
       case 'number': {

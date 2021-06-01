@@ -1,10 +1,15 @@
 /* eslint-disable camelcase */
-import { IFieldType } from '@/common/types';
 import {
   isEmpty, isEqual, pick, pickBy, isUndefined,
 } from 'lodash';
 
-export const getEmptyValue = (field: any) => (field.defaultShow ? undefined : null);
+export const getEmptyValue = (field: any) => (field && field.defaultShow ? undefined : null);
+export const getDateValue = (value: [string, string] | null, index: 0 | 1) => {
+  if (value) {
+    return value[index];
+  }
+  return value;
+};
 
 export const isFilterSame = (obj: { [key: string]: any }, obj2: { [key: string]: any }): boolean => {
   // 过滤掉 [] null '' 那些不起作用的属性
