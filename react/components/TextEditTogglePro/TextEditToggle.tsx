@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import FormField from 'choerodon-ui/pro/lib/field';
 import { toJS } from 'mobx';
+import { isEqual } from 'lodash';
 import classNames from 'classnames';
 import useClickOut from '@/hooks/useClickOut';
 import styles from './TextEditToggle.less';
@@ -100,7 +101,7 @@ const TextEditToggle: React.FC<Props> = ({
           containerRef.current.blur();
         }
         hideEditor();
-        if (waitSubmitValue !== initValue) {
+        if (!isEqual(waitSubmitValue, initValue)) {
           onSubmit(waitSubmitValue);
         }
       }
