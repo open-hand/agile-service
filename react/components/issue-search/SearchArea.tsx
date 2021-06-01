@@ -136,7 +136,7 @@ const SearchArea: React.FC = () => {
   const findSameFilter = () => {
     const currentFilterDTO = store.getCustomFieldFilters()
       ? flattenObject(store.getCustomFieldFilters()) : {};
-    console.log(currentFilterDTO);
+    // console.log(currentFilterDTO);
     // 找到与当前筛选相同条件的我的筛选
     const targetMyFilter = find(myFilters,
       (filter) => isFilterSame(flattenObject(JSON.parse(filter.filterJson)), currentFilterDTO));

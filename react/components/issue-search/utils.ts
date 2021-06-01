@@ -3,7 +3,7 @@ import {
   isEmpty, isEqual, pick, pickBy, isUndefined,
 } from 'lodash';
 
-export const getEmptyValue = (field: any) => (field.defaultShow ? undefined : null);
+export const getEmptyValue = (field: any) => (field && field.defaultShow ? undefined : null);
 export const getDateValue = (value: [string, string] | null, index: 0 | 1) => {
   if (value) {
     return value[index];
