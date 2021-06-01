@@ -476,6 +476,9 @@ public class IssueConvertDTO {
         if (this.assigneeId != null && this.assigneeId == 0) {
             this.assigneeId = null;
         }
+        if (this.mainResponsibleId != null && this.mainResponsibleId == 0) {
+            this.mainResponsibleId = null;
+        }
     }
 
     private void initializationReporter() {

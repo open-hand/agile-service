@@ -2973,7 +2973,7 @@ public class ExcelServiceImpl implements ExcelService {
                             userIds.add(mainResponsibleId);
                         }
                     });
-                    Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
+                    Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(ListUtil.filterByKey(new ArrayList<>(userIds), 0L), true);
                     Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
                     Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
                     Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);

@@ -11,6 +11,7 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.TeamPerformanceMapper;
 import io.choerodon.agile.infra.utils.DataUtil;
+import io.choerodon.agile.infra.utils.ListUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -81,7 +82,7 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
                 }
             }
         }
-        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(mainResponsibleIds, true);
+        Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(ListUtil.filterByKey(mainResponsibleIds, 0L), true);
         for (SprintTaskVO sprintTask : sprintTasks) {
             handleUser(sprintTask, usersMap.get(sprintTask.getMainResponsibleId()));
             handleMainRate(sumRemainingTime, remainingTimeComplete, sprintTask);
@@ -157,6 +158,7 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
         List<Long> mainResponsibleIds =
                 sprintBugs.stream().filter(sprintBugVO -> Objects.nonNull(sprintBugVO.getResponsibleId()))
                         .map(SprintBugVO::getResponsibleId).collect(Collectors.toList());
+        mainResponsibleIds = ListUtil.filterByKey(mainResponsibleIds, 0L);
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(mainResponsibleIds, true);
         sprintBugs.forEach(sprintBug -> handleUser(sprintBug, usersMap.get(sprintBug.getResponsibleId())));
         return sprintBugs;
