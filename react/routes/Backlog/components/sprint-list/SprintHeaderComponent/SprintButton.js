@@ -11,7 +11,7 @@ import { sprintApi, workCalendarApi } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import CloseSprint from '@/components/close-sprint';
-import { Tooltip } from 'choerodon-ui/pro/lib';
+import { Tooltip } from 'choerodon-ui/pro';
 import StartSprint from '../../start-sprint';
 import './SprintButton.less';
 

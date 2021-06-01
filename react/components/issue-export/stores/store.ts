@@ -4,7 +4,7 @@ import { findIndex } from 'lodash';
 import { observable, action, computed } from 'mobx';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
-import { DataSet } from 'choerodon-ui/pro/lib';
+import { DataSet } from 'choerodon-ui/pro';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { Observer } from 'mobx-react-lite';
 import { CheckBoxProps } from 'choerodon-ui/pro/lib/check-box/CheckBox';

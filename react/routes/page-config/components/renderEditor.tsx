@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Select, TextField, TextArea, NumberField,
-} from 'choerodon-ui/pro/lib';
+} from 'choerodon-ui/pro';
 import { set } from 'lodash';
 import { toJS } from 'mobx';
 import SelectUser from '@/components/select/select-user';

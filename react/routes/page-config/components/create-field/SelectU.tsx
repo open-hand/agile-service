@@ -4,7 +4,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { isNil } from 'lodash';
 import { Select, SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { Tooltip } from 'choerodon-ui/pro/lib';
+import { Tooltip } from 'choerodon-ui/pro';
 import CloseButton from 'choerodon-ui/pro/lib/field/CloseButton';
 import classNames from 'classnames';
 import './select-disabled.less';

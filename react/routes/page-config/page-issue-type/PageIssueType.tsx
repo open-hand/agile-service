@@ -6,7 +6,7 @@ import {
 import { HeaderButtons } from '@choerodon/master';
 import {
   Button, Modal, Spin, message, Select, Tooltip,
-} from 'choerodon-ui/pro/lib';
+} from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';

@@ -6,7 +6,7 @@ import classnames from 'classnames';
 import { Menu, Modal } from 'choerodon-ui';
 import {
   Button, Icon, Tooltip, DataSet, Select,
-} from 'choerodon-ui/pro/lib';
+} from 'choerodon-ui/pro';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 

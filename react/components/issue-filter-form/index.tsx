@@ -1,4 +1,4 @@
-import { DataSet } from 'choerodon-ui/pro/lib';
+import { DataSet } from 'choerodon-ui/pro';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import React from 'react';

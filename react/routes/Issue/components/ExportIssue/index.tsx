@@ -1,5 +1,5 @@
 import React from 'react';
-import { DataSet, Table, Modal } from 'choerodon-ui/pro/lib';
+import { DataSet, Table, Modal } from 'choerodon-ui/pro';
 import ExportIssue, { openExportIssueModal as originOpenExportIssueModal } from '@/components/issue-export';
 import IssueExportStore from '@/components/issue-export/stores/store';
 import { issueApi, TemplateAction } from '@/api';
