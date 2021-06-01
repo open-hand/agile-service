@@ -37,6 +37,7 @@ export function renderFlatField(field: IFilterField, { element, removeButton }: 
       style={{
         display: 'flex', alignItems: 'center', marginBottom: 10,
       }}
+      className="c7n-pro-form-float"
     >
       {React.cloneElement(element, {
         style: {
@@ -210,21 +211,17 @@ export function departFilter(filter: IFilter, fields: IFilterField[]) {
           break;
         }
         case 'input': {
-          if (value && value.length > 0) {
-            customField.string.push({
-              fieldId: id,
-              value,
-            });
-          }
+          customField.string.push({
+            fieldId: id,
+            value,
+          });
           break;
         }
         case 'text': {
-          if (value && value.length > 0) {
-            customField.text.push({
-              fieldId: id,
-              value,
-            });
-          }
+          customField.text.push({
+            fieldId: id,
+            value,
+          });
           break;
         }
         case 'number': {
