@@ -60,7 +60,7 @@ public interface AgilePluginService {
      * @param pageFields
      * @return
      */
-    List<PageFieldDTO> handlerProgramPageField(Long projectId, Long issueTypeId, List<PageFieldDTO> pageFields);
+    List<PageFieldDTO> handlerProgramPageField(Long projectId, Long issueTypeId, List<PageFieldDTO> pageFields, Boolean created, Boolean edited);
 
     /**
      * 创建issue初始化特性相关的值
