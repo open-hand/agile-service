@@ -301,8 +301,26 @@ export default function renderField({
     case 'radio': case 'single': case 'checkbox': case 'multiple': {
       const options = [...(!required ? [{ id: 'clear', value: '清空', enabled: true }] : []), ...(fieldOptions || [])];
       const isMultiple = !(singleList.indexOf(fieldType) !== -1);
+      if (fieldOptions) {
+        return (
+          <SelectCustomField
+            searchable
+            placeholder="字段值"
+            label="字段值"
+            name={code}
+            style={{ width: '100%' }}
+            multiple={isMultiple}
+            maxTagCount={2}
+            maxTagTextLength={10}
+            onOption={({ record }) => ({
+              disabled: isMultiple && data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
+            })}
+            fieldOptions={options.map((item) => ({ ...item, id: item.tempKey ?? item.id }))}
+          />
+        );
+      }
       return (
-        <SelectCustomField
+        <Select
           searchable
           placeholder="字段值"
           label="字段值"
@@ -314,8 +332,21 @@ export default function renderField({
           onOption={({ record }) => ({
             disabled: isMultiple && data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
           })}
-          fieldOptions={options.map((item) => ({ ...item, id: item.tempKey ?? item.id }))}
-        />
+        >
+          {options.map((item) => {
+            if (item.enabled) {
+              return (
+                <Option
+                  value={item.tempKey || item.id}
+                  key={item.tempKey || item.id}
+                >
+                  {item.value}
+                </Option>
+              );
+            }
+            return [];
+          })}
+        </Select>
       );
     }
     case 'multiMember':
