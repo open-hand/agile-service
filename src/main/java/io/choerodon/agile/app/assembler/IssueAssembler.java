@@ -20,6 +20,7 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
 
 import io.choerodon.agile.infra.utils.DateUtil;
+import io.choerodon.agile.infra.utils.ListUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -98,6 +99,7 @@ public class IssueAssembler extends AbstractAssembler {
         if (Boolean.TRUE.equals(issueCommentCondition)) {
             assigneeIdList.addAll(issueVO.getIssueCommentVOList().stream().map(IssueCommentVO::getUserId).collect(Collectors.toList()));
         }
+        assigneeIdList = ListUtil.filterByKey(assigneeIdList, 0L);
         Map<Long, UserMessageDTO> userMessageDOMap = userService.queryUsersMap(
                 assigneeIdList.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList()), true);
         handlerUser(issueVO, userMessageDOMap, issueDetailDTO);
