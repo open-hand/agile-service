@@ -15,6 +15,7 @@ import SelectPriority from '@/components/select/select-priority';
 import SelectUser from '@/components/select/select-user';
 import { issueApiConfig, statusApi } from '@/api';
 import SelectIssueType from '@/components/select/select-issue-type';
+import styles from './LinkedTable.less';
 
 const { Column } = Table;
 interface Props {
@@ -115,6 +116,7 @@ const LinkedTable: React.FC<Props> = ({ issueId, linkedTableRef }) => {
 
   return (
     <Table
+      className={styles.linkedTable}
       dataSet={dataSet}
       queryBar={() => (
         <Form dataSet={queryDataSet} columns={5}>
