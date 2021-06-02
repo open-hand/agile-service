@@ -27,6 +27,7 @@ export function getFlatElement(field: IFilterField, element: React.ReactNode) {
 }
 export function renderFlatField(field: IFilterField, { element, removeButton }: { element: React.ReactElement, removeButton: React.ReactElement | null }) {
   const isSelect = ['single', 'multiple', 'radio', 'checkbox', 'member'].includes(field.fieldType);
+  const isDate = ['datetime', 'date', 'time'].includes(field.fieldType);
   const className = classNames({
     'c7n-pro-select-flat': isSelect,
     'c7n-pro-cascader-flat': isSelect,
@@ -37,7 +38,7 @@ export function renderFlatField(field: IFilterField, { element, removeButton }: 
       style={{
         display: 'flex', alignItems: 'center', marginBottom: 10,
       }}
-      className="c7n-pro-form-float"
+      className={isDate ? 'c7n-pro-form-float' : undefined}
     >
       {React.cloneElement(element, {
         style: {
