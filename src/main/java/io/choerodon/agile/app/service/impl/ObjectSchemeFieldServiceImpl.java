@@ -1207,7 +1207,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<String> existFieldCodes = list.stream().filter(v -> Boolean.TRUE.equals(v.getSystem())).map(ObjectSchemeFieldDetailVO::getCode).collect(Collectors.toList());
         fieldCodes.removeAll(existFieldCodes);
         if (!CollectionUtils.isEmpty(fieldCodes)) {
-            list.addAll(objectSchemeFieldMapper.selectFieldsByFieldCodes(fieldCodes));
+            List<ObjectSchemeFieldDetailVO> addFields = modelMapper.map(objectSchemeFieldMapper.selectFieldsByFieldCodes(fieldCodes),  new TypeToken<List<ObjectSchemeFieldDetailVO>>(){}.getType());
+            list.addAll(addFields);
         }
         return filterFieldsByProjectCategories(list, projectId);
     }
