@@ -44,6 +44,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
         <div className="c7n-value-wrapper" style={{ display: 'flex', flexWrap: 'nowrap' }}>
           <TextEditToggle
             disabled={disabled}
+            alwaysRender={false}
             submitTrigger={['change']}
             onSubmit={this.updateIssueTag}
             initValue={tags}

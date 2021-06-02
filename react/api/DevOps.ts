@@ -137,7 +137,8 @@ class DevOpsApi extends Api<DevOpsApi> {
    * @param size
    * @param searchVO
    */
-  loadTagsByService(applicationId: number | string, page: number = 1, size: number = 5, searchVO: any) {
+  loadTagsByService(applicationId: number | string, page: number = 1, size: number = 5, searchVO: {param?: string
+  searchParam?: {tagName?: string}}) {
     return axios({
       method: 'post',
       url: `${this.prefix}/app_service/${applicationId}/git/page_tags_by_options`,

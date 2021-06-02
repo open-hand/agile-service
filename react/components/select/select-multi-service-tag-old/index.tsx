@@ -16,7 +16,7 @@ import { FlatSelect } from '@choerodon/components';
 import { getProjectId } from '@/utils/common';
 import SelectAppService from '../select-app-service';
 import SelectGitTags from '../select-git-tags';
-import './index.less';
+import styles from './index.less';
 import SelectMultiServiceTag from '../select-multi-service-tag';
 
 const prefixCls = 'c7n-agile-select-multi-service-tag';

@@ -29,7 +29,7 @@ const SelectGitTags: React.FC<Props> = forwardRef(({
     valueField: 'name',
     request: ({ page, filter }) => (applicationId ? devOpsApi.project(projectId).loadTagsByService(applicationId, page, 20, {
       searchParam: {
-        branchName: filter,
+        tagName: filter,
       },
       param: '',
     }) : (() => new Promise([] as any))),
@@ -47,10 +47,7 @@ const SelectGitTags: React.FC<Props> = forwardRef(({
     paging: true,
   }), [applicationId, projectId]);
   const props = useSelect(config);
-  useEffect(() => {
-    console.log('Component useEffect into', applicationId);
-    return () => console.log('leave Component');
-  }, [applicationId]);
+
   const Component = flat ? FlatSelect : Select;
   return (
     <Component
