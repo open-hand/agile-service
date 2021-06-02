@@ -332,7 +332,7 @@ const Issue = observer(({ cached, updateCache }) => {
         /> */}
       </Header>
       <Breadcrumb />
-      <Content style={theme === 'theme4' ? { paddingBottom: 0 } : { paddingTop: 0 }} className="c7nagile-issue-content">
+      <Content style={theme === 'theme4' ? { } : { paddingTop: 0 }} className="c7nagile-issue-content">
         <IssueSearch
           store={issueSearchStore}
           urlFilter={urlFilter}

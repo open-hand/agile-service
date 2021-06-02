@@ -171,11 +171,11 @@ class BacklogHome extends Component {
           flexDirection: 'column',
           ...theme === 'theme4' ? {
             paddingTop: 45,
-            marginLeft: 0,
-            marginRight: 0,
+            // marginLeft: 0,
+            // marginRight: 0,
             paddingLeft: 0,
             paddingRight: 0,
-            paddingBottom: 0,
+            // paddingBottom: 0,
           } : {
             padding: 0, paddingTop: 4,
           },
