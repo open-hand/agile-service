@@ -1564,7 +1564,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         // 有新增系统字段未配置到字段扩展表直接添加字段到pageConfigFieldVOS
         addPageFieldVOS(pageConfigFieldVOS,organizationId,projectId,issueTypeId);
         if (agilePluginService != null) {
-           return agilePluginService.queryProgramPageConfigFields(projectId,issueTypeId,pageConfigFieldVOS);
+           return filterFieldsByProjectCategories(
+                   agilePluginService.queryProgramPageConfigFields(projectId,issueTypeId,pageConfigFieldVOS),
+                   projectId);
         }
         return filterFieldsByProjectCategories(pageConfigFieldVOS, projectId);
     }
