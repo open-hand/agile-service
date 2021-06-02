@@ -77,6 +77,10 @@ const FragmentUpload = inject('AppState')(observer((props) => {
   }, [showUploadList]);
 
   const beforeUpload = (file) => {
+    if (!file.size) {
+      message.error('文件不能为空');
+      return false;
+    }
     const { accept } = others;
     if (validateFile(file, accept, fileSize)) {
       setFileList((list) => [...list, {
