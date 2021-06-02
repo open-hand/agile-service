@@ -177,7 +177,7 @@ class ScrumBoardHome extends Component {
     const { destination, source, draggableId } = result;
     const [SwimLaneId, issueId] = draggableId.split(['/']);
     const allDataMap = ScrumBoardStore.getAllDataMap;
-    ScrumBoardStore.resetCanDragOn();
+    // ScrumBoardStore.resetCanDragOn();
     ScrumBoardStore.setIsDragging(SwimLaneId, false);
     headerStyle.unMountStyle();
     if (!destination) {

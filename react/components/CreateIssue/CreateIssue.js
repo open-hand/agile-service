@@ -722,42 +722,45 @@ class CreateIssue extends Component {
                 )}
               </FormItem>
             ) : null,
-            newIssueTypeCode === 'feature' ? (
-              <FormItem>
-                {getFieldDecorator('featureType', {
-                  rules: [{ required: true, message: '特性类型为必输项' }],
-                  initialValue: defaultFeatureType || 'business',
-                })(
-                  <Select
-                    label="特性类型"
-                    getPopupContainer={(triggerNode) => triggerNode.parentNode}
-                  >
-                    {[
-                      {
-                        ...this.getDefaultType(),
-                        colour: '#3D5AFE',
-                        featureType: 'business',
-                        name: '特性',
-                      }, {
-                        ...this.getDefaultType(),
-                        colour: '#FFCA28',
-                        featureType: 'enabler',
-                        name: '使能',
-                      },
-                    ].map((type) => (
-                      <Option key={type.featureType} value={type.featureType}>
-                        <TypeTag
-                          data={type}
-                          showName
-                          featureType={type.featureType}
-                        />
-                      </Option>
-                    ))}
-                  </Select>,
-                )}
-              </FormItem>
-            ) : null]
+          ]
         );
+      case 'featureType': {
+        return (
+          <FormItem>
+            {getFieldDecorator('featureType', {
+              rules: [{ required: true, message: '特性类型为必输项' }],
+              initialValue: defaultFeatureType || 'business',
+            })(
+              <Select
+                label="特性类型"
+                getPopupContainer={(triggerNode) => triggerNode.parentNode}
+              >
+                {[
+                  {
+                    ...this.getDefaultType(),
+                    colour: '#3D5AFE',
+                    featureType: 'business',
+                    name: '特性',
+                  }, {
+                    ...this.getDefaultType(),
+                    colour: '#FFCA28',
+                    featureType: 'enabler',
+                    name: '使能',
+                  },
+                ].map((type) => (
+                  <Option key={type.featureType} value={type.featureType}>
+                    <TypeTag
+                      data={type}
+                      showName
+                      featureType={type.featureType}
+                    />
+                  </Option>
+                ))}
+              </Select>,
+            )}
+          </FormItem>
+        );
+      }
       case 'assignee':
         return (
           <FormItem label="经办人" key={`${newIssueTypeCode}-assignee`}>
