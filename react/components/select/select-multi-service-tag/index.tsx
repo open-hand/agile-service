@@ -5,7 +5,7 @@ import {
   Select,
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
-import { groupBy } from 'lodash';
+import { debounce, groupBy, pick } from 'lodash';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
@@ -37,22 +37,37 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
       Object.assign(innerRef, {
         current: Object.assign(newRef, {
           focus: () => {
-            innerRef.current?.trigger?.delaySetPopupHidden(false, 110);
+            console.log('binRef...focus');
+            innerRef.current?.trigger?.delaySetPopupHidden(false, 150);
           },
         }),
       });
       ref && Object.assign(ref, { current: innerRef.current });
     }
   }, [ref]);
-
+  const handlePopupHidden = debounce((hidden) => {
+    hidden ? setEditValue(undefined) : setEditValue(handleProcessValue());
+    hidden && onBlur && onBlur();
+    onPopupHidden && onPopupHidden(hidden);
+  }, 230);
   function handleCancel() {
     setEditValue(undefined);
-    innerRef.current?.collapse();
-    onPopupHidden && onPopupHidden(true);
+    innerRef.current?.trigger?.delaySetPopupHidden(true, 0); // 关闭下拉框
+    // handlePopupHidden(true);
   }
+  useEffect(() => {
+    console.log('tag. come');
+    return () => {
+      console.log('tag.. leave');
+      onPopupHidden && onPopupHidden(true);
+    };
+  }, []);
   function handleSave(data: IMultiServiceTagItemProps[]) {
     onChange && onChange(data);
-    handleCancel();
+    setEditValue(undefined); // 置空编辑值 隐藏下拉框
+    innerRef.current?.trigger?.delaySetPopupHidden(true, 0); // 关闭下拉框
+
+    // handleCancel();
   }
   const value = useMemo(() => toJS(propsValue)?.map((item: any) => ({ meaning: (item.appServiceCode ? `${item.appServiceCode}:${item.tagName}` : item.tagName), value: item })), [propsValue]);
   const handleProcessValue = useCallback(() => {
@@ -71,25 +86,22 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
   const Component = flat ? FlatSelect : Select;
   const componentId = useMemo(() => `select-multi-service-tag-${randomString(5)}`, []);
 
-  useEffect(() => {
-    console.log('val.... useEffect mode', mode);
-    // setEditValue(handleProcessValue());
-  }, [mode]);
+  const wrapProps = useMemo(() => pick(otherProps, ['style', 'className']), [otherProps]);
   return (
-    <div id={componentId}>
+    <div id={componentId} {...wrapProps}>
       <Component
         ref={handleBindRef}
         value={value}
         multiple
         primitiveValue={false}
+        // triggerHiddenDelay={100}
         onPopupHiddenChange={(hidden) => {
-          console.log('blur..', hidden);
+          console.log('onPopupHiddenChange..', hidden);
           // onChange();
-          hidden ? setEditValue(undefined) : setEditValue(handleProcessValue());
-          hidden && setTimeout(() => onPopupHidden && onPopupHidden(true), 100);
-          hidden && onBlur && onBlur();
+          handlePopupHidden(hidden);
         }}
-        getPopupContainer={(node) => document.getElementById(componentId) as HTMLElement}
+        // getPopupContainer={(node) => document.getElementById(componentId) as HTMLElement}
+        // getPopupContainer={() => document.body}
         trigger={['click'] as any}
         onChange={(v) => {
           let newValue = v;
@@ -99,6 +111,7 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
           onChange && onChange(newValue);
           console.log('onChange', v);
         }}
+        onBlur={(e) => { console.log('e....onBlur', e); }}
         {...otherProps}
         dropdownMatchSelectWidth={false}
         popupContent={editValue ? <MultiServiceTag mode={mode} onOK={handleSave} data={editValue} onCancel={handleCancel} projectId={projectId} /> : <div />}

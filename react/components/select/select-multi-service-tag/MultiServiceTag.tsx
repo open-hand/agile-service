@@ -2,7 +2,7 @@ import React, {
   useMemo, useEffect, useCallback, useState,
 } from 'react';
 import {
-  Select, DataSet, Button,
+  Select, DataSet, Button, Icon,
 } from 'choerodon-ui/pro';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import {
@@ -114,10 +114,13 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
   const handleCreate = useCallback(() => {
     ds.create();
   }, [ds]);
-  function handleCancel(e: any) {
-    onCancel && onCancel();
+  function handleResetData(e:any) {
     ds.reset();
     e.stopPropagation();
+  }
+  function handleCancel(e: any) {
+    onCancel && onCancel();
+    handleResetData(e);
   }
   function handleSave(e: any) {
     const saveData: IMultiServiceTagItemProps[] = [];
@@ -125,7 +128,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
       saveData.push(...(item.tagName || []).map((tag: string) => ({ tagName: tag, appServiceCode: item.appServiceCode, projectId: item.projectId || projectId || getProjectId() })));
     });
     onOK && onOK(saveData);
-    handleCancel(e);
+    handleResetData(e);
   }
 
   useEffect(() => {
@@ -136,7 +139,6 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
   const loadAppServiceData = useCallback((record: Record) => {
     const currentProjectId = getCurrentProjectId(record);
     const applicationCodes = ds.filter((r) => String(r.get('projectId')) === String(currentProjectId)).map((r) => r.get('appServiceCode'));
-    console.log('ds.filter', ds.map((r) => ({ code: r.get('appServiceCode'), projectId: r.get('projectId') })));
     const appServiceList = getAppServerList(record);
     const recordAppServiceList = appServiceList?.filter((appService) => record.get('appServiceCode') === appService.code || !applicationCodes.includes(appService.code));
     return recordAppServiceList || [];
@@ -145,8 +147,8 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
   const disabledAddButton = useComputed(() => ds.filter((record) => !(record.get('appServiceCode') && record.get('tagName'))).length > 0, [ds]);
 
   return (
-    <div className={prefixCls}>
-      <div role="none" id={componentId} className={`${prefixCls}-content`} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+    <div className={prefixCls} role="none" id={componentId} onClick={(e) => e.stopPropagation()}>
+      <div className={`${prefixCls}-content`}>
         {ds.map((record) => {
           const currentProjectId = getCurrentProjectId(record);
           const appServiceId = record.get('appServiceId') || (appServerListMaps.get(String(currentProjectId)) || [])?.find((item) => item.code === record.get('appServiceCode'))?.id;
@@ -157,6 +159,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
                 <SelectSubProject
                   record={record}
                   name="projectId"
+                  label="请选择子项目"
                   placeholder="请选择子项目"
                   className={`${prefixCls}-content-item`}
                   onChange={(val) => {
@@ -169,6 +172,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
                 name="appService"
                 record={record}
                 disabled={!currentProjectId}
+                label="请选择应用服务"
                 placeholder="请选择应用服务"
                 loadData={loadAppServiceData}
                 onChange={(val) => {
@@ -186,20 +190,22 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
                 projectId={currentProjectId}
                 disabled={!appServiceId}
                 placeholder="请选择Tag"
+                label="请选择Tag"
                 className={`${prefixCls}-content-item`}
                 record={record}
                 getPopupContainer={() => document.getElementById(componentId) as any}
               />
-              {record.index !== 0 && <Button icon="delete_sweep-o" className={`${prefixCls}-content-del`} onClick={() => { ds.delete(record, false); }} />}
+
+              {record.index !== 0 && <Icon type="delete_sweep-o" className={`${prefixCls}-content-del`} onClick={() => { ds.delete(record, false); }} /> }
             </div>
           );
         })}
-        <Button className={`${prefixCls}-content-add`} icon="add" disabled={disabledAddButton} funcType={'flat' as any} color={'primary' as any} onClick={handleCreate}>添加Tag</Button>
+        <Button className={`${prefixCls}-content-add`} style={{ border: 'none' }} icon="add" disabled={disabledAddButton} funcType={'flat' as any} color={'primary' as any} onClick={handleCreate}>添加Tag</Button>
 
       </div>
       <div className={`${prefixCls}-footer`}>
-        <Button funcType={'flat' as any} color={'primary' as any} onClick={handleSave}>确定</Button>
-        <Button funcType={'flat' as any} onClick={handleCancel}>取消</Button>
+        <Button funcType={'raised' as any} color={'primary' as any} onClick={handleSave}>确定</Button>
+        <Button funcType={'raised' as any} onClick={handleCancel}>取消</Button>
 
       </div>
     </div>

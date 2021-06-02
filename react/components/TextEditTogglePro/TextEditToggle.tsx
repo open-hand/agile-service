@@ -61,6 +61,9 @@ const TextEditToggle: React.FC<Props> = ({
   const hideEditor = () => {
     if (editing) {
       setEditing(false);
+      if (containerRef.current) {
+        containerRef.current.blur();
+      }
     }
   };
   const showEditor = () => {

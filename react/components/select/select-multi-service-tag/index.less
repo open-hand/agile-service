@@ -5,19 +5,23 @@
     // z-index: 100000;
     max-height: 3.1rem;
     max-width: 3.4rem;
-    padding: .1rem .2rem;
+    padding: .1rem .14rem;
     overflow: auto;
     overflow-x: hidden;
 
     &-add {
       // margin-top: .15rem;
+      position: relative;
+      right: 4px;
       width: max-content;
     }
 
     &-del {
       position: absolute;
-      bottom: 20px;
-      right: -14px;
+      color: #5365EA;
+      cursor: pointer;
+      bottom: 25px;
+      right: 0;
     }
 
     &-form {
@@ -44,5 +48,8 @@
     width: 100%;
     padding: .1rem .24rem;
     border-top: 0.01rem solid #e0e0e0;
+    .c7n-pro-btn{
+      margin-left: .10rem;
+    }
   }
 }
