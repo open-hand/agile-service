@@ -114,7 +114,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
   const handleCreate = useCallback(() => {
     ds.create();
   }, [ds]);
-  function handleResetData(e:any) {
+  function handleResetData(e: any) {
     ds.reset();
     e.stopPropagation();
   }
@@ -147,7 +147,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
   const disabledAddButton = useComputed(() => ds.filter((record) => !(record.get('appServiceCode') && record.get('tagName'))).length > 0, [ds]);
 
   return (
-    <div className={prefixCls} role="none" id={componentId} onClick={(e) => e.stopPropagation()}>
+    <div className={prefixCls} role="none" id={componentId} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
       <div className={`${prefixCls}-content`}>
         {ds.map((record) => {
           const currentProjectId = getCurrentProjectId(record);
@@ -196,7 +196,7 @@ const MultiServiceTag: React.FC<IMultiServiceTagProps> = ({
                 getPopupContainer={() => document.getElementById(componentId) as any}
               />
 
-              {record.index !== 0 && <Icon type="delete_sweep-o" className={`${prefixCls}-content-del`} onClick={() => { ds.delete(record, false); }} /> }
+              {record.index !== 0 && <Icon type="delete_sweep-o" className={`${prefixCls}-content-del`} onClick={() => { ds.delete(record, false); }} />}
             </div>
           );
         })}
