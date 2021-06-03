@@ -56,7 +56,7 @@ const BugBarChart = observer(() => {
         return content;
       },
       textStyle: {
-        color: '#000',
+        color: 'var(--text-color)',
         fontSize: 12,
         lineHeight: 20,
       },
@@ -88,7 +88,7 @@ const BugBarChart = observer(() => {
       },
       axisLabel: {
         textStyle: {
-          color: 'rgba(0, 0, 0, 0.65)',
+          color: 'var(--text-color3)',
           fontSize: 12,
           fontStyle: 'normal',
         },
@@ -109,7 +109,7 @@ const BugBarChart = observer(() => {
       axisLabel: {
         show: true,
         textStyle: {
-          color: 'rgba(0, 0, 0, 0.65)',
+          color: 'var(--text-color3)',
           fontSize: 12,
           fontStyle: 'normal',
         },

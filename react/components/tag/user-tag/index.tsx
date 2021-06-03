@@ -81,7 +81,7 @@ const UserTag: React.FC<Props> = ({
                     tooltip={false}
                     data={item}
                     className={`${prefixCls}-tooltip-user`}
-                    textStyle={{ color: '#000', lineHeight: '18px' }}
+                    textStyle={{ color: 'var(--text-color)', lineHeight: '18px' }}
                     {...otherProps}
                   />
                 </div>

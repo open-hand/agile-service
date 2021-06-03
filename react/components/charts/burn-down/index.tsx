@@ -55,7 +55,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
       trigger: 'axis',
       backgroundColor: '#fff',
       textStyle: {
-        color: '#000',
+        color: 'var(--text-color)',
       },
       extraCssText:
         'box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2); border: 1px solid #ddd; border-radius: 0;',
@@ -115,7 +115,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
       axisLabel: {
         show: true,
         interval: Math.floor(xAxis.length / 7) - 1 || 0,
-        color: 'rgba(0, 0, 0, 0.65)',
+        color: 'var(--text-color3)',
         fontSize: FontSize,
         fontStyle: 'normal',
       },
@@ -132,7 +132,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
     yAxis: {
       name: renderChartTitle(),
       nameTextStyle: {
-        color: '#000',
+        color: 'var(--text-color)',
       },
       nameGap: 22,
       type: 'value',
@@ -149,7 +149,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
         show: true,
         // interval: 'auto',
         margin: 18,
-        color: 'rgba(0, 0, 0, 0.65)',
+        color: 'var(--text-color3)',
         fontSize: FontSize,
         fontStyle: 'normal',
         formatter(value: string) {

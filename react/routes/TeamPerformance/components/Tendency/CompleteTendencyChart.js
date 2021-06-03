@@ -75,7 +75,7 @@ const CompeleteTendencyChart = observer(() => {
           return content;
         },
         textStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           fontSize: 12,
           lineHeight: 20,
         },
@@ -113,7 +113,7 @@ const CompeleteTendencyChart = observer(() => {
         axisLabel: {
           show: true,
           textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
+            color: 'var(--text-color3)',
             fontSize: 12,
             fontStyle: 'normal',
           },
@@ -122,7 +122,7 @@ const CompeleteTendencyChart = observer(() => {
       yAxis: {
         name: currentTab,
         nameTextStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           padding: [0, 10, 0, 0],
         },
         minInterval: 1,
@@ -136,7 +136,7 @@ const CompeleteTendencyChart = observer(() => {
         axisLabel: {
           show: true,
           textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
+            color: 'var(--text-color3)',
             fontSize: 12,
             fontStyle: 'normal',
           },

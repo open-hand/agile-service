@@ -192,7 +192,7 @@ const PieChart: React.FC<PieChartProps> = ({
         },
         padding: 10,
         textStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           lineHeight: 20,
         },
         extraCssText: 'background: #FFFFFF;\n'

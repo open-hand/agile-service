@@ -23,7 +23,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { store } = useStatusCirculationContext();
   const { data: issueTypes } = useIssueTypes();
   const {
-    selectedType, setSelectedType, issueTypeInitedMap, readOnly, visibleIssueTypeCategory,
+    selectedType, setSelectedType, issueTypeInitedMap, readOnly, visibleIssueTypeCategory, noContainer,
   } = useStateMachineContext();
   const isOrganization = getIsOrganization();
   // const selectedTypeRef = useRef<string>(selectedType);
@@ -45,8 +45,9 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   //     });
   //   }
   // }, []);
-  return (
-    <Page>
+
+  const content = (
+    <>
       {
         !readOnly && (
           <>
@@ -127,7 +128,18 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           <StatusCirculationTable />
         </div>
       </Content>
-    </Page>
+    </>
+  );
+  return (
+    <>
+      {
+      noContainer ? content : (
+        <Page>
+          {content}
+        </Page>
+      )
+    }
+    </>
   );
 };
 

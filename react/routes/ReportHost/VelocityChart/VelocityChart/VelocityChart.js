@@ -90,7 +90,7 @@ class VelocityChart extends Component {
         type: 'category',
         boundaryGap: true,
         nameTextStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
         },
         axisTick: { show: false },
         axisLine: {
@@ -134,7 +134,7 @@ class VelocityChart extends Component {
         type: 'value',
 
         nameTextStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
         },
         axisTick: { show: false },
         axisLine: {

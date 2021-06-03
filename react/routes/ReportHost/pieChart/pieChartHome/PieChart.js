@@ -109,7 +109,7 @@ class PieChart extends Component {
         },
         padding: 10,
         textStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           fontSize: 12,
           lineHeight: 20,
         },

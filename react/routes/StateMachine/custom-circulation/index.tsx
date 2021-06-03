@@ -231,7 +231,7 @@ const transformFieldValue = (fieldSetting) => {
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { data: issueTypes } = useIssueTypes();
   const {
-    selectedType, setSelectedType, issueTypeInitedMap, readOnly, visibleIssueTypeCategory,
+    selectedType, setSelectedType, issueTypeInitedMap, readOnly, visibleIssueTypeCategory, noContainer,
   } = useStateMachineContext();
 
   const isOrganization = getIsOrganization();
@@ -586,8 +586,8 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     }]),
   ];
 
-  return (
-    <Page>
+  const content = (
+    <>
       {
         !readOnly && (
           <>
@@ -618,6 +618,12 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           />
         </div>
       </Content>
+    </>
+  );
+
+  return noContainer ? content : (
+    <Page>
+      {content}
     </Page>
   );
 };

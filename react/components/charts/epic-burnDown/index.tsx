@@ -242,7 +242,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
         },
         backgroundColor: '#fff',
         textStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           fontSize: getFontSize(13),
         },
         borderColor: '#ddd',
@@ -373,7 +373,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
               label: {
                 show: true,
                 position: 'bottom',
-                color: '#000',
+                color: 'var(--text-color)',
                 formatter() {
                   return 0;
                 },
@@ -394,7 +394,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
               label: {
                 show: true,
                 position: 'top',
-                color: '#000',
+                color: 'var(--text-color)',
                 formatter() {
                   return 0;
                 },

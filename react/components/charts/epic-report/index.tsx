@@ -234,7 +234,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
         nameLocation: 'end',
         nameGap: -10,
         nameTextStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           padding: [35, 0, 0, 0],
         },
         axisTick: { show: false },
@@ -250,7 +250,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
           show: true,
           interval: map(data, 'groupDay').length >= 20 ? 4 : 0,
           margin: 13,
-          color: 'rgba(0, 0, 0, 0.65)',
+          color: 'var(--text-color3)',
           fontSize: getFontSize(12),
           fontStyle: 'normal',
           formatter(value: string) {
@@ -296,7 +296,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
           {
             name: '问题计数',
             nameTextStyle: {
-              color: '#000',
+              color: 'var(--text-color)',
             },
             type: 'value',
             minInterval: 1,
@@ -312,7 +312,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
             axisLabel: {
               show: true,
               margin: 18,
-              color: 'rgba(0, 0, 0, 0.65)',
+              color: 'var(--text-color3)',
               fontSize: getFontSize(12),
               fontStyle: 'normal',
             },
@@ -362,7 +362,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
           {
             name: UNIT2NAME[unit],
             nameTextStyle: {
-              color: '#000',
+              color: 'var(--text-color)',
             },
             type: 'value',
             minInterval: 1,
@@ -378,7 +378,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
             axisLabel: {
               show: true,
               margin: 18,
-              color: 'rgba(0, 0, 0, 0.65)',
+              color: 'var(--text-color3)',
               fontSize: getFontSize(12),
               fontStyle: 'normal',
               formatter(value: string) {
@@ -400,7 +400,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
           {
             name: '问题计数',
             nameTextStyle: {
-              color: '#000',
+              color: 'var(--text-color)',
             },
             type: 'value',
             minInterval: 1,
@@ -416,7 +416,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
             axisLabel: {
               show: true,
               margin: 18,
-              color: 'rgba(0, 0, 0, 0.65)',
+              color: 'var(--text-color3)',
               fontSize: getFontSize(12),
               fontStyle: 'normal',
             },

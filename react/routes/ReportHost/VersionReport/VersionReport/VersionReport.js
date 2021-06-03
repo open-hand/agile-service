@@ -121,7 +121,7 @@ class EpicReport extends Component {
         nameLocation: 'end',
         nameGap: -10,
         nameTextStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           // verticalAlign: 'bottom',
           padding: [35, 0, 0, 0],
         },
@@ -139,7 +139,7 @@ class EpicReport extends Component {
           interval: VS.getChartDataX.length >= 20 ? 4 : 0,
           margin: 13,
           textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
+            color: 'var(--text-color3)',
             fontSize: 12,
             fontStyle: 'normal',
           },
@@ -186,7 +186,7 @@ class EpicReport extends Component {
           {
             name: '问题数',
             nameTextStyle: {
-              color: '#000',
+              color: 'var(--text-color)',
             },
             type: 'value',
             minInterval: 1,
@@ -204,7 +204,7 @@ class EpicReport extends Component {
               interval: 'auto',
               margin: 18,
               textStyle: {
-                color: 'rgba(0, 0, 0, 0.65)',
+                color: 'var(--text-color3)',
                 fontSize: 12,
                 fontStyle: 'normal',
               },
@@ -264,7 +264,7 @@ class EpicReport extends Component {
           {
             name: VS.getChartYAxisName,
             nameTextStyle: {
-              color: '#000',
+              color: 'var(--text-color)',
             },
             type: 'value',
             minInterval: 1,
@@ -282,7 +282,7 @@ class EpicReport extends Component {
               interval: 'auto',
               margin: 18,
               textStyle: {
-                color: 'rgba(0, 0, 0, 0.65)',
+                color: 'var(--text-color3)',
                 fontSize: 12,
                 fontStyle: 'normal',
               },
@@ -305,7 +305,7 @@ class EpicReport extends Component {
           {
             name: '百分比',
             nameTextStyle: {
-              color: '#000',
+              color: 'var(--text-color)',
             },
             type: 'value',
             minInterval: 1,
@@ -323,7 +323,7 @@ class EpicReport extends Component {
               interval: 'auto',
               margin: 18,
               textStyle: {
-                color: 'rgba(0, 0, 0, 0.65)',
+                color: 'var(--text-color3)',
                 fontSize: 12,
                 fontStyle: 'normal',
               },

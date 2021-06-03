@@ -192,7 +192,7 @@ class VersionBurndown extends Component {
         },
         backgroundColor: '#fff',
         textStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
         },
         borderColor: '#ddd',
         borderWidth: 1,
@@ -327,7 +327,7 @@ class VersionBurndown extends Component {
               label: {
                 show: true,
                 position: 'bottom',
-                color: '#000',
+                color: 'var(--text-color)',
                 formatter(param) {
                   return 0;
                 },
@@ -348,7 +348,7 @@ class VersionBurndown extends Component {
               label: {
                 show: true,
                 position: 'top',
-                color: '#000',
+                color: 'var(--text-color)',
                 formatter(param) {
                   return 0;
                 },

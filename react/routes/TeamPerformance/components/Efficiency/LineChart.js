@@ -97,7 +97,7 @@ const LineChart = observer(() => {
           return content;
         },
         textStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           fontSize: 12,
           lineHeight: 20,
         },
@@ -124,11 +124,11 @@ const LineChart = observer(() => {
           },
         },
         nameTextStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
         },
         axisLabel: {
           textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
+            color: 'var(--text-color3)',
             fontSize: 12,
             fontStyle: 'normal',
           },
@@ -146,7 +146,7 @@ const LineChart = observer(() => {
         type: 'value',
         name: currentTab,
         nameTextStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           padding: [0, 10, 0, 0],
         },
         axisTick: { show: false },
@@ -155,7 +155,7 @@ const LineChart = observer(() => {
           show: true,
           interval: 'auto',
           textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
+            color: 'var(--text-color3)',
             fontSize: 12,
             fontStyle: 'normal',
           },
@@ -172,7 +172,7 @@ const LineChart = observer(() => {
         name: '百分比',
         type: 'value',
         nameTextStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           padding: [0, 0, 0, 50],
         },
         min: 0,
@@ -180,7 +180,7 @@ const LineChart = observer(() => {
           show: true,
           interval: 'auto',
           textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
+            color: 'var(--text-color3)',
             fontSize: 12,
             fontStyle: 'normal',
           },
