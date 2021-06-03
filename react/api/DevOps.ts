@@ -41,6 +41,9 @@ class DevOpsApi extends Api<DevOpsApi> {
       method: 'put',
       url: `${this.prefix}/app_service/${applicationId}/git/update_branch_issue`,
       data: devopsBranchVO,
+      params: {
+        onlyInsert: true,
+      },
     });
   }
 
