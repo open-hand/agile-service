@@ -80,18 +80,32 @@ public class EncryptionUtils {
         if (searchArgs.isPresent()) {
             Map<String, Object> map = (Map) searchArgs.get().get("customField");
             if (!ObjectUtils.isEmpty(map) && !map.isEmpty()) {
-                List<Object> options = (List) map.get("option");
-                if (!CollectionUtils.isEmpty(options)) {
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    List<Object> options = (List) entry.getValue();
                     List<Object> filterOptions = new ArrayList<>();
-                    options.forEach(v -> {
-                        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(v));
-                        JSONArray value = jsonObject.getJSONArray("value");
-                        if (!ObjectUtils.isEmpty(value) && !value.isEmpty()) {
-                            filterOptions.add(v);
-                        }
-                    });
-                    map.put("option", filterOptions);
+                    if (!CollectionUtils.isEmpty(options)) {
+                        options.forEach(v -> filterEmptyValue(entry.getKey(), v, filterOptions));
+                    }
+                    map.put(entry.getKey(), filterOptions);
                 }
+            }
+        }
+    }
+
+    private static void filterEmptyValue(String key, Object customValue, List<Object> filterOptions) {
+        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(customValue));
+        if ("option".equals(key)) {
+            JSONArray value = jsonObject.getJSONArray("value");
+            if (!ObjectUtils.isEmpty(value) && !value.isEmpty()) {
+                filterOptions.add(customValue);
+            }
+        } else if ("data".equals(key)) {
+            if (!ObjectUtils.isEmpty(jsonObject.get("startTime")) && !ObjectUtils.isEmpty(jsonObject.get("endTime"))) {
+                filterOptions.add(customValue);
+            }
+        } else {
+            if (jsonObject.get("value") != null) {
+                filterOptions.add(customValue);
             }
         }
     }
@@ -663,6 +677,9 @@ public class EncryptionUtils {
                         }
                         nodeObjValue.put("value", list);
                     } else if (StringUtils.contains(next.getKey(), "date")){
+                        if (ObjectUtils.isEmpty(node.get("startDate")) || ObjectUtils.isEmpty(node.get("endDate"))) {
+                            continue;
+                        }
                         try {
                             String startTime = null;
                             String endTime = null;
@@ -681,6 +698,9 @@ public class EncryptionUtils {
                             throw new CommonException(e);
                         }
                     }else {
+                        if (ObjectUtils.isEmpty(value1) || value1.isNull()) {
+                            continue;
+                        }
                         nodeObjValue.put("value", value1.isNumber() ? value1.numberValue() : value1.textValue());
                     }
                     objects.add(nodeObjValue);
