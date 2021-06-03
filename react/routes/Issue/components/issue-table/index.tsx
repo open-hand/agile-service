@@ -15,7 +15,7 @@ export interface IssueTableMainProps extends IssueTableProps {
 const ROW_HEIGHT = 40;
 const HEADER_HEIGHT = 45;
 const FOOTER_HEIGHT = 100;
-const MIN_HEIGHT = 200;
+const MIN_HEIGHT = 60;
 const IssueTableMain: React.FC<IssueTableMainProps> = ({
   listLayoutColumns: savedListLayoutColumns,
   fields,
@@ -63,7 +63,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
   }), [fields, listLayoutColumns, onSummaryClick]);
   const getHeight = usePersistFn((availableHeight:number) => {
     const heightFromData = tableProps.data.length * ROW_HEIGHT + HEADER_HEIGHT;
-    return Math.max(Math.min(heightFromData, availableHeight - FOOTER_HEIGHT), MIN_HEIGHT);
+    return Math.min(Math.max(heightFromData, MIN_HEIGHT), Math.max(10 * ROW_HEIGHT + HEADER_HEIGHT, availableHeight - FOOTER_HEIGHT));
   });
 
   return (
@@ -83,7 +83,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
           })))}
         />
       </div>
-      <AutoSize>
+      <AutoSize style={{ overflow: 'visible' }}>
         {({ height }) => (
           <IssueTable
             height={height ? getHeight(height) : undefined}
