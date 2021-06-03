@@ -101,7 +101,7 @@ import SelectVersion from '@/components/select/select-version';
             {
                 fixVersionsFixed.length || fixVersions.length ? (
                   <div>
-                    <div style={{ color: '#000' }}>
+                    <div style={{ color: 'var(--text-color)' }}>
                       {_.map(fixVersionsFixed, 'name').join(' , ')}
                     </div>
                     <p className="primary" style={{ wordBreak: 'break-word' }}>

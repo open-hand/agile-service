@@ -111,7 +111,7 @@ const ServiceCodeQuality: React.FC<ServiceCodeQualityProps> = ({
         },
         axisLabel: {
           margin: 13,
-          color: 'rgba(0, 0, 0, 0.65)',
+          color: 'var(--text-color3)',
           fontSize: 12,
           align: 'right',
         },
@@ -128,7 +128,7 @@ const ServiceCodeQuality: React.FC<ServiceCodeQualityProps> = ({
         type: 'value',
         nameTextStyle: {
           fontSize: 13,
-          color: '#000',
+          color: 'var(--text-color)',
           padding: dates && dates.length ? undefined : [0, 0, 0, 25],
         },
         axisTick: { show: false },
@@ -141,7 +141,7 @@ const ServiceCodeQuality: React.FC<ServiceCodeQualityProps> = ({
         },
         axisLabel: {
           margin: 13,
-          color: 'rgba(0, 0, 0, 0.65)',
+          color: 'var(--text-color3)',
           fontSize: 12,
         },
         splitLine: {

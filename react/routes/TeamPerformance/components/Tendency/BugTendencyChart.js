@@ -100,7 +100,7 @@ const BugTendencyChart = observer(() => {
           return content;
         },
         textStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           fontSize: 12,
           lineHeight: 20,
         },
@@ -135,7 +135,7 @@ const BugTendencyChart = observer(() => {
         axisLabel: {
           show: true,
           textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
+            color: 'var(--text-color3)',
             fontSize: 12,
             fontStyle: 'normal',
           },
@@ -145,7 +145,7 @@ const BugTendencyChart = observer(() => {
       yAxis: {
         name: '问题计数',
         nameTextStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           padding: [0, 10, 0, 0],
         },
         minInterval: 1,
@@ -154,7 +154,7 @@ const BugTendencyChart = observer(() => {
         axisLabel: {
           show: true,
           textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
+            color: 'var(--text-color3)',
             fontSize: 12,
             fontStyle: 'normal',
           },

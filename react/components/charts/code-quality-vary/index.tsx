@@ -188,7 +188,7 @@ const CodeQualityVary: React.FC<CodeQualityVaryProps> = ({
         },
         axisLabel: {
           margin: 15, // X轴文字和坐标线之间的间距
-          color: 'rgba(0, 0, 0, 0.65)',
+          color: 'var(--text-color3)',
           fontSize: 12,
         },
         splitLine: {

@@ -71,10 +71,10 @@ class WorkCalendar extends Component {
     let dateStyle;
 
     const workDayStyle = {
-      color: '#000', background: '#EFEFEF',
+      color: 'var(--text-color)', background: '#EFEFEF',
     };
     const holiadyWorkDayStyle = {
-      color: '#000', background: '#EFEFEF',
+      color: 'var(--text-color)', background: '#EFEFEF',
     };
     const notWorkDayStyle = {
       color: '#EF2A26', background: '#FFE7E7',
@@ -303,7 +303,7 @@ class WorkCalendar extends Component {
    * @param text -- icon内部文字
    * @returns ReactNodes
    */
-  renderTag = (title, color = '#000', fontColor = '#FFF', text) => (
+  renderTag = (title, color = 'var(--text-color)', fontColor = '#FFF', text) => (
     <div style={{ marginTop: 5, display: 'flex', alignItem: 'center' }}>
       <span
         className="legend-tag"
@@ -330,9 +330,9 @@ class WorkCalendar extends Component {
       }}
       >
         {this.renderTag('起始日/结束日', '#5365EA', '#FFF', 'N')}
-        {this.renderTag('工作日', '#EFEFEF', '#000', 'N')}
+        {this.renderTag('工作日', '#EFEFEF', 'var(--text-color)', 'N')}
         {this.renderTag('休息日', '#FEF3F2', '#EF2A26', 'N')}
-        {this.renderTag('法定节假日补班', '#000', '#FFF', '班')}
+        {this.renderTag('法定节假日补班', 'var(--text-color)', '#FFF', '班')}
         {this.renderTag('法定节假日', '#EF2A26', '#FFF', '休')}
       </div>
     </div>

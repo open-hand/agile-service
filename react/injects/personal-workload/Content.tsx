@@ -189,7 +189,7 @@ const PersonalWorkload = () => {
           label: {
             position: 'top',
             show: true,
-            color: 'rgba(0, 0, 0, 0.87)',
+            color: 'var(--text-color)',
             fontWeight: 500,
             fontSize: 13,
             lineHeight: 18,

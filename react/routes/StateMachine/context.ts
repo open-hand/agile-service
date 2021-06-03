@@ -9,6 +9,7 @@ interface Context {
   setIssueTypeInitedMap: (initedMap: Map<string, boolean>) => void,
   readOnly: boolean
   visibleIssueTypeCategory?: 'all' | 'custom' | 'initial'
+  noContainer: boolean
 }
 const StateMachineContext = createContext<Context>({} as Context);
 

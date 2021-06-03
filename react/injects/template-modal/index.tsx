@@ -32,7 +32,7 @@ const TemplateContent = () => {
       </Tabs>
       {
         activeKey === 'statusMachineTemplate' && (
-          <StatusMachineTemplate readOnly visibleIssueTypeCategory="initial" />
+          <StatusMachineTemplate readOnly visibleIssueTypeCategory="initial" noContainer />
         )
       }
       {

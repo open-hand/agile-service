@@ -219,7 +219,7 @@ class EpicBurndown extends Component {
         },
         backgroundColor: '#fff',
         textStyle: {
-          color: '#000',
+          color: 'var(--text-color)',
           fontSize: 13,
         },
         borderColor: '#ddd',
@@ -352,7 +352,7 @@ class EpicBurndown extends Component {
               label: {
                 show: true,
                 position: 'bottom',
-                color: '#000',
+                color: 'var(--text-color)',
                 formatter(param) {
                   return 0;
                 },
@@ -373,7 +373,7 @@ class EpicBurndown extends Component {
               label: {
                 show: true,
                 position: 'top',
-                color: '#000',
+                color: 'var(--text-color)',
                 formatter(param) {
                   return 0;
                 },

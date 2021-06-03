@@ -43,7 +43,7 @@ const tabs: ITab[] = [{
 const { TabPane } = Tabs;
 const StateMachine: React.FC = ({
   // @ts-ignore
-  defaultTabKeys = ['status', 'status_change', 'custom'], readOnly = false, activeKey: propActiveKey, setActiveKey: propSetActiveKey, visibleIssueTypeCategory, ...otherProps
+  defaultTabKeys = ['status', 'status_change', 'custom'], readOnly = false, activeKey: propActiveKey, setActiveKey: propSetActiveKey, visibleIssueTypeCategory, noContainer = false, ...otherProps
 }) => {
   const defaultTabs = tabs.filter((item) => includes(defaultTabKeys, item.key));
   const params = useQueryString();
@@ -106,15 +106,18 @@ const StateMachine: React.FC = ({
       issueTypeInitedMap,
       setIssueTypeInitedMap,
       readOnly,
+      noContainer,
       visibleIssueTypeCategory,
     }}
     >
       {
         loading ? <Loading loading={loading} /> : (
-          <div style={{
-            marginLeft: readOnly ? -24 : 0,
-            marginTop: readOnly ? -16 : 0,
-          }}
+          <div
+            style={{
+              marginLeft: readOnly ? -24 : 0,
+              marginTop: readOnly ? -16 : 0,
+              flex: readOnly ? 1 : 0,
+            }}
           >
             {
               isOrganization && !issueTypeInitedMap.get(selectedType) ? (

@@ -22,7 +22,7 @@ const Preview = ({
         <Button funcType="flat" className={`${prefixCls}-header-downloadWrap`}>
           <span className={`${prefixCls}-header-downloadWrap-span`}>
             <a style={{ marginRight: 6 }} role="none" onClick={handleDownLoadFile}>
-              <Icon type="get_app" style={{ color: '#000' }} />
+              <Icon type="get_app" style={{ color: 'var(--text-color)' }} />
               <span className={`${prefixCls}-header-downloadWrap-fileName`}>{decodeURIComponent(fileName)}</span>
             </a>
           </span>

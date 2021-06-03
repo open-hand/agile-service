@@ -1,4 +1,4 @@
-@base: #000000;
+@base: var(--text-color);
 
 .c7n-backlog-issue {
   display: flex;
@@ -59,7 +59,7 @@
   &-version {
     border-radius: 2px;
     padding: 0 7px;
-    border: 0.01rem solid fade(@base, 36%);
+    border: 0.01rem solid var(--divider);
     margin: 0 5px;
     white-space: nowrap;
   }
@@ -92,11 +92,11 @@
     min-width: 0.2rem;
     height: 0.2rem;
     border-radius: 1rem;
-    background: fade(@base, 8%);
+    background: var(--selection-background);
     display: flex;
     justify-content: center;
     align-items: center;
-    color: fade(@base, 65%);
+    color: var(--text-color3);
     margin-left: 0.12rem;
   }
 

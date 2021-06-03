@@ -113,7 +113,7 @@ const IterationSpeed: React.FC<IterationSpeedProps> = ({
       type: 'category',
       boundaryGap: true,
       nameTextStyle: {
-        color: '#000',
+        color: 'var(--text-color)',
       },
       axisTick: { show: false },
       axisLine: {
@@ -127,7 +127,7 @@ const IterationSpeed: React.FC<IterationSpeedProps> = ({
       axisLabel: {
         show: true,
         interval: 0,
-        color: 'rgba(0, 0, 0, 0.65)',
+        color: 'var(--text-color3)',
         fontSize: FontSize,
         formatter(value: string) {
           if (value.length > 10) {
@@ -151,7 +151,7 @@ const IterationSpeed: React.FC<IterationSpeedProps> = ({
       name: UnitNameMap.get(unit),
       type: 'value',
       nameTextStyle: {
-        color: '#000',
+        color: 'var(--text-color)',
       },
       axisTick: { show: false },
       axisLine: {
@@ -164,7 +164,7 @@ const IterationSpeed: React.FC<IterationSpeedProps> = ({
       },
       axisLabel: {
         show: true,
-        color: 'rgba(0, 0, 0, 0.65)',
+        color: 'var(--text-color3)',
         fontSize: FontSize,
       },
       splitLine: {

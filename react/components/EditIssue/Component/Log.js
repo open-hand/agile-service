@@ -165,11 +165,11 @@ class Log extends Component {
         </div>
         <div className="line-start" style={{ color: 'var(--text-color3)', marginTop: '10px' }}>
           <span style={{ width: 70 }}>耗费时间:</span>
-          <span style={{ color: '#000', fontWeight: '500' }}>{`${worklog.workTime}小时` || '无'}</span>
+          <span style={{ color: 'var(--text-color)', fontWeight: '500' }}>{`${worklog.workTime}小时` || '无'}</span>
         </div>
         <div className="line-start" style={{ color: 'var(--text-color3)', marginTop: '10px' }}>
           <span style={{ width: 70 }}>工作日期:</span>
-          <span style={{ color: '#000', fontWeight: '500' }}>{worklog.startDate || '无'}</span>
+          <span style={{ color: 'var(--text-color)', fontWeight: '500' }}>{worklog.startDate || '无'}</span>
         </div>
         {
           expand && (
