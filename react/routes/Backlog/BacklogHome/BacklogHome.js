@@ -175,7 +175,7 @@ class BacklogHome extends Component {
             // marginRight: 0,
             paddingLeft: 0,
             paddingRight: 0,
-            // paddingBottom: 0,
+            paddingBottom: 0,
           } : {
             padding: 0, paddingTop: 4,
           },

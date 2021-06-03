@@ -1,25 +1,3 @@
-.c7n-backlogTools {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.14rem;
-  padding: 0.06rem 0.24rem 0.05rem;
-  border-bottom: 0.01rem solid var(--divider);
-  flex-shrink: 0;
-  align-items: center;
-
-  .c7n-backlogTools-left {
-    display: flex;
-    flex-grow: 1;
-    align-items: center;
-    flex-wrap: wrap;
-    overflow: hidden;
-  }
-
-  .c7n-backlogTools-right {
-    display: flex;
-  }
-}
-
 body:not([data-theme="theme4"]) {
   .c7n-backlog-page {
     .page-breadcrumb {
@@ -97,11 +75,6 @@ body:not([data-theme="theme4"]) {
   cursor: pointer;
 }
 
-.c7n-agile-backlogTools-popover {
-  .c7n-checkbox-group-item {
-    margin-bottom: 0.05rem;
-  }
-}
 
 .c7n-backlog-content {
   //position: absolute;
@@ -112,6 +85,7 @@ body:not([data-theme="theme4"]) {
   display: flex;
   width: 100%;
   flex-direction: column;
+  padding-bottom: var(--guide-space);
 }
 
 .c7n-backlog-clearFilter {

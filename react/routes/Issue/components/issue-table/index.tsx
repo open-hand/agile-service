@@ -63,7 +63,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
   }), [fields, listLayoutColumns, onSummaryClick]);
   const getHeight = usePersistFn((availableHeight:number) => {
     const heightFromData = tableProps.data.length * ROW_HEIGHT + HEADER_HEIGHT;
-    return Math.max(Math.min(heightFromData, availableHeight - FOOTER_HEIGHT), MIN_HEIGHT);
+    return Math.min(heightFromData, Math.max(10 * ROW_HEIGHT + HEADER_HEIGHT, availableHeight - FOOTER_HEIGHT));
   });
 
   return (
@@ -83,7 +83,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
           })))}
         />
       </div>
-      <AutoSize>
+      <AutoSize style={{ overflow: 'visible' }}>
         {({ height }) => (
           <IssueTable
             height={height ? getHeight(height) : undefined}

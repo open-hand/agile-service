@@ -1,14 +1,14 @@
-import React, { useRef } from 'react';
+import React, { HTMLAttributes, useRef } from 'react';
 import { useSize } from 'ahooks';
 
-interface AutoSizeProps {
+interface AutoSizeProps extends HTMLAttributes<HTMLDivElement> {
   children: (size: ReturnType<typeof useSize>) => React.ReactNode
 }
-const AutoSize: React.FC<AutoSizeProps> = ({ children }) => {
+const AutoSize: React.FC<AutoSizeProps> = ({ children, ...props }) => {
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref.current);
   return (
-    <div ref={ref} style={{ height: '100%', overflow: 'hidden' }}>
+    <div ref={ref} {...props} style={{ height: '100%', overflow: 'hidden', ...props.style }}>
       {children(size)}
     </div>
   );
