@@ -93,7 +93,7 @@ function FieldIssueLinks({ form, projectId }) {
           <Button
             shape="circle"
             style={{ marginLeft: 10, fontSize: 20 }}
-            icon="delete"
+            icon="delete_sweep-o"
             onClick={() => remove(k)}
           />
         </div>
