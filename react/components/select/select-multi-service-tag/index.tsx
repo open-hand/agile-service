@@ -10,10 +10,8 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
 import { randomString } from '@/utils/random';
-
-import './index.less';
-import useClickOut from '@/hooks/useClickOut';
 import MultiServiceTag, { IMultiServiceTagItemProps, IMultiServiceTagProps } from './MultiServiceTag';
+import './index.less';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
@@ -66,8 +64,6 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
     onChange && onChange(data);
     setEditValue(undefined); // 置空编辑值 隐藏下拉框
     innerRef.current?.trigger?.delaySetPopupHidden(true, 0); // 关闭下拉框
-
-    // handleCancel();
   }
   const value = useMemo(() => toJS(propsValue)?.map((item: any) => ({ meaning: (item.appServiceCode ? `${item.appServiceCode}:${item.tagName}` : item.tagName), value: item })), [propsValue]);
   const handleProcessValue = useCallback(() => {
@@ -88,35 +84,33 @@ const SelectMultiServiceTag: React.FC<Props> = forwardRef(({
 
   const wrapProps = useMemo(() => pick(otherProps, ['style', 'className']), [otherProps]);
   return (
-    <div id={componentId} {...wrapProps}>
-      <Component
-        ref={handleBindRef}
-        value={value}
-        multiple
-        primitiveValue={false}
-        // triggerHiddenDelay={100}
-        onPopupHiddenChange={(hidden) => {
-          console.log('onPopupHiddenChange..', hidden);
-          // onChange();
-          handlePopupHidden(hidden);
-        }}
+  // <div id={componentId} {...wrapProps}>
+    <Component
+      ref={handleBindRef}
+      value={value}
+      multiple
+      primitiveValue={false}
+      onPopupHiddenChange={(hidden) => {
+        console.log('onPopupHiddenChange..', hidden);
+        // onChange();
+        handlePopupHidden(hidden);
+      }}
         // getPopupContainer={(node) => document.getElementById(componentId) as HTMLElement}
         // getPopupContainer={() => document.body}
-        trigger={['click'] as any}
-        onChange={(v) => {
-          let newValue = v;
-          if (v && v.length > 0) {
-            newValue = v.map((i: any) => i.value);
-          }
-          onChange && onChange(newValue);
-          console.log('onChange', v);
-        }}
-        onBlur={(e) => { console.log('e....onBlur', e); }}
-        {...otherProps}
-        dropdownMatchSelectWidth={false}
-        popupContent={editValue ? <MultiServiceTag mode={mode} onOK={handleSave} data={editValue} onCancel={handleCancel} projectId={projectId} /> : <div />}
-      />
-    </div>
+      trigger={['click'] as any}
+      onChange={(v) => {
+        let newValue = v;
+        if (v && v.length > 0) {
+          newValue = v.map((i: any) => i.value);
+        }
+        onChange && onChange(newValue);
+        console.log('onChange', v);
+      }}
+      {...otherProps}
+      dropdownMatchSelectWidth={false}
+      popupContent={editValue ? <MultiServiceTag mode={mode} onOK={handleSave} data={editValue} onCancel={handleCancel} projectId={projectId} /> : <div />}
+    />
+  // </div>
   );
 });
 
