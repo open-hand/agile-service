@@ -466,10 +466,10 @@ class ScrumBoardHome extends Component {
               <p>
                 {'任务'}
                 {ScrumBoardStore.getUpdatedParentIssue?.issueNum}
-                {'的全部子任务为done'}
+                {'全部子任务均为已解决状态'}
               </p>
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <p style={{ marginRight: 20, marginBottom: 0 }}>您是否要更新父问题进行匹配</p>
+                <p style={{ marginRight: 20, marginBottom: 0 }}>是否更新父级问题状态</p>
                 <Select
                   style={{
                     width: 250,
