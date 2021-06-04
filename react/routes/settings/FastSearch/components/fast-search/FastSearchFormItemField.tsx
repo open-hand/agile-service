@@ -71,8 +71,8 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
     unassignedEpic: undefined,
     clearButton: true,
     primitiveValue: false,
-    selectAllButton: false,
-    reverse: false,
+    // selectAllButton: false,
+    // reverse: false,
     autoQueryConfig: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? selectUserAutoQueryConfig : undefined,
     style: { width: '100%' },
     afterLoad: record.get('_editData') && record.get('_editDataCode') === record.get('fieldCode') ? handleBindOptions : undefined,
@@ -82,7 +82,7 @@ const FastSearchFormItemField: React.FC<{ record: Record, name: string }> = ({ r
   const render = useCallback(() => {
     if (isRenderNullSelect) {
       return (
-        <Select {...otherProps} primitiveValue={false}>
+        <Select {...otherProps} style={{ width: '100%' }} primitiveValue={false}>
           <Option value="'null'">空</Option>
         </Select>
       );

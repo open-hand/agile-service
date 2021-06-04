@@ -1,13 +1,14 @@
 import React, {
   useMemo, forwardRef, useEffect, useRef,
 } from 'react';
-import { Select } from 'choerodon-ui/pro';
+import { Select, Tooltip } from 'choerodon-ui/pro';
 import { Observer, useComputed, useForceUpdate } from 'mobx-react-lite';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { devOpsApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ILabel } from '@/common/types';
 import { FlatSelect } from '@choerodon/components';
+import { omit, pick } from 'lodash';
 
 interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
@@ -47,12 +48,20 @@ const SelectGitTags: React.FC<Props> = forwardRef(({
     paging: true,
   }), [applicationId, projectId]);
   const props = useSelect(config);
-
   const Component = flat ? FlatSelect : Select;
+
+  if (!applicationId) {
+    return (
+      <Tooltip title="请先选择应用服务">
+        <div {...pick(otherProps, ['style', 'className'])}>
+          <Component ref={ref} disabled {...omit(otherProps, ['style', 'className'])} style={{ width: '100%' }} />
+        </div>
+      </Tooltip>
+    );
+  }
   return (
     <Component
       ref={ref}
-      help={!applicationId ? '请先选择应用服务' : undefined}
       {...props}
       {...otherProps}
     />
