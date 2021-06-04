@@ -41,7 +41,7 @@ class CreateStory extends Component {
   handleClickOutside = (e) => {
     const { adding } = this.state;
 
-    if (e?.path.some((i) => i.id === 'create-stroy-issue-type-menu') || !adding) {
+    if (e.composedPath()?.some((i) => i.id === 'create-stroy-issue-type-menu') || !adding) {
       return;
     }
     this.handleCreateIssue();
