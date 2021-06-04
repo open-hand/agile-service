@@ -1,7 +1,6 @@
 module.exports = {
   modules: [
     '.',
-    '@choerodon/base-pro',
   ],
   webpackConfig(config) {
     config.module.rules.push({
