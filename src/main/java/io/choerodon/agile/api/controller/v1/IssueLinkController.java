@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.IssueLinkService;
 
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -107,6 +108,9 @@ public class IssueLinkController {
             @ApiParam(value = "组织id", required = true)
             @RequestParam(required = false) Long organizationId) {
         EncryptionUtils.decryptSearchVO(searchVO);
+        if (organizationId == null) {
+            organizationId = ConvertUtil.getOrganizationId(projectId);
+        }
         return Optional.ofNullable(issueLinkService.listUnLinkIssue(issueId, projectId, searchVO, pageRequest, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.listUnLinkIssue"));
