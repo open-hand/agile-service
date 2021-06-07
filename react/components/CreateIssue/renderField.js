@@ -47,12 +47,13 @@ export default function renderField(field, projectId) {
         <Checkbox.Group
           label={fieldName}
         >
-          <Row>
+          <Row className>
             {fieldOptions && fieldOptions.length > 0
               && fieldOptions.filter((option) => option.enabled).map((item) => (
                 <Col
                   span={24}
                   key={item.id}
+                  style={{ width: 'auto' }}
                 >
                   <Checkbox
                     value={item.id}
