@@ -101,7 +101,7 @@ public class IssueLinkController {
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
             @ApiParam(value = "项目id", required = true)
-            @PathVariable(name = "issueId") Long issueId,
+            @PathVariable(name = "issueId") @Encrypt Long issueId,
             @ApiParam(value = "查询参数", required = true)
             @RequestBody(required = false) SearchVO searchVO,
             @ApiParam(value = "组织id", required = true)
