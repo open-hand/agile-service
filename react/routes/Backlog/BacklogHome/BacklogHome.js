@@ -185,7 +185,7 @@ class BacklogHome extends Component {
             className="c7n-backlog"
             style={{
               flex: 1,
-              overflow: 'hidden',
+              // overflow: 'hidden',
             }}
           >
             <SideNav onChange={this.toggleCurrentVisible} activeKey={BacklogStore.whichVisible}>

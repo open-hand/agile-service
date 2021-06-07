@@ -83,25 +83,33 @@ const ReportPage: React.FC<Props> = ({
             />
           </Header>
           <Breadcrumb title={edit ? '编辑项目报告' : '创建项目报告'} />
-          <Content style={{ paddingBottom: 0, paddingTop: 0 }}>
-            <div className={styles.container}>
-              <div className={styles.content}>
+          <Content style={{
+            paddingBottom: 0,
+            // paddingTop: 0,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            paddingTop: 20,
+          }}
+          >
+            {/* <div className={styles.container}> */}
+            <div className={styles.content}>
+              <div className={styles.header}>
+                <div className={styles.tip} />
+                <span className={styles.title}>基本信息</span>
+              </div>
+              <BaseInfo />
+              <div>
                 <div className={styles.header}>
                   <div className={styles.tip} />
-                  <span className={styles.title}>基本信息</span>
+                  <span className={styles.title}>报告内容</span>
+                  {renderAddButton()}
                 </div>
-                <BaseInfo />
-                <div>
-                  <div className={styles.header}>
-                    <div className={styles.tip} />
-                    <span className={styles.title}>报告内容</span>
-                    {renderAddButton()}
-                  </div>
-                  <BlockList />
-                </div>
+                <BlockList />
               </div>
-              <Operation />
             </div>
+            <Operation />
+            {/* </div> */}
           </Content>
         </Page>
       )}
