@@ -15,11 +15,11 @@ const VersionList = ({ match }) => (
     {
         (permission, loading) => (
           <PageWrap
-            noHeader={!loading && permission ? [] : ['choerodon.code.project.cooperation.version-list.ps.release']}
+            noHeader={!loading && permission ? [] : ['choerodon.code.project.cooperation.project-version.ps.default']}
           >
-            <PageTab title="规划版本" route={LINK_URL.versionRelease} tabKey="choerodon.code.project.cooperation.version-list.ps.release" component={Release} />
+            <PageTab title="规划版本" route={LINK_URL.versionRelease} tabKey="choerodon.code.project.cooperation.project-version.ps.default" component={Release} />
 
-            <PageTab title="发布版本" route={LINK_URL.versionPublish} tabKey="choerodon.code.project.cooperation.version-list.ps.publish" component={() => Publish} />
+            <PageTab title="发布版本" route={LINK_URL.versionPublish} tabKey="choerodon.code.project.cooperation.project-version.ps.publish" component={() => Publish} />
 
           </PageWrap>
         )
