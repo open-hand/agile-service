@@ -169,6 +169,7 @@ class BacklogHome extends Component {
         <Content style={{
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'visible',
           ...theme === 'theme4' ? {
             paddingTop: 45,
             // marginLeft: 0,
