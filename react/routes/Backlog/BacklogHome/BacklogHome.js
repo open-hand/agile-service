@@ -163,7 +163,7 @@ class BacklogHome extends Component {
           background: 'white',
           height: '1px',
           top: '112px',
-          left: '89px',
+          left: '97px',
           zIndex: 3,
         }}
         />
