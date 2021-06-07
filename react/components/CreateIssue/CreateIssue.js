@@ -776,6 +776,7 @@ class CreateIssue extends Component {
                   style={{ flex: 1 }}
                   allowClear
                   extraOption={form.getFieldValue('assigneedId') === AppState.userInfo.id ? [AppState.userInfo, field.defaultValueObj, this.props.chosenAssignee].filter((o) => typeof (o) !== 'string' && o) : [field.defaultValueObj, this.props.chosenAssignee].filter((o) => typeof (o) !== 'string' && o)}
+                  getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                 />,
               )}
               <IsProjectMember>
@@ -785,7 +786,7 @@ class CreateIssue extends Component {
                     role="none"
                     style={{
                       display: 'inline-block',
-                      color: 'rgba(63, 81, 181)',
+                      color: 'var(--primary-color)',
                       marginLeft: 10,
                       cursor: 'pointer',
                     }}
@@ -809,6 +810,7 @@ class CreateIssue extends Component {
                 style={{ flex: 1 }}
                 allowClear
                 extraOption={field.defaultValueObj}
+                getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
               />,
             )}
           </FormItem>
@@ -1253,6 +1255,7 @@ class CreateIssue extends Component {
                   style={{ flex: 1 }}
                   allowClear
                   extraOption={field.defaultValueObj}
+                  getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                 />,
               )}
             </div>
