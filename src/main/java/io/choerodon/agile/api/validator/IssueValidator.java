@@ -270,9 +270,6 @@ public class IssueValidator {
         if (issueConvertDTO == null) {
             throw new CommonException("error.IssueUpdateTypeVO.issueDO");
         }
-        if (issueUpdateTypeVO.getTypeCode().equals(SUB_TASK)) {
-            throw new CommonException("error.IssueRule.subTask");
-        }
         Long originStateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, issueConvertDTO.getIssueTypeId());
         Long currentStateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, issueUpdateTypeVO.getIssueTypeId());
         if (originStateMachineId == null || currentStateMachineId == null) {
@@ -331,12 +328,6 @@ public class IssueValidator {
         IssueConvertDTO issueConvertDTO = issueService.queryIssueByProjectIdAndIssueId(projectId, issueTransformTask.getIssueId());
         if (issueConvertDTO == null) {
             throw new CommonException("error.IssueUpdateTypeVO.issueDO");
-        }
-        if (issueTransformTask.getTypeCode().equals(SUB_TASK)) {
-            throw new CommonException("error.IssueRule.subTask");
-        }
-        if (issueTransformTask.getTypeCode().equals(issueConvertDTO.getTypeCode())) {
-            throw new CommonException("error.IssueRule.sameTypeCode");
         }
         return issueConvertDTO;
     }
