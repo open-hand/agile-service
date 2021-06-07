@@ -87,7 +87,7 @@ const Comments: React.FC<Props> = ({
       }
       {
         readonly && !comments.length && (
-          <span style={{ textAlign: 'center' }}>暂无评论</span>
+          <span style={{ textAlign: 'center', color: 'var(--text-color3)' }}>暂无评论</span>
         )
       }
     </div>

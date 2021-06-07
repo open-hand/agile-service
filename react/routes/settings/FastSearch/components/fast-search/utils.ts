@@ -168,7 +168,7 @@ export function getTransformOperatorToRelationRuleMap() {
  * @param condition
  * @returns
  */
-export function processDataValue(value: any, condition: Pick<IFastSearchCondition, 'fieldCode' | 'fieldType' | 'isCustomField'>): string {
+export function processDataValue(value: any, condition: Pick<IFastSearchCondition, 'fieldCode' | 'fieldType' | 'isCustomField' | 'id'>): string {
   const newValue = value;
   if (['date', 'time', 'datetime'].includes(condition.fieldType)) {
     return moment(newValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']).format(DateFormatString[condition.fieldType as 'date' | 'time']);
@@ -281,8 +281,8 @@ export function processWaitSubmitData(mainDataSet: DataSet, searchConditionDataS
       fieldCode: condition.fieldCode,
       operation,
       value: Array.isArray(value) ? `(${value.join(',')})` : `${value}`,
-      predefined: !condition.isCustomField,
-      customFieldType: condition.isCustomField ? getCustomFieldType(condition.fieldType) : undefined,
+      predefined: !condition.id,
+      customFieldType: condition.id ? getCustomFieldType(condition.fieldType) : undefined,
     };
   });
   const mainData = mainDataSet.current?.toData();

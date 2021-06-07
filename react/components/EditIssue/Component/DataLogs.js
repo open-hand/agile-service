@@ -38,9 +38,9 @@ class DataLogs extends Component {
         }
         {
           datalogs.length > 5 && expand ? (
-            <div style={{ marginTop: 10 }}>
+            <div style={{ marginTop: 10, marginLeft: 55 }}>
               <Button className="leftBtn" onClick={() => this.setState({ expand: false })}>
-                <span>折叠</span>
+                <span>收起</span>
                 <Icon type="baseline-arrow_drop_up icon" style={{ marginRight: 2 }} />
               </Button>
             </div>

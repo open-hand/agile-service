@@ -634,7 +634,7 @@ class CreateIssue extends Component {
                           initialValue: defaultTypeId || '',
                         })(<Select
                           label="问题类型"
-                          getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                          getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                           onChange={((value) => {
                             const { typeCode, id } = originIssueTypes.find(
                               (item) => item.id === value,
@@ -691,6 +691,7 @@ class CreateIssue extends Component {
                   rules: [{ required: true, message: '父级任务为必选项' }],
                 })(
                   <SelectFocusLoad
+                    getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                     label="关联父级任务"
                     type="subTask_parent_issue"
                     allowClear
@@ -712,6 +713,7 @@ class CreateIssue extends Component {
                 {getFieldDecorator('subBugParent', {
                 })(
                   <SelectFocusLoad
+                    getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                     label="关联父级任务"
                     type="subBug_parent_issue"
                     allowClear
@@ -733,7 +735,7 @@ class CreateIssue extends Component {
             })(
               <Select
                 label="特性类型"
-                getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
               >
                 {[
                   {
@@ -819,6 +821,7 @@ class CreateIssue extends Component {
               rules: [{ required: ['sub_task', 'sub_bug'].includes(mode) || newIssueTypeCode === 'sub_task' || (newIssueTypeCode === 'bug' && form.getFieldValue('subBugParent')) ? false : field.required, message: '请选择冲刺' }],
             })(
               <SelectFocusLoad
+                getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                 label="冲刺"
                 allowClear
                 type="sprint"
@@ -843,6 +846,7 @@ class CreateIssue extends Component {
               rules: [{ required: true, message: '优先级为必选项' }],
             })(
               <SelectFocusLoad
+                getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                 label="优先级"
                 type="priority"
                 afterLoad={this.setDefaultSelect('priorityId')}
@@ -863,6 +867,7 @@ class CreateIssue extends Component {
                 : value), // 限制最长10位
             })(
               <SelectFocusLoad
+                getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                 label="标签"
                 mode="tags"
                 loadWhenMount
@@ -885,6 +890,7 @@ class CreateIssue extends Component {
               rules: [{ required: field.required, message: '请选择特性' }],
             })(
               <SelectFocusLoad
+                getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                 label="特性"
                 allowClear
                 type="feature"
@@ -901,6 +907,7 @@ class CreateIssue extends Component {
                 { required: field.required, message: '请选择修复的版本' }],
             })(
               <SelectFocusLoad
+                getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                 label="影响的版本"
                 mode="multiple"
                 loadWhenMount
@@ -924,6 +931,7 @@ class CreateIssue extends Component {
                 { required: field.required, message: '请选择修复的版本' }],
             })(
               <SelectFocusLoad
+                getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                 label="修复的版本"
                 mode="multiple"
                 loadWhenMount
@@ -953,6 +961,7 @@ class CreateIssue extends Component {
                           rules: [{ required: field.required, message: '请选择史诗' }],
                         })(
                           <SelectFocusLoad
+                            getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                             label="史诗"
                             allowClear
                             type="epic"
@@ -975,6 +984,7 @@ class CreateIssue extends Component {
                     <FormItem label="特性" key="featureId">
                       {getFieldDecorator('featureId', {})(
                         <SelectFocusLoad
+                          getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                           label="特性"
                           allowClear
                           type="feature"
@@ -1012,6 +1022,7 @@ class CreateIssue extends Component {
                 mode="multiple"
                 type="component"
                 allowClear
+                getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
               >
                 {field.defaultValueObjs?.map((component) => (
                   <Option
@@ -1071,7 +1082,7 @@ class CreateIssue extends Component {
                 <SelectNumber
                   label="预估时间"
                   loose
-                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                  getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                   className="c7n-createIssue-numSelect"
                 />,
               )}
@@ -1094,7 +1105,7 @@ class CreateIssue extends Component {
                 <SelectNumber
                   label="故事点"
                   loose
-                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                  getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                   className="c7n-createIssue-numSelect"
                 />,
               )}
@@ -1168,6 +1179,7 @@ class CreateIssue extends Component {
                     label="PI"
                     type="pi"
                     optionArgs={!hasPermission}
+                    getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                     afterLoad={(sprints) => {
                       this.props.defaultPi && form.setFieldsValue({
                         pi: this.props.defaultPi,
@@ -1256,6 +1268,7 @@ class CreateIssue extends Component {
               })(
                 <SelectFocusLoad
                   request={() => statusApi.loadAllForIssueType(newIssueTypeId, applyType)}
+                  getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                   label={field.fieldName}
                   type="issue_status"
                   loadWhenMount
@@ -1324,6 +1337,7 @@ class CreateIssue extends Component {
               {getFieldDecorator(`linkTypes[${index}]`, {
               })(
                 <SelectFocusLoad
+                  getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                   label="关系"
                   type="issue_link"
                 />,
@@ -1333,6 +1347,7 @@ class CreateIssue extends Component {
               {getFieldDecorator(`linkIssues[${index}]`, {
               })(
                 <SelectFocusLoad
+                  getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
                   label="问题"
                   type="issues_in_link"
                 />,

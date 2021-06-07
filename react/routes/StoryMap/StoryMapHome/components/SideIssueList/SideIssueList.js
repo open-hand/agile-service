@@ -16,8 +16,11 @@ const { Option } = FlatSelect;
 @FiltersProvider(['issueStatus', 'version'])
 @observer
 class SideIssueList extends Component {
-  state = {
-    filter: '',
+  constructor(props) {
+    super(props);
+    this.state = {
+      filter: '',
+    };
   }
 
   componentDidMount() {
@@ -34,7 +37,7 @@ class SideIssueList extends Component {
 
   handleFilter = (issue) => {
     const { filter } = this.state;
-    return issue.issueNum.indexOf(filter) > -1 || issue.summary.indexOf(filter) > -1;
+    return !filter ? true : issue.issueNum.indexOf(filter) > -1 || issue.summary.indexOf(filter) > -1;
   }
 
   handleClickFilter = () => {

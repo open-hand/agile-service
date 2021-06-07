@@ -56,7 +56,7 @@ const SelectSelfAppService: React.FC<Props> = forwardRef(({
       return data;
     },
     paging: false,
-  }), []);
+  }), [projectId]);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
 

@@ -111,7 +111,7 @@ export default function renderField(field, projectId) {
         type="custom_field"
         label={fieldName}
         allowClear={!required}
-        getPopupContainer={(triggerNode) => triggerNode.parentNode}
+        getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
         requestArgs={{
           fieldId: field.fieldId,
           selected: field.defaultValue,
@@ -126,8 +126,7 @@ export default function renderField(field, projectId) {
         filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
         label={fieldName}
         mode="multiple"
-        getPopupContainer={(triggerNode) => triggerNode.parentNode}
-
+        getPopupContainer={(triggerNode) => document.getElementsByClassName('c7n-modal-body')[0]}
       >
         {field.fieldOptions && field.fieldOptions.length > 0
           && field.fieldOptions.filter((option) => option.enabled).map((item) => (

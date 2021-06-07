@@ -10,10 +10,12 @@ export interface IFastSearchCondition {
     value: any
     fieldType: IFieldTypeWithSystemType
     valueText?: string | string[]
-    isCustomField: boolean
+    isCustomField?: boolean
+    id?:boolean /** 用以判断是否为自定义字段 存在则为自定义字段，否则为系统字段 */
     bothRelation?: string
 }
 export interface IFastSearchEditConditionWithEditStatus extends Omit<IFastSearchCondition, 'valueText' | 'valueBindValue' | 'name' | 'fieldType'> {
+    isCustomField:boolean
     _editData: true
     _editDataCode?: IFastSearchEditConditionWithEditStatus['fieldCode']
 }

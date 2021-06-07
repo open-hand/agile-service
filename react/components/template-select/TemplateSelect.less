@@ -7,17 +7,11 @@
     align-items: center;
     padding: 0 10px;
     height: 36px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--divider);
     border-radius: 5px;
-    &:hover {
-      border: 1px solid var(--text-color);
-    }
     &:focus {
       outline: 0;
-      border: 2px solid #5365EA;
-      .trigger_label {
-        color: #5365EA;
-      }
+      border: 1px solid #5365EA;
     }
     &:focus-within {
       .iconPicker {
@@ -32,7 +26,7 @@
     }
     .trigger_label {
       position: absolute;
-      color: rgba(0, 0, 0, 0.6);
+      color: #9EADBE;
       pointer-events: none;
       top: 0;
       padding: 0 4px;

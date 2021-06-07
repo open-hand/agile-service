@@ -211,7 +211,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
             List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, stateMachineId, false);
             stateMachineNode.setType(NodeType.CUSTOM);
             String maxRank = statusMachineNodeMapper.queryMaxRank(organizationId, stateMachineId);
-            stateMachineNode.setRank(maxRank);
+            stateMachineNode.setRank(ObjectUtils.isEmpty(maxRank) ? RankUtil.mid() : RankUtil.genNext(maxRank));
             stateMachineNodeService.baseCreate(stateMachineNode);
             if (Boolean.TRUE.equals(defaultStatus)) {
                 defaultStatus(organizationId, stateMachineId, statusId);

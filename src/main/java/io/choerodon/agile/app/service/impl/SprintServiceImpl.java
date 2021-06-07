@@ -300,7 +300,9 @@ public class SprintServiceImpl implements SprintService {
     }
 
     protected void handleSprintIssueData(List<IssueIdSprintIdVO> issueIdSprintIdVOS, List<Long> issueIds, List<SprintSearchVO> sprintSearches, BackLogIssueVO backLogIssueVO, Long projectId, Map<Long, PriorityVO> priorityMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, IssueTypeVO> issueTypeDTOMap,List<Long> allIssue) {
-        List<Long> allIssueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
+        List<Long> allIssueIds = new ArrayList<>();
+        allIssueIds.addAll(issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList()));
+        allIssueIds.addAll(issueIds);
         //查询出所有经办人用户id
         Map<Long, UserMessageDTO> usersMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(allIssueIds)) {
