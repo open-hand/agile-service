@@ -1359,7 +1359,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                                     Long projectId) {
         List<String> fieldList = new ArrayList<>(Arrays.asList(UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK));
         String originType = issueConvertDTO.getTypeCode();
-        if (originType.equals(SUB_TASK)) {
+        if (originType.equals(SUB_TASK) && !Objects.equals(issueUpdateTypeVO.getTypeCode(), SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
         }
         if (STORY_TYPE.equals(issueConvertDTO.getTypeCode()) && issueConvertDTO.getStoryPoints() != null) {
@@ -2067,7 +2067,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public synchronized IssueVO transformedTask(IssueConvertDTO issueConvertDTO, IssueTransformTask issueTransformTask, Long organizationId) {
         String originType = issueConvertDTO.getTypeCode();
         List<String> fieldList = new ArrayList<>(Arrays.asList(TRANSFORMED_TASK_FIELD_LIST_NO_RANK));
-        if (originType.equals(SUB_TASK)) {
+        if (originType.equals(SUB_TASK) && !Objects.equals(issueTransformTask.getTypeCode(), SUB_TASK)) {
             issueConvertDTO.setParentIssueId(null);
         }
         if (STORY_TYPE.equals(issueConvertDTO.getTypeCode()) && issueConvertDTO.getStoryPoints() != null) {
