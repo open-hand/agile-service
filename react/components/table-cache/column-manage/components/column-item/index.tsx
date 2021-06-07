@@ -17,22 +17,26 @@ const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDr
 interface ColumnProps extends React.HTMLAttributes<HTMLDivElement> {
   index: number
   data: Option
+  tooltip: boolean
   selected: boolean
   onSelectChange: (key: string, value: boolean) => void
 }
-const ColumnItem: React.FC<Pick<ColumnProps, 'data' | 'selected' | 'onSelectChange'>> = ({
+const ColumnItem: React.FC<Pick<ColumnProps, 'data' | 'selected' | 'onSelectChange' | 'tooltip'>> = ({
   data,
   selected,
   onSelectChange,
+  tooltip,
 }) => {
   const handleCheckChange = useLockFn(async (e) => {
     onSelectChange(data.code, e.target.checked);
   });
   return (
     <>
-      <Tooltip title={data.title}>
-        <div className={styles.title}>{data.title}</div>
-      </Tooltip>
+      {tooltip ? (
+        <Tooltip title={data.title}>
+          <div className={styles.title}>{data.title}</div>
+        </Tooltip>
+      ) : <div className={styles.title}>{data.title}</div>}
       <Checkbox className={styles.checkbox} checked={selected} onChange={handleCheckChange} />
     </>
   );
@@ -43,10 +47,11 @@ const DragableColumnItem: React.FC<ColumnProps> = ({
   data,
   selected,
   onSelectChange,
+  tooltip,
   ...otherProps
 }) => {
   const draggableId = data.code;
-  const item = <ColumnItem data={data} selected={selected} onSelectChange={onSelectChange} />;
+  const item = <ColumnItem tooltip={tooltip} data={data} selected={selected} onSelectChange={onSelectChange} />;
   if (data.disabled) {
     return null;
   }

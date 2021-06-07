@@ -333,7 +333,7 @@ const getColumnsMap = ({ onSummaryClick }) => new Map([
     render: renderEpicOrFeature,
   }],
   ['mainResponsibleUser', {
-    title: <Tooltip title="负责人">负责人</Tooltip>,
+    title: <Tooltip title="主要负责人">主要负责人</Tooltip>,
     dataIndex: 'mainResponsibleUser',
     render: ({ rowData, dataIndex }) => rowData[dataIndex] && <UserTag data={rowData[dataIndex]} />,
   }],
