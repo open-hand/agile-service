@@ -31,6 +31,6 @@ export default class DateTimePickerWithConfig extends DateTimePicker {
     // 先得到合规时间
     const date = this.getValidDate(defaultPickerValue || moment().startOf('d'));
     // 如果传了默认值，认定是当天结束，暂时这么处理
-    return defaultPickerValue ? this.getValidDate(date.endOf('day')) : date;
+    return defaultPickerValue ? this.getValidDate(date.endOf('day')) : this.getValidDate(date.startOf('day'));
   }
 }
