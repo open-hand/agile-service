@@ -214,7 +214,7 @@ function EditIssue() {
   const issue = store.getIssue;
   const {
     issueId, issueNum, summary,
-    assigneeId, objectVersionNumber, createdBy, typeCode,
+    assigneeId, objectVersionNumber, createdBy, typeCode, issueTypeId,
   } = issue;
   const linkIssues = store.getLinkIssues;
 
@@ -334,6 +334,7 @@ function EditIssue() {
             visible={transformFromSubIssueShow}
             issueId={issueId}
             issueNum={issueNum}
+            originIssueTypeId={issueTypeId}
             ovn={objectVersionNumber}
             onCancel={() => store.setTransformFromSubIssueShow(false)}
             onOk={handleTransformFromSubIssue.bind(this)}

@@ -7,6 +7,7 @@ import { issueApi, issueTypeApi, statusApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import TypeTag from '../TypeTag';
 import './TransformFromSubIssue.less';
+import openRequiredFieldsModal from '../EditIssue/IssueComponent/required-fields';
 
 const { Sidebar } = Modal;
 const FormItem = Form.Item;
@@ -55,9 +56,13 @@ class TransformFromSubIssue extends Component {
 
   handleTransformSubIssue = () => {
     const {
-      issueId, ovn, form, onOk,
+      issueId, ovn, form, onOk, store,
     } = this.props;
-    form.validateFields((err, values) => {
+    const issue = store.getIssue;
+    const {
+      objectVersionNumber, summary, issueTypeVO = {},
+    } = issue;
+    form.validateFields(async (err, values) => {
       if (!err) {
         const { originTypes, isEpicType } = this.state;
         const { typeCode } = originTypes.find((t) => t.id === values.typeId);
@@ -67,18 +72,36 @@ class TransformFromSubIssue extends Component {
           objectVersionNumber: ovn,
           typeCode,
           issueTypeId: values.typeId,
-          statusId: values.statusId,
+          // statusId: values.statusId,
         };
-        this.setState({
-          loading: true,
-        });
-        issueApi.subtaskTransformTask(issueUpdateTypeVO)
-          .then((res) => {
-            this.setState({
-              loading: false,
-            });
-            onOk();
+
+        const res = await issueApi.getRequiredField(issueId, values.typeId);
+        if (res && res.length) {
+          store.setTransformFromSubIssueShow(false);
+          openRequiredFieldsModal({
+            requiredFields: res,
+            issueVO: {
+              summary,
+              issueId,
+              issueTypeVO,
+              objectVersionNumber,
+              typeCode,
+              issueTypeId: values.typeId,
+            },
+            reloadIssue: onOk,
           });
+        } else {
+          this.setState({
+            loading: true,
+          });
+          issueApi.subtaskTransformTask(issueUpdateTypeVO)
+            .then(() => {
+              this.setState({
+                loading: false,
+              });
+              onOk();
+            });
+        }
       }
     });
   };
@@ -86,15 +109,15 @@ class TransformFromSubIssue extends Component {
   onTypeChange = (typeId) => {
     const { form } = this.props;
     const { originTypes } = this.state;
-    form.setFieldsValue({
-      statusId: undefined,
-    });
+    // form.setFieldsValue({
+    //   statusId: undefined,
+    // });
     const epicType = originTypes.find((t) => t.typeCode === 'issue_epic');
     this.setState({
       issueTypeId: typeId,
       isEpicType: epicType && epicType.id === typeId,
     }, () => {
-      this.getStatus();
+      // this.getStatus();
     });
   };
 
@@ -115,6 +138,7 @@ class TransformFromSubIssue extends Component {
       visible,
       onCancel,
       issueNum,
+      originIssueTypeId,
     } = this.props;
     const { getFieldDecorator } = form;
     const {
@@ -148,7 +172,7 @@ class TransformFromSubIssue extends Component {
                 getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 onChange={this.onTypeChange}
               >
-                {originTypes.filter((t) => t.typeCode !== 'sub_task').map((type) => (
+                {(originTypes || []).filter((item) => item.id !== originIssueTypeId).map((type) => (
                   <Option key={type.id} value={type.id}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
                       <TypeTag
@@ -161,7 +185,7 @@ class TransformFromSubIssue extends Component {
               </Select>,
             )}
           </FormItem>
-          <FormItem label="状态">
+          {/* <FormItem label="状态">
             {getFieldDecorator('statusId', {
               rules: [{ required: true, message: '请选择状态' }],
             })(
@@ -190,7 +214,7 @@ class TransformFromSubIssue extends Component {
                 }
               </Select>,
             )}
-          </FormItem>
+          </FormItem> */}
           {
             isEpicType && (
               <FormItem label="史诗名称">

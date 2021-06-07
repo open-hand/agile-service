@@ -104,6 +104,8 @@ const IssueType = observer(({
       },
     ];
     currentIssueType = featureType === 'business' ? issueTypeData[0] : issueTypeData[1];
+  } else if (typeCode === 'sub_task') {
+    issueTypeData = issueTypeData.filter((item, i) => item.stateMachineId !== stateMachineId && item.typeCode === 'sub_task');
   } else {
     issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => !['feature', 'sub_task'].includes(item.typeCode));
     if (isInProgram) {
@@ -156,7 +158,7 @@ const IssueType = observer(({
           />
         </div>
       ) : (
-        <Dropdown overlay={typeList} trigger={['click']} disabled={typeCode === 'sub_task' || disabled}>
+        <Dropdown overlay={typeList} trigger={['click']} disabled={disabled}>
           <div
             className="issue-nav-narrow"
           >
@@ -164,12 +166,10 @@ const IssueType = observer(({
               data={currentIssueType}
               featureType={featureVO && featureVO.featureType}
             />
-            {typeCode !== 'sub_task' && (
             <Icon
               type="arrow_drop_down"
               style={{ fontSize: 16 }}
             />
-            )}
           </div>
         </Dropdown>
       )}
