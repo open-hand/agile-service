@@ -75,6 +75,7 @@ const IssueTableMain: React.FC<IssueTableMainProps> = ({
       }}
       >
         <ColumnManage
+          tooltip={false}
           value={visibleColumnCodes}
           options={columns.map(((c) => ({
             code: c.code,

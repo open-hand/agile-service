@@ -22,10 +22,11 @@ export interface ColumnManageProps {
   options: Option[]
   value?: string[]
   onChange?: (value: string[]) => void
+  tooltip?: boolean
 }
 
 const ColumnManageModal: React.FC<ColumnManageProps> = (props) => {
-  const { modal, type } = props;
+  const { modal, type, tooltip = true } = props;
 
   const { options } = props;
   const [columns, setColumns] = useState([...options]);
@@ -87,6 +88,7 @@ const ColumnManageModal: React.FC<ColumnManageProps> = (props) => {
         onDragEnd={handleDragEnd}
       >
         <ColumnList
+          tooltip={tooltip}
           columns={columns}
           selectedKeys={selectedKeys}
           onSelectChange={handleSelectChange}
