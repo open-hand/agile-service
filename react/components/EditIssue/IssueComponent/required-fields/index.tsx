@@ -400,7 +400,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
   }, [changeTypeDataSet, issueVO.summary, requiredFields]);
 
   const { stateMachineId } = find(issueTypeData, { id: issueVO.issueTypeVO?.id }) || {};
-  issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => !['feature', 'sub_task'].includes(item.typeCode));
+  issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => !['feature', ...(issueVO.typeCode === 'sub_task' ? [] : ['sub_task'])].includes(item.typeCode));
   if (isInProgram) {
     issueTypeData = issueTypeData.filter((item) => item.typeCode !== 'issue_epic');
   }
@@ -408,7 +408,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
   return (
     <>
       <Loading loading={loading} />
-      <Form className={styles.changeType} dataSet={issueTypeIdDataSet}>
+      <Form className={styles.changeType} dataSet={issueTypeIdDataSet} style={{ marginLeft: -5 }}>
         <div className={styles.part_title}>
           类型修改为
         </div>
@@ -425,7 +425,7 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
           <div className={styles.part_title} style={{ marginTop: 10, marginBottom: 13 }}>补全必输字段</div>
         )
       }
-      <Form dataSet={changeTypeDataSet} columns={2}>
+      <Form dataSet={changeTypeDataSet} columns={2} style={{ marginLeft: -5 }}>
         {
         (loading ? [] : requiredFields).map((item) => (renderField({
           field: item, otherComponentProps: {}, dataSet: changeTypeDataSet, isInProgram,
