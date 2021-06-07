@@ -5,6 +5,7 @@ import io.choerodon.agile.infra.dto.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -26,12 +27,14 @@ public interface IssueLinkMapper extends BaseMapper<IssueLinkDTO> {
     /**
      * 根据IssueId查询issueLink
      *
-     * @param issueId   issueId
-     * @param projectId projectId
+     * @param issueIds   issueIds
+     * @param projectIds projectIds
      * @param noIssueTest noIssueTest
      * @return IssueLinkDTO
      */
-    List<IssueLinkDTO> queryIssueLinkByIssueId(@Param("issueId") Long issueId, @Param("projectId") Long projectId, @Param("noIssueTest") Boolean noIssueTest);
+    List<IssueLinkDTO> queryIssueLinkByIssueId(@Param("issueIds") Set<Long> issueIds,
+                                               @Param("projectIds") Set<Long> projectIds,
+                                               @Param("noIssueTest") Boolean noIssueTest);
 
     /**
      * 批量更新issue链接关系到别的issueLinkType
