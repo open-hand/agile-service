@@ -66,13 +66,21 @@ class TransformFromSubIssue extends Component {
       if (!err) {
         const { originTypes, isEpicType } = this.state;
         const { typeCode } = originTypes.find((t) => t.id === values.typeId);
+        // const issueUpdateTypeVO = {
+        //   epicName: isEpicType ? values.epicName : undefined,
+        //   issueId,
+        //   objectVersionNumber: ovn,
+        //   typeCode,
+        //   issueTypeId: values.typeId,
+        //   // statusId: values.statusId,
+        // };
+
         const issueUpdateTypeVO = {
           epicName: isEpicType ? values.epicName : undefined,
           issueId,
           objectVersionNumber: ovn,
           typeCode,
           issueTypeId: values.typeId,
-          // statusId: values.statusId,
         };
 
         const res = await issueApi.getRequiredField(issueId, values.typeId);
@@ -94,7 +102,8 @@ class TransformFromSubIssue extends Component {
           this.setState({
             loading: true,
           });
-          issueApi.subtaskTransformTask(issueUpdateTypeVO)
+          // issueApi.subtaskTransformTask(issueUpdateTypeVO)
+          issueApi.updateType(issueUpdateTypeVO)
             .then(() => {
               this.setState({
                 loading: false,
