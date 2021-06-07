@@ -241,6 +241,7 @@ public class ExcelUtil {
     protected static CellStyle createForegroundColor(Workbook workbook, IndexedColors colors) {
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setFillForegroundColor(colors.getIndex());
+        cellStyle.setAlignment(HorizontalAlignment.LEFT);
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         return cellStyle;
     }
