@@ -28,8 +28,9 @@ const Header: React.FC<HeaderProps> = ({
     }
   }, [column, store]);
   const handleDeleteClick = useCallback(() => {
-    Modal.confirm({
-      title: '确认删除',
+    Modal.open({
+      title: '删除列',
+      children: '确认删除此列?',
       onOk: () => {
         store.deleteColumn(column);
       },

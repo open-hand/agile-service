@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import {
-  Page, Header, Content, Breadcrumb,
+  Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/master';
-import { Button } from 'choerodon-ui/pro';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { useParams } from 'react-router';
 import { Loading } from '@/components';
@@ -45,12 +44,17 @@ const KanbanTemplateDetail = () => {
   return (
     <Page>
       <Header>
-        <Button
-          icon="playlist_add"
-          onClick={handleColumnCreateClick}
-        >
-          创建列
-        </Button>
+        <HeaderButtons
+          showClassName={false}
+          items={[
+            {
+              name: '创建列',
+              icon: 'playlist_add',
+              display: true,
+              handler: handleColumnCreateClick,
+            },
+          ]}
+        />
       </Header>
       <Breadcrumb title="编辑看板模板" />
       <Content style={{
