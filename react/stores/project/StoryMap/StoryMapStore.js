@@ -650,7 +650,7 @@ class StoryMapStore {
             const { sprintId } = sprint;
             remove(targetFeature.sprint[sprintId], { issueId: story.issueId });
             const v = find(this.sprintList, { sprintId });
-            if (sprint) {
+            if (sprint && v) {
               v.storyNum -= 1;
             }
           });

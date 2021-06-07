@@ -100,7 +100,7 @@ class CreateEpic extends Component {
         justifyContent: 'center',
       }}
       >
-        <Input autoFocus onPressEnter={this.handleCreateIssue} placeholder="在此创建史诗" maxLength="22" value={value} onChange={this.handleChange} />
+        <Input autoFocus onPressEnter={this.handleCreateIssue} placeholder="史诗是开发或需求的核心内容，例如：用户管理" maxLength="22" value={value} onChange={this.handleChange} />
       </Card>
     );
   }
