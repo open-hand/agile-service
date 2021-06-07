@@ -169,7 +169,6 @@ class BacklogHome extends Component {
         <Content style={{
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'visible',
           ...theme === 'theme4' ? {
             paddingTop: 45,
             // marginLeft: 0,
@@ -186,7 +185,7 @@ class BacklogHome extends Component {
             className="c7n-backlog"
             style={{
               flex: 1,
-              // overflow: 'hidden',
+              overflow: 'hidden',
             }}
           >
             <SideNav onChange={this.toggleCurrentVisible} activeKey={BacklogStore.whichVisible}>
@@ -260,12 +259,12 @@ class BacklogHome extends Component {
               </div>
             </Spin>
             <CreateIssue />
-            <IssueDetail
-              refresh={() => this.refresh(false)}
-              innerRef={this.IssueDetailRef}
-            />
           </div>
         </Content>
+        <IssueDetail
+          refresh={() => this.refresh(false)}
+          innerRef={this.IssueDetailRef}
+        />
       </>
     );
   }
