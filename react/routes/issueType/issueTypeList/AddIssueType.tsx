@@ -287,8 +287,8 @@ const AddIssueType: React.FC<Props> = ({
     <div className={styles.addIssueType}>
       <div className={styles.addIssueType_content}>
         <Form dataSet={addDataSet} disabled={isOrganization && isSystemType} className={styles.addIssueType_form}>
-          <TextField name="name" />
-          <TextArea name="description" />
+          <TextField name="name" placeholder="例如：故事、工单" />
+          <TextArea name="description" placeholder="例如：故事是用户的需求，是从用户的角度来描述用户渴望得到的功能。" />
           {
             !isSystemType && (
               <Select name="typeCode" />

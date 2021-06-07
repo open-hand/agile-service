@@ -83,7 +83,13 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
 
   return (
     <Form dataSet={dataSet}>
-      <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} valueChangeAction="input" />
+      <TextField
+        name="sprintName"
+        required
+        maxLength={MAX_LENGTH_SPRINT}
+        valueChangeAction="input"
+        placeholder="请输入冲刺名称，您可以以冲刺+时间戳命名"
+      />
       <Select name="duration" clearButton={false}>
         <Option value="0">自定义</Option>
         <Option value="1">1周</Option>
@@ -96,6 +102,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
         rowSpan={2}
         colSpan={2}
         name="sprintGoal"
+        placeholder="请输入冲刺目标"
       />
     </Form>
   );
@@ -190,7 +197,13 @@ export function CreateCurrentPiSprint({
         创建的冲刺将自动关联当前PI：
         {`${pi.code}-${pi.name}`}
       </div>
-      <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} valueChangeAction="input" />
+      <TextField
+        name="sprintName"
+        required
+        maxLength={MAX_LENGTH_SPRINT}
+        valueChangeAction="input"
+        placeholder="请输入冲刺名称，您可以以冲刺+时间戳命名"
+      />
       <Select name="duration" clearButton={false}>
         <Option value="0">自定义</Option>
         <Option value="1" disabled={isDisabledOption('1')}>1周</Option>
@@ -223,6 +236,7 @@ export function CreateCurrentPiSprint({
       <TextArea
         name="sprintGoal"
         resize="vertical"
+        placeholder="请输入冲刺目标"
       />
     </Form>
   );

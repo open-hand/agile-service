@@ -11,6 +11,7 @@ import { Modal } from 'choerodon-ui/pro';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import SideNav from '@/components/side-nav';
 import { HeaderButtons } from '@choerodon/master';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
@@ -58,7 +59,7 @@ class BacklogHome extends Component {
     Modal.open({
       drawer: true,
       style: {
-        width: 340,
+        width: MODAL_WIDTH.small,
       },
       key: createSprintKey,
       title: '创建冲刺',
@@ -80,7 +81,7 @@ class BacklogHome extends Component {
     Modal.open({
       drawer: true,
       style: {
-        width: 340,
+        width: MODAL_WIDTH.small,
       },
       key: createCurrentPiSprintKey,
       title: '当前PI下创建冲刺',
