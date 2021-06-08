@@ -36,7 +36,7 @@ const TableAction = (props) => {
         menus.length > 0 ? (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <Dropdown overlay={renderMenu()} trigger="click">
-              <Button shape="circle" icon="more_vert" />
+              <Button shape="circle" icon="more_vert" style={{ color: 'var(--primary-color)' }} />
             </Dropdown>
           </div>
         ) : null

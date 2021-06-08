@@ -63,7 +63,7 @@ const TableDropMenu = (props) => {
           ? (
             <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
               <Dropdown overlay={menu} trigger="click">
-                <Icon shape="circle" type="more_vert" />
+                <Icon shape="circle" type="more_vert" style={{ color: 'var(--primary-color)' }} />
               </Dropdown>
             </div>
           ) : null}

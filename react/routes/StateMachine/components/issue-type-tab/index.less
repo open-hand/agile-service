@@ -1,4 +1,6 @@
 .issueTypeTab {
+  margin-top: .15rem;
+
   .issueTypeTabItem {
     display: inline-block;
     color: var(--text-color);
@@ -24,16 +26,17 @@
     color: #FFF;
     border-color: #5365EA !important;
 
-    & + .issueTypeTabItem {
+    &+.issueTypeTabItem {
       border-left-color: #5365EA !important;
     }
   }
+
   .brighter {
     background-color: #5365EA;
     border-color: #5365EA !important;
 
-    & + .issueTypeTabItem {
-      border-left-color:#5365EA !important;
+    &+.issueTypeTabItem {
+      border-left-color: #5365EA !important;
     }
   }
 }

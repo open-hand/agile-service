@@ -257,7 +257,6 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
           }}
         >
           <Column name="name" renderer={renderMenu} width={180} />
-          {isInProgram ? <Column name="programVersionInfoVOS" width={180} renderer={renderProgramVersion} /> : null}
           <Column
             name="status"
             width={100}
@@ -280,9 +279,9 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
               </div>
             )}
           />
-          <Column name="startDate" className="c7n-agile-table-cell" width={100} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
-          <Column name="expectReleaseDate" className="c7n-agile-table-cell" width={120} tooltip={'always' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
-          <Column name="releaseDate" className="c7n-agile-table-cell" width={120} tooltip={'always' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+          <Column name="startDate" className="c7n-agile-table-cell" width={100} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+          <Column name="expectReleaseDate" className="c7n-agile-table-cell" width={120} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+          <Column name="releaseDate" className="c7n-agile-table-cell" width={120} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
           <Column
             name="description"
             className="c7n-agile-table-cell"

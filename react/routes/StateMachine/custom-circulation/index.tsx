@@ -248,7 +248,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     },
     feedback: {
       // @ts-ignore
-      loadFailed() {},
+      loadFailed() { },
     },
     selection: false,
     fields: [
@@ -600,16 +600,17 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           </>
         )
       }
-      <Content style={{ borderTop: 'none' }}>
-        <IssueTypeTab
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
-          excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
-          brighter={readOnly}
-          visibleIssueTypeCategory={visibleIssueTypeCategory}
-        />
+      <Content style={{ borderTop: 'none', overflow: 'hidden' }}>
         {tab}
+
         <div className={`${styles.customCirculation}`}>
+          <IssueTypeTab
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+            brighter={readOnly}
+            visibleIssueTypeCategory={visibleIssueTypeCategory}
+          />
           <Table
             className={styles.table}
             dataSet={customCirculationDataSet}

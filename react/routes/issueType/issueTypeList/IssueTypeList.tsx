@@ -195,6 +195,7 @@ function IssueTypeList() {
           style={{
             fontSize: 18,
             cursor: 'pointer',
+            color: 'var(--primary-color)',
           }}
         />
       </Dropdown>
