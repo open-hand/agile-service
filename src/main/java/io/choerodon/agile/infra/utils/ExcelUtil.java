@@ -277,7 +277,11 @@ public class ExcelUtil {
         if (data instanceof ExportIssuesVO) {
             ExportIssuesVO vo = (ExportIssuesVO) data;
             int size = vo.getRelatedIssueCount();
-            height = (short) (height * size);
+            int result = height * size;
+            if (result > Short.MAX_VALUE) {
+                result = Short.MAX_VALUE;
+            }
+            height = (short) result;
         }
         row.setHeight(height);
         for (int i = 0; i < fieldsName.length; i++) {
