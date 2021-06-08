@@ -1957,7 +1957,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     protected void batchCreateCopyIssueLink(Boolean condition, Long issueId, Long newIssueId, Long projectId) {
         if (condition) {
-            List<IssueLinkDTO> issueLinkDTOList = modelMapper.map(issueLinkMapper.queryIssueLinkByIssueId(issueId, projectId, false), new TypeToken<List<IssueLinkDTO>>() {
+            List<IssueLinkDTO> issueLinkDTOList = modelMapper.map(issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(Arrays.asList(issueId)), new HashSet<>(Arrays.asList(projectId)), false), new TypeToken<List<IssueLinkDTO>>() {
             }.getType());
             issueLinkDTOList.forEach(issueLinkDTO -> {
                 IssueLinkDTO copy = new IssueLinkDTO();

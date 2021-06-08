@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
+import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.infra.dto.ExcelCursorDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
 import io.choerodon.core.exception.CommonException;
@@ -92,6 +93,16 @@ public class ExcelUtil {
     private static final String EXCEPTION = "Exception:{}";
     private static final String ERROR_IO_WORKBOOK_WRITE_OUTPUTSTREAM = "error.io.workbook.write.output.stream";
 
+    private static final Map<String, Integer> WIDTH_MAP = new HashMap<>();
+    static {
+        Arrays.asList("概要", "Tag", "关联问题").forEach(x -> WIDTH_MAP.put(x, 8000));
+        Arrays.asList("描述").forEach(x -> WIDTH_MAP.put(x, 12000));
+        Arrays.asList("冲刺").forEach(x -> WIDTH_MAP.put(x, 6000));
+        Arrays.asList("版本", "修复的版本", "冲刺", "影响的版本", "所属史诗", "创建时间", "最后更新时间", "预计开始时间", "预计结束时间", "已耗费时间", "总预估时间")
+                .forEach(x -> WIDTH_MAP.put(x, 5000));
+    }
+
+
     private static String[] subArray(String[] data, boolean withFeature) {
         if (withFeature) {
             return Arrays.copyOf(data,data.length);
@@ -127,11 +138,14 @@ public class ExcelUtil {
         }
     }
 
+
+
+
     public static Workbook initIssueExportWorkbook(String sheetName, String[] fieldsName) {
         //1、创建工作簿
         SXSSFWorkbook workbook = new SXSSFWorkbook();
         //1.3、列标题样式
-        CellStyle style2 = createCellStyle(workbook, (short) 13, CellStyle.ALIGN_LEFT, true);
+        CellStyle style2 = createCellStyle(workbook, (short) 13, HorizontalAlignment.LEFT.getCode(), true);
         //1.4、强制换行
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setWrapText(true);
@@ -139,7 +153,6 @@ public class ExcelUtil {
         SXSSFSheet sheet = workbook.createSheet(sheetName);
         //设置默认列宽
         sheet.setDefaultColumnWidth(13);
-        sheet.setColumnWidth(3, 12000);
         //创建标题列
         SXSSFRow row2 = sheet.createRow(0);
         row2.setHeight((short) 260);
@@ -147,10 +160,14 @@ public class ExcelUtil {
             //3.3设置列标题
             SXSSFCell cell2 = row2.createCell(i);
             //加载单元格样式
-            style2.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
+            style2.setFillForegroundColor(HSSFColor.HSSFColorPredefined.PALE_BLUE.getIndex());
             style2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             cell2.setCellStyle(style2);
             cell2.setCellValue(fieldsName[i]);
+            Integer width = WIDTH_MAP.get(fieldsName[i]);
+            if (width != null) {
+                sheet.setColumnWidth(i, width);
+            }
         }
         return workbook;
     }
@@ -256,7 +273,17 @@ public class ExcelUtil {
                                              CellStyle foregroundColor,
                                              SimpleDateFormat formatter) {
         SXSSFRow row = sheet.createRow(rowNum);
-        row.setHeight((short) 260);
+        short height = (short) 300;
+        if (data instanceof ExportIssuesVO) {
+            ExportIssuesVO vo = (ExportIssuesVO) data;
+            int size = vo.getRelatedIssueCount();
+            int result = height * size;
+            if (result > Short.MAX_VALUE) {
+                result = Short.MAX_VALUE;
+            }
+            height = (short) result;
+        }
+        row.setHeight(height);
         for (int i = 0; i < fieldsName.length; i++) {
             //4、操作单元格；将数据写入excel
             handleWriteCell(row, i, data, cellStyle, fields, clazz, foregroundColor, formatter);
