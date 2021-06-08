@@ -708,7 +708,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         // 对rank值为空的node进行处理
         stateMachineNodeService.handlerNullRankNode(projectVO.getOrganizationId(), statusMachineId, applyType);
         // 进行排序
-        stateMachineNodeService.sortNode(projectId, statusMachineId, nodeSortVO, applyType);
+        stateMachineNodeService.sortNode(projectVO.getOrganizationId(), statusMachineId, nodeSortVO, applyType);
         // 清除状态机实例
         instanceCache.cleanStateMachine(statusMachineId);
         return null;

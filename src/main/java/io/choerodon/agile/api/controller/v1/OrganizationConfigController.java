@@ -328,4 +328,13 @@ public class OrganizationConfigController {
         return Results.success();
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "支持对状态机-状态与流转进行排序")
+    @PutMapping(value = "/status_transform/sort")
+    public ResponseEntity<NodeSortVO> updateSort(@PathVariable("organization_id") Long organizationId,
+                                                 @Encrypt Long statusMachineId,
+                                                 @RequestBody NodeSortVO nodeSortVO) {
+        return new ResponseEntity<>(organizationConfigService.updateSort(organizationId, statusMachineId, nodeSortVO), HttpStatus.OK);
+    }
+
 }
