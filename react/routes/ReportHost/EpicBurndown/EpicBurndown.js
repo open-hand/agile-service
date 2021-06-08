@@ -14,7 +14,7 @@ import STATUS from '@/constants/STATUS';
 import to from '@/utils/to';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 
-import pic from '../../../assets/image/emptyChart.svg';
+import pic from '../../../assets/image/NoData.svg';
 // import finish from './legend/finish.svg';
 import SwithChart from '../Component/switchChart';
 import StatusTag from '../../../components/StatusTag';

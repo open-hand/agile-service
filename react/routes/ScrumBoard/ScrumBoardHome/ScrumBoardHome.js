@@ -1,13 +1,12 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission,
+  Page, Header, Content, stores, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import {
-  Button, Spin, Select, Icon, Modal, Form, Tooltip,
+  Select, Icon, Modal, Form,
 } from 'choerodon-ui';
 import { HeaderButtons } from '@choerodon/master';
-import { FlatSelect } from '@choerodon/components';
 import Loading from '@/components/Loading';
 import { set } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
@@ -28,7 +27,6 @@ import NoneSprint from '../ScrumBoardComponent/NoneSprint/NoneSprint';
 import '../ScrumBoardComponent/RenderSwimLaneContext/RenderSwimLaneContext.less';
 import SwimLane from '../ScrumBoardComponent/RenderSwimLaneContext/SwimLane';
 import CSSBlackMagic from '../../../components/CSSBlackMagic/CSSBlackMagic';
-import HeaderLine from '../../../components/HeaderLine';
 import ScrumBoardFullScreen from '../ScrumBoardComponent/ScrumBoardFullScreen';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 import CreateIssue from '../ScrumBoardComponent/create-issue';
@@ -36,7 +34,6 @@ import ExpandAllButton from '../ScrumBoardComponent/expand-all-button';
 import BoardSearch from '../ScrumBoardComponent/board-search';
 import SelectBoard from '../ScrumBoardComponent/select-board';
 
-const { Option } = FlatSelect;
 const { AppState } = stores;
 
 const style = (swimLaneId) => `

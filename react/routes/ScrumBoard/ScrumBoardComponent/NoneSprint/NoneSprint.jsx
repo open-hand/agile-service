@@ -1,6 +1,7 @@
 /* eslint-disable react/self-closing-comp,jsx-a11y/accessible-emoji */
 import React from 'react';
 import { observer } from 'mobx-react-lite';
+import { EmptyPage } from '@choerodon/components';
 import EmptyScrumboard from './emptyScrumboard.svg';
 
 const NoneSprint = ({ doingSprintExist, filterItems, hasSetFilter }) => {
@@ -14,28 +15,19 @@ const NoneSprint = ({ doingSprintExist, filterItems, hasSetFilter }) => {
 
   return (
     <>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginTop: '80px',
-        }}
-      >
-        <img style={{ width: 170 }} src={EmptyScrumboard} alt="emptyscrumboard" />
-        <div
-          style={{
-            marginLeft: 40,
-          }}
-        >
-          <p style={{ color: 'var(--text-color3)', fontSize: '13px' }}>{`${tipTitle}`}</p>
-          <p style={{ fontSize: 16, lineHeight: '34px' }}>
+      <EmptyPage
+        image={EmptyScrumboard}
+        description={(
+          <>
+            {tipTitle}
+            ，
             在工作列表的
-            <span style={{ color: '#5365EA' }}>待办事项</span>
+            <EmptyPage.Button style={{ color: '#5365EA' }}>待办事项</EmptyPage.Button>
             {!doingSprintExist ? '中开启冲刺' : '规划问题到当前冲刺'}
-          </p>
-        </div>
-      </div>
+          </>
+        )}
+      >
+      </EmptyPage>
     </>
   );
 };

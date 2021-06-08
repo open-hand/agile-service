@@ -10,7 +10,7 @@ import {
 } from 'choerodon-ui';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
-import pic from '../../../../assets/image/emptyChart.svg';
+import pic from '../../../../assets/image/NoData.svg';
 import SwithChart from '../../Component/switchChart';
 import VS from '../../../../stores/project/velocityChart';
 import EmptyBlock from '../../../../components/EmptyBlock';

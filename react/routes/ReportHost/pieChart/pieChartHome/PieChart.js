@@ -22,7 +22,7 @@ import SwitchChart from '../../Component/switchChart';
 import PieChartStore from '../../../../stores/project/pieChart/PieChartStore';
 import NoDataComponent from '../../Component/noData';
 import BackBtn from '../../back-btn';
-import pic from '../../../../assets/image/emptyChart.svg';
+import pic from '../../../../assets/image/NoData.svg';
 
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
   input.toLowerCase(),

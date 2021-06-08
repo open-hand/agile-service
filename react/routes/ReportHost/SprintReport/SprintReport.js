@@ -13,7 +13,7 @@ import querystring from 'querystring';
 import BurndownChartStore from '@/stores/project/burndownChart/BurndownChartStore';
 import ReportStore from '@/stores/project/Report';
 import { commonformatDate } from '@/utils/Date';
-import epicSvg from '@/assets/image/emptyChart.svg';
+import epicSvg from '@/assets/image/NoData.svg';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';

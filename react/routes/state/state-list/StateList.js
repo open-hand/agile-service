@@ -403,6 +403,9 @@ function StateList(props) {
               <TextArea
                 label={<FormattedMessage id="state.des" />}
                 maxLength={45}
+                autosize={{
+                  minRows: 1,
+                }}
               />,
             )}
           </FormItem>

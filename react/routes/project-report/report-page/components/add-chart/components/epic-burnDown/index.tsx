@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useImperativeHandle } from 'react';
 import EpicBurnDown from '@/components/charts/epic-burnDown';
 import EpicBurnDownSearch from '@/components/charts/epic-burnDown/search';
 import useEpicBurnDownReport, { EpicBurnConfig } from '@/components/charts/epic-burnDown/useEpicBurnDownReport';
-import pic from '@/assets/image/emptyChart.svg';
+import pic from '@/assets/image/NoData.svg';
 import EmptyBlock from '@/components/EmptyBlock';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';

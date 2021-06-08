@@ -5,7 +5,7 @@ import {
   map, trim, fill, sum, floor, last,
 } from 'lodash';
 import LINK_URL from '@/constants/LINK_URL';
-import pic from '@/assets/image/emptyChart.svg';
+import pic from '@/assets/image/NoData.svg';
 import to from '@/utils/to';
 import { Spin } from 'choerodon-ui';
 import { EChartOption } from 'echarts';

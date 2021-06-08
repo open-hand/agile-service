@@ -10,7 +10,7 @@ import {
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import to from '@/utils/to';
-import pic from '../../../../assets/image/emptyChart.svg';
+import pic from '../../../../assets/image/NoData.svg';
 import finish from './legend/finish.svg';
 import total from './legend/total.svg';
 import noEstimated from './legend/noEstimated.svg';

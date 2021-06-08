@@ -8,7 +8,7 @@ import {
 import Accumulation from '@/components/charts/accumulation';
 import AccumulationSearch from '@/components/charts/accumulation/search';
 import useAccumulationReport from '@/components/charts/accumulation/useAccumulationReport';
-import pic from '@/assets/image/emptyChart.svg';
+import pic from '@/assets/image/NoData.svg';
 import BackBtn from '../back-btn';
 import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';

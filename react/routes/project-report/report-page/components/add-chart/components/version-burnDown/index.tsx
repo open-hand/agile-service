@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useImperativeHandle } from 'react';
 import VersionBurnDown from '@/components/charts/version-burnDown';
 import VersionBurnDownSearch from '@/components/charts/version-burnDown/search';
 import useVersionBurnDownReport, { VersionBurnConfig } from '@/components/charts/version-burnDown/useVersionBurnDownReport';
-import pic from '@/assets/image/emptyChart.svg';
+import pic from '@/assets/image/NoData.svg';
 import EmptyBlock from '@/components/EmptyBlock';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';

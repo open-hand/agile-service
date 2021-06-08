@@ -3,7 +3,6 @@ import {
   DataSet,
   Table,
   Modal,
-  Button,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -13,11 +12,10 @@ import TableAction from '@/components/TableAction';
 import Users from '@/components/tag/users';
 import { User } from '@/common/types';
 import to from '@/utils/to';
-import Empty from '@/components/Empty';
-import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { EmptyPage } from '@choerodon/components';
 import Loading from '@/components/Loading';
 import UserTag from '@/components/tag/user-tag';
-import NoReport from './no-report.svg';
+import NoData from '@/assets/image/NoData.svg';
 
 const { Column } = Table;
 
@@ -114,23 +112,18 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
       />
     </Table>
   ) : (
-    <Empty
-      title="暂无项目报告"
+    <EmptyPage
       description={(
         <>
           当前项目下无项目报告，请创建
-          <br />
-          <Button
-            style={{ fontSize: '14px', marginTop: 15 }}
-            color={'primary' as ButtonColor}
-            funcType={'raised' as FuncType}
+          <EmptyPage.Button
             onClick={onClick}
           >
-            创建项目报告
-          </Button>
+            【创建项目报告】
+          </EmptyPage.Button>
         </>
-        )}
-      pic={NoReport}
+      )}
+      image={NoData}
     />
   )
   );

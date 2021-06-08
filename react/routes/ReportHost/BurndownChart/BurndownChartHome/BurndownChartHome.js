@@ -22,7 +22,7 @@ import IssueSearch, { IssueSearchStore } from '@/components/issue-search';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import BurndownChartStore from '@/stores/project/burndownChart/BurndownChartStore';
-import epicSvg from '@/assets/image/emptyChart.svg';
+import epicSvg from '@/assets/image/NoData.svg';
 import NoDataComponent from '../../Component/noData';
 import SwithChart from '../../Component/switchChart';
 import BurndownTable from './components/burndown-table';
