@@ -3,7 +3,6 @@ import {
   Radio, Select, message, Icon,
 } from 'choerodon-ui';
 import { componentApi } from '@/api';
-import './component.less';
 
 const RadioGroup = Radio.Group;
 const { Option } = Select;

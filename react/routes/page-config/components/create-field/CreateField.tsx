@@ -353,6 +353,7 @@ function CreateField() {
           <TextField
             name="name"
             valueChangeAction={'input' as any}
+            placeholder="问题的属性字段，例如：实际完成时间"
           />
           <div>
             <Select

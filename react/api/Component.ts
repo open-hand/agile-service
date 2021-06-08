@@ -5,9 +5,11 @@ const { AppState } = stores;
 interface IComponent {
   defaultAssigneeRole: string,
   description: string
-  managerId: number,
-  projectId: number,
+  managerId: string,
+  sequence: number,
   name: string,
+  componentId?: string,
+  objectVersionNumber?: number,
 }
 class ComponentApi {
   get prefix() {
@@ -69,7 +71,7 @@ class ComponentApi {
    * @param componentId
    * @param obj
    */
-  update(componentId: number, obj: object) {
+  update(componentId: string, obj: object) {
     const projectId = AppState.currentMenuType.id;
     const component = {
       projectId,
@@ -96,7 +98,7 @@ class ComponentApi {
    * 根据模块id加载模块
    * @param componentId
    */
-  load(componentId: number) {
+  load(componentId: string) {
     return axios.get(`${this.prefix}/component/${componentId}`);
   }
 
