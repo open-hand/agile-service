@@ -39,7 +39,7 @@ const CreateComponent: React.FC<Props> = ({
     if (value && value.trim()) {
       const data: boolean = await componentApi.checkName(value);
       if (data && value !== componentName) {
-        return '筛选名称重复';
+        return '模块名称重复';
       }
     }
     return true;
