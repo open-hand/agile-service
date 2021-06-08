@@ -1,6 +1,6 @@
 include: https://api.choerodon.com.cn/devops/v1/projects/1528/ci_contents/pipelines/02b7a9c2-7872-44ea-bfb4-044c827d0c17/content.yaml
 
-#image: registry.cn-shanghai.aliyuncs.com/c7n/cibase:0.11.0
+#image: registry.cn-shanghai.aliyuncs.com/c7n/cibase:0.11.4
 #
 #stages:
 #  - build
