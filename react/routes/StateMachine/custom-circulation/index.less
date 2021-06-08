@@ -1,9 +1,12 @@
 .customCirculation {
+  overflow: auto;
+  height: 100%;
+
   .table {
     :global {
-      .c7n-pro-table-filter-select {
-        border-top: none !important;
-      }
+      // .c7n-pro-table-filter-select {
+      //   border-top: none !important;
+      // }
 
       .c7n-pro-table-cell[data-index="id"] {
         .c7n-pro-table-cell-inner {
@@ -54,7 +57,9 @@
   }
 }
 
-.customCirculation_updateFieldModal, .customCirculation_autoTransformModal, .customCirculation_notifySettingModal {
+.customCirculation_updateFieldModal,
+.customCirculation_autoTransformModal,
+.customCirculation_notifySettingModal {
   :global {
     .c7n-pro-modal-body {
       padding: 0 !important;

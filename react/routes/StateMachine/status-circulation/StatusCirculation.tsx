@@ -105,6 +105,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         )
       }
       <Content style={{ display: 'flex', flexDirection: 'column', paddingBottom: 0 }}>
+        {tab}
         <IssueTypeTab
           selectedType={selectedType}
           setSelectedType={(newType) => {
@@ -123,7 +124,6 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           brighter={readOnly}
           visibleIssueTypeCategory={visibleIssueTypeCategory}
         />
-        {tab}
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
           <StatusCirculationTable />
         </div>
@@ -133,12 +133,12 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   return (
     <>
       {
-      noContainer ? content : (
-        <Page>
-          {content}
-        </Page>
-      )
-    }
+        noContainer ? content : (
+          <Page>
+            {content}
+          </Page>
+        )
+      }
     </>
   );
 };
