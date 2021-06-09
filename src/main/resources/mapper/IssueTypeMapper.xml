@@ -54,7 +54,7 @@
         <if test="onlyEnabled">
             and ifnull(t3.enabled, 1) = 1
         </if>
-        order by t3.rank desc
+        order by t3.rank desc, t1.id desc
     </select>
 
     <select id="selectSystemIssueTypeByOrganizationIds" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
@@ -154,7 +154,7 @@
                 )
             </if>
         </if>
-        order by t3.rank desc, t3.id desc
+        order by t3.rank desc, t1.id desc
     </select>
 
     <select id="selectByReferenceId" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">

@@ -621,8 +621,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (!ZERO.equals(projectId)) {
             //项目群暂时不可以配置问题类型，过滤掉测试/自动化测试/特性
             issueTypeSearchVO.setTypeCodes(AGILE_ISSUE_TYPES);
-            //项目层的问题类型，初始化rank值
-            initRankIfNull(organizationId, projectId);
         }
         Page<IssueTypeVO> result =
                 PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO));
