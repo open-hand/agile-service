@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
+import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.InstanceService;
 import io.choerodon.agile.app.service.PriorityService;
@@ -12,7 +13,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -25,10 +25,6 @@ public class ConvertUtil {
     private ConvertUtil() {
         throw new IllegalStateException("Utility class");
     }
-
-    private static final Map<Long, ProjectVO> ORGANIZATION_MAP = new ConcurrentHashMap<>();
-    private static final Map<Long, ProjectVO> PROJECT_WITHOUT_AGILE_MAP = new ConcurrentHashMap<>();
-
     /**
      * 根据projectId获取issue类型Map
      *
@@ -75,13 +71,15 @@ public class ConvertUtil {
     }
 
     public static ProjectVO queryProject(Long projectId) {
-        ProjectVO projectVO = ORGANIZATION_MAP.get(projectId);
-        if (projectVO != null) {
-            return projectVO;
+        RedisUtil redisUtil = SpringBeanUtil.getBean(RedisUtil.class);
+        String key = "projectInfo:"+projectId;
+        Object project = redisUtil.get(key);
+        if (project != null) {
+            return JSON.parseObject(project.toString(), ProjectVO.class);
         } else {
-            projectVO = SpringBeanUtil.getBean(BaseFeignClient.class).queryProject(projectId).getBody();
+            ProjectVO projectVO = SpringBeanUtil.getBean(BaseFeignClient.class).queryProject(projectId).getBody();
             if (projectVO != null) {
-                ORGANIZATION_MAP.put(projectId, projectVO);
+                redisUtil.set(key, JSON.toJSONString(projectVO));
                 return projectVO;
             } else {
                 throw new CommonException("error.queryProject.notFound");
@@ -97,21 +95,6 @@ public class ConvertUtil {
         }
         List<String> codes = categories.stream().map(ProjectCategoryDTO::getCode).collect(Collectors.toList());
         return codes.contains(code);
-    }
-
-    public static ProjectVO queryProjectWithoutAgile(Long projectId) {
-        ProjectVO projectVO = PROJECT_WITHOUT_AGILE_MAP.get(projectId);
-        if (projectVO != null) {
-            return projectVO;
-        } else {
-            projectVO = SpringBeanUtil.getBean(BaseFeignClient.class).queryProject(projectId, false).getBody();
-            if (projectVO != null) {
-                PROJECT_WITHOUT_AGILE_MAP.put(projectId, projectVO);
-                return projectVO;
-            } else {
-                throw new CommonException("error.queryProject.notFound");
-            }
-        }
     }
 
     public static Map<Long, IssueTypeWithStateMachineIdVO> queryIssueTypesWithStateMachineIdByProjectId(Long projectId, String applyType) {
