@@ -83,7 +83,7 @@ class EditBoardName extends Component {
     } = this.state;
     const { editBoardNameDisabled } = this.props;
     return (
-      <div>
+      <div style={{ marginLeft: 5 }}>
         <Spin spinning={loading}>
           {
             editBoardNameDisabled ? (
@@ -105,7 +105,7 @@ class EditBoardName extends Component {
                     valueChangeAction="input"
                   />
                 </Form>
-                <div style={{ padding: '12px 0', borderTop: '1px solid var(--divider)', textAlign: 'right' }}>
+                <div style={{ padding: '12px 0', borderTop: '1px solid var(--divider)' }}>
                   <Button
                     color="primary"
                     loading={loading}

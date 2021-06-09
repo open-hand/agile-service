@@ -163,7 +163,7 @@ const StoryMapHome = observer(() => {
             display: !isInProgram && isEmpty && !loading,
           },
           {
-            name: '需求池',
+            name: '未规划列表',
             icon: 'work_log',
             handler: handleOpenIssueList,
             display: !StoryMapStore.isFullScreen,

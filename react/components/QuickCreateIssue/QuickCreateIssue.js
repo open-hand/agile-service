@@ -4,7 +4,7 @@ import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 import { Choerodon } from '@choerodon/boot';
 import {
-  Icon, Dropdown, Input, Menu, Form,
+  Icon, Dropdown, Input, Menu,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import { debounce } from 'lodash';
@@ -15,14 +15,12 @@ import TypeTag from '../TypeTag';
 import './QuickCreateIssue.less';
 import UserDropdown from '../UserDropdown';
 
-const FormItem = Form.Item;
-
 const propTypes = {
   defaultPriority: PropTypes.number,
   issueTypes: PropTypes.shape([]),
   onCreate: PropTypes.func,
 };
-@Form.create({})
+
 class QuickCreateIssue extends Component {
   constructor(props) {
     super(props);
@@ -31,6 +29,7 @@ class QuickCreateIssue extends Component {
       create: false,
       loading: false,
       currentTypeId: props.issueTypes[0]?.id,
+      summary: '',
     };
     this.userDropDownRef = createRef();
   }
@@ -45,11 +44,11 @@ class QuickCreateIssue extends Component {
   }
 
   loadInitValue = async (currentIssueTypeId) => {
-    const { form } = this.props;
+    const { summary } = this.state;
     const defaultSummary = await fieldApi.getSummaryDefaultValue(currentIssueTypeId);
-    if (form.getFieldValue('summary') === this.currentTemplate) {
+    if (summary === this.currentTemplate) {
       this.currentTemplate = defaultSummary;
-      form.setFieldsValue({
+      this.setState({
         summary: defaultSummary,
       });
     }
@@ -62,100 +61,96 @@ class QuickCreateIssue extends Component {
     this.loadInitValue(key);
   };
 
-  handleCreate = debounce(() => {
+  handleCreate = debounce(async () => {
     const { currentTypeId } = this.state;
     const {
-      form, issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram, cantCreateEvent,
+      issueTypes, relateIssueId, sprintId, epicId, versionIssueRelVOList: propsVersionIssueRelVOList, chosenFeatureId, isInProgram, cantCreateEvent,
     } = this.props;
 
     const assigneeId = this.userDropDownRef?.current?.selectedUser?.id;
 
-    form.validateFields(async (err, values) => {
-      const { summary } = values;
-      if (summary && summary.trim()) {
-        if (!err) {
+    const { summary } = this.state;
+    if (summary && summary.trim()) {
+      this.setState({
+        loading: true,
+      });
+      const currentType = issueTypes.find((t) => t.id === currentTypeId);
+      if (!await checkCanQuickCreate(currentType.id, assigneeId)) { //
+        if (!cantCreateEvent) {
+          Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
           this.setState({
-            loading: true,
+            loading: false,
           });
-          const currentType = issueTypes.find((t) => t.id === currentTypeId);
-          if (!await checkCanQuickCreate(currentType.id, assigneeId)) { //
-            if (!cantCreateEvent) {
-              Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
-              this.setState({
-                loading: false,
-              });
-            } else {
-              Choerodon.prompt('请填写标注的必填字段');
-              if (this.props.summaryChange) {
-                this.props.summaryChange(summary);
-              }
-              if (this.props.typeIdChange) {
-                this.props.typeIdChange(currentType.id);
-              }
-              if (this.props.setDefaultSprint) {
-                this.props.setDefaultSprint(sprintId);
-              }
-              if (this.props.assigneeChange) {
-                this.props.assigneeChange(assigneeId);
-              }
-              this.setState({
-                loading: false,
-                create: false,
-              });
-              cantCreateEvent();
-            }
-            return;
+        } else {
+          Choerodon.prompt('请填写标注的必填字段');
+          if (this.props.summaryChange) {
+            this.props.summaryChange(summary);
           }
-          const {
-            defaultPriority, onCreate,
-          } = this.props;
-          if (summary.trim() !== '') {
-            const param = {
-              schemeCode: 'agile_issue',
-              issueTypeId: currentType.id,
-              pageCode: 'agile_issue_create',
-            };
-            const fields = await fieldApi.getFields(param);
-            const fieldsMap = fields2Map(fields);
-
-            const issue = getQuickCreateDefaultObj({
-              epicName: currentTypeId === 'issue_epic' ? summary.trim() : undefined,
-              featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
-              assigneeId,
-              epicId,
-              relateIssueId,
-              versionIssueRelVOList: propsVersionIssueRelVOList,
-              sprintId,
-              summary,
-              issueTypeId: currentType.id,
-              typeCode: currentType.typeCode,
-              priorityId: defaultPriority.id,
-              epicId,
-            }, fieldsMap);
-
-            issueApi.create(issue).then((res) => {
-              this.setState({
-                loading: false,
-                create: false,
-              });
-              const dto = {
-                schemeCode: 'agile_issue',
-                issueTypeId: currentType.id, // res.issueTypeId,
-                pageCode: 'agile_issue_create',
-              };
-              fieldApi.quickCreateDefault(res.issueId, dto);
-              if (onCreate) {
-                onCreate(res);
-              }
-            }).catch(() => {
-              this.setState({
-                loading: false,
-              });
-            });
+          if (this.props.typeIdChange) {
+            this.props.typeIdChange(currentType.id);
           }
+          if (this.props.setDefaultSprint) {
+            this.props.setDefaultSprint(sprintId);
+          }
+          if (this.props.assigneeChange) {
+            this.props.assigneeChange(assigneeId);
+          }
+          this.setState({
+            loading: false,
+            create: false,
+          });
+          cantCreateEvent();
         }
+        return;
       }
-    });
+      const {
+        defaultPriority, onCreate,
+      } = this.props;
+      if (summary.trim() !== '') {
+        const param = {
+          schemeCode: 'agile_issue',
+          issueTypeId: currentType.id,
+          pageCode: 'agile_issue_create',
+        };
+        const fields = await fieldApi.getFields(param);
+        const fieldsMap = fields2Map(fields);
+
+        const issue = getQuickCreateDefaultObj({
+          epicName: currentTypeId === 'issue_epic' ? summary.trim() : undefined,
+          featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
+          assigneeId,
+          epicId,
+          relateIssueId,
+          versionIssueRelVOList: propsVersionIssueRelVOList,
+          sprintId,
+          summary,
+          issueTypeId: currentType.id,
+          typeCode: currentType.typeCode,
+          priorityId: defaultPriority.id,
+          epicId,
+        }, fieldsMap);
+
+        issueApi.create(issue).then((res) => {
+          this.setState({
+            loading: false,
+            create: false,
+          });
+          const dto = {
+            schemeCode: 'agile_issue',
+            issueTypeId: currentType.id, // res.issueTypeId,
+            pageCode: 'agile_issue_create',
+          };
+          fieldApi.quickCreateDefault(res.issueId, dto);
+          if (onCreate) {
+            onCreate(res);
+          }
+        }).catch(() => {
+          this.setState({
+            loading: false,
+          });
+        });
+      }
+    }
   }, 500, {
     leading: true,
   });
@@ -177,9 +172,9 @@ class QuickCreateIssue extends Component {
 
   render() {
     const {
-      create, loading, currentTypeId,
+      create, loading, currentTypeId, summary,
     } = this.state;
-    const { issueTypes, buttonShowText, form: { getFieldDecorator } } = this.props;
+    const { issueTypes, buttonShowText } = this.props;
     const currentType = issueTypes.find((t) => t.id === currentTypeId);
 
     const typeList = (
@@ -218,55 +213,52 @@ class QuickCreateIssue extends Component {
       >
         {
           create ? (
-            <Form style={{ width: '100%' }}>
-              <div style={{ display: 'block', width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <Dropdown overlay={typeList} trigger={['click']}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <TypeTag
-                        data={currentType}
-                      />
-                      <Icon
-                        type="arrow_drop_down"
-                        style={{ fontSize: 16 }}
-                      />
-                    </div>
-                  </Dropdown>
-                  <UserDropdown userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id || 'null'} />
-                  <FormItem label="summary" style={{ flex: 1, margin: '0 10px', padding: 0 }}>
-                    {getFieldDecorator('summary', {
-                      rules: [{ required: true, message: '请输入问题概要！' }],
-                    })(
-                      <Input
-                        className="hidden-label"
-                        autoFocus
-                        autoComplete="on"
-                        onPressEnter={this.handleCreate}
-                        maxLength={44}
-                        placeholder="请输入问题概要"
-                      />,
-                    )}
-                  </FormItem>
-                  <Button
-                    color="primary"
-                    funcType="raised"
-                    disabled={this.props.issueTypes.length === 0}
-                    // htmlType="submit"
-                    onClick={this.handleCreate}
-                    style={{ margin: '0 10px' }}
-                    loading={loading}
-                  >
-                    确定
-                  </Button>
-                  <Button
-                    funcType="raised"
-                    onClick={this.handleCancel}
-                  >
-                    取消
-                  </Button>
-                </div>
+            <div style={{ display: 'block', width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Dropdown overlay={typeList} trigger={['click']}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <TypeTag
+                      data={currentType}
+                    />
+                    <Icon
+                      type="arrow_drop_down"
+                      style={{ fontSize: 16 }}
+                    />
+                  </div>
+                </Dropdown>
+                <UserDropdown userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id || 'null'} />
+                <Input
+                  className="hidden-label"
+                  autoFocus
+                  autoComplete="on"
+                  onPressEnter={this.handleCreate}
+                  onChange={(e) => {
+                    this.setState({
+                      summary: e.target.value,
+                    });
+                  }}
+                  value={summary}
+                  maxLength={44}
+                  placeholder="请输入问题概要"
+                />
+                <Button
+                  color="primary"
+                  funcType="raised"
+                  disabled={this.props.issueTypes.length === 0 || !summary}
+                  onClick={this.handleCreate}
+                  style={{ margin: '0 10px' }}
+                  loading={loading}
+                >
+                  确定
+                </Button>
+                <Button
+                  funcType="raised"
+                  onClick={this.handleCancel}
+                >
+                  取消
+                </Button>
               </div>
-            </Form>
+            </div>
           ) : (
             <Button
               funcType="flat"

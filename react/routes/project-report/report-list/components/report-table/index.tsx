@@ -15,7 +15,7 @@ import to from '@/utils/to';
 import { EmptyPage } from '@choerodon/components';
 import Loading from '@/components/Loading';
 import UserTag from '@/components/tag/user-tag';
-import NoData from '@/assets/image/NoData.svg';
+import NoReport from './NoReport.svg';
 
 const { Column } = Table;
 
@@ -115,7 +115,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
     <EmptyPage
       description={(
         <>
-          当前项目下无项目报告，请创建
+          当前项目下无项目报告，请
           <EmptyPage.Button
             onClick={onClick}
           >
@@ -123,7 +123,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
           </EmptyPage.Button>
         </>
       )}
-      image={NoData}
+      image={NoReport}
     />
   )
   );
