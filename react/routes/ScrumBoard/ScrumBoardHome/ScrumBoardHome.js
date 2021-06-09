@@ -361,6 +361,12 @@ class ScrumBoardHome extends Component {
                 element: <ScrumBoardFullScreen />,
               },
               {
+                display: true,
+                icon: 'refresh',
+                // funcType: 'flat',
+                handler: () => this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard)),
+              },
+              {
                 name: '完成冲刺',
                 icon: 'alarm_on',
                 // funcType: 'flat',
@@ -369,6 +375,7 @@ class ScrumBoardHome extends Component {
                 permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish'],
                 preElement: this.renderRemainDate(),
               },
+
             ]}
           />
         </Header>

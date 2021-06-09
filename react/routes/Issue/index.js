@@ -302,6 +302,12 @@ const Issue = observer(({ cached, updateCache }) => {
           },
           {
             display: true,
+            icon: 'refresh',
+            // funcType: 'flat',
+            handler: refresh,
+          },
+          {
+            display: true,
             element: <TableModeSwitch
               data={tableListMode ? 'list' : 'tree'}
               onChange={(mode) => {
