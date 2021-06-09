@@ -4,7 +4,7 @@ import React, {
 import { toJS } from 'mobx';
 import { observer, useObservable } from 'mobx-react-lite';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
-import { Row, Col } from 'choerodon-ui';
+import { Row, Col, Icon } from 'choerodon-ui';
 import moment from 'moment';
 import {
   DataSet, Form, Button,
@@ -167,8 +167,12 @@ const IssueFilterForm: React.FC = () => {
                 {render(item)}
               </Col>
               <Col span={2}>
-                <Button
-                  icon="delete_sweep-o"
+                <Icon
+                  type="delete_sweep-o"
+                  style={{
+                    color: 'var(--primary-color)',
+                    cursor: 'pointer',
+                  }}
                   onClick={() => {
                     const { onDelete } = props;
                     onDelete!(item);

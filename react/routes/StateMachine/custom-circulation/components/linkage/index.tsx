@@ -4,6 +4,7 @@ import React, {
 import {
   Form, DataSet, Button, Select, Row, Col,
 } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import useIssueTypes from '@/hooks/data/useIssueTypes';
 import SelectStatus from '@/components/select/select-status';
@@ -11,7 +12,6 @@ import { statusTransformApi } from '@/api';
 import Loading from '@/components/Loading';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { getIsOrganization } from '@/utils/common';
 import { IIssueType } from '@/common/types';
 import styles from './index.less';
@@ -127,7 +127,7 @@ const Linkage = ({
           const statusName = `${key}-status`;
           const issueTypeId = getFieldValue(typeName);
           return (
-            <Row key={key} gutter={20}>
+            <Row key={key} gutter={20} type="flex" align="middle">
               <Col span={11}>
                 <Select
                   label="父任务类型"
@@ -153,9 +153,12 @@ const Linkage = ({
                 />
               </Col>
               <Col span={2}>
-                <Button
-                  style={{ flexShrink: 0 }}
-                  icon="delete_sweep-o"
+                <Icon
+                  type="delete_sweep-o"
+                  style={{
+                    color: 'var(--primary-color)',
+                    cursor: 'pointer',
+                  }}
                   onClick={() => {
                     Field.remove(key);
                     removeField(typeName);
@@ -168,8 +171,8 @@ const Linkage = ({
         })}
         <div>
           <Button
+            style={{ marginTop: -4 }}
             icon="playlist_add"
-            color={'primary' as ButtonColor}
             onClick={() => {
               const newKey = Field.add();
               addFieldRule(newKey);

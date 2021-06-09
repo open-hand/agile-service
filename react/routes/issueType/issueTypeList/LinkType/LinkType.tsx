@@ -282,7 +282,7 @@ const LinkType: React.FC<Props> = ({ modal, issueTypeDataSet }) => {
         </Form>
       </div>
       <div className={styles.linkType_footer}>
-        <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={refrencedLoading} onClick={handleSave}>保存</Button>
+        <Button color={'primary' as ButtonColor} funcType={'raised' as FuncType} loading={refrencedLoading} onClick={handleSave} style={{ marginLeft: 10 }}>保存</Button>
         <Button funcType={'raised' as FuncType} onClick={handleCancel}>取消</Button>
       </div>
     </div>

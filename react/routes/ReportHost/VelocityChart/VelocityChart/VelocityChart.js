@@ -189,7 +189,7 @@ class VelocityChart extends Component {
           data: VS.getChartDataYCommitted,
           emphasis: {
             itemStyle: {
-              color: '#e0e0e0',
+              color: 'var(--divider)',
             },
           },
         },

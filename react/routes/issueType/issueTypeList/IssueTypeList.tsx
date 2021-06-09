@@ -55,7 +55,7 @@ function IssueTypeList() {
       icon,
     };
     return (
-      <div className={`${styles.name} c7n-agile-table-cell-click`} role="none" onClick={() => handleEdit({ record, dataSet })}>
+      <div className={styles.name}>
         <TypeTag
           data={data as IIssueType}
           showName
@@ -63,7 +63,7 @@ function IssueTypeList() {
         />
       </div>
     );
-  }, [handleEdit]);
+  }, []);
 
   const renderAction = useCallback(({ dataSet, record }: RenderProps) => {
     const handleDelete = () => {
@@ -117,8 +117,12 @@ function IssueTypeList() {
       });
     };
 
-    const handleMenuClick = (e: { key: 'delete' | 'start' | 'stop' | 'referenced' | 'dontReferenced'}) => {
+    const handleMenuClick = (e: { key: 'edit' | 'delete' | 'start' | 'stop' | 'referenced' | 'dontReferenced'}) => {
       switch (e.key) {
+        case 'edit': {
+          handleEdit({ record, dataSet });
+          break;
+        }
         case 'delete': {
           Modal.open({
             className: styles.delete_modal,
@@ -158,18 +162,19 @@ function IssueTypeList() {
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this)} className={styles.issueType_menu}>
+        <Menu.Item key="edit">编辑</Menu.Item>
         {
           record?.get('deleted') && (
             <Menu.Item key="delete">删除</Menu.Item>
           )
         }
         {
-          isOrganization && record?.get('referenced') && (
+          isOrganization && record?.get('source') !== 'system' && record?.get('referenced') && (
             <Menu.Item key="dontReferenced">不允许引用</Menu.Item>
           )
         }
         {
-          isOrganization && !record?.get('referenced') && (
+          isOrganization && record?.get('source') !== 'system' && !record?.get('referenced') && (
             <Menu.Item key="referenced">允许引用</Menu.Item>
           )
         }
@@ -185,7 +190,7 @@ function IssueTypeList() {
         }
       </Menu>
     );
-    return isOrganization && record?.get('source') === 'system' ? null : (
+    return (
       <Dropdown
         overlay={menu}
         trigger={['click'] as Action[]}
@@ -200,7 +205,7 @@ function IssueTypeList() {
         />
       </Dropdown>
     );
-  }, [isOrganization]);
+  }, [handleEdit, isOrganization]);
 
   const renderTypeCode = useCallback(({ record }: RenderProps) => {
     const standardTypeMap = new Map([

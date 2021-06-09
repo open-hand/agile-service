@@ -16,6 +16,7 @@
             overflow-x: hidden;
             .linkType_form {
               padding-right: 0.24rem;
+              margin: 0;
               .icon {
                 position: relative;
                 :global {
@@ -77,7 +78,7 @@
             }
           }
           &_footer {
-            border-top: 0.01rem solid #e0e0e0;
+            border-top: 0.01rem solid var(--divider);
             padding-top: 12px;
             padding-bottom: 12px;
             padding-left: 24px;
@@ -109,7 +110,7 @@ body[data-theme="theme4"] {
     }
     &_footer {
       display: flex;
-      justify-content: flex-end;
+      flex-direction: row-reverse;
       padding: 20px 24px !important;
     }
   }
