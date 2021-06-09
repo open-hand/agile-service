@@ -188,6 +188,7 @@ const OptionList: React.ForwardRefRenderFunction<OptionListRef, OptionListProps>
           <Button
             onClick={handleAddClick}
             disabled={currentAdd}
+            style={{ marginTop: 16 }}
             icon="playlist_add"
           >
             添加

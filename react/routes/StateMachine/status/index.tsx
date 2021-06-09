@@ -127,7 +127,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
             name="operate"
             renderer={({ record }) => (
               <Button
-                icon="delete"
+                icon="delete_sweep-o"
                 onClick={() => {
                   openDeleteStatus({
                     onSubmit: () => {

@@ -168,7 +168,7 @@ const IssueFilterForm: React.FC = () => {
               </Col>
               <Col span={2}>
                 <Button
-                  icon="delete"
+                  icon="delete_sweep-o"
                   onClick={() => {
                     const { onDelete } = props;
                     onDelete!(item);

@@ -281,35 +281,38 @@ function CreateField() {
               disabled={isEdit ?? false}
               title={formatMessage({ id: `field.${fieldType}` })}
               data={fieldOptions}
-              tips={formatMessage({ id: 'field.dragList.tips' })}
+              tips={(
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {formatMessage({ id: 'field.dragList.tips' })}
+                  {isEdit && (
+                    <Button
+                      onClick={() => {
+                        openEditFieldOptionsModal({
+                          fieldOptions,
+                          fieldId,
+                          onClose: (newData) => {
+                            setFieldOptions(newData);
+                          },
+                        });
+                      }}
+                    >
+                      调整选项
+                    </Button>
+                  )}
+                </div>
+              )}
               formatMessage={formatMessage}
               onChange={onTreeChange}
               onCreate={onTreeCreate}
               onDelete={onTreeDelete}
               onInvalid={onTreeDelete}
             />
-            {isEdit && (
-              <Button
-                onClick={() => {
-                  openEditFieldOptionsModal({
-                    fieldOptions,
-                    fieldId,
-                    onClose: (newData) => {
-                      setFieldOptions(newData);
-                    },
-                  });
-                }}
-                style={{ marginTop: 15 }}
-              >
-                调整选项
-              </Button>
-            )}
             <SelectCustomField
               name="defaultValue"
               key={`${singleList.indexOf(fieldType) !== -1 ? 'single' : 'multiple'}-defaultValue-select`}
               style={{ width: '100%', marginTop: '20px' }}
               multiple={!(singleList.indexOf(fieldType) !== -1)}
-              fieldOptions={fieldOptions}
+              fieldOptions={[...fieldOptions]}
               selected={toJS(current?.get('defaultValue'))}
             />
           </>

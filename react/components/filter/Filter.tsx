@@ -137,7 +137,7 @@ const Filter: React.FC<FilterProps> = ({
     if (removeButton === true) {
       return (
         <Button
-          icon="delete"
+          icon="delete_sweep-o"
           style={{ marginLeft: 10, flexShrink: 0 }}
           onClick={() => {
             handleSelectChange([field.code], false);

@@ -65,7 +65,7 @@ const ProjectConfig: React.FC<ProjectConfigProps> = ({
               onClick={() => {
                 dataSet.remove(record);
               }}
-              icon="delete"
+              icon="delete_sweep-o"
             />
           </Col>
         </Row>

@@ -46,7 +46,7 @@ function FastSearchFormItemOrigin({ record, onDelete }: FastSearchFormItemProps)
           </Col>
         </Row>
       </Form>
-      <Button icon="delete" onClick={() => onDelete(record)} disabled={!record.index} className={styles.form_item_del_btn} />
+      <Button icon="delete_sweep-o" onClick={() => onDelete(record)} disabled={!record.index} className={styles.form_item_del_btn} />
     </div>
   );
 }

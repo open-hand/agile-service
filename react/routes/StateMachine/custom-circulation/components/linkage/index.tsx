@@ -155,7 +155,7 @@ const Linkage = ({
               <Col span={2}>
                 <Button
                   style={{ flexShrink: 0 }}
-                  icon="delete"
+                  icon="delete_sweep-o"
                   onClick={() => {
                     Field.remove(key);
                     removeField(typeName);
