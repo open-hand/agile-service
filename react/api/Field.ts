@@ -238,7 +238,7 @@ class FieldApi extends Api<FieldApi> {
         page,
         size,
         organizationId: this.orgId,
-        selected: selected ? castArray(selected).join(',') : undefined,
+        selected: selected ? castArray(selected).join(',') || undefined : undefined,
       },
     });
   }
