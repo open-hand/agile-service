@@ -626,6 +626,22 @@ class StatusTransformApi extends Api<StatusTransformApi> {
     });
   }
 
+  orgSortStatus(statusMachineId: string, data: {
+    outSetId: string,
+    before: boolean
+    nodeId: string
+  }) {
+    return axios({
+      method: 'put',
+      url: `${this.orgPrefix}/status_transform/sort`,
+      data,
+      params: {
+        statusMachineId,
+        applyType: getApplyType(),
+      },
+    });
+  }
+
   hasTemplate(
     issueTypeId: string,
   ) {
