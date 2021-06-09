@@ -245,7 +245,7 @@ const Condition:React.FC<Props> = ({
             <span
               className={styles.trigger_label}
               style={{
-                top: selected.length ? '-12px' : '7px',
+                top: selected.length ? '3px' : '14px',
                 left: '6px',
                 fontSize: selected.length ? '12px' : '13px',
               }}
@@ -255,7 +255,7 @@ const Condition:React.FC<Props> = ({
             <span className={styles.selected}>
               {selected.join(',')}
             </span>
-            <Icon type="arrow_drop_down" />
+            <Icon type="expand_more" className={styles.iconPicker} />
           </div>
         </Dropdown>
         {/* <Divider className={styles.divider} />

@@ -201,7 +201,7 @@ const IterationSpeed: React.FC<IterationSpeedProps> = ({
         data: getChartDataYCommitted(),
         emphasis: {
           itemStyle: {
-            color: '#e0e0e0',
+            color: 'var(--divider)',
           },
         },
       },

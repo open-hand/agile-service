@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import {
   DataSet, Select, Form, Button, Row, Col,
 } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { getProjectId, getIsOrganization, getOrganizationId } from '@/utils/common';
 import { find, includes } from 'lodash';
@@ -564,14 +565,18 @@ const UpdateField = ({
                 </Col>
               )}
               <Col span={2}>
-                <Button
+                <Icon
                   onClick={() => {
                     // @ts-ignore
                     Field.remove(key);
                     // @ts-ignore
                     dataSet.current.init(f.code);
                   }}
-                  icon="delete_sweep-o"
+                  type="delete_sweep-o"
+                  style={{
+                    cursor: 'pointer',
+                    color: 'var(--primary-color)',
+                  }}
                 />
               </Col>
             </Row>
@@ -583,7 +588,6 @@ const UpdateField = ({
           // @ts-ignore
           onClick={Field.add}
           icon="add"
-          color={'primary' as ButtonColor}
         >
           添加字段
         </Button>

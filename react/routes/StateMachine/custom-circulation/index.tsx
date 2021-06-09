@@ -396,6 +396,8 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           type="settings-o"
           style={{
             fontSize: 18,
+            cursor: 'pointer',
+            color: 'var(--primary-color)',
           }}
         />
       </Dropdown>
@@ -565,12 +567,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         // @ts-ignore
         value, text, name, record, dataSet,
       }) => (
-        <span style={{
-          // @ts-ignore
-          color: 'rgba(0,0,0,.87)',
-          // color: STATUS[record.get('type')],
-        }}
-        >
+        <span>
           {text}
         </span>
       ),

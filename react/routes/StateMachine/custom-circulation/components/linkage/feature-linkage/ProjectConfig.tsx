@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import {
   Form, DataSet, Button, Col, Row,
 } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import SelectIssueType from '@/components/select/pro/select-issue-type';
@@ -30,7 +31,7 @@ const ProjectConfig: React.FC<ProjectConfigProps> = ({
   return (
     <Form dataSet={dataSet} style={{ padding: '10px 20px' }}>
       {dataSet.map((record) => (
-        <Row gutter={20}>
+        <Row gutter={20} type="flex" align="middle">
           <Col span={11}>
             <SelectIssueType
               record={record}
@@ -61,18 +62,22 @@ const ProjectConfig: React.FC<ProjectConfigProps> = ({
             />
           </Col>
           <Col span={2}>
-            <Button
+            <Icon
               onClick={() => {
                 dataSet.remove(record);
               }}
-              icon="delete_sweep-o"
+              type="delete_sweep-o"
+              style={{
+                color: 'var(--primary-color)',
+                cursor: 'pointer',
+              }}
             />
           </Col>
         </Row>
       ))}
       <div>
         <Button
-          style={{ marginTop: -20 }}
+          style={{ marginTop: -4 }}
           onClick={() => {
             dataSet.create();
           }}

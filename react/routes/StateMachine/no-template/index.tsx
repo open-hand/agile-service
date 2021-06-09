@@ -5,6 +5,7 @@ import {
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui/pro';
 import { Tooltip } from 'choerodon-ui';
+import { ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
 import { EmptyPage } from '@choerodon/components';
 import { getIsOrganization } from '@/utils/common';
 import { statusTransformApi } from '@/api';
@@ -46,6 +47,7 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
                   <Button
                     icon="playlist_add"
                     disabled
+                    style={{ marginLeft: 16 }}
                   >
                     创建新的状态
                   </Button>
@@ -54,6 +56,8 @@ const NoTemplate: React.FC<{ activeKey: string }> = ({ activeKey }) => {
                   <Button
                     icon="settings-o"
                     disabled
+                    color={'primary' as ButtonColor}
+                    style={{ marginLeft: 16 }}
                   >
                     设置初始状态
                   </Button>
