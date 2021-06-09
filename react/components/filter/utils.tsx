@@ -214,14 +214,14 @@ export function departFilter(filter: IFilter, fields: IFilterField[]) {
         case 'input': {
           customField.string.push({
             fieldId: id,
-            value,
+            value: value || null,
           });
           break;
         }
         case 'text': {
           customField.text.push({
             fieldId: id,
-            value,
+            value: value || null,
           });
           break;
         }
