@@ -137,18 +137,7 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
             </Tooltip>
           </Menu.Item>
         </Permission>
-        {isInProgram
-          && (
-            <Permission service={['choerodon.code.project.cooperation.work-list.ps.version.link.program.version']} key="linkProgramVersion">
-              <Menu.Item key="linkProgramVersion">
-                <Tooltip placement="top" title="关联项目群版本">
-                  <span>
-                    关联项目群版本
-                  </span>
-                </Tooltip>
-              </Menu.Item>
-            </Permission>
-          )}
+
         {statusCode === 'archived'
           ? null
           : (
