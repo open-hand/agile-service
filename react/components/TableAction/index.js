@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Dropdown, Menu, Button } from 'choerodon-ui';
 import './index.less';
 
@@ -7,8 +7,17 @@ const TableAction = (props) => {
   const {
     menus, text, onMenuClick, onEditClick,
   } = props;
+  const clickable = !!onEditClick;
+  const handleClickMenu = useCallback((params) => {
+    if (params.key === 'menuEdit' && clickable) {
+      onEditClick();
+      return;
+    }
+    onMenuClick && onMenuClick(params);
+  }, [clickable, onEditClick, onMenuClick]);
   const renderMenu = () => (
-    <Menu onClick={onMenuClick}>
+    <Menu onClick={handleClickMenu}>
+      {clickable ? <Menu.Item key="menuEdit">编辑</Menu.Item> : null}
       {menus.map((menu) => (
         <Menu.Item key={menu.key}>
           {menu.text}
@@ -16,21 +25,10 @@ const TableAction = (props) => {
       ))}
     </Menu>
   );
-  const clickable = !!onEditClick;
   return (
     <div className={prefix}>
       <span style={{ display: 'flex', overflow: 'hidden' }}>
-        {clickable ? (
-          <a
-            className="c7n-agile-table-cell-click"
-            style={{ overflow: 'hidden' }}
-            role="none"
-            onClick={onEditClick}
-            onKeyDown={null}
-          >
-            {text}
-          </a>
-        ) : <span className="c7n-agile-table-cell">{text}</span>}
+        <span className="c7n-agile-table-cell">{text}</span>
       </span>
       {
         menus.length > 0 ? (

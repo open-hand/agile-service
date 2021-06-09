@@ -1,7 +1,10 @@
-import React from 'react';
-import { Dropdown, Icon, Tooltip } from 'choerodon-ui';
+import React, { useCallback, useMemo } from 'react';
+import {
+  Dropdown, Icon, Tooltip, Menu,
+} from 'choerodon-ui';
 import { Permission } from '@choerodon/boot';
 import './TableDropMenu.less';
+import { pick } from 'lodash';
 
 /**
  * 表格中的下拉菜单
@@ -25,19 +28,47 @@ const TableDropMenu = (props) => {
   } = permission || props;
   // 渲染文本
   const renderText = () => {
-    const textA = (
-      // eslint-disable-next-line jsx-a11y/interactive-supports-focus
-      <a className="c7n-agile-table-cell-click" role="button" onClick={onClickEdit} onKeyDown={null}>
+    const finalText = (
+      <span>
         {text}
-      </a>
+      </span>
     );
-    const finalText = onClickEdit ? textA : text;
     return tooltip ? <Tooltip placement="topLeft" title={typeof (tooltip) !== 'boolean' ? tooltip : text}>{finalText}</Tooltip> : finalText;
   };// cursor: 'pointer'
+  const handleClickMenu = useCallback((originOnClick) => (params) => {
+    if (params.key === 'menuEdit') {
+      onClickEdit && onClickEdit();
+      return;
+    }
+    originOnClick && originOnClick(params);
+  }, [onClickEdit]);
+  const renderDropdown = useCallback((hasPermission) => {
+    let showMenu = hasPermission && isHasMenu && menu ? menu : undefined;
+    const editItem = onClickEdit ? <Menu.Item key="menuEdit">编辑</Menu.Item> : null;
+    if (showMenu && React.isValidElement(showMenu)) {
+      const { children: menuItems, onClick } = pick(showMenu.props, ['children', 'onClick']);
+      const children = [editItem, ...(menuItems || [])].filter(Boolean);
+      const handleClick = handleClickMenu(onClick);
+      showMenu = React.cloneElement(showMenu, { ...showMenu.props, children, onClick: handleClick });
+    } else if (editItem) {
+      showMenu = (
+        <Menu onClick={onClickEdit}>
+          {editItem}
+        </Menu>
+      );
+    }
+    return showMenu ? (
+      <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+        <Dropdown overlay={showMenu} trigger="click">
+          <Icon shape="circle" type="more_vert" style={{ color: 'var(--primary-color)' }} />
+        </Dropdown>
+      </div>
+    ) : null;
+  }, [handleClickMenu, isHasMenu, menu, onClickEdit]);
   return (
     <div
       style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: onClickEdit ? 'pointer' : 'inherit', ...style,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', ...style,
       }}
       className={className || 'table-drop-menu-base'}
     >
@@ -59,14 +90,7 @@ const TableDropMenu = (props) => {
           : renderText()}
       </span>
       <Permission {...menuPermissionProps}>
-        {isHasMenu && menu
-          ? (
-            <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-              <Dropdown overlay={menu} trigger="click">
-                <Icon shape="circle" type="more_vert" style={{ color: 'var(--primary-color)' }} />
-              </Dropdown>
-            </div>
-          ) : null}
+        {renderDropdown}
       </Permission>
     </div>
   );
