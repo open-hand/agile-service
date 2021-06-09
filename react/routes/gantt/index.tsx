@@ -310,6 +310,12 @@ const GanttPage: React.FC = () => {
                 title: isFullScreen ? '退出全屏' : '全屏',
               },
             },
+            {
+              display: true,
+              icon: 'refresh',
+              // funcType: 'flat',
+              handler: loadData,
+            },
           ]}
         />
       </Header>
