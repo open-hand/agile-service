@@ -14,5 +14,10 @@ import java.util.Set;
 public interface IssueTypeExtendMapper extends BaseMapper<IssueTypeExtendDTO> {
 
     List<IssueTypeExtendDTO> selectByIssueTypeIds(@Param("issueTypeIds") Set<Long> issueTypeIds,
+                                                  @Param("projectId") Long projectId,
                                                   @Param("organizationId") Long organizationId);
+
+    String selectMaxRank(@Param("organizationId") Long organizationId,
+                         @Param("projectId") Long projectId,
+                         @Param("rank") String rank);
 }
