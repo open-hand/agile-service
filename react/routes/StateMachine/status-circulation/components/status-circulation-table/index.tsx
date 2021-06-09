@@ -14,6 +14,7 @@ import Table, { ColumnsType } from 'antd/lib/table';
 import 'antd/lib/table/style';
 import { useStateMachineContext } from '@/routes/StateMachine/context';
 import CheckboxAll from '@/components/check-box';
+import { getIsOrganization } from '@/utils/common';
 import { useStatusCirculationContext } from '../..';
 import Checkbox from './Checkbox';
 import DeleteStatus from './DeleteStatus';
@@ -163,7 +164,7 @@ const StatusCirculationTable: React.FC = () => {
     const down = dragIndex < hoverIndex;
     if (hoverIndex !== dragIndex && data[dragIndex] && data[hoverIndex]) {
       // @ts-ignore
-      statusTransformApi.sortStatus(data[dragIndex].stateMachineId, {
+      statusTransformApi[getIsOrganization() ? 'orgSortStatus' : 'sortStatus'](data[dragIndex].stateMachineId, {
         // @ts-ignore
         outSetId: data[hoverIndex].nodeId,
         before: !down,
