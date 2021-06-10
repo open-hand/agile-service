@@ -10,7 +10,7 @@ import {
 } from 'choerodon-ui';
 import { TableColumnTooltip, TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { devOpsApi, devOpsApiConfig } from '@/api';
-import TableAction from '@/components/TableAction';
+import TableDropMenu from '@/components/table-drop-menu';
 import { map } from 'lodash';
 
 const { Column } = Table;
@@ -107,9 +107,9 @@ const LinkedBranch: React.ForwardRefRenderFunction<{
         name="branchName"
         tooltip={'overflow' as TableColumnTooltip}
         renderer={({ record, text }) => (
-          <TableAction
+          <TableDropMenu
             onMenuClick={({ key }: { key: string }) => handleMenuClick(key, record)}
-            menus={[{
+            menuData={[{
               key: 'delete',
               text: '移除关联分支',
             }, {

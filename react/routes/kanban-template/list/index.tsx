@@ -9,7 +9,7 @@ import {
 } from 'choerodon-ui/pro';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { kanbanTemplateApiConfig, kanbanTemplateApi } from '@/api';
-import TableAction from '@/components/TableAction';
+import TableDropMenu from '@/components/table-drop-menu';
 import to from '@/utils/to';
 import UserHead from '@/components/UserHead';
 import openKanbanTemplateModal from './components/modal';
@@ -97,18 +97,20 @@ const KanbanTemplateList = () => {
             name="name"
             tooltip={'overflow' as TableColumnTooltip}
             renderer={({ record, text }) => (
-              <TableAction
-                onEditClick={() => record && to(`/agile/kanban-template/detail/${record.get('boardId')}`, {
-                  type: 'org',
-                })}
-                onMenuClick={({ key }: { key: string }) => handleMenuClick(key, record)}
-                menus={[{
+              <TableDropMenu
+                menuData={[{
+                  action: () => record && to(`/agile/kanban-template/detail/${record.get('boardId')}`, {
+                    type: 'org',
+                  }),
+                  text: '编辑',
+                }, {
                   key: 'detail',
                   text: '编辑',
                 }, {
                   key: 'delete',
                   text: '删除',
                 }]}
+                onMenuClick={({ key }: { key: string }) => handleMenuClick(key, record)}
                 text={text}
               />
             )}

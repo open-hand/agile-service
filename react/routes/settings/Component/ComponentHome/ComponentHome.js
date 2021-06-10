@@ -8,7 +8,7 @@ import {
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import './ComponentHome.less';
-import TableAction from '@/components/TableAction';
+import TableDropMenu from '@/components/table-drop-menu';
 import UserTag from '@/components/tag/user-tag';
 import DeleteComponent from '../ComponentComponent/DeleteComponent';
 import Store from './stores';
@@ -49,13 +49,19 @@ function ComponentHome() {
   };
 
   const renderMenu = (text, record) => (
-    <TableAction
-      menus={[{
-        key: 'delete',
-        text: '删除',
-      }]}
-      onEditClick={() => { openComponentModal({ componentId: record?.get('componentId'), name: record?.get('name'), onOk: handleOk }); }}
+    <TableDropMenu
+      menuData={[
+        {
+          action: () => { openComponentModal({ componentId: record?.get('componentId'), name: record?.get('name'), onOk: handleOk }); },
+          text: '编辑',
+        },
+        {
+          key: 'delete',
+          text: '删除',
+          service: ['choerodon.code.project.setting.issue.ps.deletecomponent'],
+        }]}
       onMenuClick={() => openDeleteModal(record)}
+      tooltip={false}
       text={(
         <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={text}>
           <p
@@ -71,10 +77,8 @@ function ComponentHome() {
           </p>
         </Tooltip>
       )}
-      type={type}
-      projectId={id}
-      organizationId={orgId}
-      service={['choerodon.code.project.setting.issue.ps.deletecomponent']}
+      permissionType={type}
+      permission={{ projectId: id, organizationId: orgId }}
     />
   );
   const renderTable = () => (

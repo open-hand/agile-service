@@ -14,8 +14,8 @@ import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { pageConfigApi } from '@/api/PageConfig';
 import { getMenuType } from '@/utils/common';
 import NewCheckBox from '@/components/check-box';
+import TableDropMenu from '@/components/table-drop-menu';
 import { useObjectSchemeStore } from './stores';
-import TableDropMenu from '../../../common/TableDropMenu';
 import CreateField from '../components/create-field';
 import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
@@ -179,11 +179,11 @@ function ObjectScheme() {
     return (
       <div className="c7n-table-cell-drop-menu">
         <TableDropMenu
-          menu={menu}
+          oldMenuData={menu}
           tooltip
-          onClickEdit={disabledEditDel ? undefined : openEditFieldModal}
+          menuData={disabledEditDel ? undefined : [{ action: openEditFieldModal, text: '编辑' }]}
           text={text}
-          isHasMenu={!(system && disabledFields.includes(record?.get('code')))}
+          showMenu={!(system && disabledFields.includes(record?.get('code')))}
         />
       </div>
     );

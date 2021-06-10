@@ -11,12 +11,12 @@ import { Table, DataSet } from 'choerodon-ui/pro';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { versionApi } from '@/api';
+import TableDropMenu from '@/components/table-drop-menu';
 import AddRelease from '../ReleaseComponent/AddRelease';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 import './ReleaseHome.less';
 import EditRelease from '../ReleaseComponent/EditRelease';
 import PublicRelease from '../ReleaseComponent/PublicRelease';
-import TableDropMenu from '../../../common/TableDropMenu';
 import DeleteReleaseWithIssues from '../ReleaseComponent/DeleteReleaseWithIssues';
 import { openLinkVersionModal } from '../ReleaseComponent/link-program-vesion';
 import { openCreatReleaseVersionModal, openEditReleaseVersionModal } from '../components/create-edit-release-version';
@@ -112,70 +112,41 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
   function renderMenu({ text, record }: RenderProps) {
     const { type, id, organizationId } = AppState.currentMenuType;
     const statusCode = record?.get('statusCode');
-    const menu = (
-      <Menu onClick={(e) => handleClickMenu(record!, e.key)}>
-        {statusCode === 'archived'
-          ? null
-          : (
-            <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus']} key="releaseStatus">
-              <Menu.Item key="releaseStatus">
-                <Tooltip placement="top" title={statusCode === 'version_planning' ? '发布' : '撤销发布'}>
-                  <span>
-                    {statusCode === 'version_planning' ? '发布' : '撤销发布'}
-                  </span>
-                </Tooltip>
-              </Menu.Item>
-            </Permission>
-          )}
-
-        <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus']} key="archivedStatus">
-          <Menu.Item key="archivedStatus">
-            <Tooltip placement="top" title={statusCode === 'archived' ? '撤销归档' : '归档'}>
-              <span>
-                {statusCode === 'archived' ? '撤销归档' : '归档'}
-              </span>
-            </Tooltip>
-          </Menu.Item>
-        </Permission>
-
-        {statusCode === 'archived'
-          ? null
-          : (
-            <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion']} key="del">
-              <Menu.Item key="del">
-                <Tooltip placement="top" title="删除">
-                  <span>
-                    删除
-                  </span>
-                </Tooltip>
-              </Menu.Item>
-            </Permission>
-          )}
-      </Menu>
-    );
 
     return (
       <TableDropMenu
-        menu={menu}
         text={text}
         style={{ lineHeight: 'inherit' }}
-        onClickEdit={() => handleClickMenu(record!, 'edit')}
-        type={type}
-        tooltip
-        projectId={id}
-        menuPermissionProps={{
-          service:
-            [
-              'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
-              'choerodon.code.project.cooperation.work-list.ps.version.link.program.version',
-              'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
-            ],
-        }}
-        organizationId={organizationId}
-        service={[
-          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
-          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
+        menuData={[
+          { action: () => handleClickMenu(record!, 'edit'), text: '编辑' },
+          {
+            action: () => handleClickMenu(record!, 'releaseStatus'),
+            text: statusCode === 'version_planning' ? '发布' : '撤销发布',
+            display: statusCode !== 'archived',
+            service: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus'],
+          },
+          {
+            action: () => handleClickMenu(record!, 'archivedStatus'),
+            text: statusCode === 'archived' ? '撤销归档' : '归档',
+            service: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus'],
+          },
+          {
+            action: () => handleClickMenu(record!, 'del'),
+            text: '删除',
+            display: statusCode !== 'archived',
+            service: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion'],
+          },
         ]}
+        permissionType={type}
+        organizationId={organizationId}
+        tooltip
+        permissionMenu={{
+          service: [
+            'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
+            'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
+          ],
+        }}
+
       />
     );
   }

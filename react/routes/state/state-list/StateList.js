@@ -12,12 +12,12 @@ import {
   Content, Header, TabPage as Page, Breadcrumb, Choerodon, useTheme,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
+import TableDropMenu from '@/components/table-drop-menu';
 import { getStageMap, getStageList } from '@/utils/stateMachine';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { statusApi } from '@/api';
 import Store from './stores';
 import './StateList.less';
-import TableDropMenu from '../../../common/TableDropMenu';
 import openStateModal from './StateModal';
 
 const backlogStates = ['backlog_pending_approval', 'backlog_rejected', 'backlog_create', 'backlog_planning', 'backlog_processing', 'backlog_developed', 'backlog_publish'];
@@ -178,13 +178,16 @@ function StateList(props) {
       );
       return (
         <TableDropMenu
-          menu={menu}
-          isHasMenu={!(record.code || (record.stateMachineInfoList && record.stateMachineInfoList.length))}
-          onClickEdit={() => {
-            openStateModal({
-              onOk: handleOnOk, statusId: record.id, name: record.name, disabledEditName: backlogStates.includes(record.code),
-            });
-          }}
+          oldMenuData={menu}
+          showMenu={!(record.code || (record.stateMachineInfoList && record.stateMachineInfoList.length))}
+          menuData={[{
+            action: () => {
+              openStateModal({
+                onOk: handleOnOk, statusId: record.id, name: record.name, disabledEditName: backlogStates.includes(record.code),
+              });
+            },
+            text: '编辑',
+          }]}
           text={text}
         />
       );
