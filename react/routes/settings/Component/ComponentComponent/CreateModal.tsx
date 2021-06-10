@@ -100,7 +100,7 @@ const CreateComponent: React.FC<Props> = ({
         componentId,
         objectVersionNumber: componentId ? component?.objectVersionNumber : undefined,
       };
-      await componentId ? componentApi.update(componentId as string, data) : componentApi.create(data);
+      componentId ? await componentApi.update(componentId as string, data) : await componentApi.create(data);
       onOk();
       return true;
     }
