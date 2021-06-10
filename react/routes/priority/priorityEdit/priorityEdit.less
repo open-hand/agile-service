@@ -2,7 +2,7 @@
   padding: 0.03rem;
   background: #fff;
   border-radius: 0.02rem;
-  box-shadow: 0 0 0 0.01rem rgba(0, 0, 0, 0.246);
+  border: 1px solid var(--divider);
   display: inline-block;
   cursor: pointer;
 
@@ -32,5 +32,46 @@
 .c7n-agile-priority-checkbox {
   .c7n-checkbox-disabled .c7n-checkbox-inner {
     background-color: #f5f5f5 !important;
+  }
+}
+
+.c7n-editPriority-modal {
+  .c7n-modal-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    .c7n-modal-header {
+      flex-shrink: 0;
+      padding: 20px;
+      border-bottom: 1px solid var(--divider);
+      .c7n-modal-title {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 20px;
+      }
+    }
+    .c7n-modal-body {
+      flex: 1;
+      overflow-y: scroll;
+      max-height: unset !important;
+      height: auto !important;
+    }
+    .c7n-modal-footer {
+      flex-shrink: 0;
+      height: auto;
+      padding: 20px;
+      display: flex;
+      margin-bottom: 0;
+      border-top: 1px solid var(--divider);
+      flex-direction: row-reverse;
+      justify-content: flex-start;
+      .c7n-pro-btn {
+        margin-left: 10px;
+        span {
+          font-size: 13px;
+        }
+      }
+    }
   }
 }

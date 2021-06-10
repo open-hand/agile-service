@@ -142,6 +142,7 @@ class PriorityEdit extends Component {
           <Button key="back" funcType="raised" onClick={this.handleEditingCancel}><FormattedMessage id="cancel" /></Button>,
         ]}
         width={MODAL_WIDTH.small}
+        className="c7n-editPriority-modal"
       >
         <Form>
           <FormItem
@@ -185,6 +186,7 @@ class PriorityEdit extends Component {
                   label={<FormattedMessage id="priority.des" />}
                   placeholder={intl.formatMessage({ id: 'priority.create.des.placeholder' })}
                   maxLength={45}
+                  autosize
                 />,
               )
             }

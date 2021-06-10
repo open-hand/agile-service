@@ -601,13 +601,15 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         {tab}
 
         <div className={`${styles.customCirculation}`}>
-          <IssueTypeTab
-            selectedType={selectedType}
-            setSelectedType={setSelectedType}
-            excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
-            brighter={readOnly}
-            visibleIssueTypeCategory={visibleIssueTypeCategory}
-          />
+          <div style={{ marginLeft: 1 }}>
+            <IssueTypeTab
+              selectedType={selectedType}
+              setSelectedType={setSelectedType}
+              excludeTypes={isOrganization ? ['feature', 'issue_epic', 'issue_auto_test', 'issue_test'] : []}
+              brighter={readOnly}
+              visibleIssueTypeCategory={visibleIssueTypeCategory}
+            />
+          </div>
           <Table
             className={styles.table}
             dataSet={customCirculationDataSet}
