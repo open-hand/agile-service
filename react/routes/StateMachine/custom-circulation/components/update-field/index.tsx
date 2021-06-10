@@ -389,9 +389,13 @@ const UpdateField = ({
           // @ts-ignore
           transformResponse: (response) => {
             try {
-              const data = JSON.parse(response);
-              return data.filter((v: Priority) => v.enable);
+              if (typeof response === 'string') {
+                const data = JSON.parse(response);
+                return data.filter((v: Priority) => v.enable);
+              }
+              return response;
             } catch (error) {
+              console.log(error);
               return response;
             }
           },
