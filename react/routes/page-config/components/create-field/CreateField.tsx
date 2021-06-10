@@ -309,10 +309,11 @@ function CreateField() {
             />
             <SelectCustomField
               name="defaultValue"
-              key={`${singleList.indexOf(fieldType) !== -1 ? 'single' : 'multiple'}-defaultValue-select`}
+              // 防止fieldOptions变了之后选项没更新
+              key={JSON.stringify(fieldOptions)}
               style={{ width: '100%', marginTop: '20px' }}
               multiple={!(singleList.indexOf(fieldType) !== -1)}
-              fieldOptions={[...fieldOptions]}
+              fieldOptions={fieldOptions.map((f) => ({ ...f, id: f.tempKey }))}
               selected={toJS(current?.get('defaultValue'))}
             />
           </>
