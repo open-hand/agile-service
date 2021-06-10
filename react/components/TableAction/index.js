@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { Dropdown, Menu, Button } from 'choerodon-ui';
+import { Dropdown, Menu } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import './index.less';
 
 const prefix = 'c7n-table-action';
@@ -32,9 +33,9 @@ const TableAction = (props) => {
       </span>
       {
         menus.length > 0 ? (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
             <Dropdown overlay={renderMenu()} trigger="click">
-              <Button shape="circle" icon="more_vert" style={{ color: 'var(--primary-color)' }} />
+              <Icon type="more_vert" style={{ color: 'var(--primary-color)' }} />
             </Dropdown>
           </div>
         ) : null

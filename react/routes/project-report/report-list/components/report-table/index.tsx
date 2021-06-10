@@ -57,8 +57,9 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
   const handleMenuClick = useCallback(async (key, record) => {
     switch (key) {
       case 'delete': {
-        Modal.confirm({
-          title: `确认删除报告“${record.get('title')}”`,
+        Modal.open({
+          title: '确认删除',
+          children: `确认删除报告“${record.get('title')}”`,
           onOk: async () => {
             await projectReportApi.delete(record.get('id'));
             dataSet.query();

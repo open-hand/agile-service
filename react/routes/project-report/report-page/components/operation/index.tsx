@@ -130,8 +130,9 @@ const Operation: React.FC<Props> = () => {
     exportRef.current?.export(handleSend);
   }, [handleSend]);
   const handleCancelClick = useCallback(() => {
-    Modal.confirm({
-      title: `确认退出${edit ? '编辑' : '创建'}？`,
+    Modal.open({
+      title: '确认退出？',
+      children: `确认退出${edit ? '编辑' : '创建'}？`,
       onOk: () => {
         to('/agile/project-report');
       },
