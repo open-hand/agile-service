@@ -22,7 +22,7 @@ const LINK_URL = {
   workListVersion: '/agile/project-version',
   versionRelease: '/agile/project-version/release',
   versionPublish: '/agile/project-version/publish',
-  report: '/charts',
+  report: '/agile/charts',
   reportBurnDown: '/agile/reporthost/burndownchart',
   reportIssueType: '/agile/reporthost/pieReport/typeCode',
   reportPriority: '/agile/reporthost/pieReport/priority',
