@@ -438,3 +438,15 @@ export interface ISearchVO {
 }
 
 export type IVersionStatusCode = 'version_planning' | 'released' | 'archived'
+export interface IBootActionDataItem {
+  service?: string[]
+  text?: React.ReactNode
+  action?: Function /** 单独触发 */
+  icon?: string
+}
+export interface IBootPermissionProps {
+  service: string[]
+  organizationId?: string
+  projectId?: string | number
+  type?: string
+}

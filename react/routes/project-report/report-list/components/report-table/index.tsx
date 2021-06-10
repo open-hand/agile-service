@@ -8,7 +8,7 @@ import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { projectReportApiConfig, projectReportApi } from '@/api';
-import TableAction from '@/components/TableAction';
+import TableDropMenu from '@/components/table-drop-menu';
 import Users from '@/components/tag/users';
 import { User } from '@/common/types';
 import to from '@/utils/to';
@@ -82,13 +82,13 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
         name="title"
         tooltip={'overflow' as TableColumnTooltip}
         renderer={({ record }) => (
-          <TableAction
-            onEditClick={() => to(`/agile/project-report/edit/${record?.get('id')}`)}
+          <TableDropMenu
+            menuData={[{ action: () => to(`/agile/project-report/edit/${record?.get('id')}`), text: '编辑' },
+              {
+                key: 'delete',
+                text: '删除',
+              }]}
             onMenuClick={({ key }: { key: string }) => handleMenuClick(key, record)}
-            menus={[{
-              key: 'delete',
-              text: '删除',
-            }]}
             text={record?.get('title')}
           />
         )}

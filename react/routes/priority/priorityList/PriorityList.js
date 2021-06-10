@@ -12,10 +12,10 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 import { priorityApi } from '@/api';
+import TableDropMenu from '@/components/table-drop-menu';
 import PriorityCreate from '../priorityCreate';
 import PriorityEdit from '../priorityEdit';
 import BodyRow from './bodyRow';
-import TableDropMenu from '../../../common/TableDropMenu';
 
 import './PriorityList.less';
 
@@ -121,11 +121,11 @@ class PriorityList extends Component {
     );
     return (
       <TableDropMenu
-        menu={menu}
+        oldMenuData={menu}
+        menuData={[{ action: () => this.handleEdit(record.id), text: '编辑' }]}
         text={name}
-        isHasMenu={!(record.enable && enableList && enableList.length === 1)}
-        // eslint-disable-next-line react/jsx-no-bind
-        onClickEdit={this.handleEdit.bind(this, record.id)}
+        showMenu={!(record.enable && enableList && enableList.length === 1)}
+
       />
     );
   };

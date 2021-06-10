@@ -11,7 +11,7 @@ import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 
 import { Observer, observer } from 'mobx-react-lite';
-import TableDropMenu from '@/common/TableDropMenu';
+import TableDropMenu from '@/components/table-drop-menu';
 import CheckBox from '@/components/check-box';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { usePageIssueTypeStore } from '../../stores';
@@ -51,20 +51,15 @@ const DraggableItem: React.FC<Props> = ({
 
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={classnames(`${prefixCls}-text`, { [`${prefixCls}-text-edit`]: !textEditToggleProps.disabled })}>
-
       <TableDropMenu
-        menu={(
-          <Menu onClick={() => onClickDel(record!, dataSet!)}>
-            <Menu.Item>删除</Menu.Item>
-          </Menu>
-        )}
+        menuData={[{ action: () => onClickDel(record!, dataSet!), text: '删除' }]}
         text={(
           <>
             {!isDragDisabled && <Icon type="baseline-drag_indicator" className={`${prefixCls}-text-icon`} />}
             <span>{value}</span>
           </>
         )}
-        isHasMenu={false}
+        showMenu={false}
       />
     </div>
   );
