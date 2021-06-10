@@ -152,7 +152,13 @@ class BacklogHome extends Component {
                 title: '无活跃的PI',
               },
               permissions: ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint'],
-            }]}
+            },
+            {
+              display: true,
+              icon: 'refresh',
+              handler: () => this.refresh(),
+            },
+            ]}
           />
         </Header>
         <Breadcrumb />

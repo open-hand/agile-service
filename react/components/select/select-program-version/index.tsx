@@ -156,6 +156,7 @@ const OldSelectProgramVersion: React.FC<OldProps> = ({ teamProjectIds, ...restPr
   });
   return (
     <OldSelect
+      showCheckAll={false}
       maxTagCount={3}
       {...restProps}
     >
