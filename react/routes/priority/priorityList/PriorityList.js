@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { HeaderButtons } from '@choerodon/master';
 import {
-  Table, Button, Modal, Select, Icon, message, Menu,
+  Table, Select, Icon, message, Menu,
 } from 'choerodon-ui';
+import { Modal } from 'choerodon-ui/pro';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import {
   Content, Header, TabPage as Page, stores, Breadcrumb,
@@ -21,7 +22,6 @@ import './PriorityList.less';
 
 const { Option } = Select;
 const { AppState } = stores;
-const { confirm } = Modal;
 
 const ColorBlock = ({ color }) => (
   <div
@@ -182,9 +182,9 @@ class PriorityList extends Component {
     const that = this;
     const count = await priorityApi.checkBeforeDel(priority.id);
     const priorityList = PriorityStore.getPriorityList.filter((item) => item.id !== priority.id);
-    confirm({
+    Modal.open({
       title: intl.formatMessage({ id: 'priority.delete.title' }),
-      content: (
+      children: (
         <div>
           <div style={{ marginBottom: 10 }}>
             {`${intl.formatMessage({ id: 'priority.delete.title' })}：${priority.name}`}
@@ -259,9 +259,9 @@ class PriorityList extends Component {
     const { intl } = this.props;
     if (priority.enable) {
       const that = this;
-      confirm({
+      Modal.open({
         title: intl.formatMessage({ id: 'priority.disable.title' }),
-        content: (
+        children: (
           <div>
             <div style={{ marginBottom: 10 }}>
               {intl.formatMessage({ id: 'priority.disable.title' })}

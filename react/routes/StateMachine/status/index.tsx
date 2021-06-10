@@ -3,8 +3,8 @@ import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
-import { Button, Table, DataSet } from 'choerodon-ui/pro';
-import { Divider } from 'choerodon-ui';
+import { Table, DataSet } from 'choerodon-ui/pro';
+import { Divider, Icon } from 'choerodon-ui';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApiConfig, ITotalStatus } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
@@ -126,8 +126,8 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
           <Column
             name="operate"
             renderer={({ record }) => (
-              <Button
-                icon="delete_sweep-o"
+              <Icon
+                type="delete_sweep-o"
                 onClick={() => {
                   openDeleteStatus({
                     onSubmit: () => {
@@ -136,6 +136,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
                     data: record?.toData() as ITotalStatus,
                   });
                 }}
+                style={{ color: 'var(--primary-color)', cursor: 'pointer' }}
               />
             )}
           />

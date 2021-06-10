@@ -70,7 +70,7 @@ const DeleteStatus: React.FC<Props> = ({
   return (
     <Spin spinning={loading}>
       <div>
-        {reason}
+        {reason || `确认删除状态“${data.name}”`}
       </div>
     </Spin>
   );

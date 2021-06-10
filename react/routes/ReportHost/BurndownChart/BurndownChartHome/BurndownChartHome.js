@@ -287,9 +287,9 @@ class BurndownChartHome extends Component {
         <Content>
           {
             sprints.length > 0 ? (
-              <div>
+              <div style={{ width: '100%' }}>
                 <div style={{
-                  display: 'flex', alignItems: 'flex-start',
+                  display: 'flex', alignItems: 'flex-start', width: '100%',
                 }}
                 >
                   <Select
@@ -340,11 +340,15 @@ class BurndownChartHome extends Component {
                     <Option value="storyPoints">故事点</Option>
                     <Option value="issueCount">问题计数</Option>
                   </Select>
-                  <IssueSearch
-                    store={this.issueSearchStore}
-                    onClear={this.refresh}
-                    onChange={this.refresh}
-                  />
+                  <div
+                    style={{ flexShrink: 1 }}
+                  >
+                    <IssueSearch
+                      store={this.issueSearchStore}
+                      onClear={this.refresh}
+                      onChange={this.refresh}
+                    />
+                  </div>
                 </div>
                 <BurnDownChart
                   type={select}

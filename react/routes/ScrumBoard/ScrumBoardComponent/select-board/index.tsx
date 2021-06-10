@@ -21,7 +21,14 @@ const SelectBoard: React.FC<SelectBoardProps> = ({
       <Permission
         service={['choerodon.code.project.cooperation.iteration-plan.ps.board.create']}
       >
-        <Button style={{ width: '100%', height: 42, textAlign: 'left' }} onClick={onFooterClick}>创建看板</Button>
+        <li className="c7n-pro-select-dropdown-menu-item" style={{ marginTop: -8 }}>
+          <span
+            role="none"
+            onClick={onFooterClick}
+          >
+            创建看板
+          </span>
+        </li>
       </Permission>
     ) : null);
   return (
