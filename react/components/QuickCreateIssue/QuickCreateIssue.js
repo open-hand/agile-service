@@ -134,6 +134,7 @@ class QuickCreateIssue extends Component {
           this.setState({
             loading: false,
             create: false,
+            summary: '',
           });
           const dto = {
             schemeCode: 'agile_issue',
