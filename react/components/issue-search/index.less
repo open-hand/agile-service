@@ -107,21 +107,31 @@
     & > div:first-child {
       display: none;
     }
+
     & > div:nth-child(2) > div {
 
       & > ul > li > ul > li {
         padding-left: .12rem;
       }
-      & >ul {
-        & >li:nth-child(3) {
-          .c7n-checkbox { // 隐藏CheckBox
+
+      & > ul {
+        & > li:nth-child(3) {
+          .c7n-checkbox {
+            // 隐藏CheckBox
             display: none;
           }
-          & >ul >li {
+
+          & > ul > li {
             padding-left: .1rem;
           }
         }
       }
     }
+  }
+
+  .c7n-pro-input,
+  .c7n-pro-input-number {
+    padding-top: 0.01rem !important;
+    height: 30px !important;
   }
 }
