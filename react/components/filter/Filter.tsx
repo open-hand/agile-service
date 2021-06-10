@@ -137,6 +137,7 @@ const Filter: React.FC<FilterProps> = ({
     if (removeButton === true) {
       return (
         <Button
+          funcType={'flat' as any}
           icon="delete_sweep-o"
           style={{ marginLeft: 10, flexShrink: 0 }}
           onClick={() => {

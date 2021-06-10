@@ -3,10 +3,10 @@ import { Icon } from 'choerodon-ui';
 import classNames from 'classnames';
 import { IFilter } from '@/components/filter';
 import { find, map, castArray } from 'lodash';
+import InputField from '@/components/issue-search/custom-fields/field/InputField';
+import NumberField from '@/components/issue-search/custom-fields/field/NumberField';
 import { IFilterField, ICustomField } from './index';
 import { IRenderFields } from './Filter';
-import InputField from './components/InputField';
-import NumberField from './components/NumberField';
 /* eslint-disable camelcase */
 export function getFlatElement(field: IFilterField, element: React.ReactNode) {
   if (field.system) {
@@ -129,7 +129,7 @@ export const renderGroupedFields: IRenderFields = ({
         display: 'flex', alignItems: 'flex-start', height: folded ? 48 : 'unset', overflowY: 'hidden',
       }}
     >
-      {contentField && <div>{getFieldElement(contentField).element}</div>}
+      {contentField && <div style={{ marginRight: 5 }}>{getFieldElement(contentField).element}</div>}
       <div>
         {result}
       </div>
