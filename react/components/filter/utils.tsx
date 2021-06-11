@@ -120,7 +120,7 @@ export const renderGroupedFields: IRenderFields = ({
     </div>
   ));
   if (result.length > 0) {
-    result[result.length - 1].props.children.push(<div style={{ marginLeft: 10, marginTop: 3 }}>{selectField}</div>);
+    result[result.length - 1].props.children.push(<div style={{ marginLeft: 10 }}>{selectField}</div>);
   }
   return (
     <div
