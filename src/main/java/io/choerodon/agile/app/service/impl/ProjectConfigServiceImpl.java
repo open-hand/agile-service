@@ -128,6 +128,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private TestServiceClientOperator testServiceClientOperator;
     @Autowired
     private StatusBranchMergeSettingMapper statusBranchMergeSettingMapper;
+    
+    @Autowired
+    private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -776,6 +779,13 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 throw new CommonException("error.status.branch_merge_setting_exist");
             }
         }
+        
+        // 校验是否存在关联问题联动设置
+        List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS = linkIssueStatusLinkageService.listByIssueTypeAndStatusId(projectId, organizationId, issueTypeId, currentStatusId);
+        if (!CollectionUtils.isEmpty(linkIssueStatusLinkageVOS)) {
+            throw new CommonException("error.link.issue.status.linkage.exist");
+        }
+
         return machineNodeDTO;
     }
 
@@ -808,6 +818,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 .collect(Collectors.groupingBy(StatusNoticeSettingVO::getStatusId));
         Map<Long, List<StatusLinkageVO>> statusLinkageMap = linkageVOS.stream()
                 .collect(Collectors.groupingBy(StatusLinkageVO::getStatusId));
+        Map<Long, List<LinkIssueStatusLinkageVO>> linkIssueMap = linkIssueStatusLinkageService.listByIssueTypeAndStatusIds(projectId, organizationId, issueTypeId, statusIds);
         if (!CollectionUtils.isEmpty(transferSettingVOS)) {
             transferSettingMap.putAll(transferSettingVOS.stream().collect(Collectors.groupingBy(StatusTransferSettingVO::getStatusId)));
         }
@@ -825,6 +836,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             if (!ObjectUtils.isEmpty(statusBranchMergeSettingList)) {
                 statusSettingVO.setStatusBranchMergeSettingVO(statusBranchMergeSettingList.get(0));
             }
+            statusSettingVO.setLinkIssueStatusLinkageVOS(linkIssueMap.getOrDefault(statusSettingVO.getId(), new ArrayList<>()));
         }
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {

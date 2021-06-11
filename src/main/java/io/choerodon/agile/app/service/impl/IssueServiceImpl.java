@@ -183,6 +183,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private FieldValueMapper fieldValueMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -913,6 +915,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         try {
             statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId);
             boolean transformFlag = statusLinkageService.updateParentStatus(projectId, issueId, applyType);
+            linkIssueStatusLinkageService.updateLinkIssueStatus(projectId, issueId, applyType);
             if (transformFlag) {
                 return null;
             } else {
