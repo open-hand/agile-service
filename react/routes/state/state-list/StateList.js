@@ -4,14 +4,14 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Table, Form, Tooltip, Menu,
+  Table, Form, Icon,
 } from 'choerodon-ui';
+import { Dropdown, Menu } from 'choerodon-ui/pro';
 import { FormattedMessage } from 'react-intl';
 import {
   Content, Header, TabPage as Page, Breadcrumb, useTheme,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
-import TableDropMenu from '@/components/table-drop-menu';
 import { getStageMap, getStageList } from '@/utils/stateMachine';
 import Store from './stores';
 import openStateModal from './StateModal';
@@ -126,32 +126,56 @@ function StateList(props) {
     dataIndex: 'name',
     key: 'name',
     filters: [],
+    render: (text, record) => (
+      <span>{text}</span>
+    ),
+  },
+  {
+    dataIndex: 'action',
+    key: 'action',
     render: (text, record) => {
+      const handleMenuClick = (e) => {
+        switch (e.key) {
+          case 'edit': {
+            openStateModal({
+              onOk: handleOnOk, statusId: record.id, name: record.name, disabledEditName: backlogStates.includes(record.code),
+            });
+            break;
+          }
+          case 'delete': {
+            confirmDelete(record);
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      };
       const menu = (
-        <Menu onClick={confirmDelete.bind(this, record)}>
-          <Menu.Item key="del">
-            <Tooltip placement="top" title={<FormattedMessage id="delete" />}>
-              <span>
-                删除
-              </span>
-            </Tooltip>
-          </Menu.Item>
+        // eslint-disable-next-line react/jsx-no-bind
+        <Menu onClick={handleMenuClick.bind(this)}>
+          <Menu.Item key="edit">编辑</Menu.Item>
+          {
+            !(record.code || (record.stateMachineInfoList && record.stateMachineInfoList.length)) && (
+              <Menu.Item key="delete">删除</Menu.Item>
+            )
+          }
         </Menu>
       );
       return (
-        <TableDropMenu
-          oldMenuData={menu}
-          showMenu={!(record.code || (record.stateMachineInfoList && record.stateMachineInfoList.length))}
-          menuData={[{
-            action: () => {
-              openStateModal({
-                onOk: handleOnOk, statusId: record.id, name: record.name, disabledEditName: backlogStates.includes(record.code),
-              });
-            },
-            text: '编辑',
-          }]}
-          text={text}
-        />
+        <Dropdown
+          overlay={menu}
+          trigger={['click']}
+        >
+          <Icon
+            type="more_vert"
+            style={{
+              fontSize: 18,
+              cursor: 'pointer',
+              color: 'var(--primary-color)',
+            }}
+          />
+        </Dropdown>
       );
     },
   },
