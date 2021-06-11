@@ -558,27 +558,23 @@ class VersionBurndown extends Component {
   renderChart = () => {
     if (!ES.chartDataOrigin.length) {
       return (
-        <div style={{
-          display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '50px 0', textAlign: 'center',
-        }}
-        >
-          <img src={pic} alt="没有预估故事点" />
-          <div style={{ textAlign: 'left', marginLeft: '50px' }}>
-            <span style={{ fontSize: 12, color: 'var(--text-color3)' }}>报表不能显示</span>
-            <p style={{ marginTop: 10, fontSize: 20 }}>
+        <EmptyPage
+          style={{ paddingTop: 20 }}
+          image={pic}
+          description={(
+            <div>
               在此版本中没有预估的故事，请在
-              <a
-                role="none"
+              <EmptyPage.Button
                 onClick={() => {
                   to(LINK_URL.workListBacklog);
                 }}
               >
-                待办事项
-              </a>
-              中创建故事并预估故事点。
-            </p>
-          </div>
-        </div>
+                【待办事项】
+              </EmptyPage.Button>
+              <span>中创建故事并预估故事点。</span>
+            </div>
+          )}
+        />
       );
     }
     return (
@@ -901,7 +897,7 @@ class VersionBurndown extends Component {
                     </EmptyPage.Button>
                     <span>中创建一个版本</span>
                   </div>
-          )}
+                )}
               />
             )
           }
