@@ -78,7 +78,7 @@ const CreateState: React.FC<Props> = ({
         name: ds?.current?.get('name') as string,
         type: ds?.current?.get('type') as string,
       };
-      await statusId ? statusApi.update(statusId as string, Object.assign(editStatus, data)) : statusApi.create(data);
+      statusId ? await statusApi.update(statusId as string, Object.assign(editStatus, data)) : await statusApi.create(data);
       onOk();
       return true;
     }
