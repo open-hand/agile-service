@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import {
-  Input, Form, Icon, Dropdown, Menu,
+  Input, Icon, Dropdown, Menu,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
@@ -11,16 +11,12 @@ import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import { useLockFn } from 'ahooks';
 import { IIssueType, Issue, User } from '@/common/types';
 import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
-import { FormProps } from 'choerodon-ui/lib/form';
 import { fieldApi, issueApi } from '@/api';
-import { WrappedFormUtils } from 'choerodon-ui/lib/form/Form';
 import { fields2Map } from '@/utils/defaultValue';
 import TypeTag from '../TypeTag';
 import UserDropdown from '../UserDropdown';
 
-const FormItem = Form.Item;
-
-interface QuickCreateSubIssueProps extends FormProps {
+interface QuickCreateSubIssueProps {
   priorityId: string
   parentIssueId: string
   sprintId: string
@@ -33,9 +29,10 @@ interface QuickCreateSubIssueProps extends FormProps {
   assigneeChange?: (assigneeId: string | undefined) => void
 }
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
-  form, priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, cantCreateEvent, summaryChange, typeIdChange, setDefaultSprint, assigneeChange,
+  priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, cantCreateEvent, summaryChange, typeIdChange, setDefaultSprint, assigneeChange,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({ typeCode: 'sub_task', onlyEnabled: true });
+  const [summary, setSummary] = useState('');
   const [expand, setExpand] = useState(false);
   const [id, setId] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
@@ -51,102 +48,94 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     setId(key);
   }, []);
   const handleCreate = useLockFn(async () => {
-    (form as WrappedFormUtils).validateFields(async (err, values) => {
-      const { summary } = values;
-      const assigneeId = userDropDownRef?.current?.selectedUser?.id;
+    const assigneeId = userDropDownRef?.current?.selectedUser?.id;
 
-      if (currentType && summary && summary.trim()) {
-        if (!err) {
-          setLoading(true);
-          if (!await checkCanQuickCreate(currentType.id, assigneeId)) {
-            if (!cantCreateEvent) {
-              Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
-              setLoading(false);
-            } else {
-              Choerodon.prompt('请填写标注的必填字段');
-              if (summaryChange) {
-                summaryChange(summary);
-              }
-              if (typeIdChange) {
-                typeIdChange(currentType.id);
-              }
-              if (setDefaultSprint) {
-                setDefaultSprint(sprintId);
-              }
-              if (assigneeChange) {
-                assigneeChange(assigneeId);
-              }
-              setLoading(false);
-              handleCancel();
-              cantCreateEvent();
-            }
-            return;
+    if (currentType && summary && summary.trim()) {
+      setLoading(true);
+      if (!await checkCanQuickCreate(currentType.id, assigneeId)) {
+        if (!cantCreateEvent) {
+          Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
+          setLoading(false);
+        } else {
+          Choerodon.prompt('请填写标注的必填字段');
+          if (summaryChange) {
+            summaryChange(summary);
           }
-          const param = {
-            schemeCode: 'agile_issue',
-            issueTypeId: currentType.id,
-            pageCode: 'agile_issue_create',
-          };
-          const fields = await fieldApi.getFields(param);
-          const fieldsMap = fields2Map(fields);
-          const issue = getQuickCreateDefaultObj({
-            summary,
-            priorityId,
-            parentIssueId,
-            issueTypeId: currentType.id,
-            typeCode: 'sub_task',
-            sprintId,
-            assigneeId,
-          }, fieldsMap);
-
-          const res = await issueApi.createSubtask(issue);
-          await fieldApi.quickCreateDefault(res.issueId, {
-            schemeCode: 'agile_issue',
-            issueTypeId: currentType.id,
-            pageCode: 'agile_issue_create',
-          });
+          if (typeIdChange) {
+            typeIdChange(currentType.id);
+          }
+          if (setDefaultSprint) {
+            setDefaultSprint(sprintId);
+          }
+          if (assigneeChange) {
+            assigneeChange(assigneeId);
+          }
           setLoading(false);
           handleCancel();
-          onCreate && onCreate(res);
+          cantCreateEvent();
         }
+        return;
       }
-    });
+      const param = {
+        schemeCode: 'agile_issue',
+        issueTypeId: currentType.id,
+        pageCode: 'agile_issue_create',
+      };
+      const fields = await fieldApi.getFields(param);
+      const fieldsMap = fields2Map(fields);
+      const issue = getQuickCreateDefaultObj({
+        summary,
+        priorityId,
+        parentIssueId,
+        issueTypeId: currentType.id,
+        typeCode: 'sub_task',
+        sprintId,
+        assigneeId,
+      }, fieldsMap);
+
+      const res = await issueApi.createSubtask(issue);
+      await fieldApi.quickCreateDefault(res.issueId, {
+        schemeCode: 'agile_issue',
+        issueTypeId: currentType.id,
+        pageCode: 'agile_issue_create',
+      });
+      setLoading(false);
+      setSummary('');
+      handleCancel();
+      onCreate && onCreate(res);
+    }
   });
   useEffect(() => {
     if (expand && id) {
       fieldApi.getSummaryDefaultValue(id).then((res) => {
-        form?.getFieldValue('summary') === currentTemplate.current && form?.setFieldsValue({
-          summary: res,
-        });
+        summary === currentTemplate.current && setSummary(res as string);
       });
     }
-  }, [expand, form, id]);
+  }, [expand, summary, id]);
   const handleCancel = useCallback(() => {
     setExpand(false);
   }, []);
   if (isLoading) {
     return null;
   }
-  const { getFieldDecorator } = form as WrappedFormUtils;
   return issueTypes ? (
     <div className="c7n-subTask-quickCreate">
       {expand
         ? (
-          <Form style={{ width: '100%' }}>
-            <div style={{ display: 'block', width: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {issueTypes.length > 1 && (
-                  <Dropdown
-                    overlay={(
-                      <Menu
-                        style={{
-                          background: '#fff',
-                          boxShadow: '0 5px 5px -3px rgba(0, 0, 0, 0.20), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px var(--divider)',
-                          borderRadius: '2px',
-                        }}
-                        onClick={handleMenuClick}
-                      >
-                        {
+          <div style={{ display: 'block', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {issueTypes.length > 1 && (
+              <Dropdown
+                overlay={(
+                  <Menu
+                    style={{
+                      background: '#fff',
+                      boxShadow: '0 5px 5px -3px rgba(0, 0, 0, 0.20), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px var(--divider)',
+                      borderRadius: '2px',
+                    }}
+                    onClick={handleMenuClick}
+                  >
+                    {
                           issueTypes.map((type) => (
                             <Menu.Item key={type.id}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -158,53 +147,52 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                             </Menu.Item>
                           ))
                         }
-                      </Menu>
+                  </Menu>
                     )}
-                    trigger={['click']}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <TypeTag
-                        data={currentType as IIssueType}
-                      />
-                      <Icon
-                        type="arrow_drop_down"
-                        style={{ fontSize: 16 }}
-                      />
-                    </div>
-                  </Dropdown>
-                )}
-                <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} />
-                <FormItem label="summary" style={{ flex: 1, margin: '0 10px', padding: 0 }}>
-                  {getFieldDecorator('summary', {
-                    rules: [{ required: true, message: '请输入问题概要！' }],
-                  })(
-                    <Input
-                      className="hidden-label"
-                      autoFocus
-                      autoComplete="on"
-                      onPressEnter={handleCreate}
-                      maxLength={44}
-                      placeholder="请输入问题概要"
-                    />,
-                  )}
-                </FormItem>
-                <Button
-                  color={'primary' as ButtonColor}
-                  onClick={handleCreate}
-                  style={{ margin: '0 10px' }}
-                  loading={loading}
-                >
-                  确定
-                </Button>
-                <Button
-                  onClick={handleCancel}
-                  disabled={loading}
-                >
-                  取消
-                </Button>
-              </div>
+                trigger={['click']}
+              >
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <TypeTag
+                    data={currentType as IIssueType}
+                  />
+                  <Icon
+                    type="arrow_drop_down"
+                    style={{ fontSize: 16 }}
+                  />
+                </div>
+              </Dropdown>
+              )}
+              <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} />
+
+              <Input
+                className="hidden-label"
+                autoFocus
+                autoComplete="on"
+                onPressEnter={handleCreate}
+                onChange={(e) => {
+                  setSummary(e.target.value);
+                }}
+                value={summary}
+                maxLength={44}
+                placeholder="请输入问题概要"
+              />
+              <Button
+                color={'primary' as ButtonColor}
+                onClick={handleCreate}
+                style={{ margin: '0 10px' }}
+                loading={loading}
+                disabled={!summary}
+              >
+                确定
+              </Button>
+              <Button
+                onClick={handleCancel}
+                disabled={loading}
+              >
+                取消
+              </Button>
             </div>
-          </Form>
+          </div>
         ) : (
           <Button
             icon="playlist_add"
@@ -219,5 +207,4 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     </div>
   ) : null;
 };
-// @ts-ignore
-export default Form.create({})(QuickCreateSubIssue);
+export default QuickCreateSubIssue;
