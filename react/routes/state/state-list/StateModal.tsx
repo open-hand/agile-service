@@ -2,12 +2,13 @@ import React, {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
 import {
-  Modal, TextField, TextArea, DataSet, NumberField, Select, Form,
+  Modal, TextField, DataSet, Select, Form,
 } from 'choerodon-ui/pro';
+import TextArea from '@/components/TextArea';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
-import { componentApi, statusApi } from '@/api';
+import { statusApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { getStageList } from '@/utils/stateMachine';
 import styles from './StateModal.less';
@@ -59,7 +60,6 @@ const CreateState: React.FC<Props> = ({
       name: 'description',
       label: '状态描述',
       type: 'string' as FieldType,
-      maxLength: 45,
     }, {
       name: 'type',
       label: '阶段',
@@ -108,7 +108,13 @@ const CreateState: React.FC<Props> = ({
   return (
     <Form dataSet={ds} className={styles.statusModal}>
       <TextField name="name" placeholder="用于标识问题所处的阶段，例如：测试中" help={disabledEditName ? '状态被需求池使用，不可更改名称' : ''} />
-      <TextArea name="description" />
+      <TextArea
+        maxLength={45}
+        name="description"
+        autoSize={{
+          minRows: 2,
+        }}
+      />
       <Select name="type" clearButton={false}>
         {stageList.map((stage) => (
           <Option
