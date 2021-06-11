@@ -115,7 +115,7 @@ const PersonalWorkload = () => {
         name: chartOption === 'issueCount' ? '问题计数' : '工时',
         minInterval: 1,
         nameTextStyle: {
-          color: 'rgba(0,0,0,0.65)',
+          color: 'var(--text-color3)',
         },
         type: 'value',
         splitLine: {

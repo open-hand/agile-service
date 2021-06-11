@@ -6,8 +6,9 @@ import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Table, Select, Spin,
+  Table, Spin,
 } from 'choerodon-ui';
+import { Form, Select } from 'choerodon-ui/pro';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import { EmptyPage } from '@choerodon/components';
@@ -367,22 +368,24 @@ class VelocityChart extends Component {
         <Content style={{ paddingTop: 20 }}>
           {!(!VS.chartLoading && !VS.getChartDataX.length) ? (
             <div>
-              <Select
-                style={{ width: 512 }}
-                label="单位选择"
-                value={VS.currentUnit}
-                onChange={(unit) => this.handleChangeCurrentUnit(unit)}
-              >
-                <Option key="story_point" value="story_point">
-                  故事点
-                </Option>
-                <Option key="issue_count" value="issue_count">
-                  问题计数
-                </Option>
-                <Option key="remain_time" value="remain_time">
-                  剩余时间
-                </Option>
-              </Select>
+              <Form style={{ marginBottom: -20, width: 512 }}>
+                <Select
+                  label="单位选择"
+                  value={VS.currentUnit}
+                  onChange={(unit) => this.handleChangeCurrentUnit(unit)}
+                  clearButton={false}
+                >
+                  <Option key="story_point" value="story_point">
+                    故事点
+                  </Option>
+                  <Option key="issue_count" value="issue_count">
+                    问题计数
+                  </Option>
+                  <Option key="remain_time" value="remain_time">
+                    剩余时间
+                  </Option>
+                </Select>
+              </Form>
               <Spin spinning={VS.chartLoading}>
                 <ReactEcharts
                   className="c7n-chart"

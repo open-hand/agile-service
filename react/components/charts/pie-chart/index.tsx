@@ -209,7 +209,7 @@ const PieChart: React.FC<PieChartProps> = ({
           // @ts-ignore
           data: pieData,
           label: {
-            color: 'rgba(0,0,0,0.65)',
+            color: 'var(--text-color3)',
             position: 'outside',
             formatter: (value: any) => {
               if (value.data.name === null) {

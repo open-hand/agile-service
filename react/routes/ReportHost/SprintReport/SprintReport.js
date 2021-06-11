@@ -3,8 +3,9 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Button, Spin, Icon, Select, Table, Checkbox, Tabs, Tooltip, Pagination,
+  Spin, Icon, Table, Checkbox, Tabs, Tooltip, Pagination,
 } from 'choerodon-ui';
+import { Form, Select } from 'choerodon-ui/pro';
 import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
@@ -331,48 +332,50 @@ class SprintReport extends Component {
                 <div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <Select
-                        getPopupContainer={(triggerNode) => triggerNode.parentNode}
-                        style={{ width: 244 }}
-                        label="迭代冲刺"
-                        value={this.state.defaultSprint}
-                        onChange={(value) => {
-                          ReportStore.changeCurrentSprint(value);
-                          ReportStore.setDonePagination({
-                            current: 0,
-                            pageSize: 10,
-                            total: undefined,
-                          });
-                          ReportStore.setTodoPagination({
-                            current: 0,
-                            pageSize: 10,
-                            total: undefined,
-                          });
-                          ReportStore.setRemovePagination({
-                            current: 0,
-                            pageSize: 10,
-                            total: undefined,
-                          });
-                          let newEndDate;
-                          for (let index = 0, len = BurndownChartStore.getSprintList.length;
-                            index < len; index += 1) {
-                            if (BurndownChartStore.getSprintList[index].sprintId === value) {
-                              newEndDate = BurndownChartStore.getSprintList[index].endDate;
+                      <Form style={{ width: 244, marginBottom: -20 }}>
+                        <Select
+                          clearButton={false}
+                          getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                          label="迭代冲刺"
+                          value={this.state.defaultSprint}
+                          onChange={(value) => {
+                            ReportStore.changeCurrentSprint(value);
+                            ReportStore.setDonePagination({
+                              current: 0,
+                              pageSize: 10,
+                              total: undefined,
+                            });
+                            ReportStore.setTodoPagination({
+                              current: 0,
+                              pageSize: 10,
+                              total: undefined,
+                            });
+                            ReportStore.setRemovePagination({
+                              current: 0,
+                              pageSize: 10,
+                              total: undefined,
+                            });
+                            let newEndDate;
+                            for (let index = 0, len = BurndownChartStore.getSprintList.length;
+                              index < len; index += 1) {
+                              if (BurndownChartStore.getSprintList[index].sprintId === value) {
+                                newEndDate = BurndownChartStore.getSprintList[index].endDate;
+                              }
                             }
-                          }
-                          this.setState({
-                            defaultSprint: value,
-                            endDate: newEndDate,
-                          }, () => {
-                            this.axiosGetRestDays();
-                          });
-                        }}
-                      >
-                        {BurndownChartStore.getSprintList.length > 0
-                          ? BurndownChartStore.getSprintList.map((item) => (
-                            <Option value={item.sprintId}>{item.sprintName}</Option>
-                          )) : ''}
-                      </Select>
+                            this.setState({
+                              defaultSprint: value,
+                              endDate: newEndDate,
+                            }, () => {
+                              this.axiosGetRestDays();
+                            });
+                          }}
+                        >
+                          {BurndownChartStore.getSprintList.length > 0
+                            ? BurndownChartStore.getSprintList.map((item) => (
+                              <Option value={item.sprintId}>{item.sprintName}</Option>
+                            )) : ''}
+                        </Select>
+                      </Form>
                       <Checkbox
                         style={{ marginLeft: 24 }}
                         checked={this.state.restDayShow}

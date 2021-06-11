@@ -2,6 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import {
   Button, Modal, Spin, Tooltip,
 } from 'choerodon-ui/pro';
+import { Icon } from 'choerodon-ui';
 import Measure from 'react-measure';
 import { observer, Observer, useComputed } from 'mobx-react-lite';
 import { DragDropContextProvider } from 'react-dnd';
@@ -134,10 +135,18 @@ const StatusCirculationTable: React.FC = () => {
       return (
         <div>
           <Tooltip title={disabled[1]}>
-            <Button
-              disabled={disabled[0]}
-              icon="delete_sweep-o"
-              onClick={() => handleDeleteClick(record)}
+            <Icon
+              type="delete_sweep-o"
+              style={{
+                cursor: disabled[0] ? 'not-allowed' : 'pointer',
+                color: disabled[0] ? 'rgba(87,102,121,0.50)' : 'var(--primary-color)',
+              }}
+              onClick={() => {
+                if (disabled[0]) {
+                  return;
+                }
+                handleDeleteClick(record);
+              }}
             />
           </Tooltip>
         </div>
@@ -145,7 +154,7 @@ const StatusCirculationTable: React.FC = () => {
     }
     ),
   }]),
-  ], [handleDeleteClick, readOnly, statusColumns, store]);
+  ], [handleDeleteClick, readOnly, selectedType, statusColumns, store]);
 
   const components = {
     body: {

@@ -159,7 +159,7 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
             align: 'right',
             // @ts-ignore
             textStyle: {
-              color: 'rgba(0,0,0,0.65)',
+              color: 'var(--text-color3)',
               fontSize: getFontSize(12),
             },
             formatter(value: string) {
