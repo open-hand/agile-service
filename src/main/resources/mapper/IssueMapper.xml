@@ -544,7 +544,8 @@
         ais.is_completed as completed
         from agile_issue ai
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
-        where ai.issue_id in
+        where ai.project_id = #{projectId}
+        and ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}
         </foreach>
@@ -638,26 +639,37 @@
         )
         <if test="issueIds != null and issueIds.size > 0">
             and (
-            (search.type_code = 'sub_task' and search.parent_type_code != 'bug' and
-            search.parent_issue_id in
-            <foreach collection="issueIds" item="id" open="(" separator="," close=")">
-                #{id}
-            </foreach>
-            )
-            or (
-            search.type_code = 'sub_task' and
-            search.parent_issue_id in
-            <foreach collection="issueIds" item="id" open="(" separator="," close=")">
-                #{id}
-            </foreach>
-            )
-            or
-            (search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 and
-            search.relate_issue_id in
-            <foreach collection="issueIds" item="id" open="(" separator="," close=")">
-                #{id}
-            </foreach>
-            )
+                (
+                    search.project_id = #{projectId}
+                    and search.type_code = 'sub_task' and search.parent_type_code != 'bug'
+                    and search.parent_issue_id is not null
+                    and search.parent_issue_id != 0
+                    and search.parent_issue_id in
+                    <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+                        #{id}
+                    </foreach>
+                )
+                or (
+                    search.project_id = #{projectId}
+                    and search.type_code = 'sub_task'
+                    and search.parent_issue_id is not null
+                    and search.parent_issue_id != 0
+                    and search.parent_issue_id in
+                    <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+                        #{id}
+                    </foreach>
+                )
+                or
+                (
+                    search.project_id = #{projectId}
+                    and search.type_code = 'bug'
+                    and search.relate_issue_id is not null
+                    and search.relate_issue_id != 0
+                    and search.relate_issue_id in
+                    <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+                        #{id}
+                    </foreach>
+                )
             )
         </if>
         <if test='searchVO.searchArgs != null'>
@@ -747,6 +759,7 @@
         ai.parent_issue_id,
         ai.type_code,
         ai.relate_issue_id,
+        ai.project_id,
         aii2.type_code as parent_type_code,
         aii2.relate_issue_id as parent_relate_issue_id
         FROM agile_issue ai
