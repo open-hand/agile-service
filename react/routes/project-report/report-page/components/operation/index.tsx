@@ -134,10 +134,12 @@ const Operation: React.FC<Props> = () => {
       title: '确认退出？',
       children: `确认退出${edit ? '编辑' : '创建'}？`,
       onOk: () => {
+        // 确认退出后不需要保存提示
+        store.setDirty(false);
         to('/agile/project-report');
       },
     });
-  }, [edit]);
+  }, [edit, store]);
   return (
     <div
       className={styles.bar}

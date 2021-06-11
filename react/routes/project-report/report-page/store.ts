@@ -176,6 +176,11 @@ class ProjectReportStore {
 
   @observable baseInfo: IProjectReport | null = null
 
+  @action
+  setDirty(dirty: boolean) {
+    this.dirty = dirty;
+  }
+
   @action('添加一个block')
   addBlock(block: IReportBlock) {
     this.blockList.push(block);
