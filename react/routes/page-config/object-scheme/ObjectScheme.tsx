@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Table, Button, Modal, Menu, Icon,
+  Table, Modal, Menu,
 } from 'choerodon-ui/pro';
 import { Tag } from 'choerodon-ui';
 import {
@@ -9,7 +9,6 @@ import {
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
-import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { pageConfigApi } from '@/api/PageConfig';
 import { getMenuType } from '@/utils/common';
@@ -52,10 +51,10 @@ function ObjectScheme() {
       title: formatMessage({ id: 'field.delete.title' }, { name: record?.get('name') }),
       children: formatMessage({ id: 'field.delete.msg' }),
       okText: formatMessage({ id: 'delete' }),
-      okProps: { color: 'red' },
-      cancelProps: { color: 'dark' },
+      onOk: () => schemeTableDataSet.delete(record, false).then(() => handleRefresh()),
     };
-    schemeTableDataSet.delete(record, modalProps);
+    Modal.open(modalProps);
+    // ;
   }
   function handleSyncDefault() {
     const record = schemeTableDataSet.current!.clone();
