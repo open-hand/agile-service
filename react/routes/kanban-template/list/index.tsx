@@ -102,7 +102,7 @@ const KanbanTemplateList = () => {
                   action: () => record && to(`/agile/kanban-template/detail/${record.get('boardId')}`, {
                     type: 'org',
                   }),
-                  text: '编辑',
+                  text: '编辑模板',
                 }, {
                   key: 'detail',
                   text: '编辑',
