@@ -10,10 +10,10 @@ import {
 } from 'choerodon-ui';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
+import { EmptyPage } from '@choerodon/components';
 import pic from '../../../../assets/image/NoData.svg';
 import SwithChart from '../../Component/switchChart';
 import VS from '../../../../stores/project/velocityChart';
-import EmptyBlock from '../../../../components/EmptyBlock';
 import BackBtn from '../../back-btn';
 import './VelocityChart.less';
 
@@ -392,27 +392,21 @@ class VelocityChart extends Component {
               {this.renderTable()}
             </div>
           ) : (
-            <EmptyBlock
-              style={{ marginTop: 40 }}
-              textWidth="auto"
-              pic={pic}
-              title="当前项目无可用冲刺"
-              des={(
+            <EmptyPage
+              image={pic}
+              description={(
                 <div>
-                  <span>请在</span>
-                  <span
-                    className="primary"
-                    style={{ margin: '0 5px', cursor: 'pointer' }}
-                    role="none"
+                  <span>当前项目无可用冲刺，请在</span>
+                  <EmptyPage.Button
                     onClick={() => {
                       to(LINK_URL.workListBacklog);
                     }}
                   >
-                    待办事项
-                  </span>
+                    【待办事项】
+                  </EmptyPage.Button>
                   <span>中创建一个冲刺</span>
                 </div>
-                )}
+            )}
             />
           )}
         </Content>

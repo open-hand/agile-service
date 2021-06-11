@@ -11,13 +11,13 @@ import {
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import to from '@/utils/to';
+import { EmptyPage } from '@choerodon/components';
 import pic from '../../../assets/image/NoData.svg';
 import SwithChart from '../Component/switchChart';
 import StatusTag from '../../../components/StatusTag';
 import PriorityTag from '../../../components/PriorityTag';
 import TypeTag from '../../../components/TypeTag';
 import ES from '../../../stores/project/versionBurndown';
-import EmptyBlock from '../../../components/EmptyBlock';
 import seeChangeRange from './seeChangeRange.svg';
 import seeProgress from './seeProgress.svg';
 import speedIcon from './speedIcon.svg';
@@ -887,28 +887,21 @@ class VersionBurndown extends Component {
                 </Tabs>
               </div>
             ) : (
-              <EmptyBlock
-                style={{ marginTop: 40 }}
-                textWidth="auto"
-                pic={pic}
-                title="当前项目无可用版本"
-                des={(
-                  // eslint-disable-next-line react/jsx-indent
+              <EmptyPage
+                image={pic}
+                description={(
                   <div>
-                    <span>请在</span>
-                    <span
-                      className="primary"
-                      style={{ margin: '0 5px', cursor: 'pointer' }}
-                      role="none"
+                    <span>当前项目无可用版本，请在</span>
+                    <EmptyPage.Button
                       onClick={() => {
                         to(LINK_URL.workListVersion);
                       }}
                     >
-                      版本列表
-                    </span>
+                      【版本列表】
+                    </EmptyPage.Button>
                     <span>中创建一个版本</span>
                   </div>
-                )}
+          )}
               />
             )
           }

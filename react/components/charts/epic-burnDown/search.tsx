@@ -92,7 +92,7 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
               className={styles.epicBurnDown_search_select}
               labelLayout={'float' as LabelLayout}
               clearButton={false}
-              style={{ width: 493, marginRight: 33 }}
+              style={{ width: 510, marginRight: 33 }}
               label="史诗"
               value={currentEpicId}
               onChange={handleChangeCurrentEpic}
@@ -116,7 +116,14 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
                 根据图表校准冲刺
               </CheckBox>
               <span className={styles.icon_show} role="none" onMouseEnter={handleIconMouseEnter} onMouseLeave={handleIconMouseLeave}>
-                <Icon type="help icon" />
+                <Icon
+                  type="help icon"
+                  style={{
+                    position: 'relative',
+                    top: 10,
+                    color: ' var(--text-color3)',
+                  }}
+                />
               </span>
 
               <div className={styles.icon_show_info} onMouseEnter={handleIconMouseEnter} onMouseLeave={handleIconMouseLeave}>

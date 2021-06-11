@@ -3,7 +3,7 @@ import VersionBurnDown from '@/components/charts/version-burnDown';
 import VersionBurnDownSearch from '@/components/charts/version-burnDown/search';
 import useVersionBurnDownReport, { VersionBurnConfig } from '@/components/charts/version-burnDown/useVersionBurnDownReport';
 import pic from '@/assets/image/NoData.svg';
-import EmptyBlock from '@/components/EmptyBlock';
+import { EmptyPage } from '@choerodon/components';
 import to from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import { IReportChartBlock, VersionBurndownSearchVO } from '@/routes/project-report/report-page/store';
@@ -54,41 +54,24 @@ const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, projectId, data }) =>
             <VersionBurnDown {...props} />
           </>
         ) : (
-          <EmptyBlock
-            textWidth="auto"
-            pic={pic}
-            title="当前项目无可用版本"
-            des={(
+          <EmptyPage
+            image={pic}
+            description={(
               <div>
-                <span>请在</span>
-                <span
-                  className="primary"
-                  style={{ margin: '0 5px', cursor: 'pointer' }}
-                  role="none"
+                <span>当前项目无可用版本，请在</span>
+                <EmptyPage.Button
                   onClick={() => {
-                    to(LINK_URL.workListBacklog);
+                    to(LINK_URL.workListVersion);
                   }}
                 >
-                  待办事项
-                </span>
-                <span>或</span>
-                <span
-                  className="primary"
-                  style={{ margin: '0 5px', cursor: 'pointer' }}
-                  role="none"
-                  onClick={() => {
-                    to(LINK_URL.workListIssue);
-                  }}
-                >
-                  问题管理
-                </span>
+                  【版本列表】
+                </EmptyPage.Button>
                 <span>中创建一个版本</span>
               </div>
-            )}
+          )}
           />
         )
       }
-
     </div>
   );
 };

@@ -522,7 +522,7 @@ class PieChart extends Component {
                   </div>
                 </div>
               </>
-            ) : <NoDataComponent title="问题" links={[{ name: '问题管理', link: LINK_URL.workListIssue }]} img={pic} />}
+            ) : <NoDataComponent title="问题" links={[{ name: '【问题管理】', link: LINK_URL.workListIssue }]} img={pic} />}
           </Spin>
 
         </Content>
