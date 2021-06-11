@@ -20,7 +20,7 @@ function PageSwitch() {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
   const handleSelectBox = (val: any, { valueObj }: { valueObj: any }) => {
     if (pageIssueTypeStore.getDirty) {
-      Modal.confirm({
+      Modal.open({
         title: '是否放弃更改',
         className: 'c7n-agile-page-config-page-issue-type-switch-modal',
         children: (

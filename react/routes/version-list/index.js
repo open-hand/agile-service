@@ -7,12 +7,18 @@ import {
 } from '@choerodon/boot';
 import LINK_URL from '@/constants/LINK_URL';
 import { mount, has } from '@choerodon/inject';
+import useHasDevops from '@/hooks/useHasDevops';
 
 const Release = withRouter(asyncRouter(() => import('../Release')));
 const Publish = mount('agile:PublishVersion');
-const VersionList = ({ match }) => (
-  <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
-    {
+const VersionList = ({ match }) => {
+  const hasDevops = useHasDevops();
+  if (!hasDevops) {
+    return <Release />;
+  }
+  return (
+    <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
+      {
         (permission, loading) => (
           <PageWrap
             noHeader={!loading && permission ? [] : ['choerodon.code.project.cooperation.project-version.ps.default']}
@@ -24,7 +30,8 @@ const VersionList = ({ match }) => (
           </PageWrap>
         )
       }
-  </Permission>
-);
+    </Permission>
+  );
+};
 const Index = ({ match }) => (has('agile:PublishVersion') ? <VersionList /> : <Release />);
 export default Index;
