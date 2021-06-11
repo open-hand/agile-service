@@ -18,7 +18,7 @@ const clearIdMap = new Map([
   ['label', 'labelId'],
   ['component', 'componentId'],
   ['fixVersion', 'versionId'],
-  ['version', 'versionId'],
+  ['influenceVersion', 'versionId'],
 ]);
 
 const extraOptionsMap = new Map();
@@ -329,6 +329,7 @@ export default function renderField({
           multiple={isMultiple}
           maxTagCount={2}
           maxTagTextLength={10}
+          key={code}
           onOption={({ record }) => ({
             disabled: isMultiple && data[code].value && ((data[code].value.indexOf('clear') > -1 && record.get(clearIdMap.get(code) || 'value') !== 'clear') || (data[code].value.indexOf('clear') === -1 && record.get(clearIdMap.get(code) || 'value') === 'clear')),
           })}

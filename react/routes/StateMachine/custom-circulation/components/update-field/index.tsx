@@ -364,7 +364,7 @@ const UpdateField = ({
     valueField: 'versionId',
     textField: 'name',
   }, {
-    name: 'version',
+    name: 'influenceVersion',
     type: 'array' as FieldType,
     label: '影响的版本',
     lookupAxiosConfig: () => ({

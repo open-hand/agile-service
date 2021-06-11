@@ -572,7 +572,7 @@ class IssueApi extends Api<IssueApi> {
 
   decrypt(issueId: string) {
     return this.request({
-      method: 'post',
+      method: 'get',
       url: `${this.prefix}/decrypt`,
       params: {
         issueId,
