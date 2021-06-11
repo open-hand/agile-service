@@ -115,7 +115,7 @@ const StateMachine: React.FC = ({
           <div
             style={{
               marginLeft: readOnly ? -24 : 0,
-              marginTop: readOnly ? -16 : 0,
+              marginTop: readOnly ? -10 : 0,
               flex: readOnly ? 1 : 0,
             }}
           >
