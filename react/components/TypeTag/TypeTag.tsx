@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Icon, Tooltip } from 'choerodon-ui/pro';
+import { Icon, Tooltip } from 'choerodon-ui';
 import './TypeTag.less';
 import { IIssueType, IFeatureType } from '@/common/types';
 
@@ -32,8 +32,6 @@ const TypeTag: React.FC<Props> = ({
   return (
     <Tooltip
       title={name}
-      // @ts-ignore
-      getPopupContainer={((triggerNode) => triggerNode.parentNode)}
     >
       <div className="c7n-typeTag" style={style}>
         {!reverse ? (

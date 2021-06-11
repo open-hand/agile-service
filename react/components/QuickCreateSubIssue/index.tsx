@@ -179,7 +179,7 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
               <Button
                 color={'primary' as ButtonColor}
                 onClick={handleCreate}
-                style={{ margin: '0 10px' }}
+                style={{ marginLeft: 10 }}
                 loading={loading}
                 disabled={!summary}
               >

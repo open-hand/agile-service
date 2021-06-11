@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Input } from 'choerodon-ui';
-import TextEditToggle from '@/components/TextEditToggle';
+import { TextField } from 'choerodon-ui/pro';
+import TextEditToggle from '@/components/TextEditTogglePro';
 import { getProjectId } from '@/utils/common';
 import { sprintApi } from '@/api';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
-
-const { Text, Edit } = TextEditToggle;
 
 @observer class SprintGoal extends Component {
   handler = (value) => {
@@ -46,18 +44,12 @@ const { Text, Edit } = TextEditToggle;
         </p>
         <TextEditToggle
           disabled={noPermission}
-          formKey="goal"
           onSubmit={this.handler}
-          originData={sprintGoal}
+          initValue={sprintGoal}
           style={{ whiteSpace: 'nowrap' }}
-          className="hidden-length-info"
+          editor={() => <TextField autoFocus maxLength={30} style={{ width: 200 }} />}
         >
-          <Text>
-            {sprintGoal || '无'}
-          </Text>
-          <Edit>
-            {({ width }) => <Input size="small" style={{ width: Math.max(width, 300), fontSize: 13 }} autoFocus maxLength={30} />}
-          </Edit>
+          {sprintGoal || '无'}
         </TextEditToggle>
       </div>
     );

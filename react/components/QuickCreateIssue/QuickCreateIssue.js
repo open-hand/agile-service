@@ -247,7 +247,7 @@ class QuickCreateIssue extends Component {
                   funcType="raised"
                   disabled={this.props.issueTypes.length === 0 || !summary}
                   onClick={this.handleCreate}
-                  style={{ margin: '0 10px' }}
+                  style={{ marginLeft: 10 }}
                   loading={loading}
                 >
                   确定
