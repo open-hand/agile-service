@@ -285,7 +285,7 @@ const Filter: React.FC<FilterProps> = ({
     <>
       {
         (overflowLine || folded === true) && (
-          <Button className={`${styles.btn} ${folded === true ? styles.foldedBtn : ''}`} funcType={'flat' as FuncType} onClick={expandFilter}>
+          <Button className={`${styles.btn} ${folded === true ? styles.foldedBtn : ''}`} onClick={expandFilter}>
             <Icon type={folded ? 'expand_more' : 'expand_less'} />
           </Button>
         )

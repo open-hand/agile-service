@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 // eslint-disable-next-line camelcase
 import { unstable_batchedUpdates } from 'react-dom';
-import { Button, Tooltip, Icon } from 'choerodon-ui/pro';
+import { Tooltip, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
 import dayjs from 'dayjs';
@@ -26,7 +26,6 @@ import { ILocalField } from '@/components/issue-search/store';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import FilterManage from '@/components/FilterManage';
-import HeaderLine from '@/components/HeaderLine';
 import { Issue, User } from '@/common/types';
 import { transformFilter } from '@/routes/Issue/stores/utils';
 import Search from './components/search';

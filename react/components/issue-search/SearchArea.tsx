@@ -243,7 +243,6 @@ const SearchArea: React.FC = () => {
             <Tooltip title={folded ? '展开筛选' : '折叠筛选'}>
               <Button
                 onClick={handleClickExpandFilter}
-                funcType={'flat' as FuncType}
                 className={`${prefixCls}-search-right-btn ${folded === true ? 'foldedBtn' : ''}`}
               >
                 <Icon type={folded ? 'expand_more' : 'expand_less'} />
