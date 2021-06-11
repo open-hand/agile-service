@@ -82,7 +82,6 @@ const ProjectConfig: React.FC<ProjectConfigProps> = ({
             dataSet.create();
           }}
           icon="add"
-          color={'primary' as ButtonColor}
         >
           添加联动
         </Button>

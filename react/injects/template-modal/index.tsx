@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Button, Modal, Tabs } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import HostPick from '@/components/host-pick';
 import StatusMachineTemplate from '../../routes/statusMachine-template';
 import styles from './index.less';
 import KanbanTemplate from './kanban-template';
@@ -23,13 +24,17 @@ const TemplateContent = () => {
   }, []);
   return (
     <>
-      <Tabs activeKey={activeKey} onChange={handleActiveKeyChange} className={styles.template_tab}>
-        {
-          ['statusMachineTemplate', 'boardTemplate'].map((item) => (
-            <TabPane key={item} tab={templateTabMap.get(item)?.name} />
-          ))
-        }
-      </Tabs>
+      <HostPick
+        defaultActiveKey="statusMachineTemplate"
+        onChange={handleActiveKeyChange}
+        hostTabKeys={[{
+          key: 'statusMachineTemplate',
+          text: templateTabMap.get('statusMachineTemplate')?.name as string,
+        }, {
+          key: 'boardTemplate',
+          text: templateTabMap.get('boardTemplate')?.name as string,
+        }]}
+      />
       {
         activeKey === 'statusMachineTemplate' && (
           <StatusMachineTemplate readOnly visibleIssueTypeCategory="initial" noContainer />

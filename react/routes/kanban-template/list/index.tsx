@@ -47,8 +47,9 @@ const KanbanTemplateList = () => {
   const handleMenuClick = useCallback(async (key, record) => {
     switch (key) {
       case 'delete': {
-        Modal.confirm({
-          title: `确认删除看板模板“${record.get('name')}”`,
+        Modal.open({
+          title: '删除看板模板',
+          children: `确认删除看板模板“${record.get('name')}”`,
           onOk: async () => {
             await kanbanTemplateApi.delete(record.get('boardId'));
             dataSet.query(dataSet.currentPage);

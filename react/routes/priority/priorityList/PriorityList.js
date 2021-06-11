@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { HeaderButtons } from '@choerodon/master';
 import {
-  Table, Select, Icon, message, Menu,
+  Table, Icon, message, Menu,
 } from 'choerodon-ui';
-import { Modal } from 'choerodon-ui/pro';
+import { Modal, Form, Select } from 'choerodon-ui/pro';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import {
   Content, Header, TabPage as Page, stores, Breadcrumb,
@@ -211,19 +211,20 @@ class PriorityList extends Component {
           </div>
           {count !== 0
             && (
-              <div>
+              <Form style={{ marginBottom: -20 }}>
                 <Select
                   label={intl.formatMessage({ id: 'priority.title' })}
                   placeholder={intl.formatMessage({ id: 'priority.delete.chooseNewPriority.placeholder' })}
                   onChange={this.handleSelectChange}
                   style={{ width: 470 }}
                   defaultValue={priorityList[0].id}
+                  clearButton={false}
                 >
                   {priorityList.map(
                     (item) => <Option value={item.id} key={String(item.id)}>{item.name}</Option>,
                   )}
                 </Select>
-              </div>
+              </Form>
             )}
         </div>),
       width: 520,
