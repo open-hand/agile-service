@@ -380,7 +380,6 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> checkDeleteStatus(Long projectId,String applyType, Long statusId) {
         Map<String, Object> result = new HashMap<>();
         result.put("checkResult", true);
