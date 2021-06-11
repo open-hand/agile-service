@@ -65,7 +65,7 @@ export function getRoutes(match) {
     <PermissionRoute service={['choerodon.code.project.setting.issue.ps.issuelink']} path={`${match.url}/issuelink`} component={IssueLink} />,
     <PermissionRoute
       service={[]}
-      path={`${match.url}/kanban-template/detail/:templateId`}
+      path={`${match.url}/states/kanban-template/detail/:templateId`}
       component={KanbanTemplateDetail}
     />,
     <Route path={`${match.url}/states`} component={State} />,

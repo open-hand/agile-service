@@ -100,7 +100,7 @@ const KanbanTemplateList = () => {
             renderer={({ record, text }) => (
               <TableDropMenu
                 menuData={[{
-                  action: () => record && to(`/agile/kanban-template/detail/${record.get('boardId')}`, {
+                  action: () => record && to(`/agile/states/kanban-template/detail/${record.get('boardId')}`, {
                     type: 'org',
                   }),
                   text: '编辑模板',
