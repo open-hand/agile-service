@@ -4,38 +4,20 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Table, Modal, Form, Select, Input, Tooltip, Menu,
+  Table, Form, Tooltip, Menu,
 } from 'choerodon-ui';
-import { Button as ButtonPro } from 'choerodon-ui/pro';
 import { FormattedMessage } from 'react-intl';
 import {
-  Content, Header, TabPage as Page, Breadcrumb, Choerodon, useTheme,
+  Content, Header, TabPage as Page, Breadcrumb, useTheme,
 } from '@choerodon/boot';
 import { HeaderButtons } from '@choerodon/master';
 import TableDropMenu from '@/components/table-drop-menu';
 import { getStageMap, getStageList } from '@/utils/stateMachine';
-import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import { statusApi } from '@/api';
 import Store from './stores';
-import './StateList.less';
 import openStateModal from './StateModal';
+import openDeleteModal from './components/DeleteModal';
 
 const backlogStates = ['backlog_pending_approval', 'backlog_rejected', 'backlog_create', 'backlog_planning', 'backlog_processing', 'backlog_developed', 'backlog_publish'];
-const { Sidebar } = Modal;
-const FormItem = Form.Item;
-const { TextArea } = Input;
-const { Option } = Select;
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 100 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 26 },
-  },
-};
-const prefixCls = 'issue-state';
 
 const stageMap = getStageMap();
 const stageList = getStageList();
@@ -47,11 +29,6 @@ function StateList(props) {
   const {
     organizationId: orgId,
   } = AppState.currentMenuType;
-  //  这三个放到一起管理
-  const [deleteVisible, setDeleteVisible] = useState(false);
-  const [deleteId, setDeleteId] = useState('');
-  const [deleteName, setDeleteName] = useState('');
-
   const [statesList, setStatesList] = useState({
     list: [],
     total: 0,
@@ -70,18 +47,7 @@ function StateList(props) {
     pageSize: 10,
   });
 
-  const confirmDelete = (record) => {
-    setDeleteId(record.id);
-    setDeleteName(record.name);
-    setDeleteVisible(true);
-  };
-
-  const handleCancel = () => {
-    setDeleteId('');
-    setDeleteVisible(false);
-  };
-
-  const loadState = ({
+  const loadState = useCallback(({
     page = 1, size = 10, sort = { field: 'id', order: 'desc' }, param = {}, isSetInitialTotal = false,
   }) => {
     stateStore.loadStateList(orgId, page, size, sort, param, isSetInitialTotal).then((data) => {
@@ -98,20 +64,16 @@ function StateList(props) {
         setInitialTotal(data.total);
       }
     });
-  };
+  }, [orgId, stateStore]);
 
-  const handleDelete = () => {
-    statusApi.delete(deleteId).then((data) => {
-      if (data && data.failed) {
-        Choerodon.prompt(data.message);
-      } else {
-        loadState({
-          page: pagination.page, size: pagination.pageSize, sort: tableParam.sorter, param: tableParam.param,
-        });
-        setDeleteId('');
-        setDeleteVisible(false);
-      }
+  const handleOnOk = useCallback(() => {
+    loadState({
+      page: pagination.page, size: pagination.pageSize, sort: tableParam.sorter, param: tableParam.param,
     });
+  }, [loadState, pagination.page, pagination.pageSize, tableParam.param, tableParam.sorter]);
+
+  const confirmDelete = (record) => {
+    openDeleteModal({ id: record.id, name: record.name, onOk: handleOnOk });
   };
 
   const tableChange = (newPagination, filters, sorter, param) => {
@@ -221,13 +183,7 @@ function StateList(props) {
       param: undefined,
       isSetInitialTotal: true,
     });
-  }, []);
-
-  const handleOnOk = useCallback(() => {
-    loadState({
-      page: pagination.page, size: pagination.pageSize, sort: tableParam.sorter, param: tableParam.param,
-    });
-  }, [loadState, pagination.page, pagination.pageSize, tableParam.param, tableParam.sorter]);
+  }, [loadState]);
 
   function render() {
     const pageInfo = {
@@ -267,21 +223,6 @@ function StateList(props) {
             className="issue-table"
           />
         </Content>
-        <Modal
-          title={<FormattedMessage id="state.delete" />}
-          visible={deleteVisible}
-          onOk={handleDelete}
-          onCancel={handleCancel}
-        >
-          <p className={`${prefixCls}-del-content`}>
-            <FormattedMessage id="state.delete" />
-            <span>:</span>
-            <span className={`${prefixCls}-del-content-name`}>{deleteName}</span>
-          </p>
-          <p className={`${prefixCls}-del-tip`}>
-            <FormattedMessage id="state.delete.tip" />
-          </p>
-        </Modal>
       </Page>
     );
   }

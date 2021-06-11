@@ -6,8 +6,9 @@ import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Tabs, Table, Select, Icon, Tooltip, Spin, Checkbox,
+  Tabs, Table, Icon, Tooltip, Spin,
 } from 'choerodon-ui';
+import { Select, Form, CheckBox } from 'choerodon-ui/pro';
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import to from '@/utils/to';
@@ -29,7 +30,6 @@ import './VersionReport.less';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
-const CheckboxGroup = Checkbox.Group;
 
 @observer
 class VersionBurndown extends Component {
@@ -85,7 +85,7 @@ class VersionBurndown extends Component {
           splitLine: { show: false },
           data: _.map(ES.chartDataOrigin, 'name'),
           itemStyle: {
-            color: 'rgba(0,0,0,0.65)',
+            color: 'var(--text-color3)',
           },
           axisTick: { show: false },
           axisLine: {
@@ -103,7 +103,7 @@ class VersionBurndown extends Component {
             showMaxLabel: true,
             agile: 'left',
             textStyle: {
-              color: 'rgba(0,0,0,0.65)',
+              color: 'var(--text-color3)',
             },
             formatter(value, index) {
               if (chartDataOrigin.length >= 7) {
@@ -134,7 +134,7 @@ class VersionBurndown extends Component {
           axisLabel: {
             show: true,
             textStyle: {
-              color: 'rgba(0,0,0,0.65)',
+              color: 'var(--text-color3)',
             },
             formatter(value, index) {
               return !value ? value : '';
@@ -162,7 +162,7 @@ class VersionBurndown extends Component {
           axisLabel: {
             show: true,
             textStyle: {
-              color: 'rgba(0,0,0,0.65)',
+              color: 'var(--text-color3)',
             },
             formatter(value, index) {
               return !value ? value : '';
@@ -231,7 +231,7 @@ class VersionBurndown extends Component {
           // data: [0, 0, 0, 16, 19],
           // data: ES.chartData[0],
           // data: checkbox ? _.fill(Array(ES.chartData[0].length), 0) : ES.chartData[0],
-          data: (checkbox && checkbox[0] === 'checked') ? _.fill(Array(ES.chartData[0].length), 0) : ES.chartData[0],
+          data: checkbox === 'checked' ? _.fill(Array(ES.chartData[0].length), 0) : ES.chartData[0],
         },
         {
           name: '工作已完成',
@@ -538,10 +538,10 @@ class VersionBurndown extends Component {
     });
   }
 
-  handleChangeCheckbox(checkbox) {
+  handleChangeCheckbox = (checkbox) => {
     this.setState({
       checkbox,
-      inverse: checkbox[0] !== 'checked',
+      inverse: checkbox !== 'checked',
     });
   }
 
@@ -665,7 +665,7 @@ class VersionBurndown extends Component {
                         </span>
                         <span
                           style={{
-                            color: 'rgba(0,0,0,0.65)',
+                            color: 'var(--text-color3)',
                             fontSize: 12,
                             marginLeft: 12,
                           }}
@@ -693,10 +693,10 @@ class VersionBurndown extends Component {
           </div>
         );
       }
-      return <p>当前版本下的冲刺没有已完成的问题</p>;
+      return <p style={{ color: 'var(--text-color)' }}>当前版本下的冲刺没有已完成的问题</p>;
     }
 
-    return <p>当前版本下的冲刺没有已完成的问题</p>;
+    return <p style={{ color: 'var(--text-color)' }}>当前版本下的冲刺没有已完成的问题</p>;
   }
 
   renderToolbarTitle = () => {
@@ -803,15 +803,16 @@ class VersionBurndown extends Component {
           {
             !(!ES.versions.length && ES.versionFinishLoading) ? (
               <div>
-                <div style={{ display: 'flex' }}>
-                  <Select
-                    style={{ width: 512, marginRight: 33, height: 35 }}
-                    label="版本"
-                    value={ES.currentVersionId}
-                    onChange={(versionId) => this.handleChangeCurrentVersion(versionId)}
-                    getPopupContainer={((triggerNode) => triggerNode.parentNode)}
-                  >
-                    {
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <Form style={{ width: 512, marginRight: 33 }}>
+                    <Select
+                      label="版本"
+                      value={ES.currentVersionId}
+                      onChange={(versionId) => this.handleChangeCurrentVersion(versionId)}
+                      getPopupContainer={((triggerNode) => triggerNode.parentNode)}
+                      clearButton={false}
+                    >
+                      {
                       ES.versions.map((version) => (
                         <Option
                           key={version.versionId}
@@ -821,13 +822,16 @@ class VersionBurndown extends Component {
                         </Option>
                       ))
                     }
-                  </Select>
+                    </Select>
+                  </Form>
                   <div className="c7n-versionSelectHeader" style={{ marginTop: 5 }}>
-                    <CheckboxGroup
-                      value={checkbox}
-                      options={[{ label: '根据图表校准冲刺', value: 'checked' }]}
-                      onChange={(checkboxVal) => this.handleChangeCheckbox(checkboxVal)}
-                    />
+                    <CheckBox
+                      value="checked"
+                      onChange={this.handleChangeCheckbox}
+                      checked={checkbox === 'checked'}
+                    >
+                      根据图表校准冲刺
+                    </CheckBox>
                     <span className="icon-show" role="none" onMouseEnter={this.handleIconMouseEnter} onMouseLeave={this.handleIconMouseLeave}>
                       <Icon type="help icon" />
                     </span>
@@ -853,12 +857,10 @@ class VersionBurndown extends Component {
                       </figure>
                     </div>
                   </div>
-
                 </div>
-                <div>
+                <div style={{ marginTop: -10 }}>
                   {this.renderVersionInfo()}
                 </div>
-
                 <Spin spinning={ES.chartLoading}>
                   <div>
                     {

@@ -30,7 +30,11 @@ const TypeTag: React.FC<Props> = ({
   }
   const reverse = ['agile_epic', 'agile_story', 'agile_fault', 'agile_task', 'agile_subtask', 'test-case', 'test-automation', 'agile-feature'].includes(icon);
   return (
-    <Tooltip title={name}>
+    <Tooltip
+      title={name}
+      // @ts-ignore
+      getPopupContainer={((triggerNode) => triggerNode.parentNode)}
+    >
       <div className="c7n-typeTag" style={style}>
         {!reverse ? (
           <Icon

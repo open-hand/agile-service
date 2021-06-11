@@ -175,11 +175,11 @@ const BurndownChart: React.FC<BurnDownProps> = ({
         type: 'line',
         data: exportAxis,
         itemStyle: {
-          color: 'rgba(0,0,0,0.65)',
+          color: 'var(--text-color3)',
         },
         lineStyle: {
           type: 'dotted',
-          color: 'rgba(0,0,0,0.65)',
+          color: 'var(--text-color3)',
         },
 
       },
@@ -189,11 +189,11 @@ const BurndownChart: React.FC<BurnDownProps> = ({
         type: 'line',
         // data: exportAxis,
         itemStyle: {
-          color: 'rgba(0,0,0,0.65)',
+          color: 'var(--text-color3)',
         },
         lineStyle: {
           type: 'dotted',
-          color: 'rgba(0,0,0,0.65)',
+          color: 'var(--text-color3)',
         },
         markArea: {
           itemStyle: {

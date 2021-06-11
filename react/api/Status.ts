@@ -149,7 +149,7 @@ class StatusApi extends Api<StatusApi> {
      * 删除状态
      * @param statusId
      */
-  delete(statusId: number) {
+  delete(statusId: string) {
     return axios.delete(`${this.orgPrefix}/status/${statusId}`);
   }
 

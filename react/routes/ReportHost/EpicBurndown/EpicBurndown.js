@@ -7,8 +7,9 @@ import {
   Page, Header, Content, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Tabs, Table, Select, Icon, Tooltip, Spin, Checkbox,
+  Tabs, Table, Icon, Tooltip, Spin,
 } from 'choerodon-ui';
+import { Form, Select, CheckBox } from 'choerodon-ui/pro';
 // import pic from './no_epic.svg';
 import STATUS from '@/constants/STATUS';
 import to from '@/utils/to';
@@ -33,7 +34,6 @@ import './EpicReport.less';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
-const CheckboxGroup = Checkbox.Group;
 
 @observer
 class EpicBurndown extends Component {
@@ -95,7 +95,7 @@ class EpicBurndown extends Component {
           data: _.map(ES.chartDataOrigin, 'name'),
           // data: xAxisData,
           itemStyle: {
-            color: 'rgba(0,0,0,0.65)',
+            color: 'var(--text-color3)',
           },
           axisTick: { show: false },
           axisLine: {
@@ -113,7 +113,7 @@ class EpicBurndown extends Component {
             showMinLabel: true,
             agile: 'right',
             textStyle: {
-              color: 'rgba(0,0,0,0.65)',
+              color: 'var(--text-color3)',
             },
             formatter(value, index) {
               if (chartDataOrigin.length >= 7) {
@@ -161,7 +161,7 @@ class EpicBurndown extends Component {
           axisLabel: {
             show: true,
             textStyle: {
-              color: 'rgba(0,0,0,0.65)',
+              color: 'var(--text-color3)',
             },
             formatter(value, index) {
               return !value ? value : '';
@@ -189,7 +189,7 @@ class EpicBurndown extends Component {
           axisLabel: {
             show: true,
             textStyle: {
-              color: 'rgba(0,0,0,0.65)',
+              color: 'var(--text-color3)',
             },
             formatter(value, index) {
               return !value ? value : '';
@@ -256,7 +256,7 @@ class EpicBurndown extends Component {
           },
           // data: [0, 0, 0, 16, 19],
           // data: ES.chartData[0],
-          data: (checkbox && checkbox[0] === 'checked') ? _.fill(Array(ES.chartData[0].length), 0) : ES.chartData[0],
+          data: checkbox === 'checked' ? _.fill(Array(ES.chartData[0].length), 0) : ES.chartData[0],
         },
         {
           name: '工作已完成',
@@ -566,7 +566,7 @@ class EpicBurndown extends Component {
   handleChangeCheckbox(checkbox) {
     this.setState({
       checkbox,
-      inverse: checkbox[0] !== 'checked',
+      inverse: checkbox !== 'checked',
     });
   }
 
@@ -701,7 +701,7 @@ class EpicBurndown extends Component {
                         </span>
                         <span
                           style={{
-                            color: 'rgba(0,0,0,0.65)',
+                            color: 'var(--text-color3)',
                             fontSize: 12,
                             marginLeft: 12,
                           }}
@@ -728,10 +728,10 @@ class EpicBurndown extends Component {
           </div>
         );
       }
-      return <p>当前史诗下的冲刺没有已完成的问题</p>;
+      return <p style={{ color: 'var(--text-color)' }}>当前史诗下的冲刺没有已完成的问题</p>;
     }
 
-    return <p>当前史诗下的冲刺没有已完成的问题</p>;
+    return <p style={{ color: 'var(--text-color)' }}>当前史诗下的冲刺没有已完成的问题</p>;
   }
 
   renderToolbarTitle = () => {
@@ -849,26 +849,30 @@ class EpicBurndown extends Component {
           {
             !(!ES.epics.length && ES.epicFinishLoading) ? (
               <div>
-                <div style={{ display: 'flex' }}>
-                  <Select
-                    style={{ width: 512, marginRight: 33, height: 35 }}
-                    label="史诗"
-                    value={ES.currentEpicId}
-                    onChange={(epic) => this.handleChangeCurrentEpic(epic)}
-                    getPopupContainer={((triggerNode) => triggerNode.parentNode)}
-                  >
-                    {
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <Form style={{ width: 512, marginRight: 33 }}>
+                    <Select
+                      label="史诗"
+                      value={ES.currentEpicId}
+                      onChange={(epic) => this.handleChangeCurrentEpic(epic)}
+                      getPopupContainer={((triggerNode) => triggerNode.parentNode)}
+                      clearButton={false}
+                    >
+                      {
                       ES.epics.map((epic) => (
                         <Option key={epic.issueId} value={epic.issueId}>{epic.epicName}</Option>
                       ))
                     }
-                  </Select>
+                    </Select>
+                  </Form>
                   <div className="c7n-epicSelectHeader" style={{ marginTop: 5 }}>
-                    <CheckboxGroup
-                      value={checkbox}
-                      options={[{ label: '根据图表校准冲刺', value: 'checked' }]}
+                    <CheckBox
+                      value="checked"
+                      checked={checkbox === 'checked'}
                       onChange={(val) => this.handleChangeCheckbox(val)}
-                    />
+                    >
+                      根据图表校准冲刺
+                    </CheckBox>
                     <span className="icon-show" role="none" onMouseEnter={this.handleIconMouseEnter} onMouseLeave={this.handleIconMouseLeave}>
                       <Icon type="help icon" />
                     </span>
@@ -895,7 +899,7 @@ class EpicBurndown extends Component {
                     </div>
                   </div>
                 </div>
-                <div>
+                <div style={{ marginTop: -10 }}>
                   {this.renderEpicInfo()}
                 </div>
 

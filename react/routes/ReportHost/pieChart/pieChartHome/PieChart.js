@@ -12,8 +12,9 @@ import {
   Page, Header, Content, axios, Breadcrumb, HeaderButtons,
 } from '@choerodon/boot';
 import {
-  Select, Spin, Tooltip,
+  Spin, Tooltip,
 } from 'choerodon-ui';
+import { Form, Select } from 'choerodon-ui/pro';
 import './pie.less';
 import { sprintApi, versionApi, statusApi } from '@/api';
 import to from '@/utils/to';
@@ -126,7 +127,7 @@ class PieChart extends Component {
           center: ['50%', '47%'],
           data: datas,
           label: {
-            color: 'rgba(0,0,0,0.65)',
+            color: 'var(--text-color3)',
             position: 'outside',
 
             formatter: (value) => {
@@ -275,15 +276,15 @@ class PieChart extends Component {
     } = this.state;
 
     return (
-      <div>
+      <Form style={{ minWidth: 200, marginLeft: 10 }}>
         <Select
           className="c7n-pieChart-filter-item"
-          style={{ minWidth: 200 }}
           value={chooseId}
           onChange={this.handleChooseIdChange}
-          allowClear
+          clearButton
           filter
           filterOption={filterOption}
+          label="维度值"
         >
           {
             chooseDimension === 'version' && versions.map((item) => (
@@ -305,7 +306,7 @@ class PieChart extends Component {
               ))
             }
         </Select>
-      </div>
+      </Form>
     );
   }
 
@@ -425,32 +426,36 @@ class PieChart extends Component {
         <Content style={{ paddingTop: 20 }}>
           <Spin spinning={PieChartStore.pieLoading}>
             <div className="c7n-pieChart-filter">
-              <Select
-                className="c7n-pieChart-filter-item"
-                getPopupContainer={(triggerNode) => triggerNode.parentNode}
-                defaultValue={type}
-                value={type}
-                label="统计类型"
-                onChange={this.changeType}
-              >
-                {
+              <Form>
+                <Select
+                  className="c7n-pieChart-filter-item"
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                  defaultValue={type}
+                  value={type}
+                  label="统计类型"
+                  onChange={this.changeType}
+                  clearButton={false}
+                >
+                  {
                   types.map((item) => (
                     <Option value={item.value} key={item.title}>{item.title}</Option>
                   ))
                 }
-              </Select>
-              <Select
-                className="c7n-pieChart-filter-item"
-                style={{ minWidth: 70 }}
-                label="选择维度"
-                defaultValue={chooseDimensionType[0].name}
-                value={chooseDimensionType
-                  .find((item) => item.key === chooseDimension)
+                </Select>
+              </Form>
+              <Form style={{ marginLeft: 10 }}>
+                <Select
+                  className="c7n-pieChart-filter-item"
+                  style={{ minWidth: 70 }}
+                  label="选择维度"
+                  defaultValue={chooseDimensionType[0].name}
+                  value={chooseDimensionType
+                    .find((item) => item.key === chooseDimension)
                   && chooseDimensionType.find((item) => item.key === chooseDimension).name}
-                onChange={this.handleChooseDimensionChange}
-                allowClear
-              >
-                {
+                  onChange={this.handleChooseDimensionChange}
+                  clearButton
+                >
+                  {
                   chooseDimensionType.map((item) => (
                     <Option
                       key={item.key}
@@ -460,7 +465,8 @@ class PieChart extends Component {
                     </Option>
                   ))
                 }
-              </Select>
+                </Select>
+              </Form>
               {
                 chooseDimension ? this.renderChooseDimension() : ''
               }
