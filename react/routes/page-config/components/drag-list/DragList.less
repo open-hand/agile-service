@@ -7,7 +7,7 @@
     // width: 3.4rem;
     display: flex;
     justify-content: space-between;
-    border: 0.01rem solid #E8E8E8;
+    border: 0.01rem solid var(--divider);
     border-radius: 0.02rem;
   }
 
@@ -22,7 +22,7 @@
     }
 
     & .c7n-card-head {
-      border-top: 0.01rem solid #e8e8e8;
+      border-top: 0.01rem solid var(--divider);
       padding: 0 10px !important;
       background: #F3F6FE;
       border-radius: 0;
@@ -61,6 +61,12 @@
 
   &-addBtn {
     color: @primary-color;
+    display: flex;
+    align-items: center;
+    &>i{
+      margin-right: 0 !important;
+    }
+ 
   }
 
   &-addItem {

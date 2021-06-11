@@ -12,16 +12,16 @@
     justify-content: space-between;
 
     &-split {
-      padding: .1rem 0;
+      padding: .05rem 0;
       padding-left: .15rem;
-      height: .4rem;
-      background: rgba(245, 245, 245, 1);
+      height: .3rem;
+      background: rgb(243, 246, 254);
       // border-top: 1px solid;
       border-bottom: 1px solid;
-      border-color: rgba(224, 224, 224, 1);
+      border-color: rgb(238, 244, 249);
 
       .c7n-page-issue-detail-header-item {
-        color: rgba(0, 0, 0, 1);
+        color: var(--text-color);
       }
     }
 
@@ -70,9 +70,13 @@
     &-split {
       border-bottom: 1px solid rgba(229, 229, 229, 1);
       // border-top: 1px solid rgba(229, 229, 229, 1);
-
+      background-color: rgb(250, 250, 252);
       border-color: rgba(229, 229, 229, 1);
       padding-left: .15rem;
+    }
+    &-split:nth-of-type(2n+1){
+      background-color: rgb(255, 255, 255);
+
     }
 
     &-text {
@@ -85,6 +89,7 @@
         // margin-bottom: .02rem;
         line-height: .24rem;
         margin-left: -.05rem;
+        margin-bottom: .03rem;
       }
     }
 
