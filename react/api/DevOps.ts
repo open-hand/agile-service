@@ -9,10 +9,10 @@ interface ICreateBranch {
   originBranch: string,
 }
 interface ILinkBrach {
-  appServiceId:string
-  issueIds:Array<string|number>
-  objectVersionNumber:number
-  branchName:string
+  appServiceId: string
+  issueIds: Array<string | number>
+  objectVersionNumber: number
+  branchName: string
 }
 class DevOpsApi extends Api<DevOpsApi> {
   get prefix() {
@@ -82,8 +82,8 @@ class DevOpsApi extends Api<DevOpsApi> {
   /**
    * 加载已经启用的服务列表
    */
-  loadActiveService() {
-    return axios.get(`${this.prefix}/app_service/list_by_active`);
+  loadActiveService(checkMember?:boolean) {
+    return axios.get(`${this.prefix}/app_service/list_by_active`, { params: { checkMember } });
   }
 
   /**
@@ -140,14 +140,17 @@ class DevOpsApi extends Api<DevOpsApi> {
    * @param size
    * @param searchVO
    */
-  loadTagsByService(applicationId: number | string, page: number = 1, size: number = 5, searchVO: {param?: string
-  searchParam?: {tagName?: string}}) {
+  loadTagsByService(applicationId: number | string, page: number = 1, size: number = 5, searchVO: {
+    param?: string
+    searchParam?: { tagName?: string }
+  }, checkMember?: boolean) {
     return axios({
       method: 'post',
       url: `${this.prefix}/app_service/${applicationId}/git/page_tags_by_options`,
       params: {
         page,
         size,
+        checkMember,
       },
       data: searchVO,
     });
