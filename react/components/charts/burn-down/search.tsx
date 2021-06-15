@@ -62,7 +62,7 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
   return (
     <div>
       <SelectSprint
-        style={{ width: 290 }}
+        style={{ width: 280 }}
         label="迭代冲刺"
         labelLayout={'float' as LabelLayout}
         clearButton={false}

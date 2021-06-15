@@ -38,7 +38,7 @@ const ServiceCodeQualityVarySearch: React.FC<ServiceCodeQualitySearchProps> = ({
       projectId={projectId}
       value={serviceId}
       onChange={setServiceId}
-      style={{ width: 250 }}
+      style={{ width: 240 }}
       afterLoad={(data) => {
         if (!serviceId) {
           if (data.length > 0) {

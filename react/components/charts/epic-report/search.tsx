@@ -43,7 +43,7 @@ const EpicReportSearch:React.FC<EpicReportSearchProps> = ({
         <Select
           labelLayout={'float' as LabelLayout}
           clearButton={false}
-          style={{ width: 250 }}
+          style={{ width: 240 }}
           label="史诗"
           value={epicId}
           onChange={handleChangeEpic}

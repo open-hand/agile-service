@@ -27,7 +27,7 @@ const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
 }) => (
   <Form labelLayout={float ? 'float' as any : 'none'}>
     <div style={{ display: 'flex' }}>
-      <div style={{ width: 510, marginLeft: 5 }}>
+      <div style={{ width: 500 }}>
         <DatePicker
           style={{ width: '100%' }}
           range

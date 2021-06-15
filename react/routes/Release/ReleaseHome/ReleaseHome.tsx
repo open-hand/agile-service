@@ -239,8 +239,11 @@ const ReleaseHome: React.FC<ReleaseHomeProps> = ({ isInProgram, tableDataSet, pr
               </div>
             )}
           />
+          {/* @ts-ignore */}
           <Column name="startDate" className="c7n-agile-table-cell" width={100} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+          {/* @ts-ignore */}
           <Column name="expectReleaseDate" className="c7n-agile-table-cell" width={120} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
+          {/* @ts-ignore */}
           <Column name="releaseDate" className="c7n-agile-table-cell" width={120} tooltip={'overflow' as any} renderer={({ text }) => (text ? text.split(' ')[0] : '')} />
           <Column
             name="description"

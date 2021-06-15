@@ -109,7 +109,7 @@ const PieSearch: React.FC<PieSearchProps> = ({
         label="统计类型"
         onChange={changeType}
         clearButton={false}
-        style={{ width: 250 }}
+        style={{ width: 240 }}
       >
         {
           types.map((item) => (

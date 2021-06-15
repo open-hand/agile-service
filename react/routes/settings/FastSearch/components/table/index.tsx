@@ -93,7 +93,9 @@ const FastSearchTable: React.ForwardRefRenderFunction<any, FastSearchTableProps>
           />
         )}
       />
+      {/* @ts-ignore */}
       <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="expressQuery" renderer={({ text }) => text && transformOperation(text)} />
+      {/* @ts-ignore */}
       <Column tooltip={'overflow' as TableColumnTooltip} className="c7n-agile-table-cell" name="description" renderer={({ text }) => text && text.split('+++')[0]} />
     </Table>
   );
