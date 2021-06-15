@@ -70,7 +70,7 @@ const Comments: React.FC<Props> = ({
   }));
 
   return adding ? (
-    <div className="line-start mt-10 c7n-editIssue-addComment" style={{ width: '100%' }}>
+    <div className="line-start mt-10 c7n-editIssue-addComment" style={{ width: '100%', overflowX: 'hidden' }}>
       <WYSIWYGEditor
         autoFocus
         footer
