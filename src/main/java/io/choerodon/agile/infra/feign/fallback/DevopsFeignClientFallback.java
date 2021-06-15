@@ -15,7 +15,7 @@ import java.util.List;
 @Component
 public class DevopsFeignClientFallback implements DevopsFeignClient {
     @Override
-    public ResponseEntity<String> listAppService(Long projectId, int page, int size, boolean checkMember) {
+    public ResponseEntity<String> listAppService(Long projectId, int page, int size, Boolean checkMember, Boolean active) {
         throw new CommonException("error.devops.listAppService");
     }
 

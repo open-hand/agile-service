@@ -23,7 +23,8 @@ public interface DevopsFeignClient {
     ResponseEntity<String> listAppService(@PathVariable("project_id") Long projectId,
                                           @RequestParam int page,
                                           @RequestParam int size,
-                                          @RequestParam boolean checkMember);
+                                          @RequestParam Boolean checkMember,
+                                          @RequestParam Boolean active);
 
     @GetMapping({"/v1/projects/{project_id}/app_service/list_by_active"})
     ResponseEntity<String> listActiveAppService(@PathVariable("project_id") Long projectId);

@@ -25,10 +25,10 @@ public class DevopsClientOperator {
     @Autowired
     private DevopsFeignClient devopsFeignClient;
 
-    public List<AppServiceRepVO> listAppService(Long projectId, int page, int size, boolean checkMember) {
+    public List<AppServiceRepVO> listAppService(Long projectId, int page, int size, Boolean checkMember, Boolean active) {
         try {
             return FeignClientUtils.doRequest(() ->
-                    devopsFeignClient.listAppService(projectId, page, size, checkMember), new TypeReference<Page<AppServiceRepVO>>() {
+                    devopsFeignClient.listAppService(projectId, page, size, checkMember, active), new TypeReference<Page<AppServiceRepVO>>() {
             }).getContent();
         } catch (ServiceUnavailableException e) {
             return new ArrayList<>();
