@@ -84,8 +84,7 @@ const KanbanTemplateList = () => {
           disabled: !enableCreate,
           handler: handleClick,
           tooltipsConfig: {
-            hidden: enableCreate,
-            title: '请先配置故事、任务、子任务或缺陷的状态机模板',
+            title: enableCreate ? undefined : '请先配置故事、任务、子任务或缺陷的状态机模板',
           },
           display: true,
         }]}

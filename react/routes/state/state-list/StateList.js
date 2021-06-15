@@ -227,8 +227,7 @@ function StateList(props) {
               disabled: !initialTotal,
               handler: () => { openStateModal({ onOk: handleOnOk }); },
               tooltipsConfig: {
-                hidden: initialTotal,
-                title: '请创建项目后再创建状态机',
+                title: initialTotal ? undefined : '请创建项目后再创建状态机',
               },
             },
           ]}
