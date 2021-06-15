@@ -205,7 +205,7 @@ class StartSprint extends Component {
             {getFieldDecorator('goal', {
               initialValue: !isNull(sprintDetail) ? sprintDetail.sprintGoal : null,
             })(
-              <TextArea label="目标" autoSize maxLength={30} />,
+              <TextArea label="目标" autosize maxLength={30} />,
             )}
           </FormItem>
           <FormItem>
