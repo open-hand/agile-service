@@ -7,6 +7,7 @@ stages:
 build front:
   stage: build
   script:
+    - npm cache clean -force
     - npm config set "//${NPM_REPO}:_authToken" "${NPM_TOKEN}"
     - npm config set "//${NPM_REGISTRY}:_authToken" "${NPM_TOKEN}"
     - npm install --registry "https://${NPM_REPO}" --sass-binary-site=http://npm.taobao.org/mirrors/node-sass
@@ -36,6 +37,7 @@ build front:
 tag front:
   stage: build
   script:
+    - npm cache clean -force
     - npm config set "//${NPM_REPO}:_authToken" "${NPM_TOKEN}"
     - npm config set "//${NPM_REGISTRY}:_authToken" "${NPM_TOKEN}"
     - npm install --registry "https://${NPM_REPO}" --sass-binary-site=http://npm.taobao.org/mirrors/node-sass
