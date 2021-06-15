@@ -14,15 +14,16 @@ interface Props extends Partial<SelectProps> {
   dataRef?: React.RefObject<Array<any>>
   ref?: any
   valueField?: string
-  afterLoad?: (sprints: ILabel[]) => void
+  afterLoad?: (sprints: any[]) => void
   applicationId?: string | null
+  checkMember?:boolean
   flat?: boolean
   projectId?: string
 
 }
 
 const SelectGitTags: React.FC<Props> = forwardRef(({
-  dataRef, valueField, afterLoad, flat, applicationId, projectId, ...otherProps
+  dataRef, valueField, afterLoad, flat, applicationId, projectId, checkMember, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'tag',
@@ -33,7 +34,7 @@ const SelectGitTags: React.FC<Props> = forwardRef(({
         tagName: filter,
       },
       param: '',
-    }) : (() => new Promise([] as any))),
+    }, checkMember) : (() => new Promise([] as any))),
     middleWare: (data: any) => {
       if (dataRef) {
         Object.assign(dataRef, {
