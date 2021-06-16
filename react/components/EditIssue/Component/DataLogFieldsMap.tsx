@@ -745,6 +745,9 @@ const fieldsMap = new Map([
       transform: ({ oldString }: { oldString: string }) => oldString.split('@')[1],
     },
   }],
+  ['Tag', {
+    name: 'Tag',
+  }],
 ]);
 
 export default fieldsMap;
