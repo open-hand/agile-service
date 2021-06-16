@@ -199,8 +199,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     @Override
     public StatusMachineNodeVO linkStatus(Long organizationId, Long issueTypeId, Long statusId, Boolean defaultStatus, Boolean transferAll) {
         StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
-        stateMachineNodeService.handlerNullRankNode(organizationId, statusId, "");
         Long stateMachineId = queryStatusMachineId(organizationId, issueTypeId);
+        stateMachineNodeService.handlerNullRankNode(organizationId, stateMachineId, "");
         StatusMachineNodeDTO stateMachineNode = new StatusMachineNodeDTO();
         stateMachineNode.setStatusId(statusId);
         stateMachineNode.setOrganizationId(organizationId);
