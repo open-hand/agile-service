@@ -6,6 +6,7 @@ import {
 import {
   Select, Icon, Modal, Form,
 } from 'choerodon-ui';
+import screenfull from 'screenfull';
 import { HeaderButtons } from '@choerodon/master';
 import Loading from '@/components/Loading';
 import { set } from 'lodash';
@@ -344,7 +345,9 @@ class ScrumBoardHome extends Component {
                 name: '更多操作',
                 groupBtnItems: [{
                   name: '配置看板',
-                  handler: () => {
+                  handler: async () => {
+                    await screenfull.exit();
+                    document.body.classList.remove('c7n-scrumboard-fullScreen');
                     to(LINK_URL.scrumboardSetting, {
                       params: {
                         boardId: ScrumBoardStore.getSelectedBoard,
@@ -371,7 +374,7 @@ class ScrumBoardHome extends Component {
                 icon: 'alarm_on',
                 // funcType: 'flat',
                 handler: this.handleFinishSprint,
-                display: currentSprintIsDoing,
+                display: !!currentSprintIsDoing,
                 permissions: ['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish'],
                 preElement: this.renderRemainDate(),
               },

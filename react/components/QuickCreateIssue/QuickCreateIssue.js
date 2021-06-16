@@ -130,7 +130,7 @@ class QuickCreateIssue extends Component {
           epicId,
         }, fieldsMap);
 
-        issueApi.create(issue).then((res) => {
+        await issueApi.create(issue).then((res) => {
           this.setState({
             loading: false,
             create: false,
