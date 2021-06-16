@@ -47,10 +47,13 @@
   }
 
   .ant-table-body {
-    .ant-table-row:nth-child(even) {
+    .ant-table-row:nth-child(odd) {
       .ant-table-cell {
         background-color: var(--table-cell-even-background) !important;
       }
+    }
+    .ant-table-cell {
+      border-color: rgb(238, 244, 249);
     }
   }
 }
