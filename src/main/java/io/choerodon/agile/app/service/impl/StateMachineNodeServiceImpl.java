@@ -313,7 +313,7 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
                     index = statusMachineNodeDTOS.indexOf(statusMachineNodeDTO);
                 }
             }
-            if (index > 0) {
+            if (index != null && index > 0) {
                 Collections.swap(statusMachineNodeDTOS, 0, index);
             }
             // 设置rank
@@ -322,9 +322,9 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
                 rank = RankUtil.mid();
             }
             for (StatusMachineNodeDTO statusMachineNodeDTO : statusMachineNodeDTOS) {
+                rank = RankUtil.genNext(rank);
                 statusMachineNodeDTO.setRank(rank);
                 baseUpdate(statusMachineNodeDTO);
-                rank = RankUtil.genNext(rank);
             }
         }
     }

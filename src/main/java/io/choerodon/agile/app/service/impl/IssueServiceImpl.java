@@ -2555,7 +2555,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Long parentIssueId = v.getParentIssueId();
             Long relateIssueId = v.getRelateIssueId();
             parentId = setParentId(parentIssueId);
-            parentId = setParentId(relateIssueId);
+            if (parentId == null) {
+                parentId = setParentId(relateIssueId);
+            }
             issueListFieldKVVO.setParentId(parentId);
             list.add(issueListFieldKVVO);
             Long assigneeId = v.getAssigneeId();

@@ -569,8 +569,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             issueStatusDTO.setEnable(false);
             issueStatusService.insertIssueStatus(issueStatusDTO);
         }
-        stateMachineNodeService.handlerNullRankNode(organizationId, statusId, applyType);
         Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        stateMachineNodeService.handlerNullRankNode(organizationId, stateMachineId, applyType);
         StatusMachineNodeDTO stateMachineNode = new StatusMachineNodeDTO();
         stateMachineNode.setStatusId(statusId);
         stateMachineNode.setOrganizationId(organizationId);
