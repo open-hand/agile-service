@@ -622,7 +622,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         field.setContext(String.join(",", typeCodes));
         field.setOrganizationId(organizationId);
         field.setProjectId(projectId);
-        decryptMemberFieldDefaultValue(field);
+        decryptAndSetDefaultValue(field);
         field = baseCreate(field, issueTypes, issueTypeIdForRank);
         //处理字段选项
         if (fieldCreateDTO.getFieldOptions() != null) {
@@ -804,7 +804,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         Set<String> typeCodes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO)
                 .stream().map(IssueTypeVO::getTypeCode).collect(Collectors.toSet());
         update.setContext(String.join(",", typeCodes));
-        decryptMemberFieldDefaultValue(update);
+        decryptAndSetDefaultValue(update);
         updateFieldIssueTypeAndDefaultValue(organizationId, projectId, fieldId, update.getDefaultValue(), updateDTO);
         update.setId(fieldId);
         baseUpdate(update);
@@ -827,13 +827,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
     }
 
-    private void decryptMemberFieldDefaultValue(ObjectSchemeFieldDTO field) {
-        boolean isMember = Objects.equals(FieldType.MULTI_MEMBER, field.getFieldType()) || Objects.equals(FieldType.MEMBER, field.getFieldType());
-        if (isMember && !ObjectUtils.isEmpty(field.getDefaultValue())) {
-            String defaultValue = tryDecryptDefaultValue(field.getFieldType(), field.getDefaultValue());
-            if (defaultValue != null) {
-                field.setDefaultValue(defaultValue);
-            }
+    private void decryptAndSetDefaultValue(ObjectSchemeFieldDTO field) {
+        String defaultValue = tryDecryptDefaultValue(field.getFieldType(), field.getDefaultValue());
+        if (defaultValue != null) {
+            field.setDefaultValue(defaultValue);
         }
     }
 
