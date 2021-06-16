@@ -3,7 +3,7 @@ import {
   Icon, Tooltip,
 } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
-import { find, remove } from 'lodash';
+import { find, isObject } from 'lodash';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui/pro';
@@ -56,9 +56,11 @@ const SearchArea: React.FC = () => {
       store.clearAllFilter();
       for (const [key, value] of Object.entries(filterObject)) {
         // 自定义字段保存的时候只保存了id，这里要找到code
-        if (value.isCustom) {
+        // @ts-ignore
+        if (value && isObject(value) && value.isCustom) {
           const code = store.getFieldCodeById(key);
           if (code) {
+            // @ts-ignore
             store.handleFilterChange(code, value.value);
           }
         } else if (key === 'createEndDate' || key === 'createStartDate') {
