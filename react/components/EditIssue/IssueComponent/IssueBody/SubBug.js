@@ -85,7 +85,7 @@ const SubBug = observer(({
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="创建缺陷" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-              <Button onClick={() => store.setCreateSubBugShow(true)}>
+              <Button onClick={() => store.setCreateSubBugShow(true)} disabled={(issueTypeData || []).length === 0}>
                 <Icon type="playlist_add icon" />
               </Button>
             </Tooltip>
@@ -114,6 +114,7 @@ const SubBug = observer(({
         setDefaultSprint={(value) => {
           store.setDefaultSprint(value);
         }}
+        btnStyle={{ marginTop: 15 }}
       />
       )}
       {

@@ -23,7 +23,7 @@ const PersonalWorkload = () => {
   const renderTitle = () => (
     <div className={`${clsPrefix}-title`}>
       <span>个人工作量统计</span>
-      {startedRecord && workloadChartDs.length ? <OverviewWrap.Switch defaultValue="issueCount" onChange={setChartOption} options={options} /> : ''}
+      {/* {startedRecord && workloadChartDs.length ? <OverviewWrap.Switch defaultValue="issueCount" onChange={setChartOption} options={options} /> : ''} */}
     </div>
   );
   const getCategoryAndCategoryCount = useCallback(() => {
