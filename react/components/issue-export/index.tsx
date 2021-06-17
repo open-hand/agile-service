@@ -30,7 +30,7 @@ export default function Index(props: IExportIssueProps) {
 }
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
-  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, action?: TemplateAction, otherModalProps?: ModalProps, exportBtnText?: string, extraOptions?: { value: string, label: '描述' }[]) {
+  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, action?: TemplateAction, otherModalProps?: ModalProps, exportBtnText?: string) {
   const columns = tableRef.current
     ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden)
     : [];

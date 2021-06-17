@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import {
-  DataSet, DatePicker, Form, Modal, TextField, TextArea,
+  DataSet, DatePicker, Form, Modal, TextField,
 } from 'choerodon-ui/pro';
-import { pick } from 'lodash';
+import TextArea from '@/components/TextArea';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { IModalProps } from '@/common/types';
 import { versionApi } from '@/api';
@@ -81,7 +81,7 @@ const CreatePublishVersion: React.FC<{ modal?: IModalProps } & Partial<PublishVe
       <TextField name="name" />
       <DatePicker name="startDate" />
       <DatePicker name="expectReleaseDate" />
-      <TextArea name="description" rows={3} />
+      <TextArea name="description" rows={3} maxLength={30} />
     </Form>
   );
 };
