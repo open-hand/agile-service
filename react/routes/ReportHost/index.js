@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/boot';
+import { asyncRouter, nomatch, Charts } from '@choerodon/boot';
 import { PermissionRoute } from '@choerodon/master';
 
 const ReportHostHome = asyncRouter(() => (import('./Home')));
@@ -16,7 +16,7 @@ const VersionBurndown = asyncRouter(() => (import('./VersionBurndown')));
 
 const ReportHostIndex = ({ match }) => (
   <Switch>
-    <Route exact path={match.url} component={ReportHostHome} />
+    <Route exact path={match.url} component={() => <Charts reportType="agile" />} />
     <PermissionRoute
       service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.burndown']}
       path={`${match.url}/burndownchart`}
