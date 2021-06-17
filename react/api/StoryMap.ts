@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId } from '@/utils/common';
+import Api from './Api';
 
 interface versionIssueRelVO {
     relationType: string // 版本关系：fix、influence
@@ -56,13 +57,12 @@ interface SortVO {
     issueId: number, // 拖拽的问题id
     objectVersionNumber: number
 }
-const organizationId = getOrganizationId();
 
 /**
  * 冲刺的工作日历 api
  * @author ding
  */
-class StoryMapApi {
+class StoryMapApi extends Api<StoryMapApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
@@ -78,7 +78,7 @@ class StoryMapApi {
       url: `${this.prefix}/story_map/main`,
       data: searchVO,
       params: {
-        organizationId,
+        organizationId: this.orgId,
       },
     });
   }
@@ -90,10 +90,10 @@ class StoryMapApi {
   move(storyMapDragVO: DragStoryMap) {
     return axios({
       method: 'post',
-      url: `${this.prefix}/story_map/move?organizationId=${getOrganizationId()}`,
+      url: `${this.prefix}/story_map/move`,
       data: storyMapDragVO,
       params: {
-        organizationId,
+        organizationId: this.orgId,
       },
 
     });
@@ -109,7 +109,7 @@ class StoryMapApi {
       url: `${this.prefix}/story_map/demand`,
       data: searchVO,
       params: {
-        organizationId,
+        organizationId: this.orgId,
       },
     });
   }
@@ -124,7 +124,7 @@ class StoryMapApi {
       url: `${this.prefix}/story_map_width`,
       data: storyMapWidthVO,
       params: {
-        organizationId,
+        organizationId: this.orgId,
       },
     });
   }
@@ -139,7 +139,7 @@ class StoryMapApi {
       url: `${this.prefix}/story_map_width`,
       data: storyMapWidthVO,
       params: {
-        organizationId,
+        organizationId: this.orgId,
       },
     });
   }

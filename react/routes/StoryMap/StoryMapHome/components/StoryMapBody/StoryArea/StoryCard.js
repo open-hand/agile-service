@@ -214,7 +214,7 @@ export default DragSource(
           storyMapDragVO.epicId = targetEpicId;
           storyMapDragVO.epicIssueIds = [issueId];
           storyMapDragVO.featureId = 0;
-          storyMapDragVO.featureIssueIds = [];
+          storyMapDragVO.featureIssueIds = [issueId];
         } else {
           storyMapDragVO.featureId = targetFeatureId;
           storyMapDragVO.featureIssueIds = [issueId];

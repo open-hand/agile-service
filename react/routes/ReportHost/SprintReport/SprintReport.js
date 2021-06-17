@@ -140,7 +140,7 @@ class SprintReport extends Component {
           loading={ReportStore.loading}
           onChange={(pagination, filters, sorter) => {
             ReportStore.setTodoPagination(Pagination);
-            ReportStore.loadTodoIssues(pagination.current - 1, pagination.pageSize);
+            ReportStore.loadTodoIssues(pagination.current, pagination.pageSize);
           }}
         />
       </div>
@@ -160,7 +160,7 @@ class SprintReport extends Component {
           loading={ReportStore.loading}
           onChange={(pagination, filters, sorter) => {
             ReportStore.setDonePagination(pagination);
-            ReportStore.loadDoneIssues(pagination.current - 1, pagination.pageSize);
+            ReportStore.loadDoneIssues(pagination.current, pagination.pageSize);
           }}
         />
       </div>
@@ -180,7 +180,7 @@ class SprintReport extends Component {
           loading={ReportStore.loading}
           onChange={(pagination, filters, sorter) => {
             ReportStore.setRemovePagination(Pagination);
-            ReportStore.removePagination(pagination.current - 1, pagination.pageSize);
+            ReportStore.removePagination(pagination.current, pagination.pageSize);
           }}
         />
       </div>
