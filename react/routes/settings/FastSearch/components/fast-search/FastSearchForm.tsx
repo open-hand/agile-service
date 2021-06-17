@@ -1,9 +1,10 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import {
-  DataSet, Form, Select, Button, Row, Col, Tooltip,
+  DataSet, Form, Select, Button, Row, Col, Tooltip, Icon,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import classNames from 'classnames';
 import FastSearchFormItemField from './FastSearchFormItemField';
 import styles from './FastSearchForm.less';
 
@@ -46,7 +47,8 @@ function FastSearchFormItemOrigin({ record, onDelete }: FastSearchFormItemProps)
           </Col>
         </Row>
       </Form>
-      <Button icon="delete_sweep-o" onClick={() => onDelete(record)} disabled={!record.index} className={styles.form_item_del_btn} />
+      <Icon type="delete_sweep-o" onClick={() => onDelete(record)} className={classNames(styles.form_item_del_btn, { [styles.form_item_del_btn_disabled]: !record.index })} />
+      {/* <Button icon="delete_sweep-o" onClick={() => onDelete(record)} disabled={!record.index} className={styles.form_item_del_btn} /> */}
     </div>
   );
 }

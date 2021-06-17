@@ -10,7 +10,7 @@ import {
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import moment from 'moment';
 import React, {
-  useCallback, useEffect, useMemo, useState,
+  useCallback, useEffect, useMemo,
 } from 'react';
 
 interface Props {
@@ -40,14 +40,15 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
     if (['datetime', 'time', 'date'].includes(record.get('fieldType')) && record.get('extraConfig')) {
       defaultValue = 'current';
     }
-    if (record.get('fieldType') === 'multiMember') {
-      defaultValue = record.get('defaultValueObj');
+    if (['multiMember', 'member'].includes(record.get('fieldType'))) {
+      defaultValue = Array.isArray(toJS(record.get('defaultValueObj'))) ? record.get('defaultValueObj') : [record.get('defaultValueObj')].filter(Boolean);
     }
 
     return defaultValue;
   }, [record]);
   const ds = useMemo(() => {
-    const defaultValue = initValue;
+    const defaultValue = initValue && ['multiMember', 'member'].includes(record.get('fieldType')) ? initValue?.map((i:any) => i.id) : initValue;
+
     // if (dateList.includes(record.get('fieldType')) && defaultValue) {
     //   defaultValue = defaultValue === 'current' ? '当前时间' : moment(defaultValue, dateFormat.datetime).format(dateFormat[record.get('fieldType') as 'date' | 'datetime' | 'time']);
     // }
@@ -71,7 +72,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
         },
       ],
     });
-  }, [defaultTypes, initValue]);
+  }, [defaultTypes, initValue, record]);
 
   const handleOk = useCallback(async () => {
     if (await ds.validate()) {
@@ -103,7 +104,7 @@ const SyncDefaultValueEditForm: React.FC<Props> = ({
       return true;
     }
     return false;
-  }, [record]);
+  }, [ds, record]);
   useEffect(() => {
     modal?.handleOk(handleOk);
   }, [handleOk, modal]);
