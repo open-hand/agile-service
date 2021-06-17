@@ -272,6 +272,7 @@ class QuickCreateIssue extends Component {
                   this.loadInitValue(currentType.id);
                 });
               }}
+              style={this.props.btnStyle || {}}
             >
               {buttonShowText || '创建问题'}
             </Button>
