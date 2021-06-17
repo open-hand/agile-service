@@ -180,7 +180,7 @@ class SprintReport extends Component {
           loading={ReportStore.loading}
           onChange={(pagination, filters, sorter) => {
             ReportStore.setRemovePagination(Pagination);
-            ReportStore.removePagination(pagination.current, pagination.pageSize);
+            ReportStore.loadRemoveIssues(pagination.current, pagination.pageSize);
           }}
         />
       </div>
