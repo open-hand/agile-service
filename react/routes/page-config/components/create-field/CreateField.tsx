@@ -8,9 +8,11 @@ import {
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import SelectUser from '@/components/select/select-user';
-import { User } from '@/common/types';
+import { FieldOption, User } from '@/common/types';
 import { toJS } from 'mobx';
-import { set, uniq, isEmpty } from 'lodash';
+import {
+  set, uniq, isEmpty, find,
+} from 'lodash';
 import SelectCustomField from '@/components/select/select-custom-field';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
@@ -168,7 +170,22 @@ function CreateField() {
         tempKey: randomString(5),
       }]);
   };
-
+  const ensureDefaultValue = (options: FieldOption[]) => {
+    const { current } = formDataSet;
+    const newDefaultValue = current?.get('defaultValue');
+    if (!newDefaultValue) {
+      return;
+    }
+    const fieldType = current?.get('fieldType');
+    if (multipleList.indexOf(fieldType) !== -1) {
+      const newValue = newDefaultValue.filter((v: string) => find(options, { id: v, enabled: true }));
+      current?.set('defaultValue', newValue);
+    } else if (singleList.indexOf(fieldType) !== -1) {
+      if (!find(options, { id: newDefaultValue, enabled: true })) {
+        current?.set('defaultValue', undefined);
+      }
+    }
+  };
   const onTreeDelete = (tempKey: string) => {
     const { current } = formDataSet;
     const newDefaultValue = current?.get('defaultValue');
@@ -292,6 +309,7 @@ function CreateField() {
                           fieldId,
                           onClose: (newData) => {
                             setFieldOptions(newData);
+                            ensureDefaultValue(newData);
                           },
                         });
                       }}
@@ -313,7 +331,7 @@ function CreateField() {
               key={JSON.stringify(fieldOptions)}
               style={{ width: '100%', marginTop: '20px' }}
               multiple={!(singleList.indexOf(fieldType) !== -1)}
-              fieldOptions={fieldOptions.map((f) => ({ ...f, id: f.tempKey }))}
+              fieldOptions={fieldOptions.map((f) => ({ ...f, id: f.id ?? f.tempKey }))}
               selected={toJS(current?.get('defaultValue'))}
             />
           </>
