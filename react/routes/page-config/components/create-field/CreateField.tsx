@@ -328,10 +328,10 @@ function CreateField() {
             <SelectCustomField
               name="defaultValue"
               // 防止fieldOptions变了之后选项没更新
-              key={JSON.stringify(fieldOptions)}
+              key={JSON.stringify(fieldOptions.filter((f) => f.enabled))}
               style={{ width: '100%', marginTop: '20px' }}
               multiple={!(singleList.indexOf(fieldType) !== -1)}
-              fieldOptions={fieldOptions.map((f) => ({ ...f, id: f.id ?? f.tempKey }))}
+              fieldOptions={fieldOptions.filter((f) => f.enabled).map((f) => ({ ...f, id: f.id ?? f.tempKey }))}
               selected={toJS(current?.get('defaultValue'))}
             />
           </>
