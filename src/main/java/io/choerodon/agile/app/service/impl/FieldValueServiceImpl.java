@@ -554,7 +554,9 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             allFieldValue.addAll(newFieldValues);
         });
         // 批量写入表中
-        fieldValueMapper.batchInsertField(projectId, schemeCode, allFieldValue);
+        if (!CollectionUtils.isEmpty(allFieldValue)) {
+            fieldValueMapper.batchInsertField(projectId, schemeCode, allFieldValue);
+        }
         // 批量生产日志
         Map<Long, List<FieldValueDTO>> newFieldMap = new HashMap<>();
         newFieldMap.putAll(allFieldValue.stream().collect(Collectors.groupingBy(FieldValueDTO::getInstanceId)));
